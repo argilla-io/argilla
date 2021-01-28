@@ -7,15 +7,15 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.record_status import RecordStatus
-from typing import Optional
-from typing import cast, List
-from ..types import UNSET, Unset
-from typing import cast
 from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
-from typing import Dict
+from ..types import UNSET, Unset
 from typing import Union
+from typing import Optional
+from ..models.record_status import RecordStatus
 from ..models.token_classification_annotation import TokenClassificationAnnotation
+from typing import Dict
+from typing import cast, List
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

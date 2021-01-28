@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.record_status import RecordStatus
-from typing import Optional
-from typing import cast, List
-from dateutil.parser import isoparse
 from ..types import UNSET, Unset
-import datetime
-from typing import cast
-from ..models.prediction_status import PredictionStatus
-from ..models.token_classification_record_out_metadata import TokenClassificationRecordOUTMetadata
-from typing import Dict
+from dateutil.parser import isoparse
 from typing import Union
+from typing import Optional
+from ..models.record_status import RecordStatus
+from ..models.token_classification_record_out_metadata import TokenClassificationRecordOUTMetadata
 from ..models.token_classification_annotation import TokenClassificationAnnotation
+import datetime
+from typing import Dict
+from ..models.prediction_status import PredictionStatus
+from typing import cast, List
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

@@ -7,19 +7,19 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.text_classification_aggregations_confidence import TextClassificationAggregationsConfidence
+from ..models.text_classification_aggregations_annotated_by import TextClassificationAggregationsAnnotatedBy
+from ..models.text_classification_aggregations_status import TextClassificationAggregationsStatus
+from ..types import UNSET, Unset
+from ..models.text_classification_aggregations_predicted import TextClassificationAggregationsPredicted
+from ..models.text_classification_aggregations_metadata import TextClassificationAggregationsMetadata
+from typing import Union
 from ..models.text_classification_aggregations_annotated_as import TextClassificationAggregationsAnnotatedAs
 from ..models.text_classification_aggregations_words import TextClassificationAggregationsWords
-from ..models.text_classification_aggregations_inputs import TextClassificationAggregationsInputs
-from ..types import UNSET, Unset
-from ..models.text_classification_aggregations_predicted_by import TextClassificationAggregationsPredictedBy
-from ..models.text_classification_aggregations_metadata import TextClassificationAggregationsMetadata
-from typing import cast
-from ..models.text_classification_aggregations_annotated_by import TextClassificationAggregationsAnnotatedBy
-from ..models.text_classification_aggregations_predicted import TextClassificationAggregationsPredicted
+from ..models.text_classification_aggregations_confidence import TextClassificationAggregationsConfidence
 from typing import Dict
-from typing import Union
-from ..models.text_classification_aggregations_status import TextClassificationAggregationsStatus
+from ..models.text_classification_aggregations_inputs import TextClassificationAggregationsInputs
+from ..models.text_classification_aggregations_predicted_by import TextClassificationAggregationsPredictedBy
+from typing import cast
 from ..models.text_classification_aggregations_predicted_as import TextClassificationAggregationsPredictedAs
 
 

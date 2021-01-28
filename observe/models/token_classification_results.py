@@ -7,13 +7,13 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.token_classification_record_out import TokenClassificationRecordOUT
-from typing import cast, List
-from ..models.token_classification_aggregations import TokenClassificationAggregations
 from ..types import UNSET, Unset
-from typing import cast
-from typing import Dict
 from typing import Union
+from ..models.token_classification_record_out import TokenClassificationRecordOUT
+from ..models.token_classification_aggregations import TokenClassificationAggregations
+from typing import Dict
+from typing import cast, List
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

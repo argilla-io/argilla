@@ -7,14 +7,14 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..types import UNSET, Unset
 from ..models.token_classification_records_bulk_tags import TokenClassificationRecordsBulkTags
 from ..models.token_classification_record import TokenClassificationRecord
-from typing import cast, List
-from ..types import UNSET, Unset
-from typing import cast
-from typing import Dict
 from typing import Union
 from ..models.token_classification_records_bulk_metadata import TokenClassificationRecordsBulkMetadata
+from typing import Dict
+from typing import cast, List
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

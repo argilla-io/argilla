@@ -7,10 +7,10 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..types import UNSET, Unset
 from ..models.sortable_field import SortableField
 from ..models.sort_order import SortOrder
 from typing import Union
-from ..types import UNSET, Unset
 from typing import cast, Union
 
 

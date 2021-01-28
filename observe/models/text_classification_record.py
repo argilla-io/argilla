@@ -7,15 +7,15 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..models.text_classification_record_explanation import TextClassificationRecordExplanation
+from ..types import UNSET, Unset
+from typing import Union
 from ..models.record_status import RecordStatus
 from ..models.text_classification_annotation import TextClassificationAnnotation
-from ..types import UNSET, Unset
-from typing import cast
 from ..models.text_classification_record_inputs import TextClassificationRecordInputs
-from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
 from typing import Dict
-from typing import Union
-from ..models.text_classification_record_explanation import TextClassificationRecordExplanation
+from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

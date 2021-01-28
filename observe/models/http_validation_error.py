@@ -8,11 +8,11 @@ import attr
 from ..types import UNSET, Unset
 
 from ..models.validation_error import ValidationError
-from typing import cast
-from typing import Dict
-from typing import Union
-from typing import cast, List
 from ..types import UNSET, Unset
+from typing import Dict
+from typing import cast, List
+from typing import Union
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

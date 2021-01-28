@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.record_status import RecordStatus
-from ..models.text_classification_record_out_explanation import TextClassificationRecordOUTExplanation
-from ..models.text_classification_annotation import TextClassificationAnnotation
 from ..types import UNSET, Unset
+from ..models.prediction_status import PredictionStatus
+from dateutil.parser import isoparse
+from typing import Union
+from ..models.record_status import RecordStatus
+from ..models.text_classification_annotation import TextClassificationAnnotation
 from ..models.text_classification_record_out_metadata import TextClassificationRecordOUTMetadata
 from ..models.text_classification_record_out_inputs import TextClassificationRecordOUTInputs
-from dateutil.parser import isoparse
 import datetime
-from typing import cast
-from ..models.prediction_status import PredictionStatus
 from typing import Dict
-from typing import Union
+from ..models.text_classification_record_out_explanation import TextClassificationRecordOUTExplanation
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

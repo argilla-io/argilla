@@ -7,10 +7,10 @@ import attr
 
 from ..types import UNSET, Unset
 
+from typing import cast
 from ..models.text_classification_aggregations_metadata_additional_property import (
     TextClassificationAggregationsMetadataAdditionalProperty,
 )
-from typing import cast
 from typing import Dict
 
 

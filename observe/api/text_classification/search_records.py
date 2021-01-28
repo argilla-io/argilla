@@ -6,15 +6,15 @@ from attr import asdict
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-from ...models.text_classification_results import TextClassificationResults
-from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Unset
 from ...models.body_search_records_classification_datasets_dataset_id__search_post import (
     BodySearchRecordsClassificationDatasets_DatasetId__SearchPost,
 )
-from typing import cast
-from typing import Dict
 from typing import Union
+from ...types import UNSET, Unset
+from ...models.http_validation_error import HTTPValidationError
+from typing import Dict
+from ...models.text_classification_results import TextClassificationResults
+from typing import cast
 
 
 def _get_kwargs(
