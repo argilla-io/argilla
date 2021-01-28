@@ -1,0 +1,80 @@
+from typing import Any, Dict
+
+from typing import List
+
+
+import attr
+
+from ..types import UNSET, Unset
+
+from typing import Union
+from ..types import UNSET, Unset
+from typing import cast, Union
+
+
+@attr.s(auto_attribs=True)
+class ClassPrediction:
+    """ Single class prediction
+
+Attributes:
+-----------
+
+class_label: Union[str, int]
+    the predicted class
+
+confidence: float
+    the predicted class confidence. For human-supervised annotations,
+    this probability should be 1.0 """
+
+    class_: Union[str, int]
+    confidence: Union[Unset, float] = 1.0
+    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        class_ = self.class_
+
+        confidence = self.confidence
+
+        field_dict: Dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {"class": class_,}
+        )
+        if confidence is not UNSET:
+            field_dict["confidence"] = confidence
+
+        return field_dict
+
+    @staticmethod
+    def from_dict(src_dict: Dict[str, Any]) -> "ClassPrediction":
+        d = src_dict.copy()
+
+        def _parse_class_(data: Any) -> Union[str, int]:
+            data = None if isinstance(data, Unset) else data
+            class_: Union[str, int]
+            return cast(Union[str, int], data)
+
+        class_ = _parse_class_(d.pop("class"))
+
+        confidence = d.pop("confidence", UNSET)
+
+        class_prediction = ClassPrediction(class_=class_, confidence=confidence,)
+
+        class_prediction.additional_properties = d
+        return class_prediction
+
+    @property
+    def additional_keys(self) -> List[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties
