@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-from typing import Dict
-from typing import cast, List
-from ..models.text_classification_sort_param import TextClassificationSortParam
 from ..models.text_classification_query import TextClassificationQuery
 from typing import cast
+from typing import cast, List
+from typing import Union
+from ..models.text_classification_sort_param import TextClassificationSortParam
+from ..types import UNSET, Unset
+from typing import Dict
 
 
 @attr.s(auto_attribs=True)
-class BodySearchRecordsClassificationDatasets_DatasetId__SearchPost:
-    """  """
+class TextClassificationSearchRequest:
+    """ Base search query request """
 
     query: Union[TextClassificationQuery, Unset] = UNSET
     sort: Union[Unset, List[TextClassificationSortParam]] = UNSET
@@ -48,7 +48,7 @@ class BodySearchRecordsClassificationDatasets_DatasetId__SearchPost:
         return field_dict
 
     @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "BodySearchRecordsClassificationDatasets_DatasetId__SearchPost":
+    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationSearchRequest":
         d = src_dict.copy()
         query: Union[TextClassificationQuery, Unset] = UNSET
         _query = d.pop("query", UNSET)
@@ -62,12 +62,10 @@ class BodySearchRecordsClassificationDatasets_DatasetId__SearchPost:
 
             sort.append(sort_item)
 
-        body_search_records_classification_datasets_dataset_id__search_post = BodySearchRecordsClassificationDatasets_DatasetId__SearchPost(
-            query=query, sort=sort,
-        )
+        text_classification_search_request = TextClassificationSearchRequest(query=query, sort=sort,)
 
-        body_search_records_classification_datasets_dataset_id__search_post.additional_properties = d
-        return body_search_records_classification_datasets_dataset_id__search_post
+        text_classification_search_request.additional_properties = d
+        return text_classification_search_request
 
     @property
     def additional_keys(self) -> List[str]:

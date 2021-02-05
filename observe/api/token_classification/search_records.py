@@ -6,22 +6,20 @@ from attr import asdict
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-from typing import Union
-from ...types import UNSET, Unset
 from ...models.http_validation_error import HTTPValidationError
 from ...models.token_classification_results import TokenClassificationResults
-from typing import Dict
-from ...models.body_search_records_token_classification_datasets_dataset_id__search_post import (
-    BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
-)
 from typing import cast
+from ...models.token_classification_search_request import TokenClassificationSearchRequest
+from typing import Union
+from ...types import UNSET, Unset
+from typing import Dict
 
 
 def _get_kwargs(
     *,
-    client: Client,
+    client: AuthenticatedClient,
     dataset_id: str,
-    json_body: BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
+    json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Dict[str, Any]:
@@ -70,9 +68,9 @@ def _build_response(*, response: httpx.Response) -> Response[Union[TokenClassifi
 
 def sync_detailed(
     *,
-    client: Client,
+    client: AuthenticatedClient,
     dataset_id: str,
-    json_body: BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
+    json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Response[Union[TokenClassificationResults, HTTPValidationError]]:
@@ -85,9 +83,9 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Client,
+    client: AuthenticatedClient,
     dataset_id: str,
-    json_body: BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
+    json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Optional[Union[TokenClassificationResults, HTTPValidationError]]:
@@ -98,9 +96,9 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Client,
+    client: AuthenticatedClient,
     dataset_id: str,
-    json_body: BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
+    json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Response[Union[TokenClassificationResults, HTTPValidationError]]:
@@ -114,9 +112,9 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Client,
+    client: AuthenticatedClient,
     dataset_id: str,
-    json_body: BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
+    json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Optional[Union[TokenClassificationResults, HTTPValidationError]]:

@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from ..models.confidence_range import ConfidenceRange
-from ..models.text_classification_query_query_inputs import TextClassificationQueryQueryInputs
-from typing import Union
+from typing import cast
+from typing import cast, List
 from typing import Optional
+from ..models.text_classification_query_query_metadata import TextClassificationQueryQueryMetadata
 from typing import cast, Union
+from typing import Union
+from ..models.prediction_status import PredictionStatus
+from ..models.text_classification_query_query_inputs import TextClassificationQueryQueryInputs
+from ..models.confidence_range import ConfidenceRange
+from ..types import UNSET, Unset
 from ..models.record_status import RecordStatus
 from typing import Dict
-from ..models.prediction_status import PredictionStatus
-from typing import cast, List
-from ..models.text_classification_query_query_metadata import TextClassificationQueryQueryMetadata
-from typing import cast
 
 
 @attr.s(auto_attribs=True)

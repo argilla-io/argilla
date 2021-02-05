@@ -7,13 +7,13 @@ from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 from ...models.http_validation_error import HTTPValidationError
-from typing import Dict
-from ...models.token_classification_records_bulk import TokenClassificationRecordsBulk
-from ...models.bulk_response import BulkResponse
 from typing import cast
+from ...models.bulk_response import BulkResponse
+from ...models.token_classification_records_bulk import TokenClassificationRecordsBulk
+from typing import Dict
 
 
-def _get_kwargs(*, client: Client, json_body: TokenClassificationRecordsBulk,) -> Dict[str, Any]:
+def _get_kwargs(*, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,) -> Dict[str, Any]:
     url = "{}/token-classification/datasets/:bulk-records".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
@@ -51,7 +51,7 @@ def _build_response(*, response: httpx.Response) -> Response[Union[BulkResponse,
 
 
 def sync_detailed(
-    *, client: Client, json_body: TokenClassificationRecordsBulk,
+    *, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,
 ) -> Response[Union[BulkResponse, HTTPValidationError]]:
     kwargs = _get_kwargs(client=client, json_body=json_body,)
 
@@ -61,7 +61,7 @@ def sync_detailed(
 
 
 def sync(
-    *, client: Client, json_body: TokenClassificationRecordsBulk,
+    *, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,
 ) -> Optional[Union[BulkResponse, HTTPValidationError]]:
     """  """
 
@@ -69,7 +69,7 @@ def sync(
 
 
 async def asyncio_detailed(
-    *, client: Client, json_body: TokenClassificationRecordsBulk,
+    *, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,
 ) -> Response[Union[BulkResponse, HTTPValidationError]]:
     kwargs = _get_kwargs(client=client, json_body=json_body,)
 
@@ -80,7 +80,7 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    *, client: Client, json_body: TokenClassificationRecordsBulk,
+    *, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,
 ) -> Optional[Union[BulkResponse, HTTPValidationError]]:
     """  """
 

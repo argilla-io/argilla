@@ -1,11 +1,5 @@
 """ Contains all the data models used in inputs/outputs """
 
-from .body_search_records_classification_datasets_dataset_id__search_post import (
-    BodySearchRecordsClassificationDatasets_DatasetId__SearchPost,
-)
-from .body_search_records_token_classification_datasets_dataset_id__search_post import (
-    BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost,
-)
 from .bulk_response import BulkResponse
 from .class_prediction import ClassPrediction
 from .confidence_range import ConfidenceRange
@@ -48,6 +42,7 @@ from .text_classification_records_bulk import TextClassificationRecordsBulk
 from .text_classification_records_bulk_metadata import TextClassificationRecordsBulkMetadata
 from .text_classification_records_bulk_tags import TextClassificationRecordsBulkTags
 from .text_classification_results import TextClassificationResults
+from .text_classification_search_request import TextClassificationSearchRequest
 from .text_classification_sort_param import TextClassificationSortParam
 from .token_attributions import TokenAttributions
 from .token_attributions_attributions import TokenAttributionsAttributions
@@ -74,5 +69,6 @@ from .token_classification_records_bulk import TokenClassificationRecordsBulk
 from .token_classification_records_bulk_metadata import TokenClassificationRecordsBulkMetadata
 from .token_classification_records_bulk_tags import TokenClassificationRecordsBulkTags
 from .token_classification_results import TokenClassificationResults
+from .token_classification_search_request import TokenClassificationSearchRequest
 from .token_classification_sort_param import TokenClassificationSortParam
 from .validation_error import ValidationError

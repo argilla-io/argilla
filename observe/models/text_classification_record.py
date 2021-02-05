@@ -7,15 +7,17 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..models.text_classification_record_inputs import TextClassificationRecordInputs
+from typing import cast
+from ..models.text_classification_annotation import TextClassificationAnnotation
+from typing import Union
+from dateutil.parser import isoparse
+from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
 from ..models.text_classification_record_explanation import TextClassificationRecordExplanation
 from ..types import UNSET, Unset
-from typing import Union
 from ..models.record_status import RecordStatus
-from ..models.text_classification_annotation import TextClassificationAnnotation
-from ..models.text_classification_record_inputs import TextClassificationRecordInputs
+import datetime
 from typing import Dict
-from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
-from typing import cast
 
 
 @attr.s(auto_attribs=True)
@@ -47,6 +49,7 @@ explanation: Dict[str, List[TokenAttributions]]
     status: Union[Unset, RecordStatus] = UNSET
     prediction: Union[TextClassificationAnnotation, Unset] = UNSET
     annotation: Union[TextClassificationAnnotation, Unset] = UNSET
+    event_timestamp: Union[Unset, datetime.datetime] = UNSET
     multi_label: Union[Unset, bool] = False
     explanation: Union[TextClassificationRecordExplanation, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -71,6 +74,10 @@ explanation: Dict[str, List[TokenAttributions]]
         if not isinstance(self.annotation, Unset):
             annotation = self.annotation.to_dict()
 
+        event_timestamp: Union[Unset, str] = UNSET
+        if not isinstance(self.event_timestamp, Unset):
+            event_timestamp = self.event_timestamp.isoformat()
+
         multi_label = self.multi_label
         explanation: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.explanation, Unset):
@@ -91,6 +98,8 @@ explanation: Dict[str, List[TokenAttributions]]
             field_dict["prediction"] = prediction
         if annotation is not UNSET:
             field_dict["annotation"] = annotation
+        if event_timestamp is not UNSET:
+            field_dict["event_timestamp"] = event_timestamp
         if multi_label is not UNSET:
             field_dict["multi_label"] = multi_label
         if explanation is not UNSET:
@@ -125,6 +134,11 @@ explanation: Dict[str, List[TokenAttributions]]
         if _annotation is not None and not isinstance(_annotation, Unset):
             annotation = TextClassificationAnnotation.from_dict(cast(Dict[str, Any], _annotation))
 
+        event_timestamp = None
+        _event_timestamp = d.pop("event_timestamp", UNSET)
+        if _event_timestamp is not None:
+            event_timestamp = isoparse(cast(str, _event_timestamp))
+
         multi_label = d.pop("multi_label", UNSET)
 
         explanation: Union[TextClassificationRecordExplanation, Unset] = UNSET
@@ -139,6 +153,7 @@ explanation: Dict[str, List[TokenAttributions]]
             status=status,
             prediction=prediction,
             annotation=annotation,
+            event_timestamp=event_timestamp,
             multi_label=multi_label,
             explanation=explanation,
         )

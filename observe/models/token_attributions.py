@@ -8,10 +8,10 @@ import attr
 from ..types import UNSET, Unset
 
 from ..types import UNSET, Unset
-from typing import Dict
 from ..models.token_attributions_attributions import TokenAttributionsAttributions
-from typing import Union
 from typing import cast
+from typing import Union
+from typing import Dict
 
 
 @attr.s(auto_attribs=True)

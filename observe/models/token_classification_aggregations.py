@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.token_classification_aggregations_predicted import TokenClassificationAggregationsPredicted
-from ..models.token_classification_aggregations_annotated_as import TokenClassificationAggregationsAnnotatedAs
-from ..types import UNSET, Unset
-from ..models.token_classification_aggregations_predicted_as import TokenClassificationAggregationsPredictedAs
-from ..models.token_classification_aggregations_metadata import TokenClassificationAggregationsMetadata
 from ..models.token_classification_aggregations_annotated_by import TokenClassificationAggregationsAnnotatedBy
-from typing import Union
-from ..models.token_classification_aggregations_words import TokenClassificationAggregationsWords
-from ..models.token_classification_aggregations_predicted_by import TokenClassificationAggregationsPredictedBy
-from typing import Dict
 from ..models.token_classification_aggregations_status import TokenClassificationAggregationsStatus
 from typing import cast
+from typing import Union
+from ..models.token_classification_aggregations_predicted_as import TokenClassificationAggregationsPredictedAs
+from ..types import UNSET, Unset
+from ..models.token_classification_aggregations_annotated_as import TokenClassificationAggregationsAnnotatedAs
+from ..models.token_classification_aggregations_words import TokenClassificationAggregationsWords
+from ..models.token_classification_aggregations_predicted import TokenClassificationAggregationsPredicted
+from ..models.token_classification_aggregations_predicted_by import TokenClassificationAggregationsPredictedBy
+from ..models.token_classification_aggregations_metadata import TokenClassificationAggregationsMetadata
+from typing import Dict
 
 
 @attr.s(auto_attribs=True)

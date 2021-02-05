@@ -8,14 +8,14 @@ import attr
 from ..types import UNSET, Unset
 
 from ..models.token_classification_query_query_metadata import TokenClassificationQueryQueryMetadata
-from ..types import UNSET, Unset
-from typing import Union
+from typing import cast
+from typing import cast, List
 from typing import Optional
+from typing import Union
+from ..models.prediction_status import PredictionStatus
+from ..types import UNSET, Unset
 from ..models.record_status import RecordStatus
 from typing import Dict
-from ..models.prediction_status import PredictionStatus
-from typing import cast, List
-from typing import cast
 
 
 @attr.s(auto_attribs=True)

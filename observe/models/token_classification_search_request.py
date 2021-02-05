@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from ..models.token_classification_query import TokenClassificationQuery
-from typing import Union
-from ..models.token_classification_sort_param import TokenClassificationSortParam
-from typing import Dict
-from typing import cast, List
 from typing import cast
+from typing import cast, List
+from ..models.token_classification_sort_param import TokenClassificationSortParam
+from typing import Union
+from ..models.token_classification_query import TokenClassificationQuery
+from ..types import UNSET, Unset
+from typing import Dict
 
 
 @attr.s(auto_attribs=True)
-class BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost:
-    """  """
+class TokenClassificationSearchRequest:
+    """ Base search query request """
 
     query: Union[TokenClassificationQuery, Unset] = UNSET
     sort: Union[Unset, List[TokenClassificationSortParam]] = UNSET
@@ -48,7 +48,7 @@ class BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost:
         return field_dict
 
     @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost":
+    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationSearchRequest":
         d = src_dict.copy()
         query: Union[TokenClassificationQuery, Unset] = UNSET
         _query = d.pop("query", UNSET)
@@ -62,12 +62,10 @@ class BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost:
 
             sort.append(sort_item)
 
-        body_search_records_token_classification_datasets_dataset_id__search_post = BodySearchRecordsTokenClassificationDatasets_DatasetId__SearchPost(
-            query=query, sort=sort,
-        )
+        token_classification_search_request = TokenClassificationSearchRequest(query=query, sort=sort,)
 
-        body_search_records_token_classification_datasets_dataset_id__search_post.additional_properties = d
-        return body_search_records_token_classification_datasets_dataset_id__search_post
+        token_classification_search_request.additional_properties = d
+        return token_classification_search_request
 
     @property
     def additional_keys(self) -> List[str]:

@@ -7,15 +7,17 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..models.token_classification_annotation import TokenClassificationAnnotation
+from typing import cast
+from typing import cast, List
+from typing import Optional
+from dateutil.parser import isoparse
+from typing import Union
 from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
 from ..types import UNSET, Unset
-from typing import Union
-from typing import Optional
 from ..models.record_status import RecordStatus
-from ..models.token_classification_annotation import TokenClassificationAnnotation
+import datetime
 from typing import Dict
-from typing import cast, List
-from typing import cast
 
 
 @attr.s(auto_attribs=True)
@@ -41,6 +43,7 @@ annotation: Optional[TokenClassificationAnnotation]
     status: Union[Unset, RecordStatus] = UNSET
     prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
     annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
+    event_timestamp: Union[Unset, datetime.datetime] = UNSET
     raw_text: Union[Unset, Optional[str]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
@@ -64,6 +67,10 @@ annotation: Optional[TokenClassificationAnnotation]
         if not isinstance(self.annotation, Unset):
             annotation = self.annotation.to_dict()
 
+        event_timestamp: Union[Unset, str] = UNSET
+        if not isinstance(self.event_timestamp, Unset):
+            event_timestamp = self.event_timestamp.isoformat()
+
         raw_text = self.raw_text
 
         field_dict: Dict[str, Any] = {}
@@ -81,6 +88,8 @@ annotation: Optional[TokenClassificationAnnotation]
             field_dict["prediction"] = prediction
         if annotation is not UNSET:
             field_dict["annotation"] = annotation
+        if event_timestamp is not UNSET:
+            field_dict["event_timestamp"] = event_timestamp
         if raw_text is not UNSET:
             field_dict["raw_text"] = raw_text
 
@@ -113,6 +122,11 @@ annotation: Optional[TokenClassificationAnnotation]
         if _annotation is not None and not isinstance(_annotation, Unset):
             annotation = TokenClassificationAnnotation.from_dict(cast(Dict[str, Any], _annotation))
 
+        event_timestamp = None
+        _event_timestamp = d.pop("event_timestamp", UNSET)
+        if _event_timestamp is not None:
+            event_timestamp = isoparse(cast(str, _event_timestamp))
+
         raw_text = d.pop("raw_text", UNSET)
 
         token_classification_record = TokenClassificationRecord(
@@ -122,6 +136,7 @@ annotation: Optional[TokenClassificationAnnotation]
             status=status,
             prediction=prediction,
             annotation=annotation,
+            event_timestamp=event_timestamp,
             raw_text=raw_text,
         )
 
