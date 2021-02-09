@@ -8,13 +8,13 @@ import attr
 from ..types import UNSET, Unset
 
 from ..models.text_classification_records_bulk_tags import TextClassificationRecordsBulkTags
-from typing import cast
-from typing import cast, List
-from ..models.text_classification_record import TextClassificationRecord
 from typing import Union
 from ..models.text_classification_records_bulk_metadata import TextClassificationRecordsBulkMetadata
-from ..types import UNSET, Unset
+from typing import cast
+from ..models.text_classification_record import TextClassificationRecord
 from typing import Dict
+from ..types import UNSET, Unset
+from typing import cast, List
 
 
 @attr.s(auto_attribs=True)

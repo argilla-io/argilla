@@ -7,10 +7,10 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import cast
-from typing import cast, List
-from ..models.class_prediction import ClassPrediction
 from typing import Dict
+from typing import cast, List
+from typing import cast
+from ..models.class_prediction import ClassPrediction
 
 
 @attr.s(auto_attribs=True)

@@ -7,12 +7,12 @@ from ...client import AuthenticatedClient, Client
 from ...types import Response
 
 from ...models.http_validation_error import HTTPValidationError
-from ...models.token_classification_results import TokenClassificationResults
-from typing import cast
-from ...models.token_classification_search_request import TokenClassificationSearchRequest
 from typing import Union
-from ...types import UNSET, Unset
+from typing import cast
+from ...models.token_classification_results import TokenClassificationResults
 from typing import Dict
+from ...models.token_classification_search_request import TokenClassificationSearchRequest
+from ...types import UNSET, Unset
 
 
 def _get_kwargs(
@@ -23,7 +23,7 @@ def _get_kwargs(
     limit: Union[Unset, int] = 500,
     from_: Union[Unset, int] = 0,
 ) -> Dict[str, Any]:
-    url = "{}/token-classification/datasets/{dataset_id}/:search".format(client.base_url, dataset_id=dataset_id)
+    url = "{}/api/token-classification/datasets/{dataset_id}/:search".format(client.base_url, dataset_id=dataset_id)
 
     headers: Dict[str, Any] = client.get_headers()
 

@@ -6,15 +6,15 @@ from attr import asdict
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
+from ...models.bulk_response import BulkResponse
 from ...models.http_validation_error import HTTPValidationError
 from typing import cast
-from ...models.bulk_response import BulkResponse
-from ...models.token_classification_records_bulk import TokenClassificationRecordsBulk
 from typing import Dict
+from ...models.token_classification_records_bulk import TokenClassificationRecordsBulk
 
 
 def _get_kwargs(*, client: AuthenticatedClient, json_body: TokenClassificationRecordsBulk,) -> Dict[str, Any]:
-    url = "{}/token-classification/datasets/:bulk-records".format(client.base_url)
+    url = "{}/api/token-classification/datasets/:bulk-records".format(client.base_url)
 
     headers: Dict[str, Any] = client.get_headers()
 

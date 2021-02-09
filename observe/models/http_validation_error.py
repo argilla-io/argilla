@@ -7,11 +7,11 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import cast
-from typing import cast, List
 from ..models.validation_error import ValidationError
+from ..types import UNSET, Unset
 from typing import Union
+from typing import cast, List
+from typing import cast
 from typing import Dict
 
 

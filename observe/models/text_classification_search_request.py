@@ -8,12 +8,12 @@ import attr
 from ..types import UNSET, Unset
 
 from ..models.text_classification_query import TextClassificationQuery
-from typing import cast
-from typing import cast, List
 from typing import Union
-from ..models.text_classification_sort_param import TextClassificationSortParam
-from ..types import UNSET, Unset
+from typing import cast
 from typing import Dict
+from ..types import UNSET, Unset
+from typing import cast, List
+from ..models.text_classification_sort_param import TextClassificationSortParam
 
 
 @attr.s(auto_attribs=True)
