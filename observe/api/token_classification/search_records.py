@@ -6,12 +6,12 @@ from attr import asdict
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-from ...models.http_validation_error import HTTPValidationError
-from typing import Union
-from typing import cast
 from ...models.token_classification_results import TokenClassificationResults
 from typing import Dict
 from ...models.token_classification_search_request import TokenClassificationSearchRequest
+from typing import cast
+from ...models.http_validation_error import HTTPValidationError
+from typing import Union
 from ...types import UNSET, Unset
 
 

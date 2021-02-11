@@ -7,17 +7,17 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Optional
-from typing import Union
-from typing import cast
-from typing import Dict
 from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
-from dateutil.parser import isoparse
-from ..models.token_classification_annotation import TokenClassificationAnnotation
-from ..types import UNSET, Unset
-from typing import cast, List
-from ..models.record_status import RecordStatus
+from typing import Dict
 import datetime
+from dateutil.parser import isoparse
+from typing import cast
+from ..models.record_status import RecordStatus
+from typing import Union
+from typing import Optional
+from ..types import UNSET, Unset
+from ..models.token_classification_annotation import TokenClassificationAnnotation
+from typing import cast, List
 
 
 @attr.s(auto_attribs=True)
@@ -68,7 +68,7 @@ annotation: Optional[TokenClassificationAnnotation]
             annotation = self.annotation.to_dict()
 
         event_timestamp: Union[Unset, str] = UNSET
-        if not isinstance(self.event_timestamp, Unset):
+        if self.event_timestamp is not None and not isinstance(self.event_timestamp, Unset):
             event_timestamp = self.event_timestamp.isoformat()
 
         raw_text = self.raw_text
@@ -124,7 +124,7 @@ annotation: Optional[TokenClassificationAnnotation]
 
         event_timestamp = None
         _event_timestamp = d.pop("event_timestamp", UNSET)
-        if _event_timestamp is not None:
+        if _event_timestamp is not None and not isinstance(_event_timestamp, Unset):
             event_timestamp = isoparse(cast(str, _event_timestamp))
 
         raw_text = d.pop("raw_text", UNSET)

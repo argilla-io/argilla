@@ -6,10 +6,10 @@ from attr import asdict
 from ...client import AuthenticatedClient, Client
 from ...types import Response
 
-from ...models.bulk_response import BulkResponse
-from ...models.http_validation_error import HTTPValidationError
-from typing import cast
 from typing import Dict
+from ...models.bulk_response import BulkResponse
+from typing import cast
+from ...models.http_validation_error import HTTPValidationError
 from ...models.token_classification_records_bulk import TokenClassificationRecordsBulk
 
 

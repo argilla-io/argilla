@@ -7,12 +7,12 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Union
-from typing import cast
 from typing import Dict
+from typing import cast
 from ..models.token_classification_aggregations import TokenClassificationAggregations
-from ..models.token_classification_record_out import TokenClassificationRecordOUT
+from typing import Union
 from ..types import UNSET, Unset
+from ..models.token_classification_record_out import TokenClassificationRecordOUT
 from typing import cast, List
 
 

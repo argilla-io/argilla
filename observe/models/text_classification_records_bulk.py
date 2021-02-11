@@ -7,13 +7,13 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.text_classification_records_bulk_tags import TextClassificationRecordsBulkTags
-from typing import Union
-from ..models.text_classification_records_bulk_metadata import TextClassificationRecordsBulkMetadata
-from typing import cast
-from ..models.text_classification_record import TextClassificationRecord
 from typing import Dict
+from ..models.text_classification_records_bulk_tags import TextClassificationRecordsBulkTags
+from typing import cast
+from typing import Union
+from ..models.text_classification_record import TextClassificationRecord
 from ..types import UNSET, Unset
+from ..models.text_classification_records_bulk_metadata import TextClassificationRecordsBulkMetadata
 from typing import cast, List
 
 

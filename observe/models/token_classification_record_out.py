@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Optional
-from typing import Union
-from typing import cast
 from typing import Dict
+import datetime
 from dateutil.parser import isoparse
+from typing import cast
+from ..models.record_status import RecordStatus
+from typing import Union
+from typing import Optional
+from ..types import UNSET, Unset
 from ..models.token_classification_record_out_metadata import TokenClassificationRecordOUTMetadata
 from ..models.token_classification_annotation import TokenClassificationAnnotation
 from ..models.prediction_status import PredictionStatus
-from ..types import UNSET, Unset
 from typing import cast, List
-from ..models.record_status import RecordStatus
-import datetime
 
 
 @attr.s(auto_attribs=True)
@@ -58,12 +58,12 @@ class TokenClassificationRecordOUT:
             annotation = self.annotation.to_dict()
 
         event_timestamp: Union[Unset, str] = UNSET
-        if not isinstance(self.event_timestamp, Unset):
+        if self.event_timestamp is not None and not isinstance(self.event_timestamp, Unset):
             event_timestamp = self.event_timestamp.isoformat()
 
         raw_text = self.raw_text
         last_updated: Union[Unset, str] = UNSET
-        if not isinstance(self.last_updated, Unset):
+        if self.last_updated is not None and not isinstance(self.last_updated, Unset):
             last_updated = self.last_updated.isoformat()
 
         predicted: Union[Unset, PredictionStatus] = UNSET
@@ -125,14 +125,14 @@ class TokenClassificationRecordOUT:
 
         event_timestamp = None
         _event_timestamp = d.pop("event_timestamp", UNSET)
-        if _event_timestamp is not None:
+        if _event_timestamp is not None and not isinstance(_event_timestamp, Unset):
             event_timestamp = isoparse(cast(str, _event_timestamp))
 
         raw_text = d.pop("raw_text", UNSET)
 
         last_updated = None
         _last_updated = d.pop("last_updated", UNSET)
-        if _last_updated is not None:
+        if _last_updated is not None and not isinstance(_last_updated, Unset):
             last_updated = isoparse(cast(str, _last_updated))
 
         predicted = None

@@ -8,8 +8,8 @@ import attr
 from ..types import UNSET, Unset
 
 from typing import Union
-from ..types import UNSET, Unset
 from typing import cast, Union
+from ..types import UNSET, Unset
 
 
 @attr.s(auto_attribs=True)

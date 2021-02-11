@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.text_classification_record_out_explanation import TextClassificationRecordOUTExplanation
-from typing import Union
-from typing import cast
 from typing import Dict
+import datetime
 from dateutil.parser import isoparse
 from ..models.text_classification_annotation import TextClassificationAnnotation
 from ..models.text_classification_record_out_metadata import TextClassificationRecordOUTMetadata
-from ..models.text_classification_record_out_inputs import TextClassificationRecordOUTInputs
-from ..models.prediction_status import PredictionStatus
-from ..types import UNSET, Unset
+from ..models.text_classification_record_out_explanation import TextClassificationRecordOUTExplanation
+from typing import cast
 from ..models.record_status import RecordStatus
-import datetime
+from typing import Union
+from ..types import UNSET, Unset
+from ..models.prediction_status import PredictionStatus
+from ..models.text_classification_record_out_inputs import TextClassificationRecordOUTInputs
 
 
 @attr.s(auto_attribs=True)
@@ -59,7 +59,7 @@ class TextClassificationRecordOUT:
             annotation = self.annotation.to_dict()
 
         event_timestamp: Union[Unset, str] = UNSET
-        if not isinstance(self.event_timestamp, Unset):
+        if self.event_timestamp is not None and not isinstance(self.event_timestamp, Unset):
             event_timestamp = self.event_timestamp.isoformat()
 
         multi_label = self.multi_label
@@ -68,7 +68,7 @@ class TextClassificationRecordOUT:
             explanation = self.explanation.to_dict()
 
         last_updated: Union[Unset, str] = UNSET
-        if not isinstance(self.last_updated, Unset):
+        if self.last_updated is not None and not isinstance(self.last_updated, Unset):
             last_updated = self.last_updated.isoformat()
 
         predicted: Union[Unset, PredictionStatus] = UNSET
@@ -132,7 +132,7 @@ class TextClassificationRecordOUT:
 
         event_timestamp = None
         _event_timestamp = d.pop("event_timestamp", UNSET)
-        if _event_timestamp is not None:
+        if _event_timestamp is not None and not isinstance(_event_timestamp, Unset):
             event_timestamp = isoparse(cast(str, _event_timestamp))
 
         multi_label = d.pop("multi_label", UNSET)
@@ -144,7 +144,7 @@ class TextClassificationRecordOUT:
 
         last_updated = None
         _last_updated = d.pop("last_updated", UNSET)
-        if _last_updated is not None:
+        if _last_updated is not None and not isinstance(_last_updated, Unset):
             last_updated = isoparse(cast(str, _last_updated))
 
         predicted = None

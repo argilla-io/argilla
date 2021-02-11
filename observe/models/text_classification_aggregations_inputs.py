@@ -10,8 +10,8 @@ from ..types import UNSET, Unset
 from ..models.text_classification_aggregations_inputs_additional_property import (
     TextClassificationAggregationsInputsAdditionalProperty,
 )
-from typing import cast
 from typing import Dict
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

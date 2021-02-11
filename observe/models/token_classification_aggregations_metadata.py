@@ -7,11 +7,11 @@ import attr
 
 from ..types import UNSET, Unset
 
+from typing import Dict
+from typing import cast
 from ..models.token_classification_aggregations_metadata_additional_property import (
     TokenClassificationAggregationsMetadataAdditionalProperty,
 )
-from typing import cast
-from typing import Dict
 
 
 @attr.s(auto_attribs=True)
