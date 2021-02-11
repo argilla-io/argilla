@@ -21,3 +21,9 @@ dmypy.json
 
 /coverage.xml
 /.coverage
+
+.ipynb_checkpoints
+.history
+
+venv
+*.jsonl
