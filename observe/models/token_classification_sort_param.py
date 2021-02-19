@@ -7,10 +7,10 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Union
 from ..models.sort_order import SortOrder
 from ..types import UNSET, Unset
 from ..models.sortable_field import SortableField
+from typing import Union
 from typing import cast, Union
 
 
@@ -62,7 +62,7 @@ class TokenClassificationSortParam:
 
         order = None
         _order = d.pop("order", UNSET)
-        if _order is not None and not isinstance((_order), Unset):
+        if _order is not None and not isinstance(_order, Unset):
             order = SortOrder(_order)
 
         token_classification_sort_param = TokenClassificationSortParam(by=by, order=order,)

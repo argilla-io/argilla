@@ -7,12 +7,12 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..types import UNSET, Unset
 from typing import Union
 from typing import Dict
-from ..types import UNSET, Unset
 from typing import cast, List
-from ..models.validation_error import ValidationError
 from typing import cast
+from ..models.validation_error import ValidationError
 
 
 @attr.s(auto_attribs=True)

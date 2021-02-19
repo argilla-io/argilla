@@ -7,17 +7,17 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
-from typing import Dict
-import datetime
-from dateutil.parser import isoparse
-from typing import cast
-from ..models.record_status import RecordStatus
-from typing import Union
 from typing import Optional
-from ..types import UNSET, Unset
+from typing import Union
+from typing import Dict
 from ..models.token_classification_annotation import TokenClassificationAnnotation
 from typing import cast, List
+import datetime
+from ..models.record_status import RecordStatus
+from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
+from ..types import UNSET, Unset
+from dateutil.parser import isoparse
+from typing import cast
 
 
 @attr.s(auto_attribs=True)
@@ -109,7 +109,7 @@ annotation: Optional[TokenClassificationAnnotation]
 
         status = None
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance((_status), Unset):
+        if _status is not None and not isinstance(_status, Unset):
             status = RecordStatus(_status)
 
         prediction: Union[TokenClassificationAnnotation, Unset] = UNSET

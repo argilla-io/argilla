@@ -7,15 +7,15 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Dict
-from typing import cast
-from ..models.record_status import RecordStatus
-from typing import Union
-from ..models.token_classification_query_query_metadata import TokenClassificationQueryQueryMetadata
 from typing import Optional
-from ..types import UNSET, Unset
-from ..models.prediction_status import PredictionStatus
+from typing import Union
+from typing import Dict
 from typing import cast, List
+from ..models.prediction_status import PredictionStatus
+from ..models.record_status import RecordStatus
+from ..models.token_classification_query_query_metadata import TokenClassificationQueryQueryMetadata
+from ..types import UNSET, Unset
+from typing import cast
 
 
 @attr.s(auto_attribs=True)
@@ -109,7 +109,7 @@ class TokenClassificationQuery:
 
         predicted = None
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance((_predicted), Unset):
+        if _predicted is not None and not isinstance(_predicted, Unset):
             predicted = PredictionStatus(_predicted)
 
         query_metadata = None

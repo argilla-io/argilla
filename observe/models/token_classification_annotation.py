@@ -7,12 +7,12 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Union
-from ..models.entity_span import EntitySpan
-from typing import Dict
 from ..types import UNSET, Unset
+from typing import Union
+from typing import Dict
 from typing import cast, List
 from typing import cast
+from ..models.entity_span import EntitySpan
 
 
 @attr.s(auto_attribs=True)

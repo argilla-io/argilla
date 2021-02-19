@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class RecordStatus(str, Enum):
+    DEFAULT = "Default"
     EDITED = "Edited"
     DISCARDED = "Discarded"
     VALIDATED = "Validated"

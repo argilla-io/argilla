@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Dict
-from typing import cast
-from ..models.confidence_range import ConfidenceRange
-from ..models.record_status import RecordStatus
-from typing import Union
-from ..models.text_classification_query_query_metadata import TextClassificationQueryQueryMetadata
-from ..models.text_classification_query_query_inputs import TextClassificationQueryQueryInputs
 from typing import Optional
-from ..types import UNSET, Unset
-from ..models.prediction_status import PredictionStatus
-from typing import cast, Union
+from typing import Union
+from typing import Dict
+from ..models.confidence_range import ConfidenceRange
 from typing import cast, List
+from typing import cast, Union
+from ..models.text_classification_query_query_metadata import TextClassificationQueryQueryMetadata
+from ..models.prediction_status import PredictionStatus
+from ..models.record_status import RecordStatus
+from ..types import UNSET, Unset
+from typing import cast
+from ..models.text_classification_query_query_inputs import TextClassificationQueryQueryInputs
 
 
 @attr.s(auto_attribs=True)
@@ -133,7 +133,7 @@ class TextClassificationQuery:
 
         predicted = None
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance((_predicted), Unset):
+        if _predicted is not None and not isinstance(_predicted, Unset):
             predicted = PredictionStatus(_predicted)
 
         query_metadata = None

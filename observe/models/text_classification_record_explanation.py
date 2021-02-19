@@ -7,10 +7,10 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import cast, List
-from ..models.token_attributions import TokenAttributions
-from typing import cast
 from typing import Dict
+from ..models.token_attributions import TokenAttributions
+from typing import cast, List
+from typing import cast
 
 
 @attr.s(auto_attribs=True)

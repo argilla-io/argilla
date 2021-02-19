@@ -7,13 +7,13 @@ import attr
 
 from ..types import UNSET, Unset
 
-from ..models.text_classification_aggregations import TextClassificationAggregations
-from ..models.text_classification_record_out import TextClassificationRecordOUT
-from typing import Dict
-from typing import cast
 from typing import Union
-from ..types import UNSET, Unset
+from typing import Dict
 from typing import cast, List
+from ..types import UNSET, Unset
+from ..models.text_classification_aggregations import TextClassificationAggregations
+from typing import cast
+from ..models.text_classification_record_out import TextClassificationRecordOUT
 
 
 @attr.s(auto_attribs=True)

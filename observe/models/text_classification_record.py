@@ -7,17 +7,17 @@ import attr
 
 from ..types import UNSET, Unset
 
-from typing import Dict
-import datetime
 from ..models.text_classification_record_explanation import TextClassificationRecordExplanation
+from typing import Union
+from typing import Dict
+from ..models.text_classification_record_inputs import TextClassificationRecordInputs
+import datetime
+from ..models.record_status import RecordStatus
+from ..types import UNSET, Unset
 from dateutil.parser import isoparse
 from ..models.text_classification_annotation import TextClassificationAnnotation
-from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
 from typing import cast
-from ..models.record_status import RecordStatus
-from typing import Union
-from ..models.text_classification_record_inputs import TextClassificationRecordInputs
-from ..types import UNSET, Unset
+from ..models.text_classification_record_metadata import TextClassificationRecordMetadata
 
 
 @attr.s(auto_attribs=True)
@@ -121,7 +121,7 @@ explanation: Dict[str, List[TokenAttributions]]
 
         status = None
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance((_status), Unset):
+        if _status is not None and not isinstance(_status, Unset):
             status = RecordStatus(_status)
 
         prediction: Union[TextClassificationAnnotation, Unset] = UNSET

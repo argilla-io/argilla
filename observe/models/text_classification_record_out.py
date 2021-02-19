@@ -7,18 +7,18 @@ import attr
 
 from ..types import UNSET, Unset
 
+from ..models.text_classification_record_out_inputs import TextClassificationRecordOUTInputs
+from typing import Union
 from typing import Dict
 import datetime
 from dateutil.parser import isoparse
-from ..models.text_classification_annotation import TextClassificationAnnotation
-from ..models.text_classification_record_out_metadata import TextClassificationRecordOUTMetadata
 from ..models.text_classification_record_out_explanation import TextClassificationRecordOUTExplanation
-from typing import cast
 from ..models.record_status import RecordStatus
-from typing import Union
-from ..types import UNSET, Unset
 from ..models.prediction_status import PredictionStatus
-from ..models.text_classification_record_out_inputs import TextClassificationRecordOUTInputs
+from ..types import UNSET, Unset
+from ..models.text_classification_record_out_metadata import TextClassificationRecordOUTMetadata
+from ..models.text_classification_annotation import TextClassificationAnnotation
+from typing import cast
 
 
 @attr.s(auto_attribs=True)
@@ -117,7 +117,7 @@ class TextClassificationRecordOUT:
 
         status = None
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance((_status), Unset):
+        if _status is not None and not isinstance(_status, Unset):
             status = RecordStatus(_status)
 
         prediction: Union[TextClassificationAnnotation, Unset] = UNSET
@@ -149,7 +149,7 @@ class TextClassificationRecordOUT:
 
         predicted = None
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance((_predicted), Unset):
+        if _predicted is not None and not isinstance(_predicted, Unset):
             predicted = PredictionStatus(_predicted)
 
         text_classification_record_out = TextClassificationRecordOUT(
