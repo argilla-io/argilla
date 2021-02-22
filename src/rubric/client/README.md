@@ -1,11 +1,11 @@
-# biome-observe-cli
-A client library for accessing biome.observe
+# Rubric python client
+A client library for accessing Rubric's API
 
 ## Usage
 First, create a client:
 
 ```python
-from observe import Client
+from rubric.client import Client
 
 client = Client(base_url="https://api.example.com")
 ```
@@ -13,7 +13,7 @@ client = Client(base_url="https://api.example.com")
 If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
 
 ```python
-from observe import AuthenticatedClient
+from rubric.client import AuthenticatedClient
 
 client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSecretToken")
 ```
@@ -21,9 +21,9 @@ client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSec
 Now call your endpoint and use your models:
 
 ```python
-from observe.models import MyDataModel
-from observe.api.my_tag import get_my_data_model
-from observe.types import Response
+from rubric.client.models import MyDataModel
+from rubric.client.api.my_tag import get_my_data_model
+from rubric.client.types import Response
 
 my_data: MyDataModel = get_my_data_model.sync(client=client)
 # or if you need more info (e.g. status_code)
@@ -32,10 +32,12 @@ response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
 
 Or do the same thing with an async version:
 
+**!!`async_api` does not exist in this client, use the async functions, see 'Things to know' below!!** 
+
 ```python
-from observe.models import MyDataModel
-from observe.async_api.my_tag import get_my_data_model
-from observe.types import Response
+from rubric.client.models import MyDataModel
+from rubric.client.async_api.my_tag import get_my_data_model
+from rubric.client.types import Response
 
 my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
 response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)

@@ -1,9 +1,7 @@
-from observe.client import Client, AuthenticatedClient
-from observe.models import * 
-from observe.api.text_classification import bulk_records
-from observe.api.token_classification import bulk_records as bulk_records_ner
-
-import logging
+from rubric.client.client import Client, AuthenticatedClient
+from rubric.client.models import *
+from rubric.client.api.text_classification import bulk_records
+from rubric.client.api.token_classification import bulk_records as bulk_records_ner
 
 
 class Rubric:
