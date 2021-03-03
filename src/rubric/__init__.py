@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from rubric.client import Client, AuthenticatedClient
-from rubric.client.models import *
-from rubric.client.api.text_classification import bulk_records
+from rubric.sdk import Client, AuthenticatedClient
+from rubric.sdk.models import *
+from rubric.sdk.api.text_classification import bulk_records
 import requests
 from typing import List, Union, Dict
 import logging

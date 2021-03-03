@@ -1,4 +1,4 @@
-from rubric.client import Client, AuthenticatedClient
+from rubric.sdk import Client, AuthenticatedClient
 from rubric import *
 
 def create_record(idx, inputs, label, metadata):

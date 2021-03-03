@@ -5,7 +5,7 @@ A client library for accessing Rubric's API
 First, create a client:
 
 ```python
-from rubric.client import Client
+from rubric.sdk import Client
 
 client = Client(base_url="https://api.example.com")
 ```
@@ -13,7 +13,7 @@ client = Client(base_url="https://api.example.com")
 If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
 
 ```python
-from rubric.client import AuthenticatedClient
+from rubric.sdk import AuthenticatedClient
 
 client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSecretToken")
 ```
@@ -21,9 +21,9 @@ client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSec
 Now call your endpoint and use your models:
 
 ```python
-from rubric.client.models import MyDataModel
-from rubric.client.api.my_tag import get_my_data_model
-from rubric.client.types import Response
+from rubric.sdk.models import MyDataModel
+from rubric.sdk.api.my_tag import get_my_data_model
+from rubric.sdk.types import Response
 
 my_data: MyDataModel = get_my_data_model.sync(client=client)
 # or if you need more info (e.g. status_code)
@@ -32,12 +32,12 @@ response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
 
 Or do the same thing with an async version:
 
-**!!`async_api` does not exist in this client, use the async functions, see 'Things to know' below!!** 
+**!!`async_api` does not exist in this client, use the async functions, see 'Things to know' below!!**
 
 ```python
-from rubric.client.models import MyDataModel
-from rubric.client.async_api.my_tag import get_my_data_model
-from rubric.client.types import Response
+from rubric.sdk.models import MyDataModel
+from rubric.sdk.async_api.my_tag import get_my_data_model
+from rubric.sdk.types import Response
 
 my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
 response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
