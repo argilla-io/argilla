@@ -1,0 +1,421 @@
+{
+  "error": false,
+  "status": "ok",
+  "exploration": {
+    "tags": {
+      "env": "test",
+      "class": "text classification"
+    },
+    "metadata": {
+      "config": {
+        "the": "config"
+      }
+    },
+    "name": "mock-ds",
+    "task": "TokenClassification",
+    "owner": null,
+    "created_at": "2021-01-20T16:18:41.146842",
+    "last_updated": "2021-01-20T16:18:41.146842",
+    "metrics": {
+      "total": 196,
+      "discarded": 1,
+      "annotated": 59
+    },
+    "filters": {
+      "text": {
+        "name": "Search",
+        "query": "",
+        "fields": [
+          "text"
+        ]
+      },
+      "metadata": [],
+      "showAnnotated": true,
+      "predictedEntity": {
+        "name": "Predicted as",
+        "field": "prediction.entities.label.keyword",
+        "values": []
+      },
+      "annotatedEntity": {
+        "name": "Annotated as",
+        "field": "annotation.entities.label.keyword",
+        "values": []
+      },
+      "annotationStatus": {
+        "name": "Annotation status",
+        "field": "annotation.status.keyword",
+        "values": []
+      }
+    },
+    "entities": [
+      "PartNumber",
+      "Quantity"
+    ],
+    "aggregations": {
+      "predictedEntity": {
+        "terms": {
+          "field": "prediction.entities.label.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      },
+      "annotatedEntity": {
+        "terms": {
+          "field": "annotation.entities.label.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      },
+      "annotationStatus": {
+        "terms": {
+          "field": "annotation.status.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      }
+    }
+  },
+  "sort": [],
+  "pagination": {
+    "from": 0,
+    "size": 20
+  },
+  "results": {
+    "total": 196,
+    "records": [
+      {
+        "id": "101",
+        "metadata": {
+          "PageContext": "0",
+          "ParagraphTextualContent": null,
+          "RecordTextualContent": "24",
+          "TabularHeaderContext": null,
+          "TabularSectionContext": "0",
+          "TextualSectionContext": null,
+          "data": {
+            "0": null,
+            "1": null,
+            "2": null,
+            "3": null,
+            "4": null,
+            "5": null,
+            "6": null,
+            "7": null,
+            "8": null,
+            "9": null,
+            "12": null,
+            "35": null,
+            "174290-26": null,
+            "Alternate Part \nNumber": null,
+            "Cage \nCode": null,
+            "Comments": null,
+            "DELIV.\nDATE\n (WEEKS)": null,
+            "DELIVERY TO_ AMMROC ADVANCE MILITARY MRO CENTER\n                                NEAR ABU DHABI INT'L AIRPORT-TERM.2 \n                                \n                                P.O. 93443 ABU DHABI\n                                UTD.ARAB EMIR.": null,
+            "DELIVERY TO_ IRISH AIR CORPS\n                                403 SQUADRON SUPPLY \n                                NO 4 SUPPORT WING, BALDONNEL\n                                22 BALDONNEL\n                                IRLANDA": null,
+            "DELIVERY TO_ SABENA TECHNICS-DNR\n                                AEROPORT DE DINAR PLEURTUIT ST-MALO \n                                SAINT MALO - B.P. 90154\n                                35801 DINARD-CEDEX\n                                FRANCE": null,
+            "DESC": null,
+            "DESCRIPTION\nFOR THE PART": null,
+            "Deadline": null,
+            "Descripción del P/N": null,
+            "Description": null,
+            "EXT. PRICE\n     EUR": null,
+            "EXT. PRICE\n     USD": null,
+            "FORMULARIO DE SOLICITUD DE \nMATERIAL EXPENDABLE \nC295": null,
+            "General Terms and Conditions of Purchase": null,
+            "ITEM": null,
+            "Liability": null,
+            "MASCARILLAS DE OXIGENO": null,
+            "MATERIAL REQUEST FORM": "CAN42119-5B",
+            "N S N": null,
+            "Número_ ARMEX- C295-24-2019": null,
+            "ODM": null,
+            "ORDEN DE TRABAJO /": null,
+            "Origen Defecto": null,
+            "P/N": null,
+            "P/N Proveedor": null,
+            "P/N Proveedor3": null,
+            "PART-NUMBER": null,
+            "PN": null,
+            "PN AIRBUS": null,
+            "POR PRESENTAR FECHA DE CADUCIDAD VENCIDA": null,
+            "PR": null,
+            "PR Line \nNo.": null,
+            "Part Number": null,
+            "Priority": null,
+            "QTY": null,
+            "Qty": null,
+            "Qty.": null,
+            "Quantity": null,
+            "REF.": null,
+            "RFQ \nLine \nNo.": null,
+            "Request": null,
+            "SOCIAL NAME_ AMMROC (ADVANCED MILITARY\n                                     MAINTEN. REPAIR & OVERHAUL CENTER)\n                                     TERMINAL 2.\n                                      ABU DHABI , UAE \n                                      P.O. 93443\n                                      UTD.ARAB EMIR.": null,
+            "SOCIAL NAME_ IRISH AIR CORPS\n                                     \n                                     CASEMENT AERODROME\n                                      IRELAND \n                                      0000\n                                      IRELAND": null,
+            "SOCIAL NAME_ TAT INDUSTRIES LAB\n                                     \n                                     AEROPORT DE DINARD- PLEURTUIT\n                                      DINARD- CEDEX \n                                      35801\n                                      FRANCE": null,
+            "Stock": null,
+            "Type": null,
+            "U/M": null,
+            "UD": null,
+            "UM": null,
+            "UNIT PRICE\nEUR": null,
+            "UNIT PRICE\nUSD": null,
+            "UOM": null,
+            "Unit": null,
+            "Unnamed_0": null,
+            "Unnamed_1": "NUT",
+            "Unnamed_2": "4",
+            "Unnamed_3": "UN",
+            "Unnamed_4": "",
+            "Unnamed_5": "",
+            "Unnamed_6": "",
+            "WP": null,
+            "qty": null
+          },
+          "extension": ".xlsx",
+          "file": "95e09a1d7c0fd7fbcc6849f4ee4ddcd0_Material Request Form  2019-21-05  PAF  024.xlsx",
+          "seq": "24",
+          "tokens": [
+            "MATERIAL",
+            "REQUEST",
+            "FORM",
+            ":",
+            "CAN42119-5B",
+            "\n\n\n",
+            "Unnamed_1",
+            ":",
+            "NUT",
+            "\n\n\n",
+            "Unnamed_2",
+            ":",
+            "4",
+            "\n\n\n",
+            "Unnamed_3",
+            ":",
+            "UN",
+            "\n\n\n",
+            "Unnamed_4",
+            ":",
+            "\n\n\n",
+            "Unnamed_5",
+            ":",
+            "\n\n\n",
+            "Unnamed_6",
+            ":"
+          ]
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model:v3",
+          "entities": [
+            {
+              "end": 8,
+              "start": 0,
+              "text": "MATERIAL"
+            },
+            {
+              "end": 16,
+              "start": 9,
+              "text": "REQUEST"
+            },
+            {
+              "end": 21,
+              "start": 17,
+              "text": "FORM"
+            },
+            {
+              "end": 22,
+              "start": 21,
+              "text": ":"
+            },
+            {
+              "end": 34,
+              "start": 23,
+              "text": "CAN42119-5B"
+            },
+            {
+              "end": 37,
+              "start": 34,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 46,
+              "start": 37,
+              "text": "Unnamed_1"
+            },
+            {
+              "end": 47,
+              "start": 46,
+              "text": ":"
+            },
+            {
+              "end": 51,
+              "start": 48,
+              "text": "NUT"
+            },
+            {
+              "end": 54,
+              "start": 51,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 63,
+              "start": 54,
+              "text": "Unnamed_2"
+            },
+            {
+              "end": 64,
+              "start": 63,
+              "text": ":"
+            },
+            {
+              "end": 66,
+              "start": 65,
+              "text": "4"
+            },
+            {
+              "end": 69,
+              "start": 66,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 78,
+              "start": 69,
+              "text": "Unnamed_3"
+            },
+            {
+              "end": 79,
+              "start": 78,
+              "text": ":"
+            },
+            {
+              "end": 82,
+              "start": 80,
+              "text": "UN"
+            },
+            {
+              "end": 85,
+              "start": 82,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 94,
+              "start": 85,
+              "text": "Unnamed_4"
+            },
+            {
+              "end": 95,
+              "start": 94,
+              "text": ":"
+            },
+            {
+              "end": 99,
+              "start": 96,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 108,
+              "start": 99,
+              "text": "Unnamed_5"
+            },
+            {
+              "end": 109,
+              "start": 108,
+              "text": ":"
+            },
+            {
+              "end": 113,
+              "start": 110,
+              "text": "\n\n\n"
+            },
+            {
+              "end": 122,
+              "start": 113,
+              "text": "Unnamed_6"
+            },
+            {
+              "end": 123,
+              "start": 122,
+              "text": ":"
+            }
+          ],
+          "score": 10
+        },
+        "annotation": {
+          "agent": "me",
+          "entities": [
+            {
+              "start": 65,
+              "end": 66,
+              "text": "__vue_devtool_undefined__",
+              "label": "Quantity",
+              "tokenStart": 12,
+              "tokenEnd": 13,
+              "metadata": {
+                "agent": "user"
+              }
+            }
+          ],
+          "score": 10
+        },
+        "tokens": [
+          "The",
+          "token",
+          "list",
+          "here"
+        ],  
+        "raw_text": "MATERIAL REQUEST FORM: CAN42119-5B\n\n\nUnnamed_1: NUT\n\n\nUnnamed_2: 4\n\n\nUnnamed_3: UN\n\n\nUnnamed_4: \n\n\nUnnamed_5: \n\n\nUnnamed_6: ",
+        "last_updated": "2021-01-20T17:14:48.920718"
+      }
+    ],
+    "aggregations": {
+      "annotatedEntity": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "Quantity",
+            "doc_count": 48
+          },
+          {
+            "key": "PartNumber",
+            "doc_count": 2
+          }
+        ]
+      },
+      "annotationStatus": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "annotated",
+            "doc_count": 59
+          },
+          {
+            "key": "discarded",
+            "doc_count": 1
+          }
+        ]
+      },
+      "predictedEntity": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "Quantity",
+            "doc_count": 109
+          },
+          {
+            "key": "PartNumber",
+            "doc_count": 72
+          }
+        ]
+      }
+    }
+  }
+}

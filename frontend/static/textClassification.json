@@ -1,0 +1,1759 @@
+{
+  "error": false,
+  "status": "ok",
+  "exploration": {
+    "tags": {},
+    "metadata": {},
+    "name": "incidencias_2008",
+    "id": "incidencias_2008",
+    "task": "TextClassification",
+    "owner": null,
+    "created_at": "2021-01-18T21:44:24.035368",
+    "last_updated": "2021-01-18T21:44:24.035368",
+    "filters": {
+      "text": {
+        "name": "Search",
+        "query": "",
+        "fields": [
+          "text"
+        ]
+      },
+      "metadata": [],
+      "showAnnotated": true,
+      "predictedEntity": {
+        "name": "Predicted as",
+        "field": "prediction.entities.label.keyword",
+        "values": []
+      },
+      "annotatedEntity": {
+        "name": "Annotated as",
+        "field": "annotation.entities.label.keyword",
+        "values": []
+      },
+      "annotationStatus": {
+        "name": "Annotation status",
+        "field": "annotation.status.keyword",
+        "values": []
+      }
+    },
+    "entities": [
+      "PartNumber",
+      "Quantity"
+    ],
+    "aggregations": {
+      "predictedEntity": {
+        "terms": {
+          "field": "prediction.entities.label.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      },
+      "annotatedEntity": {
+        "terms": {
+          "field": "annotation.entities.label.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      },
+      "annotationStatus": {
+        "terms": {
+          "field": "annotation.status.keyword",
+          "size": 100,
+          "order": {
+            "_count": "desc"
+          }
+        }
+      }
+    }
+  },
+  "sort": [],
+  "pagination": {
+    "from": 0,
+    "size": 20
+  },
+  "results": {
+    "total": 10,
+    "records": [
+      {
+        "id": "1633",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Calzada",
+              "confidence": 0.9980524778366089
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.0014142203144729137
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.00028297369135543704
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.00005786704787169583
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.000055393174989148974
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.00004541772432276048
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.00002028755443461705
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.000015038132005429361
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.000014550347259500995
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.000010853119420062285
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.000008833744686853606
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.000007648199243703857
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.0000066597608565643895
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.0000022306849132291973
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.000002173302164010238
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.0000013379483334574616
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 9.0575974809326e-7
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 3.355068542987283e-7
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 1.9753436220071308e-7
+            },
+            {
+              "class": "Riego",
+              "confidence": 1.9478297019759339e-7
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 1.6664833424329117e-7
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 1.0372723124874028e-7
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 8.436987286586373e-8
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 3.021751027176833e-8
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 1.6462886165413693e-8
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 4.012501442218763e-9
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 3.3770997109883183e-9
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 2.133984544627765e-9
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 1.171195251892243e-9
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 1.0016903972953628e-9
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 4.0437383996838605e-10
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 1.9442522591894829e-10
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Calzada",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "Hay hundida una zona de la calzada y resulta peligroso para las motos, especialmente en días de lluvia, pues se forma un charco grande y no se aprecia la profundidad del socavón."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.247776"
+      },
+      {
+        "id": "18657",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Jardines",
+              "confidence": 0.39506787061691284
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.33558493852615356
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.17210717499256134
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.013363462872803211
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.012757495045661926
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.012440660037100315
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.011634177528321743
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.00975868571549654
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.006166939623653889
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.006054446566849947
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.004381828010082245
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.004025860223919153
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.003946918528527021
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.003597579663619399
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.002290570642799139
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.0022135740146040916
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.0011092041386291385
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.0009073909022845328
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.0006575258448719978
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.000570067495573312
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.000354608113411814
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.00025680981343612075
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.0002240014000562951
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.00022220108075998724
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.00017808248230721802
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.00004063755113747902
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.00003432055382290855
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.00002016489270317834
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.000014243874829844572
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.000011708581951097585
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.000005148094714968465
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.0000017275332311328384
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "Caseta con puerta violentada, teniendo en su interior todo el sistema de riego de un parque existente en la zona. Frente al establecimiento Decathlon."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.248704"
+      },
+      {
+        "id": "18283",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Calzada",
+              "confidence": 0.9603646993637085
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.012259119190275669
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.010806703940033913
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.0034222875256091356
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.002764803124591708
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.002133307047188282
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.0019470553379505873
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.0014061477268114686
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.0010142829269170761
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.0008031117031350732
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.0007023534853942692
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.00034130862331949174
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.0002676662406884134
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.00024887477047741413
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.00024580946774221957
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.00023584815789945424
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.00022763339802622795
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.0001928861893247813
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.00015085417544469237
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.00014591672515962273
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.0000811627833172679
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.00006895557453390211
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.00005289231557981111
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.00004361246828921139
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.000020287619918235578
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.000013335929907043464
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.000012181507372588385
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.00000893015840119915
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.000005664413947670255
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.000005191503078094684
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.0000039957835724635515
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.000003234412588426494
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Calzada",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "Socavón a mitad de calzada. Asfalto levantámndose y firme suelto."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.249534"
+      },
+      {
+        "id": "807",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Limpieza",
+              "confidence": 0.6577221751213074
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.05667657032608986
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.04101622477173805
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.03974153473973274
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.03460776433348656
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.025609485805034637
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.018719734624028206
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.017801648005843163
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.015168651007115841
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.014379563741385937
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.01010084804147482
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.008961307816207409
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.008828557096421719
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.008646060712635517
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.005152537487447262
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.0050690206699073315
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.005050922743976116
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.0042305015958845615
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.002463723998516798
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.0024496549740433693
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.002391382586210966
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.0021682963706552982
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.0018952209502458572
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.0016386221395805478
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.0015157241141423583
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.0014303912175819278
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.0012202478246763349
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.0012022241717204452
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.0011505607981234789
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.0011293893912807107
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.000958231627009809
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.0009033356909640133
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Alcantarillado",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "FUERTE OLOR EN TODA LA CALLE"
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.250398"
+      },
+      {
+        "id": "18863",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.9977915287017822
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.000568298390135169
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.00043463651672936976
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.00025430580717511475
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.0002527041360735893
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.00010031516285380349
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.00008971652277978137
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.00008366998372366652
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.00006503312033601105
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.000044991869799559936
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.000041468894778518006
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.00004122002064832486
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.00003955876309191808
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.00003530233516357839
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.0000318969578074757
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.00003096451109740883
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.000028052247216692194
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.00002333359771000687
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.000010928730262094177
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.000009350985237688292
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.000002947493157989811
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.00000282904829873587
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.0000025662563984951703
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.000002444811570967431
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.0000024411142476310488
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.0000017260210825043032
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.0000015854516277613584
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.0000015532818906649482
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.0000013191209973228979
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.000001302026930716238
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.0000012283967407711316
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 7.85892837029678e-7
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "Señal informativa de Paso de Peatones tirada en el suelo, partida desde su base."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.251022"
+      },
+      {
+        "id": "21635",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.9996867179870605
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.00017530295008327812
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.00001946545671671629
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.000015247157534759026
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.000012813608918804675
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.000010497703442524653
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.00000895452467375435
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.000008836462257022504
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.000008663037988299038
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.000007078445833030855
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.0000066816542130254675
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.000006671371920674574
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.000005734613296226598
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.000005190370302443625
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.000004640989573090337
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.0000036736996662511956
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.000002544095650591771
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.000002500304617569782
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.0000017471793398726732
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.0000015299091273845988
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.0000011459330835350556
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 7.954750458338822e-7
+            },
+            {
+              "class": "Riego",
+              "confidence": 6.432867394323694e-7
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 4.925195185023767e-7
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 4.799673547495331e-7
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 4.3107289116051106e-7
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 3.9656393369114085e-7
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 3.112348565537104e-7
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 2.595737100818951e-7
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 2.1393530857949372e-7
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 2.020794909185497e-7
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 1.676646803616677e-7
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "ALUMBRADO PÚBLICO DE TODA LA CALLE APAGADO DESDE HACE VARIOS DÍAS."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.251749"
+      },
+      {
+        "id": "21670",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.6493121385574341
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.04518812894821167
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.038197629153728485
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.029874352738261223
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.02754897251725197
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.022724110633134842
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.021089620888233185
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.021000659093260765
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.019577061757445335
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.014277225360274315
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.014156615361571312
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.013023771345615387
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.011310302652418613
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.011307703331112862
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.010708277113735676
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.008320719003677368
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.006693682167679071
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.00519903376698494
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.004752054810523987
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.00441525224596262
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.003806577529758215
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.002827299293130636
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.0026694312691688538
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.002414853312075138
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.001995273632928729
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.0016221676487475634
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.0011848059948533773
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.001159454113803804
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.001086629694327712
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.0009483438334427774
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.0008850937010720372
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.0007228180184029043
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "Indica que llevan alrededor de una semana sin luz"
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.252402"
+      },
+      {
+        "id": "12274",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Jardines",
+              "confidence": 0.8905448317527771
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.03451147302985191
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.025735409930348396
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.01691179908812046
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.007402531336992979
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.005726121831685305
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.0033141011372208595
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.0027569273952394724
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.0027528118807822466
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.0021214978769421577
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.001335933106020093
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.0012714483309537172
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.001111314631998539
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.0011100679403170943
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.0006455552647821605
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.0005784501554444432
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.0005682967603206635
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.0004357913858257234
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.00028005283093079925
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.000277307175565511
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.00014973702491261065
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.00014813260349910706
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.00010094899334944785
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.00006619544728891924
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.00004824044299311936
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.000041923736716853455
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.00001579234412929509
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.000011166518561367411
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.000009045062142831739
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.000009007668268168345
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.0000051340593927307054
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.0000029892717066104524
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Jardines",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "LIMPIEZA DE JARDINES A LA ESPALDA DE LA C/ JABALÓN Nº2, 4 Y 6."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.253268"
+      },
+      {
+        "id": "19202",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.9954445362091064
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.004535680171102285
+            },
+            {
+              "class": "Aceras",
+              "confidence": 0.000017817828847910278
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.000001337814978796814
+            },
+            {
+              "class": "Calzada",
+              "confidence": 3.070013008255046e-7
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 1.513600551561467e-7
+            },
+            {
+              "class": "Cables",
+              "confidence": 7.825565973007542e-8
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 4.614209458964069e-8
+            },
+            {
+              "class": "OTROS",
+              "confidence": 1.8330126749788178e-8
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 1.1457034432282853e-8
+            },
+            {
+              "class": "Jardines",
+              "confidence": 1.1282034861892498e-8
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 3.887041799544022e-9
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 2.115025488080846e-9
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 7.1702954684838e-10
+            },
+            {
+              "class": "Árboles",
+              "confidence": 6.39461539275743e-10
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 4.514492391027858e-10
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 3.1407260125959624e-10
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 2.709841240289279e-10
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 2.424448142246405e-10
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 7.276486357898904e-11
+            },
+            {
+              "class": "Riego",
+              "confidence": 4.20461374051051e-11
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 3.118066915774875e-11
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 8.685155025722757e-12
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 4.1351006820067315e-12
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 8.116168327687578e-13
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 3.3324444549329146e-13
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 1.3321270898435794e-13
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 5.16532820747477e-14
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 3.409934078266348e-14
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 3.1748458435799584e-14
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 1.1757521192268857e-14
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 7.253913080287628e-15
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "TAPA DE ARQUETA, LA PARTE INTERIOR SE HA HUNDIDO DEJANDO UN HUECO ENTRE LA TAPA Y LA ACERA, AL PISAR SE HUNDE MAS, ALGUIEN PUEDE CAER AL TERMINAR DE HUNDIRLA. VER FOTO."
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.253941"
+      },
+      {
+        "id": "605",
+        "metadata": {
+          "model_path": "output/model.tar.gz"
+        },
+        "status": null,
+        "prediction": {
+          "agent": "model-2008",
+          "labels": [
+            {
+              "class": "Aceras",
+              "confidence": 0.2763911783695221
+            },
+            {
+              "class": "Tapas de arquetas o registros",
+              "confidence": 0.1290230005979538
+            },
+            {
+              "class": "Alcantarillado",
+              "confidence": 0.10985848307609558
+            },
+            {
+              "class": "Calzada",
+              "confidence": 0.08783674240112305
+            },
+            {
+              "class": "Limpieza",
+              "confidence": 0.08553241193294525
+            },
+            {
+              "class": "Jardines",
+              "confidence": 0.05083119496703148
+            },
+            {
+              "class": "Árboles",
+              "confidence": 0.03794015944004059
+            },
+            {
+              "class": "Vallas peatonales fijas de fundición",
+              "confidence": 0.0378902405500412
+            },
+            {
+              "class": "Señales de Tráfico Verticales excepto semáforos mantenimiento",
+              "confidence": 0.025122085586190224
+            },
+            {
+              "class": "Cables",
+              "confidence": 0.019620060920715332
+            },
+            {
+              "class": "Parques infantiles",
+              "confidence": 0.01746390387415886
+            },
+            {
+              "class": "Vallas de obra",
+              "confidence": 0.016659140586853027
+            },
+            {
+              "class": "Farolas / Alumbrado",
+              "confidence": 0.01589551568031311
+            },
+            {
+              "class": "OTROS",
+              "confidence": 0.014373398385941982
+            },
+            {
+              "class": "Mobiliario zonas verdes",
+              "confidence": 0.013818668201565742
+            },
+            {
+              "class": "Señales de Tránsito Horizontales mantenimiento",
+              "confidence": 0.009152228012681007
+            },
+            {
+              "class": "PYJ. Informes Privados",
+              "confidence": 0.007120126858353615
+            },
+            {
+              "class": "Colegios Públicos",
+              "confidence": 0.0070705474354326725
+            },
+            {
+              "class": "Fuentes Públicas",
+              "confidence": 0.006115671247243881
+            },
+            {
+              "class": "Semáforos",
+              "confidence": 0.006074192933738232
+            },
+            {
+              "class": "Riego",
+              "confidence": 0.005810379981994629
+            },
+            {
+              "class": "Señales informativas de tráfico sujetas a norma AIMPE",
+              "confidence": 0.004829107783734798
+            },
+            {
+              "class": "Duchas playas",
+              "confidence": 0.0028220233507454395
+            },
+            {
+              "class": "Aseos playas",
+              "confidence": 0.0028098798356950283
+            },
+            {
+              "class": "Solicitud de plantas",
+              "confidence": 0.0024098495487123728
+            },
+            {
+              "class": "Parques Infantiles playas",
+              "confidence": 0.001429485622793436
+            },
+            {
+              "class": "Oasis playas",
+              "confidence": 0.0013357726857066154
+            },
+            {
+              "class": "Papeleras playas",
+              "confidence": 0.0010884945513680577
+            },
+            {
+              "class": "Limpieza playas",
+              "confidence": 0.0010771939996629953
+            },
+            {
+              "class": "Accesibilidad playas",
+              "confidence": 0.000924592197407037
+            },
+            {
+              "class": "Pasarelas playas",
+              "confidence": 0.0009006384061649442
+            },
+            {
+              "class": "Cartelería playas",
+              "confidence": 0.0007735486724413931
+            }
+          ]
+        },
+        "annotation": {
+          "agent": "gold_standard",
+          "labels": [
+            {
+              "class": "Aceras",
+              "confidence": 1
+            }
+          ]
+        },
+        "inputs": {
+          "text": "ver foto"
+        },
+        "multi_label": false,
+        "explanation": null,
+        "last_updated": "2021-01-20T10:56:12.255071"
+      }
+    ],
+    "aggregations": {
+      "predicted_as": {
+        "Calzada": 2,
+        "Farolas / Alumbrado": 2,
+        "Jardines": 2,
+        "Aceras": 1,
+        "Limpieza": 1,
+        "Señales de Tráfico Verticales excepto semáforos mantenimiento": 1,
+        "Tapas de arquetas o registros": 1
+      },
+      "annotated_as": {
+        "Calzada": 2,
+        "Farolas / Alumbrado": 2,
+        "Aceras": 1,
+        "Alcantarillado": 1,
+        "Jardines": 1,
+        "Mobiliario zonas verdes": 1,
+        "Señales de Tráfico Verticales excepto semáforos mantenimiento": 1,
+        "Tapas de arquetas o registros": 1
+      },
+      "annotated_by": {
+        "gold_standard": 10
+      },
+      "predicted_by": {
+        "model-2008": 10
+      },
+      "status": {},
+      "predicted": {
+        "ok": 8,
+        "ko": 2
+      },
+      "metadata": {
+        "model_path": {
+          "output/model.tar.gz": 10
+        }
+      },
+      "words": {
+        "4": 1,
+        "6": 1,
+        "de": 8,
+        "la": 6,
+        "en": 4,
+        "y": 4,
+        "un": 3,
+        "a": 2,
+        "al": 2,
+        "calle": 2,
+        "calzada": 2,
+        "desde": 2,
+        "días": 2,
+        "el": 2,
+        "foto": 2,
+        "interior": 2,
+        "se": 2,
+        "socavón": 2,
+        "su": 2,
+        "toda": 2,
+        "una": 2,
+        "ver": 2,
+        "zona": 2,
+        "acera": 1,
+        "alguien": 1,
+        "alrededor": 1,
+        "alumbrado": 1,
+        "apagado": 1,
+        "aprecia": 1,
+        "arqueta": 1,
+        "asfalto": 1,
+        "base": 1,
+        "c": 1,
+        "caer": 1,
+        "caseta": 1,
+        "charco": 1,
+        "con": 1,
+        "decathlon": 1,
+        "dejando": 1,
+        "del": 1,
+        "entre": 1,
+        "espalda": 1,
+        "especialmente": 1,
+        "establecimiento": 1,
+        "existente": 1,
+        "firme": 1,
+        "forma": 1,
+        "frente": 1,
+        "fuerte": 1,
+        "grande": 1
+      },
+      "confidence": {
+        "0.0-0.05": 0,
+        "0.05-0.1": 0,
+        "0.1-0.15": 0,
+        "0.15-0.2": 0,
+        "0.2-0.25": 0,
+        "0.25-0.3": 1,
+        "0.3-0.35": 0,
+        "0.35-0.4": 1,
+        "0.4-0.45": 0,
+        "0.45-0.5": 0,
+        "0.5-0.55": 0,
+        "0.55-0.6": 0,
+        "0.6-0.65": 1,
+        "0.65-0.7": 1,
+        "0.7-0.75": 0,
+        "0.75-0.8": 0,
+        "0.8-0.85": 0,
+        "0.85-0.9": 1,
+        "0.9-0.95": 0,
+        "0.95-1.0": 5,
+        "1.0-*": 0
+      },
+      "inputs": {
+        "text": {
+          "ALUMBRADO PÚBLICO DE TODA LA CALLE APAGADO DESDE HACE VARIOS DÍAS.": 1,
+          "Caseta con puerta violentada, teniendo en su interior todo el sistema de riego de un parque existente en la zona. Frente al establecimiento Decathlon.": 1,
+          "FUERTE OLOR EN TODA LA CALLE": 1,
+          "Hay hundida una zona de la calzada y resulta peligroso para las motos, especialmente en días de lluvia, pues se forma un charco grande y no se aprecia la profundidad del socavón.": 1,
+          "Indica que llevan alrededor de una semana sin luz": 1,
+          "LIMPIEZA DE JARDINES A LA ESPALDA DE LA C/ JABALÓN Nº2, 4 Y 6.": 1,
+          "Señal informativa de Paso de Peatones tirada en el suelo, partida desde su base.": 1,
+          "Socavón a mitad de calzada. Asfalto levantámndose y firme suelto.": 1,
+          "TAPA DE ARQUETA, LA PARTE INTERIOR SE HA HUNDIDO DEJANDO UN HUECO ENTRE LA TAPA Y LA ACERA, AL PISAR SE HUNDE MAS, ALGUIEN PUEDE CAER AL TERMINAR DE HUNDIRLA. VER FOTO.": 1,
+          "ver foto": 1
+        }
+      }
+    }
+  }
+}

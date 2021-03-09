@@ -1,0 +1,206 @@
+// Visually hide an element
+%visuallyhidden {
+    margin: -1px;
+    padding: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip: rect(0, 0, 0, 0);
+    position: absolute;
+}
+
+// Linear gradient using $primary-color
+%primary-color-gradient {
+    background: $primary-color;
+    background: -moz-linear-gradient( top, $primary-color 0%, $primary-lighten-color 100%);
+    background: -webkit-linear-gradient( top, $primary-color 0%, $primary-lighten-color 100%);
+    background: linear-gradient( to bottom, $primary-color 0%, $primary-lighten-color 100%);
+}
+
+// Linear gradient using $secondary-color
+%secondary-color-gradient {
+    background: $secondary-color;
+    background: -moz-linear-gradient( top, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
+    background: -webkit-linear-gradient( top, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
+    background: linear-gradient( to bottom, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
+}
+
+// Align center block element
+%center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+%vertical-center {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+// Clearfix
+%clearfix {
+    &:before,
+    &:after {
+        content: ' ';
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+// Input
+%clear-input {
+    width: 100%;
+    background: none;
+    outline: none;
+    box-shadow: none;
+    border: 0;
+}
+
+%container {
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 3em;
+    @include media('>xxl') {
+        max-width: 1600px;
+    }
+}
+
+// buttons
+%button {
+  position: relative;
+  min-width: $button-width;
+  min-height: $button-height;
+  padding: 0 1.2em 0 1.2em;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  outline: 0;
+  background: none;
+  border: 0;
+  border-radius: $button-radius;
+  font-family: $ff;
+  @include font-size(13px);
+  font-style: inherit;
+  font-variant: inherit;
+  text-transform: uppercase;
+  letter-spacing: inherit;
+  font-weight: 600;
+  line-height: $button-height;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin-bottom: 10px;
+  font-family: $ff;
+  transition: all 0.4s $cb-fast;
+  &:focus {
+    outline: 0;
+  }
+  &::-moz-focus-inner {
+      border: 0;
+  }
+  &[disabled] {
+      cursor: default;
+      pointer-events: none;
+  }
+}
+
+%clear {
+  @include font-size(13px);
+  background: none;
+  min-width: auto;
+  min-height: auto;
+  width: auto;
+  padding: 0;
+  line-height: 1.3em;
+  text-decoration: none;
+  border: 0;
+  &:hover,
+  &:focus {
+      text-decoration: underline;
+      background: none;
+  }
+}
+
+// tooltip
+%tooltip {
+  box-shadow: $shadow-100;
+  padding: 0.2em;
+  color: $font-dark-color;
+  background: $lighter-color;
+  font-family: $ff;
+  @include font-size(13px);
+  border: 1px solid $line-light-color;
+  position: absolute;
+  top: -35px;
+  right: 50%;
+  margin: auto;
+  left: auto;
+  transform: translateX(50%);
+  max-width: 266px;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+}
+%tooltip-colored {
+  padding: 0.2em 0.5em;
+  color: $lighter-color;
+  background: lighten($primary-color, 10%);
+  font-family: $ff;
+  @include font-size(13px);
+  position: absolute;
+  top: -35px;
+  right: 50%;
+  margin: auto;
+  left: auto;
+  transform: translateX(50%);
+  max-width: 266px;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+%hastooltip {
+  &:after {
+    content: attr(data-title);
+    @extend %tooltip;
+    opacity: 0;
+    z-index: -1;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  &:hover:after {
+    width: auto;
+    height: auto;
+    opacity: 1;
+    transition: opacity 0.2s ease 1s;
+    z-index: 2;
+  }
+}
+%hastooltip-colored {
+  &:after {
+    content: attr(data-title);
+    @extend %tooltip-colored;
+    opacity: 0;
+    z-index: -1;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  &:hover:after {
+    width: auto;
+    height: auto;
+    opacity: 1;
+    transition: opacity 0.2s ease 0.2s;
+    z-index: 2;
+  }
+}

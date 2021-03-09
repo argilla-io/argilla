@@ -1,0 +1,131 @@
+<template>
+  <div class="re-input-container" :class="[classes]">
+    <slot />
+
+    <span v-if="enableCounter" class="re-count"
+      >{{ inputLength }} / {{ counterLength }}</span
+    >
+
+    <button
+      v-if="reClearable && hasValue"
+      tabindex="-1"
+      class="button-icon"
+      @click="clearInput"
+    >
+      <re-icon>clear</re-icon>
+    </button>
+  </div>
+</template>
+
+<script>
+import isArray from "~/components/core/utils/isArray";
+
+export default {
+  props: {
+    reInline: Boolean,
+    reClearable: Boolean,
+  },
+  data() {
+    return {
+      value: "",
+      input: false,
+      inputInstance: null,
+      enableCounter: false,
+      hasSelect: false,
+      hasPlaceholder: false,
+      hasFile: false,
+      isDisabled: false,
+      isRequired: false,
+      isFocused: false,
+      counterLength: 0,
+      inputLength: 0,
+    };
+  },
+  computed: {
+    hasValue() {
+      if (isArray(this.value)) {
+        return this.value.length > 0;
+      }
+
+      return Boolean(this.value);
+    },
+    classes() {
+      return {
+        "re-input-inline": this.reInline,
+        "re-clearable": this.reClearable,
+        "re-has-select": this.hasSelect,
+        "re-has-file": this.hasFile,
+        "re-has-value": this.hasValue,
+        "re-input-placeholder": this.hasPlaceholder,
+        "re-input-disabled": this.isDisabled,
+        "re-input-required": this.isRequired,
+        "re-input-focused": this.isFocused,
+      };
+    },
+  },
+  mounted() {
+    this.input = this.$el.querySelectorAll(
+      "input, textarea, select, .re-file"
+    )[0];
+
+    if (!this.input) {
+      this.$destroy();
+
+      throw new Error(
+        "Missing input/select/textarea inside re-input-container"
+      );
+    }
+  },
+  methods: {
+    isInput() {
+      return this.input && this.input.tagName.toLowerCase() === "input";
+    },
+    clearInput() {
+      this.inputInstance.$el.value = "";
+      this.inputInstance.$emit("input", "");
+      this.setValue("");
+    },
+    setValue(value) {
+      this.value = value;
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px $lighter-color inset;
+}
+
+.re-input-container {
+  // label {
+  //     position: absolute;
+  //     top: 23px;
+  //     left: 15px;
+  //     pointer-events: none;
+  //     transition: $swift-ease-out;
+  //     transition-duration: .3s;
+  //     color: rgba(#000, .54);
+  //     font-size: 16px;
+  //     line-height: 20px;
+  // }
+  input,
+  textarea {
+    width: 100%;
+    height: $input-size;
+    padding: 0;
+    display: block;
+    flex: 1;
+    border: none !important;
+    background: none;
+    transition: $swift-ease-out;
+    transition-property: font-size;
+    color: $font-dark-color;
+    line-height: normal;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+</style>

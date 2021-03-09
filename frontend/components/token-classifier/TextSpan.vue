@@ -1,0 +1,307 @@
+<template>
+  <span class="span">
+    <EntityHighlight
+      v-if="span.entity"
+      :text="text"
+      :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
+      :span="span"
+      :annotation-mode="annotationMode"
+      @openTagSelector="openTagSelector"
+      @removeEntity="removeEntity"
+    />
+    <span
+      v-else
+      class="span__text"
+      @mousedown="startSelection"
+      @mouseup="endSelection"
+      v-html="text"
+    /><span class="entities__selector__container">
+      <div
+        v-if="showEntitiesSelector"
+        v-click-outside="onClickOutside"
+        class="entities__selector"
+      >
+        <span v-show="!addnewSlotVisible">
+          <input
+            v-model="searchEntity"
+            class="entities__selector__search"
+            type="text"
+            placeholder="Select slot..."
+            @focus="isFocused = true"
+          />
+          <ul class="entities__selector__options">
+            <li
+              v-for="(entity, index) in filteredEntities"
+              :key="index"
+              class="entities__selector__option"
+              :class="'color_' + entities.indexOf(entity)"
+              @click="selectEntity(entity.text)"
+            >
+              <span>{{ entity.text }}</span>
+              <svgicon
+                v-if="span.entity && entity.text === span.entity.label"
+                color="#bababa"
+                name="check"
+              />
+            </li>
+          </ul>
+        </span>
+      </div>
+      <div v-if="showEntitiesSelector" class="overlay" />
+    </span>
+  </span>
+</template>
+
+<script>
+import ClickOutside from "v-click-outside";
+import "assets/icons/check";
+import "assets/icons/cross";
+
+export default {
+  directives: {
+    clickOutside: ClickOutside.directive,
+  },
+  props: {
+    record: {
+      type: Object,
+      required: true,
+    },
+    spanId: {
+      type: Number,
+      required: true,
+    },
+    annotationMode: {
+      type: Boolean,
+      default: false,
+    },
+    spans: {
+      type: Array,
+      required: true,
+    },
+    queryText: {
+      type: String,
+    },
+    entities: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  data: () => ({
+    searchEntity: "",
+    newSlot: "",
+    showEntitiesSelector: false,
+    addnewSlotVisible: false,
+    isFocused: false,
+  }),
+  computed: {
+    span() {
+      return this.spans[this.spanId];
+    },
+    text() {
+      let text;
+      const nextSpan = this.spans[this.spanId + 1];
+      if (nextSpan) {
+        text = this.record.raw_text.slice(this.span.start, nextSpan.start);
+      } else {
+        text = this.record.raw_text.slice(this.span.start);
+      }
+      return this.$highlightSearch(this.queryText, text);
+    },
+    tag_color() {
+      return this.entities.findIndex(
+        (entity) => entity.text === this.span.entity.label
+      );
+    },
+    filteredEntities() {
+      return this.entities.filter((entity) =>
+        entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
+      );
+    },
+  },
+  created() {
+    window.addEventListener("keypress", this.keyPress);
+  },
+  destroyed() {
+    window.removeEventListener("keypress", this.keyPress);
+  },
+  methods: {
+    startSelection() {
+      if (this.annotationMode) {
+        this.$emit("startSelection", this.spanId);
+      }
+    },
+    endSelection() {
+      if (this.annotationMode) {
+        this.$emit("endSelection", this.spanId);
+        this.showEntitiesSelector = true;
+        // TODO (@leireaguirrework) : What's the purpose of this block?
+        if (this.activeTag) {
+          this.selectEntity(this.activeTag);
+          // remove selection highlight after apply tag
+          const selectionHighlight = window.getSelection();
+          selectionHighlight.removeAllRanges();
+        }
+      }
+    },
+    openTagSelector() {
+      this.showEntitiesSelector = !this.showEntitiesSelector;
+      this.startSelection();
+      this.endSelection();
+    },
+    removeEntity() {
+      this.$emit("removeEntity", this.span.entity);
+      this.showEntitiesSelector = false;
+    },
+    onClickOutside() {
+      this.showEntitiesSelector = false;
+      this.searchEntity = "";
+      this.$emit("reset");
+    },
+    selectEntity(entityLabel) {
+      this.span.entity
+        ? this.$emit("changeEntityLabel", this.span.entity, entityLabel)
+        : this.$emit("selectEntity", entityLabel);
+      this.showEntitiesSelector = false;
+      this.searchEntity = "";
+    },
+    keyPress(e) {
+      const cmd = String.fromCharCode(e.keyCode).toUpperCase();
+      if (!this.isFocused && this.showEntitiesSelector && cmd) {
+        const entity = this.entities.find((t) => t.shortCut === cmd);
+        if (entity) {
+          this.selectEntity(entity.text);
+        }
+      }
+    },
+  },
+};
+</script>
+<style lang="scss">
+.highlight-text {
+  display: inline-block;
+  // font-weight: 600;
+  background: #ffbf00;
+  line-height: 16px;
+}
+</style>
+<style lang="scss" scoped>
+.entities {
+  &__selector {
+    position: absolute;
+    left: -35%;
+    top: 2em;
+    min-width: 160px;
+    z-index: 9;
+    background: white;
+    border: 1px solid $primary-color;
+    font-weight: 500;
+    &__container {
+      display: inline-block;
+      white-space: pre-line;
+    }
+    &__search {
+      width: 100%;
+      padding: 0.5em;
+      border: 0;
+      outline: none;
+      background: $lighter-color;
+      border-bottom: 1px solid $line-light-color;
+    }
+    &__options {
+      max-height: 146px;
+      overflow-y: scroll;
+      padding-left: 0;
+    }
+    &__option {
+      display: flex;
+      transition: all 0.2s ease;
+      padding: 5px;
+      padding-right: 2em;
+      position: relative;
+      cursor: pointer;
+      span {
+        padding: 3px;
+      }
+      .svg-icon {
+        position: absolute;
+        right: 0.5em;
+        top: 1em;
+        margin: auto 0 auto auto;
+        @include font-size(12px);
+      }
+    }
+  }
+}
+.span {
+  position: relative;
+  display: inline;
+  line-height: 1em;
+  &__text {
+    display: inline;
+    position: relative;
+  }
+}
+
+.overlay {
+  background: white;
+  opacity: 0.5;
+  height: 100vh;
+  position: fixed;
+  width: 100vw;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+// highlight word with overlay
+.zindex3 {
+  z-index: 3;
+}
+.selected {
+  // border: 1px dashed $tertiary-color;
+  line-height: 1.5em;
+  background: $tertiary-lighten-color;
+}
+.span span {
+  &::selection {
+    background: $tertiary-lighten-color;
+  }
+}
+// ner colors
+
+$colors: 40;
+$hue: 360;
+@for $i from 1 through $colors {
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 82%, 1);
+  .color_#{$i - 1} {
+    background: $rcolor;
+    &.active,
+    &.tag:hover {
+      border: 2px solid darken($rcolor, 50%);
+    }
+  }
+  .tag.color_#{$i - 1} span {
+    background: $rcolor;
+  }
+  .entities__selector__option.color_#{$i - 1} span {
+    background: $rcolor;
+  }
+  .entities__selector__option.color_#{$i - 1} {
+    background: white;
+    &:hover {
+      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
+    }
+    &:active {
+      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
+    }
+  }
+  .color_#{$i - 1} ::v-deep .highlight__tooltip {
+    background: $rcolor;
+  }
+  .color_#{$i - 1} ::v-deep .highlight__tooltip:after {
+    border-color: $rcolor transparent transparent transparent;
+  }
+}
+</style>

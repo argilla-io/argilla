@@ -1,0 +1,45 @@
+{
+  "name": "biome-project-nuxt",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
+    "generate-icons": "vsvg -s ./static/icons -t ./assets/icons",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
+    "precommit": "yarn lint",
+    "e2e": "cypress open --browser chrome",
+    "e2e:silent": "cypress run"
+  },
+  "dependencies": {
+    "@nuxtjs/auth-next": "5.0.0-1611574754.9020f2a",
+    "@nuxtjs/axios": "^5.12.5",
+    "@nuxtjs/dotenv": "1.4.1",
+    "@nuxtjs/style-resources": "^1.0.0",
+    "@vuex-orm/core": "^0.36.3",
+    "@vuex-orm/plugin-axios": "^0.9.3",
+    "core-js": "^3.6.5",
+    "node-sass": "^5.0.0",
+    "nuxt": "^2.14.6",
+    "prettier": "^2.2.1",
+    "sass-loader": "^10.1.0",
+    "v-click-outside": "^3.1.2",
+    "vue-moment": "^4.1.0",
+    "vue-svgicon": "^3.2.9",
+    "vue-vega": "^1.0.0-alpha.13"
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "^1.19.0",
+    "babel-eslint": "^10.1.0",
+    "cypress": "^6.2.1",
+    "eslint": "^7.17.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-cypress": "^2.11.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^7.4.1"
+  }
+}

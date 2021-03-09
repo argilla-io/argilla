@@ -1,0 +1,29 @@
+// Functions
+// -----------
+
+// http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/
+//
+//  Set a rem font size with pixel fallback
+//
+//  --- USAGE:
+//
+//  p {
+//    @include font-size(14px)
+//  }
+
+@function calculateRem($size) {
+    $remSize: $size / 16px;
+    @return $remSize * 1rem;
+}
+
+// get KEY from MAP - COLOUR PALETTES
+// http://erskinedesign.com/blog/friendlier-colour-names-sass-maps/
+
+@function palette($palette, $tone: 'base') {
+    @if map-has-key($palettes-neutral, $palette) {
+      @return map-get(map-get($palettes-neutral, $palette), $tone);
+    }
+  
+    @warn "Unknown `#{$palette}` in $palettes-neutral.";
+    @return null;
+}

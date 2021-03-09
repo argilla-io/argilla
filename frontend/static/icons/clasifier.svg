@@ -1,0 +1,15 @@
+
+<svg width="100px" height="95px" viewBox="0 0 100 95" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.1 (47250) - http://www.bohemiancoding.com/sketch -->
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Ecosystem--v3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Ecosystem-flow-1" transform="translate(-485.000000, -428.000000)" fill="#4A4A4A">
+            <g id="Page-1" transform="translate(485.000000, 428.000000)">
+                <path d="M0,60 L100,60 L100,35 L0,35 L0,60 Z M1,59 L99,59 L99,36 L1,36 L1,59 Z" id="Fill-1"></path>
+                <path d="M0,95 L100,95 L100,70 L0,70 L0,95 Z M1,94 L99,94 L99,71 L1,71 L1,94 Z" id="Fill-2"></path>
+                <path d="M0,25 L100,25 L100,0 L0,0 L0,25 Z M1,24 L99,24 L99,1 L1,1 L1,24 Z" id="Fill-3"></path>
+            </g>
+        </g>
+    </g>
+</svg>

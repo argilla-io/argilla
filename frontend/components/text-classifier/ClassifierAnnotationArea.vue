@@ -1,0 +1,201 @@
+<template>
+  <div :class="['feedback-interactions']" class="feedback-interactions__items">
+    <transition-group name="list" tag="div">
+      <ClassifierAnnotationButton
+        v-for="label in sortedLabels.slice(0, maxLabelsShown)"
+        :id="label.class"
+        :key="label.class"
+        v-model="selectedLabels"
+        :allow-multiple="multiLabel"
+        :label="label"
+        :class="['label-button', label.selected ? 'active' : '']"
+        :data-title="label.class"
+        :value="label.class"
+      >
+      </ClassifierAnnotationButton>
+    </transition-group>
+    <FilterDropdown
+      v-if="sortedLabels.length > maxLabelsShown"
+      :visible="visible"
+      class="select--label"
+      :class="{ checked: false }"
+      @visibility="onVisibility"
+    >
+      <template slot="dropdown-header">
+        <span class="dropdown__text">More labels</span>
+      </template>
+      <template slot="dropdown-content">
+        <input
+          v-model="searchText"
+          type="text"
+          autofocus
+          placeholder="Search label..."
+        />
+        <svgicon
+          v-if="searchText != undefined"
+          class="clean-search"
+          name="cross"
+          width="10"
+          height="10"
+          color="#9b9b9b"
+        ></svgicon>
+        <ClassifierAnnotationButton
+          v-for="label in dropdownSortedLabels"
+          :id="label.class"
+          :key="label.class"
+          v-model="selectedLabels"
+          :allow-multiple="multiLabel"
+          :label="label"
+          :class="['label-button']"
+          :data-title="label.class"
+          :value="label.class"
+        >
+        </ClassifierAnnotationButton>
+      </template>
+    </FilterDropdown>
+  </div>
+</template>
+<script>
+import "assets/icons/ignore";
+
+export default {
+  props: {
+    labels: {
+      type: Array,
+      required: true,
+    },
+    multiLabel: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  data: () => ({
+    searchText: undefined,
+    componentLabels: undefined,
+    maxLabelsShown: 6,
+    selectedLabel: undefined,
+    dropdownLabels: undefined,
+    visible: undefined,
+    selectedLabels: [],
+  }),
+  computed: {
+    sortedLabels() {
+      const labels = [...this.labels];
+      return labels.sort((a, b) => (a.confidence > b.confidence ? -1 : 1));
+    },
+    dropdownSortedLabels() {
+      let labels = this.sortedLabels.slice(this.maxLabelsShown);
+      return labels.filter((label) =>
+        label.class.toLowerCase().match(this.searchText)
+      );
+    },
+  },
+  watch: {
+    selectedLabels(newValue) {
+      if (newValue.length > 0) this.annotate();
+    },
+  },
+  methods: {
+    annotate() {
+      this.$emit("annotate", { labels: this.selectedLabels });
+      if (!this.multiLabel) {
+        setTimeout(function () { 
+          this.selectedLabels = []; 
+        }.bind(this), 1000)
+      }
+    },
+    onVisibility(visible) {
+      this.visible = visible;
+    },
+    decorateConfidence(confidence) {
+      return confidence * 100;
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+%item {
+  width: 30%;
+  min-width: 225px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin-left: 1% !important;
+  margin-right: 1% !important;
+  max-width: 240px;
+}
+.feedback-interactions {
+  margin: 1.5em auto 0 auto;
+  padding-right: 0;
+  &__items {
+    display: flex;
+    flex-flow: wrap;
+    margin-left: -1%;
+    margin-right: -1%;
+  }
+}
+::v-deep .dropdown__header {
+  border: 1px solid $line-smooth-color;
+  margin: auto auto 20px auto;
+  width: auto;
+  height: 42px;
+  line-height: 42px;
+  @include font-size(14px);
+  padding-left: 0.5em;
+  font-weight: 600;
+}
+::v-deep .dropdown__content {
+  max-height: 280px;
+  overflow: scroll;
+}
+.label-button {
+  @extend %item;
+}
+.select--label {
+  @extend %item;
+  ::v-deep .--checked {
+    color: $lighter-color;
+    font-weight: 600;
+    text-transform: none;
+    display: flex;
+    width: calc(100% - 1em);
+    span:first-child {
+      width: 112px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    span:last-child {
+      margin-left: 5px;
+    }
+  }
+  &.active ::v-deep {
+    .dropdown__header {
+      background: $success;
+      border: 0;
+      margin: auto auto 20px auto;
+      border: 1px solid $line-light-color;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      max-width: 240px;
+      &:after {
+        border-color: $lighter-color;
+      }
+    }
+  }
+}
+.list-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateX(30px);
+  // position: absolute !important;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+</style>

@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400|Open+Sans:400,700');
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  font-size: 100%;
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+}
+
+body {
+  margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  color: $font-dark-color;
+  font-family: $ff;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+  background: $lighter-color;
+  &.--fixed {
+    max-height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+  }
+}
+
+a,
+button {
+  color: $font-dark-color;
+}
+
+audio,
+img,
+svg,
+object,
+embed,
+canvas,
+video,
+iframe {
+  max-width: 100%;
+  font-style: italic;
+  vertical-align: middle;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+a {
+  background: transparent;
+  &:focus {
+    outline: thin dotted;
+  }
+  &:hover,
+  &:active {
+    outline: 0;
+  }
+}
+
+[tabindex='-1']:focus {
+  outline: none !important;
+}
+
+// Icons svg
+.svg-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+}
+
+.svg-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+
+// transitions
+// FADE
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to,
+.fade-leave-active {
+  opacity: 0;
+}
+
+// FADE LIST
+.list-enter-active,
+.list-enter-active p,
+.list-leave-active p {
+  transition: all 1s;
+}
+
+.list-enter p,
+.list-leave-to p
+/* .list-leave-active below version 2.1.8 */
+
+ {
+  opacity: 0;
+}
+
+// TRANSITIONS
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s;
+}
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
+
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity 0.3s;
+}
+.layout-enter,
+.layout-leave-to {
+  opacity: 0;
+}
+
+// sr only
+.sr-only {
+  @extend %visuallyhidden;
+}
+
+.hidden-input {
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+}

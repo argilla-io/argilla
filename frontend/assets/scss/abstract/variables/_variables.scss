@@ -1,0 +1,136 @@
+// Color map
+//-----------
+$palettes-neutral: ( white: ( base: #ffffff, ), black: ( base: #000000, ), grey: ( highlighted: #eff0f2, verylight: #FCFCFC, lines: #ebebeb, light: #f5f5f6, smooth: #d8d8d8, base: #9b9b9b, medium: #686a6d, dark: #4a4a4a, ), red: ( base: #ff1e5e, light: #ef6b7a, dark: #a70f3a, ), blue: ( verylight: #f5fcff, light: #F4F8FF, smooth: #E9F1FD, base: #6cc6f1, 200: #009fda, 300: #334e70, 400: #00224c, ), yellow: ( base: #fff8a2, light: #949494, dark: #1d1d1d, ), orange: ( base: #F48E5F, light: #FFB593 ), green: ( base: #2baba6, border: #8acbcd, extra-light: #fafcfc, light: #f5f9f9, highlight: #60a019, highlight-light: #f2fad5, medium: #64b09f, dark: #234240, ), purple: ( verylight: #F0E7FF, light: #9f7ae2, base: #6a29e2, medium: #49008c, normal: #8777d9, standard: #6c658f, dark: #1d1d1d, disabled: #a956f5, 100: #bab2e5, 200: #5e51a5, 300: #4a407f, ), garnet: ( base: #7c3c4e, ), lile: ( dark: #8777d9, base: #e8cfea, ), );
+$transparent: rgba(palette(white), 0);
+// Colours
+//-----------
+$primary-color: palette(orange);
+$primary-lighten-color: lighten($primary-color, 10%);
+$primary-darken-color: darken($primary-color, 10%);
+$secondary-color: palette(purple);
+$secondary-lighter-color: palette(purple, verylight);
+$secondary-lighten-color: lighten($secondary-color, 10%);
+$secondary-darken-color: darken($secondary-color, 10%);
+$tertiary-color: palette(green);
+$tertiary-lighten-color: lighten($tertiary-color, 44%);
+$tertiary-darken-color: darken($tertiary-color, 10%);
+$lighter-color: palette(white);
+$neutral-color: palette(grey, medium);
+$darker-color: palette(grey, dark);
+// States
+//-----------
+$error: palette(red);
+$warning: palette(orange);
+$success: palette(green);
+$info: palette(grey, smooth);
+$callout: #f1f0f0;
+
+// Lines
+//-----------
+$line-medium-color: palette(grey, medium);
+$line-smooth-color: palette(grey, smooth);
+$line-light-color: palette(grey, light);
+$line-lighter-color: palette(grey, lighter);
+// Metrics
+//-----------
+$precision: #e5cdee;
+$recall: #c0d2e0;
+$f1: #89c4f1;
+// Fonts
+//-----------
+$ff: 'Open Sans',
+'Helvetica',
+'Arial',
+sans-serif;
+$sff: 'Montserrat',
+'Helvetica',
+'Arial',
+sans-serif;
+$tff: 'Bitter',
+'Helvetica',
+'Arial',
+sans-serif;
+$ff-semibold: 700;
+$ff-bold: 900;
+$ff-light: 300;
+$ff-thin: 100;
+$base-font-size: 13px;
+$base-line-height: 1.4em;
+$font-dark-color: palette(grey, dark);
+$font-medium-color: palette(grey, medium);
+
+// Easing
+//-----------
+// http://cubic-bezier.com/
+// ease-in fast->slow
+// ease-out slow->fast
+//
+// $cb-fast -> ease-in
+// $cb-normal -> ease-in forzado
+// $cb-slow -> ease-out
+$cb-fast: cubic-bezier(0,
+0,
+0.24,
+0.9);
+$cb-normal: cubic-bezier(0.02,
+0.42,
+0.01,
+0.51);
+$cb-slow: cubic-bezier(0.59,
+0,
+0.68,
+0.69);
+// Grid
+//-----------
+$maxwidth: 980px;
+// Utilities
+//-----------
+$radius: 0.5em;
+// Shadows
+//-----------
+$shadow: 0 2px 4px 0 rgba(0,
+0,
+0,
+0.27);
+$shadow-light: 0 1px 4px 1px rgba(222,
+222,
+222,
+0.5);
+$shadow-100: 1px 2px 3px 0px rgba(0, 0, 0, 0.15);
+$shadow-200: 1px 2px 5px 2px rgba(0, 0, 0, 0.15);
+// Input size
+//-----------
+$input-size: 40px;
+// Buttons
+//-----------
+$button-width: 150px;
+$button-height: 40px;
+$button-radius: 3px;
+$button-fab-size: 56px;
+$button-fab-size-mini: 40px;
+$button-fab-space: 24px;
+$button-dense-height: 32px;
+$button-icon-size: 40px;
+// Transitions
+//-----------
+$swift-ease-out-duration: 0.3s !default;
+$swift-ease-out-timing-function: cubic-bezier(0.25,
+0.8,
+0.25,
+1) !default;
+$swift-ease-out: all $swift-ease-out-duration $swift-ease-out-timing-function !default;
+$swift-ease-in-duration: 0.3s !default;
+$swift-ease-in-timing-function: cubic-bezier(0.55,
+0,
+0.55,
+0.2) !default;
+$swift-ease-in: all $swift-ease-in-duration $swift-ease-in-timing-function !default;
+$swift-ease-in-out-duration: 0.5s !default;
+$swift-ease-in-out-timing-function: cubic-bezier(0.35,
+0,
+0.25,
+1) !default;
+$swift-ease-in-out: all $swift-ease-in-out-duration $swift-ease-in-out-timing-function !default;
+$swift-linear-duration: 0.15s !default;
+$swift-linear-timing-function: linear !default;
+$swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;

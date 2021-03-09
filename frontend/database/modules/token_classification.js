@@ -1,0 +1,66 @@
+import { ObservationDataset } from "@/models/Dataset";
+import { TokenClassificationDataset } from "@/models/TokenClassification";
+
+const getters = {};
+
+const actions = {
+  async setEntities(_, { dataset, entities }) {
+    return await ObservationDataset.dispatch("setUserData", {
+      dataset,
+      data: { entities },
+    });
+  },
+  async updateRecords(_, { dataset, records }) {
+    return await TokenClassificationDataset.api().post(
+      `/token-classification/datasets/:bulk-records`,
+      {
+        name: dataset.name,
+        records,
+      }
+    );
+  },
+
+  async search(store, { dataset, query, sort, size }) {
+    query = query || {};
+    sort = sort || [];
+
+    return await TokenClassificationDataset.api().post(
+      `/token-classification/datasets/${dataset.name}/:search?limit=${size}`,
+      {
+        query: { ...query, query_text: query.text },
+        sort,
+      }, // search body
+      {
+        dataTransformer: ({ data }) => {
+          return { ...dataset, results: data, query, sort };
+        },
+      }
+    );
+  },
+
+  async fetchMoreRecords(store, { dataset, size, from }) {
+    return await TokenClassificationDataset.api().post(
+      `/token-classification/datasets/${dataset.name}/:search?limit=${size}&from=${from}`,
+      {
+        query: { ...dataset.query, query_text: dataset.query.text },
+        sort: dataset.sort,
+      },
+      {
+        dataTransformer: ({ data }) => {
+          return {
+            ...dataset.$toJson(),
+            results: {
+              ...dataset.results,
+              records: dataset.results.records.concat(data.records),
+            },
+          };
+        },
+      }
+    );
+  },
+};
+
+export default {
+  getters,
+  actions,
+};
