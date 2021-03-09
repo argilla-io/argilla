@@ -8,7 +8,7 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
 COPY . /rubrix
 
-COPY --from=build-deps /usr/src/app/dist /static
+COPY --from=build-deps /usr/src/app/dist /app/static
 
 ENV USERS_DB=/config/.users.yml
 ENV ENABLE_SECURITY=1
