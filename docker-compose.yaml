@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  rubrix:
+    build: .
+    ports:
+      - "6900:80"
+    environment:
+      ELASTICSEARCH: http://elasticsearch:9200
+
+    volumes:
+      - ${PWD}/config:/config
+    networks:
+      - rubrix
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-rubrix-local
+      - cluster.initial_master_nodes=elasticsearch
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - rubrix
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.11.1
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    networks:
+      - rubrix
+
+networks:
+  rubrix:
+    driver: bridge

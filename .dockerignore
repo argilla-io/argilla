@@ -1,0 +1,11 @@
+# Ignore everything
+**
+
+!setup.*
+!pyproject.toml
+!src/**
+!config/**
+!test/**
+!docs/**
+!frontend/**
+**/node_modules/**
