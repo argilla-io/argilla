@@ -19,6 +19,9 @@ dmypy.json
 # JetBrains
 .idea/
 
+# Visual Studio Code
+.vscode/
+
 /coverage.xml
 /.coverage
 
