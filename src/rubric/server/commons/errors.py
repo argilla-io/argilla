@@ -1,6 +1,7 @@
 from typing import Type
 
 from fastapi import HTTPException, Request, status
+from fastapi.exception_handlers import http_exception_handler
 
 
 class UnauthorizedError(HTTPException):
@@ -53,5 +54,5 @@ class GenericError(HTTPException):
 
 
 async def common_exception_handler(request: Request, error: Exception):
-    """Response for generic internal errors"""
-    raise GenericError(error)
+    """Wraps errors as custom generic error"""
+    return await http_exception_handler(request, GenericError(error))
