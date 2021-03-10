@@ -65,7 +65,7 @@ class RubricClient:
             )
 
             response_token = requests.get(
-                url=api_url + "/api/me", headers=self._client.headers
+                url=api_url + "/api/me", headers=self._client.get_headers()
             ).status_code
 
             if response_token == 401:
