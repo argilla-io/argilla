@@ -7,6 +7,7 @@
       </p>
     </NuxtLink>
     <slot />
+    <ReButton v-if="this.$auth.loggedIn" class="topbar__logout" @click="logout()">Logout</ReButton>
   </div>
 </template>
 
@@ -26,6 +27,12 @@ export default {
     },
   },
   data: () => ({}),
+  methods: {
+    async logout() {
+      await this.$auth.logout();
+      await this.$auth.strategy.token.reset();
+    }
+  }
 };
 </script>
 
@@ -41,6 +48,19 @@ export default {
   font-family: $sff;
   color: $lighter-color;
   padding-left: 2em;
+  &__logout {
+    margin: auto 1em auto 1em;
+    min-height: none;
+    color: $primary-color;
+    text-transform: normal;
+    border: none;
+    background: none;
+    outline: none;
+    cursor: pointer;
+    &:hover {
+      color: darken($primary-color, 10%);
+    }
+  }
   a {
     text-decoration: none;
   }
