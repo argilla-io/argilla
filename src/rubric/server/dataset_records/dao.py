@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from fastapi import Depends
-from pydantic import Field
+from pydantic import Field, validator
 from pydantic.main import BaseModel
 from rubric.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubric.server.commons.helpers import unflatten_dict
@@ -145,12 +145,19 @@ class MultiTaskRecordDB(BaseModel):
 
     tasks: Dict[str, Dict[str, Any]]
 
-    language_words: LanguageWords
+    language_words: Optional[LanguageWords] = None
 
     @staticmethod
     def field_name_for_task(task: str) -> str:
         """Generate de es field name base for task fields"""
         return f"tasks.{task}"
+
+    @validator("language_words",always=True)
+    def set_default_language_words(cls, language_words: Optional[LanguageWords]):
+        """Creates an empty instance for language words if None was provided"""
+        if language_words is None:
+            return LanguageWords()
+        return language_words
 
 
 class TaskSearch(BaseModel):
