@@ -20,7 +20,6 @@
         @selected="onSelectAnnotation($event)"
       ></FeedbackDropdownAll>
       <ReButton
-        v-if="isTokenClassification"
         class="global-actions__button"
         @click="onValidate"
         >Validate</ReButton
@@ -248,6 +247,9 @@ export default {
     background: $lighter-color;
     border: 1px solid $line-smooth-color;
     cursor: pointer;
+    &:first-of-type {
+      margin-right: 0;
+    }
   }
   &__text {
     color: palette(grey, dark);
