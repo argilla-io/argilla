@@ -29,7 +29,6 @@
              }">
             <svgicon v-if="groupBy === 'dataSource'" name="datasource" width="16" height="auto" /> {{ group }}
           </p>
-          <ReButtonExternal v-if="groupBy === 'model'" title="View MLflow" :link="{ name: 'mlflow', params: { id: '0' } }" />
         </span>
         <ul>
           <li v-for="(item, key) in filteredResultsByGroup(group)" :key="item.name">
