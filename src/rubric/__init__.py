@@ -9,6 +9,7 @@ import logging
 from typing import Any, Iterable, Optional, Dict
 
 from rubric.client import RubricClient
+from rubric.sdk.models import *
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,8 +38,7 @@ def init(
 
     global _client
 
-    if not _client:
-        _client = RubricClient(api_url=api_url, token=token, timeout=timeout)
+    _client = RubricClient(api_url=api_url, token=token, timeout=timeout)
 
 
 def log(
