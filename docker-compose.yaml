@@ -3,6 +3,7 @@ version: "3.9"
 services:
   rubrix:
     build: .
+    container_name: rubrix
     ports:
       - "6900:80"
     environment:
