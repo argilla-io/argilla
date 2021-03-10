@@ -27,7 +27,13 @@ class LoggingMixin:
 
     """
 
+    __logger__: Logger = None
+
+    def __new__(cls, *args, **kwargs):
+        cls.__logger__ = get_logger_for_class(cls)
+        return super().__new__(cls)
+
     @property
     def logger(self) -> logging.Logger:
         """Return the logger configured for the class"""
-        return get_logger_for_class(self.__class__)
+        return self.__logger__
