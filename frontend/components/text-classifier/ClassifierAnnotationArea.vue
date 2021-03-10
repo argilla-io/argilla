@@ -89,11 +89,17 @@ export default {
         label.class.toLowerCase().match(this.searchText)
       );
     },
+    appliedLabels() {
+      return this.labels.filter(l => l.selected).map(label => label.class)
+    }
   },
   watch: {
     selectedLabels(newValue) {
       if (newValue.length > 0) this.annotate();
     },
+  },
+  mounted() {
+    this.selectedLabels = this.appliedLabels;
   },
   methods: {
     annotate() {
