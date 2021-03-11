@@ -8,7 +8,8 @@
         v-model="selectedLabels"
         :allow-multiple="multiLabel"
         :label="label"
-        :class="['label-button', label.selected ? 'active' : '']"
+        @change="updateLabels"
+        :class="['label-button', selectedLabels.includes(label) ? 'active' : '']"
         :data-title="label.class"
         :value="label.class"
       >
@@ -43,6 +44,7 @@
           v-for="label in dropdownSortedLabels"
           :id="label.class"
           :key="label.class"
+          @change="updateLabels"
           v-model="selectedLabels"
           :allow-multiple="multiLabel"
           :label="label"
@@ -91,24 +93,21 @@ export default {
     },
     appliedLabels() {
       return this.labels.filter(l => l.selected).map(label => label.class)
-    }
-  },
-  watch: {
-    selectedLabels(newValue) {
-      if (newValue.length > 0) this.annotate();
     },
   },
   mounted() {
     this.selectedLabels = this.appliedLabels;
   },
   methods: {
+    updateLabels() {
+      if (this.selectedLabels.length > 0) {
+        this.annotate();
+      } else {
+        this.$emit('updateStatus', 'Edited')
+      }
+    },
     annotate() {
       this.$emit("annotate", { labels: this.selectedLabels });
-      if (!this.multiLabel) {
-        setTimeout(function () { 
-          this.selectedLabels = []; 
-        }.bind(this), 1000)
-      }
     },
     onVisibility(visible) {
       this.visible = visible;
@@ -132,6 +131,9 @@ export default {
 .feedback-interactions {
   margin: 1.5em auto 0 auto;
   padding-right: 0;
+  & > div {
+    width: 100%;
+  }
   &__items {
     display: flex;
     flex-flow: wrap;

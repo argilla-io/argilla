@@ -15,6 +15,7 @@
       :labels="labelsForAnnotation"
       :multi-label="record.multi_label"
       @annotate="onAnnotate"
+      @updateStatus="onChangeRecordStatus"
     />
     <ClassifierExplorationArea v-else :labels="predictionLabels" />
     <RecordExtraActions
@@ -86,7 +87,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      editAnnotations: "entities/datasets/editAnnotations",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
@@ -104,16 +105,35 @@ export default {
             records: [this.record],
           });
           break;
+        case "Edited":
+          await this.editAnnotations({
+            dataset: this.dataset,
+            records: [
+              {
+                ...this.record,
+                status: "Edited",
+                annotation: {
+                  agent: this.$auth.user,
+                  labels: [],
+                },
+              },
+            ],
+          });
+          break;
         default:
           console.log("waT?", status);
       }
     },
     async onAnnotate({ labels }) {
+      console.log(labels)
       await this.validate({
         dataset: this.dataset,
         records: [
           {
             ...this.record,
+            status: ["Discarded", "Validated"].includes(this.record.status)
+              ? "Edited"
+              : this.record.status,
             annotation: {
               agent: this.$auth.user,
               labels: labels.map((label) => ({
