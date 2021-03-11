@@ -6,14 +6,23 @@ Contains methods for accesing the API.
 """
 
 import logging
-from typing import Any, Iterable, Optional, Dict
+from typing import Any, Dict, Iterable, Optional
 
+import pkg_resources
 from rubric.client import RubricClient
 from rubric.sdk.models import *
 
+try:
+    __version__ = pkg_resources.get_distribution(__name__).version
+except pkg_resources.DistributionNotFound:
+    # package is not installed
+    pass
+
 _LOGGER = logging.getLogger(__name__)
 
-_client: RubricClient = None  # Client will be stored here to pass it through functions
+_client: Optional[
+    RubricClient
+] = None  # Client will be stored here to pass it through functions
 # TODO: Convert to enviroment variables
 
 
