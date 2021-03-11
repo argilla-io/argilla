@@ -192,11 +192,17 @@ def labels_from_annotation(
     """
     if not annotation:
         return []
-    return (
-        [label.class_label for label in annotation.labels if label.confidence > 0.5]
-        if multi_label
-        else [max_class_prediction(annotation, multi_label=multi_label).class_label]
-    )
+
+    if multi_label:
+        return [
+            label.class_label for label in annotation.labels if label.confidence > 0.5
+        ]
+
+    class_prediction = max_class_prediction(annotation, multi_label=multi_label)
+    if class_prediction is None:
+        return []
+
+    return [class_prediction.class_label]
 
 
 def max_class_prediction(

@@ -107,6 +107,15 @@ def test_prediction_ok_cases():
     assert record.predicted is None
 
 
+def test_predicted_as_with_no_labels():
+    data = {
+        "inputs": {"text": "The input text"},
+        "prediction": {"agent": "test", "labels": []},
+    }
+    record = TextClassificationRecord(**data)
+    assert record.predicted_as == []
+
+
 def test_created_record_with_default_status():
     data = {
         "inputs": {"data": "My cool data"},
