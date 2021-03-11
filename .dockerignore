@@ -3,6 +3,7 @@
 
 !setup.*
 !pyproject.toml
+!pytest.ini
 !src/**
 !config/**
 !test/**
