@@ -27,9 +27,9 @@ _client: Optional[
 
 
 def init(
-    api_url: str = "http://localhost:8000",
+    api_url: str = "http://localhost:6900",
     token: Optional[str] = None,
-    timeout: int = 5,
+    timeout: int = 60,
 ):
     """Client setup function.
 

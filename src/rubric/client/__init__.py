@@ -27,9 +27,9 @@ class RubricClient:
 
     def __init__(
         self,
-        api_url: str = "http://localhost:8000",
+        api_url: str,
+        timeout: int,
         token: Optional[str] = None,
-        timeout: int = 5,
     ):
         """Client setup function.
 
@@ -38,7 +38,7 @@ class RubricClient:
         api_url : str
             Address from which the API is serving. It will use the default UVICORN address as default
         token : str
-            Authentification token. A non-secured logging will be considered the default case. Optional
+            Authentification token. A non-secured logging will be considered the default case. 
         timeout : int
             Seconds to considered a connection timeout. Optional
         """
