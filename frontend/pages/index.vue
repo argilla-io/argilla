@@ -6,6 +6,12 @@
     <div class="container">
       <ReSearchBar @input="onSearch" />
       <ReLoading v-if="$fetchState.pending" />
+      <Error
+        v-if="$fetchState.error"
+        link="/"
+        where="datasets"
+        :error="$fetchState.error"
+      />
       <div v-else>
         <ReTableInfo
           :data="datasets"
@@ -31,6 +37,7 @@
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
 export default {
+  layout: "app",
   data: () => ({
     querySearch: undefined,
     tableColumns: [

@@ -1,4 +1,4 @@
-import Component from './Component.vue'
+import Toast from './Toast.vue'
 import eventBus from './bus.js';
 
 const Api = (Vue, globalOptions = {}) => {
@@ -13,7 +13,7 @@ const Api = (Vue, globalOptions = {}) => {
 
       const propsData = Object.assign({}, defaultOptions, globalOptions, options);
 
-      return new (Vue.extend(Component))({
+      return new (Vue.extend(Toast))({
         el: document.createElement('div'),
         propsData
       })

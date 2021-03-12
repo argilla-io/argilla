@@ -27,7 +27,7 @@ export default {
   name: 'toast',
   props: {
     message: {
-      type: String,
+      type: [String, Error],
       required: true,
     },
     type: {

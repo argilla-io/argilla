@@ -1,6 +1,11 @@
 <template>
   <ReLoading v-if="$fetchState.pending" />
-  <p v-else-if="$fetchState.error">{{$fetchState.error}}</p>
+  <Error
+    v-else-if="$fetchState.error"
+    link="/"
+    :where="this.datasetName"
+    :error="$fetchState.error"
+  ></Error>
   <div v-else>
     <section ref="header" class="header">
       <ReTopbarBrand v-if="selectedTask">
@@ -25,19 +30,7 @@
       <GlobalActions v-if="annotationEnabled" :dataset="dataset" />
     </section>
     <div class="container">
-      <ResultsError
-        v-if="dataset.error"
-        :link="{ name: 'project' }"
-        :where="dataset.name"
-        :error="dataset.error"
-      />
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-        <ResultsError
-          v-if="dataset.error"
-          :link="{ name: 'project' }"
-          :where="dataset.name"
-          :error="dataset.error"
-        />
         <Results :dataset="dataset"> </Results>
         <!-- <SideBar /> -->
       </div>

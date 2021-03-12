@@ -1,11 +1,13 @@
 <template>
-  <div>
+  <app>
     <NuxtChild />
-  </div>
+  </app>
 </template>
 
 <script>
+import app from '~/layouts/app.vue';
 export default {
+  name: 'exploration',
   head() {
     return {
       bodyAttrs: {
@@ -13,6 +15,9 @@ export default {
       },
     };
   },
+  components: {
+    app
+  }
 };
 </script>
 

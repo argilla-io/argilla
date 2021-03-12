@@ -1,4 +1,4 @@
-import Component from './Component.vue';
+import Toast from './Toast.vue';
 import Api from './api';
 
 const Plugin = (Vue, options = {}) => {
@@ -7,6 +7,6 @@ const Plugin = (Vue, options = {}) => {
   Vue.prototype.$toast = methods;
 };
 
-Component.install = Plugin;
+Toast.install = Plugin;
 
-export default Component;
+export default Toast;

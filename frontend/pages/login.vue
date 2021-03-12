@@ -23,6 +23,7 @@
 
 <script>
 export default {
+  layout: "app",
   data() {
     return {
       error: undefined,
@@ -38,6 +39,7 @@ export default {
         await this.$auth.loginWith("local", {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
+        this.$nuxt.$router.push({ path: '/' })
       } catch (err) {
         this.error = err;
       }

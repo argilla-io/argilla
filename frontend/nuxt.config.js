@@ -105,10 +105,11 @@ export default {
         },
       },
     },
+    resetOnError: true,
     redirect: {
       login: "/login",
       logout: "/login",
-      home: "/",
+      home: false,
     },
   },
 
