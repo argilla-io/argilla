@@ -1,6 +1,8 @@
+import pytest
 from pydantic import ValidationError
 from rubric.server.commons.models import TaskStatus
 from rubric.server.text_classification.model import (
+    ClassPrediction,
     PredictionStatus,
     TextClassificationAnnotation,
     TextClassificationRecord,
@@ -105,6 +107,14 @@ def test_prediction_ok_cases():
 
     record.prediction = None
     assert record.predicted is None
+
+
+def test_confidence_ranges():
+    with pytest.raises(ValidationError, match="less than or equal to 1.0"):
+        ClassPrediction(class_label="BB", confidence=100)
+
+    with pytest.raises(ValidationError, match="greater than or equal to 0.0"):
+        ClassPrediction(class_label="BB", confidence=-100)
 
 
 def test_predicted_as_with_no_labels():

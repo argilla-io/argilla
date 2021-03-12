@@ -28,17 +28,11 @@ class ClassPrediction(BaseModel):
     """
 
     class_label: Union[str, int] = Field(alias="class")
-    confidence: float = 1.0
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
     # See <https://pydantic-docs.helpmanual.io/usage/model_config>
     class Config:
         allow_population_by_field_name = True
-
-    @validator("confidence")
-    def check_confidence_ranges(cls, confidence: float):
-        """Checks confidence value ranges"""
-        assert 0.0 <= confidence <= 1.0
-        return confidence
 
 
 class TextClassificationAnnotation(BaseAnnotation):
