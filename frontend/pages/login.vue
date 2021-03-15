@@ -2,7 +2,7 @@
   <div class="container">
     <form class="form" @submit.prevent="userLogin">
       <BiomeIsotipo class="form__logo" :minimal="false" />
-      <p class="form__title">biome.observe</p>
+      <p class="form__title">Rubrix</p>
       <div class="form__input" :class="{'active' : login.username}">
         <input v-model="login.username" type="text" placeholder="username" />
       </div>
@@ -39,7 +39,7 @@ export default {
         await this.$auth.loginWith("local", {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
-        this.$nuxt.$router.push({ path: '/' })
+        this.$nuxt.$router.back()
       } catch (err) {
         this.error = err;
       }
