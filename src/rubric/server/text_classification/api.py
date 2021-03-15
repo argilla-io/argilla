@@ -136,7 +136,7 @@ def search_records(
 
     task_meta = TaskMeta(
         filters=TaskSearchFilters.parse_obj(query),
-        search_aggregations=TaskSearchAggregations,
+        aggregations=TaskSearchAggregations,
         task_info=TextClassificationTask,
     )
 

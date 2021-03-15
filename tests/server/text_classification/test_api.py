@@ -187,6 +187,7 @@ def test_create_records_for_text_classification():
     assert results.total == 1
     assert results.aggregations.predicted_as == {"Mocking": 1}
     assert results.aggregations.status == {"Default": 1}
+    assert results.aggregations.confidence
     assert results.aggregations.predicted == {}
 
 
