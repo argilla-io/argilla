@@ -8,6 +8,7 @@ services:
       - "6900:80"
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
+      ENABLE_SECURITY: 1
 
     volumes:
       - ${PWD}/config:/config
