@@ -7,7 +7,7 @@
       :progress="shownRecordsProgress"
     />
     <ReButton class="button-tertiary--outline" @click="$emit('moredata')">
-      Next 20 records
+      Next 5 records
     </ReButton>
   </div>
 </template>
