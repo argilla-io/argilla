@@ -74,7 +74,7 @@ export default {
   data: () => ({
     searchText: undefined,
     componentLabels: undefined,
-    maxLabelsShown: 6,
+    maxLabelsShown: 12,
     selectedLabel: undefined,
     dropdownLabels: undefined,
     visible: undefined,
@@ -126,7 +126,7 @@ export default {
   flex-shrink: 0;
   margin-left: 1% !important;
   margin-right: 1% !important;
-  max-width: 240px;
+  max-width: 238px;
 }
 .feedback-interactions {
   margin: 1.5em auto 0 auto;
@@ -147,7 +147,7 @@ export default {
   width: auto;
   height: 42px;
   line-height: 42px;
-  @include font-size(14px);
+  @include font-size(13px);
   padding-left: 0.5em;
   font-weight: 600;
 }
@@ -183,7 +183,7 @@ export default {
       border: 1px solid $line-light-color;
       border-radius: 5px;
       transition: all 0.3s ease;
-      max-width: 240px;
+      max-width: 238px;
       &:after {
         border-color: $lighter-color;
       }

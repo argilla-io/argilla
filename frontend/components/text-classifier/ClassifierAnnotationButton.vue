@@ -96,7 +96,7 @@ $annotation-button-touch-size: 48px;
     color: palette(grey, dark);
     padding: 0;
     transition: all 0.3s ease;
-    max-width: 240px;
+    max-width: 238px;
     width: 100%;
     .feedback-interactions:not(.checked) div:first-child & {
       box-shadow: $shadow-light;
@@ -113,11 +113,10 @@ $annotation-button-touch-size: 48px;
       padding-right: 0.5em;
       width: 100%;
       display: flex;
-      @include font-size(14px);
+      @include font-size(13px);
       font-weight: 600;
       overflow: hidden;
       color: palette(grey, dark);
-      max-width: 240px;
     }
     &.active {
       .button {
