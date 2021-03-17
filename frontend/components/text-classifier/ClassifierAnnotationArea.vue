@@ -95,6 +95,9 @@ export default {
       return this.labels.filter(l => l.selected).map(label => label.class)
     },
   },
+  updated() {
+    this.selectedLabels = this.appliedLabels;
+  },
   mounted() {
     this.selectedLabels = this.appliedLabels;
   },

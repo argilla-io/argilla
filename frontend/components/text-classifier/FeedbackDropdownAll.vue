@@ -75,8 +75,6 @@ export default {
   props: {
     record: Object,
     options: Array,
-    decorateConfidence: Function,
-    showClasses: Number,
     multiLabel: Boolean,
   },
   data: () => ({
@@ -119,6 +117,7 @@ export default {
       this.visible = false;
       this.selectedOptions = [];
     },
+    
     cleanSearchText() {
       this.searchText = undefined;
       this.addnewLabelVisible = false;

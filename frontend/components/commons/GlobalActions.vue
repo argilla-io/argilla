@@ -141,14 +141,17 @@ export default {
 
     async onSelectAnnotation(labels) {
       const records = this.selectedRecords.map((record) => {
+        const appliedLabels = [...record.annotation.labels];
+        let newLabels = labels.filter(l => appliedLabels.map(label => label.class).indexOf(l) === -1);
+        newLabels = newLabels.map((label) => ({
+          class: label,
+          confidence: 1.0,
+        }));
         return {
           ...record,
           annotation: {
             agent: this.$auth.user,
-            labels: labels.map((label) => ({
-              class: label,
-              confidence: 1.0,
-            })),
+            labels: this.isMultiLabelRecord ? [...appliedLabels, ...newLabels] : newLabels,
           },
         };
       });
