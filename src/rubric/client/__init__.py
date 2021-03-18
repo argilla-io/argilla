@@ -38,7 +38,7 @@ class RubricClient:
         api_url : str
             Address from which the API is serving. It will use the default UVICORN address as default
         token : str
-            Authentification token. A non-secured logging will be considered the default case. 
+            Authentification token. A non-secured logging will be considered the default case.
         timeout : int
             Seconds to considered a connection timeout. Optional
         """
