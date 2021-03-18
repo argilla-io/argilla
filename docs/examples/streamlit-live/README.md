@@ -44,8 +44,13 @@ git clone recognai/rubrix [TODO]
 docker-compose up 
 ```
 
-3. Check the localhost is running at [http://localhost:6900/](http://localhost:6900/)
+3. By default, Rubrix will connect to the local instance on [http://localhost:6900/](http://localhost:6900/), with no security. 
+If you wish to connect to other instance, you can pass its url and key via environment variables:
 
+```bash
+RUBRIX_API_URL = your.url
+RUBRIX_API_KEY = 1234
+```
 
 # Running the app
 After starting **Rubrix** stack, you can run this Streamlit app from the root directory with

@@ -14,10 +14,6 @@ os.environ["TOKENIZERS_PARALLELISM"] = "False"  # To avoid warnings
 
 st.set_page_config(page_title="Rubrix Demo App", layout="centered")
 
-LOCAL_URL = "http://localhost:6900/"
-
-TEMPORAL_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTYxODQzNzczNH0.vlZKlsh11fDZl_DAStYqF1CLZRkOIsTxTOdkJBeWOHY"
-
 CANDIDATE_LABELS = [
     "business",
     "health",
@@ -161,17 +157,15 @@ def main():
                 }
             )
 
-            # Logging into Rubrix
-            rubric.init(token=TEMPORAL_API_KEY)
-
             dataset_name = "multilabel_text_classification"
 
             rubric.log(name=dataset_name, records=[item])
 
+            api_url = os.getenv("RUBRIX_API_URL", "http://localhost:6900")
             # Pretty-print of the logged item
             st.markdown(
                 f"""Your data has been logged! You can view your dataset in
-                 [{LOCAL_URL}{dataset_name}/]({LOCAL_URL}{dataset_name}/),
+                 [{api_url}/{dataset_name}]({api_url}/{dataset_name}),
                 which has logged this object right below:"""
             )
             st.json(item.to_dict())
@@ -181,12 +175,11 @@ def main():
             Logging this predictions into Rubrix can be done with a few commands in your Python scripts."""
             )
 
+            # By default, Rubrix will connect to http://localhost:6900 with no security.
             st.code(
                 """
             import rubric
             from rubric.sdk.models import *
-
-            rubric.init()
 
             item = TextClassificationRecord.from_dict(
                 {
