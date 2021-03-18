@@ -148,8 +148,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.record {
-  @include font-size(15px);
-}
-</style>

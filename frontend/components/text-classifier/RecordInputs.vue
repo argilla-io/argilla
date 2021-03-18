@@ -31,6 +31,7 @@ export default {
 <style lang="scss" scoped>
 .record {
   @include font-size(14px);
+  white-space: pre-line;
   &__key {
     font-weight: lighter;
     margin-right: 0.5em;
