@@ -2,6 +2,9 @@
 This module configures the global fastapi application
 
 """
+import os
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from rubric.server.commons.errors import common_exception_handler
@@ -35,9 +38,13 @@ def configure_api_router(app: FastAPI):
 
 def configure_app_statics(app: FastAPI):
     """Configure static folder for app"""
+    parent_path = Path(__file__).parent.absolute()
+
     app.mount(
         "/",
-        RewriteStaticFiles(directory="static", html=True, check_dir=False),
+        RewriteStaticFiles(
+            directory=os.path.join(parent_path, "static"), html=True, check_dir=False
+        ),
         name="static",
     )
 

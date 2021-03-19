@@ -124,3 +124,7 @@ sw.*
 
 
 yarn.lock
+package-lock.json
+
+# App generated files
+src/**/server/static/
