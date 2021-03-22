@@ -72,10 +72,11 @@ def test_dataset_snapshots_flow():
     assert client.delete(api_ds_prefix).status_code == 200
     # Clear eventually already created snapshots
     response = client.get(f"{api_ds_prefix}/snapshots")
-    for snapshot in map(DatasetSnapshot.parse_obj, response.json()):
-        assert (
-            200 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
-        )
+    if response.status_code == 200:
+        for snapshot in map(DatasetSnapshot.parse_obj, response.json()):
+            assert (
+                200 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
+            )
 
     create_some_data_for_text_classification(name)
     response = client.post(

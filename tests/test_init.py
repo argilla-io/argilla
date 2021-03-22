@@ -286,6 +286,7 @@ def test_default_init(monkeypatch):
         requests, "get", requests_mock
     )  # apply the monkeypatch for requests.get to mock_get
 
+    del os.environ["RUBRIX_API_URL"]
     rubric._client = None
     rubric.init()
 
