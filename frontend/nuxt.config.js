@@ -7,7 +7,7 @@ export default {
   ssr: false,
 
   generate: {
-    dir: "../src/rubric/server/static"
+    dir: process.env.DIST_FOLDER || "../src/rubric/server/static",
   },
 
   // Global page headers (https://go.nuxtjs.dev/config-head)
@@ -39,11 +39,13 @@ export default {
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: {
-    dirs: [{
+    dirs: [
+      {
         path: "~/components",
         pattern: "**/*.vue",
-        pathPrefix: false
-    }]
+        pathPrefix: false,
+      },
+    ],
   },
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
