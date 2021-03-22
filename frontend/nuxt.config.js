@@ -7,7 +7,7 @@ export default {
   ssr: false,
 
   generate: {
-    dir: process.env.DIST_FOLDER || "../src/rubric/server/static",
+    dir: process.env.DIST_FOLDER || "../src/rubrix/server/static",
   },
 
   // Global page headers (https://go.nuxtjs.dev/config-head)

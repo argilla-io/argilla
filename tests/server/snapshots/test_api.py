@@ -3,10 +3,10 @@ from time import sleep
 
 import pytest
 from fastapi.testclient import TestClient
-from rubric.server.commons.models import TaskStatus
-from rubric.server.server import app
-from rubric.server.snapshots.model import DatasetSnapshot
-from rubric.server.text_classification.model import (
+from rubrix.server.commons.models import TaskStatus
+from rubrix.server.server import app
+from rubrix.server.snapshots.model import DatasetSnapshot
+from rubrix.server.text_classification.model import (
     TaskType,
     TextClassificationBulkData,
     TextClassificationRecord,

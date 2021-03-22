@@ -1,4 +1,4 @@
-from rubric.logging import LoggingMixin
+from rubrix.logging import LoggingMixin
 
 
 class LoggingForTest(LoggingMixin):

@@ -6,8 +6,8 @@ import pandas as pd
 import streamlit as st
 from transformers import pipeline
 
-import rubric
-from rubric.sdk.models import *
+import rubrix
+from rubrix.sdk.models import *
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "False"  # To avoid warnings
@@ -159,7 +159,7 @@ def main():
 
             dataset_name = "multilabel_text_classification"
 
-            rubric.log(name=dataset_name, records=[item])
+            rubrix.log(name=dataset_name, records=[item])
 
             api_url = os.getenv("RUBRIX_API_URL", "http://localhost:6900")
             # Pretty-print of the logged item
@@ -178,8 +178,8 @@ def main():
             # By default, Rubrix will connect to http://localhost:6900 with no security.
             st.code(
                 """
-            import rubric
-            from rubric.sdk.models import *
+            import rubrix
+            from rubrix.sdk.models import *
 
             item = TextClassificationRecord.from_dict(
                 {
@@ -198,7 +198,7 @@ def main():
                 }
             )
 
-            rubric.log(name="experiment_name", records=[item])
+            rubrix.log(name="experiment_name", records=[item])
 
             """,
                 language="python",

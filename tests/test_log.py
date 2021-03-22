@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Rubric Log Test Unit
+"""Rubrix Log Test Unit
 
 This pytest modules aims to test the correct state to the log function.
 Interaction with the client will be mocked, as this test are independent from the API,
@@ -10,12 +10,12 @@ which could or could not be mounted.
 
 import pytest
 import requests
-import rubric
-from rubric.sdk.api.text_classification import bulk_records as text_classification_bulk
-from rubric.sdk.api.token_classification import (
+import rubrix
+from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
+from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
-from rubric.sdk.models import (
+from rubrix.sdk.models import (
     BulkResponse,
     TextClassificationRecord,
     TextClassificationRecordsBulk,
@@ -26,7 +26,7 @@ from rubric.sdk.models import (
     TokenClassificationRecordsBulkMetadata,
     TokenClassificationRecordsBulkTags,
 )
-from rubric.sdk.types import Response
+from rubrix.sdk.types import Response
 
 
 @pytest.fixture
@@ -211,7 +211,7 @@ def test_text_classification(
         Mocked response given by the sync method, emulating the log of data
     """
 
-    assert rubric.log(
+    assert rubrix.log(
         name="test", records=mock_dataset_text, tags=mock_tags_text
     ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
 
@@ -235,7 +235,7 @@ def test_token_classification(
         Mocked response given by the sync method, emulating the log of data
     """
 
-    assert rubric.log(
+    assert rubrix.log(
         name="test", records=mock_dataset_token, tags=mock_tags_token
     ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
 
@@ -263,7 +263,7 @@ def test_no_name(
         Exception, match="Empty project name has been passed as argument."
     ):
 
-        assert rubric.log(
+        assert rubrix.log(
             name="", records=mock_dataset_token, tags=mock_tags_token
         ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
 
@@ -288,7 +288,7 @@ def test_empty_records(mock_response_200, mock_response_token, mock_tags_token):
     with pytest.raises(
         Exception, match="Empty record list has been passed as argument."
     ):
-        assert rubric.log(
+        assert rubrix.log(
             name="test", records=[], tags=mock_tags_token
         ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
 
@@ -313,7 +313,7 @@ def test_unknow_record_type(
     """
 
     with pytest.raises(Exception, match="Unknown record type passed as argument."):
-        assert rubric.log(
+        assert rubrix.log(
             name="test", records=["12"], tags=mock_tags_token
         ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
 
@@ -332,12 +332,12 @@ def mock_wrong_bulk_response(monkeypatch):
 
 
 def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
-    rubric._client = None
+    rubrix._client = None
     with pytest.raises(
         Exception,
         match="Connection error: API is not responding. The API answered with",
     ):
-        rubric.log(
+        rubrix.log(
             name="dataset",
             records=[
                 TextClassificationRecord.from_dict(

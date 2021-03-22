@@ -1,12 +1,15 @@
 from time import sleep
 
 from fastapi.testclient import TestClient
-from rubric.server.commons.models import BulkResponse
-from rubric.server.server import app
-from rubric.server.text_classification.api import TextClassificationRecordsBulk
-from rubric.server.text_classification.model import TextClassificationRecord
-from rubric.server.token_classification.api import TokenClassificationRecordsBulk
-from rubric.server.token_classification.model import SearchResults, TokenClassificationRecord
+from rubrix.server.commons.models import BulkResponse
+from rubrix.server.server import app
+from rubrix.server.text_classification.api import TextClassificationRecordsBulk
+from rubrix.server.text_classification.model import TextClassificationRecord
+from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
+from rubrix.server.token_classification.model import (
+    SearchResults,
+    TokenClassificationRecord,
+)
 
 client = TestClient(app)
 

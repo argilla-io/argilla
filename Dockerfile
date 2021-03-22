@@ -9,5 +9,5 @@ RUN git init /rubrix
 RUN pip install /rubrix[server]
 
 # See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
-ENV MODULE_NAME="rubric.server.server"
+ENV MODULE_NAME="rubrix.server.server"
 ENV VARIABLE_NAME="app"

@@ -1,9 +1,9 @@
 from time import sleep
 
-from rubric.server.commons.es_wrapper import create_es_wrapper
-from rubric.server.commons.models import TaskType
-from rubric.server.datasets.dao import create_datasets_dao
-from rubric.server.datasets.model import ObservationDatasetDB
+from rubrix.server.commons.es_wrapper import create_es_wrapper
+from rubrix.server.commons.models import TaskType
+from rubrix.server.datasets.dao import create_datasets_dao
+from rubrix.server.datasets.model import ObservationDatasetDB
 
 es_wrapper = create_es_wrapper()
 dao = create_datasets_dao(es_wrapper)

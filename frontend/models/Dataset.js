@@ -1,7 +1,7 @@
 import { Model } from "@vuex-orm/core";
 import DatasetViewSettings from "./DatasetViewSettings";
 
-const USER_DATA_METADATA_KEY = "rubric.recogn.ai/ui/custom/userData.v1";
+const USER_DATA_METADATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1";
 
 class ObservationDataset extends Model {
   static entity = "datasets";

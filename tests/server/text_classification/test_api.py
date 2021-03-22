@@ -2,22 +2,22 @@ from datetime import datetime
 from time import sleep
 
 from fastapi.testclient import TestClient
-from rubric.server.commons.models import PredictionStatus, SortParam
-from rubric.server.datasets.model import ObservationDataset
-from rubric.server.server import app
-from rubric.server.text_classification.api import (
+from rubrix.server.commons.models import PredictionStatus, SortParam
+from rubrix.server.datasets.model import ObservationDataset
+from rubrix.server.server import app
+from rubrix.server.text_classification.api import (
     BulkResponse,
     SearchResults,
     TextClassificationRecordsBulk,
 )
-from rubric.server.text_classification.model import (
+from rubrix.server.text_classification.model import (
     TextClassificationAggregations,
     TextClassificationAnnotation,
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubric.server.token_classification.api import TokenClassificationRecordsBulk
-from rubric.server.token_classification.model import TokenClassificationRecord
+from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
+from rubrix.server.token_classification.model import TokenClassificationRecord
 
 client = TestClient(app)
 
