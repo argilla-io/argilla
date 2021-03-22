@@ -403,7 +403,7 @@ def test_include_event_timestamp():
     assert all(map(lambda record: record.event_timestamp is not None, results.records))
 
 
-def test_language_detection():
+def test_words_cloud():
     dataset = "test_language_detection"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
@@ -420,13 +420,13 @@ def test_language_detection():
                 ),
                 TextClassificationRecord(
                     **{
-                        "id": 0,
+                        "id": 1,
                         "inputs": {"text": "This is an simple text example"},
                     }
                 ),
                 TextClassificationRecord(
                     **{
-                        "id": 0,
+                        "id": 2,
                         "inputs": {"text": "C'est nes pas une pipe"},
                     }
                 ),
@@ -442,6 +442,4 @@ def test_language_detection():
     )
 
     results = SearchResults.parse_obj(response.json())
-    assert results.aggregations.words.en is not None
-    assert results.aggregations.words.es is not None
-    assert results.aggregations.words.fr is not None
+    assert results.aggregations.words is not None

@@ -5,7 +5,6 @@ from rubrix.server.commons.models import BaseModel, List, SortParam
 from rubrix.server.dataset_records.model import (
     BaseTaskSearchAggregations,
     DefaultTaskSearchFilters,
-    WordCloudAggregations,
 )
 from rubrix.server.datasets.model import UpdateDatasetRequest
 
@@ -66,7 +65,7 @@ class TokenClassificationAggregations(BaseTaskSearchAggregations):
 
     """
 
-    words: WordCloudAggregations = Field(default_factory=WordCloudAggregations)
+    words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 

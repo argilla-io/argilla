@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 from rubrix.server.commons.models import (
     SortParam,
 )
-from rubrix.server.dataset_records.model import WordCloudAggregations
 from rubrix.server.datasets.model import UpdateDatasetRequest
 
 from .model import TextClassificationRecord
@@ -66,7 +65,7 @@ class TextClassificationAggregations(TaskSearchAggregations):
 
     """
 
-    words: WordCloudAggregations = Field(default_factory=WordCloudAggregations)
+    words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 

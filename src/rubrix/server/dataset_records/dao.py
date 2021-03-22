@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from fastapi import Depends
-from pydantic import Field, validator
+from pydantic import Field
 from pydantic.main import BaseModel
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
@@ -11,34 +11,34 @@ from rubrix.server.datasets.dao import (
     dataset_records_index,
 )
 from rubrix.server.datasets.model import ObservationDatasetDB
+from stopwordsiso import stopwords
 
 from . import es_helpers
 from .es_helpers import aggregations, parse_aggregations, parse_tasks_aggregations
-from .model.search import WordCloudAggregations
 
-ES_ANALYZER_FOR_LANG = {
-    "es": "spanish",
-    "en": "english",
-    "fr": "french",
-    "de": "german",
-}
-
-SUPPORTED_LANGUAGES = list(ES_ANALYZER_FOR_LANG.keys())
+SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
 
 
 DATASETS_RECORDS_INDEX_TEMPLATE = {
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "multilingual_stop_analyzer": {
+                    "type": "stop",
+                    "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
+                }
+            }
+        }
+    },
     "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
     "mappings": {
         "properties": {
-            **{
-                f"language_words.{lang}": {
-                    "type": "text",
-                    "analyzer": ES_ANALYZER_FOR_LANG[lang],
-                    "fielddata": True,
-                }
-                for lang in SUPPORTED_LANGUAGES
-            },
             "event_timestamp": {"type": "date"},
+            "words": {
+                "type": "text",
+                "fielddata": True,
+                "analyzer": "multilingual_stop_analyzer",
+            },
             "tokens": {"type": "text"},
         },
         "dynamic_templates": [
@@ -68,28 +68,6 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
         ],
     },
 }
-
-
-class LanguageWords(BaseModel):
-    """
-
-    Record text content by language
-
-    es: str
-        Text record content for spanish
-    en: str
-        Text record content for english
-    ge: str
-        Text record content for german
-    fr: str
-        Text record content for french
-
-    """
-
-    es: str = None
-    en: str = None
-    ge: str = None
-    fr: str = None
 
 
 class MultiTaskRecordDB(BaseModel):
@@ -127,9 +105,8 @@ class MultiTaskRecordDB(BaseModel):
     tasks: Dict[str, Dict[str, Any]]
         A dictionary of task info. The key corresponds to
         value representation of convenient `TaskType`
-
-    language_words: LanguageWords
-        The record textual content contextualized by lang
+    words:
+        The record textual content
     """
 
     id: Union[int, str]
@@ -145,19 +122,12 @@ class MultiTaskRecordDB(BaseModel):
 
     tasks: Dict[str, Dict[str, Any]]
 
-    language_words: Optional[LanguageWords] = None
+    words: Optional[str] = None
 
     @staticmethod
     def field_name_for_task(task: str) -> str:
         """Generate de es field name base for task fields"""
         return f"tasks.{task}"
-
-    @validator("language_words", always=True)
-    def set_default_language_words(cls, language_words: Optional[LanguageWords]):
-        """Creates an empty instance for language words if None was provided"""
-        if language_words is None:
-            return LanguageWords()
-        return language_words
 
 
 class TaskSearch(BaseModel):
@@ -257,7 +227,7 @@ class MultiTaskSearch(BaseModel):
         }
         return {
             **tasks_aggregations,
-            **aggregations.language_words_cloud(langs=SUPPORTED_LANGUAGES),
+            **aggregations.words_cloud(),
             **aggregations.custom_fields(metadata_fields),
         }
 
@@ -276,10 +246,10 @@ class MultiTaskSearchResult(BaseModel):
         List of records retrieved for the pagination configuration
 
     aggregations: Optional[Dict[str, Dict[str, Any]]]
-        The query aggregations. Optional
+        The query aggregations grouped by task. Optional
 
-    language_word_clouds: Optional[WordCloudAggregations]
-        The word cloud aggregations grouped by stored languages
+    words_cloud: Optional[Dict[str, int]]
+        The words cloud aggregations
 
     metadata: Optional[Dict[str, int]]
         Metadata fields aggregations
@@ -289,7 +259,7 @@ class MultiTaskSearchResult(BaseModel):
     total: int
     records: List[MultiTaskRecordDB]
     aggregations: Optional[Dict[str, Dict[str, Any]]] = Field(default_factory=dict)
-    language_word_clouds: Optional[WordCloudAggregations] = None
+    words_cloud: Optional[Dict[str, int]] = None
     metadata: Optional[Dict[str, int]] = None
 
 
@@ -392,9 +362,7 @@ class DatasetRecordsDAO:
         )
         if search_aggregations:
             result.aggregations = parse_tasks_aggregations(search_aggregations["tasks"])
-            result.language_word_clouds = WordCloudAggregations(
-                **parse_aggregations(search_aggregations.get("language_words"))
-            )
+            result.words_cloud = parse_aggregations(search_aggregations).get("words")
             result.metadata = parse_aggregations(search_aggregations.get("metadata"))
         return result
 

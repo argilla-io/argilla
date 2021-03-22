@@ -2,10 +2,7 @@
 Common helper functions
 """
 
-from typing import Any, Dict, Optional
-
-from langdetect import detect
-from langdetect.lang_detect_exception import LangDetectException
+from typing import Any, Dict
 
 
 def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
@@ -52,11 +49,3 @@ def unflatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
     return resultDict
 
 
-def detect_language(text: str) -> Optional[str]:
-    """Return the inferred language code for a given text"""
-    try:
-        return detect(text)
-    except LangDetectException:
-        # Cannot detect language for given text. Return None
-        # TODO: improve error recovery
-        return None

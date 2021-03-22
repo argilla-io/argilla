@@ -2,12 +2,10 @@ import re
 from typing import List, Optional
 
 from fastapi import Depends
-from rubrix.server.commons.helpers import detect_language
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 
 from .dao import (
     DatasetRecordsDAO,
-    LanguageWords,
     MultiTaskRecordDB,
     MultiTaskSearch,
     MultiTaskSearchResult,
@@ -23,7 +21,6 @@ from .model import (
     MultitaskRecordSearchResults,
     RecordSearchAggregations,
     TaskMeta,
-    WordCloudAggregations,
 )
 
 
@@ -136,11 +133,9 @@ def _record_2_db_record(
 
     """
 
-    record_lang = detect_language(record.relevant_text) or "en"
-
     return MultiTaskRecordDB(
         **record.dict(by_alias=True),
-        language_words=LanguageWords(**{record_lang: record.relevant_text}),
+        words=record.relevant_text,
         tasks={
             task.value: {**record.task_info(task).dict(), "owner": owner}
             for task in record.tasks
@@ -253,7 +248,7 @@ def _dao_results_2_service_results(
         """Build service aggregations from dao results"""
 
         aggregations = RecordSearchAggregations(
-            words_cloud=result.language_word_clouds or WordCloudAggregations(),
+            words_cloud=result.words_cloud or {},
             metadata_aggregations=result.metadata or {},
         )
         for meta in _tasks:

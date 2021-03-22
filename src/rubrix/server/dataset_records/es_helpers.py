@@ -303,22 +303,16 @@ class aggregations:
         }
 
     @staticmethod
-    def language_words_cloud(
-        size: int = DEFAULT_AGGREGATION_SIZE, langs: List[str] = None
-    ):
-        """Word cloud aggregation for given languages"""
-        langs = langs or ["en"]
-
+    def words_cloud(size: int = DEFAULT_AGGREGATION_SIZE):
+        """Words cloud aggregation"""
         return {
-            field_name: {
+            "words": {
                 "terms": {
-                    "field": field_name,
+                    "field": "words",
                     "size": size,
                     "order": {"_count": "desc"},
                 }
             }
-            for lang in langs
-            for field_name in [f"language_words.{lang}"]
         }
 
     @staticmethod

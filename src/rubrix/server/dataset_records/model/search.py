@@ -107,15 +107,6 @@ class BaseTaskSearchAggregations(BaseModel):
         }
 
 
-class WordCloudAggregations(BaseModel):
-    """Word cloud aggregations for supported languages"""
-
-    es: Dict[str, int] = Field(default_factory=dict)
-    en: Dict[str, int] = Field(default_factory=dict)
-    de: Dict[str, int] = Field(default_factory=dict)
-    fr: Dict[str, int] = Field(default_factory=dict)
-
-
 class TaskMeta(BaseModel, LoggingMixin):
     """
     Task meta information data model
@@ -149,7 +140,7 @@ class RecordSearchAggregations(BaseModel, LoggingMixin):
     Attributes:
     -----------
 
-    words_cloud: WordCloudAggregations
+    words_cloud: Dict[str,int]
         Word cloud aggregations
 
     metadata_aggregations: Dict[str, Dict[str, int]]
@@ -157,7 +148,7 @@ class RecordSearchAggregations(BaseModel, LoggingMixin):
 
     """
 
-    words_cloud: WordCloudAggregations = Field(default_factory=WordCloudAggregations)
+    words_cloud: Dict[str, int] = Field(default_factory=dict)
     metadata_aggregations: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
     __tasks__: Dict[TaskType, BaseTaskSearchAggregations] = PrivateAttr(
