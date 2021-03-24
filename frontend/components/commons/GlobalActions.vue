@@ -96,7 +96,11 @@ export default {
       return this.selectedRecords.some((record) => record.multi_label);
     },
     options() {
-      return this.isTextClassification ? this.dataset.labels : [];
+      const record = this.dataset.results.records[0];
+      const labels = record
+        ? record.prediction.labels.map((label) => label.class)
+        : [];
+      return this.isTextClassification ? labels : [];
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
@@ -141,9 +145,12 @@ export default {
         const appliedLabels = record.annotation
           ? [...record.annotation.labels]
           : [];
-        let newLabels = labels.filter(
+
+        const filterAppliedLabels = labels.filter(
           (l) => appliedLabels.map((label) => label.class).indexOf(l) === -1
         );
+
+        let newLabels = this.isMultiLabelRecord ? filterAppliedLabels : labels;
         newLabels = newLabels.map((label) => ({
           class: label,
           confidence: 1.0,
