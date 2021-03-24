@@ -156,7 +156,47 @@ class RubrixClient:
                     name=name, tags=tags, metadata=metadata, records=chunk
                 ),
             )
-            if response.status_code >= 400 or not response.parsed:
+            # Concrete error codes
+            if response.status_code == 401:
+                raise Exception(
+                    "Unauthorized error: invalid credentials. The API answered with a {} code: {}".format(
+                        response.status_code, response.content
+                    )
+                )
+
+            elif response.status_code == 403:
+                raise Exception(
+                    "Forbidden error: you have not been authorised to access this dataset. The API answered with a {} code: {}".format(
+                        response.status_code, response.content
+                    )
+                )
+
+            elif response.status_code == 404:
+                raise Exception(
+                    "Not found error. The API answered with a {} code: {}".format(
+                        response.status_code, response.content
+                    )
+                )
+
+            elif response.status_code == 422:
+                raise Exception(
+                    "Unprocessable entity error: Something is wrong in your records. The API answered with a {} code: {}".format(
+                        response.status_code, response.content
+                    )
+                )
+
+            elif (
+                response.status_code >= 400
+                and response.status_code < 500
+                or not response.parsed
+            ):
+                raise Exception(
+                    "Request error: API cannot answer. The API answered with a {} code: {}".format(
+                        response.status_code, response.content
+                    )
+                )
+
+            elif response.status_code >= 500:
                 raise Exception(
                     "Connection error: API is not responding. The API answered with a {} code: {}".format(
                         response.status_code, response.content
