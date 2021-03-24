@@ -32,7 +32,7 @@
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset"> </Results>
-        <!-- <SideBar /> -->
+        <SideBar v-if="annotationEnabled" :dataset="dataset" />
       </div>
     </div>
     <ViewModeButton
@@ -58,7 +58,7 @@ export default {
       {
         name: "Text Classification",
         id: "TextClassification",
-        desc: "Change to Text Classification mode"
+        desc: "Change to Text Classification mode",
       },
     ],
   }),

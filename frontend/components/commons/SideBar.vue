@@ -1,145 +1,148 @@
 <template>
-  <div>
-    <aside class="sidebar">
-        <div class="sidebar__wrapper">
-          <!-- <div class="sidebar__content" v-if="metrics.annotated">
-            <div
-              :class="['progress__block', loadingQ ? 'loading-skeleton' : '']"
-            >
-              <p>Annotation</p>
-              <div class="total">
-                <span class="progress">{{ feedbackProgress }}%</span>
-                <ReProgress
-                  re-mode="determinate"
-                  :progress="parseFloat(feedbackProgress)"
-                />
-              </div>
-
-              <span
-                v-for="(metric, key) in metricsOverall"
-                :key="key"
-                class="info"
-              >
-                <label>{{ metric.key }}</label>
-                <span class="records-number">{{ metric.value }}</span>
-              </span>
+  <aside v-click-outside="closeMetrics" class="sidebar">
+    <p class="sidebar__show-button" @click="toggleVisibleMetrics">
+      <svgicon name="metrics" width="30" height="30" color="#F48E5F" />
+    </p>
+    <div v-if="visible && annotationsProgress" class="sidebar__wrapper">
+      <div class="sidebar__content">
+        <p>Annotations</p>
+        <span class="progress progress--percent">{{ progress }}%</span>
+        <ReProgress
+          re-mode="determinate"
+          :multiple="true"
+          :progress="(totalValidated * 100) / total"
+          :progress-secondary="(totalDiscarded * 100) / total"
+        ></ReProgress>
+        <div class="scroll">
+          <div class="info">
+            <label>All</label>
+            <span class="records-number">
+              <strong>{{ total }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Validated</label>
+            <span class="records-number">
+              <strong>{{ totalValidated }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Discarded</label>
+            <span class="records-number">
+              <strong>{{ totalDiscarded }}</strong>
+            </span>
+          </div>
+          <div
+            v-for="(counter, label) in annotationsProgress.annotatedAs"
+            :key="label"
+          >
+            <div v-if="counter > 0" class="info">
+              <label>{{ label }}</label>
+              <span class="records-number">{{ counter }}</span>
             </div>
-            <ReButton
-              v-if="metrics.annotated"
-              class="button-clear button-action"
-              @click="onOpenExportModal()"
-            >
-              <svgicon
-                name="export"
-                width="14"
-                height="14"
-                color="#F48E5F"
-              />Export annotations
-            </ReButton>
-          </div> -->
+          </div>
         </div>
-    </aside>
-    <!-- <ReModal
-      v-if="metrics.annotated"
-      :modal-custom="true"
-      :prevent-body-scroll="true"
-      modal-class="modal-primary"
-      :modal-visible="openExportModal"
-      modal-position="modal-center"
-      @close-modal="closeModal()"
-    >
-      <p class="modal__title">Confirm export of annotations</p>
-      <p class="modal__text">
-        You are about to export {{ metrics.annotated }} annotations. You will
-        find the file on the server once the action is completed.
-      </p>
-      <div class="modal-buttons">
-        <ReButton
-          class="button-tertiary--small button-tertiary--outline"
-          @click="closeModal()"
-        >
-          Cancel
-        </ReButton>
-        <ReButton class="button-secondary--small" @click="onExportAnnotations()">
-          Confirm export
-        </ReButton>
       </div>
-    </ReModal> -->
-  </div>
+    </div>
+  </aside>
 </template>
 <script>
 import "assets/icons/export";
+import "assets/icons/metrics";
 
+import { AnnotationProgress } from "@/models/AnnotationProgress";
+import { ObservationDataset } from "@/models/Dataset";
 export default {
   // TODO clean and typify
   props: {
-    metrics: {
+    dataset: {
       type: Object,
-    },
-    loadingQ: {
-      type: Boolean,
-      default: false,
+      required: true,
     },
   },
+
   data: () => ({
-    openExportModal: false,
+    visible: false,
+    preventCloseOnClickOutside: true,
   }),
+  async fetch() {
+    await ObservationDataset.dispatch("refreshAnnotationProgress", {
+      dataset: this.dataset,
+    });
+  },
   computed: {
-    metricsOverall() {
-      return Object.entries(this.metrics).map(([key, value]) => ({
-        key,
-        value,
-      }));
+    annotationsProgress() {
+      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
-    feedbackProgress() {
-      if (this.metrics.annotated) {
-        return ((this.metrics.annotated * 100) / this.metrics.total).toFixed(2);
-      }
+    totalValidated() {
+      return this.annotationsProgress.validated;
+    },
+    totalDiscarded() {
+      return this.annotationsProgress.discarded;
+    },
+    total() {
+      return this.annotationsProgress.total;
+    },
+    datasetName() {
+      return this.dataset.name;
+    },
+    datasetTask() {
+      return this.dataset.task;
+    },
+    progress() {
+      return (
+        (this.totalValidated || 0) +
+        ((this.totalDiscarded || 0) * 100) / this.total
+      ).toFixed(2);
     },
   },
+
+  watch: {
+    async datasetName() {
+      this.$fetch();
+    },
+    async datasetTask() {
+      this.$fetch();
+    },
+  },
+
   methods: {
-    onOpenExportModal() {
-      this.openExportModal = true;
+    closeMetrics() {
+      this.visible = this.preventCloseOnClickOutside;
     },
-    closeModal() {
-      this.openExportModal = false;
-    },
-    onExportAnnotations() {
-      this.openExportModal = false;
-      console.log("export");
-      // this.apiClient().exportAnnotations(this.project, this.prediction)
-      //   .then((path) => {
-      //     Vue.$toast.open({
-      //       message: `The export is finished, the file is accessible at file://${path}`,
-      //       type: 'default',
-      //     });
-      //   })
-      //   .catch((error) => {
-      //     Vue.$toast.open({
-      //       message: error,
-      //       type: 'warning',
-      //     });
-      //   });
+    toggleVisibleMetrics() {
+      !this.visible ? (this.visible = true) : (this.visible = false);
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  @include grid-col($col: 3, $gutter: 1.6em);
-  // margin-top: 2em;
-  min-width: 270px;
-  max-width: 270px;
-  margin-left: 3em;
+  margin-top: 2em;
+  margin-left: 1em;
   z-index: 0;
+  &__show-button {
+    position: absolute;
+    right: 3em;
+    cursor: pointer;
+    text-align: right;
+  }
   &__wrapper {
+    min-width: 200px;
+    max-width: 200px;
+    position: absolute;
+    right: 1em;
+    margin-top: 4em;
+    // display: none;
+    background: white;
+    padding: 1em;
+    box-shadow: $shadow;
     .fixed-header & {
-      position: fixed;
+      // position: fixed;
       width: 100%;
-      max-width: 270px;
+      max-width: 200px;
       max-height: calc(100% - 180px);
       overflow: auto;
-      top: 9em;
       transition: top 0.2s ease-in-out;
       padding-right: 1em;
     }
@@ -183,12 +186,20 @@ export default {
     position: relative;
     display: flex;
     margin-bottom: 0.7em;
+    max-height: 50vh;
+    overflow: scroll;
     label {
       margin: 0; // for tagger
       &[class^="color_"] {
         padding: 0.3em;
       }
     }
+  }
+  .scroll {
+    max-height: calc(100vh - 340px);
+    padding-right: 1em;
+    margin-right: -1em;
+    overflow: auto;
   }
   .records-number {
     margin-right: 0;

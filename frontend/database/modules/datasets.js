@@ -3,6 +3,11 @@ import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
+import { AnnotationProgress } from "@/models/AnnotationProgress";
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function toSnakeCase(e) {
   return e
@@ -87,7 +92,7 @@ const actions = {
       selected: false,
       status: "Discarded",
     }));
-    return await dispatch("updateRecords", {
+    await dispatch("updateRecords", {
       dataset,
       records: newRecords,
       persistBackend: true,
@@ -154,6 +159,31 @@ const actions = {
     });
   },
 
+  async refreshAnnotationProgress({ getters }, { dataset }) {
+    await sleep(1000); // TODO: Elasticsearch flush delay (change approach)
+
+    const entity = getters.datasetEntity(dataset);
+    const {
+      response: {
+        data: { total, aggregations },
+      },
+    } = await entity.dispatch("search", {
+      dataset,
+      query: {},
+      size: 0, // Disable persistence
+    });
+
+    return await AnnotationProgress.insertOrUpdate({
+      data: {
+        id: dataset.name + dataset.task,
+        total: total,
+        validated: aggregations.status.Validated,
+        discarded: aggregations.status.Discarded,
+        annotatedAs: aggregations.annotated_as,
+      },
+    });
+  },
+
   async updateRecords(
     { getters, dispatch },
     { dataset, records, persistBackend = false }
@@ -161,25 +191,27 @@ const actions = {
     if (records.length === 0) {
       return;
     }
+    let aggregations = {};
+    const entity = getters.datasetEntity(dataset);
     if (persistBackend) {
-      // TODO: user dataset.$dispatch("updatupdateRecords") instead
-      await dispatch(
-        `entities/${toSnakeCase(dataset.task)}/updateRecords`,
-        {
-          dataset,
-          records,
-        },
-        { root: true }
-      );
+      await entity.dispatch("updateRecords", {
+        dataset,
+        records,
+      });
     }
 
-    const entity = getters.datasetEntity(dataset);
+    dispatch("refreshAnnotationProgress", { dataset });
+
     return await entity.update({
       where: dataset.name,
       data: {
         ...dataset,
         results: {
           ...dataset.results,
+          aggregations: {
+            ...dataset.results.aggregations,
+            ...aggregations,
+          },
           records: dataset.results.records.map((record) => {
             const found = records.find((r) => r.id === record.id);
             return found || record;
@@ -236,7 +268,7 @@ const actions = {
     });
   },
 
-  async search({ dispatch }, { dataset, query, sort }) {
+  async search({ getters, dispatch }, { dataset, query, sort }) {
     query = query || {};
     sort = sort || [];
 
@@ -254,17 +286,13 @@ const actions = {
       Object.keys(query).length === 0
         ? query
         : { ...dataset.query, ...query, metadata };
-
-    await dispatch(
-      `entities/${toSnakeCase(dataset.task)}/search`,
-      {
-        dataset,
-        query: searchQuery,
-        sort,
-        size: DEFAULT_QUERY_SIZE,
-      },
-      { root: true }
-    );
+    const entity = getters.datasetEntity(dataset);
+    await entity.dispatch("search", {
+      dataset,
+      query: searchQuery,
+      sort,
+      size: DEFAULT_QUERY_SIZE,
+    });
     const viewSettings = DatasetViewSettings.query().first();
     displayQueryParams({
       query: searchQuery,

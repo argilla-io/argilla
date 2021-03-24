@@ -19,9 +19,7 @@
         @addNewLabel="onAddNewLabel"
         @selected="onSelectAnnotation($event)"
       ></FeedbackDropdownAll>
-      <ReButton
-        class="global-actions__button"
-        @click="onValidate"
+      <ReButton class="global-actions__button" @click="onValidate"
         >Validate</ReButton
       >
       <ReButton class="global-actions__button" @click="onDiscard"
@@ -70,7 +68,6 @@
   </div>
 </template>
 <script>
-import Vue from "vue";
 import { mapActions } from "vuex";
 import "assets/icons/export";
 
@@ -141,8 +138,12 @@ export default {
 
     async onSelectAnnotation(labels) {
       const records = this.selectedRecords.map((record) => {
-        const appliedLabels = [...record.annotation.labels];
-        let newLabels = labels.filter(l => appliedLabels.map(label => label.class).indexOf(l) === -1);
+        const appliedLabels = record.annotation
+          ? [...record.annotation.labels]
+          : [];
+        let newLabels = labels.filter(
+          (l) => appliedLabels.map((label) => label.class).indexOf(l) === -1
+        );
         newLabels = newLabels.map((label) => ({
           class: label,
           confidence: 1.0,
@@ -151,7 +152,9 @@ export default {
           ...record,
           annotation: {
             agent: this.$auth.user,
-            labels: this.isMultiLabelRecord ? [...appliedLabels, ...newLabels] : newLabels,
+            labels: this.isMultiLabelRecord
+              ? [...appliedLabels, ...newLabels]
+              : newLabels,
           },
         };
       });

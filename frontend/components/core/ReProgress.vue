@@ -2,12 +2,12 @@
     <transition name="re-progress" appear>
       <div class="re-progress">
         <div class="re-progress-track" :style="styles">
+        </div>
           <div
-            v-if="multiple"
+            v-if="multiple && progressSecondary"
             class="re-progress-track--secondary"
             :style="stylesSecondary"
           />
-        </div>
       </div>
     </transition>
 </template>
@@ -36,6 +36,7 @@ export default {
     },
     stylesSecondary() {
       return {
+        left: `${this.progress}%`,
         width: `${this.progressSecondary}%`,
       };
     },
@@ -70,12 +71,16 @@ export default {
   bottom: 0;
   left: 0;
   transition: $swift-ease-out;
-  border-bottom-right-radius: 2px;
-  border-top-right-radius: 2px;
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
   background: $secondary-color;
   transition: $swift-ease-out;
   max-width: 50%;
   transition-duration: 2s;
+  &:last-of-type {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
   .re-progress-enter-active & {
     max-width: 0;
   }

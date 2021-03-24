@@ -2,6 +2,7 @@ import { Database } from "@vuex-orm/core";
 
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
+import { AnnotationProgress } from "@/models/AnnotationProgress";
 
 import { ObservationDataset } from "@/models/Dataset";
 import { TextClassificationDataset } from "@/models/TextClassification";
@@ -17,6 +18,7 @@ const database = new Database();
 
 database.register(DatasetViewSettings);
 database.register(Pagination);
+database.register(AnnotationProgress);
 database.register(Notification, notifications);
 
 database.register(ObservationDataset, datasets);

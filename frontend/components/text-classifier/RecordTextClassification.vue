@@ -8,7 +8,7 @@
       :predicted="record.predicted"
     />
     <!-- record text -->
-    <RecordInputs :data="record.inputs" :queryText="dataset.query.text" />
+    <RecordInputs :data="record.inputs" :query-text="dataset.query.text" />
     <!-- record annotation area -->
     <ClassifierAnnotationArea
       v-if="annotationEnabled"
@@ -76,7 +76,7 @@ export default {
       });
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled
+      return this.dataset.viewSettings.annotationEnabled;
     },
     annotationLabels() {
       return this.record.annotation ? this.record.annotation.labels : [];
@@ -125,7 +125,6 @@ export default {
       }
     },
     async onAnnotate({ labels }) {
-      console.log(labels)
       await this.validate({
         dataset: this.dataset,
         records: [

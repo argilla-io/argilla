@@ -23,6 +23,7 @@ const actions = {
   async search(store, { dataset, query, sort, size }) {
     query = query || {};
     sort = sort || [];
+    const save = size == 0 ? false : true;
 
     return await TokenClassificationDataset.api().post(
       `/token-classification/datasets/${dataset.name}/:search?limit=${size}`,
@@ -31,6 +32,7 @@ const actions = {
         sort,
       }, // search body
       {
+        save,
         dataTransformer: ({ data }) => {
           return { ...dataset, results: data, query, sort };
         },
