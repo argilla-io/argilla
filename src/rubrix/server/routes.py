@@ -11,6 +11,7 @@ from .snapshots import api as snapshots
 from .text_classification import api as text_classification
 from .token_classification import api as token_classification
 from .users import api as users
+from .info import api as info
 
 api_router = APIRouter()
 
@@ -23,6 +24,7 @@ for router in [
     text_classification.router,
     token_classification.router,
     snapshots.router,
+    info.router,
 ]:
     api_router.include_router(router, dependencies=dependencies)
 

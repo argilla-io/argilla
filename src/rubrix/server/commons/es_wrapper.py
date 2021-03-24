@@ -20,6 +20,11 @@ class ElasticsearchWrapper(LoggingMixin):
     def __init__(self, es_client: Elasticsearch):
         self.__client__ = es_client
 
+    @property
+    def client(self):
+        """The elasticsearch client"""
+        return self.__client__
+
     def list_documents(
         self, index: str, query: Dict[str, Any] = None
     ) -> Iterable[Dict[str, Any]]:
