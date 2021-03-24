@@ -5,7 +5,7 @@ from rubrix.server.commons.settings import settings
 from rubrix.server.security.api import get_current_active_user
 from rubrix.server.users.model import User
 
-from .model import ObservationDataset, UpdateDatasetRequest
+from .model import Dataset, UpdateDatasetRequest
 from .service import DatasetsService, create_dataset_service
 
 router = APIRouter(
@@ -15,13 +15,13 @@ router = APIRouter(
 
 @router.get(
     "/",
-    response_model=List[ObservationDataset],
+    response_model=List[Dataset],
     operation_id="list_datasets",
 )
 def list_datasets(
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
-) -> List[ObservationDataset]:
+) -> List[Dataset]:
     """
     List accessible user datasets
 
@@ -41,14 +41,14 @@ def list_datasets(
 
 @router.get(
     "/{name}",
-    response_model=ObservationDataset,
+    response_model=Dataset,
     operation_id="get_dataset",
 )
 def get_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
-) -> ObservationDataset:
+) -> Dataset:
     """
     Find a dataset by name visible for current user
 
@@ -72,14 +72,14 @@ def get_dataset(
 
 
 @router.patch(
-    "/{name}", operation_id="update_dataset", response_model=ObservationDataset
+    "/{name}", operation_id="update_dataset", response_model=Dataset
 )
 def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
-) -> ObservationDataset:
+) -> Dataset:
     """
     Update a set of parameters for a dataset
 

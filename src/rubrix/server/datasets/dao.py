@@ -5,7 +5,7 @@ from fastapi import Depends
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.models import TaskType
 
-from .model import ObservationDatasetDB
+from .model import DatasetDB
 
 # TODO: elasticsearch index names will be revisited in the next iteration
 DATASETS_INDEX_NAME = f".rubric.datasets-v1"
@@ -72,7 +72,7 @@ class DatasetsDAO:
         )
         self._es.create_index(DATASETS_INDEX_NAME)
 
-    def list_datasets(self, owner_list: List[str] = None) -> List[ObservationDatasetDB]:
+    def list_datasets(self, owner_list: List[str] = None) -> List[DatasetDB]:
         """
         List the dataset for an owner list
 
@@ -95,7 +95,7 @@ class DatasetsDAO:
         )
         return [self._es_doc_to_observation_dataset(doc) for doc in docs]
 
-    def create_dataset(self, dataset: ObservationDatasetDB) -> ObservationDatasetDB:
+    def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
         """
         Stores a dataset in elasticsearch and creates corresponding dataset records index
 
@@ -123,8 +123,8 @@ class DatasetsDAO:
 
     def update_dataset(
         self,
-        dataset: ObservationDatasetDB,
-    ) -> ObservationDatasetDB:
+        dataset: DatasetDB,
+    ) -> DatasetDB:
         """
         Updates an stored dataset
 
@@ -147,7 +147,7 @@ class DatasetsDAO:
         )
         return dataset
 
-    def delete_dataset(self, dataset: ObservationDatasetDB):
+    def delete_dataset(self, dataset: DatasetDB):
         """
         Deletes indices related to provided dataset
 
@@ -164,7 +164,7 @@ class DatasetsDAO:
 
     def find_by_name(
         self, name: str, owner: Optional[str]
-    ) -> Optional[ObservationDatasetDB]:
+    ) -> Optional[DatasetDB]:
         """
         Finds a dataset by name
 
@@ -179,7 +179,7 @@ class DatasetsDAO:
         -------
             The found dataset if any. None otherwise
         """
-        dataset = ObservationDatasetDB(
+        dataset = DatasetDB(
             name=name, owner=owner, task=TaskType.text_classification
         )
         document = self._es.get_document_by_id(
@@ -204,8 +204,8 @@ class DatasetsDAO:
         return self._es_doc_to_observation_dataset(document) if document else None
 
     @staticmethod
-    def _es_doc_to_observation_dataset(doc: Dict[str, Any]) -> ObservationDatasetDB:
-        """Transforms a stored elasticsearch document into a `ObservationDatasetDB`"""
+    def _es_doc_to_observation_dataset(doc: Dict[str, Any]) -> DatasetDB:
+        """Transforms a stored elasticsearch document into a `DatasetDB`"""
 
         def __key_value_list_to_dict__(
             key_value_list: List[Dict[str, Any]]
@@ -216,7 +216,7 @@ class DatasetsDAO:
         tags = source.pop("tags", [])
         metadata = source.pop("metadata", [])
 
-        return ObservationDatasetDB.parse_obj(
+        return DatasetDB.parse_obj(
             {
                 **source,
                 "tags": __key_value_list_to_dict__(tags),
@@ -225,7 +225,7 @@ class DatasetsDAO:
         )
 
     @staticmethod
-    def _observation_dataset_to_es_doc(dataset: ObservationDatasetDB) -> Dict[str, Any]:
+    def _observation_dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
         def __dict_to_key_value_list__(data: Dict[str, Any]) -> List[Dict[str, Any]]:
             return [
                 {"key": key, "value": json.dumps(value)} for key, value in data.items()

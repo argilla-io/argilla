@@ -6,7 +6,7 @@ from typing import Any, Iterable, List, Optional
 
 import pandas as pd
 from rubrix.server.commons.models import TaskType
-from rubrix.server.datasets.model import ObservationDatasetDB
+from rubrix.server.datasets.model import DatasetDB
 
 from .model import CreationDatasetSnapshot, DatasetSnapshotDB
 from .settings import settings
@@ -15,7 +15,7 @@ from .settings import settings
 class SnapshotsDAO:
     """Abstract class for snapshots data access objects definition"""
 
-    def delete(self, dataset: ObservationDatasetDB, id: str) -> None:
+    def delete(self, dataset: DatasetDB, id: str) -> None:
         """
         Deletes the given snapshot id
 
@@ -32,7 +32,7 @@ class SnapshotsDAO:
 
     def create(
         self,
-        dataset: ObservationDatasetDB,
+        dataset: DatasetDB,
         task: TaskType,
         snapshot: CreationDatasetSnapshot,
         data: Iterable[Any],
@@ -55,7 +55,7 @@ class SnapshotsDAO:
         raise NotImplementedError()
 
     def get(
-        self, dataset: ObservationDatasetDB, id: str
+        self, dataset: DatasetDB, id: str
     ) -> Optional[DatasetSnapshotDB]:
         """
 
@@ -75,7 +75,7 @@ class SnapshotsDAO:
         raise NotImplementedError()
 
     def list(
-        self, dataset: ObservationDatasetDB, task: Optional[TaskType] = None
+        self, dataset: DatasetDB, task: Optional[TaskType] = None
     ) -> List[DatasetSnapshotDB]:
         """
         List dataset snapshots
@@ -102,7 +102,7 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
 
     def create(
         self,
-        dataset: ObservationDatasetDB,
+        dataset: DatasetDB,
         task: TaskType,
         snapshot: CreationDatasetSnapshot,
         data: Iterable[Any],
@@ -125,14 +125,14 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
         return DatasetSnapshotDB(id=snapshot.id, uri=path.as_uri())
 
     def get(
-        self, dataset: ObservationDatasetDB, id: str
+        self, dataset: DatasetDB, id: str
     ) -> Optional[DatasetSnapshotDB]:
         path = self.__snapshot_path__(dataset=dataset.name, owner=dataset.owner, id=id)
         if path:
             return DatasetSnapshotDB(id=id, uri=path.as_uri())
 
     def list(
-        self, dataset: ObservationDatasetDB, task: Optional[TaskType] = None
+        self, dataset: DatasetDB, task: Optional[TaskType] = None
     ) -> List[DatasetSnapshotDB]:
         snapshots_path_pattern = os.path.join(
             self.__dataset_snapshots_path__(
@@ -148,7 +148,7 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
             )
         ]
 
-    def delete(self, dataset: ObservationDatasetDB, id: str) -> None:
+    def delete(self, dataset: DatasetDB, id: str) -> None:
         try:
             path = self.__snapshot_path__(dataset.owner, dataset=dataset.name, id=id)
             return os.remove(path)

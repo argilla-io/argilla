@@ -3,7 +3,7 @@ from time import sleep
 
 from fastapi.testclient import TestClient
 from rubrix.server.commons.models import PredictionStatus, SortParam
-from rubrix.server.datasets.model import ObservationDataset
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
 from rubrix.server.text_classification.api import (
     BulkResponse,
@@ -112,7 +112,7 @@ def test_create_records_for_text_classification_with_multi_label():
         ).dict(by_alias=True),
     )
 
-    get_dataset = ObservationDataset.parse_obj(
+    get_dataset = Dataset.parse_obj(
         client.get(f"/api/datasets/{dataset}").json()
     )
     assert get_dataset.tags == {
@@ -175,7 +175,7 @@ def test_create_records_for_text_classification():
 
     response = client.get(f"/api/datasets/{dataset}")
     assert response.status_code == 200
-    created_dataset = ObservationDataset.parse_obj(response.json())
+    created_dataset = Dataset.parse_obj(response.json())
     assert created_dataset.tags == tags
     assert created_dataset.metadata == metadata
 

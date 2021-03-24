@@ -33,10 +33,10 @@ class CreationDatasetRequest(UpdateDatasetRequest):
         the  dataset name
     """
 
-    name: str
+    name: str = Field(regex="^(?!-|_)[a-z0-9-_]+$")
 
 
-class ObservationDatasetDB(CreationDatasetRequest):
+class DatasetDB(CreationDatasetRequest):
     """
     Low level dataset data model
 
@@ -66,7 +66,7 @@ class ObservationDatasetDB(CreationDatasetRequest):
         return self.name
 
 
-class ObservationDataset(ObservationDatasetDB):
+class Dataset(DatasetDB):
     """Dataset used for response output"""
 
     pass

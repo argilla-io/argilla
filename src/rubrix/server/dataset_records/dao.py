@@ -10,7 +10,7 @@ from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
     dataset_records_index,
 )
-from rubrix.server.datasets.model import ObservationDatasetDB
+from rubrix.server.datasets.model import DatasetDB
 from stopwordsiso import stopwords
 
 from . import es_helpers
@@ -278,7 +278,7 @@ class DatasetRecordsDAO:
 
     def add_records(
         self,
-        dataset: ObservationDatasetDB,
+        dataset: DatasetDB,
         records: Iterable[MultiTaskRecordDB],
     ) -> int:
         """
@@ -304,7 +304,7 @@ class DatasetRecordsDAO:
 
     def search_records(
         self,
-        dataset: ObservationDatasetDB,
+        dataset: DatasetDB,
         search: MultiTaskSearch,
         size: int = 100,
         record_from: int = 0,
@@ -368,7 +368,7 @@ class DatasetRecordsDAO:
 
     def scan_dataset(
         self,
-        dataset: ObservationDatasetDB,
+        dataset: DatasetDB,
         search: MultiTaskSearch,
     ) -> Iterable[MultiTaskRecordDB]:
         """

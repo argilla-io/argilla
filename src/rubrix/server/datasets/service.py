@@ -7,8 +7,8 @@ from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperation
 from .dao import DatasetsDAO, create_datasets_dao
 from .model import (
     CreationDatasetRequest,
-    ObservationDataset,
-    ObservationDatasetDB,
+    Dataset,
+    DatasetDB,
     TaskType,
     UpdateDatasetRequest,
 )
@@ -22,7 +22,7 @@ class DatasetsService:
 
     def list(
         self, owners: List[str] = None, task_type: Optional[TaskType] = None
-    ) -> List[ObservationDataset]:
+    ) -> List[Dataset]:
         """
         List datasets for a list of owners and task types
 
@@ -38,7 +38,7 @@ class DatasetsService:
             A list of datasets
         """
         return [
-            ObservationDataset(**obs.dict())
+            Dataset(**obs.dict())
             for obs in self.__dao__.list_datasets(owner_list=owners)
             if task_type is None or task_type == obs.task
         ]
@@ -48,7 +48,7 @@ class DatasetsService:
         dataset: CreationDatasetRequest,
         owner: Optional[str],
         task: TaskType,
-    ) -> ObservationDataset:
+    ) -> Dataset:
         """
         Creates a datasets from given creation request
 
@@ -67,7 +67,7 @@ class DatasetsService:
 
         """
         date_now = datetime.utcnow()
-        db_dataset = ObservationDatasetDB(
+        db_dataset = DatasetDB(
             **dataset.dict(by_alias=True),
             task=task,
             owner=owner,
@@ -75,9 +75,9 @@ class DatasetsService:
             last_updated=date_now
         )
         created_dataset = self.__dao__.create_dataset(db_dataset)
-        return ObservationDataset.parse_obj(created_dataset)
+        return Dataset.parse_obj(created_dataset)
 
-    def find_by_name(self, name: str, owner: Optional[str]) -> ObservationDataset:
+    def find_by_name(self, name: str, owner: Optional[str]) -> Dataset:
         """
         Find a dataset by name
 
@@ -97,12 +97,12 @@ class DatasetsService:
         """
         found = self.__dao__.find_by_name(name, owner=owner)
         if not found:
-            raise EntityNotFoundError(name=name, type=ObservationDataset)
+            raise EntityNotFoundError(name=name, type=Dataset)
 
         if found.owner and owner and found.owner != owner:
             raise ForbiddenOperationError()
 
-        return ObservationDataset(**found.dict()) if found else None
+        return Dataset(**found.dict()) if found else None
 
     def delete(self, name: str, owner: Optional[str]):
         """
@@ -125,7 +125,7 @@ class DatasetsService:
         name: str,
         owner: Optional[str],
         data: UpdateDatasetRequest,
-    ) -> ObservationDataset:
+    ) -> Dataset:
         """
         Updates an existing dataset. Fields in update data are
         merged with store ones. Updates cannot remove data fields.
@@ -146,7 +146,7 @@ class DatasetsService:
 
         found = self.__dao__.find_by_name(name, owner=owner)
         if not found:
-            raise EntityNotFoundError(name=name, type=ObservationDataset)
+            raise EntityNotFoundError(name=name, type=Dataset)
         if found.owner and owner and found.owner != owner:
             raise ForbiddenOperationError()
 
@@ -157,14 +157,14 @@ class DatasetsService:
         )
 
         self.__dao__.update_dataset(updated)
-        return ObservationDataset(**updated.dict(by_alias=True))
+        return Dataset(**updated.dict(by_alias=True))
 
     def upsert(
         self,
         dataset: CreationDatasetRequest,
         owner: Optional[str],
         task: Optional[TaskType] = None,
-    ) -> ObservationDataset:
+    ) -> Dataset:
         """
         Inserts or updates the dataset. Updates only affects to updatable fields
 
