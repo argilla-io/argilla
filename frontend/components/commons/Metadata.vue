@@ -120,7 +120,7 @@ export default {
   pointer-events: all;
   &__title {
     @include font-size(13px);
-    color: palette(black);
+    color: $font-dark-color;
     font-weight: 600;
     margin-top: 0;
     margin-right: 2em;
@@ -158,7 +158,7 @@ export default {
       text-align: left;
       white-space: pre-line;
       &:first-child {
-        color: palette(black);
+        color: $font-dark-color;
         margin-bottom: 0.5em;
       }
     }

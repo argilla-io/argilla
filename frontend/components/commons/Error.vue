@@ -44,8 +44,8 @@ export default {
   $this: &;
   position: relative;
   max-width: 700px;
-  border: 1px solid palette(grey, smooth);
-  color: palette(grey, medium);
+  border: 1px solid $line-smooth-color;
+  color: $neutral-color;
   border-radius: 3px;
   padding: 1.2em 5em 1.2em 1.2em;
   @include font-size(14px);
@@ -78,11 +78,11 @@ export default {
   }
   &--warning {
     margin-top: 5em;
-    background: palette(white);
-    border: 1px solid palette(red);
+    background: $lighter-color;
+    border: 1px solid $error;
     max-width: calc(100% - 320px);
     #{$this}__title {
-      color: palette(red);
+      color: $error;
       font-weight: 600;
       margin-top: 0;
       @include font-size(16px)

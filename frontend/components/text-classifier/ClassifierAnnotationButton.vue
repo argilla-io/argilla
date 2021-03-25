@@ -93,7 +93,7 @@ $annotation-button-touch-size: 48px;
   }
   &.label-button {
     margin: auto auto 20px auto;
-    color: palette(grey, dark);
+    color: $darker-color;
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
@@ -116,7 +116,7 @@ $annotation-button-touch-size: 48px;
       @include font-size(13px);
       font-weight: 600;
       overflow: hidden;
-      color: palette(grey, dark);
+      color: $darker-color;
     }
     &.active {
       .button {
@@ -170,7 +170,6 @@ $annotation-button-touch-size: 48px;
         display: inline-block;
         white-space: nowrap;
         vertical-align: top;
-        // color: palette(grey, medium);
       }
       &__info {
         margin-right: 0;
@@ -179,7 +178,7 @@ $annotation-button-touch-size: 48px;
         transition: all 0.3s ease;
       }
       &__confidence {
-        width: 40px; // color: $lighter-color;
+        width: 40px;
         @include font-size(12px);
         display: inline-block;
         text-align: center;

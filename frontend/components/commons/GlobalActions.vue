@@ -265,7 +265,7 @@ export default {
     }
   }
   &__text {
-    color: palette(grey, dark);
+    color: $darker-color;
     font-weight: normal;
   }
   &--disabled {

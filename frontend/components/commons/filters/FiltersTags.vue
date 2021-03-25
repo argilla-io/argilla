@@ -135,8 +135,8 @@ export default {
   display: block;
   padding: 10px 40px 0 8px;
   border-radius: 2px;
-  border: 1px solid palette(grey, light);
-  background: palette(grey, light);
+  border: 1px solid $line-light-color;
+  background: $line-light-color;
   overflow: hidden;
   span {
     margin-right: 3px;
@@ -157,10 +157,10 @@ export default {
   border-radius: 0;
   line-height: 1;
   min-height: 41px;
-  background: palette(white);
-  border-right: 1px solid palette(grey, lines);
-  border-bottom: 1px solid palette(grey, lines);
-  color: palette(purple);
+  background: $lighter-color;
+  border-right: 1px solid $line-light-color;
+  border-bottom: 1px solid $line-light-color;
+  color: $secondary-color;
   float: left;
   display: flex;
   align-items: center;
@@ -178,7 +178,7 @@ export default {
     text-transform: uppercase;
   }
   &--all {
-    color: palette(orange);
+    color: $primary-color;
   }
 }
 
@@ -198,7 +198,7 @@ export default {
 .tag-icon:after {
   content: "✕";
   font-weight: bold;
-  color: palette(orange);
+  color: $primary-color;
   font-size: 14px;
 }
 </style>

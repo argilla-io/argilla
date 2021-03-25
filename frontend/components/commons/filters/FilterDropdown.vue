@@ -56,7 +56,7 @@ export default {
     border-radius: 0;
     &:after {
       content: "";
-      border-color: palette(grey, dark);
+      border-color: $darker-color;
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
