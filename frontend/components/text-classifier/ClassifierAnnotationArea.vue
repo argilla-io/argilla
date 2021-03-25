@@ -39,6 +39,7 @@
           width="10"
           height="10"
           color="#9b9b9b"
+          @click="searchText = ''"
         ></svgicon>
         <ClassifierAnnotationButton
           v-for="label in dropdownSortedLabels"
