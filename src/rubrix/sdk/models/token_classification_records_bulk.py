@@ -1,40 +1,37 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.token_classification_record import TokenClassificationRecord
+from ..models.token_classification_records_bulk_metadata import (
+    TokenClassificationRecordsBulkMetadata,
+)
+from ..models.token_classification_records_bulk_tags import (
+    TokenClassificationRecordsBulkTags,
+)
 from ..types import UNSET, Unset
 
-from ..models.token_classification_records_bulk_metadata import TokenClassificationRecordsBulkMetadata
-from typing import Union
-from ..models.token_classification_records_bulk_tags import TokenClassificationRecordsBulkTags
-from typing import Dict
-from typing import cast, List
-from ..models.token_classification_record import TokenClassificationRecord
-from ..types import UNSET, Unset
-from typing import cast
+T = TypeVar("T", bound="TokenClassificationRecordsBulk")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationRecordsBulk:
-    """ Class for log records in bulk mode """
+    """ A API backward compatibility data model for bulk records endpoint """
 
-    name: str
     records: List[TokenClassificationRecord]
+    name: str
     tags: Union[TokenClassificationRecordsBulkTags, Unset] = UNSET
     metadata: Union[TokenClassificationRecordsBulkMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        name = self.name
         records = []
         for records_item_data in self.records:
             records_item = records_item_data.to_dict()
 
             records.append(records_item)
 
+        name = self.name
         tags: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags.to_dict()
@@ -46,7 +43,10 @@ class TokenClassificationRecordsBulk:
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"name": name, "records": records,}
+            {
+                "records": records,
+                "name": name,
+            }
         )
         if tags is not UNSET:
             field_dict["tags"] = tags
@@ -55,11 +55,9 @@ class TokenClassificationRecordsBulk:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationRecordsBulk":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        name = d.pop("name")
-
         records = []
         _records = d.pop("records")
         for records_item_data in _records:
@@ -67,18 +65,23 @@ class TokenClassificationRecordsBulk:
 
             records.append(records_item)
 
+        name = d.pop("name")
+
         tags: Union[TokenClassificationRecordsBulkTags, Unset] = UNSET
         _tags = d.pop("tags", UNSET)
-        if _tags is not None and not isinstance(_tags, Unset):
-            tags = TokenClassificationRecordsBulkTags.from_dict(cast(Dict[str, Any], _tags))
+        if not isinstance(_tags, Unset):
+            tags = TokenClassificationRecordsBulkTags.from_dict(_tags)
 
         metadata: Union[TokenClassificationRecordsBulkMetadata, Unset] = UNSET
         _metadata = d.pop("metadata", UNSET)
-        if _metadata is not None and not isinstance(_metadata, Unset):
-            metadata = TokenClassificationRecordsBulkMetadata.from_dict(cast(Dict[str, Any], _metadata))
+        if not isinstance(_metadata, Unset):
+            metadata = TokenClassificationRecordsBulkMetadata.from_dict(_metadata)
 
-        token_classification_records_bulk = TokenClassificationRecordsBulk(
-            name=name, records=records, tags=tags, metadata=metadata,
+        token_classification_records_bulk = cls(
+            records=records,
+            name=name,
+            tags=tags,
+            metadata=metadata,
         )
 
         token_classification_records_bulk.additional_properties = d

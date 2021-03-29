@@ -1,46 +1,45 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
+T = TypeVar("T", bound="ConfidenceRange")
 
 
 @attr.s(auto_attribs=True)
 class ConfidenceRange:
-    """  """
+    """ Confidence range filter """
 
-    range_from: Union[Unset, float] = 0.0
-    range_to: Union[Unset, float] = 1.0
+    from_: Union[Unset, float] = 0.0
+    to: Union[Unset, float] = 1.0
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        range_from = self.range_from
-        range_to = self.range_to
+        from_ = self.from_
+        to = self.to
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
-        if range_from is not UNSET:
-            field_dict["range_from"] = range_from
-        if range_to is not UNSET:
-            field_dict["range_to"] = range_to
+        if from_ is not UNSET:
+            field_dict["from"] = from_
+        if to is not UNSET:
+            field_dict["to"] = to
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ConfidenceRange":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        range_from = d.pop("range_from", UNSET)
+        from_ = d.pop("from", UNSET)
 
-        range_to = d.pop("range_to", UNSET)
+        to = d.pop("to", UNSET)
 
-        confidence_range = ConfidenceRange(range_from=range_from, range_to=range_to,)
+        confidence_range = cls(
+            from_=from_,
+            to=to,
+        )
 
         confidence_range.additional_properties = d
         return confidence_range

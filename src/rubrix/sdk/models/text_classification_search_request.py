@@ -1,27 +1,29 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.sort_param import SortParam
+from ..models.text_classification_query import TextClassificationQuery
 from ..types import UNSET, Unset
 
-from typing import Union
-from ..models.text_classification_query import TextClassificationQuery
-from typing import Dict
-from typing import cast, List
-from ..types import UNSET, Unset
-from ..models.text_classification_sort_param import TextClassificationSortParam
-from typing import cast
+T = TypeVar("T", bound="TextClassificationSearchRequest")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationSearchRequest:
-    """ Base search query request """
+    """API Search request
+
+    Attributes:
+    -----------
+
+    query: TextClassificationQuery
+        The search query configuration
+
+    sort: List[SortParam]
+        The sort params to use for record results"""
 
     query: Union[TextClassificationQuery, Unset] = UNSET
-    sort: Union[Unset, List[TextClassificationSortParam]] = UNSET
+    sort: Union[Unset, List[SortParam]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -47,22 +49,25 @@ class TextClassificationSearchRequest:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationSearchRequest":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         query: Union[TextClassificationQuery, Unset] = UNSET
         _query = d.pop("query", UNSET)
-        if _query is not None and not isinstance(_query, Unset):
-            query = TextClassificationQuery.from_dict(cast(Dict[str, Any], _query))
+        if not isinstance(_query, Unset):
+            query = TextClassificationQuery.from_dict(_query)
 
         sort = []
         _sort = d.pop("sort", UNSET)
         for sort_item_data in _sort or []:
-            sort_item = TextClassificationSortParam.from_dict(sort_item_data)
+            sort_item = SortParam.from_dict(sort_item_data)
 
             sort.append(sort_item)
 
-        text_classification_search_request = TextClassificationSearchRequest(query=query, sort=sort,)
+        text_classification_search_request = cls(
+            query=query,
+            sort=sort,
+        )
 
         text_classification_search_request.additional_properties = d
         return text_classification_search_request

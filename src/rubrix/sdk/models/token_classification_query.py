@@ -1,35 +1,41 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
+from ..models.prediction_status import PredictionStatus
+from ..models.task_status import TaskStatus
+from ..models.token_classification_query_metadata import (
+    TokenClassificationQueryMetadata,
+)
+from ..models.token_classification_query_query_text import (
+    TokenClassificationQueryQueryText,
+)
 from ..types import UNSET, Unset
 
-from typing import Optional
-from typing import Union
-from typing import Dict
-from typing import cast, List
-from ..models.prediction_status import PredictionStatus
-from ..models.record_status import RecordStatus
-from ..models.token_classification_query_query_metadata import TokenClassificationQueryQueryMetadata
-from ..types import UNSET, Unset
-from typing import cast
+T = TypeVar("T", bound="TokenClassificationQuery")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationQuery:
-    """  """
+    """Filters for token classification API
+
+    Attributes:
+    -----------
+
+    text_query: Union[str, Dict[str, str]]
+        Text query over input tokens
+
+    metadata: Optional[Dict[str, Union[str, List[str]]]]
+        Text query over metadata fields. Default=None"""
 
     predicted_as: Union[Unset, List[str]] = UNSET
     annotated_as: Union[Unset, List[str]] = UNSET
     annotated_by: Union[Unset, List[str]] = UNSET
     predicted_by: Union[Unset, List[str]] = UNSET
-    status: Union[Unset, List[RecordStatus]] = UNSET
+    status: Union[Unset, List[TaskStatus]] = UNSET
     predicted: Union[Unset, PredictionStatus] = UNSET
-    query_metadata: Union[Optional[TokenClassificationQueryQueryMetadata], Unset] = UNSET
-    query_text: Union[Unset, str] = UNSET
+    query_text: Union[Unset, str, TokenClassificationQueryQueryText] = UNSET
+    metadata: Union[TokenClassificationQueryMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -61,11 +67,20 @@ class TokenClassificationQuery:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted
 
-        query_metadata: Union[None, Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.query_metadata, Unset):
-            query_metadata = self.query_metadata.to_dict() if self.query_metadata else None
+        query_text: Union[Unset, str, TokenClassificationQueryQueryText]
+        if isinstance(self.query_text, Unset):
+            query_text = UNSET
+        elif isinstance(self.query_text, TokenClassificationQueryQueryText):
+            query_text = UNSET
+            if not isinstance(self.query_text, Unset):
+                query_text = self.query_text.to_dict()
 
-        query_text = self.query_text
+        else:
+            query_text = self.query_text
+
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -82,15 +97,15 @@ class TokenClassificationQuery:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if query_metadata is not UNSET:
-            field_dict["query_metadata"] = query_metadata
         if query_text is not UNSET:
             field_dict["query_text"] = query_text
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationQuery":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         predicted_as = cast(List[str], d.pop("predicted_as", UNSET))
 
@@ -103,31 +118,49 @@ class TokenClassificationQuery:
         status = []
         _status = d.pop("status", UNSET)
         for status_item_data in _status or []:
-            status_item = RecordStatus(status_item_data)
+            status_item = TaskStatus(status_item_data)
 
             status.append(status_item)
 
-        predicted = None
+        predicted: Union[Unset, PredictionStatus] = UNSET
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance(_predicted, Unset):
+        if not isinstance(_predicted, Unset):
             predicted = PredictionStatus(_predicted)
 
-        query_metadata = None
-        _query_metadata = d.pop("query_metadata", UNSET)
-        if _query_metadata is not None and not isinstance(_query_metadata, Unset):
-            query_metadata = TokenClassificationQueryQueryMetadata.from_dict(cast(Dict[str, Any], _query_metadata))
+        def _parse_query_text(
+            data: Any,
+        ) -> Union[Unset, str, TokenClassificationQueryQueryText]:
+            data = None if isinstance(data, Unset) else data
+            query_text: Union[Unset, str, TokenClassificationQueryQueryText]
+            try:
+                query_text = UNSET
+                _query_text = data
+                if not isinstance(_query_text, Unset):
+                    query_text = TokenClassificationQueryQueryText.from_dict(
+                        _query_text
+                    )
 
-        query_text = d.pop("query_text", UNSET)
+                return query_text
+            except:  # noqa: E722
+                pass
+            return cast(Union[Unset, str, TokenClassificationQueryQueryText], data)
 
-        token_classification_query = TokenClassificationQuery(
+        query_text = _parse_query_text(d.pop("query_text", UNSET))
+
+        metadata: Union[TokenClassificationQueryMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TokenClassificationQueryMetadata.from_dict(_metadata)
+
+        token_classification_query = cls(
             predicted_as=predicted_as,
             annotated_as=annotated_as,
             annotated_by=annotated_by,
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
-            query_metadata=query_metadata,
             query_text=query_text,
+            metadata=metadata,
         )
 
         token_classification_query.additional_properties = d

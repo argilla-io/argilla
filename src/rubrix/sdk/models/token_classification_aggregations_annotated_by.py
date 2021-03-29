@@ -1,11 +1,8 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
+T = TypeVar("T", bound="TokenClassificationAggregationsAnnotatedBy")
 
 
 @attr.s(auto_attribs=True)
@@ -22,10 +19,10 @@ class TokenClassificationAggregationsAnnotatedBy:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationAggregationsAnnotatedBy":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        token_classification_aggregations_annotated_by = TokenClassificationAggregationsAnnotatedBy()
+        token_classification_aggregations_annotated_by = cls()
 
         token_classification_aggregations_annotated_by.additional_properties = d
         return token_classification_aggregations_annotated_by

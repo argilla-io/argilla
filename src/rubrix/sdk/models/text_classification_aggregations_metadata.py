@@ -1,26 +1,21 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
-
-from typing import Dict
-from typing import cast
 from ..models.text_classification_aggregations_metadata_additional_property import (
     TextClassificationAggregationsMetadataAdditionalProperty,
 )
+
+T = TypeVar("T", bound="TextClassificationAggregationsMetadata")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationAggregationsMetadata:
     """  """
 
-    additional_properties: Dict[str, TextClassificationAggregationsMetadataAdditionalProperty] = attr.ib(
-        init=False, factory=dict
-    )
+    additional_properties: Dict[
+        str, TextClassificationAggregationsMetadataAdditionalProperty
+    ] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
 
@@ -32,28 +27,38 @@ class TextClassificationAggregationsMetadata:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationAggregationsMetadata":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        text_classification_aggregations_metadata = TextClassificationAggregationsMetadata()
+        text_classification_aggregations_metadata = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
-            additional_property = TextClassificationAggregationsMetadataAdditionalProperty.from_dict(prop_dict)
+            additional_property = (
+                TextClassificationAggregationsMetadataAdditionalProperty.from_dict(
+                    prop_dict
+                )
+            )
 
             additional_properties[prop_name] = additional_property
 
-        text_classification_aggregations_metadata.additional_properties = additional_properties
+        text_classification_aggregations_metadata.additional_properties = (
+            additional_properties
+        )
         return text_classification_aggregations_metadata
 
     @property
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> TextClassificationAggregationsMetadataAdditionalProperty:
+    def __getitem__(
+        self, key: str
+    ) -> TextClassificationAggregationsMetadataAdditionalProperty:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: TextClassificationAggregationsMetadataAdditionalProperty) -> None:
+    def __setitem__(
+        self, key: str, value: TextClassificationAggregationsMetadataAdditionalProperty
+    ) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

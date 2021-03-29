@@ -1,40 +1,43 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.text_classification_record import TextClassificationRecord
+from ..models.text_classification_records_bulk_metadata import (
+    TextClassificationRecordsBulkMetadata,
+)
+from ..models.text_classification_records_bulk_tags import (
+    TextClassificationRecordsBulkTags,
+)
 from ..types import UNSET, Unset
 
-from typing import Union
-from ..models.text_classification_record import TextClassificationRecord
-from typing import Dict
-from typing import cast, List
-from ..models.text_classification_records_bulk_metadata import TextClassificationRecordsBulkMetadata
-from ..models.text_classification_records_bulk_tags import TextClassificationRecordsBulkTags
-from ..types import UNSET, Unset
-from typing import cast
+T = TypeVar("T", bound="TextClassificationRecordsBulk")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationRecordsBulk:
-    """ Class for log records in bulk mode """
+    """API backward compatibility data model for bulk record old endpoint
 
-    name: str
+    Attributes:
+    -----------
+
+    name:str
+        The dataset name"""
+
     records: List[TextClassificationRecord]
+    name: str
     tags: Union[TextClassificationRecordsBulkTags, Unset] = UNSET
     metadata: Union[TextClassificationRecordsBulkMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        name = self.name
         records = []
         for records_item_data in self.records:
             records_item = records_item_data.to_dict()
 
             records.append(records_item)
 
+        name = self.name
         tags: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags.to_dict()
@@ -46,7 +49,10 @@ class TextClassificationRecordsBulk:
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"name": name, "records": records,}
+            {
+                "records": records,
+                "name": name,
+            }
         )
         if tags is not UNSET:
             field_dict["tags"] = tags
@@ -55,11 +61,9 @@ class TextClassificationRecordsBulk:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationRecordsBulk":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        name = d.pop("name")
-
         records = []
         _records = d.pop("records")
         for records_item_data in _records:
@@ -67,18 +71,23 @@ class TextClassificationRecordsBulk:
 
             records.append(records_item)
 
+        name = d.pop("name")
+
         tags: Union[TextClassificationRecordsBulkTags, Unset] = UNSET
         _tags = d.pop("tags", UNSET)
-        if _tags is not None and not isinstance(_tags, Unset):
-            tags = TextClassificationRecordsBulkTags.from_dict(cast(Dict[str, Any], _tags))
+        if not isinstance(_tags, Unset):
+            tags = TextClassificationRecordsBulkTags.from_dict(_tags)
 
         metadata: Union[TextClassificationRecordsBulkMetadata, Unset] = UNSET
         _metadata = d.pop("metadata", UNSET)
-        if _metadata is not None and not isinstance(_metadata, Unset):
-            metadata = TextClassificationRecordsBulkMetadata.from_dict(cast(Dict[str, Any], _metadata))
+        if not isinstance(_metadata, Unset):
+            metadata = TextClassificationRecordsBulkMetadata.from_dict(_metadata)
 
-        text_classification_records_bulk = TextClassificationRecordsBulk(
-            name=name, records=records, tags=tags, metadata=metadata,
+        text_classification_records_bulk = cls(
+            records=records,
+            name=name,
+            tags=tags,
+            metadata=metadata,
         )
 
         text_classification_records_bulk.additional_properties = d

@@ -1,27 +1,29 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.sort_param import SortParam
+from ..models.token_classification_query import TokenClassificationQuery
 from ..types import UNSET, Unset
 
-from typing import Union
-from typing import Dict
-from ..models.token_classification_sort_param import TokenClassificationSortParam
-from typing import cast, List
-from ..types import UNSET, Unset
-from ..models.token_classification_query import TokenClassificationQuery
-from typing import cast
+T = TypeVar("T", bound="TokenClassificationSearchRequest")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationSearchRequest:
-    """ Base search query request """
+    """API Search request
+
+    Attributes:
+    -----------
+
+    query: TokenClassificationQuery
+        The search query configuration
+
+    sort: List[SortParam]
+        The sort params to use for record results"""
 
     query: Union[TokenClassificationQuery, Unset] = UNSET
-    sort: Union[Unset, List[TokenClassificationSortParam]] = UNSET
+    sort: Union[Unset, List[SortParam]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -47,22 +49,25 @@ class TokenClassificationSearchRequest:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationSearchRequest":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         query: Union[TokenClassificationQuery, Unset] = UNSET
         _query = d.pop("query", UNSET)
-        if _query is not None and not isinstance(_query, Unset):
-            query = TokenClassificationQuery.from_dict(cast(Dict[str, Any], _query))
+        if not isinstance(_query, Unset):
+            query = TokenClassificationQuery.from_dict(_query)
 
         sort = []
         _sort = d.pop("sort", UNSET)
         for sort_item_data in _sort or []:
-            sort_item = TokenClassificationSortParam.from_dict(sort_item_data)
+            sort_item = SortParam.from_dict(sort_item_data)
 
             sort.append(sort_item)
 
-        token_classification_search_request = TokenClassificationSearchRequest(query=query, sort=sort,)
+        token_classification_search_request = cls(
+            query=query,
+            sort=sort,
+        )
 
         token_classification_search_request.additional_properties = d
         return token_classification_search_request

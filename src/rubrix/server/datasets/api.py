@@ -16,6 +16,7 @@ router = APIRouter(
 @router.get(
     "/",
     response_model=List[Dataset],
+    response_model_exclude_none=True,
     operation_id="list_datasets",
 )
 def list_datasets(
@@ -42,6 +43,7 @@ def list_datasets(
 @router.get(
     "/{name}",
     response_model=Dataset,
+    response_model_exclude_none=True,
     operation_id="get_dataset",
 )
 def get_dataset(
@@ -72,7 +74,10 @@ def get_dataset(
 
 
 @router.patch(
-    "/{name}", operation_id="update_dataset", response_model=Dataset
+    "/{name}",
+    operation_id="update_dataset",
+    response_model=Dataset,
+    response_model_exclude_none=True,
 )
 def update_dataset(
     name: str,
@@ -105,7 +110,10 @@ def update_dataset(
     return service.update(name, data=update_request, owner=current_user.current_group)
 
 
-@router.delete("/{name}", operation_id="delete_dataset")
+@router.delete(
+    "/{name}",
+    operation_id="delete_dataset",
+)
 def delete_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),

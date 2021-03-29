@@ -1,53 +1,52 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
-from attr import asdict
 
-from ...client import AuthenticatedClient, Client
-from ...types import Response
-
-from ...models.text_classification_results import TextClassificationResults
-from ...types import UNSET, Unset
-from typing import Union
-from ...models.text_classification_search_request import TextClassificationSearchRequest
-from typing import Dict
+from ...client import AuthenticatedClient
 from ...models.http_validation_error import HTTPValidationError
-from typing import cast
+from ...models.text_classification_search_request import TextClassificationSearchRequest
+from ...models.text_classification_search_results import TextClassificationSearchResults
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     client: AuthenticatedClient,
-    dataset_id: str,
+    name: str,
     json_body: TextClassificationSearchRequest,
-    limit: Union[Unset, int] = 500,
+    limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
 ) -> Dict[str, Any]:
-    url = "{}/api/classification/datasets/{dataset_id}/:search".format(client.base_url, dataset_id=dataset_id)
+    url = "{}/api/datasets/{name}/TextClassification/:search".format(
+        client.base_url, name=name
+    )
 
     headers: Dict[str, Any] = client.get_headers()
+    cookies: Dict[str, Any] = client.get_cookies()
 
-    params: Dict[str, Any] = {}
-    if limit is not UNSET:
-        params["limit"] = limit
-    if from_ is not UNSET:
-        params["from"] = from_
+    params: Dict[str, Any] = {
+        "limit": limit,
+        "from": from_,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     json_json_body = json_body.to_dict()
 
     return {
         "url": url,
         "headers": headers,
-        "cookies": client.get_cookies(),
+        "cookies": cookies,
         "timeout": client.get_timeout(),
         "json": json_json_body,
         "params": params,
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[Union[TextClassificationResults, HTTPValidationError]]:
+def _parse_response(
+    *, response: httpx.Response
+) -> Optional[Union[TextClassificationSearchResults, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = TextClassificationResults.from_dict(response.json())
+        response_200 = TextClassificationSearchResults.from_dict(response.json())
 
         return response_200
     if response.status_code == 422:
@@ -57,7 +56,9 @@ def _parse_response(*, response: httpx.Response) -> Optional[Union[TextClassific
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[TextClassificationResults, HTTPValidationError]]:
+def _build_response(
+    *, response: httpx.Response
+) -> Response[Union[TextClassificationSearchResults, HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -69,14 +70,22 @@ def _build_response(*, response: httpx.Response) -> Response[Union[TextClassific
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    dataset_id: str,
+    name: str,
     json_body: TextClassificationSearchRequest,
-    limit: Union[Unset, int] = 500,
+    limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Response[Union[TextClassificationResults, HTTPValidationError]]:
-    kwargs = _get_kwargs(client=client, dataset_id=dataset_id, json_body=json_body, limit=limit, from_=from_,)
+) -> Response[Union[TextClassificationSearchResults, HTTPValidationError]]:
+    kwargs = _get_kwargs(
+        client=client,
+        name=name,
+        json_body=json_body,
+        limit=limit,
+        from_=from_,
+    )
 
-    response = httpx.post(**kwargs,)
+    response = httpx.post(
+        **kwargs,
+    )
 
     return _build_response(response=response)
 
@@ -84,25 +93,56 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-    dataset_id: str,
+    name: str,
     json_body: TextClassificationSearchRequest,
-    limit: Union[Unset, int] = 500,
+    limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Optional[Union[TextClassificationResults, HTTPValidationError]]:
-    """  """
+) -> Optional[Union[TextClassificationSearchResults, HTTPValidationError]]:
+    """Searches data from dataset
 
-    return sync_detailed(client=client, dataset_id=dataset_id, json_body=json_body, limit=limit, from_=from_,).parsed
+    Parameters
+    ----------
+    name:
+        The dataset name
+    search:
+        THe search query request
+    pagination:
+        The pagination params
+    service:
+        The dataset records service
+    datasets:
+        The dataset service
+    current_user:
+        The current request user
+
+    Returns
+    -------
+        The search results data"""
+
+    return sync_detailed(
+        client=client,
+        name=name,
+        json_body=json_body,
+        limit=limit,
+        from_=from_,
+    ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    dataset_id: str,
+    name: str,
     json_body: TextClassificationSearchRequest,
-    limit: Union[Unset, int] = 500,
+    limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Response[Union[TextClassificationResults, HTTPValidationError]]:
-    kwargs = _get_kwargs(client=client, dataset_id=dataset_id, json_body=json_body, limit=limit, from_=from_,)
+) -> Response[Union[TextClassificationSearchResults, HTTPValidationError]]:
+    kwargs = _get_kwargs(
+        client=client,
+        name=name,
+        json_body=json_body,
+        limit=limit,
+        from_=from_,
+    )
 
     async with httpx.AsyncClient() as _client:
         response = await _client.post(**kwargs)
@@ -113,13 +153,38 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    dataset_id: str,
+    name: str,
     json_body: TextClassificationSearchRequest,
-    limit: Union[Unset, int] = 500,
+    limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Optional[Union[TextClassificationResults, HTTPValidationError]]:
-    """  """
+) -> Optional[Union[TextClassificationSearchResults, HTTPValidationError]]:
+    """Searches data from dataset
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    search:
+        THe search query request
+    pagination:
+        The pagination params
+    service:
+        The dataset records service
+    datasets:
+        The dataset service
+    current_user:
+        The current request user
+
+    Returns
+    -------
+        The search results data"""
 
     return (
-        await asyncio_detailed(client=client, dataset_id=dataset_id, json_body=json_body, limit=limit, from_=from_,)
+        await asyncio_detailed(
+            client=client,
+            name=name,
+            json_body=json_body,
+            limit=limit,
+            from_=from_,
+        )
     ).parsed

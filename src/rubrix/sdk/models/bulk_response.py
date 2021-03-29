@@ -1,19 +1,25 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
+T = TypeVar("T", bound="BulkResponse")
 
 
 @attr.s(auto_attribs=True)
 class BulkResponse:
-    """  """
+    """Data info for bulk results
+
+    Attributes
+    ----------
+
+    dataset:
+        The dataset name
+    processed:
+        Number of records in bulk
+    failed:
+        Number of failed records"""
 
     dataset: str
     processed: int
@@ -28,15 +34,18 @@ class BulkResponse:
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"dataset": dataset, "processed": processed,}
+            {
+                "dataset": dataset,
+                "processed": processed,
+            }
         )
         if failed is not UNSET:
             field_dict["failed"] = failed
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "BulkResponse":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         dataset = d.pop("dataset")
 
@@ -44,7 +53,11 @@ class BulkResponse:
 
         failed = d.pop("failed", UNSET)
 
-        bulk_response = BulkResponse(dataset=dataset, processed=processed, failed=failed,)
+        bulk_response = cls(
+            dataset=dataset,
+            processed=processed,
+            failed=failed,
+        )
 
         bulk_response.additional_properties = d
         return bulk_response

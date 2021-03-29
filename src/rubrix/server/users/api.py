@@ -9,6 +9,7 @@ router = APIRouter(tags=["users"])
 @router.get(
     "/me",
     response_model=User,
+    response_model_exclude_none=True,
     operation_id="whoami",
 )
 async def whoami(current_user: User = Depends(get_current_active_user)):

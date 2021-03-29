@@ -1,61 +1,46 @@
-from typing import Any, Dict
-
-from typing import List
-
+import datetime
+from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
-
-from ..types import UNSET, Unset
-
-from typing import Optional
-from typing import Union
-from typing import Dict
-from ..models.token_classification_annotation import TokenClassificationAnnotation
-from typing import cast, List
-import datetime
-from ..models.record_status import RecordStatus
-from ..models.token_classification_record_metadata import TokenClassificationRecordMetadata
-from ..types import UNSET, Unset
 from dateutil.parser import isoparse
-from typing import cast
+
+from ..models.task_status import TaskStatus
+from ..models.token_classification_annotation import TokenClassificationAnnotation
+from ..models.token_classification_record_metadata import (
+    TokenClassificationRecordMetadata,
+)
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="TokenClassificationRecord")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationRecord:
-    """ Data record for token classification
+    """The main token classification task record
 
-Attributes:
------------
+    Attributes:
+    -----------
 
-tokens: List[str]
-    the tokenized text for entity annotation
-
-prediction: TokenClassificationAnnotation
-    the predicted entities for tokens
-
-annotation: Optional[TokenClassificationAnnotation]
-    the real annotation. This annotation should be generated
-    by some human-supervised process. """
+    last_updated: datetime
+        Last record update (read only)
+    predicted: Optional[PredictionStatus]
+        The record prediction status. Optional"""
 
     tokens: List[str]
-    id: Union[Unset, str] = UNSET
-    metadata: Union[TokenClassificationRecordMetadata, Unset] = UNSET
-    status: Union[Unset, RecordStatus] = UNSET
+    status: Union[Unset, TaskStatus] = UNSET
     prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
     annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
+    id: Union[Unset, int, str] = UNSET
+    metadata: Union[TokenClassificationRecordMetadata, Unset] = UNSET
     event_timestamp: Union[Unset, datetime.datetime] = UNSET
-    raw_text: Union[Unset, Optional[str]] = UNSET
+    raw_text: Union[Unset, str] = UNSET
+    last_updated: Union[Unset, datetime.datetime] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         tokens = self.tokens
 
-        id = self.id
-        metadata: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.metadata, Unset):
-            metadata = self.metadata.to_dict()
-
-        status: Union[Unset, RecordStatus] = UNSET
+        status: Union[Unset, TaskStatus] = UNSET
         if not isinstance(self.status, Unset):
             status = self.status
 
@@ -67,77 +52,105 @@ annotation: Optional[TokenClassificationAnnotation]
         if not isinstance(self.annotation, Unset):
             annotation = self.annotation.to_dict()
 
+        id: Union[Unset, int, str]
+        if isinstance(self.id, Unset):
+            id = UNSET
+        else:
+            id = self.id
+
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
+
         event_timestamp: Union[Unset, str] = UNSET
-        if self.event_timestamp is not None and not isinstance(self.event_timestamp, Unset):
+        if not isinstance(self.event_timestamp, Unset):
             event_timestamp = self.event_timestamp.isoformat()
 
         raw_text = self.raw_text
+        last_updated: Union[Unset, str] = UNSET
+        if not isinstance(self.last_updated, Unset):
+            last_updated = self.last_updated.isoformat()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"tokens": tokens,}
+            {
+                "tokens": tokens,
+            }
         )
-        if id is not UNSET:
-            field_dict["id"] = id
-        if metadata is not UNSET:
-            field_dict["metadata"] = metadata
         if status is not UNSET:
             field_dict["status"] = status
         if prediction is not UNSET:
             field_dict["prediction"] = prediction
         if annotation is not UNSET:
             field_dict["annotation"] = annotation
+        if id is not UNSET:
+            field_dict["id"] = id
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
         if event_timestamp is not UNSET:
             field_dict["event_timestamp"] = event_timestamp
         if raw_text is not UNSET:
             field_dict["raw_text"] = raw_text
+        if last_updated is not UNSET:
+            field_dict["last_updated"] = last_updated
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationRecord":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         tokens = cast(List[str], d.pop("tokens"))
 
-        id = d.pop("id", UNSET)
-
-        metadata: Union[TokenClassificationRecordMetadata, Unset] = UNSET
-        _metadata = d.pop("metadata", UNSET)
-        if _metadata is not None and not isinstance(_metadata, Unset):
-            metadata = TokenClassificationRecordMetadata.from_dict(cast(Dict[str, Any], _metadata))
-
-        status = None
+        status: Union[Unset, TaskStatus] = UNSET
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance(_status, Unset):
-            status = RecordStatus(_status)
+        if not isinstance(_status, Unset):
+            status = TaskStatus(_status)
 
         prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
         _prediction = d.pop("prediction", UNSET)
-        if _prediction is not None and not isinstance(_prediction, Unset):
-            prediction = TokenClassificationAnnotation.from_dict(cast(Dict[str, Any], _prediction))
+        if not isinstance(_prediction, Unset):
+            prediction = TokenClassificationAnnotation.from_dict(_prediction)
 
         annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
         _annotation = d.pop("annotation", UNSET)
-        if _annotation is not None and not isinstance(_annotation, Unset):
-            annotation = TokenClassificationAnnotation.from_dict(cast(Dict[str, Any], _annotation))
+        if not isinstance(_annotation, Unset):
+            annotation = TokenClassificationAnnotation.from_dict(_annotation)
 
-        event_timestamp = None
+        def _parse_id(data: Any) -> Union[Unset, int, str]:
+            data = None if isinstance(data, Unset) else data
+            id: Union[Unset, int, str]
+            return cast(Union[Unset, int, str], data)
+
+        id = _parse_id(d.pop("id", UNSET))
+
+        metadata: Union[TokenClassificationRecordMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TokenClassificationRecordMetadata.from_dict(_metadata)
+
+        event_timestamp: Union[Unset, datetime.datetime] = UNSET
         _event_timestamp = d.pop("event_timestamp", UNSET)
-        if _event_timestamp is not None and not isinstance(_event_timestamp, Unset):
-            event_timestamp = isoparse(cast(str, _event_timestamp))
+        if not isinstance(_event_timestamp, Unset):
+            event_timestamp = isoparse(_event_timestamp)
 
         raw_text = d.pop("raw_text", UNSET)
 
-        token_classification_record = TokenClassificationRecord(
+        last_updated: Union[Unset, datetime.datetime] = UNSET
+        _last_updated = d.pop("last_updated", UNSET)
+        if not isinstance(_last_updated, Unset):
+            last_updated = isoparse(_last_updated)
+
+        token_classification_record = cls(
             tokens=tokens,
-            id=id,
-            metadata=metadata,
             status=status,
             prediction=prediction,
             annotation=annotation,
+            id=id,
+            metadata=metadata,
             event_timestamp=event_timestamp,
             raw_text=raw_text,
+            last_updated=last_updated,
         )
 
         token_classification_record.additional_properties = d

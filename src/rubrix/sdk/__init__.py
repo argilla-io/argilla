@@ -1,2 +1,2 @@
-""" A client library for accessing biome.observe """
+""" A client library for accessing Rubrix """
 from .client import AuthenticatedClient, Client

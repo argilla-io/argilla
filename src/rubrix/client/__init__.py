@@ -131,16 +131,16 @@ class RubrixClient:
 
         # Divided into Text and Token Classification Bulks
         if record_type is TextClassificationRecord:
-            BulkClass = TextClassificationRecordsBulk
+            BulkClass = TextClassificationBulkData
             bulk_records_function = text_classification_bulk.sync_detailed
-            tags = TextClassificationRecordsBulkTags.from_dict(tags)
-            metadata = TextClassificationRecordsBulkMetadata.from_dict(metadata)
+            tags = TextClassificationBulkDataTags.from_dict(tags)
+            metadata = TextClassificationBulkDataMetadata.from_dict(metadata)
 
         elif record_type is TokenClassificationRecord:
-            BulkClass = TokenClassificationRecordsBulk
+            BulkClass = TokenClassificationBulkData
             bulk_records_function = token_classification_bulk.sync_detailed
-            tags = TokenClassificationRecordsBulkTags.from_dict(tags)
-            metadata = TokenClassificationRecordsBulkMetadata.from_dict(metadata)
+            tags = TokenClassificationBulkDataTags.from_dict(tags)
+            metadata = TokenClassificationBulkDataMetadata.from_dict(metadata)
 
         # Record type is not recognised
         else:
@@ -152,9 +152,8 @@ class RubrixClient:
 
             response = bulk_records_function(
                 client=self._client,
-                json_body=BulkClass(
-                    name=name, tags=tags, metadata=metadata, records=chunk
-                ),
+                name=name,
+                json_body=BulkClass(tags=tags, metadata=metadata, records=chunk),
             )
             # Concrete error codes
             if response.status_code == 401:

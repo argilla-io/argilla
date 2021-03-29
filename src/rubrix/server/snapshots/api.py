@@ -19,6 +19,7 @@ router = APIRouter(
 @router.get(
     "/{name}/snapshots",
     response_model=List[DatasetSnapshot],
+    response_model_exclude_none=True,
     operation_id="list_dataset_snapshots",
 )
 def list_dataset_snapshots(
@@ -52,6 +53,7 @@ def list_dataset_snapshots(
 @router.get(
     "/{name}/snapshots/{snapshot_id}",
     response_model=DatasetSnapshot,
+    response_model_exclude_none=True,
     operation_id="get_dataset_snapshot",
 )
 def get_dataset_snapshot(
@@ -84,6 +86,7 @@ def get_dataset_snapshot(
 @router.post(
     "/{name}/snapshots",
     response_model=DatasetSnapshot,
+    response_model_exclude_none=True,
     operation_id="create_dataset_snapshots",
 )
 def create_dataset_snapshots(

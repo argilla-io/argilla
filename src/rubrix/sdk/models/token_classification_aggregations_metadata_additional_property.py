@@ -1,11 +1,8 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
+T = TypeVar("T", bound="TokenClassificationAggregationsMetadataAdditionalProperty")
 
 
 @attr.s(auto_attribs=True)
@@ -22,14 +19,14 @@ class TokenClassificationAggregationsMetadataAdditionalProperty:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationAggregationsMetadataAdditionalProperty":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        token_classification_aggregations_metadata_additional_property = (
-            TokenClassificationAggregationsMetadataAdditionalProperty()
-        )
+        token_classification_aggregations_metadata_additional_property = cls()
 
-        token_classification_aggregations_metadata_additional_property.additional_properties = d
+        token_classification_aggregations_metadata_additional_property.additional_properties = (
+            d
+        )
         return token_classification_aggregations_metadata_additional_property
 
     @property

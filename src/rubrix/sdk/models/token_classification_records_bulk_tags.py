@@ -1,11 +1,8 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
+T = TypeVar("T", bound="TokenClassificationRecordsBulkTags")
 
 
 @attr.s(auto_attribs=True)
@@ -22,10 +19,10 @@ class TokenClassificationRecordsBulkTags:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationRecordsBulkTags":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        token_classification_records_bulk_tags = TokenClassificationRecordsBulkTags()
+        token_classification_records_bulk_tags = cls()
 
         token_classification_records_bulk_tags.additional_properties = d
         return token_classification_records_bulk_tags

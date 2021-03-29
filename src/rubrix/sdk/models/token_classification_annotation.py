@@ -1,31 +1,24 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.entity_span import EntitySpan
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-from typing import Dict
-from typing import cast, List
-from typing import cast
-from ..models.entity_span import EntitySpan
+T = TypeVar("T", bound="TokenClassificationAnnotation")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAnnotation:
-    """ Annotation class for rToken classification problem
+    """Annotation class for rToken classification problem
 
-Attributes:
------------
-entities: List[EntitiesSpan]
-    a list of detected entities spans in tokenized text, if any.
-score: float
-    score related to annotated entities. The higher is score value, the
-    more likely is that entities were properly annotated. """
+    Attributes:
+    -----------
+    entities: List[EntitiesSpan]
+        a list of detected entities spans in tokenized text, if any.
+    score: float
+        score related to annotated entities. The higher is score value, the
+        more likely is that entities were properly annotated."""
 
     agent: str
     entities: Union[Unset, List[EntitySpan]] = UNSET
@@ -47,7 +40,9 @@ score: float
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"agent": agent,}
+            {
+                "agent": agent,
+            }
         )
         if entities is not UNSET:
             field_dict["entities"] = entities
@@ -56,8 +51,8 @@ score: float
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationAnnotation":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         agent = d.pop("agent")
 
@@ -70,7 +65,11 @@ score: float
 
         score = d.pop("score", UNSET)
 
-        token_classification_annotation = TokenClassificationAnnotation(agent=agent, entities=entities, score=score,)
+        token_classification_annotation = cls(
+            agent=agent,
+            entities=entities,
+            score=score,
+        )
 
         token_classification_annotation.additional_properties = d
         return token_classification_annotation

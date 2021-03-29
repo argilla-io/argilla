@@ -7,7 +7,7 @@ from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
 from rubrix.server.text_classification.api import (
     BulkResponse,
-    SearchResults,
+    TextClassificationSearchResults,
     TextClassificationRecordsBulk,
 )
 from rubrix.server.text_classification.model import (
@@ -44,7 +44,7 @@ def test_records_with_default_text():
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
     assert response.status_code == 200
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert results.records[0].text == {"text": "This is a text"}
 
@@ -131,7 +131,7 @@ def test_create_records_for_text_classification_with_multi_label():
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
     assert response.status_code == 200
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.aggregations.predicted_as == {"Mocking": 2, "Test": 2}
     assert results.records[0].predicted is None
@@ -183,7 +183,7 @@ def test_create_records_for_text_classification():
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
     assert response.status_code == 200
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert results.aggregations.predicted_as == {"Mocking": 1}
     assert results.aggregations.status == {"Default": 1}
@@ -252,7 +252,7 @@ def test_partial_record_update():
     )
 
     assert response.status_code == 200
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     first_record = results.records[0]
     assert TextClassificationRecord(
@@ -302,7 +302,7 @@ def test_sort_by_id_as_default():
         json={},
     )
 
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
     assert list(map(lambda r: r.id, results.records)) == [
         0,
@@ -355,7 +355,7 @@ def test_disable_aggregations_when_scroll():
         json={},
     )
 
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
     assert results.aggregations == TextClassificationAggregations()
 
@@ -398,7 +398,7 @@ def test_include_event_timestamp():
         json={},
     )
 
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
     assert all(map(lambda record: record.event_timestamp is not None, results.records))
 
@@ -441,5 +441,5 @@ def test_words_cloud():
         json={},
     )
 
-    results = SearchResults.parse_obj(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.aggregations.words is not None

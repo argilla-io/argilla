@@ -1,23 +1,19 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
-
-from typing import Dict
 from ..models.token_attributions import TokenAttributions
-from typing import cast, List
-from typing import cast
+
+T = TypeVar("T", bound="TextClassificationRecordExplanation")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationRecordExplanation:
     """  """
 
-    additional_properties: Dict[str, List[TokenAttributions]] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, List[TokenAttributions]] = attr.ib(
+        init=False, factory=dict
+    )
 
     def to_dict(self) -> Dict[str, Any]:
 
@@ -33,23 +29,27 @@ class TextClassificationRecordExplanation:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationRecordExplanation":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        text_classification_record_explanation = TextClassificationRecordExplanation()
+        text_classification_record_explanation = cls()
 
         additional_properties = {}
         for prop_name, prop_dict in d.items():
             additional_property = []
             _additional_property = prop_dict
             for additional_property_item_data in _additional_property:
-                additional_property_item = TokenAttributions.from_dict(additional_property_item_data)
+                additional_property_item = TokenAttributions.from_dict(
+                    additional_property_item_data
+                )
 
                 additional_property.append(additional_property_item)
 
             additional_properties[prop_name] = additional_property
 
-        text_classification_record_explanation.additional_properties = additional_properties
+        text_classification_record_explanation.additional_properties = (
+            additional_properties
+        )
         return text_classification_record_explanation
 
     @property

@@ -1,11 +1,8 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
+T = TypeVar("T", bound="TextClassificationAggregationsStatus")
 
 
 @attr.s(auto_attribs=True)
@@ -22,10 +19,10 @@ class TextClassificationAggregationsStatus:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationAggregationsStatus":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        text_classification_aggregations_status = TextClassificationAggregationsStatus()
+        text_classification_aggregations_status = cls()
 
         text_classification_aggregations_status.additional_properties = d
         return text_classification_aggregations_status

@@ -20,13 +20,13 @@ from rubrix.server.users.model import User
 
 from .model import (
     CreationTextClassificationRecord,
-    SearchRequest,
-    SearchResults,
     TaskSearchAggregations,
     TextClassificationAggregations,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
+    TextClassificationSearchRequest,
+    TextClassificationSearchResults,
     TextClassificationTask,
 )
 
@@ -36,7 +36,10 @@ base_endpoint = "/datasets/{name}/" + TaskType.text_classification
 
 
 @router.post(
-    base_endpoint + "/:bulk", operation_id="bulk_records", response_model=BulkResponse
+    base_endpoint + "/:bulk",
+    operation_id="bulk_records",
+    response_model=BulkResponse,
+    response_model_exclude_none=True,
 )
 def bulk_records(
     name: str,
@@ -94,17 +97,18 @@ def bulk_records(
 
 @router.post(
     base_endpoint + "/:search",
-    response_model=SearchResults,
+    response_model=TextClassificationSearchResults,
+    response_model_exclude_none=True,
     operation_id="search_records",
 )
 def search_records(
     name: str,
-    search: SearchRequest = None,
+    search: TextClassificationSearchRequest = None,
     pagination: PaginationParams = Depends(),
     service: DatasetRecordsService = Depends(create_dataset_records_service),
     datasets: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
-) -> SearchResults:
+) -> TextClassificationSearchResults:
     """
     Searches data from dataset
 
@@ -130,7 +134,7 @@ def search_records(
     """
 
     datasets.find_by_name(name, owner=current_user.current_group)
-    search = search or SearchRequest()
+    search = search or TextClassificationSearchRequest()
     query = search.query or TextClassificationQuery()
     sort = search.sort or []
 
@@ -157,7 +161,7 @@ def search_records(
         ],
     )
 
-    return SearchResults(
+    return TextClassificationSearchResults(
         total=result.total,
         records=[
             TextClassificationRecord(
@@ -198,6 +202,7 @@ class TextClassificationRecordsBulk(TextClassificationBulkData):
     "/classification/datasets/:bulk-records",
     deprecated=True,
     response_model=BulkResponse,
+    response_model_exclude_none=True,
     operation_id="bulk_records_deprecated",
 )
 def bulk_records_deprecated(
@@ -235,4 +240,27 @@ def bulk_records_deprecated(
     )
 
 
-router.post("/classification/datasets/{name}/:search", deprecated=True)(search_records)
+@router.post(
+    "/classification/datasets/{name}/:search",
+    operation_id="search_records_deprecated",
+    deprecated=True,
+    response_model=TextClassificationSearchResults,
+    response_model_exclude_none=True,
+)
+def search_records_deprecated(
+    name: str,
+    search: TextClassificationSearchRequest = None,
+    pagination: PaginationParams = Depends(),
+    service: DatasetRecordsService = Depends(create_dataset_records_service),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+) -> TextClassificationSearchResults:
+    """Deprecated endpoint for text classification search"""
+    return search_records(
+        name=name,
+        search=search,
+        pagination=pagination,
+        datasets=datasets,
+        service=service,
+        current_user=current_user,
+    )

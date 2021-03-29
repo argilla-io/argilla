@@ -15,8 +15,8 @@ class BaseRecord(BaseModel):
     """
     Minimal dataset record information
 
-    Attributes
-    ----------
+    Attributes:
+    -----------
 
     id:
         The record id
@@ -30,6 +30,12 @@ class BaseRecord(BaseModel):
     id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
+
+    @validator("id", always=True)
+    def default_id_if_none_provided(cls, id: Optional[str]) -> str:
+        if id is None:
+            return str(uuid4())
+        return id
 
     @validator("metadata")
     def flatten_metadata(cls, metadata: Dict[str, Any]):
@@ -116,8 +122,8 @@ class RecordTaskInfo(GenericModel, Generic[T]):
     """
     Base class for task data info at record level
 
-    Attributes
-    ----------
+    Attributes:
+    -----------
 
     status:
         The task status

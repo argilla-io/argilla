@@ -1,18 +1,11 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.validation_error import ValidationError
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-from typing import Dict
-from typing import cast, List
-from typing import cast
-from ..models.validation_error import ValidationError
+T = TypeVar("T", bound="HTTPValidationError")
 
 
 @attr.s(auto_attribs=True)
@@ -39,8 +32,8 @@ class HTTPValidationError:
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "HTTPValidationError":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         detail = []
         _detail = d.pop("detail", UNSET)
@@ -49,7 +42,9 @@ class HTTPValidationError:
 
             detail.append(detail_item)
 
-        http_validation_error = HTTPValidationError(detail=detail,)
+        http_validation_error = cls(
+            detail=detail,
+        )
 
         http_validation_error.additional_properties = d
         return http_validation_error

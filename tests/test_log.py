@@ -11,6 +11,12 @@ which could or could not be mounted.
 import pytest
 import requests
 import rubrix
+from rubrix import (
+    TextClassificationBulkDataMetadata,
+    TextClassificationBulkDataTags,
+    TokenClassificationBulkDataMetadata,
+    TokenClassificationBulkDataTags,
+)
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
@@ -68,8 +74,8 @@ def mock_response_text(monkeypatch):
     )
 
     def mock_get(*args, json_body: TextClassificationRecordsBulk, **kwargs):
-        assert isinstance(json_body.metadata, TextClassificationRecordsBulkMetadata)
-        assert isinstance(json_body.tags, TextClassificationRecordsBulkTags)
+        assert isinstance(json_body.metadata, TextClassificationBulkDataMetadata)
+        assert isinstance(json_body.tags, TextClassificationBulkDataTags)
         return Response(
             status_code=200,
             content=b"Everything's fine",
@@ -104,8 +110,8 @@ def mock_response_token(monkeypatch):
     )
 
     def mock_get(*args, json_body: TokenClassificationRecordsBulk, **kwargs):
-        assert isinstance(json_body.metadata, TokenClassificationRecordsBulkMetadata)
-        assert isinstance(json_body.tags, TokenClassificationRecordsBulkTags)
+        assert isinstance(json_body.metadata, TokenClassificationBulkDataMetadata)
+        assert isinstance(json_body.tags, TokenClassificationBulkDataTags)
         return Response(
             status_code=200,
             content=b"Everything's fine",

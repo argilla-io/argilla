@@ -1,0 +1,102 @@
+from typing import Any, Dict, List, Type, TypeVar, Union
+
+import attr
+
+from ..models.token_classification_bulk_data_metadata import (
+    TokenClassificationBulkDataMetadata,
+)
+from ..models.token_classification_bulk_data_tags import TokenClassificationBulkDataTags
+from ..models.token_classification_record import TokenClassificationRecord
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="TokenClassificationBulkData")
+
+
+@attr.s(auto_attribs=True)
+class TokenClassificationBulkData:
+    """Bulk data for text classification
+
+    Attributes:
+    -----------
+
+    records: List[TokenClassificationRecord]
+        Set of token classification records"""
+
+    records: List[TokenClassificationRecord]
+    tags: Union[TokenClassificationBulkDataTags, Unset] = UNSET
+    metadata: Union[TokenClassificationBulkDataMetadata, Unset] = UNSET
+    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        records = []
+        for records_item_data in self.records:
+            records_item = records_item_data.to_dict()
+
+            records.append(records_item)
+
+        tags: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.tags, Unset):
+            tags = self.tags.to_dict()
+
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
+
+        field_dict: Dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "records": records,
+            }
+        )
+        if tags is not UNSET:
+            field_dict["tags"] = tags
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        d = src_dict.copy()
+        records = []
+        _records = d.pop("records")
+        for records_item_data in _records:
+            records_item = TokenClassificationRecord.from_dict(records_item_data)
+
+            records.append(records_item)
+
+        tags: Union[TokenClassificationBulkDataTags, Unset] = UNSET
+        _tags = d.pop("tags", UNSET)
+        if not isinstance(_tags, Unset):
+            tags = TokenClassificationBulkDataTags.from_dict(_tags)
+
+        metadata: Union[TokenClassificationBulkDataMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TokenClassificationBulkDataMetadata.from_dict(_metadata)
+
+        token_classification_bulk_data = cls(
+            records=records,
+            tags=tags,
+            metadata=metadata,
+        )
+
+        token_classification_bulk_data.additional_properties = d
+        return token_classification_bulk_data
+
+    @property
+    def additional_keys(self) -> List[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

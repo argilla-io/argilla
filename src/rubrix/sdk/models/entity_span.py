@@ -1,31 +1,31 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
+T = TypeVar("T", bound="EntitySpan")
 
 
 @attr.s(auto_attribs=True)
 class EntitySpan:
-    """ The tokens span for a labeled text.
+    """The tokens span for a labeled text.
 
-Entity spans will be defined between from start to end - 1
+    Entity spans will be defined between from start to end - 1
 
-Attributes:
------------
+    Attributes:
+    -----------
 
-start: int
-    character start position
-end: int
-    character end position
-label: str
-    the label related to tokens that conforms the entity span """
+    start: int
+        character start position
+    end: int
+        character end position
+    start_token: Optional[int]
+        start token for entity span. Optional
+    end_token: Optional[int]
+        end token for entity span. Optional
+    label: str
+        the label related to tokens that conforms the entity span"""
 
     start: int
     end: int
@@ -44,7 +44,11 @@ label: str
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"start": start, "end": end, "label": label,}
+            {
+                "start": start,
+                "end": end,
+                "label": label,
+            }
         )
         if start_token is not UNSET:
             field_dict["start_token"] = start_token
@@ -53,8 +57,8 @@ label: str
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "EntitySpan":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         start = d.pop("start")
 
@@ -66,7 +70,13 @@ label: str
 
         end_token = d.pop("end_token", UNSET)
 
-        entity_span = EntitySpan(start=start, end=end, label=label, start_token=start_token, end_token=end_token,)
+        entity_span = cls(
+            start=start,
+            end=end,
+            label=label,
+            start_token=start_token,
+            end_token=end_token,
+        )
 
         entity_span.additional_properties = d
         return entity_span

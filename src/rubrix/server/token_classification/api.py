@@ -18,12 +18,12 @@ from rubrix.server.users.model import User
 from .model import (
     CreationTokenClassificationRecord,
     DefaultTaskSearchFilters,
-    SearchRequest,
-    SearchResults,
     TokenClassificationAggregations,
     TokenClassificationBulkData,
     TokenClassificationQuery,
     TokenClassificationRecord,
+    TokenClassificationSearchRequest,
+    TokenClassificationSearchResults,
     TokenClassificationTask,
 )
 
@@ -33,7 +33,94 @@ base_endpoint = "/datasets/{name}/" + TaskType.token_classification
 
 
 @router.post(
-    base_endpoint + "/:bulk", operation_id="bulk_records", response_model=BulkResponse
+    base_endpoint + "/:search",
+    response_model=TokenClassificationSearchResults,
+    response_model_exclude_none=True,
+    operation_id="search_records",
+)
+def search_records(
+    name: str,
+    search: TokenClassificationSearchRequest = None,
+    pagination: PaginationParams = Depends(),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    service: DatasetRecordsService = Depends(create_dataset_records_service),
+    current_user: User = Depends(get_current_active_user),
+) -> TokenClassificationSearchResults:
+    """
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    search:
+        The query search data
+    pagination:
+        The search pagination info
+    datasets:
+        The datasets service
+    service:
+        The dataset records service
+    current_user:
+        The current request user
+
+    Returns
+    -------
+        The search results
+    """
+
+    datasets.find_by_name(name, owner=current_user.current_group)
+    search = search or TokenClassificationSearchRequest()
+    query = search.query or TokenClassificationQuery()
+    sort = search.sort or []
+
+    task_meta = TaskMeta(
+        filters=DefaultTaskSearchFilters.parse_obj(query),
+        task_info=TokenClassificationTask,
+    )
+
+    result = service.search(
+        name,
+        owner=current_user.current_group,
+        search=MultiTaskRecordSearchQuery(
+            text_query=query.text_query,
+            metadata=query.metadata or {},
+        ).with_task(task_meta),
+        record_from=pagination.from_,
+        size=pagination.limit,
+        sort=[
+            MultiTaskSortParam(
+                **s.dict(), task=None if s.by.startswith("metadata") else task_meta.task
+            )
+            for s in sort
+        ],
+    )
+
+    return TokenClassificationSearchResults(
+        records=[
+            TokenClassificationRecord(
+                **record.dict(by_alias=True),
+                **record.task_info(task_meta.task).dict(by_alias=True),
+            )
+            for record in result.records
+        ],
+        total=result.total,
+        aggregations=TokenClassificationAggregations(
+            **result.aggregations.task_aggregations(task=task_meta.task).dict(
+                by_alias=True
+            ),
+            metadata=result.aggregations.metadata_aggregations,
+            words=result.aggregations.words_cloud,
+        )
+        if result.aggregations
+        else None,
+    )
+
+
+@router.post(
+    base_endpoint + "/:bulk",
+    operation_id="bulk_records",
+    response_model=BulkResponse,
+    response_model_exclude_none=True,
 )
 def bulk_records(
     name: str,
@@ -89,89 +176,6 @@ def bulk_records(
     )
 
 
-@router.post(
-    base_endpoint + "/:search",
-    response_model=SearchResults,
-    operation_id="search_records",
-)
-def search_records(
-    name: str,
-    search: SearchRequest = None,
-    pagination: PaginationParams = Depends(),
-    datasets: DatasetsService = Depends(create_dataset_service),
-    service: DatasetRecordsService = Depends(create_dataset_records_service),
-    current_user: User = Depends(get_current_active_user),
-) -> SearchResults:
-    """
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    search:
-        The query search data
-    pagination:
-        The search pagination info
-    datasets:
-        The datasets service
-    service:
-        The dataset records service
-    current_user:
-        The current request user
-
-    Returns
-    -------
-        The search results
-    """
-
-    datasets.find_by_name(name, owner=current_user.current_group)
-    search = search or SearchRequest()
-    query = search.query or TokenClassificationQuery()
-    sort = search.sort or []
-
-    task_meta = TaskMeta(
-        filters=DefaultTaskSearchFilters.parse_obj(query),
-        task_info=TokenClassificationTask,
-    )
-
-    result = service.search(
-        name,
-        owner=current_user.current_group,
-        search=MultiTaskRecordSearchQuery(
-            text_query=query.text_query,
-            metadata=query.metadata or {},
-        ).with_task(task_meta),
-        record_from=pagination.from_,
-        size=pagination.limit,
-        sort=[
-            MultiTaskSortParam(
-                **s.dict(), task=None if s.by.startswith("metadata") else task_meta.task
-            )
-            for s in sort
-        ],
-    )
-
-    return SearchResults(
-        records=[
-            TokenClassificationRecord(
-                **record.dict(by_alias=True),
-                **record.task_info(task_meta.task).dict(by_alias=True),
-            )
-            for record in result.records
-        ],
-        total=result.total,
-        aggregations=TokenClassificationAggregations(
-            **result.aggregations.task_aggregations(task=task_meta.task).dict(
-                by_alias=True
-            ),
-            metadata=result.aggregations.metadata_aggregations,
-            words=result.aggregations.words_cloud,
-        )
-        if result.aggregations
-        else None,
-    )
-
-
 class TokenClassificationRecordsBulk(TokenClassificationBulkData):
     """A API backward compatibility data model for bulk records endpoint"""
 
@@ -182,6 +186,7 @@ class TokenClassificationRecordsBulk(TokenClassificationBulkData):
     "/token-classification/datasets/:bulk-records",
     deprecated=True,
     response_model=BulkResponse,
+    response_model_exclude_none=True,
     operation_id="bulk_records_deprecated",
 )
 def bulk_records_deprecated(
@@ -218,6 +223,27 @@ def bulk_records_deprecated(
     )
 
 
-router.post("/token-classification/datasets/{name}/:search", deprecated=True)(
-    search_records
+@router.post(
+    "/token-classification/datasets/{name}/:search",
+    operation_id="search_records_deprecated",
+    deprecated=True,
+    response_model=TokenClassificationSearchResults,
+    response_model_exclude_none=True,
 )
+def search_records_deprecated(
+    name: str,
+    search: TokenClassificationSearchRequest = None,
+    pagination: PaginationParams = Depends(),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    service: DatasetRecordsService = Depends(create_dataset_records_service),
+    current_user: User = Depends(get_current_active_user),
+) -> TokenClassificationSearchResults:
+    """Deprecated endpoint for token classification search"""
+    return search_records(
+        name=name,
+        search=search,
+        pagination=pagination,
+        datasets=datasets,
+        service=service,
+        current_user=current_user,
+    )

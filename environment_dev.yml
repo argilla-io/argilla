@@ -1,0 +1,13 @@
+name: rubrix
+
+channels:
+- conda-forge
+
+dependencies:
+- python~=3.8.0
+- pip>=20.3.0
+# for building the frontend and the docs
+- nodejs~=14.15.0
+- pip:
+    # build python sdk
+    - openapi-python-client~=0.8.0

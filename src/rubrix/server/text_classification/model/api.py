@@ -69,7 +69,7 @@ class TextClassificationAggregations(TaskSearchAggregations):
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class SearchRequest(BaseModel):
+class TextClassificationSearchRequest(BaseModel):
     """
     API Search request
 
@@ -88,7 +88,7 @@ class SearchRequest(BaseModel):
     sort: List[SortParam] = Field(default_factory=list)
 
 
-class SearchResults(BaseModel):
+class TextClassificationSearchResults(BaseModel):
     """
     API search results
 

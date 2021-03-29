@@ -1,13 +1,8 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, cast
 
 import attr
 
-from ..types import UNSET, Unset
-
-from typing import cast, List
+T = TypeVar("T", bound="ValidationError")
 
 
 @attr.s(auto_attribs=True)
@@ -28,13 +23,17 @@ class ValidationError:
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"loc": loc, "msg": msg, "type": type,}
+            {
+                "loc": loc,
+                "msg": msg,
+                "type": type,
+            }
         )
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ValidationError":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         loc = cast(List[str], d.pop("loc"))
 
@@ -42,7 +41,11 @@ class ValidationError:
 
         type = d.pop("type")
 
-        validation_error = ValidationError(loc=loc, msg=msg, type=type,)
+        validation_error = cls(
+            loc=loc,
+            msg=msg,
+            type=type,
+        )
 
         validation_error.additional_properties = d
         return validation_error

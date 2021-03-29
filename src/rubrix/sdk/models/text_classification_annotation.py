@@ -1,27 +1,21 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-from ..types import UNSET, Unset
-
-from typing import Dict
-from typing import cast, List
-from typing import cast
 from ..models.class_prediction import ClassPrediction
+
+T = TypeVar("T", bound="TextClassificationAnnotation")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationAnnotation:
-    """ Annotation class for text classification problems
+    """Annotation class for text classification tasks
 
-Attributes:
------------
+    Attributes:
+    -----------
 
-labels: List[LabelPrediction]
-    list of annotated labels with confidence """
+    labels: List[LabelPrediction]
+        list of annotated labels with confidence"""
 
     agent: str
     labels: List[ClassPrediction]
@@ -38,13 +32,16 @@ labels: List[LabelPrediction]
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"agent": agent, "labels": labels,}
+            {
+                "agent": agent,
+                "labels": labels,
+            }
         )
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationAnnotation":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         agent = d.pop("agent")
 
@@ -55,7 +52,10 @@ labels: List[LabelPrediction]
 
             labels.append(labels_item)
 
-        text_classification_annotation = TextClassificationAnnotation(agent=agent, labels=labels,)
+        text_classification_annotation = cls(
+            agent=agent,
+            labels=labels,
+        )
 
         text_classification_annotation.additional_properties = d
         return text_classification_annotation

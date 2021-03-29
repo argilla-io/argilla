@@ -1,31 +1,51 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.text_classification_aggregations_annotated_as import (
+    TextClassificationAggregationsAnnotatedAs,
+)
+from ..models.text_classification_aggregations_annotated_by import (
+    TextClassificationAggregationsAnnotatedBy,
+)
+from ..models.text_classification_aggregations_confidence import (
+    TextClassificationAggregationsConfidence,
+)
+from ..models.text_classification_aggregations_metadata import (
+    TextClassificationAggregationsMetadata,
+)
+from ..models.text_classification_aggregations_predicted import (
+    TextClassificationAggregationsPredicted,
+)
+from ..models.text_classification_aggregations_predicted_as import (
+    TextClassificationAggregationsPredictedAs,
+)
+from ..models.text_classification_aggregations_predicted_by import (
+    TextClassificationAggregationsPredictedBy,
+)
+from ..models.text_classification_aggregations_status import (
+    TextClassificationAggregationsStatus,
+)
+from ..models.text_classification_aggregations_words import (
+    TextClassificationAggregationsWords,
+)
 from ..types import UNSET, Unset
 
-from typing import Union
-from typing import Dict
-from ..models.text_classification_aggregations_annotated_by import TextClassificationAggregationsAnnotatedBy
-from ..models.text_classification_aggregations_predicted_as import TextClassificationAggregationsPredictedAs
-from ..models.text_classification_aggregations_status import TextClassificationAggregationsStatus
-from ..models.text_classification_aggregations_metadata import TextClassificationAggregationsMetadata
-from ..models.text_classification_aggregations_confidence import TextClassificationAggregationsConfidence
-from ..types import UNSET, Unset
-from ..models.text_classification_aggregations_annotated_as import TextClassificationAggregationsAnnotatedAs
-from ..models.text_classification_aggregations_predicted_by import TextClassificationAggregationsPredictedBy
-from ..models.text_classification_aggregations_inputs import TextClassificationAggregationsInputs
-from ..models.text_classification_aggregations_words import TextClassificationAggregationsWords
-from ..models.text_classification_aggregations_predicted import TextClassificationAggregationsPredicted
-from typing import cast
+T = TypeVar("T", bound="TextClassificationAggregations")
 
 
 @attr.s(auto_attribs=True)
 class TextClassificationAggregations:
-    """  """
+    """API for result aggregations
+
+    Attributes:
+    -----------
+
+    words: WordCloudAggregations
+        The word cloud aggregations (grouped by lang)
+
+    metadata: Dict[str, Dict[str, int]]
+        The metadata fields aggregations"""
 
     predicted_as: Union[TextClassificationAggregationsPredictedAs, Unset] = UNSET
     annotated_as: Union[TextClassificationAggregationsAnnotatedAs, Unset] = UNSET
@@ -33,10 +53,9 @@ class TextClassificationAggregations:
     predicted_by: Union[TextClassificationAggregationsPredictedBy, Unset] = UNSET
     status: Union[TextClassificationAggregationsStatus, Unset] = UNSET
     predicted: Union[TextClassificationAggregationsPredicted, Unset] = UNSET
-    metadata: Union[TextClassificationAggregationsMetadata, Unset] = UNSET
-    words: Union[TextClassificationAggregationsWords, Unset] = UNSET
     confidence: Union[TextClassificationAggregationsConfidence, Unset] = UNSET
-    inputs: Union[TextClassificationAggregationsInputs, Unset] = UNSET
+    words: Union[TextClassificationAggregationsWords, Unset] = UNSET
+    metadata: Union[TextClassificationAggregationsMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -64,21 +83,17 @@ class TextClassificationAggregations:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted.to_dict()
 
-        metadata: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.metadata, Unset):
-            metadata = self.metadata.to_dict()
+        confidence: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.confidence, Unset):
+            confidence = self.confidence.to_dict()
 
         words: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.words, Unset):
             words = self.words.to_dict()
 
-        confidence: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.confidence, Unset):
-            confidence = self.confidence.to_dict()
-
-        inputs: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.inputs, Unset):
-            inputs = self.inputs.to_dict()
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -95,81 +110,81 @@ class TextClassificationAggregations:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if metadata is not UNSET:
-            field_dict["metadata"] = metadata
-        if words is not UNSET:
-            field_dict["words"] = words
         if confidence is not UNSET:
             field_dict["confidence"] = confidence
-        if inputs is not UNSET:
-            field_dict["inputs"] = inputs
+        if words is not UNSET:
+            field_dict["words"] = words
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TextClassificationAggregations":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         predicted_as: Union[TextClassificationAggregationsPredictedAs, Unset] = UNSET
         _predicted_as = d.pop("predicted_as", UNSET)
-        if _predicted_as is not None and not isinstance(_predicted_as, Unset):
-            predicted_as = TextClassificationAggregationsPredictedAs.from_dict(cast(Dict[str, Any], _predicted_as))
+        if not isinstance(_predicted_as, Unset):
+            predicted_as = TextClassificationAggregationsPredictedAs.from_dict(
+                _predicted_as
+            )
 
         annotated_as: Union[TextClassificationAggregationsAnnotatedAs, Unset] = UNSET
         _annotated_as = d.pop("annotated_as", UNSET)
-        if _annotated_as is not None and not isinstance(_annotated_as, Unset):
-            annotated_as = TextClassificationAggregationsAnnotatedAs.from_dict(cast(Dict[str, Any], _annotated_as))
+        if not isinstance(_annotated_as, Unset):
+            annotated_as = TextClassificationAggregationsAnnotatedAs.from_dict(
+                _annotated_as
+            )
 
         annotated_by: Union[TextClassificationAggregationsAnnotatedBy, Unset] = UNSET
         _annotated_by = d.pop("annotated_by", UNSET)
-        if _annotated_by is not None and not isinstance(_annotated_by, Unset):
-            annotated_by = TextClassificationAggregationsAnnotatedBy.from_dict(cast(Dict[str, Any], _annotated_by))
+        if not isinstance(_annotated_by, Unset):
+            annotated_by = TextClassificationAggregationsAnnotatedBy.from_dict(
+                _annotated_by
+            )
 
         predicted_by: Union[TextClassificationAggregationsPredictedBy, Unset] = UNSET
         _predicted_by = d.pop("predicted_by", UNSET)
-        if _predicted_by is not None and not isinstance(_predicted_by, Unset):
-            predicted_by = TextClassificationAggregationsPredictedBy.from_dict(cast(Dict[str, Any], _predicted_by))
+        if not isinstance(_predicted_by, Unset):
+            predicted_by = TextClassificationAggregationsPredictedBy.from_dict(
+                _predicted_by
+            )
 
         status: Union[TextClassificationAggregationsStatus, Unset] = UNSET
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance(_status, Unset):
-            status = TextClassificationAggregationsStatus.from_dict(cast(Dict[str, Any], _status))
+        if not isinstance(_status, Unset):
+            status = TextClassificationAggregationsStatus.from_dict(_status)
 
         predicted: Union[TextClassificationAggregationsPredicted, Unset] = UNSET
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance(_predicted, Unset):
-            predicted = TextClassificationAggregationsPredicted.from_dict(cast(Dict[str, Any], _predicted))
-
-        metadata: Union[TextClassificationAggregationsMetadata, Unset] = UNSET
-        _metadata = d.pop("metadata", UNSET)
-        if _metadata is not None and not isinstance(_metadata, Unset):
-            metadata = TextClassificationAggregationsMetadata.from_dict(cast(Dict[str, Any], _metadata))
-
-        words: Union[TextClassificationAggregationsWords, Unset] = UNSET
-        _words = d.pop("words", UNSET)
-        if _words is not None and not isinstance(_words, Unset):
-            words = TextClassificationAggregationsWords.from_dict(cast(Dict[str, Any], _words))
+        if not isinstance(_predicted, Unset):
+            predicted = TextClassificationAggregationsPredicted.from_dict(_predicted)
 
         confidence: Union[TextClassificationAggregationsConfidence, Unset] = UNSET
         _confidence = d.pop("confidence", UNSET)
-        if _confidence is not None and not isinstance(_confidence, Unset):
-            confidence = TextClassificationAggregationsConfidence.from_dict(cast(Dict[str, Any], _confidence))
+        if not isinstance(_confidence, Unset):
+            confidence = TextClassificationAggregationsConfidence.from_dict(_confidence)
 
-        inputs: Union[TextClassificationAggregationsInputs, Unset] = UNSET
-        _inputs = d.pop("inputs", UNSET)
-        if _inputs is not None and not isinstance(_inputs, Unset):
-            inputs = TextClassificationAggregationsInputs.from_dict(cast(Dict[str, Any], _inputs))
+        words: Union[TextClassificationAggregationsWords, Unset] = UNSET
+        _words = d.pop("words", UNSET)
+        if not isinstance(_words, Unset):
+            words = TextClassificationAggregationsWords.from_dict(_words)
 
-        text_classification_aggregations = TextClassificationAggregations(
+        metadata: Union[TextClassificationAggregationsMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TextClassificationAggregationsMetadata.from_dict(_metadata)
+
+        text_classification_aggregations = cls(
             predicted_as=predicted_as,
             annotated_as=annotated_as,
             annotated_by=annotated_by,
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
-            metadata=metadata,
-            words=words,
             confidence=confidence,
-            inputs=inputs,
+            words=words,
+            metadata=metadata,
         )
 
         text_classification_aggregations.additional_properties = d

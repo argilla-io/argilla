@@ -1,29 +1,48 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.token_classification_aggregations_annotated_as import (
+    TokenClassificationAggregationsAnnotatedAs,
+)
+from ..models.token_classification_aggregations_annotated_by import (
+    TokenClassificationAggregationsAnnotatedBy,
+)
+from ..models.token_classification_aggregations_metadata import (
+    TokenClassificationAggregationsMetadata,
+)
+from ..models.token_classification_aggregations_predicted import (
+    TokenClassificationAggregationsPredicted,
+)
+from ..models.token_classification_aggregations_predicted_as import (
+    TokenClassificationAggregationsPredictedAs,
+)
+from ..models.token_classification_aggregations_predicted_by import (
+    TokenClassificationAggregationsPredictedBy,
+)
+from ..models.token_classification_aggregations_status import (
+    TokenClassificationAggregationsStatus,
+)
+from ..models.token_classification_aggregations_words import (
+    TokenClassificationAggregationsWords,
+)
 from ..types import UNSET, Unset
 
-from ..models.token_classification_aggregations_predicted_as import TokenClassificationAggregationsPredictedAs
-from typing import Union
-from typing import Dict
-from ..models.token_classification_aggregations_annotated_as import TokenClassificationAggregationsAnnotatedAs
-from ..models.token_classification_aggregations_status import TokenClassificationAggregationsStatus
-from ..models.token_classification_aggregations_words import TokenClassificationAggregationsWords
-from ..models.token_classification_aggregations_predicted_by import TokenClassificationAggregationsPredictedBy
-from ..models.token_classification_aggregations_metadata import TokenClassificationAggregationsMetadata
-from ..types import UNSET, Unset
-from typing import cast
-from ..models.token_classification_aggregations_predicted import TokenClassificationAggregationsPredicted
-from ..models.token_classification_aggregations_annotated_by import TokenClassificationAggregationsAnnotatedBy
+T = TypeVar("T", bound="TokenClassificationAggregations")
 
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAggregations:
-    """  """
+    """Search results for token classification search API
+
+    Attributes:
+    -----------
+
+    words: WordCloudAggregations
+        The word cloud aggregations (grouped by language)
+
+    metadata: Dict[str, Dict[str, int]]
+        The metadata fields aggregations"""
 
     predicted_as: Union[TokenClassificationAggregationsPredictedAs, Unset] = UNSET
     annotated_as: Union[TokenClassificationAggregationsAnnotatedAs, Unset] = UNSET
@@ -31,8 +50,8 @@ class TokenClassificationAggregations:
     predicted_by: Union[TokenClassificationAggregationsPredictedBy, Unset] = UNSET
     status: Union[TokenClassificationAggregationsStatus, Unset] = UNSET
     predicted: Union[TokenClassificationAggregationsPredicted, Unset] = UNSET
-    metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
     words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
+    metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -60,13 +79,13 @@ class TokenClassificationAggregations:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted.to_dict()
 
-        metadata: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.metadata, Unset):
-            metadata = self.metadata.to_dict()
-
         words: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.words, Unset):
             words = self.words.to_dict()
+
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -83,65 +102,73 @@ class TokenClassificationAggregations:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if metadata is not UNSET:
-            field_dict["metadata"] = metadata
         if words is not UNSET:
             field_dict["words"] = words
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenClassificationAggregations":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         predicted_as: Union[TokenClassificationAggregationsPredictedAs, Unset] = UNSET
         _predicted_as = d.pop("predicted_as", UNSET)
-        if _predicted_as is not None and not isinstance(_predicted_as, Unset):
-            predicted_as = TokenClassificationAggregationsPredictedAs.from_dict(cast(Dict[str, Any], _predicted_as))
+        if not isinstance(_predicted_as, Unset):
+            predicted_as = TokenClassificationAggregationsPredictedAs.from_dict(
+                _predicted_as
+            )
 
         annotated_as: Union[TokenClassificationAggregationsAnnotatedAs, Unset] = UNSET
         _annotated_as = d.pop("annotated_as", UNSET)
-        if _annotated_as is not None and not isinstance(_annotated_as, Unset):
-            annotated_as = TokenClassificationAggregationsAnnotatedAs.from_dict(cast(Dict[str, Any], _annotated_as))
+        if not isinstance(_annotated_as, Unset):
+            annotated_as = TokenClassificationAggregationsAnnotatedAs.from_dict(
+                _annotated_as
+            )
 
         annotated_by: Union[TokenClassificationAggregationsAnnotatedBy, Unset] = UNSET
         _annotated_by = d.pop("annotated_by", UNSET)
-        if _annotated_by is not None and not isinstance(_annotated_by, Unset):
-            annotated_by = TokenClassificationAggregationsAnnotatedBy.from_dict(cast(Dict[str, Any], _annotated_by))
+        if not isinstance(_annotated_by, Unset):
+            annotated_by = TokenClassificationAggregationsAnnotatedBy.from_dict(
+                _annotated_by
+            )
 
         predicted_by: Union[TokenClassificationAggregationsPredictedBy, Unset] = UNSET
         _predicted_by = d.pop("predicted_by", UNSET)
-        if _predicted_by is not None and not isinstance(_predicted_by, Unset):
-            predicted_by = TokenClassificationAggregationsPredictedBy.from_dict(cast(Dict[str, Any], _predicted_by))
+        if not isinstance(_predicted_by, Unset):
+            predicted_by = TokenClassificationAggregationsPredictedBy.from_dict(
+                _predicted_by
+            )
 
         status: Union[TokenClassificationAggregationsStatus, Unset] = UNSET
         _status = d.pop("status", UNSET)
-        if _status is not None and not isinstance(_status, Unset):
-            status = TokenClassificationAggregationsStatus.from_dict(cast(Dict[str, Any], _status))
+        if not isinstance(_status, Unset):
+            status = TokenClassificationAggregationsStatus.from_dict(_status)
 
         predicted: Union[TokenClassificationAggregationsPredicted, Unset] = UNSET
         _predicted = d.pop("predicted", UNSET)
-        if _predicted is not None and not isinstance(_predicted, Unset):
-            predicted = TokenClassificationAggregationsPredicted.from_dict(cast(Dict[str, Any], _predicted))
-
-        metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
-        _metadata = d.pop("metadata", UNSET)
-        if _metadata is not None and not isinstance(_metadata, Unset):
-            metadata = TokenClassificationAggregationsMetadata.from_dict(cast(Dict[str, Any], _metadata))
+        if not isinstance(_predicted, Unset):
+            predicted = TokenClassificationAggregationsPredicted.from_dict(_predicted)
 
         words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
         _words = d.pop("words", UNSET)
-        if _words is not None and not isinstance(_words, Unset):
-            words = TokenClassificationAggregationsWords.from_dict(cast(Dict[str, Any], _words))
+        if not isinstance(_words, Unset):
+            words = TokenClassificationAggregationsWords.from_dict(_words)
 
-        token_classification_aggregations = TokenClassificationAggregations(
+        metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TokenClassificationAggregationsMetadata.from_dict(_metadata)
+
+        token_classification_aggregations = cls(
             predicted_as=predicted_as,
             annotated_as=annotated_as,
             annotated_by=annotated_by,
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
-            metadata=metadata,
             words=words,
+            metadata=metadata,
         )
 
         token_classification_aggregations.additional_properties = d

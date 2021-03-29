@@ -7,7 +7,7 @@ from rubrix.server.text_classification.api import TextClassificationRecordsBulk
 from rubrix.server.text_classification.model import TextClassificationRecord
 from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
 from rubrix.server.token_classification.model import (
-    SearchResults,
+    TokenClassificationSearchResults,
     TokenClassificationRecord,
 )
 
@@ -72,7 +72,7 @@ def test_records_with_default_tokenization():
     response = client.post(
         f"/api/token-classification/datasets/{dataset}/:search", json={}
     )
-    results = SearchResults.parse_obj(response.json())
+    results = TokenClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     for record in results.records:
         assert record.tokens == "This is a text".split(" ")

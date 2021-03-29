@@ -1,30 +1,25 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
 from ..types import UNSET, Unset
 
-from typing import Union
-from typing import cast, Union
-from ..types import UNSET, Unset
+T = TypeVar("T", bound="ClassPrediction")
 
 
 @attr.s(auto_attribs=True)
 class ClassPrediction:
-    """ Single class prediction
+    """Single class prediction
 
-Attributes:
------------
+    Attributes:
+    -----------
 
-class_label: Union[str, int]
-    the predicted class
+    class_label: Union[str, int]
+        the predicted class
 
-confidence: float
-    the predicted class confidence. For human-supervised annotations,
-    this probability should be 1.0 """
+    confidence: float
+        the predicted class confidence. For human-supervised annotations,
+        this probability should be 1.0"""
 
     class_: Union[str, int]
     confidence: Union[Unset, float] = 1.0
@@ -38,15 +33,17 @@ confidence: float
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"class": class_,}
+            {
+                "class": class_,
+            }
         )
         if confidence is not UNSET:
             field_dict["confidence"] = confidence
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "ClassPrediction":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
 
         def _parse_class_(data: Any) -> Union[str, int]:
@@ -58,7 +55,10 @@ confidence: float
 
         confidence = d.pop("confidence", UNSET)
 
-        class_prediction = ClassPrediction(class_=class_, confidence=confidence,)
+        class_prediction = cls(
+            class_=class_,
+            confidence=confidence,
+        )
 
         class_prediction.additional_properties = d
         return class_prediction

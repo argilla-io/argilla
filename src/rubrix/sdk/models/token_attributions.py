@@ -1,30 +1,24 @@
-from typing import Any, Dict
-
-from typing import List
-
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.token_attributions_attributions import TokenAttributionsAttributions
 from ..types import UNSET, Unset
 
-from ..types import UNSET, Unset
-from typing import Union
-from typing import cast
-from typing import Dict
-from ..models.token_attributions_attributions import TokenAttributionsAttributions
+T = TypeVar("T", bound="TokenAttributions")
 
 
 @attr.s(auto_attribs=True)
 class TokenAttributions:
-    """ The token attributions
+    """The token attributions explaining predicted labels
 
-Attributes:
------------
+    Attributes:
+    -----------
 
-token: str
-    the input token
-attributions: Dict[str, float]
-    a dictionary containing label class->attribution pairs """
+    token: str
+        The input token
+    attributions: Dict[str, float]
+        A dictionary containing label class-attribution pairs"""
 
     token: str
     attributions: Union[TokenAttributionsAttributions, Unset] = UNSET
@@ -39,24 +33,29 @@ attributions: Dict[str, float]
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
-            {"token": token,}
+            {
+                "token": token,
+            }
         )
         if attributions is not UNSET:
             field_dict["attributions"] = attributions
 
         return field_dict
 
-    @staticmethod
-    def from_dict(src_dict: Dict[str, Any]) -> "TokenAttributions":
+    @classmethod
+    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         token = d.pop("token")
 
         attributions: Union[TokenAttributionsAttributions, Unset] = UNSET
         _attributions = d.pop("attributions", UNSET)
-        if _attributions is not None and not isinstance(_attributions, Unset):
-            attributions = TokenAttributionsAttributions.from_dict(cast(Dict[str, Any], _attributions))
+        if not isinstance(_attributions, Unset):
+            attributions = TokenAttributionsAttributions.from_dict(_attributions)
 
-        token_attributions = TokenAttributions(token=token, attributions=attributions,)
+        token_attributions = cls(
+            token=token,
+            attributions=attributions,
+        )
 
         token_attributions.additional_properties = d
         return token_attributions
