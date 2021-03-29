@@ -98,8 +98,8 @@ export default {
       enableAnnotation: "entities/datasets/enableAnnotation",
       changeTask: "entities/datasets/loadViewByTask",
     }),
-    onChangeMode() {
-      this.enableAnnotation({
+    async onChangeMode() {
+      await this.enableAnnotation({
         dataset: this.dataset,
         value: this.annotationEnabled ? false : true,
       });

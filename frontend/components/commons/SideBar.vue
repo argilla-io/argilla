@@ -91,8 +91,8 @@ export default {
     },
     progress() {
       return (
-        (this.totalValidated || 0) +
-        ((this.totalDiscarded || 0) * 100) / this.total
+        ((this.totalValidated || 0) +
+        (this.totalDiscarded || 0)) * 100 / this.total
       ).toFixed(2);
     },
   },
@@ -119,7 +119,6 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   margin-top: 2em;
-  margin-left: 1em;
   z-index: 0;
   &__show-button {
     position: absolute;

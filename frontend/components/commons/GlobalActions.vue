@@ -97,9 +97,7 @@ export default {
     },
     options() {
       const record = this.dataset.results.records[0];
-      const labels = record
-        ? record.prediction.labels.map((label) => label.class)
-        : [];
+      const labels = record.prediction ? record.prediction.labels.map((label) => label.class) : [];
       return this.isTextClassification ? labels : [];
     },
     visibleRecords() {

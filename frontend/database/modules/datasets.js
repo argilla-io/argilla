@@ -313,18 +313,17 @@ const actions = {
   },
 
   async enableAnnotation(_, { dataset, value }) {
-    await DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        annotationEnabled: value,
-      },
-    });
-    const viewSettings = DatasetViewSettings.query().first();
     displayQueryParams({
       query: dataset.query,
       sort: dataset.sort,
       task: dataset.task,
-      enableAnnotation: viewSettings.annotationEnabled,
+      enableAnnotation: value,
+    });
+    return await DatasetViewSettings.update({
+      where: dataset.name,
+      data: {
+        annotationEnabled: value,
+      },
     });
   },
 
