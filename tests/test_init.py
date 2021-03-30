@@ -149,7 +149,7 @@ def test_init_token_correct(mock_response_200):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    rubrix.init(token="fjkjdf333")
+    rubrix.init(api_key="fjkjdf333")
 
     assert isinstance(rubrix._client, RubrixClient)
 
@@ -166,7 +166,7 @@ def test_init_token_incorrect(mock_response_500):
     """
     rubrix._client = None  # assert empty client
     with pytest.raises(Exception, match="Unidentified error, it should not get here."):
-        rubrix.init(token="422")
+        rubrix.init(api_key="422")
 
 
 def test_init_token_auth_fail(mock_response_token_401):
@@ -181,7 +181,7 @@ def test_init_token_auth_fail(mock_response_token_401):
     """
     rubrix._client = None  # assert empty client
     with pytest.raises(Exception, match="Authentification error: invalid credentials."):
-        rubrix.init(api_url="fake_url", token="422")
+        rubrix.init(api_url="fake_url", api_key="422")
 
 
 def test_init_evironment_url(api_url_env_var, mock_response_200):
@@ -296,6 +296,6 @@ def test_default_init(monkeypatch):
     assert rubrix._client._client.base_url == "http://localhost:6900"
 
     expected_token = "blablabla"
-    rubrix.init(token=expected_token)
+    rubrix.init(api_key=expected_token)
     assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.token == expected_token

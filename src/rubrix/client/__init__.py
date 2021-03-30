@@ -38,7 +38,7 @@ class RubrixClient:
         self,
         api_url: str,
         timeout: int,
-        token: Optional[str] = None,
+        api_key: Optional[str] = None,
     ):
         """Client setup function.
 
@@ -46,7 +46,7 @@ class RubrixClient:
         ----------
         api_url : str
             Address from which the API is serving. It will use the default UVICORN address as default
-        token : str
+        api_key : str
             Authentification token. A non-secured logging will be considered the default case.
         timeout : int
             Seconds to considered a connection timeout. Optional
@@ -64,13 +64,13 @@ class RubrixClient:
             raise Exception("Unidentified error, it should not get here.")
 
         # Non-token case
-        if token is None:
+        if api_key is None:
             self._client = Client(base_url=api_url, timeout=timeout)
 
         # Token case
         else:
             self._client = AuthenticatedClient(
-                base_url=api_url, token=token, timeout=timeout
+                base_url=api_url, token=api_key, timeout=timeout
             )
 
             response_token = requests.get(

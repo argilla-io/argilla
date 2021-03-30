@@ -29,7 +29,7 @@ _client: Optional[
 
 def init(
     api_url: Optional[str] = None,
-    token: Optional[str] = None,
+    api_key: Optional[str] = None,
     timeout: int = 60,
 ):
     """Client setup function.
@@ -42,8 +42,8 @@ def init(
     ----------
     api_url : str
         Address from which the API is serving. It will use the default UVICORN address as default
-    token : str
-        Authentification token. A non-secured log will be considered the default case. Optional
+    api_key: str
+        Authentification api key. A non-secured log will be considered the default case. Optional
     timeout : int
         Seconds to considered a connection timeout. Optional
     """
@@ -57,13 +57,13 @@ def init(
 
     # If an api_url is passed, tokens obtained via environ vars are disabled
     if api_url is not None:
-        final_token = token
+        final_key = api_key
     else:
-        final_token = token or os.getenv("RUBRIX_API_KEY")
+        final_key = api_key or os.getenv("RUBRIX_API_KEY")
 
     _client = RubrixClient(
         api_url=final_api_url,
-        token=final_token,
+        api_key=final_key,
         timeout=timeout,
     )
 
