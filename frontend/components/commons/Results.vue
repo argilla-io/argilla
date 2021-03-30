@@ -6,6 +6,7 @@
   <div v-else ref="resultsList" class="results">
     <div class="list">
       <VueAutoVirtualScrollList
+        :key="dataset.task"
         id="scroll"
         ref="scroll"
         class="virtual-scroll"
@@ -107,6 +108,17 @@ export default {
     scrollPosition: undefined,
     scrollComponent: undefined,
   }),
+  watch: {
+    '$route' (to, from) {
+      if(to.query.task !== from.query.task ) {
+        console.log('de');
+        this.$nextTick(() => {
+          this.scrollComponent.addEventListener("scroll", this.onScroll);
+          // this.$refs.scroll.setIndex(0)
+        })
+      }
+    }
+  },
   computed: {
     visibleRecords() {
       return this.dataset.visibleRecords;
@@ -178,7 +190,7 @@ export default {
     },
     // TODO (@leireaguirrework): All scroll logic will be moved to layout component
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 0) {
+      if (this.$refs.scroll.scrollTop > 1) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
@@ -194,6 +206,11 @@ export default {
 .results {
   flex-grow: 2;
   margin: 0 1em;
+}
+
+.record {
+  @include font-size(16px);
+  line-height: 1.6em;
 }
 
 .show-record-number {
@@ -255,7 +272,6 @@ export default {
   }
   &__item {
     position: relative;
-    padding: 1.5em 2em;
     background: $lighter-color;
     box-shadow: 0 1px 5px 0 rgba(101, 101, 101, 0.42);
     border-radius: 1px;
@@ -269,7 +285,7 @@ export default {
 }
 
 .list__item {
-  padding-left: 2em;
+  padding-left: 3em;
   padding-right: 3em;
   padding-bottom: 1em;
   margin-left: 0;

@@ -24,7 +24,7 @@ body {
   font-family: $ff;
   font-size: $base-font-size;
   line-height: $base-line-height;
-  background: $lighter-color;
+  background: $bg;
   &.--fixed {
     max-height: 100vh;
     overflow: hidden;

@@ -122,7 +122,6 @@ export default {
 <style lang="scss" scoped>
 .entities {
   &__container {
-    margin-bottom: 1em;
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;

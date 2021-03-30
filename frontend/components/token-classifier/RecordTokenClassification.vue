@@ -218,9 +218,7 @@ export default {
 .record {
   padding: 0 0 0 0;
   display: block;
-  @include font-size(14px);
-  line-height: 1.5em;
-  margin-bottom: 0.5em; // white-space: pre-line;
+  margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;
 }
 </style>

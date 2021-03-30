@@ -54,10 +54,33 @@ export default {
 }
 .annotations {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 1em;
 }
 .predictions {
   margin-top: 1em;
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.8em;
+  margin-left: -0.8em;
+  .pill {
+    height: 40px;
+    line-height: 40px;
+    display: flex;
+    width: 240px;
+    align-items: center;
+    margin-left: 0.8em;
+    margin-right: 0.8em;
+    margin-bottom: 1.6em;
+    font-weight: bold;
+    border-color: $line-smooth-color;
+    box-shadow: $shadow-light;
+    border-radius: 5px;
+    &__confidence {
+      margin-right: 0;
+      margin-left: auto;
+    }
+  }
 }
 .pill {
   @extend %pill;
@@ -65,6 +88,7 @@ export default {
   color: $font-medium-color;
   margin-bottom: 0.5em;
   @include font-size(13px);
+  line-height: 1.4em;
   &__container {
     display: flex;
     margin-bottom: 1em;

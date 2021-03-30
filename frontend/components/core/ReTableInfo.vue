@@ -1,5 +1,5 @@
  <template>
-  <div>
+  <transition appear name="fade">
     <div v-if="resultsAvailable" class="table-info">
       <div class="table-info__header">
         <slot name="columns">
@@ -37,7 +37,7 @@
               <span v-for="(column, idx) in columns" :key="idx" class="table-info__item__col">
                 <span :class="column.class">
                   <span v-if="column.type === 'link'" @click="onActionClicked(item.kind, item.name)">{{ itemValue(item, column) }}</span>
-                  <ReDate v-else-if="column.type === 'date'" class="table-info__meta" :date="item.created_at" />
+                  <ReDate v-else-if="column.type === 'date'" class="table-info__meta" :date="itemValue(item, column)" />
                   <span v-else-if="column.type === 'object'">
                     <p v-for="key in Object.keys(itemValue(item, column))" :key="key">
                       <strong>{{key}}:</strong>  {{(itemValue(item, column))[key]}}
@@ -95,7 +95,7 @@
     <div v-else>
       <ResultsEmpty empty-title="0 results found" />
     </div>
-  </div>
+  </transition>
 </template>
 
 
@@ -293,10 +293,17 @@ export default {
   list-style: none;
   margin-bottom: 5em;
   min-height: calc(100vh - 400px);
+  background: $lighter-color;
+  box-shadow: $shadow-light;
   ul {
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+  li {
+    &:nth-child(odd) {
+      background: #fcfcfc;
+    }
   }
   &__header {
     min-height: auto;
@@ -304,14 +311,18 @@ export default {
     padding-bottom: 0.3em;
     margin-top: 1em;
     background: transparent;
-    border-bottom: 1px solid $line-light-color;
+    border-bottom: 1px solid $line-smooth-color;
+    padding: 1em 2em;
+    button {
+      font-weight: bold;
+    }
     &__checkbox {
       margin: 0 !important;
     }
     &__button {
       position: absolute !important;
-      bottom: 0;
-      margin-left: 1em;
+      top: 2em;
+      right: 2em;
       margin-bottom: 0 !important;
     }
     #{$this}__item {
@@ -351,8 +362,7 @@ export default {
   &__item {
     position: relative;
     list-style: none;
-    padding: 1em 6em 1em 0;
-    background-color: $lighter-color;
+    padding: 1em 8em 1em 2em;
     display: flex;
     width: 100%;
     border-bottom: 1px solid $line-light-color;
@@ -387,7 +397,7 @@ export default {
   // }
   &__actions {
     position: absolute;
-    right: 0;
+    right: 2em;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -427,15 +437,15 @@ export default {
   }
   &__top-button {
     position: absolute !important;
-    right: 0;
-    top: 0;
+    right: 2em;
+    top: 1.3em;
     &:after {
       content: none !important;
     }
   }
   &__group {
     padding-bottom: 2em;
-    border-bottom: 1px solid $line-light-color;
+    border-bottom: 1px solid $line-smooth-color;
     display: block;
     &__title {
       margin: 3em 0 0 0;

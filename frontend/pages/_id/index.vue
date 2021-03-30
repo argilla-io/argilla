@@ -119,11 +119,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.loading {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-}
 
 .container {
   @extend %container;
@@ -170,7 +165,7 @@ export default {
     // transition: transform 0.2s ease-in-out;
     // transform: translateY(10px);
     position: fixed;
-    background: $line-light-color;
+    background: $bg;
     z-index: 2;
     box-shadow: 1px 1px 6px $font-medium-color;
     ::v-deep .filters,
@@ -186,7 +181,7 @@ export default {
     ::v-deep .global-actions {
       margin-top: 0;
       padding-top: 0;
-      background: $line-light-color;
+      background: $bg;
       border: none;
       min-height: 70px;
     }

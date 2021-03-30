@@ -23,6 +23,7 @@ export default {
   background: transparent;
   max-width: 270px;
   border: 1px solid $line-light-color;
+  background: $lighter-color;
   padding: 0 1em;
   display: flex;
   align-items: center;

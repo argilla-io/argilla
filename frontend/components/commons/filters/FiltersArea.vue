@@ -12,11 +12,11 @@
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
           ></FiltersList>
-          <SortFilter
+          <!-- <SortFilter
             :sort-options="sortOptions"
             @defaultSort="onDefaultSort"
             @sort="onSort"
-          />
+          /> -->
         </div>
       </div>
     </div>

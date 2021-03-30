@@ -23,6 +23,8 @@ export default {
 
 <style lang="scss">
 .theme-exploration {
-  background: $line-light-color;
+  background: $bg;
+    //   height: 100vh;
+    // overflow: hidden;
 }
 </style>

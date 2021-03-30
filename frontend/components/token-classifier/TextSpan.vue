@@ -26,7 +26,7 @@
             v-model="searchEntity"
             class="entities__selector__search"
             type="text"
-            placeholder="Select slot..."
+            placeholder="Select entity..."
             @focus="isFocused = true"
           />
           <ul class="entities__selector__options">

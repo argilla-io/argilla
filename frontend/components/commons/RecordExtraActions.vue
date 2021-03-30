@@ -73,8 +73,10 @@ export default {
 <style lang="scss" scoped>
 .record {
   &__extra-actions {
+    line-height: 1;
     @include font-size(13px);
     text-align: right;
+    margin-right: -2em;
     .annotate {
       color: $success;
     }
@@ -82,7 +84,7 @@ export default {
       color: $error;
     }
     > div {
-      margin-top: 1em;
+      margin-top: 0;
     }
     > * + *:before {
       content: "";

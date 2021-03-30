@@ -1,5 +1,5 @@
 <template>
-  <aside v-click-outside="closeMetrics" class="sidebar">
+  <aside class="sidebar">
     <p class="sidebar__show-button" @click="toggleVisibleMetrics">
       <svgicon name="metrics" width="30" height="30" color="#F48E5F" />
     </p>
@@ -63,7 +63,6 @@ export default {
 
   data: () => ({
     visible: false,
-    preventCloseOnClickOutside: true,
   }),
   async fetch() {
     await ObservationDataset.dispatch("refreshAnnotationProgress", {
@@ -107,9 +106,6 @@ export default {
   },
 
   methods: {
-    closeMetrics() {
-      this.visible = this.preventCloseOnClickOutside;
-    },
     toggleVisibleMetrics() {
       !this.visible ? (this.visible = true) : (this.visible = false);
     },

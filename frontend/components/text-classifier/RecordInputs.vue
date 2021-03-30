@@ -30,13 +30,12 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  @include font-size(14px);
   white-space: pre-line;
   &__key {
-    font-weight: lighter;
+    font-weight: bold;
     margin-right: 0.5em;
     text-transform: uppercase;
-    @include font-size(13px);
+    @include font-size(16px);
   }
   &__item {
     margin-right: 1em;

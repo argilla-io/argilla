@@ -45,7 +45,7 @@ export default {
       { name: "Task", field: "task", class: "task" },
       { name: "Tags", field: "tags", class: "text", type: "object" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
-      { name: "Updated at", field: "updated_at", class: "date", type: "date" },
+      { name: "Updated at", field: "last_updated", class: "date", type: "date" },
     ],
     actions: [
       { name: "delete", icon: "delete", tooltip: "Delete" },
@@ -59,7 +59,7 @@ export default {
       },
     ],
     sortedOrder: "desc",
-    sortedByField: "id",
+    sortedByField: "last_updated",
     showModal: undefined,
   }),
   async fetch() {
@@ -128,7 +128,7 @@ export default {
 <style lang="scss" scoped>
 .container {
   @extend %container;
-  padding-top: 0;
+  padding-top: 0.2em;
   padding-bottom: 0;
   &--intro {
     padding-top: 2em;
@@ -143,6 +143,7 @@ export default {
     }
   }
 }
+
 .title {
   display: inline-block;
   font-weight: lighter;

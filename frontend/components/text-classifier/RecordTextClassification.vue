@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="record">
     <!-- annotation labels and prediction status -->
     <LabelPill
       v-if="record.annotation && !annotationEnabled"

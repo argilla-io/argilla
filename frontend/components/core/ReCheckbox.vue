@@ -79,7 +79,7 @@ export default {
 <style lang="scss" scoped>
 $checkbox-size: 20px;
 $checkbox-touch-size: 20px;
-$checkbox-color: $line-light-color;
+$checkbox-color: $line-smooth-color;
 $checkbox-color-dark: $font-medium-color;
 .re-checkbox {
   width: auto;
