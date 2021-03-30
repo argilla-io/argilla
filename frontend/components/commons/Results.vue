@@ -108,17 +108,6 @@ export default {
     scrollPosition: undefined,
     scrollComponent: undefined,
   }),
-  watch: {
-    '$route' (to, from) {
-      if(to.query.task !== from.query.task ) {
-        console.log('de');
-        this.$nextTick(() => {
-          this.scrollComponent.addEventListener("scroll", this.onScroll);
-          // this.$refs.scroll.setIndex(0)
-        })
-      }
-    }
-  },
   computed: {
     visibleRecords() {
       return this.dataset.visibleRecords;
@@ -187,6 +176,7 @@ export default {
     },
     onVirtualScrollUpdated() {
       this.scrollPosition = this.$refs.scroll.offset + 1;
+      document.getElementById("scroll").addEventListener("scroll", this.onScroll);
     },
     // TODO (@leireaguirrework): All scroll logic will be moved to layout component
     onScroll() {
