@@ -6,13 +6,13 @@ Contains methods for accesing the API.
 """
 
 import logging
-from typing import Any, Dict, Iterable, List, Optional
 import os
 import re
+from typing import Iterable
 
 import pkg_resources
 from rubrix.client import RubrixClient, models
-from rubrix.sdk.models import *
+from rubrix.client.models import *
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version

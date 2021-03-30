@@ -3,7 +3,7 @@ from time import sleep
 import httpx
 import requests
 from fastapi.testclient import TestClient
-from rubrix import TextClassificationSearchResults
+from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
 
@@ -29,11 +29,7 @@ def test_log_something(monkeypatch):
 
     response = rubrix.log(
         name=dataset_name,
-        records=[
-            rubrix.TextClassificationRecord.from_dict(
-                {"inputs": {"text": "This is a test"}}
-            )
-        ],
+        records=[rubrix.TextClassificationRecord(inputs={"text": "This is a test"})],
     )
 
     assert response.processed == 1

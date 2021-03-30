@@ -12,25 +12,23 @@ import pytest
 import requests
 import rubrix
 from rubrix import (
-    TextClassificationBulkDataMetadata,
-    TextClassificationBulkDataTags,
-    TokenClassificationBulkDataMetadata,
-    TokenClassificationBulkDataTags,
+    BulkResponse,
+    EntitySpan,
+    TextClassificationRecord,
+    TokenClassificationAnnotation,
+    TokenClassificationRecord,
 )
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
 from rubrix.sdk.models import (
-    BulkResponse,
-    TextClassificationRecord,
+    TextClassificationBulkDataMetadata,
+    TextClassificationBulkDataTags,
     TextClassificationRecordsBulk,
-    TextClassificationRecordsBulkMetadata,
-    TextClassificationRecordsBulkTags,
-    TokenClassificationRecord,
+    TokenClassificationBulkDataMetadata,
+    TokenClassificationBulkDataTags,
     TokenClassificationRecordsBulk,
-    TokenClassificationRecordsBulkMetadata,
-    TokenClassificationRecordsBulkTags,
 )
 from rubrix.sdk.types import Response
 
@@ -69,9 +67,7 @@ def mock_response_text(monkeypatch):
         Mockup function
     """
 
-    _response = BulkResponse.from_dict(
-        {"dataset": "test", "processed": 500, "failed": 0}
-    )
+    _response = BulkResponse(dataset="test", processed=500, failed=0)
 
     def mock_get(*args, json_body: TextClassificationRecordsBulk, **kwargs):
         assert isinstance(json_body.metadata, TextClassificationBulkDataMetadata)
@@ -105,9 +101,7 @@ def mock_response_token(monkeypatch):
         Mockup function
     """
 
-    _response = BulkResponse.from_dict(
-        {"dataset": "test", "processed": 500, "failed": 0}
-    )
+    _response = BulkResponse(dataset="test", processed=500, failed=0)
 
     def mock_get(*args, json_body: TokenClassificationRecordsBulk, **kwargs):
         assert isinstance(json_body.metadata, TokenClassificationBulkDataMetadata)
@@ -134,13 +128,10 @@ def mock_dataset_text():
     """Mocked dataset for text classification"""
 
     return [
-        TextClassificationRecord.from_dict(
-            {
-                "idx": "test",
-                "inputs": {"review_body": "increible test"},
-                "metadata": {"product_category": "test de pytest"},
-                "label": 5,
-            }
+        TextClassificationRecord(
+            id="test",
+            inputs={"review_body": "increible test"},
+            metadata={"product_category": "test de pytest"},
         )
     ]
 
@@ -150,25 +141,16 @@ def mock_dataset_token():
     """Mocked dataset for token classification"""
 
     return [
-        TokenClassificationRecord.from_dict(
-            {
-                "raw_text": "Super test",
-                "prediction": {
-                    "agent": "spacy",
-                    "entities": [
-                        {
-                            "start": "a",
-                            "end": "b",
-                            "start_token": "c",
-                            "end_token": "d",
-                            "label": "e",
-                        }
-                    ],
-                },
-                "tokens": ["a", "b"],
-                "event_timestamp": "1999-330",
-                "metadata": {"model": "spacy_es_core_news_sm"},
-            }
+        TokenClassificationRecord(
+            raw_text="Super test",
+            prediction=TokenClassificationAnnotation(
+                agent="spacy",
+                entities=[
+                    EntitySpan(start=0, end=5, start_token=0, end_token=3, label="e")
+                ],
+            ),
+            tokens=["a", "b"],
+            metadata={"model": "spacy_es_core_news_sm"},
         )
     ]
 
@@ -219,7 +201,7 @@ def test_text_classification(
 
     assert rubrix.log(
         name="test", records=mock_dataset_text, tags=mock_tags_text
-    ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
+    ) == BulkResponse(dataset="test", processed= 500, failed=0)
 
 
 def test_token_classification(
@@ -243,7 +225,7 @@ def test_token_classification(
 
     assert rubrix.log(
         name="test", records=mock_dataset_token, tags=mock_tags_token
-    ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
+    ) == BulkResponse(dataset="test", processed= 500, failed=0)
 
 
 def test_no_name(
@@ -346,9 +328,7 @@ def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
         rubrix.log(
             name="dataset",
             records=[
-                TextClassificationRecord.from_dict(
-                    {"inputs": {"text": "The textual info"}}
-                )
+                TextClassificationRecord(inputs={"text": "The textual info"})
             ],
             tags={"env": "Test"},
         )

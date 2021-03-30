@@ -11,13 +11,19 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import requests
 from rubrix.client import models
+from rubrix.client.models import (
+    BulkResponse,
+    DatasetSnapshot,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
 from rubrix.sdk import AuthenticatedClient, Client
 from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
-from rubrix.sdk.models import *
+from rubrix.sdk import models
 from rubrix.sdk.types import Response
 
 
@@ -134,16 +140,18 @@ class RubrixClient:
 
         # Divided into Text and Token Classification Bulks
         if record_type is TextClassificationRecord:
-            BulkClass = TextClassificationBulkData
+            bulk_class = models.TextClassificationBulkData
             bulk_records_function = text_classification_bulk.sync_detailed
-            tags = TextClassificationBulkDataTags.from_dict(tags)
-            metadata = TextClassificationBulkDataMetadata.from_dict(metadata)
+            tags = models.TextClassificationBulkDataTags.from_dict(tags)
+            metadata = models.TextClassificationBulkDataMetadata.from_dict(metadata)
+            record_class = models.TextClassificationRecord
 
         elif record_type is TokenClassificationRecord:
-            BulkClass = TokenClassificationBulkData
+            bulk_class = models.TokenClassificationBulkData
             bulk_records_function = token_classification_bulk.sync_detailed
-            tags = TokenClassificationBulkDataTags.from_dict(tags)
-            metadata = TokenClassificationBulkDataMetadata.from_dict(metadata)
+            tags = models.TokenClassificationBulkDataTags.from_dict(tags)
+            metadata = models.TokenClassificationBulkDataMetadata.from_dict(metadata)
+            record_class = models.TokenClassificationRecord
 
         # Record type is not recognised
         else:
@@ -156,7 +164,11 @@ class RubrixClient:
             response = bulk_records_function(
                 client=self._client,
                 name=name,
-                json_body=BulkClass(tags=tags, metadata=metadata, records=chunk),
+                json_body=bulk_class(
+                    tags=tags,
+                    metadata=metadata,
+                    records=[record_class.from_dict(r.asdict()) for r in chunk],
+                ),
             )
 
             _check_response_errors(response)
@@ -164,11 +176,9 @@ class RubrixClient:
             failed += response.parsed.failed
 
         # Creating a composite BulkResponse with the total processed and failed
-        return BulkResponse.from_dict(
-            {"dataset": name, "processed": processed, "failed": failed}
-        )
+        return BulkResponse(dataset=name, processed=processed, failed=failed)
 
-    def snapshots(self, dataset: str) -> List[models.DatasetSnapshot]:
+    def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
         """
         Retrieves created snapshots for given dataset
 
@@ -189,7 +199,7 @@ class RubrixClient:
         _check_response_errors(response)
 
         return [
-            models.DatasetSnapshot(
+            DatasetSnapshot(
                 id=snapshot.id, task=snapshot.task, creation_date=snapshot.creation_date
             )
             for snapshot in response.parsed
