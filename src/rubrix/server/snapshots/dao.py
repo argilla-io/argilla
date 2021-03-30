@@ -1,3 +1,4 @@
+import datetime
 import ntpath
 import os
 from glob import glob
@@ -54,9 +55,7 @@ class SnapshotsDAO:
         """
         raise NotImplementedError()
 
-    def get(
-        self, dataset: DatasetDB, id: str
-    ) -> Optional[DatasetSnapshotDB]:
+    def get(self, dataset: DatasetDB, id: str) -> Optional[DatasetSnapshotDB]:
         """
 
         Parameters
@@ -122,14 +121,22 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
                 f"No data for dataset snapshot {dataset.name} and task {task}"
             )
         df.to_json(path, orient="records")
-        return DatasetSnapshotDB(id=snapshot.id, uri=path.as_uri())
+        return DatasetSnapshotDB(
+            id=snapshot.id,
+            uri=path.as_uri(),
+            task=self.__task_from_path__(str(path), dataset),
+            creation_date=self.__file_creation_date__(path),
+        )
 
-    def get(
-        self, dataset: DatasetDB, id: str
-    ) -> Optional[DatasetSnapshotDB]:
+    def get(self, dataset: DatasetDB, id: str) -> Optional[DatasetSnapshotDB]:
         path = self.__snapshot_path__(dataset=dataset.name, owner=dataset.owner, id=id)
         if path:
-            return DatasetSnapshotDB(id=id, uri=path.as_uri())
+            return DatasetSnapshotDB(
+                id=id,
+                uri=path.as_uri(),
+                task=self.__task_from_path__(str(path), dataset),
+                creation_date=self.__file_creation_date__(path),
+            )
 
     def list(
         self, dataset: DatasetDB, task: Optional[TaskType] = None
@@ -141,7 +148,12 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
             "*",
         )
         return [
-            DatasetSnapshotDB(id=ntpath.basename(file), uri=Path(file).as_uri())
+            DatasetSnapshotDB(
+                id=ntpath.basename(file),
+                uri=Path(file).as_uri(),
+                task=self.__task_from_path__(file, dataset),
+                creation_date=self.__file_creation_date__(Path(file)),
+            )
             for file in glob(
                 snapshots_path_pattern,
                 recursive=True,
@@ -178,6 +190,18 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
     def __owner_snapshots_path__(self, owner: str) -> Path:
         owner = owner or "default"
         return Path(os.path.join(self.__base_path__, owner))
+
+    def __task_from_path__(self, file: str, dataset: DatasetDB) -> str:
+        clean_path = file.replace(
+            os.path.join(self.__owner_snapshots_path__(dataset.owner), dataset.name),
+            "",
+        )
+        return clean_path[1:].split("/")[0]
+
+    @staticmethod
+    def __file_creation_date__(path: Path) -> datetime.datetime:
+        stats = path.stat()
+        return datetime.datetime.fromtimestamp(stats.st_ctime)
 
 
 _instance: Optional[SnapshotsDAO] = None

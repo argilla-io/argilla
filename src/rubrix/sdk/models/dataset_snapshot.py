@@ -1,6 +1,8 @@
+import datetime
 from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
+from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -13,12 +15,17 @@ class DatasetSnapshot:
 
     id: str
     uri: str
+    task: str
+    creation_date: datetime.datetime
     format: Union[Unset, str] = "json"
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
         uri = self.uri
+        task = self.task
+        creation_date = self.creation_date.isoformat()
+
         format = self.format
 
         field_dict: Dict[str, Any] = {}
@@ -27,6 +34,8 @@ class DatasetSnapshot:
             {
                 "id": id,
                 "uri": uri,
+                "task": task,
+                "creation_date": creation_date,
             }
         )
         if format is not UNSET:
@@ -41,11 +50,17 @@ class DatasetSnapshot:
 
         uri = d.pop("uri")
 
+        task = d.pop("task")
+
+        creation_date = isoparse(d.pop("creation_date"))
+
         format = d.pop("format", UNSET)
 
         dataset_snapshot = cls(
             id=id,
             uri=uri,
+            task=task,
+            creation_date=creation_date,
             format=format,
         )
 

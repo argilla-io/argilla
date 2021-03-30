@@ -89,6 +89,8 @@ def test_dataset_snapshots_flow():
 
     snapshot = DatasetSnapshot(**response.json())
     assert os.path.exists(uri_2_path(snapshot.uri))
+    assert snapshot.task == TaskType.text_classification
+    assert snapshot.creation_date
 
     response = client.get(f"{api_ds_prefix}/snapshots")
     assert response.status_code == 200

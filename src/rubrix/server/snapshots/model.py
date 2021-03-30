@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel
 
 
@@ -27,9 +29,15 @@ class DatasetSnapshotDB(CreationDatasetSnapshot):
 
     uri: str
         The access uri to snapshot dataset
+    task: str
+        The snapshot task
+    creation_date:
+        THe snapshot creation date
     """
 
     uri: str
+    task: str
+    creation_date: datetime.datetime
 
 
 class DatasetSnapshot(DatasetSnapshotDB):

@@ -4,19 +4,25 @@ import httpx
 import requests
 from fastapi.testclient import TestClient
 from rubrix import TextClassificationSearchResults
+from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
 
 import rubrix
 
+from tests.server.snapshots.test_api import create_some_data_for_text_classification
+
 client = TestClient(app)
 
 
-def test_log_something(monkeypatch):
+def mocking_client(monkeypatch):
     monkeypatch.setattr(requests, "get", client.get)
     monkeypatch.setattr(requests, "post", client.post)
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
 
+
+def test_log_something(monkeypatch):
+    mocking_client(monkeypatch)
     dataset_name = "test-dataset"
 
     client.delete(f"/api/datasets/{dataset_name}")
@@ -40,3 +46,20 @@ def test_log_something(monkeypatch):
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"
+
+
+def test_list_snapshots(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_create_dataset_snapshot"
+    api_ds_prefix = f"/api/datasets/{dataset}"
+    create_some_data_for_text_classification(dataset)
+    response = client.post(
+        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
+    )
+    assert response.status_code == 200
+    snapshots = rubrix.snapshots(dataset)
+    assert len(snapshots) > 0
+    for snapshot in snapshots:
+        assert snapshot.task == TaskType.text_classification
+        assert snapshot.id
+        assert snapshot.creation_date

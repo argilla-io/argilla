@@ -6,16 +6,19 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 
-from typing import Any, Dict, Optional, List, Union, Iterable
 import logging
-import requests
+from typing import Any, Dict, Iterable, List, Optional
 
-from rubrix.sdk import Client, AuthenticatedClient
-from rubrix.sdk.models import *
+import requests
+from rubrix.client import models
+from rubrix.sdk import AuthenticatedClient, Client
+from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
+from rubrix.sdk.models import *
+from rubrix.sdk.types import Response
 
 
 class RubrixClient:
@@ -155,58 +158,84 @@ class RubrixClient:
                 name=name,
                 json_body=BulkClass(tags=tags, metadata=metadata, records=chunk),
             )
-            # Concrete error codes
-            if response.status_code == 401:
-                raise Exception(
-                    "Unauthorized error: invalid credentials. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
 
-            elif response.status_code == 403:
-                raise Exception(
-                    "Forbidden error: you have not been authorised to access this dataset. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
-
-            elif response.status_code == 404:
-                raise Exception(
-                    "Not found error. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
-
-            elif response.status_code == 422:
-                raise Exception(
-                    "Unprocessable entity error: Something is wrong in your records. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
-
-            elif (
-                response.status_code >= 400
-                and response.status_code < 500
-                or not response.parsed
-            ):
-                raise Exception(
-                    "Request error: API cannot answer. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
-
-            elif response.status_code >= 500:
-                raise Exception(
-                    "Connection error: API is not responding. The API answered with a {} code: {}".format(
-                        response.status_code, response.content
-                    )
-                )
-
-            else:
-                processed += response.parsed.processed
-                failed += response.parsed.failed
+            _check_response_errors(response)
+            processed += response.parsed.processed
+            failed += response.parsed.failed
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse.from_dict(
             {"dataset": name, "processed": processed, "failed": failed}
+        )
+
+    def snapshots(self, dataset: str) -> List[models.DatasetSnapshot]:
+        """
+        Retrieves created snapshots for given dataset
+
+        Parameters
+        ----------
+        dataset: str
+            The dataset name
+
+        Returns
+        -------
+            A list of snapshots
+
+        """
+
+        response = list_dataset_snapshots.sync_detailed(
+            client=self._client, name=dataset
+        )
+        _check_response_errors(response)
+
+        return [
+            models.DatasetSnapshot(
+                id=snapshot.id, task=snapshot.task, creation_date=snapshot.creation_date
+            )
+            for snapshot in response.parsed
+        ]
+
+
+def _check_response_errors(response: Response) -> None:
+    """Checks response status codes and raise corresponding error if found"""
+
+    http_status = response.status_code
+    response_data = response.parsed
+
+    if http_status == 401:
+        raise Exception(
+            "Unauthorized error: invalid credentials. The API answered with a {} code: {}".format(
+                http_status, response_data
+            )
+        )
+
+    elif http_status == 403:
+        raise Exception(
+            "Forbidden error: you have not been authorised to access this dataset. "
+            "The API answered with a {} code: {}".format(http_status, response_data)
+        )
+
+    elif http_status == 404:
+        raise Exception(
+            "Not found error. The API answered with a {} code: {}".format(
+                http_status, response_data
+            )
+        )
+
+    elif http_status == 422:
+        raise Exception(
+            "Unprocessable entity error: Something is wrong in your records. "
+            "The API answered with a {} code: {}".format(http_status, response_data)
+        )
+
+    elif 400 <= http_status < 500:
+        raise Exception(
+            "Request error: API cannot answer. "
+            "The API answered with a {} code: {}".format(http_status, response_data)
+        )
+
+    elif http_status >= 500:
+        raise Exception(
+            "Connection error: API is not responding. "
+            "The API answered with a {} code: {}".format(http_status, response_data)
         )

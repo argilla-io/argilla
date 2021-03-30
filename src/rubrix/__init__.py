@@ -6,12 +6,12 @@ Contains methods for accesing the API.
 """
 
 import logging
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional
 import os
 import re
 
 import pkg_resources
-from rubrix.client import RubrixClient
+from rubrix.client import RubrixClient, models
 from rubrix.sdk.models import *
 
 try:
@@ -92,15 +92,35 @@ def log(
         The default chunk size for data bulk
 
     """
-    global _client
+    return _client_instance().log(
+        records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
+    )
 
+
+def _client_instance() -> RubrixClient:
+    """Checks module instance client and init if not initialized"""
+
+    global _client
     # Calling a by-default-init if it was not called before
     if _client is None:
         _LOGGER.warning(
             "Tried to log data without previous initialization. An initialization by default has been performed."
         )
         init()
+    return _client
 
-    return _client.log(
-        records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
-    )
+
+def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
+    """
+    Retrieve dataset snapshots
+
+    Parameters
+    ----------
+    dataset:
+        The dataset name
+
+    Returns
+    -------
+
+    """
+    return _client_instance().snapshots(dataset)
