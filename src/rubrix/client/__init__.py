@@ -6,8 +6,8 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 
-import logging
 from typing import Any, Dict, Iterable, List, Optional
+import logging
 
 import requests
 from rubrix.client import models
@@ -55,7 +55,7 @@ class RubrixClient:
         self._client = None  # Variable to store the client after the init
 
         try:
-            response = requests.get(url=api_url + "/openapi.json").status_code
+            response = requests.get(url=f"{api_url}/api/docs/spec.json").status_code
         except ConnectionRefusedError:
             raise Exception("Connection Refused: cannot connect to the API.")
 

@@ -52,6 +52,10 @@ def configure_app_statics(app: FastAPI):
 app = FastAPI(
     title="Rubrix",
     description="Rubrix API",
+    # Disable default openapi configuration
+    openapi_url="/api/docs/spec.json",
+    docs_url="/api/docs" if api_settings.docs_enabled else None,
+    redoc_url=None,
 )
 
 for app_configure in [

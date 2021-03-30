@@ -58,7 +58,7 @@ class UsersService:
         """
         to_encode = {
             "sub": username,
-            "exp": datetime.utcnow() + expires_delta or timedelta(minutes=15),
+            "exp": datetime.utcnow() + (expires_delta or timedelta(minutes=15)),
         }
         return jwt.encode(
             to_encode,

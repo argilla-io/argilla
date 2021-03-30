@@ -21,11 +21,16 @@ class ApiSettings(BaseSettings):
 
     cors_origins: (CORS_ORIGINS env var)
         List of host patterns for CORS origin access
+
+    docs_enabled: True
+        If True, enable openapi docs endpoint at /api/docs
     """
 
     only_bulk_api: bool = False
     elasticsearch: str = "http://localhost:9200"
     cors_origins: List[str] = ["*"]
+
+    docs_enabled: bool = True
 
 
 settings = ApiSettings()

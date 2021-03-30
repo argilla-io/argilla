@@ -77,7 +77,7 @@ def mock_response_token_401(monkeypatch):
     def mock_get(*args, **kwargs):
         if kwargs["url"] == "fake_url/api/me":
             return response_401
-        elif kwargs["url"] == "fake_url/openapi.json":
+        elif kwargs["url"] == "fake_url/api/docs/spec.json":
             return response_200
 
     monkeypatch.setattr(
