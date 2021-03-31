@@ -276,7 +276,9 @@ $hue: 360;
 @for $i from 1 through $colors {
   $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 82%, 1);
   .color_#{$i - 1} {
-    background: $rcolor;
+    ::v-deep span {
+      background: $rcolor;
+    }
     &.active,
     &.tag:hover {
       border: 2px solid darken($rcolor, 50%);
