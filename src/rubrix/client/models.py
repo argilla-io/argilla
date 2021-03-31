@@ -1,9 +1,8 @@
-import datetime
 import dataclasses
+import datetime
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-
-from pydantic.dataclasses import dataclass
 
 
 class TaskStatus(str, Enum):
@@ -74,7 +73,7 @@ class ClassPrediction:
         this probability should be 1.0
     """
 
-    prediction_class: Union[str, int]
+    class_label: Union[str, int]
     confidence: Optional[float] = 1.0
 
 
