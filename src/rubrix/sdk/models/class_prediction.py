@@ -51,7 +51,7 @@ class ClassPrediction:
             class_: Union[str, int]
             return cast(Union[str, int], data)
 
-        class_ = _parse_class_(d.pop("class"))
+        class_ = _parse_class_(d.pop("class", d.pop("class_label")))
 
         confidence = d.pop("confidence", UNSET)
 
