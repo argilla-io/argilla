@@ -292,7 +292,6 @@ export default {
   padding: 0;
   list-style: none;
   margin-bottom: 5em;
-  min-height: calc(100vh - 400px);
   background: $lighter-color;
   box-shadow: $shadow-light;
   ul {

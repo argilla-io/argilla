@@ -101,7 +101,11 @@ export default {
       let text;
       const nextSpan = this.spans[this.spanId + 1];
       if (nextSpan) {
-        text = this.record.raw_text.slice(this.span.start, nextSpan.start);
+        if (this.spans[this.spanId].entity) {
+          text = this.record.raw_text.slice(this.span.start, nextSpan.start - 1);
+        } else {
+          text = this.record.raw_text.slice(this.span.start, nextSpan.start);
+        }
       } else {
         text = this.record.raw_text.slice(this.span.start);
       }

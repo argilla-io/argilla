@@ -42,7 +42,6 @@ export default {
     querySearch: undefined,
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
-      { name: "Task", field: "task", class: "task" },
       { name: "Tags", field: "tags", class: "text", type: "object" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       { name: "Updated at", field: "last_updated", class: "date", type: "date" },
