@@ -1,7 +1,12 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from rubrix.server.commons.settings import settings
+from rubrix.server.dataset_records.service import (
+    DatasetRecordsService,
+    create_dataset_records_service,
+)
 from rubrix.server.security.api import get_current_active_user
 from rubrix.server.users.model import User
 
@@ -133,3 +138,4 @@ def delete_dataset(
 
     """
     service.delete(name, owner=current_user.current_group)
+

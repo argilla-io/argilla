@@ -20,6 +20,11 @@ def mocking_client(monkeypatch):
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
 
+    def stream_mock(*args, url: str, **kwargs):
+        return client.get(url, stream=True)
+
+    monkeypatch.setattr(httpx, "stream", stream_mock)
+
 
 def test_log_something(monkeypatch):
     mocking_client(monkeypatch)
@@ -59,3 +64,10 @@ def test_list_snapshots(monkeypatch):
         assert snapshot.task == TaskType.text_classification
         assert snapshot.id
         assert snapshot.creation_date
+
+    ds = rubrix.load(name=dataset)
+    assert ds
+
+    ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
+    assert ds
+

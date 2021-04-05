@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
+from rubrix.server.dataset_records import scan_data_response
 from rubrix.server.dataset_records.model import (
     MultiTaskRecord,
     MultiTaskRecordSearchQuery,
@@ -246,4 +248,34 @@ def search_records_deprecated(
         datasets=datasets,
         service=service,
         current_user=current_user,
+    )
+
+
+@router.get(
+    base_endpoint + "/data",
+    operation_id="get_dataset_data",
+)
+async def get_dataset_data(
+    name: str,
+    service: DatasetRecordsService = Depends(create_dataset_records_service),
+    current_user: User = Depends(get_current_active_user),
+) -> StreamingResponse:
+    """
+    Creates a data stream over dataset records
+
+    Parameters
+    ----------
+    name
+        The dataset name
+    service:
+        The dataset records service
+    current_user:
+        Request user
+
+    """
+    return scan_data_response(
+        service,
+        dataset=name,
+        owner=current_user.current_group,
+        tasks=[TokenClassificationTask],
     )

@@ -369,7 +369,7 @@ class DatasetRecordsDAO:
     def scan_dataset(
         self,
         dataset: DatasetDB,
-        search: MultiTaskSearch,
+        search: Optional[MultiTaskSearch] = None,
     ) -> Iterable[MultiTaskRecordDB]:
         """
         Iterates over a dataset records
@@ -379,19 +379,21 @@ class DatasetRecordsDAO:
         dataset:
             The dataset
         search:
-            The search parameters
+            The search parameters. Optional
 
         Returns
         -------
             An iterable over found dataset records
         """
+        search = search or MultiTaskSearch()
         es_query = {
             "query": search.query,
         }
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
         )
-        return (MultiTaskRecordDB.parse_obj(doc["_source"]) for doc in docs)
+        for doc in docs:
+            yield MultiTaskRecordDB.parse_obj(doc["_source"])
 
 
 _instance: Optional[DatasetRecordsDAO] = None

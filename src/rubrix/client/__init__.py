@@ -6,9 +6,11 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 
-from typing import Any, Dict, Iterable, List, Optional
 import logging
+from collections import defaultdict
+from typing import Any, Dict, Iterable, List, Optional
 
+import datasets
 import requests
 from rubrix.client import models
 from rubrix.client.models import (
@@ -17,13 +19,12 @@ from rubrix.client.models import (
     TextClassificationRecord,
     TokenClassificationRecord,
 )
-from rubrix.sdk import AuthenticatedClient, Client
+from rubrix.sdk import AuthenticatedClient, Client, models
 from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
-from rubrix.sdk import models
 from rubrix.sdk.types import Response
 
 
@@ -178,7 +179,38 @@ class RubrixClient:
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
 
-    def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
+    def load(
+        self, name: str, snapshot: Optional[str] = None, task: Optional[str] = None
+    ) -> datasets.Dataset:
+
+        if snapshot:
+            from rubrix.sdk.api.snapshots import _get_data
+
+            response = _get_data.sync_detailed(
+                client=self._client, name=name, snapshot_id=snapshot
+            )
+        else:
+
+            task = task or "text_classification"
+            task = task.lower().strip()
+
+            if task == "text_classification":
+                from rubrix.sdk.api.text_classification import _get_dataset_data
+
+            elif task == "token_classification":
+                from rubrix.sdk.api.token_classification import _get_dataset_data
+            else:
+                raise ValueError(f"Wrong task defined {task}")
+            response = _get_dataset_data.sync_detailed(client=self._client, name=name)
+
+        _check_response_errors(response)
+        data = defaultdict(list)
+        for r in response.parsed:
+            for item, value in r.items():
+                data[item].append(value)
+        return datasets.Dataset.from_dict(data)
+
+    def snapshots(self, dataset: str) -> List[models.DatasetSnapshot]:
         """
         Retrieves created snapshots for given dataset
 

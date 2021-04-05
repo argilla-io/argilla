@@ -1,9 +1,11 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import TaskType
 from rubrix.server.commons.settings import settings as api_settings
 from rubrix.server.security.api import get_current_active_user
+from rubrix.server.snapshots.helpers import stream_from_uri
 from rubrix.server.users.model import User
 
 from .model import DatasetSnapshot
@@ -143,3 +145,32 @@ def delete_dataset_snapshot(
 
     """
     service.delete(name, owner=current_user.current_group, id=snapshot_id)
+
+
+@router.get(
+    "/{name}/snapshots/{snapshot_id}/data",
+    operation_id="get_data",
+)
+async def get_data(
+    name: str,
+    snapshot_id: str,
+    service: SnapshotsService = Depends(create_snapshots_service),
+    current_user: User = Depends(get_current_active_user),
+) -> StreamingResponse:
+    """
+    Creates a data stream over dataset records
+
+    Parameters
+    ----------
+    name:
+        Dataset name
+    snapshot_id:
+        Snapshot id
+    service:
+        Snapshots service
+    current_user:
+        Current request user
+
+    """
+    snapshot = service.get(name, owner=current_user.current_group, id=snapshot_id)
+    return stream_from_uri(snapshot.uri)

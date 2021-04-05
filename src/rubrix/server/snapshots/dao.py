@@ -120,7 +120,7 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
             raise ValueError(
                 f"No data for dataset snapshot {dataset.name} and task {task}"
             )
-        df.to_json(path, orient="records")
+        df.to_json(path, orient="records", lines=True)
         return DatasetSnapshotDB(
             id=snapshot.id,
             uri=path.as_uri(),

@@ -1,6 +1,7 @@
 import os
 from time import sleep
 
+import pandas
 import pytest
 from fastapi.testclient import TestClient
 from rubrix.server.commons.models import TaskStatus
@@ -75,7 +76,8 @@ def test_dataset_snapshots_flow():
     if response.status_code == 200:
         for snapshot in map(DatasetSnapshot.parse_obj, response.json()):
             assert (
-                200 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
+                200
+                == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
             )
 
     create_some_data_for_text_classification(name)
@@ -101,6 +103,10 @@ def test_dataset_snapshots_flow():
     response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}")
     assert response.status_code == 200
     assert snapshot == DatasetSnapshot(**response.json())
+
+    response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}/data")
+    df = pandas.read_json(response.content, lines=True)
+    assert len(df) == 2
 
     client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}")
     response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}")

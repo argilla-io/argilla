@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional
+from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
@@ -20,6 +20,7 @@ from .model import (
     MultiTaskSortParam,
     MultitaskRecordSearchResults,
     RecordSearchAggregations,
+    RecordTaskInfo,
     TaskMeta,
 )
 
@@ -112,6 +113,29 @@ class DatasetRecordsService:
         )
         return _dao_results_2_service_results(results, tasks=configured_tasks)
 
+    def scan_dataset(
+        self,
+        dataset: str,
+        owner: Optional[str],
+        tasks: List[Type[RecordTaskInfo]],
+    ) -> Iterable[MultiTaskRecord]:
+        """
+        Scan a dataset records
+
+        Parameters
+        ----------
+        dataset:
+            The dataset name
+        owner:
+            The dataset owner. Optional
+        tasks:
+            Task list that should be included in output record
+
+        """
+        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
+        for db_record in self.__dao__.scan_dataset(dataset):
+            yield _record_db_2_record(db_record, _tasks=tasks)
+
 
 def _record_2_db_record(
     record: MultiTaskRecord, owner: Optional[str]
@@ -182,7 +206,7 @@ _DEFAULT_TOKENIZATION_PATTERN = re.compile(r"\s+")
 
 
 def _record_db_2_record(
-    db_record: MultiTaskRecordDB, _tasks: List[TaskMeta]
+    db_record: MultiTaskRecordDB, _tasks: List[Type[RecordTaskInfo]]
 ) -> MultiTaskRecord:
     """
     Builds a service record from a db record
@@ -215,7 +239,7 @@ def _record_db_2_record(
     )
 
     for meta in _tasks:
-        record.with_task_info(meta.task_info(**db_record.tasks.get(meta.task, {})))
+        record.with_task_info(meta(**db_record.tasks.get(meta.task(), {})))
 
     # Creates defaults inputs for handle multiple tasks
     _normalize_record_inputs(record)
@@ -263,7 +287,10 @@ def _dao_results_2_service_results(
 
     return MultitaskRecordSearchResults(
         total=results.total,
-        records=[_record_db_2_record(r, _tasks=tasks) for r in results.records],
+        records=[
+            _record_db_2_record(r, _tasks=[t.task_info for t in tasks])
+            for r in results.records
+        ],
         aggregations=_aggregations_from_dao_results(results, _tasks=tasks),
     )
 

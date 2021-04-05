@@ -10,6 +10,7 @@ import os
 import re
 from typing import Iterable
 
+import datasets
 import pkg_resources
 from rubrix.client import RubrixClient, models
 from rubrix.client.models import *
@@ -104,7 +105,8 @@ def _client_instance() -> RubrixClient:
     # Calling a by-default-init if it was not called before
     if _client is None:
         _LOGGER.warning(
-            "Tried to log data without previous initialization. An initialization by default has been performed."
+            "Tried to log data without previous initialization."
+            " An initialization by default has been performed."
         )
         init()
     return _client
@@ -124,3 +126,27 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 
     """
     return _client_instance().snapshots(dataset)
+
+
+def load(
+    name: str, snapshot: Optional[str] = None, task: Optional[str] = None
+) -> datasets.Dataset:
+    """
+    Load datase/snapshot data as a huggingface dataset
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    snapshot:
+        The dataset snapshot id. Optional
+    task:
+        The data task to retrieve (when no snapshots provided). Optional
+
+    Returns
+    -------
+
+        A huggingfaces dataset
+
+    """
+    return _client_instance().load(name=name, snapshot=snapshot, task=task)
