@@ -11,6 +11,7 @@ from rubrix.server.commons.errors import common_exception_handler
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 
 from .commons.settings import settings as api_settings
+from .security.settings import settings as security_settings
 from .routes import api_router
 
 
@@ -43,7 +44,13 @@ def configure_app_statics(app: FastAPI):
     app.mount(
         "/",
         RewriteStaticFiles(
-            directory=os.path.join(parent_path, "static"), html=True, check_dir=False
+            directory=os.path.join(
+                parent_path,
+                "static",
+                "secured" if security_settings.enable_security else "unsecured",
+            ),
+            html=True,
+            check_dir=False,
         ),
         name="static",
     )

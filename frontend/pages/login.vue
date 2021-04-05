@@ -3,10 +3,10 @@
     <form class="form" @submit.prevent="userLogin">
       <BiomeIsotipo class="form__logo" :minimal="false" />
       <p class="form__title">Rubrix</p>
-      <div class="form__input" :class="{'active' : login.username}">
+      <div class="form__input" :class="{ active: login.username }">
         <input v-model="login.username" type="text" placeholder="username" />
       </div>
-      <div class="form__input" :class="{'active' : login.password}">
+      <div class="form__input" :class="{ active: login.password }">
         <input
           v-model="login.password"
           type="password"
@@ -33,14 +33,30 @@ export default {
       },
     };
   },
+  async mounted() {
+    if (this.$auth.loggedIn) {
+      return;
+    }
+    if (!this.$config.securityEnabled) {
+      await this.$auth.setUser("local");
+      await this.$auth.setUserToken("mock-token");
+      this.nextRedirect();
+    }
+  },
   methods: {
+    nextRedirect() {
+      const redirect_url = this.$nuxt.$route.query.redirect || "/";
+      this.$router.push({
+        path: redirect_url,
+      });
+    },
     async userLogin() {
       try {
-        await this.$store.dispatch('entities/deleteAll');
+        await this.$store.dispatch("entities/deleteAll");
         await this.$auth.loginWith("local", {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
-        this.$nuxt.$router.back()
+        this.nextRedirect();
       } catch (err) {
         this.error = err;
       }
@@ -56,6 +72,7 @@ export default {
   align-items: center;
   min-height: 100vh;
 }
+
 .form {
   background: $lighter-color;
   margin: auto;
@@ -87,7 +104,8 @@ export default {
         transition: width 0.3s ease-in-out;
       }
     }
-    &:after, &:before {
+    &:after,
+    &:before {
       content: "";
       height: 1px;
       background: $line-smooth-color;

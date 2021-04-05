@@ -2,12 +2,19 @@ require("dotenv").config();
 const API_BASE_URL =
   process.env.API_BASE_URL || process.env.BASE_URL || "http://localhost:6900";
 
+const ENABLE_SECURITY = process.env.ENABLE_SECURITY || true;
+const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
+
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
 
+  publicRuntimeConfig: {
+    securityEnabled: ENABLE_SECURITY,
+  },
+
   generate: {
-    dir: process.env.DIST_FOLDER || "../src/rubrix/server/static",
+    dir: DIST_FOLDER,
   },
 
   // Global page headers (https://go.nuxtjs.dev/config-head)
@@ -120,6 +127,6 @@ export default {
   },
 
   router: {
-    middleware: ["auth"],
+    middleware: ["auth-guard"],
   },
 };
