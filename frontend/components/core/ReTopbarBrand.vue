@@ -23,10 +23,6 @@ export default {
       type: String,
       default: undefined,
     },
-    referer: {
-      type: Object,
-      required: true,
-    },
     icon: {
       type: String,
       default: undefined,

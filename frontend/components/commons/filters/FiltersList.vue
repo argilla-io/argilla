@@ -101,18 +101,27 @@ export default {
     groups() {
       return [...new Set(this.filterList.map((f) => f.group))];
     },
+    isMultiLabelRecord() {
+      return this.dataset.results.records.some((record) => record.multi_label);
+    },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
         .map((filter) => {
+          console.log(filter)
+          function isZero(number){
+            return number === 0;
+          }
           return {
             ...filter,
             id: filter.key,
             options: aggregations[filter.key],
             selected: this.dataset.query[filter.key],
             disabled:
+              filter.key === 'confidence' && this.isMultiLabelRecord ||
               !aggregations[filter.key] ||
-              !Object.entries(aggregations[filter.key]).length,
+              !Object.entries(aggregations[filter.key]).length ||
+              Object.values(aggregations[filter.key]).every(isZero)
           };
         })
         .filter(({ disabled }) => !disabled);
