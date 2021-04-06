@@ -4,6 +4,7 @@ import httpx
 
 from ...client import AuthenticatedClient
 from ...models.dataset_snapshot import DatasetSnapshot
+from ...models.error_message import ErrorMessage
 from ...models.http_validation_error import HTTPValidationError
 from ...models.task_type import TaskType
 from ...types import UNSET, Response, Unset
@@ -40,7 +41,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, response: httpx.Response
-) -> Optional[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Optional[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -50,6 +53,14 @@ def _parse_response(
             response_200.append(response_200_item)
 
         return response_200
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -59,7 +70,9 @@ def _parse_response(
 
 def _build_response(
     *, response: httpx.Response
-) -> Response[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Response[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -73,7 +86,9 @@ def sync_detailed(
     client: AuthenticatedClient,
     name: str,
     task: Union[Unset, TaskType] = UNSET,
-) -> Response[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Response[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
@@ -92,7 +107,9 @@ def sync(
     client: AuthenticatedClient,
     name: str,
     task: Union[Unset, TaskType] = UNSET,
-) -> Optional[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Optional[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     """List the created dataset snapshots
 
     Parameters
@@ -122,7 +139,9 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     name: str,
     task: Union[Unset, TaskType] = UNSET,
-) -> Response[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Response[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
@@ -140,7 +159,9 @@ async def asyncio(
     client: AuthenticatedClient,
     name: str,
     task: Union[Unset, TaskType] = UNSET,
-) -> Optional[Union[List[DatasetSnapshot], HTTPValidationError]]:
+) -> Optional[
+    Union[List[DatasetSnapshot], ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     """List the created dataset snapshots
 
     Parameters

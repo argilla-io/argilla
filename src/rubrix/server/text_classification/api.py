@@ -1,5 +1,3 @@
-import itertools
-
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
@@ -272,11 +270,12 @@ def search_records_deprecated(
 
 @router.get(
     base_endpoint + "/data",
-    operation_id="get_dataset_data",
+    operation_id="stream_data",
 )
-async def get_dataset_data(
+async def stream_data(
     name: str,
     service: DatasetRecordsService = Depends(create_dataset_records_service),
+    datasets: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
 ) -> StreamingResponse:
     """
@@ -288,10 +287,13 @@ async def get_dataset_data(
         The dataset name
     service:
         The dataset records service
+    datasets:
+        The datasets service
     current_user:
         Request user
 
     """
+    datasets.find_by_name(name, owner=current_user.current_group)
     return scan_data_response(
         service,
         dataset=name,

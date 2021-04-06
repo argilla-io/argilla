@@ -1,9 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ...client import AuthenticatedClient
 from ...models.api_status import ApiStatus
+from ...models.error_message import ErrorMessage
 from ...types import Response
 
 
@@ -24,15 +25,27 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[ApiStatus]:
+def _parse_response(
+    *, response: httpx.Response
+) -> Optional[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     if response.status_code == 200:
         response_200 = ApiStatus.from_dict(response.json())
 
         return response_200
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[ApiStatus]:
+def _build_response(
+    *, response: httpx.Response
+) -> Response[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -44,7 +57,7 @@ def _build_response(*, response: httpx.Response) -> Response[ApiStatus]:
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[ApiStatus]:
+) -> Response[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
     )
@@ -59,7 +72,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> Optional[ApiStatus]:
+) -> Optional[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     """Parameters
     ----------
     current_user:
@@ -80,7 +93,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[ApiStatus]:
+) -> Response[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
     )
@@ -94,7 +107,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> Optional[ApiStatus]:
+) -> Optional[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     """Parameters
     ----------
     current_user:

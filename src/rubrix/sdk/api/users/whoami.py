@@ -1,8 +1,9 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ...client import AuthenticatedClient
+from ...models.error_message import ErrorMessage
 from ...models.user import User
 from ...types import Response
 
@@ -24,15 +25,27 @@ def _get_kwargs(
     }
 
 
-def _parse_response(*, response: httpx.Response) -> Optional[User]:
+def _parse_response(
+    *, response: httpx.Response
+) -> Optional[Union[User, ErrorMessage, ErrorMessage]]:
     if response.status_code == 200:
         response_200 = User.from_dict(response.json())
 
         return response_200
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
     return None
 
 
-def _build_response(*, response: httpx.Response) -> Response[User]:
+def _build_response(
+    *, response: httpx.Response
+) -> Response[Union[User, ErrorMessage, ErrorMessage]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -44,7 +57,7 @@ def _build_response(*, response: httpx.Response) -> Response[User]:
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[User]:
+) -> Response[Union[User, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
     )
@@ -59,7 +72,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> Optional[User]:
+) -> Optional[Union[User, ErrorMessage, ErrorMessage]]:
     """User info endpoint
 
     Parameters
@@ -79,7 +92,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[User]:
+) -> Response[Union[User, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
     )
@@ -93,7 +106,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> Optional[User]:
+) -> Optional[Union[User, ErrorMessage, ErrorMessage]]:
     """User info endpoint
 
     Parameters

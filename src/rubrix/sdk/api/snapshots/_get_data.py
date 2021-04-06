@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, Optional, Union
 
 import httpx
+from rubrix.sdk.models import ErrorMessage
 
 from ...client import AuthenticatedClient
 from ...models.http_validation_error import HTTPValidationError
@@ -25,13 +26,22 @@ def _get_kwargs(
         "url": url,
         "headers": headers,
         "cookies": cookies,
-        "timeout": None, # Override default timeout
+        "timeout": None,  # Override default timeout
     }
 
 
 def _parse_response(
     *, response: httpx.Response
-) -> Optional[Union[None, HTTPValidationError]]:
+) -> Optional[Union[None, HTTPValidationError, ErrorMessage]]:
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
+
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
         return response_422

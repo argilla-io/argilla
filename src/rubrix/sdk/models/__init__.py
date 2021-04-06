@@ -12,6 +12,7 @@ from .dataset_metadata import DatasetMetadata
 from .dataset_snapshot import DatasetSnapshot
 from .dataset_tags import DatasetTags
 from .entity_span import EntitySpan
+from .error_message import ErrorMessage
 from .http_validation_error import HTTPValidationError
 from .prediction_status import PredictionStatus
 from .sort_order import SortOrder

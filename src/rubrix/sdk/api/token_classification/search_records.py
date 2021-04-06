@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import AuthenticatedClient
+from ...models.error_message import ErrorMessage
 from ...models.http_validation_error import HTTPValidationError
 from ...models.token_classification_search_request import (
     TokenClassificationSearchRequest,
@@ -48,11 +49,26 @@ def _get_kwargs(
 
 def _parse_response(
     *, response: httpx.Response
-) -> Optional[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     if response.status_code == 200:
         response_200 = TokenClassificationSearchResults.from_dict(response.json())
 
         return response_200
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -62,7 +78,14 @@ def _parse_response(
 
 def _build_response(
     *, response: httpx.Response
-) -> Response[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Response[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -78,7 +101,14 @@ def sync_detailed(
     json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Response[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Response[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
@@ -101,7 +131,14 @@ def sync(
     json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Optional[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     """Parameters
     ----------
     name:
@@ -137,7 +174,14 @@ async def asyncio_detailed(
     json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Response[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Response[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
@@ -159,7 +203,14 @@ async def asyncio(
     json_body: TokenClassificationSearchRequest,
     limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
-) -> Optional[Union[TokenClassificationSearchResults, HTTPValidationError]]:
+) -> Optional[
+    Union[
+        TokenClassificationSearchResults,
+        ErrorMessage,
+        ErrorMessage,
+        HTTPValidationError,
+    ]
+]:
     """Parameters
     ----------
     name:

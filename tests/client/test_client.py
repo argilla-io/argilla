@@ -1,6 +1,7 @@
 from time import sleep
 
 import httpx
+import pytest
 import requests
 from fastapi.testclient import TestClient
 from rubrix.sdk.models import TextClassificationSearchResults
@@ -71,3 +72,24 @@ def test_list_snapshots(monkeypatch):
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
     assert ds
 
+
+def test_load_for_unrecognized_task(monkeypatch):
+    mocking_client(monkeypatch)
+    with pytest.raises(Exception, match="Wrong task defined whatever"):
+        rubrix.load(name="not_found", task="whatever")
+
+
+def test_not_found_response(monkeypatch):
+    mocking_client(monkeypatch)
+    not_found_match = "Not found error. The API answered with a 404 code"
+    with pytest.raises(Exception, match=not_found_match):
+        rubrix.snapshots(dataset="not_found")
+
+    with pytest.raises(Exception, match=not_found_match):
+        rubrix.load(name="not-found")
+
+    with pytest.raises(Exception, match=not_found_match):
+        rubrix.load(name="not-found", task="token_classification")
+
+    with pytest.raises(Exception, match=not_found_match):
+        rubrix.load(name="not-found", snapshot="blabla")

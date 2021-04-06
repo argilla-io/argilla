@@ -2,6 +2,26 @@ from typing import Type
 
 from fastapi import HTTPException, Request, status
 from fastapi.exception_handlers import http_exception_handler
+from pydantic import BaseModel
+
+
+class ErrorMessage(BaseModel):
+    """
+    Generic error class. This class is needed only for openapi documentation
+    purposes.
+
+    If some field in additional http errors changes, these changes
+    should be reflected in the error model.
+
+    Attributes:
+    -----------
+
+    detail:
+        The error message
+
+    """
+
+    detail: str
 
 
 class UnauthorizedError(HTTPException):

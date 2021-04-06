@@ -4,6 +4,7 @@ import httpx
 
 from ...client import AuthenticatedClient
 from ...models.bulk_response import BulkResponse
+from ...models.error_message import ErrorMessage
 from ...models.http_validation_error import HTTPValidationError
 from ...models.text_classification_records_bulk import TextClassificationRecordsBulk
 from ...types import Response
@@ -32,11 +33,19 @@ def _get_kwargs(
 
 def _parse_response(
     *, response: httpx.Response
-) -> Optional[Union[BulkResponse, HTTPValidationError]]:
+) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     if response.status_code == 200:
         response_200 = BulkResponse.from_dict(response.json())
 
         return response_200
+    if response.status_code == 404:
+        response_404 = ErrorMessage.from_dict(response.json())
+
+        return response_404
+    if response.status_code == 500:
+        response_500 = ErrorMessage.from_dict(response.json())
+
+        return response_500
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -46,7 +55,7 @@ def _parse_response(
 
 def _build_response(
     *, response: httpx.Response
-) -> Response[Union[BulkResponse, HTTPValidationError]]:
+) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -59,7 +68,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     json_body: TextClassificationRecordsBulk,
-) -> Response[Union[BulkResponse, HTTPValidationError]]:
+) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -76,7 +85,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     json_body: TextClassificationRecordsBulk,
-) -> Optional[Union[BulkResponse, HTTPValidationError]]:
+) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     """Old search endpoint
 
     Parameters
@@ -105,7 +114,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     json_body: TextClassificationRecordsBulk,
-) -> Response[Union[BulkResponse, HTTPValidationError]]:
+) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         json_body=json_body,
@@ -121,7 +130,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     json_body: TextClassificationRecordsBulk,
-) -> Optional[Union[BulkResponse, HTTPValidationError]]:
+) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     """Old search endpoint
 
     Parameters

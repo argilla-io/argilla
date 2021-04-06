@@ -149,9 +149,9 @@ def delete_dataset_snapshot(
 
 @router.get(
     "/{name}/snapshots/{snapshot_id}/data",
-    operation_id="get_data",
+    operation_id="stream_data",
 )
-async def get_data(
+async def stream_data(
     name: str,
     snapshot_id: str,
     service: SnapshotsService = Depends(create_snapshots_service),

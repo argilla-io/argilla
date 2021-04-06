@@ -200,7 +200,10 @@ class RubrixClient:
             elif task == "token_classification":
                 from rubrix.sdk.api.token_classification import _get_dataset_data
             else:
-                raise ValueError(f"Wrong task defined {task}")
+                raise ValueError(
+                    f"Wrong task defined {task}. "
+                    "Allowed values are [text_classification, token_classification]"
+                )
             response = _get_dataset_data.sync_detailed(client=self._client, name=name)
 
         _check_response_errors(response)
