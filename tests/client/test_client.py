@@ -50,7 +50,7 @@ def test_log_something(monkeypatch):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_list_snapshots(monkeypatch):
+def test_snapshots(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_create_dataset_snapshot"
     api_ds_prefix = f"/api/datasets/{dataset}"
@@ -93,3 +93,4 @@ def test_not_found_response(monkeypatch):
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found", snapshot="blabla")
+

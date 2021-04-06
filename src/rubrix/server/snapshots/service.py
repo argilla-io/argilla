@@ -153,10 +153,11 @@ class SnapshotsService:
         data = {"id": record.id, **{k: v for k, v in metadata.items()}}
         task_info = record.tasks[task]
         if task == TaskType.text_classification:
+            multi_label = task_info.get("multi_label", False)
             data.update(
                 {
                     "labels": task_info["annotated_as"]
-                    if len(task_info["annotated_as"]) != 1
+                    if multi_label
                     else task_info["annotated_as"][0],
                     **{k: v for k, v in record.text.items()},
                 }

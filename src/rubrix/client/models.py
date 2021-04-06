@@ -157,7 +157,7 @@ class EntitySpan:
 
 @dataclass
 class TokenClassificationAnnotation:
-    """Annotation class for rToken classification problem
+    """Annotation class for Token classification problem
 
     Attributes:
     -----------

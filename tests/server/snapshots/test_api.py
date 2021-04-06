@@ -44,6 +44,12 @@ def create_some_data_for_text_classification(name: str):
                         {"class": "NoClass"},
                     ],
                 },
+                "annotation": {
+                    "agent": "test",
+                    "labels": [
+                        {"class": "Test"},
+                    ],
+                },
             },
         ]
     ]
