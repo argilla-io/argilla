@@ -4,6 +4,7 @@ import httpx
 import pytest
 import requests
 from fastapi.testclient import TestClient
+from rubrix import TextClassificationRecord
 from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
@@ -72,6 +73,16 @@ def test_snapshots(monkeypatch):
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
     assert ds
 
+
+def test_log_records_with_too_long_text(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset_name = "test_log_records_with_too_long_text"
+    client.delete(f"/api/datasets/{dataset_name}")
+    item = TextClassificationRecord(
+        inputs={"text": "This is a toooooo long text\n" * 10000}
+    )
+
+    rubrix.log([item], name=dataset_name)
 
 def test_load_for_unrecognized_task(monkeypatch):
     mocking_client(monkeypatch)
