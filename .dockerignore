@@ -1,12 +1,5 @@
 # Ignore everything
 **
 
-!setup.*
-!pyproject.toml
-!pytest.ini
-!src/**
-!config/**
-!test/**
-!docs/**
-!frontend/**
-**/node_modules/**
+# Distribution packages
+!dist/**

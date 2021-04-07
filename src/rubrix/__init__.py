@@ -10,7 +10,6 @@ import os
 import re
 from typing import Iterable
 
-import datasets
 import pandas
 import pkg_resources
 from rubrix.client import RubrixClient, models
