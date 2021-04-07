@@ -7,10 +7,9 @@ Methods for using the Rubrix Client, called from the module init file.
 
 
 import logging
-from collections import defaultdict
 from typing import Any, Dict, Iterable, List, Optional
 
-import datasets
+import pandas
 import requests
 from rubrix.client import models
 from rubrix.client.models import (
@@ -181,7 +180,7 @@ class RubrixClient:
 
     def load(
         self, name: str, snapshot: Optional[str] = None, task: Optional[str] = None
-    ) -> datasets.Dataset:
+    ) -> pandas.DataFrame:
 
         if snapshot:
             from rubrix.sdk.api.snapshots import _get_data
@@ -207,11 +206,7 @@ class RubrixClient:
             response = _get_dataset_data.sync_detailed(client=self._client, name=name)
 
         _check_response_errors(response)
-        data = defaultdict(list)
-        for r in response.parsed:
-            for item, value in r.items():
-                data[item].append(value)
-        return datasets.Dataset.from_dict(data)
+        return pandas.DataFrame(response.parsed)
 
     def snapshots(self, dataset: str) -> List[models.DatasetSnapshot]:
         """

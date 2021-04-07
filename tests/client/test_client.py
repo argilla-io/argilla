@@ -1,6 +1,7 @@
 from time import sleep
 
 import httpx
+import pandas
 import pytest
 import requests
 from fastapi.testclient import TestClient
@@ -68,10 +69,18 @@ def test_snapshots(monkeypatch):
         assert snapshot.creation_date
 
     ds = rubrix.load(name=dataset)
-    assert ds
+    assert isinstance(ds, pandas.DataFrame)
+    assert "annotation" in ds.columns
+    assert "prediction" in ds.columns
+
+    ds = rubrix.load(name=dataset, task="token_classification")
+    assert isinstance(ds, pandas.DataFrame)
+    assert "annotation" in ds.columns
+    assert "prediction" in ds.columns
+    assert "tokens" in ds.columns
 
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
-    assert ds
+    assert isinstance(ds, pandas.DataFrame)
 
 
 def test_log_records_with_too_long_text(monkeypatch):

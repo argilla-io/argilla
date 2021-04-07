@@ -11,6 +11,7 @@ import re
 from typing import Iterable
 
 import datasets
+import pandas
 import pkg_resources
 from rubrix.client import RubrixClient, models
 from rubrix.client.models import *
@@ -130,7 +131,7 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 
 def load(
     name: str, snapshot: Optional[str] = None, task: Optional[str] = None
-) -> datasets.Dataset:
+) -> pandas.DataFrame:
     """
     Load datase/snapshot data as a huggingface dataset
 

@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, Optional, Union
 
 import httpx
+from rubrix.sdk.api._streaming_helpers import build_stream_response
 from rubrix.sdk.models import ErrorMessage
 
 from ...client import AuthenticatedClient
@@ -29,38 +30,6 @@ def _get_kwargs(
     }
 
 
-def _parse_response(
-    *, response: httpx.Response
-) -> Optional[Union[None, HTTPValidationError, ErrorMessage]]:
-    if response.status_code == 404:
-        response_404 = ErrorMessage.from_dict(response.json())
-
-        return response_404
-    if response.status_code == 500:
-        response_500 = ErrorMessage.from_dict(response.json())
-
-        return response_500
-
-    if response.status_code == 422:
-        response_422 = HTTPValidationError.from_dict(response.json())
-        return response_422
-    return None
-
-
-def _build_response(
-    *, response: httpx.Response
-) -> Response[Union[None, HTTPValidationError]]:
-    parse_response = _parse_response(response=response)
-    if not parse_response:
-        parse_response = [json.loads(r) for r in response.iter_lines()]
-    return Response(
-        status_code=response.status_code,
-        content=b"",
-        headers=response.headers,
-        parsed=parse_response,
-    )
-
-
 def sync_detailed(
     *,
     client: AuthenticatedClient,
@@ -72,7 +41,7 @@ def sync_detailed(
     )
 
     with httpx.stream("GET", **kwargs) as response:
-        return _build_response(response=response)
+        return build_stream_response(response=response)
 
 
 def sync(

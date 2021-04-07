@@ -165,14 +165,7 @@ def search_records(
 
     return TextClassificationSearchResults(
         total=result.total,
-        records=[
-            TextClassificationRecord(
-                **record.dict(by_alias=True),
-                **record.task_info(task_meta.task).dict(by_alias=True),
-                inputs=record.text,
-            )
-            for record in result.records
-        ],
+        records=list(map(_multi_task_record_2_text_classification, result.records)),
         aggregations=TextClassificationAggregations(
             **result.aggregations.task_aggregations(task=task_meta.task).dict(
                 by_alias=True
@@ -299,4 +292,15 @@ async def stream_data(
         dataset=name,
         owner=current_user.current_group,
         tasks=[TextClassificationTask],
+        record_transform=_multi_task_record_2_text_classification,
+    )
+
+
+def _multi_task_record_2_text_classification(
+    record: MultiTaskRecord,
+) -> TextClassificationRecord:
+    return TextClassificationRecord(
+        **record.dict(by_alias=True),
+        **record.task_info(TextClassificationRecord.task()).dict(by_alias=True),
+        inputs=record.text,
     )

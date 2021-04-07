@@ -98,13 +98,7 @@ def search_records(
     )
 
     return TokenClassificationSearchResults(
-        records=[
-            TokenClassificationRecord(
-                **record.dict(by_alias=True),
-                **record.task_info(task_meta.task).dict(by_alias=True),
-            )
-            for record in result.records
-        ],
+        records=list(map(_multi_task_record_2_token_classification, result.records)),
         total=result.total,
         aggregations=TokenClassificationAggregations(
             **result.aggregations.task_aggregations(task=task_meta.task).dict(
@@ -282,4 +276,14 @@ async def stream_data(
         dataset=name,
         owner=current_user.current_group,
         tasks=[TokenClassificationTask],
+        record_transform=_multi_task_record_2_token_classification,
+    )
+
+
+def _multi_task_record_2_token_classification(
+    record: MultiTaskRecord,
+) -> TokenClassificationRecord:
+    return TokenClassificationRecord(
+        **record.dict(by_alias=True),
+        **record.task_info(TokenClassificationRecord.task()).dict(by_alias=True),
     )

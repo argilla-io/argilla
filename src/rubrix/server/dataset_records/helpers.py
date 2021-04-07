@@ -1,8 +1,9 @@
 import itertools
-from typing import List, Optional, Type
+from typing import Any, Callable, List, Optional, Type
 
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import RecordTaskInfo
+from rubrix.server.dataset_records.model import MultiTaskRecord
 from rubrix.server.dataset_records.service import DatasetRecordsService
 
 
@@ -12,6 +13,7 @@ def scan_data_response(
     owner: Optional[str],
     tasks: List[Type[RecordTaskInfo]],
     chunk_size: int = 1000,
+    record_transform: Optional[Callable[[MultiTaskRecord], Any]] = None,
 ) -> StreamingResponse:
     """Generate an textual stream data response for a dataset scan"""
 
@@ -30,6 +32,9 @@ def scan_data_response(
                 tasks=tasks,
             ),
         ):
-            yield "\n".join(map(lambda r: r.json(), filter(lambda r: r is not None, batch))) + "\n"
+            filtered_records = filter(lambda r: r is not None, batch)
+            if record_transform:
+                filtered_records = map(record_transform, filtered_records)
+            yield "\n".join(map(lambda r: r.json(), filtered_records)) + "\n"
 
     return StreamingResponse(stream_generator(), media_type="application/json")
