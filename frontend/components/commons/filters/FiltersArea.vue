@@ -129,6 +129,9 @@ export default {
     left: 0;
     right: 0;
     z-index: 2;
+    .fixed-header & {
+      border-bottom: 1px solid $line-light-color;
+    }
   }
   &__row {
     display: flex;
@@ -163,12 +166,6 @@ export default {
       padding-right: 3em;
       @include media(">xxl") {
         max-width: 1600px;
-      }
-      &:after {
-        content: "";
-        border-bottom: 1px solid $line-light-color;
-        width: 100vw;
-        display: block;
       }
     }
   }

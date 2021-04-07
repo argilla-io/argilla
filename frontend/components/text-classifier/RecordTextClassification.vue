@@ -8,7 +8,7 @@
       :predicted="record.predicted"
     />
     <!-- record text -->
-    <RecordInputs :data="record.inputs" :query-text="dataset.query.text" />
+    <RecordInputs :predicted="record.predicted" :data="record.inputs" :explanation="record.explanation" :query-text="dataset.query.text" />
     <!-- record annotation area -->
     <ClassifierAnnotationArea
       v-if="annotationEnabled"

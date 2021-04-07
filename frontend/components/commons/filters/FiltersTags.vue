@@ -118,7 +118,7 @@ export default {
       margin-left: 1.5em;
     }
     .fixed-header & {
-      min-height: 43px;
+      min-height: 40px;
       width: calc(100% - 250px);
       z-index: 1;
       border-bottom: 0;

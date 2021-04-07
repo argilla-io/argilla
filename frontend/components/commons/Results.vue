@@ -5,6 +5,7 @@
   />
   <div v-else ref="resultsList" class="results">
     <div class="list">
+      <ExplainHelpInfo v-if="isExplainedRecord"></ExplainHelpInfo>
       <VueAutoVirtualScrollList
         :key="dataset.task"
         id="scroll"
@@ -92,6 +93,7 @@
 
 <script>
 import "assets/icons/check";
+import "assets/icons/help";
 
 import { mapActions } from "vuex";
 
@@ -123,7 +125,10 @@ export default {
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled
-    }
+    },
+    isExplainedRecord() {
+      return this.dataset.results.records.some((record) => record.explanation);
+    },
   },
 
   // TODO (@leireaguirrework): All scroll logic will be moved to layout component
@@ -303,4 +308,5 @@ export default {
   opacity: 0;
   transform: translateY(-30px);
 }
+
 </style>

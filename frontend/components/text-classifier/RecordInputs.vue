@@ -3,7 +3,8 @@
     <span v-for="(text, index) in data" :key="index" class="record">
       <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
         <span class="record__key">{{ index }}:</span>
-        <RecordString :queryText="queryText" :text="text"></RecordString>
+        <LazyRecordExplain :predicted="predicted" :queryText="queryText" :explain="explanation[index]" v-if="explanation"/>
+        <LazyRecordString v-else :queryText="queryText" :text="text"/>
       </span>
     </span>
   </div>
@@ -16,7 +17,13 @@ export default {
       type: Object,
       required: true,
     },
+    explanation: {
+      type: Object,
+    },
     queryText: {
+      type: String,
+    },
+    predicted: {
       type: String,
     },
   },
