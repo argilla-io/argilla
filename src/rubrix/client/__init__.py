@@ -15,6 +15,7 @@ from rubrix.client import models
 from rubrix.client.models import (
     BulkResponse,
     DatasetSnapshot,
+    Record,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
@@ -82,7 +83,7 @@ class RubrixClient:
 
     def log(
         self,
-        records: Iterable[Any],
+        records: Iterable[Record],
         name: str,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -155,7 +156,10 @@ class RubrixClient:
 
         # Record type is not recognised
         else:
-            raise Exception("Unknown record type passed as argument.")
+            raise Exception(
+                f"Unknown record type passed as argument for [{','.join(map(str,records[0:5]))}...] "
+                f"Available values are {Record.__args__}"
+            )
             # TODO: podriamos tener una lista con todos los tipos posibles, y imprimir las posibilidades de records.
 
         for i in range(0, len(records), chunk_size):

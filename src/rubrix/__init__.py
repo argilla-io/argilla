@@ -8,7 +8,7 @@ Contains methods for accesing the API.
 import logging
 import os
 import re
-from typing import Iterable
+from typing import Iterable, Sequence
 
 import pandas
 import pkg_resources
@@ -70,7 +70,7 @@ def init(
 
 
 def log(
-    records: Iterable[Any],
+    records: Union[Record, Iterable[Record]],
     name: str,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
@@ -82,7 +82,7 @@ def log(
     Parameters
     ----------
     records:
-        The data records list.
+        The data record object or list.
     name:
         The dataset name
     tags:
@@ -93,6 +93,15 @@ def log(
         The default chunk size for data bulk
 
     """
+
+    # Records can be a single object or a list. In case it is a single object, we create a single-element list
+    # This check filter dictionaries and string based objects (that are iterables too but we don't want to
+    # wrap in a list)
+    if not (
+        isinstance(records, Iterable) and not isinstance(records, (dict, str, bytes))
+    ):
+        records = [records]
+
     return _client_instance().log(
         records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
     )

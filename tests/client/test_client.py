@@ -1,4 +1,5 @@
 from time import sleep
+from typing import Iterable
 
 import httpx
 import pandas
@@ -93,6 +94,7 @@ def test_log_records_with_too_long_text(monkeypatch):
 
     rubrix.log([item], name=dataset_name)
 
+
 def test_load_for_unrecognized_task(monkeypatch):
     mocking_client(monkeypatch)
     with pytest.raises(Exception, match="Wrong task defined whatever"):
@@ -114,3 +116,35 @@ def test_not_found_response(monkeypatch):
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found", snapshot="blabla")
 
+
+def test_single_record(monkeypatch):
+
+    mocking_client(monkeypatch)
+    dataset_name = "test_log_single_records"
+    client.delete(f"/api/datasets/{dataset_name}")
+    item = TextClassificationRecord(
+        inputs={"text": "This is a single record. Only this. No more."}
+    )
+
+    rubrix.log(item, name=dataset_name)
+
+
+def test_passing_wrong_iterable_data(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset_name = "test_log_single_records"
+    client.delete(f"/api/datasets/{dataset_name}")
+    with pytest.raises(Exception, match="Unknown record type passed"):
+        rubrix.log({"a": "010", "b": 100}, name=dataset_name)
+
+
+def test_log_with_generator(monkeypatch):
+
+    mocking_client(monkeypatch)
+    dataset_name = "test_log_with_generator"
+    client.delete(f"/api/datasets/{dataset_name}")
+
+    def generator(items: int = 10) -> Iterable[TextClassificationRecord]:
+        for i in range(0, items):
+            yield TextClassificationRecord(id=i, inputs={"text": "The text data"})
+
+    rubrix.log(generator(), name=dataset_name)

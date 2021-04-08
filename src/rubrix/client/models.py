@@ -185,3 +185,6 @@ class TokenClassificationRecord(AsDictMixin):
     metadata: Optional[Dict[str, Any]] = dataclasses.field(default_factory=dict)
     status: Optional[TaskStatus] = None
     event_timestamp: Optional[datetime.datetime] = None
+
+
+Record = Union[TextClassificationRecord, TokenClassificationRecord]
