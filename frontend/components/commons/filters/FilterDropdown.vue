@@ -131,6 +131,7 @@ export default {
     outline: none;
     z-index: 1;
     border: 0;
+    @include font-size(13px);
   }
   .clean-search {
     z-index: 1;

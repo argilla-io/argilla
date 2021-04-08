@@ -109,7 +109,7 @@ export default {
       } else {
         text = this.record.raw_text.slice(this.span.start);
       }
-      return this.$highlightSearch(this.queryText, text);
+      return this.queryText ? this.$highlightSearch(this.queryText, text) : text;
     },
     tag_color() {
       return this.entities.findIndex(
@@ -183,8 +183,7 @@ export default {
 <style lang="scss">
 .highlight-text {
   display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
+  background: #ffbf00 !important;
   line-height: 16px;
 }
 </style>

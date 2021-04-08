@@ -92,17 +92,6 @@ export default {
       );
       return filtered;
     },
-    highlightSearch(option, searchText) {
-      if (!searchText) {
-        return option;
-      }
-      return option
-        .toString()
-        .replace(
-          new RegExp(searchText, "gi"),
-          (match) => `<span class="highlight-text">${match}</span>`
-        );
-    },
   },
 };
 </script>
