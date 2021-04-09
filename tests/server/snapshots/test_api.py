@@ -63,8 +63,6 @@ def create_some_data_for_text_classification(name: str):
         ).dict(by_alias=True),
     )
 
-    sleep(1)
-
 
 def uri_2_path(uri: str):
     from urllib.parse import urlparse

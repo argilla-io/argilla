@@ -44,8 +44,6 @@ def test_log_something(monkeypatch):
     assert response.processed == 1
     assert response.failed == 0
 
-    sleep(1)
-
     response = client.post(f"/api/datasets/{dataset_name}/TextClassification/:search")
     results = TextClassificationSearchResults.from_dict(response.json())
     assert results.total == 1

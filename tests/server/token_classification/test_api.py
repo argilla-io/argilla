@@ -1,15 +1,10 @@
-from time import sleep
-
 from fastapi.testclient import TestClient
 from rubrix.server.commons.models import BulkResponse
 from rubrix.server.server import app
 from rubrix.server.text_classification.api import TextClassificationRecordsBulk
 from rubrix.server.text_classification.model import TextClassificationRecord
 from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
-from rubrix.server.token_classification.model import (
-    TokenClassificationSearchResults,
-    TokenClassificationRecord,
-)
+from rubrix.server.token_classification.model import (TokenClassificationRecord, TokenClassificationSearchResults)
 
 client = TestClient(app)
 
@@ -67,7 +62,6 @@ def test_records_with_default_tokenization():
     )
 
     assert response.status_code == 200, response.json()
-    sleep(1)
 
     response = client.post(
         f"/api/token-classification/datasets/{dataset}/:search", json={}

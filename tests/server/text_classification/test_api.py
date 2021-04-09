@@ -1,15 +1,11 @@
 from datetime import datetime
-from time import sleep
 
 from fastapi.testclient import TestClient
 from rubrix.server.commons.models import PredictionStatus, SortParam
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
-from rubrix.server.text_classification.api import (
-    BulkResponse,
-    TextClassificationSearchResults,
-    TextClassificationRecordsBulk,
-)
+from rubrix.server.text_classification.api import (BulkResponse, TextClassificationRecordsBulk,
+                                                   TextClassificationSearchResults)
 from rubrix.server.text_classification.model import (
     TextClassificationAggregations,
     TextClassificationAnnotation,
@@ -39,7 +35,6 @@ def test_records_with_default_text():
     )
 
     assert response.status_code == 200, response.json()
-    sleep(1)
 
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
@@ -127,7 +122,6 @@ def test_create_records_for_text_classification_with_multi_label():
 
     assert response.status_code == 200, response.json()
 
-    sleep(1)
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
     assert response.status_code == 200
@@ -179,7 +173,6 @@ def test_create_records_for_text_classification():
     assert created_dataset.tags == tags
     assert created_dataset.metadata == metadata
 
-    sleep(1)
     response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
 
     assert response.status_code == 200
@@ -233,14 +226,12 @@ def test_partial_record_update():
     )
 
     bulk.records = [record]
-    sleep(1)
 
     client.post(
         "/api/classification/datasets/:bulk-records",
         json=bulk.dict(by_alias=True),
     )
 
-    sleep(1)
     response = client.post(
         f"/api/classification/datasets/{name}/:search",
         json={
@@ -296,7 +287,6 @@ def test_sort_by_id_as_default():
             ],
         ).dict(by_alias=True),
     )
-    sleep(1)
     response = client.post(
         f"/api/classification/datasets/{dataset}/:search?from=0&limit=10",
         json={},
@@ -349,7 +339,6 @@ def test_disable_aggregations_when_scroll():
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.processed == 100
 
-    sleep(1)
     response = client.post(
         f"/api/classification/datasets/{dataset}/:search?from=10",
         json={},
@@ -392,7 +381,6 @@ def test_include_event_timestamp():
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.processed == 100
 
-    sleep(1)
     response = client.post(
         f"/api/classification/datasets/{dataset}/:search?from=10",
         json={},
@@ -435,7 +423,6 @@ def test_words_cloud():
     )
     BulkResponse.parse_obj(response.json())
 
-    sleep(1)
     response = client.post(
         f"/api/classification/datasets/{dataset}/:search",
         json={},

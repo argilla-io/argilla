@@ -246,6 +246,7 @@ class ElasticsearchWrapper(LoggingMixin):
             index=index,
             actions=map(map_doc_2_action, documents),
             raise_on_error=True,
+            refresh="wait_for"
         )
         return len(failed)
 
