@@ -98,7 +98,8 @@ def log(
     # This check filter dictionaries and string based objects (that are iterables too but we don't want to
     # wrap in a list)
     if not (
-        isinstance(records, Iterable) and not isinstance(records, (dict, str, bytes))
+        isinstance(records, Iterable)
+        and not isinstance(records, (dict, str, bytes, *Record.__args__))
     ):
         records = [records]
 

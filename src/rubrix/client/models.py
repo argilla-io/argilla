@@ -1,8 +1,8 @@
-import dataclasses
 import datetime
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 
 class TaskStatus(str, Enum):
@@ -22,15 +22,7 @@ class TaskStatus(str, Enum):
     VALIDATED = "Validated"
 
 
-class AsDictMixin:
-    """Dataclases mixin for easy object2dict operation"""
-
-    def asdict(self) -> Dict[str, Any]:
-        return {k: v for k, v in dataclasses.asdict(self).items() if v is not None}
-
-
-@dataclass
-class BulkResponse:
+class BulkResponse(BaseModel):
     """Data info for bulk results
 
     Attributes:
@@ -49,8 +41,7 @@ class BulkResponse:
     failed: Optional[int] = 0
 
 
-@dataclass
-class DatasetSnapshot:
+class DatasetSnapshot(BaseModel):
     """The dataset snapshot info"""
 
     id: str
@@ -58,8 +49,7 @@ class DatasetSnapshot:
     creation_date: datetime.datetime
 
 
-@dataclass
-class ClassPrediction:
+class ClassPrediction(BaseModel):
     """Single class prediction
 
     Attributes:
@@ -77,8 +67,7 @@ class ClassPrediction:
     confidence: Optional[float] = 1.0
 
 
-@dataclass
-class TextClassificationAnnotation:
+class TextClassificationAnnotation(BaseModel):
     """Annotation class for text classification tasks
 
     Attributes:
@@ -93,8 +82,7 @@ class TextClassificationAnnotation:
     labels: List[ClassPrediction]
 
 
-@dataclass
-class TokenAttributions:
+class TokenAttributions(BaseModel):
     """The token attributions explaining predicted labels
 
     Attributes:
@@ -107,11 +95,10 @@ class TokenAttributions:
     """
 
     token: str
-    attributions: Dict[str, float] = dataclasses.field(default_factory=dict)
+    attributions: Dict[str, float] = Field(default_factory=dict)
 
 
-@dataclass
-class TextClassificationRecord(AsDictMixin):
+class TextClassificationRecord(BaseModel):
     """Record for text classification"""
 
     inputs: Dict[str, Any]
@@ -123,13 +110,12 @@ class TextClassificationRecord(AsDictMixin):
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
     id: Optional[Union[int, str]] = None
-    metadata: Optional[Dict[str, Any]] = dataclasses.field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[TaskStatus] = None
     event_timestamp: Optional[datetime.datetime] = None
 
 
-@dataclass
-class EntitySpan:
+class EntitySpan(BaseModel):
     """The tokens span for a labeled text.
 
     Entity spans will be defined between from start to end - 1
@@ -155,8 +141,7 @@ class EntitySpan:
     end_token: Optional[int] = None
 
 
-@dataclass
-class TokenClassificationAnnotation:
+class TokenClassificationAnnotation(BaseModel):
     """Annotation class for Token classification problem
 
     Attributes:
@@ -172,8 +157,7 @@ class TokenClassificationAnnotation:
     score: Optional[float] = None
 
 
-@dataclass
-class TokenClassificationRecord(AsDictMixin):
+class TokenClassificationRecord(BaseModel):
     """Record for token classification"""
 
     tokens: List[str]
@@ -182,7 +166,7 @@ class TokenClassificationRecord(AsDictMixin):
     annotation: Optional[TokenClassificationAnnotation] = None
 
     id: Optional[Union[int, str]] = None
-    metadata: Optional[Dict[str, Any]] = dataclasses.field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[TaskStatus] = None
     event_timestamp: Optional[datetime.datetime] = None
 
