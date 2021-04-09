@@ -26,7 +26,7 @@ class AsDictMixin:
     """Dataclases mixin for easy object2dict operation"""
 
     def asdict(self) -> Dict[str, Any]:
-        return {k: v for k, v in dataclasses.asdict(self).items() if v}
+        return {k: v for k, v in dataclasses.asdict(self).items() if v is not None}
 
 
 @dataclass

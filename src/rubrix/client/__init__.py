@@ -16,6 +16,7 @@ from rubrix.client.models import (
     BulkResponse,
     DatasetSnapshot,
     Record,
+    TaskStatus,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
@@ -127,11 +128,9 @@ class RubrixClient:
         processed = 0
         failed = 0
 
-        """Check chunk_size <= length of training dataset not needed, as the Python slice system will adjust
-        a bigger-than-possible length to the whole list, having all input in the same chunk.
-        However, a desired check can be placed to create a custom chunk_size when that limit is exceeded
-        """
-
+        # Check chunk_size <= length of training dataset not needed, as the Python slice system will adjust
+        # a bigger-than-possible length to the whole list, having all input in the same chunk.
+        # However, a desired check can be placed to create a custom chunk_size when that limit is exceeded
         if chunk_size > self.MAX_CHUNK_SIZE:
             self._LOGGER.warning(
                 """The introduced chunk size is noticeably large, timeout erros may ocurr.
@@ -171,7 +170,10 @@ class RubrixClient:
                 json_body=bulk_class(
                     tags=tags,
                     metadata=metadata,
-                    records=[record_class.from_dict(r.asdict()) for r in chunk],
+                    records=[
+                        record_class.from_dict(_set_defaults(r).asdict())
+                        for r in chunk
+                    ],
                 ),
             )
 
@@ -238,6 +240,13 @@ class RubrixClient:
             )
             for snapshot in response.parsed
         ]
+
+
+def _set_defaults(record: Record) -> Record:
+    """Review default values for data record"""
+    if record.annotation is not None and record.status is None:
+        record.status = TaskStatus.VALIDATED
+    return record
 
 
 def _check_response_errors(response: Response) -> None:

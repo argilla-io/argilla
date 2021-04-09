@@ -1,12 +1,18 @@
 from time import sleep
-from typing import Iterable
+from typing import Iterable, List
 
 import httpx
 import pandas
 import pytest
 import requests
 from fastapi.testclient import TestClient
-from rubrix import TextClassificationRecord
+from rubrix import (
+    ClassPrediction,
+    Record,
+    TaskStatus,
+    TextClassificationAnnotation,
+    TextClassificationRecord,
+)
 from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
@@ -146,3 +152,41 @@ def test_log_with_generator(monkeypatch):
             yield TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     rubrix.log(generator(), name=dataset_name)
+
+
+def test_log_with_annotation(monkeypatch):
+
+    mocking_client(monkeypatch)
+    dataset_name = "test_log_with_annotation"
+    client.delete(f"/api/datasets/{dataset_name}")
+    rubrix.log(
+        TextClassificationRecord(
+            id=0,
+            inputs={"text": "The text data"},
+            annotation=TextClassificationAnnotation(
+                agent="test", labels=[ClassPrediction(class_label="T")]
+            ),
+        ),
+        name=dataset_name,
+    )
+
+    df = rubrix.load(dataset_name)
+    records = df.to_dict(orient="records")
+    assert len(records) == 1
+    assert records[0]["status"] == TaskStatus.VALIDATED
+
+    rubrix.log(
+        TextClassificationRecord(
+            id=0,
+            inputs={"text": "The text data"},
+            annotation=TextClassificationAnnotation(
+                agent="test", labels=[ClassPrediction(class_label="T")]
+            ),
+            status=TaskStatus.DISCARDED
+        ),
+        name=dataset_name,
+    )
+    df = rubrix.load(dataset_name)
+    records = df.to_dict(orient="records")
+    assert len(records) == 1
+    assert records[0]["status"] == TaskStatus.DISCARDED
