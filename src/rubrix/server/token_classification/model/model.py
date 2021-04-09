@@ -23,11 +23,11 @@ class EntitySpan(BaseModel):
     start: int
         character start position
     end: int
-        character end position
+        character end position, must be higher than the starting character.
     start_token: Optional[int]
         start token for entity span. Optional
     end_token: Optional[int]
-        end token for entity span. Optional
+        end token for entity span, must be higher than the starting token position. Optional
     label: str
         the label related to tokens that conforms the entity span
     """
@@ -41,7 +41,9 @@ class EntitySpan(BaseModel):
     @validator("end")
     def check_span_offset(cls, end: int, values):
         """Validates span offset"""
-        assert end > values["start"]
+        assert (
+            end > values["start"]
+        ), "End character cannot be placed before the starting character, it must be at least one character after."
         return end
 
     @validator("end_token")
@@ -49,7 +51,9 @@ class EntitySpan(BaseModel):
         """Validates token span offset"""
         start_token = values["start_token"]
         if start_token is not None and end_token is not None:
-            assert end_token > start_token
+            assert (
+                end_token > start_token
+            ), "End token cannot be lower or equal than the start token."
         return end_token
 
     def __hash__(self):
