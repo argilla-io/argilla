@@ -171,7 +171,7 @@ class RubrixClient:
                     tags=tags,
                     metadata=metadata,
                     records=[
-                        record_class.from_dict(_set_defaults(r).asdict())
+                        record_class.from_dict(_set_defaults(r).dict(exclude_none=True))
                         for r in chunk
                     ],
                 ),
