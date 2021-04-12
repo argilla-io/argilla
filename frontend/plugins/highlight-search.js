@@ -4,10 +4,11 @@ export default ({ app }, inject) => {
     if (!query) {
       return text;
     }
+    let q = query.replace(/^"|"$/g, '');
     return text
       .toString()
       .replace(
-        new RegExp(query, "gi"),
+        new RegExp(q, "gi"),
         (match) => `<span class="highlight-text">${match}</span>`
       );
   }
