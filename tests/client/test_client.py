@@ -29,6 +29,7 @@ def mocking_client(monkeypatch):
     monkeypatch.setattr(requests, "post", client.post)
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "delete", client.delete)
 
     def stream_mock(*args, url: str, **kwargs):
         return client.get(url, stream=True)
@@ -182,7 +183,7 @@ def test_log_with_annotation(monkeypatch):
             annotation=TextClassificationAnnotation(
                 agent="test", labels=[ClassPrediction(class_label="T")]
             ),
-            status=TaskStatus.DISCARDED
+            status=TaskStatus.DISCARDED,
         ),
         name=dataset_name,
     )
@@ -190,3 +191,26 @@ def test_log_with_annotation(monkeypatch):
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["status"] == TaskStatus.DISCARDED
+
+
+def test_delete_dataset(monkeypatch):
+
+    mocking_client(monkeypatch)
+    dataset_name = "test_delete_dataset"
+    client.delete(f"/api/datasets/{dataset_name}")
+
+    rubrix.log(
+        TextClassificationRecord(
+            id=0,
+            inputs={"text": "The text data"},
+            annotation=TextClassificationAnnotation(
+                agent="test", labels=[ClassPrediction(class_label="T")]
+            ),
+        ),
+        name=dataset_name,
+    )
+    rubrix.load(name=dataset_name)
+    rubrix.delete(name=dataset_name)
+    sleep(1)
+    with pytest.raises(Exception, match="Not found error. The API answered with a 404 code"):
+        rubrix.load(name=dataset_name)

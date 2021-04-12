@@ -160,3 +160,16 @@ def load(
 
     """
     return _client_instance().load(name=name, snapshot=snapshot, task=task)
+
+
+def delete(name: str) -> None:
+    """
+    Delete a dataset with given name
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+
+    """
+    _client_instance().delete(name=name)

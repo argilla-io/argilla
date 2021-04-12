@@ -22,6 +22,7 @@ from rubrix.client.models import (
 )
 from rubrix.sdk import AuthenticatedClient, Client, models
 from rubrix.sdk.api.snapshots import list_dataset_snapshots
+from rubrix.sdk.api.datasets import delete_dataset
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
@@ -240,6 +241,18 @@ class RubrixClient:
             )
             for snapshot in response.parsed
         ]
+
+    def delete(self, name: str):
+        """
+        Delete a dataset with given name
+
+        Parameters
+        ----------
+        name:
+            The dataset name
+        """
+        response = delete_dataset.sync_detailed(client=self._client, name=name)
+        _check_response_errors(response)
 
 
 def _set_defaults(record: Record) -> Record:
