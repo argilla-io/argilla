@@ -97,7 +97,7 @@ export default {
     },
     options() {
       const record = this.dataset.results.records[0];
-      let labels = record.prediction ? record.prediction.labels.map((label) => label.class) : [];
+      let labels = record && record.prediction ? record.prediction.labels.map((label) => label.class) : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return this.isTextClassification ? labels : [];
     },
