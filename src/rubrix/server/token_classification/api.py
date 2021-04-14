@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
 from rubrix.server.dataset_records import scan_data_response
@@ -251,6 +251,7 @@ def search_records_deprecated(
 )
 async def stream_data(
     name: str,
+    limit: int = Query(default=None, description="Limit loaded records", gt=0),
     service: DatasetRecordsService = Depends(create_dataset_records_service),
     datasets: DatasetsService = Depends(create_dataset_service),
     current_user: User = Depends(get_current_active_user),
@@ -262,6 +263,8 @@ async def stream_data(
     ----------
     name
         The dataset name
+    limit:
+        The number of records limit. Optional
     service:
         The dataset records service
     datasets:
@@ -277,6 +280,7 @@ async def stream_data(
         owner=current_user.current_group,
         tasks=[TokenClassificationTask],
         record_transform=_multi_task_record_2_token_classification,
+        limit=limit,
     )
 
 

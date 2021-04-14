@@ -1,5 +1,4 @@
 import os
-from time import sleep
 
 import pandas
 import pytest
@@ -16,9 +15,10 @@ from rubrix.server.text_classification.model import (
 client = TestClient(app)
 
 
-def create_some_data_for_text_classification(name: str):
+def create_some_data_for_text_classification(name: str, n: int):
     records = [
         TextClassificationRecord(**data)
+        for _ in range(0, round(n / 2) or 10)
         for data in [
             {
                 "inputs": {"data": "my data"},
@@ -84,7 +84,8 @@ def test_dataset_snapshots_flow():
                 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
             )
 
-    create_some_data_for_text_classification(name)
+    expected_data = 2
+    create_some_data_for_text_classification(name, n=expected_data)
     response = client.post(
         f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
     )
@@ -110,7 +111,7 @@ def test_dataset_snapshots_flow():
 
     response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}/data")
     df = pandas.read_json(response.content, lines=True)
-    assert len(df) == 2
+    assert len(df) == expected_data
 
     client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}")
     response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}")

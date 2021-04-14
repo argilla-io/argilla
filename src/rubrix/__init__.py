@@ -139,7 +139,10 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 
 
 def load(
-    name: str, snapshot: Optional[str] = None, task: Optional[str] = None
+    name: str,
+    snapshot: Optional[str] = None,
+    task: Optional[str] = None,
+    limit: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
     Load datase/snapshot data as a huggingface dataset
@@ -152,14 +155,15 @@ def load(
         The dataset snapshot id. Optional
     task:
         The data task to retrieve (when no snapshots provided). Optional
+    limit:
+        The number of records to retrieve
 
     Returns
     -------
-
-        A huggingfaces dataset
+        A pandas Dataframe
 
     """
-    return _client_instance().load(name=name, snapshot=snapshot, task=task)
+    return _client_instance().load(name=name, snapshot=snapshot, task=task, limit=limit)
 
 
 def delete(name: str) -> None:

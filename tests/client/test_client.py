@@ -1,14 +1,14 @@
 from time import sleep
-from typing import Iterable, List
+from typing import Iterable
 
 import httpx
 import pandas
 import pytest
 import requests
+import rubrix
 from fastapi.testclient import TestClient
 from rubrix import (
     ClassPrediction,
-    Record,
     TaskStatus,
     TextClassificationAnnotation,
     TextClassificationRecord,
@@ -16,8 +16,6 @@ from rubrix import (
 from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
-
-import rubrix
 
 from tests.server.snapshots.test_api import create_some_data_for_text_classification
 
@@ -32,7 +30,7 @@ def mocking_client(monkeypatch):
     monkeypatch.setattr(httpx, "delete", client.delete)
 
     def stream_mock(*args, url: str, **kwargs):
-        return client.get(url, stream=True)
+        return client.get(url, stream=True, **kwargs)
 
     monkeypatch.setattr(httpx, "stream", stream_mock)
 
@@ -40,7 +38,6 @@ def mocking_client(monkeypatch):
 def test_log_something(monkeypatch):
     mocking_client(monkeypatch)
     dataset_name = "test-dataset"
-
     client.delete(f"/api/datasets/{dataset_name}")
 
     response = rubrix.log(
@@ -61,8 +58,12 @@ def test_log_something(monkeypatch):
 def test_snapshots(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_create_dataset_snapshot"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
     api_ds_prefix = f"/api/datasets/{dataset}"
-    create_some_data_for_text_classification(dataset)
+
+    expected_data = 100
+    create_some_data_for_text_classification(dataset, n=expected_data)
     response = client.post(
         f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
     )
@@ -76,6 +77,7 @@ def test_snapshots(monkeypatch):
 
     ds = rubrix.load(name=dataset)
     assert isinstance(ds, pandas.DataFrame)
+    assert len(ds) == expected_data
     assert "annotation" in ds.columns
     assert "prediction" in ds.columns
 
@@ -87,6 +89,32 @@ def test_snapshots(monkeypatch):
 
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
     assert isinstance(ds, pandas.DataFrame)
+
+
+def test_load_limits(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_load_limits"
+    api_ds_prefix = f"/api/datasets/{dataset}"
+    client.delete(api_ds_prefix)
+
+    create_some_data_for_text_classification(dataset, 50)
+    response = client.post(
+        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
+    )
+
+    limit_data_to = 10
+    ds = rubrix.load(name=dataset, limit=limit_data_to)
+    assert isinstance(ds, pandas.DataFrame)
+    assert len(ds) == limit_data_to
+
+    ds = rubrix.load(name=dataset, limit=limit_data_to, task="token_classification")
+    assert isinstance(ds, pandas.DataFrame)
+    assert len(ds) == limit_data_to
+
+    snapshot = rubrix.snapshots(dataset)[0]
+    ds = rubrix.load(name=dataset, snapshot=snapshot.id, limit=limit_data_to)
+    assert isinstance(ds, pandas.DataFrame)
+    assert len(ds) == limit_data_to
 
 
 def test_log_records_with_too_long_text(monkeypatch):

@@ -19,11 +19,11 @@ class EntitySpan:
     start: int
         character start position
     end: int
-        character end position
+        character end position, must be higher than the starting character.
     start_token: Optional[int]
         start token for entity span. Optional
     end_token: Optional[int]
-        end token for entity span. Optional
+        end token for entity span, must be higher than the starting token position. Optional
     label: str
         the label related to tokens that conforms the entity span"""
 

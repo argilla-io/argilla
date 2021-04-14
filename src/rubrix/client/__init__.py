@@ -186,14 +186,18 @@ class RubrixClient:
         return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
-        self, name: str, snapshot: Optional[str] = None, task: Optional[str] = None
+        self,
+        name: str,
+        snapshot: Optional[str] = None,
+        task: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> pandas.DataFrame:
 
         if snapshot:
             from rubrix.sdk.api.snapshots import _get_data
 
             response = _get_data.sync_detailed(
-                client=self._client, name=name, snapshot_id=snapshot
+                client=self._client, name=name, snapshot_id=snapshot, limit=limit
             )
         else:
 
@@ -210,7 +214,7 @@ class RubrixClient:
                     f"Wrong task defined {task}. "
                     "Allowed values are [text_classification, token_classification]"
                 )
-            response = _get_dataset_data.sync_detailed(client=self._client, name=name)
+            response = _get_dataset_data.sync_detailed(client=self._client, name=name, limit=limit)
 
         _check_response_errors(response)
         return pandas.DataFrame(response.parsed)

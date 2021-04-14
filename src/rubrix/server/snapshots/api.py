@@ -154,6 +154,7 @@ def delete_dataset_snapshot(
 async def stream_data(
     name: str,
     snapshot_id: str,
+    limit: int = Query(default=None, description="Limit loaded records", gt=0),
     service: SnapshotsService = Depends(create_snapshots_service),
     current_user: User = Depends(get_current_active_user),
 ) -> StreamingResponse:
@@ -164,6 +165,8 @@ async def stream_data(
     ----------
     name:
         Dataset name
+    limit:
+        The number of records's limit
     snapshot_id:
         Snapshot id
     service:
@@ -173,4 +176,4 @@ async def stream_data(
 
     """
     snapshot = service.get(name, owner=current_user.current_group, id=snapshot_id)
-    return stream_from_uri(snapshot.uri)
+    return stream_from_uri(snapshot.uri, limit=limit)
