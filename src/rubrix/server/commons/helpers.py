@@ -2,7 +2,7 @@
 Common helper functions
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 
 def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
@@ -35,11 +35,31 @@ def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
     return _flatten_internal_(data, _sep=sep)
 
 
-def unflatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
-    """Given a flat dictionary keys, build a hierarchical version by grouping keys"""
+def unflatten_dict(
+    data: Dict[str, Any], sep: str = ".", stop_keys: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """
+    Given a flat dictionary keys, build a hierarchical version by grouping keys
+
+    Parameters
+    ----------
+    data:
+        The data dictionary
+    sep:
+        The key separator. Default "."
+    stop_keys
+        List of dictionary first level keys where hierarchy will stop
+
+    Returns
+    -------
+
+    """
     resultDict = {}
+
     for key, value in data.items():
         parts = key.split(sep)
+        if parts[0] in stop_keys:
+            parts = [parts[0], sep.join(parts[1:])]
         d = resultDict
         for part in parts[:-1]:
             if part not in d:
@@ -47,5 +67,3 @@ def unflatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
             d = d[part]
         d[parts[-1]] = value
     return resultDict
-
-

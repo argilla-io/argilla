@@ -4,8 +4,11 @@ from fastapi.testclient import TestClient
 from rubrix.server.commons.models import PredictionStatus, SortParam
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
-from rubrix.server.text_classification.api import (BulkResponse, TextClassificationRecordsBulk,
-                                                   TextClassificationSearchResults)
+from rubrix.server.text_classification.api import (
+    BulkResponse,
+    TextClassificationRecordsBulk,
+    TextClassificationSearchResults,
+)
 from rubrix.server.text_classification.model import (
     TextClassificationAggregations,
     TextClassificationAnnotation,
@@ -107,9 +110,7 @@ def test_create_records_for_text_classification_with_multi_label():
         ).dict(by_alias=True),
     )
 
-    get_dataset = Dataset.parse_obj(
-        client.get(f"/api/datasets/{dataset}").json()
-    )
+    get_dataset = Dataset.parse_obj(client.get(f"/api/datasets/{dataset}").json())
     assert get_dataset.tags == {
         "env": "test",
         "class": "text classification",
@@ -430,3 +431,42 @@ def test_words_cloud():
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.aggregations.words is not None
+
+
+def test_metadata_with_point_in_field_name():
+    dataset = "test_metadata_with_point_in_field_name"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    response = client.post(
+        "/api/classification/datasets/:bulk-records",
+        data=TextClassificationRecordsBulk(
+            name=dataset,
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"text": "Esto es un ejemplo de texto"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+                TextClassificationRecord(
+                    **{
+                        "id": 1,
+                        "inputs": {"text": "This is an simple text example"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+            ],
+        ).json(by_alias=True),
+    )
+
+    response = client.post(
+        f"/api/classification/datasets/{dataset}/:search?limit=0",
+        json={},
+    )
+
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert "field.one" in results.aggregations.metadata
+    assert results.aggregations.metadata.get("field.one", {})["1"] == 2
+    assert results.aggregations.metadata.get("field.two", {})["2"] == 2
+

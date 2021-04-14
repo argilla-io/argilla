@@ -67,12 +67,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                         "ignore_above": 20,  # Avoid bulk errors with too long keywords
                         # Some elasticsearch verions includes automatically raw fields, so
                         # we must limit those fields too
-                        "fields" : {
-                            "raw" : {
-                                "type" : "keyword",
-                                "ignore_above" : 10
-                                }
-                        },
+                        "fields": {"raw": {"type": "keyword", "ignore_above": 10}},
                     },
                 }
             },
@@ -365,8 +360,10 @@ class DatasetRecordsDAO:
         hits = results["hits"]
         total = hits["total"]
         docs = hits["hits"]
-        search_aggregations = unflatten_dict(results.get("aggregations", {}))
 
+        search_aggregations = unflatten_dict(
+            results.get("aggregations", {}), stop_keys=["metadata"]
+        )
         result = MultiTaskSearchResult(
             total=total,
             records=[MultiTaskRecordDB.parse_obj(doc["_source"]) for doc in docs],
@@ -374,7 +371,9 @@ class DatasetRecordsDAO:
         if search_aggregations:
             result.aggregations = parse_tasks_aggregations(search_aggregations["tasks"])
             result.words_cloud = parse_aggregations(search_aggregations).get("words")
-            result.metadata = parse_aggregations(search_aggregations.get("metadata"))
+            result.metadata = parse_aggregations(
+                search_aggregations.get("metadata", {})
+            )
         return result
 
     def scan_dataset(

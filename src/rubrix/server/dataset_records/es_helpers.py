@@ -79,24 +79,12 @@ def parse_aggregations(
     if es_aggregations is None:
         return None
 
-    aggs = {}
-    for key, values in es_aggregations.items() or {}:
-        split_key = key.split(".")
-        base_key = split_key[0]
-        rest_key = ".".join(split_key[1:])
-        aggregation = {
+    return {
+        key: {
             bucket["key"]: bucket["doc_count"] for bucket in values.get("buckets", {})
         }
-
-        if not rest_key:
-            aggs[base_key] = aggregation
-        else:
-            current_value = aggs.get(base_key)
-            if current_value is None:
-                aggs[base_key] = {rest_key: aggregation}
-            else:
-                current_value[rest_key] = aggregation
-    return aggs
+        for key, values in es_aggregations.items() or {}
+    }
 
 
 def decode_sortable_field(field: SortableField) -> str:
@@ -280,7 +268,7 @@ class aggregations:
         def __resolve_aggregation_for_field_type(
             field_type: str, field_name: str
         ) -> Optional[Dict[str, Any]]:
-            if field_type == "keyword":
+            if field_type in ["keyword", "long", "integer"]:
                 return {
                     "terms": {
                         "field": field_name,

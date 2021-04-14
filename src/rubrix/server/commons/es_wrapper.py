@@ -246,7 +246,7 @@ class ElasticsearchWrapper(LoggingMixin):
             index=index,
             actions=map(map_doc_2_action, documents),
             raise_on_error=True,
-            refresh="wait_for"
+            refresh="wait_for",
         )
         return len(failed)
 
@@ -274,6 +274,7 @@ class ElasticsearchWrapper(LoggingMixin):
         return {
             key: list(definition["mapping"].values())[0]["type"]
             for key, definition in response[index]["mappings"].items()
+            if not key.endswith(".raw") # Drop raw version of fields
         }
 
     def update_document(
