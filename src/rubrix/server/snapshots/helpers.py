@@ -1,10 +1,11 @@
 import mmap
+from typing import Optional
 
 import numpy as np
 from fastapi.responses import StreamingResponse
 
 
-def stream_from_uri(uri: str) -> StreamingResponse:
+def stream_from_uri(uri: str, limit: Optional[int] = None) -> StreamingResponse:
     """
     Stream data file as streaming response
 
@@ -12,6 +13,8 @@ def stream_from_uri(uri: str) -> StreamingResponse:
     ----------
     uri:
         The file uri
+    limit:
+        The number of lines to read. Optional
 
     Returns
     -------
@@ -26,7 +29,7 @@ def stream_from_uri(uri: str) -> StreamingResponse:
         """
         Scan file to find byte offsets
         """
-        tmp_offsets = [0]  # python auto-extends this
+        tmp_offsets = [0]
         eof_symbol = b""
         with open(uri, "r+b") as f:
             mm = mmap.mmap(
@@ -35,6 +38,8 @@ def stream_from_uri(uri: str) -> StreamingResponse:
             for _ in iter(mm.readline, eof_symbol):
                 pos = mm.tell()
                 tmp_offsets.append(pos)
+
+        tmp_offsets = tmp_offsets[:limit] if limit else tmp_offsets
         # convert to numpy array for compactness;
         # can use uint32 for small and medium corpora (i.e., less than 100M lines)
         offsets = np.asarray(tmp_offsets, dtype="uint64")
