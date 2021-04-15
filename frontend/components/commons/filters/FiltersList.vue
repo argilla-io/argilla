@@ -139,8 +139,8 @@ export default {
             : [],
         };
       });
-
-      return [...filters, ...metadataFilters];
+      const sortedMetadataFilters = metadataFilters.sort((a, b) => (a.key.toLowerCase() > b.key.toLowerCase()) ? 1 : -1);
+      return [...filters, ...sortedMetadataFilters];
     },
   },
   mounted() {

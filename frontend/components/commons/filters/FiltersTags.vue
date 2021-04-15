@@ -7,7 +7,7 @@
     />
     <span v-for="(filter, index) in formattedFilters" :key="index">
       <span class="tag">
-        <span>{{ filter.name }} = {{ filter.value }}</span>
+        <span :title="`${filter.name} = ${filter.value}`">{{ filter.name }} = {{ filter.value }}</span>
         <i
           aria-hidden="true"
           tabindex="1"

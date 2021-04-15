@@ -2,7 +2,7 @@
   <div>
     <FilterDropdown :class="{ highlighted: visible }" class="dropdown--filter" :visible="visible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <span>{{ filter.name }}</span>
+        <span :title="filter.name">{{ filter.name }}</span>
       </span>
       <div slot="dropdown-content">
         <input v-model="searchText" class="filter-options" type="text" autofocus :placeholder="placeholder" />
