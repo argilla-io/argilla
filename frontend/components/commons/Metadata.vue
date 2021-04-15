@@ -9,7 +9,7 @@
       <span v-if="!Array.isArray(name)">{{ name | truncate(100) }}</span>
     </p>
     <div class="metadata__container">
-      <div v-for="(value, key) in metadataItems" :key="key">
+      <div v-for="(value, key) in sortedMetadataItems" :key="key">
         <div
           :class="[
             'metadata__blocks',
@@ -79,6 +79,11 @@ export default {
     metadata: {},
     disableButton: true,
   }),
+  computed: {
+    sortedMetadataItems() {    
+      return Object.keys(this.metadataItems).sort().reduce((r, k) => (r[k] = this.metadataItems[k], r), {});
+    },
+  },
   methods: {
     addFilter(key, value) {
       let meta = { ...this.metadata };
@@ -160,9 +165,15 @@ export default {
       &:first-child {
         color: $font-dark-color;
         margin-bottom: 0.5em;
+        .--selected & {
+          color: $secondary-color;
+        }
       }
     }
     &__button {
+      .--selected & {
+        color: $secondary-color;
+      }
       margin: auto 0 auto auto;
       overflow: visible;
     }
