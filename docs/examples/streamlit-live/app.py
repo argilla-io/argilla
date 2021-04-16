@@ -129,37 +129,24 @@ def main():
 
             # Population of labels
             labels = []
-
             for _, row in df.reset_index().iterrows():
-                labels.append({"class": row["index"], "confidence": row["confidence"]})
-
-            # Population of annotations
-            annotations = []
-
-            for label in selected_labels:
-                annotations.append({"class": label, "confidence": 1})
+                labels.append((row["index"], row["confidence"]))
 
             # Creation of the classification record
-            item = TextClassificationRecord.from_dict(
-                {
-                    "inputs": {"text": text_input},
-                    "prediction": {
-                        "agent": "typeform/squeezebert-mnli",  # Agent who makes the prediction
-                        "labels": labels,
-                    },
-                    "annotation": {
-                        "agent": "streamlit-user",  # Agent who makes the annotation
-                        "labels": annotations,
-                    },
-                    "multi_label": True,
-                    "event_timestamp": datetime.datetime.now().isoformat(),
-                    "metadata": {"model": "typeform/squeezebert-mnli"},
-                }
+            item = rubrix.TextClassificationRecord(
+                inputs={"text": text_input},
+                prediction=labels,
+                prediction_agent="typeform/squeezebert-mnli",
+                annotation=selected_labels,
+                annotation_agent="streamlit-user",
+                multi_label=True,
+                event_timestamp=datetime.datetime.now(),
+                metadata={"model": "typeform/squeezebert-mnli"}
             )
 
             dataset_name = "multilabel_text_classification"
 
-            rubrix.log(name=dataset_name, records=[item])
+            rubrix.log(name=dataset_name, records=item)
 
             api_url = os.getenv("RUBRIX_API_URL", "http://localhost:6900")
             # Pretty-print of the logged item
@@ -168,7 +155,7 @@ def main():
                  [{api_url}/{dataset_name}]({api_url}/{dataset_name}),
                 which has logged this object right below:"""
             )
-            st.json(item.to_dict())
+            st.json(item.dict())
 
             st.markdown(
                 """
@@ -179,26 +166,19 @@ def main():
             st.code(
                 """
             import rubrix
-            from rubrix.sdk.models import *
 
-            item = TextClassificationRecord.from_dict(
-                {
-                    "inputs": {"text": text_input},
-                    "prediction": {
-                        "agent": "typeform/squeezebert-mnli",  # Agent who makes the prediction
-                        "labels": labels,
-                    },
-                    "annotation": {
-                        "agent": "streamlit-user",  # Agent who makes the annotation
-                        "labels": annotations,
-                    },
-                    "multi_label": True,
-                    "event_timestamp": datetime.datetime.now().isoformat(),
-                    "metadata": {"model": "typeform/squeezebert-mnli"},
-                }
+            item = rubrix.TextClassificationRecord(
+                inputs={"text": text_input},
+                prediction=labels,
+                prediction_agent="typeform/squeezebert-mnli",
+                annotation=selected_labels,
+                annotation_agent="streamlit-user",
+                multi_label=True,
+                event_timestamp=datetime.datetime.now(),
+                metadata={"model": "typeform/squeezebert-mnli"}
             )
 
-            rubrix.log(name="experiment_name", records=[item])
+            rubrix.log(name="experiment_name", records=item)
 
             """,
                 language="python",
