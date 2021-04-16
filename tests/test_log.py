@@ -6,16 +6,14 @@ This pytest modules aims to test the correct state to the log function.
 Interaction with the client will be mocked, as this test are independent from the API,
 which could or could not be mounted.
 """
-
+from typing import cast
 
 import pytest
 import requests
 import rubrix
 from rubrix import (
     BulkResponse,
-    EntitySpan,
     TextClassificationRecord,
-    TokenClassificationAnnotation,
     TokenClassificationRecord,
 )
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
@@ -123,66 +121,7 @@ def mock_response_token(monkeypatch):
     )  # apply the monkeypatch for requests.get to mock_get
 
 
-@pytest.fixture
-def mock_dataset_text():
-    """Mocked dataset for text classification"""
-
-    return [
-        TextClassificationRecord(
-            id="test",
-            inputs={"review_body": "increible test"},
-            metadata={"product_category": "test de pytest"},
-        )
-    ]
-
-
-@pytest.fixture
-def mock_dataset_token():
-    """Mocked dataset for token classification"""
-
-    return [
-        TokenClassificationRecord(
-            raw_text="Super test",
-            prediction=TokenClassificationAnnotation(
-                agent="spacy",
-                entities=[
-                    EntitySpan(start=0, end=5, start_token=0, end_token=3, label="e")
-                ],
-            ),
-            tokens=["a", "b"],
-            metadata={"model": "spacy_es_core_news_sm"},
-        )
-    ]
-
-
-@pytest.fixture
-def mock_tags_text():
-    """Mocked tagst for text classification"""
-
-    return {
-        "type": "sentiment classifier",
-        "lang": "spanish",
-        "description": "Spanish sentiment classifier with `multifield inputs` (title and body)",
-    }
-
-
-@pytest.fixture
-def mock_tags_token():
-    """Mocked dataset for token classification"""
-
-    return {
-        "type": "sentiment classifier",
-        "lang": "spanish",
-        "description": "Spanish sentiment classifier with `multifield inputs` (title and body)",
-    }
-
-
-def test_text_classification(
-    mock_response_200,
-    mock_dataset_text,
-    mock_tags_text,
-    mock_response_text,
-):
+def test_text_classification(mock_response_200, mock_response_text):
     """Testing text classification with log function
 
     It checks a Response is generated.
@@ -191,22 +130,30 @@ def test_text_classification(
     ----------
     mock_response_200
         Mocked correct http response, emulating API init
-    mock_dataset_text
-        Mocked ClassificationRecord list to log
-    mock_tags_text
-        Mocked tags dictionary for text classification
     mock_response_text
         Mocked response given by the sync method, emulating the log of data
     """
+    records = [
+        TextClassificationRecord(
+            inputs={"review_body": "increible test"},
+            prediction=[("test", 0.9), ("test2", 0.1)],
+            annotation="test",
+            metadata={"product_category": "test de pytest"},
+            id="test",
+        )
+    ]
 
-    assert rubrix.log(
-        name="test", records=mock_dataset_text, tags=mock_tags_text
-    ) == BulkResponse(dataset="test", processed= 500, failed=0)
+    assert (
+        rubrix.log(
+            name="test",
+            records=records,
+            tags={"type": "sentiment classifier", "lang": "spanish"},
+        )
+        == BulkResponse(dataset="test", processed=500, failed=0)
+    )
 
 
-def test_token_classification(
-    mock_response_200, mock_dataset_token, mock_tags_token, mock_response_token
-):
+def test_token_classification(mock_response_200, mock_response_token):
     """Testing token classification with log function
 
     It checks a Response is generated.
@@ -215,22 +162,33 @@ def test_token_classification(
     ----------
     mock_response_200
         Mocked correct http response, emulating API init
-    mock_dataset_token
-        Mocked ClassificationRecord list to log
-    mock_tags_token
-        Mocked tags dictionary for token classification
     mock_response_token
         Mocked response given by the sync method, emulating the log of data
     """
+    records = [
+        TokenClassificationRecord(
+            text="Super test",
+            tokens=["Super", "test"],
+            prediction=[("test", 6, 10)],
+            annotation=[("test", 6, 10)],
+            prediction_agent="spacy",
+            annotation_agent="recognai",
+            metadata={"model": "spacy_es_core_news_sm"},
+            id=1,
+        )
+    ]
 
-    assert rubrix.log(
-        name="test", records=mock_dataset_token, tags=mock_tags_token
-    ) == BulkResponse(dataset="test", processed= 500, failed=0)
+    assert (
+        rubrix.log(
+            name="test",
+            records=records[0],
+            tags={"type": "sentiment classifier", "lang": "spanish"},
+        )
+        == BulkResponse(dataset="test", processed=500, failed=0)
+    )
 
 
-def test_no_name(
-    mock_response_200, mock_dataset_token, mock_tags_token, mock_response_token
-):
+def test_no_name(mock_response_200):
     """Testing classification with no input name
 
     It checks an Exception is raised, with the corresponding message.
@@ -239,24 +197,15 @@ def test_no_name(
     ----------
     mock_response_200
         Mocked correct http response, emulating API init
-    mock_dataset_token
-        Mocked ClassificationRecord list to log
-    mock_tags_token
-        Mocked tags dictionary for token classification
-    mock_response_token
-        Mocked response given by the sync method, emulating the log of data
     """
 
     with pytest.raises(
         Exception, match="Empty project name has been passed as argument."
     ):
-
-        assert rubrix.log(
-            name="", records=mock_dataset_token, tags=mock_tags_token
-        ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
+        assert rubrix.log(name="", records=cast(TextClassificationRecord, None))
 
 
-def test_empty_records(mock_response_200, mock_response_token, mock_tags_token):
+def test_empty_records(mock_response_200):
     """Testing classification with empty record list
 
     It checks an Exception is raised, with the corresponding message.
@@ -265,25 +214,15 @@ def test_empty_records(mock_response_200, mock_response_token, mock_tags_token):
     ----------
     mock_response_200
         Mocked correct http response, emulating API init
-    mock_dataset_token
-        Mocked ClassificationRecord list to log
-    mock_tags_token
-        Mocked tags dictionary for token classification
-    mock_response_token
-        Mocked response given by the sync method, emulating the log of data
     """
 
     with pytest.raises(
         Exception, match="Empty record list has been passed as argument."
     ):
-        assert rubrix.log(
-            name="test", records=[], tags=mock_tags_token
-        ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
+        rubrix.log(name="test", records=[])
 
 
-def test_unknow_record_type(
-    mock_response_200, mock_dataset_token, mock_response_token, mock_tags_token
-):
+def test_unknow_record_type(mock_response_200):
     """Testing classification with unknown record type
 
     It checks an Exception is raised, with the corresponding message.
@@ -292,18 +231,10 @@ def test_unknow_record_type(
     ----------
     mock_response_200
         Mocked correct http response, emulating API init
-    mock_dataset_token
-        Mocked ClassificationRecord list to log
-    mock_tags_token
-        Mocked tags dictionary for token classification
-    mock_response_token
-        Mocked response given by the sync method, emulating the log of data
     """
 
     with pytest.raises(Exception, match="Unknown record type passed as argument."):
-        assert rubrix.log(
-            name="test", records=["12"], tags=mock_tags_token
-        ) == BulkResponse.from_dict({"dataset": "test", "processed": 500, "failed": 0})
+        rubrix.log(name="test", records=["12"])
 
 
 @pytest.fixture
@@ -327,8 +258,6 @@ def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
     ):
         rubrix.log(
             name="dataset",
-            records=[
-                TextClassificationRecord(inputs={"text": "The textual info"})
-            ],
+            records=[TextClassificationRecord(inputs={"text": "The textual info"})],
             tags={"env": "Test"},
         )

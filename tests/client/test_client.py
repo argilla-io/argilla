@@ -1,3 +1,4 @@
+import datetime
 from time import sleep
 from typing import Iterable
 
@@ -7,12 +8,7 @@ import pytest
 import requests
 import rubrix
 from fastapi.testclient import TestClient
-from rubrix import (
-    ClassPrediction,
-    TaskStatus,
-    TextClassificationAnnotation,
-    TextClassificationRecord,
-)
+from rubrix import RubrixClient, TextClassificationRecord, TokenAttributions, TokenClassificationRecord
 from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
@@ -42,7 +38,7 @@ def test_log_something(monkeypatch):
 
     response = rubrix.log(
         name=dataset_name,
-        records=[rubrix.TextClassificationRecord(inputs={"text": "This is a test"})],
+        records=[TextClassificationRecord(inputs={"text": "This is a test"})],
     )
 
     assert response.processed == 1
@@ -151,7 +147,6 @@ def test_not_found_response(monkeypatch):
 
 
 def test_single_record(monkeypatch):
-
     mocking_client(monkeypatch)
     dataset_name = "test_log_single_records"
     client.delete(f"/api/datasets/{dataset_name}")
@@ -171,7 +166,6 @@ def test_passing_wrong_iterable_data(monkeypatch):
 
 
 def test_log_with_generator(monkeypatch):
-
     mocking_client(monkeypatch)
     dataset_name = "test_log_with_generator"
     client.delete(f"/api/datasets/{dataset_name}")
@@ -184,7 +178,6 @@ def test_log_with_generator(monkeypatch):
 
 
 def test_log_with_annotation(monkeypatch):
-
     mocking_client(monkeypatch)
     dataset_name = "test_log_with_annotation"
     client.delete(f"/api/datasets/{dataset_name}")
@@ -192,9 +185,8 @@ def test_log_with_annotation(monkeypatch):
         TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
-            annotation=TextClassificationAnnotation(
-                agent="test", labels=[ClassPrediction(class_label="T")]
-            ),
+            annotation="T",
+            annotation_agent="test",
         ),
         name=dataset_name,
     )
@@ -202,27 +194,64 @@ def test_log_with_annotation(monkeypatch):
     df = rubrix.load(dataset_name)
     records = df.to_dict(orient="records")
     assert len(records) == 1
-    assert records[0]["status"] == TaskStatus.VALIDATED
+    assert records[0]["status"] == "Validated"
 
     rubrix.log(
         TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
-            annotation=TextClassificationAnnotation(
-                agent="test", labels=[ClassPrediction(class_label="T")]
-            ),
-            status=TaskStatus.DISCARDED,
+            annotation="T",
+            annotation_agent="test",
+            status="Discarded"
         ),
         name=dataset_name,
     )
     df = rubrix.load(dataset_name)
     records = df.to_dict(orient="records")
     assert len(records) == 1
-    assert records[0]["status"] == TaskStatus.DISCARDED
+    assert records[0]["status"] == "Discarded"
+
+
+@pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
+def test_text_classification_record_to_sdk(annotation):
+    token_attributions = [TokenAttributions(token="test", attributions={"label1": 1., "label2": 2.})]
+    record = TextClassificationRecord(
+        inputs={"text": "test"},
+        prediction=[("label1", 0.5), ("label2", 0.5)],
+        annotation=annotation,
+        prediction_agent="test_model",
+        annotation_agent="test_annotator",
+        multi_label=True,
+        explanation={"text": token_attributions},
+        id=1,
+        metadata={"metadata": "test"},
+        status="Default",
+        event_timestamp=datetime.datetime(2000, 1, 1),
+    )
+    sdk_record = RubrixClient._text_classification_record_to_sdk(record)
+
+    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
+
+
+def test_token_classification_record_to_sdk():
+    record = TokenClassificationRecord(
+        text="test text",
+        tokens=["test", "text"],
+        prediction=[("label", 0, 5)],
+        annotation=[("label", 0, 5)],
+        prediction_agent="test_model",
+        annotation_agent="test_annotator",
+        id=1,
+        metadata={"metadata": "test"},
+        status="Default",
+        event_timestamp=datetime.datetime(2000, 1, 1),
+    )
+    sdk_record = RubrixClient._token_classification_record_to_sdk(record)
+
+    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
 def test_delete_dataset(monkeypatch):
-
     mocking_client(monkeypatch)
     dataset_name = "test_delete_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
@@ -231,9 +260,8 @@ def test_delete_dataset(monkeypatch):
         TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
-            annotation=TextClassificationAnnotation(
-                agent="test", labels=[ClassPrediction(class_label="T")]
-            ),
+            agent="test",
+            annotation=["T"],
         ),
         name=dataset_name,
     )

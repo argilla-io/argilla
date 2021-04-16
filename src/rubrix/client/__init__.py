@@ -5,24 +5,21 @@
 Methods for using the Rubrix Client, called from the module init file.
 """
 
-
 import logging
 from typing import Any, Dict, Iterable, List, Optional
 
 import pandas
 import requests
-from rubrix.client import models
 from rubrix.client.models import (
     BulkResponse,
     DatasetSnapshot,
     Record,
-    TaskStatus,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
 from rubrix.sdk import AuthenticatedClient, Client, models
-from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.datasets import delete_dataset
+from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
@@ -38,10 +35,10 @@ class RubrixClient:
     MAX_CHUNK_SIZE = 5000  # Larger sizzes will trigger a warning
 
     def __init__(
-        self,
-        api_url: str,
-        timeout: int,
-        api_key: Optional[str] = None,
+            self,
+            api_url: str,
+            timeout: int,
+            api_key: Optional[str] = None,
     ):
         """Client setup function.
 
@@ -84,12 +81,12 @@ class RubrixClient:
                 raise Exception("Authentification error: invalid credentials.")
 
     def log(
-        self,
-        records: Iterable[Record],
-        name: str,
-        tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
+            self,
+            records: Iterable[Record],
+            name: str,
+            tags: Optional[Dict[str, str]] = None,
+            metadata: Optional[Dict[str, Any]] = None,
+            chunk_size: int = 500,
     ) -> BulkResponse:
         """
         Register a set of logs into Rubrix
@@ -145,24 +142,24 @@ class RubrixClient:
             bulk_records_function = text_classification_bulk.sync_detailed
             tags = models.TextClassificationBulkDataTags.from_dict(tags)
             metadata = models.TextClassificationBulkDataMetadata.from_dict(metadata)
-            record_class = models.TextClassificationRecord
+            to_sdk_model = self._text_classification_record_to_sdk
 
         elif record_type is TokenClassificationRecord:
             bulk_class = models.TokenClassificationBulkData
             bulk_records_function = token_classification_bulk.sync_detailed
             tags = models.TokenClassificationBulkDataTags.from_dict(tags)
             metadata = models.TokenClassificationBulkDataMetadata.from_dict(metadata)
-            record_class = models.TokenClassificationRecord
+            to_sdk_model = self._token_classification_record_to_sdk
 
         # Record type is not recognised
         else:
             raise Exception(
-                f"Unknown record type passed as argument for [{','.join(map(str,records[0:5]))}...] "
+                f"Unknown record type passed as argument for [{','.join(map(str, records[0:5]))}...] "
                 f"Available values are {Record.__args__}"
             )
 
         for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
+            chunk = records[i: i + chunk_size]
 
             response = bulk_records_function(
                 client=self._client,
@@ -170,10 +167,7 @@ class RubrixClient:
                 json_body=bulk_class(
                     tags=tags,
                     metadata=metadata,
-                    records=[
-                        record_class.from_dict(_set_defaults(r).dict(exclude_none=True))
-                        for r in chunk
-                    ],
+                    records=[to_sdk_model(r) for r in chunk],
                 ),
             )
 
@@ -185,11 +179,11 @@ class RubrixClient:
         return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
-        self,
-        name: str,
-        snapshot: Optional[str] = None,
-        task: Optional[str] = None,
-        limit: Optional[int] = None,
+            self,
+            name: str,
+            snapshot: Optional[str] = None,
+            task: Optional[str] = None,
+            limit: Optional[int] = None,
     ) -> pandas.DataFrame:
 
         if snapshot:
@@ -218,7 +212,7 @@ class RubrixClient:
         _check_response_errors(response)
         return pandas.DataFrame(response.parsed)
 
-    def snapshots(self, dataset: str) -> List[models.DatasetSnapshot]:
+    def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
         """
         Retrieves created snapshots for given dataset
 
@@ -245,6 +239,54 @@ class RubrixClient:
             for snapshot in response.parsed
         ]
 
+    @staticmethod
+    def _text_classification_record_to_sdk(
+            record: TextClassificationRecord,
+    ) -> models.TextClassificationRecord:
+        """Transforms and returns the record as an SDK `TextClassificationRecord` model"""
+        model_dict = {
+            "inputs": record.inputs,
+            "multi_label": record.multi_label,
+            "status": record.status,
+        }
+        if record.prediction is not None:
+            labels = [
+                {"class_label": label, "confidence": confidence}
+                for label, confidence in record.prediction
+            ]
+            model_dict["prediction"] = {
+                "agent": record.prediction_agent or "None",
+                "labels": labels,
+            }
+        if record.annotation is not None:
+            annotations = (
+                record.annotation
+                if isinstance(record.annotation, list)
+                else [record.annotation]
+            )
+            gold_labels = [
+                {"class_label": label, "confidence": 1.0} for label in annotations
+            ]
+            model_dict["annotation"] = {
+                "agent": record.annotation_agent or "None",
+                "labels": gold_labels,
+            }
+            model_dict["status"] = record.status or "Validated"
+        if record.explanation is not None:
+            model_dict["explanation"] = {
+                key: [attribution.dict() for attribution in value]
+                for key, value in record.explanation.items()
+            }
+
+        if record.id is not None:
+            model_dict["id"] = record.id
+        if record.metadata is not None:
+            model_dict["metadata"] = record.metadata
+        if record.event_timestamp is not None:
+            model_dict["event_timestamp"] = record.event_timestamp.isoformat()
+
+        return models.TextClassificationRecord.from_dict(model_dict)
+
     def delete(self, name: str):
         """
         Delete a dataset with given name
@@ -257,12 +299,40 @@ class RubrixClient:
         response = delete_dataset.sync_detailed(client=self._client, name=name)
         _check_response_errors(response)
 
+    @staticmethod
+    def _token_classification_record_to_sdk(record: TokenClassificationRecord):
+        """Transforms and returns the record as an SDK `TokenClassificationRecord` model"""
+        model_dict = {
+            "raw_text": record.text,
+            "tokens": record.tokens,
+            "status": record.status,
+        }
+        if record.prediction is not None:
+            entities = [
+                {"label": pred[0], "start": pred[1], "end": pred[2]}
+                for pred in record.prediction
+            ]
+            model_dict["prediction"] = {
+                "agent": record.prediction_agent,
+                "entities": entities,
+            }
+        if record.annotation is not None:
+            gold_entities = [
+                {"label": ann[0], "start": ann[1], "end": ann[2]}
+                for ann in record.annotation
+            ]
+            model_dict["annotation"] = {
+                "agent": record.annotation_agent,
+                "entities": gold_entities,
+            }
+        if record.id is not None:
+            model_dict["id"] = record.id
+        if record.metadata is not None:
+            model_dict["metadata"] = record.metadata
+        if record.event_timestamp is not None:
+            model_dict["event_timestamp"] = record.event_timestamp.isoformat()
 
-def _set_defaults(record: Record) -> Record:
-    """Review default values for data record"""
-    if record.annotation is not None and record.status is None:
-        record.status = TaskStatus.VALIDATED
-    return record
+        return models.TokenClassificationRecord.from_dict(model_dict)
 
 
 def _check_response_errors(response: Response) -> None:
