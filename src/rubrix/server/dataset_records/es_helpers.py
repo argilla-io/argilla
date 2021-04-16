@@ -193,7 +193,6 @@ class filters:
             return {"match_all": {}}
 
         if isinstance(text_query, str):
-            # TODO: Search in language_words with a parameterized language
             return {
                 "query_string": {"fields": ["text.*", "tokens"], "query": text_query}
             }
@@ -276,7 +275,7 @@ class aggregations:
                         "order": {"_count": "desc"},
                     }
                 }
-            return None  # TODO: resolve another types
+            return None  # TODO: revise elasticsearch aggregations for API match
 
         if not fields_definitions:
             return {}

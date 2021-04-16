@@ -160,7 +160,6 @@ class RubrixClient:
                 f"Unknown record type passed as argument for [{','.join(map(str,records[0:5]))}...] "
                 f"Available values are {Record.__args__}"
             )
-            # TODO: podriamos tener una lista con todos los tipos posibles, y imprimir las posibilidades de records.
 
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
