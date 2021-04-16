@@ -7,7 +7,7 @@ from rubrix.server.commons.models import TaskType
 
 from .model import DatasetDB
 
-# TODO: elasticsearch index names will be revisited in the next iteration
+# TODO: elasticsearch index names will be revisited in the next iteration -> .rubrix
 DATASETS_INDEX_NAME = f".rubric.datasets-v1"
 DATASETS_RECORDS_INDEX_NAME = ".rubric.dataset.{}.records-v1"
 
