@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Iterable, List, Optional
 
 import pandas as pd
+
 from rubrix.server.commons.models import TaskType
 from rubrix.server.datasets.model import DatasetDB
 
@@ -107,14 +108,24 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
         data: Iterable[Any],
     ) -> DatasetSnapshotDB:
         os.makedirs(
-            self.__dataset_snapshots_path__(
-                dataset.name, owner=dataset.owner, task=task
+            _dataset_snapshots_path(
+                base_path=self.__base_path__,
+                dataset=dataset.name,
+                owner=dataset.owner,
+                task=task,
             ),
             exist_ok=True,
         )
-        path = self.__snapshot_path__(
-            dataset.owner, dataset=dataset.name, task=task, id=snapshot.id
+        paths = _snapshot_path_matches(
+            base_path=self.__base_path__,
+            dataset=dataset.name,
+            owner=dataset.owner,
+            task=task,
+            id=snapshot.id,
         )
+        assert len(paths) == 1, f"Corrupted snapshot data for snapshot {id}"
+
+        path = paths[0]
         df = pd.DataFrame(data).reset_index()
         if df.empty:
             raise ValueError(
@@ -124,84 +135,229 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
         return DatasetSnapshotDB(
             id=snapshot.id,
             uri=path.as_uri(),
-            task=self.__task_from_path__(str(path), dataset),
+            task=_task_from_path(str(path)),
             creation_date=self.__file_creation_date__(path),
         )
 
     def get(self, dataset: DatasetDB, id: str) -> Optional[DatasetSnapshotDB]:
-        path = self.__snapshot_path__(dataset=dataset.name, owner=dataset.owner, id=id)
-        if path:
+        paths = _snapshot_path_matches(
+            base_path=self.__base_path__,
+            dataset=dataset.name,
+            owner=dataset.owner,
+            id=id,
+        )
+        if paths:
+            path = paths[0]
             return DatasetSnapshotDB(
                 id=id,
                 uri=path.as_uri(),
-                task=self.__task_from_path__(str(path), dataset),
+                task=_task_from_path(str(path)),
                 creation_date=self.__file_creation_date__(path),
             )
 
     def list(
         self, dataset: DatasetDB, task: Optional[TaskType] = None
     ) -> List[DatasetSnapshotDB]:
-        snapshots_path_pattern = os.path.join(
-            self.__dataset_snapshots_path__(
-                owner=dataset.owner, dataset=dataset.name, task=task
-            ),
-            "*",
-        )
+        paths = _snapshot_path_matches(
+                base_path=self.__base_path__,
+                owner=dataset.owner,
+                dataset=dataset.name,
+                task=task,
+                id="*",
+            )
         return [
             DatasetSnapshotDB(
                 id=ntpath.basename(file),
-                uri=Path(file).as_uri(),
-                task=self.__task_from_path__(file, dataset),
-                creation_date=self.__file_creation_date__(Path(file)),
+                uri=file.as_uri(),
+                task=_task_from_path(str(file)),
+                creation_date=self.__file_creation_date__(file),
             )
-            for file in glob(
-                snapshots_path_pattern,
-                recursive=True,
-            )
+            for file in paths
         ]
 
     def delete(self, dataset: DatasetDB, id: str) -> None:
         try:
-            path = self.__snapshot_path__(dataset.owner, dataset=dataset.name, id=id)
-            return os.remove(path)
+            paths = _snapshot_path_matches(
+                base_path=self.__base_path__,
+                dataset=dataset.name,
+                owner=dataset.owner,
+                id=id,
+            )
+            for path in paths:
+                return os.remove(path)
         except:
             return None
-
-    def __snapshot_path__(
-        self, owner: str, dataset: str, id: str, task: Optional[str] = None
-    ) -> Optional[Path]:
-        snapshots_path = self.__dataset_snapshots_path__(
-            dataset, owner=owner, task=task
-        )
-        if task is None:
-            files = glob(os.path.join(snapshots_path, id))
-            if len(files) == 0:
-                return None
-            assert len(files) == 1, f"Corrupted snapshot data for snapshot {id}"
-            return Path(files[0])
-        return Path(os.path.join(snapshots_path, id))
-
-    def __dataset_snapshots_path__(
-        self, dataset: str, owner: str, task: Optional[str] = None
-    ) -> Path:
-        task = task or "*"
-        return Path(os.path.join(self.__owner_snapshots_path__(owner), dataset, task))
-
-    def __owner_snapshots_path__(self, owner: str) -> Path:
-        owner = owner or "default"
-        return Path(os.path.join(self.__base_path__, owner))
-
-    def __task_from_path__(self, file: str, dataset: DatasetDB) -> str:
-        clean_path = file.replace(
-            os.path.join(self.__owner_snapshots_path__(dataset.owner), dataset.name),
-            "",
-        )
-        return clean_path[1:].split("/")[0]
 
     @staticmethod
     def __file_creation_date__(path: Path) -> datetime.datetime:
         stats = path.stat()
         return datetime.datetime.fromtimestamp(stats.st_ctime)
+
+
+def _owner_snapshots_path(base_path: str, owner: Optional[str]) -> Path:
+    """
+    Composes snapshots owner's path from a given base path
+
+    Parameters
+    ----------
+    base_path:
+        The base path
+    owner
+        The owner
+    """
+    owner = owner or "default"
+    return Path(os.path.join(base_path, owner))
+
+
+def _dataset_snapshots_path(
+    base_path: str, dataset: str, owner: Optional[str], task: Optional[str] = None
+) -> Path:
+    """
+    Composes snapshots dataset's path
+
+    Parameters
+    ----------
+    base_path:
+        Base path
+    dataset:
+        The dataset name
+    owner:
+        The dataset's owner
+    task
+        The snapshot task
+    """
+    task = task or "**"
+    return Path(os.path.join(_owner_snapshots_path(base_path, owner), dataset, task))
+
+
+def _task_from_path(file: str) -> str:
+    """
+    Calculates the snapshot task from a given file path
+
+    Parameters
+    ----------
+    file:
+        The file path
+    """
+    snapshot_id, task, *_ = list(reversed(file.split(os.sep)))
+    return task
+
+
+def _snapshot_path_matches(
+    base_path: str,
+    owner: str,
+    dataset: str,
+    id: str,
+    task: Optional[str] = None,
+    glob_fn=glob,
+) -> List[Path]:
+    """Return path matches for snapshot path pattern"""
+    snapshots_path = _dataset_snapshots_path(
+        base_path=base_path, dataset=dataset, owner=owner, task=task
+    )
+    path_pattern = os.path.join(snapshots_path, id)
+    if task is None:
+        files = glob_fn(path_pattern)
+        return list(map(Path, files))
+    return [Path(path_pattern)]
+
+
+class S3SnapshotsDAOImpl(SnapshotsDAO):
+    """Snapshots backend using s3 storage"""
+
+    def __init__(self, bucket_name: str):
+        import s3fs
+        self.__s3__ = s3fs.S3FileSystem()
+        assert self.__s3__.exists(bucket_name), (
+            f"Provided bucket '{bucket_name}' does not exist or aws credentials was not properly configured. "
+            "See <https://boto3.amazonaws.com/v1/documentation"
+            "/api/latest/guide/configuration.html#using-environment-variables>"
+        )
+        self.__bucket__ = bucket_name
+
+    def delete(self, dataset: DatasetDB, id: str) -> None:
+        paths = _snapshot_path_matches(
+            base_path=self.__bucket__,
+            owner=dataset.owner,
+            dataset=dataset.name,
+            id=id,
+            glob_fn=self.__s3__.glob,
+        )
+        for path in paths:
+            self.__s3__.rm(str(path))
+
+    def create(
+        self,
+        dataset: DatasetDB,
+        task: TaskType,
+        snapshot: CreationDatasetSnapshot,
+        data: Iterable[Any],
+    ) -> DatasetSnapshotDB:
+        path = _snapshot_path_matches(
+            self.__bucket__,
+            owner=dataset.owner,
+            dataset=dataset.name,
+            task=task,
+            id=snapshot.id,
+            glob_fn=self.__s3__.glob,
+        )[0]
+
+        df = pd.DataFrame(data).reset_index()
+        if df.empty:
+            raise ValueError(
+                f"No data for dataset snapshot {dataset.name} and task {task}"
+            )
+        s3_uri = f"s3://{path}"
+        df.to_json(s3_uri, orient="records", lines=True)
+
+        return DatasetSnapshotDB(
+            id=snapshot.id,
+            uri=s3_uri,
+            task=_task_from_path(s3_uri),
+            creation_date=self.__date_from_s3_path(str(path)),
+        )
+
+    def get(self, dataset: DatasetDB, id: str) -> Optional[DatasetSnapshotDB]:
+        paths = _snapshot_path_matches(
+            base_path=self.__bucket__,
+            dataset=dataset.name,
+            owner=dataset.owner,
+            id=id,
+            glob_fn=self.__s3__.glob,
+        )
+        if paths:
+            path = str(paths[0])
+            return DatasetSnapshotDB(
+                id=id,
+                uri=f"s3://{path}",
+                task=_task_from_path(str(path)),
+                creation_date=self.__date_from_s3_path(path),
+            )
+
+    def list(
+        self, dataset: DatasetDB, task: Optional[TaskType] = None
+    ) -> List[DatasetSnapshotDB]:
+        files = _snapshot_path_matches(
+            base_path=self.__bucket__,
+            dataset=dataset.name,
+            owner=dataset.owner,
+            id="*",
+            glob_fn=self.__s3__.glob,
+        )
+        return [
+            DatasetSnapshotDB(
+                id=ntpath.basename(file),
+                uri=f"s3://{file}",
+                task=_task_from_path(str(file)),
+                creation_date=self.__date_from_s3_path(str(file)),
+            )
+            for file in files
+        ]
+
+    def __date_from_s3_path(self, path: str) -> datetime.datetime:
+        return self.__s3__.stat(path)[
+            "LastModified"
+        ]  # We can use this since no modification will be applied
 
 
 _instance: Optional[SnapshotsDAO] = None
@@ -214,7 +370,15 @@ def create_snapshots_dao() -> SnapshotsDAO:
     """
     global _instance
 
-    if settings.snapshots_provider == "local":
-        if not _instance:
-            _instance = LocalSnapshotsDAOImpl(folder=settings.snapshots_path)
+    if _instance:
         return _instance
+
+    if settings.snapshots_provider == "local":
+        _instance = LocalSnapshotsDAOImpl(folder=settings.snapshots_path)
+    elif settings.snapshots_provider == "s3":
+        _instance = S3SnapshotsDAOImpl(bucket_name=settings.snapshots_s3_bucket)
+    else:
+        raise ValueError(
+            f"Unknown provider [{settings.snapshots_provider}]. Available values are : local, s3"
+        )
+    return _instance

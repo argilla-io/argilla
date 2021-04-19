@@ -1,5 +1,6 @@
 import os
 
+
 import pandas
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +12,7 @@ from rubrix.server.text_classification.model import (
     TextClassificationBulkData,
     TextClassificationRecord,
 )
+
 
 client = TestClient(app)
 
@@ -75,6 +77,8 @@ def test_dataset_snapshots_flow():
     name = "test_create_dataset_snapshot"
     api_ds_prefix = f"/api/datasets/{name}"
     assert client.delete(api_ds_prefix).status_code == 200
+    expected_data = 2
+    create_some_data_for_text_classification(name, n=expected_data)
     # Clear eventually already created snapshots
     response = client.get(f"{api_ds_prefix}/snapshots")
     if response.status_code == 200:
@@ -84,8 +88,6 @@ def test_dataset_snapshots_flow():
                 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
             )
 
-    expected_data = 2
-    create_some_data_for_text_classification(name, n=expected_data)
     response = client.post(
         f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
     )
@@ -95,7 +97,6 @@ def test_dataset_snapshots_flow():
         client.post(f"{api_ds_prefix}/snapshots?task={TaskType.token_classification}")
 
     snapshot = DatasetSnapshot(**response.json())
-    assert os.path.exists(uri_2_path(snapshot.uri))
     assert snapshot.task == TaskType.text_classification
     assert snapshot.creation_date
 
