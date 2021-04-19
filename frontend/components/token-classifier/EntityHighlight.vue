@@ -81,12 +81,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .highlight {
+  @include font-size(16px);
+  line-height: 1em;
   position: relative;
   cursor: default;
   display: inline;
   border-radius: 2px;
   padding: 0;
-  margin-right: 3px;
   &--block {
     display: block;
     .highlight__content:after {
