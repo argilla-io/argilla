@@ -38,13 +38,13 @@ def test_log_something(monkeypatch):
 
     response = rubrix.log(
         name=dataset_name,
-        records=[TextClassificationRecord(inputs={"text": "This is a test"})],
+        records=rubrix.TextClassificationRecord(inputs={"text": "This is a test"}),
     )
 
     assert response.processed == 1
     assert response.failed == 0
 
-    response = client.post(f"/api/datasets/{dataset_name}/TextClassification/:search")
+    response = client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
     results = TextClassificationSearchResults.from_dict(response.json())
     assert results.total == 1
     assert len(results.records) == 1

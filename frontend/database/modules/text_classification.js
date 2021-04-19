@@ -12,7 +12,7 @@ const actions = {
   },
   async updateRecords(_, { dataset, records }) {
     return await TextClassificationDataset.api().post(
-      `/classification/datasets/:bulk-records`,
+      `/datasets/${dataset.name}/TextClassification:bulk`,
       {
         name: dataset.name,
         records,
@@ -59,7 +59,7 @@ const actions = {
     const save = size == 0 ? false : true;
 
     return await TextClassificationDataset.api().post(
-      `/classification/datasets/${dataset.name}/:search?limit=${size}`,
+      `/datasets/${dataset.name}/TextClassification:search?limit=${size}`,
       {
         query: { ...query, query_inputs: query.text },
         sort,
@@ -75,7 +75,7 @@ const actions = {
 
   async fetchMoreRecords(store, { dataset, size, from }) {
     return await TextClassificationDataset.api().post(
-      `/classification/datasets/${dataset.name}/:search?limit=${size}&from=${from}`,
+      `/datasets/${dataset.name}/TextClassification:search?limit=${size}&from=${from}`,
       {
         query: { ...dataset.query, query_inputs: dataset.query.text },
         sort: dataset.sort,

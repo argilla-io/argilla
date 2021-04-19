@@ -56,9 +56,8 @@ def create_some_data_for_text_classification(name: str, n: int):
         ]
     ]
     client.post(
-        f"/api/datasets/{name}/{TaskType.text_classification}/:bulk",
+        f"/api/datasets/{name}/{TaskType.text_classification}:bulk",
         json=TextClassificationBulkData(
-            name=name,
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,

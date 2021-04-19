@@ -12,7 +12,7 @@ const actions = {
   },
   async updateRecords(_, { dataset, records }) {
     return await TokenClassificationDataset.api().post(
-      `/token-classification/datasets/:bulk-records`,
+      `/datasets/${dataset.name}/TokenClassification:bulk`,
       {
         name: dataset.name,
         records,
@@ -26,7 +26,7 @@ const actions = {
     const save = size == 0 ? false : true;
 
     return await TokenClassificationDataset.api().post(
-      `/token-classification/datasets/${dataset.name}/:search?limit=${size}`,
+      `/datasets/${dataset.name}/TokenClassification:search?limit=${size}`,
       {
         query: { ...query, query_text: query.text },
         sort,
@@ -42,7 +42,7 @@ const actions = {
 
   async fetchMoreRecords(store, { dataset, size, from }) {
     return await TokenClassificationDataset.api().post(
-      `/token-classification/datasets/${dataset.name}/:search?limit=${size}&from=${from}`,
+      `/datasets/${dataset.name}/TokenClassification:search?limit=${size}&from=${from}`,
       {
         query: { ...dataset.query, query_text: dataset.query.text },
         sort: dataset.sort,

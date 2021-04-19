@@ -6,17 +6,19 @@ from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
 from rubrix.server.text_classification.api import (
     BulkResponse,
-    TextClassificationRecordsBulk,
     TextClassificationSearchResults,
 )
 from rubrix.server.text_classification.model import (
     TextClassificationAggregations,
     TextClassificationAnnotation,
+    TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
-from rubrix.server.token_classification.model import TokenClassificationRecord
+from rubrix.server.token_classification.model import (
+    TokenClassificationBulkData,
+    TokenClassificationRecord,
+)
 
 client = TestClient(app)
 
@@ -30,16 +32,17 @@ def test_records_with_default_text():
         for data in [{"tokens": "This is a text".split(" ")}]
     ]
     response = client.post(
-        "/api/token-classification/datasets/:bulk-records",
-        json=TokenClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkData(
             records=records,
         ).dict(by_alias=True),
     )
 
     assert response.status_code == 200, response.json()
 
-    response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search", json={}
+    )
 
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -85,9 +88,8 @@ def test_create_records_for_text_classification_with_multi_label():
         ]
     ]
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        json=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -101,9 +103,8 @@ def test_create_records_for_text_classification_with_multi_label():
     assert bulk_response.processed == 2
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        json=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
             tags={"new": "tag"},
             metadata={"new": {"metadata": "value"}},
             records=records,
@@ -123,7 +124,9 @@ def test_create_records_for_text_classification_with_multi_label():
 
     assert response.status_code == 200, response.json()
 
-    response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search", json={}
+    )
 
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -137,8 +140,7 @@ def test_create_records_for_text_classification():
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
     metadata = {"config": {"the": "config"}}
-    classification_bulk = TextClassificationRecordsBulk(
-        name=dataset,
+    classification_bulk = TextClassificationBulkData(
         tags=tags,
         metadata=metadata,
         records=[
@@ -158,7 +160,7 @@ def test_create_records_for_text_classification():
         ],
     )
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
+        f"/api/datasets/{dataset}/TextClassification:bulk",
         json=classification_bulk.dict(by_alias=True),
     )
 
@@ -174,7 +176,9 @@ def test_create_records_for_text_classification():
     assert created_dataset.tags == tags
     assert created_dataset.metadata == metadata
 
-    response = client.post(f"/api/classification/datasets/{dataset}/:search", json={})
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search", json={}
+    )
 
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
@@ -204,13 +208,12 @@ def test_partial_record_update():
         }
     )
 
-    bulk = TextClassificationRecordsBulk(
-        name=name,
+    bulk = TextClassificationBulkData(
         records=[record],
     )
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
+        f"/api/datasets/{name}/TextClassification:bulk",
         json=bulk.dict(by_alias=True),
     )
 
@@ -229,12 +232,12 @@ def test_partial_record_update():
     bulk.records = [record]
 
     client.post(
-        "/api/classification/datasets/:bulk-records",
+        f"/api/datasets/{name}/TextClassification:bulk",
         json=bulk.dict(by_alias=True),
     )
 
     response = client.post(
-        f"/api/classification/datasets/{name}/:search",
+        f"/api/datasets/{name}/TextClassification:search",
         json={
             "query": TextClassificationQuery(predicted=PredictionStatus.OK).dict(
                 by_alias=True
@@ -273,9 +276,8 @@ def test_sort_by_id_as_default():
     dataset = "test_sort_by_id_as_default"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        json=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
             records=[
                 TextClassificationRecord(
                     **{
@@ -289,7 +291,7 @@ def test_sort_by_id_as_default():
         ).dict(by_alias=True),
     )
     response = client.post(
-        f"/api/classification/datasets/{dataset}/:search?from=0&limit=10",
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={},
     )
 
@@ -314,9 +316,8 @@ def test_disable_aggregations_when_scroll():
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        json=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=[
@@ -341,7 +342,7 @@ def test_disable_aggregations_when_scroll():
     assert bulk_response.processed == 100
 
     response = client.post(
-        f"/api/classification/datasets/{dataset}/:search?from=10",
+        f"/api/datasets/{dataset}/TextClassification:search?from=10",
         json={},
     )
 
@@ -355,9 +356,8 @@ def test_include_event_timestamp():
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        data=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=[
@@ -383,7 +383,7 @@ def test_include_event_timestamp():
     assert bulk_response.processed == 100
 
     response = client.post(
-        f"/api/classification/datasets/{dataset}/:search?from=10",
+        f"/api/datasets/{dataset}/TextClassification:search?from=10",
         json={},
     )
 
@@ -397,9 +397,8 @@ def test_words_cloud():
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        data=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
             records=[
                 TextClassificationRecord(
                     **{
@@ -425,7 +424,7 @@ def test_words_cloud():
     BulkResponse.parse_obj(response.json())
 
     response = client.post(
-        f"/api/classification/datasets/{dataset}/:search",
+        f"/api/datasets/{dataset}/TextClassification:search",
         json={},
     )
 
@@ -438,9 +437,8 @@ def test_metadata_with_point_in_field_name():
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        data=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
             records=[
                 TextClassificationRecord(
                     **{
@@ -461,7 +459,7 @@ def test_metadata_with_point_in_field_name():
     )
 
     response = client.post(
-        f"/api/classification/datasets/{dataset}/:search?limit=0",
+        f"/api/datasets/{dataset}/TextClassification:search?limit=0",
         json={},
     )
 
@@ -469,4 +467,3 @@ def test_metadata_with_point_in_field_name():
     assert "field.one" in results.aggregations.metadata
     assert results.aggregations.metadata.get("field.one", {})["1"] == 2
     assert results.aggregations.metadata.get("field.two", {})["2"] == 2
-

@@ -16,7 +16,7 @@ def _get_kwargs(
     name: str,
     json_body: TextClassificationBulkData,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TextClassification/:bulk".format(
+    url = "{}/api/datasets/{name}/TextClassification:bulk".format(
         client.base_url, name=name
     )
 
