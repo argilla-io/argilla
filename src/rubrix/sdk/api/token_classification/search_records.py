@@ -22,7 +22,7 @@ def _get_kwargs(
     limit: Union[Unset, int] = 50,
     from_: Union[Unset, int] = 0,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TokenClassification/:search".format(
+    url = "{}/api/datasets/{name}/TokenClassification:search".format(
         client.base_url, name=name
     )
 

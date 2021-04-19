@@ -21,12 +21,12 @@ from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
 from rubrix.sdk.models import (
+    TextClassificationBulkData,
     TextClassificationBulkDataMetadata,
     TextClassificationBulkDataTags,
-    TextClassificationRecordsBulk,
+    TokenClassificationBulkData,
     TokenClassificationBulkDataMetadata,
     TokenClassificationBulkDataTags,
-    TokenClassificationRecordsBulk,
 )
 from rubrix.sdk.types import Response
 
@@ -67,7 +67,7 @@ def mock_response_text(monkeypatch):
 
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
-    def mock_get(*args, json_body: TextClassificationRecordsBulk, **kwargs):
+    def mock_get(*args, json_body: TextClassificationBulkData, **kwargs):
         assert isinstance(json_body.metadata, TextClassificationBulkDataMetadata)
         assert isinstance(json_body.tags, TextClassificationBulkDataTags)
         return Response(
@@ -101,7 +101,7 @@ def mock_response_token(monkeypatch):
 
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
-    def mock_get(*args, json_body: TokenClassificationRecordsBulk, **kwargs):
+    def mock_get(*args, json_body: TokenClassificationBulkData, **kwargs):
         assert isinstance(json_body.metadata, TokenClassificationBulkDataMetadata)
         assert isinstance(json_body.tags, TokenClassificationBulkDataTags)
         return Response(

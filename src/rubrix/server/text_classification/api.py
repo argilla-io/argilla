@@ -40,7 +40,7 @@ base_endpoint = "/datasets/{name}/" + TaskType.text_classification
 
 
 @router.post(
-    base_endpoint + "/:bulk",
+    base_endpoint + ":bulk",
     operation_id="bulk_records",
     response_model=BulkResponse,
     response_model_exclude_none=True,
@@ -100,7 +100,7 @@ def bulk_records(
 
 
 @router.post(
-    base_endpoint + "/:search",
+    base_endpoint + ":search",
     response_model=TextClassificationSearchResults,
     response_model_exclude_none=True,
     operation_id="search_records",
@@ -177,89 +177,6 @@ def search_records(
         )
         if result.aggregations
         else None,
-    )
-
-
-class TextClassificationRecordsBulk(TextClassificationBulkData):
-    """
-    API backward compatibility data model for bulk record old endpoint
-
-    Attributes:
-    -----------
-
-    name:str
-        The dataset name
-
-    """
-
-    name: str
-
-
-@router.post(
-    "/classification/datasets/:bulk-records",
-    deprecated=True,
-    response_model=BulkResponse,
-    response_model_exclude_none=True,
-    operation_id="bulk_records_deprecated",
-)
-def bulk_records_deprecated(
-    bulk: TextClassificationRecordsBulk,
-    datasets: DatasetsService = Depends(create_dataset_service),
-    service: DatasetRecordsService = Depends(create_dataset_records_service),
-    current_user: User = Depends(get_current_active_user),
-) -> BulkResponse:
-    """
-    Old search endpoint
-
-    Parameters
-    ----------
-    bulk:
-        The bulk data
-    datasets:
-        The datasets service
-    service:
-        The dataset records service
-    current_user:
-        Current request user
-
-    Returns
-    -------
-
-        The bulk response
-
-    """
-    return bulk_records(
-        name=bulk.name,
-        bulk=bulk,
-        datasets=datasets,
-        service=service,
-        current_user=current_user,
-    )
-
-
-@router.post(
-    "/classification/datasets/{name}/:search",
-    operation_id="search_records_deprecated",
-    deprecated=True,
-    response_model=TextClassificationSearchResults,
-    response_model_exclude_none=True,
-)
-def search_records_deprecated(
-    name: str,
-    search: TextClassificationSearchRequest = None,
-    pagination: PaginationParams = Depends(),
-    service: DatasetRecordsService = Depends(create_dataset_records_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
-) -> TextClassificationSearchResults:
-    """Deprecated endpoint for text classification search"""
-    return search_records(
-        name=name,
-        search=search,
-        pagination=pagination,
-        datasets=datasets,
-        service=service,
-        current_user=current_user,
     )
 
 

@@ -1,10 +1,15 @@
 from fastapi.testclient import TestClient
 from rubrix.server.commons.models import BulkResponse
 from rubrix.server.server import app
-from rubrix.server.text_classification.api import TextClassificationRecordsBulk
-from rubrix.server.text_classification.model import TextClassificationRecord
-from rubrix.server.token_classification.api import TokenClassificationRecordsBulk
-from rubrix.server.token_classification.model import (TokenClassificationRecord, TokenClassificationSearchResults)
+from rubrix.server.text_classification.model import (
+    TextClassificationBulkData,
+    TextClassificationRecord,
+)
+from rubrix.server.token_classification.model import (
+    TokenClassificationBulkData,
+    TokenClassificationRecord,
+    TokenClassificationSearchResults,
+)
 
 client = TestClient(app)
 
@@ -27,9 +32,8 @@ def test_create_records_for_token_classification():
         ]
     ]
     response = client.post(
-        "/api/token-classification/datasets/:bulk-records",
-        json=TokenClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -54,9 +58,8 @@ def test_records_with_default_tokenization():
         ]
     ]
     response = client.post(
-        "/api/classification/datasets/:bulk-records",
-        json=TextClassificationRecordsBulk(
-            name=dataset,
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
             records=records,
         ).dict(by_alias=True),
     )
@@ -64,7 +67,7 @@ def test_records_with_default_tokenization():
     assert response.status_code == 200, response.json()
 
     response = client.post(
-        f"/api/token-classification/datasets/{dataset}/:search", json={}
+        f"/api/datasets/{dataset}/TokenClassification:search", json={}
     )
     results = TokenClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
