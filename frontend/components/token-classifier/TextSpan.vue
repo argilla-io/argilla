@@ -49,6 +49,7 @@
       </div>
       <div v-if="showEntitiesSelector" class="overlay" />
     </span>
+    <span class="span__whitespace" v-html="whiteSpace"></span>
   </span>
 </template>
 
@@ -98,18 +99,10 @@ export default {
       return this.spans[this.spanId];
     },
     text() {
-      let text;
-      const nextSpan = this.spans[this.spanId + 1];
-      if (nextSpan) {
-        if (this.spans[this.spanId].entity) {
-          text = this.record.raw_text.slice(this.span.start, nextSpan.start - 1);
-        } else {
-          text = this.record.raw_text.slice(this.span.start, nextSpan.start);
-        }
-      } else {
-        text = this.record.raw_text.slice(this.span.start);
-      }
-      return this.queryText ? this.$highlightSearch(this.queryText, text) : text;
+      return this.record.raw_text.slice(this.spans[this.spanId].start, this.spans[this.spanId].end);
+    },
+    whiteSpace() {
+      return this.record.raw_text.slice(this.spans[this.spanId].end, this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : '');
     },
     tag_color() {
       return this.entities.findIndex(
@@ -199,6 +192,8 @@ export default {
     border: 1px solid $primary-color;
     font-weight: 500;
     &__container {
+      @include font-size(14px);
+      line-height: 1em;
       display: inline-block;
       white-space: pre-line;
     }
@@ -239,9 +234,14 @@ export default {
   position: relative;
   display: inline;
   line-height: 1em;
+  @include font-size(0);
   &__text {
+    @include font-size(16px);
     display: inline;
     position: relative;
+  }
+  &__whitespace {
+    @include font-size(16px);
   }
 }
 
@@ -264,8 +264,10 @@ export default {
 }
 .selected {
   // border: 1px dashed $tertiary-color;
-  line-height: 1.5em;
-  background: $tertiary-lighten-color;
+  .span__text {
+    line-height: 1.5em;
+    background: $tertiary-lighten-color;
+  }
 }
 .span span {
   &::selection {
