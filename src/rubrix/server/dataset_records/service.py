@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Type, Union
 
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
@@ -113,11 +113,12 @@ class DatasetRecordsService:
         )
         return _dao_results_2_service_results(results, tasks=configured_tasks)
 
-    def scan_dataset(
+    def read_dataset(
         self,
         dataset: str,
         owner: Optional[str],
         tasks: List[Type[RecordTaskInfo]],
+        ids: Optional[List[Union[str, int]]] = None,
     ) -> Iterable[MultiTaskRecord]:
         """
         Scan a dataset records
@@ -130,10 +131,15 @@ class DatasetRecordsService:
             The dataset owner. Optional
         tasks:
             Task list that should be included in output record
+        ids:
+            If provided, scan will retrieve only records matching
+            the provided ids. Optional
 
         """
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
-        for db_record in self.__dao__.scan_dataset(dataset):
+        for db_record in self.__dao__.scan_dataset(
+            dataset, search=MultiTaskSearch(ids=ids)
+        ):
             yield _record_db_2_record(db_record, _tasks=tasks)
 
 

@@ -142,6 +142,7 @@ def load(
     name: str,
     snapshot: Optional[str] = None,
     task: Optional[str] = None,
+    ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
@@ -155,6 +156,8 @@ def load(
         The dataset snapshot id. Optional
     task:
         The data task to retrieve (when no snapshots provided). Optional
+    ids:
+        If provided, load dataset records with given ids.
     limit:
         The number of records to retrieve
 
@@ -163,7 +166,9 @@ def load(
         A pandas Dataframe
 
     """
-    return _client_instance().load(name=name, snapshot=snapshot, task=task, limit=limit)
+    return _client_instance().load(
+        name=name, snapshot=snapshot, task=task, limit=limit, ids=ids
+    )
 
 
 def delete(name: str) -> None:

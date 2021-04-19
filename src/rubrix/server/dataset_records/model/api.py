@@ -56,11 +56,14 @@ class MultiTaskRecordSearchQuery(BaseModel, LoggingMixin):
         The elasticsearch text query
     metadata: Dict[str, Union[str, List[str]]]
         The elasticsearch metadata query
+    ids: List[Union[str, int]]
+        The record ids to retrieve. This will apply an exact match over ids.
 
     """
 
     text_query: Optional[Union[str, Dict[str, str]]] = None
-    metadata: Dict[str, Union[str, List[str]]] = Field(default=dict)
+    metadata: Dict[str, Union[str, List[str]]] = Field(default_factory=dict)
+    ids: List[Union[str, int]] = Field(default_factory=list)
 
     __tasks__: Dict[TaskType, TaskMeta] = PrivateAttr(default_factory=dict)
 
@@ -132,3 +135,18 @@ class MultitaskRecordSearchResults(BaseModel):
     total: int = 0
     records: List[MultiTaskRecord]
     aggregations: RecordSearchAggregations
+
+
+class StreamDataRequest(BaseModel):
+    """
+    Request data for scan dataset endpoint
+
+    Attributes:
+    -----------
+
+    ids:
+        The list of record ids to scan
+
+    """
+
+    ids: Optional[List[Union[str, int]]] = None

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
@@ -6,6 +8,7 @@ from rubrix.server.dataset_records.model import (
     MultiTaskRecord,
     MultiTaskRecordSearchQuery,
     MultiTaskSortParam,
+    StreamDataRequest,
     TaskMeta,
 )
 from rubrix.server.dataset_records.service import (
@@ -172,12 +175,13 @@ def bulk_records(
     )
 
 
-@router.get(
+@router.post(
     base_endpoint + "/data",
     operation_id="stream_data",
 )
 async def stream_data(
     name: str,
+    request: Optional[StreamDataRequest] = None,
     limit: int = Query(default=None, description="Limit loaded records", gt=0),
     service: DatasetRecordsService = Depends(create_dataset_records_service),
     datasets: DatasetsService = Depends(create_dataset_service),
@@ -190,6 +194,8 @@ async def stream_data(
     ----------
     name
         The dataset name
+    request:
+        The stream data request
     limit:
         The number of records limit. Optional
     service:
@@ -201,6 +207,8 @@ async def stream_data(
 
     """
     datasets.find_by_name(name, owner=current_user.current_group)
+
+    request = request or StreamDataRequest()
     return scan_data_response(
         service,
         dataset=name,
@@ -208,6 +216,7 @@ async def stream_data(
         tasks=[TokenClassificationTask],
         record_transform=_multi_task_record_2_token_classification,
         limit=limit,
+        ids=request.ids,
     )
 
 

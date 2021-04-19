@@ -26,6 +26,8 @@ def mocking_client(monkeypatch):
     monkeypatch.setattr(httpx, "delete", client.delete)
 
     def stream_mock(*args, url: str, **kwargs):
+        if "POST" in args:
+            return client.post(url, stream=True, **kwargs)
         return client.get(url, stream=True, **kwargs)
 
     monkeypatch.setattr(httpx, "stream", stream_mock)
@@ -74,14 +76,11 @@ def test_snapshots(monkeypatch):
     ds = rubrix.load(name=dataset)
     assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == expected_data
-    assert "annotation" in ds.columns
-    assert "prediction" in ds.columns
+    records = list(map(lambda r: TextClassificationRecord(**r), ds.to_dict(orient="records")))
 
     ds = rubrix.load(name=dataset, task="token_classification")
     assert isinstance(ds, pandas.DataFrame)
-    assert "annotation" in ds.columns
-    assert "prediction" in ds.columns
-    assert "tokens" in ds.columns
+    records = list(map(lambda r: TokenClassificationRecord(**r), ds.to_dict(orient="records")))
 
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
     assert isinstance(ds, pandas.DataFrame)
@@ -260,7 +259,7 @@ def test_delete_dataset(monkeypatch):
         TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
-            agent="test",
+            annotation_agent="test",
             annotation=["T"],
         ),
         name=dataset_name,
@@ -268,5 +267,27 @@ def test_delete_dataset(monkeypatch):
     rubrix.load(name=dataset_name)
     rubrix.delete(name=dataset_name)
     sleep(1)
-    with pytest.raises(Exception, match="Not found error. The API answered with a 404 code"):
+    with pytest.raises(
+            Exception, match="Not found error. The API answered with a 404 code"
+    ):
         rubrix.load(name=dataset_name)
+
+
+def test_load_with_ids_list(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_load_with_ids_list"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+    api_ds_prefix = f"/api/datasets/{dataset}"
+
+    expected_data = 100
+    create_some_data_for_text_classification(dataset, n=expected_data)
+    response = client.post(
+        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
+    )
+    assert response.status_code == 200
+    ds = rubrix.load(name=dataset, ids=[3, 5])
+    assert len(ds) == 2
+
+    ds = rubrix.load(name=dataset, ids=[3, 5], task="token_classification")
+    assert len(ds) == 2
