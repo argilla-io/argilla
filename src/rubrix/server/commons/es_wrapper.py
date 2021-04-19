@@ -1,7 +1,7 @@
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import elasticsearch
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
 from rubrix.logging import LoggingMixin
 
@@ -85,7 +85,6 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        self.logger.info(query)
         return self.__client__.search(
             index=index,
             body=query or {},
@@ -268,14 +267,20 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
             A dictionary with full field name as key and its type as value
         """
-        response = self.__client__.indices.get_field_mapping(
-            fields=field_name, index=index
-        )
-        return {
-            key: list(definition["mapping"].values())[0]["type"]
-            for key, definition in response[index]["mappings"].items()
-            if not key.endswith(".raw")  # Drop raw version of fields
-        }
+        try:
+            response = self.__client__.indices.get_field_mapping(
+                fields=field_name,
+                index=index,
+                ignore_unavailable=False,
+            )
+            return {
+                key: list(definition["mapping"].values())[0]["type"]
+                for key, definition in response[index]["mappings"].items()
+                if not key.endswith(".raw")  # Drop raw version of fields
+            }
+        except NotFoundError:
+            # No mapping data
+            return {}
 
     def update_document(
         self,
@@ -307,6 +312,38 @@ class ElasticsearchWrapper(LoggingMixin):
         if partial_update:
             self.__client__.update(index=index, id=doc_id, body={"doc": document})
         self.__client__.index(index=index, id=doc_id, body=document)
+
+    def open_index(self, index: str):
+        """
+        Open an elasticsearch index. If index is already open, this operation will do nothing
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.11/indices-open-close.html>`_
+
+        Parameters
+        ----------
+        index:
+            The index name
+        """
+        self.__client__.indices.open(
+            index=index, wait_for_active_shards=settings.es_records_index_shards
+        )
+
+    def close_index(self, index: str):
+        """
+        Closes an elasticsearch index. If index is already closed, this operation will do nothing.
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.11/indices-open-close.html>`_
+
+        Parameters
+        ----------
+        index:
+            The index name
+        """
+        self.__client__.indices.close(
+            index=index,
+            ignore_unavailable=True,
+            wait_for_active_shards=settings.es_records_index_shards,
+        )
 
 
 _instance = None  # The singleton instance

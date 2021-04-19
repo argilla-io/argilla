@@ -24,6 +24,12 @@ class ApiSettings(BaseSettings):
 
     docs_enabled: True
         If True, enable openapi docs endpoint at /api/docs
+
+    es_records_index_shards:
+        Configures the number of shards for dataset records index creation. Default=1
+
+    es_records_index_replicas:
+        Configures the number of shard replicas for dataset records index creation. Default=0
     """
 
     only_bulk_api: bool = False
@@ -31,6 +37,9 @@ class ApiSettings(BaseSettings):
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
+
+    es_records_index_shards: int = 1
+    es_records_index_replicas: int = 0
 
 
 settings = ApiSettings()

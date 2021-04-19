@@ -6,6 +6,7 @@ from pydantic import Field
 from pydantic.main import BaseModel
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
+from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
     dataset_records_index,
@@ -21,6 +22,8 @@ SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
 
 DATASETS_RECORDS_INDEX_TEMPLATE = {
     "settings": {
+        "number_of_shards": settings.es_records_index_shards,
+        "number_of_replicas": settings.es_records_index_replicas,
         "analysis": {
             "analyzer": {
                 "multilingual_stop_analyzer": {
@@ -28,7 +31,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                     "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
                 }
             }
-        }
+        },
     },
     "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
     "mappings": {
@@ -318,7 +321,7 @@ class DatasetRecordsDAO:
     def search_records(
         self,
         dataset: DatasetDB,
-        search: MultiTaskSearch,
+        search: Optional[MultiTaskSearch] = None,
         size: int = 100,
         record_from: int = 0,
         sort: Optional[List[Dict[str, Any]]] = None,
@@ -344,7 +347,7 @@ class DatasetRecordsDAO:
             The search result
 
         """
-
+        search = search or MultiTaskSearch()
         records_index = dataset_records_index(dataset.id)
         metadata_fields = self._es.get_field_mapping(
             index=records_index, field_name="metadata.*"
@@ -376,7 +379,9 @@ class DatasetRecordsDAO:
             records=[MultiTaskRecordDB.parse_obj(doc["_source"]) for doc in docs],
         )
         if search_aggregations:
-            result.aggregations = parse_tasks_aggregations(search_aggregations["tasks"])
+            result.aggregations = parse_tasks_aggregations(
+                search_aggregations.get("tasks", {})
+            )
             result.words_cloud = parse_aggregations(search_aggregations).get("words")
             result.metadata = parse_aggregations(
                 search_aggregations.get("metadata", {})
