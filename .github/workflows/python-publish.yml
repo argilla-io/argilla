@@ -1,0 +1,45 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  release:
+    types: [published]
+
+jobs:
+  deploy_release:
+    name: Deploy Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: environment_dev.yml
+          activate-environment: rubrix
+      - name: Build Package 🍟
+        run: |
+          pip install -U build
+          scripts/build_distribution.sh
+      - name: Publish Package to TestPyPI 🥪
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Test Installing 🍿
+        run: pip install --index-url https://test.pypi.org/simple --no-deps biome-text==${GITHUB_REF#refs/*/v}
+      - name: Publish Package to PyPI 🥩
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
