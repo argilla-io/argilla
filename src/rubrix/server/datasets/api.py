@@ -1,12 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import StreamingResponse
 from rubrix.server.commons.settings import settings
-from rubrix.server.dataset_records.service import (
-    DatasetRecordsService,
-    create_dataset_records_service,
-)
 from rubrix.server.security.api import get_current_active_user
 from rubrix.server.users.model import User
 
@@ -138,3 +133,54 @@ def delete_dataset(
 
     """
     service.delete(name, owner=current_user.current_group)
+
+
+@router.put(
+    "/{name}:close",
+    operation_id="close_dataset",
+)
+def close_dataset(
+    name: str,
+    service: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Closes a dataset. This operation will releases backend resources
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    service:
+        The datasets service
+    current_user:
+        The current user
+
+    """
+    service.close_dataset(name, owner=current_user.current_group)
+
+
+@router.put(
+    "/{name}:open",
+    operation_id="open_dataset",
+)
+def open_dataset(
+    name: str,
+    service: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Closes a dataset. This operation will releases backend resources
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    service:
+        The datasets service
+    current_user:
+        The current user
+
+    """
+    service.open_dataset(name, owner=current_user.current_group)
+

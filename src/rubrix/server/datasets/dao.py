@@ -237,6 +237,14 @@ class DatasetsDAO:
             "metadata": __dict_to_key_value_list__(metadata),
         }
 
+    def close(self, dataset: DatasetDB):
+        """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
+        self._es.close_index(dataset_records_index(dataset.id))
+
+    def open(self, dataset: DatasetDB):
+        """Make available a dataset"""
+        self._es.open_index(dataset_records_index(dataset.id))
+
 
 _instance: Optional[DatasetsDAO] = None
 

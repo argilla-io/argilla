@@ -196,6 +196,14 @@ class DatasetsService:
                 owner=owner,
             )
 
+    def close_dataset(self, name: str, owner: Optional[str]):
+        found = self.find_by_name(name, owner)
+        self.__dao__.close(found)
+
+    def open_dataset(self, name: str, owner: Optional[str]):
+        found = self.find_by_name(name, owner)
+        self.__dao__.open(found)
+
 
 _instance: Optional[DatasetsService] = None
 

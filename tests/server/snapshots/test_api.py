@@ -77,9 +77,6 @@ def uri_2_path(uri: str):
 def test_dataset_snapshots_flow():
     name = "test_create_dataset_snapshot"
     api_ds_prefix = f"/api/datasets/{name}"
-    assert client.delete(api_ds_prefix).status_code == 200
-    expected_data = 2
-    create_some_data_for_text_classification(name, n=expected_data)
     # Clear eventually already created snapshots
     response = client.get(f"{api_ds_prefix}/snapshots")
     if response.status_code == 200:
@@ -89,6 +86,9 @@ def test_dataset_snapshots_flow():
                 == client.delete(f"{api_ds_prefix}/snapshots/{snapshot.id}").status_code
             )
 
+    assert client.delete(api_ds_prefix).status_code == 200
+    expected_data = 2
+    create_some_data_for_text_classification(name, n=expected_data)
     response = client.post(
         f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
     )
