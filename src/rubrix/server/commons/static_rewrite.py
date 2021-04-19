@@ -11,4 +11,3 @@ class RewriteStaticFiles(StaticFiles):
         if self.html and response.status_code == 404:
             response = await super().get_response(path="", scope=scope)
         return response
-

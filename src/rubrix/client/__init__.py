@@ -6,7 +6,7 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 import logging
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
 import requests
@@ -15,6 +15,7 @@ from rubrix.client.models import (
     DatasetSnapshot,
     Record,
     TextClassificationRecord,
+    TokenAttributions,
     TokenClassificationRecord,
 )
 from rubrix.sdk import AuthenticatedClient, Client, models
@@ -24,6 +25,7 @@ from rubrix.sdk.api.text_classification import bulk_records as text_classificati
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
+from rubrix.sdk.models.stream_data_request import StreamDataRequest
 from rubrix.sdk.types import Response
 
 
@@ -35,10 +37,10 @@ class RubrixClient:
     MAX_CHUNK_SIZE = 5000  # Larger sizzes will trigger a warning
 
     def __init__(
-            self,
-            api_url: str,
-            timeout: int,
-            api_key: Optional[str] = None,
+        self,
+        api_url: str,
+        timeout: int,
+        api_key: Optional[str] = None,
     ):
         """Client setup function.
 
@@ -81,12 +83,12 @@ class RubrixClient:
                 raise Exception("Authentification error: invalid credentials.")
 
     def log(
-            self,
-            records: Iterable[Record],
-            name: str,
-            tags: Optional[Dict[str, str]] = None,
-            metadata: Optional[Dict[str, Any]] = None,
-            chunk_size: int = 500,
+        self,
+        records: Iterable[Record],
+        name: str,
+        tags: Optional[Dict[str, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        chunk_size: int = 500,
     ) -> BulkResponse:
         """
         Register a set of logs into Rubrix
@@ -159,7 +161,7 @@ class RubrixClient:
             )
 
         for i in range(0, len(records), chunk_size):
-            chunk = records[i: i + chunk_size]
+            chunk = records[i : i + chunk_size]
 
             response = bulk_records_function(
                 client=self._client,
@@ -179,11 +181,12 @@ class RubrixClient:
         return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
-            self,
-            name: str,
-            snapshot: Optional[str] = None,
-            task: Optional[str] = None,
-            limit: Optional[int] = None,
+        self,
+        name: str,
+        snapshot: Optional[str] = None,
+        task: Optional[str] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        limit: Optional[int] = None,
     ) -> pandas.DataFrame:
 
         if snapshot:
@@ -207,10 +210,26 @@ class RubrixClient:
                     f"Wrong task defined {task}. "
                     "Allowed values are [text_classification, token_classification]"
                 )
-            response = _get_dataset_data.sync_detailed(client=self._client, name=name, limit=limit)
-
+            response = _get_dataset_data.sync_detailed(
+                client=self._client,
+                name=name,
+                request=StreamDataRequest(ids=ids or []),
+                limit=limit,
+            )
         _check_response_errors(response)
-        return pandas.DataFrame(response.parsed)
+
+        return pandas.DataFrame(
+            response.parsed
+            if snapshot
+            else map(lambda r: r.dict(), self._map_to_records(response.parsed, task))
+        )
+
+    def _map_to_records(self, data: Iterable[Dict], task: str) -> Iterable[Record]:
+        if task == "text_classification":
+            map_fn = self._text_classification_sdk_to_record
+        else:
+            map_fn = self._token_classification_sdk_to_record
+        return map(map_fn, data)
 
     def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
         """
@@ -240,8 +259,49 @@ class RubrixClient:
         ]
 
     @staticmethod
+    def _text_classification_sdk_to_record(
+        sdk: Union[models.TextClassificationRecord, Dict[str, Any]]
+    ) -> TextClassificationRecord:
+        """Transforms and returns the sdk model as a `TextClassificationRecord` record"""
+        if isinstance(sdk, models.TextClassificationRecord):
+            sdk = sdk.to_dict()
+
+        record = TextClassificationRecord(
+            id=sdk.get("id"),
+            event_timestamp=sdk.get("event_timestamp"),
+            inputs=sdk.get("text", sdk.get("inputs")),
+            multi_label=sdk.get("multi_label"),
+            status=sdk.get("status"),
+        )
+
+        prediction = sdk.get("prediction")
+        if prediction:
+            record.prediction = [
+                (label["class"], label["confidence"]) for label in prediction["labels"]
+            ]
+            record.prediction_agent = prediction["agent"]
+
+        annotation = sdk.get("annotation")
+        if annotation:
+            # TODO(dfidalgo): it's depends on multilabel field?
+            record.annotation = [label["class"] for label in annotation["labels"]]
+            record.annotation_agent = annotation["agent"]
+
+        explanation = sdk.get("explanation")
+        if explanation:
+            record.explanation = {
+                key: [TokenAttributions(**attribution) for attribution in attributions]
+                for key, attributions in explanation
+            }
+        metadata = sdk.get("metadata")
+        if metadata:
+            record.metadata = metadata
+
+        return record
+
+    @staticmethod
     def _text_classification_record_to_sdk(
-            record: TextClassificationRecord,
+        record: TextClassificationRecord,
     ) -> models.TextClassificationRecord:
         """Transforms and returns the record as an SDK `TextClassificationRecord` model"""
         model_dict = {
@@ -251,7 +311,7 @@ class RubrixClient:
         }
         if record.prediction is not None:
             labels = [
-                {"class_label": label, "confidence": confidence}
+                {"class": label, "confidence": confidence}
                 for label, confidence in record.prediction
             ]
             model_dict["prediction"] = {
@@ -264,9 +324,7 @@ class RubrixClient:
                 if isinstance(record.annotation, list)
                 else [record.annotation]
             )
-            gold_labels = [
-                {"class_label": label, "confidence": 1.0} for label in annotations
-            ]
+            gold_labels = [{"class": label, "confidence": 1.0} for label in annotations]
             model_dict["annotation"] = {
                 "agent": record.annotation_agent or "None",
                 "labels": gold_labels,
@@ -277,7 +335,6 @@ class RubrixClient:
                 key: [attribution.dict() for attribution in value]
                 for key, value in record.explanation.items()
             }
-
         if record.id is not None:
             model_dict["id"] = record.id
         if record.metadata is not None:
@@ -298,6 +355,42 @@ class RubrixClient:
         """
         response = delete_dataset.sync_detailed(client=self._client, name=name)
         _check_response_errors(response)
+
+    @staticmethod
+    def _token_classification_sdk_to_record(
+        sdk: Union[models.TokenClassificationRecord, Dict[str, Any]]
+    ) -> TokenClassificationRecord:
+        if isinstance(sdk, models.TokenClassificationRecord):
+            sdk = sdk.to_dict()
+        record = TokenClassificationRecord(
+            id=sdk.get("id"),
+            event_timestamp=sdk.get("event_timestamp"),
+            tokens=sdk.get("tokens"),
+            text=sdk.get("raw_text"),
+            status=sdk.get("status"),
+        )
+
+        prediction = sdk.get("prediction")
+        if prediction:
+            record.prediction_agent = prediction["agent"]
+            record.prediction = [
+                (entity["label"], entity["start"], entity["end"])
+                for entity in prediction["entities"]
+            ]
+
+        annotation = sdk.get("annotation")
+        if annotation:
+            record.annotation = [
+                (entity["label"], entity["start"], entity["end"])
+                for entity in annotation["entities"]
+            ]
+            record.annotation_agent = annotation["agent"]
+
+        metadata = sdk.get("metadata")
+        if metadata:
+            record.metadata = metadata
+
+        return record
 
     @staticmethod
     def _token_classification_record_to_sdk(record: TokenClassificationRecord):

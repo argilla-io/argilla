@@ -20,9 +20,10 @@ client = TestClient(app)
 def create_some_data_for_text_classification(name: str, n: int):
     records = [
         TextClassificationRecord(**data)
-        for _ in range(0, round(n / 2) or 10)
+        for idx in range(0, n or 10, 2)
         for data in [
             {
+                "id": idx,
                 "inputs": {"data": "my data"},
                 "multi_label": True,
                 "metadata": {"field_one": "value one", "field_two": "value 2"},
@@ -36,6 +37,7 @@ def create_some_data_for_text_classification(name: str, n: int):
                 },
             },
             {
+                "id": idx + 1,
                 "inputs": {"data": "my data"},
                 "multi_label": True,
                 "metadata": {"field_one": "another value one", "field_two": "value 2"},

@@ -159,7 +159,7 @@ class ElasticsearchWrapper(LoggingMixin):
             The document source
 
         """
-        self.__client__.index(index=index, body=document, id=doc_id)
+        self.__client__.index(index=index, body=document, id=doc_id, refresh="wait_for")
 
     def get_document_by_id(self, index: str, doc_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -274,7 +274,7 @@ class ElasticsearchWrapper(LoggingMixin):
         return {
             key: list(definition["mapping"].values())[0]["type"]
             for key, definition in response[index]["mappings"].items()
-            if not key.endswith(".raw") # Drop raw version of fields
+            if not key.endswith(".raw")  # Drop raw version of fields
         }
 
     def update_document(

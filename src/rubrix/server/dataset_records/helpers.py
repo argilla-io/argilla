@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional, Type, Union
 
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.models import RecordTaskInfo
@@ -32,13 +32,14 @@ def takeuntil(iterable, limit: int):
 
 
 def scan_data_response(
-        service: DatasetRecordsService,
-        dataset: str,
-        owner: Optional[str],
-        tasks: List[Type[RecordTaskInfo]],
-        chunk_size: int = 1000,
-        limit: Optional[int] = None,
-        record_transform: Optional[Callable[[MultiTaskRecord], Any]] = None,
+    service: DatasetRecordsService,
+    dataset: str,
+    owner: Optional[str],
+    tasks: List[Type[RecordTaskInfo]],
+    chunk_size: int = 1000,
+    limit: Optional[int] = None,
+    ids: Optional[List[Union[str, int]]] = None,
+    record_transform: Optional[Callable[[MultiTaskRecord], Any]] = None,
 ) -> StreamingResponse:
     """Generate an textual stream data response for a dataset scan"""
 
@@ -49,10 +50,11 @@ def scan_data_response(
             args = [iter(iterable)] * n
             return itertools.zip_longest(fillvalue=fillvalue, *args)
 
-        data_stream = service.scan_dataset(
+        data_stream = service.read_dataset(
             dataset=dataset,
             owner=owner,
             tasks=tasks,
+            ids=ids,
         )
         if limit:
             data_stream = takeuntil(data_stream, limit=limit)
@@ -64,6 +66,6 @@ def scan_data_response(
             filtered_records = filter(lambda r: r is not None, batch)
             if record_transform:
                 filtered_records = map(record_transform, filtered_records)
-            yield "\n".join(map(lambda r: r.json(), filtered_records)) + "\n"
+            yield "\n".join(map(lambda r: r.json(by_alias=True), filtered_records)) + "\n"
 
     return StreamingResponse(stream_generator(), media_type="application/json")

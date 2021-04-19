@@ -162,9 +162,7 @@ class DatasetsDAO:
         finally:
             self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
 
-    def find_by_name(
-        self, name: str, owner: Optional[str]
-    ) -> Optional[DatasetDB]:
+    def find_by_name(self, name: str, owner: Optional[str]) -> Optional[DatasetDB]:
         """
         Finds a dataset by name
 
@@ -179,9 +177,7 @@ class DatasetsDAO:
         -------
             The found dataset if any. None otherwise
         """
-        dataset = DatasetDB(
-            name=name, owner=owner, task=TaskType.text_classification
-        )
+        dataset = DatasetDB(name=name, owner=owner, task=TaskType.text_classification)
         document = self._es.get_document_by_id(
             index=DATASETS_INDEX_NAME, doc_id=dataset.id
         )

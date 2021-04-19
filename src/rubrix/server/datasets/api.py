@@ -138,4 +138,3 @@ def delete_dataset(
 
     """
     service.delete(name, owner=current_user.current_group)
-

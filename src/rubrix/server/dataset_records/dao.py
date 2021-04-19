@@ -165,6 +165,9 @@ class MultiTaskSearch(BaseModel):
 
     Attributes:
     -----------
+    ids: Optional[List[Union[str,int]]]
+        Records ids to retrieve. If ids list is provided, rest of
+        query params will be omitted. Optional
 
     text_query: Optional[Dict[str, Any]]
         Elasticsearch text query filters
@@ -177,6 +180,7 @@ class MultiTaskSearch(BaseModel):
 
     """
 
+    ids: Optional[List[Union[str, int]]] = None
     text_query: Optional[Dict[str, Any]] = None
     metadata_filters: Optional[Dict[str, Union[str, List[str]]]] = None
     tasks: List[TaskSearch] = Field(default_factory=list)
@@ -196,6 +200,9 @@ class MultiTaskSearch(BaseModel):
                             task_search.filters, prefix=field_name
                         )
                     )
+
+        if self.ids:
+            return {"ids": {"values": self.ids}}
 
         return {
             "bool": {
@@ -350,7 +357,7 @@ class DatasetRecordsDAO:
         es_query = {
             "size": size,
             "from": record_from,
-            "query": {"bool": {"must": search.query}},
+            "query": search.query,
             "sort": sort,
             "aggs": search_aggregations or {},
         }

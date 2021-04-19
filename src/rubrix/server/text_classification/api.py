@@ -8,6 +8,7 @@ from rubrix.server.dataset_records.model import (
     MultiTaskRecord,
     MultiTaskRecordSearchQuery,
     MultiTaskSortParam,
+    StreamDataRequest,
     TaskMeta,
 )
 from rubrix.server.dataset_records.service import (
@@ -180,12 +181,13 @@ def search_records(
     )
 
 
-@router.get(
+@router.post(
     base_endpoint + "/data",
     operation_id="stream_data",
 )
 async def stream_data(
     name: str,
+    request: Optional[StreamDataRequest] = None,
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: DatasetRecordsService = Depends(create_dataset_records_service),
     datasets: DatasetsService = Depends(create_dataset_service),
@@ -198,6 +200,8 @@ async def stream_data(
     ----------
     name
         The dataset name
+    request:
+        The stream data request
     limit:
         The load number of records limit. Optional
     service:
@@ -208,6 +212,7 @@ async def stream_data(
         Request user
 
     """
+    request = request or StreamDataRequest()
     datasets.find_by_name(name, owner=current_user.current_group)
     return scan_data_response(
         service,
@@ -216,6 +221,7 @@ async def stream_data(
         tasks=[TextClassificationTask],
         record_transform=_multi_task_record_2_text_classification,
         limit=limit,
+        ids=request.ids,
     )
 
 
