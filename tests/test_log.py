@@ -11,6 +11,8 @@ from typing import cast
 import pytest
 import requests
 import rubrix
+import logging
+
 from rubrix import (
     BulkResponse,
     TextClassificationRecord,
@@ -261,3 +263,40 @@ def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
             records=[TextClassificationRecord(inputs={"text": "The textual info"})],
             tags={"env": "Test"},
         )
+
+
+def test_info_message(mock_response_200, mock_response_text, caplog):
+    """Testing initialization info message
+
+    Parameters
+    ----------
+    mock_response_200
+        Mocked correct http response, emulating API init
+    mock_response_text
+        Mocked response given by the sync method, emulating the log of data
+    caplog
+        Captures the logging output
+    """
+
+    caplog.set_level(logging.INFO)
+
+    records = [
+        TextClassificationRecord(
+            inputs={"review_body": "increible test"},
+            prediction=[("test", 0.9), ("test2", 0.1)],
+            annotation="test",
+            metadata={"product_category": "test de pytest"},
+            id="test",
+        )
+    ]
+
+    rubrix.log(
+        name="test",
+        records=records,
+        tags={"type": "sentiment classifier", "lang": "spanish"},
+    )
+
+    assert (
+        "Rubrix has been initialized on http://localhost:6900"
+        in caplog.record_tuples[0]
+    )

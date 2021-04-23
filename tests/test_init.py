@@ -287,8 +287,12 @@ def test_default_init(monkeypatch):
     )  # apply the monkeypatch for requests.get to mock_get
 
     rubrix._client = None
-    del os.environ["RUBRIX_API_URL"]
-    del os.environ["RUBRIX_API_KEY"]
+
+    if "RUBRIX_API_URL" in os.environ:
+        del os.environ["RUBRIX_API_URL"]
+
+    if "RUBRIX_API_KEY" in os.environ:
+        del os.environ["RUBRIX_API_KEY"]
 
     rubrix.init()
 
