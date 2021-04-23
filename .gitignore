@@ -31,6 +31,9 @@ dmypy.json
 venv
 *.jsonl
 
+# Sphinx documentation
+docs/_build/
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs
