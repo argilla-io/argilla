@@ -62,6 +62,8 @@ def init(
     else:
         final_key = api_key or os.getenv("RUBRIX_API_KEY")
 
+    _LOGGER.info(f"Rubrix has been initialized on {final_api_url}")
+
     _client = RubrixClient(
         api_url=final_api_url,
         api_key=final_key,
@@ -114,10 +116,6 @@ def _client_instance() -> RubrixClient:
     global _client
     # Calling a by-default-init if it was not called before
     if _client is None:
-        _LOGGER.warning(
-            "Tried to log data without previous initialization."
-            " An initialization by default has been performed."
-        )
         init()
     return _client
 
