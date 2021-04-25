@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi.responses import StreamingResponse
-from rubrix.server.dataset_records import takeuntil
+from rubrix.server.tasks.commons.helpers import takeuntil
 from smart_open import open as smart_open
 
 

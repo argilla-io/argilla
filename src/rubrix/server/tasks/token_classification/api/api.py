@@ -1,0 +1,205 @@
+import itertools
+from typing import Iterable, Optional
+
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
+from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
+from rubrix.server.datasets.model import CreationDatasetRequest
+from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+from rubrix.server.security.api import get_current_active_user
+from rubrix.server.tasks.commons.helpers import takeuntil
+from rubrix.server.tasks.token_classification.api.model import (
+    TokenClassificationBulkData,
+    TokenClassificationQuery,
+    TokenClassificationRecord,
+    TokenClassificationSearchRequest,
+    TokenClassificationSearchResults,
+)
+from rubrix.server.tasks.token_classification.service.service import (
+    TokenClassificationService,
+    token_classification_service,
+)
+from rubrix.server.users.model import User
+
+TASK_TYPE = TaskType.token_classification
+BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+
+router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
+
+
+@router.post(
+    BASE_ENDPOINT + ":bulk",
+    operation_id="bulk_records",
+    response_model=BulkResponse,
+    response_model_exclude_none=True,
+)
+def bulk_records(
+    name: str,
+    bulk: TokenClassificationBulkData,
+    service: TokenClassificationService = Depends(token_classification_service),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+) -> BulkResponse:
+    """
+    Includes a chunk of record data with provided dataset bulk information
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    bulk:
+        The bulk data
+    service:
+        the Service
+    datasets:
+        The dataset service
+    current_user:
+        Current request user
+
+    Returns
+    -------
+        Bulk response data
+    """
+
+    datasets.upsert(
+        CreationDatasetRequest(**{**bulk.dict(), "name": name}),
+        owner=current_user.current_group,
+        task=TASK_TYPE,
+    )
+    result = service.add_records(
+        dataset=name,
+        owner=current_user.current_group,
+        records=bulk.records,
+    )
+    return BulkResponse(
+        dataset=name,
+        processed=result.processed,
+        failed=result.failed,
+    )
+
+
+@router.post(
+    BASE_ENDPOINT + ":search",
+    response_model=TokenClassificationSearchResults,
+    response_model_exclude_none=True,
+    operation_id="search_records",
+)
+def search_records(
+    name: str,
+    search: TokenClassificationSearchRequest = None,
+    pagination: PaginationParams = Depends(),
+    service: TokenClassificationService = Depends(token_classification_service),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+) -> TokenClassificationSearchResults:
+    """
+    Searches data from dataset
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    search:
+        THe search query request
+    pagination:
+        The pagination params
+    service:
+        The dataset records service
+    datasets:
+        The dataset service
+    current_user:
+        The current request user
+
+    Returns
+    -------
+        The search results data
+
+    """
+
+    datasets.find_by_name(name, owner=current_user.current_group)
+    search = search or TokenClassificationSearchRequest()
+    query = search.query or TokenClassificationQuery()
+
+    result = service.search(
+        dataset=name,
+        owner=current_user.current_group,
+        search=query,
+        record_from=pagination.from_,
+        size=pagination.limit,
+    )
+
+    return result
+
+
+def scan_data_response(
+    data_stream: Iterable[TokenClassificationRecord],
+    chunk_size: int = 1000,
+    limit: Optional[int] = None,
+) -> StreamingResponse:
+    """Generate an textual stream data response for a dataset scan"""
+
+    async def stream_generator(stream):
+        """Converts dataset scan into a text stream"""
+
+        def grouper(n, iterable, fillvalue=None):
+            args = [iter(iterable)] * n
+            return itertools.zip_longest(fillvalue=fillvalue, *args)
+
+        if limit:
+            stream = takeuntil(stream, limit=limit)
+
+        for batch in grouper(
+            n=chunk_size,
+            iterable=stream,
+        ):
+            filtered_records = filter(lambda r: r is not None, batch)
+            yield "\n".join(
+                map(
+                    lambda r: r.json(by_alias=True, exclude_none=True), filtered_records
+                )
+            ) + "\n"
+
+    return StreamingResponse(
+        stream_generator(data_stream), media_type="application/json"
+    )
+
+
+@router.post(
+    BASE_ENDPOINT + ":data",
+    operation_id="stream_data",
+)
+async def stream_data(
+    name: str,
+    query: Optional[TokenClassificationQuery] = None,
+    limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
+    service: TokenClassificationService = Depends(token_classification_service),
+    datasets: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Depends(get_current_active_user),
+) -> StreamingResponse:
+    """
+    Creates a data stream over dataset records
+
+    Parameters
+    ----------
+    name
+        The dataset name
+    query:
+        The stream data query
+    limit:
+        The load number of records limit. Optional
+    service:
+        The dataset records service
+    datasets:
+        The datasets service
+    current_user:
+        Request user
+
+    """
+    query = query or TokenClassificationQuery()
+    found = datasets.find_by_name(name, owner=current_user.current_group)
+    data_stream = service.read_dataset(found.name, owner=found.owner, query=query)
+
+    return scan_data_response(
+        data_stream=data_stream,
+        limit=limit,
+    )

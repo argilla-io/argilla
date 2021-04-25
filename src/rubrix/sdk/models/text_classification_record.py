@@ -31,19 +31,33 @@ class TextClassificationRecord:
         The record prediction status. Optional"""
 
     inputs: TextClassificationRecordInputs
+    id: Union[Unset, int, str] = UNSET
+    metadata: Union[TextClassificationRecordMetadata, Unset] = UNSET
+    event_timestamp: Union[Unset, datetime.datetime] = UNSET
     status: Union[Unset, TaskStatus] = UNSET
     prediction: Union[TextClassificationAnnotation, Unset] = UNSET
     annotation: Union[TextClassificationAnnotation, Unset] = UNSET
     multi_label: Union[Unset, bool] = False
     explanation: Union[TextClassificationRecordExplanation, Unset] = UNSET
-    id: Union[Unset, int, str] = UNSET
-    metadata: Union[TextClassificationRecordMetadata, Unset] = UNSET
-    event_timestamp: Union[Unset, datetime.datetime] = UNSET
     last_updated: Union[Unset, datetime.datetime] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         inputs = self.inputs.to_dict()
+
+        id: Union[Unset, int, str]
+        if isinstance(self.id, Unset):
+            id = UNSET
+        else:
+            id = self.id
+
+        metadata: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.metadata, Unset):
+            metadata = self.metadata.to_dict()
+
+        event_timestamp: Union[Unset, str] = UNSET
+        if not isinstance(self.event_timestamp, Unset):
+            event_timestamp = self.event_timestamp.isoformat()
 
         status: Union[Unset, TaskStatus] = UNSET
         if not isinstance(self.status, Unset):
@@ -62,20 +76,6 @@ class TextClassificationRecord:
         if not isinstance(self.explanation, Unset):
             explanation = self.explanation.to_dict()
 
-        id: Union[Unset, int, str]
-        if isinstance(self.id, Unset):
-            id = UNSET
-        else:
-            id = self.id
-
-        metadata: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.metadata, Unset):
-            metadata = self.metadata.to_dict()
-
-        event_timestamp: Union[Unset, str] = UNSET
-        if not isinstance(self.event_timestamp, Unset):
-            event_timestamp = self.event_timestamp.isoformat()
-
         last_updated: Union[Unset, str] = UNSET
         if not isinstance(self.last_updated, Unset):
             last_updated = self.last_updated.isoformat()
@@ -87,6 +87,12 @@ class TextClassificationRecord:
                 "inputs": inputs,
             }
         )
+        if id is not UNSET:
+            field_dict["id"] = id
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
+        if event_timestamp is not UNSET:
+            field_dict["event_timestamp"] = event_timestamp
         if status is not UNSET:
             field_dict["status"] = status
         if prediction is not UNSET:
@@ -97,12 +103,6 @@ class TextClassificationRecord:
             field_dict["multi_label"] = multi_label
         if explanation is not UNSET:
             field_dict["explanation"] = explanation
-        if id is not UNSET:
-            field_dict["id"] = id
-        if metadata is not UNSET:
-            field_dict["metadata"] = metadata
-        if event_timestamp is not UNSET:
-            field_dict["event_timestamp"] = event_timestamp
         if last_updated is not UNSET:
             field_dict["last_updated"] = last_updated
 
@@ -112,6 +112,23 @@ class TextClassificationRecord:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
         inputs = TextClassificationRecordInputs.from_dict(d.pop("inputs"))
+
+        def _parse_id(data: Any) -> Union[Unset, int, str]:
+            data = None if isinstance(data, Unset) else data
+            id: Union[Unset, int, str]
+            return cast(Union[Unset, int, str], data)
+
+        id = _parse_id(d.pop("id", UNSET))
+
+        metadata: Union[TextClassificationRecordMetadata, Unset] = UNSET
+        _metadata = d.pop("metadata", UNSET)
+        if not isinstance(_metadata, Unset):
+            metadata = TextClassificationRecordMetadata.from_dict(_metadata)
+
+        event_timestamp: Union[Unset, datetime.datetime] = UNSET
+        _event_timestamp = d.pop("event_timestamp", UNSET)
+        if not isinstance(_event_timestamp, Unset):
+            event_timestamp = isoparse(_event_timestamp)
 
         status: Union[Unset, TaskStatus] = UNSET
         _status = d.pop("status", UNSET)
@@ -135,23 +152,6 @@ class TextClassificationRecord:
         if not isinstance(_explanation, Unset):
             explanation = TextClassificationRecordExplanation.from_dict(_explanation)
 
-        def _parse_id(data: Any) -> Union[Unset, int, str]:
-            data = None if isinstance(data, Unset) else data
-            id: Union[Unset, int, str]
-            return cast(Union[Unset, int, str], data)
-
-        id = _parse_id(d.pop("id", UNSET))
-
-        metadata: Union[TextClassificationRecordMetadata, Unset] = UNSET
-        _metadata = d.pop("metadata", UNSET)
-        if not isinstance(_metadata, Unset):
-            metadata = TextClassificationRecordMetadata.from_dict(_metadata)
-
-        event_timestamp: Union[Unset, datetime.datetime] = UNSET
-        _event_timestamp = d.pop("event_timestamp", UNSET)
-        if not isinstance(_event_timestamp, Unset):
-            event_timestamp = isoparse(_event_timestamp)
-
         last_updated: Union[Unset, datetime.datetime] = UNSET
         _last_updated = d.pop("last_updated", UNSET)
         if not isinstance(_last_updated, Unset):
@@ -159,14 +159,14 @@ class TextClassificationRecord:
 
         text_classification_record = cls(
             inputs=inputs,
+            id=id,
+            metadata=metadata,
+            event_timestamp=event_timestamp,
             status=status,
             prediction=prediction,
             annotation=annotation,
             multi_label=multi_label,
             explanation=explanation,
-            id=id,
-            metadata=metadata,
-            event_timestamp=event_timestamp,
             last_updated=last_updated,
         )
 

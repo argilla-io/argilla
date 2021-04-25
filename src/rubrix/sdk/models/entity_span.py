@@ -1,8 +1,6 @@
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
-
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="EntitySpan")
 
@@ -20,26 +18,18 @@ class EntitySpan:
         character start position
     end: int
         character end position, must be higher than the starting character.
-    start_token: Optional[int]
-        start token for entity span. Optional
-    end_token: Optional[int]
-        end token for entity span, must be higher than the starting token position. Optional
     label: str
         the label related to tokens that conforms the entity span"""
 
     start: int
     end: int
     label: str
-    start_token: Union[Unset, int] = UNSET
-    end_token: Union[Unset, int] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         start = self.start
         end = self.end
         label = self.label
-        start_token = self.start_token
-        end_token = self.end_token
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -50,10 +40,6 @@ class EntitySpan:
                 "label": label,
             }
         )
-        if start_token is not UNSET:
-            field_dict["start_token"] = start_token
-        if end_token is not UNSET:
-            field_dict["end_token"] = end_token
 
         return field_dict
 
@@ -66,16 +52,10 @@ class EntitySpan:
 
         label = d.pop("label")
 
-        start_token = d.pop("start_token", UNSET)
-
-        end_token = d.pop("end_token", UNSET)
-
         entity_span = cls(
             start=start,
             end=end,
             label=label,
-            start_token=start_token,
-            end_token=end_token,
         )
 
         entity_span.additional_properties = d

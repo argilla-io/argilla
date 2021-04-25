@@ -3,21 +3,13 @@
   <Error
     v-else-if="$fetchState.error"
     link="/"
-    :where="this.datasetName"
+    :where="datasetName"
     :error="$fetchState.error"
   ></Error>
   <div v-else>
     <section ref="header" class="header">
       <ReTopbarBrand v-if="selectedTask">
         <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
-        <ReButton
-          v-for="task in tasks"
-          :key="task.id"
-          :title="task.desc"
-          :class="['switch-button', selectedTask === task.id ? 'selected' : '']"
-          @click="onChangeTask(task.id)"
-          >{{ task.name }}</ReButton
-        >
       </ReTopbarBrand>
 
       <FiltersArea :dataset="dataset"> </FiltersArea>
@@ -119,7 +111,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .container {
   @extend %container;
   padding-top: 0;

@@ -27,31 +27,20 @@ class TokenClassificationRecord:
         The record prediction status. Optional"""
 
     tokens: List[str]
-    status: Union[Unset, TaskStatus] = UNSET
-    prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
-    annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
+    raw_text: str
     id: Union[Unset, int, str] = UNSET
     metadata: Union[TokenClassificationRecordMetadata, Unset] = UNSET
     event_timestamp: Union[Unset, datetime.datetime] = UNSET
-    raw_text: Union[Unset, str] = UNSET
+    status: Union[Unset, TaskStatus] = UNSET
+    prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
+    annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
     last_updated: Union[Unset, datetime.datetime] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         tokens = self.tokens
 
-        status: Union[Unset, TaskStatus] = UNSET
-        if not isinstance(self.status, Unset):
-            status = self.status
-
-        prediction: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.prediction, Unset):
-            prediction = self.prediction.to_dict()
-
-        annotation: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.annotation, Unset):
-            annotation = self.annotation.to_dict()
-
+        raw_text = self.raw_text
         id: Union[Unset, int, str]
         if isinstance(self.id, Unset):
             id = UNSET
@@ -66,7 +55,18 @@ class TokenClassificationRecord:
         if not isinstance(self.event_timestamp, Unset):
             event_timestamp = self.event_timestamp.isoformat()
 
-        raw_text = self.raw_text
+        status: Union[Unset, TaskStatus] = UNSET
+        if not isinstance(self.status, Unset):
+            status = self.status
+
+        prediction: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.prediction, Unset):
+            prediction = self.prediction.to_dict()
+
+        annotation: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.annotation, Unset):
+            annotation = self.annotation.to_dict()
+
         last_updated: Union[Unset, str] = UNSET
         if not isinstance(self.last_updated, Unset):
             last_updated = self.last_updated.isoformat()
@@ -76,22 +76,21 @@ class TokenClassificationRecord:
         field_dict.update(
             {
                 "tokens": tokens,
+                "raw_text": raw_text,
             }
         )
-        if status is not UNSET:
-            field_dict["status"] = status
-        if prediction is not UNSET:
-            field_dict["prediction"] = prediction
-        if annotation is not UNSET:
-            field_dict["annotation"] = annotation
         if id is not UNSET:
             field_dict["id"] = id
         if metadata is not UNSET:
             field_dict["metadata"] = metadata
         if event_timestamp is not UNSET:
             field_dict["event_timestamp"] = event_timestamp
-        if raw_text is not UNSET:
-            field_dict["raw_text"] = raw_text
+        if status is not UNSET:
+            field_dict["status"] = status
+        if prediction is not UNSET:
+            field_dict["prediction"] = prediction
+        if annotation is not UNSET:
+            field_dict["annotation"] = annotation
         if last_updated is not UNSET:
             field_dict["last_updated"] = last_updated
 
@@ -102,20 +101,7 @@ class TokenClassificationRecord:
         d = src_dict.copy()
         tokens = cast(List[str], d.pop("tokens"))
 
-        status: Union[Unset, TaskStatus] = UNSET
-        _status = d.pop("status", UNSET)
-        if not isinstance(_status, Unset):
-            status = TaskStatus(_status)
-
-        prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
-        _prediction = d.pop("prediction", UNSET)
-        if not isinstance(_prediction, Unset):
-            prediction = TokenClassificationAnnotation.from_dict(_prediction)
-
-        annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
-        _annotation = d.pop("annotation", UNSET)
-        if not isinstance(_annotation, Unset):
-            annotation = TokenClassificationAnnotation.from_dict(_annotation)
+        raw_text = d.pop("raw_text")
 
         def _parse_id(data: Any) -> Union[Unset, int, str]:
             data = None if isinstance(data, Unset) else data
@@ -134,7 +120,20 @@ class TokenClassificationRecord:
         if not isinstance(_event_timestamp, Unset):
             event_timestamp = isoparse(_event_timestamp)
 
-        raw_text = d.pop("raw_text", UNSET)
+        status: Union[Unset, TaskStatus] = UNSET
+        _status = d.pop("status", UNSET)
+        if not isinstance(_status, Unset):
+            status = TaskStatus(_status)
+
+        prediction: Union[TokenClassificationAnnotation, Unset] = UNSET
+        _prediction = d.pop("prediction", UNSET)
+        if not isinstance(_prediction, Unset):
+            prediction = TokenClassificationAnnotation.from_dict(_prediction)
+
+        annotation: Union[TokenClassificationAnnotation, Unset] = UNSET
+        _annotation = d.pop("annotation", UNSET)
+        if not isinstance(_annotation, Unset):
+            annotation = TokenClassificationAnnotation.from_dict(_annotation)
 
         last_updated: Union[Unset, datetime.datetime] = UNSET
         _last_updated = d.pop("last_updated", UNSET)
@@ -143,13 +142,13 @@ class TokenClassificationRecord:
 
         token_classification_record = cls(
             tokens=tokens,
-            status=status,
-            prediction=prediction,
-            annotation=annotation,
+            raw_text=raw_text,
             id=id,
             metadata=metadata,
             event_timestamp=event_timestamp,
-            raw_text=raw_text,
+            status=status,
+            prediction=prediction,
+            annotation=annotation,
             last_updated=last_updated,
         )
 

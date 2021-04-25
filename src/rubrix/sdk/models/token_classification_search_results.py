@@ -18,10 +18,10 @@ class TokenClassificationSearchResults:
 
     total: int
         The total number of records
-    records: List[TextClassificationRecord]
+    records: List[TokenClassificationRecord]
         The selected records to return
-    aggregations: TextClassificationAggregations
-        Search aggregations (if no pagination)"""
+    aggregations: TokenClassificationAggregations
+        SearchRequest aggregations (if no pagination)"""
 
     total: Union[Unset, int] = 0
     records: Union[Unset, List[TokenClassificationRecord]] = UNSET

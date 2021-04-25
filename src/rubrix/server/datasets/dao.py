@@ -7,9 +7,8 @@ from rubrix.server.commons.models import TaskType
 
 from .model import DatasetDB
 
-# TODO: elasticsearch index names will be revisited in the next iteration -> .rubrix
-DATASETS_INDEX_NAME = f".rubric.datasets-v1"
-DATASETS_RECORDS_INDEX_NAME = ".rubric.dataset.{}.records-v1"
+DATASETS_INDEX_NAME = f".rubrix.datasets-v0"
+DATASETS_RECORDS_INDEX_NAME = ".rubrix.dataset.{}.records-v0"
 
 
 DATASETS_INDEX_TEMPLATE = {
@@ -64,7 +63,10 @@ class DatasetsDAO:
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
+        self.init()
 
+    def init(self):
+        """Initializes dataset dao. Used on app startup"""
         self._es.create_index_template(
             name=DATASETS_INDEX_NAME,
             template=DATASETS_INDEX_TEMPLATE,

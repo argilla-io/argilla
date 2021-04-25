@@ -10,8 +10,7 @@ from .info import api as info
 from .security import api as security
 from .security.settings import settings
 from .snapshots import api as snapshots
-from .text_classification import api as text_classification
-from .token_classification import api as token_classification
+from .tasks import api as tasks
 from .users import api as users
 
 api_router = APIRouter(
@@ -28,8 +27,9 @@ dependencies = [*security_dependencies]
 for router in [
     users.router,
     datasets.router,
-    text_classification.router,
-    token_classification.router,
+    # text_classification.router,
+    # token_classification.router,
+    tasks.router,
     snapshots.router,
     info.router,
 ]:

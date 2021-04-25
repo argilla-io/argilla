@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.sort_param import SortParam
 from ..models.text_classification_query import TextClassificationQuery
 from ..types import UNSET, Unset
 
@@ -11,19 +10,15 @@ T = TypeVar("T", bound="TextClassificationSearchRequest")
 
 @attr.s(auto_attribs=True)
 class TextClassificationSearchRequest:
-    """API Search request
+    """API SearchRequest request
 
     Attributes:
     -----------
 
     query: TextClassificationQuery
-        The search query configuration
-
-    sort: List[SortParam]
-        The sort params to use for record results"""
+        The search query configuration"""
 
     query: Union[TextClassificationQuery, Unset] = UNSET
-    sort: Union[Unset, List[SortParam]] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -31,21 +26,11 @@ class TextClassificationSearchRequest:
         if not isinstance(self.query, Unset):
             query = self.query.to_dict()
 
-        sort: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.sort, Unset):
-            sort = []
-            for sort_item_data in self.sort:
-                sort_item = sort_item_data.to_dict()
-
-                sort.append(sort_item)
-
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if query is not UNSET:
             field_dict["query"] = query
-        if sort is not UNSET:
-            field_dict["sort"] = sort
 
         return field_dict
 
@@ -57,16 +42,8 @@ class TextClassificationSearchRequest:
         if not isinstance(_query, Unset):
             query = TextClassificationQuery.from_dict(_query)
 
-        sort = []
-        _sort = d.pop("sort", UNSET)
-        for sort_item_data in _sort or []:
-            sort_item = SortParam.from_dict(sort_item_data)
-
-            sort.append(sort_item)
-
         text_classification_search_request = cls(
             query=query,
-            sort=sort,
         )
 
         text_classification_search_request.additional_properties = d

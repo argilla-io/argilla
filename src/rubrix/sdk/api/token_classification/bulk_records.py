@@ -92,9 +92,7 @@ def sync(
     name: str,
     json_body: TokenClassificationBulkData,
 ) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Set a chunk of records data with provided dataset bulk information.
-
-    If dataset does not exists, this bulk will create a new one with provided info.
+    """Includes a chunk of record data with provided dataset bulk information
 
     Parameters
     ----------
@@ -102,16 +100,16 @@ def sync(
         The dataset name
     bulk:
         The bulk data
-    datasets:
-        The datasets service
     service:
-        The dataset records service
+        the Service
+    datasets:
+        The dataset service
     current_user:
-        The current request user
+        Current request user
 
     Returns
     -------
-        The bulk response"""
+        Bulk response data"""
 
     return sync_detailed(
         client=client,
@@ -144,9 +142,7 @@ async def asyncio(
     name: str,
     json_body: TokenClassificationBulkData,
 ) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Set a chunk of records data with provided dataset bulk information.
-
-    If dataset does not exists, this bulk will create a new one with provided info.
+    """Includes a chunk of record data with provided dataset bulk information
 
     Parameters
     ----------
@@ -154,16 +150,16 @@ async def asyncio(
         The dataset name
     bulk:
         The bulk data
-    datasets:
-        The datasets service
     service:
-        The dataset records service
+        the Service
+    datasets:
+        The dataset service
     current_user:
-        The current request user
+        Current request user
 
     Returns
     -------
-        The bulk response"""
+        Bulk response data"""
 
     return (
         await asyncio_detailed(

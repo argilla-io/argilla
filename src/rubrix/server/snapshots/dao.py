@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Iterable, List, Optional
 
 import pandas as pd
-
 from rubrix.server.commons.models import TaskType
 from rubrix.server.datasets.model import DatasetDB
 
@@ -159,12 +158,12 @@ class LocalSnapshotsDAOImpl(SnapshotsDAO):
         self, dataset: DatasetDB, task: Optional[TaskType] = None
     ) -> List[DatasetSnapshotDB]:
         paths = _snapshot_path_matches(
-                base_path=self.__base_path__,
-                owner=dataset.owner,
-                dataset=dataset.name,
-                task=task,
-                id="*",
-            )
+            base_path=self.__base_path__,
+            owner=dataset.owner,
+            dataset=dataset.name,
+            task=task,
+            id="*",
+        )
         return [
             DatasetSnapshotDB(
                 id=ntpath.basename(file),
@@ -267,6 +266,7 @@ class S3SnapshotsDAOImpl(SnapshotsDAO):
 
     def __init__(self, bucket_name: str):
         import s3fs
+
         self.__s3__ = s3fs.S3FileSystem()
         assert self.__s3__.exists(bucket_name), (
             f"Provided bucket '{bucket_name}' does not exist or aws credentials was not properly configured. "

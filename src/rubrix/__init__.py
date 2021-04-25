@@ -8,7 +8,7 @@ Contains methods for accesing the API.
 import logging
 import os
 import re
-from typing import Iterable, Sequence
+from typing import Iterable
 
 import pandas
 import pkg_resources
@@ -139,7 +139,6 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 def load(
     name: str,
     snapshot: Optional[str] = None,
-    task: Optional[str] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
@@ -152,10 +151,9 @@ def load(
         The dataset name
     snapshot:
         The dataset snapshot id. Optional
-    task:
-        The data task to retrieve (when no snapshots provided). Optional
     ids:
         If provided, load dataset records with given ids.
+        Won't apply for snapshots
     limit:
         The number of records to retrieve
 
@@ -164,9 +162,7 @@ def load(
         A pandas Dataframe
 
     """
-    return _client_instance().load(
-        name=name, snapshot=snapshot, task=task, limit=limit, ids=ids
-    )
+    return _client_instance().load(name=name, snapshot=snapshot, limit=limit, ids=ids)
 
 
 def delete(name: str) -> None:

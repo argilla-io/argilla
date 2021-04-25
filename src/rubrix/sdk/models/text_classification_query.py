@@ -2,8 +2,8 @@ from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
 
-from ..models.confidence_range import ConfidenceRange
 from ..models.prediction_status import PredictionStatus
+from ..models.score_range import ScoreRange
 from ..models.task_status import TaskStatus
 from ..models.text_classification_query_metadata import TextClassificationQueryMetadata
 from ..models.text_classification_query_query_inputs import (
@@ -20,60 +20,47 @@ class TextClassificationQuery:
 
     Attributes:
     -----------
+    ids: Optional[List[Union[str, int]]]
+        Record ids list
 
-    text_query: Union[str, Dict[str, str]]
+    query_text: Union[str, Dict[str, str]]
         Text query over inputs
-
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
 
-    multi_label: Optional[bool]
-        Filter by multi label. Default=None"""
+    predicted_as: List[str]
+        List of predicted terms
+    annotated_as: List[str]
+        List of annotated terms
+    annotated_by: List[str]
+        List of annotation agents
+    predicted_by: List[str]
+        List of predicted agents
+    status: List[TaskStatus]
+        List of task status
+    predicted: Optional[PredictionStatus]
+        The task prediction status"""
 
+    ids: Union[Unset, List[Union[str, int]]] = UNSET
+    query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs] = UNSET
+    metadata: Union[TextClassificationQueryMetadata, Unset] = UNSET
     predicted_as: Union[Unset, List[str]] = UNSET
     annotated_as: Union[Unset, List[str]] = UNSET
     annotated_by: Union[Unset, List[str]] = UNSET
     predicted_by: Union[Unset, List[str]] = UNSET
+    confidence: Union[ScoreRange, Unset] = UNSET
     status: Union[Unset, List[TaskStatus]] = UNSET
     predicted: Union[Unset, PredictionStatus] = UNSET
-    confidence: Union[ConfidenceRange, Unset] = UNSET
-    query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs] = UNSET
-    metadata: Union[TextClassificationQueryMetadata, Unset] = UNSET
-    multi_label: Union[Unset, bool] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        predicted_as: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.predicted_as, Unset):
-            predicted_as = self.predicted_as
+        ids: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.ids, Unset):
+            ids = []
+            for ids_item_data in self.ids:
+                ids_item = ids_item_data
 
-        annotated_as: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.annotated_as, Unset):
-            annotated_as = self.annotated_as
-
-        annotated_by: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.annotated_by, Unset):
-            annotated_by = self.annotated_by
-
-        predicted_by: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.predicted_by, Unset):
-            predicted_by = self.predicted_by
-
-        status: Union[Unset, List[Any]] = UNSET
-        if not isinstance(self.status, Unset):
-            status = []
-            for status_item_data in self.status:
-                status_item = status_item_data.value
-
-                status.append(status_item)
-
-        predicted: Union[Unset, PredictionStatus] = UNSET
-        if not isinstance(self.predicted, Unset):
-            predicted = self.predicted
-
-        confidence: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.confidence, Unset):
-            confidence = self.confidence.to_dict()
+                ids.append(ids_item)
 
         query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs]
         if isinstance(self.query_inputs, Unset):
@@ -90,11 +77,47 @@ class TextClassificationQuery:
         if not isinstance(self.metadata, Unset):
             metadata = self.metadata.to_dict()
 
-        multi_label = self.multi_label
+        predicted_as: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.predicted_as, Unset):
+            predicted_as = self.predicted_as
+
+        annotated_as: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.annotated_as, Unset):
+            annotated_as = self.annotated_as
+
+        annotated_by: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.annotated_by, Unset):
+            annotated_by = self.annotated_by
+
+        predicted_by: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.predicted_by, Unset):
+            predicted_by = self.predicted_by
+
+        confidence: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.confidence, Unset):
+            confidence = self.confidence.to_dict()
+
+        status: Union[Unset, List[Any]] = UNSET
+        if not isinstance(self.status, Unset):
+            status = []
+            for status_item_data in self.status:
+                status_item = status_item_data.value
+
+                status.append(status_item)
+
+        predicted: Union[Unset, PredictionStatus] = UNSET
+        if not isinstance(self.predicted, Unset):
+            predicted = self.predicted
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
+        if ids is not UNSET:
+            field_dict["ids"] = ids
+        if query_inputs is not UNSET:
+            field_dict["query_inputs"] = query_inputs
+        if metadata is not UNSET:
+            field_dict["metadata"] = metadata
         if predicted_as is not UNSET:
             field_dict["predicted_as"] = predicted_as
         if annotated_as is not UNSET:
@@ -103,48 +126,30 @@ class TextClassificationQuery:
             field_dict["annotated_by"] = annotated_by
         if predicted_by is not UNSET:
             field_dict["predicted_by"] = predicted_by
+        if confidence is not UNSET:
+            field_dict["confidence"] = confidence
         if status is not UNSET:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if confidence is not UNSET:
-            field_dict["confidence"] = confidence
-        if query_inputs is not UNSET:
-            field_dict["query_inputs"] = query_inputs
-        if metadata is not UNSET:
-            field_dict["metadata"] = metadata
-        if multi_label is not UNSET:
-            field_dict["multi_label"] = multi_label
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        predicted_as = cast(List[str], d.pop("predicted_as", UNSET))
+        ids = []
+        _ids = d.pop("ids", UNSET)
+        for ids_item_data in _ids or []:
 
-        annotated_as = cast(List[str], d.pop("annotated_as", UNSET))
+            def _parse_ids_item(data: Any) -> Union[str, int]:
+                data = None if isinstance(data, Unset) else data
+                ids_item: Union[str, int]
+                return cast(Union[str, int], data)
 
-        annotated_by = cast(List[str], d.pop("annotated_by", UNSET))
+            ids_item = _parse_ids_item(ids_item_data)
 
-        predicted_by = cast(List[str], d.pop("predicted_by", UNSET))
-
-        status = []
-        _status = d.pop("status", UNSET)
-        for status_item_data in _status or []:
-            status_item = TaskStatus(status_item_data)
-
-            status.append(status_item)
-
-        predicted: Union[Unset, PredictionStatus] = UNSET
-        _predicted = d.pop("predicted", UNSET)
-        if not isinstance(_predicted, Unset):
-            predicted = PredictionStatus(_predicted)
-
-        confidence: Union[ConfidenceRange, Unset] = UNSET
-        _confidence = d.pop("confidence", UNSET)
-        if not isinstance(_confidence, Unset):
-            confidence = ConfidenceRange.from_dict(_confidence)
+            ids.append(ids_item)
 
         def _parse_query_inputs(
             data: Any,
@@ -171,19 +176,42 @@ class TextClassificationQuery:
         if not isinstance(_metadata, Unset):
             metadata = TextClassificationQueryMetadata.from_dict(_metadata)
 
-        multi_label = d.pop("multi_label", UNSET)
+        predicted_as = cast(List[str], d.pop("predicted_as", UNSET))
+
+        annotated_as = cast(List[str], d.pop("annotated_as", UNSET))
+
+        annotated_by = cast(List[str], d.pop("annotated_by", UNSET))
+
+        predicted_by = cast(List[str], d.pop("predicted_by", UNSET))
+
+        confidence: Union[ScoreRange, Unset] = UNSET
+        _confidence = d.pop("confidence", UNSET)
+        if not isinstance(_confidence, Unset):
+            confidence = ScoreRange.from_dict(_confidence)
+
+        status = []
+        _status = d.pop("status", UNSET)
+        for status_item_data in _status or []:
+            status_item = TaskStatus(status_item_data)
+
+            status.append(status_item)
+
+        predicted: Union[Unset, PredictionStatus] = UNSET
+        _predicted = d.pop("predicted", UNSET)
+        if not isinstance(_predicted, Unset):
+            predicted = PredictionStatus(_predicted)
 
         text_classification_query = cls(
+            ids=ids,
+            query_inputs=query_inputs,
+            metadata=metadata,
             predicted_as=predicted_as,
             annotated_as=annotated_as,
             annotated_by=annotated_by,
             predicted_by=predicted_by,
+            confidence=confidence,
             status=status,
             predicted=predicted,
-            confidence=confidence,
-            query_inputs=query_inputs,
-            metadata=metadata,
-            multi_label=multi_label,
         )
 
         text_classification_query.additional_properties = d

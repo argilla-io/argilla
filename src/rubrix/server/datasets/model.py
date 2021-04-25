@@ -31,6 +31,8 @@ class CreationDatasetRequest(UpdateDatasetRequest):
 
     name: str
         the  dataset name
+    task:
+        The dataset task type. Deprecated
     """
 
     name: str = Field(regex="^(?!-|_)[a-z0-9-_]+$")
@@ -42,7 +44,6 @@ class DatasetDB(CreationDatasetRequest):
 
     Attributes:
     -----------
-
     task:
         The dataset task type. Deprecated
     owner:

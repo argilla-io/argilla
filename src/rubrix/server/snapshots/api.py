@@ -93,7 +93,6 @@ def get_dataset_snapshot(
 )
 def create_dataset_snapshots(
     name: str,
-    task: Optional[TaskType] = Query(None),
     service: SnapshotsService = Depends(create_snapshots_service),
     current_user: User = Depends(get_current_active_user),
 ) -> DatasetSnapshot:
@@ -104,8 +103,6 @@ def create_dataset_snapshots(
     ----------
     name:
         Dataset name
-    task:
-        Task type query selector
     service:
         Snapshots service
     current_user:
@@ -116,7 +113,7 @@ def create_dataset_snapshots(
         Created snapshot
     """
 
-    return service.create(dataset=name, owner=current_user.current_group, task=task)
+    return service.create(dataset=name, owner=current_user.current_group)
 
 
 @router.delete(
@@ -147,8 +144,8 @@ def delete_dataset_snapshot(
     service.delete(name, owner=current_user.current_group, id=snapshot_id)
 
 
-@router.get(
-    "/{name}/snapshots/{snapshot_id}/data",
+@router.post(
+    "/{name}/snapshots/{snapshot_id}:data",
     operation_id="stream_data",
 )
 async def stream_data(

@@ -1,10 +1,7 @@
 import datetime
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
-
-from rubrix.sdk import models
 
 
 class BulkResponse(BaseModel):

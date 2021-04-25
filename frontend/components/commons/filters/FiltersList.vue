@@ -92,11 +92,6 @@ export default {
       },
     ],
   }),
-  watch: {
-    groups() {
-      this.setInitialGroup();
-    }
-  },
   computed: {
     groups() {
       return [...new Set(this.filterList.map((f) => f.group))];
@@ -108,8 +103,7 @@ export default {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
         .map((filter) => {
-          console.log(filter)
-          function isZero(number){
+          function isZero(number) {
             return number === 0;
           }
           return {
@@ -118,10 +112,10 @@ export default {
             options: aggregations[filter.key],
             selected: this.dataset.query[filter.key],
             disabled:
-              filter.key === 'confidence' && this.isMultiLabelRecord ||
+              (filter.key === "confidence" && this.isMultiLabelRecord) ||
               !aggregations[filter.key] ||
               !Object.entries(aggregations[filter.key]).length ||
-              Object.values(aggregations[filter.key]).every(isZero)
+              Object.values(aggregations[filter.key]).every(isZero),
           };
         })
         .filter(({ disabled }) => !disabled);
@@ -139,12 +133,19 @@ export default {
             : [],
         };
       });
-      const sortedMetadataFilters = metadataFilters.sort((a, b) => (a.key.toLowerCase() > b.key.toLowerCase()) ? 1 : -1);
+      const sortedMetadataFilters = metadataFilters.sort((a, b) =>
+        a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
+      );
       return [...filters, ...sortedMetadataFilters];
     },
   },
+  watch: {
+    groups() {
+      this.setInitialGroup();
+    },
+  },
   mounted() {
-    this.setInitialGroup()
+    this.setInitialGroup();
   },
   methods: {
     itemsAppliedOnGroup(group) {
