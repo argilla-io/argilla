@@ -6,36 +6,24 @@ from ...client import AuthenticatedClient
 from ...models.dataset_snapshot import DatasetSnapshot
 from ...models.error_message import ErrorMessage
 from ...models.http_validation_error import HTTPValidationError
-from ...models.task_type import TaskType
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 def _get_kwargs(
     *,
     client: AuthenticatedClient,
     name: str,
-    task: Union[Unset, TaskType] = UNSET,
 ) -> Dict[str, Any]:
     url = "{}/api/datasets/{name}/snapshots".format(client.base_url, name=name)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
 
-    json_task: Union[Unset, TaskType] = UNSET
-    if not isinstance(task, Unset):
-        json_task = task
-
-    params: Dict[str, Any] = {
-        "task": json_task,
-    }
-    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
     return {
         "url": url,
         "headers": headers,
         "cookies": cookies,
         "timeout": client.get_timeout(),
-        "params": params,
     }
 
 
@@ -76,12 +64,10 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     name: str,
-    task: Union[Unset, TaskType] = UNSET,
 ) -> Response[Union[DatasetSnapshot, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
-        task=task,
     )
 
     response = httpx.post(
@@ -95,7 +81,6 @@ def sync(
     *,
     client: AuthenticatedClient,
     name: str,
-    task: Union[Unset, TaskType] = UNSET,
 ) -> Optional[Union[DatasetSnapshot, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     """Creates a dataset snapshot
 
@@ -103,8 +88,6 @@ def sync(
     ----------
     name:
         Dataset name
-    task:
-        Task type query selector
     service:
         Snapshots service
     current_user:
@@ -117,7 +100,6 @@ def sync(
     return sync_detailed(
         client=client,
         name=name,
-        task=task,
     ).parsed
 
 
@@ -125,12 +107,10 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     name: str,
-    task: Union[Unset, TaskType] = UNSET,
 ) -> Response[Union[DatasetSnapshot, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
-        task=task,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -143,7 +123,6 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     name: str,
-    task: Union[Unset, TaskType] = UNSET,
 ) -> Optional[Union[DatasetSnapshot, ErrorMessage, ErrorMessage, HTTPValidationError]]:
     """Creates a dataset snapshot
 
@@ -151,8 +130,6 @@ async def asyncio(
     ----------
     name:
         Dataset name
-    task:
-        Task type query selector
     service:
         Snapshots service
     current_user:
@@ -166,6 +143,5 @@ async def asyncio(
         await asyncio_detailed(
             client=client,
             name=name,
-            task=task,
         )
     ).parsed

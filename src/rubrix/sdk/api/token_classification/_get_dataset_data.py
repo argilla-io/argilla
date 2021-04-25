@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 from rubrix.sdk.api._streaming_helpers import build_stream_response
-from rubrix.sdk.models.stream_data_request import StreamDataRequest
+from rubrix.sdk.models import TokenClassificationQuery
 
 from ...client import AuthenticatedClient
 from ...models.http_validation_error import HTTPValidationError
@@ -13,10 +13,10 @@ def _get_kwargs(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Optional[StreamDataRequest] = None,
+    json_body: Optional[TokenClassificationQuery] = None,
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TokenClassification/data".format(
+    url = "{}/api/datasets/{name}/TokenClassification:data".format(
         client.base_url, name=name
     )
 
@@ -41,7 +41,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     name: str,
-    request: Optional[StreamDataRequest] = None,
+    request: Optional[TokenClassificationQuery] = None,
     limit: Optional[int] = None,
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(client=client, name=name, limit=limit, json_body=request)

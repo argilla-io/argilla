@@ -17,8 +17,8 @@ class ClassPrediction:
     class_label: Union[str, int]
         the predicted class
 
-    confidence: float
-        the predicted class confidence. For human-supervised annotations,
+    score: float
+        the predicted class score. For human-supervised annotations,
         this probability should be 1.0"""
 
     class_: Union[str, int]

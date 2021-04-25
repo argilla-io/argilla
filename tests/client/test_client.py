@@ -8,8 +8,13 @@ import pytest
 import requests
 import rubrix
 from fastapi.testclient import TestClient
-from rubrix import RubrixClient, TextClassificationRecord, TokenAttributions, TokenClassificationRecord
-from rubrix.sdk.models import TextClassificationSearchResults
+from rubrix import (
+    RubrixClient,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
+from rubrix.sdk.models import DatasetSnapshot, TextClassificationSearchResults
 from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
 
@@ -62,9 +67,7 @@ def test_snapshots(monkeypatch):
 
     expected_data = 100
     create_some_data_for_text_classification(dataset, n=expected_data)
-    response = client.post(
-        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
-    )
+    response = client.post(f"{api_ds_prefix}/snapshots")
     assert response.status_code == 200
     snapshots = rubrix.snapshots(dataset)
     assert len(snapshots) > 0
@@ -76,11 +79,9 @@ def test_snapshots(monkeypatch):
     ds = rubrix.load(name=dataset)
     assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == expected_data
-    records = list(map(lambda r: TextClassificationRecord(**r), ds.to_dict(orient="records")))
-
-    ds = rubrix.load(name=dataset, task="token_classification")
-    assert isinstance(ds, pandas.DataFrame)
-    records = list(map(lambda r: TokenClassificationRecord(**r), ds.to_dict(orient="records")))
+    records = list(
+        map(lambda r: TextClassificationRecord(**r), ds.to_dict(orient="records"))
+    )
 
     ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
     assert isinstance(ds, pandas.DataFrame)
@@ -93,16 +94,10 @@ def test_load_limits(monkeypatch):
     client.delete(api_ds_prefix)
 
     create_some_data_for_text_classification(dataset, 50)
-    response = client.post(
-        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
-    )
+    response = client.post(f"{api_ds_prefix}/snapshots")
 
     limit_data_to = 10
     ds = rubrix.load(name=dataset, limit=limit_data_to)
-    assert isinstance(ds, pandas.DataFrame)
-    assert len(ds) == limit_data_to
-
-    ds = rubrix.load(name=dataset, limit=limit_data_to, task="token_classification")
     assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
@@ -123,12 +118,6 @@ def test_log_records_with_too_long_text(monkeypatch):
     rubrix.log([item], name=dataset_name)
 
 
-def test_load_for_unrecognized_task(monkeypatch):
-    mocking_client(monkeypatch)
-    with pytest.raises(Exception, match="Wrong task defined whatever"):
-        rubrix.load(name="not_found", task="whatever")
-
-
 def test_not_found_response(monkeypatch):
     mocking_client(monkeypatch)
     not_found_match = "Not found error. The API answered with a 404 code"
@@ -137,9 +126,6 @@ def test_not_found_response(monkeypatch):
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found")
-
-    with pytest.raises(Exception, match=not_found_match):
-        rubrix.load(name="not-found", task="token_classification")
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found", snapshot="blabla")
@@ -201,7 +187,7 @@ def test_log_with_annotation(monkeypatch):
             inputs={"text": "The text data"},
             annotation="T",
             annotation_agent="test",
-            status="Discarded"
+            status="Discarded",
         ),
         name=dataset_name,
     )
@@ -213,7 +199,9 @@ def test_log_with_annotation(monkeypatch):
 
 @pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
 def test_text_classification_record_to_sdk(annotation):
-    token_attributions = [TokenAttributions(token="test", attributions={"label1": 1., "label2": 2.})]
+    token_attributions = [
+        TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
+    ]
     record = TextClassificationRecord(
         inputs={"text": "test"},
         prediction=[("label1", 0.5), ("label2", 0.5)],
@@ -268,7 +256,7 @@ def test_delete_dataset(monkeypatch):
     rubrix.delete(name=dataset_name)
     sleep(1)
     with pytest.raises(
-            Exception, match="Not found error. The API answered with a 404 code"
+        Exception, match="Not found error. The API answered with a 404 code"
     ):
         rubrix.load(name=dataset_name)
 
@@ -282,12 +270,11 @@ def test_load_with_ids_list(monkeypatch):
 
     expected_data = 100
     create_some_data_for_text_classification(dataset, n=expected_data)
-    response = client.post(
-        f"{api_ds_prefix}/snapshots?task={TaskType.text_classification}"
-    )
+    response = client.post(f"{api_ds_prefix}/snapshots")
     assert response.status_code == 200
+    snapshot = DatasetSnapshot.from_dict(response.json())
     ds = rubrix.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
 
-    ds = rubrix.load(name=dataset, ids=[3, 5], task="token_classification")
-    assert len(ds) == 2
+    ds = rubrix.load(name=dataset, ids=[3, 5], snapshot=snapshot.id)
+    assert len(ds) == 100

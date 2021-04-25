@@ -4,13 +4,13 @@ import elasticsearch
 import pytest
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.models import TaskType
-from rubrix.server.dataset_records.dao import create_dataset_records_dao
+from rubrix.server.tasks.commons.dao.dao import dataset_records_dao
 from rubrix.server.datasets.dao import create_datasets_dao
 from rubrix.server.datasets.model import DatasetDB
 
 es_wrapper = create_es_wrapper()
 dao = create_datasets_dao(es_wrapper)
-records = create_dataset_records_dao(es_wrapper)
+records = dataset_records_dao(es_wrapper)
 
 
 def test_retrieve_ownered_dataset_for_no_owner_user():

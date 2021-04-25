@@ -2,8 +2,10 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
-from ..models.text_classification_aggregations import TextClassificationAggregations
 from ..models.text_classification_record import TextClassificationRecord
+from ..models.text_classification_search_aggregations import (
+    TextClassificationSearchAggregations,
+)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TextClassificationSearchResults")
@@ -21,11 +23,11 @@ class TextClassificationSearchResults:
     records: List[TextClassificationRecord]
         The selected records to return
     aggregations: TextClassificationAggregations
-        Search aggregations (if no pagination)"""
+        SearchRequest aggregations (if no pagination)"""
 
     total: Union[Unset, int] = 0
     records: Union[Unset, List[TextClassificationRecord]] = UNSET
-    aggregations: Union[TextClassificationAggregations, Unset] = UNSET
+    aggregations: Union[TextClassificationSearchAggregations, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -66,10 +68,10 @@ class TextClassificationSearchResults:
 
             records.append(records_item)
 
-        aggregations: Union[TextClassificationAggregations, Unset] = UNSET
+        aggregations: Union[TextClassificationSearchAggregations, Unset] = UNSET
         _aggregations = d.pop("aggregations", UNSET)
         if not isinstance(_aggregations, Unset):
-            aggregations = TextClassificationAggregations.from_dict(_aggregations)
+            aggregations = TextClassificationSearchAggregations.from_dict(_aggregations)
 
         text_classification_search_results = cls(
             total=total,

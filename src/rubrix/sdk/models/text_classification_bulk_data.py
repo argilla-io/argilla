@@ -2,11 +2,13 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.creation_text_classification_record import (
+    CreationTextClassificationRecord,
+)
 from ..models.text_classification_bulk_data_metadata import (
     TextClassificationBulkDataMetadata,
 )
 from ..models.text_classification_bulk_data_tags import TextClassificationBulkDataTags
-from ..models.text_classification_record import TextClassificationRecord
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TextClassificationBulkData")
@@ -22,7 +24,7 @@ class TextClassificationBulkData:
     records: List[TextClassificationRecord]
         The text classification record list"""
 
-    records: List[TextClassificationRecord]
+    records: List[CreationTextClassificationRecord]
     tags: Union[TextClassificationBulkDataTags, Unset] = UNSET
     metadata: Union[TextClassificationBulkDataMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -62,7 +64,7 @@ class TextClassificationBulkData:
         records = []
         _records = d.pop("records")
         for records_item_data in _records:
-            records_item = TextClassificationRecord.from_dict(records_item_data)
+            records_item = CreationTextClassificationRecord.from_dict(records_item_data)
 
             records.append(records_item)
 

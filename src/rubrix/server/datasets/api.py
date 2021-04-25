@@ -183,4 +183,3 @@ def open_dataset(
 
     """
     service.open_dataset(name, owner=current_user.current_group)
-

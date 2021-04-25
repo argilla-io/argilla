@@ -100,16 +100,15 @@ def sync(
         The dataset name
     bulk:
         The bulk data
+    service:
+        the Service
     datasets:
         The dataset service
-    service:
-        The dataset records service
     current_user:
         Current request user
 
     Returns
     -------
-
         Bulk response data"""
 
     return sync_detailed(
@@ -151,16 +150,15 @@ async def asyncio(
         The dataset name
     bulk:
         The bulk data
+    service:
+        the Service
     datasets:
         The dataset service
-    service:
-        The dataset records service
     current_user:
         Current request user
 
     Returns
     -------
-
         Bulk response data"""
 
     return (

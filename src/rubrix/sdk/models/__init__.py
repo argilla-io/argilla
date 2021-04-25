@@ -6,7 +6,6 @@ from .api_status_elasticsearch import ApiStatusElasticsearch
 from .api_status_mem_info import ApiStatusMemInfo
 from .bulk_response import BulkResponse
 from .class_prediction import ClassPrediction
-from .confidence_range import ConfidenceRange
 from .dataset import Dataset
 from .dataset_metadata import DatasetMetadata
 from .dataset_snapshot import DatasetSnapshot
@@ -15,40 +14,8 @@ from .entity_span import EntitySpan
 from .error_message import ErrorMessage
 from .http_validation_error import HTTPValidationError
 from .prediction_status import PredictionStatus
-from .sort_order import SortOrder
-from .sort_param import SortParam
-from .sortable_field import SortableField
 from .task_status import TaskStatus
 from .task_type import TaskType
-from .text_classification_aggregations import TextClassificationAggregations
-from .text_classification_aggregations_annotated_as import (
-    TextClassificationAggregationsAnnotatedAs,
-)
-from .text_classification_aggregations_annotated_by import (
-    TextClassificationAggregationsAnnotatedBy,
-)
-from .text_classification_aggregations_confidence import (
-    TextClassificationAggregationsConfidence,
-)
-from .text_classification_aggregations_metadata import (
-    TextClassificationAggregationsMetadata,
-)
-from .text_classification_aggregations_metadata_additional_property import (
-    TextClassificationAggregationsMetadataAdditionalProperty,
-)
-from .text_classification_aggregations_predicted import (
-    TextClassificationAggregationsPredicted,
-)
-from .text_classification_aggregations_predicted_as import (
-    TextClassificationAggregationsPredictedAs,
-)
-from .text_classification_aggregations_predicted_by import (
-    TextClassificationAggregationsPredictedBy,
-)
-from .text_classification_aggregations_status import (
-    TextClassificationAggregationsStatus,
-)
-from .text_classification_aggregations_words import TextClassificationAggregationsWords
 from .text_classification_annotation import TextClassificationAnnotation
 from .text_classification_bulk_data import TextClassificationBulkData
 from .text_classification_bulk_data_metadata import TextClassificationBulkDataMetadata

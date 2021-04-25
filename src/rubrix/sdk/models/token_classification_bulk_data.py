@@ -2,11 +2,13 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.creation_token_classification_record import (
+    CreationTokenClassificationRecord,
+)
 from ..models.token_classification_bulk_data_metadata import (
     TokenClassificationBulkDataMetadata,
 )
 from ..models.token_classification_bulk_data_tags import TokenClassificationBulkDataTags
-from ..models.token_classification_record import TokenClassificationRecord
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TokenClassificationBulkData")
@@ -14,15 +16,15 @@ T = TypeVar("T", bound="TokenClassificationBulkData")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationBulkData:
-    """Bulk data for text classification
+    """API bulk data for text classification
 
     Attributes:
     -----------
 
-    records: List[TokenClassificationRecord]
-        Set of token classification records"""
+    records: List[TextClassificationRecord]
+        The text classification record list"""
 
-    records: List[TokenClassificationRecord]
+    records: List[CreationTokenClassificationRecord]
     tags: Union[TokenClassificationBulkDataTags, Unset] = UNSET
     metadata: Union[TokenClassificationBulkDataMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -62,7 +64,9 @@ class TokenClassificationBulkData:
         records = []
         _records = d.pop("records")
         for records_item_data in _records:
-            records_item = TokenClassificationRecord.from_dict(records_item_data)
+            records_item = CreationTokenClassificationRecord.from_dict(
+                records_item_data
+            )
 
             records.append(records_item)
 

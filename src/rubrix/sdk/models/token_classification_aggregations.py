@@ -8,6 +8,9 @@ from ..models.token_classification_aggregations_annotated_as import (
 from ..models.token_classification_aggregations_annotated_by import (
     TokenClassificationAggregationsAnnotatedBy,
 )
+from ..models.token_classification_aggregations_confidence import (
+    TokenClassificationAggregationsConfidence,
+)
 from ..models.token_classification_aggregations_metadata import (
     TokenClassificationAggregationsMetadata,
 )
@@ -33,14 +36,24 @@ T = TypeVar("T", bound="TokenClassificationAggregations")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAggregations:
-    """Search results for token classification search API
+    """API for result aggregations
 
     Attributes:
     -----------
-
+    predicted_as: Dict[str, int]
+        Occurrence info about more relevant predicted terms
+    annotated_as: Dict[str, int]
+        Occurrence info about more relevant annotated terms
+    annotated_by: Dict[str, int]
+        Occurrence info about more relevant annotation agent terms
+    predicted_by: Dict[str, int]
+        Occurrence info about more relevant prediction agent terms
+    status: Dict[str, int]
+        Occurrence info about task status
+    predicted: Dict[str, int]
+        Occurrence info about task prediction status
     words: WordCloudAggregations
-        The word cloud aggregations (grouped by language)
-
+        The word cloud aggregations
     metadata: Dict[str, Dict[str, int]]
         The metadata fields aggregations"""
 
@@ -50,6 +63,7 @@ class TokenClassificationAggregations:
     predicted_by: Union[TokenClassificationAggregationsPredictedBy, Unset] = UNSET
     status: Union[TokenClassificationAggregationsStatus, Unset] = UNSET
     predicted: Union[TokenClassificationAggregationsPredicted, Unset] = UNSET
+    confidence: Union[TokenClassificationAggregationsConfidence, Unset] = UNSET
     words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
     metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -79,6 +93,10 @@ class TokenClassificationAggregations:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted.to_dict()
 
+        confidence: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.confidence, Unset):
+            confidence = self.confidence.to_dict()
+
         words: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.words, Unset):
             words = self.words.to_dict()
@@ -102,6 +120,8 @@ class TokenClassificationAggregations:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
+        if confidence is not UNSET:
+            field_dict["confidence"] = confidence
         if words is not UNSET:
             field_dict["words"] = words
         if metadata is not UNSET:
@@ -150,6 +170,13 @@ class TokenClassificationAggregations:
         if not isinstance(_predicted, Unset):
             predicted = TokenClassificationAggregationsPredicted.from_dict(_predicted)
 
+        confidence: Union[TokenClassificationAggregationsConfidence, Unset] = UNSET
+        _confidence = d.pop("confidence", UNSET)
+        if not isinstance(_confidence, Unset):
+            confidence = TokenClassificationAggregationsConfidence.from_dict(
+                _confidence
+            )
+
         words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
         _words = d.pop("words", UNSET)
         if not isinstance(_words, Unset):
@@ -167,6 +194,7 @@ class TokenClassificationAggregations:
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
+            confidence=confidence,
             words=words,
             metadata=metadata,
         )

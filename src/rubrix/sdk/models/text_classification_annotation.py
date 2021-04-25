@@ -15,7 +15,7 @@ class TextClassificationAnnotation:
     -----------
 
     labels: List[LabelPrediction]
-        list of annotated labels with confidence"""
+        list of annotated labels with score"""
 
     agent: str
     labels: List[ClassPrediction]

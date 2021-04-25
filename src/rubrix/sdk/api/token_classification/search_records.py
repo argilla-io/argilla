@@ -139,24 +139,26 @@ def sync(
         HTTPValidationError,
     ]
 ]:
-    """Parameters
+    """Searches data from dataset
+
+    Parameters
     ----------
     name:
         The dataset name
     search:
-        The query search data
+        THe search query request
     pagination:
-        The search pagination info
-    datasets:
-        The datasets service
+        The pagination params
     service:
         The dataset records service
+    datasets:
+        The dataset service
     current_user:
         The current request user
 
     Returns
     -------
-        The search results"""
+        The search results data"""
 
     return sync_detailed(
         client=client,
@@ -211,24 +213,26 @@ async def asyncio(
         HTTPValidationError,
     ]
 ]:
-    """Parameters
+    """Searches data from dataset
+
+    Parameters
     ----------
     name:
         The dataset name
     search:
-        The query search data
+        THe search query request
     pagination:
-        The search pagination info
-    datasets:
-        The datasets service
+        The pagination params
     service:
         The dataset records service
+    datasets:
+        The dataset service
     current_user:
         The current request user
 
     Returns
     -------
-        The search results"""
+        The search results data"""
 
     return (
         await asyncio_detailed(

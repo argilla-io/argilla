@@ -25,7 +25,11 @@ from rubrix.sdk.api.text_classification import bulk_records as text_classificati
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
-from rubrix.sdk.models.stream_data_request import StreamDataRequest
+from rubrix.sdk.models import (
+    TaskType,
+    TextClassificationQuery,
+    TokenClassificationQuery,
+)
 from rubrix.sdk.types import Response
 
 
@@ -184,7 +188,6 @@ class RubrixClient:
         self,
         name: str,
         snapshot: Optional[str] = None,
-        task: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
     ) -> pandas.DataFrame:
@@ -195,41 +198,40 @@ class RubrixClient:
             response = _get_data.sync_detailed(
                 client=self._client, name=name, snapshot_id=snapshot, limit=limit
             )
+            _check_response_errors(response)
+            return pandas.DataFrame(response.parsed)
         else:
 
-            task = task or "text_classification"
-            task = task.lower().strip()
+            from rubrix.sdk.api.datasets import get_dataset
 
-            if task == "text_classification":
+            response = get_dataset.sync_detailed(client=self._client, name=name)
+            _check_response_errors(response)
+            task = response.parsed.task
+
+            if task == TaskType.TEXTCLASSIFICATION:
                 from rubrix.sdk.api.text_classification import _get_dataset_data
 
-            elif task == "token_classification":
+                map_fn = self._text_classification_sdk_to_record
+                request_class = TextClassificationQuery
+            elif task == TaskType.TOKENCLASSIFICATION:
                 from rubrix.sdk.api.token_classification import _get_dataset_data
+
+                map_fn = self._token_classification_sdk_to_record
+                request_class = TokenClassificationQuery
             else:
                 raise ValueError(
-                    f"Wrong task defined {task}. "
-                    "Allowed values are [text_classification, token_classification]"
+                    f"Sorry, load method is only allowed with token and text classification"
                 )
             response = _get_dataset_data.sync_detailed(
                 client=self._client,
                 name=name,
-                request=StreamDataRequest(ids=ids or []),
+                request=request_class(ids=ids or []),
                 limit=limit,
             )
-        _check_response_errors(response)
 
-        return pandas.DataFrame(
-            response.parsed
-            if snapshot
-            else map(lambda r: r.dict(), self._map_to_records(response.parsed, task))
-        )
-
-    def _map_to_records(self, data: Iterable[Dict], task: str) -> Iterable[Record]:
-        if task == "text_classification":
-            map_fn = self._text_classification_sdk_to_record
-        else:
-            map_fn = self._token_classification_sdk_to_record
-        return map(map_fn, data)
+            return pandas.DataFrame(
+                map(lambda r: r.dict(), map(map_fn, response.parsed))
+            )
 
     def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
         """

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 from rubrix.server.commons.models import TaskStatus
-from rubrix.server.text_classification.model import (
+from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
     TextClassificationAnnotation,
@@ -16,7 +16,7 @@ def test_flatten_inputs():
         }
     }
     record = TextClassificationRecord.parse_obj(data)
-    assert list(record.text.keys()) == ["mail.subject", "mail.body"]
+    assert list(record.inputs.keys()) == ["mail.subject", "mail.body"]
 
 
 def test_flatten_metadata():
@@ -46,7 +46,7 @@ def test_confidence_integrity():
     try:
         TextClassificationRecord.parse_obj(data)
     except ValidationError as e:
-        assert "Wrong confidence distributions" in e.json()
+        assert "Wrong score distributions" in e.json()
 
     data["multi_label"] = True
     record = TextClassificationRecord.parse_obj(data)

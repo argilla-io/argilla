@@ -4,15 +4,10 @@ from typing import Any, Dict, List, Optional
 from fastapi import Depends
 from rubrix.server.commons.errors import EntityNotFoundError
 from rubrix.server.commons.models import TaskStatus, TaskType
-from rubrix.server.dataset_records.dao import (
-    DatasetRecordsDAO,
-    MultiTaskRecordDB,
-    MultiTaskSearch,
-    TaskSearch,
-    create_dataset_records_dao,
-)
-from rubrix.server.dataset_records.es_helpers import filters
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
+from rubrix.server.tasks.commons.dao.model import RecordSearch
+from rubrix.server.tasks.commons.es_helpers import filters
 
 from .dao import SnapshotsDAO, create_snapshots_dao
 from .model import CreationDatasetSnapshot, DatasetSnapshot
@@ -81,9 +76,7 @@ class SnapshotsService:
             for snap in self.__dao__.list(dataset=dataset, task=task)
         ]
 
-    def create(
-        self, dataset: str, owner: Optional[str], task: Optional[TaskType] = None
-    ) -> DatasetSnapshot:
+    def create(self, dataset: str, owner: Optional[str]) -> DatasetSnapshot:
         """
         Creates a dataset snapshot
 
@@ -93,8 +86,6 @@ class SnapshotsService:
             Dataset name
         owner:
             Dataset owner. Optional
-        task:
-            Task type which create dataset snapshot records
 
         Returns
         -------
@@ -102,23 +93,16 @@ class SnapshotsService:
 
         """
         dataset = self.__datasets__.find_by_name(name=dataset, owner=owner)
-        task = task or dataset.task
+        task = dataset.task
         task_records = self.__dataset_records__.scan_dataset(
             dataset=dataset,
-            search=MultiTaskSearch(
-                tasks=[
-                    TaskSearch(
-                        task=task,
-                        filters=[filters.status(status=[TaskStatus.validated])],
-                    )
-                ]
-            ),
+            search=RecordSearch(query=filters.status(status=[TaskStatus.validated])),
         )
 
         created = self.__dao__.create(
             dataset=dataset,
             task=task,
-            snapshot=CreationDatasetSnapshot(id=datetime.utcnow().timestamp()),
+            snapshot=CreationDatasetSnapshot(id=str(datetime.utcnow().timestamp())),
             data=(self.record_to_snapshot(record, task) for record in task_records),
         )
 
@@ -147,32 +131,28 @@ class SnapshotsService:
         return self.__dao__.delete(dataset=dataset, id=id)
 
     @staticmethod
-    def record_to_snapshot(record: MultiTaskRecordDB, task: TaskType) -> Dict[str, Any]:
+    def record_to_snapshot(record: Dict[str, Any], task: TaskType) -> Dict[str, Any]:
         """Convert a record dict into an snapshot data structure"""
-        metadata = record.metadata or {}
-        data = {"id": record.id, **{k: v for k, v in metadata.items()}}
-        task_info = record.tasks[task]
+        # TODO: task level logic should be place in each task module and this method should coordinate
+        #  depending on incoming task argument
+        metadata = record.get("metadata", {})
+        data = {"id": record["id"], **{k: v for k, v in metadata.items()}}
         if task == TaskType.text_classification:
-            multi_label = task_info.get("multi_label", False)
+            multi_label = record.get("multi_label", False)
             data.update(
                 {
-                    "labels": task_info["annotated_as"]
+                    "labels": record["annotated_as"]
                     if multi_label
-                    else task_info["annotated_as"][0],
-                    **{k: v for k, v in record.text.items()},
+                    else record["annotated_as"][0],
+                    **{k: v for k, v in record["inputs"].items()},
                 }
             )
         elif task == TaskType.token_classification:
             data.update(
                 {
-                    "tokens": record.tokens,
-                    "text": record.raw_text
-                    or (
-                        list(record.text.values())[0]
-                        if record.text and len(record.text) == 1
-                        else " ".join(record.tokens)
-                    ),
-                    "entities": task_info["annotation"]["entities"],
+                    "tokens": record["tokens"],
+                    "text": record["raw_text"],
+                    "entities": record["annotation"]["entities"],
                 }
             )
         return data
@@ -184,7 +164,7 @@ _instance: Optional[DatasetsService] = None
 def create_snapshots_service(
     dao: SnapshotsDAO = Depends(create_snapshots_dao),
     datasets: DatasetsService = Depends(create_dataset_service),
-    dataset_records: DatasetRecordsDAO = Depends(create_dataset_records_dao),
+    dataset_records: DatasetRecordsDAO = Depends(dataset_records_dao),
 ) -> SnapshotsService:
     """
     Creates the dataset snapshots service

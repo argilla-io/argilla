@@ -4,50 +4,16 @@ from fastapi.testclient import TestClient
 from rubrix.server.commons.models import PredictionStatus, SortParam
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
-from rubrix.server.text_classification.api import (
+from rubrix.server.tasks.text_classification.api import (
     BulkResponse,
-    TextClassificationSearchResults,
-)
-from rubrix.server.text_classification.model import (
-    TextClassificationAggregations,
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
-)
-from rubrix.server.token_classification.model import (
-    TokenClassificationBulkData,
-    TokenClassificationRecord,
+    TextClassificationSearchResults,
 )
 
 client = TestClient(app)
-
-
-def test_records_with_default_text():
-    dataset = "test_records_with_default_text"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
-
-    records = [
-        TokenClassificationRecord.parse_obj(data)
-        for data in [{"tokens": "This is a text".split(" ")}]
-    ]
-    response = client.post(
-        f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
-            records=records,
-        ).dict(by_alias=True),
-    )
-
-    assert response.status_code == 200, response.json()
-
-    response = client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
-    )
-
-    assert response.status_code == 200
-    results = TextClassificationSearchResults.parse_obj(response.json())
-    assert results.total == 1
-    assert results.records[0].text == {"text": "This is a text"}
 
 
 def test_create_records_for_text_classification_with_multi_label():
@@ -185,7 +151,7 @@ def test_create_records_for_text_classification():
     assert results.total == 1
     assert results.aggregations.predicted_as == {"Mocking": 1}
     assert results.aggregations.status == {"Default": 1}
-    assert results.aggregations.confidence
+    assert results.aggregations.score
     assert results.aggregations.predicted == {}
 
 
@@ -250,6 +216,8 @@ def test_partial_record_update():
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     first_record = results.records[0]
+    assert first_record.last_updated is not None
+    first_record.last_updated = None
     assert TextClassificationRecord(
         **first_record.dict(by_alias=True, exclude_none=True)
     ) == TextClassificationRecord(
@@ -348,7 +316,7 @@ def test_disable_aggregations_when_scroll():
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
-    assert results.aggregations == TextClassificationAggregations()
+    assert results.aggregations is None
 
 
 def test_include_event_timestamp():

@@ -278,6 +278,7 @@ def test_info_message(mock_response_200, mock_response_text, caplog):
         Captures the logging output
     """
 
+    rubrix._client = None # Force client initialization
     caplog.set_level(logging.INFO)
 
     records = [
@@ -296,7 +297,9 @@ def test_info_message(mock_response_200, mock_response_text, caplog):
         tags={"type": "sentiment classifier", "lang": "spanish"},
     )
 
+    print(caplog.text)
+
     assert (
         "Rubrix has been initialized on http://localhost:6900"
-        in caplog.record_tuples[0]
+        in caplog.text
     )
