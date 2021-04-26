@@ -15,8 +15,8 @@ from rubrix import (
     TokenClassificationRecord,
 )
 from rubrix.sdk.models import DatasetSnapshot, TextClassificationSearchResults
-from rubrix.server.commons.models import TaskType
 from rubrix.server.server import app
+from rubrix.server.tasks.commons import TaskType
 
 from tests.server.snapshots.test_api import create_some_data_for_text_classification
 

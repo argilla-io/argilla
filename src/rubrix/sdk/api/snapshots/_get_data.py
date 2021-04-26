@@ -15,7 +15,7 @@ def _get_kwargs(
     snapshot_id: str,
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/snapshots/{snapshot_id}:data".format(
+    url = "{}/api/datasets/{name}/snapshots/{snapshot_id}/data".format(
         client.base_url, name=name, snapshot_id=snapshot_id
     )
 
@@ -43,5 +43,5 @@ def sync_detailed(
 ) -> Response[Union[None, HTTPValidationError]]:
     kwargs = _get_kwargs(client=client, name=name, snapshot_id=snapshot_id, limit=limit)
 
-    with httpx.stream("POST", **kwargs) as response:
+    with httpx.stream("GET", **kwargs) as response:
         return build_stream_response(response=response)

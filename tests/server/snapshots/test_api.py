@@ -2,9 +2,9 @@ import os
 
 import pandas
 from fastapi.testclient import TestClient
-from rubrix.server.commons.models import TaskStatus
 from rubrix.server.server import app
 from rubrix.server.snapshots.model import DatasetSnapshot
+from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification.api import (
     TaskType,
     TextClassificationBulkData,
@@ -86,9 +86,7 @@ def test_dataset_snapshots_flow():
     assert client.delete(api_ds_prefix).status_code == 200
     expected_data = 2
     create_some_data_for_text_classification(name, n=expected_data)
-    response = client.post(
-        f"{api_ds_prefix}/snapshots"
-    )
+    response = client.post(f"{api_ds_prefix}/snapshots")
     assert response.status_code == 200
 
     snapshot = DatasetSnapshot(**response.json())
@@ -105,7 +103,7 @@ def test_dataset_snapshots_flow():
     assert response.status_code == 200
     assert snapshot == DatasetSnapshot(**response.json())
 
-    response = client.post(f"{api_ds_prefix}/snapshots/{snapshot.id}:data")
+    response = client.get(f"{api_ds_prefix}/snapshots/{snapshot.id}/data")
     df = pandas.read_json(response.content, lines=True)
     assert len(df) == expected_data
 

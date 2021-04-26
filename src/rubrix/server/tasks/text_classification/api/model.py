@@ -144,6 +144,10 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         return None
 
     @property
+    def words(self) -> str:
+        return "\n".join(self.inputs.values())
+
+    @property
     def predicted_as(self) -> List[str]:
         return self._labels_from_annotation(
             self.prediction, multi_label=self.multi_label

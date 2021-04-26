@@ -2,8 +2,8 @@ import datetime
 from typing import Any, Dict, Iterable, List, Optional
 
 from fastapi import Depends
-from rubrix.server.commons.models import BulkResponse
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+from rubrix.server.tasks.commons import BulkResponse
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.es_helpers import filters

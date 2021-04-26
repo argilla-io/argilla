@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Dict
 
 from pydantic import BaseModel, Field
-from rubrix.server.commons.models import TaskType
+from rubrix.server.tasks.commons import TaskType
 
 
 class UpdateDatasetRequest(BaseModel):

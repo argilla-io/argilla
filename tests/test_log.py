@@ -278,7 +278,7 @@ def test_info_message(mock_response_200, mock_response_text, caplog):
         Captures the logging output
     """
 
-    rubrix._client = None # Force client initialization
+    rubrix._client = None  # Force client initialization
     caplog.set_level(logging.INFO)
 
     records = [
@@ -299,7 +299,4 @@ def test_info_message(mock_response_200, mock_response_text, caplog):
 
     print(caplog.text)
 
-    assert (
-        "Rubrix has been initialized on http://localhost:6900"
-        in caplog.text
-    )
+    assert "Rubrix has been initialized on http://localhost:6900" in caplog.text

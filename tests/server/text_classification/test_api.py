@@ -1,11 +1,10 @@
 from datetime import datetime
 
 from fastapi.testclient import TestClient
-from rubrix.server.commons.models import PredictionStatus, SortParam
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.server import app
+from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
-    BulkResponse,
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,
@@ -208,7 +207,6 @@ def test_partial_record_update():
             "query": TextClassificationQuery(predicted=PredictionStatus.OK).dict(
                 by_alias=True
             ),
-            "sort": [SortParam(by="annotated_as").dict(by_alias=True)],
         },
     )
 
