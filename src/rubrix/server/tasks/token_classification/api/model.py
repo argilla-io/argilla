@@ -113,7 +113,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
                 assert (
                     not mention
-                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned token. "
+                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned entity mention. "
 
     def task(cls) -> TaskType:
         """The record task type"""
