@@ -81,21 +81,40 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     text: str = Field(alias="raw_text")
 
     @root_validator
-    def check_prediction_integrity(cls, values):
-        """Validates prediction entities in terms of offset spans"""
-        if values.get("prediction") is None:
-            return values
-        raw_text = values.get("text")
-        raw_text = raw_text or " ".join(values.get("tokens", []))
-        prediction = values["prediction"]
-        for entity in prediction.entities:
-            assert (
-                len(raw_text[entity.start : entity.end]) > 1
-            ), "Entities definition out of index"
+    def data_validation(cls, values):
+        prediction = values.get("prediction")
+        annotation = values.get("annotation")
+        text = values["text"]
+        tokens = values["tokens"]
+
+        cls.check_annotation(prediction, text, tokens)
+        cls.check_annotation(annotation, text, tokens)
 
         return values
 
-    @classmethod
+    @staticmethod
+    def check_annotation(
+        annotation: Optional[TokenClassificationAnnotation],
+        text: str,
+        tokens: List[str],
+    ):
+        """Validates entities in terms of offset spans"""
+        if annotation:
+            for entity in annotation.entities:
+                mention = text[entity.start : entity.end]
+                assert len(mention) > 0, f"Empty offset defined for entity {entity}"
+
+                idx = 0
+                while mention and idx < len(tokens):
+                    current_token = tokens[idx]
+                    if current_token in mention:
+                        mention = mention.replace(current_token, "")
+                    idx += 1
+
+                assert (
+                    not mention
+                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned token. "
+
     def task(cls) -> TaskType:
         """The record task type"""
         return TaskType.token_classification

@@ -278,3 +278,26 @@ def test_load_with_ids_list(monkeypatch):
 
     ds = rubrix.load(name=dataset, ids=[3, 5], snapshot=snapshot.id)
     assert len(ds) == 100
+
+
+def test_token_classification_spans(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_token_classification_with_consecutive_spans"
+    texto = "Esto es una prueba"
+    item = rubrix.TokenClassificationRecord(
+        text=texto,
+        tokens=texto.split(),
+        prediction=[("test", 1, 2)],  # Inicio y fin son consecutivos
+        prediction_agent="test",
+    )
+    with pytest.raises(Exception, match=r"Defined offset \[s\] is token misaligned"):
+        rubrix.log(item, name=dataset)
+
+    item.prediction = [("test", 0, 6)]
+    with pytest.raises(
+        Exception, match=r"Defined offset \[Esto e\] is token misaligned"
+    ):
+        rubrix.log(item, name=dataset)
+
+    item.prediction = [("test", 0, 4)]
+    rubrix.log(item, name=dataset)
