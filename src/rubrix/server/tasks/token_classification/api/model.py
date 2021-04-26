@@ -125,6 +125,10 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return []
         return [self.prediction.score]
 
+    @property
+    def words(self) -> str:
+        return self.text
+
     def _entities(self) -> Set[EntitySpan]:
         """Shortcut for real annotated entities, if provided"""
         if self.annotation is None:

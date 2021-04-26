@@ -1,14 +1,57 @@
 """
 Common model for task definitions
 """
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 from uuid import uuid4
 
+from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 from rubrix.server.commons.helpers import flatten_dict
+
+
+class EsRecordDataFieldNames(str, Enum):
+    """Common elasticsearch field names"""
+
+    predicted_as = "predicted_as"
+    annotated_as = "annotated_as"
+    annotated_by = "annotated_by"
+    predicted_by = "predicted_by"
+    status = "status"
+    predicted = "predicted"
+    score = "score"
+    words = "words"
+
+
+class BulkResponse(BaseModel):
+    """
+    Data info for bulk results
+
+    Attributes
+    ----------
+
+    dataset:
+        The dataset name
+    processed:
+        Number of records in bulk
+    failed:
+        Number of failed records
+    """
+
+    dataset: str
+    processed: int
+    failed: int = 0
+
+
+@dataclass
+class PaginationParams:
+    """Query pagination params"""
+
+    limit: int = Query(50, gte=0, le=1000, description="Response records limit")
+    from_: int = Query(0, ge=0, alias="from", description="Record sequence from")
 
 
 class BaseAnnotation(BaseModel):
@@ -37,7 +80,8 @@ class TaskType(str, Enum):
 
     text_classification = "TextClassification"
     token_classification = "TokenClassification"
-    text2text = "Text2Text"
+    text_to_text = "TextToText"
+    multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 
 class TaskStatus(str, Enum):
@@ -153,6 +197,14 @@ class BaseRecord(GenericModel, Generic[T]):
         raise NotImplementedError
 
     @property
+    def words(self) -> str:
+        """
+        Textual information related to record.
+        This info will be used analytical data purposes (word tags, word distributions,...)
+        """
+        raise NotImplementedError
+
+    @property
     def predicted_by(self) -> List[str]:
         """The prediction agents"""
         if self.prediction:
@@ -181,12 +233,13 @@ class BaseRecord(GenericModel, Generic[T]):
         """
         return {
             **super().dict(*args, **kwargs),
-            "predicted": self.predicted,
-            "annotated_as": self.annotated_as,
-            "predicted_as": self.predicted_as,
-            "annotated_by": self.annotated_by,
-            "predicted_by": self.predicted_by,
-            "score": self.scores,
+            EsRecordDataFieldNames.predicted: self.predicted,
+            EsRecordDataFieldNames.annotated_as: self.annotated_as,
+            EsRecordDataFieldNames.predicted_as: self.predicted_as,
+            EsRecordDataFieldNames.annotated_by: self.annotated_by,
+            EsRecordDataFieldNames.predicted_by: self.predicted_by,
+            EsRecordDataFieldNames.score: self.scores,
+            EsRecordDataFieldNames.words: self.words,
             **self.extended_fields(),
         }
 

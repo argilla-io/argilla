@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Depends
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
-from rubrix.server.commons.models import TaskType
+from rubrix.server.tasks.commons import TaskType
 
 from .model import DatasetDB
 

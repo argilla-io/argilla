@@ -3,7 +3,7 @@ from time import sleep
 import elasticsearch
 import pytest
 from rubrix.server.commons.es_wrapper import create_es_wrapper
-from rubrix.server.commons.models import TaskType
+from rubrix.server.tasks.commons import TaskType
 from rubrix.server.tasks.commons.dao.dao import dataset_records_dao
 from rubrix.server.datasets.dao import create_datasets_dao
 from rubrix.server.datasets.model import DatasetDB
@@ -31,7 +31,9 @@ def test_close_dataset():
     )
 
     dao.close(created)
-    with pytest.raises(elasticsearch.exceptions.RequestError, match="index_closed_exception"):
+    with pytest.raises(
+        elasticsearch.exceptions.RequestError, match="index_closed_exception"
+    ):
         records.search_records(dataset=created)
 
     dao.open(created)

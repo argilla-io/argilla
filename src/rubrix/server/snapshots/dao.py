@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Any, Iterable, List, Optional
 
 import pandas as pd
-from rubrix.server.commons.models import TaskType
 from rubrix.server.datasets.model import DatasetDB
+from rubrix.server.tasks.commons import TaskType
 
 from .model import CreationDatasetSnapshot, DatasetSnapshotDB
 from .settings import settings

@@ -10,7 +10,7 @@ from rubrix.server.datasets.dao import (
 )
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
-from rubrix.server.tasks.commons.es_helpers import aggregations, parse_aggregations
+from rubrix.server.tasks.commons.es_helpers import EsRecordDataFieldNames, aggregations, parse_aggregations
 from stopwordsiso import stopwords
 
 SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
@@ -32,7 +32,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
     "mappings": {
         "properties": {
             "event_timestamp": {"type": "date"},
-            "words": {
+            EsRecordDataFieldNames.words: {
                 "type": "text",
                 "fielddata": True,
                 "analyzer": "multilingual_stop_analyzer",

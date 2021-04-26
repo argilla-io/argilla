@@ -3,11 +3,11 @@ from typing import Iterable, Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
-from rubrix.server.commons.models import BulkResponse, PaginationParams, TaskType
-from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.datasets.model import CreationDatasetRequest
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.security.api import get_current_active_user
+from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
+from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationBulkData,
     TextClassificationQuery,
@@ -167,7 +167,7 @@ def scan_data_response(
 
 
 @router.post(
-    BASE_ENDPOINT + ":data",
+    BASE_ENDPOINT + "/data",
     operation_id="stream_data",
 )
 async def stream_data(

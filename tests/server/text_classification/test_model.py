@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from rubrix.server.commons.models import TaskStatus
+from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,

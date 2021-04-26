@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
-from rubrix.server.commons.models import BulkResponse
 from rubrix.server.server import app
+from rubrix.server.tasks.commons import BulkResponse
 from rubrix.server.tasks.token_classification.api import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
@@ -42,4 +42,3 @@ def test_create_records_for_token_classification():
     assert bulk_response.dataset == dataset
     assert bulk_response.failed == 0
     assert bulk_response.processed == 2
-

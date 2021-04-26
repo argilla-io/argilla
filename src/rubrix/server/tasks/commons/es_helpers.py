@@ -1,8 +1,9 @@
 import math
 from typing import Any, Dict, List, Optional, Union
 
-from rubrix.server.commons.models import SortableField
 from rubrix.server.tasks.commons import PredictionStatus, ScoreRange, TaskStatus
+
+from .api import EsRecordDataFieldNames
 
 
 def prefix_query_fields(
@@ -85,7 +86,7 @@ def parse_aggregations(
     }
 
 
-def decode_sortable_field(field: SortableField) -> str:
+def decode_field_name(field: EsRecordDataFieldNames) -> str:
     return field.value
 
 
@@ -104,7 +105,9 @@ class filters:
         if not predicted_by:
             return None
         return {
-            "terms": {decode_sortable_field(SortableField.predicted_by): predicted_by}
+            "terms": {
+                decode_field_name(EsRecordDataFieldNames.predicted_by): predicted_by
+            }
         }
 
     @staticmethod
@@ -113,7 +116,9 @@ class filters:
         if not annotated_by:
             return None
         return {
-            "terms": {decode_sortable_field(SortableField.annotated_by): annotated_by}
+            "terms": {
+                decode_field_name(EsRecordDataFieldNames.annotated_by): annotated_by
+            }
         }
 
     @staticmethod
@@ -121,7 +126,7 @@ class filters:
         """Filter records by status"""
         if not status:
             return None
-        return {"terms": {decode_sortable_field(SortableField.status): status}}
+        return {"terms": {decode_field_name(EsRecordDataFieldNames.status): status}}
 
     @staticmethod
     def metadata(metadata: Dict[str, Union[str, List[str]]]) -> List[Dict[str, Any]]:
@@ -146,7 +151,9 @@ class filters:
         if not predicted_as:
             return None
         return {
-            "terms": {decode_sortable_field(SortableField.predicted_as): predicted_as}
+            "terms": {
+                decode_field_name(EsRecordDataFieldNames.predicted_as): predicted_as
+            }
         }
 
     @staticmethod
@@ -156,7 +163,9 @@ class filters:
         if not annotated_as:
             return None
         return {
-            "terms": {decode_sortable_field(SortableField.annotated_as): annotated_as}
+            "terms": {
+                decode_field_name(EsRecordDataFieldNames.annotated_as): annotated_as
+            }
         }
 
     @staticmethod
@@ -164,7 +173,9 @@ class filters:
         """Filter records with given predicted status"""
         if predicted is None:
             return None
-        return {"term": {decode_sortable_field(SortableField.predicted): predicted}}
+        return {
+            "term": {decode_field_name(EsRecordDataFieldNames.predicted): predicted}
+        }
 
     @staticmethod
     def text_query(text_query: Optional[Union[str, Dict[str, Any]]]) -> Dict[str, Any]:
@@ -205,7 +216,7 @@ class filters:
         if score.range_to is not None:
             score_filter["lte"] = score.range_to
 
-        return {"range": {"score": score_filter}}
+        return {"range": {EsRecordDataFieldNames.score: score_filter}}
 
 
 class aggregations:
@@ -219,7 +230,7 @@ class aggregations:
         return {
             "predicted_by": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.predicted_by),
+                    "field": decode_field_name(EsRecordDataFieldNames.predicted_by),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -232,7 +243,7 @@ class aggregations:
         return {
             "annotated_by": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.annotated_by),
+                    "field": decode_field_name(EsRecordDataFieldNames.annotated_by),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -245,7 +256,7 @@ class aggregations:
         return {
             "status": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.status),
+                    "field": decode_field_name(EsRecordDataFieldNames.status),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -290,7 +301,7 @@ class aggregations:
         return {
             "words": {
                 "terms": {
-                    "field": "words",
+                    "field": EsRecordDataFieldNames.words,
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -303,7 +314,7 @@ class aggregations:
         return {
             "predicted_as": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.predicted_as),
+                    "field": decode_field_name(EsRecordDataFieldNames.predicted_as),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -317,7 +328,7 @@ class aggregations:
         return {
             "annotated_as": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.annotated_as),
+                    "field": decode_field_name(EsRecordDataFieldNames.annotated_as),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -330,7 +341,7 @@ class aggregations:
         return {
             "predicted": {
                 "terms": {
-                    "field": decode_sortable_field(SortableField.predicted),
+                    "field": decode_field_name(EsRecordDataFieldNames.predicted),
                     "size": size,
                     "order": {"_count": "desc"},
                 }
@@ -354,7 +365,7 @@ class aggregations:
         return {
             "score": {
                 "range": {
-                    "field": "score",
+                    "field": EsRecordDataFieldNames.score,
                     "ranges": [
                         {"from": _from / ten_decimals, "to": _to / ten_decimals}
                         for _from, _to in zip(

@@ -16,7 +16,7 @@ def _get_kwargs(
     json_body: Optional[TokenClassificationQuery] = None,
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TokenClassification:data".format(
+    url = "{}/api/datasets/{name}/TokenClassification/data".format(
         client.base_url, name=name
     )
 
