@@ -187,7 +187,8 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     @validator("inputs")
     def flatten_text(cls, text: Dict[str, Any]):
         """Normalizes input text to dict of strings"""
-        return flatten_dict(text)
+        flat_dict = flatten_dict(text)
+        return flat_dict
 
     @classmethod
     def _labels_from_annotation(
