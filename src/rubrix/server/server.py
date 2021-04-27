@@ -5,9 +5,13 @@ This module configures the global fastapi application
 import os
 from pathlib import Path
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from rubrix.server.commons.errors import common_exception_handler
+from pydantic import ValidationError
+from rubrix.server.commons.errors import (
+    common_exception_handler,
+    validation_exception_handler,
+)
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
@@ -33,6 +37,7 @@ def configure_middleware(app: FastAPI):
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers """
     api.exception_handler(500)(common_exception_handler)
+    api.exception_handler(ValidationError)(validation_exception_handler)
 
 
 def configure_api_router(app: FastAPI):

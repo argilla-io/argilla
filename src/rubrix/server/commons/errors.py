@@ -2,7 +2,7 @@ from typing import Type
 
 from fastapi import HTTPException, Request, status
 from fastapi.exception_handlers import http_exception_handler
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 
 class ErrorMessage(BaseModel):
@@ -39,7 +39,9 @@ class InactiveUserError(HTTPException):
     """Inactive user error """
 
     def __init__(self):
-        super().__init__(status_code=400, detail="Inactive user")
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        )
 
 
 class ForbiddenOperationError(HTTPException):
@@ -64,6 +66,15 @@ class EntityNotFoundError(HTTPException):
         )
 
 
+class GenericValidationError(HTTPException):
+    """Generic data validation error out of request"""
+
+    def __init__(self, error: ValidationError):
+        super().__init__(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+        )
+
+
 class GenericError(HTTPException):
     """Generic error"""
 
@@ -76,3 +87,8 @@ class GenericError(HTTPException):
 async def common_exception_handler(request: Request, error: Exception):
     """Wraps errors as custom generic error"""
     return await http_exception_handler(request, GenericError(error))
+
+
+async def validation_exception_handler(request: Request, error: ValidationError):
+    """Wraps pydantic errors"""
+    return await http_exception_handler(request, GenericValidationError(error))

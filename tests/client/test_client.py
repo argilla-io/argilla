@@ -290,7 +290,9 @@ def test_token_classification_spans(monkeypatch):
         prediction=[("test", 1, 2)],  # Inicio y fin son consecutivos
         prediction_agent="test",
     )
-    with pytest.raises(Exception, match=r"Defined offset \[s\] is a misaligned entity mention"):
+    with pytest.raises(
+        Exception, match=r"Defined offset \[s\] is a misaligned entity mention"
+    ):
         rubrix.log(item, name=dataset)
 
     item.prediction = [("test", 0, 6)]
