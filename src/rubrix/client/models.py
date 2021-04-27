@@ -80,7 +80,7 @@ class TextClassificationRecord(BaseModel):
         The timestamp of the record. Default: None
     """
 
-    inputs: Dict[str, Any]
+    inputs: Dict[str, Union[str, List[str]]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
