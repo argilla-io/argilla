@@ -21,7 +21,7 @@ jobs:
       - name: Setup ElasticSearch 🔎
         uses: getong/elasticsearch-action@v1.2
         with:
-          elasticsearch version: 7.12
+          elasticsearch version: 7.3.2
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
