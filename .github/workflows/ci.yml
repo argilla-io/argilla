@@ -75,8 +75,8 @@ jobs:
           registry: docker.io
           tags: latest
           dockerfile: release.Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
@@ -93,11 +93,13 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-      - name: Setup Conda Env 🐍
-        uses: conda-incubator/setup-miniconda@v2
+
+      - name: Download python package
+        uses: actions/download-artifact@v2
         with:
-          environment-file: environment_dev.yml
-          activate-environment: rubrix
+          name: python-package
+          path: dist
+
       - name: Cache pip 👜
         uses: actions/cache@v2
         env:
@@ -106,22 +108,7 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
-      - name: Install rubrix 🧊
-        run: pip install .[server,tests]
-      - name: Run tests 📈
-        run: pytest tests
-      - name: Build Package 🍟
-        run: |
-          pip install -U build
-          scripts/build_distribution.sh
-      - name: Build & push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v5
-        with:
-          image: recogna/rubrix
-          registry: docker.io
-          dockerfile: release.Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
@@ -135,3 +122,12 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Build & push release Docker image
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with:
+          image: recogna/rubrix
+          registry: docker.io
+          dockerfile: release.Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
