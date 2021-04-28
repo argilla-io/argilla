@@ -51,6 +51,7 @@ jobs:
 
   deploy_docker:
     name: Build docker image
+    runs-on: ubuntu-latest
     if: ${{ github.branch == 'master' }}
     needs:
     - build
@@ -58,6 +59,15 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+
+      - name: Download python package
+        uses: actions/download-artifact@v2
+        with:
+          name: python-package
+          path: dist
+
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
@@ -75,6 +85,8 @@ jobs:
     name: Deploy Release
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
+    needs:
+      - build
     defaults:
       run:
         shell: bash -l {0}
