@@ -71,7 +71,7 @@ jobs:
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
-          image: recogna/rubrix
+          image: recognai/rubrix
           registry: docker.io
           tags: latest
           dockerfile: release.Dockerfile
