@@ -9,8 +9,8 @@ on:
     types: [published]
 
 jobs:
-  tests:
-    name: Run Tests
+  build:
+    name: Build python package
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,7 +21,7 @@ jobs:
       - name: Setup ElasticSearch 🔎
         uses: getong/elasticsearch-action@v1.2
         with:
-          elasticsearch version: 7.3.2
+          elasticsearch version: 7.12
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -39,6 +39,34 @@ jobs:
         run: pip install .[server,tests]
       - name: Run tests 📈
         run: pytest tests
+      - name: Build Package 🍟
+        run: |
+          pip install -U build
+          scripts/build_distribution.sh
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-package
+          path: dist
+
+  deploy_docker:
+    name: Build docker image
+    if: ${{ github.branch == 'master' }}
+    needs:
+    - build
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with:
+          image: recogna/rubrix
+          registry: docker.io
+          tags: latest
+          dockerfile: release.Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
@@ -47,7 +75,6 @@ jobs:
     name: Deploy Release
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
-    needs: tests
     defaults:
       run:
         shell: bash -l {0}
@@ -59,10 +86,30 @@ jobs:
         with:
           environment-file: environment_dev.yml
           activate-environment: rubrix
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if setup.cfg has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
+      - name: Install rubrix 🧊
+        run: pip install .[server,tests]
+      - name: Run tests 📈
+        run: pytest tests
       - name: Build Package 🍟
         run: |
           pip install -U build
           scripts/build_distribution.sh
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with:
+          image: recogna/rubrix
+          registry: docker.io
+          dockerfile: release.Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:

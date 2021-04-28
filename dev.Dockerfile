@@ -16,9 +16,8 @@ ENV USERS_DB=/config/.users.yml
 
 WORKDIR /build
 
-RUN git log --oneline
-
-RUN pip install -U build \
+RUN git log --oneline \
+ && pip install -U build \
  && python -m build \
  && find dist/*.whl -exec pip install {}[server] \;
 
