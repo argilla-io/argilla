@@ -2,15 +2,20 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [master]
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'master'
   release:
     types: [published]
 
 jobs:
-  tests:
-    name: Run Tests
+  build:
+    name: Build python package
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,6 +44,51 @@ jobs:
         run: pip install .[server,tests]
       - name: Run tests 📈
         run: pytest tests
+      - name: Build Package 🍟
+        run: |
+          pip install -U build
+          scripts/build_distribution.sh
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-package
+          path: dist
+
+  deploy_docker:
+    name: Build latest docker image
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Download python package
+        uses: actions/download-artifact@v2
+        with:
+          name: python-package
+          path: dist
+      - name: Docker meta
+        id: meta
+        uses: crazy-max/ghaction-docker-meta@v2
+        with:
+          images: recognai/rubrix
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: release.Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
@@ -47,22 +97,20 @@ jobs:
     name: Deploy Release
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
-    needs: tests
+    needs:
+      - build
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-      - name: Setup Conda Env 🐍
-        uses: conda-incubator/setup-miniconda@v2
+
+      - name: Download python package
+        uses: actions/download-artifact@v2
         with:
-          environment-file: environment_dev.yml
-          activate-environment: rubrix
-      - name: Build Package 🍟
-        run: |
-          pip install -U build
-          scripts/build_distribution.sh
+          name: python-package
+          path: dist
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
@@ -70,7 +118,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps biome-text==${GITHUB_REF#refs/*/v}
+        run: pip install --index-url https://test.pypi.org/simple --no-deps rubrix==${GITHUB_REF#refs/*/v}
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:
