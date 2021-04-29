@@ -2,15 +2,12 @@ version: "3.9"
 
 services:
   rubrix:
-    image: recognai/rubrix:latest
+    image: recognai/rubrix:master
     ports:
       - "6900:80"
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
-      ENABLE_SECURITY: 0
 
-    volumes:
-      - ${PWD}/config:/config
     networks:
       - rubrix
 
