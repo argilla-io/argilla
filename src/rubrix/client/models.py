@@ -52,7 +52,7 @@ class TextClassificationRecord(BaseModel):
 
     Attributes
     ----------
-    inputs : `Dict[str, Any]`
+    inputs : `Dict[str, Union[str, List[str]]]`
         The inputs of the record
     prediction : `List[Tuple[str, float]]`, optional
         A list of tuples containing the predictions for the record. The first entry of the tuple is the predicted label,
