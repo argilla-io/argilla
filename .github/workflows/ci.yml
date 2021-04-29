@@ -49,8 +49,8 @@ jobs:
           name: python-package
           path: dist
 
-  deploy_docker:
-    name: Build docker image
+  deploy_docker_latest:
+    name: Build latest docker image
     runs-on: ubuntu-latest
     if: contains( github.ref, 'master')
     needs:
@@ -61,14 +61,12 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
-
-      - name: Build & push Docker image
+      - name: Build & push <latest> Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: recognai/rubrix
@@ -106,14 +104,13 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps biome-text==${GITHUB_REF#refs/*/v}
+        run: pip install --index-url https://test.pypi.org/simple --no-deps rubrix==${GITHUB_REF#refs/*/v}
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-
-      - name: Build & push release Docker image
+      - name: Build & push <release> Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: recogna/rubrix
