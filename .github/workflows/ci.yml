@@ -52,7 +52,7 @@ jobs:
   deploy_docker:
     name: Build docker image
     runs-on: ubuntu-latest
-    if: ${{ github.branch == 'master' }}
+    if: contains( github.ref, 'master')
     needs:
     - build
     defaults:
@@ -99,16 +99,6 @@ jobs:
         with:
           name: python-package
           path: dist
-
-      - name: Cache pip 👜
-        uses: actions/cache@v2
-        env:
-          # Increase this value to reset cache if setup.cfg has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
-
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
