@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from rubrix.client.models import TextClassificationRecord
 from rubrix.client.models import TokenClassificationRecord
@@ -36,3 +37,9 @@ def test_token_classification_record(annotation, status, expected_status):
         text="test text", tokens=["test", "text"], annotation=annotation, status=status
     )
     assert record.status == expected_status
+
+
+def test_text_classification_record_none_inputs():
+    """Test validation error for None in inputs"""
+    with pytest.raises(ValidationError):
+        TextClassificationRecord(inputs={"text": None})
