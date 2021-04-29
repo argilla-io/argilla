@@ -2,9 +2,14 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [master]
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'master'
   release:
     types: [published]
 
@@ -65,14 +70,25 @@ jobs:
         with:
           name: python-package
           path: dist
-      - name: Build & push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v5
+      - name: Docker meta
+        id: meta
+        uses: crazy-max/ghaction-docker-meta@v2
         with:
-          image: recognai/rubrix
-          registry: docker.io
-          dockerfile: release.Dockerfile
+          images: recognai/rubrix
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: release.Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
