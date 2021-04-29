@@ -49,10 +49,9 @@ jobs:
           name: python-package
           path: dist
 
-  deploy_docker_latest:
+  deploy_docker:
     name: Build latest docker image
     runs-on: ubuntu-latest
-    if: contains( github.ref, 'master')
     needs:
     - build
     defaults:
@@ -66,12 +65,11 @@ jobs:
         with:
           name: python-package
           path: dist
-      - name: Build & push <latest> Docker image
+      - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: recognai/rubrix
           registry: docker.io
-          tags: latest
           dockerfile: release.Dockerfile
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -110,11 +108,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-      - name: Build & push <release> Docker image
-        uses: mr-smithers-excellent/docker-build-push@v5
-        with:
-          image: recogna/rubrix
-          registry: docker.io
-          dockerfile: release.Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
