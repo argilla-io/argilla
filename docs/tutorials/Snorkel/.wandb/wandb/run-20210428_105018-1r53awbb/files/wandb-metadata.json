@@ -1,0 +1,24 @@
+{
+    "os": "Linux-4.4.0-19041-Microsoft-x86_64-with-debian-bullseye-sid",
+    "python": "3.7.10",
+    "heartbeatAt": "2021-04-28T08:50:23.777483",
+    "startedAt": "2021-04-28T08:50:18.784902",
+    "docker": null,
+    "cpu_count": 4,
+    "cuda": null,
+    "args": [
+        "-f",
+        "/home/javispp/.local/share/jupyter/runtime/kernel-4c853a0e-956a-4fe7-929c-cdbaaba77ef5.json"
+    ],
+    "state": "running",
+    "program": "Practicas/RUBRIX/rubrix/docs/tutorials/Snorkel/02-snorkel_v2.ipynb",
+    "root": "/home/javispp/Practicas/RUBRIX/rubrix",
+    "git": {
+        "remote": "https://gitlab.com/recognai-team/biome/rubrix",
+        "commit": "9dbb5136f9b8e37abaf809549393c06df37b88da"
+    },
+    "email": null,
+    "host": "LAPTOP-SM4PJHR2",
+    "username": "javispp",
+    "executable": "/home/javispp/miniconda3/envs/biome2/bin/python"
+}
