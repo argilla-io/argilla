@@ -2,10 +2,10 @@
 > Open-source tool for tracking and evolving data for AI
 
 <p align="center">
-    <a href="https://github.com/recognai/biome-text/actions">
+    <a href="https://github.com/recognai/rubrix/actions">
         <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
     </a>
-    <a href="https://github.com/recognai/biome-text/blob/master/LICENSE.txt">
+    <a href="https://github.com/recognai/rubrix/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/recognai/rubrix.svg?color=blue">
     </a>
     <!--a href="https://www.recogn.ai/biome-text/">
