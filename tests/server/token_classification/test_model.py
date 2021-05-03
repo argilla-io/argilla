@@ -21,6 +21,25 @@ def test_char_position():
         text=text,
         tokens=text.split(),
         prediction=TokenClassificationAnnotation(
-            agent="test", entities=[EntitySpan(start=0, end=1, label="test")]
+            agent="test",
+            entities=[
+                EntitySpan(start=0, end=1, label="test"),
+                EntitySpan(start=2, end=len(text), label="test"),
+            ],
         ),
     )
+
+
+def test_fix_substrings():
+    text = "On one ones o no"
+    TokenClassificationRecord(
+        text=text,
+        tokens=text.split(),
+        prediction=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=3, end=6, label="test"),
+            ],
+        ),
+    )
+
