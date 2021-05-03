@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   rubrix:
-    image: recognai/rubrix:master
+    image: recognai/rubrix:latest
     ports:
       - "6900:80"
     environment:
