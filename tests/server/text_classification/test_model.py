@@ -9,16 +9,6 @@ from rubrix.server.tasks.text_classification.api import (
 )
 
 
-def test_flatten_inputs():
-    data = {
-        "inputs": {
-            "mail": {"subject": "The mail subject", "body": "This is a large text body"}
-        }
-    }
-    record = TextClassificationRecord.parse_obj(data)
-    assert list(record.inputs.keys()) == ["mail.subject", "mail.body"]
-
-
 def test_flatten_metadata():
     data = {
         "inputs": {"text": "bogh"},
