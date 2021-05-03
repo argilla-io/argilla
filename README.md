@@ -2,10 +2,10 @@
 > Open-source tool for tracking and evolving data for AI
 
 <p align="center">
-    <a href="https://github.com/recognai/biome-text/actions">
+    <a href="https://github.com/recognai/rubrix/actions">
         <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
     </a>
-    <a href="https://github.com/recognai/biome-text/blob/master/LICENSE.txt">
+    <a href="https://github.com/recognai/rubrix/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/recognai/rubrix.svg?color=blue">
     </a>
     <!--a href="https://www.recogn.ai/biome-text/">
@@ -85,7 +85,7 @@ You can also view the API docs at [http://localhost:6900/api/docs](http://localh
 
 ## 2. Install the Rubrix Python library:
 
-```python
+```bash
 pip install rubrix==0.1.0b2
 ```
 
@@ -93,7 +93,7 @@ pip install rubrix==0.1.0b2
 
 The following code will log one record into the `example-dataset` dataset: 
 
-```bash
+```python
 import rubrix as rb
 
 rb.log(
@@ -145,8 +145,7 @@ Rubrix is flexible with input and output shapes, which means you can model relat
 - Key phrase extraction (https://paperswithcode.com/task/keyword-extraction)
 - Slot filling
 
-## Other planned tasks
-
+## Planned tasks
 ### Natural language processing
 
 - Text2Text, covering summarization, machine translation, natural language generation, etc.
