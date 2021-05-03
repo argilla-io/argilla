@@ -18,7 +18,7 @@
 
 
 
-Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists and subject matter.
+Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers.
 
 With Rubrix, you can:
 
