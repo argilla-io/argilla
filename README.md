@@ -18,7 +18,7 @@
 
 
 
-Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists and subject matter.
+Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers.
 
 With Rubrix, you can:
 
@@ -29,8 +29,8 @@ With Rubrix, you can:
 
 We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. Rubrix is composed of:
 
-- a **web application and a REST API**, you can launch using Docker or build it yourself.
-- a **Python library** to interact with your data and models, you can install via `pip`.
+- a **web application and a REST API**, which you can launch using Docker or build it yourself.
+- a **Python library** to bridge data and models, which you can install via `pip`.
 
 ## Use cases
 
