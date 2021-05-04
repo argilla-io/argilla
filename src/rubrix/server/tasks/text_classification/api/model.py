@@ -138,7 +138,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         if self.predicted_as and self.annotated_as:
             return (
                 PredictionStatus.OK
-                if self.predicted_as == self.annotated_as
+                if set(self.predicted_as) == set(self.annotated_as)
                 else PredictionStatus.KO
             )
         return None

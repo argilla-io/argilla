@@ -123,3 +123,24 @@ def test_created_record_with_default_status():
 
     record = TextClassificationRecord.parse_obj(data)
     assert record.status == TaskStatus.default
+
+
+def test_predicted_ok_for_multilabel_unordered():
+    record = TextClassificationRecord(
+        inputs={"text": "The text"},
+        prediction=TextClassificationAnnotation(
+            agent="test",
+            labels=[
+                ClassPrediction(class_label="B"),
+                ClassPrediction(class_label="C", score=0.3),
+                ClassPrediction(class_label="A"),
+            ],
+        ),
+        annotation=TextClassificationAnnotation(
+            agent="test",
+            labels=[ClassPrediction(class_label="A"), ClassPrediction(class_label="B")],
+        ),
+        multi_label=True,
+    )
+
+    assert record.predicted == PredictionStatus.OK
