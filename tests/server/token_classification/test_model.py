@@ -43,3 +43,16 @@ def test_fix_substrings():
         ),
     )
 
+def test_entities_with_spaces():
+
+    text = "This is  a  great  space"
+    TokenClassificationRecord(
+        text=text,
+        tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
+        prediction=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=9, end=len(text), label="test"),
+            ],
+        ),
+    )
