@@ -100,6 +100,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     ):
         """Validates entities in terms of offset spans"""
         if annotation:
+            tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
                 mention = text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
@@ -111,7 +112,8 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                     jdx = idx
                     while (
                         current_mention.startswith(current_token)
-                        and current_mention and jdx <= len(tokens)
+                        and current_mention
+                        and jdx <= len(tokens)
                     ):
                         current_mention = current_mention[len(current_token) :]
                         current_mention = current_mention.lstrip()
