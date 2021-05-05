@@ -10,9 +10,9 @@ dependencies:
 - pytest
 # docs
 - sphinx==3.5.4
-- sphinx_rtd_theme
-- nbsphinx
-- pandoc
+- sphinx_rtd_theme==0.5.2
+- nbsphinx==0.8.4
+- pandoc==2.12
 # for building the frontend
 - nodejs~=14.15.0
 - pip:
