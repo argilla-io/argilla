@@ -8,8 +8,8 @@ which could or could not be mounted.
 """
 from typing import cast
 
+import httpx
 import pytest
-import requests
 import rubrix
 import logging
 
@@ -46,12 +46,10 @@ def mock_response_200(monkeypatch):
     """
 
     def mock_get(*args, **kwargs):
-        response = requests.models.Response()
-        response.status_code = 200
-        return response
+        return httpx.Response(200)
 
     monkeypatch.setattr(
-        requests, "get", mock_get
+        httpx, "get", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
