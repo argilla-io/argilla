@@ -3,11 +3,11 @@
 """Rubrix Client Init Testing File"""
 
 import os
-import pytest
-import requests
 
+import httpx
+import pytest
 import rubrix
-from rubrix.client import RubrixClient, Client, AuthenticatedClient
+from rubrix.client import AuthenticatedClient, Client, RubrixClient
 
 
 @pytest.fixture
@@ -22,13 +22,13 @@ def mock_response_200(monkeypatch):
         Mockup function
     """
 
-    def mock_get(*args, **kwargs):
-        response = requests.models.Response()
-        response.status_code = 200
-        return response
+    def mock_get(url,*args, **kwargs):
+        if "/api/me" in url:
+            return httpx.Response(status_code=200,json={"username": "booohh"})
+        return httpx.Response(status_code=200)
 
     monkeypatch.setattr(
-        requests, "get", mock_get
+        httpx, "get", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -46,12 +46,10 @@ def mock_response_500(monkeypatch):
     """
 
     def mock_get(*args, **kwargs):
-        response = requests.models.Response()
-        response.status_code = 500
-        return response
+        return httpx.Response(status_code=500)
 
     monkeypatch.setattr(
-        requests, "get", mock_get
+        httpx, "get", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -68,11 +66,8 @@ def mock_response_token_401(monkeypatch):
         Mockup function
 
     """
-    response_200 = requests.models.Response()
-    response_200.status_code = 200
-
-    response_401 = requests.models.Response()
-    response_401.status_code = 401
+    response_200 = httpx.Response(status_code=200)
+    response_401 = httpx.Response(status_code=401)
 
     def mock_get(*args, **kwargs):
         if kwargs["url"] == "fake_url/api/me":
@@ -81,7 +76,7 @@ def mock_response_token_401(monkeypatch):
             return response_200
 
     monkeypatch.setattr(
-        requests, "get", mock_get
+        httpx, "get", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -276,16 +271,7 @@ def test_trailing_slash(api_url_env_var_trailing_slash, mock_response_200):
     assert rubrix._client._client.base_url == "http://fakeurl.com"
 
 
-def test_default_init(monkeypatch):
-    def requests_mock(*args, **kwargs):
-        response = requests.models.Response()
-        response.status_code = 200
-        return response
-
-    monkeypatch.setattr(
-        requests, "get", requests_mock
-    )  # apply the monkeypatch for requests.get to mock_get
-
+def test_default_init(mock_response_200):
     rubrix._client = None
 
     if "RUBRIX_API_URL" in os.environ:

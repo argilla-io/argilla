@@ -8,8 +8,8 @@ Methods for using the Rubrix Client, called from the module init file.
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Union
 
+import httpx
 import pandas
-import requests
 from rubrix.client.models import (
     BulkResponse,
     DatasetSnapshot,
@@ -25,6 +25,7 @@ from rubrix.sdk.api.text_classification import bulk_records as text_classificati
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
 )
+from rubrix.sdk.api.users import whoami
 from rubrix.sdk.models import (
     TaskType,
     TextClassificationQuery,
@@ -61,7 +62,7 @@ class RubrixClient:
         self._client = None  # Variable to store the client after the init
 
         try:
-            response = requests.get(url=f"{api_url}/api/docs/spec.json").status_code
+            response = httpx.get(url=f"{api_url}/api/docs/spec.json").status_code
         except ConnectionRefusedError:
             raise Exception("Connection Refused: cannot connect to the API.")
 
@@ -79,11 +80,8 @@ class RubrixClient:
                 base_url=api_url, token=api_key, timeout=timeout
             )
 
-            response_token = requests.get(
-                url=api_url + "/api/me", headers=self._client.get_headers()
-            ).status_code
-
-            if response_token == 401:
+            whoami_response_status = whoami.sync_detailed(client=self._client).status_code
+            if whoami_response_status == 401:
                 raise Exception("Authentification error: invalid credentials.")
 
     def log(
