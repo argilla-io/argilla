@@ -13,6 +13,8 @@ dependencies:
 - sphinx_rtd_theme==0.5.2
 - nbsphinx==0.8.4
 - pandoc==2.12
+# we need this to ensure syntax highlighting in the notebook code cells for the docs
+- ipython
 # for building the frontend
 - nodejs~=14.15.0
 - pip:
