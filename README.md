@@ -27,7 +27,7 @@ We've tried to make working with Rubrix easy and fun, while keeping it scalable 
 
 ## Quick links
 
-- Get started with the [installation guide](#markdown-header-get-started)
+- Get started with the [installation guide](#get-started)
 - Check out the [Tutorials](https://github.com/recognai/rubrix/tree/master/docs/tutorials)
 
 ## Use cases
