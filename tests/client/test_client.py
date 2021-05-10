@@ -122,7 +122,7 @@ def test_not_found_response(monkeypatch):
     mocking_client(monkeypatch)
     not_found_match = "Not found error. The API answered with a 404 code"
     with pytest.raises(Exception, match=not_found_match):
-        rubrix.snapshots(dataset="not_found")
+        rubrix.snapshots(name="not_found")
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found")
