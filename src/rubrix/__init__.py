@@ -134,7 +134,7 @@ def snapshots(name: str) -> List[models.DatasetSnapshot]:
         A list with all DatasetSnapshot associated to the given dataset
 
     """
-    return _client_instance().snapshots(dataset)
+    return _client_instance().snapshots(name)
 
 
 def load(
