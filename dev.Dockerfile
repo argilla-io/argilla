@@ -23,7 +23,9 @@ RUN git log --oneline \
 
 WORKDIR /app
 
-RUN rm -rf /build
+RUN rm -rf /build \
+ && wget -O /wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+ && chmod +x /wait-for-it.sh
 
 # See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
 ENV MODULE_NAME="rubrix.server.server"
