@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3"
 
 services:
   rubrix:
@@ -7,6 +7,8 @@ services:
       - "6900:80"
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
+
+    command: /wait-for-it.sh elasticsearch:9200 -- /start.sh
 
     networks:
       - rubrix
