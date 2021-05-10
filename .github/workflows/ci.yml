@@ -52,7 +52,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
       - name: Install rubrix 🧊
-        run: pip install .[server,tests]
+        run: pip install .[server]
       - name: Run tests 📈
         run: pytest tests
 <<<<<<< HEAD

@@ -1,12 +1,16 @@
-version: "3.9"
+version: "3"
 
 services:
   rubrix:
+<<<<<<< HEAD
 <<<<<<< HEAD
     image: recognai/rubrix:latest
 =======
     image: recognai/rubrix:master
 >>>>>>> 9025f469b860a9de1dec32b7ea3543f4182468e4
+=======
+    image: recognai/rubrix:latest
+>>>>>>> 0d9d4b1aa37a70390f078f7eb16932bb81d9e537
     ports:
       - "6900:80"
     environment:
@@ -15,6 +19,8 @@ services:
       ENABLE_SECURITY: 0
 =======
 >>>>>>> 9025f469b860a9de1dec32b7ea3543f4182468e4
+
+    command: /wait-for-it.sh elasticsearch:9200 -- /start.sh
 
     networks:
       - rubrix

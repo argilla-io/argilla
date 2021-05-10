@@ -127,7 +127,11 @@ class TokenClassificationService:
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TokenClassificationAggregations.parse_obj(results.aggregations)
+            aggregations=TokenClassificationAggregations(
+                **results.aggregations,
+                words=results.words,
+                metadata=results.metadata or {},
+            )
             if results.aggregations
             else None,
         )

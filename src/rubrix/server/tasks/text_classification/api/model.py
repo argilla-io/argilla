@@ -81,7 +81,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     Attributes:
     -----------
 
-    inputs: Dict[str, Any]
+    inputs: Dict[str, Union[str, List[str]]]
         The input data text
 
     multi_label: bool
@@ -93,7 +93,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         The dictionary key must be aligned with provided record text. Optional
     """
 
-    inputs: Dict[str, Any]
+    inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
     explanation: Dict[str, List[TokenAttributions]] = None
 
@@ -138,7 +138,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         if self.predicted_as and self.annotated_as:
             return (
                 PredictionStatus.OK
-                if self.predicted_as == self.annotated_as
+                if set(self.predicted_as) == set(self.annotated_as)
                 else PredictionStatus.KO
             )
         return None

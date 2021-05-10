@@ -100,6 +100,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     ):
         """Validates entities in terms of offset spans"""
         if annotation:
+            tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
                 mention = text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
@@ -107,13 +108,26 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                 idx = 0
                 while mention and idx < len(tokens):
                     current_token = tokens[idx]
-                    if current_token in mention:
-                        mention = mention.replace(current_token, "")
+                    current_mention = mention
+                    jdx = idx
+                    while (
+                        current_mention.startswith(current_token)
+                        and current_mention
+                        and jdx <= len(tokens)
+                    ):
+                        current_mention = current_mention[len(current_token) :]
+                        current_mention = current_mention.lstrip()
+                        jdx += 1
+                        if jdx < len(tokens):
+                            current_token = tokens[jdx]
+
+                    if not current_mention:
+                        mention = current_mention
                     idx += 1
 
                 assert (
                     not mention
-                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned entity mention. "
+                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned entity mention"
 
     def task(cls) -> TaskType:
         """The record task type"""

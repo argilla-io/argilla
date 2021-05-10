@@ -68,10 +68,10 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                     "match_mapping_type": "string",
                     "mapping": {
                         "type": "keyword",
-                        "ignore_above": 20,  # Avoid bulk errors with too long keywords
+                        "ignore_above": 128,  # Avoid bulk errors with too long keywords
                         # Some elasticsearch versions includes automatically raw fields, so
                         # we must limit those fields too
-                        "fields": {"raw": {"type": "keyword", "ignore_above": 10}},
+                        "fields": {"raw": {"type": "keyword", "ignore_above": 128}},
                     },
                 }
             },
