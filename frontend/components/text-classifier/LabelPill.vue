@@ -1,6 +1,13 @@
 <template>
   <div>
-      <p v-for="label in labels" :key="label.index"  class="pill" :title="label.class">
+      <svgicon
+        :class="['icon__predicted', predicted]"
+        v-if="predicted"
+        width="20"
+        height="20"
+        :name="predicted ? 'predicted-ko' : 'predicted-ok'"
+      ></svgicon>
+      <p v-for="label in labels" :key="label.index"  :class="['pill', isAnnotated(label) ? 'active' : '']" :title="label.class">
         <span class="pill__text">{{ label.class }} </span>
         <span class="pill__confidence" v-if="showConfidence">
           <ReNumeric
@@ -11,11 +18,12 @@
           ></ReNumeric>
         </span>
       </p>
-      <span v-if="predicted" :class="['pill__predicted', predicted]"></span>
     </div>
 </template>
 
 <script>
+import 'assets/icons/predicted-ok';
+import 'assets/icons/predicted-ko';
 export default {
   props: {
     labels: {
@@ -28,12 +36,18 @@ export default {
     showConfidence: {
       type: Boolean,
       default: false,
+    },
+    annotationLabels: {
+      type: Array,
     }
   },
   methods: {
     decorateConfidence(confidence) {
       return confidence * 100;
     },
+    isAnnotated(label) {
+      return label.confidence > 0.5 ? true : false
+    }
   }
 };
 </script>
@@ -53,9 +67,25 @@ export default {
   margin-right: 0.5em;
 }
 .annotations {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 1em;
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: block;
+  height: 100%;
+  overflow: auto;
+  text-align: right;
+  padding: 0.5em;
+  .pill {
+    text-align: left;
+    display: inline-block;
+    background: palette(grey, bg);
+    border: none;
+    display: inline-block;
+    border-radius: 10px;
+    &__text {
+      white-space: break-spaces;
+    }
+  }
 }
 .predictions {
   margin-top: 1em;
@@ -73,8 +103,7 @@ export default {
     margin-right: 0.8em;
     margin-bottom: 1.6em;
     font-weight: bold;
-    border-color: $line-smooth-color;
-    box-shadow: $shadow-light;
+    border: 1px solid palette(grey, smooth);
     border-radius: 5px;
     &__confidence {
       margin-right: 0;
@@ -87,7 +116,6 @@ export default {
   border: 1px solid $line-medium-color;
   color: $font-medium-color;
   margin-bottom: 0.5em;
-  @include font-size(13px);
   line-height: 1.4em;
   &__container {
     display: flex;
@@ -104,17 +132,22 @@ export default {
     font-weight: bold;
     margin-left: 1em;
   }
+  &.active {
+    border-color: $secondary-color;
+  }
+}
+.icon {
   &__predicted {
-    margin: 0.4em;
-    height: 15px;
-    width: 15px;
-    border-radius: 50%;
-    display: inline-block;
+    display: block;
+    text-align: right;
+    margin-right: 0;
+    margin-left: auto;
+    margin-bottom: 1em;
     &.ko {
-      background: $error;
+      fill: $error;
     }
     &.ok {
-      background: $success;
+      fill: $success;
     }
   }
 }

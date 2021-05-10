@@ -7,13 +7,13 @@
     <div class="list">
       <ExplainHelpInfo v-if="isExplainedRecord"></ExplainHelpInfo>
       <VueAutoVirtualScrollList
+        style="width: 100%"
         :key="dataset.task"
         id="scroll"
         ref="scroll"
         class="virtual-scroll"
         :total-height="1200"
-        :default-height="80"
-        style="width: 100%"
+        :default-height="100"
         @updated="onVirtualScrollUpdated"
       >
         <div
@@ -103,6 +103,9 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    headerHeight: {
+      type: Number,
+    }
   },
   data: () => ({
     showMetadata: undefined,
@@ -181,18 +184,18 @@ export default {
     },
     onVirtualScrollUpdated() {
       this.scrollPosition = this.$refs.scroll.offset + 1;
-      document.getElementById("scroll").addEventListener("scroll", this.onScroll);
+      // document.getElementById("scroll").addEventListener("scroll", this.onScroll);
     },
     // TODO (@leireaguirrework): All scroll logic will be moved to layout component
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 1) {
+      if (this.$refs.scroll.scrollTop > 100) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
       }
-    },
+    }
   },
 };
 </script>
@@ -200,12 +203,6 @@ export default {
 <style lang="scss" scoped>
 .results {
   flex-grow: 2;
-  margin: 0 1em;
-}
-
-.record {
-  @include font-size(16px);
-  line-height: 1.6em;
 }
 
 .show-record-number {
@@ -215,7 +212,6 @@ export default {
   right: 1em;
   background: $lighter-color;
   border-radius: 10px;
-  box-shadow: $shadow;
   min-height: 30px;
   line-height: 30px;
   padding: 0 0.5em;
@@ -238,9 +234,7 @@ export default {
   margin-bottom: 0;
   list-style: none;
   .virtual-scroll {
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 2em;
+    padding-top: 1em;
     height: 100vh !important;
   }
   &__checkbox.re-checkbox {
@@ -255,7 +249,7 @@ export default {
       top: 1em;
       right: 1em;
     }
-    padding-bottom: 1.2em;
+    padding-bottom: 2px;
     position: relative;
     &.--discarded {
       ::v-deep .record,
@@ -268,10 +262,7 @@ export default {
   &__item {
     position: relative;
     background: $lighter-color;
-    box-shadow: 0 1px 5px 0 rgba(101, 101, 101, 0.42);
-    border-radius: 1px;
-    border: 1px solid $line-light-color;
-    border-radius: 1px;
+    border-radius: 3px;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
@@ -285,7 +276,6 @@ export default {
   padding-bottom: 1em;
   margin-left: 0;
   padding-top: 2.2em;
-  border-radius: 1px;
   &--annotation-mode {
     padding-left: 4em;
     @extend .list__item;

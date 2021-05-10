@@ -11,7 +11,7 @@ export default {
     labels: {
       type: Array,
       required: true,
-    },
+    }
   },
   data: () => ({
     maxLabels: 16,

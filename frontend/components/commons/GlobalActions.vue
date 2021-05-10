@@ -1,11 +1,10 @@
 <template>
   <div
-    :class="[
-      'global-actions',
+    :class="['container',
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
   >
-    <div class="global-actions__container">
+    <div class="global-actions">
       <!-- TODO use v-model for ReCheckbox with boolean values -->
       <ReCheckbox
         v-model="allSelected"
@@ -29,42 +28,7 @@
         Actions will apply to the
         <span>{{ selectedRecords.length }} records</span> selected
       </p>
-      <ReButton
-        class="button-clear button-action global-actions__export"
-        @click="onOpenExportModal()"
-      >
-        <svgicon name="export" width="14" height="14" color="#F48E5F" />Export
-        annotations
-      </ReButton>
     </div>
-    <ReModal
-      :modal-custom="true"
-      :prevent-body-scroll="true"
-      modal-class="modal-primary"
-      :modal-visible="openExportModal"
-      modal-position="modal-center"
-      @close-modal="closeModal()"
-    >
-      <p class="modal__title">Confirm export of annotations</p>
-      <p class="modal__text">
-        You are about to export {{ annotationsSum }} annotations. You will find
-        the file on the server once the action is completed.
-      </p>
-      <div class="modal-buttons">
-        <ReButton
-          class="button-tertiary--small button-tertiary--outline"
-          @click="closeModal()"
-        >
-          Cancel
-        </ReButton>
-        <ReButton
-          class="button-secondary--small"
-          @click="onExportAnnotations()"
-        >
-          Confirm export
-        </ReButton>
-      </div>
-    </ReModal>
   </div>
 </template>
 <script>
@@ -104,9 +68,6 @@ export default {
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
-    annotationsSum() {
-      return this.dataset.results.aggregations.status.Validated;
-    },
     _allSelected() {
       return this.allSelected;
     },
@@ -136,7 +97,6 @@ export default {
       updateRecords: "entities/datasets/updateRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
-      exportAnnotations: "entities/datasets/exportAnnotations",
     }),
 
     async onSelectAnnotation(labels) {
@@ -188,27 +148,23 @@ export default {
         labels: [...new Set([...this.dataset.labels, newLabel])],
       });
     },
-    onOpenExportModal() {
-      this.openExportModal = true;
-    },
-    closeModal() {
-      this.openExportModal = false;
-    },
-    async onExportAnnotations() {
-      this.openExportModal = false;
-      this.exportAnnotations({ name: this.dataset.name });
-    },
   },
 };
 </script>
 <style lang="scss" scoped>
+.container {
+  @extend %container;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 .global-actions {
-  padding: 2em 1.2em 0 1.2em;
   display: flex;
   align-items: center;
-  color: $font-medium-color;
-  min-height: 0;
-  font-weight: 600;
+  width: 100%;
+  text-align: left;
+  padding: 1em 1.4em;
+  background: $lighter-color;
+  border-radius: 3px;
   .fixed-header & {
     margin-top: 0;
     padding-top: 0;
@@ -216,10 +172,10 @@ export default {
     border: none;
     min-height: 70px;
   }
-  @include media(">desktopLarge") {
-    padding-left: 4em;
-    padding-right: 4em;
-  }
+  // @include media(">desktopLarge") {
+  //   padding-left: 4em;
+  //   padding-right: 4em;
+  // }
   .re-checkbox {
     position: relative;
     left: 0;
@@ -229,14 +185,6 @@ export default {
   &__export {
     margin: auto 0 auto auto;
   }
-  &__container {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    @extend %container;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
   &__select {
     margin-left: 0.8em;
     ::v-deep .dropdown__header {
@@ -244,6 +192,8 @@ export default {
       max-height: 33px;
       background: $lighter-color;
       border-width: 1px;
+      color: $font-secondary;
+      font-weight: bold;
     }
   }
   &__button {
@@ -255,10 +205,13 @@ export default {
     margin-right: 1em;
     outline: none;
     font-weight: 600;
-    color: $font-medium-color;
+    color: $font-secondary;
     background: $lighter-color;
     border: 1px solid $line-smooth-color;
     cursor: pointer;
+    &:hover, &:focus {
+      border-color: $primary-color;
+    }
     &:first-of-type {
       margin-right: 0;
     }
@@ -279,7 +232,7 @@ export default {
   margin: 0;
   span {
     font-weight: bold;
-    color: $secondary-color;
+    color: $primary-color;
   }
 }
 </style>

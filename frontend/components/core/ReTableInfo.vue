@@ -16,9 +16,6 @@
               </button>
             </div>
           </div>
-          <ReButton v-if="refreshAvailable" class="table-info__top-button button-clear" @click="$emit('refresh-data')">
-            <svgicon name="refresh" width="20" height="14" /> Refresh
-          </ReButton>
         </slot>
       </div>
       <div v-for="group in groups" :key="group">
@@ -134,10 +131,6 @@ export default {
     showModal: {
       type: String,
       default: undefined,
-    },
-    refreshAvailable: {
-      type: Boolean,
-      default: true,
     },
     globalActions: {
       type: Boolean,
@@ -292,9 +285,8 @@ export default {
   padding: 0;
   list-style: none;
   margin-bottom: 5em;
-  background: $lighter-color;
-  box-shadow: $shadow-light;
   ul {
+    background: $lighter-color;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -305,16 +297,13 @@ export default {
     }
   }
   &__header {
+    background: $lighter-color;
     min-height: auto;
     position: relative;
     padding-bottom: 0.3em;
     margin-top: 1em;
-    background: transparent;
-    border-bottom: 1px solid $line-smooth-color;
-    padding: 1em 2em;
-    button {
-      font-weight: bold;
-    }
+    margin-bottom: 3px;
+    padding: 1em 0;
     &__checkbox {
       margin: 0 !important;
     }
@@ -341,7 +330,8 @@ export default {
       background: transparent;
       padding-left: 0;
       padding-right: 0;
-      color: $font-medium-color;
+      color: $font-secondary;
+      @include font-size(14px);
       &.active.desc {
         &:after {
           transform: rotate(180deg);
@@ -375,6 +365,9 @@ export default {
       flex: 1 1 0px;
       text-overflow: ellipsis;
       overflow: hidden;
+      &:nth-last-of-type(-n+3) {
+        max-width: 120px;
+      }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
@@ -431,16 +424,7 @@ export default {
   }
   &__meta {
     font-weight: lighter;
-    @include font-size(13px);
     color: $font-medium-color;
-  }
-  &__top-button {
-    position: absolute !important;
-    right: 2em;
-    top: 1.3em;
-    &:after {
-      content: none !important;
-    }
   }
   &__group {
     padding-bottom: 2em;
@@ -466,17 +450,19 @@ export default {
   }
   .text {
     color: $font-medium-color;
+    p {
+      display: inline-block;
+      background: palette(grey, bg);
+      padding: 0.5em;
+      border-radius: 10px;
+      margin-right: 0.5em;
+      margin-top: 0;
+    }
   }
   .dataSource {
     color: $font-medium-color;
     font-weight: 600;
     white-space: nowrap;
-  }
-  .task {
-    display: inline-block;
-    background: lighten($secondary-color, 44%);
-    border-radius: 2px;
-    padding: 0.2em 0.5em;
   }
   .actionName {
     margin-left: 1em;
@@ -494,30 +480,19 @@ export default {
     }
   }
 }
-// .state {
-//   transition: none !important;
-// }
-// .disable-view {
-//   .button-primary--small {
-//     display: none;
-//   }
-// }
 
 .modal-buttons {
   text-align: right;
 }
 .modal__title {
-  @include font-size(13px);
   color: $font-dark-color;
   font-weight: 600;
   margin-top: 0;
   margin-right: 2em;
 }
 
-.--hasTooltip {
-  @extend %hastooltip;
-}
 .--hasTooltip-colored {
   @extend %hastooltip-colored;
+  @extend %tooltip--left;
 }
 </style>

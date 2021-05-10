@@ -28,12 +28,11 @@ export default {
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
-  margin: 2em 0 2em auto;
   pointer-events: all;
   @include font-size(14px);
   .svg-icon {
-    margin: auto;
-    order: 2;
+    margin: auto 1em auto auto;
+    fill: $primary-color;
   }
 }
 </style>

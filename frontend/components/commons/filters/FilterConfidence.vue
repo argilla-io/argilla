@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="filter__row">
+    <p class="filter__label">{{ filter.name }}:</p>
     <div
       class="filter__item filter__item--confidence"
       :class="{ 'filter__item--open': confidenceExpanded }"
@@ -54,7 +55,6 @@
         >
       </div>
     </div>
-    <div v-if="confidenceExpanded" class="overlay"></div>
   </div>
 </template>
 
@@ -129,13 +129,6 @@ export default {
   created() {
     this.confidenceRanges = [this.rangeOptions.min, this.rangeOptions.max];
   },
-  updated() {
-    if (this.confidenceExpanded) {
-      document.body.classList.add("--fixed");
-    } else {
-      document.body.classList.remove("--fixed");
-    }
-  },
   methods: {
     expandConfidence() {
       this.confidenceExpanded = true;
@@ -155,6 +148,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .filter__item--confidence {
+  position: relative;
   text-align: left;
   transition: border 0.2s ease;
   background: $lighter-color;
@@ -167,7 +161,7 @@ export default {
   border-radius: 0;
   &:hover,
   &:focus {
-    border: 2px solid $secondary-color;
+    border: 2px solid $primary-color;
     background: $lighter-color;
     transition: border 0.2s ease, background 0.2s ease;
   }
@@ -218,6 +212,7 @@ export default {
   &.expanded {
     margin-top: 10px;
     position: absolute;
+    top: 0;
     background: $lighter-color;
     padding: 0.8em 0.8em 0 0.8em;
     min-height: auto;
@@ -230,7 +225,7 @@ export default {
     width: 400px;
     max-width: 100vw;
     min-height: 210px;
-    border: 2px solid $secondary-color;
+    border: 2px solid $primary-color;
     pointer-events: all;
     &:after {
       content: none;
@@ -253,6 +248,18 @@ export default {
     }
     .label-default {
       display: block;
+    }
+  }
+}
+.filter {
+  position: relative;
+  &__row {
+    display: flex;
+    align-items: center;
+    .filter__item--confidence:not(.expanded) {
+      margin-right: 0;
+      margin-left: auto;
+      width: 220px;
     }
   }
 }

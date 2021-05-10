@@ -123,7 +123,8 @@ export default {
 
         // trigger re-render
         if (hasChange) {
-          if (this.heights[offset + 1]) this.$refs.container.scrollTop += scrollDiff
+          // prevent jump
+          // if (this.heights[offset + 1]) this.$refs.container.scrollTop += scrollDiff
           this.heights = newHeights
         }
       })

@@ -1,6 +1,6 @@
 <template>
   <div class="topbar">
-    <BiomeIsotipo v-if="!title" />
+    <RubrixIsotipo v-if="!title" />
     <NuxtLink v-else :to="{ name: 'datasets' }">
       <p class="title">
         {{ title }}
@@ -11,7 +11,7 @@
       v-if="$auth.loggedIn && $config.securityEnabled"
       class="topbar__logout"
       @click="logout"
-      >Logout</ReButton
+      >Close session</ReButton
     >
   </div>
 </template>
@@ -45,32 +45,32 @@ export default {
   align-items: center;
   min-height: 60px;
   position: relative;
-  background: $lighter-color;
+  background: $primary-color;
   border-bottom: 1px solid $line-light-color;
-  font-family: $sff;
+  font-family: $s-font-medium;
   color: $lighter-color;
-  padding-left: 2em;
+  @extend %container;
+  padding-top: 0;
+  padding-bottom: 0;
   &__logout {
-    margin: auto 1em auto 1em;
+    @include font-size(15px);
+    color: $lighter-color;
+    margin: auto 0 auto 1em;
     min-height: none;
-    color: $primary-color;
     text-transform: normal;
     border: none;
     background: none;
     outline: none;
     cursor: pointer;
-    &:hover {
-      color: darken($primary-color, 10%);
-    }
   }
   a {
     text-decoration: none;
   }
   .title {
+    color: $lighter-color;
     @include font-size(18px);
     font-weight: 900;
     font-family: $ff;
-    color: $lighter-color;
     text-decoration: none;
     .svg-icon {
       margin-right: 0.5em;

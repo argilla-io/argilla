@@ -220,5 +220,7 @@ export default {
   display: block;
   margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;
+  @include font-size(16px);
+  line-height: 1.6em;
 }
 </style>

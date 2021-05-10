@@ -80,7 +80,7 @@ export default {
 $checkbox-size: 20px;
 $checkbox-touch-size: 20px;
 $checkbox-color: $line-smooth-color;
-$checkbox-color-dark: $font-medium-color;
+$checkbox-color-dark: $primary-color;
 .re-checkbox {
   width: auto;
   margin: 16px 8px 16px 0;
@@ -157,7 +157,7 @@ $checkbox-color-dark: $font-medium-color;
       opacity: 0;
       width: 16px;
       height: 16px;
-      background: $checkbox-color;
+      background: $primary-color;
       position: absolute;
       left: 1px;
       top: 1px;
@@ -178,11 +178,11 @@ $checkbox-color-dark: $font-medium-color;
   &--dark {
     &.checked {
       .checkbox-label {
-        color: $secondary-color;
+        color: $primary-color;
       }
     }
     .checkbox-container {
-      border: 1px solid $checkbox-color-dark;
+      border: 1px solid palette(grey);
       &:after {
         background: $checkbox-color-dark;
       }

@@ -4,7 +4,12 @@
       <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
     </ReTopbarBrand>
     <div class="container">
-      <ReSearchBar @input="onSearch" />
+      <div class="interactions">
+        <ReSearchBar @input="onSearch" />
+        <ReButton class="button-primary" @click="$fetch">
+          <svgicon name="refresh" width="20" height="14" /> Refresh
+        </ReButton>
+      </div>
       <ReLoading v-if="$fetchState.pending" />
       <Error
         v-if="$fetchState.error"
@@ -25,7 +30,6 @@
           :show-modal="showModal"
           @sort-column="onSortColumns"
           @onActionClicked="onActionClicked"
-          @refresh-data="$fetch"
           @close-modal="closeModal"
         />
       </div>
@@ -43,6 +47,7 @@ export default {
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
       { name: "Tags", field: "tags", class: "text", type: "object" },
+      { name: "Task", field: "task", class: "task", type: "task" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       { name: "Updated at", field: "last_updated", class: "date", type: "date" },
     ],
@@ -140,6 +145,16 @@ export default {
       left: 0;
       right: 0;
     }
+  }
+}
+
+.interactions {
+  display: flex;
+  align-items: flex-end;
+  margin: 2em 0 1em 0;
+  .re-button {
+    margin-left: auto;
+    margin-bottom: 0;
   }
 }
 

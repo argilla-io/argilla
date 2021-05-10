@@ -3,6 +3,9 @@
     :class="{ disabled: !checked, 'disable-action': disableAction }"
     class="re-switch"
   >
+    <label v-if="$slots.default" :for="id || name" class="re-switch-label">
+      <slot />
+    </label>
     <div class="re-switch-container" @click="toggle($event)">
       <div class="re-switch-thumb" :style="styles">
         <input
@@ -13,12 +16,16 @@
           :value="value"
           tabindex="-1"
         />
-        <button :type="type" class="re-switch-holder" />
+        <button :type="type" class="re-switch-holder">
+          <svgicon
+            width="12"
+            height="12"
+            name="check"
+            color="white"
+          ></svgicon>
+        </button>
       </div>
     </div>
-    <label v-if="$slots.default" :for="id || name" class="re-switch-label">
-      <slot />
-    </label>
   </div>
 </template>
 
@@ -26,6 +33,7 @@
 const checkedPosition = 90;
 const initialPosition = "-1px";
 
+import "assets/icons/check";
 export default {
   props: {
     name: String,
@@ -97,9 +105,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$switch-width: 30px;
+$switch-width: 44px;
 $switch-height: 13px;
-$switch-thumb-size: 16px;
+$switch-thumb-size: 24px;
 $switch-ripple-size: 48px;
 .re-switch {
   width: auto;
@@ -107,8 +115,8 @@ $switch-ripple-size: 48px;
   display: inline-flex;
   position: relative;
   &.disabled {
-    .re-switch-container {
-      background-color: $font-medium-color;
+    svg {
+      display: none;
     }
     .re-switch-thumb {
       background-color: $lighter-color !important;
@@ -116,9 +124,6 @@ $switch-ripple-size: 48px;
   }
   &.disable-action {
     opacity: 0.5;
-    .re-switch-container {
-      background-color: $font-medium-color;
-    }
     .re-switch-thumb {
       background-color: $lighter-color !important;
       transform: translate3d(-1px, -50%, 0px) !important;
@@ -135,7 +140,7 @@ $switch-ripple-size: 48px;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;
-    background-color: $primary-lighten-color;
+    background-color: palette(grey, smooth);
     .re-switch-thumb {
       box-shadow: $shadow;
       width: $switch-thumb-size;
@@ -168,7 +173,7 @@ $switch-ripple-size: 48px;
   .re-switch-label {
     height: $switch-height;
     line-height: $switch-height;
-    margin-left: 1em;
+    margin-right: 1em;
   }
 }
 

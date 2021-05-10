@@ -11,8 +11,7 @@
       <ReTopbarBrand v-if="selectedTask">
         <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
       </ReTopbarBrand>
-
-      <FiltersArea :dataset="dataset"> </FiltersArea>
+      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode" :annotation-mode="annotationEnabled"> </FiltersArea>
       <EntitiesHeader
         v-if="dataset.task === 'TokenClassification'"
         :annotation-mode="annotationEnabled"
@@ -23,14 +22,10 @@
     </section>
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-        <Results :dataset="dataset"> </Results>
+        <Results :dataset="dataset" :headerHeight="headerHeight"> </Results>
         <SideBar v-if="annotationEnabled" :dataset="dataset" />
       </div>
     </div>
-    <ViewModeButton
-      :annotation-mode="annotationEnabled"
-      @onChangeMode="onChangeMode"
-    />
   </div>
 </template>
 
@@ -38,7 +33,7 @@
 import { mapActions, mapGetters } from "vuex";
 
 export default {
-  layout: "exploration",
+  layout: "app",
   data: () => ({
     headerHeight: 200,
     tasks: [
@@ -115,6 +110,7 @@ export default {
   @extend %container;
   padding-top: 0;
   padding-bottom: 0;
+  margin-left: 0;
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;
@@ -131,7 +127,7 @@ export default {
 
 .grid {
   @include grid($flex-wrap: nowrap, $gutter: 2em);
-  margin-top: 0;
+  margin: 0;;
   .fixed-header & {
     margin-top: 3em;
   }

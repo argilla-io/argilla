@@ -39,6 +39,7 @@ export default {
   text-align: center;
   display: block;
   margin-bottom: 2em;
+  @include font-size(13px);
   .re-progress {
     width: 300px;
     margin: 1.5em auto;

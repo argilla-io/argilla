@@ -1,6 +1,6 @@
 <template>
   <div class="filters__tags">
-    <BiomeIsotipo
+    <RubrixIsotipo
       v-if="fixedHeader"
       class="filters__tags__logo"
       :minimal="true"
@@ -17,14 +17,8 @@
       </span>
     </span>
 
-    <span v-if="severalFiltersApplied" class="tag tag--all">
-      <span>Clear all</span>
-      <i
-        aria-hidden="true"
-        tabindex="1"
-        class="tag-icon"
-        @click="$emit('clearAll')"
-      />
+    <span @click="$emit('clearAll')" v-if="severalFiltersApplied" class="tag tag--all">
+      <span>Remove all</span>
     </span>
   </div>
 </template>
@@ -105,6 +99,7 @@ export default {
     @extend %clearfix;
     position: relative;
     text-align: left;
+    margin-top: 10px;
     &--empty {
       border-bottom: none;
     }
@@ -123,6 +118,7 @@ export default {
       z-index: 1;
       border-bottom: 0;
       max-width: 930px;
+      margin-top: 3px;
       @include media(">xxl") {
         max-width: 1330px;
       }
@@ -130,18 +126,6 @@ export default {
   }
 }
 
-.tags {
-  min-height: 44px;
-  display: block;
-  padding: 10px 40px 0 8px;
-  border-radius: 2px;
-  border: 1px solid $line-light-color;
-  background: $line-light-color;
-  overflow: hidden;
-  span {
-    margin-right: 3px;
-  }
-}
 
 .filters__tags__logo {
   float: left;
@@ -153,17 +137,21 @@ export default {
 // filters tag
 .tag {
   position: relative;
-  padding: 0.5em 1em;
+  padding: 0.2em 1em;
   border-radius: 0;
   line-height: 1;
-  min-height: 41px;
-  background: $lighter-color;
-  border-right: 1px solid $line-light-color;
-  border-bottom: 1px solid $line-light-color;
-  color: $secondary-color;
+  min-height: 30px;
+  background: palette(grey, smooth);
+  color: $primary-color;
   float: left;
   display: flex;
   align-items: center;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  @include font-size(13px);
+  .fixed-header & {
+    margin-bottom: 3px;
+  }
   > span {
     display: inline-block;
     white-space: nowrap;
@@ -178,7 +166,8 @@ export default {
     text-transform: uppercase;
   }
   &--all {
-    color: $primary-color;
+    cursor: pointer;
+    color: $font-secondary;
   }
 }
 

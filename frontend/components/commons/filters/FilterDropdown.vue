@@ -53,7 +53,7 @@ export default {
     align-items: center;
     padding: 0 1em;
     transition: all 0.2s ease;
-    border-radius: 0;
+    border-radius: 3px;
     &:after {
       content: "";
       border-color: $darker-color;
@@ -72,11 +72,11 @@ export default {
     }
     &:hover,
     &:focus {
-      border: 2px solid $secondary-color;
+      border-color: $primary-color;
       background: $lighter-color;
       transition: all 0.3s ease;
       &:after {
-        border-color: $secondary-color;
+        border-color: $primary-color;
       }
     }
     // dropdown selected text
@@ -86,6 +86,20 @@ export default {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    p {
+      display: inline-block;
+      margin: 0;
+      &:after {
+        content: ",";
+        position: relative;
+        margin-right: 5px;
+      }
+      &:last-child {
+        &:after {
+          content: none;
+        }
+      }
     }
   }
   &__check {
@@ -97,7 +111,7 @@ export default {
     left: 0;
     margin-top: 0;
     background: $lighter-color;
-    border: 2px solid $secondary-color;
+    border: 2px solid $primary-color;
     padding: 0 1em 0 1em;
     z-index: 3;
     transform: translate(0);
@@ -121,7 +135,7 @@ export default {
   &--open {
     pointer-events: all;
     .dropdown__content {
-      min-width: 200px;
+      min-width: 220px;
     }
   }
   input {
@@ -131,7 +145,6 @@ export default {
     outline: none;
     z-index: 1;
     border: 0;
-    @include font-size(13px);
   }
   .clean-search {
     z-index: 1;
@@ -144,14 +157,16 @@ export default {
 }
 .dropdown--filter {
   &.highlighted {
-    z-index: 3;
+    .dropdown__header {
+      border: 1px solid $primary-color;
+    }
   }
   &.dropdown--open {
     .placeholder {
       display: block;
     }
     .dropdown__header {
-      border: 2px solid $secondary-color;
+      border: 2px solid $primary-color;
       background: $lighter-color;
       &:after {
         visibility: hidden;
@@ -173,7 +188,7 @@ export default {
       &__header {
         &:hover,
         &:focus {
-          border: 2px solid $secondary-color;
+          border: 2px solid $primary-color;
           background: $lighter-color;
         }
       }

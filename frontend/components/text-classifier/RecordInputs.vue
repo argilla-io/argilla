@@ -47,6 +47,8 @@ export default {
   &__item {
     margin-right: 1em;
     display: inline-block;
+    @include font-size(16px);
+    line-height: 1.6em;
   }
   &--email {
     display: block;

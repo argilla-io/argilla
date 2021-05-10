@@ -1,20 +1,20 @@
 <template>
-  <div class="filters">
+  <div class="filters" v-click-outside="onClickOutside">
     <div class="filters__tabs">
       <p
         v-for="group in groups"
         :key="group"
-        :class="{ active: initialVisibleGroup === group }"
+        :class="{ active: initialVisibleGroup === group || itemsAppliedOnGroup(group) }"
         @click="selectGroup(group)"
       >
         {{ group }}
-        <span v-if="itemsAppliedOnGroup(group)" class="filters__tabs__number">{{
+        <span v-if="itemsAppliedOnGroup(group)">({{
           itemsAppliedOnGroup(group)
-        }}</span>
+        }})</span>
       </p>
     </div>
     <div v-for="group in groups" :key="group">
-      <div v-if="initialVisibleGroup === group">
+      <div v-if="initialVisibleGroup === group" :class="['filters__tabs__content', filterList.filter((f) => f.group === group).length > 6 ? 'filters__tabs__content--overflow' : '']">
         <span
           v-for="filter in filterList.filter((f) => f.group === group)"
           :key="filter.id"
@@ -46,7 +46,7 @@ export default {
     },
   },
   data: () => ({
-    initialVisibleGroup: "Predictions",
+    initialVisibleGroup: undefined,
     filters: [
       {
         key: "predicted_as",
@@ -79,16 +79,16 @@ export default {
         group: "Annotations",
       },
       {
-        key: "status",
-        name: "Status",
-        type: "select",
-        group: "Annotations",
-      },
-      {
         key: "annotated_by",
         name: "Annotated by",
         type: "select",
         group: "Annotations",
+      },
+      {
+        key: "status",
+        name: "Status",
+        type: "select",
+        group: "Status",
       },
     ],
   }),
@@ -139,15 +139,10 @@ export default {
       return [...filters, ...sortedMetadataFilters];
     },
   },
-  watch: {
-    groups() {
-      this.setInitialGroup();
-    },
-  },
-  mounted() {
-    this.setInitialGroup();
-  },
   methods: {
+    onClickOutside() {
+      this.initialVisibleGroup = undefined;
+    },
     itemsAppliedOnGroup(group) {
       return this.filterList
         .filter((f) => f.group === group)
@@ -177,64 +172,49 @@ export default {
 $number-size: 18px;
 .filters {
   $this: &;
+  position: relative;
   display: inline-block;
   width: 100%;
   z-index: 2;
   &__tabs {
     display: flex;
-    &__number {
-      position: relative;
-      color: $font-medium-color;
-      z-index: 1;
+    &__content {
+      width: 450px;
       position: absolute;
-      height: $number-size;
-      width: $number-size;
-      text-align: center;
-      top: -5px;
-      right: -5px;
-      @include font-size(10px);
-      &:before {
-        content: "";
-        box-shadow: $shadow;
-        background: $lighter-color;
-        border-radius: 50%;
-        height: $number-size;
-        width: $number-size;
-        position: absolute;
-        right: 0;
-        z-index: -1;
+      top: calc(100% + 1em);
+      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      background: $lighter-color;
+      padding: 3em 3em 2em 3em;
+      border-radius: 5px;
+      max-height: 550px;
+      &--overflow {
+        overflow: auto;
       }
     }
     p {
       cursor: pointer;
       position: relative;
+      margin-bottom: 0;
       margin-top: 0;
-      padding: 0.3em 1em;
-      border: 1px solid $line-smooth-color;
-      margin-right: -1px;
+      padding: 0.8em 1em;
+      border-radius: 5px;
+      margin-right: 1em;
+      color: $font-secondary;
+      @include font-size(15px);
       &:last-child {
         margin-right: 0;
       }
       &.active {
-        border: 1px solid $secondary-color;
-        background: $secondary-color;
-        color: $lighter-color;
+        background: palette(grey, smooth);
+        color: $primary-color;
       }
     }
   }
 }
 
 .filter {
-  vertical-align: bottom;
-  float: left;
-  margin-bottom: 0;
-  text-align: left;
-  position: relative;
-  padding-right: 1em;
-  min-width: 135px;
-  width: 25%;
+  display: block;
   margin-bottom: 1em;
-  max-width: 200px;
   &__sort {
     // max-width: 144px;
     min-width: 150px;
