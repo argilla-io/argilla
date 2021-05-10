@@ -143,7 +143,7 @@ def load(
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
-    Load datase/snapshot data as a huggingface dataset
+    Load dataset/snapshot data as a huggingface dataset
 
     Parameters
     ----------
