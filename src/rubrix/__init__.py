@@ -131,6 +131,7 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 
     Returns
     -------
+        A list with all DatasetSnapshot associated to the given dataset
 
     """
     return _client_instance().snapshots(dataset)
