@@ -34,7 +34,7 @@
               v-for="(entity, index) in filteredEntities"
               :key="index"
               class="entities__selector__option"
-              :class="'color_' + entities.indexOf(entity)"
+              :class="`color_${entity.colorId}`"
               @click="selectEntity(entity.text)"
             >
               <span>{{ entity.text }}</span>
@@ -105,9 +105,9 @@ export default {
       return this.record.raw_text.slice(this.spans[this.spanId].end, this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : '');
     },
     tag_color() {
-      return this.entities.findIndex(
+      return this.entities.filter(
         (entity) => entity.text === this.span.entity.label
-      );
+      )[0].colorId;
     },
     filteredEntities() {
       return this.entities.filter((entity) =>

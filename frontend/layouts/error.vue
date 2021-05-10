@@ -1,8 +1,5 @@
 <template>
   <div class="error">
-    <div class="navbar">
-      <Biome></Biome>
-    </div>
     <div class="container">
       <div class="error__content">
         <p class="error__text">

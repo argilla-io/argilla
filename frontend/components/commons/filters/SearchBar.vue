@@ -165,10 +165,10 @@ export default {
 
 <style lang="scss" scoped>
 .searchbar {
-  background: transparent;
+  background: $lighter-color;
   width: 230px;
   min-height: 43px;
-  border: 2px solid $line-smooth-color;
+  border: none;
   padding: 0 1em;
   display: flex;
   align-items: center;
@@ -176,9 +176,9 @@ export default {
   margin-right: 0;
   margin-left: auto;
   pointer-events: all;
+  border-radius: 5px;
   .fixed-header & {
     height: 40px;
-    background: $lighter-color;
   }
   &__container {
     position: relative;
@@ -194,7 +194,7 @@ export default {
     right: 0;
     margin-top: 0;
     background: $lighter-color;
-    border: 2px solid $secondary-color;
+    border: 2px solid $primary-color;
     padding: 0 1em 0 1em;
     z-index: 3;
     max-height: 224px;
@@ -233,14 +233,14 @@ export default {
       }
     }
   }
-  &.re-input-focused {
-    border: 2px solid $secondary-color;
-    .svg-icon {
-      fill: $secondary-color;
-    }
-  }
+  // &.re-input-focused {
+  //   border: 2px solid $secondary-color;
+  //   .svg-icon {
+  //     fill: $secondary-color;
+  //   }
+  // }
   .svg-icon {
-    fill: $font-medium-color;
+    fill: $primary-color;
     margin: auto;
     order: 2;
   }

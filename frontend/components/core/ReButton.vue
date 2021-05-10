@@ -61,7 +61,7 @@ export default {
 <style lang="scss" scoped>
 .button-primary {
   @extend %button;
-  background-color: $secondary-color;
+  background-color: $primary-color;
   color: $lighter-color;
   .svg-icon {
     margin-right: 1em;
@@ -72,10 +72,10 @@ export default {
   &:focus,
   &:active,
   &.active {
-    background-color: $secondary-darken-color;
+    background-color: $primary-darken-color;
   }
   &[disabled] {
-    background-color: $secondary-lighten-color;
+    background-color: $primary-lighten-color;
     box-shadow: none;
   }
   &--main {
@@ -86,7 +86,7 @@ export default {
     &:hover,
     &:focus {
       box-shadow: none;
-      background-color: $secondary-color;
+      background-color: $primary-color;
     }
   }
   &--small {
@@ -274,11 +274,11 @@ export default {
 }
 .button-action {
   position: relative;
-  color: $primary-color;
+  color: $font-secondary;
   display: inline-block;
   height: 30px;
   line-height: 30px;
-  margin-bottom: -1em;
+  margin-bottom: 0;
   text-transform: none;
   &:hover,
   &:focus {

@@ -124,7 +124,6 @@ export default {
   margin: auto;
   pointer-events: all;
   &__title {
-    @include font-size(13px);
     color: $font-dark-color;
     font-weight: 600;
     margin-top: 0;

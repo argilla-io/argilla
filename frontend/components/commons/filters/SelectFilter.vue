@@ -1,8 +1,15 @@
 <template>
-  <div>
-    <FilterDropdown :class="{ highlighted: visible }" class="dropdown--filter" :visible="visible" @visibility="onVisibility">
+  <div class="filter__row">
+    <p class="filter__label">{{ filter.name }}:</p>
+    <FilterDropdown :class="{ highlighted: visible || appliedFilters.length }" class="dropdown--filter" :visible="visible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <span :title="filter.name">{{ filter.name }}</span>
+        <span v-if="appliedFilters.length">
+          <p v-if="typeof appliedFilters === 'string'">{{ appliedFilters }}</p>
+          <p v-else v-for="appliedFilter in appliedFilters" :key="appliedFilter">{{ appliedFilter }}</p>
+        </span>
+        <span v-else>
+          Select...
+        </span>
       </span>
       <div slot="dropdown-content">
         <input v-model="searchText" class="filter-options" type="text" autofocus :placeholder="placeholder" />
@@ -31,7 +38,6 @@
         </div>
       </div>
     </FilterDropdown>
-    <div v-if="visible" class="overlay" />
   </div>
 </template>
 
@@ -105,6 +111,20 @@ export default {
 }
 
 .filter {
+  &__row {
+    display: flex;
+    align-items: center;
+    .dropdown {
+      margin-right: 0;
+      margin-left: auto;
+      width: 220px;
+      flex-shrink: 0;
+    }
+  }
+  &__label {
+    word-break: break-word;
+    margin-right: 1em;
+  }
   &__buttons {
     margin-top: 1em;
     text-align: right;
@@ -113,18 +133,6 @@ export default {
       margin-right: 0.5em;
     }
   }
-}
-
-.overlay {
-  background: rgba(0, 0, 0, 0.19);
-  height: 127vh;
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
 }
 
 .dropdown {
@@ -153,7 +161,7 @@ export default {
 }
 .filter-options {
   &__back {
-    color: $secondary-color;
+    color: $primary-color;
     margin-top: 1em;
     display: flex;
     align-items: center;
@@ -163,7 +171,7 @@ export default {
       padding: 0.5em;
       &:after {
         content: '';
-        border-color: $secondary-color;
+        border-color: $primary-color;
         border-style: solid;
         border-width: 1px 1px 0 0;
         display: inline-block;

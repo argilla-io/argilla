@@ -1,11 +1,12 @@
 <template>
   <aside class="sidebar">
-    <p class="sidebar__show-button" @click="toggleVisibleMetrics">
-      <svgicon name="metrics" width="30" height="30" color="#F48E5F" />
+    <p v-if="!visible" class="sidebar__show-button" @click="toggleVisibleMetrics">
+      <svgicon name="metrics" width="30" height="30" color="#4C4EA3" />
     </p>
-    <div v-if="visible && annotationsProgress" class="sidebar__wrapper">
+    <div v-if="annotationsProgress" v-show="visible" class="sidebar__wrapper">
       <div class="sidebar__content">
-        <p>Annotations</p>
+        <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> Annotation</p>
+        <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
         <span class="progress progress--percent">{{ progress }}%</span>
         <ReProgress
           re-mode="determinate"
@@ -43,13 +44,49 @@
           </div>
         </div>
       </div>
+      <ReButton
+        class="button-clear button-action global-actions__export"
+        @click="onOpenExportModal()"
+      >
+        <svgicon name="export" width="14" height="14" color="#0508D9" />Export
+        annotations
+      </ReButton>
     </div>
+    <ReModal
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      modal-class="modal-primary"
+      :modal-visible="openExportModal"
+      modal-position="modal-center"
+      @close-modal="closeModal()"
+    >
+      <p class="modal__title">Confirm export of annotations</p>
+      <p class="modal__text">
+        You are about to export {{ annotationsSum }} annotations. You will find
+        the file on the server once the action is completed.
+      </p>
+      <div class="modal-buttons">
+        <ReButton
+          class="button-tertiary--small button-tertiary--outline"
+          @click="closeModal()"
+        >
+          Cancel
+        </ReButton>
+        <ReButton
+          class="button-secondary--small"
+          @click="onExportAnnotations()"
+        >
+          Confirm export
+        </ReButton>
+      </div>
+    </ReModal>
   </aside>
 </template>
 <script>
 import "assets/icons/export";
 import "assets/icons/metrics";
-
+import "assets/icons/cross";
+import { mapActions } from "vuex";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { ObservationDataset } from "@/models/Dataset";
 export default {
@@ -63,6 +100,7 @@ export default {
 
   data: () => ({
     visible: false,
+    openExportModal: false,
   }),
   async fetch() {
     await ObservationDataset.dispatch("refreshAnnotationProgress", {
@@ -70,6 +108,9 @@ export default {
     });
   },
   computed: {
+    annotationsSum() {
+      return this.dataset.results.aggregations.status.Validated;
+    },
     annotationsProgress() {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
@@ -106,32 +147,71 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      exportAnnotations: "entities/datasets/exportAnnotations",
+    }),
     toggleVisibleMetrics() {
       !this.visible ? (this.visible = true) : (this.visible = false);
+    },
+    onOpenExportModal() {
+      this.openExportModal = true;
+    },
+    closeModal() {
+      this.openExportModal = false;
+    },
+    async onExportAnnotations() {
+      this.openExportModal = false;
+      this.exportAnnotations({ name: this.dataset.name });
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  margin-top: 2em;
-  z-index: 0;
+  z-index: 1;
   &__show-button {
     position: absolute;
-    right: 3em;
+    right: 0;
+    padding: 1em;
+    background: $lighter-color;
+    box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
     cursor: pointer;
     text-align: right;
+    margin-top: -4.5em;
+    .fixed-header & {
+      margin-top: 0;
+    }
+    @include media('>desktopLarge') {
+      display: none;
+    }
+  }
+  &__close-button {
+    position: absolute;
+    top: 1.5em; 
+    right: 2em;
+    cursor: pointer;
+    @include media('>desktopLarge') {
+      display: none;
+    }
   }
   &__wrapper {
-    min-width: 200px;
-    max-width: 200px;
+    border-radius: 5px;
+    min-width: 280px;
     position: absolute;
     right: 1em;
-    margin-top: 4em;
-    // display: none;
+    margin-top: -4.5em;
     background: white;
-    padding: 1em;
-    box-shadow: $shadow;
+    padding: 1em 2em;
+    box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+    @include media('>desktopLarge') {
+      margin-left: 1em;
+      margin-top: 1em;
+      display: block !important;
+      position: relative;
+      right: 0;
+    }
     .fixed-header & {
       // position: fixed;
       width: 100%;
@@ -151,9 +231,15 @@ export default {
       padding-top: 0;
     }
     p {
+      display: flex;
+      align-items: flex-end;
       @include font-size(18px);
       margin-top: 0;
+      margin-bottom: 2em;
       font-weight: 600;
+      svg {
+        margin-right: 1em;
+      }
     }
   }
   .re-progress {
@@ -177,7 +263,6 @@ export default {
     margin-bottom: 1em;
   }
   .info {
-    @include font-size(13px);
     position: relative;
     display: flex;
     margin-bottom: 0.7em;
@@ -237,7 +322,6 @@ export default {
   .progress {
     float: right;
     line-height: 0.8em;
-    @include font-size(13px);
     font-weight: bold;
   }
 }

@@ -9,8 +9,7 @@
       v-for="(entity, index) in filteredEntities.slice(0, entitiesNumber)"
       :key="index"
       class="entity"
-      :class="[
-        'color_' + entities.indexOf(entity),
+      :class="[`color_${entity.colorId}`,
         activeEntity === entity.text ? 'active' : '',
         annotationMode ? 'non-selectable--show-sort-code' : 'non-selectable',
       ]"
@@ -122,6 +121,8 @@ export default {
 <style lang="scss" scoped>
 .entities {
   &__container {
+    margin-bottom: 1em;
+    padding: 0 4em;
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
@@ -135,7 +136,7 @@ export default {
 }
 .entity {
   padding: 0.3em;
-  margin: 1em 0.5em 0 0.5em;
+  margin: 1em 1em 0 0;
   position: relative;
   display: inline-block;
   cursor: pointer;
@@ -172,7 +173,6 @@ export default {
       position: relative;
       display: inline-block;
       .re-button {
-        @include font-size(13px);
         margin-left: auto;
         margin-right: 1em;
         margin-bottom: 0.5em;

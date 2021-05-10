@@ -1,13 +1,13 @@
 // Color map
 //-----------
-$palettes-neutral: ( white: ( base: #ffffff, ), black: ( base: #000000, ), grey: ( highlighted: #eff0f2, verylight: #d8d8d8, lines: #ebebeb, bg:#f5f5f6, light: #eaeaec, smooth: #d8d8d8, base: #9b9b9b, medium: #686a6d, dark: #4a4a4a, ), red: ( base: #ff1e5e, light: #ef6b7a, dark: #a70f3a, ), blue: ( verylight: #f5fcff, light: #F4F8FF, smooth: #E9F1FD, base: #6cc6f1, 200: #009fda, 300: #334e70, 400: #00224c, ), yellow: ( base: #fff8a2, light: #949494, dark: #1d1d1d, ), orange: ( base: #F48E5F, light: #FFB593 ), green: ( base: #2baba6, border: #8acbcd, extra-light: #fafcfc, light: #f5f9f9, highlight: #60a019, highlight-light: #f2fad5, medium: #64b09f, dark: #234240, ), purple: ( verylight: #F0E7FF, light: #9f7ae2, base: #6a29e2, medium: #49008c, normal: #8777d9, standard: #6c658f, dark: #1d1d1d, disabled: #a956f5, 100: #bab2e5, 200: #5e51a5, 300: #4a407f, ), garnet: ( base: #7c3c4e, ), lile: ( dark: #8777d9, base: #e8cfea, ), );
+$palettes-neutral: ( white: ( base: #ffffff, ), black: ( base: #000000, ), grey: ( highlighted: #eff0f2, verylight: #d8d8d8, lines: #ebebeb, bg:#f5f5f6, light: #F2F3F7, smooth: #E9EAED, base: #9b9b9b, medium: #686a6d, dark: #4a4a4a, ), red: ( base: #ff1e5e, light: #ef6b7a, dark: #a70f3a, ), blue: ( verylight: #f5fcff, light: #F4F8FF, smooth: #E9F1FD, base: #6cc6f1, 200: #009fda, 300: #334e70, 400: #00224c, ), yellow: ( base: #fff8a2, light: #949494, dark: #1d1d1d, ), orange: ( base: #F48E5F, light: #FFB593 ), green: ( base: #60A018, border: #8acbcd, extra-light: #fafcfc, light: #f5f9f9, highlight: #60a019, highlight-light: #f2fad5, medium: #64b09f, dark: #234240, ), purple: ( verylight: #F0E7FF, light: #9f7ae2, base: #6a29e2, medium: #49008c, normal: #8777d9, standard: #6c658f, dark: #1d1d1d, disabled: #a956f5, 100: #bab2e5, 200: #5e51a5, 300: #4a407f, ), garnet: ( base: #7c3c4e, ), lile: ( dark: #8777d9, base: #e8cfea, ), );
 $transparent: rgba(palette(white), 0);
 // Colours
 //-----------
-$primary-color: palette(orange);
+$primary-color: #0508D9;
 $primary-lighten-color: lighten($primary-color, 10%);
 $primary-darken-color: darken($primary-color, 10%);
-$secondary-color: palette(purple);
+$secondary-color: #4C4EA3;
 $secondary-lighter-color: palette(purple, verylight);
 $secondary-lighten-color: lighten($secondary-color, 10%);
 $secondary-darken-color: darken($secondary-color, 10%);
@@ -24,7 +24,7 @@ $warning: palette(orange);
 $success: palette(green);
 $info: palette(grey, smooth);
 $callout: #f1f0f0;
-$bg: palette(grey, bg);
+$bg: palette(grey, light);
 
 // Lines
 //-----------
@@ -43,10 +43,10 @@ $ff: 'Open Sans',
 'Helvetica',
 'Arial',
 sans-serif;
-$sff: 'Montserrat',
-'Helvetica',
-'Arial',
-sans-serif;
+$s-font-bold: 'Futura Bold';
+$s-font-light: 'Futura Light';
+$s-font-medium: 'Futura Medium';
+$s-font-medium-condensed: 'Futura Medium Condensed';
 $tff: 'Bitter',
 'Helvetica',
 'Arial',
@@ -55,10 +55,12 @@ $ff-semibold: 700;
 $ff-bold: 900;
 $ff-light: 300;
 $ff-thin: 100;
-$base-font-size: 13px;
+$base-font-size: 14px;
 $base-line-height: 1.4em;
 $font-dark-color: palette(grey, dark);
 $font-medium-color: palette(grey, medium);
+$font-secondary: #4C4EA3;
+$font-secondary-dark: #353664;
 
 // Easing
 //-----------
@@ -104,8 +106,8 @@ $shadow-200: 1px 2px 5px 2px rgba(0, 0, 0, 0.15);
 $input-size: 40px;
 // Buttons
 //-----------
-$button-width: 150px;
-$button-height: 40px;
+$button-width: 100px;
+$button-height: 30px;
 $button-radius: 3px;
 $button-fab-size: 56px;
 $button-fab-size-mini: 40px;

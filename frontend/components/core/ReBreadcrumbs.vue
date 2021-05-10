@@ -30,22 +30,19 @@ export default {
   display: inline-block;
   list-style: none;
   padding-left: 0;
+  font-family: $s-font-medium;
+  font-weight: normal;
   &__item {
     margin: auto 0.5em auto auto;
-    color: $primary-color;
+    color: $lighter-color;
     text-decoration: none;
     outline: none;
     &:not(:last-child):after {
       content: "/";
       margin-left: 0.5em;
     }
-    &:hover,
-    &:focus {
-      transition: $swift-ease-in-out;
-      color: $primary-darken-color;
-    }
     &:last-child {
-      font-weight: bold;
+      font-family: $s-font-bold;
     }
   }
 }

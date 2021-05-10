@@ -4,9 +4,14 @@
       <div class="container">
         <div class="filters__row">
           <HeaderTitle v-if="dataset.results.records" :dataset="dataset" />
-          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
+          <ReSwitch
+            class="filters__switch"
+            v-model="annotationMode"
+            @change="$emit('onChangeMode')"
+          >Annotation Mode</ReSwitch>
         </div>
         <div class="filters__row">
+          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
           <FiltersList
             :dataset="dataset"
             @applyFilter="onApplyFilter"
@@ -18,14 +23,14 @@
             @sort="onSort"
           /> -->
         </div>
+        <FiltersTags
+          :dataset="dataset"
+          @clearFilter="onClearFilter"
+          @clearMetaFilter="onClearMetaFilter"
+          @clearAll="onClearAllFilters"
+        />
       </div>
     </div>
-    <FiltersTags
-      :dataset="dataset"
-      @clearFilter="onClearFilter"
-      @clearMetaFilter="onClearMetaFilter"
-      @clearAll="onClearAllFilters"
-    />
   </div>
 </template>
 
@@ -37,8 +42,12 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    annotationEnabled: {
+      type: Boolean,
+    },
   },
   data: () => ({
+    annotationMode: false,
     sortable: {
       type: Boolean,
       default: false,
@@ -51,6 +60,9 @@ export default {
       { filter: "confidence", text: "Confidence", range: ["0", "1"] },
     ],
   }),
+  mounted() {
+    this.annotationMode = this.$route.query.allowAnnotation === "true" ? true : false;
+  },
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
@@ -108,6 +120,7 @@ export default {
   @extend %container;
   padding-top: 0;
   padding-bottom: 0;
+  margin-left: 0;
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;
@@ -138,9 +151,7 @@ export default {
     align-items: center;
   }
   &__content {
-    background: $lighter-color;
     padding: 1em 0 0.5em 0;
-    border-bottom: 1px solid $line-smooth-color;
     position: relative;
     z-index: 2;
   }
@@ -148,10 +159,10 @@ export default {
     margin-top: 1em;
     margin-right: 0;
     margin-left: auto;
+    @include font-size(13px);
   }
   &__searchbar {
-    margin-left: 3em;
-    margin-right: 0;
+    margin-right: 10px;
     .fixed-header & {
       transition: position 0.5s ease 2s;
       pointer-events: none;
@@ -160,13 +171,9 @@ export default {
       left: 0;
       top: 0;
       height: 42px;
-      max-width: 1200px;
       margin-left: auto;
       margin-right: auto;
-      padding-right: 3em;
-      @include media(">xxl") {
-        max-width: 1600px;
-      }
+      padding-right: 4em;
     }
   }
   &--disabled {

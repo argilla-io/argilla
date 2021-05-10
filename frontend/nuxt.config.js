@@ -92,7 +92,7 @@ export default {
     scss: "./assets/scss/abstract.scss",
   },
 
-  loading: { color: "#F48E5F", throttle: 100 },
+  loading: { color: "#0508D9", throttle: 100 },
 
   auth: {
     strategies: {

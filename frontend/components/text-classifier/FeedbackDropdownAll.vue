@@ -64,7 +64,6 @@
         </div>
       </template>
     </FilterDropdown>
-    <div class="overlay" v-if="visible"></div>
   </div>
 </template>
 <script>
@@ -141,13 +140,6 @@ export default {
       }
     },
   },
-  updated() {
-    if (this.visible) {
-      document.body.classList.add('--fixed');
-    } else {
-      document.body.classList.remove('--fixed');
-    }
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -162,7 +154,7 @@ export default {
       align-content: center;
       input {
         @include input-placeholder {
-          color: palette(grey);
+          color: $font-secondary;
         }
       }
       .svg-icon {
@@ -195,16 +187,5 @@ export default {
   ::v-deep .dropdown__content {
     transform: translate 0;
   }
-}
-.overlay {
-  background: rgba(0, 0, 0, 0.19);
-  height: 140vh;
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
 }
 </style>

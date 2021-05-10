@@ -98,17 +98,6 @@ input:-webkit-autofill {
 }
 
 .re-input-container {
-  // label {
-  //     position: absolute;
-  //     top: 23px;
-  //     left: 15px;
-  //     pointer-events: none;
-  //     transition: $swift-ease-out;
-  //     transition-duration: .3s;
-  //     color: rgba(#000, .54);
-  //     font-size: 16px;
-  //     line-height: 20px;
-  // }
   input,
   textarea {
     width: 100%;
@@ -120,8 +109,11 @@ input:-webkit-autofill {
     background: none;
     transition: $swift-ease-out;
     transition-property: font-size;
-    color: $font-dark-color;
+    color: $font-secondary;
     line-height: normal;
+    @include input-placeholder {
+      color: $font-secondary;
+    }
     &:focus {
       outline: none;
     }

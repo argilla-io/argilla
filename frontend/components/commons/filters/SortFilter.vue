@@ -37,7 +37,6 @@
         </ul>
       </div>
     </FilterDropdown>
-    <div v-if="visible" class="overlay" />
   </div>
 </template>
 
@@ -73,14 +72,6 @@ export default {
       return this.sortOptions[key] || this.sortOptions[0];
     },
   },
-  updated() {
-    if (this.visible) {
-      document.body.classList.add("--fixed");
-    } else {
-      document.body.classList.remove("--fixed");
-    }
-  },
-
   methods: {
     onVisibility(value) {
       this.visible = value;

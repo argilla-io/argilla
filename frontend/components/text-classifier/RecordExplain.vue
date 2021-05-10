@@ -160,7 +160,6 @@ export default {
     visibility: hidden;
     overflow: hidden;
     pointer-events: none;
-    @include font-size(13px);
     font-weight: lighter;
     border-radius: 3px;
     word-break: normal;

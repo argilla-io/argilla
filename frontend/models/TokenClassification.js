@@ -80,15 +80,24 @@ class TokenClassificationDataset extends ObservationDataset {
           .concat(Object.keys(aggregations.predicted_as))
       ),
     ];
-    names.sort();
+    names.sort()
     return names.map((name) => {
       let shortcut = name.slice(0, 1).toUpperCase();
       const availableChars = characters.filter((c) => !usedChars.includes(c));
       if (availableChars.indexOf(shortcut) === -1) {
         [shortcut] = availableChars;
       }
+      function colorId(name) {
+        const firstLetter = name.slice(0,1);;
+        const lastLetter = name.slice(-1);
+        const asciiCode = firstLetter.charCodeAt(0) + lastLetter.charCodeAt(0);
+        const nameLength = name.length < 30 ? name.length : Math.round(name.length / 3);
+        const random = Math.round((asciiCode - nameLength) / 10) + nameLength;
+        return random
+      }
       usedChars.push(shortcut);
       return {
+        colorId: colorId(name),
         text: name,
         shortCut: shortcut,
       };

@@ -151,7 +151,6 @@ export default {
   width: auto;
   height: 42px;
   line-height: 42px;
-  @include font-size(13px);
   padding-left: 0.5em;
   font-weight: 600;
 }
@@ -181,7 +180,7 @@ export default {
   }
   &.active ::v-deep {
     .dropdown__header {
-      background: $success;
+      background: $secondary-color;
       border: 0;
       margin: auto auto 20px auto;
       border: 1px solid $line-light-color;

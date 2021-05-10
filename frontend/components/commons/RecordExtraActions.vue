@@ -76,9 +76,11 @@ export default {
 .record {
   &__extra-actions {
     line-height: 1;
+    text-align: left;
+    color: $primary-color;
+    margin-top: 1em;
+    margin-bottom: 1em;
     @include font-size(13px);
-    text-align: right;
-    margin-right: -2em;
     .annotate {
       color: $success;
     }

@@ -1,30 +1,34 @@
 <template>
   <div class="record">
     <!-- annotation labels and prediction status -->
-    <LabelPill
-      v-if="record.annotation && !annotationEnabled"
-      class="annotations"
-      :labels="record.annotation.labels"
-      :predicted="record.predicted"
-    />
-    <!-- record text -->
-    <RecordInputs :predicted="record.predicted" :data="record.inputs" :explanation="record.explanation" :query-text="dataset.query.text" />
-    <!-- record annotation area -->
-    <ClassifierAnnotationArea
-      v-if="annotationEnabled"
-      :labels="labelsForAnnotation"
-      :multi-label="record.multi_label"
-      @annotate="onAnnotate"
-      @updateStatus="onChangeRecordStatus"
-    />
-    <ClassifierExplorationArea v-else :labels="predictionLabels" />
-    <RecordExtraActions
-      :allow-validate="false"
-      :annotation-mode="annotationEnabled"
-      :record="record"
-      @onChangeRecordStatus="onChangeRecordStatus"
-      @onShowMetadata="$emit('onShowMetadata')"
-    />
+    <div class="record--left">
+      <!-- record text -->
+      <RecordInputs :predicted="record.predicted" :data="record.inputs" :explanation="record.explanation" :query-text="dataset.query.text" />
+      <!-- record annotation area -->
+      <ClassifierAnnotationArea
+        v-if="annotationEnabled"
+        :labels="labelsForAnnotation"
+        :multi-label="record.multi_label"
+        @annotate="onAnnotate"
+        @updateStatus="onChangeRecordStatus"
+      />
+      <ClassifierExplorationArea v-else :labels="predictionLabels" />
+      <RecordExtraActions
+        :allow-validate="false"
+        :annotation-mode="annotationEnabled"
+        :record="record"
+        @onChangeRecordStatus="onChangeRecordStatus"
+        @onShowMetadata="$emit('onShowMetadata')"
+      />
+    </div>
+    <div class="record__labels" v-if="!annotationEnabled">
+      <LabelPill
+        v-if="record.annotation && !annotationEnabled"
+        class="annotations"
+        :labels="record.annotation.labels"
+        :predicted="record.predicted"
+      />
+    </div>
   </div>
 </template>
 <script>
@@ -147,3 +151,20 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.record {
+  display: flex;
+  &--left {
+    width: 100%;
+  }
+  &__labels {
+    position: relative;
+    border-left: 1px solid palette(grey, bg);
+    margin-left: 2em;
+    width: 150px;
+    flex-shrink: 0;
+  }
+}
+</style>
+

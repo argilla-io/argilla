@@ -62,11 +62,7 @@
 
 %container {
     margin: 0 auto;
-    max-width: 1200px;
-    padding: 3em;
-    @include media('>xxl') {
-        max-width: 1600px;
-    }
+    padding: 4em;
 }
 
 // buttons
@@ -88,7 +84,6 @@
   @include font-size(13px);
   font-style: inherit;
   font-variant: inherit;
-  text-transform: uppercase;
   letter-spacing: inherit;
   font-weight: 600;
   line-height: $button-height;
@@ -138,10 +133,7 @@
   @include font-size(13px);
   border: 1px solid $line-light-color;
   position: absolute;
-  top: -35px;
-  right: 50%;
   margin: auto;
-  left: auto;
   transform: translateX(50%);
   max-width: 266px;
   overflow-wrap: break-word;
@@ -149,17 +141,27 @@
   z-index: 2;
   white-space: nowrap;
 }
+%tooltip--top {
+  &:after {
+    top: -35px;
+    right: 50%;
+    left: auto;
+  }
+}
+%tooltip--left {
+  &:after {
+    right: 60px;
+    top: auto;
+  }
+}
 %tooltip-colored {
   padding: 0.2em 0.5em;
-  color: $lighter-color;
-  background: lighten($primary-color, 10%);
+  color: $primary-color;
+  background: palette(grey, bg);
   font-family: $ff;
   @include font-size(13px);
   position: absolute;
-  top: -35px;
-  right: 50%;
   margin: auto;
-  left: auto;
   transform: translateX(50%);
   max-width: 266px;
   overflow-wrap: break-word;
