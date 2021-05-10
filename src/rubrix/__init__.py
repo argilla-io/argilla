@@ -131,6 +131,7 @@ def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
 
     Returns
     -------
+        A list with all DatasetSnapshot associated to the given dataset
 
     """
     return _client_instance().snapshots(dataset)
@@ -143,7 +144,7 @@ def load(
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
-    Load datase/snapshot data as a huggingface dataset
+    Load dataset/snapshot data as a huggingface dataset
 
     Parameters
     ----------
