@@ -120,21 +120,21 @@ def _client_instance() -> RubrixClient:
     return _client
 
 
-def snapshots(dataset: str) -> List[models.DatasetSnapshot]:
+def snapshots(name: str) -> List[models.DatasetSnapshot]:
     """
     Retrieve dataset snapshots
 
     Parameters
     ----------
-    dataset:
-        The dataset name
+    name:
+        The dataset name whose snapshots will be retrieved
 
     Returns
     -------
         A list with all DatasetSnapshot associated to the given dataset
 
     """
-    return _client_instance().snapshots(dataset)
+    return _client_instance().snapshots(name)
 
 
 def load(
