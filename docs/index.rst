@@ -17,10 +17,21 @@ Indices and tables
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
+   :caption: Getting Started
+   :hidden:
+
+   documentation/getting_started/introduction
+   documentation/getting_started/setup&installation
+   documentation/getting_started/concepts
+
+   
+   
+.. toctree::
+   :maxdepth: 3
    :caption: Tutorials
    :hidden:
 
-   tutorials/01-huggingface
-   tutorials/02.spacy
-   tutorials/03-kglab_pytorch_geometric
+   documentation/tutorials/01-huggingface
+   documentation/tutorials/02.spacy
+   documentation/tutorials/03-kglab_pytorch_geometric
