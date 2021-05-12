@@ -157,6 +157,10 @@ export default {
   display: flex;
   &--left {
     width: 100%;
+    padding: 2em 2em 0.5em 2em;
+    .list__item--annotation-mode & {
+      padding-left: 4em;
+    }
   }
   &__labels {
     position: relative;

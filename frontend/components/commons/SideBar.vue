@@ -1,40 +1,41 @@
 <template>
-  <aside class="sidebar">
+  <aside :class="['sidebar', annotationIsEnabled ? 'annotation' : 'explore']">
     <p v-if="!visible" class="sidebar__show-button" @click="toggleVisibleMetrics">
       <svgicon name="metrics" width="30" height="30" color="#4C4EA3" />
     </p>
     <div v-if="annotationsProgress" v-show="visible" class="sidebar__wrapper">
       <div class="sidebar__content">
-        <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> Annotation</p>
+        <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> {{ getTitle }}</p>
         <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
-        <span class="progress progress--percent">{{ progress }}%</span>
+        <span v-if="annotationIsEnabled" class="progress progress--percent">{{ progress }}%</span>
         <ReProgress
+          v-if="annotationIsEnabled"
           re-mode="determinate"
           :multiple="true"
           :progress="(totalValidated * 100) / total"
           :progress-secondary="(totalDiscarded * 100) / total"
         ></ReProgress>
         <div class="scroll">
-          <div class="info">
+          <div v-if="annotationIsEnabled" class="info">
             <label>All</label>
             <span class="records-number">
               <strong>{{ total }}</strong>
             </span>
           </div>
-          <div class="info">
+          <div v-if="annotationIsEnabled" class="info">
             <label>Validated</label>
             <span class="records-number">
               <strong>{{ totalValidated }}</strong>
             </span>
           </div>
-          <div class="info">
+          <div v-if="annotationIsEnabled" class="info">
             <label>Discarded</label>
             <span class="records-number">
               <strong>{{ totalDiscarded }}</strong>
             </span>
           </div>
           <div
-            v-for="(counter, label) in annotationsProgress.annotatedAs"
+            v-for="(counter, label) in getInfo"
             :key="label"
           >
             <div v-if="counter > 0" class="info">
@@ -44,42 +45,60 @@
           </div>
         </div>
       </div>
-      <ReButton
+      <ReButton v-if="annotationIsEnabled"
         class="button-clear button-action global-actions__export"
         @click="onOpenExportModal()"
       >
         <svgicon name="export" width="14" height="14" color="#0508D9" />Export
         annotations
       </ReButton>
+      <ReModal
+        v-if="annotationIsEnabled"
+        :modal-custom="true"
+        :prevent-body-scroll="true"
+        modal-class="modal-primary"
+        :modal-visible="openExportModal"
+        modal-position="modal-center"
+        @close-modal="closeModal()"
+      >
+        <p class="modal__title">Confirm export of annotations</p>
+        <p class="modal__text">
+          You are about to export {{ annotationsSum }} annotations. You will find
+          the file on the server once the action is completed.
+        </p>
+        <div class="modal-buttons">
+          <ReButton
+            class="button-tertiary--small button-tertiary--outline"
+            @click="closeModal()"
+          >
+            Cancel
+          </ReButton>
+          <ReButton
+            class="button-secondary--small"
+            @click="onExportAnnotations()"
+          >
+            Confirm export
+          </ReButton>
+        </div>
+      </ReModal>
     </div>
-    <ReModal
-      :modal-custom="true"
-      :prevent-body-scroll="true"
-      modal-class="modal-primary"
-      :modal-visible="openExportModal"
-      modal-position="modal-center"
-      @close-modal="closeModal()"
-    >
-      <p class="modal__title">Confirm export of annotations</p>
-      <p class="modal__text">
-        You are about to export {{ annotationsSum }} annotations. You will find
-        the file on the server once the action is completed.
-      </p>
-      <div class="modal-buttons">
-        <ReButton
-          class="button-tertiary--small button-tertiary--outline"
-          @click="closeModal()"
-        >
-          Cancel
-        </ReButton>
-        <ReButton
-          class="button-secondary--small"
-          @click="onExportAnnotations()"
-        >
-          Confirm export
-        </ReButton>
+    <!-- <div v-else-if="dataset.results.aggregations.words" class="sidebar__wrapper">
+      <div class="sidebar__content">
+        <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> Keywords</p>
+        <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
+        <div class="scroll">
+          <div
+            v-for="(counter, label) in dataset.results.aggregations.words"
+            :key="label"
+          >
+            <div v-if="counter > 0" class="info">
+              <label>{{ label }}</label>
+              <span class="records-number">{{ counter }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </ReModal>
+    </div> -->
   </aside>
 </template>
 <script>
@@ -114,6 +133,12 @@ export default {
     annotationsProgress() {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
+    getInfo() {
+      return this.annotationIsEnabled ? this.annotationsProgress.annotatedAs : this.dataset.results.aggregations.words;
+    },
+    getTitle() {
+      return this.annotationIsEnabled ? 'Annotation' : 'Keywords';
+    },
     totalValidated() {
       return this.annotationsProgress.validated;
     },
@@ -135,6 +160,9 @@ export default {
         (this.totalDiscarded || 0)) * 100 / this.total
       ).toFixed(2);
     },
+    annotationIsEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
+    }
   },
 
   watch: {
@@ -168,7 +196,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  z-index: 1;
+  z-index: 2;
   &__show-button {
     position: absolute;
     right: 0;
@@ -179,7 +207,12 @@ export default {
     border-bottom-left-radius: 6px;
     cursor: pointer;
     text-align: right;
-    margin-top: -4.5em;
+    .annotation & {
+      margin-top: -4.5em;
+    }
+    .explore & {
+      margin-top: 1em;
+    }
     .fixed-header & {
       margin-top: 0;
     }
@@ -201,10 +234,15 @@ export default {
     min-width: 280px;
     position: absolute;
     right: 1em;
-    margin-top: -4.5em;
     background: white;
     padding: 1em 2em;
     box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+    .annotation & {
+      margin-top: -4.5em;
+    }
+    .explore & {
+      margin-top: 1em;
+    }
     @include media('>desktopLarge') {
       margin-left: 1em;
       margin-top: 1em;

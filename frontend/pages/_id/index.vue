@@ -23,7 +23,7 @@
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset" :headerHeight="headerHeight"> </Results>
-        <SideBar v-if="annotationEnabled" :dataset="dataset" />
+        <SideBar :dataset="dataset" />
       </div>
     </div>
   </div>

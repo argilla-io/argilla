@@ -45,7 +45,7 @@
               </span>
               <div v-if="visibleActions" class="table-info__actions">
                 <ReButton v-for="action in filterActions" :key="action.index" :data-title="action.tooltip" class="--hasTooltip-colored table-info__actions__button button-icon" :class="action.class" @click="onActionClicked(action.name, item.name)">
-                  <svgicon v-if="action.icon !== undefined" :name="action.icon" width="20" height="18" />
+                  <svgicon v-if="action.icon !== undefined" :name="action.icon" width="26" height="20" />
                 </ReButton>
               </div>
               <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="showModal === item.name" modal-position="modal-center" @close-modal="$emit('close-modal')">
@@ -292,7 +292,7 @@ export default {
     margin: 0;
   }
   li {
-    &:nth-child(odd) {
+    &:hover, &:focus {
       background: #fcfcfc;
     }
   }
@@ -390,20 +390,9 @@ export default {
   &__actions {
     position: absolute;
     right: 2em;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    &:after {
-      content: '';
-      width: 20px;
-      height: 1px;
-      background: $line-light-color;
-      position: absolute;
-      top: 50%;
-    }
     &__button {
       position: relative;
-      margin: auto !important;
+      margin-left: 1em;
       padding: 0 !important;
       .svg-icon {
         fill: $primary-color;
@@ -457,6 +446,8 @@ export default {
       border-radius: 10px;
       margin-right: 0.5em;
       margin-top: 0;
+      float: left;
+      clear: both;
     }
   }
   .dataSource {
