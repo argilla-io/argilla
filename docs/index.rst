@@ -90,15 +90,13 @@ Text classification deals with predicting in which categories a text fits. As if
    :target: images/showdown.png
    :alt: images/showdown.png
 
-
 Next steps
 ----------
 
 [here we describe the docs structure with links to subsections: what and who are they for]
 
-
-* **Setup and installation**
-* **Concepts**
+* :ref:`setup-and-installation`
+* :ref:`concepts`
 * **Tutorials**
 * **Guides**
 * **Reference**
