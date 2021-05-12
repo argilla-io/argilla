@@ -216,11 +216,14 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 0 0 0 0;
+  padding: 2em 2em 0.5em 2em;
   display: block;
   margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
+  .list__item--annotation-mode & {
+    padding-left: 4em;
+  }
 }
 </style>

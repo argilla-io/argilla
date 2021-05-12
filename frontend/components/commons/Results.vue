@@ -208,7 +208,7 @@ export default {
 .show-record-number {
   position: fixed;
   overflow: scroll;
-  top: 5em;
+  top: 7em;
   right: 1em;
   background: $lighter-color;
   border-radius: 10px;
@@ -271,13 +271,13 @@ export default {
 }
 
 .list__item {
-  padding-left: 3em;
-  padding-right: 3em;
-  padding-bottom: 1em;
-  margin-left: 0;
-  padding-top: 2.2em;
+  // padding-left: 3em;
+  // padding-right: 3em;
+  // padding-bottom: 1em;
+  // margin-left: 0;
+  // padding-top: 2.2em;
   &--annotation-mode {
-    padding-left: 4em;
+    // padding-left: 4em;
     @extend .list__item;
   }
   &__checkbox.re-checkbox {

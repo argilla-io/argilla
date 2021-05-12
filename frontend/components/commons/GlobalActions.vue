@@ -168,6 +168,7 @@ export default {
   .fixed-header & {
     margin-top: 0;
     padding-top: 0;
+    padding-bottom: 0;
     background: $bg;
     border: none;
     min-height: 70px;
