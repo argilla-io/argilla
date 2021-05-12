@@ -111,7 +111,7 @@ Next steps
    :caption: Getting Started
    :hidden:
 
-   index.rst
+   self
    getting_started/setup&installation
    getting_started/concepts
 
