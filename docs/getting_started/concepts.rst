@@ -36,16 +36,18 @@ Text classification record
 
 Text classification deals with predicting in which categories a text fits. As if you're shown an image you could quickly tell if there's a dog or a cat in it, we build NLP models to distinguish between a Jane Austen's novel or a Charlotte Bronte's poem. It's all about feeding models with labeled examples and see how it start predicting over the very same labels.
 
+Let's see examples over a spam classifier.
+
 .. code-block:: python
 
     record = rb.TextClassificationRecord(
         inputs={
-            "text": "your input text"
+            "text": "Access this link to get free discounts!"
         },
-        prediction = [('label1', 0.8), ('label2', 0.2)]
+        prediction = [('SPAM', 0.8), ('HAM', 0.2)]
         prediction_agent = "link or reference to agent",
 
-        annotation = "label",
+        annotation = "SPAM",
         annotation_agent= "link or reference to annotator",
 
         metadata={  # Information about this record
@@ -63,15 +65,15 @@ Another similar task to Text Classification, but yet a bit different, is Multila
 
    record = rb.TextClassificationRecord(
         inputs={
-            "text": "your input text"
+            "text": "I can't wait to travel to Egypts and visit the pyramids"
         },
         multi_label = True,
 
-        prediction = [('label1', 0.8), ('label2', 0.2)],
+        prediction = [('travel', 0.8), ('history', 0.6), ('economy', 0.3), ('sports', 0.2)],
         prediction_agent = "link or reference to agent",
 
         # When annotated, scores are suppoused to be 1
-        annotation = [label for label in labels],   # list of all annotated labels,
+        annotation = ['travel', 'history'],   # list of all annotated labels,
         annotation_agent= "link or reference to annotator",
 
         metadata={  # Information about this record
@@ -89,15 +91,15 @@ Token classification kind-of-tasks are NLP tasks aimed to divide the input text 
 .. code-block:: python
 
     record = rb.TokenClassificationRecord(
-        text = "your input text",
+        text = "Michael is a professor at Harvard",
         tokens = token_list,
 
         # Predictions are a list of tuples with all your token labels and its starting and ending positions
-        prediction = [(label, start_position, end_position)],
+        prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
         prediction_agent = "link or reference to agent",
 
         # Annotations are a list of tuples with all your token labels and its starting and ending positions
-        annotation = [(label, start_position, end_position)],
+        annotation = [('NAME', 0, 7), ('ORG', 26, 33)],
         annotation_agent = "link or reference to annotator",
 
         metadata={  # Information about this record
