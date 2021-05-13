@@ -22,7 +22,7 @@ With Rubrix, you can:
 
 Rubrix is designed to enable novel, human-in-the loop workflows involving data scientists, subject matter experts and data engineers for curating, understanding and evolving data for AI projects.
 
-We've tried to Rubrix easy, fun and seamless to use with your favourite libraries  while keeping it scalable and flexible. Rubrix's main components are:
+We've tried to make Rubrix easy, fun and seamless to use with your favourite libraries while keeping it scalable and flexible. Rubrix's main components are:
 
 
 * a **Python library**  you can install with ``pip`` to interact with your data and models,
