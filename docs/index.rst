@@ -86,22 +86,23 @@ Text classification deals with predicting in which categories a text fits. As if
 [here we will include a short video, or gif]
 
 
-.. image:: images/showdown.png
-   :target: images/showdown.png
-   :alt: images/showdown.png
-
 Next steps
 ----------
 
-[here we describe the docs structure with links to subsections: what and who are they for]
+The documentation is divided in different categories, which explore each aspect and use case of Rubrix. Here you have quick links to each one:
 
 * :ref:`setup-and-installation`
 * :ref:`concepts`
 * **Tutorials**
 * **Guides**
 * **Reference**
-* **Community**
 
+Community
+---------
+You can join the conversation on our Github page and our Github forum.
+
+* `Github page <https://github.com/recognai/rubrix>`
+* `Github forum <https://github.com/recognai/rubrix/discussions>`
 
 
 .. toctree::
