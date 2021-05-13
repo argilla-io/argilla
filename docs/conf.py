@@ -32,7 +32,6 @@ release = "0.0.1"
 # ones.
 extensions = [
     "nbsphinx",
-    "sphinxcontrib.video",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

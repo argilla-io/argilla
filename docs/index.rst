@@ -83,7 +83,10 @@ Text classification deals with predicting in which categories a text fits. As if
 
        rb.log(item, name="ag_news_zeroshot")
 
-[here we will include a short video, or gif]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
+
 
 
 Next steps
