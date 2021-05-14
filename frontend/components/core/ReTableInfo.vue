@@ -355,7 +355,7 @@ export default {
     display: flex;
     width: 100%;
     border-bottom: 1px solid $line-light-color;
-    align-items: center;
+    align-items:flex-start;
     text-decoration: none;
     outline: none;
     min-height: 5.4em;

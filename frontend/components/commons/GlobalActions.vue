@@ -173,10 +173,9 @@ export default {
     border: none;
     min-height: 70px;
   }
-  // @include media(">desktopLarge") {
-  //   padding-left: 4em;
-  //   padding-right: 4em;
-  // }
+  @include media(">desktopLarge") {
+    width: calc(100% - 294px);
+  }
   .re-checkbox {
     position: relative;
     left: 0;

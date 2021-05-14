@@ -166,7 +166,7 @@ export default {
     position: relative;
     border-left: 1px solid palette(grey, bg);
     margin-left: 2em;
-    width: 150px;
+    width: 170px;
     flex-shrink: 0;
   }
 }

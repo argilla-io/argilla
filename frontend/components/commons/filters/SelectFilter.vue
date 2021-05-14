@@ -8,7 +8,7 @@
           <p v-else v-for="appliedFilter in appliedFilters" :key="appliedFilter">{{ appliedFilter }}</p>
         </span>
         <span v-else>
-          Select...
+          {{filter.placeholder}}
         </span>
       </span>
       <div slot="dropdown-content">
