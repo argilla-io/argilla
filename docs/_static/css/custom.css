@@ -1,0 +1,205 @@
+/** css/custom.css **/
+
+:root {
+  --primaryColor: #0508D9;
+  --sidebarBackground: #FFFFFF;
+  --sidebarBackgroundDark: #fcfcfc;
+  --sidebarBackgroundDarker: #F2F3F7;
+  --sidebarColor: #404040;
+  --sidebarTitleColor: #404040;;
+  --white: #ffffff;
+}
+/* This line is theme specific - it includes the base theme CSS */
+@import '../theme.css';  /* for Alabaster */
+/*@import 'theme.css';       /* for the Read the Docs theme */
+
+.wy-nav-side {
+  background: var(--sidebarBackground)
+}
+.wy-side-nav-search {
+  background: none
+}
+.wy-nav-content-wrap {
+  background: var(--sidebarBackgroundDark)
+}
+@media screen and (min-width: 1100px) {
+  .wy-nav-content {
+    background: #ffffff
+  }
+}
+.rst-content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
+  font-family: 'Futura Bold';
+}
+.wy-menu-vertical li.toctree-l1.current>a {
+  border: none;
+}
+.wy-menu-vertical li.current>a, .wy-menu-vertical li.on a {
+  color: var(--sidebarColor);
+}
+.wy-menu-vertical a:hover {
+  background: var(--sidebarBackgroundDark);
+  color: var(--sidebarColor);
+}
+.wy-menu-vertical li.current {
+  background: var(--sidebarBackgroundDark)
+}
+.wy-menu-vertical li.current a {
+  border: none;
+}
+.wy-menu-vertical li.toctree-l2.current>a, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a {
+  background: #d3d3d4
+}
+.wy-menu-vertical li.toctree-l2 a, .wy-menu-vertical li.toctree-l3 a, .wy-menu-vertical li.toctree-l4 a, .wy-menu-vertical li.toctree-l5 a, .wy-menu-vertical li.toctree-l6 a, .wy-menu-vertical li.toctree-l7 a, .wy-menu-vertical li.toctree-l8 a, .wy-menu-vertical li.toctree-l9 a, .wy-menu-vertical li.toctree-l10 a {
+  color: var(--sidebarColor);
+}
+.wy-menu-vertical a, .wy-menu-vertical li.current>a span.toctree-expand, .wy-menu-vertical li.on a span.toctree-expand {
+  color: var(--sidebarColor);
+}
+.wy-menu-vertical li.toctree-l2.current>a, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a {
+  background: var(--sidebarBackgroundDarker)
+}
+.wy-menu-vertical li.current a:hover {
+  background: var(--sidebarBackgroundDarker)
+}
+.wy-menu-vertical li.toctree-l1.current>a {
+  background: var(--sidebarBackgroundDarker)
+}
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+  color: var(--sidebarTitleColor)
+}
+
+a {
+  color: var(--primaryColor)
+}
+a:hover {
+  color: #0709ae
+}
+.btn-neutral {
+  background: none !important;
+  box-shadow: none !important;
+}
+.btn-neutral:hover {
+  border: 1px solid rgba(0,0,0,.2);
+  background: none !important;
+}
+.btn-neutral span {
+  display: none !important;
+}
+.wy-side-nav-search input[type=text] {
+  border-radius: 3px;
+  border: 1px solid #e9eaed;
+  padding: 0 1em 0 3em;
+  outline: none;
+  background: transparent;
+  min-height: 40px;
+  min-width: 200px;
+  box-shadow: none;
+  background: url('../images/search.svg') no-repeat 10px 12px;
+}
+
+.rst-content div[class^=highlight], .rst-content pre.literal-block {
+  border: none;
+  border-radius: 5px;
+}
+.wy-side-nav-search {
+  text-align: left;
+}
+.wy-side-nav-search img {
+  max-width: 170px !important;
+}
+.wy-nav-top {
+  background: var(--primaryColor)
+}
+
+.highlight { background-color: #333346; color: white }
+.highlight .c { color: #82d6eb; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #3ef070; font-weight: bold } /* Keyword */
+.highlight .o { color: #dddcdc } /* Operator */
+.highlight .cm { color: #82d6eb; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #3ef070 } /* Comment.Preproc */
+.highlight .c1 { color: #82d6eb; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #82d6eb; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: rgb(242, 243, 167) } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: rgb(255, 222, 130) } /* Generic.Error */
+.highlight .gh { color: #c1c1e2; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #3ef070 } /* Generic.Inserted */
+.highlight .go { color: #808080 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #e2a1e2; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: rgb(153, 181, 245) } /* Generic.Traceback */
+.highlight .kc { color: #3ef070; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #3ef070; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #3ef070; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #3ef070 } /* Keyword.Pseudo */
+.highlight .kr { color: #3ef070; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #f79cc2 } /* Keyword.Type */
+.highlight .m { color: #fbffc2 } /* Literal.Number */
+.highlight .s { color: #a0c7ee } /* Literal.String */
+.highlight .na { color: #a0c7ee } /* Name.Attribute */
+.highlight .nb { color: #f089d5; } /* Name.Builtin */
+.highlight .nc { color: #48c1f5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: white; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #3ef070 } /* Name.Exception */
+.highlight .nf { color: #8aa7f0 } /* Name.Function */
+.highlight .fm { color: rgb(193, 193, 247) }
+.highlight .nl { color: #8aa7f0; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #48c1f5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #8ba2d3; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #d5abe0 } /* Name.Variable */
+.highlight .ow { color: #3ef070; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #fbffc2 } /* Literal.Number.Float */
+.highlight .mh { color: #fbffc2 } /* Literal.Number.Hex */
+.highlight .mi { color: #fbffc2 } /* Literal.Number.Integer */
+.highlight .mo { color: #fbffc2 } /* Literal.Number.Oct */
+.highlight .sb { color: #a0c7ee } /* Literal.String.Backtick */
+.highlight .sc { color: #a0c7ee } /* Literal.String.Char */
+.highlight .sd { color: #a0c7ee; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #a0c7ee } /* Literal.String.Double */
+.highlight .se { color: #a0c7ee; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #a0c7ee } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #f8b884 } /* Literal.String.Other */
+.highlight .sr { color: #4f9ff3 } /* Literal.String.Regex */
+.highlight .s1 { color: #a0c7ee } /* Literal.String.Single */
+.highlight .ss { color: #aff849 } /* Literal.String.Symbol */
+.highlight .bp { color: #3ef070 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #d5abe0 } /* Name.Variable.Class */
+.highlight .vg { color: #d5abe0 } /* Name.Variable.Global */
+.highlight .vi { color: #d5abe0 } /* Name.Variable.Instance */
+.highlight .il { color: #fbffc2 } 
+
+@font-face {
+  font-family: 'Futura Medium';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Futura'), url('fonts/futura-medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Futura Medium Condensed';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Futura Medium Condensed'), url('fonts/futura-medium-condensed.woff2') format('woff2');
+}
+  
+  
+  @font-face {
+  font-family: 'Futura Bold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Futura Bold'), url('fonts/futura-bold.woff2') format('woff2');
+  }
+  
+  
+  @font-face {
+  font-family: 'Futura Light';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Futura Light'), url('fonts/futura-light.woff2') format('woff2');
+}
