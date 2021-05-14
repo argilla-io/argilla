@@ -58,8 +58,8 @@ html_static_path = ['_static']
 nbsphinx_execute = 'never'
 
 # Theme options
-html_logo = '_build/html/_images/logo.svg'
-html_favicon = '_build/html/_images/favicon.ico'
+html_logo = '_static/images/logo.svg'
+html_favicon = '_static/images/favicon.ico'
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = [
