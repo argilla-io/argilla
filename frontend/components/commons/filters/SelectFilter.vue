@@ -93,7 +93,7 @@ export default {
       }
       let filtered = Object.fromEntries(
         Object.entries(options).filter(([id, value]) =>
-          id.match(text.toLowerCase())
+          id.toLowerCase().match(text.toLowerCase())
         )
       );
       return filtered;
