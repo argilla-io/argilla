@@ -230,7 +230,7 @@ export default {
   }
   &__wrapper {
     border-radius: 5px;
-    min-width: 280px;
+    width: 280px;
     position: absolute;
     right: 1em;
     background: white;
