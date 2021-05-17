@@ -74,7 +74,7 @@ export default {
   height: 100%;
   overflow: auto;
   text-align: right;
-  padding: 0.5em;
+  padding: 1em;
   .pill {
     text-align: left;
     display: inline-block;
@@ -83,6 +83,7 @@ export default {
     display: inline-block;
     border-radius: 10px;
     &__text {
+      word-break: break-all;
       white-space: break-spaces;
     }
   }

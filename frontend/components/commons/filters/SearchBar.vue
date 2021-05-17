@@ -183,8 +183,8 @@ export default {
   &__container {
     position: relative;
     max-width: 280px;
-    margin-right: 0;
-    margin-left: auto;
+    margin-right: auto;
+    margin-left: 0;
   }
   &__dropdown {
     position: absolute;

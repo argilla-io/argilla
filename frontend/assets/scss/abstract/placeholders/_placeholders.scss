@@ -150,8 +150,9 @@
 }
 %tooltip--left {
   &:after {
-    right: 60px;
+    right: calc(100% + 5px);
     top: auto;
+    transform: none !important;
   }
 }
 %tooltip-colored {

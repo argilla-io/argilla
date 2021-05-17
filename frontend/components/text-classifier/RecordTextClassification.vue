@@ -157,12 +157,16 @@ export default {
   display: flex;
   &--left {
     width: 100%;
+    padding: 2em 2em 0.5em 2em;
+    .list__item--annotation-mode & {
+      padding-left: 4em;
+    }
   }
   &__labels {
     position: relative;
     border-left: 1px solid palette(grey, bg);
     margin-left: 2em;
-    width: 150px;
+    width: 170px;
     flex-shrink: 0;
   }
 }

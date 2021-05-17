@@ -162,7 +162,7 @@ export default {
     @include font-size(13px);
   }
   &__searchbar {
-    margin-right: 10px;
+    margin-right: 2em;
     .fixed-header & {
       transition: position 0.5s ease 2s;
       pointer-events: none;
