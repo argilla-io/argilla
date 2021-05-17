@@ -164,7 +164,20 @@ def main():
             # By default, Rubrix will connect to http://localhost:6900 with no security.
             st.code(
                 """
-            s
+            import rubrix as rb
+
+            item = rb.TextClassificationRecord(
+                inputs={"text": text_input},
+                prediction=labels,
+                prediction_agent="typeform/squeezebert-mnli",
+                annotation=selected_labels,
+                annotation_agent="streamlit-user",
+                multi_label=True,
+                event_timestamp=datetime.datetime.now(),
+                metadata={"model": "typeform/squeezebert-mnli"}
+            )
+
+            rb.log(name="experiment_name", records=item)
 
             """,
                 language="python",
