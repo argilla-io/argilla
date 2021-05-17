@@ -140,7 +140,7 @@ def main():
                 annotation_agent="streamlit-user",
                 multi_label=True,
                 event_timestamp=datetime.datetime.now(),
-                metadata={"model": "typeform/squeezebert-mnli"}
+                metadata={"model": "typeform/squeezebert-mnli"},
             )
 
             dataset_name = "multilabel_text_classification"
