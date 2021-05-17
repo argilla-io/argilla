@@ -83,6 +83,7 @@ export default {
     display: inline-block;
     border-radius: 10px;
     &__text {
+      word-break: break-all;
       white-space: break-spaces;
     }
   }

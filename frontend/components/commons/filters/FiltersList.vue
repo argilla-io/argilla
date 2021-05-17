@@ -14,7 +14,7 @@
       </p>
     </div>
     <div v-for="group in groups" :key="group">
-      <div v-if="initialVisibleGroup === group" :class="['filters__tabs__content', filterList.filter((f) => f.group === group).length > 6 ? 'filters__tabs__content--overflow' : '']">
+      <div v-if="initialVisibleGroup === group" :class="['filters__tabs__content', filterList.filter((f) => f.group === group).length > 6 ? 'filters__tabs__content--large' : '']">
         <span
           v-for="filter in filterList.filter((f) => f.group === group)"
           :key="filter.id"
@@ -53,42 +53,48 @@ export default {
         name: "Predicted as",
         type: "select",
         group: "Predictions",
+        placeholder: "Select labels"
       },
       {
         key: "predicted",
-        name: "Predicted",
+        name: "Predicted ok",
         type: "select",
         group: "Predictions",
+        placeholder: "Select yes/no"
       },
       {
         key: "confidence",
         name: "Confidence",
         type: "confidence",
-        group: "Predictions",
+        group: "Predictions"
       },
       {
         key: "predicted_by",
         name: "Predicted by",
         type: "select",
         group: "Predictions",
+        placeholder: "Select agents"
       },
       {
         key: "annotated_as",
         name: "Annotated as",
         type: "select",
         group: "Annotations",
+        placeholder: "Select labels"
       },
       {
         key: "annotated_by",
         name: "Annotated by",
         type: "select",
         group: "Annotations",
+        placeholder: "Select labels"
       },
       {
         key: "status",
         name: "Status",
         type: "select",
         group: "Status",
+        placeholder: "Select options"
       },
     ],
   }),
@@ -126,6 +132,7 @@ export default {
           name: key,
           type: "select",
           group: "Metadata",
+          placeholder: "Select options",
           id: key,
           options: aggregations.metadata[key],
           selected: this.dataset.query.metadata
@@ -158,6 +165,7 @@ export default {
       }
     },
     onApply(filter, values) {
+      this.initialVisibleGroup = undefined;
       if (filter.group === "Metadata") {
         this.$emit("applyMetaFilter", { filter: filter.key, values });
       } else {
@@ -187,8 +195,14 @@ $number-size: 18px;
       padding: 3em 3em 2em 3em;
       border-radius: 5px;
       max-height: 550px;
-      &--overflow {
-        overflow: auto;
+      &--large {
+        width: 910px;
+        column-count: 2;
+        max-height: 80vh;
+        & > span {
+          display: inline-block;
+          width: 100%;
+        }
       }
     }
     p {

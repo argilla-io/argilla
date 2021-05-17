@@ -222,6 +222,7 @@ export default {
   white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
+  font-weight: 600;
   .list__item--annotation-mode & {
     padding-left: 4em;
   }

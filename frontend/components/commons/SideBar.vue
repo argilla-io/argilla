@@ -49,8 +49,7 @@
         class="button-clear button-action global-actions__export"
         @click="onOpenExportModal()"
       >
-        <svgicon name="export" width="14" height="14" color="#0508D9" />Export
-        annotations
+        <svgicon name="export" width="14" height="14" color="#0508D9" />Create snapshot
       </ReButton>
       <ReModal
         v-if="annotationIsEnabled"
@@ -61,7 +60,7 @@
         modal-position="modal-center"
         @close-modal="closeModal()"
       >
-        <p class="modal__title">Confirm export of annotations</p>
+        <p class="modal__title">Confirm snapshot creation</p>
         <p class="modal__text">
           You are about to export {{ annotationsSum }} annotations. You will find
           the file on the server once the action is completed.
@@ -77,7 +76,7 @@
             class="button-secondary--small"
             @click="onExportAnnotations()"
           >
-            Confirm export
+            Confirm
           </ReButton>
         </div>
       </ReModal>
@@ -137,7 +136,7 @@ export default {
       return this.annotationIsEnabled ? this.annotationsProgress.annotatedAs : this.dataset.results.aggregations.words;
     },
     getTitle() {
-      return this.annotationIsEnabled ? 'Annotation' : 'Keywords';
+      return this.annotationIsEnabled ? 'Annotations' : 'Keywords';
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -231,7 +230,7 @@ export default {
   }
   &__wrapper {
     border-radius: 5px;
-    min-width: 280px;
+    width: 280px;
     position: absolute;
     right: 1em;
     background: white;
