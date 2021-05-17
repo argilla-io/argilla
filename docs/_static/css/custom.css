@@ -1,5 +1,5 @@
 /** css/custom.css **/
-
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
 :root {
   --sidebarWidth: 360px;
   --primaryColor: #0508D9;
@@ -11,10 +11,7 @@
   --white: #ffffff;
   --line: #e9eaed;
 }
-/* This line is theme specific - it includes the base theme CSS */
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
-@import '../theme.css';  /* for Alabaster */
-/*@import 'theme.css';       /* for the Read the Docs theme */
+
 body {
   font-family: "Open Sans" ,"Helvetica Neue", "Arial", "sans-serif";
   color: #484848;
@@ -24,6 +21,9 @@ html {
 }
 h1 {
   font-size: 190%;
+}
+#search-results {
+  margin-top: 4em;
 }
 .document {
   margin-top: -2em;
