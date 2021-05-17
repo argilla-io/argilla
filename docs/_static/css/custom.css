@@ -1,34 +1,87 @@
 /** css/custom.css **/
 
 :root {
+  --sidebarWidth: 360px;
   --primaryColor: #0508D9;
   --sidebarBackground: #FFFFFF;
   --sidebarBackgroundDark: #fcfcfc;
   --sidebarBackgroundDarker: #F2F3F7;
-  --sidebarColor: #404040;
+  --sidebarColor: #484848;
   --sidebarTitleColor: #404040;;
   --white: #ffffff;
+  --line: #e9eaed;
 }
 /* This line is theme specific - it includes the base theme CSS */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
 @import '../theme.css';  /* for Alabaster */
 /*@import 'theme.css';       /* for the Read the Docs theme */
-
+body {
+  font-family: "Open Sans" ,"Helvetica Neue", "Arial", "sans-serif";
+  color: #484848;
+}
+html {
+  font-size: 15px;
+}
+h1 {
+  font-size: 190%;
+}
+.document {
+  margin-top: -2em;
+}
+.document .section h1 {
+  margin-top: 3em;
+}
+.document .section h2 {
+  margin-top: 2.5em;
+}
+.document .section h3 {
+  margin-top: 2em;
+}
+.rst-footer-buttons {
+  margin-top: 4em;
+}
+p {
+  font-size: 14px;
+  line-height: 1.8em;
+}
+.wy-breadcrumbs li:firt-child {
+  color: var(--line);
+}
+.wy-breadcrumbs li:not(.wy-breadcrumbs-aside) a {
+  color: var(--sidebarColor);
+}
 .wy-nav-side {
-  background: var(--sidebarBackground)
+  background: var(--sidebarBackground);
+  border-right: 1px solid var(--line);
+}
+.wy-menu-vertical a {
+  padding-top: 0.65em !important;
+  padding-bottom: 0.65em !important;
 }
 .wy-side-nav-search {
   background: none
 }
-.wy-nav-content-wrap {
-  background: var(--sidebarBackgroundDark)
+.wy-nav-content {
+  max-width: 1000px;
 }
-@media screen and (min-width: 1100px) {
-  .wy-nav-content {
-    background: #ffffff
-  }
+.icon-home:before {
+  content: "Home";
+  font-family: "Open Sans" ,"Helvetica Neue", "Arial", "sans-serif";
+  -webkit-font-smoothing: auto;
+}
+.wy-breadcrumbs + hr {
+  display: none;
+}
+.fa-plus-square-o:before, .wy-menu-vertical li span.toctree-expand:before,
+.fa-minus-square-o:before, .wy-menu-vertical li.current>a span.toctree-expand:before, .wy-menu-vertical li.on a span.toctree-expand:before {
+  content: none;
+}
+.wy-nav-content-wrap {
+  background: #ffffff
 }
 .rst-content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
-  font-family: 'Futura Bold';
+  font-family: 'Futura Medium';
+  font-weight: normal;
 }
 .wy-menu-vertical li.toctree-l1.current>a {
   border: none;
@@ -95,6 +148,7 @@ a:hover {
   min-width: 200px;
   box-shadow: none;
   background: url('../images/search.svg') no-repeat 10px 12px;
+  font-size: 14px;
 }
 
 .rst-content div[class^=highlight], .rst-content pre.literal-block {
@@ -105,13 +159,13 @@ a:hover {
   text-align: left;
 }
 .wy-side-nav-search img {
-  max-width: 170px !important;
+  max-width: 150px !important;
 }
 .wy-nav-top {
   background: var(--primaryColor)
 }
 
-.highlight { background-color: #333346; color: white }
+.highlight { background-color: #333346; color: white; padding: 1em !important; }
 .highlight .c { color: #82d6eb; font-style: italic } /* Comment */
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #3ef070; font-weight: bold } /* Keyword */
@@ -202,4 +256,39 @@ a:hover {
   font-style: normal;
   font-weight: normal;
   src: local('Futura Light'), url('fonts/futura-light.woff2') format('woff2');
+}
+
+@media screen and (min-width: 1100px) {
+  .wy-nav-content {
+    padding: 2em 4.5em;
+    background: #ffffff
+  }
+  .wy-nav-content-wrap {
+    margin-left: var(--sidebarWidth);
+  }
+  .wy-menu-vertical {
+    width: var(--sidebarWidth);
+  }
+  .wy-nav-side {
+    width: var(--sidebarWidth);
+  }
+  .wy-side-scroll {
+    width: var(--sidebarWidth);
+  }
+  .wy-side-nav-search,
+  .wy-menu-vertical p.caption,
+  .wy-menu-vertical li.toctree-l1.current>a,
+  .wy-menu-vertical a {
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+  .wy-menu-vertical li.toctree-l2.current>a {
+    padding-left: 3em;
+    padding-right: 2em;  
+  };
+  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a, 
+  .wy-menu-vertical li.toctree-l3.current>a {
+    padding-left: 4em;
+    padding-right: 2em;    
+  }
 }
