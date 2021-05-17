@@ -115,13 +115,10 @@ export default {
     .fixed-header & {
       min-height: 40px;
       width: calc(100% - 250px);
+      margin-left: auto;
       z-index: 1;
       border-bottom: 0;
-      max-width: 930px;
       margin-top: 3px;
-      @include media(">xxl") {
-        max-width: 1330px;
-      }
     }
   }
 }

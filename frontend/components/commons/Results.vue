@@ -26,20 +26,8 @@
               annotationEnabled ? 'list__item--annotation-mode' : 'list__item'
             "
           >
-            <div class="list__li__status">
-              <span
-                v-if="annotationEnabled && item.status === 'Edited'"
-                class="list__item__asterisk"
-                title="Edited"
-              >
-                *
-              </span>
-              <span
-                v-if="annotationEnabled && item.status === 'Validated'"
-                title="Validated"
-              >
-                <svgicon color="#2baba6" name="check" />
-              </span>
+            <div v-if="annotationEnabled && item.status !== 'Default'" class="list__li__status">
+              {{ item.status }}
             </div>
             <ReCheckbox
               v-if="annotationEnabled"
@@ -208,7 +196,7 @@ export default {
 .show-record-number {
   position: fixed;
   overflow: scroll;
-  top: 5em;
+  top: 7em;
   right: 1em;
   background: $lighter-color;
   border-radius: 10px;
@@ -271,13 +259,13 @@ export default {
 }
 
 .list__item {
-  padding-left: 3em;
-  padding-right: 3em;
-  padding-bottom: 1em;
-  margin-left: 0;
-  padding-top: 2.2em;
+  // padding-left: 3em;
+  // padding-right: 3em;
+  // padding-bottom: 1em;
+  // margin-left: 0;
+  // padding-top: 2.2em;
   &--annotation-mode {
-    padding-left: 4em;
+    // padding-left: 4em;
     @extend .list__item;
   }
   &__checkbox.re-checkbox {

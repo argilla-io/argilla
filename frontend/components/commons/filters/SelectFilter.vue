@@ -8,7 +8,7 @@
           <p v-else v-for="appliedFilter in appliedFilters" :key="appliedFilter">{{ appliedFilter }}</p>
         </span>
         <span v-else>
-          Select...
+          {{filter.placeholder}}
         </span>
       </span>
       <div slot="dropdown-content">
@@ -93,7 +93,7 @@ export default {
       }
       let filtered = Object.fromEntries(
         Object.entries(options).filter(([id, value]) =>
-          id.match(text.toLowerCase())
+          id.toLowerCase().match(text.toLowerCase())
         )
       );
       return filtered;

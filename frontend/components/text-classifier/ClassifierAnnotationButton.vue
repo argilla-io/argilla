@@ -98,6 +98,7 @@ $annotation-button-touch-size: 48px;
     transition: all 0.3s ease;
     max-width: 238px;
     width: 100%;
+    border-radius: 7px;
     .button {
       outline: none;
       cursor: pointer;

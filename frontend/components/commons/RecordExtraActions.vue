@@ -9,10 +9,7 @@
       :key="status.key"
       @click="onChangeRecordStatus(status.key)"
     >
-      <span v-if="status.isActive" :class="status.class">{{
-        status.activeName
-      }}</span>
-      <span v-else>{{ status.name }}</span>
+      <span>{{ status.name }}</span>
     </div>
   </div>
 </template>
@@ -35,7 +32,6 @@ export default {
     statusActions: [
       {
         name: "Discard",
-        activeName: "Discarded",
         key: "Discarded",
         class: "discard",
       },
@@ -77,7 +73,7 @@ export default {
   &__extra-actions {
     line-height: 1;
     text-align: left;
-    color: $primary-color;
+    color: $font-secondary;
     margin-top: 1em;
     margin-bottom: 1em;
     @include font-size(13px);

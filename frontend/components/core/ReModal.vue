@@ -126,12 +126,13 @@ export default {
   pointer-events: all;
 }
 .modal-primary {
-  border: 1px solid $primary-color;
+  box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
   border-radius: 0;
-  box-shadow: none;
   max-width: 520px;
   ::v-deep .modal__title {
-    color: $primary-color;
+    font-family: "Futura Medium";
+    font-weight: normal;
+    @include font-size(16px);
   }
   ::v-deep .modal__text {
     margin-bottom: 2em;
