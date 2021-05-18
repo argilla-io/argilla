@@ -13,7 +13,7 @@ In our streamlit app we are working on a use case of *multilabel text classifica
 
 After the threshold is selected, the user can make its own annotation, whether or not she or he thinks the predictions are correct. This is where the *human-in-the-middle* comes into play, by responding to a model made prediction with a user made annotation, that could eventually be used to provide feedback to the model or to make retrainings.
 
-Once the annotated labels are selected, the user can press the **log** button. A ``TextClassificationRecord`` will be created an logged into Rubrix with all the information about the process: the input text, the prediction and the annotation. This data is also displayed in the streamlit app, as the process ends. But you could always change the input text, the threshold or the annotated labels and log again!
+Once the annotated labels are selected, the user can press the **log** button. A ``TextClassificationRecord`` will be created and logged into Rubrix with all the information about the process: the input text, the prediction and the annotation. This data is also displayed in the streamlit app, as the process ends. But you could always change the input text, the threshold or the annotated labels and log again!
 
 How to run the app
 ------------------
