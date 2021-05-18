@@ -36,18 +36,19 @@ Rubrix can be used alongside any third-party apps via its REST API or its Python
 Then, using the Python client we log instances of ``rubrix.TextClassificationRecord``s as follows:
 
 .. code-block:: python
+    import rubrix as rb
 
-   item = rb.TextClassificationRecord(
-                   inputs={"text": text_input},
-                   prediction=labels,
-                   prediction_agent="typeform/squeezebert-mnli",
-                   annotation=selected_labels,
-                   annotation_agent="streamlit-user",
-                   multi_label=True,
-                   event_timestamp=datetime.datetime.now(),
-                   metadata={"model": "typeform/squeezebert-mnli"}
-               )
+    item = rb.TextClassificationRecord(
+                    inputs={"text": text_input},
+                    prediction=labels,
+                    prediction_agent="typeform/squeezebert-mnli",
+                    annotation=selected_labels,
+                    annotation_agent="streamlit-user",
+                    multi_label=True,
+                    event_timestamp=datetime.datetime.now(),
+                    metadata={"model": "typeform/squeezebert-mnli"}
+                )
 
-   dataset_name = "multilabel_text_classification"
+    dataset_name = "multilabel_text_classification"
 
-   rb.log(name=dataset_name, records=item)
+    rb.log(name=dataset_name, records=item)
