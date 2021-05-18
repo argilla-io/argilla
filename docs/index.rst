@@ -4,8 +4,8 @@
    contain the root `toctree` directive.
 
 
-Rubrix Docs
-===========
+First steps with Rubrix
+=======================
 
 What's Rubrix?
 --------------
@@ -85,7 +85,7 @@ Text classification deals with predicting in which categories a text fits. As if
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
+   <iframe width="100%" height="500" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
 
 
 
