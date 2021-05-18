@@ -36,6 +36,7 @@ Rubrix can be used alongside any third-party apps via its REST API or its Python
 Then, using the Python client we log instances of ``rubrix.TextClassificationRecord``s as follows:
 
 .. code-block:: python
+
     import rubrix as rb
 
     item = rb.TextClassificationRecord(
