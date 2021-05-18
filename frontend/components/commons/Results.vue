@@ -236,6 +236,7 @@ export default {
       position: absolute;
       top: 1em;
       right: 1em;
+      font-style: italic;
     }
     padding-bottom: 2px;
     position: relative;
