@@ -6,8 +6,7 @@ import pandas as pd
 import streamlit as st
 from transformers import pipeline
 
-import rubrix
-from rubrix.sdk.models import *
+import rubrix as rb
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "False"  # To avoid warnings
@@ -133,7 +132,7 @@ def main():
                 labels.append((row["index"], row["confidence"]))
 
             # Creation of the classification record
-            item = rubrix.TextClassificationRecord(
+            item = rb.TextClassificationRecord(
                 inputs={"text": text_input},
                 prediction=labels,
                 prediction_agent="typeform/squeezebert-mnli",
@@ -141,12 +140,12 @@ def main():
                 annotation_agent="streamlit-user",
                 multi_label=True,
                 event_timestamp=datetime.datetime.now(),
-                metadata={"model": "typeform/squeezebert-mnli"}
+                metadata={"model": "typeform/squeezebert-mnli"},
             )
 
             dataset_name = "multilabel_text_classification"
 
-            rubrix.log(name=dataset_name, records=item)
+            rb.log(name=dataset_name, records=item)
 
             api_url = os.getenv("RUBRIX_API_URL", "http://localhost:6900")
             # Pretty-print of the logged item
@@ -165,9 +164,9 @@ def main():
             # By default, Rubrix will connect to http://localhost:6900 with no security.
             st.code(
                 """
-            import rubrix
+            import rubrix as rb
 
-            item = rubrix.TextClassificationRecord(
+            item = rb.TextClassificationRecord(
                 inputs={"text": text_input},
                 prediction=labels,
                 prediction_agent="typeform/squeezebert-mnli",
@@ -178,7 +177,7 @@ def main():
                 metadata={"model": "typeform/squeezebert-mnli"}
             )
 
-            rubrix.log(name="experiment_name", records=item)
+            rb.log(name="experiment_name", records=item)
 
             """,
                 language="python",

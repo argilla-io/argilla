@@ -117,7 +117,12 @@ You can join the conversation on our Github page and our Github forum.
    getting_started/setup&installation
    getting_started/concepts
 
-   
+.. toctree::
+   :maxdepth: 3
+   :caption: Guides
+   :hidden:
+
+   guides/streamlit_guide.rst
    
 .. toctree::
    :maxdepth: 3
