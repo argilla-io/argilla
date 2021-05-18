@@ -351,14 +351,13 @@ export default {
   &__item {
     position: relative;
     list-style: none;
-    padding: 1em 8em 1em 2em;
+    padding: 2em 8em 2em 2em;
     display: flex;
     width: 100%;
     border-bottom: 1px solid $line-light-color;
     align-items:flex-start;
     text-decoration: none;
     outline: none;
-    min-height: 5.4em;
     &__col {
       text-align: left;
       margin-right: 1.5em;
@@ -408,7 +407,6 @@ export default {
     color: $primary-color;
     @include font-size(15px);
     cursor: pointer;
-    margin-bottom: 0.5em;
     word-break: break-word;
   }
   &__meta {
@@ -448,6 +446,9 @@ export default {
       margin-top: 0;
       float: left;
       clear: both;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
   .dataSource {
