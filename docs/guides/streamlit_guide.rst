@@ -27,7 +27,7 @@ We've created a `standalone repository <https://github.com/recognai/rubrix-strea
 Rubrix integration
 ------------------
 
-Rubrix can be used alongside any third-party apps, as long as there is a Python script running beneath. In our case, the logging of the record is made when the log button is pressed. In that moment, two lists will be populated:
+Rubrix can be used alongside any third-party apps via its REST API or its Python client. In our case, the logging of the record is made when the log button is pressed. In that moment, two lists will be populated:
 
 
 * ``labels``\ , with the predicted labels by the zero-shot classifier
