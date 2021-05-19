@@ -1,6 +1,6 @@
 <template>
   <div class="filter__row">
-    <p class="filter__label">{{ filter.name }}:</p>
+    <p class="filter__label" :title="filter.name">{{ filter.name }}:</p>
     <FilterDropdown :class="{ highlighted: visible || appliedFilters.length }" class="dropdown--filter" :visible="visible" @visibility="onVisibility">
       <span slot="dropdown-header">
         <span v-if="appliedFilters.length">
@@ -122,8 +122,11 @@ export default {
     }
   }
   &__label {
-    word-break: break-word;
-    margin-right: 1em;
+    word-break: normal;
+    margin: 0 1em 0 0;
+    max-width: 166px;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   &__buttons {
     margin-top: 1em;

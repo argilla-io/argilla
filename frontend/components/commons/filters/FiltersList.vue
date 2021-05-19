@@ -197,11 +197,14 @@ $number-size: 18px;
       max-height: 550px;
       &--large {
         width: 910px;
-        column-count: 2;
         max-height: 80vh;
+        overflow: auto;
         & > span {
           display: inline-block;
-          width: 100%;
+          width: 50%;
+          &:nth-child(2n+1) {
+            padding-right: 1em;
+          }
         }
       }
     }
