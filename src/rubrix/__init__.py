@@ -41,11 +41,11 @@ def init(
 
     Parameters
     ----------
-    api_url : str
+    api_url: str
         Address from which the API is serving. It will use the default UVICORN address as default
     api_key: str
         Authentification api key. A non-secured log will be considered the default case. Optional
-    timeout : int
+    timeout: int
         Seconds to considered a connection timeout. Optional
     """
 
@@ -53,14 +53,11 @@ def init(
 
     final_api_url = api_url or os.getenv("RUBRIX_API_URL", "http://localhost:6900")
 
-    # Checking that the api_url does not ends in '/'
+    # Checking that the api_url does not end in '/'
     final_api_url = re.sub(r"\/$", "", final_api_url)
 
     # If an api_url is passed, tokens obtained via environ vars are disabled
-    if api_url is not None:
-        final_key = api_key
-    else:
-        final_key = api_key or os.getenv("RUBRIX_API_KEY")
+    final_key = api_key or os.getenv("RUBRIX_API_KEY")
 
     _LOGGER.info(f"Rubrix has been initialized on {final_api_url}")
 
@@ -83,15 +80,15 @@ def log(
 
     Parameters
     ----------
-    records:
+    records
         The data record object or list.
-    name:
+    name
         The dataset name
-    tags:
+    tags
         A set of tags related to dataset. Optional
-    metadata:
+    metadata
         A set of extra info for dataset. Optional
-    chunk_size:
+    chunk_size
         The default chunk size for data bulk
 
     """
@@ -126,11 +123,12 @@ def snapshots(name: str) -> List[models.DatasetSnapshot]:
 
     Parameters
     ----------
-    name:
+    name
         The dataset name whose snapshots will be retrieved
 
     Returns
     -------
+    List[models.DatasetSnapshot]
         A list with all DatasetSnapshot associated to the given dataset
 
     """

@@ -132,3 +132,11 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/01-huggingface
    tutorials/02.spacy
    tutorials/03-kglab_pytorch_geometric
+
+.. toctree::
+   :maxdepth: 3
+   :caption: References
+   :hidden:
+
+   reference_guides/api_reference
+
