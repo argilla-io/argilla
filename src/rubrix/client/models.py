@@ -7,14 +7,13 @@ from pydantic import BaseModel, Field
 class BulkResponse(BaseModel):
     """Data info for bulk results
 
-    Attributes:
-    -----------
-
-    dataset:
+    Parameters
+    ----------
+    dataset
         The dataset name
-    processed:
+    processed
         Number of records in bulk
-    failed:
+    failed
         Number of failed records
     """
 
@@ -34,12 +33,11 @@ class DatasetSnapshot(BaseModel):
 class TokenAttributions(BaseModel):
     """The token attributions explaining predicted labels
 
-    Attributes:
-    -----------
-
-    token: str
+    Parameters
+    ----------
+    token
         The input token
-    attributions: Dict[str, float]
+    attributions
         A dictionary containing label class-attribution pairs
     """
 
@@ -50,7 +48,7 @@ class TokenAttributions(BaseModel):
 class TextClassificationRecord(BaseModel):
     """Record for text classification
 
-    Attributes
+    Parameters
     ----------
     inputs : `Dict[str, Union[str, List[str]]]`
         The inputs of the record
@@ -106,14 +104,14 @@ class TextClassificationRecord(BaseModel):
 class TokenClassificationRecord(BaseModel):
     """Record for a token classification task
 
-    Attributes
+    Parameters
     ----------
     text : `str`
         The input of the record
     tokens : `List[str]`
         The tokenized input of the record. We use this to guide the annotation process and to cross-check the spans of
         your `prediction`/`annotation`.
-    prediction : `List[Tuple[str, int, int]]`, optional
+    prediction
         A list of tuples containing the predictions for the record. The first entry of the tuple is the name of
         predicted entity, the second and third entry correspond to the start and stop character index of the entity.
         Default: None
