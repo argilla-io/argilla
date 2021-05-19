@@ -1,7 +1,7 @@
-API Reference
-=============
+Python client API
+=================
 
-Actions
+Methods
 -------
 
 .. automodule:: rubrix

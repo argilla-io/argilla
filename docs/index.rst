@@ -135,8 +135,8 @@ You can join the conversation on our Github page and our Github forum.
 
 .. toctree::
    :maxdepth: 3
-   :caption: References
+   :caption: Reference
    :hidden:
 
-   references/api_reference
+   reference/python_client_api
 
