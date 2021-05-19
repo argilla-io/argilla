@@ -83,7 +83,7 @@ Another similar task to Text Classification, but yet a bit different, is Multila
 
 
 Token classification record
-""""""""""""""""""""""""""
+"""""""""""""""""""""""""""
 
 Token classification kind-of-tasks are NLP tasks aimed to divide the input text into words, or syllabes, and assign certain values to them. Think about giving each word in a sentence its gramatical category, or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POST-tagging.
 
