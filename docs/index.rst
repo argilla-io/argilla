@@ -135,7 +135,7 @@ You can join the conversation on our Github page and our Github forum.
 
 .. toctree::
    :maxdepth: 3
-   :caption: Reference guides
+   :caption: References
    :hidden:
 
    reference_guides/api_reference
