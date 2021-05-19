@@ -2,7 +2,7 @@
   <div class="container">
     <form class="form" @submit.prevent="userLogin">
       <Rubrix class="form__logo" />
-      <p class="form__title">Annotation tool create a short text</p>
+      <p class="form__title">Track and iterate on data for AI</p>
       <div class="form__input" :class="{ active: login.username }">
         <input v-model="login.username" type="text" placeholder="ID" />
       </div>
