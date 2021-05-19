@@ -33,7 +33,7 @@ Rubrix can be used alongside any third-party apps via its REST API or its Python
 * ``labels``\ , with the predicted labels by the zero-shot classifier
 * ``selected_labels``\ , with the annotated labels, selected by the user.
 
-Then, using the Python client we log instances of ``rubrix.TextClassificationRecord``s as follows:
+Then, using the Python client we log instances of ``rubrix.TextClassificationRecord`` as follows:
 
 .. code-block:: python
 
