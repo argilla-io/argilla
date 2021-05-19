@@ -86,7 +86,24 @@ Text classification deals with predicting in which categories a text fits. As if
 
    <iframe width="100%" height="500" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
 
+Use cases
+---------
 
+* **Model monitoring and observability:** log and observe predictions of live models.
+* **Ground-truth data collection**: collect labels to start a project from scratch or from existing live models.
+* **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
+* **Model debugging**: log predictions during the development process to visually spot issues.
+* **Explainability:** log things like token attributions to understand your model predictions.
+* **App development:** get a powerful search-based API on top of your model predictions and ground truth data.
+
+Design Principles
+-----------------
+
+Rubrix design is:
+
+* **Agnostic**: you can use Rubrix with any library or framework, no need to implement any interface or modify your existing toolbox and workflows.
+* **Flexible:**  Rubrix does not make any strong assumption about your input data, so you can log and structure your data as it fits your use case.
+* **Minimalistic:** Rubrix is built around a small set of concepts and methods.
 
 Next steps
 ----------
@@ -103,8 +120,8 @@ Community
 ---------
 You can join the conversation on our Github page and our Github forum.
 
-* `Github page <https://github.com/recognai/rubrix>`
-* `Github forum <https://github.com/recognai/rubrix/discussions>`
+* `Github page <https://github.com/recognai/rubrix>`_
+* `Github forum <https://github.com/recognai/rubrix/discussions>`_
 
 
 .. toctree::
@@ -115,6 +132,7 @@ You can join the conversation on our Github page and our Github forum.
    self
    getting_started/setup&installation
    getting_started/concepts
+   getting_started/supported_tasks
 
 .. toctree::
    :maxdepth: 3
