@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Rubrix Init Method
-
-Contains methods for accesing the API.
+"""
+This module contains the interface to access Rubrix's REST API.
 """
 
 import logging
@@ -12,7 +11,7 @@ from typing import Iterable
 
 import pandas
 import pkg_resources
-from rubrix.client import RubrixClient, models
+from rubrix.client import RubrixClient
 from rubrix.client.models import *
 
 try:
@@ -32,21 +31,21 @@ def init(
     api_url: Optional[str] = None,
     api_key: Optional[str] = None,
     timeout: int = 60,
-):
-    """Client setup function.
+) -> None:
+    """Init the python client.
 
-    Calling the RubrixClient init function.
     Passing an api_url disables environment variable reading, which will provide
     default values.
 
-    Parameters
-    ----------
-    api_url: str
-        Address from which the API is serving. It will use the default UVICORN address as default
-    api_key: str
-        Authentification api key. A non-secured log will be considered the default case. Optional
-    timeout: int
-        Seconds to considered a connection timeout. Optional
+    Args:
+        api_url:
+            Address of the REST API. If `None` (default) and the env variable ``RUBRIX_API_URL`` is not set,
+            it will default to `http://localhost:6900`.
+        api_key:
+            Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
+            is not set, it will default to a not authenticated connection.
+        timeout:
+            Wait `timeout` seconds for the connection to timeout. Default: 60.
     """
 
     global _client
@@ -74,23 +73,23 @@ def log(
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
     chunk_size: int = 500,
-):
-    """
-    Register a set of logs into Rubrix
+) -> BulkResponse:
+    """Log Records to Rubrix.
 
-    Parameters
-    ----------
-    records
-        The data record object or list.
-    name
-        The dataset name
-    tags
-        A set of tags related to dataset. Optional
-    metadata
-        A set of extra info for dataset. Optional
-    chunk_size
-        The default chunk size for data bulk
+    Args:
+        records:
+            The record or an iterable of records.
+        name:
+            The dataset name.
+        tags:
+            A dictionary of tags related to the dataset.
+        metadata:
+            A dictionary of extra info for the dataset.
+        chunk_size:
+            The chunk size for a data bulk.
 
+    Returns:
+        Summary of the response from the REST API
     """
 
     # Records can be a single object or a list. In case it is a single object, we create a single-element list
@@ -108,7 +107,7 @@ def log(
 
 
 def _client_instance() -> RubrixClient:
-    """Checks module instance client and init if not initialized"""
+    """Checks module instance client and init if not initialized."""
 
     global _client
     # Calling a by-default-init if it was not called before
@@ -117,20 +116,14 @@ def _client_instance() -> RubrixClient:
     return _client
 
 
-def snapshots(name: str) -> List[models.DatasetSnapshot]:
-    """
-    Retrieve dataset snapshots
+def snapshots(name: str) -> List[DatasetSnapshot]:
+    """Retrieve dataset snapshots.
 
-    Parameters
-    ----------
-    name
-        The dataset name whose snapshots will be retrieved
+    Args:
+        name: The dataset name whose snapshots will be retrieved.
 
-    Returns
-    -------
-    List[models.DatasetSnapshot]
-        A list with all DatasetSnapshot associated to the given dataset
-
+    Returns:
+        A list of snapshots.
     """
     return _client_instance().snapshots(name)
 
@@ -141,37 +134,30 @@ def load(
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
-    """
-    Load dataset/snapshot data as a huggingface dataset
+    """Load dataset/snapshot data to a pandas DataFrame.
 
-    Parameters
-    ----------
-    name:
-        The dataset name
-    snapshot:
-        The dataset snapshot id. Optional
-    ids:
-        If provided, load dataset records with given ids.
-        Won't apply for snapshots
-    limit:
-        The number of records to retrieve
+    Args:
+        name:
+            The dataset name.
+        snapshot:
+            The dataset snapshot id.
+        ids:
+            If provided, load dataset records with given ids. Ignored for snapshots.
+        limit:
+            The number of records to retrieve.
 
-    Returns
-    -------
-        A pandas Dataframe
-
+    Returns:
+        The dataset as a pandas Dataframe.
     """
     return _client_instance().load(name=name, snapshot=snapshot, limit=limit, ids=ids)
 
 
 def delete(name: str) -> None:
-    """
-    Delete a dataset with given name
+    """Delete a dataset.
 
-    Parameters
-    ----------
-    name:
-        The dataset name
+    Args:
+        name:
+            The dataset name.
 
     """
     _client_instance().delete(name=name)
