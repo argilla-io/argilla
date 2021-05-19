@@ -10,7 +10,6 @@ The Python library and the UI are built around a few simple but key concepts. Th
 
 
 .. image:: ../images/rubrix_concepts.svg
-   :target: ../images/rubrix_concepts.svg
    :alt: ../images/rubrix_concepts.svg
 
 
