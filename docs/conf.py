@@ -16,13 +16,17 @@
 
 
 # -- Project information -----------------------------------------------------
+import rubrix as rb
 
 project = "rubrix"
 copyright = "2021, Recognai"
 author = "Recognai"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1"
+release = rb.__version__
+
+# The short X.Y version
+version = ".".join(rb.__version__.split(".")[0:2])
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,7 +36,15 @@ release = "0.0.1"
 # ones.
 extensions = [
     "nbsphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
 ]
+
+# Do not execute the notebooks when building the docs
+nbsphinx_execute = "never"
+
+# TODO: Change this to "both" once Sphinx 4.1 is out
+autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -55,7 +67,6 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-nbsphinx_execute = "never"
 
 # Theme options
 html_logo = "_static/images/logo.svg"
