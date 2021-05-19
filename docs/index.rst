@@ -138,5 +138,5 @@ You can join the conversation on our Github page and our Github forum.
    :caption: References
    :hidden:
 
-   reference_guides/api_reference
+   references/api_reference
 
