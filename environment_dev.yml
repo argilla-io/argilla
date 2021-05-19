@@ -9,9 +9,9 @@ dependencies:
 # tests
 - pytest
 # docs
-- sphinx==3.5.4
+- sphinx==4.0.1
 - sphinx_rtd_theme==0.5.2
-- nbsphinx==0.8.4
+- nbsphinx==0.8.5
 - pandoc==2.12
 # we need this to ensure syntax highlighting in the notebook code cells for the docs
 - ipython
