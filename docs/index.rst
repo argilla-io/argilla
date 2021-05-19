@@ -30,7 +30,6 @@ We've tried to make Rubrix easy, fun and seamless to use with your favourite lib
 
 
 .. image:: images/rubrix_intro.svg
-   :target: images/rubrix_intro.svg
    :alt: images/rubrix_intro.svg
 
 
