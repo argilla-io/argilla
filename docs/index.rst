@@ -157,3 +157,11 @@ You can join the conversation on our Github page and our Github forum.
 
    references/api_reference
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Community
+   :hidden:
+
+   Github page <https://github.com/recognai/rubrix>
+   Discussion forum <https://github.com/recognai/rubrix/discussions>
+
