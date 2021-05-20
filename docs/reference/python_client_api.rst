@@ -1,3 +1,5 @@
+.. _api:
+
 Python client API
 =================
 

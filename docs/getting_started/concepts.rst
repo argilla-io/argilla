@@ -132,6 +132,8 @@ Metada will hold extra information that you want your record to have: if it belo
 Methods
 -------
 
+To find more information about these methods, please visit our :ref:`api`
+
 rb.log
 ^^^^^^
 
