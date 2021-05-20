@@ -30,3 +30,5 @@ RUN rm -rf /build \
 # See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
 ENV MODULE_NAME="rubrix.server.server"
 ENV VARIABLE_NAME="app"
+
+CMD /wait-for-it.sh $ELASTICSEARCH -- /start.sh

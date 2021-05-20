@@ -8,8 +8,6 @@ services:
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
 
-    command: /wait-for-it.sh elasticsearch:9200 -- /start.sh
-
     networks:
       - rubrix
 
