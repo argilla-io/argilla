@@ -159,7 +159,7 @@ You can join the conversation on our Github page and our Github forum.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Support
+   :caption: Community
    :hidden:
 
    Github page <https://github.com/recognai/rubrix>
