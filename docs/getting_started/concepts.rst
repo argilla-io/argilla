@@ -3,9 +3,9 @@
 Concepts
 ========
 
-In this section, we will introduce Rubrix basic concepts and the methods of the Python library that implement them. They are the way in which us, the user, communicate with the service, so it's important to understand what's happening behind the curtain. 
+In this section, we will introduce Rubrix basic concepts and the methods of the Python library that implement them. They are the way in which us, the users, communicate with the service, so it's important to understand what's happening behind the curtain. 
 
-We have two main subsections: Rubrix data model (explaining those main concepts Rubrix is built around) and Python client API methods, which implement those concepts and data structures.
+We have two main subsections: Rubrix data model (explaining those main concepts Rubrix is built around) and Python client API methods (which implement those concepts and data structures).
 
 Rubrix Data model
 -----------------
@@ -62,7 +62,7 @@ Let's see examples over a spam classifier.
 Multi-label text classification record
 """"""""""""""""""""""""""""""""""""""
 
-Another similar task to Text Classification, but yet a bit different, is Multilabel Text Classification. Just one key difference: more than one label may be predicted. While in a regular Text Classification task we may decide that the tweet "I can't wait to travel to Egypts and visit the pyramids" fits into the hastag #Travel, which is accurate, in Multilabel Text Classification we can classify it as more than one hastag, like #Travel #History #Africa #Sightseeing #Desert.
+Another similar task to Text Classification, but yet a bit different, is Multi-label Text Classification. Just one key difference: more than one label may be predicted. While in a regular Text Classification task we may decide that the tweet "I can't wait to travel to Egypts and visit the pyramids" fits into the hastag #Travel, which is accurate, in Multi-label Text Classification we can classify it as more than one hastag, like #Travel #History #Africa #Sightseeing #Desert.
 
 .. code-block:: python
 
@@ -129,7 +129,7 @@ A prediction is a piece information assigned to a record, a label or a set of la
 Metadata
 ^^^^^^^^
 
-Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record ... Feel free to use it as you need! It is logged as a Python dictionary. 
+Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record... Feel free to use it as you need! 
 
 Methods
 -------
