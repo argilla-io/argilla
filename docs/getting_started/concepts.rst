@@ -87,7 +87,7 @@ Another similar task to Text Classification, but yet a bit different, is Multila
 Token classification record
 """""""""""""""""""""""""""
 
-Token classification kind-of-tasks are NLP tasks aimed to divide the input text into words, or syllabes, and assign certain values to them. Think about giving each word in a sentence its gramatical category, or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POST-tagging.
+Token classification kind-of-tasks are NLP tasks aimed to divide the input text into words, or syllabes, and assign certain values to them. Think about giving each word in a sentence its gramatical category, or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POS-tagging.
 
 .. code-block:: python
 
@@ -112,7 +112,7 @@ Token classification kind-of-tasks are NLP tasks aimed to divide the input text 
 Task
 ^^^^
 
-A task defines the objective and shape of the predictions and annotations inside a record. [LINK a las tasks].
+A task defines the objective and shape of the predictions and annotations inside a record. You can see our supported tasks at :ref:`tasks`
 
 Annotation
 ^^^^^^^^^^

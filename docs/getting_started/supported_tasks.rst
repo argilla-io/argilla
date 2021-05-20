@@ -1,3 +1,4 @@
+.. _tasks:
 
 Supported and planned tasks
 ===========================
