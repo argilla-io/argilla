@@ -3,6 +3,8 @@
 Concepts
 ========
 
+In this section, we will introduce Rubrix basic concepts and the methods of the Python library that implement them. They are the way in which us, the user, communicate with the service, so it's important to understand what's happening behind the curtain.
+
 Rubrix Basic Concepts
 ---------------------
 
