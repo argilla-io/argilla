@@ -127,7 +127,7 @@ A prediction is a piece information assigned to a record, a label or a set of la
 Metadata
 ^^^^^^^^
 
-To complete, talk about metadata at dataset and record level
+Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record ... Feel free to use it as you need! It is logged as a Python dictionary. 
 
 Methods
 -------
@@ -148,37 +148,6 @@ Register a set of logs into Rubrix.
    )
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.log(
-           records: Union[rubrix.client.models.TextClassificationRecord, rubrix.client.models.TokenClassificationRecord, Iterable[Union[rubrix.client.models.TextClassificationRecord, rubrix.client.models.TokenClassificationRecord]]],
-           name: str,
-           tags: Union[Dict[str, str], NoneType] = None,
-           metadata: Union[Dict[str, Any], NoneType] = None,
-           chunk_size: int = 500,
-       )
-       Docstring:
-       Register a set of logs into Rubrix
-
-       Parameters
-       ----------
-       records:
-           The data record object or list.
-       name:
-           The dataset name
-       tags:
-           A set of tags related to dataset. Optional
-       metadata:
-           A set of extra info for dataset. Optional
-       chunk_size:
-           The default chunk size for data bulk
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.load
 ^^^^^^^
 
@@ -188,39 +157,6 @@ Load a dataset or a snapshot as a Huggingface dataset.
 
    rb.load(name='example-dataset')
 
-
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.load(
-           name: str,
-           snapshot: Union[str, NoneType] = None,
-           ids: Union[List[Union[str, int]], NoneType] = None,
-           limit: Union[int, NoneType] = None,
-       ) -> pandas.core.frame.DataFrame
-       Docstring:
-       Load dataset/snapshot data as a huggingface dataset
-
-       Parameters
-       ----------
-       name:
-           The dataset name
-       snapshot:
-           The dataset snapshot id. Optional
-       ids:
-           If provided, load dataset records with given ids.
-           Won't apply for snapshots
-       limit:
-           The number of records to retrieve
-
-       Returns
-       -------
-           A pandas Dataframe
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
 
 rb.snapshots
 ^^^^^^^^^^^^
@@ -232,26 +168,6 @@ Retrieve a dataset snapshot.
    rb.snapshots(name='example-dataset')
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature: rb.snapshots(dataset: str) -> List[rubrix.sdk.models.dataset_snapshot.DatasetSnapshot]
-       Docstring:
-       Retrieve dataset snapshots
-
-       Parameters
-       ----------
-       dataset:
-           The dataset name
-
-       Returns
-       -------
-               rA list with all DatasetSnapshot associated to the given dataset
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.delete
 ^^^^^^^^^
 
@@ -262,22 +178,6 @@ Delete a dataset with a given name.
    rb.delete(name='example-dataset')
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature: rb.delete(name: str) -> None
-       Docstring:
-       Delete a dataset with given name
-
-       Parameters
-       ----------
-       name:
-           The dataset name
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.init
 ^^^^^^^
 
@@ -286,33 +186,3 @@ Client setup function. You can pass  the api url and api key via environment var
 .. code-block:: python
 
    rb.init(api_url='http://localhost:9090', api_key='4AkeAPIk3Y')
-
-
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.init(
-           api_url: Union[str, NoneType] = None,
-           api_key: Union[str, NoneType] = None,
-           timeout: int = 60,
-       )
-       Docstring:
-       Client setup function.
-
-       Calling the RubrixClient init function.
-       Passing an api_url disables environment variable reading, which will provide
-       default values.
-
-       Parameters
-       ----------
-       api_url : str
-           Address from which the API is serving. It will use the default UVICORN address as default
-       api_key: str
-           Authentification api key. A non-secured log will be considered the default case. Optional
-       timeout : int
-           Seconds to considered a connection timeout. Optional
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
