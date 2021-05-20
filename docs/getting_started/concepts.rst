@@ -3,10 +3,12 @@
 Concepts
 ========
 
-In this section, we will introduce Rubrix basic concepts and the methods of the Python library that implement them. They are the way in which us, the user, communicate with the service, so it's important to understand what's happening behind the curtain.
+In this section, we will introduce Rubrix basic concepts and the methods of the Python library that implement them. They are the way in which us, the user, communicate with the service, so it's important to understand what's happening behind the curtain. 
 
-Rubrix Basic Concepts
----------------------
+We have two main subsections: Rubrix data model (explaining those main concepts Rubrix is built around) and Python client API methods, which implement those concepts and data structures.
+
+Rubrix Data model
+-----------------
 
 The Python library and the UI are built around a few simple but key concepts. This section aims to clarify what those concepts and show you the main constructs for using Rubrix with your own models and data. Let's take a look at Rubrix's components and methods:
 
