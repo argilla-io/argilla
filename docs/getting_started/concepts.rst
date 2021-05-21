@@ -134,59 +134,30 @@ Metada will hold extra information that you want your record to have: if it belo
 Methods
 -------
 
-To find more information about these methods, please visit our :ref:`api`
-
-rb.log
-^^^^^^
-
-Register a set of logs into Rubrix. 
-
-.. code-block:: python
-
-   rb.log(
-       rb.TextClassificationRecord(
-           inputs={"text": "my first rubrix example"},
-           prediction=[('spam', 0.8), ('ham', 0.2)]
-       ),
-       name='example-dataset'
-   )
-
-
-rb.load
-^^^^^^^
-
-Load a dataset or a snapshot as a Huggingface dataset.
-
-.. code-block:: python
-
-   rb.load(name='example-dataset')
-
-
-rb.snapshots
-^^^^^^^^^^^^
-
-Retrieve a dataset snapshot.
-
-.. code-block:: python
-
-   rb.snapshots(name='example-dataset')
-
-
-rb.delete
-^^^^^^^^^
-
-Delete a dataset with a given name.
-
-.. code-block:: python
-
-   rb.delete(name='example-dataset')
-
+To find more information about these methods, please check out the :ref:`api`.
 
 rb.init
 ^^^^^^^
 
-Client setup function. You can pass  the api url and api key via environment variables ``RUBRIX_API_URL`` and ``RUBRIX_API_KEY``\ , or via arguments of these functions. We recommend to use the environment variables, if you set them calling this function won't be necessary, magic will happen in the background.
+Setup the python client: :meth:`rubrix.init`
 
-.. code-block:: python
+rb.log
+^^^^^^
 
-   rb.init(api_url='http://localhost:9090', api_key='4AkeAPIk3Y')
+Register a set of logs into Rubrix: :meth:`rubrix.log`
+
+rb.load
+^^^^^^^
+
+Load a dataset or a snapshot as a pandas DataFrame: :meth:`rubrix.load`
+
+rb.snapshots
+^^^^^^^^^^^^
+
+Retrieve a list of dataset snapshots: :meth:`rubrix.snapshots`
+
+rb.delete
+^^^^^^^^^
+
+Delete a dataset with a given name: :meth:`rubrix.delete`
+
