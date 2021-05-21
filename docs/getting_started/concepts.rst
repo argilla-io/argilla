@@ -3,14 +3,18 @@
 Concepts
 ========
 
-Rubrix Basic Concepts
----------------------
+In this section, we introduce the core concepts of Rubrix. These concepts are important for understanding how to interact with the tool and its core Python client.
+
+We have two main sections: Rubrix data model and Python client API methods.
+
+Rubrix Data model
+-----------------
 
 The Python library and the UI are built around a few simple but key concepts. This section aims to clarify what those concepts and show you the main constructs for using Rubrix with your own models and data. Let's take a look at Rubrix's components and methods:
 
 
-.. image:: ../images/rubrix_concepts.svg
-   :alt: ../images/rubrix_concepts.svg
+.. image:: ../images/rubrix_data_model.svg
+   :alt: ../images/rubrix_data_model.svg
 
 
 Dataset
@@ -58,7 +62,7 @@ Let's see examples over a spam classifier.
 Multi-label text classification record
 """"""""""""""""""""""""""""""""""""""
 
-Another similar task to Text Classification, but yet a bit different, is Multilabel Text Classification. Just one key difference: more than one label may be predicted. While in a regular Text Classification task we may decide that the tweet "I can't wait to travel to Egypts and visit the pyramids" fits into the hastag #Travel, which is accurate, in Multilabel Text Classification we can classify it as more than one hastag, like #Travel #History #Africa #Sightseeing #Desert.
+Another similar task to Text Classification, but yet a bit different, is Multi-label Text Classification. Just one key difference: more than one label may be predicted. While in a regular Text Classification task we may decide that the tweet "I can't wait to travel to Egypts and visit the pyramids" fits into the hastag #Travel, which is accurate, in Multi-label Text Classification we can classify it as more than one hastag, like #Travel #History #Africa #Sightseeing #Desert.
 
 .. code-block:: python
 
@@ -85,7 +89,7 @@ Another similar task to Text Classification, but yet a bit different, is Multila
 Token classification record
 """""""""""""""""""""""""""
 
-Token classification kind-of-tasks are NLP tasks aimed to divide the input text into words, or syllabes, and assign certain values to them. Think about giving each word in a sentence its gramatical category, or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POST-tagging.
+Token classification kind-of-tasks are NLP tasks aimed to divide the input text into words, or syllabes, and assign certain values to them. Think about giving each word in a sentence its gramatical category, or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POS-tagging.
 
 .. code-block:: python
 
@@ -110,7 +114,7 @@ Token classification kind-of-tasks are NLP tasks aimed to divide the input text 
 Task
 ^^^^
 
-A task defines the objective and shape of the predictions and annotations inside a record. [LINK a las tasks].
+A task defines the objective and shape of the predictions and annotations inside a record. You can see our supported tasks at :ref:`tasks`
 
 Annotation
 ^^^^^^^^^^
@@ -125,10 +129,12 @@ A prediction is a piece information assigned to a record, a label or a set of la
 Metadata
 ^^^^^^^^
 
-To complete, talk about metadata at dataset and record level
+Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record... Feel free to use it as you need! 
 
 Methods
 -------
+
+To find more information about these methods, please visit our :ref:`api`
 
 rb.log
 ^^^^^^
@@ -146,37 +152,6 @@ Register a set of logs into Rubrix.
    )
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.log(
-           records: Union[rubrix.client.models.TextClassificationRecord, rubrix.client.models.TokenClassificationRecord, Iterable[Union[rubrix.client.models.TextClassificationRecord, rubrix.client.models.TokenClassificationRecord]]],
-           name: str,
-           tags: Union[Dict[str, str], NoneType] = None,
-           metadata: Union[Dict[str, Any], NoneType] = None,
-           chunk_size: int = 500,
-       )
-       Docstring:
-       Register a set of logs into Rubrix
-
-       Parameters
-       ----------
-       records:
-           The data record object or list.
-       name:
-           The dataset name
-       tags:
-           A set of tags related to dataset. Optional
-       metadata:
-           A set of extra info for dataset. Optional
-       chunk_size:
-           The default chunk size for data bulk
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.load
 ^^^^^^^
 
@@ -186,39 +161,6 @@ Load a dataset or a snapshot as a Huggingface dataset.
 
    rb.load(name='example-dataset')
 
-
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.load(
-           name: str,
-           snapshot: Union[str, NoneType] = None,
-           ids: Union[List[Union[str, int]], NoneType] = None,
-           limit: Union[int, NoneType] = None,
-       ) -> pandas.core.frame.DataFrame
-       Docstring:
-       Load dataset/snapshot data as a huggingface dataset
-
-       Parameters
-       ----------
-       name:
-           The dataset name
-       snapshot:
-           The dataset snapshot id. Optional
-       ids:
-           If provided, load dataset records with given ids.
-           Won't apply for snapshots
-       limit:
-           The number of records to retrieve
-
-       Returns
-       -------
-           A pandas Dataframe
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
 
 rb.snapshots
 ^^^^^^^^^^^^
@@ -230,26 +172,6 @@ Retrieve a dataset snapshot.
    rb.snapshots(name='example-dataset')
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature: rb.snapshots(dataset: str) -> List[rubrix.sdk.models.dataset_snapshot.DatasetSnapshot]
-       Docstring:
-       Retrieve dataset snapshots
-
-       Parameters
-       ----------
-       dataset:
-           The dataset name
-
-       Returns
-       -------
-               rA list with all DatasetSnapshot associated to the given dataset
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.delete
 ^^^^^^^^^
 
@@ -260,22 +182,6 @@ Delete a dataset with a given name.
    rb.delete(name='example-dataset')
 
 
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature: rb.delete(name: str) -> None
-       Docstring:
-       Delete a dataset with given name
-
-       Parameters
-       ----------
-       name:
-           The dataset name
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
-
 rb.init
 ^^^^^^^
 
@@ -284,33 +190,3 @@ Client setup function. You can pass  the api url and api key via environment var
 .. code-block:: python
 
    rb.init(api_url='http://localhost:9090', api_key='4AkeAPIk3Y')
-
-
-* 
-  Show docstring
-
-  .. code-block::
-
-       Signature:
-       rb.init(
-           api_url: Union[str, NoneType] = None,
-           api_key: Union[str, NoneType] = None,
-           timeout: int = 60,
-       )
-       Docstring:
-       Client setup function.
-
-       Calling the RubrixClient init function.
-       Passing an api_url disables environment variable reading, which will provide
-       default values.
-
-       Parameters
-       ----------
-       api_url : str
-           Address from which the API is serving. It will use the default UVICORN address as default
-       api_key: str
-           Authentification api key. A non-secured log will be considered the default case. Optional
-       timeout : int
-           Seconds to considered a connection timeout. Optional
-       File:      ~/recognai/rubrix/venv/lib/python3.8/site-packages/rubrix/__init__.py
-       Type:      function
