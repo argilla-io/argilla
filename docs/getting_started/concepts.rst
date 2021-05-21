@@ -13,8 +13,8 @@ Rubrix Data model
 The Python library and the UI are built around a few simple but key concepts. This section aims to clarify what those concepts and show you the main constructs for using Rubrix with your own models and data. Let's take a look at Rubrix's components and methods:
 
 
-.. image:: ../images/rubrix_concepts.svg
-   :alt: ../images/rubrix_concepts.svg
+.. image:: ../images/rubrix_data_models.svg
+   :alt: ../images/rubrix_data_models.svg
 
 
 Dataset
