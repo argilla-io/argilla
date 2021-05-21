@@ -5,7 +5,7 @@ Concepts
 
 In this section, we introduce the core concepts of Rubrix. These concepts are important for understanding how to interact with the tool and its core Python client.
 
-We have two main subsections: Rubrix data model (explaining those main concepts Rubrix is built around) and Python client API methods (which implement those concepts and data structures).
+We have two main sections: Rubrix data model and Python client API methods.
 
 Rubrix Data model
 -----------------
