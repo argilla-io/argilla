@@ -25,7 +25,6 @@ export default {
     margin: auto;
   }
   &__title {
-    font-family: $s-font-medium;
     @include font-size(30px);
     font-weight: 400;
   }

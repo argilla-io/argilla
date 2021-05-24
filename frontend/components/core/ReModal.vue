@@ -130,7 +130,6 @@ export default {
   border-radius: 0;
   max-width: 520px;
   ::v-deep .modal__title {
-    font-family: "Futura Medium";
     font-weight: normal;
     @include font-size(16px);
   }

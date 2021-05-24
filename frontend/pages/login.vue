@@ -91,7 +91,6 @@ export default {
   &__title {
     text-align: center;
     @include font-size(20px);
-    font-family: $s-font-medium;
     line-height: 1.2em;
     margin: 0 auto 2em auto;
   }

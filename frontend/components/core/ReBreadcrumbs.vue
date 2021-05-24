@@ -30,7 +30,6 @@ export default {
   display: inline-block;
   list-style: none;
   padding-left: 0;
-  font-family: $s-font-medium;
   font-weight: normal;
   &__item {
     margin: auto 0.5em auto auto;
@@ -42,7 +41,7 @@ export default {
       margin-left: 0.5em;
     }
     &:last-child {
-      font-family: $s-font-bold;
+      font-weight: 600;
     }
   }
 }

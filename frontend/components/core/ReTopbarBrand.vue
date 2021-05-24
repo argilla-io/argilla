@@ -47,7 +47,6 @@ export default {
   position: relative;
   background: $primary-color;
   border-bottom: 1px solid $line-light-color;
-  font-family: $s-font-medium;
   color: $lighter-color;
   @extend %container;
   padding-top: 0;

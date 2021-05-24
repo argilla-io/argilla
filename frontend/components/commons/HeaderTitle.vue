@@ -30,7 +30,6 @@ export default {
     font-weight: normal;
     margin-right: auto;
     &__info {
-      font-family: $s-font-medium;
       font-weight: normal;
       @include font-size(16px);
       color: $font-secondary-dark;
