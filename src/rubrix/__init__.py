@@ -46,6 +46,9 @@ def init(
             is not set, it will default to a not authenticated connection.
         timeout:
             Wait `timeout` seconds for the connection to timeout. Default: 60.
+
+    Examples:
+        >>> rb.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
     """
 
     global _client
@@ -90,6 +93,13 @@ def log(
 
     Returns:
         Summary of the response from the REST API
+
+    Examples:
+        >>> record = rb.TextClassificationRecord(
+        ...     inputs={"text": "my first rubrix example"},
+        ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+        ... )
+        >>> response = rb.log(record, name="example-dataset")
     """
 
     # Records can be a single object or a list. In case it is a single object, we create a single-element list
@@ -124,6 +134,9 @@ def snapshots(name: str) -> List[DatasetSnapshot]:
 
     Returns:
         A list of snapshots.
+
+    Examples:
+        >>> snapshot_list = rb.snapshots(name="example-dataset")
     """
     return _client_instance().snapshots(name)
 
@@ -148,6 +161,9 @@ def load(
 
     Returns:
         The dataset as a pandas Dataframe.
+
+    Examples:
+        >>> dataframe = rb.load(name="example-dataset")
     """
     return _client_instance().load(name=name, snapshot=snapshot, limit=limit, ids=ids)
 
@@ -159,5 +175,7 @@ def delete(name: str) -> None:
         name:
             The dataset name.
 
+    Examples:
+        >>> rb.delete(name="example-dataset")
     """
     _client_instance().delete(name=name)
