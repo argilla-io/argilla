@@ -39,7 +39,7 @@ export default {
 .record {
   white-space: pre-line;
   &__key {
-    font-weight: 400;
+    font-weight: 600;
     margin-right: 0.5em;
     text-transform: uppercase;
     @include font-size(16px);
@@ -49,7 +49,6 @@ export default {
     display: inline-block;
     @include font-size(16px);
     line-height: 1.6em;
-    font-weight: 600;
   }
   &--email {
     display: block;

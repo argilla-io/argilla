@@ -72,9 +72,9 @@
           @moredata="onShowMoreData"
         />
       </VueAutoVirtualScrollList>
-      <p class="show-record-number">
+      <!-- <p class="show-record-number">
         <span>&#8249;</span> {{ scrollPosition }} of {{ results.total }}
-      </p>
+      </p> -->
     </div>
   </div>
 </template>

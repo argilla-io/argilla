@@ -1,6 +1,6 @@
 <template>
   <div class="filters__title">
-    <h2 class="filters__title__info">{{ dataset.name }} records ({{ dataset.results.total }})
+    <h2 class="filters__title__info">{{ taskName }} records ({{ dataset.results.total }})
     </h2>
   </div>
 </template>
@@ -13,6 +13,15 @@ export default {
       type: Object,
     },
   },
+  computed: {
+    taskName() {
+      if (this.dataset.task === 'TokenClassification') {
+        return 'Token Classification'
+      } else if (this.dataset.task === 'TextClassification') {
+        return 'Text Classification'
+      }
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -21,7 +30,6 @@ export default {
     font-weight: normal;
     margin-right: auto;
     &__info {
-      font-family: $s-font-medium;
       font-weight: normal;
       @include font-size(16px);
       color: $font-secondary-dark;

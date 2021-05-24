@@ -251,8 +251,6 @@ export default {
     }
     .fixed-header & {
       // position: fixed;
-      width: 100%;
-      max-width: 200px;
       max-height: calc(100% - 180px);
       overflow: auto;
       transition: top 0.2s ease-in-out;
