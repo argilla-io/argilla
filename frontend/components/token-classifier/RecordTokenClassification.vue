@@ -155,9 +155,7 @@ export default {
           {
             ...this.record,
             selected: true,
-            status: ["Discarded", "Validated"].includes(this.record.status)
-              ? "Edited"
-              : this.record.status,
+            status: "Edited",
             annotation: {
               entities,
               agent: this.$auth.user,
