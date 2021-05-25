@@ -123,6 +123,23 @@ export default {
     line-height: 30px;
     min-width: auto;
   }
+  &--outline {
+    @extend .button-secondary;
+    background: transparent;
+    border: 1px solid $line-smooth-color;
+    color: $secondary-color;
+    text-transform: none;
+    &:hover,
+    &:focus {
+      background: transparent;
+      border-color: darken($line-smooth-color, 10%);
+      color: darken($secondary-color, 10%);
+    }
+    &[disabled] {
+      background-color: transparent;
+      opacity: 0.6;
+    }
+  }
 }
 
 .button-tertiary {

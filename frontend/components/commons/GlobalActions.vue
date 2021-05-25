@@ -15,7 +15,6 @@
         :multi-label="isMultiLabelRecord"
         class="global-actions__select"
         :options="options"
-        @addNewLabel="onAddNewLabel"
         @selected="onSelectAnnotation($event)"
       ></FeedbackDropdownAll>
       <ReButton class="global-actions__button" @click="onValidate"
@@ -28,12 +27,28 @@
         Actions will apply to the
         <span>{{ selectedRecords.length }} records</span> selected
       </p>
+      <div class="new-label__container">
+        <reButton class="new-label__main-button button-secondary--outline" @click="newLabelVisible = true" v-if="!newLabelVisible"><svgicon name="plus" width="20" height="20" /> Create new label</reButton>
+        <div v-else class="new-label">
+            <input
+              autofocus
+              class="new-label__input"
+              v-model="newLabel"
+              type="text"
+              placeholder="New label"
+              @keyup.enter="addNewLabel(newLabel)"
+            />
+            <svgicon class="new-label__close" name="cross" @click="closeNewLabelVisible()" />
+            <reButton class="new-label__button button-primary--small" @click="addNewLabel(newLabel)" v-if="this.newLabel">Create</reButton>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
 import "assets/icons/export";
+import "assets/icons/plus";
 
 export default {
   props: {
@@ -45,6 +60,8 @@ export default {
   data: () => ({
     allSelected: false,
     openExportModal: false,
+    newLabel: undefined,
+    newLabelVisible: false,
   }),
   computed: {
     selectedRecords() {
@@ -130,6 +147,10 @@ export default {
         records: records,
       });
     },
+    closeNewLabelVisible() {
+      this.newLabel = undefined;
+      this.newLabelVisible = false;
+    },
     async onDiscard() {
       await this.discard({
         dataset: this.dataset,
@@ -142,11 +163,21 @@ export default {
         records: this.selectedRecords,
       });
     },
-    async onAddNewLabel(newLabel) {
-      this.dataset.$dispatch("setLabels", {
-        dataset: this.dataset,
-        labels: [...new Set([...this.dataset.labels, newLabel])],
-      });
+    async addNewLabel(newLabel) {
+      if (this.isTextClassification) {
+        this.dataset.$dispatch("setLabels", {
+          dataset: this.dataset,
+          labels: [...new Set([...this.dataset.labels, newLabel])],
+        });
+      } else if (this.isTokenClassification) {
+          this.dataset.$dispatch("setEntities", {
+          dataset: this.dataset,
+          entities: [
+            ...new Set([...this.dataset.entities.map((ent) => ent.text), newLabel]),
+          ],
+        });
+      }
+      this.closeNewLabelVisible();
     },
   },
 };
@@ -156,6 +187,42 @@ export default {
   @extend %container;
   padding-top: 0;
   padding-bottom: 0;
+}
+.new-label {
+  width: 180px;
+  border-radius: 3px;
+  border: 2px solid $primary-color;
+  padding: 1em;
+  position: absolute;
+  top: -1em;
+  background: $lighter-color;
+  text-align: left;
+  &__close {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    cursor: pointer;
+  }
+  &__input {
+    border: 0;
+    outline: none;
+    padding-right: 2em;
+    width: 100%;
+  }
+  &__button {
+    margin-top: 2em;
+    margin-bottom: 0 !important;
+  }
+  &__main-button {
+    margin-bottom: 0 !important;
+  }
+  &__container {
+    text-align: right;
+    position: relative;
+    margin-right: 0;
+    margin-left: auto;
+    width: 180px;
+  }
 }
 .global-actions {
   display: flex;

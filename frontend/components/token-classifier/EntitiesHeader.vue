@@ -26,24 +26,6 @@
         entitiesNumber === filteredEntities.length ? "Show less" : "Show all"
       }}</ReButton
     >
-    <p
-      v-if="!addnewSlotVisible && annotationMode"
-      class="entity__new"
-      @click="openAddSlot()"
-    >
-      + New Entity
-    </p>
-    <div v-if="addnewSlotVisible" class="entity__new__container">
-      <input
-        ref="addSlotInput"
-        v-model="newSlot"
-        class="entity__new__input"
-        type="text"
-        placeholder="New entity"
-        @keyup.enter="addEntity(newSlot)"
-      />
-      <svgicon name="cross" @click="addnewSlotVisible = false" />
-    </div>
   </div>
 </template>
 
@@ -69,9 +51,7 @@ export default {
   data: () => ({
     activeEntity: undefined,
     searchEntity: "",
-    newSlot: "",
     showEntitySelector: false,
-    addnewSlotVisible: false,
     entitiesNumber: 12,
   }),
   computed: {
@@ -100,19 +80,6 @@ export default {
           this.activeEntity = entity.text;
         }
       }
-    },
-    openAddSlot() {
-      this.addnewSlotVisible = true;
-      this.$nextTick(() => this.$refs.addSlotInput.focus());
-    },
-    async addEntity(entity) {
-      this.addnewSlotVisible = false;
-      this.dataset.$dispatch("setEntities", {
-        dataset: this.dataset,
-        entities: [
-          ...new Set([...this.dataset.entities.map((ent) => ent.text), entity]),
-        ],
-      });
     },
   },
 };
@@ -158,54 +125,6 @@ export default {
     margin-left: 0.5em;
     .non-selectable & {
       display: none;
-    }
-  }
-  &__new {
-    margin: 0 0 0 0.5em;
-    display: inline-block;
-    color: $primary-color;
-    line-height: 25px;
-    &:hover {
-      color: darken($primary-color, 10%);
-    }
-    &__container {
-      margin-left: 0.5em;
-      position: relative;
-      display: inline-block;
-      .re-button {
-        margin-left: auto;
-        margin-right: 1em;
-        margin-bottom: 0.5em;
-        display: block;
-        color: $primary-color;
-        font-weight: bold;
-        &:hover,
-        &:focus {
-          text-decoration: none;
-          color: darken($primary-color, 10%);
-        }
-        &:after {
-          content: none !important;
-        }
-      }
-      .svg-icon {
-        cursor: pointer;
-        position: absolute;
-        right: 1em;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        color: $primary-color;
-        &:hover {
-          color: darken($primary-color, 10%);
-        }
-      }
-    }
-    &__input {
-      border: 1px solid $line-smooth-color;
-      min-height: 30px;
-      padding: 2px 10px;
-      outline: none;
     }
   }
 }

@@ -37,23 +37,6 @@
             </span>
           </li>
         </ul>
-        <div v-if="!filterSearch(options, searchText).length" class="selector__new-label">
-          <p v-if="!addnewLabelVisible" class="selector__new-label__button"
-            @click="openAddLabel()"
-          >
-            + New Label
-          </p>
-          <div v-if="addnewLabelVisible" class="selector__new-label__input">
-            <input
-              ref="addLabelInput"
-              v-model="newLabel"
-              type="text"
-              placeholder="New label"
-              @keyup.enter="addNewLabel(newLabel)"
-            />
-            <svgicon name="cross" @click="addnewLabelVisible = false" />
-          </div>
-        </div>
         <div v-if="multiLabel && filterSearch(options, searchText).length" class="filter__buttons">
           <ReButton class="button-tertiary--small button-tertiary--outline" @click="onVisibility(false)">
             Cancel
@@ -81,8 +64,6 @@ export default {
     searchText: undefined,
     showTooltipOnHover: false,
     selectedOptions: [],
-    newLabel: undefined,
-    addnewLabelVisible: false,
   }),
   filters: {
     truncate(string, value) {
@@ -93,33 +74,18 @@ export default {
     },
   },
   methods: {
-    openAddLabel() {
-      let text = this.searchText;
-      this.newLabel = text
-      this.addnewLabelVisible = true;
-      this.$nextTick(() => this.$refs.addLabelInput.focus());
-    },
-    addNewLabel(newLabel) {
-      if (!this.options.some(option => option === newLabel)) {
-        this.$emit('addNewLabel', newLabel)
-      }
-      this.addnewLabelVisible = false;
-    },
     onVisibility(value) {
       this.visible = value;
       this.searchText = undefined;
-      this.addnewLabelVisible = false;
     },
     selected(labels) {
       this.$emit('selected', labels);
-      this.addnewLabelVisible = false;
       this.visible = false;
       this.selectedOptions = [];
     },
     
     cleanSearchText() {
       this.searchText = undefined;
-      this.addnewLabelVisible = false;
     },
     filterSearch(options, text) {
       if (text === undefined) {
@@ -145,24 +111,6 @@ export default {
 <style lang="scss" scoped>
 // @import "@recognai/re-commons/src/assets/scss/components/tooltip.scss";
 .selector {
-  &__new-label {
-    &__button {
-      cursor: pointer;
-    }
-    &__input {
-      display: flex;
-      align-content: center;
-      input {
-        @include input-placeholder {
-          color: $font-secondary;
-        }
-      }
-      .svg-icon {
-        margin: auto;
-        cursor: pointer;
-      }
-    }
-  }
   &__option {
     display: block;
     padding: 0.5em 0;
