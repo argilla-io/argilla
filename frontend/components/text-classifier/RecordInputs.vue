@@ -38,6 +38,7 @@ export default {
 <style lang="scss" scoped>
 .record {
   white-space: pre-line;
+  display: block;
   &__key {
     font-weight: 600;
     margin-right: 0.5em;
