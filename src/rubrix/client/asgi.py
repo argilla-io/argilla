@@ -11,6 +11,7 @@ from rubrix import Record, TextClassificationRecord, TokenClassificationRecord
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
+from starlette.types import Message, Receive
 
 _logger = logging.getLogger(__name__)
 _spaces_regex = re.compile(r"\s+")
@@ -45,6 +46,28 @@ def text_classification_mapper(inputs, outputs):
     )
 
 
+class CachedJsonRequest(Request):
+    """
+    We must a cached version of incoming requests since request body cannot be read from middleware directly.
+    See <https://github.com/encode/starlette/issues/847> for more information
+
+    TODO Remove usage of CachedRequest when https://github.com/encode/starlette/pull/848 is released
+    """
+
+    @property
+    def receive(self) -> Receive:
+        body = None
+        if hasattr(self, "_body"):
+            body = self._body
+        if body is not None:
+
+            async def cached_receive() -> Message:
+                return dict(type="http.request", body=body)
+
+            return cached_receive
+        return self._receive
+
+
 class RubrixLogHTTPMiddleware(BaseHTTPMiddleware):
     """An standard starlette middleware that enables rubrix logs for http prediction requests"""
 
@@ -72,12 +95,22 @@ class RubrixLogHTTPMiddleware(BaseHTTPMiddleware):
         if self._endpoint != request.url.path:  # Filtering endpoint path
             return await call_next(request)
 
-        response: Response = await call_next(request)
+        content_type = request.headers.get("Content-type", None)
+        if "application/json" not in content_type:
+            return await call_next(request)
+
+        cached_request = CachedJsonRequest(
+            request.scope, request.receive, request._send
+        )
+        inputs = await cached_request.json()
+        response: Response = await call_next(cached_request)
         try:
-            if not isinstance(response, (JSONResponse, StreamingResponse)):
+            if (
+                not isinstance(response, (JSONResponse, StreamingResponse))
+                or response.status_code >= 400
+            ):
                 return response
 
-            inputs = await request.json()
             new_response, outputs = await self._extract_response_content(response)
             self._queue.put_nowait((inputs, outputs, str(request.url)))
             return new_response

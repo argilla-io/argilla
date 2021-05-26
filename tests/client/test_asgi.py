@@ -1,4 +1,8 @@
+import time
+from typing import Any, Dict
+
 import rubrix
+from fastapi import FastAPI
 from rubrix import TextClassificationRecord, TokenClassificationRecord
 from rubrix.client.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
 from starlette.applications import Starlette
@@ -11,7 +15,7 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
     expected_endpoint = "/predict"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
-    app = Starlette()
+    app = FastAPI()
     app.add_middleware(
         RubrixLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
@@ -19,7 +23,7 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
     )
 
     @app.route(expected_endpoint, methods=["POST"])
-    def mock_predict(request):
+    def mock_predict(data: Dict[str, Any]):
         return JSONResponse(
             content=[
                 {"labels": ["A", "B"], "probabilities": [0.9, 0.1]},
@@ -53,7 +57,11 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
         ],
     )
 
+    assert mock_log.was_called
+    time.sleep(0.200)
+    mock_log.was_called = False
     mock.get("/another/predict/route")
+    assert not mock_log.was_called
 
 
 def test_rubrix_middleware_for_token_classification(monkeypatch):
