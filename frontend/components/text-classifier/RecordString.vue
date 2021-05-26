@@ -36,7 +36,11 @@ export default {
   }),
   computed: {
     escapedText() {
-      return this.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return this.text.replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
     }
   },
   mounted() {
