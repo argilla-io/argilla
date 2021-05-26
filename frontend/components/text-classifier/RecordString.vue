@@ -10,7 +10,8 @@
       <re-button :title="allowScroll ? 'prevent scroll' : 'allow scroll'" v-if="this.scrollHeight >= 800" class="record__scroll__button button-icon" @click="allowScroll = !allowScroll">
         <svgicon :name="allowScroll ? 'unlock' : 'lock'" width="15" height="14"></svgicon>
       </re-button>
-      <span class="record__content" v-html="$highlightSearch(this.queryText, text)"></span>
+      <span class="record__content" v-html="$highlightSearch(this.queryText, this.escapedText)">
+      </span>
     </span>
   </span>
 </template>
@@ -33,6 +34,11 @@ export default {
     allowScroll: false,
     scrollHeight: undefined,
   }),
+  computed: {
+    escapedText() {
+      return this.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+  },
   mounted() {
     if (this.$refs.list) {
       const padding = 2;
