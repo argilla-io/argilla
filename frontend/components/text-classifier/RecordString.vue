@@ -10,7 +10,8 @@
       <re-button :title="allowScroll ? 'prevent scroll' : 'allow scroll'" v-if="this.scrollHeight >= 800" class="record__scroll__button button-icon" @click="allowScroll = !allowScroll">
         <svgicon :name="allowScroll ? 'unlock' : 'lock'" width="15" height="14"></svgicon>
       </re-button>
-      <span class="record__content" v-html="$highlightSearch(this.queryText, text)"></span>
+      <span class="record__content" v-html="$highlightSearch(this.queryText, text)">
+      </span>
     </span>
   </span>
 </template>
