@@ -1,11 +1,17 @@
 
 export default ({ app }, inject) => {
   const highlightSearch = function(query, text){
+    const escapedText = this.text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
     if (!query) {
-      return text;
+      return escapedText;
     }
     let q = query.replace(/^"|"$/g, '');
-    return text
+    return escapedText
       .toString()
       .replace(
         new RegExp(q, "gi"),
