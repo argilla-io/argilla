@@ -100,8 +100,9 @@ class RubrixLogHTTPMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         cached_request = CachedJsonRequest(
-            request.scope, request.receive, request._send
+            scope=request.scope, receive=request.receive, send=request._send
         )
+        # Must read body before call_next
         inputs = await cached_request.json()
         response: Response = await call_next(cached_request)
         try:
@@ -123,6 +124,9 @@ class RubrixLogHTTPMiddleware(BaseHTTPMiddleware):
             try:
                 inputs, outputs, url = self._queue.get()
                 self._log_to_rubrix(inputs, outputs, url)
+            except Exception as ex:
+                # Run thread FOREVER!!!
+                _logger.error("Error sending records to rubrix", exc_info=ex)
             finally:
                 self._queue.task_done()
 
@@ -163,4 +167,4 @@ class RubrixLogHTTPMiddleware(BaseHTTPMiddleware):
         if records:
             for r in records:
                 r.prediction_agent = url
-            rubrix.log(records, name=self._dataset, tags=tags)
+            rubrix.log(records=records, name=self._dataset, tags=tags)
