@@ -1,8 +1,10 @@
 from typing import Type
 
 from fastapi import HTTPException, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel, ValidationError
+from pydantic.error_wrappers import ErrorWrapper
 
 
 class ErrorMessage(BaseModel):
@@ -36,7 +38,7 @@ class UnauthorizedError(HTTPException):
 
 
 class InactiveUserError(HTTPException):
-    """Inactive user error """
+    """Inactive user error"""
 
     def __init__(self):
         super().__init__(
@@ -71,7 +73,8 @@ class GenericValidationError(HTTPException):
 
     def __init__(self, error: ValidationError):
         super().__init__(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=[str(error)]
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=jsonable_encoder(error.errors()),
         )
 
 
