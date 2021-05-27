@@ -107,6 +107,11 @@ def test_rubrix_middleware_for_token_classification(monkeypatch):
         expected_endpoint,
         json=[{"text": "The main text data"}, {"text": "The main text data"}],
     )
+    time.sleep(0.2)
     assert mock_log.was_called
 
+    mock_log.was_called = False
     mock.get("/another/predict/route")
+
+    time.sleep(0.2)
+    assert not mock_log.was_called
