@@ -238,6 +238,23 @@ def test_token_classification_record_to_sdk():
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
+def test_create_ds_with_wrong_name(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset_name = "Test Create_ds_with_wrong_name"
+    client.delete(f"/api/datasets/{dataset_name}")
+
+    with pytest.raises(
+        Exception,
+        match="msg='string does not match regex",
+    ):
+        rubrix.log(
+            TextClassificationRecord(
+                inputs={"text": "The text data"},
+            ),
+            name=dataset_name,
+        )
+
+
 def test_delete_dataset(monkeypatch):
     mocking_client(monkeypatch)
     dataset_name = "test_delete_dataset"
