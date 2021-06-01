@@ -66,7 +66,7 @@ class RubrixClient:
         except ConnectionRefusedError:
             raise Exception("Connection Refused: cannot connect to the API.")
 
-        if response != 200:  # Incorrect authentification
+        if response != 200:  # Incorrect authentication
             # default
             raise Exception("Unidentified error, it should not get here.")
 
