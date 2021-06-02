@@ -1,5 +1,5 @@
-# Rubrix
-> Open-source tool for tracking and evolving data for AI
+![](docs/images/rubrix_logo.svg)
+# Open-source tool for tracking and evolving data for AI
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
