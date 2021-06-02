@@ -3,9 +3,12 @@ This module contains the data models for the interface
 """
 
 import datetime
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+from rubrix.server.commons.helpers import limit_value_length
+from rubrix.server.tasks.commons import MAX_KEYWORD_LENGTH
 
 
 class BulkResponse(BaseModel):
@@ -58,6 +61,17 @@ class TokenAttributions(BaseModel):
     attributions: Dict[str, float] = Field(default_factory=dict)
 
 
+def limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """Checks metadata values length and apply value truncation for large values"""
+    new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
+    if new_value != metadata:
+        warnings.warn(
+            "Some metadata values exceed the max length. "
+            f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
+        )
+    return new_value
+
+
 class TextClassificationRecord(BaseModel):
     """Record for text classification
 
@@ -89,7 +103,7 @@ class TextClassificationRecord(BaseModel):
             The timestamp of the record.
     """
 
-    inputs: Dict[str, Union[str, List[str]]]
+    inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
@@ -103,6 +117,17 @@ class TextClassificationRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+
+    @validator("inputs", pre=True)
+    def input_as_dict(cls, inputs):
+        """Preprocess record inputs and wraps as dictionary if needed"""
+        if isinstance(inputs, dict):
+            return inputs
+        return dict(text=inputs)
+
+    @validator("metadata", pre=True)
+    def check_value_length(cls, metadata):
+        return limit_metadata_values(metadata)
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""
@@ -154,6 +179,10 @@ class TokenClassificationRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+
+    @validator("metadata", pre=True)
+    def check_value_length(cls, metadata):
+        return limit_metadata_values(metadata)
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""

@@ -7,6 +7,7 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
+    MAX_KEYWORD_LENGTH,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
@@ -31,6 +32,16 @@ class ClassPrediction(BaseModel):
 
     class_label: Union[str, int] = Field(alias="class")
     score: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    @validator("class_label")
+    def check_label_length(cls, class_label):
+        if isinstance(class_label, str):
+            assert 1 <= len(class_label) <= MAX_KEYWORD_LENGTH, (
+                f"Class name '{class_label}' exceeds max length of {MAX_KEYWORD_LENGTH}"
+                if len(class_label) > MAX_KEYWORD_LENGTH
+                else f"Class name must not be empty"
+            )
+        return class_label
 
     # See <https://pydantic-docs.helpmanual.io/usage/model_config>
     class Config:

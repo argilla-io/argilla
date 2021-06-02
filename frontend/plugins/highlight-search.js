@@ -10,7 +10,7 @@ export default ({ app }, inject) => {
     if (!query) {
       return escapedText;
     }
-    let q = query.replace(/^"|"$/g, '');
+    let q = query.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, '');
     return escapedText
       .toString()
       .replace(

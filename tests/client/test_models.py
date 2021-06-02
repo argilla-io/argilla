@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+from rubrix import MAX_KEYWORD_LENGTH
 
 from rubrix.client.models import TextClassificationRecord
 from rubrix.client.models import TokenClassificationRecord
@@ -20,6 +21,16 @@ def test_text_classification_record(annotation, status, expected_status):
         inputs={"text": "test"}, annotation=annotation, status=status
     )
     assert record.status == expected_status
+
+
+def test_text_classification_input_string():
+    assert TextClassificationRecord(inputs="A text") == TextClassificationRecord(
+        inputs=dict(text="A text")
+    )
+
+    assert TextClassificationRecord(
+        inputs=["A text", "another text"]
+    ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]))
 
 
 @pytest.mark.parametrize(
@@ -43,3 +54,16 @@ def test_text_classification_record_none_inputs():
     """Test validation error for None in inputs"""
     with pytest.raises(ValidationError):
         TextClassificationRecord(inputs={"text": None})
+
+
+def test_metadata_values_length():
+    text = "oh yeah!"
+    metadata = {"too_long": "a" * 200}
+
+    record = TextClassificationRecord(inputs={"text": text}, metadata=metadata)
+    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+
+    record = TokenClassificationRecord(
+        text=text, tokens=text.split(), metadata=metadata
+    )
+    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH

@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from rubrix.server.tasks.commons import TaskStatus
+from rubrix.server.tasks.commons import MAX_KEYWORD_LENGTH, TaskStatus
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
@@ -18,6 +18,30 @@ def test_flatten_metadata():
     }
     record = TextClassificationRecord.parse_obj(data)
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
+
+
+def test_too_long_metadata():
+    record = TextClassificationRecord.parse_obj(
+        {
+            "inputs": {"text": "bogh"},
+            "metadata": {"too_long": "a"*1000},
+        }
+    )
+
+    assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+
+
+def test_too_long_label():
+    with pytest.raises(ValidationError, match="exceeds max length"):
+        TextClassificationRecord.parse_obj(
+            {
+                "inputs": {"text": "bogh"},
+                "prediction": {
+                    "agent": "test",
+                    "labels": [{"class": "a"*1000}],
+                },
+            }
+        )
 
 
 def test_confidence_integrity():

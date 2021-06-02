@@ -10,7 +10,9 @@ from uuid import uuid4
 from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
-from rubrix.server.commons.helpers import flatten_dict
+from rubrix.server.commons.helpers import flatten_dict, limit_value_length
+
+MAX_KEYWORD_LENGTH = 128
 
 
 class EsRecordDataFieldNames(str, Enum):
@@ -147,7 +149,7 @@ class BaseRecord(GenericModel, Generic[T]):
             return str(uuid4())
         return id
 
-    @validator("metadata")
+    @validator("metadata", pre=True)
     def flatten_metadata(cls, metadata: Dict[str, Any]):
         """
         A fastapi validator for flatten metadata dictionary
@@ -163,7 +165,8 @@ class BaseRecord(GenericModel, Generic[T]):
 
         """
         if metadata:
-            return flatten_dict(metadata)
+            metadata = flatten_dict(metadata)
+            metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
         return metadata
 
     @validator("status", always=True)
