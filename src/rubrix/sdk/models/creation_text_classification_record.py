@@ -27,7 +27,7 @@ class CreationTextClassificationRecord:
     Attributes:
     -----------
 
-    inputs: Dict[str, Any]
+    inputs: Dict[str, Union[str, List[str]]]
         The input data text
 
     multi_label: bool

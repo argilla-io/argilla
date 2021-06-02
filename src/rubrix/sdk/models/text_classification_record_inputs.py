@@ -1,6 +1,8 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
 import attr
+
+from ..types import Unset
 
 T = TypeVar("T", bound="TextClassificationRecordInputs")
 
@@ -9,12 +11,20 @@ T = TypeVar("T", bound="TextClassificationRecordInputs")
 class TextClassificationRecordInputs:
     """  """
 
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Union[str, List[str]]] = attr.ib(
+        init=False, factory=dict
+    )
 
     def to_dict(self) -> Dict[str, Any]:
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
+        for prop_name, prop in self.additional_properties.items():
+            if isinstance(prop, list):
+                field_dict[prop_name] = prop
+
+            else:
+                field_dict[prop_name] = prop
+
         field_dict.update({})
 
         return field_dict
@@ -24,17 +34,35 @@ class TextClassificationRecordInputs:
         d = src_dict.copy()
         text_classification_record_inputs = cls()
 
-        text_classification_record_inputs.additional_properties = d
+        additional_properties = {}
+        for prop_name, prop_dict in d.items():
+
+            def _parse_additional_property(data: Any) -> Union[str, List[str]]:
+                data = None if isinstance(data, Unset) else data
+                additional_property: Union[str, List[str]]
+                try:
+                    additional_property = cast(List[str], data)
+
+                    return additional_property
+                except:  # noqa: E722
+                    pass
+                return cast(Union[str, List[str]], data)
+
+            additional_property = _parse_additional_property(prop_dict)
+
+            additional_properties[prop_name] = additional_property
+
+        text_classification_record_inputs.additional_properties = additional_properties
         return text_classification_record_inputs
 
     @property
     def additional_keys(self) -> List[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> Union[str, List[str]]:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: str, value: Union[str, List[str]]) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

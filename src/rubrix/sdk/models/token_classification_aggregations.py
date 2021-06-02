@@ -11,6 +11,9 @@ from ..models.token_classification_aggregations_annotated_by import (
 from ..models.token_classification_aggregations_confidence import (
     TokenClassificationAggregationsConfidence,
 )
+from ..models.token_classification_aggregations_mentions import (
+    TokenClassificationAggregationsMentions,
+)
 from ..models.token_classification_aggregations_metadata import (
     TokenClassificationAggregationsMetadata,
 )
@@ -22,6 +25,9 @@ from ..models.token_classification_aggregations_predicted_as import (
 )
 from ..models.token_classification_aggregations_predicted_by import (
     TokenClassificationAggregationsPredictedBy,
+)
+from ..models.token_classification_aggregations_predicted_mentions import (
+    TokenClassificationAggregationsPredictedMentions,
 )
 from ..models.token_classification_aggregations_status import (
     TokenClassificationAggregationsStatus,
@@ -55,7 +61,11 @@ class TokenClassificationAggregations:
     words: WordCloudAggregations
         The word cloud aggregations
     metadata: Dict[str, Dict[str, int]]
-        The metadata fields aggregations"""
+        The metadata fields aggregations
+    mentions: Dict[str,int]
+        The annotated entity spans
+    predicted_mentions: Dict[str,int]
+        The prediction entity spans"""
 
     predicted_as: Union[TokenClassificationAggregationsPredictedAs, Unset] = UNSET
     annotated_as: Union[TokenClassificationAggregationsAnnotatedAs, Unset] = UNSET
@@ -66,6 +76,10 @@ class TokenClassificationAggregations:
     confidence: Union[TokenClassificationAggregationsConfidence, Unset] = UNSET
     words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
     metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
+    predicted_mentions: Union[
+        TokenClassificationAggregationsPredictedMentions, Unset
+    ] = UNSET
+    mentions: Union[TokenClassificationAggregationsMentions, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -105,6 +119,14 @@ class TokenClassificationAggregations:
         if not isinstance(self.metadata, Unset):
             metadata = self.metadata.to_dict()
 
+        predicted_mentions: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.predicted_mentions, Unset):
+            predicted_mentions = self.predicted_mentions.to_dict()
+
+        mentions: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.mentions, Unset):
+            mentions = self.mentions.to_dict()
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
@@ -126,6 +148,10 @@ class TokenClassificationAggregations:
             field_dict["words"] = words
         if metadata is not UNSET:
             field_dict["metadata"] = metadata
+        if predicted_mentions is not UNSET:
+            field_dict["predicted_mentions"] = predicted_mentions
+        if mentions is not UNSET:
+            field_dict["mentions"] = mentions
 
         return field_dict
 
@@ -187,6 +213,22 @@ class TokenClassificationAggregations:
         if not isinstance(_metadata, Unset):
             metadata = TokenClassificationAggregationsMetadata.from_dict(_metadata)
 
+        predicted_mentions: Union[
+            TokenClassificationAggregationsPredictedMentions, Unset
+        ] = UNSET
+        _predicted_mentions = d.pop("predicted_mentions", UNSET)
+        if not isinstance(_predicted_mentions, Unset):
+            predicted_mentions = (
+                TokenClassificationAggregationsPredictedMentions.from_dict(
+                    _predicted_mentions
+                )
+            )
+
+        mentions: Union[TokenClassificationAggregationsMentions, Unset] = UNSET
+        _mentions = d.pop("mentions", UNSET)
+        if not isinstance(_mentions, Unset):
+            mentions = TokenClassificationAggregationsMentions.from_dict(_mentions)
+
         token_classification_aggregations = cls(
             predicted_as=predicted_as,
             annotated_as=annotated_as,
@@ -197,6 +239,8 @@ class TokenClassificationAggregations:
             confidence=confidence,
             words=words,
             metadata=metadata,
+            predicted_mentions=predicted_mentions,
+            mentions=mentions,
         )
 
         token_classification_aggregations.additional_properties = d
