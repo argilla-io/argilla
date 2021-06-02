@@ -6,6 +6,7 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
+    MAX_KEYWORD_LENGTH,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
@@ -32,7 +33,7 @@ class EntitySpan(BaseModel):
 
     start: int
     end: int
-    label: str
+    label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
 
     @validator("end")
     def check_span_offset(cls, end: int, values):
