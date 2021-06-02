@@ -3,7 +3,6 @@ from typing import Any, Dict, Iterable, List, Optional
 from fastapi import Depends
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
-from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
     dataset_records_index,
@@ -11,73 +10,10 @@ from rubrix.server.datasets.dao import (
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 from rubrix.server.tasks.commons.es_helpers import (
-    EsRecordDataFieldNames,
+    DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,
 )
-from stopwordsiso import stopwords
-
-SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
-
-DATASETS_RECORDS_INDEX_TEMPLATE = {
-    "settings": {
-        "number_of_shards": settings.es_records_index_shards,
-        "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                "multilingual_stop_analyzer": {
-                    "type": "stop",
-                    "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
-                }
-            }
-        },
-    },
-    "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
-    "mappings": {
-        "properties": {
-            "event_timestamp": {"type": "date"},
-            EsRecordDataFieldNames.words: {
-                "type": "text",
-                "fielddata": True,
-                "analyzer": "multilingual_stop_analyzer",
-            },
-            # TODO: Not here since is task dependant
-            "tokens": {"type": "text"},
-        },
-        "dynamic_templates": [
-            # TODO: Not here since is task dependant
-            {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}},
-            {
-                "status": {
-                    "path_match": "*.status",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "predicted": {
-                    "path_match": "*.predicted",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "strings": {
-                    "match_mapping_type": "string",
-                    "mapping": {
-                        "type": "keyword",
-                        "ignore_above": 128,  # Avoid bulk errors with too long keywords
-                        # Some elasticsearch versions includes automatically raw fields, so
-                        # we must limit those fields too
-                        "fields": {"raw": {"type": "keyword", "ignore_above": 128}},
-                    },
-                }
-            },
-        ],
-    },
-}
 
 
 class DatasetRecordsDAO:
