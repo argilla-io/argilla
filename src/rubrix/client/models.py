@@ -89,7 +89,7 @@ class TextClassificationRecord(BaseModel):
             The timestamp of the record.
     """
 
-    inputs: Union[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
