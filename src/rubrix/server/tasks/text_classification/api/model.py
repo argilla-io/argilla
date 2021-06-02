@@ -37,7 +37,7 @@ class ClassPrediction(BaseModel):
     def check_label_length(cls, class_label):
         if isinstance(class_label, str):
             assert 1 <= len(class_label) <= MAX_KEYWORD_LENGTH, (
-                f"Class {class_label} exceeds max length"
+                f"Class name '{class_label}' exceeds max length of {MAX_KEYWORD_LENGTH}"
                 if len(class_label) > MAX_KEYWORD_LENGTH
                 else f"Class must not be empty"
             )
