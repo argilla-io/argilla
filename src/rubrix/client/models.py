@@ -66,8 +66,8 @@ def limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
     new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
     if new_value != metadata:
         warnings.warn(
-            "Some metadata values exceeds max length"
-            f"Those values will be truncated keeping only last {MAX_KEYWORD_LENGTH} characters."
+            "Some metadata values exceed the max length. "
+            f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
         )
     return new_value
 
