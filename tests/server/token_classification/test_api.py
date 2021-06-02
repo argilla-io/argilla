@@ -13,6 +13,7 @@ client = TestClient(app)
 def test_create_records_for_token_classification():
     dataset = "test_create_records_for_token_classification"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    entity_label = "TEST"
 
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -23,7 +24,7 @@ def test_create_records_for_token_classification():
                 "metadata": {"field_one": "value one", "field_two": "value 2"},
                 "prediction": {
                     "agent": "test",
-                    "entities": [{"start": 0, "end": 4, "label": "TEST"}],
+                    "entities": [{"start": 0, "end": 4, "label": entity_label}],
                 },
             },
             {
@@ -32,7 +33,7 @@ def test_create_records_for_token_classification():
                 "metadata": {"field_one": "value one", "field_two": "value 2"},
                 "annotation": {
                     "agent": "test",
-                    "entities": [{"start": 0, "end": 4, "label": "TEST"}],
+                    "entities": [{"start": 0, "end": 4, "label": entity_label}],
                 },
             },
         ]
@@ -55,5 +56,5 @@ def test_create_records_for_token_classification():
     response = client.post(f"/api/datasets/{dataset}/TokenClassification:search")
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
-    assert "This" in results.aggregations.predicted_mentions
-    assert "This" in results.aggregations.mentions
+    assert "This" in results.aggregations.predicted_mentions[entity_label]
+    assert "This" in results.aggregations.mentions[entity_label]

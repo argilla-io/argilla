@@ -14,10 +14,20 @@ def parse_aggregations(
     if es_aggregations is None:
         return None
 
+    def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
+        parsed = {}
+        for bucket in buckets:
+            key, doc_count = bucket.pop("key"), bucket.pop("doc_count")
+            if len(bucket) == 1 and not ("from" in bucket or "to" in bucket):
+                k = [k for k in bucket if k not in ["key", "doc_count"]][0]
+                parsed.update({key: parse_buckets(bucket[k].get("buckets", []))})
+            else:
+                parsed.update({key: doc_count})
+
+        return parsed
+
     return {
-        key: {
-            bucket["key"]: bucket["doc_count"] for bucket in values.get("buckets", {})
-        }
+        key: parse_buckets(values.get("buckets", []))
         for key, values in es_aggregations.items() or {}
     }
 
@@ -159,6 +169,29 @@ class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
 
     DEFAULT_AGGREGATION_SIZE = 100
+
+    @staticmethod
+    def bidimentional_terms_aggregations(
+        name: str, field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
+    ):
+        return {
+            name: {
+                "terms": {
+                    "field": field_name_x,
+                    "size": size,
+                    "order": {"_count": "desc"},
+                },
+                "aggs": {
+                    field_name_y: {
+                        "terms": {
+                            "field": field_name_y,
+                            "size": size,
+                            "order": {"_count": "desc"},
+                        }
+                    }
+                },
+            }
+        }
 
     @staticmethod
     def terms_aggregation(field_name: str, size: int = DEFAULT_AGGREGATION_SIZE):

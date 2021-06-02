@@ -308,9 +308,9 @@ class TokenClassificationAggregations(BaseModel):
         The word cloud aggregations
     metadata: Dict[str, Dict[str, int]]
         The metadata fields aggregations
-    mentions: Dict[str,int]
+    mentions: Dict[str,Dict[str,int]]
         The annotated entity spans
-    predicted_mentions: Dict[str,int]
+    predicted_mentions: Dict[str,Dict[str,int]]
         The prediction entity spans
     """
 
@@ -323,8 +323,8 @@ class TokenClassificationAggregations(BaseModel):
     score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
     words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
-    predicted_mentions: Dict[str, int] = Field(default_factory=dict)
-    mentions: Dict[str, int] = Field(default_factory=dict)
+    predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
 class TokenClassificationSearchResults(BaseModel):

@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons import BulkResponse, EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.es_helpers import aggregations, filters
@@ -125,8 +125,16 @@ class TokenClassificationService:
             search=RecordSearch(
                 query=as_elasticsearch(search),
                 aggregations={
-                    **aggregations.terms_aggregation(PREDICTED_MENTIONS_ES_FIELD_NAME),
-                    **aggregations.terms_aggregation(MENTIONS_ES_FIELD_NAME),
+                    **aggregations.bidimentional_terms_aggregations(
+                        name=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                        field_name_x=EsRecordDataFieldNames.predicted_as,
+                        field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                    ),
+                    **aggregations.bidimentional_terms_aggregations(
+                        name=MENTIONS_ES_FIELD_NAME,
+                        field_name_x=EsRecordDataFieldNames.annotated_as,
+                        field_name_y=MENTIONS_ES_FIELD_NAME,
+                    ),
                 },
             ),
             size=size,
