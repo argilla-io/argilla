@@ -1,9 +1,85 @@
 import math
 from typing import Any, Dict, List, Optional, Union
 
-from rubrix.server.tasks.commons import PredictionStatus, ScoreRange, TaskStatus
+from rubrix.server.commons.settings import settings
+from rubrix.server.datasets.dao import (
+    DATASETS_RECORDS_INDEX_NAME,
+)
+from rubrix.server.tasks.commons import (
+    MAX_KEYWORD_LENGTH,
+    PredictionStatus,
+    ScoreRange,
+    TaskStatus,
+)
+from stopwordsiso import stopwords
 
 from .api import EsRecordDataFieldNames
+
+SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
+DATASETS_RECORDS_INDEX_TEMPLATE = {
+    "settings": {
+        "number_of_shards": settings.es_records_index_shards,
+        "number_of_replicas": settings.es_records_index_replicas,
+        "analysis": {
+            "analyzer": {
+                "multilingual_stop_analyzer": {
+                    "type": "stop",
+                    "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
+                }
+            }
+        },
+    },
+    "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
+    "mappings": {
+        "properties": {
+            "event_timestamp": {"type": "date"},
+            EsRecordDataFieldNames.words: {
+                "type": "text",
+                "fielddata": True,
+                "analyzer": "multilingual_stop_analyzer",
+            },
+            # TODO: Not here since is task dependant
+            "tokens": {"type": "text"},
+        },
+        "dynamic_templates": [
+            # TODO: Not here since is task dependant
+            {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}},
+            {
+                "status": {
+                    "path_match": "*.status",
+                    "mapping": {
+                        "type": "keyword",
+                    },
+                }
+            },
+            {
+                "predicted": {
+                    "path_match": "*.predicted",
+                    "mapping": {
+                        "type": "keyword",
+                    },
+                }
+            },
+            {
+                "strings": {
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "keyword",
+                        "ignore_above": MAX_KEYWORD_LENGTH,  # Avoid bulk errors with too long keywords
+                        # Some elasticsearch versions includes automatically raw fields, so
+                        # we must limit those fields too
+                        "fields": {
+                            "raw": {
+                                "type": "keyword",
+                                "ignore_above": MAX_KEYWORD_LENGTH,
+                            }
+                        },
+                    },
+                }
+            },
+        ],
+    },
+}
 
 
 def prefix_query_fields(
@@ -130,7 +206,7 @@ class filters:
 
     @staticmethod
     def metadata(metadata: Dict[str, Union[str, List[str]]]) -> List[Dict[str, Any]]:
-        """Filter records by compound metadata """
+        """Filter records by compound metadata"""
         if not metadata:
             return []
 
