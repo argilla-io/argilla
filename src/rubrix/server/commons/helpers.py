@@ -87,7 +87,7 @@ def limit_value_length(data: Any, max_length: int) -> Any:
     """
 
     if isinstance(data, str):
-        return data[len(data) - max_length :]
+        return data[-max_length:]
     if isinstance(data, dict):
         return {
             k: limit_value_length(v, max_length=max_length) for k, v in data.items()
