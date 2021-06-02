@@ -3,12 +3,14 @@ from typing import Any, Dict, Iterable, List, Optional
 
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons import BulkResponse, EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import filters
+from rubrix.server.tasks.commons.es_helpers import aggregations, filters
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
+    MENTIONS_ES_FIELD_NAME,
+    PREDICTED_MENTIONS_ES_FIELD_NAME,
     TokenClassificationAggregations,
     TokenClassificationQuery,
     TokenClassificationRecord,
@@ -120,7 +122,21 @@ class TokenClassificationService:
 
         results = self.__dao__.search_records(
             dataset,
-            search=RecordSearch(query=as_elasticsearch(search)),
+            search=RecordSearch(
+                query=as_elasticsearch(search),
+                aggregations={
+                    **aggregations.bidimentional_terms_aggregations(
+                        name=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                        field_name_x=EsRecordDataFieldNames.predicted_as,
+                        field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                    ),
+                    **aggregations.bidimentional_terms_aggregations(
+                        name=MENTIONS_ES_FIELD_NAME,
+                        field_name_x=EsRecordDataFieldNames.annotated_as,
+                        field_name_y=MENTIONS_ES_FIELD_NAME,
+                    ),
+                },
+            ),
             size=size,
             record_from=record_from,
         )

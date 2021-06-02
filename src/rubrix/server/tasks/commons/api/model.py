@@ -224,7 +224,7 @@ class BaseRecord(GenericModel, Generic[T]):
     def extended_fields(self) -> Dict[str, Any]:
         """
         Used for extends fields to store in db. Tasks that would include extra
-        more properties than commons (predicted, annotated_as,....) could implement
+        properties than commons (predicted, annotated_as,....) could implement
         this method.
         """
         return {}

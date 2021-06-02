@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 from rubrix.server.datasets.model import UpdateDatasetRequest
@@ -12,6 +12,10 @@ from rubrix.server.tasks.commons import (
     TaskStatus,
     TaskType,
 )
+
+
+PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
+MENTIONS_ES_FIELD_NAME = "mentions"
 
 
 class EntitySpan(BaseModel):
@@ -163,6 +167,18 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def words(self) -> str:
         return self.text
 
+    def extended_fields(self) -> Dict[str, Any]:
+        return {
+            PREDICTED_MENTIONS_ES_FIELD_NAME: self._predicted_mentions(),
+            MENTIONS_ES_FIELD_NAME: self._mentions(),
+        }
+
+    def _predicted_mentions(self) -> List[str]:
+        return self.__mentions_from_entities__(self._predicted_entities())
+
+    def _mentions(self) -> List[str]:
+        return self.__mentions_from_entities__(self._entities())
+
     def _entities(self) -> Set[EntitySpan]:
         """Shortcut for real annotated entities, if provided"""
         if self.annotation is None:
@@ -174,6 +190,9 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         if self.prediction is None:
             return set()
         return set(self.prediction.entities)
+
+    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> List[str]:
+        return [self.text[entity.start : entity.end] for entity in entities]
 
     class Config:
         allow_population_by_field_name = True
@@ -290,6 +309,10 @@ class TokenClassificationAggregations(BaseModel):
         The word cloud aggregations
     metadata: Dict[str, Dict[str, int]]
         The metadata fields aggregations
+    mentions: Dict[str,Dict[str,int]]
+        The annotated entity spans
+    predicted_mentions: Dict[str,Dict[str,int]]
+        The prediction entity spans
     """
 
     predicted_as: Dict[str, int] = Field(default_factory=dict)
@@ -301,6 +324,8 @@ class TokenClassificationAggregations(BaseModel):
     score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
     words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
 class TokenClassificationSearchResults(BaseModel):
