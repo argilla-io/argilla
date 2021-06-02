@@ -93,10 +93,6 @@ def limit_value_length(data: Any, max_length: int) -> Any:
             k: limit_value_length(v, max_length=max_length) for k, v in data.items()
         }
     if isinstance(data, (list, tuple, set)):
-        new_values = [limit_value_length(v, max_length=max_length) for v in data]
-        if isinstance(data, tuple):
-            return tuple(new_values)
-        if isinstance(data, set):
-            return set(new_values)
-        return new_values
+        new_values = map(lambda x: limit_value_length(x, max_length=max_length), data)
+        return type(data)(new_values)
     return data
