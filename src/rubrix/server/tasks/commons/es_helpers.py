@@ -6,70 +6,6 @@ from rubrix.server.tasks.commons import PredictionStatus, ScoreRange, TaskStatus
 from .api import EsRecordDataFieldNames
 
 
-def prefix_query_fields(
-    query_filters: List[Dict[str, Any]], prefix: str
-) -> List[Dict[str, Any]]:
-    """Scans all query filters and add a prefix to configured field names"""
-
-    prefixed_query_fields = []
-    for query_filter in query_filters:
-        filter_type = list(query_filter.keys())[0]
-        if filter_type in ["term", "terms", "range"]:
-            prefixed_query_fields.append(
-                {
-                    filter_type: {
-                        f"{prefix}.{key}": value
-                        for key, value in query_filter[filter_type].items()
-                    }
-                }
-            )
-        elif filter_type == "query_string":
-            prefixed_query_fields.append(
-                {
-                    filter_type: {
-                        **query_filter[filter_type],
-                        "default_field": f"{prefix}.{query_filter[filter_type]['default_field']}",
-                    }
-                }
-            )
-        else:
-            raise ValueError(query_filter)
-
-    return prefixed_query_fields
-
-
-def prefix_aggregations_fields(
-    query_aggregations: Dict[str, Dict[str, Any]], prefix: str
-) -> Dict[str, Dict[str, Any]]:
-    """Scans all query aggregations and add a prefix to configured field names"""
-    prefixed_aggregations = {}
-    query_aggregations = query_aggregations or {}
-    for name, aggregation in query_aggregations.items():
-        aggregation_type = list(aggregation.keys())[0]
-        if aggregation_type in ["terms", "range"]:
-            prefixed_aggregations.update(
-                {
-                    f"{prefix}.{name}": {
-                        aggregation_type: {
-                            **aggregation[aggregation_type],
-                            "field": f"{prefix}.{aggregation[aggregation_type].get('field')}",
-                        }
-                    }
-                }
-            )
-        else:
-            raise ValueError(query_aggregations)
-    return prefixed_aggregations
-
-
-def parse_tasks_aggregations(tasks_aggregations: Dict[str, Dict[str, Any]]):
-    """Transforms elasticsearch aggregations with task info into a more friendly structure"""
-    return {
-        task_name: parse_aggregations(aggs)
-        for task_name, aggs in tasks_aggregations.items()
-    }
-
-
 def parse_aggregations(
     es_aggregations: Dict[str, Any] = None
 ) -> Optional[Dict[str, Any]]:
@@ -130,7 +66,7 @@ class filters:
 
     @staticmethod
     def metadata(metadata: Dict[str, Union[str, List[str]]]) -> List[Dict[str, Any]]:
-        """Filter records by compound metadata """
+        """Filter records by compound metadata"""
         if not metadata:
             return []
 
@@ -223,6 +159,18 @@ class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
 
     DEFAULT_AGGREGATION_SIZE = 100
+
+    @staticmethod
+    def terms_aggregation(field_name: str, size: int = DEFAULT_AGGREGATION_SIZE):
+        return {
+            field_name: {
+                "terms": {
+                    "field": field_name,
+                    "size": size,
+                    "order": {"_count": "desc"},
+                }
+            }
+        }
 
     @staticmethod
     def predicted_by(size: int = DEFAULT_AGGREGATION_SIZE):

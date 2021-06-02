@@ -6,9 +6,11 @@ from rubrix.server.datasets.service import DatasetsService, create_dataset_servi
 from rubrix.server.tasks.commons import BulkResponse
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import filters
+from rubrix.server.tasks.commons.es_helpers import aggregations, filters
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
+    MENTIONS_ES_FIELD_NAME,
+    PREDICTED_MENTIONS_ES_FIELD_NAME,
     TokenClassificationAggregations,
     TokenClassificationQuery,
     TokenClassificationRecord,
@@ -120,7 +122,13 @@ class TokenClassificationService:
 
         results = self.__dao__.search_records(
             dataset,
-            search=RecordSearch(query=as_elasticsearch(search)),
+            search=RecordSearch(
+                query=as_elasticsearch(search),
+                aggregations={
+                    **aggregations.terms_aggregation(PREDICTED_MENTIONS_ES_FIELD_NAME),
+                    **aggregations.terms_aggregation(MENTIONS_ES_FIELD_NAME),
+                },
+            ),
             size=size,
             record_from=record_from,
         )
