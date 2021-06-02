@@ -5,7 +5,7 @@ This module contains the data models for the interface
 import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class BulkResponse(BaseModel):
@@ -89,7 +89,7 @@ class TextClassificationRecord(BaseModel):
             The timestamp of the record.
     """
 
-    inputs: Dict[str, Union[str, List[str]]]
+    inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
@@ -103,6 +103,13 @@ class TextClassificationRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+
+    @validator("inputs", pre=True)
+    def input_as_dict(cls, inputs):
+        """Preprocess record inputs and wraps as dictionary if needed"""
+        if isinstance(inputs, dict):
+            return inputs
+        return dict(text=inputs)
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""
