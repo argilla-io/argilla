@@ -22,6 +22,16 @@ def test_text_classification_record(annotation, status, expected_status):
     assert record.status == expected_status
 
 
+def test_text_classification_input_string():
+    assert TextClassificationRecord(inputs="A text") == TextClassificationRecord(
+        inputs=dict(text="A text")
+    )
+
+    assert TextClassificationRecord(
+        inputs=["A text", "another text"]
+    ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]))
+
+
 @pytest.mark.parametrize(
     ("annotation", "status", "expected_status"),
     [
