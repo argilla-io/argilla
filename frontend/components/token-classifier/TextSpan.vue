@@ -5,6 +5,7 @@
       :text="text"
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
       :span="span"
+      :queryText="queryText"
       :annotation-mode="annotationMode"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
@@ -14,7 +15,7 @@
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
-      v-html="text"
+      v-html="$highlightSearch(this.queryText, text)"
     /><span class="entities__selector__container">
       <div
         v-if="showEntitiesSelector"
