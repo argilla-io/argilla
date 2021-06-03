@@ -4,7 +4,7 @@
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="text"
+      v-html="$highlightSearch(this.queryText, text)"
     />
     <span class="highlight__label">
       <span :class="['highlight__tooltip', annotationMode ? 'highlight__tooltip--icon' : '']">
@@ -42,6 +42,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    queryText: {
+      type: String,
+    }
   },
   data: () => {
     return {
