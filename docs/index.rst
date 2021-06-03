@@ -139,7 +139,8 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Guides
    :hidden:
 
-   guides/streamlit_guide.rst
+   guides/streamlit_guide
+   guides/cookbook
    
 .. toctree::
    :maxdepth: 3
