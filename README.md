@@ -1,4 +1,6 @@
-<img align="center" src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
+<p align="center">
+    <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
+</p>
 
 # Open-source tool for tracking and evolving data for AI
 
