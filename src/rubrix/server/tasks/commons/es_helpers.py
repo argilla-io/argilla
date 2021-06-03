@@ -207,7 +207,11 @@ class filters:
 
         if isinstance(text_query, str):
             return {
-                "query_string": {"fields": ["inputs.*", "tokens"], "query": text_query}
+                "query_string": {
+                    "default_field": "words",
+                    "default_operator": "AND",
+                    "query": text_query,
+                }
             }
 
         return {
@@ -216,6 +220,7 @@ class filters:
                     {
                         "query_string": {
                             "default_field": f"inputs.{key}",
+                            "default_operator": "AND",
                             "query": query_text,
                         }
                     }
