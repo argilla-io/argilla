@@ -314,3 +314,16 @@ a:hover {
     padding-right: 2em;    
   }
 }
+/* Change the white to any color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active
+{
+ -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
+.rst-content .highlighted {
+  background: #c5c6e0;
+  box-shadow: 0 0 0 2px #c5c6e0;
+}
