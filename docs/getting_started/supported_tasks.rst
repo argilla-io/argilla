@@ -1,7 +1,8 @@
 .. _tasks:
 
-Supported and planned tasks
-===========================
+Tasks
+=====
+This section gives you ideas about the kind of tasks you can use Rubrix for. It also describes some of the tasks on our roadmap, if there's some task you want and don't see here or you want to contribute a task, file an issue or use the Discussion forum at `Rubrix's GitHub page <https://github.com/recognai/rubrix/>`_.
 
 Supported tasks
 ---------------
@@ -49,8 +50,8 @@ Rubrix is flexible with input and output shapes, which means you can model relat
 * `Key phrase extraction <https://paperswithcode.com/task/keyword-extraction>`_
 * Slot filling
 
-Planned tasks
--------------
+Tasks on the roadmap
+--------------------
 
 Natural language processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -59,8 +60,8 @@ Natural language processing
 * Text2Text, covering summarization, machine translation, natural language generation, etc.
 * Question answering
 
-Image
-^^^^^
+Computer vision
+^^^^^^^^^^^^^^^
 
 
 * Image classification
