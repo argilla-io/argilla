@@ -2,7 +2,7 @@
 Monitoring and collecting data from third-party apps
 ====================================================
 
-The goal of this guide is to show you **how Rubrix can be integrated into third-party ML applications** to collect predictions and user feedback. For this one we are going to use `streamlit <https://streamlit.io>`_\ , an amazing tool that turns Python scripts into beautiful web-apps. 
+This guide will show you **how can Rubrix be integrated into third-party applications** to collect predictions and user feedback. To do this, we are going to use `streamlit <https://streamlit.io>`_\ , an amazing tool to turn Python scripts into beautiful web-apps. 
 
 Let's make a quick tour of the app, how you can run it locally and how to integrate Rubrix into other apps.
 
