@@ -6,6 +6,7 @@
 
 First steps with Rubrix
 =======================
+Welcome to Rubrix's documentation.
 
 What's Rubrix?
 --------------
@@ -20,7 +21,7 @@ With Rubrix, you can:
 * **Iterate** on ground-truth data and predictions to debug, track and improve your models over time.
 * **Build** custom applications and dashboards on top of your model predictions and ground-truth data.
 
-Rubrix is designed to enable novel, human-in-the loop workflows involving data scientists, subject matter experts and data engineers for curating, understanding and evolving data for AI projects.
+Rubrix is designed to enable novel, human-in-the loop workflows involving data scientists, subject matter experts and data engineers for curating, understanding and evolving data for AI and data science projects.
 
 We've tried to make Rubrix easy, fun and seamless to use with your favourite libraries while keeping it scalable and flexible. Rubrix's main components are:
 
@@ -33,32 +34,29 @@ We've tried to make Rubrix easy, fun and seamless to use with your favourite lib
    :alt: images/rubrix_intro.svg
 
 
-Rubrix's architecture and components
-
-Rubrix currently focuses on ``natural language processing`` and ``knowledge graph`` use cases but we will be adding support for speech recognition and computer vision soon. 
+Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we will be adding support for speech recognition and computer vision soon. 
 
 Quickstart
 ----------
 
-Getting started with the Rubrix is really easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
+Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
 
 
-#. 
-   Make sure you have ``Docker`` installed and run (check our **Setup and Installation[add_link]** guide for a more detailed installation process):
+Make sure you have ``Docker`` installed and run (check the **Setup and Installation** section for a more detailed installation process):
    
-   .. code-block::
+.. code-block:: bash
 
-      wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
-
-
-   #. Install Rubrix python library (and ``transformers`` and ``datasets`` libraries for this example):
-
-``pip install rubrix transformers datatasets``
+   wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 
 
-#. Use your favourite editor or a Jupyter notebook to run the following:
+Install Rubrix python library (and ``transformers`` and ``datasets`` libraries for this example):
 
-Text classification deals with predicting in which categories a text fits. As if you're shown an image you could quickly tell if there's a dog or a cat in it, we build NLP models to distinguish between a Jane Austen's novel or a Charlotte Bronte's poem. It's all about feeding models with labeled examples and see how it start predicting over the very same labels.
+.. code-block:: bash
+
+   pip install rubrix transformers datatasets
+
+
+Use your favourite editor or a Jupyter notebook to run the following:
 
 .. code-block:: python
 
@@ -70,14 +68,16 @@ Text classification deals with predicting in which categories a text fits. As if
 
    dataset = load_dataset("ag_news", split='test[0:100]')
 
+   # Our labels are: ['World', 'Sports', 'Business', 'Sci/Tech']
+   labels = dataset.features["label"].names
+
    for record in dataset:
-       # Our labels are: ['World', 'Sports', 'Business', 'Sci/Tech']
-       prediction = model(record['text'], dataset.features["label"].names) 
+       prediction = model(record['text'], labels) 
 
        item = rb.TextClassificationRecord(
            inputs={"text": record["text"]},
            prediction=list(zip(prediction['labels'], prediction['scores'])), 
-           annotation=categories[record["label"]]
+           annotation=labels[record["label"]]
        )
 
        rb.log(item, name="ag_news_zeroshot")
@@ -99,7 +99,7 @@ Use cases
 Design Principles
 -----------------
 
-Rubrix design is:
+Rubrix's design is:
 
 * **Agnostic**: you can use Rubrix with any library or framework, no need to implement any interface or modify your existing toolbox and workflows.
 * **Flexible:**  Rubrix does not make any strong assumption about your input data, so you can log and structure your data as it fits your use case.
@@ -108,7 +108,7 @@ Rubrix design is:
 Next steps
 ----------
 
-The documentation is divided in different categories, which explore each aspect and use case of Rubrix. Here you have quick links to each one:
+The documentation is divided into different sections, which explore different aspects of Rubrix:
 
 * :ref:`setup-and-installation`
 * :ref:`concepts`
