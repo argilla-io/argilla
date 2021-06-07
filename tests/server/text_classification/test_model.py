@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
-from rubrix.server.tasks.commons import MAX_KEYWORD_LENGTH, TaskStatus
+from rubrix.server.tasks.commons import TaskStatus
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,

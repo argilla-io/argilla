@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from rubrix import MAX_KEYWORD_LENGTH
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
     TokenClassificationAnnotation,

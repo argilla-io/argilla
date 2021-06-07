@@ -7,12 +7,12 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
-    MAX_KEYWORD_LENGTH,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
     TaskType,
 )
+from rubrix._constants import MAX_KEYWORD_LENGTH
 
 
 class ClassPrediction(BaseModel):

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, validator
 from rubrix.server.commons.helpers import limit_value_length
-from rubrix.server.tasks.commons import MAX_KEYWORD_LENGTH
+from rubrix._constants import MAX_KEYWORD_LENGTH
 
 
 class BulkResponse(BaseModel):

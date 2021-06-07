@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from rubrix import MAX_KEYWORD_LENGTH
+from rubrix._constants import MAX_KEYWORD_LENGTH
 
 from rubrix.client.models import TextClassificationRecord
 from rubrix.client.models import TokenClassificationRecord

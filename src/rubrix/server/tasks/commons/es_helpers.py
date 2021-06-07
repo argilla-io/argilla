@@ -6,11 +6,11 @@ from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
 )
 from rubrix.server.tasks.commons import (
-    MAX_KEYWORD_LENGTH,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
 )
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from stopwordsiso import stopwords
 
 from .api import EsRecordDataFieldNames

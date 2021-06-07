@@ -10,9 +10,8 @@ from uuid import uuid4
 from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
-
-MAX_KEYWORD_LENGTH = 128
 
 
 class EsRecordDataFieldNames(str, Enum):

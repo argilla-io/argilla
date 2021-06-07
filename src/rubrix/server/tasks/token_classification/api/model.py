@@ -6,13 +6,12 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
-    MAX_KEYWORD_LENGTH,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
     TaskType,
 )
-
+from rubrix._constants import MAX_KEYWORD_LENGTH
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
