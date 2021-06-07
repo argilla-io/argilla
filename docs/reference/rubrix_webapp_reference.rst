@@ -16,8 +16,10 @@ The **Home page** is the entry point to Rubrix Datasets. It's a searchable and s
 - **Created at**, which corresponds to the timestamp of the Dataset creation. Datasets in Rubrix are created by directly using ``rb.log`` to log a collection of records.
 - **Updated at**, which corresponds to the timestamp of the last update to this dataset, either by adding/changing/removing some annotations with the UI or via the Python client or the REST API.
 
-.. image:: ../images/reference/ui/home_page.png
+.. figure:: ../images/reference/ui/home_page.png
    :alt: Rubrix Home page view
+
+   Rubrix Home page view
 
 Dataset page
 ------------
@@ -25,22 +27,17 @@ The **Dataset page** is the workspace for exploring and annotating records in a 
 
 Here we describe the search components and the two modes of operation (Explore and Annotation).
 
-Search components
-^^^^^^^^^^^^^^^^^
 The Rubrix Dataset page is driven by search features. The search bar gives users quick filters for easily exploring and selecting data subsets.
-
-.. image:: ../images/reference/ui/search_components.png
-   :alt: Rubrix UI search-bar
-
 The main sections of the search bar are following:
 
-**Search input**
+Search input
+^^^^^^^^^^^^
 
 This component enables:
 
-*Full-text queries* over all record ``inputs``.
+**Full-text queries** over all record ``inputs``.
 
-*Queries using Elasticsearch's query DSL* with the `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\, which enables powerful queries for advanced users, using the Rubrix data model. Some examples are:
+**Queries using Elasticsearch's query DSL** with the `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\, which enables powerful queries for advanced users, using the Rubrix data model. Some examples are:
 
 ``inputs.text:(women AND feminists)`` : records containing the words "women" AND "feminist" in the inputs.text field.
 
@@ -52,50 +49,87 @@ This component enables:
 
 ``NOT(_exists_:metadata.format)`` : records that don't have a value for metadata.format.
 
-.. image:: ../images/reference/ui/es_query_dsl_string.png
+.. figure:: ../images/reference/ui/es_query_dsl_string.png
    :alt: Search input with Elasticsearch DSL query string
 
+   Rubrix search input with Elasticsearch DSL query string
 
-**Predictions filters**
+
+Predictions filters
+^^^^^^^^^^^^^^^^^^^
+
 This component allows filtering by aspects related to predictions, such as:
 
 - predicted as, for filtering records by predicted labels,
 - predicted by, for filtering by prediction_agent (e.g., different versions of a model)
 - predicted ok or ko, for filtering records whose predictions are (or not) correct with respect to the annotations.
 
-**Annotations filters**
+Annotations filters
+^^^^^^^^^^^^^^^^^^^^^
+
 This component allows filtering by aspects related to annotations, such as:
 
 - annotated as, for filtering records by annotated labels,
 - annotated by, for filtering by annotation_agent (e.g., different human users or dataset versions)
 
-.. image:: ../images/reference/ui/annotation_filters.png
+.. figure:: ../images/reference/ui/annotation_filters.png
    :alt: Rubrix annotation filters
 
-**Status filter**
+   Rubrix annotation filters
+
+Status filter
+^^^^^^^^^^^^^
+
 This component allows filtering by record status:
 
 - **Default**: records without any annotation or edition.
 - **Validated**: records with validated annotations.
 - **Edited**: records with annotations but not yet validated.
 
-.. image:: ../images/reference/ui/status_filters.png
+.. figure:: ../images/reference/ui/status_filters.png
    :alt: Rubrix status filters
 
-**Metadata filters**
+   Rubrix status filters
+
+Metadata filters
+^^^^^^^^^^^^^^^^
 This component allows filtering by metadata fields. The list of filters is dynamic and it's created with the aggregations of metadata fields included in any of the logged records.
 
-**Active query parameters**
+Active query parameters
+^^^^^^^^^^^^^^^^^^^^^^^
 This component show the current active search params, it allows removing each individual param as well as all params at once.
 
-.. image:: ../images/reference/ui/active_query_params.png
-   :alt: Active query params bar
+.. figure:: ../images/reference/ui/active_query_params.png
+   :alt: Active query params module
+
+   Active query params module
 
 
 Explore mode
 ^^^^^^^^^^^^
 This mode enables users to explore a records in a dataset. Different tasks provide different visualizations tailored for the task.
 
+.. figure:: ../images/reference/ui/explore_textcat.png
+   :alt: Rubrix Text Classification Explore mode
+
+   Rubrix Text Classification Explore mode
+
+.. figure:: ../images/reference/ui/explore_ner.png
+   :alt: Rubrix Token Classification (NER) Explore mode
+
+   Rubrix Token Classification (NER) Explore mode
+
 Annotation mode
 ^^^^^^^^^^^^^^^
 This mode enables users to add and modify annotations, while following the same interaction patterns as in the explore mode (e.g., using filters and advanced search), as well as novel features such as bulk annotation for a given set of search params.
+
+.. figure:: ../images/reference/ui/annotation_textcat.png
+   :alt: Rubrix Text Classification Annotation mode
+
+   Rubrix Text Classification Annotation mode
+
+
+.. figure:: ../images/reference/ui/annotation_ner.png
+   :alt: Rubrix Token Classification (NER) Annotation mode
+
+   Rubrix Token Classification (NER) Annotation mode
