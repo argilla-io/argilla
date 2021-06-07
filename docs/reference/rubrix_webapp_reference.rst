@@ -101,7 +101,7 @@ This component show the current active search params, it allows removing each in
 
 .. figure:: ../images/reference/ui/active_query_params.png
    :alt: Active query params module
-   
+
    Active query params module
 
 
@@ -132,4 +132,4 @@ This mode enables users to add and modify annotations, while following the same 
 .. figure:: ../images/reference/ui/annotation_ner.png
    :alt: Rubrix Token Classification (NER) Annotation mode
 
-   Rubrix Text Classification Annotation mode
+   Rubrix Token Classification (NER) Annotation mode
