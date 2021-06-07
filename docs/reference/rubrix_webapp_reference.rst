@@ -1,16 +1,14 @@
 .. _webapp_reference:
 
-Rubrix UI reference
-========================
-This section contains a quick overview of the Rubrix web-app's User Interface (UI).
+Rubrix UI
+=========
+This section contains a quick overview of Rubrix web-app's User Interface (UI).
 
 The web-app has two main pages: the **Home** page and the **Dataset** page.
 
 Home page
 ---------
-The **Home page** is the entry point to Rubrix Datasets. 
-
-Specifically, it is a searchable and sortable list of datasets with the following attributes:
+The **Home page** is the entry point to Rubrix Datasets. It's a searchable and sortable list of datasets with the following attributes:
 
 - **Name**
 - **Tags**, which displays the ``tags`` passed to the ``rubrix.log`` method. Tags are useful to organize your datasets by project, model, status and any other dataset attribute you can think of.
@@ -23,16 +21,18 @@ Specifically, it is a searchable and sortable list of datasets with the followin
 
 Dataset page
 ------------
-The **Dataset page** is the main workspace for exploring and annotating Datasets in Rubrix. Every Task has its own specialized components, while keeping a similar layout and structure.
+The **Dataset page** is the workspace for exploring and annotating records in a Rubrix Dataset. Every task has its own specialized components, while keeping a similar layout and structure.
+
+Here we describe the search components and the two modes of operation (Explore and Annotation).
 
 Search components
 ^^^^^^^^^^^^^^^^^
-The Rubrix Dataset page is built around search features. The search bar gives users quick filters for easily exploring and selecting dataset subsets.
+The Rubrix Dataset page is driven by search features. The search bar gives users quick filters for easily exploring and selecting data subsets.
 
 .. image:: ../images/reference/ui/search_components.png
    :alt: Rubrix UI search-bar
 
-The main sections of the search-bar are following:
+The main sections of the search bar are following:
 
 **Search input**
 
@@ -42,35 +42,51 @@ This component enables:
 
 *Queries using Elasticsearch's query DSL* with the `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\, which enables powerful queries for advanced users, using the Rubrix data model. Some examples are:
 
-``inputs.text:(women AND feminists)``, records containing "women" AND "feminist" in the inputs.text field.
+``inputs.text:(women AND feminists)`` : records containing the words "women" AND "feminist" in the inputs.text field.
 
-``inputs.text:(NOT women)``, records NOT containing women in the inputs.text field.
+``inputs.text:(NOT women)`` : records NOT containing women in the inputs.text field.
 
-``inputs.hypothesis:(not OR don't)``, records containing women in the inputs.text field.
+``inputs.hypothesis:(not OR don't)`` : records containing the word "not" or the phrase "don't" in the inputs.hypothesis field.
 
-``metadata.format:pdf AND metadata.page_number>1``, records with metadata.format equals pdf and with metadata.page_number greater than 1.
+``metadata.format:pdf AND metadata.page_number>1`` : records with metadata.format equals pdf and with metadata.page_number greater than 1.
 
-``NOT(_exists_:metadata.format)``, records that don't have a metadata.format.
+``NOT(_exists_:metadata.format)`` : records that don't have a value for metadata.format.
 
 .. image:: ../images/reference/ui/es_query_dsl_string.png
    :alt: Search input with Elasticsearch DSL query string
 
 
 **Predictions filters**
+This component allows filtering by aspects related to predictions, such as:
+
+- predicted as, for filtering records by predicted labels,
+- predicted by, for filtering by prediction_agent (e.g., different versions of a model)
+- predicted ok or ko, for filtering records whose predictions are (or not) correct with respect to the annotations.
 
 **Annotations filters**
+This component allows filtering by aspects related to annotations, such as:
+
+- annotated as, for filtering records by annotated labels,
+- annotated by, for filtering by annotation_agent (e.g., different human users or dataset versions)
 
 .. image:: ../images/reference/ui/annotation_filters.png
    :alt: Rubrix annotation filters
 
-**Status filters**
+**Status filter**
+This component allows filtering by record status:
+
+- **Default**: records without any annotation or edition.
+- **Validated**: records with validated annotations.
+- **Edited**: records with annotations but not yet validated.
 
 .. image:: ../images/reference/ui/status_filters.png
    :alt: Rubrix status filters
 
 **Metadata filters**
+This component allows filtering by metadata fields. The list of filters is dynamic and it's created with the aggregations of metadata fields included in any of the logged records.
 
 **Active query parameters**
+This component show the current active search params, it allows removing each individual param as well as all params at once.
 
 .. image:: ../images/reference/ui/active_query_params.png
    :alt: Active query params bar
@@ -78,8 +94,8 @@ This component enables:
 
 Explore mode
 ^^^^^^^^^^^^
-
+This mode enables users to explore a records in a dataset. Different tasks provide different visualizations tailored for the task.
 
 Annotation mode
 ^^^^^^^^^^^^^^^
-
+This mode enables users to add and modify annotations, while following the same interaction patterns as in the explore mode (e.g., using filters and advanced search), as well as novel features such as bulk annotation for a given set of search params.
