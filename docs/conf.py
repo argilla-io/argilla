@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 import rubrix as rb
 
-project = "rubrix"
+project = "Rubrix"
 copyright = "2021, Recognai"
 author = "Recognai"
 
