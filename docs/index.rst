@@ -157,6 +157,7 @@ You can join the conversation on our Github page and our Github forum.
    :hidden:
 
    reference/python_client_api
+   reference/rubrix_webapp_reference
 
 .. toctree::
    :maxdepth: 2
