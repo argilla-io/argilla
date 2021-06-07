@@ -25,16 +25,11 @@ The **Dataset page** is the workspace for exploring and annotating records in a 
 
 Here we describe the search components and the two modes of operation (Explore and Annotation).
 
-Search components
-^^^^^^^^^^^^^^^^^
 The Rubrix Dataset page is driven by search features. The search bar gives users quick filters for easily exploring and selecting data subsets.
-
-.. image:: ../images/reference/ui/search_components.png
-   :alt: Rubrix UI search-bar
-
 The main sections of the search bar are following:
 
-**Search input**
+Search input
+^^^^^^^^^^^^
 
 This component enables:
 
@@ -56,14 +51,18 @@ This component enables:
    :alt: Search input with Elasticsearch DSL query string
 
 
-**Predictions filters**
+Predictions filters
+^^^^^^^^^^^^^^^^^^^
+
 This component allows filtering by aspects related to predictions, such as:
 
 - predicted as, for filtering records by predicted labels,
 - predicted by, for filtering by prediction_agent (e.g., different versions of a model)
 - predicted ok or ko, for filtering records whose predictions are (or not) correct with respect to the annotations.
 
-**Annotations filters**
+Annotations filters
+^^^^^^^^^^^^^^^^^^^^^
+
 This component allows filtering by aspects related to annotations, such as:
 
 - annotated as, for filtering records by annotated labels,
@@ -72,7 +71,9 @@ This component allows filtering by aspects related to annotations, such as:
 .. image:: ../images/reference/ui/annotation_filters.png
    :alt: Rubrix annotation filters
 
-**Status filter**
+Status filter
+^^^^^^^^^^^^^
+
 This component allows filtering by record status:
 
 - **Default**: records without any annotation or edition.
@@ -82,10 +83,12 @@ This component allows filtering by record status:
 .. image:: ../images/reference/ui/status_filters.png
    :alt: Rubrix status filters
 
-**Metadata filters**
+Metadata filters
+^^^^^^^^^^^^^^^^
 This component allows filtering by metadata fields. The list of filters is dynamic and it's created with the aggregations of metadata fields included in any of the logged records.
 
-**Active query parameters**
+Active query parameters
+^^^^^^^^^^^^^^^^^^^^^^^
 This component show the current active search params, it allows removing each individual param as well as all params at once.
 
 .. image:: ../images/reference/ui/active_query_params.png
