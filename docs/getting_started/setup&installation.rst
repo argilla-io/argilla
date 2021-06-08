@@ -58,7 +58,7 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 
    pip install rubrix[server]
 
-3. Launch a local instance of the Rubrix webapp
+3. Launch a local instance of the Rubrix web app
 
 .. code-block::
 
