@@ -103,8 +103,7 @@ export default {
   background: $primary-color;
   color: $lighter-color;
   .svg-icon {
-    margin-right: 1em;
-    vertical-align: middle;
+    margin: auto 0.5em auto -0.3em;
     fill: $secondary-color;
   }
   &:hover,
@@ -129,6 +128,7 @@ export default {
     border: 1px solid $line-smooth-color;
     color: $secondary-color;
     text-transform: none;
+    display: flex;
     &:hover,
     &:focus {
       background: transparent;
