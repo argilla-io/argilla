@@ -6,7 +6,7 @@ Setup and installation
 In this guide, we will help you to get up and running with Rubrix. Basically, you need to:
 
 1. Install the Python client
-2. Launch the webapp
+2. Launch the web app
 
 1. Install the Rubrix python client
 ------------------------------------
