@@ -219,6 +219,8 @@ export default {
   }
   &__main-button {
     margin-bottom: 0 !important;
+    margin-right: 0;
+    margin-left: auto;
   }
   &__container {
     text-align: right;
