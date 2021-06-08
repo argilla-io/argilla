@@ -8,7 +8,7 @@ In this guide, we will help you to get up and running with Rubrix. Basically, yo
 1. Install the Python client
 2. Launch the web app
 
-1. Install the Rubrix python client
+1. Install the Rubrix Python client
 ------------------------------------
 
 First, make sure you have Python 3.6 or above installed.
