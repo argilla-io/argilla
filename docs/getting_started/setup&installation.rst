@@ -30,22 +30,22 @@ There are two ways to launch the webapp:
 Using ``docker-compose`` (recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This is the recommended way because it automatically includes an
-`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance, Rubrix's main persistent layer.
-
-You first need to install the `Docker Engine <https://docs.docker.com/engine/install/>`_ for your platform.
+For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`_.
 Then you can launch the docker-contained webapp with the following command:
 
 .. code-block:: bash
 
    wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
 
+This is the recommended way because it automatically includes an
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance, Rubrix's main persistent layer.
+
 Executing the server code manually
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When executing the server coder manually you need to provide an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance yourself.
-This method may be preferred if you (1) want to avoid or cannot use ``Docker``\ ,
+This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 (2) have an existing Elasticsearch service, or
 (3) want to have full control over your Elasticsearch configuration.
 
