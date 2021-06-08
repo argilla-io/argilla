@@ -43,7 +43,7 @@ This is the recommended way because it automatically includes an
 Executing the server code manually
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When executing the server coder manually you need to provide an
+When executing the server code manually you need to provide an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance yourself.
 This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 (2) have an existing Elasticsearch service, or
