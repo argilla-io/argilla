@@ -28,7 +28,7 @@
         <span>{{ selectedRecords.length }} records</span> selected
       </p>
       <div class="new-label__container">
-        <reButton class="new-label__main-button button-secondary--outline" @click="newLabelVisible = true" v-if="!newLabelVisible"><svgicon name="plus" width="20" height="20" /> Create new label</reButton>
+        <reButton class="new-label__main-button button-secondary--outline" @click="newLabelVisible = true" v-if="!newLabelVisible"><svgicon name="plus" width="10" height="10" />Create new label</reButton>
         <div v-else class="new-label">
             <input
               autofocus
@@ -39,7 +39,7 @@
               @keyup.enter="addNewLabel(newLabel)"
             />
             <svgicon class="new-label__close" name="cross" @click="closeNewLabelVisible()" />
-            <reButton class="new-label__button button-primary--small" @click="addNewLabel(newLabel)" v-if="this.newLabel">Create</reButton>
+            <reButton class="new-label__button button-primary--small" @click="addNewLabel(newLabel)" :disabled="!this.newLabel">Create</reButton>
         </div>
       </div>
     </div>
@@ -199,9 +199,13 @@ export default {
   text-align: left;
   &__close {
     position: absolute;
-    top: 1em;
+    top: 1.2em;
     right: 1em;
     cursor: pointer;
+    height: 12px;
+    width: 12px;
+    stroke: $font-secondary;
+    stroke-width: 1;
   }
   &__input {
     border: 0;
