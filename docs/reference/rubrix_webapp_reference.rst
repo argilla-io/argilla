@@ -49,6 +49,8 @@ This component enables:
 
 ``NOT(_exists_:metadata.format)`` : records that don't have a value for metadata.format.
 
+``predicted_as:(NOT Sports)`` : records which are not predicted with the label ``Sports``, this is useful when you have many target labels and want to exclude only some of them.
+
 .. figure:: ../images/reference/ui/es_query_dsl_string.png
    :alt: Search input with Elasticsearch DSL query string
 
