@@ -1,15 +1,14 @@
 <template>
-    <transition name="re-progress" appear>
-      <div class="re-progress">
-        <div class="re-progress-track" :style="styles">
-        </div>
-          <div
-            v-if="multiple && progressSecondary"
-            class="re-progress-track--secondary"
-            :style="stylesSecondary"
-          />
-      </div>
-    </transition>
+  <transition name="re-progress" appear>
+    <div class="re-progress">
+      <div class="re-progress-track" :style="styles"></div>
+      <div
+        v-if="multiple && progressSecondary"
+        class="re-progress-track--secondary"
+        :style="stylesSecondary"
+      />
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -75,7 +74,7 @@ export default {
   border-top-left-radius: 2px;
   background: $secondary-color;
   transition: $swift-ease-out;
-  max-width: 50%;
+  max-width: 100%;
   transition-duration: 2s;
   &:last-of-type {
     border-bottom-left-radius: 0;
