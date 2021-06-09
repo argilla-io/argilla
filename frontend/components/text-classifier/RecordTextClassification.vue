@@ -3,7 +3,12 @@
     <!-- annotation labels and prediction status -->
     <div class="record--left">
       <!-- record text -->
-      <RecordInputs :predicted="record.predicted" :data="record.inputs" :explanation="record.explanation" :query-text="dataset.query.text" />
+      <RecordInputs
+        :predicted="record.predicted"
+        :data="record.inputs"
+        :explanation="record.explanation"
+        :query-text="dataset.query.text"
+      />
       <!-- record annotation area -->
       <ClassifierAnnotationArea
         v-if="annotationEnabled"
@@ -21,7 +26,7 @@
         @onShowMetadata="$emit('onShowMetadata')"
       />
     </div>
-    <div class="record__labels" v-if="!annotationEnabled">
+    <div v-if="!annotationEnabled" class="record__labels">
       <LabelPill
         v-if="record.annotation && !annotationEnabled"
         class="annotations"
@@ -125,7 +130,7 @@ export default {
           });
           break;
         default:
-          console.log("waT?", status);
+          console.warn("waT?", status);
       }
     },
     async onAnnotate({ labels }) {
@@ -171,4 +176,3 @@ export default {
   }
 }
 </style>
-

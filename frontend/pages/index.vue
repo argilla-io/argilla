@@ -24,7 +24,7 @@
           :sorted-by-field="sortedByField"
           :actions="actions"
           :columns="tableColumns"
-          :querySearch="querySearch"
+          :query-search="querySearch"
           :global-actions="false"
           search-on="name"
           :show-modal="showModal"
@@ -49,7 +49,12 @@ export default {
       { name: "Tags", field: "tags", class: "text", type: "object" },
       { name: "Task", field: "task", class: "task", type: "task" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
-      { name: "Updated at", field: "last_updated", class: "date", type: "date" },
+      {
+        name: "Updated at",
+        field: "last_updated",
+        class: "date",
+        type: "date",
+      },
     ],
     actions: [
       { name: "delete", icon: "delete", tooltip: "Delete" },
@@ -94,7 +99,7 @@ export default {
           this.$router.push(rowId);
           break;
         default:
-          console.log(action);
+          console.warn(action);
       }
     },
     onSearch(event) {

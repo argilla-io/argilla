@@ -255,7 +255,7 @@ const actions = {
      */
     if (dataset.task === null) {
       // TODO: Error handling
-      console.log("wat!?", dataset);
+      console.warn("wat!?", dataset);
       return undefined;
     }
 

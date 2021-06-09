@@ -8,7 +8,7 @@
       :annotation-mode="annotationEnabled"
       :entities="dataset.entities"
       :spans="textSpans"
-      :queryText="dataset.query.text"
+      :query-text="dataset.query.text"
       :class="isSelected(i) ? 'selected' : ''"
       @startSelection="onStartSelection"
       @endSelection="onEndSelection"
@@ -120,7 +120,7 @@ export default {
       return textSpans;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled
+      return this.dataset.viewSettings.annotationEnabled;
     },
   },
   methods: {
@@ -135,7 +135,7 @@ export default {
           await this.discard({ dataset: this.dataset, records: [this.record] });
           break;
         default:
-          console.log("waT?", status);
+          console.warn("waT?", status);
       }
     },
     onReset() {
@@ -163,7 +163,7 @@ export default {
           },
         ],
       });
-      this.onReset()
+      this.onReset();
     },
     onSelectEntity(entity) {
       const from = Math.min(this.selectionStart, this.selectionEnd);
