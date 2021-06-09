@@ -58,6 +58,7 @@ class TextClassificationDataset extends ObservationDataset {
     const uniqueLabels = [
       ...new Set(
         (labels || [])
+          .filter((l) => l && l.trim())
           .concat(Object.keys(aggregations.annotated_as))
           .concat(Object.keys(aggregations.predicted_as))
       ),

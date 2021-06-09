@@ -1,6 +1,7 @@
 <template>
   <div
-    :class="['container',
+    :class="[
+      'container',
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
   >
@@ -28,18 +29,33 @@
         <span>{{ selectedRecords.length }} records</span> selected
       </p>
       <div class="new-label__container">
-        <reButton class="new-label__main-button button-secondary--outline" @click="newLabelVisible = true" v-if="!newLabelVisible"><svgicon name="plus" width="10" height="10" />Create new label</reButton>
+        <reButton
+          v-if="!newLabelVisible"
+          class="new-label__main-button button-secondary--outline"
+          @click="newLabelVisible = true"
+          ><svgicon name="plus" width="10" height="10" />Create new
+          label</reButton
+        >
         <div v-else class="new-label">
-            <input
-              autofocus
-              class="new-label__input"
-              v-model="newLabel"
-              type="text"
-              placeholder="New label"
-              @keyup.enter="addNewLabel(newLabel)"
-            />
-            <svgicon class="new-label__close" name="cross" @click="closeNewLabelVisible()" />
-            <reButton class="new-label__button button-primary--small" @click="addNewLabel(newLabel)" :disabled="!this.newLabel">Create</reButton>
+          <input
+            v-model="newLabel"
+            autofocus
+            class="new-label__input"
+            type="text"
+            placeholder="New label"
+            @keyup.enter="addNewLabel(newLabel)"
+          />
+          <svgicon
+            class="new-label__close"
+            name="cross"
+            @click="closeNewLabelVisible()"
+          />
+          <reButton
+            class="new-label__button button-primary--small"
+            :disabled="!this.newLabel"
+            @click="addNewLabel(newLabel)"
+            >Create</reButton
+          >
         </div>
       </div>
     </div>
@@ -78,7 +94,10 @@ export default {
     },
     options() {
       const record = this.dataset.results.records[0];
-      let labels = record && record.prediction ? record.prediction.labels.map((label) => label.class) : [];
+      let labels =
+        record && record.prediction
+          ? record.prediction.labels.map((label) => label.class)
+          : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return this.isTextClassification ? labels : [];
     },
@@ -164,16 +183,23 @@ export default {
       });
     },
     async addNewLabel(newLabel) {
+      if (!newLabel || !newLabel.trim()) {
+        // If no label, nothing to do
+        return;
+      }
       if (this.isTextClassification) {
         this.dataset.$dispatch("setLabels", {
           dataset: this.dataset,
           labels: [...new Set([...this.dataset.labels, newLabel])],
         });
       } else if (this.isTokenClassification) {
-          this.dataset.$dispatch("setEntities", {
+        this.dataset.$dispatch("setEntities", {
           dataset: this.dataset,
           entities: [
-            ...new Set([...this.dataset.entities.map((ent) => ent.text), newLabel]),
+            ...new Set([
+              ...this.dataset.entities.map((ent) => ent.text),
+              newLabel,
+            ]),
           ],
         });
       }
@@ -282,7 +308,8 @@ export default {
     background: $lighter-color;
     border: 1px solid $line-smooth-color;
     cursor: pointer;
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       border-color: $primary-color;
     }
     &:first-of-type {
