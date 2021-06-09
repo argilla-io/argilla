@@ -50,8 +50,8 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 (3) want to have full control over your Elasticsearch configuration.
 
 1. First you need to install
-   `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.12/install-elasticsearch.html>`_
-   and launch an Elasticsearch instance.
+   `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html>`_
+   (we recommend version 7.10) and launch an Elasticsearch instance.
 2. Install the Rubrix Python library together with its server dependencies:
 
 .. code-block:: bash
