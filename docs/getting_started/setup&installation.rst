@@ -52,6 +52,9 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 1. First you need to install
    `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html>`_
    (we recommend version 7.10) and launch an Elasticsearch instance.
+   For MacOS and Windows there are
+   `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`_ and a
+   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively.
 2. Install the Rubrix Python library together with its server dependencies:
 
 .. code-block:: bash
