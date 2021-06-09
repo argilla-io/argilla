@@ -4,8 +4,11 @@
       'container',
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
-  >
+  >      
     <div class="global-actions">
+      <ReButton class="button--refresh button-primary" @click="refresh()">
+        <svgicon name="refresh" width="20" height="14" /> Refresh
+      </ReButton>
       <!-- TODO use v-model for ReCheckbox with boolean values -->
       <ReCheckbox
         v-model="allSelected"
@@ -65,6 +68,7 @@
 import { mapActions } from "vuex";
 import "assets/icons/export";
 import "assets/icons/plus";
+import "assets/icons/refresh";
 
 export default {
   props: {
@@ -133,8 +137,14 @@ export default {
       updateRecords: "entities/datasets/updateRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      search: "entities/datasets/search",
     }),
-
+    refresh() {
+      this.search({
+        dataset: this.dataset,
+        query: this.dataset.query
+      });
+    },
     async onSelectAnnotation(labels) {
       const records = this.selectedRecords.map((record) => {
         const appliedLabels = record.annotation
@@ -256,6 +266,13 @@ export default {
     width: 180px;
   }
 }
+.button--refresh {
+  position: absolute !important;
+  z-index: 2;
+  top: -40px;
+  right: 0;
+  left: auto;
+}
 .global-actions {
   display: flex;
   align-items: center;
@@ -264,6 +281,7 @@ export default {
   padding: 1em 1.4em;
   background: $lighter-color;
   border-radius: 3px;
+  position: relative;
   .fixed-header & {
     margin-top: 0;
     padding-top: 0;
