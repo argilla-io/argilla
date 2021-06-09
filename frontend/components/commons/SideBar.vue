@@ -34,13 +34,15 @@
               <strong>{{ totalDiscarded }}</strong>
             </span>
           </div>
-          <div
-            v-for="(counter, label) in getInfo"
-            :key="label"
-          >
-            <div v-if="counter > 0" class="info">
-              <label>{{ label }}</label>
-              <span class="records-number">{{ counter }}</span>
+          <div class="labels">
+            <div
+              v-for="(counter, label) in getInfo"
+              :key="label"
+            >
+              <div v-if="counter > 0" class="info">
+                <label>{{ label }}</label>
+                <span class="records-number">{{ counter }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -290,6 +292,9 @@ export default {
     width: calc(100% - 40px);
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .labels {
+    margin-top: 3em;
   }
   .total {
     font-weight: 600;
