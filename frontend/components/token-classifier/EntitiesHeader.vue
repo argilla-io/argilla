@@ -90,6 +90,10 @@ export default {
   &__container {
     margin-bottom: 1em;
     padding: 0 4em;
+    width: calc(100% - 120px);
+    @include media(">desktopLarge") {
+      width: calc(100% - 360px);
+    }
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;

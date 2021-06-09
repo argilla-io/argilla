@@ -100,6 +100,7 @@ export default {
     position: relative;
     text-align: left;
     margin-top: 10px;
+    width: calc(100% - 150px);
     &--empty {
       border-bottom: none;
     }
@@ -119,6 +120,7 @@ export default {
       z-index: 1;
       border-bottom: 0;
       margin-top: 3px;
+      padding-right: 150px;
     }
   }
 }

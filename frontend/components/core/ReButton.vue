@@ -63,9 +63,9 @@ export default {
   @extend %button;
   background-color: $primary-color;
   color: $lighter-color;
+  display: flex;
   .svg-icon {
-    margin-right: 1em;
-    vertical-align: middle;
+    margin: auto 0.5em auto -0.3em;
     fill: $lighter-color;
   }
   &:hover,
