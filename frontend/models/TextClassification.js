@@ -49,12 +49,14 @@ class TextClassificationDataset extends ObservationDataset {
         {},
         (data) => new TextClassificationSearchResults(data)
       ),
+      globalResults: this.attr({}),
     };
   }
 
   get labels() {
     const { labels } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
-    const aggregations = this.results.aggregations;
+    const aggregations = this.globalResults.aggregations;
+    console.log('ag', aggregations)
     const uniqueLabels = [
       ...new Set(
         (labels || [])

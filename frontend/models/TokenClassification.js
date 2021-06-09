@@ -64,6 +64,7 @@ class TokenClassificationDataset extends ObservationDataset {
         {},
         (data) => new TokenClassificationSearchResults(data)
       ),
+      globalResults: this.attr({}),
     };
   }
 
@@ -72,7 +73,7 @@ class TokenClassificationDataset extends ObservationDataset {
 
     const usedChars = [];
     const characters = "1234567890".split("");
-    const aggregations = this.results.aggregations;
+    const aggregations = this.globalResults.aggregations;
     const names = [
       ...new Set(
         (entities || [])
