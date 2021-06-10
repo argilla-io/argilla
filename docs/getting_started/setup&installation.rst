@@ -5,49 +5,13 @@ Setup and installation
 
 In this guide, we will help you to get up and running with Rubrix. Basically, you need to:
 
+1. Install the Python client
+2. Launch the web app
 
-#. Setup and launch the webapp, whose main external dependency is `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html#install-elasticsearch>`_\ , Rubrix's main persistence layer.
-#. Install the Python library.
-
-1. Setup and launch the webapp
-------------------------------
-
-There are two ways of launching the webapp:
-
-
-#. Using **Docker** and a ``docker-compose`` file we provide with all you need for the *webapp* (recommended).
-#. Setting up your own Elasticsearch installation and launching the Rubrix server. This method is useful if you (1) want to avoid or cannot use ``Docker``\ , (2)  have an existing Elasticsearch service, or (3) want to have full control over your Elasticsearch configuration.
-
-Using Docker and ``docker-compose`` (recommended)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You first need to install the `Docker Engine <https://docs.docker.com/engine/install/>`_ for your platform.
-
-You can launch your docker-contained environment with the following command:
-
-.. code-block:: bash
-
-   wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
-
-Using an Elasticsearch installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-#. If you do not have an existing Elasticsearch installation,  install `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.12/install-elasticsearch.html>`_ and launch your Elasticsearch instance.
-#. Install the Rubrix Python library following the `guide <>`_ below.
-#. Launch a local instance of the Rubrix webapp ``python -m rubrix.server``. By default, the Rubrix server will look for your ES endpoint URL at ``http://localhost:9200`` if you want to customize this, you can setup the ``ELASTICSEARCH`` env variable with your ES endpoint URL.
-
-Checking your webapp and REST API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You should be able to access Rubrix via `http://localhost:6900/ <http://localhost:6900/>`_\ , and you can also check the API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
-
-2. Install the Rubrix Python library
+1. Install the Rubrix Python client
 ------------------------------------
 
-First, make sure you have Python 3.6-3.8 and ``pip`` installed. 
-
-Before installing the library  recommend you to create a fresh `Conda virtual environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_\ ,  `venv <https://docs.python.org/3/library/venv.html>`_ or a similar virtual environment manager.
+First, make sure you have Python 3.6 or above installed.
 
 Then you can install Rubrix with ``pip``\ :
 
@@ -55,10 +19,67 @@ Then you can install Rubrix with ``pip``\ :
 
    pip install rubrix
 
+2. Setup and launch the webapp
+------------------------------
+
+There are two ways to launch the webapp:
+
+#. Using `docker-compose <https://docs.docker.com/compose/>`_ (**recommended**).
+#. Executing the server code manually
+
+Using ``docker-compose`` (recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`_.
+Then you can launch the docker-contained webapp with the following command:
+
+.. code-block:: bash
+
+   wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
+
+This is the recommended way because it automatically includes an
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance, Rubrix's main persistent layer.
+
+Executing the server code manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When executing the server code manually you need to provide an
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance yourself.
+This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
+(2) have an existing Elasticsearch service, or
+(3) want to have full control over your Elasticsearch configuration.
+
+1. First you need to install
+   `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html>`_
+   (we recommend version 7.10) and launch an Elasticsearch instance.
+   For MacOS and Windows there are
+   `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`_ and a
+   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively.
+2. Install the Rubrix Python library together with its server dependencies:
+
+.. code-block:: bash
+
+   pip install rubrix[server]
+
+3. Launch a local instance of the Rubrix web app
+
+.. code-block::
+
+   python -m rubrix.server
+
+By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
+If you want to customize this, you can set the ``ELASTICSEARCH`` environment variable pointing to your endpoint.
+
+Checking your webapp and REST API
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now you should be able to access Rubrix via `http://localhost:6900/ <http://localhost:6900/>`_\ ,
+and you can also check the API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
+
 3. Testing the installation by logging some data
 ------------------------------------------------
 
-The following code will log one record into the ``example-dataset`` :
+The following code will log one record into a data set called ``example-dataset`` :
 
 .. code-block:: python
 
@@ -69,17 +90,17 @@ The following code will log one record into the ``example-dataset`` :
        name='example-dataset'
    )
 
-You should receive this response in your terminal or your Jupyter Notebook:
+You should receive this response in your terminal or Jupyter Notebook:
 
 .. code-block:: bash
 
    BulkResponse(dataset='example-dataset', processed=1, failed=0)
 
-Which means that the data has been logged correctly. 
+This means that the data has been logged correctly.
 
-If you go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`_\ , you will find your first dataset.
+If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`_ , you will find your first data set.
 
-Congratulations! You are ready to start working with Rubrix with your own data. 
+Congratulations! You are ready to start working with Rubrix.
 
 Next steps
 ----------
