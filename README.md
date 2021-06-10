@@ -87,5 +87,4 @@ BulkResponse(dataset='example-dataset', processed=1, failed=0)
 
 If you go to your Rubrix app at [http://localhost:6900/](http://localhost:6900/), you should see your first dataset.
 
-Congratulations! You are ready to start working with Rubrix with your own data. To better understand what's possible take a look at our tutorials at: [https://github.com/recognai/rubrix/tree/master/docs/tutorials](https://github.com/recognai/rubrix/tree/master/docs/tutorials)
-
+Congratulations! You are ready to start working with Rubrix with your own data. To better understand what's possible take a look at our [Cookbook](https://docs.rubrix.ml/en/latest/guides/cookbook.html)
