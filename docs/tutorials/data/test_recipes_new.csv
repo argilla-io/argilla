@@ -1,0 +1,4 @@
+,index,id,ingredients,type,labels,definition
+6,6,recipe:109852,"['ind:WhiteSugar', 'ind:Butter', 'ind:ChickenEgg', 'ind:VanillaExtract', 'ind:Salt', 'ind:BakingPowder', 'ind:WholeWheatFlour', 'ind:AllPurposeFlour', 'ind:CowMilk', 'ind:chocolate_chips']",wtm:Recipe,['Sweet'],polka dot pancakes
+2,2,recipe:379243,"['ind:pecans', 'ind:Salt', 'ind:egg_yolks', 'ind:LemonJuice', 'ind:AllPurposeFlour', 'ind:BrownSugar', 'ind:egg_whites', 'ind:WhiteSugar', 'ind:sour_cream']",wtm:Recipe,['Sour'],southern pecan pie filling
+9,9,recipe:211828,"['ind:ChickenEgg', 'ind:VanillaExtract', 'ind:Salt', 'ind:chocolate_chips', 'ind:walnuts', 'ind:AllPurposeFlour', 'ind:WhiteSugar', 'ind:light_brown_sugar', 'ind:BakingSoda', 'ind:Butter']",wtm:Recipe,['Sweet'],original chocolate chip cookies
