@@ -54,11 +54,11 @@ And then run:
    
    wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 
-Install Rubrix python library (and ``transformers`` and ``datasets`` libraries for this example):
+Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`` libraries for this example):
 
 .. code-block:: bash
 
-   pip install rubrix transformers datatasets
+   pip install rubrix transformers datasets torch
 
 
 Use your favourite editor or a Jupyter notebook to run the following:
