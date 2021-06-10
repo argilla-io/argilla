@@ -31,6 +31,13 @@ Using ``docker-compose`` (recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`_.
+
+Create your desired folder:
+
+.. code-block:: bash
+
+   mkdir rubrix && cd rubrix
+
 Then you can launch the docker-contained webapp with the following command:
 
 .. code-block:: bash
