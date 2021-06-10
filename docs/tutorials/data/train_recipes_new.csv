@@ -1,8 +1,0 @@
-,index,id,ingredients,type,labels,definition
-3,3,recipe:60077,"['ind:scallion', 'ind:sour_cream', 'ind:cheddar_cheese', 'ind:cream_cheese', 'ind:Butter', 'ind:monterey_jack_cheese', 'ind:Garlic']",wtm:Recipe,['Sour'],dip for garlic lovers
-8,8,recipe:205610,"['ind:CowMilk', 'ind:Cornstarch', 'ind:WhiteSugar', 'ind:VanillaExtract', 'ind:Salt', 'ind:ChickenEgg']",wtm:Recipe,['Sweet'],cornstarch custard pudding
-5,5,recipe:149169,"['ind:ChickenEgg', 'ind:maple_syrup', 'ind:cinnamon', 'ind:powdered_sugar', 'ind:french_bread', 'ind:WhiteSugar', 'ind:cream_cheese']",wtm:Recipe,['Sweet'],easy french toast casserole  make ahead
-1,1,recipe:311753,"['ind:chives', 'ind:chili_powder', 'ind:garlic_powder', 'ind:OliveOil', 'ind:Onion', 'ind:red_potatoes', 'ind:sour_cream', 'ind:Salt']",wtm:Recipe,['Sour'],zesty potatoes with sour cream chives
-0,0,recipe:45607,"['ind:seasoning_salt', 'ind:fresh_parsley', 'ind:Mayonnaise', 'ind:Onion', 'ind:sour_cream', 'ind:dried_dill_weed', 'ind:hot_sauce']",wtm:Recipe,['Sour'],parsley dill dip
-4,4,recipe:18641,"['ind:salsa', 'ind:ground_beef', 'ind:sour_cream', 'ind:lettuce', 'ind:tortilla_chips', 'ind:Cheese', 'ind:taco_seasoning']",wtm:Recipe,['Sour'],david s taco salad
-7,7,recipe:195622,"['ind:AllPurposeFlour', 'ind:chocolate_chips', 'ind:Cornstarch', 'ind:WhiteSugar', 'ind:BakingSoda', 'ind:Butter', 'ind:ChickenEgg', 'ind:VanillaExtract', 'ind:nuts']",wtm:Recipe,['Sweet'],chocolate chip biscotti
