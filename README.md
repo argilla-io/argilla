@@ -45,7 +45,7 @@ wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/mas
 
 1. ([https://www.elastic.co/guide/en/elasticsearch/reference/7.12/install-elasticsearch.html](Install) and) launch your Elasticsearch instance. 
 
-2. Install the Rubrix Python library with server code `pip install rubrix[server]==0.1.0b2`.
+2. Install the Rubrix Python library with server code `pip install rubrix[server]`.
 
 3. Launch a local instance of Rubrix app: `python -m rubrix.server`. 
 
