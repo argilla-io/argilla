@@ -25,7 +25,9 @@ const actions = {
     sort = sort || [];
     const save = size == 0 ? false : true;
 
-    const results = await TextClassificationDataset.api().post(`/datasets/${dataset.name}/TextClassification:search?limit=0`)
+    const results = await TokenClassificationDataset.api().post(
+      `/datasets/${dataset.name}/TokenClassification:search?limit=0`
+    );
     let globalResultsData = results.response.data;
 
     return await TokenClassificationDataset.api().post(
@@ -37,7 +39,13 @@ const actions = {
       {
         save,
         dataTransformer: ({ data }) => {
-          return { ...dataset, results: data, globalResults: globalResultsData, query, sort };
+          return {
+            ...dataset,
+            results: data,
+            globalResults: globalResultsData,
+            query,
+            sort,
+          };
         },
       }
     );
