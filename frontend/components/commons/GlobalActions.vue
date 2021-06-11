@@ -4,8 +4,13 @@
       'container',
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
-  >      
-    <div class="global-actions">
+  >   
+    <div class="global-actions--exploration" v-if="!annotationEnabled">
+      <ReButton class="button--refresh button-primary" @click="refresh()">
+        <svgicon name="refresh" width="20" height="14" /> Refresh
+      </ReButton>
+    </div>   
+    <div class="global-actions" v-else>
       <ReButton class="button--refresh button-primary" @click="refresh()">
         <svgicon name="refresh" width="20" height="14" /> Refresh
       </ReButton>
@@ -76,6 +81,10 @@ export default {
       type: Object,
       required: true,
     },
+    annotationEnabled: {
+      type: Boolean,
+      required: true,      
+    }
   },
   data: () => ({
     allSelected: false,
@@ -282,6 +291,9 @@ export default {
   background: $lighter-color;
   border-radius: 3px;
   position: relative;
+  &--exploration {
+    position: relative;
+  }
   .fixed-header & {
     margin-top: 0;
     padding-top: 0;
