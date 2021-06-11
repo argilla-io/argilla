@@ -30,7 +30,7 @@ export default {
 <style lang="scss" scoped>
 .searchbar {
   background: $lighter-color;
-  width: 230px;
+  width: 285px;
   min-height: 43px;
   border: none;
   padding: 0 1em;
