@@ -153,8 +153,9 @@ You can join the conversation on our Github page and our Github forum.
    :hidden:
 
    tutorials/01-huggingface
-   tutorials/02.spacy
+   tutorials/02-spacy
    tutorials/03-kglab_pytorch_geometric
+   tutorials/04-snorkel
 
 .. toctree::
    :maxdepth: 3
