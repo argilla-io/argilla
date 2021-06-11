@@ -18,7 +18,7 @@
         :entities="dataset.entities"
         :dataset="dataset"
       />
-      <GlobalActions v-if="annotationEnabled" :dataset="dataset" />
+      <GlobalActions :annotationEnabled="annotationEnabled" :dataset="dataset" />
     </section>
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
