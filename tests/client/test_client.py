@@ -278,6 +278,28 @@ def test_delete_dataset(monkeypatch):
         rubrix.load(name=dataset_name)
 
 
+def test_text_classifier_with_inputs_list(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_text_classifier_with_inputs_list"
+    client.delete(f"/api/datasets/{dataset}")
+
+    expected_inputs = ["A", "List", "of", "values"]
+    rubrix.log(
+        TextClassificationRecord(
+            id=0,
+            inputs=expected_inputs,
+            annotation_agent="test",
+            annotation=["T"],
+        ),
+        name=dataset,
+    )
+
+    df = rubrix.load(name=dataset)
+    records = df.to_dict(orient="records")
+    assert len(records) == 1
+    assert records[0]["inputs"]["text"] == expected_inputs
+
+
 def test_load_with_ids_list(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_load_with_ids_list"

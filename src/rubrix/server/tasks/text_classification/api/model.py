@@ -156,7 +156,13 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
 
     @property
     def words(self) -> str:
-        return "\n".join(self.inputs.values())
+        sentences = []
+        for v in self.inputs.values():
+            if isinstance(v, list):
+                sentences.extend(v)
+            else:
+                sentences.append(v)
+        return "\n".join(sentences)
 
     @property
     def predicted_as(self) -> List[str]:
