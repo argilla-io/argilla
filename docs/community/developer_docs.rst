@@ -56,15 +56,3 @@ Then go to the `docs` folder in your cloned repo and execute the ``make`` comman
     make html
 
 This will create a ``_build/html`` folder in which you can find the ``index.html`` file of the documentation.
-
-
-Start the web app
------------------
-
-[TODO]
-
-
-Making a release
-----------------
-
-[TODO]

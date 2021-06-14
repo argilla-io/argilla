@@ -38,12 +38,13 @@ For further information, please visit [Rubrix documentation](https://docs.rubrix
 
 ### 1a. Using Docker and docker-compose
 
-Create your desired folder:
+Create a folder:
 
 ```bash
 mkdir rubrix && cd rubrix
 ```
-And then:
+
+and launch the docker-contained web app with the follwing command:
 
 ```bash
 wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
