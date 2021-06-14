@@ -4,7 +4,8 @@
       <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
         <span class="record__key">{{ index }}:</span>
         <LazyRecordExplain :predicted="predicted" :queryText="queryText" :explain="explanation[index]" v-if="explanation"/>
-        <LazyRecordString v-else :queryText="queryText" :text="text"/>
+        <LazyRecordString v-else-if="isStringOrNumber(text)" :queryText="queryText" :text="text"/>
+        <LazyRecordList v-else-if="isList(text)" :queryText="queryText" :text="text"/>
       </span>
     </span>
   </div>
@@ -28,8 +29,20 @@ export default {
     },
   },
   methods: {
-    isHtml(recordValue) {
-      return recordValue.includes("<meta");
+    isHtml(record) {
+      return record.includes("<meta");
+    },
+    isStringOrNumber(record) {
+      if (typeof (record) === 'string' || typeof (record) === 'number') {
+        return true;
+      }
+      return false;
+    },
+    isList(record) {
+      if (Array.isArray(record)) {
+        return true;
+      }
+      return false;
     },
   },
 };

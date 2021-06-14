@@ -2,6 +2,7 @@
 export default ({ app }, inject) => {
   const highlightSearch = function(query, text){
     const escapedText = this.text
+      .toString()
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
