@@ -39,10 +39,7 @@ export default {
       return false;
     },
     isList(record) {
-      if (Array.isArray(record)) {
-        return true;
-      }
-      return false;
+      return Array.isArray(record);
     },
   },
 };
