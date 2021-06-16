@@ -156,6 +156,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/02-spacy
    tutorials/03-kglab_pytorch_geometric
    tutorials/04-snorkel
+   tutorials/05-active_learning
 
 .. toctree::
    :maxdepth: 3
