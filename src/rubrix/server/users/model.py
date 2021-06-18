@@ -23,4 +23,4 @@ class UserInDB(User):
     hashed_password: str
 
 
-MOCK_USER = User(username="mock-user", disabled=False)
+MOCK_USER = User(username=".local-Rubrix", disabled=False)

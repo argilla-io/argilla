@@ -1,11 +1,11 @@
 import itertools
 from typing import Iterable, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 from rubrix.server.datasets.model import CreationDatasetRequest
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.security.api import get_current_active_user
+from rubrix.server.security import auth
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
@@ -38,7 +38,7 @@ def bulk_records(
     bulk: TextClassificationBulkData,
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
     Includes a chunk of record data with provided dataset bulk information
@@ -92,7 +92,7 @@ def search_records(
     pagination: PaginationParams = Depends(),
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TextClassificationSearchResults:
     """
     Searches data from dataset
@@ -176,7 +176,7 @@ async def stream_data(
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
     Creates a data stream over dataset records

@@ -62,9 +62,9 @@ class TokenClassificationAggregations:
         The word cloud aggregations
     metadata: Dict[str, Dict[str, int]]
         The metadata fields aggregations
-    mentions: Dict[str,int]
+    mentions: Dict[str,Dict[str,int]]
         The annotated entity spans
-    predicted_mentions: Dict[str,int]
+    predicted_mentions: Dict[str,Dict[str,int]]
         The prediction entity spans"""
 
     predicted_as: Union[TokenClassificationAggregationsPredictedAs, Unset] = UNSET
