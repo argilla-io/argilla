@@ -51,7 +51,7 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 40;
+const DEFAULT_QUERY_SIZE = 60;
 
 function configuredRouteParams() {
   return {
@@ -338,18 +338,20 @@ const actions = {
   },
 
   async fetchMoreRecords({ dispatch }, { dataset }) {
+    const loadedRecords = dataset.results.records.length;
+    const prefetchPaginationSize =
+      dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
     if (
       // Prefetch data before reach the end of pagination
-      dataset.results.records.length < dataset.results.total &&
-      dataset.results.records.length <
-      dataset.visibleRecords.length + dataset.viewSettings.pagination.size
+      loadedRecords < dataset.results.total &&
+      loadedRecords <= prefetchPaginationSize
     ) {
       dispatch(
         `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
         {
           dataset,
-          from: dataset.results.records.length,
-          size: 2 * dataset.results.records.length,
+          from: loadedRecords,
+          size: 2 * loadedRecords,
         },
         { root: true }
       );
