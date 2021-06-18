@@ -1,13 +1,13 @@
 <template>
-  <div v-if="this.items && this.items < this.total" class="show-more-data">
-    <p>{{ this.items }} of {{ this.total }} records</p>
+  <div v-if="items && items < total" class="show-more-data">
+    <p>{{ items }} of {{ total }} records</p>
     <ReProgress
       class="re-progress--minimal"
       re-mode="determinate"
       :progress="shownRecordsProgress"
     />
     <ReButton class="button-tertiary--outline" @click="$emit('moredata')">
-      Next 5 records
+      Next {{ moreDataSize }} records
     </ReButton>
   </div>
 </template>
@@ -22,6 +22,10 @@ export default {
     total: {
       default: undefined,
       type: Number,
+    },
+    moreDataSize: {
+      type: Number,
+      default: 5,
     },
   },
   data: () => ({}),
