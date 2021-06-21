@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 from rubrix.server.commons.settings import settings as api_settings
-from rubrix.server.security.api import get_current_active_user
+from rubrix.server.security import auth
 from rubrix.server.snapshots.helpers import stream_from_uri
 from rubrix.server.tasks.commons import TaskType
 from rubrix.server.users.model import User
@@ -28,7 +28,7 @@ def list_dataset_snapshots(
     name: str,
     task: Optional[TaskType] = Query(None),
     service: SnapshotsService = Depends(create_snapshots_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[DatasetSnapshot]:
     """
     List the created dataset snapshots
@@ -62,7 +62,7 @@ def get_dataset_snapshot(
     name: str,
     snapshot_id: str,
     service: SnapshotsService = Depends(create_snapshots_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> DatasetSnapshot:
     """
     Get snapshot by id
@@ -94,7 +94,7 @@ def get_dataset_snapshot(
 def create_dataset_snapshots(
     name: str,
     service: SnapshotsService = Depends(create_snapshots_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> DatasetSnapshot:
     """
     Creates a dataset snapshot
@@ -123,7 +123,7 @@ def delete_dataset_snapshot(
     name: str,
     snapshot_id: str,
     service: SnapshotsService = Depends(create_snapshots_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
     Deletes an dataset snapshot
@@ -153,7 +153,7 @@ async def stream_data(
     snapshot_id: str,
     limit: int = Query(default=None, description="Limit loaded records", gt=0),
     service: SnapshotsService = Depends(create_snapshots_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
     Creates a data stream over dataset records

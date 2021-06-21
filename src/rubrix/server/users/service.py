@@ -38,58 +38,8 @@ class UsersService:
         if user and self.__verify_password__(password, user.hashed_password):
             return user
 
-    @staticmethod
-    def create_access_token(
-        username: str, expires_delta: Optional[timedelta] = None
-    ) -> str:
-        """
-        Creates an access token
-
-        Parameters
-        ----------
-        username:
-            The user name
-        expires_delta:
-            Token expiration
-
-        Returns
-        -------
-            An access token string
-        """
-        to_encode = {
-            "sub": username,
-            "exp": datetime.utcnow() + (expires_delta or timedelta(minutes=15)),
-        }
-        return jwt.encode(
-            to_encode,
-            settings.secret_key,
-            algorithm=settings.algorithm,
-        )
-
-    def fetch_token_user(self, token: str) -> Optional[User]:
-        """
-        Fetch the user for a given access token
-
-        Parameters
-        ----------
-        token:
-            The access token
-
-        Returns
-        -------
-            An User instance if a valid token was provided. None otherwise
-        """
-        try:
-            payload = jwt.decode(
-                token,
-                settings.secret_key,
-                algorithms=[settings.algorithm],
-            )
-            username: str = payload.get("sub")
-            if username:
-                return self.__dao__.get_user(user_name=username)
-        except JWTError:
-            return None
+    def get_user(self, username) -> Optional[User]:
+        return self.__dao__.get_user(username)
 
     def __verify_password__(self, password: str, hashed_password: str) -> bool:
         return self.__PWD_CONTEXT__.verify(password, hashed_password)

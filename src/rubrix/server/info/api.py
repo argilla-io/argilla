@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends
-from rubrix.server.security.api import get_current_active_user
-from rubrix.server.users.model import User
+from fastapi import APIRouter, Depends, Security
+from rubrix.server.security import auth
 
 from .model import ApiInfo, ApiStatus
 from .service import ApiInfoService, create_info_service
@@ -8,17 +7,19 @@ from .service import ApiInfoService, create_info_service
 router = APIRouter(tags=["status"])
 
 
-@router.get("/_status", operation_id="api_status", response_model=ApiStatus)
+@router.get(
+    "/_status",
+    operation_id="api_status",
+    response_model=ApiStatus,
+    dependencies=[Security(auth.get_user, scopes=[])],
+)
 def api_status(
-    current_user: User = Depends(get_current_active_user),
     service: ApiInfoService = Depends(create_info_service),
 ) -> ApiStatus:
     """
 
     Parameters
     ----------
-    current_user:
-        Connected user (since protected endpoint)
     service:
         The Api info service
 
