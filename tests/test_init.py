@@ -22,9 +22,9 @@ def mock_response_200(monkeypatch):
         Mockup function
     """
 
-    def mock_get(url,*args, **kwargs):
+    def mock_get(url, *args, **kwargs):
         if "/api/me" in url:
-            return httpx.Response(status_code=200,json={"username": "booohh"})
+            return httpx.Response(status_code=200, json={"username": "booohh"})
         return httpx.Response(status_code=200)
 
     monkeypatch.setattr(
@@ -129,7 +129,10 @@ def test_init_incorrect(mock_response_500):
     """
 
     rubrix._client = None  # assert empty client
-    with pytest.raises(Exception, match="Unidentified error, it should not get here."):
+    with pytest.raises(
+        Exception,
+        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+    ):
         rubrix.init()
 
 
@@ -160,7 +163,10 @@ def test_init_token_incorrect(mock_response_500):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    with pytest.raises(Exception, match="Unidentified error, it should not get here."):
+    with pytest.raises(
+        Exception,
+        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+    ):
         rubrix.init(api_key="422")
 
 
