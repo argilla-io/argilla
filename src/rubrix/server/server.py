@@ -76,7 +76,8 @@ def configure_app_startup(app: FastAPI):
 
 
 def configure_app_security(app: FastAPI):
-    if hasattr(auth, "router"):
+
+    if security_settings.enable_security and hasattr(auth, "router"):
         app.include_router(auth.router)
 
 

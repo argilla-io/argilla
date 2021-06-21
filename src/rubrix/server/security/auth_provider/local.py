@@ -170,7 +170,7 @@ class LocalAuthProvider(AuthProvider):
         if not security_settings.enable_security:
             return MOCK_USER
 
-        user = self.users.fetch_token_user(token)
+        user = self.fetch_token_user(token)
         if user is None:
             raise UnauthorizedError()
 
