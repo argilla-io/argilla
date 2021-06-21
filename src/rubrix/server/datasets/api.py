@@ -1,8 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 from rubrix.server.commons.settings import settings
-from rubrix.server.security.api import get_current_active_user
+from rubrix.server.security import auth
 from rubrix.server.users.model import User
 
 from .model import Dataset, UpdateDatasetRequest
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 def list_datasets(
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
     """
     List accessible user datasets
@@ -49,7 +49,7 @@ def list_datasets(
 def get_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
     Find a dataset by name visible for current user
@@ -83,7 +83,7 @@ def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
     Update a set of parameters for a dataset
@@ -117,7 +117,7 @@ def update_dataset(
 def delete_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
     Deletes a dataset
@@ -142,7 +142,7 @@ def delete_dataset(
 def close_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
     Closes a dataset. This operation will releases backend resources
@@ -167,7 +167,7 @@ def close_dataset(
 def open_dataset(
     name: str,
     service: DatasetsService = Depends(create_dataset_service),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
     Closes a dataset. This operation will releases backend resources

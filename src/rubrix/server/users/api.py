@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from rubrix.server.security.api import get_current_active_user
+from fastapi import APIRouter, Security
+from rubrix.server.security import auth
 
 from .model import User
 
@@ -12,7 +12,7 @@ router = APIRouter(tags=["users"])
     response_model_exclude_none=True,
     operation_id="whoami",
 )
-async def whoami(current_user: User = Depends(get_current_active_user)):
+async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
     """
     User info endpoint
 
