@@ -5,12 +5,23 @@ const API_BASE_URL =
 const ENABLE_SECURITY = process.env.ENABLE_SECURITY || true;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
+let authRedirect = false;
+let authStrategy = ENABLE_SECURITY ? "localProvider" : "noAuth";
+if (authStrategy !== "noAuth") {
+  authRedirect = {
+    login: "/login",
+    logout: "/login",
+    home: false,
+  };
+}
+
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
 
   publicRuntimeConfig: {
     securityEnabled: ENABLE_SECURITY,
+    authStrategy,
   },
 
   generate: {
@@ -96,15 +107,29 @@ export default {
 
   auth: {
     strategies: {
-      local: {
+      noAuth: {
+        scheme: "local",
         token: {
-          property: "access_token",
-          // required: true,
-          // type: 'Bearer'
+          property: "username",
+          required: false,
         },
         user: {
           property: "username",
-          // autoFetch: false,
+          required: false,
+        },
+        endpoints: {
+          login: false,
+          logout: false,
+          user: false,
+        },
+      },
+      localProvider: {
+        scheme: "local",
+        token: {
+          property: "access_token",
+        },
+        user: {
+          property: "username",
         },
         endpoints: {
           login: {
@@ -119,11 +144,7 @@ export default {
       },
     },
     resetOnError: true,
-    redirect: {
-      login: "/login",
-      logout: "/login",
-      home: false,
-    },
+    redirect: authRedirect,
   },
 
   router: {
