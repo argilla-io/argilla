@@ -62,14 +62,18 @@ class RubrixClient:
         self._client = None  # Variable to store the client after the init
 
         try:
-            response = httpx.get(url=f"{api_url}/api/docs/spec.json").status_code
+            response = httpx.get(url=f"{api_url}/api/docs/spec.json")
         except ConnectionRefusedError:
             raise Exception("Connection Refused: cannot connect to the API.")
 
-        if response != 200:  # Incorrect authentication
+        if response.status_code != 200:  # Incorrect authentication
             # default
-            raise Exception("Unidentified error, it should not get here.")
-
+            raise Exception(
+                "Connection error: Indetermined error connecting to Rubrix Server. "
+                "The API answered with a {} code: {}".format(
+                    response.status_code, response.content
+                )
+            )
         # Non-token case
         if api_key is None:
             self._client = Client(base_url=api_url, timeout=timeout)
@@ -80,7 +84,9 @@ class RubrixClient:
                 base_url=api_url, token=api_key, timeout=timeout
             )
 
-            whoami_response_status = whoami.sync_detailed(client=self._client).status_code
+            whoami_response_status = whoami.sync_detailed(
+                client=self._client
+            ).status_code
             if whoami_response_status == 401:
                 raise Exception("Authentification error: invalid credentials.")
 
