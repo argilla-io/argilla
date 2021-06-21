@@ -53,7 +53,7 @@ export default {
     async userLogin() {
       try {
         await this.$store.dispatch("entities/deleteAll");
-        await this.$auth.loginWith("local", {
+        await this.$auth.loginWith(this.$config.authStrategy, {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
         this.nextRedirect();
