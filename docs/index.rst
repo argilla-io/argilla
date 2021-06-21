@@ -89,7 +89,9 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
 .. raw:: html
 
-   <iframe width="100%" height="500" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
+   <video autoplay width="100%" height="500" controls mute plays-inline>
+      <source src="https://www.rubrix.ml/rubrix_video.webm" type='video/webm; codecs="vp8, vorbis"' />
+   </video>
 
 Use cases
 ---------
