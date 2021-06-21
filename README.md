@@ -2,7 +2,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-# Open-source tool for tracking and evolving data for AI
+# Open-source tool for tracking, exploring and iterating on data for AI
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -14,7 +14,7 @@
 </p>
 
 
-Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
+[Rubrix](https://rubrix.ml) is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
 
 ![](docs/images/rubrix_intro.svg)
 
@@ -105,7 +105,7 @@ The following code will log one record into the `example-dataset` dataset:
 import rubrix as rb
 
 rb.log(
-    rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
+    rb.TextClassificationRecord(inputs="my first rubrix example"),
     name='example-dataset'
 )
 
