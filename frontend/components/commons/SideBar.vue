@@ -306,8 +306,6 @@ export default {
     position: relative;
     display: flex;
     margin-bottom: 0.7em;
-    max-height: 50vh;
-    overflow: scroll;
     label {
       margin: 0; // for tagger
       &[class^="color_"] {
