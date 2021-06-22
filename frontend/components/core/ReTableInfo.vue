@@ -51,9 +51,8 @@
               <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="showModal === item.name" modal-position="modal-center" @close-modal="$emit('close-modal')">
                 <div>
                   <p class="modal__title">Delete confirmation</p>
-                  <span>You are about to delete:
-                    <strong>{{ item.actionName }}</strong>. This process cannot be undone.</span>
-                  <br />
+                  <p>You are about to delete:
+                    <strong>{{ item.name }}</strong>. This process cannot be undone.</p>
                   <div class="modal-buttons">
                     <ReButton class="button-tertiary--small button-tertiary--outline" @click="$emit('close-modal')">
                       Cancel
