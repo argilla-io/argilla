@@ -7,14 +7,13 @@
     <div class="list">
       <ExplainHelpInfo v-if="isExplainedRecord"></ExplainHelpInfo>
       <VueAutoVirtualScrollList
-        style="width: 100%"
-        :key="dataset.task"
         id="scroll"
+        :key="dataset.task"
         ref="scroll"
+        style="width: 100%"
         class="virtual-scroll"
         :total-height="1200"
         :default-height="100"
-        @updated="onVirtualScrollUpdated"
       >
         <div
           v-for="(item, index) in visibleRecords"
@@ -26,7 +25,10 @@
               annotationEnabled ? 'list__item--annotation-mode' : 'list__item'
             "
           >
-            <div v-if="annotationEnabled && item.status !== 'Default'" class="list__li__status">
+            <div
+              v-if="annotationEnabled && item.status !== 'Default'"
+              class="list__li__status"
+            >
               {{ item.status }}
             </div>
             <ReCheckbox
@@ -69,12 +71,10 @@
           v-if="moreDataAvailable"
           :items="visibleRecords.length"
           :total="dataset.results.total"
+          :more-data-size="dataset.viewSettings.pagination.size"
           @moredata="onShowMoreData"
         />
       </VueAutoVirtualScrollList>
-      <!-- <p class="show-record-number">
-        <span>&#8249;</span> {{ scrollPosition }} of {{ results.total }}
-      </p> -->
     </div>
   </div>
 </template>
@@ -91,14 +91,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    headerHeight: {
-      type: Number,
-    }
   },
   data: () => ({
     showMetadata: undefined,
     isSelectedRecord: false,
-    scrollPosition: undefined,
     scrollComponent: undefined,
   }),
   computed: {
@@ -115,7 +111,7 @@ export default {
       return this.visibleRecords.length < this.results.total;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled
+      return this.dataset.viewSettings.annotationEnabled;
     },
     isExplainedRecord() {
       return this.dataset.results.records.some((record) => record.explanation);
@@ -147,9 +143,6 @@ export default {
         dataset: this.dataset,
       });
     },
-    onVirtualScrollUpdated() {
-      this.scrollPosition = this.$refs.scroll.offset;
-    },
     onMetaFilterApply(metadata) {
       this.onCloseModal();
       this.search({
@@ -170,10 +163,6 @@ export default {
     onCloseModal() {
       this.showMetadata = false;
     },
-    onVirtualScrollUpdated() {
-      this.scrollPosition = this.$refs.scroll.offset + 1;
-      // document.getElementById("scroll").addEventListener("scroll", this.onScroll);
-    },
     // TODO (@leireaguirrework): All scroll logic will be moved to layout component
     onScroll() {
       if (this.$refs.scroll.scrollTop > 100) {
@@ -183,7 +172,7 @@ export default {
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
       }
-    }
+    },
   },
 };
 </script>
@@ -287,5 +276,4 @@ export default {
   opacity: 0;
   transform: translateY(-30px);
 }
-
 </style>
