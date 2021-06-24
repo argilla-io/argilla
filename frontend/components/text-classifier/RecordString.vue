@@ -20,13 +20,13 @@
         ></svgicon>
       </re-button>
       <div v-if="isList(text)">
-        <span v-for="item in text" :key="item.index">
+        <div v-for="item in text" :key="item.index">
           <span
             class="record__content"
             v-html="$highlightSearch(queryText, item)"
           >
           </span>
-        </span>
+        </div>
       </div>
 
       <span

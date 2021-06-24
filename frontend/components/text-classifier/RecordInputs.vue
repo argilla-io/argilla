@@ -24,7 +24,6 @@ export default {
     },
     queryText: {
       type: String,
-      required: true,
     },
     predicted: {
       type: String,
