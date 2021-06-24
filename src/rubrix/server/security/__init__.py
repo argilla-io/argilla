@@ -1,1 +1,1 @@
-from .auth_provider.local import auth
+from .factory import auth
