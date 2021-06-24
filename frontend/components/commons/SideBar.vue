@@ -209,7 +209,7 @@ export default {
     cursor: pointer;
     text-align: right;
     .annotation & {
-      margin-top: -4.5em;
+      margin-top: 1em;
     }
     .explore & {
       margin-top: 1em;
