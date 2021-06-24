@@ -8,11 +8,12 @@ from fastapi.security import (
     SecurityScopes,
 )
 from jose import JWTError, jwt
+from pydantic import BaseSettings
 from rubrix.server.commons.errors import InactiveUserError, UnauthorizedError
-from rubrix.server.security.auth_provider.base import AuthProvider
+from rubrix.server.security.auth_provider.base import (
+    AuthProvider, )
 from rubrix.server.security.model import Token
-from rubrix.server.security.settings import settings, settings as security_settings
-from rubrix.server.users.model import MOCK_USER, User
+from rubrix.server.users.model import User
 from rubrix.server.users.service import UsersService
 
 _TOKEN_URL = "/api/security/token"
@@ -20,19 +21,53 @@ _API_KEY_URL = "/api/security/api-key"
 
 _oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=_TOKEN_URL,
-    # TODO: This is a workaround for ui integration.
-    #  When no security is enabled, auth provider should be mocked/disabled
-    auto_error=security_settings.enable_security,
 )
+
+
+class Settings(BaseSettings):
+
+    """
+    Attributes
+    ----------
+
+    secret_key:
+        The secret key used for signed the token data
+
+    algorithm:
+        Encryption algorithm for token data
+
+    token_expiration_in_minutes:
+        The session token expiration in minutes. Default=30
+
+    """
+
+    secret_key: str = "secret"
+    algorithm: str = "HS256"
+    token_expiration_in_minutes: int = 30
+
+    class Config:
+        env_prefix = "RUBRIX_LOCAL_AUTH_"
+
+        fields = {
+            "secret_key": {"env": ["SECRET_KEY", f"{env_prefix}SECRET_KEY"]},
+            "token_expiration_in_minutes": {
+                "env": [
+                    "TOKEN_EXPIRATION_IN_MINUTES",
+                    f"{env_prefix}TOKEN_EXPIRATION_IN_MINUTES",
+                ]
+            },
+        }
 
 
 class LocalAuthProvider(AuthProvider):
     def __init__(
         self,
         users: UsersService,
+        settings: Settings,
     ):
         self.users = users
         self.router = APIRouter(tags=["security"])
+        self.settings = settings
 
         @self.router.post(
             _TOKEN_URL, response_model=Token, operation_id="login_for_access_token"
@@ -58,7 +93,7 @@ class LocalAuthProvider(AuthProvider):
             if not user:
                 raise UnauthorizedError()
             access_token_expires = timedelta(
-                minutes=security_settings.token_expiration_in_minutes
+                minutes=self.settings.token_expiration_in_minutes
             )
             access_token = self._create_access_token(
                 user.username, expires_delta=access_token_expires
@@ -95,9 +130,8 @@ class LocalAuthProvider(AuthProvider):
             )
             return Token(access_token=access_token)
 
-    @staticmethod
     def _create_access_token(
-        username: str, expires_delta: Optional[timedelta] = None
+        self, username: str, expires_delta: Optional[timedelta] = None
     ) -> str:
         """
         Creates an access token
@@ -121,8 +155,8 @@ class LocalAuthProvider(AuthProvider):
 
         return jwt.encode(
             to_encode,
-            settings.secret_key,
-            algorithm=settings.algorithm,
+            self.settings.secret_key,
+            algorithm=self.settings.algorithm,
         )
 
     def fetch_token_user(self, token: str) -> Optional[User]:
@@ -141,8 +175,8 @@ class LocalAuthProvider(AuthProvider):
         try:
             payload = jwt.decode(
                 token,
-                settings.secret_key,
-                algorithms=[settings.algorithm],
+                self.settings.secret_key,
+                algorithms=[self.settings.algorithm],
             )
             username: str = payload.get("sub")
             if username:
@@ -167,9 +201,6 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        if not security_settings.enable_security:
-            return MOCK_USER
-
         user = self.fetch_token_user(token)
         if user is None:
             raise UnauthorizedError()
@@ -184,10 +215,8 @@ def create_local_auth_provider():
     from rubrix.server.users.dao import create_users_dao
     from rubrix.server.users.service import create_users_service
 
+    settings = Settings()
     users_dao = create_users_dao()
     users_service = create_users_service(users_dao)
 
-    return LocalAuthProvider(users=users_service)
-
-
-auth = create_local_auth_provider()
+    return LocalAuthProvider(users=users_service, settings=settings)
