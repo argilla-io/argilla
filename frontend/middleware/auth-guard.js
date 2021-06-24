@@ -1,8 +1,11 @@
 export default ({ $auth, route, redirect }) => {
-  if (!route.path.includes("/login")) {
-    if (!$auth.loggedIn) {
-      const REDIRECT_URL = "/login?redirect=" + route.path;
-      redirect(REDIRECT_URL);
-    }
+  switch (route.path) {
+    case "/login":
+      break;
+    default:
+      if (!$auth.loggedIn) {
+        const REDIRECT_URL = "/login?redirect=" + route.fullPath;
+        redirect(REDIRECT_URL);
+      }
   }
 };
