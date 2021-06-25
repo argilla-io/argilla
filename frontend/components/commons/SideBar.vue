@@ -34,9 +34,21 @@
               <strong>{{ totalDiscarded }}</strong>
             </span>
           </div>
-          <div class="labels">
+          <div v-if="annotationIsEnabled" class="labels">
             <div
               v-for="(counter, label) in getInfo"
+              :key="label"
+            >
+              <div v-if="counter > 0" class="info">
+                <label>{{ label }}</label>
+                <span class="records-number">{{ counter }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="labels">
+            <strong v-if="annotationIsEnabled">Keywords:</strong>
+            <div
+              v-for="(counter, label) in getKeywords"
               :key="label"
             >
               <div v-if="counter > 0" class="info">
@@ -135,7 +147,10 @@ export default {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
     getInfo() {
-      return this.annotationIsEnabled ? this.annotationsProgress.annotatedAs : this.dataset.results.aggregations.words;
+      return this.annotationsProgress.annotatedAs;
+    },
+    getKeywords() {
+      return this.dataset.results.aggregations.words;
     },
     getTitle() {
       return this.annotationIsEnabled ? 'Annotations' : 'Keywords';
@@ -239,7 +254,7 @@ export default {
     padding: 1em 2em;
     box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
     .annotation & {
-      margin-top: -4.5em;
+      margin-top: 1em;
     }
     .explore & {
       margin-top: 1em;
