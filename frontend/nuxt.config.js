@@ -120,7 +120,7 @@ export default {
         endpoints: {
           login: false,
           logout: false,
-          user: false,
+          user: { url: "/me", propertyName: false },
         },
       },
       localProvider: {
