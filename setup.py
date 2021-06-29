@@ -10,7 +10,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 setup(
     name="rubrix",
     # other arguments omitted
-    description="Open-source tool for tracking, exploring and evolving data for AI projects.",
+    description="Open-source tool for tracking, exploring and labelling data for AI projects.",
     long_description=long_description,
     author="recognai",
     author_email="contact@recogn.ai",
