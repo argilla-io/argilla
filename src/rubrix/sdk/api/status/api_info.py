@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 
-from ...client import AuthenticatedClient
+from ...client import Client
 from ...models.api_info import ApiInfo
 from ...models.error_message import ErrorMessage
 from ...types import Response
@@ -10,7 +10,7 @@ from ...types import Response
 
 def _get_kwargs(
     *,
-    client: AuthenticatedClient,
+    client: Client,
 ) -> Dict[str, Any]:
     url = "{}/api/_info".format(client.base_url)
 
@@ -56,7 +56,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: AuthenticatedClient,
+    client: Client,
 ) -> Response[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
@@ -71,7 +71,7 @@ def sync_detailed(
 
 def sync(
     *,
-    client: AuthenticatedClient,
+    client: Client,
 ) -> Optional[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
     """  """
 
@@ -82,7 +82,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: AuthenticatedClient,
+    client: Client,
 ) -> Response[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
     kwargs = _get_kwargs(
         client=client,
@@ -96,7 +96,7 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: AuthenticatedClient,
+    client: Client,
 ) -> Optional[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
     """  """
 
