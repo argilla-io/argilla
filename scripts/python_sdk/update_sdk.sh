@@ -11,7 +11,5 @@ RESULTS="$(cd $BASEDIR \
 --custom-template-path $BASEDIR/templates_fix/
 )"
 
-rsync -av --delete --exclude "**/_*.py" --exclude "**/stream_data.py" $BASEDIR/sdk/ src/rubrix/sdk
+rsync -av --delete --exclude "**/_*.py" --exclude "**/stream_data.py" --exclude "**/client.py" $BASEDIR/sdk/ src/rubrix/sdk
 rm -rf $BASEDIR/sdk
-
-
