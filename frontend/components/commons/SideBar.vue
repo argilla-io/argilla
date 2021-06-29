@@ -48,11 +48,11 @@
           <div class="labels">
             <strong v-if="annotationIsEnabled">Keywords:</strong>
             <div
-              v-for="(counter, label) in getKeywords"
-              :key="label"
+              v-for="(counter, keyword) in getKeywords"
+              :key="keyword"
             >
               <div v-if="counter > 0" class="info">
-                <label>{{ label }}</label>
+                <label>{{ keyword }}</label>
                 <span class="records-number">{{ counter }}</span>
               </div>
             </div>
