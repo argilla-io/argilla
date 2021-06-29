@@ -23,7 +23,10 @@
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset" :headerHeight="headerHeight"> </Results>
-        <SideBar :dataset="dataset" :entities="dataset.entities" />
+        <SideBar :dataset="dataset" :annotationEnabled="annotationEnabled">
+          <TextClassificationMetrics v-if="dataset.task === 'TextClassification'" :dataset="dataset" />
+          <TokenClassificationMetrics v-else :dataset="dataset" :entities="dataset.entities" />
+        </Sidebar>
       </div>
     </div>
   </div>
