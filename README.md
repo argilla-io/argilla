@@ -21,16 +21,25 @@
 With Rubrix, you can:
 
 - **Monitor** the predictions of deployed models.
-- **Collect** ground-truth data for starting up a project or evolving an existing one.
-- **Iterate** on ****ground-truth data**** and predictions to debug, track and improve your models over time.
+- **Label** data for starting up or evolving an existing project.
+- **Iterate** on ****ground-truth**** and predictions to debug, track and improve your data and models over time.
 - **Build** custom ****applications and dashboards**** on top of your model predictions.
 
 We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. Rubrix is composed of:
 
-- a **web application and a REST API**, which you can launch using Docker or build it yourself.
 - a **Python library** to bridge data and models, which you can install via `pip`.
+- a **web application** to explore and label data, which you can launch using Docker or build it yourself.
 
-For further information, please visit the [documentation](https://docs.rubrix.ml/en/stable/)
+
+This an example of Rubrix UI annotation mode:
+
+![](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
+
+
+
+📖 For further information, please visit the [documentation](https://docs.rubrix.ml/en/stable/). 
+
+If you want to get started, keep reading.
 
 # Get started
 
