@@ -14,7 +14,9 @@
 </p>
 
 
-[Rubrix](https://rubrix.ml) is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
+[Rubrix](https://rubrix.ml) is a tool for tracking and iterating on data for artificial intelligence projects. 
+
+Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
 
 ![](docs/images/rubrix_intro.svg)
 
@@ -25,10 +27,12 @@ With Rubrix, you can:
 - **Iterate** on ****ground-truth**** and predictions to debug, track and improve your data and models over time.
 - **Build** custom ****applications and dashboards**** on top of your model predictions.
 
-We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. Rubrix is composed of:
+We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. 
+
+Rubrix is composed of:
 
 - a **Python library** to bridge data and models, which you can install via `pip`.
-- a **web application** to explore and label data, which you can launch using Docker or build it yourself.
+- a **web application** to explore and label data, which you can launch using Docker or directly with Python.
 
 
 This is an example of Rubrix UI annotation mode:
@@ -48,7 +52,7 @@ To get started you need to follow three steps:
    
 ## 1. Install the Python client
 
-You can install the Rubrix Python client via
+You can install the Python client with `pip`:
 
 ```python
 pip install rubrix
@@ -123,7 +127,9 @@ BulkResponse(dataset='example-dataset', processed=1, failed=0)
 
 If you go to your Rubrix app at [http://localhost:6900/](http://localhost:6900/), you should see your first dataset.
 
-Congratulations! You are ready to start working with Rubrix with your own data. To better understand what's possible take a look at our [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
+Congratulations! You are ready to start working with Rubrix with your own data.
+
+To better understand what's possible take a look at Rubrix's [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
 
 # Community
-As a new open-source project we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help.
+As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
