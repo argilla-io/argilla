@@ -31,15 +31,12 @@ We've tried to make working with Rubrix easy and fun, while keeping it scalable 
 - a **web application** to explore and label data, which you can launch using Docker or build it yourself.
 
 
-This an example of Rubrix UI annotation mode:
+This is an example of Rubrix UI annotation mode:
 
-![](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
+![Rubrix Annotation Mode](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
 
 
-
-📖 For further information, please visit the [documentation](https://docs.rubrix.ml/en/stable/). 
-
-If you want to get started, keep reading.
+📖 For more information, visit the [documentation](https://docs.rubrix.ml/en/stable/) or if you want to get started, keep reading.
 
 # Get started
 
@@ -127,3 +124,6 @@ BulkResponse(dataset='example-dataset', processed=1, failed=0)
 If you go to your Rubrix app at [http://localhost:6900/](http://localhost:6900/), you should see your first dataset.
 
 Congratulations! You are ready to start working with Rubrix with your own data. To better understand what's possible take a look at our [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
+
+# Community
+As a new open-source project we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help.
