@@ -8,23 +8,25 @@
         <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
         <slot></slot>
       </div>
-      <ReButton v-if="annotationEnabled" class="button-clear button-action global-actions__export" @click="onOpenExportModal()">
-        <svgicon name="export" width="14" height="14" color="#0508D9" />Create snapshot
-      </ReButton>
-      <ReModal v-if="annotationEnabled" :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="openExportModal" modal-position="modal-center" @close-modal="closeModal()">
-        <p class="modal__title">Confirm snapshot creation</p>
-        <p class="modal__text">
-          You are about to export {{ annotationsSum }} annotations. You will find the file on the server once the action is completed.
-        </p>
-        <div class="modal-buttons">
-          <ReButton class="button-tertiary--small button-tertiary--outline" @click="closeModal()">
-            Cancel
-          </ReButton>
-          <ReButton class="button-secondary--small" @click="onExportAnnotations()">
-            Confirm
-          </ReButton>
-        </div>
-      </ReModal>
+      <div v-if="annotationEnabled">
+        <ReButton class="button-clear button-action global-actions__export" @click="onOpenExportModal()">
+          <svgicon name="export" width="14" height="14" color="#0508D9" />Create snapshot
+        </ReButton>
+        <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="openExportModal" modal-position="modal-center" @close-modal="closeModal()">
+          <p class="modal__title">Confirm snapshot creation</p>
+          <p class="modal__text">
+            You are about to export {{ annotationsSum }} annotations. You will find the file on the server once the action is completed.
+          </p>
+          <div class="modal-buttons">
+            <ReButton class="button-tertiary--small button-tertiary--outline" @click="closeModal()">
+              Cancel
+            </ReButton>
+            <ReButton class="button-secondary--small" @click="onExportAnnotations()">
+              Confirm
+            </ReButton>
+          </div>
+        </ReModal>
+      </div>
     </div>
   </aside>
 </template>
