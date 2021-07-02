@@ -2,7 +2,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-# Open-source tool for tracking, exploring, and labelling data for AI
+### Open-source tool for tracking, exploring, and labelling data for AI
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
