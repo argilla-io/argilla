@@ -81,10 +81,6 @@ export default {
       type: Object,
       required: true,
     },
-    annotationEnabled: {
-      type: Boolean,
-      required: true,      
-    }
   },
   data: () => ({
     allSelected: false,
@@ -119,6 +115,9 @@ export default {
     },
     _allSelected() {
       return this.allSelected;
+    },
+    annotationEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
     },
   },
   watch: {

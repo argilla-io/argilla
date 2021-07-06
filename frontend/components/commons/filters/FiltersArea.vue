@@ -42,9 +42,6 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    annotationEnabled: {
-      type: Boolean,
-    },
   },
   data: () => ({
     annotationMode: false,

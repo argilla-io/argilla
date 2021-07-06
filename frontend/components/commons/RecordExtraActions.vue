@@ -3,14 +3,15 @@
     <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
       <span>View metadata</span>
     </div>
-
-    <div
-      v-for="status in allowedStatusActions"
-      :key="status.key"
-      @click="onChangeRecordStatus(status.key)"
-    >
-      <span>{{ status.name }}</span>
-    </div>
+    <template v-if="allowChangeStatus">
+      <div
+        v-for="status in allowedStatusActions"
+        :key="status.key"
+        @click="onChangeRecordStatus(status.key)"
+      >
+        <span>{{ status.name }}</span>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -19,7 +20,7 @@ import { BaseRecord } from "@/models/Common";
 
 export default {
   props: {
-    annotationMode: {
+    allowChangeStatus: {
       type: Boolean,
       default: false,
     },
@@ -46,10 +47,6 @@ export default {
       return this.record.status;
     },
     allowedStatusActions() {
-      if (!this.annotationMode) {
-        return [];
-      }
-
       return this.statusActions.map((status) => ({
         ...status,
         isActive: this.recordStatus === status.key,
