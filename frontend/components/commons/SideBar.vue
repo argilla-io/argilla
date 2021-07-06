@@ -74,7 +74,7 @@ export default {
       this.exportAnnotations({ name: this.dataset.name });
     },
     toggleVisibleMetrics() {
-      !this.visible ? (this.visible = true) : (this.visible = false);
+      this.visible  = !this.visible;
     },
   },
 };
