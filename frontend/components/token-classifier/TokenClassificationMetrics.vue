@@ -1,6 +1,6 @@
 <template>
   <div v-if="!$fetchState.pending">
-    <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> Mentions</p>
+    <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" />{{ getTitle }}</p>
     <div class="sidebar__tabs">
       <a href="#" :class="activeTab === 'mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('mentions')">Annotated as</a>
       <a href="#" :class="activeTab === 'predicted_mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('predicted_mentions')">Predicted as</a>
@@ -74,11 +74,13 @@ export default {
     entities() {
       return this.dataset.entities;
     },
+    getTitle() {
+      return this.annotationIsEnabled ? 'Annotations' : 'Mentions';
+    },
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationsProgress() {
-      console.log(AnnotationProgress.find(this.dataset.name + this.dataset.task))
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
     annotationIsEnabled() {
