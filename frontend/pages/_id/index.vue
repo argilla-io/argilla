@@ -11,14 +11,13 @@
       <ReTopbarBrand v-if="selectedTask">
         <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
       </ReTopbarBrand>
-      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode" :annotation-mode="annotationEnabled"> </FiltersArea>
+      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode"> </FiltersArea>
       <EntitiesHeader
         v-if="dataset.task === 'TokenClassification'"
-        :annotation-mode="annotationEnabled"
         :entities="dataset.entities"
         :dataset="dataset"
       />
-      <GlobalActions :annotationEnabled="annotationEnabled" :dataset="dataset" />
+      <GlobalActions :dataset="dataset" />
     </section>
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">

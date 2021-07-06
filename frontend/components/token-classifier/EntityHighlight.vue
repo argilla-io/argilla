@@ -4,14 +4,14 @@
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="$highlightSearch(this.queryText, text)"
+      v-html="$highlightSearch(this.dataset.query.text, text)"
     />
     <span class="highlight__label">
-      <span :class="['highlight__tooltip', annotationMode ? 'highlight__tooltip--icon' : '']">
+      <span :class="['highlight__tooltip', annotationEnabled ? 'highlight__tooltip--icon' : '']">
         <span
           >{{ span.entity.label }}
           <svgicon
-            v-if="annotationMode"
+            v-if="annotationEnabled"
             width="12"
             height="12"
             name="cross"
@@ -38,13 +38,10 @@ export default {
       type: String,
       required: true,
     },
-    annotationMode: {
-      type: Boolean,
-      default: false,
+    dataset: {
+      type: Object,
+      required: true,
     },
-    queryText: {
-      type: String,
-    }
   },
   data: () => {
     return {
@@ -57,11 +54,14 @@ export default {
     isText() {
       return this.text.replace(/\s/g, "").length;
     },
+    annotationEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
+    },
   },
   methods: {
     openTagSelector() {
       this.clicked = true;
-      if (this.annotationMode) {
+      if (this.annotationEnabled) {
         setTimeout(() => {
           if (!this.doubleClicked) {
             this.$emit("openTagSelector");
@@ -72,7 +72,7 @@ export default {
     },
     removeEntity() {
       this.doubleClicked = true;
-      if (this.annotationMode) {
+      if (this.annotationEnabled) {
         this.$emit("removeEntity");
         setTimeout(() => {
           this.doubleClicked = false;
