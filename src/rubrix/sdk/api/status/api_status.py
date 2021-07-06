@@ -75,8 +75,6 @@ def sync(
 ) -> Optional[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     """Parameters
     ----------
-    current_user:
-        Connected user (since protected endpoint)
     service:
         The Api info service
 
@@ -110,8 +108,6 @@ async def asyncio(
 ) -> Optional[Union[ApiStatus, ErrorMessage, ErrorMessage]]:
     """Parameters
     ----------
-    current_user:
-        Connected user (since protected endpoint)
     service:
         The Api info service
 
