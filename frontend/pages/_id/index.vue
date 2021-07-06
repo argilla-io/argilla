@@ -25,7 +25,7 @@
         <Results :dataset="dataset" :headerHeight="headerHeight"> </Results>
         <SideBar :dataset="dataset" :annotationEnabled="annotationEnabled">
           <TextClassificationMetrics v-if="dataset.task === 'TextClassification'" :dataset="dataset" />
-          <TokenClassificationMetrics v-else :dataset="dataset" :entities="dataset.entities" />
+          <TokenClassificationMetrics v-else :dataset="dataset" />
         </Sidebar>
       </div>
     </div>

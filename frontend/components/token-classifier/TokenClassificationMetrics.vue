@@ -20,9 +20,6 @@ export default {
       type: Object,
       required: true,
     },
-    entities:{
-      type: Array,
-    }
   },
   data: () => ({
     limit: 3,
@@ -36,6 +33,9 @@ export default {
     datasetName() {
       return this.dataset.name;
     },
+    entities() {
+      return this.dataset.entities;
+    }
   },
 
   watch: {
