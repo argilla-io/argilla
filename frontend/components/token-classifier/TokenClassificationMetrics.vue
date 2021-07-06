@@ -1,11 +1,41 @@
 <template>
-  <div>
+  <div v-if="!$fetchState.pending">
     <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> Mentions</p>
     <div class="sidebar__tabs">
       <a href="#" :class="activeTab === 'mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('mentions')">Annotated as</a>
       <a href="#" :class="activeTab === 'predicted_mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('predicted_mentions')">Predicted as</a>
     </div>
+    <span v-if="annotationIsEnabled" class="progress progress--percent">{{ progress }}%</span>
+    <ReProgress v-if="annotationIsEnabled" re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
     <div class="scroll">
+      <div v-if="annotationIsEnabled">
+        <div class="info">
+          <label>All</label>
+          <span class="records-number">
+            <strong>{{ total }}</strong>
+          </span>
+        </div>
+        <div class="info">
+          <label>Validated</label>
+          <span class="records-number">
+            <strong>{{ totalValidated }}</strong>
+          </span>
+        </div>
+        <div class="info">
+          <label>Discarded</label>
+          <span class="records-number">
+            <strong>{{ totalDiscarded }}</strong>
+          </span>
+        </div>
+        <div class="labels">
+          <div v-for="(counter, label) in getInfo" :key="label">
+            <div v-if="counter > 0" class="info">
+              <label>{{ label }}</label>
+              <span class="records-number">{{ counter }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div v-for="(prop, key) in filteredMentions" :key="key" :class="expandedMentionsGroup === key ? 'expanded' : ''">
         <span :class="[`color_${entities.filter(e => e.text === key)[0].colorId}`, 'entity']">{{ key }}</span>
         <SidebarCollapsableMentions :limit="expandedMentionsGroup && expandedMentionsGroup !== key ? 0 : currentMentionsLength" :entities="entities" :k="key" :object="filteredMentions" @limit="onShowMore(key)" />
@@ -14,6 +44,9 @@
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
+import { AnnotationProgress } from "@/models/AnnotationProgress";
+import { ObservationDataset } from "@/models/Dataset";
 export default {
   props: {
     dataset: {
@@ -29,13 +62,46 @@ export default {
     filteredMentions: [],
     expandedMentionsGroup: undefined,
   }),
+  async fetch() {
+    await ObservationDataset.dispatch("refreshAnnotationProgress", {
+      dataset: this.dataset,
+    });
+  },
   computed: {
     datasetName() {
       return this.dataset.name;
     },
     entities() {
       return this.dataset.entities;
-    }
+    },
+    annotationsSum() {
+      return this.dataset.results.aggregations.status.Validated;
+    },
+    annotationsProgress() {
+      console.log(AnnotationProgress.find(this.dataset.name + this.dataset.task))
+      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
+    },
+    annotationIsEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
+    },
+    getInfo() {
+      return this.annotationIsEnabled ? this.annotationsProgress.annotatedAs : this.dataset.results.aggregations.words;
+    },
+    totalValidated() {
+      return this.annotationsProgress.validated;
+    },
+    totalDiscarded() {
+      return this.annotationsProgress.discarded;
+    },
+    total() {
+      return this.annotationsProgress.total;
+    },
+    progress() {
+      return (
+        ((this.totalValidated || 0) +
+          (this.totalDiscarded || 0)) * 100 / this.total
+      ).toFixed(2);
+    },
   },
 
   watch: {
@@ -63,6 +129,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.re-progress {
+  width: calc(100% - 90px);
+  &--multiple {
+    width: calc(100% - 90px);
+  }
+}
 .sidebar {
   &__tabs {
     display: flex;
@@ -106,6 +178,60 @@ export default {
     margin-right: -1em;
     overflow: auto;
   }
+}
+.info {
+  position: relative;
+  display: flex;
+  margin-bottom: 0.7em;
+  label {
+    margin: 0; // for tagger
+    &[class^='color_'] {
+      padding: 0.3em;
+    }
+  }
+}
+.records-number {
+  margin-right: 0;
+  margin-left: auto;
+  font-weight: bold;
+}
+.progress__block {
+  margin-bottom: 2.5em;
+  position: relative;
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+  &.loading-skeleton {
+    opacity: 0;
+  }
+  .re-progress {
+    margin-bottom: 0.5em;
+  }
+  p {
+    @include font-size(18px);
+    margin-top: 0;
+    font-weight: 600;
+    &:not(.button) {
+      pointer-events: none;
+    }
+  }
+  .button-icon {
+    color: $primary-color;
+    padding: 0;
+    display: flex;
+    margin-left: auto;
+    margin-right: 0;
+    margin-top: 2em;
+    .svg-icon {
+      fill: $primary-color;
+      margin-left: 1em;
+    }
+  }
+}
+.progress {
+  float: right;
+  line-height: 0.8em;
+  font-weight: bold;
 }
 $colors: 40;
 $hue: 360;
