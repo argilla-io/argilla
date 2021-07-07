@@ -171,7 +171,6 @@ export default {
         return {
           ...record,
           annotation: {
-            agent: this.$auth.user,
             labels: this.isMultiLabelRecord
               ? [...appliedLabels, ...newLabels]
               : newLabels,

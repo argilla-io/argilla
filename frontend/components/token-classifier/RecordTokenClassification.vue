@@ -156,7 +156,7 @@ export default {
             status: "Edited",
             annotation: {
               entities,
-              agent: this.$auth.user,
+
             },
           },
         ],

@@ -7,12 +7,6 @@
       </p>
     </NuxtLink>
     <slot />
-    <ReButton
-      v-if="$auth.loggedIn && $config.securityEnabled"
-      class="topbar__logout"
-      @click="logout"
-      >Close session</ReButton
-    >
   </div>
 </template>
 
@@ -29,12 +23,6 @@ export default {
     },
   },
   data: () => ({}),
-  methods: {
-    async logout() {
-      await this.$auth.logout();
-      await this.$auth.strategy.token.reset();
-    },
-  },
 };
 </script>
 

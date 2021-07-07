@@ -121,7 +121,6 @@ export default {
                 ...this.record,
                 status: "Edited",
                 annotation: {
-                  agent: this.$auth.user,
                   labels: [],
                 },
               },
@@ -142,7 +141,6 @@ export default {
               ? "Edited"
               : this.record.status,
             annotation: {
-              agent: this.$auth.user,
               labels: labels.map((label) => ({
                 class: label,
                 confidence: 1.0,
