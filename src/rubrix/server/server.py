@@ -16,12 +16,10 @@ from rubrix.server.commons.errors import (
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
-from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 
 from .commons.settings import settings as api_settings
 from .routes import api_router
-from .security.settings import settings as security_settings
 
 
 def configure_middleware(app: FastAPI):
@@ -54,11 +52,7 @@ def configure_app_statics(app: FastAPI):
     app.mount(
         "/",
         RewriteStaticFiles(
-            directory=os.path.join(
-                parent_path,
-                "static",
-                "secured" if security_settings.enable_security else "unsecured",
-            ),
+            directory=os.path.join(parent_path, "static"),
             html=True,
             check_dir=False,
         ),
@@ -76,12 +70,6 @@ def configure_app_startup(app: FastAPI):
         dataset_records.init()
 
 
-def configure_app_security(app: FastAPI):
-
-    if security_settings.enable_security and hasattr(auth, "router"):
-        app.include_router(auth.router)
-
-
 app = FastAPI(
     title="Rubrix",
     description="Rubrix API",
@@ -95,7 +83,6 @@ app = FastAPI(
 for app_configure in [
     configure_middleware,
     configure_api_exceptions,
-    configure_app_security,
     configure_api_router,
     configure_app_statics,
     configure_app_startup,
