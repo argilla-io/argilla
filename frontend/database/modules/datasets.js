@@ -154,7 +154,7 @@ const actions = {
     }
 
     return Notification.dispatch("notify", {
-      message: `The export is finished, <strong>${data.id}</strong> is accessible at:<br\> <strong>${data.uri}</strong>`,
+      message: `The export is finished, <strong>${data.id}</strong> is accessible at:<br/> <strong>${data.uri}</strong>`,
       type: "success",
     });
   },

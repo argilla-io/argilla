@@ -1,6 +1,5 @@
-
-export default ({ app }, inject) => {
-  const highlightSearch = function(query, text){
+export default (context, inject) => {
+  const highlightSearch = function (query, text) {
     const escapedText = text
       .toString()
       .replace(/&/g, "&amp;")
@@ -11,13 +10,13 @@ export default ({ app }, inject) => {
     if (!query) {
       return escapedText;
     }
-    let q = query.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, '');
+    let q = query.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
     return escapedText
       .toString()
       .replace(
         new RegExp(q, "gi"),
         (match) => `<span class="highlight-text">${match}</span>`
       );
-  }
-  inject('highlightSearch', highlightSearch)
-}
+  };
+  inject("highlightSearch", highlightSearch);
+};

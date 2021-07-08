@@ -1,16 +1,21 @@
 {
-  "name": "Rubrix",
-  "version": "1.0.0",
+  "name": "rubrix",
+  "version": "0.1.2",
   "private": true,
+  "eslintIgnore": [
+    "node_modules/**/*",
+    ".nuxt/**/*",
+    "dist/**/*"
+  ],
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
     "generate-icons": "vsvg -s ./static/icons -t ./assets/icons",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
-    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
-    "precommit": "yarn lint",
+    "lint": "eslint --ext .js,.vue --ignore-path .eslintignore  .",
+    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .eslintignore  .",
+    "precommit": "yarn lintfix",
     "e2e": "cypress open --browser chrome",
     "e2e:silent": "cypress run"
   },
@@ -25,7 +30,6 @@
     "moment-timezone": "^0.5.33",
     "node-sass": "^5.0.0",
     "nuxt": "^2.14.6",
-    "prettier": "^2.2.1",
     "sass-loader": "^10.1.0",
     "v-click-outside": "^3.1.2",
     "vue-moment": "^4.1.0",
@@ -33,6 +37,7 @@
     "vue-vega": "^1.0.0-alpha.13"
   },
   "devDependencies": {
+    "prettier": "^2.2.1",
     "axios-mock-adapter": "^1.19.0",
     "babel-eslint": "^10.1.0",
     "cypress": "^6.2.1",

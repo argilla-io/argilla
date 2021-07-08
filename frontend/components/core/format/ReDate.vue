@@ -1,7 +1,10 @@
-
-
 <template>
-  <span>{{ date | moment('utc') | moment('subtract', `${this.timeDifference} minutes`) | moment('from', 'now') }}</span>
+  <span>{{
+    date
+      | moment("utc")
+      | moment("subtract", `${timeDifference} minutes`)
+      | moment("from", "now")
+  }}</span>
 </template>
 
 <script>
@@ -10,7 +13,7 @@ export default {
   computed: {
     timeDifference() {
       return new Date().getTimezoneOffset();
-    }
+    },
   },
 };
 </script>

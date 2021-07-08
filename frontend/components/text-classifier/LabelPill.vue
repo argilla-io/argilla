@@ -1,29 +1,34 @@
 <template>
   <div>
-      <svgicon
-        :class="['icon__predicted', predicted]"
-        v-if="predicted"
-        width="20"
-        height="20"
-        :name="predicted ? 'predicted-ko' : 'predicted-ok'"
-      ></svgicon>
-      <p v-for="label in labels" :key="label.index"  :class="['pill', isAnnotated(label) ? 'active' : '']" :title="label.class">
-        <span class="pill__text">{{ label.class }} </span>
-        <span class="pill__confidence" v-if="showConfidence">
-          <ReNumeric
-            class="radio-data__confidence"
-            :value="decorateConfidence(label.confidence)"
-            type="%"
-            :decimals="2"
-          ></ReNumeric>
-        </span>
-      </p>
-    </div>
+    <svgicon
+      v-if="predicted"
+      :class="['icon__predicted', predicted]"
+      width="20"
+      height="20"
+      :name="predicted ? 'predicted-ko' : 'predicted-ok'"
+    ></svgicon>
+    <p
+      v-for="label in labels"
+      :key="label.index"
+      :class="['pill', isAnnotated(label) ? 'active' : '']"
+      :title="label.class"
+    >
+      <span class="pill__text">{{ label.class }} </span>
+      <span v-if="showConfidence" class="pill__confidence">
+        <ReNumeric
+          class="radio-data__confidence"
+          :value="decorateConfidence(label.confidence)"
+          type="%"
+          :decimals="2"
+        ></ReNumeric>
+      </span>
+    </p>
+  </div>
 </template>
 
 <script>
-import 'assets/icons/predicted-ok';
-import 'assets/icons/predicted-ko';
+import "assets/icons/predicted-ok";
+import "assets/icons/predicted-ko";
 export default {
   props: {
     labels: {
@@ -39,16 +44,16 @@ export default {
     },
     annotationLabels: {
       type: Array,
-    }
+    },
   },
   methods: {
     decorateConfidence(confidence) {
       return confidence * 100;
     },
     isAnnotated(label) {
-      return label.confidence > 0.5 ? true : false
-    }
-  }
+      return label.confidence > 0.5 ? true : false;
+    },
+  },
 };
 </script>
 

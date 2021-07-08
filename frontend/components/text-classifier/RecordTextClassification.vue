@@ -19,8 +19,7 @@
       />
       <ClassifierExplorationArea v-else :labels="predictionLabels" />
       <RecordExtraActions
-        :allow-validate="false"
-        :annotation-mode="annotationEnabled"
+        :allow-change-status="annotationEnabled"
         :record="record"
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="$emit('onShowMetadata')"

@@ -1,36 +1,38 @@
 <template>
-      <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
-        <transition name="fade" appear>
-        <div class="modal-wrapper" :class="modalPosition">
-          <div :class="['modal-container', modalClass]">
-            <p v-if="!modalCustom" class="modal__title">
-              <span
-                class="state"
-                :class="modalClass === 'modal-info' ? 'succeeded' : 'failed'"
-              />
-              {{ modalTitle }}
-            </p>
-            <div v-if="!modalCustom" />
-            <slot />
-            <ReButton
-              v-if="modalCloseButton"
-              class="modal-close"
-              @click="$emit('close-modal')"
-            >
-              <span class="modal-close__text">close</span>
-              <svgicon name="cross" width="10" height="auto" />
-            </ReButton>
-          </div>
+  <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
+    <transition name="fade" appear>
+      <div class="modal-wrapper" :class="modalPosition">
+        <div :class="['modal-container', modalClass]">
+          <p v-if="!modalCustom" class="modal__title">
+            <span
+              class="state"
+              :class="modalClass === 'modal-info' ? 'succeeded' : 'failed'"
+            />
+            {{ modalTitle }}
+          </p>
+          <div v-if="!modalCustom" />
+          <slot />
+          <ReButton
+            v-if="modalCloseButton"
+            class="modal-close"
+            @click="$emit('close-modal')"
+          >
+            <span class="modal-close__text">close</span>
+            <svgicon name="cross" width="10" height="auto" />
+          </ReButton>
         </div>
-        </transition>
       </div>
+    </transition>
+  </div>
 </template>
 
 <script>
 import "assets/icons/cross";
 import ClickOutside from "v-click-outside";
 export default {
-  data: () => ({}),
+  directives: {
+    clickOutside: ClickOutside.directive,
+  },
   props: {
     modalCloseButton: {
       type: Boolean,
@@ -65,9 +67,7 @@ export default {
       default: "modal-bottom",
     },
   },
-  directives: {
-    clickOutside: ClickOutside.directive,
-  },
+  data: () => ({}),
   updated() {
     if (this.preventBodyScroll) {
       if (this.modalVisible) {
@@ -97,7 +97,7 @@ export default {
   transition: opacity 0.3s ease;
   pointer-events: none;
   cursor: default;
-  background: rgba(0, 0, 0, 0.10);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .modal-wrapper {
@@ -126,7 +126,7 @@ export default {
   pointer-events: all;
 }
 .modal-primary {
-  box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
   border-radius: 0;
   max-width: 520px;
   ::v-deep .modal__title {

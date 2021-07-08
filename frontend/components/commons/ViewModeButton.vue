@@ -1,27 +1,40 @@
 <template>
   <div class="view-mode">
-    <p class="view-mode__text">{{annotationMode ? 'Turn off annotation mode' : 'Turn on annotation mode'}}</p>
-    <ReButton :class="['view-mode__button', annotationMode ? '--on' : '']" @click="$emit('onChangeMode')">
-      <svgicon class="view-mode__icon" name='editable' width="30" height="30" color="#ffffff"></svgicon>
+    <p class="view-mode__text">
+      {{
+        annotationMode ? "Turn off annotation mode" : "Turn on annotation mode"
+      }}
+    </p>
+    <ReButton
+      :class="['view-mode__button', annotationMode ? '--on' : '']"
+      @click="$emit('onChangeMode')"
+    >
+      <svgicon
+        class="view-mode__icon"
+        name="editable"
+        width="30"
+        height="30"
+        color="#ffffff"
+      ></svgicon>
     </ReButton>
   </div>
 </template>
 
 <script>
-import 'assets/icons/editable';
+import "assets/icons/editable";
 export default {
-  data: () => {
-    return {
-      allow: false,
-    }
-  },
   props: {
     annotationMode: {
       type: Boolean,
       default: false,
-    }
+    },
   },
-}
+  data: () => {
+    return {
+      allow: false,
+    };
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -75,5 +88,3 @@ $size: 50px;
   }
 }
 </style>
-
-

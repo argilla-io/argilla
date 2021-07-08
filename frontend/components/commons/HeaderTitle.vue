@@ -1,6 +1,7 @@
 <template>
   <div class="filters__title">
-    <h2 class="filters__title__info">{{ taskName }} records ({{ dataset.results.total }})
+    <h2 class="filters__title__info">
+      {{ taskName }} records ({{ dataset.results.total }})
     </h2>
   </div>
 </template>
@@ -9,19 +10,20 @@
 export default {
   props: {
     dataset: {
-      default: () => { },
+      default: () => {},
       type: Object,
     },
   },
   computed: {
     taskName() {
-      if (this.dataset.task === 'TokenClassification') {
-        return 'Token Classification'
-      } else if (this.dataset.task === 'TextClassification') {
-        return 'Text Classification'
+      if (this.dataset.task === "TokenClassification") {
+        return "Token Classification";
+      } else if (this.dataset.task === "TextClassification") {
+        return "Text Classification";
       }
-    }
-  }
+      return false;
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>

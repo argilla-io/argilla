@@ -5,8 +5,7 @@
       :text="text"
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
       :span="span"
-      :queryText="queryText"
-      :annotation-mode="annotationMode"
+      :dataset="dataset"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
     />
@@ -15,7 +14,7 @@
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
-      v-html="$highlightSearch(this.queryText, text)"
+      v-html="$highlightSearch(dataset.query.text, text)"
     /><span class="entities__selector__container">
       <div
         v-if="showEntitiesSelector"
@@ -72,20 +71,13 @@ export default {
       type: Number,
       required: true,
     },
-    annotationMode: {
-      type: Boolean,
-      default: false,
-    },
     spans: {
       type: Array,
       required: true,
     },
-    queryText: {
-      type: String,
-    },
-    entities: {
-      type: Array,
-      default: () => [],
+    dataset: {
+      type: Object,
+      required: true,
     },
   },
   data: () => ({
@@ -100,20 +92,29 @@ export default {
       return this.spans[this.spanId];
     },
     text() {
-      return this.record.raw_text.slice(this.spans[this.spanId].start, this.spans[this.spanId].end);
+      return this.record.raw_text.slice(
+        this.spans[this.spanId].start,
+        this.spans[this.spanId].end
+      );
     },
     whiteSpace() {
-      return this.record.raw_text.slice(this.spans[this.spanId].end, this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : '');
+      return this.record.raw_text.slice(
+        this.spans[this.spanId].end,
+        this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
+      );
     },
     tag_color() {
-      return this.entities.filter(
+      return this.dataset.entities.filter(
         (entity) => entity.text === this.span.entity.label
       )[0].colorId;
     },
     filteredEntities() {
-      return this.entities.filter((entity) =>
+      return this.dataset.entities.filter((entity) =>
         entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
       );
+    },
+    annotationEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
     },
   },
   created() {
@@ -124,12 +125,12 @@ export default {
   },
   methods: {
     startSelection() {
-      if (this.annotationMode) {
+      if (this.annotationEnabled) {
         this.$emit("startSelection", this.spanId);
       }
     },
     endSelection() {
-      if (this.annotationMode) {
+      if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
         this.showEntitiesSelector = true;
         // TODO (@leireaguirrework) : What's the purpose of this block?
@@ -165,7 +166,7 @@ export default {
     keyPress(e) {
       const cmd = String.fromCharCode(e.keyCode).toUpperCase();
       if (!this.isFocused && this.showEntitiesSelector && cmd) {
-        const entity = this.entities.find((t) => t.shortCut === cmd);
+        const entity = this.dataset.entities.find((t) => t.shortCut === cmd);
         if (entity) {
           this.selectEntity(entity.text);
         }

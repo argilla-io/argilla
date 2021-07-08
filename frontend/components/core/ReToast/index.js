@@ -1,5 +1,5 @@
-import Toast from './Toast.vue';
-import Api from './api';
+import Toast from "./Toast.vue";
+import Api from "./api";
 
 const Plugin = (Vue, options = {}) => {
   const methods = Api(Vue, options);

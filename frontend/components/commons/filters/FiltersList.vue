@@ -1,20 +1,30 @@
 <template>
-  <div class="filters" v-click-outside="onClickOutside">
+  <div v-click-outside="onClickOutside" class="filters">
     <div class="filters__tabs">
       <p
         v-for="group in groups"
         :key="group"
-        :class="{ active: initialVisibleGroup === group || itemsAppliedOnGroup(group) }"
+        :class="{
+          active: initialVisibleGroup === group || itemsAppliedOnGroup(group),
+        }"
         @click="selectGroup(group)"
       >
         {{ group }}
-        <span v-if="itemsAppliedOnGroup(group)">({{
-          itemsAppliedOnGroup(group)
-        }})</span>
+        <span v-if="itemsAppliedOnGroup(group)"
+          >({{ itemsAppliedOnGroup(group) }})</span
+        >
       </p>
     </div>
     <div v-for="group in groups" :key="group">
-      <div v-if="initialVisibleGroup === group" :class="['filters__tabs__content', filterList.filter((f) => f.group === group).length > 6 ? 'filters__tabs__content--large' : '']">
+      <div
+        v-if="initialVisibleGroup === group"
+        :class="[
+          'filters__tabs__content',
+          filterList.filter((f) => f.group === group).length > 6
+            ? 'filters__tabs__content--large'
+            : '',
+        ]"
+      >
         <span
           v-for="filter in filterList.filter((f) => f.group === group)"
           :key="filter.id"
@@ -53,48 +63,48 @@ export default {
         name: "Predicted as",
         type: "select",
         group: "Predictions",
-        placeholder: "Select labels"
+        placeholder: "Select labels",
       },
       {
         key: "predicted",
         name: "Predicted ok",
         type: "select",
         group: "Predictions",
-        placeholder: "Select yes/no"
+        placeholder: "Select yes/no",
       },
       {
         key: "confidence",
         name: "Confidence",
         type: "confidence",
-        group: "Predictions"
+        group: "Predictions",
       },
       {
         key: "predicted_by",
         name: "Predicted by",
         type: "select",
         group: "Predictions",
-        placeholder: "Select agents"
+        placeholder: "Select agents",
       },
       {
         key: "annotated_as",
         name: "Annotated as",
         type: "select",
         group: "Annotations",
-        placeholder: "Select labels"
+        placeholder: "Select labels",
       },
       {
         key: "annotated_by",
         name: "Annotated by",
         type: "select",
         group: "Annotations",
-        placeholder: "Select labels"
+        placeholder: "Select labels",
       },
       {
         key: "status",
         name: "Status",
         type: "select",
         group: "Status",
-        placeholder: "Select options"
+        placeholder: "Select options",
       },
     ],
   }),
@@ -190,7 +200,7 @@ $number-size: 18px;
       width: 450px;
       position: absolute;
       top: calc(100% + 1em);
-      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
       background: $lighter-color;
       padding: 3em 3em 2em 3em;
       border-radius: 5px;
@@ -202,7 +212,7 @@ $number-size: 18px;
         & > span {
           display: inline-block;
           width: 50%;
-          &:nth-child(2n+1) {
+          &:nth-child(2n + 1) {
             padding-right: 1em;
           }
         }

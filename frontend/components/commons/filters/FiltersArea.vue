@@ -5,10 +5,11 @@
         <div class="filters__row">
           <HeaderTitle v-if="dataset.results.records" :dataset="dataset" />
           <ReSwitch
-            class="filters__switch"
             v-model="annotationMode"
+            class="filters__switch"
             @change="$emit('onChangeMode')"
-          >Annotation Mode</ReSwitch>
+            >Annotation Mode</ReSwitch
+          >
         </div>
         <div class="filters__row">
           <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
@@ -42,9 +43,6 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    annotationEnabled: {
-      type: Boolean,
-    },
   },
   data: () => ({
     annotationMode: false,
@@ -61,7 +59,8 @@ export default {
     ],
   }),
   mounted() {
-    this.annotationMode = this.$route.query.allowAnnotation === "true" ? true : false;
+    this.annotationMode =
+      this.$route.query.allowAnnotation === "true" ? true : false;
   },
   methods: {
     ...mapActions({
