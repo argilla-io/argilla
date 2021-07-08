@@ -1,44 +1,50 @@
 <template>
   <div v-if="!$fetchState.pending">
     <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" />{{ getTitle }}</p>
-    <div class="sidebar__tabs">
-      <a href="#" :class="activeTab === 'mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('mentions')">Annotated as</a>
-      <a href="#" :class="activeTab === 'predicted_mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('predicted_mentions')">Predicted as</a>
-    </div>
-    <span v-if="annotationIsEnabled" class="progress progress--percent">{{ progress }}%</span>
-    <ReProgress v-if="annotationIsEnabled" re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
-    <div class="scroll">
-      <div v-if="annotationIsEnabled">
-        <div class="info">
-          <label>All</label>
-          <span class="records-number">
-            <strong>{{ total }}</strong>
-          </span>
-        </div>
-        <div class="info">
-          <label>Validated</label>
-          <span class="records-number">
-            <strong>{{ totalValidated }}</strong>
-          </span>
-        </div>
-        <div class="info">
-          <label>Discarded</label>
-          <span class="records-number">
-            <strong>{{ totalDiscarded }}</strong>
-          </span>
-        </div>
-        <div class="labels">
-          <div v-for="(counter, label) in getInfo" :key="label">
-            <div v-if="counter > 0" class="info">
-              <label>{{ label }}</label>
-              <span class="records-number">{{ counter }}</span>
+    <div v-if="annotationIsEnabled">
+      <span class="progress progress--percent">{{ progress }}%</span>
+      <ReProgress re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
+      <div class="scroll">
+        <div>
+          <div class="info">
+            <label>All</label>
+            <span class="records-number">
+              <strong>{{ total }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Validated</label>
+            <span class="records-number">
+              <strong>{{ totalValidated }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Discarded</label>
+            <span class="records-number">
+              <strong>{{ totalDiscarded }}</strong>
+            </span>
+          </div>
+          <div class="labels">
+            <div v-for="(counter, label) in getInfo" :key="label">
+              <div v-if="counter > 0" class="info">
+                <label>{{ label }}</label>
+                <span class="records-number">{{ counter }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div v-for="(prop, key) in filteredMentions" :key="key" :class="expandedMentionsGroup === key ? 'expanded' : ''">
-        <span :class="[`color_${entities.filter(e => e.text === key)[0].colorId}`, 'entity']">{{ key }}</span>
-        <SidebarCollapsableMentions :limit="expandedMentionsGroup && expandedMentionsGroup !== key ? 0 : currentMentionsLength" :entities="entities" :k="key" :object="filteredMentions" @limit="onShowMore(key)" />
+    </div>
+    <div v-else>
+      <div class="sidebar__tabs">
+        <a href="#" :class="activeTab === 'mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('mentions')">Annotated as</a>
+        <a href="#" :class="activeTab === 'predicted_mentions' ? 'active' : ''" @click.prevent="filteredMentionsBy('predicted_mentions')">Predicted as</a>
+      </div>
+      <div class="scroll">
+        <div v-for="(prop, key) in filteredMentions" :key="key" :class="expandedMentionsGroup === key ? 'expanded' : ''">
+          <span :class="[`color_${entities.filter(e => e.text === key)[0].colorId}`, 'entity']">{{ key }}</span>
+          <SidebarCollapsableMentions :limit="expandedMentionsGroup && expandedMentionsGroup !== key ? 0 : currentMentionsLength" :entities="entities" :k="key" :object="filteredMentions" @limit="onShowMore(key)" />
+        </div>
       </div>
     </div>
   </div>

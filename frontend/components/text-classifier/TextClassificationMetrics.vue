@@ -1,44 +1,45 @@
 <template>
   <div v-if="!$fetchState.pending">
     <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> {{ getTitle }}</p>
-    <span v-if="annotationIsEnabled" class="progress progress--percent">{{ progress }}%</span>
-    <ReProgress v-if="annotationIsEnabled" re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
-    <div class="scroll" >
-      <div v-if="annotationIsEnabled">
-        <div class="info">
-          <label>All</label>
-          <span class="records-number">
-            <strong>{{ total }}</strong>
-          </span>
-        </div>
-        <div class="info">
-          <label>Validated</label>
-          <span class="records-number">
-            <strong>{{ totalValidated }}</strong>
-          </span>
-        </div>
-        <div class="info">
-          <label>Discarded</label>
-          <span class="records-number">
-            <strong>{{ totalDiscarded }}</strong>
-          </span>
-        </div>
-        <div class="labels">
-          <div v-for="(counter, label) in getInfo" :key="label">
-            <div v-if="counter > 0" class="info">
-              <label>{{ label }}</label>
-              <span class="records-number">{{ counter }}</span>
+    <div v-if="annotationIsEnabled">
+      <span class="progress progress--percent">{{ progress }}%</span>
+      <ReProgress re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
+      <div class="scroll" >
+        <div>
+          <div class="info">
+            <label>All</label>
+            <span class="records-number">
+              <strong>{{ total }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Validated</label>
+            <span class="records-number">
+              <strong>{{ totalValidated }}</strong>
+            </span>
+          </div>
+          <div class="info">
+            <label>Discarded</label>
+            <span class="records-number">
+              <strong>{{ totalDiscarded }}</strong>
+            </span>
+          </div>
+          <div class="labels">
+            <div v-for="(counter, label) in getInfo" :key="label">
+              <div v-if="counter > 0" class="info">
+                <label>{{ label }}</label>
+                <span class="records-number">{{ counter }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div>
-        <strong class="subtitle" v-if="annotationIsEnabled">Keywords:</strong>
-        <div v-for="(counter, keyword) in getKeywords" :key="keyword">
-          <div v-if="counter > 0" class="info">
-            <label>{{ keyword }}</label>
-            <span class="records-number">{{ counter }}</span>
-          </div>
+    </div>
+    <div v-else class="scroll" >
+      <div v-for="(counter, keyword) in getKeywords" :key="keyword">
+        <div v-if="counter > 0" class="info">
+          <label>{{ keyword }}</label>
+          <span class="records-number">{{ counter }}</span>
         </div>
       </div>
     </div>
