@@ -24,9 +24,12 @@
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset"> </Results>
         <SideBar :dataset="dataset" :class="dataset.task">
-          <TextClassificationMetrics v-if="dataset.task === 'TextClassification'" :dataset="dataset" />
+          <TextClassificationMetrics
+            v-if="dataset.task === 'TextClassification'"
+            :dataset="dataset"
+          />
           <TokenClassificationMetrics v-else :dataset="dataset" />
-        </Sidebar>
+        </SideBar>
       </div>
     </div>
   </div>

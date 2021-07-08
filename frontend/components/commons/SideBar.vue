@@ -1,5 +1,4 @@
 <template>
-
   <aside :class="['sidebar', annotationIsEnabled ? 'annotation' : 'explore']">
     <p
       v-if="!visible"
@@ -10,23 +9,48 @@
     </p>
     <div v-show="visible" class="sidebar__wrapper">
       <div class="sidebar__content">
-        <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
+        <svgicon
+          class="sidebar__close-button"
+          name="cross"
+          width="16"
+          height="16"
+          color="#4C4EA3"
+          @click="toggleVisibleMetrics"
+        />
         <slot></slot>
       </div>
       <div v-if="annotationEnabled">
-        <ReButton class="button-clear button-action global-actions__export" @click="onOpenExportModal()">
-          <svgicon name="export" width="14" height="14" color="#0508D9" />Create snapshot
+        <ReButton
+          class="button-clear button-action global-actions__export"
+          @click="onOpenExportModal()"
+        >
+          <svgicon name="export" width="14" height="14" color="#0508D9" />Create
+          snapshot
         </ReButton>
-        <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="openExportModal" modal-position="modal-center" @close-modal="closeModal()">
+        <ReModal
+          :modal-custom="true"
+          :prevent-body-scroll="true"
+          modal-class="modal-primary"
+          :modal-visible="openExportModal"
+          modal-position="modal-center"
+          @close-modal="closeModal()"
+        >
           <p class="modal__title">Confirm snapshot creation</p>
           <p class="modal__text">
-            You are about to export {{ annotationsSum }} annotations. You will find the file on the server once the action is completed.
+            You are about to export {{ annotationsSum }} annotations. You will
+            find the file on the server once the action is completed.
           </p>
           <div class="modal-buttons">
-            <ReButton class="button-tertiary--small button-tertiary--outline" @click="closeModal()">
+            <ReButton
+              class="button-tertiary--small button-tertiary--outline"
+              @click="closeModal()"
+            >
               Cancel
             </ReButton>
-            <ReButton class="button-secondary--small" @click="onExportAnnotations()">
+            <ReButton
+              class="button-secondary--small"
+              @click="onExportAnnotations()"
+            >
               Confirm
             </ReButton>
           </div>
@@ -44,23 +68,23 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    }
+    },
   },
   data: () => ({
     visible: false,
     openExportModal: false,
   }),
-  watch: {
-    async datasetName() {
-      this.$fetch();
-    },
-  },
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
+    },
+  },
+  watch: {
+    async datasetName() {
+      this.$fetch();
     },
   },
   methods: {
@@ -78,7 +102,7 @@ export default {
       this.exportAnnotations({ name: this.dataset.name });
     },
     toggleVisibleMetrics() {
-      this.visible  = !this.visible;
+      this.visible = !this.visible;
     },
   },
 };
@@ -165,4 +189,3 @@ export default {
   }
 }
 </style>
- 

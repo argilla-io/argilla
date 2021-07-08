@@ -30,7 +30,7 @@
           </div>
         </slot>
       </div>
-      <div class="table-info__body" v-for="group in groups" :key="group">
+      <div v-for="group in groups" :key="group" class="table-info__body">
         <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
           <p
             class="table-info__group__title"
