@@ -25,9 +25,9 @@ body {
   font-size: $base-font-size;
   line-height: $base-line-height;
   background: $bg;
+  max-height: 100vh;
+  overflow: hidden;
   &.--fixed {
-    max-height: 100vh;
-    overflow: hidden;
     pointer-events: none;
   }
 }

@@ -11,19 +11,18 @@
       <ReTopbarBrand v-if="selectedTask">
         <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
       </ReTopbarBrand>
-      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode" :annotation-mode="annotationEnabled"> </FiltersArea>
+      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode"> </FiltersArea>
       <EntitiesHeader
         v-if="dataset.task === 'TokenClassification'"
-        :annotation-mode="annotationEnabled"
         :entities="dataset.entities"
         :dataset="dataset"
       />
-      <GlobalActions :annotationEnabled="annotationEnabled" :dataset="dataset" />
+      <GlobalActions :dataset="dataset" />
     </section>
     <div class="container">
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-        <Results :dataset="dataset" :headerHeight="headerHeight"> </Results>
-        <SideBar :dataset="dataset" :annotationEnabled="annotationEnabled">
+        <Results :dataset="dataset"> </Results>
+        <SideBar :dataset="dataset">
           <TextClassificationMetrics v-if="dataset.task === 'TextClassification'" :dataset="dataset" />
           <TokenClassificationMetrics v-else :dataset="dataset" />
         </Sidebar>
@@ -38,7 +37,6 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   layout: "app",
   data: () => ({
-    headerHeight: 200,
     tasks: [
       {
         name: "Token Classification",
@@ -79,9 +77,6 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
   },
-  updated() {
-    this.refreshHeaderHeight();
-  },
   methods: {
     ...mapActions({
       fetchDataset: "entities/datasets/fetchByName",
@@ -99,10 +94,6 @@ export default {
         dataset: this.dataset,
         value: value,
       });
-    },
-    refreshHeaderHeight() {
-      const headerComponent = this.$refs.header;
-      if (headerComponent) this.headerHeight = this.$refs.header.clientHeight;
     },
   },
 };
@@ -132,11 +123,27 @@ export default {
   @include grid($flex-wrap: nowrap, $gutter: 2em);
   margin: 0;;
   .fixed-header & {
-    margin-top: 3em;
+      ::v-deep .virtual-scroll {
+        padding-top: 3em;
+      }
+      .sidebar {
+        padding-top: 3em;
+        &.TokenClassification {
+          padding-top: 7.5em;
+        }
+      }
   }
   &--editable {
     .fixed-header & {
-      margin-top: 9em;
+      ::v-deep .virtual-scroll, .sidebar {
+        padding-top: 8.4em;
+      }
+      .sidebar {
+        padding-top: 8.4em;
+        &.TokenClassification {
+          padding-top: 12.4em;
+        }
+      }
     }
   }
 }
