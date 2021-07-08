@@ -122,7 +122,7 @@ export default {
         return options;
       }
       let filtered = Object.fromEntries(
-        Object.entries(options).filter((id) =>
+        Object.entries(options).filter(([id]) =>
           id.toLowerCase().match(text.toLowerCase())
         )
       );

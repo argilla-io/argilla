@@ -91,7 +91,7 @@ export default {
       let meta = { ...this.metadata };
       meta[key] ? (meta[key] = undefined) : (meta[key] = value);
       this.metadata = Object.fromEntries(
-        Object.entries(meta).filter((value) => value)
+        Object.entries(meta).filter(([, value]) => value)
       );
       this.disableButton = false;
     },
