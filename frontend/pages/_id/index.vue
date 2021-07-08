@@ -11,7 +11,8 @@
       <ReTopbarBrand v-if="selectedTask">
         <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
       </ReTopbarBrand>
-      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode"> </FiltersArea>
+      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode">
+      </FiltersArea>
       <EntitiesHeader
         v-if="dataset.task === 'TokenClassification'"
         :entities="dataset.entities"
@@ -23,9 +24,12 @@
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset"> </Results>
         <SideBar :dataset="dataset" :class="dataset.task">
-          <TextClassificationMetrics v-if="dataset.task === 'TextClassification'" :dataset="dataset" />
+          <TextClassificationMetrics
+            v-if="dataset.task === 'TextClassification'"
+            :dataset="dataset"
+          />
           <TokenClassificationMetrics v-else :dataset="dataset" />
-        </Sidebar>
+        </SideBar>
       </div>
     </div>
   </div>
@@ -121,21 +125,22 @@ export default {
 
 .grid {
   @include grid($flex-wrap: nowrap, $gutter: 2em);
-  margin: 0;;
+  margin: 0;
   .fixed-header & {
-      ::v-deep .virtual-scroll {
-        padding-top: 3em;
+    ::v-deep .virtual-scroll {
+      padding-top: 3em;
+    }
+    .sidebar {
+      padding-top: 3em;
+      &.TokenClassification {
+        padding-top: 7.5em;
       }
-      .sidebar {
-        padding-top: 3em;
-        &.TokenClassification {
-          padding-top: 7.5em;
-        }
-      }
+    }
   }
   &--editable {
     .fixed-header & {
-      ::v-deep .virtual-scroll, .sidebar {
+      ::v-deep .virtual-scroll,
+      .sidebar {
         padding-top: 8.4em;
       }
       .sidebar {

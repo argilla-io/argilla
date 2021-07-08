@@ -4,13 +4,13 @@
       'container',
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
-  >   
-    <div class="global-actions--exploration" v-if="!annotationEnabled">
+  >
+    <div v-if="!annotationEnabled" class="global-actions--exploration">
       <ReButton class="button--refresh button-primary" @click="refresh()">
         <svgicon name="refresh" width="20" height="14" /> Refresh
       </ReButton>
-    </div>   
-    <div class="global-actions" v-else>
+    </div>
+    <div v-else class="global-actions">
       <ReButton class="button--refresh button-primary" @click="refresh()">
         <svgicon name="refresh" width="20" height="14" /> Refresh
       </ReButton>
@@ -60,7 +60,7 @@
           />
           <reButton
             class="new-label__button button-primary--small"
-            :disabled="!this.newLabel"
+            :disabled="!newLabel"
             @click="addNewLabel(newLabel)"
             >Create</reButton
           >
@@ -150,7 +150,7 @@ export default {
     refresh() {
       this.search({
         dataset: this.dataset,
-        query: this.dataset.query
+        query: this.dataset.query,
       });
     },
     async onSelectAnnotation(labels) {

@@ -17,12 +17,7 @@
           tabindex="-1"
         />
         <button :type="type" class="re-switch-holder">
-          <svgicon
-            width="12"
-            height="12"
-            name="check"
-            color="white"
-          ></svgicon>
+          <svgicon width="12" height="12" name="check" color="white"></svgicon>
         </button>
       </div>
     </div>

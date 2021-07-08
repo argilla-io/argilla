@@ -53,7 +53,7 @@ export default {
     },
   },
   methods: {
-    toggleCheck($event) {
+    toggleCheck() {
       if (!this.disabled) {
         if (Array.isArray(this.areChecked)) {
           const checked = this.areChecked.slice();

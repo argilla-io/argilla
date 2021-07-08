@@ -1,27 +1,56 @@
 <template>
   <aside :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']">
-    <p v-if="!visible" class="sidebar__show-button" @click="toggleVisibleMetrics">
+    <p
+      v-if="!visible"
+      class="sidebar__show-button"
+      @click="toggleVisibleMetrics"
+    >
       <svgicon name="metrics" width="30" height="30" color="#4C4EA3" />
     </p>
     <div v-show="visible" class="sidebar__wrapper">
       <div class="sidebar__content">
-        <svgicon class="sidebar__close-button" @click="toggleVisibleMetrics" name="cross" width="16" height="16" color="#4C4EA3" />
+        <svgicon
+          class="sidebar__close-button"
+          name="cross"
+          width="16"
+          height="16"
+          color="#4C4EA3"
+          @click="toggleVisibleMetrics"
+        />
         <slot></slot>
       </div>
       <div v-if="annotationEnabled">
-        <ReButton class="button-clear button-action global-actions__export" @click="onOpenExportModal()">
-          <svgicon name="export" width="14" height="14" color="#0508D9" />Create snapshot
+        <ReButton
+          class="button-clear button-action global-actions__export"
+          @click="onOpenExportModal()"
+        >
+          <svgicon name="export" width="14" height="14" color="#0508D9" />Create
+          snapshot
         </ReButton>
-        <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="openExportModal" modal-position="modal-center" @close-modal="closeModal()">
+        <ReModal
+          :modal-custom="true"
+          :prevent-body-scroll="true"
+          modal-class="modal-primary"
+          :modal-visible="openExportModal"
+          modal-position="modal-center"
+          @close-modal="closeModal()"
+        >
           <p class="modal__title">Confirm snapshot creation</p>
           <p class="modal__text">
-            You are about to export {{ annotationsSum }} annotations. You will find the file on the server once the action is completed.
+            You are about to export {{ annotationsSum }} annotations. You will
+            find the file on the server once the action is completed.
           </p>
           <div class="modal-buttons">
-            <ReButton class="button-tertiary--small button-tertiary--outline" @click="closeModal()">
+            <ReButton
+              class="button-tertiary--small button-tertiary--outline"
+              @click="closeModal()"
+            >
               Cancel
             </ReButton>
-            <ReButton class="button-secondary--small" @click="onExportAnnotations()">
+            <ReButton
+              class="button-secondary--small"
+              @click="onExportAnnotations()"
+            >
               Confirm
             </ReButton>
           </div>
@@ -39,23 +68,23 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    }
+    },
   },
   data: () => ({
     visible: false,
     openExportModal: false,
   }),
-  watch: {
-    async datasetName() {
-      this.$fetch();
-    },
-  },
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
+    },
+  },
+  watch: {
+    async datasetName() {
+      this.$fetch();
     },
   },
   methods: {
@@ -73,7 +102,7 @@ export default {
       this.exportAnnotations({ name: this.dataset.name });
     },
     toggleVisibleMetrics() {
-      this.visible  = !this.visible;
+      this.visible = !this.visible;
     },
   },
 };
@@ -100,7 +129,7 @@ export default {
     .fixed-header & {
       margin-top: 0;
     }
-    @include media('>desktopLarge') {
+    @include media(">desktopLarge") {
       display: none;
     }
   }
@@ -109,7 +138,7 @@ export default {
     top: 1.5em;
     right: 2em;
     cursor: pointer;
-    @include media('>desktopLarge') {
+    @include media(">desktopLarge") {
       display: none;
     }
   }
@@ -130,7 +159,7 @@ export default {
     .explore & {
       margin-top: 1em;
     }
-    @include media('>desktopLarge') {
+    @include media(">desktopLarge") {
       margin-left: 1em;
       margin-top: 1em;
       display: block !important;
@@ -160,4 +189,3 @@ export default {
   }
 }
 </style>
- 

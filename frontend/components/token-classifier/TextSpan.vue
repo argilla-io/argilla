@@ -14,7 +14,7 @@
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
-      v-html="$highlightSearch(this.dataset.query.text, text)"
+      v-html="$highlightSearch(dataset.query.text, text)"
     /><span class="entities__selector__container">
       <div
         v-if="showEntitiesSelector"
@@ -77,8 +77,8 @@ export default {
     },
     dataset: {
       type: Object,
-      required: true,      
-    }
+      required: true,
+    },
   },
   data: () => ({
     searchEntity: "",
@@ -92,10 +92,16 @@ export default {
       return this.spans[this.spanId];
     },
     text() {
-      return this.record.raw_text.slice(this.spans[this.spanId].start, this.spans[this.spanId].end);
+      return this.record.raw_text.slice(
+        this.spans[this.spanId].start,
+        this.spans[this.spanId].end
+      );
     },
     whiteSpace() {
-      return this.record.raw_text.slice(this.spans[this.spanId].end, this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : '');
+      return this.record.raw_text.slice(
+        this.spans[this.spanId].end,
+        this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
+      );
     },
     tag_color() {
       return this.dataset.entities.filter(

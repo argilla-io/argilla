@@ -1,4 +1,4 @@
- <template>
+<template>
   <transition appear name="fade">
     <div v-if="resultsAvailable" class="table-info">
       <div class="table-info__header">
@@ -6,58 +6,129 @@
           <div class="table-info__item">
             <div v-if="globalActions">
               <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
-              <ReButton :disabled="!this.selectedItems.length" class="button-tertiary--outline button-tertiary--small table-info__header__button" @click="$emit('confirm-delete-multiple')">
+              <ReButton
+                :disabled="!selectedItems.length"
+                class="
+                  button-tertiary--outline button-tertiary--small
+                  table-info__header__button
+                "
+                @click="$emit('confirm-delete-multiple')"
+              >
                 Delete
               </ReButton>
             </div>
-            <div v-for="(column, key) in columns" :key="key" class="table-info__item__col">
-              <button v-if="!column.hidden" :class="[sortOrder, { active: sortedBy === column.field }]" @click="sort(column)">
+            <div
+              v-for="(column, key) in columns"
+              :key="key"
+              class="table-info__item__col"
+            >
+              <button
+                v-if="!column.hidden"
+                :class="[sortOrder, { active: sortedBy === column.field }]"
+                @click="sort(column)"
+              >
                 {{ column.name }}
               </button>
             </div>
           </div>
         </slot>
       </div>
-      <div class="table-info__body" v-for="group in groups" :key="group">
+      <div v-for="group in groups" :key="group" class="table-info__body">
         <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
-          <p class="table-info__group__title" :class="{
-               model: groupBy === 'model',
-               datasource: groupBy === 'dataSource',
-             }">
-            <svgicon v-if="groupBy === 'dataSource'" name="datasource" width="16" height="auto" /> {{ group }}
+          <p
+            class="table-info__group__title"
+            :class="{
+              model: groupBy === 'model',
+              datasource: groupBy === 'dataSource',
+            }"
+          >
+            <svgicon
+              v-if="groupBy === 'dataSource'"
+              name="datasource"
+              width="16"
+              height="auto"
+            />
+            {{ group }}
           </p>
         </span>
         <ul>
-          <li v-for="(item, key) in filteredResultsByGroup(group)" :key="item.name">
+          <li v-for="item in filteredResultsByGroup(group)" :key="item.name">
             <div class="table-info__item">
               <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
-              <span v-for="(column, idx) in columns" :key="idx" class="table-info__item__col">
+              <span
+                v-for="(column, idx) in columns"
+                :key="idx"
+                class="table-info__item__col"
+              >
                 <span :class="column.class">
-                  <span v-if="column.type === 'link'" @click="onActionClicked(item.kind, item.name)">{{ itemValue(item, column) }}</span>
-                  <ReDate v-else-if="column.type === 'date'" class="table-info__meta" :date="itemValue(item, column)" />
+                  <span
+                    v-if="column.type === 'link'"
+                    @click="onActionClicked(item.kind, item.name)"
+                    >{{ itemValue(item, column) }}</span
+                  >
+                  <ReDate
+                    v-else-if="column.type === 'date'"
+                    class="table-info__meta"
+                    :date="itemValue(item, column)"
+                  />
                   <span v-else-if="column.type === 'object'">
-                    <p v-for="key in Object.keys(itemValue(item, column))" :key="key">
-                      <strong>{{key}}:</strong>  {{(itemValue(item, column))[key]}}
+                    <p
+                      v-for="key in Object.keys(itemValue(item, column))"
+                      :key="key"
+                    >
+                      <strong>{{ key }}:</strong>
+                      {{ itemValue(item, column)[key] }}
                     </p>
                   </span>
                   <span v-else>{{ itemValue(item, column) }}</span>
                 </span>
               </span>
               <div v-if="visibleActions" class="table-info__actions">
-                <ReButton v-for="action in filterActions" :key="action.index" :data-title="action.tooltip" class="--hasTooltip-colored table-info__actions__button button-icon" :class="action.class" @click="onActionClicked(action.name, item.name)">
-                  <svgicon v-if="action.icon !== undefined" :name="action.icon" width="26" height="20" />
+                <ReButton
+                  v-for="action in filterActions"
+                  :key="action.index"
+                  :data-title="action.tooltip"
+                  class="
+                    --hasTooltip-colored
+                    table-info__actions__button
+                    button-icon
+                  "
+                  :class="action.class"
+                  @click="onActionClicked(action.name, item.name)"
+                >
+                  <svgicon
+                    v-if="action.icon !== undefined"
+                    :name="action.icon"
+                    width="26"
+                    height="20"
+                  />
                 </ReButton>
               </div>
-              <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="showModal === item.name" modal-position="modal-center" @close-modal="$emit('close-modal')">
+              <ReModal
+                :modal-custom="true"
+                :prevent-body-scroll="true"
+                modal-class="modal-primary"
+                :modal-visible="showModal === item.name"
+                modal-position="modal-center"
+                @close-modal="$emit('close-modal')"
+              >
                 <div>
                   <p class="modal__title">Delete confirmation</p>
-                  <p>You are about to delete:
-                    <strong>{{ item.name }}</strong>. This process cannot be undone.</p>
+                  <p>
+                    You are about to delete: <strong>{{ item.name }}</strong
+                    >. This process cannot be undone.
+                  </p>
                   <div class="modal-buttons">
-                    <ReButton class="button-tertiary--small button-tertiary--outline" @click="$emit('close-modal')">
+                    <ReButton
+                      class="button-tertiary--small button-tertiary--outline"
+                      @click="$emit('close-modal')"
+                    >
                       Cancel
                     </ReButton>
-                    <ReButton class="button-secondary--small" @click="onActionClicked('confirm-delete', item.name)">
+                    <ReButton
+                      class="button-secondary--small"
+                      @click="onActionClicked('confirm-delete', item.name)"
+                    >
                       Yes, delete
                     </ReButton>
                   </div>
@@ -93,7 +164,6 @@
     </div>
   </transition>
 </template>
-
 
 <script>
 import "assets/icons/delete";
@@ -142,7 +212,7 @@ export default {
     querySearch: {
       type: String,
       default: undefined,
-    }
+    },
   },
   data() {
     return {
@@ -291,7 +361,8 @@ export default {
     margin: 0;
   }
   li {
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       background: #fcfcfc;
     }
   }
@@ -338,7 +409,7 @@ export default {
         }
       }
       &:after {
-        content: '▾';
+        content: "▾";
         display: inline-block;
         height: 10px;
         width: 16px;
@@ -359,7 +430,7 @@ export default {
     display: flex;
     width: 100%;
     border-bottom: 1px solid $line-light-color;
-    align-items:flex-start;
+    align-items: flex-start;
     text-decoration: none;
     outline: none;
     &__col {
@@ -368,7 +439,7 @@ export default {
       flex: 1 1 0px;
       text-overflow: ellipsis;
       overflow: hidden;
-      &:nth-last-of-type(-n+3) {
+      &:nth-last-of-type(-n + 3) {
         max-width: 120px;
       }
       &:first-child {

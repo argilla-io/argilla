@@ -1,10 +1,18 @@
 <template>
   <div v-if="!$fetchState.pending">
-    <p><svgicon name="metrics" width="24" height="24" color="#4C4EA3" /> {{ getTitle }}</p>
+    <p>
+      <svgicon name="metrics" width="24" height="24" color="#4C4EA3" />
+      {{ getTitle }}
+    </p>
     <div v-if="annotationIsEnabled">
       <span class="progress progress--percent">{{ progress }}%</span>
-      <ReProgress re-mode="determinate" :multiple="true" :progress="(totalValidated * 100) / total" :progress-secondary="(totalDiscarded * 100) / total"></ReProgress>
-      <div class="scroll" >
+      <ReProgress
+        re-mode="determinate"
+        :multiple="true"
+        :progress="(totalValidated * 100) / total"
+        :progress-secondary="(totalDiscarded * 100) / total"
+      ></ReProgress>
+      <div class="scroll">
         <div>
           <div class="info">
             <label>All</label>
@@ -35,7 +43,7 @@
         </div>
       </div>
     </div>
-    <div v-else class="scroll" >
+    <div v-else class="scroll">
       <div v-for="(counter, keyword) in getKeywords" :key="keyword">
         <div v-if="counter > 0" class="info">
           <label>{{ keyword }}</label>
@@ -48,7 +56,6 @@
 
 <script>
 import "assets/icons/export";
-import { mapActions } from "vuex";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { ObservationDataset } from "@/models/Dataset";
 export default {
@@ -72,10 +79,12 @@ export default {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
     getInfo() {
-      return this.annotationIsEnabled ? this.annotationsProgress.annotatedAs : this.dataset.results.aggregations.words;
+      return this.annotationIsEnabled
+        ? this.annotationsProgress.annotatedAs
+        : this.dataset.results.aggregations.words;
     },
     getTitle() {
-      return this.annotationIsEnabled ? 'Annotations' : 'Keywords';
+      return this.annotationIsEnabled ? "Annotations" : "Keywords";
     },
     getKeywords() {
       return this.dataset.results.aggregations.words;
@@ -94,8 +103,8 @@ export default {
     },
     progress() {
       return (
-        ((this.totalValidated || 0) +
-          (this.totalDiscarded || 0)) * 100 / this.total
+        (((this.totalValidated || 0) + (this.totalDiscarded || 0)) * 100) /
+        this.total
       ).toFixed(2);
     },
     annotationIsEnabled() {
@@ -161,7 +170,7 @@ label {
   margin-bottom: 0.7em;
   label {
     margin: 0; // for tagger
-    &[class^='color_'] {
+    &[class^="color_"] {
       padding: 0.3em;
     }
   }
@@ -216,4 +225,3 @@ label {
   font-weight: bold;
 }
 </style>
- 

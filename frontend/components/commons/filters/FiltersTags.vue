@@ -7,7 +7,9 @@
     />
     <span v-for="(filter, index) in formattedFilters" :key="index">
       <span class="tag">
-        <span :title="`${filter.name} = ${filter.value}`">{{ filter.name }} = {{ filter.value }}</span>
+        <span :title="`${filter.name} = ${filter.value}`"
+          >{{ filter.name }} = {{ filter.value }}</span
+        >
         <i
           aria-hidden="true"
           tabindex="1"
@@ -17,7 +19,11 @@
       </span>
     </span>
 
-    <span @click="$emit('clearAll')" v-if="severalFiltersApplied" class="tag tag--all">
+    <span
+      v-if="severalFiltersApplied"
+      class="tag tag--all"
+      @click="$emit('clearAll')"
+    >
       <span>Remove all</span>
     </span>
   </div>
@@ -124,7 +130,6 @@ export default {
     }
   }
 }
-
 
 .filters__tags__logo {
   float: left;

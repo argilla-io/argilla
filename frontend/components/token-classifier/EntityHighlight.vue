@@ -4,10 +4,15 @@
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="$highlightSearch(this.dataset.query.text, text)"
+      v-html="$highlightSearch(dataset.query.text, text)"
     />
     <span class="highlight__label">
-      <span :class="['highlight__tooltip', annotationEnabled ? 'highlight__tooltip--icon' : '']">
+      <span
+        :class="[
+          'highlight__tooltip',
+          annotationEnabled ? 'highlight__tooltip--icon' : '',
+        ]"
+      >
         <span
           >{{ span.entity.label }}
           <svgicon
