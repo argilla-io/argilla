@@ -30,7 +30,7 @@
           </div>
         </slot>
       </div>
-      <div v-for="group in groups" :key="group">
+      <div class="table-info__body" v-for="group in groups" :key="group">
         <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
           <p
             class="table-info__group__title"
@@ -413,6 +413,11 @@ export default {
         text-align: center;
       }
     }
+  }
+  &__body {
+    overflow: auto;
+    height: calc(100vh - 203px);
+    padding-bottom: 0.5em;
   }
   &__item {
     position: relative;
