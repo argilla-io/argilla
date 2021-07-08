@@ -21,8 +21,7 @@ According to the amazing `NLP Progress resource by Seb Ruder <http://nlpprogress
 
 Rubrix is flexible with input and output shapes, which means you can model many related tasks like for example:
 
-`Key phrase extraction <https://paperswithcode.com/task/keyword-extraction>`_
-
+* `Key phrase extraction <https://paperswithcode.com/task/keyword-extraction>`_
 * `Sentiment analysis <http://nlpprogress.com/english/sentiment_analysis.html>`_ 
 * `Natural Language Inference <http://nlpprogress.com/english/natural_language_inference.html>`_
 * `Relationship Extraction <http://nlpprogress.com/english/relationship_extraction.html>`_
