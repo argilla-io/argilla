@@ -5,10 +5,8 @@
       :key="i"
       :record="record"
       :span-id="i"
-      :annotation-mode="annotationEnabled"
-      :entities="dataset.entities"
       :spans="textSpans"
-      :query-text="dataset.query.text"
+      :dataset="dataset"
       :class="isSelected(i) ? 'selected' : ''"
       @startSelection="onStartSelection"
       @endSelection="onEndSelection"
@@ -18,7 +16,7 @@
       @reset="onReset"
     />
     <RecordExtraActions
-      :annotation-mode="annotationEnabled"
+      :allow-change-status="annotationEnabled"
       :record="record"
       @onChangeRecordStatus="onChangeRecordStatus"
       @onShowMetadata="$emit('onShowMetadata')"

@@ -11,7 +11,7 @@
       class="entity"
       :class="[`color_${entity.colorId}`,
         activeEntity === entity.text ? 'active' : '',
-        annotationMode ? 'non-selectable--show-sort-code' : 'non-selectable',
+        annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
       ]"
       @click="onActiveEntity(entity)"
     >
@@ -43,10 +43,6 @@ export default {
       type: Object,
       required: true,
     },
-    annotationMode: {
-      type: Boolean,
-      default: false,
-    },
   },
   data: () => ({
     activeEntity: undefined,
@@ -63,6 +59,9 @@ export default {
     entityKey() {
       return Object.keys(this.entities);
     },
+    annotationEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
+    }
   },
   methods: {
     toggleEntitiesNumber() {
@@ -73,7 +72,7 @@ export default {
       }
     },
     onActiveEntity(entity) {
-      if (this.annotationMode) {
+      if (this.annotationEnabled) {
         if (this.activeEntity === entity.text) {
           this.activeEntity = undefined;
         } else {
