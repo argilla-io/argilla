@@ -2,14 +2,19 @@
   "name": "rubrix",
   "version": "0.1.2",
   "private": true,
+  "eslintIgnore": [
+    "node_modules/**/*",
+    ".nuxt/**/*",
+    "dist/**/*"
+  ],
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
     "generate-icons": "vsvg -s ./static/icons -t ./assets/icons",
-    "lint": "eslint --ext .js,.vue .",
-    "lintfix": "eslint --fix --ext .js,.vue .",
+    "lint": "eslint --ext .js,.vue --ignore-path .eslintignore  .",
+    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .eslintignore  .",
     "precommit": "yarn lintfix",
     "e2e": "cypress open --browser chrome",
     "e2e:silent": "cypress run"
