@@ -341,6 +341,21 @@ const actions = {
     const loadedRecords = dataset.results.records.length;
     const prefetchPaginationSize =
       dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
+
+    const newPagination = await Pagination.update({
+      where: dataset.name,
+      data: {
+        page: dataset.viewSettings.pagination.page + 1,
+      },
+    });
+
+    const newDataset = await dataset.constructor.update({
+      where: dataset.name,
+      data: {
+        viewSettings: { ...dataset.viewSettings, pagination: newPagination },
+      },
+    });
+
     if (
       // Prefetch data before reach the end of pagination
       loadedRecords < dataset.results.total &&
@@ -349,19 +364,13 @@ const actions = {
       dispatch(
         `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
         {
-          dataset,
+          dataset: newDataset,
           from: loadedRecords,
-          size: 2 * loadedRecords,
+          size: 2 * DEFAULT_QUERY_SIZE,
         },
         { root: true }
       );
     }
-    return await Pagination.update({
-      where: dataset.name,
-      data: {
-        page: dataset.viewSettings.pagination.page + 1,
-      },
-    });
   },
 };
 
