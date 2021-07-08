@@ -33,7 +33,7 @@
 // import reSpinner from '@recognai/re-commons/src/components/elements/core/reSpinner/reSpinner';
 
 export default {
-  name: 'ReButton',
+  name: "ReButton",
   props: {
     href: String,
     target: String,

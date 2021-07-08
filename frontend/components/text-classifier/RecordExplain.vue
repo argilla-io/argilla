@@ -1,8 +1,13 @@
-
 <template>
   <div>
-    <div v-for="tokenItem in explainFormatted" :key="tokenItem.index" :class="['atom', customClass(tokenItem)]">
-      <span v-if="tokenItem.grad" class="atom__tooltip">{{tokenItem.grad}}</span>
+    <div
+      v-for="tokenItem in explainFormatted"
+      :key="tokenItem.index"
+      :class="['atom', customClass(tokenItem)]"
+    >
+      <span v-if="tokenItem.grad" class="atom__tooltip">{{
+        tokenItem.grad
+      }}</span>
       <span v-html="tokenItem.text === ' ' ? '&nbsp;' : tokenItem.text"></span>
     </div>
   </div>
@@ -10,39 +15,6 @@
 
 <script>
 export default {
-  computed: {
-    explainFormatted() {
-      // TODO ALLOW FOR MULTI LABEL
-      return this.explain.map(token => {
-        const grad = Number(Object.values(token.attributions)).toFixed(3);
-        let percent = Math.round(Math.abs(grad) * 100);
-        if (percent !== 0) {
-          /* eslint-disable no-mixed-operators */
-          const p = 1.5; // color sensitivity (values from 1 to 4)
-          const s = 100 / Math.log10(100) ** p;
-          percent = Math.round(Math.log10(percent) ** p * s);
-        }
-        return {
-          text: this.queryText ? this.$highlightSearch(this.queryText, token.token) : token.token,
-          percent: percent.toString(),
-          grad
-        }
-      })
-    },
-  },
-  methods: {
-    customClass(tokenItem) {
-      if (this.predicted !== undefined) {
-        if (Math.sign(tokenItem.grad) !== 1) {
-          return `grad-neg-${tokenItem.percent}`
-        } else {
-          return this.predicted === 'ko' ? `grad-rest-${tokenItem.percent}` : `grad-plus-${tokenItem.percent}`
-        }
-      } else {
-        return Math.sign(tokenItem.grad) !== 1 ? `grad-rest-${tokenItem.percent}` : `grad-plus-${tokenItem.percent}`
-      }
-    }
-  },
   props: {
     queryText: {
       type: String,
@@ -54,6 +26,45 @@ export default {
     predicted: {
       type: String,
       default: undefined,
+    },
+  },
+  computed: {
+    explainFormatted() {
+      // TODO ALLOW FOR MULTI LABEL
+      return this.explain.map((token) => {
+        const grad = Number(Object.values(token.attributions)).toFixed(3);
+        let percent = Math.round(Math.abs(grad) * 100);
+        if (percent !== 0) {
+          /* eslint-disable no-mixed-operators */
+          const p = 1.5; // color sensitivity (values from 1 to 4)
+          const s = 100 / Math.log10(100) ** p;
+          percent = Math.round(Math.log10(percent) ** p * s);
+        }
+        return {
+          text: this.queryText
+            ? this.$highlightSearch(this.queryText, token.token)
+            : token.token,
+          percent: percent.toString(),
+          grad,
+        };
+      });
+    },
+  },
+  methods: {
+    customClass(tokenItem) {
+      if (this.predicted !== undefined) {
+        if (Math.sign(tokenItem.grad) !== 1) {
+          return `grad-neg-${tokenItem.percent}`;
+        } else {
+          return this.predicted === "ko"
+            ? `grad-rest-${tokenItem.percent}`
+            : `grad-plus-${tokenItem.percent}`;
+        }
+      } else {
+        return Math.sign(tokenItem.grad) !== 1
+          ? `grad-rest-${tokenItem.percent}`
+          : `grad-plus-${tokenItem.percent}`;
+      }
     },
   },
 };
@@ -175,4 +186,3 @@ export default {
   margin: 0 0.13em 0 0.12em;
 }
 </style>
-

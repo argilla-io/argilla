@@ -9,7 +9,8 @@
       v-for="(entity, index) in filteredEntities.slice(0, entitiesNumber)"
       :key="index"
       class="entity"
-      :class="[`color_${entity.colorId}`,
+      :class="[
+        `color_${entity.colorId}`,
         activeEntity === entity.text ? 'active' : '',
         annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
       ]"
@@ -61,7 +62,7 @@ export default {
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
-    }
+    },
   },
   methods: {
     toggleEntitiesNumber() {

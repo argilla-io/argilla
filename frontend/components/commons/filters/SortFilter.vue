@@ -101,8 +101,9 @@ export default {
       return true;
     },
     sortedRange(by, byDir) {
-      return `${by.range[byDir === this.sortOrder[0] ? 0 : 1]} - ${by.range[byDir === this.sortOrder[0] ? 1 : 0]
-        }`;
+      return `${by.range[byDir === this.sortOrder[0] ? 0 : 1]} - ${
+        by.range[byDir === this.sortOrder[0] ? 1 : 0]
+      }`;
     },
   },
 };

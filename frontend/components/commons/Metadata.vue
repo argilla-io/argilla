@@ -80,8 +80,10 @@ export default {
     disableButton: true,
   }),
   computed: {
-    sortedMetadataItems() {    
-      return Object.keys(this.metadataItems).sort().reduce((r, k) => (r[k] = this.metadataItems[k], r), {});
+    sortedMetadataItems() {
+      return Object.keys(this.metadataItems)
+        .sort()
+        .reduce((r, k) => ((r[k] = this.metadataItems[k]), r), {});
     },
   },
   methods: {

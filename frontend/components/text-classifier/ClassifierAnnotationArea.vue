@@ -8,10 +8,13 @@
         v-model="selectedLabels"
         :allow-multiple="multiLabel"
         :label="label"
-        @change="updateLabels"
-        :class="['label-button', selectedLabels.includes(label) ? 'active' : '']"
+        :class="[
+          'label-button',
+          selectedLabels.includes(label) ? 'active' : '',
+        ]"
         :data-title="label.class"
         :value="label.class"
+        @change="updateLabels"
       >
       </ClassifierAnnotationButton>
     </transition-group>
@@ -45,13 +48,13 @@
           v-for="label in dropdownSortedLabels"
           :id="label.class"
           :key="label.class"
-          @change="updateLabels"
           v-model="selectedLabels"
           :allow-multiple="multiLabel"
           :label="label"
           :class="['label-button']"
           :data-title="label.class"
           :value="label.class"
+          @change="updateLabels"
         >
         </ClassifierAnnotationButton>
       </template>
@@ -93,7 +96,7 @@ export default {
       );
     },
     appliedLabels() {
-      return this.labels.filter(l => l.selected).map(label => label.class)
+      return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
   },
   updated() {
@@ -107,7 +110,7 @@ export default {
       if (this.selectedLabels.length > 0) {
         this.annotate();
       } else {
-        this.$emit('updateStatus', 'Edited')
+        this.$emit("updateStatus", "Edited");
       }
     },
     annotate() {

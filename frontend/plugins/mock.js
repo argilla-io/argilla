@@ -1,4 +1,3 @@
-
 // import MockAdapter from 'axios-mock-adapter'
 // import mockTextClassification from '@/database/mockTextClassification'
 // import mockTokenClassification from '@/database/mockTokenClassification'
