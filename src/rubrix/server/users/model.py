@@ -1,6 +1,8 @@
-from typing import List, Optional
-
 from pydantic import BaseModel
+from typing import List, Optional
+from fastapi.security import (
+    SecurityScopes,
+)
 
 
 class User(BaseModel):
@@ -17,10 +19,16 @@ class User(BaseModel):
         return self.user_groups[0] if self.user_groups else None
 
 
-class UserInDB(User):
-    """Internal user model"""
-
-    hashed_password: str
-
-
 MOCK_USER = User(username=".local-Rubrix", disabled=False)
+
+
+class AuthProvider:
+    """Base class for auth provider"""
+
+    async def get_user(self, security_scopes: SecurityScopes, **kwargs) -> User:
+        raise NotImplementedError()
+
+
+class MockAuthProvider(AuthProvider):
+    async def get_user(self, security_scopes: SecurityScopes) -> User:
+        return MOCK_USER
