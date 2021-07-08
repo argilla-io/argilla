@@ -36,10 +36,6 @@ import "assets/icons/metrics";
 import "assets/icons/cross";
 export default {
   props: {
-    annotationEnabled: {
-      type: Boolean,
-      default: false
-    },
     dataset: {
       type: Object,
       required: true,
@@ -57,6 +53,9 @@ export default {
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
+    },
+    annotationEnabled() {
+      return this.dataset.viewSettings.annotationEnabled;
     },
   },
   methods: {
