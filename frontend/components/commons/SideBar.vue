@@ -1,5 +1,5 @@
 <template>
-  <aside :class="['sidebar', annotationIsEnabled ? 'annotation' : 'explore']">
+  <aside :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']">
     <p
       v-if="!visible"
       class="sidebar__show-button"
