@@ -60,7 +60,7 @@
           />
           <reButton
             class="new-label__button button-primary--small"
-            :disabled="!this.newLabel"
+            :disabled="!newLabel"
             @click="addNewLabel(newLabel)"
             >Create</reButton
           >

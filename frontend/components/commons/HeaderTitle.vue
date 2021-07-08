@@ -21,6 +21,7 @@ export default {
       } else if (this.dataset.task === "TextClassification") {
         return "Text Classification";
       }
+      return false;
     },
   },
 };

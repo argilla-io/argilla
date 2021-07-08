@@ -1,4 +1,4 @@
-export default ({ app }, inject) => {
+export default (context, inject) => {
   const highlightSearch = function (query, text) {
     const escapedText = text
       .toString()

@@ -14,6 +14,5 @@ export default ({ $axios, app }) => {
       message: error,
       type: "error",
     });
-    return Promise.reject(error);
   });
 };

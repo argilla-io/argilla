@@ -105,13 +105,12 @@ export default {
         const {
           $el: { children: htmlChildren },
           offset,
-          defaultHeight,
         } = this;
         const htmlAsArray = Array.from(htmlChildren);
         const children = htmlAsArray.slice(1, htmlAsArray.length - 1); // remove empty divs
         const newHeights = this.heights.slice(0); // recomputing heights
         // scrollDiff is used for backward scrolling (where not all items before have known height)
-        let scrollDiff = 0;
+        // let scrollDiff = 0;
         let hasChange = false;
 
         children.forEach((child, i) => {
@@ -119,10 +118,10 @@ export default {
           // if item has been set or updated
           if (newHeights[index] !== child.offsetHeight) {
             // if item is in the space before items, update the scroll
-            if (index <= offset) {
-              scrollDiff +=
-                child.offsetHeight - (newHeights[index] || defaultHeight);
-            }
+            // if (index <= offset) {
+            //   scrollDiff +=
+            //     child.offsetHeight - (newHeights[index] || defaultHeight);
+            // }
             newHeights[index] = child.offsetHeight;
             hasChange = true;
           }
@@ -169,7 +168,7 @@ export default {
     this.readItemsHeight();
     this.$emit("updated");
   },
-  render(h) {
+  render() {
     // eslint-disable-line no-unused-vars
     const { spaceBefore, firstItemIndex } = this.calculateSpaceBefore();
     const { items, lastItemIndex } = this.calculateItems(

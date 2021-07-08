@@ -91,7 +91,7 @@ export default {
       let meta = { ...this.metadata };
       meta[key] ? (meta[key] = undefined) : (meta[key] = value);
       this.metadata = Object.fromEntries(
-        Object.entries(meta).filter(([key, value]) => value)
+        Object.entries(meta).filter((value) => value)
       );
       this.disableButton = false;
     },
@@ -185,6 +185,7 @@ export default {
     margin-top: 2em;
     .re-button {
       margin-bottom: 0;
+      display: inline-block;
     }
   }
 }

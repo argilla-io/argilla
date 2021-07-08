@@ -2,7 +2,7 @@
   <span>{{
     date
       | moment("utc")
-      | moment("subtract", `${this.timeDifference} minutes`)
+      | moment("subtract", `${timeDifference} minutes`)
       | moment("from", "now")
   }}</span>
 </template>

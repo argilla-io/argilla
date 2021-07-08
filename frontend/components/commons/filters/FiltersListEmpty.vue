@@ -2,7 +2,7 @@
   <div id="SearchFilterList" class="filters__container grid">
     <div class="filters">
       <div
-        v-for="filter in this.computedDummyFilters"
+        v-for="filter in computedDummyFilters"
         :key="filter.id"
         class="filter disabled"
       >

@@ -14,7 +14,7 @@
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
-      v-html="$highlightSearch(this.dataset.query.text, text)"
+      v-html="$highlightSearch(dataset.query.text, text)"
     /><span class="entities__selector__container">
       <div
         v-if="showEntitiesSelector"

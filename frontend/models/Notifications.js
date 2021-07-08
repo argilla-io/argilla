@@ -5,7 +5,7 @@ class Notification extends Model {
 
   static fields() {
     return {
-      id: this.uid(() => uuid()),
+      id: this.uid(),
     };
   }
 }

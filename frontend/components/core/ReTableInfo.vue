@@ -7,8 +7,11 @@
             <div v-if="globalActions">
               <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
               <ReButton
-                :disabled="!this.selectedItems.length"
-                class="button-tertiary--outline button-tertiary--small table-info__header__button"
+                :disabled="!selectedItems.length"
+                class="
+                  button-tertiary--outline button-tertiary--small
+                  table-info__header__button
+                "
                 @click="$emit('confirm-delete-multiple')"
               >
                 Delete
@@ -49,10 +52,7 @@
           </p>
         </span>
         <ul>
-          <li
-            v-for="(item, key) in filteredResultsByGroup(group)"
-            :key="item.name"
-          >
+          <li v-for="item in filteredResultsByGroup(group)" :key="item.name">
             <div class="table-info__item">
               <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
               <span
@@ -88,7 +88,11 @@
                   v-for="action in filterActions"
                   :key="action.index"
                   :data-title="action.tooltip"
-                  class="--hasTooltip-colored table-info__actions__button button-icon"
+                  class="
+                    --hasTooltip-colored
+                    table-info__actions__button
+                    button-icon
+                  "
                   :class="action.class"
                   @click="onActionClicked(action.name, item.name)"
                 >

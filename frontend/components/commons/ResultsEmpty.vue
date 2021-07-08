@@ -8,7 +8,11 @@
 
 <script>
 export default {
-  props: ["emptyTitle"],
+  props: {
+    emptyTitle: {
+      type: String,
+    },
+  },
 };
 </script>
 

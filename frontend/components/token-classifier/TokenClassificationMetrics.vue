@@ -89,7 +89,6 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { ObservationDataset } from "@/models/Dataset";
 export default {
