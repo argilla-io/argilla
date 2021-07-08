@@ -54,12 +54,7 @@ export default {
   buildModules: [],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
-  modules: [
-    "@nuxtjs/style-resources",
-    "@nuxtjs/axios",
-    "@nuxtjs/dotenv",
-    "@nuxtjs/auth-next",
-  ],
+  modules: ["@nuxtjs/style-resources", "@nuxtjs/axios", "@nuxtjs/dotenv"],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
