@@ -1031,12 +1031,14 @@ export default {
         this.slider[slider].style.msTransform = translateValue;
         if (this.direction === "vertical") {
           this.$refs.process.style.height = processSize;
-          this.$refs.process.style[this.reverse ? "top" : "bottom"] =
-            processPos;
+          this.$refs.process.style[
+            this.reverse ? "top" : "bottom"
+          ] = processPos;
         } else {
           this.$refs.process.style.width = processSize;
-          this.$refs.process.style[this.reverse ? "right" : "left"] =
-            processPos;
+          this.$refs.process.style[
+            this.reverse ? "right" : "left"
+          ] = processPos;
         }
       } else {
         this.slider.style.transform = translateValue;
