@@ -96,6 +96,9 @@ export default {
     extend(config) {
       config.resolve.alias["vue"] = "vue/dist/vue.common";
     },
+    babel: {
+      plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],
+    },
   },
 
   // https://github.com/nuxt-community/style-resources-module
