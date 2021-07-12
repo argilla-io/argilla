@@ -119,7 +119,7 @@ export default {
     });
   },
   computed: {
-    areMentions() {
+    existMentions() {
       return Object.keys(this.filteredMentions).length;
     },
     datasetName() {
