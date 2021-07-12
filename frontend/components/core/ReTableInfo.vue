@@ -8,7 +8,10 @@
               <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
               <ReButton
                 :disabled="!selectedItems.length"
-                class="button-tertiary--outline button-tertiary--small table-info__header__button"
+                class="
+                  button-tertiary--outline button-tertiary--small
+                  table-info__header__button
+                "
                 @click="$emit('confirm-delete-multiple')"
               >
                 Delete
@@ -85,7 +88,11 @@
                   v-for="action in filterActions"
                   :key="action.index"
                   :data-title="action.tooltip"
-                  class="--hasTooltip-colored table-info__actions__button button-icon"
+                  class="
+                    --hasTooltip-colored
+                    table-info__actions__button
+                    button-icon
+                  "
                   :class="action.class"
                   @click="onActionClicked(action.name, item.name)"
                 >
