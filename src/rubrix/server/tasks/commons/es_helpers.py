@@ -93,8 +93,6 @@ def parse_aggregations(
         return None
 
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
-        # TODO(me): process custom kind of aggregations (mentions & predicted mentions)
-        # raise NotImplementedError()
         parsed = {}
         for bucket in buckets:
             key, doc_count = bucket.pop("key", None), bucket.pop("doc_count")
