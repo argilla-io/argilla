@@ -60,7 +60,7 @@
         >
       </div>
       <div class="scroll">
-        <div v-if="!areMentions">
+        <div v-if="!existMentions">
           <span class="sidebar__tabs__empty"
             >There are no
             {{ activeTab === "mentions" ? "annotations" : "predictions" }}</span
