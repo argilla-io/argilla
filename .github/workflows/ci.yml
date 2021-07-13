@@ -54,6 +54,15 @@ jobs:
           name: python-package
           path: dist
 
+  code_coverage:
+    name: Upload coverage
+    steps:
+      # (Other steps go here)
+      - name: "Upload coverage to Codecov"
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+
   deploy_docker:
     name: Build latest docker image
     runs-on: ubuntu-latest

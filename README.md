@@ -22,6 +22,7 @@
     <a href="https://hub.docker.com/r/recognai/rubrix">
         <img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix">
     </a>
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 </p>
 
 <h3 align="center">Explore, label, and monitor data for AI projects</h3>
