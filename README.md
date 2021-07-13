@@ -4,14 +4,15 @@
 </p>
 
 <p align="center">
+    <a href="https://github.com/recognai/rubrix/actions">
+        <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
+    </a>
     <a href="https://pypi.org/project/rubrix/">
         <img alt="CI" src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
     </a>
-
     <a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
     </a>
-
     <a href="https://twitter.com/recogn_ai">
         <img alt="CI" src="https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow">
     </a>
@@ -19,14 +20,6 @@
 
 <h3 align="center">Explore, label, and monitor data for AI projects</h3>
 
-<p align="center">
-    <a href="https://github.com/recognai/rubrix/actions">
-        <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
-    </a>
-    <!--a href="https://github.com/recognai/rubrix/blob/master/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/recognai/rubrix.svg?color=blue">
-    </a-->
-</p>
 
 ![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
 
