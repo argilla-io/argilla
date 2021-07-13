@@ -1,11 +1,20 @@
-<p align="center">
-[![pypi](https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/rubrix/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/ambv/black)
-[![Recognai Twitter](https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow)](https://twitter.com/recogn_ai)
-</p>
 
 <p align="center">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
+</p>
+
+<p align="center">
+    <a href="https://pypi.org/project/rubrix/">
+        <img alt="CI" src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
+    </a>
+
+    <a href="https://github.com/ambv/black">
+        <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
+    </a>
+
+    <a href="https://twitter.com/recogn_ai">
+        <img alt="CI" src="https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow">
+    </a>
 </p>
 
 <h3 align="center">Explore, label, and monitor data for AI projects</h3>
