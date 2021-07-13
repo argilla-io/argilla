@@ -54,6 +54,27 @@ jobs:
           name: python-package
           path: dist
 
+  codecov_coverage:
+    name: Codecov Coverage Report
+    needs: -build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code 🛎
+      uses: actions/checkout@v2
+    - name: Setup Python 🐍
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+    - name: Generate Report 📄
+      run: |
+        pip install pytest-cov
+        pytest --cov=./
+    - name: Upload Coverage to Codecov 📦
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+
+
   deploy_docker:
     name: Build latest docker image
     runs-on: ubuntu-latest
