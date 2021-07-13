@@ -40,6 +40,8 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
             },
             # TODO: Not here since is task dependant
             "tokens": {"type": "text"},
+            "predicted_mentions": {"type": "nested"},
+            "mentions": {"type": "nested"},
         },
         "dynamic_templates": [
             # TODO: Not here since is task dependant
@@ -93,19 +95,22 @@ def parse_aggregations(
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, doc_count = bucket.pop("key"), bucket.pop("doc_count")
+            key, doc_count = bucket.pop("key", None), bucket.pop("doc_count")
             if len(bucket) == 1 and not ("from" in bucket or "to" in bucket):
                 k = [k for k in bucket if k not in ["key", "doc_count"]][0]
-                parsed.update({key: parse_buckets(bucket[k].get("buckets", []))})
+                parsed.update({key or k: parse_buckets(bucket[k].get("buckets", []))})
             else:
                 parsed.update({key: doc_count})
 
         return parsed
 
-    return {
-        key: parse_buckets(values.get("buckets", []))
-        for key, values in es_aggregations.items() or {}
-    }
+    result = {}
+    for key, values in es_aggregations.items() or {}:
+        if "buckets" in values:
+            result[key] = parse_buckets(values["buckets"])
+        else:
+            result.update(parse_buckets([values]))
+    return result
 
 
 def decode_field_name(field: EsRecordDataFieldNames) -> str:
@@ -250,6 +255,12 @@ class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
 
     DEFAULT_AGGREGATION_SIZE = 100
+
+    @staticmethod
+    def nested_aggregation(
+        name: str, nested_path: str, inner_aggregation: Dict[str, Any]
+    ):
+        return {name: {"nested": {"path": nested_path}, "aggs": inner_aggregation}}
 
     @staticmethod
     def bidimentional_terms_aggregations(

@@ -57,15 +57,16 @@ def unflatten_dict(
     resultDict = {}
 
     for key, value in data.items():
-        parts = key.split(sep)
-        if parts[0] in stop_keys:
-            parts = [parts[0], sep.join(parts[1:])]
-        d = resultDict
-        for part in parts[:-1]:
-            if part not in d:
-                d[part] = {}
-            d = d[part]
-        d[parts[-1]] = value
+        if key is not None:
+            parts = key.split(sep)
+            if parts[0] in stop_keys:
+                parts = [parts[0], sep.join(parts[1:])]
+            d = resultDict
+            for part in parts[:-1]:
+                if part not in d:
+                    d[part] = {}
+                d = d[part]
+            d[parts[-1]] = value
     return resultDict
 
 
