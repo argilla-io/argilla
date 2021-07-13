@@ -18,8 +18,7 @@ jobs:
       PYTHON: '3.9'
     steps:
     - name: Checkout Code 🛎
-        uses: actions/checkout@v2
-
+      uses: actions/checkout@v2
     - name: Setup Python 🐍
       uses: actions/setup-python@master
       with:
