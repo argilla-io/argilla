@@ -16,7 +16,12 @@
     <a href="https://twitter.com/recogn_ai">
         <img alt="CI" src="https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow">
     </a>
-    <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/recognai/rubrix">
+    <a href="https://hub.docker.com/r/recognai/rubrix">
+        <img alt="CI" src="https://img.shields.io/docker/pulls/recognai/rubrix">
+    </a>
+    <a href="https://hub.docker.com/r/recognai/rubrix">
+        <img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix">
+    </a>
 </p>
 
 <h3 align="center">Explore, label, and monitor data for AI projects</h3>
