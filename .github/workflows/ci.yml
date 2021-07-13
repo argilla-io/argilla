@@ -56,6 +56,12 @@ jobs:
 
   code_coverage:
     name: Upload coverage
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       # (Other steps go here)
       - name: "Upload coverage to Codecov"
@@ -68,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - build
+    - code_coverage
     defaults:
       run:
         shell: bash -l {0}
