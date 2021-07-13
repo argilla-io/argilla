@@ -16,6 +16,7 @@
     <a href="https://twitter.com/recogn_ai">
         <img alt="CI" src="https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow">
     </a>
+    <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/recognai/rubrix">
 </p>
 
 <h3 align="center">Explore, label, and monitor data for AI projects</h3>
