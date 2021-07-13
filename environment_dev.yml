@@ -17,6 +17,7 @@ dependencies:
 - ipython
 # for building the frontend
 - nodejs~=14.15.0
+- pytest-cov
 - pip:
     # build python sdk
     - openapi-python-client~=0.8.0
