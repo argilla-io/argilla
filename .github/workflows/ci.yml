@@ -65,8 +65,6 @@ jobs:
     steps:
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v1
-        env:
-          CODECOV_TOKEN: 3486d14f-5985-4ddd-a8e4-8efd5c3aa081
         with:
           fail_ci_if_error: true
 
