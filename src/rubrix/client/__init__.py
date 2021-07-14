@@ -94,26 +94,21 @@ class RubrixClient:
         """
         Register a set of logs into Rubrix
 
-        Parameters
-        ----------
-        records:
-            The data records list.
-        name:
-            The dataset name
-        tags:
-            A set of tags related to dataset. Optional
-        metadata:
-            A set of extra info for dataset. Optional
-        chunk_size:
-            The default chunk size for data bulk
+        Args:
+            records:
+                The data records list.
+            name:
+                The dataset name
+            tags:
+                A set of tags related to dataset. Optional
+            metadata:
+                A set of extra info for dataset. Optional
+            chunk_size:
+                The default chunk size for data bulk
 
-        Returns
-        -------
-        BulkResponse
-            If successful, with a summary response from the API.
-
+        Returns:
+            A summary response from the API if successful.
         """
-
         if not name:
             raise Exception("Empty project name has been passed as argument.")
 
@@ -134,7 +129,7 @@ class RubrixClient:
         # However, a desired check can be placed to create a custom chunk_size when that limit is exceeded
         if chunk_size > self.MAX_CHUNK_SIZE:
             self._LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout erros may ocurr.
+                """The introduced chunk size is noticeably large, timeout errors may ocurr.
                 Consider a chunk size smaller than %s""",
                 self.MAX_CHUNK_SIZE,
             )
@@ -146,6 +141,7 @@ class RubrixClient:
             tags = models.TextClassificationBulkDataTags.from_dict(tags)
             metadata = models.TextClassificationBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._text_classification_record_to_sdk
+            self._check_record_embeddings(records)
 
         elif record_type is TokenClassificationRecord:
             bulk_class = models.TokenClassificationBulkData
@@ -215,6 +211,19 @@ class RubrixClient:
         )
 
         return pandas.DataFrame(map(lambda r: r.dict(), map(map_fn, response.parsed)))
+
+    @staticmethod
+    def _check_record_embeddings(records: List[TextClassificationRecord]):
+        """Checks if all record embeddings have the same length"""
+        embedding_dims = [
+            len(rec.record_embedding)
+            for rec in records
+            if rec.record_embedding is not None
+        ]
+        if len(set(embedding_dims)) > 1:
+            raise Exception(
+                f"Different dimensions found for the `record_embedding`s: {set(embedding_dims)}"
+            )
 
     @staticmethod
     def _text_classification_sdk_to_record(
