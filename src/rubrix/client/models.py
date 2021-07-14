@@ -60,7 +60,9 @@ class TextClassificationRecord(BaseModel):
 
     Args:
         inputs:
-            The inputs of the record
+            The inputs of the record.
+        record_embedding:
+            A vector used for cosine-similarity searches.
         prediction:
             A list of tuples containing the predictions for the record.
             The first entry of the tuple is the predicted label, the second entry is its corresponding score.
@@ -87,6 +89,7 @@ class TextClassificationRecord(BaseModel):
     """
 
     inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
+    record_embedding: Optional[List[float]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
