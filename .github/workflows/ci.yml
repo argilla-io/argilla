@@ -48,9 +48,7 @@ jobs:
           pytest tests --cov='.'
           coverage combine
       - name: Upload Coverage to Codecov 📦
-        uses: |
-          coverage combine
-          codecov/codecov-action@v1
+        uses: codecov/codecov-action@v1
         with:
           fail_ci_if_error: true
       - name: Build Package 🍟
