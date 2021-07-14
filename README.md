@@ -10,6 +10,9 @@
     <a href="https://pypi.org/project/rubrix/">
         <img alt="CI" src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
     </a>
+    <a href="https://pypi.org/project/rubrix/">
+        <img alt="CI" src="https://img.shields.io/pypi/dm/rubrix">
+    </a>
     <a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
     </a>
