@@ -20,7 +20,7 @@
         <img alt="CI" src="https://img.shields.io/docker/pulls/recognai/rubrix">
     </a>
     <a href="https://hub.docker.com/r/recognai/rubrix">
-        <img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix">
+        <img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix?sort=semver">
     </a>
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 </p>
