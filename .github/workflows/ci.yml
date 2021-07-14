@@ -43,7 +43,7 @@ jobs:
       - name: Install rubrix 🧊
         run: pip install .[server]
       - name: Run tests 📈
-        run: /
+        run: |
           pip install pytest-cov
           pytest tests  --cov='.'
       - name: Upload Coverage to Codecov 📦
