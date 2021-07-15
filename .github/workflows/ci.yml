@@ -46,7 +46,7 @@ jobs:
         run: |
           pip install pytest-cov
           pytest tests --cov='.'
-          ls
+          ls -a
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
