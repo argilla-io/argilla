@@ -50,7 +50,7 @@ jobs:
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
-          files: .coverage
+          files: coverage.xml
           flags: pytest
           fail_ci_if_error: true
           path_to_write_report: ./coverage/codecov_report.txt
