@@ -49,9 +49,9 @@ jobs:
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
-          files: .coverage # optional
-          flags: pytest # optional
-          fail_ci_if_error: true # optional (default = false)
+          files: .coverage # not optional, if not it cannot find it
+          flags: pytest
+          fail_ci_if_error: true
       - name: Build Package 🍟
         run: |
           pip install -U build
