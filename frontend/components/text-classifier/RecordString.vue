@@ -57,7 +57,7 @@ export default {
     allowScroll: false,
     scrollHeight: undefined,
   }),
-  mounted() {
+  updated() {
     if (this.$refs.list) {
       const padding = 2;
       this.scrollHeight = this.$refs.list.clientHeight + padding;
