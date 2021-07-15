@@ -127,5 +127,8 @@ export default {
       overflow: hidden;
     }
   }
+  &__content {
+    word-break: break-word;
+  }
 }
 </style>
