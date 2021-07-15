@@ -54,13 +54,19 @@ jobs:
           fail_ci_if_error: true
       - name: Build Package 🍟
         run: |
-          pip install -U build
-          scripts/build_distribution.sh
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v2
+          pip install pytest
+          pip install pytest-cov
+          pytest --cov=./ --cov-report=xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
         with:
-          name: python-package
-          path: dist
+          files: ./coverage1.xml,./coverage2.xml
+          directory: ./coverage/reports/
+          flags: pytest
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
 
   deploy_docker:
     name: Build latest docker image
