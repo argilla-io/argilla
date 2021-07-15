@@ -45,7 +45,7 @@ jobs:
       - name: Run tests 📈
         run: |
           pip install pytest-cov
-          pytest --cov=./
+          pytest -p pytest_cov --cov
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
