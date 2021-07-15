@@ -46,14 +46,12 @@ jobs:
         run: |
           pip install pytest-cov
           pytest tests --cov='.'
-          ls -a
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
-          files: ./coverage1.xml,./coverage2.xml # optional
+          files: .coverage # optional
           flags: pytest # optional
           fail_ci_if_error: true # optional (default = false)
-          verbose: true # optional (default = false)
       - name: Build Package 🍟
         run: |
           pip install -U build
