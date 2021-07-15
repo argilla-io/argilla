@@ -46,11 +46,11 @@ jobs:
         run: |
           pip install pytest
           pip install pytest-cov
-          pytest -p pytest_cov --cov
+          pytest -p pytest_cov --cov=./ --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
-          files: .coverage
+          files: coverage.xml
           flags: pytest
           fail_ci_if_error: true
           path_to_write_report: ./coverage/codecov_report.txt
