@@ -58,15 +58,20 @@ export default {
     scrollHeight: undefined,
   }),
   updated() {
-    if (this.$refs.list) {
-      const padding = 2;
-      this.scrollHeight = this.$refs.list.clientHeight + padding;
-    }
+    this.getRecordHeight();
   },
-
+  mounted() {
+    this.getRecordHeight();
+  },
   methods: {
     isList(record) {
       return Array.isArray(record);
+    },
+    getRecordHeight() {
+      if (this.$refs.list) {
+        const padding = 2;
+        this.scrollHeight = this.$refs.list.clientHeight + padding;
+      }
     },
   },
 };
