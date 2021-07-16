@@ -58,7 +58,7 @@ export default {
     scrollHeight: undefined,
   }),
   updated() {
-    this.getRecordHeight();
+    this.calculateScrollHeight();
   },
   mounted() {
     this.getRecordHeight();
