@@ -61,7 +61,7 @@ export default {
     this.calculateScrollHeight();
   },
   mounted() {
-    this.getRecordHeight();
+    this.calculateScrollHeight();
   },
   methods: {
     isList(record) {
