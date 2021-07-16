@@ -57,7 +57,13 @@ export default {
   computed: {
     formattedFilters() {
       const filters = this.filters.flatMap(({ id, name }) => {
-        const value = this.dataset.query[id];
+        let value = this.dataset.query[id];
+        if (id === 'confidence' && value) {
+            value = {
+              from: Math.round(value.from * 100) / 100,
+              to: Math.round(value.to * 100) / 100,
+            }
+        }
         if (value === undefined) {
           return [];
         }
