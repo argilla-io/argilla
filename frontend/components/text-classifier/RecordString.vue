@@ -67,7 +67,7 @@ export default {
     isList(record) {
       return Array.isArray(record);
     },
-    getRecordHeight() {
+    calculateScrollHeight() {
       if (this.$refs.list) {
         const padding = 2;
         this.scrollHeight = this.$refs.list.clientHeight + padding;
