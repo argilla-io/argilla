@@ -152,7 +152,7 @@ export default {
     this.getRecordHeight();
   },
   mounted() {
-    this.getRecordHeight();
+    this.calculateScrollHeight();
   },
   methods: {
     ...mapActions({
