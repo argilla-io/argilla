@@ -2,7 +2,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-### Open-source tool for tracking, exploring, and labelling data for AI
+<h3 align="center">Open-source tool for tracking, exploring, and labelling data for AI</h3>
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -13,6 +13,7 @@
     </a-->
 </p>
 
+![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
 
 [Rubrix](https://rubrix.ml) is a tool for tracking and iterating on data for artificial intelligence projects. 
 
