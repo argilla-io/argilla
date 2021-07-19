@@ -149,7 +149,7 @@ export default {
     },
   },
   updated() {
-    this.getRecordHeight();
+    this.calculateScrollHeight();
   },
   mounted() {
     this.calculateScrollHeight();
