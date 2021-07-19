@@ -1,8 +1,9 @@
 import os
+from rubrix.server.commons.errors import InvalidTextSearchError
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import elasticsearch
-from elasticsearch import Elasticsearch, NotFoundError
+from elasticsearch import Elasticsearch, NotFoundError, RequestError
 from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
 from rubrix.logging import LoggingMixin
 
@@ -86,14 +87,25 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        return self.__client__.search(
-            index=index,
-            body=query or {},
-            routing=routing,
-            track_total_hits=True,
-            rest_total_hits_as_int=True,
-            size=size,
-        )
+        try:
+            return self.__client__.search(
+                index=index,
+                body=query or {},
+                routing=routing,
+                track_total_hits=True,
+                rest_total_hits_as_int=True,
+                size=size,
+            )
+        except RequestError as rex:
+
+            if rex.error != "search_phase_execution_exception":
+                raise rex
+
+            detail = rex.info["error"]
+            detail = detail.get("root_cause")
+            detail = detail[0].get("reason") if detail else rex.info["error"]
+
+            raise InvalidTextSearchError(detail)
 
     def create_index(
         self, index: str, force_recreate: bool = False, mappings: Dict[str, Any] = None
