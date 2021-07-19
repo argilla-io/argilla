@@ -212,10 +212,33 @@ class filters:
 
         if isinstance(text_query, str):
             return {
-                "query_string": {
-                    "default_field": "words",
-                    "default_operator": "AND",
-                    "query": text_query,
+                # TODO: normalize text fields for all tasks
+                "bool": {
+                    "should": [
+                        {
+                            "query_string": {
+                                "default_field": "words",
+                                "default_operator": "AND",
+                                "query": text_query,
+                                "boost": "5.0",
+                            }
+                        },
+                        {
+                            "query_string": {
+                                "default_field": "inputs.*",
+                                "default_operator": "AND",
+                                "query": text_query,
+                            }
+                        },
+                        {
+                            "query_string": {
+                                "default_field": "tokens",
+                                "default_operator": "AND",
+                                "query": text_query,
+                            }
+                        },
+                    ],
+                    "minimum_should_match": "30%",
                 }
             }
 
