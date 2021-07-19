@@ -231,7 +231,7 @@ export default {
       entities.splice(found, 1);
       this.updateRecordEntities(entities);
     },
-    getRecordHeight() {
+    calculateScrollHeight() {
       if (this.$refs.list) {
         const padding = 2;
         this.scrollHeight = this.$refs.list.clientHeight + padding;
