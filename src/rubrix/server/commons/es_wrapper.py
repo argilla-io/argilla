@@ -97,10 +97,13 @@ class ElasticsearchWrapper(LoggingMixin):
                 size=size,
             )
         except RequestError as rex:
+
+            if rex.error != "search_phase_execution_exception":
+                raise rex
+
             detail = rex.info["error"]
-            if rex.error == "search_phase_execution_exception":
-                detail = detail.get("root_cause")
-                detail = detail[0].get("reason") if detail else rex.info["error"]
+            detail = detail.get("root_cause")
+            detail = detail[0].get("reason") if detail else rex.info["error"]
 
             raise InvalidTextSearchError(detail)
 
