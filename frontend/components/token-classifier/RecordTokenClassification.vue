@@ -1,12 +1,7 @@
 <template>
   <div class="record">
     <span class="record__scroll__container">
-      <span
-        :class="[
-          'record__scroll--large',
-          !allowScroll ? 'record__scroll--prevent' : '',
-        ]"
-      >
+      <span :class="[!allowScroll ? 'record__scroll--prevent' : '']">
         <re-button
           v-if="scrollHeight >= 800"
           :title="allowScroll ? 'prevent scroll' : 'allow scroll'"
@@ -19,25 +14,25 @@
             height="14"
           ></svgicon>
         </re-button>
-      <div ref="list" v-if="textSpans.length">
-        <TextSpan
-          v-for="(token, i) in textSpans"
-          :key="i"
-          :record="record"
-          :span-id="i"
-          :spans="textSpans"
-          :dataset="dataset"
-          :class="isSelected(i) ? 'selected' : ''"
-          @startSelection="onStartSelection"
-          @endSelection="onEndSelection"
-          @selectEntity="onSelectEntity"
-          @changeEntityLabel="onChangeEntityLabel"
-          @removeEntity="onRemoveEntity"
-          @reset="onReset"
-        />
-      </div>
+        <div v-if="textSpans.length" ref="list">
+          <TextSpan
+            v-for="(token, i) in textSpans"
+            :key="i"
+            :record="record"
+            :span-id="i"
+            :spans="textSpans"
+            :dataset="dataset"
+            :class="isSelected(i) ? 'selected' : ''"
+            @startSelection="onStartSelection"
+            @endSelection="onEndSelection"
+            @selectEntity="onSelectEntity"
+            @changeEntityLabel="onChangeEntityLabel"
+            @removeEntity="onRemoveEntity"
+            @reset="onReset"
+          />
+        </div>
       </span>
-            <RecordExtraActions
+      <RecordExtraActions
         :allow-change-status="annotationEnabled"
         :record="record"
         @onChangeRecordStatus="onChangeRecordStatus"
