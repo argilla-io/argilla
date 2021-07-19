@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 from rubrix.server.datasets.model import UpdateDatasetRequest
@@ -168,15 +168,31 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
-            PREDICTED_MENTIONS_ES_FIELD_NAME: self._predicted_mentions(),
-            MENTIONS_ES_FIELD_NAME: self._mentions(),
+            PREDICTED_MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity}
+                for mention, entity in self._predicted_mentions()
+            ],
+            MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity}
+                for mention, entity in self._mentions()
+            ],
         }
 
-    def _predicted_mentions(self) -> List[str]:
-        return self.__mentions_from_entities__(self._predicted_entities())
+    def _predicted_mentions(self) -> List[Tuple[str, str]]:
+        return [
+            (mention, entity)
+            for mention, entity in self.__mentions_from_entities__(
+                self._predicted_entities()
+            ).items()
+        ]
 
-    def _mentions(self) -> List[str]:
-        return self.__mentions_from_entities__(self._entities())
+    def _mentions(self) -> List[Tuple[str, str]]:
+        return [
+            (mention, entity)
+            for mention, entity in self.__mentions_from_entities__(
+                self._entities()
+            ).items()
+        ]
 
     def _entities(self) -> Set[EntitySpan]:
         """Shortcut for real annotated entities, if provided"""
@@ -190,8 +206,12 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return set()
         return set(self.prediction.entities)
 
-    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> List[str]:
-        return [self.text[entity.start : entity.end] for entity in entities]
+    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> Dict[str, str]:
+        return {
+            mention: entity.label
+            for entity in entities
+            for mention in [self.text[entity.start : entity.end]]
+        }
 
     class Config:
         allow_population_by_field_name = True

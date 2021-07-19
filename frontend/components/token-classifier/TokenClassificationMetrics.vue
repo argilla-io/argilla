@@ -48,20 +48,27 @@
       <div class="sidebar__tabs">
         <a
           href="#"
-          :class="activeTab === 'mentions' ? 'active' : ''"
-          @click.prevent="filteredMentionsBy('mentions')"
-          >Annotated as</a
-        >
-        <a
-          href="#"
           :class="activeTab === 'predicted_mentions' ? 'active' : ''"
           @click.prevent="filteredMentionsBy('predicted_mentions')"
           >Predicted as</a
         >
+        <a
+          href="#"
+          :class="activeTab === 'mentions' ? 'active' : ''"
+          @click.prevent="filteredMentionsBy('mentions')"
+          >Annotated as</a
+        >
       </div>
       <div class="scroll">
+        <div v-if="!existMentions">
+          <span class="sidebar__tabs__empty"
+            >There are no
+            {{ activeTab === "mentions" ? "annotations" : "predictions" }}</span
+          >
+        </div>
         <div
           v-for="(prop, key) in filteredMentions"
+          v-else
           :key="key"
           :class="expandedMentionsGroup === key ? 'expanded' : ''"
         >
@@ -112,6 +119,9 @@ export default {
     });
   },
   computed: {
+    existMentions() {
+      return Object.keys(this.filteredMentions).length;
+    },
     datasetName() {
       return this.dataset.name;
     },
@@ -191,6 +201,10 @@ export default {
   &__tabs {
     display: flex;
     padding-bottom: 1em;
+    &__empty {
+      margin-top: 2em;
+      display: inline-block;
+    }
     a {
       width: 100%;
       border: 1px solid palette(grey, smooth);
@@ -199,6 +213,7 @@ export default {
       color: $font-secondary;
       text-decoration: none;
       margin: 0 5px;
+      outline: none;
       @include font-size(13px);
       padding: 0.3em;
       &.active {

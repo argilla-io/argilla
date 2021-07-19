@@ -1,30 +1,55 @@
 <template>
   <div class="record">
-    <TextSpan
-      v-for="(token, i) in textSpans"
-      :key="i"
-      :record="record"
-      :span-id="i"
-      :spans="textSpans"
-      :dataset="dataset"
-      :class="isSelected(i) ? 'selected' : ''"
-      @startSelection="onStartSelection"
-      @endSelection="onEndSelection"
-      @selectEntity="onSelectEntity"
-      @changeEntityLabel="onChangeEntityLabel"
-      @removeEntity="onRemoveEntity"
-      @reset="onReset"
-    />
-    <RecordExtraActions
-      :allow-change-status="annotationEnabled"
-      :record="record"
-      @onChangeRecordStatus="onChangeRecordStatus"
-      @onShowMetadata="$emit('onShowMetadata')"
-    />
+    <span class="record__scroll__container">
+      <span
+        :class="[
+          'record__scroll--large',
+          !allowScroll ? 'record__scroll--prevent' : '',
+        ]"
+      >
+        <re-button
+          v-if="scrollHeight >= 800"
+          :title="allowScroll ? 'prevent scroll' : 'allow scroll'"
+          class="record__scroll__button button-icon"
+          @click="allowScroll = !allowScroll"
+        >
+          <svgicon
+            :name="allowScroll ? 'unlock' : 'lock'"
+            width="15"
+            height="14"
+          ></svgicon>
+        </re-button>
+      <div ref="list" v-if="textSpans.length">
+        <TextSpan
+          v-for="(token, i) in textSpans"
+          :key="i"
+          :record="record"
+          :span-id="i"
+          :spans="textSpans"
+          :dataset="dataset"
+          :class="isSelected(i) ? 'selected' : ''"
+          @startSelection="onStartSelection"
+          @endSelection="onEndSelection"
+          @selectEntity="onSelectEntity"
+          @changeEntityLabel="onChangeEntityLabel"
+          @removeEntity="onRemoveEntity"
+          @reset="onReset"
+        />
+      </div>
+      </span>
+            <RecordExtraActions
+        :allow-change-status="annotationEnabled"
+        :record="record"
+        @onChangeRecordStatus="onChangeRecordStatus"
+        @onShowMetadata="$emit('onShowMetadata')"
+      />
+    </span>
   </div>
 </template>
 
 <script>
+import "assets/icons/lock";
+import "assets/icons/unlock";
 import { mapActions } from "vuex";
 
 export default {
@@ -42,6 +67,8 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      allowScroll: false,
+      scrollHeight: undefined,
     };
   },
   computed: {
@@ -121,6 +148,12 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
   },
+  updated() {
+    this.calculateScrollHeight();
+  },
+  mounted() {
+    this.calculateScrollHeight();
+  },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateRecords",
@@ -198,6 +231,12 @@ export default {
       entities.splice(found, 1);
       this.updateRecordEntities(entities);
     },
+    calculateScrollHeight() {
+      if (this.$refs.list) {
+        const padding = 2;
+        this.scrollHeight = this.$refs.list.clientHeight + padding;
+      }
+    },
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);
       const end = Math.max(this.selectionStart, this.selectionEnd);
@@ -219,6 +258,52 @@ export default {
   @include font-size(16px);
   line-height: 1.6em;
   font-weight: 600;
+  &__scroll {
+    display: block;
+    max-height: 300px;
+    overflow: auto;
+    border: 1px solid $line-smooth-color;
+    @include font-size(14px);
+    margin-bottom: 0.5em;
+    &--large {
+      display: block;
+      overflow: auto;
+      max-height: 800px;
+      margin-bottom: 0.5em;
+      ::v-deep .record__scroll__button {
+        right: 0;
+        top: 0;
+        .svg-icon {
+          margin-left: auto !important;
+        }
+      }
+    }
+    &__container {
+      position: relative;
+      display: block;
+    }
+    &__button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: block;
+      background: $lighter-color;
+      border: 1px solid $primary-color;
+      border-radius: 3px;
+      height: 25px;
+      width: 25px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      .svg-icon {
+        margin: auto;
+        fill: $primary-color;
+      }
+    }
+    &--prevent {
+      overflow: hidden;
+    }
+  }
   .list__item--annotation-mode & {
     padding-left: 4em;
   }

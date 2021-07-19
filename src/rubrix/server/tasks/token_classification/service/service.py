@@ -125,15 +125,23 @@ class TokenClassificationService:
             search=RecordSearch(
                 query=as_elasticsearch(search),
                 aggregations={
-                    **aggregations.bidimentional_terms_aggregations(
+                    **aggregations.nested_aggregation(
                         name=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                        field_name_x=EsRecordDataFieldNames.predicted_as,
-                        field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                        nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
+                            name=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                            field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME + ".entity",
+                            field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME + ".mention",
+                        ),
                     ),
-                    **aggregations.bidimentional_terms_aggregations(
+                    **aggregations.nested_aggregation(
                         name=MENTIONS_ES_FIELD_NAME,
-                        field_name_x=EsRecordDataFieldNames.annotated_as,
-                        field_name_y=MENTIONS_ES_FIELD_NAME,
+                        nested_path=MENTIONS_ES_FIELD_NAME,
+                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
+                            name=MENTIONS_ES_FIELD_NAME,
+                            field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
+                            field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
+                        ),
                     ),
                 },
             ),

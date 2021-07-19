@@ -135,8 +135,7 @@ export default {
           };
         })
         .filter(({ disabled }) => !disabled);
-
-      const metadataFilters = Object.keys(aggregations.metadata).map((key) => {
+      const metadataFilters = aggregations.metadata && Object.keys(aggregations.metadata).map((key) => {
         return {
           key: key,
           name: key,
@@ -150,9 +149,9 @@ export default {
             : [],
         };
       });
-      const sortedMetadataFilters = metadataFilters.sort((a, b) =>
+      const sortedMetadataFilters = metadataFilters && metadataFilters.sort((a, b) =>
         a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
-      );
+      ) || [];
       return [...filters, ...sortedMetadataFilters];
     },
   },

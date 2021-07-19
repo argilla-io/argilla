@@ -76,7 +76,7 @@ export default {
   }),
   computed: {
     annotationsSum() {
-      return this.dataset.results.aggregations.status.Validated;
+      return this.dataset.results.aggregations.status ? this.dataset.results.aggregations.status.Validated : 0;
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;

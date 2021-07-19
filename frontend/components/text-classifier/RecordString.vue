@@ -57,16 +57,21 @@ export default {
     allowScroll: false,
     scrollHeight: undefined,
   }),
-  mounted() {
-    if (this.$refs.list) {
-      const padding = 2;
-      this.scrollHeight = this.$refs.list.clientHeight + padding;
-    }
+  updated() {
+    this.calculateScrollHeight();
   },
-
+  mounted() {
+    this.calculateScrollHeight();
+  },
   methods: {
     isList(record) {
       return Array.isArray(record);
+    },
+    calculateScrollHeight() {
+      if (this.$refs.list) {
+        const padding = 2;
+        this.scrollHeight = this.$refs.list.clientHeight + padding;
+      }
     },
   },
 };
@@ -126,6 +131,9 @@ export default {
     &--prevent {
       overflow: hidden;
     }
+  }
+  &__content {
+    word-break: break-word;
   }
 }
 </style>
