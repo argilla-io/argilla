@@ -61,7 +61,8 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
    (we recommend version 7.10) and launch an Elasticsearch instance.
    For MacOS and Windows there are
    `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`_ and a
-   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively.
+   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively. **If you already have an Elasticsearch instance**, see the section "Configuring your Elasticsearch instance for Rubrix" below.
+   
 2. Install the Rubrix Python library together with its server dependencies:
 
 .. code-block:: bash
@@ -76,6 +77,33 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
 
 By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
 If you want to customize this, you can set the ``ELASTICSEARCH`` environment variable pointing to your endpoint.
+
+Configuring your Elasticsearch instance for Rubrix
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you have an Elasticsearch instance and want to share resources with other applications, you can easily configure it for using Rubrix.
+
+All you need to take into account is:
+
+* Rubrix will create its ES indices with the following pattern ``.rubrix_*``. It's recommended to create a new role (e.g., rubrix) and provide it with all privileges for this index pattern.
+
+* Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
+
+Rubrix use the `ELASTICSEARCH` environment variable to set the ES connection. 
+
+You can provide the credentials using the following scheme: 
+
+.. code-block:: bash
+   http(s)://user:passwd@elastichost
+   
+.. code-block:: python
+
+   http(s)://user:passwd@elastichost...
+   
+Below you can see a screenshot for setting up a new ``rubrix`` Role and its permissions:
+
+.. figure:: https://user-images.githubusercontent.com/15624271/123934452-40e26000-d9ce-11eb-967d-a46a0b2afa1f.png
+   :alt: Elasticsearch Rubrix role permission
+
 
 Checking your webapp and REST API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
