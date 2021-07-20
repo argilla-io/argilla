@@ -2,7 +2,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-<h3 align="center">Open-source tool for tracking, exploring, and labelling data for AI</h3>
+<h3 align="center">Explore, label, and monitor data for AI projects</h3>
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -15,7 +15,7 @@
 
 ![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
 
-[Rubrix](https://rubrix.ml) is a tool for tracking and iterating on data for artificial intelligence projects. 
+[Rubrix](https://rubrix.ml) is a free and open-source tool for exploring and iterating on data for artificial intelligence projects. 
 
 Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
 
