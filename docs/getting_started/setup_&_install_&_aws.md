@@ -1,0 +1,119 @@
+## Download
+```shell
+docker pull recognai/rubrix:v0.1.3
+```
+
+## Launch (external elasticsearch)
+```shell
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-instance-url>" --name rubrix recognai/rubrix:v0.1.3
+```
+## Find running instance
+
+```shell
+docker ps
+```
+
+## Stop container
+
+```shell
+docker stop rubrix
+```
+
+## Deploy your own elasticsearch cluster
+Follow docker installation guide in [official elasticsearch page](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
+
+## Configure elasticsearch role/users 
+If you have an Elasticsearch instance and want to share resources with other applications, you can easily configure it for using Rubrix.
+
+All you need to take into account is:
+
+* Rubrix will create its ES indices with the following pattern ``.rubrix_*``. It's recommended to create a new role (e.g., rubrix) and provide it with all privileges for this index pattern.
+
+* Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
+
+Rubrix use the `ELASTICSEARCH` environment variable to set the ES connection. 
+
+You can provide the credentials using the following scheme: 
+
+```bash
+   http(s)://user:passwd@elastichost
+```
+```python
+   http(s)://user:passwd@elastichost...
+```
+   
+Below you can see a screenshot for setting up a new ``rubrix`` Role and its permissions:
+
+<img src="https://user-images.githubusercontent.com/15624271/123934452-40e26000-d9ce-11eb-967d-a46a0b2afa1f.png"/>
+   
+
+
+
+## Deploy to aws instance using docker-machine
+
+### Setup an AWS profile 
+
+`aws` command cli must be installed. Then, type:
+```shell
+aws configure --profile rubrix
+```
+and follow command instructions. For more details, visit aws [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)
+
+Once profile is create (a new entry should be created in file `~/.aws/config`), you can activate by setting environment variable:
+
+```shell
+export AWS_PROFILE=rubrix
+```
+
+### Create docker machine (aws)
+```shell
+docker-machine create --driver amazonec2 \
+--amazonec2-root-size 60 \
+--amazonec2-instance-type t2.large \
+--amazonec2-open-port 80 \
+--amazonec2-ami ami-0b541372 \
+--amazonec2-region eu-west-1 \
+rubrix-aws
+```
+Available ami depends on region. The provided ami is available for eu-west regions
+
+### Verify machine creation 
+```shell
+$>docker-machine ls
+
+NAME                   ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER     ERRORS
+rubrix-aws             -        amazonec2   Running   tcp://52.213.178.33:2376           v20.10.7   
+```
+### Save asigned machine ip
+In our case the assigned ip is `52.213.178.33`
+
+### Connect to remote docker machine
+To enable local docker client connect to remote daemon, we must type following command:
+
+```shell
+eval $(docker-machine env rubrix-aws)
+```
+### Define a docker-compose.yaml
+```yaml
+# docker-compose.yaml
+version: "3"
+
+services:
+  rubrix:
+    image: recognai/rubrix:v0.1.3
+    ports:
+      - "80:80"
+    environment:
+      ELASTICSEARCH: <elasticsearch-host_and_port>
+    restart: unless-stopped
+```
+### Pull image
+```shell
+docker-compose pull
+```
+### Launch docker container
+```shell
+docker-compose up -d 
+```
+### Accessing to rubrix 
+In our case http://52.213.178.33
