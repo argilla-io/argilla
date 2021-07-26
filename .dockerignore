@@ -10,7 +10,6 @@
 !.gitignore
 !pyproject.toml
 !setup.cfg
-!pytest.ini
 !.git/**
 
 **/node_modules/**
