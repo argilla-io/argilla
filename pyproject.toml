@@ -1,3 +1,12 @@
 [build-system]
 requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli = "True"
+addopts = "--cov=rubrix --cov-report=xml"
+testpaths = [
+    "tests"
+]

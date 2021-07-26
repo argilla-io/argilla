@@ -8,6 +8,7 @@ dependencies:
 - pip>=20.3.0
 # tests
 - pytest
+- pytest-cov
 # docs
 - sphinx==4.0.1
 - sphinx_rtd_theme==0.5.2
