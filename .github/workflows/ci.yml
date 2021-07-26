@@ -43,10 +43,9 @@ jobs:
       - name: Install rubrix 🧊
         run: pip install .[server]
       - name: Run tests 📈
-        run: |
-          pip install pytest
-          pip install pytest-cov
-          pytest -p pytest_cov --cov=./ --cov-report=xml
+        run: 
+          #pytest -p pytest_cov --cov=./ --cov-report=xml
+          pytest
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:

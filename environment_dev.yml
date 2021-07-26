@@ -8,6 +8,7 @@ dependencies:
 - pip>=20.3.0
 # tests
 - pytest
+- pytest-cov
 # docs
 - sphinx==4.0.1
 - sphinx_rtd_theme==0.5.2
@@ -17,7 +18,6 @@ dependencies:
 - ipython
 # for building the frontend
 - nodejs~=14.15.0
-- pytest-cov
 - pip:
     # build python sdk
     - openapi-python-client~=0.8.0
