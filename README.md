@@ -2,7 +2,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-# Open-source tool for tracking and evolving data for AI
+<h3 align="center">Explore, label, and monitor data for AI projects</h3>
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -13,24 +13,35 @@
     </a-->
 </p>
 
+![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
 
-Rubrix is a tool for tracking and iterating on data for artificial intelligence projects. Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
+[Rubrix](https://rubrix.ml) is a free and open-source tool for exploring and iterating on data for artificial intelligence projects. 
+
+Rubrix focuses on enabling novel, human in the loop workflows involving data scientists, subject matter experts and ML/data engineers. 
 
 ![](docs/images/rubrix_intro.svg)
 
 With Rubrix, you can:
 
 - **Monitor** the predictions of deployed models.
-- **Collect** ground-truth data for starting up a project or evolving an existing one.
-- **Iterate** on ****ground-truth data**** and predictions to debug, track and improve your models over time.
+- **Label** data for starting up or evolving an existing project.
+- **Iterate** on ****ground-truth**** and predictions to debug, track and improve your data and models over time.
 - **Build** custom ****applications and dashboards**** on top of your model predictions.
 
-We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. Rubrix is composed of:
+We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. 
 
-- a **web application and a REST API**, which you can launch using Docker or build it yourself.
+Rubrix is composed of:
+
 - a **Python library** to bridge data and models, which you can install via `pip`.
+- a **web application** to explore and label data, which you can launch using Docker or directly with Python.
 
-For further information, please visit the [documentation](https://docs.rubrix.ml/en/stable/)
+
+This is an example of Rubrix UI annotation mode:
+
+![Rubrix Annotation Mode](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
+
+
+📖 For more information, visit the [documentation](https://docs.rubrix.ml/en/stable/) or if you want to get started, keep reading.
 
 # Get started
 
@@ -42,7 +53,7 @@ To get started you need to follow three steps:
    
 ## 1. Install the Python client
 
-You can install the Rubrix Python client via
+You can install the Python client with `pip`:
 
 ```python
 pip install rubrix
@@ -105,7 +116,7 @@ The following code will log one record into the `example-dataset` dataset:
 import rubrix as rb
 
 rb.log(
-    rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
+    rb.TextClassificationRecord(inputs="my first rubrix example"),
     name='example-dataset'
 )
 
@@ -117,4 +128,9 @@ BulkResponse(dataset='example-dataset', processed=1, failed=0)
 
 If you go to your Rubrix app at [http://localhost:6900/](http://localhost:6900/), you should see your first dataset.
 
-Congratulations! You are ready to start working with Rubrix with your own data. To better understand what's possible take a look at our [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
+Congratulations! You are ready to start working with Rubrix with your own data.
+
+To better understand what's possible take a look at Rubrix's [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
+
+# Community
+As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.

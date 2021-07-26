@@ -7,10 +7,33 @@
         !allowScroll ? 'record__scroll--prevent' : '',
       ]"
     >
-      <re-button :title="allowScroll ? 'prevent scroll' : 'allow scroll'" v-if="this.scrollHeight >= 800" class="record__scroll__button button-icon" @click="allowScroll = !allowScroll">
-        <svgicon :name="allowScroll ? 'unlock' : 'lock'" width="15" height="14"></svgicon>
+      <re-button
+        v-if="scrollHeight >= 800"
+        :title="allowScroll ? 'prevent scroll' : 'allow scroll'"
+        class="record__scroll__button button-icon"
+        @click="allowScroll = !allowScroll"
+      >
+        <svgicon
+          :name="allowScroll ? 'unlock' : 'lock'"
+          width="15"
+          height="14"
+        ></svgicon>
       </re-button>
-      <span class="record__content" v-html="$highlightSearch(this.queryText, text)">
+      <div v-if="isList(text)">
+        <div v-for="item in text" :key="item.index">
+          <span
+            class="record__content"
+            v-html="$highlightSearch(queryText, item)"
+          >
+          </span>
+        </div>
+      </div>
+
+      <span
+        v-else
+        class="record__content"
+        v-html="$highlightSearch(queryText, text)"
+      >
       </span>
     </span>
   </span>
@@ -22,7 +45,7 @@ import "assets/icons/unlock";
 export default {
   props: {
     text: {
-      type: String,
+      type: [String, Array],
       required: true,
     },
     queryText: {
@@ -34,11 +57,22 @@ export default {
     allowScroll: false,
     scrollHeight: undefined,
   }),
+  updated() {
+    this.calculateScrollHeight();
+  },
   mounted() {
-    if (this.$refs.list) {
-      const padding = 2;
-      this.scrollHeight = this.$refs.list.clientHeight + padding;
-    }
+    this.calculateScrollHeight();
+  },
+  methods: {
+    isList(record) {
+      return Array.isArray(record);
+    },
+    calculateScrollHeight() {
+      if (this.$refs.list) {
+        const padding = 2;
+        this.scrollHeight = this.$refs.list.clientHeight + padding;
+      }
+    },
   },
 };
 </script>
@@ -97,6 +131,9 @@ export default {
     &--prevent {
       overflow: hidden;
     }
+  }
+  &__content {
+    word-break: break-word;
   }
 }
 </style>

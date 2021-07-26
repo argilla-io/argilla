@@ -10,10 +10,19 @@ export default ({ $axios, app }) => {
     if (error instanceof ExpiredAuthSessionError || [401, 403].includes(code)) {
       app.$auth.logout();
     }
+
+    if (code === 400) {
+      // Add more erros once are better handled
+      return Notification.dispatch("notify", {
+        message:
+          "Error: " + JSON.stringify(error.response.data.detail || error),
+        type: "error",
+      });
+    }
+
     return Notification.dispatch("notify", {
       message: error,
       type: "error",
     });
-    return Promise.reject(error);
   });
 };

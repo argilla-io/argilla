@@ -10,6 +10,7 @@ from rubrix.server.tasks.text_classification.api import (
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchResults,
+    TextClassificationSearchRequest,
 )
 
 client = TestClient(app)
@@ -433,3 +434,33 @@ def test_metadata_with_point_in_field_name():
     assert "field.one" in results.aggregations.metadata
     assert results.aggregations.metadata.get("field.one", {})["1"] == 2
     assert results.aggregations.metadata.get("field.two", {})["2"] == 2
+
+
+def test_wrong_text_query():
+    dataset = "test_wrong_text_query"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"text": "Esto es un ejemplo de texto"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+            ],
+        ).json(by_alias=True),
+    )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json=TextClassificationSearchRequest(
+            query=TextClassificationQuery(query_text="!")
+        ).dict(),
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Failed to parse query [!]"

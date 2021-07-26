@@ -85,7 +85,7 @@ export default {
       color: $error;
       font-weight: 600;
       margin-top: 0;
-      @include font-size(16px)
+      @include font-size(16px);
     }
   }
 }

@@ -7,7 +7,9 @@
     />
     <span v-for="(filter, index) in formattedFilters" :key="index">
       <span class="tag">
-        <span :title="`${filter.name} = ${filter.value}`">{{ filter.name }} = {{ filter.value }}</span>
+        <span :title="`${filter.name} = ${filter.value}`"
+          >{{ filter.name }} = {{ filter.value }}</span
+        >
         <i
           aria-hidden="true"
           tabindex="1"
@@ -17,7 +19,11 @@
       </span>
     </span>
 
-    <span @click="$emit('clearAll')" v-if="severalFiltersApplied" class="tag tag--all">
+    <span
+      v-if="severalFiltersApplied"
+      class="tag tag--all"
+      @click="$emit('clearAll')"
+    >
       <span>Remove all</span>
     </span>
   </div>
@@ -51,7 +57,13 @@ export default {
   computed: {
     formattedFilters() {
       const filters = this.filters.flatMap(({ id, name }) => {
-        const value = this.dataset.query[id];
+        let value = this.dataset.query[id];
+        if (id === 'confidence' && value) {
+            value = {
+              from: Math.round(value.from * 100) / 100,
+              to: Math.round(value.to * 100) / 100,
+            }
+        }
         if (value === undefined) {
           return [];
         }
@@ -124,7 +136,6 @@ export default {
     }
   }
 }
-
 
 .filters__tags__logo {
   float: left;

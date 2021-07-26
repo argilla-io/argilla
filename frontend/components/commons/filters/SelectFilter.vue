@@ -1,35 +1,65 @@
 <template>
   <div class="filter__row">
     <p class="filter__label" :title="filter.name">{{ filter.name }}:</p>
-    <FilterDropdown :class="{ highlighted: visible || appliedFilters.length }" class="dropdown--filter" :visible="visible" @visibility="onVisibility">
+    <FilterDropdown
+      :class="{ highlighted: visible || appliedFilters.length }"
+      class="dropdown--filter"
+      :visible="visible"
+      @visibility="onVisibility"
+    >
       <span slot="dropdown-header">
         <span v-if="appliedFilters.length">
           <p v-if="typeof appliedFilters === 'string'">{{ appliedFilters }}</p>
-          <p v-else v-for="appliedFilter in appliedFilters" :key="appliedFilter">{{ appliedFilter }}</p>
+          <p
+            v-for="appliedFilter in appliedFilters"
+            v-else
+            :key="appliedFilter"
+          >
+            {{ appliedFilter }}
+          </p>
         </span>
         <span v-else>
-          {{filter.placeholder}}
+          {{ filter.placeholder }}
         </span>
       </span>
       <div slot="dropdown-content">
-        <input v-model="searchText" class="filter-options" type="text" autofocus :placeholder="placeholder" />
+        <input
+          v-model="searchText"
+          class="filter-options"
+          type="text"
+          autofocus
+          :placeholder="placeholder"
+        />
         <ul>
-          <li v-for="(recordsCounter, optionName) in filterOptions(
+          <li
+            v-for="(recordsCounter, optionName) in filterOptions(
               filter.options,
               searchText
-            )" :key="optionName.index">
-            <ReCheckbox class="re-checkbox--dark" :id="optionName" :value="optionName" v-model="selectedOptions">
+            )"
+            :key="optionName.index"
+          >
+            <ReCheckbox
+              :id="optionName"
+              v-model="selectedOptions"
+              class="re-checkbox--dark"
+              :value="optionName"
+            >
               {{ optionName }} ({{ recordsCounter }})
             </ReCheckbox>
           </li>
-          <li v-if="
+          <li
+            v-if="
               !Object.entries(filterOptions(filter.options, searchText)).length
-            ">
+            "
+          >
             0 results
           </li>
         </ul>
         <div class="filter__buttons">
-          <ReButton class="button-tertiary--small button-tertiary--outline" @click="onCancel">
+          <ReButton
+            class="button-tertiary--small button-tertiary--outline"
+            @click="onCancel"
+          >
             Cancel
           </ReButton>
           <ReButton class="button-primary--small" @click="onApply">
@@ -54,14 +84,6 @@ export default {
       default: "Search...",
     },
   },
-  watch: {
-    appliedFilters() {
-      this.selectedOptions = this.appliedFilters;
-    }
-  },
-  mounted() {
-    this.selectedOptions = this.appliedFilters;
-  },
   data: () => ({
     visible: false,
     searchText: undefined,
@@ -71,7 +93,15 @@ export default {
   computed: {
     appliedFilters() {
       return this.filter.selected || [];
-    }
+    },
+  },
+  watch: {
+    appliedFilters() {
+      this.selectedOptions = this.appliedFilters;
+    },
+  },
+  mounted() {
+    this.selectedOptions = this.appliedFilters;
   },
   methods: {
     onVisibility(value) {
@@ -92,7 +122,7 @@ export default {
         return options;
       }
       let filtered = Object.fromEntries(
-        Object.entries(options).filter(([id, value]) =>
+        Object.entries(options).filter(([id]) =>
           id.toLowerCase().match(text.toLowerCase())
         )
       );
@@ -152,11 +182,11 @@ export default {
     }
     & + .dropdown__selectables {
       &:before {
-        content: ',  ';
+        content: ",  ";
         margin-right: 2px;
       }
       &:after {
-        content: '...';
+        content: "...";
         margin-left: -2px;
       }
     }
@@ -173,7 +203,7 @@ export default {
       margin-right: 1em;
       padding: 0.5em;
       &:after {
-        content: '';
+        content: "";
         border-color: $primary-color;
         border-style: solid;
         border-width: 1px 1px 0 0;
@@ -209,7 +239,7 @@ export default {
     border: none;
     outline: none;
     &:after {
-      content: '';
+      content: "";
       border-color: #4a4a4a;
       border-style: solid;
       border-width: 1px 1px 0 0;

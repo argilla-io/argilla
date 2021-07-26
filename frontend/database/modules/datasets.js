@@ -51,7 +51,7 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 40;
+const DEFAULT_QUERY_SIZE = 60;
 
 function configuredRouteParams() {
   return {
@@ -154,7 +154,7 @@ const actions = {
     }
 
     return Notification.dispatch("notify", {
-      message: `The export is finished, <strong>${data.id}</strong> is accessible at:<br\> <strong>${data.uri}</strong>`,
+      message: `The export is finished, <strong>${data.id}</strong> is accessible at:<br/> <strong>${data.uri}</strong>`,
       type: "success",
     });
   },
@@ -338,28 +338,39 @@ const actions = {
   },
 
   async fetchMoreRecords({ dispatch }, { dataset }) {
-    if (
-      // Prefetch data before reach the end of pagination
-      dataset.results.records.length < dataset.results.total &&
-      dataset.results.records.length <
-      dataset.visibleRecords.length + dataset.viewSettings.pagination.size
-    ) {
-      dispatch(
-        `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
-        {
-          dataset,
-          from: dataset.results.records.length,
-          size: 2 * dataset.results.records.length,
-        },
-        { root: true }
-      );
-    }
-    return await Pagination.update({
+    const loadedRecords = dataset.results.records.length;
+    const prefetchPaginationSize =
+      dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
+
+    const newPagination = await Pagination.update({
       where: dataset.name,
       data: {
         page: dataset.viewSettings.pagination.page + 1,
       },
     });
+
+    const newDataset = await dataset.constructor.update({
+      where: dataset.name,
+      data: {
+        viewSettings: { ...dataset.viewSettings, pagination: newPagination },
+      },
+    });
+
+    if (
+      // Prefetch data before reach the end of pagination
+      loadedRecords < dataset.results.total &&
+      loadedRecords <= prefetchPaginationSize
+    ) {
+      dispatch(
+        `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
+        {
+          dataset: newDataset,
+          from: loadedRecords,
+          size: 2 * DEFAULT_QUERY_SIZE,
+        },
+        { root: true }
+      );
+    }
   },
 };
 

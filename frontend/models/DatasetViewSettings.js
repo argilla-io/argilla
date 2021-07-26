@@ -6,7 +6,7 @@ class Pagination extends Model {
   static fields() {
     return {
       id: this.string(null),
-      size: this.number(5),
+      size: this.number(20),
       page: this.number(1),
     };
   }

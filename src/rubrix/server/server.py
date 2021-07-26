@@ -8,6 +8,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
+from rubrix import __version__ as rubrix_version
 from rubrix.server.commons.errors import (
     common_exception_handler,
     validation_exception_handler,
@@ -88,6 +89,7 @@ app = FastAPI(
     openapi_url="/api/docs/spec.json",
     docs_url="/api/docs" if api_settings.docs_enabled else None,
     redoc_url=None,
+    version=str(rubrix_version),
 )
 
 for app_configure in [

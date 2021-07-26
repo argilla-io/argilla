@@ -1,23 +1,38 @@
 <template>
   <div class="help">
-    <div class="help__button" v-if="!showHelpPanel" @click="showHelpPanel = true">
-      <svgicon
-        name="help"
-        width="22"
-        height="22"
-        color="#F38959"
-      ></svgicon>
-        Help
+    <div
+      v-if="!showHelpPanel"
+      class="help__button"
+      @click="showHelpPanel = true"
+    >
+      <svgicon name="help" width="22" height="22" color="#F38959"></svgicon>
+      Help
     </div>
-    <div class="help__panel" v-if="showHelpPanel">
+    <div v-if="showHelpPanel" class="help__panel">
       <div class="help__panel__button" @click="showHelpPanel = false">
         Close
       </div>
-      <p class="help__panel__title" >What do highlight colours mean?</p>
-      <p>We use model interpretability methods such as Integrated Gradients to compute the attribution of tokens to the model prediction with the goal of providing hints about the model interpretation of data.</p>
-      <p>Model predictions can be correct or incorrect, as indicated by the green or red labels assigned to the predictions together with their confidence. Given this attributions work as follows:</p>
-      <p>[0,+1] <strong>Positive attributions</strong> will have the same colour as the label assigned to the prediction (red for wrong, green for correct). Tokens with positive attributions have the most impacto on the model predicting a specific label.</p>
-      <p>[1-, 0] <strong>Negative attributions</strong> will always be blue and highlight those tokens that diverge the model from its final prediction.</p>
+      <p class="help__panel__title">What do highlight colours mean?</p>
+      <p>
+        We use model interpretability methods such as Integrated Gradients to
+        compute the attribution of tokens to the model prediction with the goal
+        of providing hints about the model interpretation of data.
+      </p>
+      <p>
+        Model predictions can be correct or incorrect, as indicated by the green
+        or red labels assigned to the predictions together with their
+        confidence. Given this attributions work as follows:
+      </p>
+      <p>
+        [0,+1] <strong>Positive attributions</strong> will have the same colour
+        as the label assigned to the prediction (red for wrong, green for
+        correct). Tokens with positive attributions have the most impacto on the
+        model predicting a specific label.
+      </p>
+      <p>
+        [1-, 0] <strong>Negative attributions</strong> will always be blue and
+        highlight those tokens that diverge the model from its final prediction.
+      </p>
     </div>
   </div>
 </template>
@@ -25,9 +40,9 @@
 <script>
 export default {
   data: () => ({
-    showHelpPanel: false
-  })
-}
+    showHelpPanel: false,
+  }),
+};
 </script>
 
 <style lang="scss" scoped>
@@ -54,7 +69,8 @@ export default {
       font-weight: 600;
       margin-top: 0;
     }
-    ul, p {
+    ul,
+    p {
       @include font-size(13px);
     }
     ul {
@@ -68,7 +84,7 @@ export default {
       top: 1em;
       cursor: pointer;
       &:after {
-        content: '\2715';
+        content: "\2715";
         font-weight: bold;
         color: palette(orange);
         font-size: 14px;
@@ -86,4 +102,3 @@ export default {
   }
 }
 </style>
-
