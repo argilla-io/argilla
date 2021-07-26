@@ -89,9 +89,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
 .. raw:: html
 
-   <video autoplay width="100%" height="500" controls mute plays-inline>
-      <source src="https://www.rubrix.ml/rubrix_video.webm" type='video/webm; codecs="vp8, vorbis"' />
-   </video>
+   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif">
 
 Use cases
 ---------
