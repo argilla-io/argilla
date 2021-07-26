@@ -115,11 +115,11 @@ mkdir rubrix && cd rubrix
 and launch the docker-contained web app with the following command:
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
+wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 ```
 
 This is the recommended way because it automatically includes an
-[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistent layer.
+[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
 
 ### Executing the server code manually
 
