@@ -24,11 +24,9 @@ Rubrix focuses on enabling novel, human in the loop workflows involving data sci
 With Rubrix, you can:
 
 - **Monitor** the predictions of deployed models.
-- **Label** data for starting up or evolving an existing project.
+- **Label** data with a novel search-guided, iterative workflow.
 - **Iterate** on ****ground-truth**** and predictions to debug, track and improve your data and models over time.
-- **Build** custom ****applications and dashboards**** on top of your model predictions.
-
-We've tried to make working with Rubrix easy and fun, while keeping it scalable and flexible. 
+- **Build** custom ****dashboards**** on top of your model predictions and labels.
 
 Rubrix is composed of:
 
@@ -36,12 +34,52 @@ Rubrix is composed of:
 - a **web application** to explore and label data, which you can launch using Docker or directly with Python.
 
 
-This is an example of Rubrix UI annotation mode:
+This is an example of Rubrix's labeling mode:
 
 ![Rubrix Annotation Mode](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
 
+And this is an example for logging model predictions from a 🤗 transformers text classification pipeline:
 
-📖 For more information, visit the [documentation](https://docs.rubrix.ml/en/stable/) or if you want to get started, keep reading.
+```python
+from datasets import load_dataset
+import rubrix as rb
+
+model = pipeline('zero-shot-classification', model="typeform/distilbert-base-uncased-mnli")
+
+dataset = load_dataset("ag_news", split='test[0:100]')
+
+# Our labels are: ['World', 'Sports', 'Business', 'Sci/Tech']
+labels = dataset.features["label"].names
+
+for record in dataset:
+    prediction = model(record['text'], labels)
+
+    item = rb.TextClassificationRecord(
+        inputs={"text": record["text"]},
+        prediction=list(zip(prediction['labels'], prediction['scores'])),
+        annotation=labels[record["label"]]
+    )
+
+    rb.log(item, name="ag_news_zeroshot")
+```
+
+# Quick links
+
+| Doc | Description |
+|---|---|
+| 🚶 **[First steps](https://docs.rubrix.ml/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
+| 👩‍🏫 **[Concepts](https://docs.rubrix.ml/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
+| 🛠️ **[Setup and install](https://docs.rubrix.ml/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
+| 🗒️ **[Tasks](https://docs.rubrix.ml/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
+| 📱 **[UI reference](https://docs.rubrix.ml/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
+| 🐍 **[Python API docs](https://docs.rubrix.ml/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
+| 👩‍🍳 **[Rubrix cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
+| 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
+| 🤗 **[Hugging Face tutorial](https://docs.rubrix.ml/en/stable/tutorials/01-huggingface.html)** | Using Rubrix with 🤗`transformers` and `datasets` |
+| 💫 **[spaCy tutorial](https://docs.rubrix.ml/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
+| 🐠 **[Weak supervision tutorial](https://docs.rubrix.ml/en/stable/tutorials/04-snorkel.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
+| 🤔 **[Active learning tutorial](https://docs.rubrix.ml/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
+| 🧪 **[Knowledge graph tutorial](https://docs.rubrix.ml/en/stable/tutorials/03-kglab_pytorch_geometric.html)** | How to use Rubrix with `kglab` & `pytorch_geometric` |
 
 # Get started
 
@@ -77,11 +115,11 @@ mkdir rubrix && cd rubrix
 and launch the docker-contained web app with the following command:
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
+wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 ```
 
 This is the recommended way because it automatically includes an
-[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistent layer.
+[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
 
 ### Executing the server code manually
 
