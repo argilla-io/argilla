@@ -89,7 +89,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
 .. raw:: html
 
-   <iframe width="100%" height="500" src="https://www.youtube.com/embed/9s87bb2UMdA?autoplay=1" frameborder="0" allowfullscreen allow='autoplay'></iframe>
+   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif?raw=true">
 
 Use cases
 ---------
