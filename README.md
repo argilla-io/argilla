@@ -3,6 +3,8 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
+<h3 align="center">Explore, label, and monitor data for AI projects</h3>
+
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
         <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
@@ -27,9 +29,6 @@
     </a>
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 </p>
-
-<h3 align="center">Explore, label, and monitor data for AI projects</h3>
-
 
 ![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
 
