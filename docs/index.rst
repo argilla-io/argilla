@@ -89,7 +89,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
 .. raw:: html
 
-   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif">
+   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif?raw=true">
 
 Use cases
 ---------
