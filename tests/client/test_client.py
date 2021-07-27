@@ -14,11 +14,10 @@ from rubrix import (
     TokenAttributions,
     TokenClassificationRecord,
 )
-from rubrix.sdk.models import DatasetSnapshot, TextClassificationSearchResults
+from rubrix.sdk.models import TextClassificationSearchResults
 from rubrix.server.server import app
-from rubrix.server.tasks.commons import TaskType
 
-from tests.server.snapshots.test_api import create_some_data_for_text_classification
+from tests.server.test_api import create_some_data_for_text_classification
 
 client = TestClient(app)
 
@@ -58,35 +57,6 @@ def test_log_something(monkeypatch):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_snapshots(monkeypatch):
-    mocking_client(monkeypatch)
-    dataset = "test_create_dataset_snapshot"
-    client.delete(f"/api/datasets/{dataset}")
-    sleep(1)
-    api_ds_prefix = f"/api/datasets/{dataset}"
-
-    expected_data = 100
-    create_some_data_for_text_classification(dataset, n=expected_data)
-    response = client.post(f"{api_ds_prefix}/snapshots")
-    assert response.status_code == 200
-    snapshots = rubrix.snapshots(dataset)
-    assert len(snapshots) > 0
-    for snapshot in snapshots:
-        assert snapshot.task == TaskType.text_classification
-        assert snapshot.id
-        assert snapshot.creation_date
-
-    ds = rubrix.load(name=dataset)
-    assert isinstance(ds, pandas.DataFrame)
-    assert len(ds) == expected_data
-    records = list(
-        map(lambda r: TextClassificationRecord(**r), ds.to_dict(orient="records"))
-    )
-
-    ds = rubrix.load(name=dataset, snapshot=snapshots[0].id)
-    assert isinstance(ds, pandas.DataFrame)
-
-
 def test_load_limits(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_load_limits"
@@ -94,15 +64,13 @@ def test_load_limits(monkeypatch):
     client.delete(api_ds_prefix)
 
     create_some_data_for_text_classification(dataset, 50)
-    response = client.post(f"{api_ds_prefix}/snapshots")
 
     limit_data_to = 10
     ds = rubrix.load(name=dataset, limit=limit_data_to)
     assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
-    snapshot = rubrix.snapshots(dataset)[0]
-    ds = rubrix.load(name=dataset, snapshot=snapshot.id, limit=limit_data_to)
+    ds = rubrix.load(name=dataset, limit=limit_data_to)
     assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
@@ -121,14 +89,9 @@ def test_log_records_with_too_long_text(monkeypatch):
 def test_not_found_response(monkeypatch):
     mocking_client(monkeypatch)
     not_found_match = "Not found error. The API answered with a 404 code"
-    with pytest.raises(Exception, match=not_found_match):
-        rubrix.snapshots(name="not_found")
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found")
-
-    with pytest.raises(Exception, match=not_found_match):
-        rubrix.load(name="not-found", snapshot="blabla")
 
 
 def test_single_record(monkeypatch):
@@ -305,18 +268,11 @@ def test_load_with_ids_list(monkeypatch):
     dataset = "test_load_with_ids_list"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
-    api_ds_prefix = f"/api/datasets/{dataset}"
 
     expected_data = 100
     create_some_data_for_text_classification(dataset, n=expected_data)
-    response = client.post(f"{api_ds_prefix}/snapshots")
-    assert response.status_code == 200
-    snapshot = DatasetSnapshot.from_dict(response.json())
     ds = rubrix.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
-
-    ds = rubrix.load(name=dataset, ids=[3, 5], snapshot=snapshot.id)
-    assert len(ds) == 100
 
 
 def test_token_classification_spans(monkeypatch):
