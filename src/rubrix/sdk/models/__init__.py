@@ -8,7 +8,6 @@ from .bulk_response import BulkResponse
 from .class_prediction import ClassPrediction
 from .dataset import Dataset
 from .dataset_metadata import DatasetMetadata
-from .dataset_snapshot import DatasetSnapshot
 from .dataset_tags import DatasetTags
 from .entity_span import EntitySpan
 from .error_message import ErrorMessage
