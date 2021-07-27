@@ -126,7 +126,7 @@ export default {
       return this.dataset.name;
     },
     entities() {
-      return this.dataset.entities;
+      return this.dataset.entities.sort((a, b) => a.text.localeCompare(b.text));
     },
     getTitle() {
       return this.annotationIsEnabled ? "Annotations" : "Mentions";
@@ -300,10 +300,10 @@ export default {
   line-height: 0.8em;
   font-weight: bold;
 }
-$colors: 40;
+$colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 82%, 1);
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 82% - ($colors % $i), 1);
   .color_#{$i - 1} {
     background: $rcolor;
   }
