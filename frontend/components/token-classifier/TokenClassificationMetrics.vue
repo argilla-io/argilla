@@ -85,7 +85,7 @@
                 ? 0
                 : currentMentionsLength
             "
-            :entities="entities"
+            :entities="sortedEntities"
             :k="key"
             :object="filteredMentions"
             @limit="onShowMore(key)"
@@ -125,8 +125,11 @@ export default {
     datasetName() {
       return this.dataset.name;
     },
+    sortedEntities() {
+      return this.entities.slice(0).sort((a, b) => a.text.localeCompare(b.text));
+    },
     entities() {
-      return this.dataset.entities.sort((a, b) => a.text.localeCompare(b.text));
+      return this.dataset.entities;
     },
     getTitle() {
       return this.annotationIsEnabled ? "Annotations" : "Mentions";
