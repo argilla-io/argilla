@@ -167,7 +167,7 @@ export default {
       this.$fetch();
     },
   },
-  mounted() {
+  updated() {
     this.filteredMentions = this.dataset.results.aggregations[this.activeTab];
   },
 
