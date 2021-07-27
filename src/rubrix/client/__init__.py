@@ -12,7 +12,6 @@ import httpx
 import pandas
 from rubrix.client.models import (
     BulkResponse,
-    DatasetSnapshot,
     Record,
     TextClassificationRecord,
     TokenAttributions,
@@ -20,7 +19,6 @@ from rubrix.client.models import (
 )
 from rubrix.sdk import AuthenticatedClient, Client, models
 from rubrix.sdk.api.datasets import delete_dataset
-from rubrix.sdk.api.snapshots import list_dataset_snapshots
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
@@ -191,78 +189,40 @@ class RubrixClient:
     def load(
         self,
         name: str,
-        snapshot: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
     ) -> pandas.DataFrame:
+        from rubrix.sdk.api.datasets import get_dataset
 
-        if snapshot:
-            from rubrix.sdk.api.snapshots import _get_data
-
-            response = _get_data.sync_detailed(
-                client=self._client, name=name, snapshot_id=snapshot, limit=limit
-            )
-            _check_response_errors(response)
-            return pandas.DataFrame(response.parsed)
-        else:
-
-            from rubrix.sdk.api.datasets import get_dataset
-
-            response = get_dataset.sync_detailed(client=self._client, name=name)
-            _check_response_errors(response)
-            task = response.parsed.task
-
-            if task == TaskType.TEXTCLASSIFICATION:
-                from rubrix.sdk.api.text_classification import _get_dataset_data
-
-                map_fn = self._text_classification_sdk_to_record
-                request_class = TextClassificationQuery
-            elif task == TaskType.TOKENCLASSIFICATION:
-                from rubrix.sdk.api.token_classification import _get_dataset_data
-
-                map_fn = self._token_classification_sdk_to_record
-                request_class = TokenClassificationQuery
-            else:
-                raise ValueError(
-                    f"Sorry, load method is only allowed with token and text classification"
-                )
-            response = _get_dataset_data.sync_detailed(
-                client=self._client,
-                name=name,
-                request=request_class(ids=ids or []),
-                limit=limit,
-            )
-
-            return pandas.DataFrame(
-                map(lambda r: r.dict(), map(map_fn, response.parsed))
-            )
-
-    def snapshots(self, dataset: str) -> List[DatasetSnapshot]:
-        """
-        Retrieves created snapshots for given dataset
-
-        Parameters
-        ----------
-        dataset: str
-            The dataset name
-
-        Returns
-        -------
-            A list of snapshots
-
-        """
-
-        response = list_dataset_snapshots.sync_detailed(
-            client=self._client, name=dataset
-        )
+        response = get_dataset.sync_detailed(client=self._client, name=name)
         _check_response_errors(response)
+        task = response.parsed.task
 
-        return [
-            DatasetSnapshot(
-                id=snapshot.id, task=snapshot.task, creation_date=snapshot.creation_date
+        if task == TaskType.TEXTCLASSIFICATION:
+            from rubrix.sdk.api.text_classification import _get_dataset_data
+
+            map_fn = self._text_classification_sdk_to_record
+            request_class = TextClassificationQuery
+        elif task == TaskType.TOKENCLASSIFICATION:
+            from rubrix.sdk.api.token_classification import _get_dataset_data
+
+            map_fn = self._token_classification_sdk_to_record
+            request_class = TokenClassificationQuery
+        else:
+            raise ValueError(
+                f"Sorry, load method is only allowed with token and text classification"
             )
-            for snapshot in response.parsed
-        ]
+        response = _get_dataset_data.sync_detailed(
+            client=self._client,
+            name=name,
+            request=request_class(ids=ids or []),
+            limit=limit,
+        )
+
+        return pandas.DataFrame(
+            map(lambda r: r.dict(), map(map_fn, response.parsed))
+        )
+
 
     @staticmethod
     def _text_classification_sdk_to_record(
