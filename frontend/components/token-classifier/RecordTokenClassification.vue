@@ -257,7 +257,6 @@ export default {
   white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
-  font-weight: 600;
   &__scroll {
     display: block;
     max-height: 300px;
