@@ -11,7 +11,7 @@
       </span>
     </div>
     <a
-      v-if="limit !== 0"
+      v-if="limit !== 0 && Object.entries(object[k]).length > 3"
       class="sidebar__view-more"
       href="#"
       @click.prevent="$emit('limit', k)"
