@@ -6,11 +6,11 @@
       </span>
       <div class="annotation-button-data__info">
         <ReNumeric
-          v-if="decorateConfidence(label.confidence)"
+          v-if="!label.selected && decorateConfidence(label.confidence) > 0"
           class="annotation-button-data__confidence"
           :value="decorateConfidence(label.confidence)"
           type="%"
-          :decimals="0"
+          :decimals="2"
         ></ReNumeric>
       </div>
     </label>
