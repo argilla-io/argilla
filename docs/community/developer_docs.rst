@@ -16,7 +16,7 @@ and clone the fork to your computer:
     cd rubrix
 
 To keep your fork's master branch up to date with our repo you should add it as an
-`upstream remote branch <https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik`_:
+`upstream remote branch <https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik>`_:
 
 .. code-block:: bash
 

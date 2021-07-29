@@ -93,6 +93,7 @@ Rubrix use the `ELASTICSEARCH` environment variable to set the ES connection.
 You can provide the credentials using the following scheme: 
 
 .. code-block:: bash
+
    http(s)://user:passwd@elastichost
    
 .. code-block:: python
