@@ -43,6 +43,18 @@ extensions = [
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
+# Hide input/output prompts (cell counts)
+nbsphinx_prolog = """
+.. raw:: html
+
+    <style>
+        .nbinput .prompt,
+        .nboutput .prompt {
+            display: none;
+        }
+    </style>
+"""
+
 # TODO: Change this to "both" once Sphinx 4.1 is out
 autodoc_typehints = "description"
 
