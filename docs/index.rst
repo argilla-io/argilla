@@ -153,13 +153,14 @@ You can join the conversation on our Github page and our Github forum.
    :maxdepth: 3
    :caption: Tutorials
    :hidden:
-   
+
    tutorials/01-huggingface
    tutorials/02-spacy
    tutorials/03-kglab_pytorch_geometric
    tutorials/04-snorkel
    tutorials/05-active_learning
    tutorials/06-labeling-finetuning
+   tutorials/07-find_label_errors
 
 .. toctree::
    :maxdepth: 3
