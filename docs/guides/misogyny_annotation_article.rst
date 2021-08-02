@@ -72,12 +72,13 @@ Merging data from different sources
 
 The thesis started around the data corpus of IberEval 2018. Misogyny
 classification, which was established by the organization, is made
-following these categories: \* **Misogynous**: binary field, defines if
-the tweet is sexist or not. \* **Misogyny category:** denotes the type
-of misogynistic behaviour if there is misogyny in the text. 5 possible
-categories; *Stereotype & Objectification*, *Dominance*, *Derailing*,
-*Sexual Harassment & Threats of Violence* and *Discredit*. \* **Misogyny
-target**: Active, if the misogyny behaviour is targetted towards a
+following these categories: 
+
+-   **Misogynous**: binary field, defines if the tweet is sexist or not.  
+-   **Misogyny category:** denotes the type of misogynistic behaviour, if there is misogyny in the text. 
+5 possible categories: *Stereotype & Objectification*, *Dominance*, *Derailing*,
+*Sexual Harassment & Threats of Violence* and *Discredit*. 
+-   **Misogyny target**: Active, if the misogyny behaviour is targetted towards a
 specific woman or group of women or Passive if the behaviour is
 targetted to many potential receivers, even women as a gender.
 
