@@ -1,3 +1,4 @@
+# Setup and Installation in cloud providers
 ## Download
 ```shell
 docker pull recognai/rubrix:v0.1.3
