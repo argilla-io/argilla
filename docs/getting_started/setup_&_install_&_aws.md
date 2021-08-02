@@ -20,7 +20,7 @@ docker stop rubrix
 ```
 
 ## Deploy your own elasticsearch cluster
-Follow docker installation guide in [official elasticsearch page](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
+Follow the docker installation guide on the [official elasticsearch page](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
 
 ## Configure elasticsearch role/users 
 If you have an Elasticsearch instance and want to share resources with other applications, you can easily configure it for using Rubrix.
@@ -31,7 +31,7 @@ All you need to take into account is:
 
 * Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
 
-Rubrix use the `ELASTICSEARCH` environment variable to set the ES connection. 
+Rubrix uses the `ELASTICSEARCH` environment variable to set the ES connection. 
 
 You can provide the credentials using the following scheme: 
 
@@ -53,19 +53,22 @@ Below you can see a screenshot for setting up a new ``rubrix`` Role and its perm
 
 ### Setup an AWS profile 
 
-`aws` command cli must be installed. Then, type:
+The `aws` command cli must be installed. Then, type:
+
 ```shell
 aws configure --profile rubrix
 ```
-and follow command instructions. For more details, visit aws [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)
 
-Once profile is create (a new entry should be created in file `~/.aws/config`), you can activate by setting environment variable:
+and follow command instructions. For more details, visit [AWS official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)
+
+Once the profile is created (a new entry should be appear in file `~/.aws/config`), you can activate it via setting environment variable:
 
 ```shell
 export AWS_PROFILE=rubrix
 ```
 
 ### Create docker machine (aws)
+
 ```shell
 docker-machine create --driver amazonec2 \
 --amazonec2-root-size 60 \
@@ -85,10 +88,10 @@ NAME                   ACTIVE   DRIVER      STATE     URL                       
 rubrix-aws             -        amazonec2   Running   tcp://52.213.178.33:2376           v20.10.7   
 ```
 ### Save asigned machine ip
-In our case the assigned ip is `52.213.178.33`
+In our case, the assigned ip is `52.213.178.33`
 
 ### Connect to remote docker machine
-To enable local docker client connect to remote daemon, we must type following command:
+To enable the connection between the local docker client and the remote daemon, we must type following command:
 
 ```shell
 eval $(docker-machine env rubrix-aws)
