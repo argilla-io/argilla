@@ -174,4 +174,5 @@ You can join the conversation on our Github page and our Github forum.
    community/developer_docs
    Github page <https://github.com/recognai/rubrix>
    Discussion forum <https://github.com/recognai/rubrix/discussions>
+   guides/misogyny_annotation_article
 
