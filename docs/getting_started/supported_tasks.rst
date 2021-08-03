@@ -24,6 +24,7 @@ Rubrix is flexible with input and output shapes, which means you can model many 
 * `Key phrase extraction <https://paperswithcode.com/task/keyword-extraction>`_
 * `Sentiment analysis <http://nlpprogress.com/english/sentiment_analysis.html>`_ 
 * `Natural Language Inference <http://nlpprogress.com/english/natural_language_inference.html>`_
+* `Semantic Textual Similarity <https://paperswithcode.com/task/semantic-textual-similarity>`_
 * `Relationship Extraction <http://nlpprogress.com/english/relationship_extraction.html>`_
 * `Stance detection <http://nlpprogress.com/english/stance_detection.html>`_
 * **Multi-label text classification**
