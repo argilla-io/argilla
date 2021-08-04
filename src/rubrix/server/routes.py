@@ -7,7 +7,6 @@ from rubrix.server.commons.errors import ErrorMessage
 
 from .datasets import api as datasets
 from .info import api as info
-from .snapshots import api as snapshots
 from .users import api as users
 from .tasks import api as tasks
 
@@ -24,7 +23,6 @@ dependencies = []
 for router in [
     users.router,
     datasets.router,
-    snapshots.router,
     info.router,
     tasks.router
 ]:
