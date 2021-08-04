@@ -22,10 +22,6 @@ Dataset
 
 A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``Pandas.Dataframe`` from a Python app, script, or a Jupyter/Colab notebook. 
 
-Snapshot
-^^^^^^^^
-
-To be introduced, stay tuned.
 
 Record
 ^^^^^^
