@@ -358,6 +358,79 @@ class ElasticsearchWrapper(LoggingMixin):
             wait_for_active_shards=settings.es_records_index_shards,
         )
 
+    def clone_index(self, index: str, clone_to: str, override: bool = True):
+        """
+        Clone an existing index. During index clone, source must be setup as read-only index. Then, changes can be
+        applied
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.x/indices-clone-index.html>`_
+
+        Parameters
+        ----------
+        index:
+            The source index name
+        clone_to:
+            The destination index name
+        override:
+            If True, destination index will be removed if exists
+        """
+        index_read_only = self.is_index_read_only(index)
+        try:
+            if not index_read_only:
+                self.index_read_only(index, read_only=True)
+            if override:
+                self.delete_index(clone_to)
+            self.__client__.indices.clone(
+                index=index,
+                target=clone_to,
+                wait_for_active_shards=settings.es_records_index_shards,
+            )
+        finally:
+            self.index_read_only(index, read_only=index_read_only)
+
+    def is_index_read_only(self, index: str) -> bool:
+        """
+        Fetch info about read-only configuration index
+
+        Parameters
+        ----------
+        index:
+            The index name
+
+        Returns
+        -------
+            True if queried index is read-only, False otherwise
+
+        """
+        response = self.__client__.indices.get_settings(
+            index=index,
+            name="index.blocks.write",
+            allow_no_indices=True,
+            flat_settings=True,
+        )
+        print(response)
+        return (
+            response[index]["settings"]["index.blocks.write"] == "true"
+            if response
+            else False
+        )
+
+    def index_read_only(self, index: str, read_only: bool):
+        """
+        Enable/disable index read only
+
+        Parameters
+        ----------
+        index:
+            The index name
+        read_only:
+            True for enable read-only, False otherwise
+
+        """
+        self.__client__.indices.put_settings(
+            index=index, body={"settings": {"index.blocks.write": read_only}}
+        )
+
 
 _instance = None  # The singleton instance
 

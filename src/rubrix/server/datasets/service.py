@@ -6,6 +6,7 @@ from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperation
 
 from .dao import DatasetsDAO, create_datasets_dao
 from .model import (
+    CopyDatasetRequest,
     CreationDatasetRequest,
     Dataset,
     DatasetDB,
@@ -195,6 +196,27 @@ class DatasetsService:
                 task=task or TaskType.text_classification,
                 owner=owner,
             )
+
+    def copy_dataset(
+        self, name: str, owner: Optional[str], data: CopyDatasetRequest
+    ) -> Dataset:
+        found = self.find_by_name(name, owner)
+        date_now = datetime.utcnow()
+        created_dataset = DatasetDB(
+            name=data.name,
+            task=found.task,
+            owner=owner,
+            created_at=date_now,
+            last_updated=date_now,
+            tags={**found.tags, **data.tags},
+            metadata={**found.metadata, **data.metadata, "copied_from": found.name},
+        )
+        self.__dao__.copy(
+            source=found,
+            target=created_dataset,
+        )
+
+        return Dataset.parse_obj(created_dataset)
 
     def close_dataset(self, name: str, owner: Optional[str]):
         found = self.find_by_name(name, owner)

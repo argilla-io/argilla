@@ -239,6 +239,16 @@ class DatasetsDAO:
             "metadata": __dict_to_key_value_list__(metadata),
         }
 
+    def copy(self, source: DatasetDB, target: DatasetDB):
+        self._es.add_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=target.id,
+            document=self._observation_dataset_to_es_doc(target),
+        )
+        index_from = dataset_records_index(source.id)
+        index_to = dataset_records_index(target.id)
+        self._es.clone_index(index=index_from, clone_to=index_to)
+
     def close(self, dataset: DatasetDB):
         """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
         self._es.close_index(dataset_records_index(dataset.id))
