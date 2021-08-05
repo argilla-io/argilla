@@ -126,36 +126,18 @@ def _client_instance() -> RubrixClient:
     return _client
 
 
-def snapshots(name: str) -> List[DatasetSnapshot]:
-    """Retrieve dataset snapshots.
-
-    Args:
-        name: The dataset name whose snapshots will be retrieved.
-
-    Returns:
-        A list of snapshots.
-
-    Examples:
-        >>> snapshot_list = rb.snapshots(name="example-dataset")
-    """
-    return _client_instance().snapshots(name)
-
-
 def load(
     name: str,
-    snapshot: Optional[str] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
 ) -> pandas.DataFrame:
-    """Load dataset/snapshot data to a pandas DataFrame.
+    """Load dataset data to a pandas DataFrame.
 
     Args:
         name:
             The dataset name.
-        snapshot:
-            The dataset snapshot id.
         ids:
-            If provided, load dataset records with given ids. Ignored for snapshots.
+            If provided, load dataset records with given ids.
         limit:
             The number of records to retrieve.
 
@@ -165,7 +147,7 @@ def load(
     Examples:
         >>> dataframe = rb.load(name="example-dataset")
     """
-    return _client_instance().load(name=name, snapshot=snapshot, limit=limit, ids=ids)
+    return _client_instance().load(name=name, limit=limit, ids=ids)
 
 
 def delete(name: str) -> None:

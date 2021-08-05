@@ -138,6 +138,7 @@ You can join the conversation on our Github page and our Github forum.
    getting_started/setup&installation
    getting_started/concepts
    getting_started/supported_tasks
+   getting_started/setup&install_aws
 
 .. toctree::
    :maxdepth: 3
@@ -152,12 +153,12 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Tutorials
    :hidden:
    
-   tutorials/06-labeling-finettuning
    tutorials/01-huggingface
    tutorials/02-spacy
    tutorials/03-kglab_pytorch_geometric
    tutorials/04-snorkel
    tutorials/05-active_learning
+   tutorials/06-labeling-finetuning
 
 .. toctree::
    :maxdepth: 3

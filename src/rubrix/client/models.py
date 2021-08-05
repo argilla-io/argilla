@@ -28,23 +28,6 @@ class BulkResponse(BaseModel):
     failed: Optional[int] = 0
 
 
-class DatasetSnapshot(BaseModel):
-    """The dataset snapshot info.
-
-    Args:
-        id:
-            Id of the snapshot.
-        task:
-            Task of the snapshot.
-        creation_date:
-            Creation date of the snapshot.
-    """
-
-    id: str
-    task: str
-    creation_date: datetime.datetime
-
-
 class TokenAttributions(BaseModel):
     """Attribution of the token to the predicted label.
 
