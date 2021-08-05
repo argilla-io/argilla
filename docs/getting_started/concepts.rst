@@ -22,10 +22,6 @@ Dataset
 
 A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``Pandas.Dataframe`` from a Python app, script, or a Jupyter/Colab notebook. 
 
-Snapshot
-^^^^^^^^
-
-A snapshot is a version of a ``Dataset`` containing ``annotations`` at a given time. Snapshots can be created through the Rubrix UI so they can be loaded and used using the Python library.
 
 Record
 ^^^^^^
@@ -149,12 +145,7 @@ Register a set of logs into Rubrix: :meth:`rubrix.log`
 rb.load
 ^^^^^^^
 
-Load a dataset or a snapshot as a pandas DataFrame: :meth:`rubrix.load`
-
-rb.snapshots
-^^^^^^^^^^^^
-
-Retrieve a list of dataset snapshots: :meth:`rubrix.snapshots`
+Load a dataset as a pandas DataFrame: :meth:`rubrix.load`
 
 rb.delete
 ^^^^^^^^^
