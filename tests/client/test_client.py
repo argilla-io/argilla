@@ -28,6 +28,7 @@ def mocking_client(monkeypatch):
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)
+    monkeypatch.setattr(httpx, "put", client.put)
 
     def stream_mock(*args, url: str, **kwargs):
         if "POST" in args:
@@ -240,6 +241,29 @@ def test_delete_dataset(monkeypatch):
     ):
         rubrix.load(name=dataset_name)
 
+
+def test_dataset_copy(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_dataset_copy"
+    dataset_copy = "new_dataset"
+
+    client.delete(f"/api/datasets/{dataset}")
+    client.delete(f"/api/datasets/{dataset_copy}")
+
+    rubrix.log(
+        TextClassificationRecord(
+            id=0,
+            inputs="This is the record input",
+            annotation_agent="test",
+            annotation=["T"],
+        ),
+        name=dataset,
+    )
+    rubrix.copy(dataset, dest=dataset_copy)
+    df = rubrix.load(name=dataset)
+    df_copy = rubrix.load(name=dataset_copy)
+
+    assert df.equals(df_copy)
 
 def test_text_classifier_with_inputs_list(monkeypatch):
     mocking_client(monkeypatch)
