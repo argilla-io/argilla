@@ -33,9 +33,9 @@ Think of predictions as the classification that your system made over that input
 Text classification record
 """""""""""""""""""""""""""
 
-Text classification deals with predicting in which categories a text fits. As if you're shown an image you could quickly tell if there's a dog or a cat in it, we build NLP models to distinguish between a Jane Austen's novel or a Charlotte Bronte's poem. It's all about feeding models with labeled examples and see how it start predicting over the very same labels.
+Text classification deals with predicting in which categories a text fits. As if you're shown an image you could quickly tell if there's a dog or a cat in it, we build NLP models to distinguish between a Jane Austen's novel or a Charlotte Bronte's poem. It's all about feeding models with labelled examples and seeing how they start predicting over the very same labels.
 
-Let's see examples over a spam classifier.
+Let's see examples of a spam classifier.
 
 .. code-block:: python
 
