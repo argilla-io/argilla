@@ -6,7 +6,7 @@
     ]"
   >
     <span
-      v-for="(entity, index) in filteredEntities.slice(0, entitiesNumber)"
+      v-for="(entity, index) in formattedEntities.slice(0, entitiesNumber)"
       :key="index"
       class="entity"
       :class="[
@@ -20,11 +20,11 @@
       <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
     </span>
     <ReButton
-      v-if="filteredEntities.length >= entitiesNumber"
+      v-if="formattedEntities.length > 12"
       class="entities__container__button"
       @click="toggleEntitiesNumber"
       >{{
-        entitiesNumber === filteredEntities.length ? "Show less" : "Show all"
+        entitiesNumber === formattedEntities.length ? "Show less" : "Show all"
       }}</ReButton
     >
   </div>
@@ -60,6 +60,10 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
+    formattedEntities() {
+      const characters = "1234567890".split("");
+      return this.filteredEntities.map((ent, index) => ({ ...ent, shortCut: characters[index] }))
+    }
   },
   methods: {
     toggleEntitiesNumber() {

@@ -31,7 +31,7 @@
           />
           <ul class="entities__selector__options">
             <li
-              v-for="(entity, index) in filteredEntities"
+              v-for="(entity, index) in formattedEntities"
               :key="index"
               class="entities__selector__option"
               :class="`color_${entity.colorId}`"
@@ -113,6 +113,10 @@ export default {
         entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
       ).sort((a, b) => a.text.localeCompare(b.text));
     },
+    formattedEntities() {
+      const characters = "1234567890".split("");
+      return this.filteredEntities.map((ent, index) => ({ ...ent, shortCut: characters[index] }))
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
@@ -166,7 +170,7 @@ export default {
     keyPress(e) {
       const cmd = String.fromCharCode(e.keyCode).toUpperCase();
       if (!this.isFocused && this.showEntitiesSelector && cmd) {
-        const entity = this.dataset.entities.find((t) => t.shortCut === cmd);
+        const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
         if (entity) {
           this.selectEntity(entity.text);
         }
