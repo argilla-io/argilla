@@ -1,8 +1,15 @@
 <template>
   <div>
     <p class="sidebar__title">Stats</p>
-    <StatsSelector :selectedOption="selectedOption" :options="options" @selectOption="onSelectOption"/>
-    <StatsErrorDistribution v-if="selectedOption.id === 'error'" :dataset="dataset" />
+    <StatsSelector
+      :selected-option="selectedOption"
+      :options="options"
+      @selectOption="onSelectOption"
+    />
+    <StatsErrorDistribution
+      v-if="selectedOption.id === 'error'"
+      :dataset="dataset"
+    />
     <template v-if="selectedOption.id === 'keywords'">
       <div class="scroll">
         <div v-for="(counter, keyword) in getKeywords" :key="keyword">
@@ -28,10 +35,10 @@ export default {
   data: () => {
     return {
       selectedOption: {
-        id: 'keywords',
-        name: 'Keywords'
+        id: "keywords",
+        name: "Keywords",
       },
-    }
+    };
   },
   computed: {
     getKeywords() {
@@ -40,32 +47,32 @@ export default {
     options() {
       let options = [];
       options.push({
-        id: 'keywords',
-        name: 'Keywords'
-      })
+        id: "keywords",
+        name: "Keywords",
+      });
       if (Object.values(this.dataset.results.aggregations.predicted).length) {
         options.push({
-          id: 'error',
-          name: 'Error Distribution'
-        })
+          id: "error",
+          name: "Error Distribution",
+        });
       }
       return options;
-    }
+    },
   },
   methods: {
     onSelectOption(opt) {
       this.selectedOption = opt;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
 .sidebar {
-    &__title {
-        color: $font-secondary-dark;
-        margin-top: 0.5em;
-        @include font-size(20px)
-    }
+  &__title {
+    color: $font-secondary-dark;
+    margin-top: 0.5em;
+    @include font-size(20px);
+  }
 }
 label {
   display: block;

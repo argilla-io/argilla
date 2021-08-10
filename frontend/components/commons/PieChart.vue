@@ -1,12 +1,14 @@
 <template>
-    <div class="pie" :style="{animationDelay: `${-percent}s`}">{{percent}}%</div>
+  <div class="pie" :style="{ animationDelay: `${-percent}s` }">
+    {{ percent }}%
+  </div>
 </template>
 <script>
 export default {
   props: {
     percent: {
-      type: Number
-    }
+      type: Number,
+    },
   },
 };
 </script>
@@ -19,7 +21,7 @@ export default {
 }
 @keyframes bg {
   50% {
-    background: #FF541E;
+    background: #ff541e;
   }
 }
 .pie {
@@ -27,10 +29,10 @@ export default {
   width: 100px;
   line-height: 100px;
   border-radius: 50%;
-  background: #50CB88;
+  background: #50cb88;
   color: transparent;
   text-align: center;
-  background-image: linear-gradient(to right, transparent 50%, #FF541E 0);  
+  background-image: linear-gradient(to right, transparent 50%, #ff541e 0);
   transform-origin: left;
   &:before {
     content: "";
@@ -48,4 +50,3 @@ export default {
   }
 }
 </style>
-

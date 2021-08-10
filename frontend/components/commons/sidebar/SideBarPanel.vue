@@ -19,7 +19,7 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
-  }
+  },
 };
 </script>
 <style lang="scss" scoped>

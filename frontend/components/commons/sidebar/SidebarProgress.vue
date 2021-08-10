@@ -1,38 +1,39 @@
 <template>
-  <div v-if="this.annotationsProgress">
+  <div v-if="annotationsProgress">
     <p class="sidebar__title">AnnotationProgress</p>
     <div class="progress__info">
       <p class="progress__info__text">Total annotations</p>
       <span class="progress__info__percent">{{ progress }}%</span>
     </div>
-      <div class="progress__numbers">
-          <span>{{this.totalAnnotated}}</span>/{{this.total}}
-      </div>
-      <ReProgress
-        re-mode="determinate"
-        :multiple="true"
-        :progress="(totalValidated * 100) / total"
-        :progress-secondary="(totalDiscarded * 100) / total"
-      ></ReProgress>
-      <div class="scroll">
-        <div>
-          <div class="info">
-            <span class="color-bullet validated"></span>
-            <label>Validated</label>
-            <span class="records-number">
-              {{ totalValidated }}
-            </span>
-          </div>
-          <div class="info">
-            <span class="color-bullet discarded"></span>
-            <label>Discarded</label>
-            <span class="records-number">
-              {{ totalDiscarded }}
-            </span>
-          </div>
-          <slot></slot>
+    <div class="progress__numbers">
+      <span>{{ totalAnnotated }}</span
+      >/{{ total }}
+    </div>
+    <ReProgress
+      re-mode="determinate"
+      :multiple="true"
+      :progress="(totalValidated * 100) / total"
+      :progress-secondary="(totalDiscarded * 100) / total"
+    ></ReProgress>
+    <div class="scroll">
+      <div>
+        <div class="info">
+          <span class="color-bullet validated"></span>
+          <label>Validated</label>
+          <span class="records-number">
+            {{ totalValidated }}
+          </span>
         </div>
+        <div class="info">
+          <span class="color-bullet discarded"></span>
+          <label>Discarded</label>
+          <span class="records-number">
+            {{ totalDiscarded }}
+          </span>
+        </div>
+        <slot></slot>
       </div>
+    </div>
   </div>
 </template>
 
@@ -66,7 +67,7 @@ export default {
       return this.annotationsProgress.discarded;
     },
     totalAnnotated() {
-        return this.totalValidated + this.totalDiscarded;
+      return this.totalValidated + this.totalDiscarded;
     },
     total() {
       return this.annotationsProgress.total;
@@ -88,11 +89,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
-    &__title {
-        color: $font-secondary-dark;
-        margin-top: 0.5em;
-        @include font-size(20px)
-    }
+  &__title {
+    color: $font-secondary-dark;
+    margin-top: 0.5em;
+    @include font-size(20px);
+  }
 }
 label {
   margin-top: 1.2em;
@@ -173,35 +174,35 @@ label {
   line-height: 0.8em;
   font-weight: bold;
   &__info {
-      display: flex;
-      @include font-size(15px);
-      align-items: center;
-      color: $font-secondary-dark;
-      &__percent {
-          margin-right: 0;
-          margin-left: auto;
-      }
+    display: flex;
+    @include font-size(15px);
+    align-items: center;
+    color: $font-secondary-dark;
+    &__percent {
+      margin-right: 0;
+      margin-left: auto;
+    }
   }
   &__numbers {
-     color: $font-secondary-dark;
-     margin-bottom: 1.5em;
-     @include font-size(18px); 
-     span {
-        @include font-size(40px);
-     }
+    color: $font-secondary-dark;
+    margin-bottom: 1.5em;
+    @include font-size(18px);
+    span {
+      @include font-size(40px);
+    }
   }
 }
-  .color-bullet {
-      height: 10px;
-      width: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      margin: 0.3em 0.3em 0.3em 0;
-      &.validated {
-          background: #4C4EA3;
-      }
-      &.discarded {
-          background: #A1A2CC;
-      }
+.color-bullet {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0.3em 0.3em 0.3em 0;
+  &.validated {
+    background: #4c4ea3;
   }
+  &.discarded {
+    background: #a1a2cc;
+  }
+}
 </style>

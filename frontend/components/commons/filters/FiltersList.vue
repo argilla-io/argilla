@@ -135,23 +135,28 @@ export default {
           };
         })
         .filter(({ disabled }) => !disabled);
-      const metadataFilters = aggregations.metadata && Object.keys(aggregations.metadata).map((key) => {
-        return {
-          key: key,
-          name: key,
-          type: "select",
-          group: "Metadata",
-          placeholder: "Select options",
-          id: key,
-          options: aggregations.metadata[key],
-          selected: this.dataset.query.metadata
-            ? this.dataset.query.metadata[key] || []
-            : [],
-        };
-      });
-      const sortedMetadataFilters = metadataFilters && metadataFilters.sort((a, b) =>
-        a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
-      ) || [];
+      const metadataFilters =
+        aggregations.metadata &&
+        Object.keys(aggregations.metadata).map((key) => {
+          return {
+            key: key,
+            name: key,
+            type: "select",
+            group: "Metadata",
+            placeholder: "Select options",
+            id: key,
+            options: aggregations.metadata[key],
+            selected: this.dataset.query.metadata
+              ? this.dataset.query.metadata[key] || []
+              : [],
+          };
+        });
+      const sortedMetadataFilters =
+        (metadataFilters &&
+          metadataFilters.sort((a, b) =>
+            a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
+          )) ||
+        [];
       return [...filters, ...sortedMetadataFilters];
     },
   },

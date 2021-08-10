@@ -1,8 +1,15 @@
 <template>
   <div v-if="!$fetchState.pending">
     <p class="sidebar__title">Stats</p>
-    <StatsSelector :selectedOption="selectedOption" :options="options" @selectOption="onSelectOption"/>
-    <StatsErrorDistribution v-if="selectedOption.id === 'error'" :dataset="dataset" />
+    <StatsSelector
+      :selected-option="selectedOption"
+      :options="options"
+      @selectOption="onSelectOption"
+    />
+    <StatsErrorDistribution
+      v-if="selectedOption.id === 'error'"
+      :dataset="dataset"
+    />
     <div v-if="selectedOption.id === 'mentions'">
       <div class="sidebar__tabs">
         <a
@@ -55,7 +62,6 @@
   </div>
 </template>
 <script>
-import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { ObservationDataset } from "@/models/Dataset";
 export default {
   props: {
@@ -72,8 +78,8 @@ export default {
     filteredMentions: [],
     expandedMentionsGroup: undefined,
     selectedOption: {
-      id: 'mentions',
-      name: 'Mentions'
+      id: "mentions",
+      name: "Mentions",
     },
   }),
   async fetch() {
@@ -85,14 +91,14 @@ export default {
     options() {
       let options = [];
       options.push({
-        id: 'mentions',
-        name: 'Mentions'
-      })
+        id: "mentions",
+        name: "Mentions",
+      });
       if (Object.values(this.dataset.results.aggregations.predicted).length) {
         options.push({
-          id: 'error',
-          name: 'Error Distribution'
-        })
+          id: "error",
+          name: "Error Distribution",
+        });
       }
       return options;
     },
@@ -131,11 +137,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
-    &__title {
-        color: $font-secondary-dark;
-        margin-top: 0.5em;
-        @include font-size(20px)
-    }
+  &__title {
+    color: $font-secondary-dark;
+    margin-top: 0.5em;
+    @include font-size(20px);
+  }
 }
 .sidebar {
   &__tabs {

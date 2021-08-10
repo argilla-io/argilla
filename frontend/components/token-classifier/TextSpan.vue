@@ -109,9 +109,11 @@ export default {
       )[0].colorId;
     },
     filteredEntities() {
-      return this.dataset.entities.filter((entity) =>
-        entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
-      ).sort((a, b) => a.text.localeCompare(b.text));
+      return this.dataset.entities
+        .filter((entity) =>
+          entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
+        )
+        .sort((a, b) => a.text.localeCompare(b.text));
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -281,7 +283,12 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 82% - ($colors % $i), 1);
+  $rcolor: hsla(
+    ($colors * $i) + ($hue * $i / $colors),
+    100% - $i / 2,
+    82% - ($colors % $i),
+    1
+  );
   .color_#{$i - 1} {
     ::v-deep span {
       background: $rcolor;

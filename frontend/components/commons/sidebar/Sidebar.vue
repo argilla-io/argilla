@@ -1,37 +1,40 @@
 <template>
-    <div class="sidebar">
-        <div class="sidebar__actions">
-            <a href="#" @click.prevent="logout()" data-title="close session">
-            <svgicon
-                name="logout"
-            ></svgicon>
-            </a>
-            <a href="#" @click.prevent data-title="annotation mode">
-              <ReSwitch
-                class="sidebar__actions__switch"
-                v-model="annotationMode"
-                @change="$emit('onChangeMode')"
-                ></ReSwitch
-              >
-            </a>
-            <a href="#" @click.prevent="refresh()" data-title="refresh">
-            <svgicon
-                name="refresh"
-            ></svgicon>
-            </a>
-        </div>
-        <div class="sidebar__info">
-            <a class="sidebar__info__button" href="#" v-for="sidebarInfo in sidebarInfoOptions" :key="sidebarInfo.id" :data-title="sidebarInfo.tooltip" :class="visibleSidebarInfo === sidebarInfo.id ? 'active' : ''" @click.prevent="showSidebarInfo(sidebarInfo.id)">
-            <svgicon
-                class="sidebar__info__chev"
-                :name="visibleSidebarInfo === sidebarInfo ? 'chev-right' : 'chev-left'"
-            ></svgicon>
-            <svgicon
-                :name="sidebarInfo.icon"
-            ></svgicon>
-            </a>
-        </div>
+  <div class="sidebar">
+    <div class="sidebar__actions">
+      <a href="#" data-title="close session" @click.prevent="logout()">
+        <svgicon name="logout"></svgicon>
+      </a>
+      <a href="#" data-title="annotation mode" @click.prevent>
+        <ReSwitch
+          v-model="annotationMode"
+          class="sidebar__actions__switch"
+          @change="$emit('onChangeMode')"
+        ></ReSwitch>
+      </a>
+      <a href="#" data-title="refresh" @click.prevent="refresh()">
+        <svgicon name="refresh"></svgicon>
+      </a>
     </div>
+    <div class="sidebar__info">
+      <a
+        v-for="sidebarInfo in sidebarInfoOptions"
+        :key="sidebarInfo.id"
+        class="sidebar__info__button"
+        href="#"
+        :data-title="sidebarInfo.tooltip"
+        :class="visibleSidebarInfo === sidebarInfo.id ? 'active' : ''"
+        @click.prevent="showSidebarInfo(sidebarInfo.id)"
+      >
+        <svgicon
+          class="sidebar__info__chev"
+          :name="
+            visibleSidebarInfo === sidebarInfo ? 'chev-right' : 'chev-left'
+          "
+        ></svgicon>
+        <svgicon :name="sidebarInfo.icon"></svgicon>
+      </a>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -49,26 +52,26 @@ export default {
         {
           id: "progress",
           tooltip: "annotation progress",
-          icon: "progress"
+          icon: "progress",
         },
         {
           id: "stats",
           tooltip: "stats",
-          icon: "metrics"
+          icon: "metrics",
         },
       ],
       visibleSidebarInfo: undefined,
-    }
-  },
-  methods: {
-    showSidebarInfo(info) {
-      this.visibleSidebarInfo = info;
-      this.$emit('showSidebarInfo', info);
-    },
+    };
   },
   mounted() {
     this.annotationMode =
       this.$route.query.allowAnnotation === "true" ? true : false;
+  },
+  methods: {
+    showSidebarInfo(info) {
+      this.visibleSidebarInfo = info;
+      this.$emit("showSidebarInfo", info);
+    },
   },
 };
 </script>
@@ -101,7 +104,7 @@ $sidebar-button-size: 45px;
       left: 5px;
       width: 5px;
       margin-right: 0;
-      stroke-width: 2
+      stroke-width: 2;
     }
     .svg-icon {
       & + .svg-icon {
@@ -130,4 +133,3 @@ a[data-title] {
   }
 }
 </style>
-

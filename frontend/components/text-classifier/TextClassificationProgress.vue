@@ -1,14 +1,14 @@
 <template>
-    <SidebarProgress :dataset="dataset">
-      <div class="labels" v-if="annotationsProgress">
-        <div v-for="(counter, label) in getInfo" :key="label">
-          <div v-if="counter > 0" class="info">
-            <label>{{ label }}</label>
-            <span class="records-number">{{ counter }}</span>
-          </div>
+  <SidebarProgress :dataset="dataset">
+    <div v-if="annotationsProgress" class="labels">
+      <div v-for="(counter, label) in getInfo" :key="label">
+        <div v-if="counter > 0" class="info">
+          <label>{{ label }}</label>
+          <span class="records-number">{{ counter }}</span>
         </div>
       </div>
-    </SidebarProgress>
+    </div>
+  </SidebarProgress>
 </template>
 
 <script>

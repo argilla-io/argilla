@@ -1,17 +1,20 @@
 <template>
-    <SidebarProgress :dataset="dataset">
-      <div class="labels" v-if="annotationsProgress">
-        <div v-for="(counter, label) in getInfo" :key="label">
-          <div v-if="counter > 0" class="info">
-            <label :class="[
+  <SidebarProgress :dataset="dataset">
+    <div v-if="annotationsProgress" class="labels">
+      <div v-for="(counter, label) in getInfo" :key="label">
+        <div v-if="counter > 0" class="info">
+          <label
+            :class="[
               `color_${entities.filter((e) => e.text === label)[0].colorId}`,
               'entity',
-            ]">{{ label }}</label>
-            <span class="records-number">{{ counter }}</span>
-          </div>
+            ]"
+            >{{ label }}</label
+          >
+          <span class="records-number">{{ counter }}</span>
         </div>
       </div>
-    </SidebarProgress>
+    </div>
+  </SidebarProgress>
 </template>
 
 <script>
@@ -54,11 +57,14 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 82% - ($colors % $i), 1);
+  $rcolor: hsla(
+    ($colors * $i) + ($hue * $i / $colors),
+    100% - $i / 2,
+    82% - ($colors % $i),
+    1
+  );
   .color_#{$i - 1} {
     background: $rcolor;
   }
 }
 </style>
-
-

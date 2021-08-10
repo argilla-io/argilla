@@ -19,25 +19,25 @@
             height="14"
           ></svgicon>
         </re-button>
-      <div ref="list" v-if="textSpans.length">
-        <TextSpan
-          v-for="(token, i) in textSpans"
-          :key="i"
-          :record="record"
-          :span-id="i"
-          :spans="textSpans"
-          :dataset="dataset"
-          :class="isSelected(i) ? 'selected' : ''"
-          @startSelection="onStartSelection"
-          @endSelection="onEndSelection"
-          @selectEntity="onSelectEntity"
-          @changeEntityLabel="onChangeEntityLabel"
-          @removeEntity="onRemoveEntity"
-          @reset="onReset"
-        />
-      </div>
+        <div v-if="textSpans.length" ref="list">
+          <TextSpan
+            v-for="(token, i) in textSpans"
+            :key="i"
+            :record="record"
+            :span-id="i"
+            :spans="textSpans"
+            :dataset="dataset"
+            :class="isSelected(i) ? 'selected' : ''"
+            @startSelection="onStartSelection"
+            @endSelection="onEndSelection"
+            @selectEntity="onSelectEntity"
+            @changeEntityLabel="onChangeEntityLabel"
+            @removeEntity="onRemoveEntity"
+            @reset="onReset"
+          />
+        </div>
       </span>
-            <RecordExtraActions
+      <RecordExtraActions
         :allow-change-status="annotationEnabled"
         :record="record"
         @onChangeRecordStatus="onChangeRecordStatus"

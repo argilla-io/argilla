@@ -90,7 +90,7 @@ export default {
     @extend .re-progress-track;
     left: auto;
     right: 0;
-    background: #A1A2CC;
+    background: #a1a2cc;
   }
 }
 

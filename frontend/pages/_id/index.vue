@@ -6,14 +6,13 @@
     :where="datasetName"
     :error="$fetchState.error"
   ></Error>
-  <div class="app" v-else>
+  <div v-else class="app">
     <div class="app__content">
       <section ref="header" class="header">
         <ReTopbarBrand v-if="selectedTask">
           <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
         </ReTopbarBrand>
-        <FiltersArea :dataset="dataset">
-        </FiltersArea>
+        <FiltersArea :dataset="dataset"> </FiltersArea>
         <EntitiesHeader
           v-if="dataset.task === 'TokenClassification'"
           :entities="dataset.entities"
@@ -25,10 +24,17 @@
       <div class="container">
         <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
           <Results :dataset="dataset"> </Results>
-            <SideBarPanel :dataset="dataset" v-if="sidebarVisible || width > 1500" :class="dataset.task">
-              <transition name="fade">
+          <SideBarPanel
+            v-if="sidebarVisible || width > 1500"
+            :dataset="dataset"
+            :class="dataset.task"
+          >
+            <transition name="fade">
               <div v-if="sidebarInfoType === 'progress'">
-                <TextClassificationProgress :dataset="dataset" v-if="dataset.task === 'TextClassification'" />
+                <TextClassificationProgress
+                  v-if="dataset.task === 'TextClassification'"
+                  :dataset="dataset"
+                />
                 <TokenClassificationProgress v-else :dataset="dataset" />
               </div>
               <div v-if="sidebarInfoType === 'stats'">
@@ -38,12 +44,15 @@
                 />
                 <TokenClassificationStats v-else :dataset="dataset" />
               </div>
-              </transition>
-            </SideBarPanel>
+            </transition>
+          </SideBarPanel>
         </div>
       </div>
     </div>
-    <Sidebar @showSidebarInfo="onShowSidebarInfo" @onChangeMode="onChangeMode" />
+    <Sidebar
+      @showSidebarInfo="onShowSidebarInfo"
+      @onChangeMode="onChangeMode"
+    />
   </div>
 </template>
 
@@ -53,7 +62,7 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   layout: "app",
   data: () => ({
-    sidebarInfoType: 'progress',
+    sidebarInfoType: "progress",
     sidebarVisible: false,
     width: window.innerWidth,
   }),
@@ -100,10 +109,10 @@ export default {
       if (this.sidebarInfoType !== info) {
         this.sidebarVisible = true;
       } else {
-        this.sidebarVisible =! this.sidebarVisible;
+        this.sidebarVisible = !this.sidebarVisible;
       }
       this.sidebarInfoType = info;
-    }
+    },
     // async onChangeTask(value) {
     //   await this.changeTask({
     //     dataset: this.dataset,
@@ -114,7 +123,7 @@ export default {
   updated() {
     window.onresize = () => {
       this.width = window.innerWidth;
-    }
+    };
   },
 };
 </script>
