@@ -37,6 +37,7 @@
               :class="`color_${entity.colorId}`"
               @click="selectEntity(entity.text)"
             >
+              <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
               <span>{{ entity.text }}</span>
               <svgicon
                 v-if="span.entity && entity.text === span.entity.label"
@@ -109,13 +110,18 @@ export default {
       )[0].colorId;
     },
     filteredEntities() {
-      return this.dataset.entities.filter((entity) =>
-        entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
-      ).sort((a, b) => a.text.localeCompare(b.text));
+      return this.dataset.entities
+        .filter((entity) =>
+          entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
+        )
+        .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
       const characters = "1234567890".split("");
-      return this.filteredEntities.map((ent, index) => ({ ...ent, shortCut: characters[index] }))
+      return this.filteredEntities.map((ent, index) => ({
+        ...ent,
+        shortCut: characters[index],
+      }));
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -128,6 +134,9 @@ export default {
     window.removeEventListener("keypress", this.keyPress);
   },
   methods: {
+    onKeydown(event) {
+      alert("onKeydown", event);
+    },
     startSelection() {
       if (this.annotationEnabled) {
         this.$emit("startSelection", this.spanId);
@@ -280,12 +289,33 @@ export default {
     background: $tertiary-lighten-color;
   }
 }
+.entity {
+  &.non-selectable,
+  &.non-selectable--show-sort-code {
+    cursor: default;
+    pointer-events: none;
+  }
+  &__sort-code {
+    @include font-size(12px);
+    color: $font-medium-color;
+    font-weight: lighter;
+    margin-left: 0.5em;
+    .non-selectable & {
+      display: none;
+    }
+  }
+}
 // ner colors
 
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 82% - ($colors % $i), 1);
+  $rcolor: hsla(
+    ($colors * $i) + ($hue * $i / $colors),
+    100% - $i / 2,
+    82% - ($colors % $i),
+    1
+  );
   .color_#{$i - 1} {
     ::v-deep span {
       background: $rcolor;
