@@ -43,7 +43,7 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  min-height: 60px;
+  min-height: 45px;
   position: relative;
   background: $primary-color;
   border-bottom: 1px solid $line-light-color;

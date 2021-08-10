@@ -48,6 +48,7 @@ export default {
   }
 }
 .info {
+  color: $font-secondary-dark;
   position: relative;
   display: flex;
   margin-bottom: 0.7em;

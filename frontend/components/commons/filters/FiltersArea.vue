@@ -4,12 +4,6 @@
       <div class="container">
         <div class="filters__row">
           <HeaderTitle v-if="dataset.results.records" :dataset="dataset" />
-          <ReSwitch
-            v-model="annotationMode"
-            class="filters__switch"
-            @change="$emit('onChangeMode')"
-            >Annotation Mode</ReSwitch
-          >
         </div>
         <div class="filters__row">
           <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
@@ -45,7 +39,6 @@ export default {
     },
   },
   data: () => ({
-    annotationMode: false,
     sortable: {
       type: Boolean,
       default: false,
@@ -58,10 +51,6 @@ export default {
       { filter: "confidence", text: "Confidence", range: ["0", "1"] },
     ],
   }),
-  mounted() {
-    this.annotationMode =
-      this.$route.query.allowAnnotation === "true" ? true : false;
-  },
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
@@ -153,12 +142,6 @@ export default {
     padding: 1em 0 0.5em 0;
     position: relative;
     z-index: 2;
-  }
-  &__switch {
-    margin-top: 1em;
-    margin-right: 0;
-    margin-left: auto;
-    @include font-size(13px);
   }
   &__searchbar {
     margin-right: 2em;
