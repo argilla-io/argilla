@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="sidebar__actions">
-      <a href="#" data-title="close session" @click.prevent="logout()">
+      <a href="#" v-if="$auth.loggedIn && $config.securityEnabled" data-title="close session" @click.prevent="logout()">
         <svgicon name="logout"></svgicon>
       </a>
       <a v-if="sidebarType === 'dataset-view'" href="#" data-title="annotation mode" @click.prevent>
