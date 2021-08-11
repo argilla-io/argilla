@@ -37,7 +37,9 @@
               :class="`color_${entity.colorId}`"
               @click="selectEntity(entity.text)"
             >
-              <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
+              <span v-if="controlPressed" class="entity__sort-code"
+                >[{{ entity.shortCut }}]</span
+              >
               <span>{{ entity.text }}</span>
               <svgicon
                 v-if="span.entity && entity.text === span.entity.label"
@@ -87,6 +89,8 @@ export default {
     showEntitiesSelector: false,
     addnewSlotVisible: false,
     isFocused: false,
+    controlPressed: false,
+    controlKey: undefined,
   }),
   computed: {
     span() {
@@ -128,15 +132,14 @@ export default {
     },
   },
   created() {
-    window.addEventListener("keydown", this.keyPress);
+    window.addEventListener("keydown", this.keyDown);
+    window.addEventListener("keyup", this.keyUp);
   },
   destroyed() {
-    window.removeEventListener("keydown", this.keyPress);
+    window.removeEventListener("keydown", this.keyDown);
+    window.addEventListener("keyup", this.keyUp);
   },
   methods: {
-    onKeydown(event) {
-      alert("onKeydown", event);
-    },
     startSelection() {
       if (this.annotationEnabled) {
         this.$emit("startSelection", this.spanId);
@@ -176,9 +179,18 @@ export default {
       this.showEntitiesSelector = false;
       this.searchEntity = "";
     },
-    keyPress(e) {
-      const cmd = String.fromCharCode(e.keyCode).toUpperCase();
-      if (e.ctrlKey && this.showEntitiesSelector && cmd) {
+    keyUp(event) {
+      if (this.controlKey === event.key) {
+        this.controlPressed = false;
+      }
+    },
+    keyDown(event) {
+      if (event.ctrlKey) {
+        this.controlKey = event.key;
+        this.controlPressed = true;
+      }
+      const cmd = String.fromCharCode(event.keyCode).toUpperCase();
+      if (this.controlPressed && this.showEntitiesSelector && cmd) {
         const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
         if (entity) {
           this.selectEntity(entity.text);
