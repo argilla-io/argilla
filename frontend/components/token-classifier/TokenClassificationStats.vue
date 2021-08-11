@@ -102,11 +102,18 @@ export default {
     entities() {
       return this.dataset.entities;
     },
+    query() {
+      return this.dataset.query;
+    }
+  },
+  watch: {
+    query() {
+      this.filteredMentions = this.dataset.results.aggregations[this.activeTab];
+    },
   },
   mounted() {
     this.filteredMentions = this.dataset.results.aggregations[this.activeTab];
   },
-
   methods: {
     filteredMentionsBy(type) {
       this.activeTab = type;
