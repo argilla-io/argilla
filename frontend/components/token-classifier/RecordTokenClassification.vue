@@ -17,7 +17,7 @@
           @reset="onReset"
         />
       </div>
-            <RecordExtraActions
+      <RecordExtraActions
         :allow-change-status="annotationEnabled"
         :record="record"
         @onChangeRecordStatus="onChangeRecordStatus"

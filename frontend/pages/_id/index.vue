@@ -6,31 +6,53 @@
     :where="datasetName"
     :error="$fetchState.error"
   ></Error>
-  <div v-else>
-    <section ref="header" class="header">
-      <ReTopbarBrand v-if="selectedTask">
-        <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
-      </ReTopbarBrand>
-      <FiltersArea :dataset="dataset" @onChangeMode="onChangeMode">
-      </FiltersArea>
-      <EntitiesHeader
-        v-if="dataset.task === 'TokenClassification'"
-        :dataset="dataset"
-      />
-      <GlobalActions :dataset="dataset" />
-    </section>
-    <div class="container">
-      <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-        <Results :dataset="dataset"> </Results>
-        <SideBar :dataset="dataset" :class="dataset.task">
-          <TextClassificationMetrics
-            v-if="dataset.task === 'TextClassification'"
+  <div v-else class="app">
+    <div class="app__content">
+      <section ref="header" class="header">
+        <ReTopbarBrand v-if="selectedTask">
+          <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
+        </ReTopbarBrand>
+        <FiltersArea :dataset="dataset"> </FiltersArea>
+        <EntitiesHeader
+          v-if="dataset.task === 'TokenClassification'"
+          :entities="dataset.entities"
+          :dataset="dataset"
+        />
+        <GlobalActions :dataset="dataset" />
+      </section>
+
+      <div class="container">
+        <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
+          <Results :dataset="dataset"> </Results>
+          <SideBarPanel
+            v-if="sidebarVisible || width > 1500"
             :dataset="dataset"
-          />
-          <TokenClassificationMetrics v-else :dataset="dataset" />
-        </SideBar>
+            :class="dataset.task"
+          >
+            <div v-show="sidebarInfoType === 'progress'">
+              <TextClassificationProgress
+                v-if="dataset.task === 'TextClassification'"
+                :dataset="dataset"
+              />
+              <TokenClassificationProgress v-else :dataset="dataset" />
+            </div>
+            <div v-show="sidebarInfoType === 'stats'">
+              <TextClassificationStats
+                v-if="dataset.task === 'TextClassification'"
+                :dataset="dataset"
+              />
+              <TokenClassificationStats v-else :dataset="dataset" />
+            </div>
+          </SideBarPanel>
+        </div>
       </div>
     </div>
+    <Sidebar
+      :dataset="dataset"
+      @refresh="onRefresh"
+      @showSidebarInfo="onShowSidebarInfo"
+      @onChangeMode="onChangeMode"
+    />
   </div>
 </template>
 
@@ -40,18 +62,9 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   layout: "app",
   data: () => ({
-    tasks: [
-      {
-        name: "Token Classification",
-        id: "TokenClassification",
-        desc: "Change to Token Classification mode",
-      },
-      {
-        name: "Text Classification",
-        id: "TextClassification",
-        desc: "Change to Text Classification mode",
-      },
-    ],
+    sidebarInfoType: "progress",
+    sidebarVisible: false,
+    width: window.innerWidth,
   }),
   async fetch() {
     await this.fetchDataset(this.datasetName);
@@ -85,6 +98,7 @@ export default {
       fetchDataset: "entities/datasets/fetchByName",
       enableAnnotation: "entities/datasets/enableAnnotation",
       changeTask: "entities/datasets/loadViewByTask",
+      search: "entities/datasets/search",
     }),
     async onChangeMode() {
       await this.enableAnnotation({
@@ -92,17 +106,35 @@ export default {
         value: this.annotationEnabled ? false : true,
       });
     },
-    async onChangeTask(value) {
-      await this.changeTask({
+    onRefresh() {
+      this.search({
         dataset: this.dataset,
-        value: value,
+        query: this.dataset.query,
       });
     },
+    onShowSidebarInfo(info) {
+      if (this.sidebarInfoType !== info) {
+        this.sidebarVisible = true;
+      } else {
+        this.sidebarVisible = !this.sidebarVisible;
+      }
+      this.sidebarInfoType = info;
+    },
+  },
+  updated() {
+    window.onresize = () => {
+      this.width = window.innerWidth;
+    };
   },
 };
 </script>
-
 <style lang="scss" scoped>
+.app {
+  display: flex;
+  &__content {
+    width: 100%;
+  }
+}
 .container {
   @extend %container;
   padding-top: 0;

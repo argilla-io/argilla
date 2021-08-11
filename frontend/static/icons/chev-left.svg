@@ -1,13 +1,12 @@
 
-<svg width="6px" height="11px" viewBox="0 0 6 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 48.1 (47250) - http://www.bohemiancoding.com/sketch -->
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Matching-(Correos)" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.9">
-        <g id="Matchview" transform="translate(-1098.000000, -599.000000)" fill="#000000" fill-rule="nonzero">
-            <g id="Group-6" transform="translate(843.000000, 582.000000)">
-                <g id="Group-17" transform="translate(255.000000, 17.000000)">
-                    <polygon id="Shape" transform="translate(2.805978, 5.625000) scale(-1, 1) translate(-2.805978, -5.625000) " points="0.18097783 1.13942069 0.50910283 0.81902217 5.10285283 5.30460148 5.43097783 5.625 5.10285283 5.94539852 0.50910283 10.4309778 0.18097783 10.1105793 4.77472783 5.625"></polygon>
+<svg width="6px" height="9px" viewBox="0 0 6 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="RUBRIX" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Annotation-mode-small-screen-Copy-3" transform="translate(-1203.000000, -228.000000)" fill="#0508D9">
+            <g id="Group-28" transform="translate(1195.000000, 210.000000)">
+                <g id="Group-26" transform="translate(8.000000, 12.000000)">
+                    <g id="Group-32">
+                        <polygon id="Path" transform="translate(2.960526, 10.276316) scale(1, -1) translate(-2.960526, -10.276316) " points="3.03643725 10.2763158 5.92105263 13.07804 4.40283405 14.5526316 1.51821867 11.7509074 0 10.2763158 1.51821867 8.80172414 4.40283405 6 5.92105263 7.47459169"></polygon>
+                    </g>
                 </g>
             </g>
         </g>

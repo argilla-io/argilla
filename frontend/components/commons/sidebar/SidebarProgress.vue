@@ -1,61 +1,43 @@
 <template>
-  <div v-if="!$fetchState.pending">
-    <p>
-      <svgicon name="metrics" width="24" height="24" color="#4C4EA3" />
-      {{ getTitle }}
-    </p>
-    <div v-if="annotationIsEnabled">
-      <span class="progress progress--percent">{{ progress }}%</span>
-      <ReProgress
-        re-mode="determinate"
-        :multiple="true"
-        :progress="(totalValidated * 100) / total"
-        :progress-secondary="(totalDiscarded * 100) / total"
-      ></ReProgress>
-      <div class="scroll">
-        <div>
-          <div class="info">
-            <label>All</label>
-            <span class="records-number">
-              <strong>{{ total }}</strong>
-            </span>
-          </div>
-          <div class="info">
-            <label>Validated</label>
-            <span class="records-number">
-              <strong>{{ totalValidated }}</strong>
-            </span>
-          </div>
-          <div class="info">
-            <label>Discarded</label>
-            <span class="records-number">
-              <strong>{{ totalDiscarded }}</strong>
-            </span>
-          </div>
-          <div class="labels">
-            <div v-for="(counter, label) in getInfo" :key="label">
-              <div v-if="counter > 0" class="info">
-                <label>{{ label }}</label>
-                <span class="records-number">{{ counter }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div v-if="annotationsProgress">
+    <p class="sidebar__title">AnnotationProgress</p>
+    <div class="progress__info">
+      <p class="progress__info__text">Total annotations</p>
+      <span class="progress__info__percent">{{ progress }}%</span>
     </div>
-    <div v-else class="scroll">
-      <div v-for="(counter, keyword) in getKeywords" :key="keyword">
-        <div v-if="counter > 0" class="info">
-          <label>{{ keyword }}</label>
-          <span class="records-number">{{ counter }}</span>
+    <div class="progress__numbers">
+      <span>{{ totalAnnotated }}</span
+      >/{{ total }}
+    </div>
+    <ReProgress
+      re-mode="determinate"
+      :multiple="true"
+      :progress="(totalValidated * 100) / total"
+      :progress-secondary="(totalDiscarded * 100) / total"
+    ></ReProgress>
+    <div class="scroll">
+      <div>
+        <div class="info">
+          <span class="color-bullet validated"></span>
+          <label>Validated</label>
+          <span class="records-number">
+            {{ totalValidated }}
+          </span>
         </div>
+        <div class="info">
+          <span class="color-bullet discarded"></span>
+          <label>Discarded</label>
+          <span class="records-number">
+            {{ totalDiscarded }}
+          </span>
+        </div>
+        <slot></slot>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import "assets/icons/export";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { ObservationDataset } from "@/models/Dataset";
 export default {
@@ -78,22 +60,14 @@ export default {
     annotationsProgress() {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
     },
-    getInfo() {
-      return this.annotationIsEnabled
-        ? this.annotationsProgress.annotatedAs
-        : this.dataset.results.aggregations.words;
-    },
-    getTitle() {
-      return this.annotationIsEnabled ? "Annotations" : "Keywords";
-    },
-    getKeywords() {
-      return this.dataset.results.aggregations.words;
-    },
     totalValidated() {
       return this.annotationsProgress.validated;
     },
     totalDiscarded() {
       return this.annotationsProgress.discarded;
+    },
+    totalAnnotated() {
+      return this.totalValidated + this.totalDiscarded;
     },
     total() {
       return this.annotationsProgress.total;
@@ -111,31 +85,14 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
   },
-
-  watch: {
-    async datasetName() {
-      this.$fetch();
-    },
-  },
 };
 </script>
 <style lang="scss" scoped>
-.re-progress {
-  width: calc(100% - 90px);
-  &--multiple {
-    width: calc(100% - 90px);
-  }
-}
-p {
-  display: flex;
-  align-items: flex-end;
-  font-size: 18px;
-  font-size: 1.125rem;
-  margin-top: 0;
-  margin-bottom: 2em;
-  font-weight: 600;
-  svg {
-    margin-right: 0.5em;
+.sidebar {
+  &__title {
+    color: $font-secondary-dark;
+    margin-top: 0.5em;
+    @include font-size(20px);
   }
 }
 label {
@@ -145,13 +102,6 @@ label {
   width: calc(100% - 40px);
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.labels {
-  margin-top: 3em;
-  strong {
-    margin-bottom: 1em;
-    display: block;
-  }
 }
 .total {
   font-weight: 600;
@@ -168,6 +118,7 @@ label {
   position: relative;
   display: flex;
   margin-bottom: 0.7em;
+  color: $font-secondary-dark;
   label {
     margin: 0; // for tagger
     &[class^="color_"] {
@@ -184,7 +135,6 @@ label {
 .records-number {
   margin-right: 0;
   margin-left: auto;
-  font-weight: bold;
 }
 .progress__block {
   margin-bottom: 2.5em;
@@ -223,5 +173,36 @@ label {
   float: right;
   line-height: 0.8em;
   font-weight: bold;
+  &__info {
+    display: flex;
+    @include font-size(15px);
+    align-items: center;
+    color: $font-secondary-dark;
+    &__percent {
+      margin-right: 0;
+      margin-left: auto;
+    }
+  }
+  &__numbers {
+    color: $font-secondary-dark;
+    margin-bottom: 1.5em;
+    @include font-size(18px);
+    span {
+      @include font-size(40px);
+    }
+  }
+}
+.color-bullet {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0.3em 0.3em 0.3em 0;
+  &.validated {
+    background: #4c4ea3;
+  }
+  &.discarded {
+    background: #a1a2cc;
+  }
 }
 </style>
