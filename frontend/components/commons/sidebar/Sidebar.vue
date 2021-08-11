@@ -11,7 +11,7 @@
           @change="$emit('onChangeMode')"
         ></ReSwitch>
       </a>
-      <a href="#" data-title="refresh" @click.prevent="refresh()">
+      <a href="#" data-title="refresh" @click.prevent="$emit('refresh')">
         <svgicon name="refresh"></svgicon>
       </a>
     </div>
@@ -71,6 +71,10 @@ export default {
     showSidebarInfo(info) {
       this.visibleSidebarInfo = info;
       this.$emit("showSidebarInfo", info);
+    },
+    async logout() {
+      await this.$auth.logout();
+      await this.$auth.strategy.token.reset();
     },
   },
 };

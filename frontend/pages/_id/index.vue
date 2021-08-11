@@ -50,6 +50,7 @@
       </div>
     </div>
     <Sidebar
+      @refresh="onRefresh"
       @showSidebarInfo="onShowSidebarInfo"
       @onChangeMode="onChangeMode"
     />
@@ -98,11 +99,18 @@ export default {
       fetchDataset: "entities/datasets/fetchByName",
       enableAnnotation: "entities/datasets/enableAnnotation",
       changeTask: "entities/datasets/loadViewByTask",
+      search: "entities/datasets/search",
     }),
     async onChangeMode() {
       await this.enableAnnotation({
         dataset: this.dataset,
         value: this.annotationEnabled ? false : true,
+      });
+    },
+    onRefresh() {
+      this.search({
+        dataset: this.dataset,
+        query: this.dataset.query,
       });
     },
     onShowSidebarInfo(info) {
