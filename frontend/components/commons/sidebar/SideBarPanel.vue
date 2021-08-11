@@ -34,7 +34,7 @@ export default {
     background: white;
     padding: 1em 2em;
     box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-    max-height: calc(100% - 160px);
+    max-height: calc(100vh - 160px);
     overflow: auto;
     transition: top 0.2s ease-in-out;
     .annotation & {
