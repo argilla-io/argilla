@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!$fetchState.pending">
+  <div>
     <p class="sidebar__title">Stats</p>
     <StatsSelector
       :selected-option="selectedOption"
@@ -62,7 +62,6 @@
   </div>
 </template>
 <script>
-import { ObservationDataset } from "@/models/Dataset";
 export default {
   props: {
     dataset: {
@@ -82,11 +81,6 @@ export default {
       name: "Mentions",
     },
   }),
-  async fetch() {
-    await ObservationDataset.dispatch("refreshAnnotationProgress", {
-      dataset: this.dataset,
-    });
-  },
   computed: {
     options() {
       let options = [];
