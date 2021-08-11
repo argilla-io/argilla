@@ -1,11 +1,12 @@
 <template>
   <div>
-    <ReTopbarBrand>
-      <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
-    </ReTopbarBrand>
     <ReLoading v-if="$fetchState.pending" />
     <div class="wrapper" v-else>
-      <div class="container">
+      <div class="main">
+        <ReTopbarBrand>
+          <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
+        </ReTopbarBrand>
+        <div class="container">
         <div class="interactions">
           <ReSearchBar @input="onSearch" />
         </div>
@@ -31,6 +32,7 @@
             @close-modal="closeModal"
           />
         </div>
+      </div>
       </div>
       <Sidebar
         sidebarType="base"
@@ -140,6 +142,9 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
+  .main {
+    width: 100%;
+  }
 }
 .container {
   @extend %container;
