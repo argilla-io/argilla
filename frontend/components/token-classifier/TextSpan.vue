@@ -128,10 +128,10 @@ export default {
     },
   },
   created() {
-    window.addEventListener("keypress", this.keyPress);
+    window.addEventListener("keydown", this.keyPress);
   },
   destroyed() {
-    window.removeEventListener("keypress", this.keyPress);
+    window.removeEventListener("keydown", this.keyPress);
   },
   methods: {
     onKeydown(event) {
@@ -178,7 +178,7 @@ export default {
     },
     keyPress(e) {
       const cmd = String.fromCharCode(e.keyCode).toUpperCase();
-      if (!this.isFocused && this.showEntitiesSelector && cmd) {
+      if (e.ctrlKey && this.showEntitiesSelector && cmd) {
         const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
         if (entity) {
           this.selectEntity(entity.text);
