@@ -48,6 +48,8 @@ export default {
   data: () => {
     return {
       annotationMode: false,
+      width: window.innerWidth,
+      visibleSidebarInfo: undefined,
       sidebarInfoOptions: [
         {
           id: "progress",
@@ -60,7 +62,6 @@ export default {
           icon: "metrics",
         },
       ],
-      visibleSidebarInfo: undefined,
     };
   },
   props: {
@@ -69,9 +70,17 @@ export default {
       default: 'dataset-view',
     }
   },
+  updated() {
+    window.onresize = () => {
+      this.width = window.innerWidth;
+    };
+  },
   mounted() {
     this.annotationMode =
       this.$route.query.allowAnnotation === "true" ? true : false;
+    if (this.width > 1500) {
+      this.visibleSidebarInfo = 'progress'
+    }
   },
   methods: {
     showSidebarInfo(info) {
