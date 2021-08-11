@@ -41,7 +41,7 @@ export default {
       margin-top: -4.5em;
     }
     .explore & {
-      margin-top: -4.5em;
+      margin-top: 1em;
     }
     .fixed-header & {
       margin-top: 0;
