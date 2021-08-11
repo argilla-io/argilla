@@ -13,13 +13,9 @@
         v-if="isDatasetView"
         href="#"
         data-title="annotation mode"
-        @click.prevent
-      >
-        <ReSwitch
-          v-model="annotationMode"
-          class="sidebar__actions__switch"
-          @change="$emit('onChangeMode')"
-        ></ReSwitch>
+        @click="$emit('onChangeMode')"
+      >        
+        <svgicon :class="annotationMode ? 'active' : 'inactive'" name="editable"></svgicon>
       </a>
       <a href="#" data-title="refresh" @click.prevent="$emit('refresh')">
         <svgicon name="refresh"></svgicon>
@@ -50,6 +46,7 @@
 <script>
 import "assets/icons/logout";
 import "assets/icons/refresh";
+import "assets/icons/editable";
 import "assets/icons/progress";
 import "assets/icons/metrics";
 import "assets/icons/chev-left";
@@ -136,6 +133,9 @@ $sidebar-button-size: 45px;
     text-align: center;
     line-height: $sidebar-button-size;
     margin: auto;
+    &.inactive {
+      opacity: 0.15;
+    }
   }
   &__actions {
     margin-bottom: 3.8em;
