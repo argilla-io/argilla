@@ -25,7 +25,12 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                 "multilingual_stop_analyzer": {
                     "type": "stop",
                     "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
-                }
+                },
+                "extended_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                    "filter": ["lowercase", "asciifolding"],
+                },
             }
         },
     },
@@ -33,10 +38,16 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
     "mappings": {
         "properties": {
             "event_timestamp": {"type": "date"},
+            # TODO(in new index version): Data based on text field with multiple fields:
+            #   - keywords: for words aggregations
+            #   - extended: including stop words and special characters in search
             EsRecordDataFieldNames.words: {
                 "type": "text",
                 "fielddata": True,
                 "analyzer": "multilingual_stop_analyzer",
+                "fields": {
+                    "extended": {"type": "text", "analyzer": "extended_analyzer"}
+                },
             },
             # TODO: Not here since is task dependant
             "tokens": {"type": "text"},
@@ -64,6 +75,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
             },
             {
                 "strings": {
+                    # TODO: Limit metadata.* mapping expansion
                     "match_mapping_type": "string",
                     "mapping": {
                         "type": "keyword",
@@ -212,36 +224,28 @@ class filters:
 
         if isinstance(text_query, str):
             return {
-                # TODO: normalize text fields for all tasks
                 "bool": {
                     "should": [
                         {
                             "query_string": {
-                                "default_field": "words",
+                                "default_field": EsRecordDataFieldNames.words,
                                 "default_operator": "AND",
                                 "query": text_query,
-                                "boost": "5.0",
+                                "boost": "2.0",
                             }
                         },
                         {
                             "query_string": {
-                                "default_field": "inputs.*",
+                                "default_field": f"{EsRecordDataFieldNames.words}.extended",
                                 "default_operator": "AND",
                                 "query": text_query,
                             }
-                        },
-                        {
-                            "query_string": {
-                                "default_field": "tokens",
-                                "default_operator": "AND",
-                                "query": text_query,
-                            }
-                        },
+                        }
                     ],
-                    "minimum_should_match": "30%",
+                    "minimum_should_match": "50%",
                 }
             }
-
+        # TODO: remove this capability (search text is string only)
         return {
             "bool": {
                 "should": [
