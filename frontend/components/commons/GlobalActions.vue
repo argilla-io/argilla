@@ -5,7 +5,7 @@
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
   >
-    <div class="global-actions">
+    <div v-if="annotationEnabled" class="global-actions">
       <!-- TODO use v-model for ReCheckbox with boolean values -->
       <ReCheckbox
         v-model="allSelected"
