@@ -9,6 +9,9 @@
       >
         <svgicon name="logout"></svgicon>
       </a>
+      <a href="#" data-title="refresh" @click.prevent="$emit('refresh')">
+        <svgicon name="refresh"></svgicon>
+      </a>
       <a
         v-if="isDatasetView"
         href="#"
@@ -16,9 +19,6 @@
         @click="$emit('onChangeMode')"
       >        
         <svgicon :class="annotationMode ? 'active' : 'inactive'" name="editable"></svgicon>
-      </a>
-      <a href="#" data-title="refresh" @click.prevent="$emit('refresh')">
-        <svgicon name="refresh"></svgicon>
       </a>
     </div>
     <div v-if="isDatasetView" class="sidebar__info">
