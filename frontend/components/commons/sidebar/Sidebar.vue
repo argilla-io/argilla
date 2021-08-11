@@ -1,10 +1,20 @@
 <template>
   <div class="sidebar">
     <div class="sidebar__actions">
-      <a href="#" v-if="$auth.loggedIn && $config.securityEnabled" data-title="close session" @click.prevent="logout()">
+      <a
+        v-if="$auth.loggedIn && $config.securityEnabled"
+        href="#"
+        data-title="close session"
+        @click.prevent="logout()"
+      >
         <svgicon name="logout"></svgicon>
       </a>
-      <a v-if="sidebarType === 'dataset-view'" href="#" data-title="annotation mode" @click.prevent>
+      <a
+        v-if="isDatasetView"
+        href="#"
+        data-title="annotation mode"
+        @click.prevent
+      >
         <ReSwitch
           v-model="annotationMode"
           class="sidebar__actions__switch"
@@ -15,7 +25,7 @@
         <svgicon name="refresh"></svgicon>
       </a>
     </div>
-    <div v-if="sidebarType === 'dataset-view'" class="sidebar__info">
+    <div v-if="isDatasetView" class="sidebar__info">
       <a
         v-for="sidebarInfo in sidebarInfoOptions"
         :key="sidebarInfo.id"
@@ -45,6 +55,13 @@ import "assets/icons/metrics";
 import "assets/icons/chev-left";
 import "assets/icons/chev-right";
 export default {
+  props: {
+    dataset: {
+      type: Object,
+      requried: false,
+      default: undefined,
+    },
+  },
   data: () => {
     return {
       annotationMode: false,
@@ -64,11 +81,18 @@ export default {
       ],
     };
   },
-  props: {
-    sidebarType: {
-      type: String,
-      default: 'dataset-view',
-    }
+  computed: {
+    annotationEnabled() {
+      return this.isDatasetView && this.dataset.viewSettings.annotationEnabled;
+    },
+    isDatasetView() {
+      return this.dataset !== undefined;
+    },
+  },
+  watch: {
+    annotationEnabled(newValue) {
+      this.annotationMode = newValue;
+    },
   },
   updated() {
     window.onresize = () => {
@@ -76,11 +100,10 @@ export default {
     };
   },
   mounted() {
-    this.annotationMode =
-      this.$route.query.allowAnnotation === "true" ? true : false;
     if (this.width > 1500) {
-      this.visibleSidebarInfo = 'progress'
+      this.visibleSidebarInfo = "progress";
     }
+    this.annotationMode = this.annotationEnabled;
   },
   methods: {
     showSidebarInfo(info) {

@@ -29,25 +29,26 @@
             :dataset="dataset"
             :class="dataset.task"
           >
-              <div v-show="sidebarInfoType === 'progress'">
-                <TextClassificationProgress
-                  v-if="dataset.task === 'TextClassification'"
-                  :dataset="dataset"
-                />
-                <TokenClassificationProgress v-else :dataset="dataset" />
-              </div>
-              <div v-show="sidebarInfoType === 'stats'">
-                <TextClassificationStats
-                  v-if="dataset.task === 'TextClassification'"
-                  :dataset="dataset"
-                />
-                <TokenClassificationStats v-else :dataset="dataset" />
-              </div>
+            <div v-show="sidebarInfoType === 'progress'">
+              <TextClassificationProgress
+                v-if="dataset.task === 'TextClassification'"
+                :dataset="dataset"
+              />
+              <TokenClassificationProgress v-else :dataset="dataset" />
+            </div>
+            <div v-show="sidebarInfoType === 'stats'">
+              <TextClassificationStats
+                v-if="dataset.task === 'TextClassification'"
+                :dataset="dataset"
+              />
+              <TokenClassificationStats v-else :dataset="dataset" />
+            </div>
           </SideBarPanel>
         </div>
       </div>
     </div>
     <Sidebar
+      :dataset="dataset"
       @refresh="onRefresh"
       @showSidebarInfo="onShowSidebarInfo"
       @onChangeMode="onChangeMode"
