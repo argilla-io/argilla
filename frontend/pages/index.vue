@@ -3,36 +3,39 @@
     <ReTopbarBrand>
       <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
     </ReTopbarBrand>
-    <div class="container">
-      <div class="interactions">
-        <ReSearchBar @input="onSearch" />
-        <ReButton class="button-primary" @click="$fetch">
-          <svgicon name="refresh" width="20" height="14" /> Refresh
-        </ReButton>
-      </div>
-      <ReLoading v-if="$fetchState.pending" />
-      <Error
-        v-if="$fetchState.error"
-        link="/"
-        where="datasets"
-        :error="$fetchState.error"
-      />
-      <div v-else>
-        <ReTableInfo
-          :data="datasets"
-          :sorted-order="sortedOrder"
-          :sorted-by-field="sortedByField"
-          :actions="actions"
-          :columns="tableColumns"
-          :query-search="querySearch"
-          :global-actions="false"
-          search-on="name"
-          :show-modal="showModal"
-          @sort-column="onSortColumns"
-          @onActionClicked="onActionClicked"
-          @close-modal="closeModal"
+    <ReLoading v-if="$fetchState.pending" />
+    <div class="wrapper" v-else>
+      <div class="container">
+        <div class="interactions">
+          <ReSearchBar @input="onSearch" />
+        </div>
+        <Error
+          v-if="$fetchState.error"
+          link="/"
+          where="datasets"
+          :error="$fetchState.error"
         />
+        <div>
+          <ReTableInfo
+            :data="datasets"
+            :sorted-order="sortedOrder"
+            :sorted-by-field="sortedByField"
+            :actions="actions"
+            :columns="tableColumns"
+            :query-search="querySearch"
+            :global-actions="false"
+            search-on="name"
+            :show-modal="showModal"
+            @sort-column="onSortColumns"
+            @onActionClicked="onActionClicked"
+            @close-modal="closeModal"
+          />
+        </div>
       </div>
+      <Sidebar
+        sidebarType="base"
+        @refresh="$fetch"
+      />
     </div>
   </div>
 </template>
@@ -135,6 +138,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  display: flex;
+}
 .container {
   @extend %container;
   padding-top: 0.2em;

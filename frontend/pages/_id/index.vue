@@ -119,12 +119,6 @@ export default {
       }
       this.sidebarInfoType = info;
     },
-    // async onChangeTask(value) {
-    //   await this.changeTask({
-    //     dataset: this.dataset,
-    //     value: value,
-    //   });
-    // },
   },
   updated() {
     window.onresize = () => {

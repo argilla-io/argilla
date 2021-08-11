@@ -4,7 +4,7 @@
       <a href="#" data-title="close session" @click.prevent="logout()">
         <svgicon name="logout"></svgicon>
       </a>
-      <a href="#" data-title="annotation mode" @click.prevent>
+      <a v-if="sidebarType === 'dataset-view'" href="#" data-title="annotation mode" @click.prevent>
         <ReSwitch
           v-model="annotationMode"
           class="sidebar__actions__switch"
@@ -15,7 +15,7 @@
         <svgicon name="refresh"></svgicon>
       </a>
     </div>
-    <div class="sidebar__info">
+    <div v-if="sidebarType === 'dataset-view'" class="sidebar__info">
       <a
         v-for="sidebarInfo in sidebarInfoOptions"
         :key="sidebarInfo.id"
@@ -63,6 +63,12 @@ export default {
       visibleSidebarInfo: undefined,
     };
   },
+  props: {
+    sidebarType: {
+      type: String,
+      default: 'dataset-view',
+    }
+  },
   mounted() {
     this.annotationMode =
       this.$route.query.allowAnnotation === "true" ? true : false;
@@ -85,6 +91,8 @@ $sidebar-button-size: 45px;
 .sidebar {
   background: palette(grey, verylight);
   width: $sidebar-button-size;
+  min-width: $sidebar-button-size;
+  min-height: 100vh;
   z-index: 2;
   a {
     position: relative;
