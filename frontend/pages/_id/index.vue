@@ -15,7 +15,6 @@
       </FiltersArea>
       <EntitiesHeader
         v-if="dataset.task === 'TokenClassification'"
-        :entities="dataset.entities"
         :dataset="dataset"
       />
       <GlobalActions :dataset="dataset" />
