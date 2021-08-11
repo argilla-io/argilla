@@ -29,22 +29,20 @@
             :dataset="dataset"
             :class="dataset.task"
           >
-            <transition name="fade">
-              <div v-if="sidebarInfoType === 'progress'">
+              <div v-show="sidebarInfoType === 'progress'">
                 <TextClassificationProgress
                   v-if="dataset.task === 'TextClassification'"
                   :dataset="dataset"
                 />
                 <TokenClassificationProgress v-else :dataset="dataset" />
               </div>
-              <div v-if="sidebarInfoType === 'stats'">
+              <div v-show="sidebarInfoType === 'stats'">
                 <TextClassificationStats
                   v-if="dataset.task === 'TextClassification'"
                   :dataset="dataset"
                 />
                 <TokenClassificationStats v-else :dataset="dataset" />
               </div>
-            </transition>
           </SideBarPanel>
         </div>
       </div>
