@@ -34,17 +34,27 @@ export default {
     background: white;
     padding: 1em 2em;
     box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-    max-height: calc(100vh - 160px);
     overflow: auto;
     transition: top 0.2s ease-in-out;
+    .TextClassification & {
+      max-height: calc(100vh - 180px);
+    }
+    .TokenClassification & {
+      max-height: calc(100vh - 260px);   
+    }
     .annotation & {
       margin-top: -4.5em;
     }
     .explore & {
       margin-top: 1em;
     }
-    .fixed-header & {
-      margin-top: 0;
+    .fixed-header .TextClassification & {
+      max-height: calc(100vh - 160px);
+      margin-top: 1em;
+    }
+    .fixed-header .TokenClassification & {
+      max-height: calc(100vh - 260px);
+      margin-top: 1em;
     }
     @include media(">desktopLarge") {
       margin-left: 1em;
