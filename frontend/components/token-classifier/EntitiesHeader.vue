@@ -6,7 +6,7 @@
     ]"
   >
     <span
-      v-for="(entity, index) in filteredEntities.slice(0, entitiesNumber)"
+      v-for="(entity, index) in visibleEntities"
       :key="index"
       class="entity"
       :class="[
@@ -17,15 +17,12 @@
       @click="onActiveEntity(entity)"
     >
       {{ entity.text }}
-      <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
     </span>
     <ReButton
-      v-if="filteredEntities.length >= entitiesNumber"
+      v-if="dataset.entities.length > entitiesNumber"
       class="entities__container__button"
       @click="toggleEntitiesNumber"
-      >{{
-        entitiesNumber === filteredEntities.length ? "Show less" : "Show all"
-      }}</ReButton
+      >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
     >
   </div>
 </template>
@@ -33,13 +30,10 @@
 <script>
 import "assets/icons/check";
 import "assets/icons/cross";
+const MAX_ENTITIES_SHOWN = 10;
 
 export default {
   props: {
-    entities: {
-      type: Array,
-      required: true,
-    },
     dataset: {
       type: Object,
       required: true,
@@ -47,17 +41,20 @@ export default {
   },
   data: () => ({
     activeEntity: undefined,
-    searchEntity: "",
     showEntitySelector: false,
-    entitiesNumber: 12,
+    entitiesNumber: MAX_ENTITIES_SHOWN,
   }),
   computed: {
-    filteredEntities() {
-      return this.entities
-        .filter((entity) =>
-          entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
-        )
-        .sort((a, b) => a.text.localeCompare(b.text));
+    visibleEntities() {
+      let entities = [...this.dataset.entities]
+        .sort((a, b) => a.text.localeCompare(b.text))
+        .map((ent) => ({
+          ...ent,
+        }));
+
+      return this.showEntitySelector
+        ? entities
+        : entities.slice(0, this.entitiesNumber);
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -65,11 +62,7 @@ export default {
   },
   methods: {
     toggleEntitiesNumber() {
-      if (this.entitiesNumber === this.filteredEntities.length) {
-        this.entitiesNumber = 12;
-      } else {
-        this.entitiesNumber = this.filteredEntities.length;
-      }
+      this.showEntitySelector = !this.showEntitySelector;
     },
     onActiveEntity(entity) {
       if (this.annotationEnabled) {
