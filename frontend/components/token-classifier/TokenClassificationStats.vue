@@ -193,10 +193,15 @@ export default {
     overflow: auto;
   }
 }
-$colors: 40;
+$colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 82%, 1);
+  $rcolor: hsla(
+    ($colors * $i) + ($hue * $i / $colors),
+    100% - $i / 2,
+    82% - ($colors % $i),
+    1
+  );
   .color_#{$i - 1} {
     background: $rcolor;
   }
