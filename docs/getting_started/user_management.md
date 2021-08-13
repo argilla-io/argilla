@@ -83,4 +83,4 @@ You can reload the rubrix service to refresh the container:
 docker-compose up -d rubrix
 ````
 
-If everything go well, you can use configured users in rubrix for data annotation
+If everything went well, configured users can now log in and their annotations will be tracked with their usernames.
