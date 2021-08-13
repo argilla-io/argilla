@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional
-
 from fastapi import APIRouter, Depends
 from fastapi.security import (
     OAuth2PasswordBearer,
@@ -8,55 +6,18 @@ from fastapi.security import (
     SecurityScopes,
 )
 from jose import JWTError, jwt
-from pydantic import BaseSettings
 from rubrix.server.commons.errors import InactiveUserError, UnauthorizedError
 from rubrix.server.security.auth_provider.base import (
-    AuthProvider, )
-from rubrix.server.security.model import Token
-from rubrix.server.users.model import User
-from rubrix.server.users.service import UsersService
-
-_TOKEN_URL = "/api/security/token"
-_API_KEY_URL = "/api/security/api-key"
-
-_oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=_TOKEN_URL,
+    AuthProvider,
+    api_key_header,
 )
+from rubrix.server.security.auth_provider.local.users.service import UsersService
+from rubrix.server.security.model import Token, User
+from typing import Optional
 
+from .settings import Settings, settings
 
-class Settings(BaseSettings):
-
-    """
-    Attributes
-    ----------
-
-    secret_key:
-        The secret key used for signed the token data
-
-    algorithm:
-        Encryption algorithm for token data
-
-    token_expiration_in_minutes:
-        The session token expiration in minutes. Default=30
-
-    """
-
-    secret_key: str = "secret"
-    algorithm: str = "HS256"
-    token_expiration_in_minutes: int = 30
-
-    class Config:
-        env_prefix = "RUBRIX_LOCAL_AUTH_"
-
-        fields = {
-            "secret_key": {"env": ["SECRET_KEY", f"{env_prefix}SECRET_KEY"]},
-            "token_expiration_in_minutes": {
-                "env": [
-                    "TOKEN_EXPIRATION_IN_MINUTES",
-                    f"{env_prefix}TOKEN_EXPIRATION_IN_MINUTES",
-                ]
-            },
-        }
+_oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_api_url, auto_error=False)
 
 
 class LocalAuthProvider(AuthProvider):
@@ -70,7 +31,9 @@ class LocalAuthProvider(AuthProvider):
         self.settings = settings
 
         @self.router.post(
-            _TOKEN_URL, response_model=Token, operation_id="login_for_access_token"
+            settings.token_api_url,
+            response_model=Token,
+            operation_id="login_for_access_token",
         )
         async def login_for_access_token(
             form_data: OAuth2PasswordRequestForm = Depends(),
@@ -97,36 +60,6 @@ class LocalAuthProvider(AuthProvider):
             )
             access_token = self._create_access_token(
                 user.username, expires_delta=access_token_expires
-            )
-            return Token(access_token=access_token)
-
-        @self.router.post(
-            _API_KEY_URL,
-            response_model=Token,
-            operation_id="generate_user_api_key",
-        )
-        async def generate_user_api_key(
-            user: User = Depends(self.get_user),
-            access_token_expiration: Optional[timedelta] = timedelta(
-                hours=730
-            ),  # 1 month,
-        ) -> Token:
-            """
-
-            Parameters
-            ----------
-            user:
-                request user
-            access_token_expiration:
-                The access token expiration
-
-            Returns
-            -------
-                An api access token for api-key purposes.
-
-            """
-            access_token = self._create_access_token(
-                user.username, expires_delta=access_token_expiration
             )
             return Token(access_token=access_token)
 
@@ -187,13 +120,16 @@ class LocalAuthProvider(AuthProvider):
     async def get_user(
         self,
         security_scopes: SecurityScopes,
-        token: str = Depends(_oauth2_scheme),
+        api_key: Optional[str] = Depends(api_key_header),
+        token: Optional[str] = Depends(_oauth2_scheme),
     ) -> User:
         """
         Fetches the user for a given token
 
         Parameters
         ----------
+        api_key:
+            The apikey header info if provided
         token:
             The login token.
             fastapi injects this param from request
@@ -201,7 +137,11 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        user = self.fetch_token_user(token)
+        user = await self._find_user_by_api_key(api_key)
+        if user:
+            return user
+        if token:
+            user = self.fetch_token_user(token)
         if user is None:
             raise UnauthorizedError()
 
@@ -210,10 +150,13 @@ class LocalAuthProvider(AuthProvider):
 
         return user
 
+    async def _find_user_by_api_key(self, api_key) -> User:
+        return await self.users.find_user_by_api_key(api_key)
+
 
 def create_local_auth_provider():
-    from rubrix.server.users.dao import create_users_dao
-    from rubrix.server.users.service import create_users_service
+    from .users.dao import create_users_dao
+    from .users.service import create_users_service
 
     settings = Settings()
     users_dao = create_users_dao()

@@ -16,7 +16,7 @@ class UsersSettings(BaseSettings):
 
     """
 
-    users_db = ".users.yml"
+
 
 
 settings = UsersSettings()
