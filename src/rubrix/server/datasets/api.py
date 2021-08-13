@@ -1,16 +1,12 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, Security
-from rubrix.server.commons.settings import settings
 from rubrix.server.security import auth
-from rubrix.server.users.model import User
+from rubrix.server.security.model import User
+from typing import List
 
 from .model import Dataset, UpdateDatasetRequest
 from .service import DatasetsService, create_dataset_service
 
-router = APIRouter(
-    tags=["datasets"], prefix="/datasets", include_in_schema=not settings.only_bulk_api
-)
+router = APIRouter(tags=["datasets"], prefix="/datasets")
 
 
 @router.get(

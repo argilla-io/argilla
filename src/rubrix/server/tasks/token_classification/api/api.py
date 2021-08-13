@@ -1,11 +1,10 @@
 import itertools
-from typing import Iterable, Optional
-
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 from rubrix.server.datasets.model import CreationDatasetRequest
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.security import auth
+from rubrix.server.security.model import User
 from rubrix.server.tasks.commons import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.token_classification.api.model import (
@@ -19,7 +18,7 @@ from rubrix.server.tasks.token_classification.service.service import (
     TokenClassificationService,
     token_classification_service,
 )
-from rubrix.server.users.model import User
+from typing import Iterable, Optional
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE

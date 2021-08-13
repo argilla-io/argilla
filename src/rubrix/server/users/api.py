@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Security
 from rubrix.server.security import auth
-
-from .model import User
+from rubrix.server.security.model import User
 
 router = APIRouter(tags=["users"])
 
