@@ -1,6 +1,6 @@
-from typing import Dict
-
 import attr
+from rubrix._constants import API_KEY_HEADER_NAME
+from typing import Dict
 
 
 @attr.s(auto_attribs=True)
@@ -45,6 +45,6 @@ class AuthenticatedClient(Client):
         """Get headers to be used in authenticated endpoints"""
         return {
             "Authorization": f"Bearer {self.token}",  # Backward compatibility
-            "X-Api-Key": self.token,
+            API_KEY_HEADER_NAME: self.token,
             **self.headers,
         }

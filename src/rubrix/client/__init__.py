@@ -72,21 +72,15 @@ class RubrixClient:
                     response.status_code, response.content
                 )
             )
-        # Non-token case
-        if api_key is None:
-            self._client = Client(base_url=api_url, timeout=timeout)
+        self._client = AuthenticatedClient(
+            base_url=api_url, token=api_key, timeout=timeout
+        )
 
-        # Token case
-        else:
-            self._client = AuthenticatedClient(
-                base_url=api_url, token=api_key, timeout=timeout
-            )
-
-            whoami_response_status = whoami.sync_detailed(
-                client=self._client
-            ).status_code
-            if whoami_response_status == 401:
-                raise Exception("Authentification error: invalid credentials.")
+        whoami_response_status = whoami.sync_detailed(
+            client=self._client
+        ).status_code
+        if whoami_response_status == 401:
+            raise Exception("Authentification error: invalid credentials.")
 
     def log(
         self,
