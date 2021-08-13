@@ -2,7 +2,7 @@
    :format: html
 
 
-Setup and Installation in cloud providers
+Advanced installation setup using docker
 =========================================
 
 Download
@@ -10,14 +10,14 @@ Download
 
 .. code-block:: shell
 
-   docker pull recognai/rubrix:v0.1.3
+   docker pull recognai/rubrix
 
 Launch (external elasticsearch)
 -------------------------------
 
 .. code-block:: shell
 
-   docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-instance-url>" --name rubrix recognai/rubrix:v0.1.3
+   docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-instance-url>" --name rubrix recognai/rubrix
 
 Find running instance
 ---------------------
@@ -137,7 +137,7 @@ Define a docker-compose.yaml
 
    services:
      rubrix:
-       image: recognai/rubrix:v0.1.3
+       image: recognai/rubrix
        ports:
          - "80:80"
        environment:
