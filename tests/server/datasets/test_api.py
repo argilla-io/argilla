@@ -1,9 +1,6 @@
-import pytest
-from fastapi.testclient import TestClient
-from rubrix.server.server import app
 from rubrix.server.tasks.text_classification import TextClassificationBulkData
 
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def test_dataset_naming_validation():

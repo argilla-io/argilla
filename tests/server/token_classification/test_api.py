@@ -1,5 +1,3 @@
-from fastapi.testclient import TestClient
-from rubrix.server.server import app
 from rubrix.server.tasks.commons import BulkResponse
 from rubrix.server.tasks.token_classification import (
     TokenClassificationQuery,
@@ -11,7 +9,7 @@ from rubrix.server.tasks.token_classification.api import (
     TokenClassificationRecord,
 )
 
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def test_search_special_characters():

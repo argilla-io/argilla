@@ -45,7 +45,9 @@ def mock_response_200(monkeypatch):
         Mockup function
     """
 
-    def mock_get(*args, **kwargs):
+    def mock_get(url, *args, **kwargs):
+        if "/api/me" in url:
+            return httpx.Response(200, json={"username": "rubrix"})
         return httpx.Response(200)
 
     monkeypatch.setattr(

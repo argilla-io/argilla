@@ -1,13 +1,9 @@
 import datetime
-from time import sleep
-from typing import Iterable
-
 import httpx
 import pandas
 import pytest
 import requests
 import rubrix
-from fastapi.testclient import TestClient
 from rubrix import (
     RubrixClient,
     TextClassificationRecord,
@@ -15,11 +11,11 @@ from rubrix import (
     TokenClassificationRecord,
 )
 from rubrix.sdk.models import TextClassificationSearchResults
-from rubrix.server.server import app
+from time import sleep
+from typing import Iterable
 
 from tests.server.test_api import create_some_data_for_text_classification
-
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def mocking_client(monkeypatch):
