@@ -77,7 +77,7 @@ services:
       
     ...
 ````
-You can reload the rubrix service for refresh container:
+You can reload the rubrix service to refresh the container:
 
 ````bash
 docker-compose up -d rubrix
