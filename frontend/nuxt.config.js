@@ -2,27 +2,11 @@ require("dotenv").config();
 const API_BASE_URL =
   process.env.API_BASE_URL || process.env.BASE_URL || "http://localhost:6900";
 
-const ENABLE_SECURITY = process.env.ENABLE_SECURITY || true;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
-
-let authRedirect = false;
-let authStrategy = ENABLE_SECURITY ? "localProvider" : "noAuth";
-if (authStrategy !== "noAuth") {
-  authRedirect = {
-    login: "/login",
-    logout: "/login",
-    home: false,
-  };
-}
 
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
-
-  publicRuntimeConfig: {
-    securityEnabled: ENABLE_SECURITY,
-    authStrategy,
-  },
 
   generate: {
     dir: DIST_FOLDER,
@@ -110,23 +94,7 @@ export default {
 
   auth: {
     strategies: {
-      noAuth: {
-        scheme: "local",
-        token: {
-          property: "username",
-          required: false,
-        },
-        user: {
-          property: "username",
-          required: false,
-        },
-        endpoints: {
-          login: false,
-          logout: false,
-          user: { url: "/me", propertyName: false },
-        },
-      },
-      localProvider: {
+      authProvider: {
         scheme: "local",
         token: {
           property: "access_token",
@@ -147,7 +115,7 @@ export default {
       },
     },
     resetOnError: true,
-    redirect: authRedirect,
+    redirect: { login: "/login", logout: "/login", home: false },
   },
 
   router: {
