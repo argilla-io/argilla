@@ -143,6 +143,7 @@ Next steps
 
 To continue learning we recommend you to:
 
-
+* :ref:`users_management`
 * Check our **guides** and **tutorials.**
 * Read about Rubrix's main **concepts.**
+
