@@ -1,17 +1,22 @@
-## Default user credentials
+.. _users_management:
+
+Default user credentials
+========================
 
 - username: `rubrix`
 - password: `1234`
 - api key: `rubrix.apikey` (configured automatically by client)
 
 
-## Override user api key
+Override user api key
+---------------------
 
 ````bash
 export RUBRIX_LOCAL_AUTH_DEFAULT_APIKEY=new-apikey
 ````
 
-## Override user password
+Override user password
+----------------------
 
 You must set an already hashed password in environment var
 
@@ -27,7 +32,8 @@ then, configure the environment variable
 export RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD="<generateed_user_password>"
 ```
 
-## Create a user db file
+Create a user db file
+---------------------
 
 Create a new yaml file like following:
 
@@ -55,7 +61,8 @@ python -m rubrix.server
 This configuration will make enable your configured users for data annotation
 
 
-## Configure using docker-compose
+Configure using docker-compose
+==============================
 
 Be sure your users db file is created in same folder that your `docker-compose.yaml`.
 
