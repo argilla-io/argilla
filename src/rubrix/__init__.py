@@ -115,7 +115,7 @@ def log(
         records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
     )
 
-def copy(dataset:str, dest:str):
+def copy(dataset:str, name_of_copy:str):
     """Creates a copy of a dataset including its tags and metadata
 
     Args:
@@ -125,7 +125,7 @@ def copy(dataset:str, dest:str):
             Name of the copied dataset
 
     Examples:
-        >>> rb.copy("my_dataset", dest="new_dataset")
+        >>> rb.copy("my_dataset", name_of_copy="new_dataset")
         >>> df = rb.load("new_dataset")
     """
     _client_instance().copy(source=dataset,target=dest)
