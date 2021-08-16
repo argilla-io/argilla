@@ -37,7 +37,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
     "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
     "mappings": {
         "properties": {
-            "event_timestamp": {"type": "date"},
+            EsRecordDataFieldNames.event_timestamp: {"type": "date"},
             # TODO(in new index version): Data based on text field with multiple fields:
             #   - keywords: for words aggregations
             #   - extended: including stop words and special characters in search
@@ -49,45 +49,38 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                     "extended": {"type": "text", "analyzer": "extended_analyzer"}
                 },
             },
-            # TODO: Not here since is task dependant
-            "tokens": {"type": "text"},
-            "predicted_mentions": {"type": "nested"},
-            "mentions": {"type": "nested"},
+            EsRecordDataFieldNames.predicted_as: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.predicted_by: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.annotated_as: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.annotated_by: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.status: {
+                "type": "keyword",
+            },
+            EsRecordDataFieldNames.predicted: {
+                "type": "keyword",
+            },
+
         },
         "dynamic_templates": [
-            # TODO: Not here since is task dependant
-            {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}},
             {
-                "status": {
-                    "path_match": "*.status",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "predicted": {
-                    "path_match": "*.predicted",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "strings": {
-                    # TODO: Limit metadata.* mapping expansion
+                "metadata_strings": {
+                    "path_match": "metadata.*",
                     "match_mapping_type": "string",
                     "mapping": {
                         "type": "keyword",
-                        "ignore_above": MAX_KEYWORD_LENGTH,  # Avoid bulk errors with too long keywords
-                        # Some elasticsearch versions includes automatically raw fields, so
-                        # we must limit those fields too
-                        "fields": {
-                            "raw": {
-                                "type": "keyword",
-                                "ignore_above": MAX_KEYWORD_LENGTH,
-                            }
-                        },
+                        "ignore_above": MAX_KEYWORD_LENGTH,
                     },
                 }
             },
