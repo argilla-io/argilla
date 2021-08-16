@@ -121,8 +121,8 @@ def copy(dataset:str, dest:str):
     Args:
         dataset:
             Name of the source dataset
-        dest:
-            The destination dataset name
+        name_of_copy:
+            Name of the copied dataset
 
     Examples:
         >>> rb.copy("my_dataset", dest="new_dataset")
