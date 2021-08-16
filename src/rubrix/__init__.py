@@ -116,7 +116,7 @@ def log(
     )
 
 def copy(dataset:str, dest:str):
-    """Copies a dataset an all its tags and metadata into another dataset
+    """Creates a copy of a dataset including its tags and metadata
 
     Args:
         dataset:
