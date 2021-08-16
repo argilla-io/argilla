@@ -190,7 +190,7 @@ def open_dataset(
     response_model=Dataset,
     response_model_exclude_none=True,
 )
-def open_dataset(
+def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
     service: DatasetsService = Depends(create_dataset_service),
