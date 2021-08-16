@@ -120,7 +120,7 @@ def copy(dataset:str, dest:str):
 
     Args:
         dataset:
-            The source dataset
+            Name of the source dataset
         dest:
             The destination dataset name
 
