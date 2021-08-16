@@ -217,48 +217,30 @@ class filters:
         }
 
     @staticmethod
-    def text_query(text_query: Optional[Union[str, Dict[str, Any]]]) -> Dict[str, Any]:
+    def text_query(text_query: Optional[str]) -> Dict[str, Any]:
         """Filter records matching text query"""
         if text_query is None:
             return {"match_all": {}}
-
-        if isinstance(text_query, str):
-            return {
-                "bool": {
-                    "should": [
-                        {
-                            "query_string": {
-                                "default_field": EsRecordDataFieldNames.words,
-                                "default_operator": "AND",
-                                "query": text_query,
-                                "boost": "2.0",
-                            }
-                        },
-                        {
-                            "query_string": {
-                                "default_field": f"{EsRecordDataFieldNames.words}.extended",
-                                "default_operator": "AND",
-                                "query": text_query,
-                            }
-                        }
-                    ],
-                    "minimum_should_match": "50%",
-                }
-            }
-        # TODO: remove this capability (search text is string only)
         return {
             "bool": {
                 "should": [
                     {
                         "query_string": {
-                            "default_field": f"inputs.{key}",
+                            "default_field": EsRecordDataFieldNames.words,
                             "default_operator": "AND",
-                            "query": query_text,
+                            "query": text_query,
+                            "boost": "2.0",
                         }
-                    }
-                    for key, query_text in text_query.items()
+                    },
+                    {
+                        "query_string": {
+                            "default_field": f"{EsRecordDataFieldNames.words}.extended",
+                            "default_operator": "AND",
+                            "query": text_query,
+                        }
+                    },
                 ],
-                "minimum_should_match": "100%",
+                "minimum_should_match": "50%",
             }
         }
 
