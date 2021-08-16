@@ -1,9 +1,12 @@
 import datetime
-from typing import Any, Dict, Iterable, List, Optional
-
 from fastapi import Depends
+from rubrix import MAX_KEYWORD_LENGTH
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse, EsRecordDataFieldNames
+from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons.dao import (
+    extends_index_dynamic_templates,
+    extends_index_properties,
+)
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.es_helpers import aggregations, filters
@@ -15,6 +18,27 @@ from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchResults,
+)
+from typing import Any, Dict, Iterable, List, Optional
+
+extends_index_properties(
+    {
+        "tokens": {"type": "text"},
+        "predicted_mentions": {"type": "nested"},
+        "mentions": {"type": "nested"},
+    }
+)
+
+extends_index_dynamic_templates(
+    {
+        "mentions": {
+            "path_match": "*mentions.*",
+            "mapping": {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+        }
+    },
 )
 
 

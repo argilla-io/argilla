@@ -1,9 +1,8 @@
 import datetime
-from typing import Any, Dict, Iterable, List, Optional
-
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.es_helpers import filters
@@ -14,7 +13,11 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
+from typing import Any, Dict, Iterable, List, Optional
 
+extends_index_dynamic_templates(
+    {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
+)
 
 def as_elasticsearch(search: TextClassificationQuery) -> Dict[str, Any]:
     """Build an elasticsearch query part from search query"""
