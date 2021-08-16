@@ -197,7 +197,7 @@ def copy_dataset(
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
-    Closes a dataset. This operation will releases backend resources
+    Creates a dataset copy and its tags/metadata info
 
     Parameters
     ----------
