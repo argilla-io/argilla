@@ -1,4 +1,5 @@
 import itertools
+from rubrix.server.security.model import User
 from typing import Iterable, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
@@ -19,7 +20,6 @@ from rubrix.server.tasks.text_classification.service.service import (
     TextClassificationService,
     text_classification_service,
 )
-from rubrix.server.users.model import User
 
 TASK_TYPE = TaskType.text_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE

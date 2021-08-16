@@ -1,10 +1,7 @@
-import pytest
-from fastapi.testclient import TestClient
 from rubrix import __version__ as rubrix_version
 from rubrix.server.info.model import ApiInfo, ApiStatus
-from rubrix.server.server import app
 
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def test_api_info():

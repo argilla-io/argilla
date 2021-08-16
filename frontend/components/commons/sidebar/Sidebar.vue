@@ -2,7 +2,7 @@
   <div class="sidebar">
     <div class="sidebar__actions">
       <a
-        v-if="$auth.loggedIn && $config.securityEnabled"
+        v-if="$auth.loggedIn"
         href="#"
         data-title="close session"
         @click.prevent="logout()"
@@ -17,8 +17,11 @@
         href="#"
         data-title="annotation mode"
         @click="$emit('onChangeMode')"
-      >        
-        <svgicon :class="annotationMode ? 'active' : 'inactive'" name="editable"></svgicon>
+      >
+        <svgicon
+          :class="annotationMode ? 'active' : 'inactive'"
+          name="editable"
+        ></svgicon>
       </a>
     </div>
     <div v-if="isDatasetView" class="sidebar__info">

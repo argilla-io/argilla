@@ -1,22 +1,19 @@
 from datetime import datetime
-
-from fastapi.testclient import TestClient
 from rubrix.server.datasets.model import Dataset
-from rubrix.server.server import app
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
-    TextClassificationSearchResults,
     TextClassificationSearchRequest,
+    TextClassificationSearchResults,
 )
 
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
-def test_create_records_for_text_classification_with_multi_label():
+def test_create_records_for_text_classification_with_multi_label(monkeypatch):
     dataset = "test_create_records_for_text_classification_with_multi_label"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 

@@ -9,7 +9,7 @@ from rubrix.server.tasks.text_classification.api import (
     TextClassificationRecord,
 )
 
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def create_some_data_for_text_classification(name: str, n: int):

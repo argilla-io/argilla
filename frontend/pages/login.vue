@@ -37,11 +37,6 @@ export default {
     if (this.$auth.loggedIn) {
       return;
     }
-    if (!this.$config.securityEnabled) {
-      await this.$auth.setUser("local");
-      await this.$auth.setUserToken("mock-token");
-      this.nextRedirect();
-    }
   },
   methods: {
     nextRedirect() {
@@ -53,7 +48,7 @@ export default {
     async userLogin() {
       try {
         await this.$store.dispatch("entities/deleteAll");
-        await this.$auth.loginWith(this.$config.authStrategy, {
+        await this.$auth.loginWith("authProvider", {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
         this.nextRedirect();
