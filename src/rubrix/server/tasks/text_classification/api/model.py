@@ -311,7 +311,7 @@ class TextClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
         Record ids list
 
-    query_text: Union[str, Dict[str, str]]
+    query_text: str
         Text query over inputs
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
@@ -333,9 +333,7 @@ class TextClassificationQuery(BaseModel):
 
     ids: Optional[List[Union[str, int]]]
 
-    query_text: Union[str, Dict[str, str]] = Field(
-        default_factory=dict, alias="query_inputs"
-    )
+    query_text: str = Field(default=None, alias="query_inputs")
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
