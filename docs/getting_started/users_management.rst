@@ -31,6 +31,18 @@ Generate an user password:
 
    htpasswd -nbB "" <passwd>
 
+(when copy generated password hash, remove the first ``:`` character)
+
+.. code-block:: shell
+
+   %> htpasswd -nbB "" my-passwd
+   :$2y$05$T5mHt/TfRHPPYwbeN2.q7e11QqhgvsHbhvQQ1c/pdap.xPZM2axje
+
+
+
+
+
+
 then, configure the environment variable
 
 .. code-block:: shell
@@ -76,7 +88,7 @@ Configure using docker-compose
 
 Be sure your users db file is created in same folder that your `docker-compose.yaml`.
 
-Then, open provided `docker-compose.yaml` and configuration to rubrix service:
+Then, open provided ``docker-compose.yaml`` and configuration to rubrix service:
 
 .. code-block:: yaml
 
