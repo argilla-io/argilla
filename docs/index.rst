@@ -138,7 +138,7 @@ You can join the conversation on our Github page and our Github forum.
    getting_started/setup&installation
    getting_started/concepts
    getting_started/supported_tasks
-   getting_started/setup&install_aws
+   getting_started/advanced_setup_guides
 
 .. toctree::
    :maxdepth: 3
