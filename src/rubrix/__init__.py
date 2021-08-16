@@ -128,7 +128,7 @@ def copy(dataset:str, name_of_copy:str):
         >>> rb.copy("my_dataset", name_of_copy="new_dataset")
         >>> df = rb.load("new_dataset")
     """
-    _client_instance().copy(source=dataset,target=dest)
+    _client_instance().copy(source=dataset, target=name_of_copy)
 
 def _client_instance() -> RubrixClient:
     """Checks module instance client and init if not initialized."""
