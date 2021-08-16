@@ -8,9 +8,6 @@ from ..models.task_status import TaskStatus
 from ..models.token_classification_query_metadata import (
     TokenClassificationQueryMetadata,
 )
-from ..models.token_classification_query_query_text import (
-    TokenClassificationQueryQueryText,
-)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TokenClassificationQuery")
@@ -25,7 +22,7 @@ class TokenClassificationQuery:
     ids: Optional[List[Union[str, int]]]
         Record ids list
 
-    query_text: Union[str, Dict[str, str]]
+    query_text: str
         Text query over inputs
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
@@ -44,7 +41,7 @@ class TokenClassificationQuery:
         The task prediction status"""
 
     ids: Union[Unset, List[Union[str, int]]] = UNSET
-    query_text: Union[Unset, str, TokenClassificationQueryQueryText] = UNSET
+    query_text: Union[Unset, str] = UNSET
     metadata: Union[TokenClassificationQueryMetadata, Unset] = UNSET
     predicted_as: Union[Unset, List[str]] = UNSET
     annotated_as: Union[Unset, List[str]] = UNSET
@@ -64,17 +61,7 @@ class TokenClassificationQuery:
 
                 ids.append(ids_item)
 
-        query_text: Union[Unset, str, TokenClassificationQueryQueryText]
-        if isinstance(self.query_text, Unset):
-            query_text = UNSET
-        elif isinstance(self.query_text, TokenClassificationQueryQueryText):
-            query_text = UNSET
-            if not isinstance(self.query_text, Unset):
-                query_text = self.query_text.to_dict()
-
-        else:
-            query_text = self.query_text
-
+        query_text = self.query_text
         metadata: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.metadata, Unset):
             metadata = self.metadata.to_dict()
@@ -153,25 +140,7 @@ class TokenClassificationQuery:
 
             ids.append(ids_item)
 
-        def _parse_query_text(
-            data: Any,
-        ) -> Union[Unset, str, TokenClassificationQueryQueryText]:
-            data = None if isinstance(data, Unset) else data
-            query_text: Union[Unset, str, TokenClassificationQueryQueryText]
-            try:
-                query_text = UNSET
-                _query_text = data
-                if not isinstance(_query_text, Unset):
-                    query_text = TokenClassificationQueryQueryText.from_dict(
-                        _query_text
-                    )
-
-                return query_text
-            except:  # noqa: E722
-                pass
-            return cast(Union[Unset, str, TokenClassificationQueryQueryText], data)
-
-        query_text = _parse_query_text(d.pop("query_text", UNSET))
+        query_text = d.pop("query_text", UNSET)
 
         metadata: Union[TokenClassificationQueryMetadata, Unset] = UNSET
         _metadata = d.pop("metadata", UNSET)

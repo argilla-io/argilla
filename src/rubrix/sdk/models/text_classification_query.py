@@ -6,9 +6,6 @@ from ..models.prediction_status import PredictionStatus
 from ..models.score_range import ScoreRange
 from ..models.task_status import TaskStatus
 from ..models.text_classification_query_metadata import TextClassificationQueryMetadata
-from ..models.text_classification_query_query_inputs import (
-    TextClassificationQueryQueryInputs,
-)
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="TextClassificationQuery")
@@ -23,7 +20,7 @@ class TextClassificationQuery:
     ids: Optional[List[Union[str, int]]]
         Record ids list
 
-    query_text: Union[str, Dict[str, str]]
+    query_text: str
         Text query over inputs
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
@@ -42,7 +39,7 @@ class TextClassificationQuery:
         The task prediction status"""
 
     ids: Union[Unset, List[Union[str, int]]] = UNSET
-    query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs] = UNSET
+    query_inputs: Union[Unset, str] = UNSET
     metadata: Union[TextClassificationQueryMetadata, Unset] = UNSET
     predicted_as: Union[Unset, List[str]] = UNSET
     annotated_as: Union[Unset, List[str]] = UNSET
@@ -62,17 +59,7 @@ class TextClassificationQuery:
 
                 ids.append(ids_item)
 
-        query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs]
-        if isinstance(self.query_inputs, Unset):
-            query_inputs = UNSET
-        elif isinstance(self.query_inputs, TextClassificationQueryQueryInputs):
-            query_inputs = UNSET
-            if not isinstance(self.query_inputs, Unset):
-                query_inputs = self.query_inputs.to_dict()
-
-        else:
-            query_inputs = self.query_inputs
-
+        query_inputs = self.query_inputs
         metadata: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.metadata, Unset):
             metadata = self.metadata.to_dict()
@@ -151,25 +138,7 @@ class TextClassificationQuery:
 
             ids.append(ids_item)
 
-        def _parse_query_inputs(
-            data: Any,
-        ) -> Union[Unset, str, TextClassificationQueryQueryInputs]:
-            data = None if isinstance(data, Unset) else data
-            query_inputs: Union[Unset, str, TextClassificationQueryQueryInputs]
-            try:
-                query_inputs = UNSET
-                _query_inputs = data
-                if not isinstance(_query_inputs, Unset):
-                    query_inputs = TextClassificationQueryQueryInputs.from_dict(
-                        _query_inputs
-                    )
-
-                return query_inputs
-            except:  # noqa: E722
-                pass
-            return cast(Union[Unset, str, TextClassificationQueryQueryInputs], data)
-
-        query_inputs = _parse_query_inputs(d.pop("query_inputs", UNSET))
+        query_inputs = d.pop("query_inputs", UNSET)
 
         metadata: Union[TextClassificationQueryMetadata, Unset] = UNSET
         _metadata = d.pop("metadata", UNSET)
