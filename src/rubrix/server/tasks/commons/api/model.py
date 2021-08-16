@@ -25,6 +25,7 @@ class EsRecordDataFieldNames(str, Enum):
     predicted = "predicted"
     score = "score"
     words = "words"
+    event_timestamp = "event_timestamp"
 
 
 class BulkResponse(BaseModel):

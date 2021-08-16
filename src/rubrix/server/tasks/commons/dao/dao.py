@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, List, Optional
+import dataclasses
 
 from fastapi import Depends
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
@@ -14,6 +14,61 @@ from rubrix.server.tasks.commons.es_helpers import (
     aggregations,
     parse_aggregations,
 )
+from typing import Any, Dict, Iterable, List, Optional
+
+
+@dataclasses.dataclass
+class _IndexTemplateExtensions:
+
+    analyzers: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
+    properties: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
+    dynamic_templates: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
+
+
+_extensions = _IndexTemplateExtensions()
+
+
+def extends_index_properties(extended_properties: Dict[str, Any]):
+    """
+    Add explict properties configuration to rubrix index template
+
+    See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
+
+    Parameters
+    ----------
+    extended_properties:
+        The properties dictionary configuration. Several properties could be configured here
+
+    """
+    _extensions.properties.append(extended_properties)
+
+
+def extends_index_dynamic_templates(*templates: Dict[str, Any]):
+    """
+    Add dynamic mapping template configuration to rubrix index template
+
+    See https://www.elastic.co/guide/en/elasticsearch/reference/7.x/dynamic-templates.html#dynamic-templates
+
+    Parameters
+    ----------
+    templates:
+        One or several mapping templates
+    """
+    _extensions.dynamic_templates.extend(templates)
+
+
+def extends_index_analyzers(analyzers: Dict[str, Any]):
+    """
+    Add index analysis configuration to rubrix index template
+
+    See https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer.html
+
+    Parameters
+    ----------
+    analyzers:
+        The analyzers configuration. Several analyzers could be configured here
+    """
+    _extensions.analyzers.append(analyzers)
 
 
 class DatasetRecordsDAO:
@@ -25,9 +80,24 @@ class DatasetRecordsDAO:
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
+
+        template = DATASETS_RECORDS_INDEX_TEMPLATE.copy()
+
+        if _extensions.analyzers:
+            for analyzer in _extensions.analyzers:
+                template["settings"]["analysis"]["analyzer"].update(analyzer)
+
+        if _extensions.dynamic_templates:
+            for dynamic_template in _extensions.dynamic_templates:
+                template["mappings"]["dynamic_templates"].append(dynamic_template)
+
+        if _extensions.properties:
+            for property in _extensions.properties:
+                template["mappings"]["properties"].update(property)
+
         self._es.create_index_template(
             name=DATASETS_RECORDS_INDEX_NAME,
-            template=DATASETS_RECORDS_INDEX_TEMPLATE,
+            template=template,
             force_recreate=True,
         )
 
