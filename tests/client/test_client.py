@@ -259,11 +259,15 @@ def test_dataset_copy(monkeypatch):
         ),
         name=dataset,
     )
-    rubrix.copy(dataset, dest=dataset_copy)
+    rubrix.copy(dataset, name_of_copy=dataset_copy)
     df = rubrix.load(name=dataset)
     df_copy = rubrix.load(name=dataset_copy)
 
     assert df.equals(df_copy)
+
+    with pytest.raises(Exception):
+        rubrix.copy(dataset, name_of_copy=dataset_copy)
+
 
 def test_text_classifier_with_inputs_list(monkeypatch):
     mocking_client(monkeypatch)
@@ -285,6 +289,7 @@ def test_text_classifier_with_inputs_list(monkeypatch):
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["inputs"]["text"] == expected_inputs
+
 
 
 def test_load_with_ids_list(monkeypatch):

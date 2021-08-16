@@ -2,7 +2,11 @@ from datetime import datetime
 from typing import List, Optional
 
 from fastapi import Depends
-from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperationError
+from rubrix.server.commons.errors import (
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    ForbiddenOperationError,
+)
 
 from .dao import DatasetsDAO, create_datasets_dao
 from .model import (
@@ -200,6 +204,11 @@ class DatasetsService:
     def copy_dataset(
         self, name: str, owner: Optional[str], data: CopyDatasetRequest
     ) -> Dataset:
+        try:
+            self.find_by_name(data.name, owner=owner)
+            raise EntityAlreadyExistsError(name=data.name, type=Dataset)
+        except (EntityNotFoundError, ForbiddenOperationError):
+            pass
         found = self.find_by_name(name, owner)
         date_now = datetime.utcnow()
         created_dataset = DatasetDB(

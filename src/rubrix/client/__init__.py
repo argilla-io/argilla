@@ -392,9 +392,11 @@ class RubrixClient:
         return models.TokenClassificationRecord.from_dict(model_dict)
 
     def copy(self, source: str, target: str):
-        copy_dataset.sync_detailed(
+        response = copy_dataset.sync_detailed(
             client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
         )
+        if response.status_code == 409:
+            raise RuntimeError(f"Already created an dataset with name {target}")
 
 
 def _check_response_errors(response: Response) -> None:
