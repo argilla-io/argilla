@@ -21,7 +21,6 @@ from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_recor
 
 from .commons.settings import settings as api_settings
 from .routes import api_router
-from .security.settings import settings as security_settings
 
 
 def configure_middleware(app: FastAPI):
@@ -57,7 +56,6 @@ def configure_app_statics(app: FastAPI):
             directory=os.path.join(
                 parent_path,
                 "static",
-                "secured" if security_settings.enable_security else "unsecured",
             ),
             html=True,
             check_dir=False,
@@ -78,7 +76,7 @@ def configure_app_startup(app: FastAPI):
 
 def configure_app_security(app: FastAPI):
 
-    if security_settings.enable_security and hasattr(auth, "router"):
+    if hasattr(auth, "router"):
         app.include_router(auth.router)
 
 

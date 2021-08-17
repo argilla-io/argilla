@@ -4,7 +4,8 @@ export default ({ $auth, route, redirect }) => {
       break;
     default:
       if (!$auth.loggedIn) {
-        const REDIRECT_URL = "/login?redirect=" + route.fullPath;
+        const REDIRECT_URL =
+          "/login?redirect=" + encodeURIComponent(route.fullPath);
         redirect(REDIRECT_URL);
       }
   }

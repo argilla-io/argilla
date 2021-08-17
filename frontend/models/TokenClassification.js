@@ -70,9 +70,6 @@ class TokenClassificationDataset extends ObservationDataset {
 
   get entities() {
     const { entities } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
-
-    const usedChars = [];
-    const characters = "1234567890".split("");
     const aggregations = this.globalResults.aggregations;
     const names = [
       ...new Set(
@@ -83,16 +80,9 @@ class TokenClassificationDataset extends ObservationDataset {
       ),
     ];
     return names.map((name, index) => {
-      let shortcut = name.slice(0, 1).toUpperCase();
-      const availableChars = characters.filter((c) => !usedChars.includes(c));
-      if (availableChars.indexOf(shortcut) === -1) {
-        [shortcut] = availableChars;
-      }
-      usedChars.push(shortcut);
       return {
         colorId: index,
         text: name,
-        shortCut: shortcut,
       };
     });
   }

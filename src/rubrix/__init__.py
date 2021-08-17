@@ -7,6 +7,7 @@ This module contains the interface to access Rubrix's REST API.
 import logging
 import os
 import re
+from rubrix._constants import DEFAULT_API_KEY
 from typing import Iterable
 
 import pandas
@@ -59,7 +60,7 @@ def init(
     final_api_url = re.sub(r"\/$", "", final_api_url)
 
     # If an api_url is passed, tokens obtained via environ vars are disabled
-    final_key = api_key or os.getenv("RUBRIX_API_KEY")
+    final_key = api_key or os.getenv("RUBRIX_API_KEY", DEFAULT_API_KEY)
 
     _LOGGER.info(f"Rubrix has been initialized on {final_api_url}")
 

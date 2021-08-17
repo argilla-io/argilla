@@ -5,15 +5,7 @@
       selectedRecords.length ? '' : 'global-actions--disabled',
     ]"
   >
-    <div v-if="!annotationEnabled" class="global-actions--exploration">
-      <ReButton class="button--refresh button-primary" @click="refresh()">
-        <svgicon name="refresh" width="20" height="14" /> Refresh
-      </ReButton>
-    </div>
-    <div v-else class="global-actions">
-      <ReButton class="button--refresh button-primary" @click="refresh()">
-        <svgicon name="refresh" width="20" height="14" /> Refresh
-      </ReButton>
+    <div v-if="annotationEnabled" class="global-actions">
       <!-- TODO use v-model for ReCheckbox with boolean values -->
       <ReCheckbox
         v-model="allSelected"
@@ -145,14 +137,7 @@ export default {
       updateRecords: "entities/datasets/updateRecords",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
-      search: "entities/datasets/search",
     }),
-    refresh() {
-      this.search({
-        dataset: this.dataset,
-        query: this.dataset.query,
-      });
-    },
     async onSelectAnnotation(labels) {
       const records = this.selectedRecords.map((record) => {
         const appliedLabels = record.annotation
@@ -273,13 +258,6 @@ export default {
     margin-left: auto;
     width: 180px;
   }
-}
-.button--refresh {
-  position: absolute !important;
-  z-index: 2;
-  top: -40px;
-  right: 0;
-  left: auto;
 }
 .global-actions {
   display: flex;

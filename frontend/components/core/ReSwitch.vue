@@ -25,7 +25,7 @@
 </template>
 
 <script>
-const checkedPosition = 90;
+const checkedPosition = 50;
 const initialPosition = "-1px";
 
 import "assets/icons/check";
@@ -100,14 +100,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$switch-width: 44px;
-$switch-height: 13px;
+$switch-width: 36px;
+$switch-height: 11px;
 $switch-thumb-size: 24px;
-$switch-ripple-size: 48px;
+$switch-ripple-size: 44px;
 .re-switch {
-  width: auto;
-  margin: 0;
-  display: inline-flex;
+  display: flex;
   position: relative;
   &.disabled {
     svg {
@@ -125,13 +123,14 @@ $switch-ripple-size: 48px;
     }
     &:active {
       .re-switch-thumb {
-        transform: translate3d(90%, -50%, 0px) !important;
+        transform: translate3d(50%, -50%, 0px) !important;
       }
     }
   }
   .re-switch-container {
     width: $switch-width;
     height: $switch-height;
+    margin: auto;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;

@@ -25,57 +25,62 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
                 "multilingual_stop_analyzer": {
                     "type": "stop",
                     "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
-                }
+                },
+                "extended_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                    "filter": ["lowercase", "asciifolding"],
+                },
             }
         },
     },
     "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
     "mappings": {
         "properties": {
-            "event_timestamp": {"type": "date"},
+            EsRecordDataFieldNames.event_timestamp: {"type": "date"},
+            # TODO(in new index version): Data based on text field with multiple fields:
+            #   - keywords: for words aggregations
+            #   - extended: including stop words and special characters in search
             EsRecordDataFieldNames.words: {
                 "type": "text",
                 "fielddata": True,
                 "analyzer": "multilingual_stop_analyzer",
+                "fields": {
+                    "extended": {"type": "text", "analyzer": "extended_analyzer"}
+                },
             },
-            # TODO: Not here since is task dependant
-            "tokens": {"type": "text"},
-            "predicted_mentions": {"type": "nested"},
-            "mentions": {"type": "nested"},
+            EsRecordDataFieldNames.predicted_as: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.predicted_by: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.annotated_as: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.annotated_by: {
+                "type": "keyword",
+                "ignore_above": MAX_KEYWORD_LENGTH,
+            },
+            EsRecordDataFieldNames.status: {
+                "type": "keyword",
+            },
+            EsRecordDataFieldNames.predicted: {
+                "type": "keyword",
+            },
+
         },
         "dynamic_templates": [
-            # TODO: Not here since is task dependant
-            {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}},
             {
-                "status": {
-                    "path_match": "*.status",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "predicted": {
-                    "path_match": "*.predicted",
-                    "mapping": {
-                        "type": "keyword",
-                    },
-                }
-            },
-            {
-                "strings": {
+                "metadata_strings": {
+                    "path_match": "metadata.*",
                     "match_mapping_type": "string",
                     "mapping": {
                         "type": "keyword",
-                        "ignore_above": MAX_KEYWORD_LENGTH,  # Avoid bulk errors with too long keywords
-                        # Some elasticsearch versions includes automatically raw fields, so
-                        # we must limit those fields too
-                        "fields": {
-                            "raw": {
-                                "type": "keyword",
-                                "ignore_above": MAX_KEYWORD_LENGTH,
-                            }
-                        },
+                        "ignore_above": MAX_KEYWORD_LENGTH,
                     },
                 }
             },
@@ -205,56 +210,30 @@ class filters:
         }
 
     @staticmethod
-    def text_query(text_query: Optional[Union[str, Dict[str, Any]]]) -> Dict[str, Any]:
+    def text_query(text_query: Optional[str]) -> Dict[str, Any]:
         """Filter records matching text query"""
         if text_query is None:
             return {"match_all": {}}
-
-        if isinstance(text_query, str):
-            return {
-                # TODO: normalize text fields for all tasks
-                "bool": {
-                    "should": [
-                        {
-                            "query_string": {
-                                "default_field": "words",
-                                "default_operator": "AND",
-                                "query": text_query,
-                                "boost": "5.0",
-                            }
-                        },
-                        {
-                            "query_string": {
-                                "default_field": "inputs.*",
-                                "default_operator": "AND",
-                                "query": text_query,
-                            }
-                        },
-                        {
-                            "query_string": {
-                                "default_field": "tokens",
-                                "default_operator": "AND",
-                                "query": text_query,
-                            }
-                        },
-                    ],
-                    "minimum_should_match": "30%",
-                }
-            }
-
         return {
             "bool": {
                 "should": [
                     {
                         "query_string": {
-                            "default_field": f"inputs.{key}",
+                            "default_field": EsRecordDataFieldNames.words,
                             "default_operator": "AND",
-                            "query": query_text,
+                            "query": text_query,
+                            "boost": "2.0",
                         }
-                    }
-                    for key, query_text in text_query.items()
+                    },
+                    {
+                        "query_string": {
+                            "default_field": f"{EsRecordDataFieldNames.words}.extended",
+                            "default_operator": "AND",
+                            "query": text_query,
+                        }
+                    },
                 ],
-                "minimum_should_match": "100%",
+                "minimum_should_match": "50%",
             }
         }
 

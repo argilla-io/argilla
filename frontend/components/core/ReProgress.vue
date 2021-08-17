@@ -45,11 +45,14 @@ export default {
 
 <style lang="scss" scoped>
 .re-progress {
-  height: 10px;
+  height: 22px;
   position: relative;
   overflow: hidden;
-  background: #d1d0d3;
-  border-radius: 2px;
+  background: palette(grey, light);
+  border-top-left-radius: 0;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 0;
+  border-bottom-right-radius: 10px;
   margin: 0 0 1.5em 0;
   &--minimal {
     @extend .re-progress;
@@ -87,7 +90,7 @@ export default {
     @extend .re-progress-track;
     left: auto;
     right: 0;
-    background: $error;
+    background: #a1a2cc;
   }
 }
 

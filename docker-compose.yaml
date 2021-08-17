@@ -7,6 +7,10 @@ services:
       - "6900:80"
     environment:
       ELASTICSEARCH: http://elasticsearch:9200
+      # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
+
+    # volumes:
+      #- ${PWD}/.users.yaml:/config/.users.yaml
 
     networks:
       - rubrix
