@@ -70,15 +70,15 @@ dataset = load_dataset("ag_news", split='test[0:100]')
 labels = dataset.features["label"].names
 
 for record in dataset:
-   prediction = model(record['text'], labels)
+    prediction = model(record['text'], labels)
 
-   item = rb.TextClassificationRecord(
-      inputs=record["text"],
-      prediction=list(zip(prediction['labels'], prediction['scores'])),
-      annotation=labels[record["label"]]
-   )
+    item = rb.TextClassificationRecord(
+        inputs=record["text"],
+        prediction=list(zip(prediction['labels'], prediction['scores'])),
+        annotation=labels[record["label"]]
+    )
 
-   rb.log(item, name="ag_news_zeroshot")
+    rb.log(item, name="ag_news_zeroshot")
 ```
 
 # Quick links
