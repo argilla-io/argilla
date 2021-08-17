@@ -7,6 +7,7 @@ In this guide, we will help you to get up and running with Rubrix. Basically, yo
 
 1. Install the Python client
 2. Launch the web app
+3. Start logging data
 
 1. Install the Rubrix Python client
 ------------------------------------
@@ -81,14 +82,8 @@ But you can customize this by setting the ``ELASTICSEARCH`` environment variable
 
 **If you are already running an Elasticsearch instance for other applications and want to share it with Rubrix**, please refer to our :ref:`advanced setup guide <configure-elasticsearch-role-users>`.
 
-Checking your web app and REST API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Now you should be able to access Rubrix via `http://localhost:6900/ <http://localhost:6900/>`_\ ,
-and you can also check the API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
-
-3. Testing the installation by logging some data
-------------------------------------------------
+3. Start logging data
+---------------------
 
 The following code will log one record into a data set called ``example-dataset`` :
 
@@ -97,15 +92,24 @@ The following code will log one record into a data set called ``example-dataset`
    import rubrix as rb
 
    rb.log(
-       rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
+       rb.TextClassificationRecord(inputs="My first Rubrix example"),
        name='example-dataset'
    )
 
 If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`_ , you will find your first data set.
+**The default username and password are** ``rubrix`` **and** ``1234`` (see the :ref:`user management guide <user-management>` to configure this).
+You can also check the REST API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
 
 Congratulations! You are ready to start working with Rubrix.
 
-**If you want to setup Rubrix using docker, share the Elasticsearch instance with other applications or manage users in the Rubrix server**, please refer to our :ref:`advanced setup guides <advanced-setup-guides>`.
+Please refer to our :ref:`advanced setup guides <advanced-setup-guides>` if you want to:
+
+- setup Rubrix using docker
+- share the Elasticsearch instance with other applications
+- deploy Rubrix on an AWS instance
+- manage users in Rubrix
+
+.. **If you want to setup Rubrix using docker, share the Elasticsearch instance with other applications,  or manage users in the Rubrix server**, please refer to our :ref:`advanced setup guides <advanced-setup-guides>`.
 
 Next steps
 ----------
