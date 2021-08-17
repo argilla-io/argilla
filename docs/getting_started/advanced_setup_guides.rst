@@ -160,92 +160,90 @@ Launch docker container
 
    docker-compose up -d
 
-Accessing to rubrix
-^^^^^^^^^^^^^^^^^^^
+Accessing Rubrix
+^^^^^^^^^^^^^^^^
 
 In our case http://52.213.178.33
 
 
-.. _users-management:
+.. _user-management:
 
-Users management
-----------------
+User management
+---------------
 
 The Rubrix server allows you to manage various users, which helps you to keep track of the annotation agents.
 
-Default user credentials
-^^^^^^^^^^^^^^^^^^^^^^^^
+The default user
+^^^^^^^^^^^^^^^^
+
+By default, Rubrix is only configured for the following user:
 
 - username: ``rubrix``
 - password: ``1234``
-- api key: ``rubrix.apikey`` (configured automatically by the client)
+- api key: ``rubrix.apikey``
 
 
-Override user api key
-^^^^^^^^^^^^^^^^^^^^^
+How to override the default api key
+"""""""""""""""""""""""""""""""""""
+
+To override the default api key you can set the following environment variable before launching the server:
 
 .. code-block:: shell
 
     export RUBRIX_LOCAL_AUTH_DEFAULT_APIKEY=new-apikey
 
 
-Override user password
-^^^^^^^^^^^^^^^^^^^^^^
+How to override the default user password
+"""""""""""""""""""""""""""""""""""""""""
 
-You must set an environment variable that contains an already hashed password.
+To override the password, you must set an environment variable that contains an already hashed password.
 
-Generate the hashed password:
+To generate a hashed password you can use ``htpasswd``:
 
 .. code-block:: shell
 
    %> htpasswd -nbB "" my-new-password
    :$2y$05$T5mHt/TfRHPPYwbeN2.q7e11QqhgvsHbhvQQ1c/pdap.xPZM2axje
 
-then, configure the environment variable omitting the first ``:`` character:
+Then set the environment variable omitting the first ``:`` character (in our case ``$2y$05$T5...``):
 
 .. code-block:: shell
 
     export RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD="<generated_user_password>"
 
 
-Create a user db file
-^^^^^^^^^^^^^^^^^^^^^
+How to add new users
+^^^^^^^^^^^^^^^^^^^^
 
-Create a new yaml file like the following one:
+To configure the Rubrix server for various users, you just need to create a yaml file like the following one:
 
 .. code-block:: yaml
 
     #.users.yaml
     # Users are provided as a list
     - username: user1
-      hashed_password: <generated-hashed-password> # See previous steps
-      api_key: "ThisIsTheUserAPIKEY"
+      hashed_password: <generated-hashed-password> # See the previous section above
+      api_key: "ThisIsTheUser1APIKEY"
     - username: user2
-      hashed_password: <generated-hashed-password> # See previous steps
-      api_key: "ThisIsTheUserAPIKEY"
+      hashed_password: <generated-hashed-password> # See the previous section above
+      api_key: "ThisIsTheUser2APIKEY"
     - ...
 
-Then point the following environment variable to this yaml file:
+Then point the following environment variable to this yaml file before launching the server:
 
 .. code-block:: shell
 
     export RUBRIX_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yaml
 
-
-With the env variable set launch the *Rubrix* server:
-
-.. code-block:: shell
-
-    python -m rubrix.server
-
 If everything went well, the configured users can now log in and their annotations will be tracked with their usernames.
 
-Configure using docker-compose
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Make sure you create the db file in the same folder as your `docker-compose.yaml`.
+Using docker-compose
+""""""""""""""""""""
 
-Then, open the provided ``docker-compose.yaml`` and configure the *rubrix* service in the following way:
+Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`.
+
+Then open the provided ``docker-compose.yaml`` and configure the *rubrix* service in the following way:
 
 .. code-block:: yaml
 
