@@ -197,8 +197,7 @@ How to override the default user password
 """""""""""""""""""""""""""""""""""""""""
 
 To override the password, you must set an environment variable that contains an already hashed password.
-
-To generate a hashed password you can use ``htpasswd``:
+You can use ``htpasswd`` to generate a hashed password:
 
 .. code-block:: shell
 
