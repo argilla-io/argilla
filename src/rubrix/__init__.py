@@ -117,6 +117,22 @@ def log(
     )
 
 
+def copy(dataset: str, name_of_copy: str):
+    """Creates a copy of a dataset including its tags and metadata
+
+    Args:
+        dataset:
+            Name of the source dataset
+        name_of_copy:
+            Name of the copied dataset
+
+    Examples:
+        >>> rb.copy("my_dataset", name_of_copy="new_dataset")
+        >>> df = rb.load("new_dataset")
+    """
+    _client_instance().copy(source=dataset, target=name_of_copy)
+
+
 def _client_instance() -> RubrixClient:
     """Checks module instance client and init if not initialized."""
 

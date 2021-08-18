@@ -3,7 +3,7 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from typing import List
 
-from .model import Dataset, UpdateDatasetRequest
+from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService, create_dataset_service
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
@@ -179,3 +179,38 @@ def open_dataset(
 
     """
     service.open_dataset(name, owner=current_user.current_group)
+
+
+@router.put(
+    "/{name}:copy",
+    operation_id="copy_dataset",
+    response_model=Dataset,
+    response_model_exclude_none=True,
+)
+def copy_dataset(
+    name: str,
+    copy_request: CopyDatasetRequest,
+    service: DatasetsService = Depends(create_dataset_service),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> Dataset:
+    """
+    Creates a dataset copy and its tags/metadata info
+
+    Parameters
+    ----------
+    name:
+        The dataset name
+    copy_request:
+        The copy request data
+    service:
+        The datasets service
+    current_user:
+        The current user
+
+    """
+
+    return service.copy_dataset(
+        name=name,
+        owner=current_user.current_group,
+        data=copy_request
+    )

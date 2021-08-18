@@ -6,6 +6,7 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 import logging
+from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
@@ -18,7 +19,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.sdk import AuthenticatedClient, Client, models
-from rubrix.sdk.api.datasets import delete_dataset
+from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk,
@@ -213,10 +214,7 @@ class RubrixClient:
             limit=limit,
         )
 
-        return pandas.DataFrame(
-            map(lambda r: r.dict(), map(map_fn, response.parsed))
-        )
-
+        return pandas.DataFrame(map(lambda r: r.dict(), map(map_fn, response.parsed)))
 
     @staticmethod
     def _text_classification_sdk_to_record(
@@ -386,6 +384,13 @@ class RubrixClient:
             model_dict["event_timestamp"] = record.event_timestamp.isoformat()
 
         return models.TokenClassificationRecord.from_dict(model_dict)
+
+    def copy(self, source: str, target: str):
+        response = copy_dataset.sync_detailed(
+            client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
+        )
+        if response.status_code == 409:
+            raise RuntimeError(f"Already created an dataset with name {target}")
 
 
 def _check_response_errors(response: Response) -> None:

@@ -62,6 +62,19 @@ class InvalidTextSearchError(HTTPException):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
 
 
+class EntityAlreadyExistsError(HTTPException):
+    """Error raised when entity was created"""
+
+    def __init__(self, name: str, type: Type):
+        self.name = name
+        self.type = Type
+
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Already created entity {name} of type {type.__name__}",
+        )
+
+
 class EntityNotFoundError(HTTPException):
     """Error raised when entity not found"""
 
