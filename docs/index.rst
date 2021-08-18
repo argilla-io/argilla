@@ -42,7 +42,7 @@ Quickstart
 Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
 
 
-Make sure you have ``Docker`` installed and run (check the **Setup and Installation** section for a more detailed installation process):
+Make sure you have ``Docker`` installed and run (check the :ref:`setup and installation section <setup-and-installation>` for a more detailed installation process):
    
 .. code-block:: bash
 
@@ -80,12 +80,15 @@ Use your favourite editor or a Jupyter notebook to run the following:
        prediction = model(record['text'], labels) 
 
        item = rb.TextClassificationRecord(
-           inputs={"text": record["text"]},
+           inputs=record["text"],
            prediction=list(zip(prediction['labels'], prediction['scores'])), 
            annotation=labels[record["label"]]
        )
 
        rb.log(item, name="ag_news_zeroshot")
+
+Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
+**The default username and password are** ``rubrix`` **and** ``1234``.
 
 .. raw:: html
 
@@ -138,7 +141,7 @@ You can join the conversation on our Github page and our Github forum.
    getting_started/setup&installation
    getting_started/concepts
    getting_started/supported_tasks
-   getting_started/setup&install_aws
+   getting_started/advanced_setup_guides
 
 .. toctree::
    :maxdepth: 3

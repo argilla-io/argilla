@@ -58,10 +58,11 @@ This is an example of Rubrix's labeling mode:
 And this is an example for logging model predictions from a 🤗 transformers text classification pipeline:
 
 ```python
+from transformers import pipeline
 from datasets import load_dataset
 import rubrix as rb
 
-model = pipeline('zero-shot-classification', model="typeform/distilbert-base-uncased-mnli")
+model = pipeline('zero-shot-classification', model="typeform/squeezebert-mnli")
 
 dataset = load_dataset("ag_news", split='test[0:100]')
 
@@ -72,7 +73,7 @@ for record in dataset:
     prediction = model(record['text'], labels)
 
     item = rb.TextClassificationRecord(
-        inputs={"text": record["text"]},
+        inputs=record["text"],
         prediction=list(zip(prediction['labels'], prediction['scores'])),
         annotation=labels[record["label"]]
     )
@@ -110,18 +111,18 @@ To get started you need to follow three steps:
 
 You can install the Python client with `pip`:
 
-```python
+```bash
 pip install rubrix
 ```
 
-## 2. Launch the webapp
+## 2. Launch the web app
 
 There are two ways to launch the webapp:
 
-- Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
-- Executing the server code manually
+- a) Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
+- b) Executing the server code manually
 
-### Using docker-compose (recommended)
+### a) Using docker-compose (recommended)
 
 Create a folder:
 
@@ -138,7 +139,7 @@ wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 This is the recommended way because it automatically includes an
 [Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
 
-### Executing the server code manually
+### b) Executing the server code manually
 
 When executing the server code manually you need to provide an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance yourself.
 
@@ -161,29 +162,26 @@ python -m rubrix.server
 ```
 
 By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
-If you want to customize this, you can set the ``ELASTICSEARCH`` environment variable pointing to your endpoint.
+But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
 
 ## 3. Start logging data
 
-The following code will log one record into the `example-dataset` dataset: 
+The following code will log one record into a data set called `example-dataset`:
 
 ```python
 import rubrix as rb
 
 rb.log(
-    rb.TextClassificationRecord(inputs="my first rubrix example"),
+    rb.TextClassificationRecord(inputs="My first Rubrix example"),
     name='example-dataset'
 )
-
 ```
 
-```bash
-BulkResponse(dataset='example-dataset', processed=1, failed=0)
-```
+If you go to your Rubrix app at http://localhost:6900/, you should see your first dataset.
+**The default username and password are ``rubrix`` and ``1234``**.
+You can also check the REST API docs at http://localhost:6900/api/docs.
 
-If you go to your Rubrix app at [http://localhost:6900/](http://localhost:6900/), you should see your first dataset.
-
-Congratulations! You are ready to start working with Rubrix with your own data.
+Congratulations! You are ready to start working with Rubrix.
 
 To better understand what's possible take a look at Rubrix's [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
 

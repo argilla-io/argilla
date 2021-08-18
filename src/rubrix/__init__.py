@@ -44,7 +44,7 @@ def init(
             it will default to `http://localhost:6900`.
         api_key:
             Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
-            is not set, it will default to a not authenticated connection.
+            is not set, it will default to `rubrix.apikey`.
         timeout:
             Wait `timeout` seconds for the connection to timeout. Default: 60.
 

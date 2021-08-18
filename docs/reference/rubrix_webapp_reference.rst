@@ -75,7 +75,7 @@ This component allows filtering by aspects related to predictions, such as:
 - predicted ok or ko, for filtering records whose predictions are (or not) correct with respect to the annotations.
 
 Annotations filters
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 This component allows filtering by aspects related to annotations, such as:
 
@@ -143,3 +143,6 @@ This mode enables users to add and modify annotations, while following the same 
    :alt: Rubrix Token Classification (NER) Annotation mode
 
    Rubrix Token Classification (NER) Annotation mode
+
+Annotation by different users will be saved with different annotation agents.
+To setup various users in your Rubrix server, please refer to our :ref:`user management guide <user-management>`.

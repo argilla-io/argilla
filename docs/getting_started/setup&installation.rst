@@ -7,6 +7,7 @@ In this guide, we will help you to get up and running with Rubrix. Basically, yo
 
 1. Install the Python client
 2. Launch the web app
+3. Start logging data
 
 1. Install the Rubrix Python client
 ------------------------------------
@@ -19,16 +20,16 @@ Then you can install Rubrix with ``pip``\ :
 
    pip install rubrix
 
-2. Setup and launch the webapp
-------------------------------
+2. Launch the web app
+---------------------
 
 There are two ways to launch the webapp:
 
-#. Using `docker-compose <https://docs.docker.com/compose/>`_ (**recommended**).
-#. Executing the server code manually
+a. Using `docker-compose <https://docs.docker.com/compose/>`_ (**recommended**).
+b. Executing the server code manually
 
-Using ``docker-compose`` (recommended)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+a) Using ``docker-compose`` (recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`_.
 
@@ -47,12 +48,13 @@ and launch the docker-contained web app with the following command:
 This is the recommended way because it automatically includes an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance, Rubrix's main persistent layer.
 
-Executing the server code manually
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+b) Executing the server code manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When executing the server code manually you need to provide an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance yourself.
-This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
+This method may be preferred if you
+(1) want to avoid or cannot use ``Docker``,
 (2) have an existing Elasticsearch service, or
 (3) want to have full control over your Elasticsearch configuration.
 
@@ -61,8 +63,8 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
    (we recommend version 7.10) and launch an Elasticsearch instance.
    For MacOS and Windows there are
    `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`_ and a
-   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively. **If you already have an Elasticsearch instance**, see the section "Configuring your Elasticsearch instance for Rubrix" below.
-   
+   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively.
+
 2. Install the Rubrix Python library together with its server dependencies:
 
 .. code-block:: bash
@@ -76,44 +78,12 @@ This method may be preferred if you (1) want to avoid or cannot use ``Docker``,
    python -m rubrix.server
 
 By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
-If you want to customize this, you can set the ``ELASTICSEARCH`` environment variable pointing to your endpoint.
+But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
 
-Configuring your Elasticsearch instance for Rubrix
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If you have an Elasticsearch instance and want to share resources with other applications, you can easily configure it for using Rubrix.
+**If you are already running an Elasticsearch instance for other applications and want to share it with Rubrix**, please refer to our :ref:`advanced setup guide <configure-elasticsearch-role-users>`.
 
-All you need to take into account is:
-
-* Rubrix will create its ES indices with the following pattern ``.rubrix_*``. It's recommended to create a new role (e.g., rubrix) and provide it with all privileges for this index pattern.
-
-* Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
-
-Rubrix use the `ELASTICSEARCH` environment variable to set the ES connection. 
-
-You can provide the credentials using the following scheme: 
-
-.. code-block:: bash
-
-   http(s)://user:passwd@elastichost
-   
-.. code-block:: python
-
-   http(s)://user:passwd@elastichost...
-   
-Below you can see a screenshot for setting up a new ``rubrix`` Role and its permissions:
-
-.. figure:: https://user-images.githubusercontent.com/15624271/123934452-40e26000-d9ce-11eb-967d-a46a0b2afa1f.png
-   :alt: Elasticsearch Rubrix role permission
-
-
-Checking your webapp and REST API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Now you should be able to access Rubrix via `http://localhost:6900/ <http://localhost:6900/>`_\ ,
-and you can also check the API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
-
-3. Testing the installation by logging some data
-------------------------------------------------
+3. Start logging data
+---------------------
 
 The following code will log one record into a data set called ``example-dataset`` :
 
@@ -122,28 +92,32 @@ The following code will log one record into a data set called ``example-dataset`
    import rubrix as rb
 
    rb.log(
-       rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
+       rb.TextClassificationRecord(inputs="My first Rubrix example"),
        name='example-dataset'
    )
 
-You should receive this response in your terminal or Jupyter Notebook:
-
-.. code-block:: bash
-
-   BulkResponse(dataset='example-dataset', processed=1, failed=0)
-
-This means that the data has been logged correctly.
-
 If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`_ , you will find your first data set.
+**The default username and password are** ``rubrix`` **and** ``1234`` (see the :ref:`user management guide <user-management>` to configure this).
+You can also check the REST API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
 
 Congratulations! You are ready to start working with Rubrix.
+
+Please refer to our :ref:`advanced setup guides <advanced-setup-guides>` if you want to:
+
+- setup Rubrix using docker
+- share the Elasticsearch instance with other applications
+- deploy Rubrix on an AWS instance
+- manage users in Rubrix
+
+.. **If you want to setup Rubrix using docker, share the Elasticsearch instance with other applications,  or manage users in the Rubrix server**, please refer to our :ref:`advanced setup guides <advanced-setup-guides>`.
 
 Next steps
 ----------
 
 To continue learning we recommend you to:
 
-* :ref:`users_management`
-* Check our **guides** and **tutorials.**
-* Read about Rubrix's main **concepts.**
+* Check our **Guides** and **Tutorials.**
+* Read about Rubrix's main :ref:`concepts`
+
+
 
