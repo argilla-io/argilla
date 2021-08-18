@@ -7,8 +7,8 @@ from rubrix.server.commons.errors import ErrorMessage
 
 from .datasets import api as datasets
 from .info import api as info
-from .users import api as users
 from .tasks import api as tasks
+from .users import api as users
 
 api_router = APIRouter(
     responses={
