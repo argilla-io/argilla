@@ -27,14 +27,14 @@ class Text2TextAnnotation(BaseAnnotation):
     -----------
 
     text: str
-        the generated text
+        the annotation text
 
     score: float
         the annotation score
     """
 
     text: str
-    score: float = Field(ge=0.0, le=1.0)
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
