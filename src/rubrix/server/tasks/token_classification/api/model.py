@@ -106,7 +106,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         if annotation:
             tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
-                mention = text[entity.start : entity.end]
+                mention = text[entity.start: entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
 
                 idx = 0
@@ -119,7 +119,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                         and current_mention
                         and jdx <= len(tokens)
                     ):
-                        current_mention = current_mention[len(current_token) :]
+                        current_mention = current_mention[len(current_token):]
                         current_mention = current_mention.lstrip()
                         jdx += 1
                         if jdx < len(tokens):
@@ -210,7 +210,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         return {
             mention: entity.label
             for entity in entities
-            for mention in [self.text[entity.start : entity.end]]
+            for mention in [self.text[entity.start: entity.end]]
         }
 
     class Config:

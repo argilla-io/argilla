@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ApiInfo")
 
 @attr.s(auto_attribs=True)
 class ApiInfo:
-    """ Basic api info """
+    """Basic api info"""
 
     rubrix_version: str
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)

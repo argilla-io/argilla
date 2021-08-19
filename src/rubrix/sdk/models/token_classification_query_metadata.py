@@ -9,7 +9,7 @@ T = TypeVar("T", bound="TokenClassificationQueryMetadata")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationQueryMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Union[str, List[str]]] = attr.ib(
         init=False, factory=dict

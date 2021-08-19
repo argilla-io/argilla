@@ -6,7 +6,6 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 import logging
-from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
@@ -18,7 +17,7 @@ from rubrix.client.models import (
     TokenAttributions,
     TokenClassificationRecord,
 )
-from rubrix.sdk import AuthenticatedClient, Client, models
+from rubrix.sdk import AuthenticatedClient, models
 from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
@@ -30,6 +29,7 @@ from rubrix.sdk.models import (
     TextClassificationQuery,
     TokenClassificationQuery,
 )
+from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from rubrix.sdk.types import Response
 
 
@@ -77,9 +77,7 @@ class RubrixClient:
             base_url=api_url, token=api_key, timeout=timeout
         )
 
-        whoami_response_status = whoami.sync_detailed(
-            client=self._client
-        ).status_code
+        whoami_response_status = whoami.sync_detailed(client=self._client).status_code
         if whoami_response_status == 401:
             raise Exception("Authentification error: invalid credentials.")
 
@@ -162,7 +160,7 @@ class RubrixClient:
             )
 
         for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
+            chunk = records[i: i + chunk_size]
 
             response = bulk_records_function(
                 client=self._client,

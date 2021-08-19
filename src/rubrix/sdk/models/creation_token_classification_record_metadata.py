@@ -7,7 +7,7 @@ T = TypeVar("T", bound="CreationTokenClassificationRecordMetadata")
 
 @attr.s(auto_attribs=True)
 class CreationTokenClassificationRecordMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

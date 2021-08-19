@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ApiStatusMemInfo")
 
 @attr.s(auto_attribs=True)
 class ApiStatusMemInfo:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

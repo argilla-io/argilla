@@ -9,7 +9,7 @@ T = TypeVar("T", bound="CreationTextClassificationRecordExplanation")
 
 @attr.s(auto_attribs=True)
 class CreationTextClassificationRecordExplanation:
-    """  """
+    """ """
 
     additional_properties: Dict[str, List[TokenAttributions]] = attr.ib(
         init=False, factory=dict

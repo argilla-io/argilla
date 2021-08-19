@@ -71,7 +71,6 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
             EsRecordDataFieldNames.predicted: {
                 "type": "keyword",
             },
-
         },
         "dynamic_templates": [
             {

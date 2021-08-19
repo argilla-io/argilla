@@ -20,10 +20,5 @@ api_router = APIRouter(
 
 dependencies = []
 
-for router in [
-    users.router,
-    datasets.router,
-    info.router,
-    tasks.router
-]:
+for router in [users.router, datasets.router, info.router, tasks.router]:
     api_router.include_router(router, dependencies=dependencies)

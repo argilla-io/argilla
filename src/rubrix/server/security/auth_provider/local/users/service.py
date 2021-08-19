@@ -37,7 +37,7 @@ class UsersService:
     def get_user(self, username) -> Optional[User]:
         return self.__dao__.get_user(username)
 
-    async def find_user_by_api_key(self, api_key:str) -> Optional[User]:
+    async def find_user_by_api_key(self, api_key: str) -> Optional[User]:
         return await self.__dao__.get_user_by_api_key(api_key)
 
     def __verify_password__(self, password: str, hashed_password: str) -> bool:

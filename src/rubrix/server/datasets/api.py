@@ -210,7 +210,5 @@ def copy_dataset(
     """
 
     return service.copy_dataset(
-        name=name,
-        owner=current_user.current_group,
-        data=copy_request
+        name=name, owner=current_user.current_group, data=copy_request
     )

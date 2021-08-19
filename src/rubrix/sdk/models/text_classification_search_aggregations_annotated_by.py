@@ -7,7 +7,7 @@ T = TypeVar("T", bound="TextClassificationSearchAggregationsAnnotatedBy")
 
 @attr.s(auto_attribs=True)
 class TextClassificationSearchAggregationsAnnotatedBy:
-    """  """
+    """ """
 
     additional_properties: Dict[str, int] = attr.ib(init=False, factory=dict)
 

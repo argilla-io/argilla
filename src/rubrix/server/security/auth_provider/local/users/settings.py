@@ -17,6 +17,4 @@ class UsersSettings(BaseSettings):
     """
 
 
-
-
 settings = UsersSettings()

@@ -7,7 +7,7 @@ T = TypeVar("T", bound="TokenClassificationAggregationsStatus")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAggregationsStatus:
-    """  """
+    """ """
 
     additional_properties: Dict[str, int] = attr.ib(init=False, factory=dict)
 

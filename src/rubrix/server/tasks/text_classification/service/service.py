@@ -19,6 +19,7 @@ extends_index_dynamic_templates(
     {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
 )
 
+
 def as_elasticsearch(search: TextClassificationQuery) -> Dict[str, Any]:
     """Build an elasticsearch query part from search query"""
 

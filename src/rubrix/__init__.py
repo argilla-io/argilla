@@ -49,6 +49,7 @@ def init(
             Wait `timeout` seconds for the connection to timeout. Default: 60.
 
     Examples:
+        >>> import rubrix as rb
         >>> rb.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
     """
 
@@ -96,7 +97,8 @@ def log(
         Summary of the response from the REST API
 
     Examples:
-        >>> record = rb.TextClassificationRecord(
+        >>> import rubrix as rb
+        ... record = rb.TextClassificationRecord(
         ...     inputs={"text": "my first rubrix example"},
         ...     prediction=[('spam', 0.8), ('ham', 0.2)]
         ... )
@@ -112,6 +114,7 @@ def log(
     ):
         records = [records]
 
+    # noinspection PyTypeChecker,PydanticTypeChecker
     return _client_instance().log(
         records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
     )
@@ -127,7 +130,8 @@ def copy(dataset: str, name_of_copy: str):
             Name of the copied dataset
 
     Examples:
-        >>> rb.copy("my_dataset", name_of_copy="new_dataset")
+        >>> import rubrix as rb
+        ... rb.copy("my_dataset", name_of_copy="new_dataset")
         >>> df = rb.load("new_dataset")
     """
     _client_instance().copy(source=dataset, target=name_of_copy)
@@ -162,6 +166,7 @@ def load(
         The dataset as a pandas Dataframe.
 
     Examples:
+        >>> import rubrix as rb
         >>> dataframe = rb.load(name="example-dataset")
     """
     return _client_instance().load(name=name, limit=limit, ids=ids)
@@ -175,6 +180,7 @@ def delete(name: str) -> None:
             The dataset name.
 
     Examples:
+        >>> import rubrix as rb
         >>> rb.delete(name="example-dataset")
     """
     _client_instance().delete(name=name)

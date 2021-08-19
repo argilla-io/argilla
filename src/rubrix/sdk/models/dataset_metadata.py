@@ -7,7 +7,7 @@ T = TypeVar("T", bound="DatasetMetadata")
 
 @attr.s(auto_attribs=True)
 class DatasetMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

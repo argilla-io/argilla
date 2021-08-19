@@ -114,6 +114,7 @@ class TextClassificationRecord(BaseModel):
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""
+        # noinspection PyArgumentList
         super().__init__(*args, **kwargs)
         self.status = self.status or (
             "Default" if self.annotation is None else "Validated"

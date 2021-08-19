@@ -7,7 +7,7 @@ import os
 import httpx
 import pytest
 import rubrix
-from rubrix.client import AuthenticatedClient, Client, RubrixClient
+from rubrix.client import AuthenticatedClient, RubrixClient
 
 
 @pytest.fixture
@@ -202,7 +202,7 @@ def test_init_evironment_url(api_url_env_var, mock_response_200):
     rubrix.init()
 
     assert isinstance(rubrix._client, RubrixClient)
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://fakeurl.com"
 
 
@@ -247,7 +247,7 @@ def test_init_evironment_no_url_token(token_env_var, mock_response_200):
     rubrix.init(api_url="http://anotherfakeurl.com")
 
     assert isinstance(rubrix._client, RubrixClient)
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://anotherfakeurl.com"
 
 
@@ -288,7 +288,7 @@ def test_default_init(mock_response_200):
 
     rubrix.init()
 
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://localhost:6900"
 
     expected_token = "blablabla"

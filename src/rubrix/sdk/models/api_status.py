@@ -10,7 +10,7 @@ T = TypeVar("T", bound="ApiStatus")
 
 @attr.s(auto_attribs=True)
 class ApiStatus:
-    """ The Rubrix api status model """
+    """The Rubrix api status model"""
 
     rubrix_version: str
     elasticsearch: ApiStatusElasticsearch

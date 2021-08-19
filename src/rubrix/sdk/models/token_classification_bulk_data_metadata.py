@@ -7,7 +7,7 @@ T = TypeVar("T", bound="TokenClassificationBulkDataMetadata")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationBulkDataMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

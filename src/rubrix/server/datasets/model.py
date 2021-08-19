@@ -40,6 +40,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     """
     Request body for copy dataset operation
     """
+
     pass
 
 

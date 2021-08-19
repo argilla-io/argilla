@@ -73,7 +73,7 @@ def sync(
     *,
     client: Client,
 ) -> Optional[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
-    """  """
+    """ """
 
     return sync_detailed(
         client=client,
@@ -98,7 +98,7 @@ async def asyncio(
     *,
     client: Client,
 ) -> Optional[Union[ApiInfo, ErrorMessage, ErrorMessage]]:
-    """  """
+    """ """
 
     return (
         await asyncio_detailed(
