@@ -3,7 +3,7 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="225"/>
 </p>
 
-<h3 align="center">Explore, label, and monitor data for AI projects</h3>
+<h3 align="center">Explore, label, and monitor data for natural language processing projects</h3>
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -85,19 +85,19 @@ for record in dataset:
 
 | Doc | Description |
 |---|---|
-| 🚶 **[First steps](https://docs.rubrix.ml/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
-| 👩‍🏫 **[Concepts](https://docs.rubrix.ml/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
-| 🛠️ **[Setup and install](https://docs.rubrix.ml/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
-| 🗒️ **[Tasks](https://docs.rubrix.ml/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
-| 📱 **[UI reference](https://docs.rubrix.ml/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
-| 🐍 **[Python API docs](https://docs.rubrix.ml/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
-| 👩‍🍳 **[Rubrix cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
+| 🚶 **[First steps](https://rubrix.rtfd.io/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
+| 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
+| 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
+| 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
+| 📱 **[UI reference](https://rubrix.rtfd.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
+| 🐍 **[Python API docs](https://rubrix.rtfd.io/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
+| 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
 | 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
-| 🤗 **[Hugging Face tutorial](https://docs.rubrix.ml/en/stable/tutorials/01-huggingface.html)** | Using Rubrix with 🤗`transformers` and `datasets` |
-| 💫 **[spaCy tutorial](https://docs.rubrix.ml/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
-| 🐠 **[Weak supervision tutorial](https://docs.rubrix.ml/en/stable/tutorials/04-snorkel.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
-| 🤔 **[Active learning tutorial](https://docs.rubrix.ml/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
-| 🧪 **[Knowledge graph tutorial](https://docs.rubrix.ml/en/stable/tutorials/03-kglab_pytorch_geometric.html)** | How to use Rubrix with `kglab` & `pytorch_geometric` |
+| 🤗 **[Hugging Face tutorial](https://rubrix.rtfd.io/en/stable/tutorials/01-huggingface.html)** | Using Rubrix with 🤗`transformers` and `datasets` |
+| 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
+| 🐠 **[Weak supervision tutorial](https://rubrix.rtfd.io/en/stable/tutorials/04-snorkel.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
+| 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
+| 🧪 **[Knowledge graph tutorial](https://rubrix.rtfd.io/en/stable/tutorials/03-kglab_pytorch_geometric.html)** | How to use Rubrix with `kglab` & `pytorch_geometric` |
 
 # Get started
 
@@ -183,7 +183,7 @@ You can also check the REST API docs at http://localhost:6900/api/docs.
 
 Congratulations! You are ready to start working with Rubrix.
 
-To better understand what's possible take a look at Rubrix's [Cookbook](https://docs.rubrix.ml/en/stable/guides/cookbook.html)
+To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
 
 # Community
 As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
