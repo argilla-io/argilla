@@ -23,3 +23,5 @@ dependencies:
     - openapi-python-client~=0.8.0
     # install rubrix in editable mode
     - -e .[server]
+    # sphinx og
+    - sphinxext.opengraph==0.4.2
