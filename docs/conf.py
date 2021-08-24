@@ -38,6 +38,7 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinxext.opengraph",
 ]
 
 # Do not execute the notebooks when building the docs
@@ -87,3 +88,6 @@ html_favicon = "_static/images/favicon.ico"
 # or fully qualified paths (eg. https://...)
 html_css_files = ["css/custom.css"]
 html_theme_options = {"logo_only": True}
+
+# Open graph meta
+ogp_image = "http://example.org/image.png"
