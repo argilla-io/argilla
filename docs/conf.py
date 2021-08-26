@@ -90,4 +90,8 @@ html_css_files = ["css/custom.css"]
 html_theme_options = {"logo_only": True}
 
 # Open graph meta
-ogp_image = "_static/images/rubrix_logo_og.png"
+ogp_image = "https://github.com/recognai/rubrix-materials/raw/main/rubrix_logo_og.png"
+
+ogp_custom_meta_tags = [
+    '<meta name="twitter:card" content="summary_large_image" />',
+]
