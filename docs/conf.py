@@ -90,4 +90,4 @@ html_css_files = ["css/custom.css"]
 html_theme_options = {"logo_only": True}
 
 # Open graph meta
-ogp_image = "_static/images/logo_og.png"
+ogp_image = "_static/images/rubrix_logo_og.png"
