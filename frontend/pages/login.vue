@@ -4,7 +4,7 @@
       <Rubrix class="form__logo" />
       <p class="form__title">Track and iterate on data for AI</p>
       <div class="form__input" :class="{ active: login.username }">
-        <input v-model="login.username" type="text" placeholder="ID" />
+        <input v-model="login.username" type="text" placeholder="Username" />
       </div>
       <div class="form__input" :class="{ active: login.password }">
         <input
