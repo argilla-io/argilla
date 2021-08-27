@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     getInfo() {
-      return this.dataset.results.aggregations.annotated_as;
+      return this.annotationsProgress.annotatedAs;
     },
     annotationsProgress() {
       return AnnotationProgress.find(this.dataset.name + this.dataset.task);
