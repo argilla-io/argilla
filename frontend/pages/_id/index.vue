@@ -20,7 +20,6 @@
         />
         <GlobalActions :dataset="dataset" />
       </section>
-
       <div class="container">
         <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
           <Results :dataset="dataset"> </Results>
@@ -30,18 +29,13 @@
             :class="dataset.task"
           >
             <div v-show="sidebarInfoType === 'progress'">
-              <TextClassificationProgress
-                v-if="dataset.task === 'TextClassification'"
+              <component
+                :is="currentTaskProgress"
                 :dataset="dataset"
-              />
-              <TokenClassificationProgress v-else :dataset="dataset" />
+              ></component>
             </div>
             <div v-show="sidebarInfoType === 'stats'">
-              <TextClassificationStats
-                v-if="dataset.task === 'TextClassification'"
-                :dataset="dataset"
-              />
-              <TokenClassificationStats v-else :dataset="dataset" />
+              <component :is="currentTaskStats" :dataset="dataset"></component>
             </div>
           </SideBarPanel>
         </div>
@@ -89,9 +83,20 @@ export default {
         { link: this.$route.fullPath, name: this.datasetName },
       ];
     },
+    currentTaskProgress() {
+      return this.selectedTask + "Progress";
+    },
+    currentTaskStats() {
+      return this.selectedTask + "Stats";
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
+  },
+  updated() {
+    window.onresize = () => {
+      this.width = window.innerWidth;
+    };
   },
   methods: {
     ...mapActions({
@@ -120,11 +125,6 @@ export default {
       }
       this.sidebarInfoType = info;
     },
-  },
-  updated() {
-    window.onresize = () => {
-      this.width = window.innerWidth;
-    };
   },
 };
 </script>
