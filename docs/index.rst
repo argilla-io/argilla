@@ -58,7 +58,7 @@ Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`
 
 .. code-block:: bash
 
-   pip install rubrix transformers datasets torch
+   pip install rubrix==0.3.0 transformers datasets torch
 
 
 Use your favourite editor or a Jupyter notebook to run the following:

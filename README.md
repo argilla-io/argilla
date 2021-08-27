@@ -112,7 +112,7 @@ To get started you need to follow three steps:
 You can install the Python client with `pip`:
 
 ```bash
-pip install rubrix
+pip install rubrix==0.3.0
 ```
 
 ## 2. Launch the web app
@@ -152,7 +152,7 @@ When executing the server code manually you need to provide an [Elasticsearch](h
 2. Install the Rubrix Python library together with its server dependencies:
 
 ```bash
-pip install rubrix[server]
+pip install rubrix[server]==0.3.0
 ```
 
 3. Launch a local instance of the Rubrix web app
