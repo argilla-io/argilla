@@ -135,6 +135,7 @@ export default {
     async onAnnotate({ labels }) {
       await this.validate({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: [
           {
             ...this.record,
@@ -142,7 +143,6 @@ export default {
               ? "Edited"
               : this.record.status,
             annotation: {
-              agent: this.$auth.user,
               labels: labels.map((label) => ({
                 class: label,
                 confidence: 1.0,

@@ -98,9 +98,13 @@ const actions = {
       persistBackend: true,
     });
   },
-  async validateAnnotations({ dispatch }, { dataset, records }) {
+  async validateAnnotations({ dispatch }, { dataset, records, agent }) {
     const newRecords = records.map((record) => ({
       ...record,
+      annotation: {
+        agent,
+        ...record.annotation,
+      },
       selected: false,
       status: "Validated",
     }));
