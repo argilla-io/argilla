@@ -156,7 +156,6 @@ export default {
         return {
           ...record,
           annotation: {
-            agent: this.$auth.user,
             labels: this.isMultiLabelRecord
               ? [...appliedLabels, ...newLabels]
               : newLabels,
@@ -167,6 +166,7 @@ export default {
       await this.validate({
         dataset: this.dataset,
         records: records,
+        agent: this.$auth.user,
       });
     },
     closeNewLabelVisible() {
@@ -180,9 +180,19 @@ export default {
       });
     },
     async onValidate() {
+      let records = this.selectedRecords;
+      if (this.isTokenClassification) {
+        records = records.map((record) => ({
+          ...record,
+          annotation: record.annotation
+            ? record.annotation
+            : { entities: record.prediction.entities },
+        }));
+      }
       await this.validate({
         dataset: this.dataset,
-        records: this.selectedRecords,
+        records: records,
+        agent: this.$auth.user,
       });
     },
     async addNewLabel(newLabel) {
