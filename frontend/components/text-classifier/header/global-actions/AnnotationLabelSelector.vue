@@ -137,7 +137,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-// @import "@recognai/re-commons/src/assets/scss/components/tooltip.scss";
 .selector {
   &__option {
     display: block;
