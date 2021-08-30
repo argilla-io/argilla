@@ -30,7 +30,7 @@
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 </p>
 
-![Rubrix Intro](https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif)
+![Rubrix Intro](https://github.com/recognai/rubrix-materials/raw/main/zeroshot.gif)
 
 [Rubrix](https://rubrix.ml) is a free and open-source tool for exploring and iterating on data for artificial intelligence projects. 
 
@@ -51,11 +51,8 @@ Rubrix is composed of:
 - a **web application** to explore and label data, which you can launch using Docker or directly with Python.
 
 
-This is an example of Rubrix's labeling mode:
 
-![Rubrix Annotation Mode](https://github.com/dvsrepo/imgs/blob/main/rubrix_annotation_mode.gif)
-
-And this is an example for logging model predictions from a 🤗 transformers text classification pipeline:
+This is an example for logging model predictions from a 🤗 transformers text classification pipeline:
 
 ```python
 from transformers import pipeline
