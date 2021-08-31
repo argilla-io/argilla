@@ -2,14 +2,18 @@ import datetime
 from fastapi import Depends
 from rubrix import MAX_KEYWORD_LENGTH
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons import BulkResponse, SortableField
 from rubrix.server.tasks.commons.dao import (
     extends_index_dynamic_templates,
     extends_index_properties,
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import aggregations, filters
+from rubrix.server.tasks.commons.es_helpers import (
+    aggregations,
+    filters,
+    sort_by2elasticsearch,
+)
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
@@ -117,7 +121,8 @@ class TokenClassificationService:
         self,
         dataset: str,
         owner: Optional[str],
-        search: TokenClassificationQuery,
+        query: TokenClassificationQuery,
+        sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
     ) -> TokenClassificationSearchResults:
@@ -130,8 +135,10 @@ class TokenClassificationService:
             The dataset name
         owner:
             The dataset owner
-        search:
+        query:
             The search parameters
+        sort_by:
+            The sort by order list
         record_from:
             The record from return results
         size:
@@ -147,7 +154,8 @@ class TokenClassificationService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=as_elasticsearch(search),
+                query=as_elasticsearch(query),
+                sort=sort_by2elasticsearch(sort_by),
                 aggregations={
                     **aggregations.nested_aggregation(
                         name=PREDICTED_MENTIONS_ES_FIELD_NAME,

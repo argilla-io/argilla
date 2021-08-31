@@ -8,7 +8,7 @@ from rubrix.server.tasks.commons import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
-    TaskStatus,
+    SortableField, TaskStatus,
     TaskType,
 )
 from rubrix._constants import MAX_KEYWORD_LENGTH
@@ -293,6 +293,7 @@ class TokenClassificationQuery(BaseModel):
 
 
 class TokenClassificationSearchRequest(BaseModel):
+
     """
     API SearchRequest request
 
@@ -301,9 +302,11 @@ class TokenClassificationSearchRequest(BaseModel):
 
     query: TokenClassificationQuery
         The search query configuration
+    sort:
+        The sort by order in search results
     """
-
     query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
+    sort: List[SortableField] = Field(default_factory=list)
 
 
 class TokenClassificationAggregations(BaseModel):
