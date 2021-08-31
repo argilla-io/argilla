@@ -14,6 +14,14 @@
           >({{ itemsAppliedOnGroup(group) }})</span
         >
       </p>
+      <p :class="{
+          active: initialVisibleGroup === 'sort',
+        }" @click="selectGroup('sort')">Sort</p>
+    </div>
+    <div class='filters__tabs__content' v-if="initialVisibleGroup === 'sort'">
+          <SortList
+            :sortOptions="this.filterList"
+          />
     </div>
     <div v-for="group in groups" :key="group">
       <div
