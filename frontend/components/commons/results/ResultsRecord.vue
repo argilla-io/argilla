@@ -163,27 +163,22 @@ export default {
     position: relative;
     background: $lighter-color;
     border-radius: 3px;
+    display: inline-block;
+    width: 100%;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
     }
-  }
-}
-.list__item {
-  // padding-left: 3em;
-  // padding-right: 3em;
-  // padding-bottom: 1em;
-  // margin-left: 0;
-  // padding-top: 2.2em;
-  &--annotation-mode {
-    // padding-left: 4em;
-    @extend .list__item !optional;
-  }
-  &__checkbox.re-checkbox {
-    position: absolute;
-    left: 1.2em;
-    top: 1.2em;
-    width: auto;
+    &--annotation-mode {
+      // padding-left: 4em;
+      @extend .list__item !optional;
+    }
+    &__checkbox.re-checkbox {
+      position: absolute;
+      left: 1.2em;
+      top: 1.2em;
+      width: auto;
+    }
   }
 }
 .show-record-number {

@@ -140,7 +140,7 @@ export default {
     width: 100%;
     padding: 2em 2em 0.5em 2em;
     .list__item--annotation-mode & {
-      padding-left: 4em;
+      padding-left: 65px;
     }
   }
   &__labels {
@@ -149,6 +149,7 @@ export default {
     margin-left: 2em;
     width: 170px;
     flex-shrink: 0;
+    margin-bottom: -3em;
   }
 }
 </style>

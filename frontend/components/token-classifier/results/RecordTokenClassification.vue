@@ -206,7 +206,7 @@ export default {
   @include font-size(16px);
   line-height: 1.6em;
   .list__item--annotation-mode & {
-    padding-left: 4em;
+    padding-left: 65px;
   }
 }
 </style>
