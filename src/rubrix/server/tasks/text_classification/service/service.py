@@ -1,11 +1,15 @@
 import datetime
 from fastapi import Depends
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse
+from rubrix.server.tasks.commons import (
+    BulkResponse,
+    EsRecordDataFieldNames,
+    SortableField,
+)
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import filters
+from rubrix.server.tasks.commons.es_helpers import filters, sort_by2elasticsearch
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     TextClassificationQuery,
@@ -20,7 +24,7 @@ extends_index_dynamic_templates(
 )
 
 
-def as_elasticsearch(search: TextClassificationQuery) -> Dict[str, Any]:
+def query2elasticsearch(search: TextClassificationQuery) -> Dict[str, Any]:
     """Build an elasticsearch query part from search query"""
 
     if search.ids:
@@ -95,7 +99,8 @@ class TextClassificationService:
         self,
         dataset: str,
         owner: Optional[str],
-        search: TextClassificationQuery,
+        query: TextClassificationQuery,
+        sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
     ) -> TextClassificationSearchResults:
@@ -108,8 +113,10 @@ class TextClassificationService:
             The dataset name
         owner:
             The dataset owner
-        search:
+        query:
             The search parameters
+        sort_by:
+            The sort by list
         record_from:
             The record from return results
         size:
@@ -121,10 +128,25 @@ class TextClassificationService:
 
         """
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
-
         results = self.__dao__.search_records(
             dataset,
-            search=RecordSearch(query=as_elasticsearch(search)),
+            search=RecordSearch(
+                query=query2elasticsearch(query),
+                sort=sort_by2elasticsearch(
+                    sort_by,
+                    valid_fields=[
+                        "metadata",
+                        EsRecordDataFieldNames.score,
+                        EsRecordDataFieldNames.predicted,
+                        EsRecordDataFieldNames.predicted_as,
+                        EsRecordDataFieldNames.predicted_by,
+                        EsRecordDataFieldNames.annotated_as,
+                        EsRecordDataFieldNames.annotated_by,
+                        EsRecordDataFieldNames.status,
+                        EsRecordDataFieldNames.event_timestamp,
+                    ],
+                ),
+            ),
             size=size,
             record_from=record_from,
         )
@@ -162,7 +184,7 @@ class TextClassificationService:
         """
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=as_elasticsearch(query))
+            dataset, search=RecordSearch(query=query2elasticsearch(query))
         ):
             yield TextClassificationRecord.parse_obj(db_record)
 
