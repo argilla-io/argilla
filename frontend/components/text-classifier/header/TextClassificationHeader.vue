@@ -9,7 +9,7 @@
       >
         <template slot="first" slot-scope="validateDiscard">
           <annotation-label-selector
-            :class="'global-actions__select'"
+            :class="'validate-discard-actions__select'"
             :multi-label="isMultiLabelRecord"
             :options="availableLabels"
             @selected="onSelectLabels($event, validateDiscard.selectedRecords)"
@@ -102,19 +102,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.globa-actions__select {
-  margin-left: 0.8em;
-  ::v-deep .dropdown__header {
-    border-radius: 5px;
-    max-height: 33px;
-    background: $lighter-color;
-    border-width: 1px;
-    color: $font-secondary;
-    font-weight: bold;
-    &:first-of-type {
-      margin-right: 0;
-    }
-  }
-}
-</style>
+

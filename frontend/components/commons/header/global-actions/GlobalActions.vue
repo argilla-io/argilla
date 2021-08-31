@@ -21,13 +21,14 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .container {
   @extend %container;
+  margin: 0 auto;
+  padding: 4em;
   padding-top: 0;
   padding-bottom: 0;
 }
-
 .global-actions {
   display: flex;
   align-items: center;
@@ -50,58 +51,6 @@ export default {
   }
   @include media(">desktopLarge") {
     width: calc(100% - 294px);
-  }
-  .re-checkbox {
-    position: relative;
-    left: 0;
-    top: 0;
-    margin: 0 8px 0 0;
-  }
-  &__export {
-    margin: auto 0 auto auto;
-  }
-  &__select {
-    margin-left: 0.8em;
-    ::v-deep .dropdown__header {
-      border-radius: 5px;
-      max-height: 33px;
-      background: $lighter-color;
-      border-width: 1px;
-      color: $font-secondary;
-      font-weight: bold;
-    }
-  }
-  &__button {
-    border-radius: 5px;
-    height: 33px;
-    border: none;
-    min-width: 80px;
-    margin-left: 1em;
-    margin-right: 1em;
-    outline: none;
-    font-weight: 600;
-    color: $font-secondary;
-    background: $lighter-color;
-    border: 1px solid $line-smooth-color;
-    cursor: pointer;
-    &:hover,
-    &:focus {
-      border-color: $primary-color;
-    }
-    &:first-of-type {
-      margin-right: 0;
-    }
-  }
-  &__text {
-    color: $darker-color;
-    font-weight: normal;
-  }
-  &--disabled {
-    .global-actions__button,
-    .global-actions__select {
-      pointer-events: none;
-      opacity: 0.5;
-    }
   }
 }
 </style>
