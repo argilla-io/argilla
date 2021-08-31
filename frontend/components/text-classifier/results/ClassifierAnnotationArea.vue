@@ -110,7 +110,7 @@ export default {
       if (this.selectedLabels.length > 0) {
         this.annotate();
       } else {
-        this.$emit("updateStatus", "Edited");
+        this.$emit("edit", { labels: [] });
       }
     },
     annotate() {

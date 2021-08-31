@@ -15,15 +15,9 @@
         :labels="labelsForAnnotation"
         :multi-label="record.multi_label"
         @annotate="onAnnotate"
-        @updateStatus="onChangeRecordStatus"
+        @edit="onEdit"
       />
       <ClassifierExplorationArea v-else :labels="predictionLabels" />
-      <RecordExtraActions
-        :allow-change-status="annotationEnabled"
-        :record="record"
-        @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="$emit('onShowMetadata')"
-      />
     </div>
     <div v-if="!annotationEnabled" class="record__labels">
       <LabelPill
@@ -95,43 +89,26 @@ export default {
   },
   methods: {
     ...mapActions({
-      editAnnotations: "entities/datasets/editAnnotations",
-      discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
+      edit: "entities/datasets/editAnnotations",
     }),
-    async onChangeRecordStatus(status) {
-      switch (status) {
-        case "Validated":
-          await this.validate({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        case "Discarded":
-          await this.discard({
-            dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        case "Edited":
-          await this.editAnnotations({
-            dataset: this.dataset,
-            records: [
-              {
-                ...this.record,
-                status: "Edited",
-                annotation: {
-                  agent: this.$auth.user,
-                  labels: [],
-                },
-              },
-            ],
-          });
-          break;
-        default:
-          console.warn("waT?", status);
-      }
+
+    async onEdit({ labels }) {
+      await this.edit({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            status: "Edited",
+            annotation: {
+              agent: this.$auth.user,
+              labels,
+            },
+          },
+        ],
+      });
     },
+
     async onAnnotate({ labels }) {
       await this.validate({
         dataset: this.dataset,
