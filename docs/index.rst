@@ -164,6 +164,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/05-active_learning
    tutorials/06-labeling-finetuning
    tutorials/07-find_label_errors
+   tutorials/08-zeroshot_ner
 
 .. toctree::
    :maxdepth: 3
