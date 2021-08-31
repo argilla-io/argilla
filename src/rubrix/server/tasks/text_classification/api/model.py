@@ -186,9 +186,13 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             [label.score for label in self.prediction.labels]
             if self.multi_label
             else [
-                self._max_class_prediction(
-                    self.prediction, multi_label=self.multi_label
-                ).score
+                prediction_class.score
+                for prediction_class in [
+                    self._max_class_prediction(
+                        self.prediction, multi_label=self.multi_label
+                    )
+                ]
+                if prediction_class
             ]
         )
 
