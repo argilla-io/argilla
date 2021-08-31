@@ -29,12 +29,12 @@ class EsRecordDataFieldNames(str, Enum):
     event_timestamp = "event_timestamp"
 
 
-class SortOrder(Enum, str):
+class SortOrder(str, Enum):
     asc = "asc"
     desc = "desc"
 
 
-class SortableField:
+class SortableField(BaseModel):
     """Sortable field structure"""
 
     id: str
