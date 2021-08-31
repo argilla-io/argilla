@@ -9,8 +9,12 @@
       </section>
       <div class="container">
         <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-          <Results :dataset="dataset"> </Results>
-          <SideBarPanel v-if="sidebarVisible || width > 1500" :dataset="dataset" :class="dataset.task">
+          <Results :dataset="dataset" />
+          <SideBarPanel
+            v-if="sidebarVisible || width > 1500"
+            :dataset="dataset"
+            :class="dataset.task"
+          >
             <div v-show="sidebarInfoType === 'progress'">
               <component :is="currentTaskProgress" :dataset="dataset" />
             </div>
