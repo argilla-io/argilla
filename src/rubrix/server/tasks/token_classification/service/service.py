@@ -2,7 +2,7 @@ import datetime
 from fastapi import Depends
 from rubrix import MAX_KEYWORD_LENGTH
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse, SortableField
+from rubrix.server.tasks.commons import BulkResponse, EsRecordDataFieldNames, SortableField
 from rubrix.server.tasks.commons.dao import (
     extends_index_dynamic_templates,
     extends_index_properties,
@@ -155,7 +155,20 @@ class TokenClassificationService:
             dataset,
             search=RecordSearch(
                 query=as_elasticsearch(query),
-                sort=sort_by2elasticsearch(sort_by),
+                sort=sort_by2elasticsearch(
+                    sort_by,
+                    valid_fields=[
+                        "metadata",
+                        EsRecordDataFieldNames.score,
+                        EsRecordDataFieldNames.predicted,
+                        EsRecordDataFieldNames.predicted_as,
+                        EsRecordDataFieldNames.predicted_by,
+                        EsRecordDataFieldNames.annotated_as,
+                        EsRecordDataFieldNames.annotated_by,
+                        EsRecordDataFieldNames.status,
+                        EsRecordDataFieldNames.event_timestamp,
+                    ],
+                ),
                 aggregations={
                     **aggregations.nested_aggregation(
                         name=PREDICTED_MENTIONS_ES_FIELD_NAME,
