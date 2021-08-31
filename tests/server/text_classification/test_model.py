@@ -153,7 +153,7 @@ def test_created_record_with_default_status():
 def test_predicted_ok_for_multilabel_unordered():
     record = TextClassificationRecord(
         inputs={"text": "The text"},
-        prediction=TextClassificationAnnotation(
+        prediction_class=TextClassificationAnnotation(
             agent="test",
             labels=[
                 ClassPrediction(class_label="B"),

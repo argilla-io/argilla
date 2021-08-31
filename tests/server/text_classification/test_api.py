@@ -1,4 +1,7 @@
 from datetime import datetime
+
+import pytest
+
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
@@ -273,6 +276,54 @@ def test_sort_by_id_as_default():
         16,
         17,
     ]
+
+
+def test_some_sort_by():
+    dataset = "test_some_sort_by"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": i,
+                        "inputs": {"data": "my data"},
+                        "prediction": {"agent": f"agent_{i%5}", "labels": []},
+                        "metadata": {
+                            "s": f"{i} value",
+                        },
+                    }
+                )
+                for i in range(0, 100)
+            ],
+        ).dict(by_alias=True),
+    )
+    with pytest.raises(AssertionError):
+        client.post(
+            f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+            json={
+                "sort": [
+                    {"id": "wrong_field"},
+                ]
+            },
+        )
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+        json={
+            "sort": [
+                {"id": "predicted_by", "order": "desc"},
+                {"id": "metadata.s", "order": "asc"},
+            ]
+        },
+    )
+
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert results.total == 100
+    assert (
+        list(map(lambda r: r.id, results.records))
+        == [14, 19, 24, 29, 34, 39, 4, 44, 49, 54]
+    )
 
 
 def test_disable_aggregations_when_scroll():
