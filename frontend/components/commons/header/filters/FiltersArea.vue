@@ -11,12 +11,8 @@
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
+            @applySortBy="onApplySortBy"
           ></FiltersList>
-          <!-- <SortFilter
-            :sort-options="sortOptions"
-            @defaultSort="onDefaultSort"
-            @sort="onSort"
-          /> -->
         </div>
         <FiltersTags
           :dataset="dataset"
@@ -68,6 +64,12 @@ export default {
       this.search({
         dataset: this.dataset,
         query: { metadata: { [filter]: values } },
+      });
+    },
+    async onApplySortBy(sortList) {
+      await this.search({
+        dataset: this.dataset,
+        sort: sortList,
       });
     },
     onClearFilter(filter, value) {

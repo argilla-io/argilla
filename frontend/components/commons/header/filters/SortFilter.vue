@@ -6,17 +6,13 @@
       @visibility="onVisibility"
     >
       <span slot="dropdown-header">
-        <span v-if="selectedField"
-          >{{ selectedField.name }}</span
-        >
+        <span v-if="selectedField">{{ selectedField.name }}</span>
         <span v-else>Sort by</span>
       </span>
       <div slot="dropdown-content">
         <ul>
           <span v-for="option in sortOptions" :key="option.text">
-            <ul
-              @click="addField(option)"
-            >
+            <ul @click="addField(option)">
               <li>
                 {{ option.name }}
               </li>
@@ -25,10 +21,17 @@
         </ul>
       </div>
     </FilterDropdown>
-    <p title="sort direction" v-if="selectedField" class="sort__direction" @click="selectSortDirection()">{{defaultSortedByDir === 'asc' ? '↑' : '↓'}}</p>
-    <svgicon
-      title="remove field"
+    <p
       v-if="selectedField"
+      title="sort direction"
+      class="sort__direction"
+      @click="selectSortDirection()"
+    >
+      {{ defaultSortedByDir === "asc" ? "↑" : "↓" }}
+    </p>
+    <svgicon
+      v-if="selectedField"
+      title="remove field"
       class="sort__remove-button"
       name="cross"
       width="14"
@@ -39,7 +42,7 @@
 </template>
 
 <script>
-import 'assets/icons/cross';
+import "assets/icons/cross";
 export default {
   props: {
     sortOptions: {
@@ -48,7 +51,8 @@ export default {
     },
     selectedField: {
       type: Object,
-    }
+      default: undefined,
+    },
   },
   data: () => ({
     visible: false,
@@ -59,8 +63,10 @@ export default {
     onVisibility(value) {
       this.visible = value;
     },
-    selectSortDirection(){
-      this.defaultSortedByDir === 'asc' ? this.defaultSortedByDir ='desc' : this.defaultSortedByDir = 'asc';
+    selectSortDirection() {
+      this.defaultSortedByDir === "asc"
+        ? (this.defaultSortedByDir = "desc")
+        : (this.defaultSortedByDir = "asc");
       this.$emit("addSortField", this.selectedField, this.defaultSortedByDir);
     },
     removeField() {

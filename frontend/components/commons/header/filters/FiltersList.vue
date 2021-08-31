@@ -14,14 +14,17 @@
           >({{ itemsAppliedOnGroup(group) }})</span
         >
       </p>
-      <p :class="{
+      <p
+        :class="{
           active: initialVisibleGroup === 'sort',
-        }" @click="selectGroup('sort')">Sort</p>
+        }"
+        @click="selectGroup('sort')"
+      >
+        Sort
+      </p>
     </div>
-    <div class='filters__tabs__content' v-if="initialVisibleGroup === 'sort'">
-          <SortList
-            :sortOptions="this.filterList"
-          />
+    <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content">
+      <SortList :sort-options="filterList" @sortBy="onSortBy" />
     </div>
     <div v-for="group in groups" :key="group">
       <div
@@ -193,6 +196,9 @@ export default {
       } else {
         this.$emit("applyFilter", { filter: filter.key, values });
       }
+    },
+    onSortBy(sortList) {
+      this.$emit("applySortBy", sortList);
     },
   },
 };
