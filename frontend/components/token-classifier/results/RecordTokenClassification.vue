@@ -17,12 +17,6 @@
         @reset="onReset"
       />
     </div>
-    <RecordExtraActions
-      :allow-change-status="annotationEnabled"
-      :record="record"
-      @onChangeRecordStatus="onChangeRecordStatus"
-      @onShowMetadata="$emit('onShowMetadata')"
-    />
   </div>
 </template>
 
@@ -129,15 +123,6 @@ export default {
       discard: "entities/datasets/discardAnnotations",
     }),
 
-    async onChangeRecordStatus(status) {
-      switch (status) {
-        case "Discarded":
-          await this.discard({ dataset: this.dataset, records: [this.record] });
-          break;
-        default:
-          console.warn("waT?", status);
-      }
-    },
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
