@@ -71,9 +71,13 @@ export default {
     line-height: 1;
     text-align: left;
     color: $font-secondary;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 1.5em;
     @include font-size(13px);
+    padding-left: 2.3em;
+    .list__item--annotation-mode & {
+      padding-left: 65px;
+    }
     .annotate {
       color: $success;
     }

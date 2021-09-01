@@ -8,6 +8,7 @@ export default {
   props: {
     percent: {
       type: Number,
+      required: true,
     },
   },
 };

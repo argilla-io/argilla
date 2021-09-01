@@ -1,28 +1,22 @@
 <template>
   <div class="record">
-      <div ref="list" v-if="textSpans.length">
-        <TextSpan
-          v-for="(token, i) in textSpans"
-          :key="i"
-          :record="record"
-          :span-id="i"
-          :spans="textSpans"
-          :dataset="dataset"
-          :class="isSelected(i) ? 'selected' : ''"
-          @startSelection="onStartSelection"
-          @endSelection="onEndSelection"
-          @selectEntity="onSelectEntity"
-          @changeEntityLabel="onChangeEntityLabel"
-          @removeEntity="onRemoveEntity"
-          @reset="onReset"
-        />
-      </div>
-      <RecordExtraActions
-        :allow-change-status="annotationEnabled"
+    <div v-if="textSpans.length" ref="list">
+      <TextSpan
+        v-for="(token, i) in textSpans"
+        :key="i"
         :record="record"
-        @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="$emit('onShowMetadata')"
+        :span-id="i"
+        :spans="textSpans"
+        :dataset="dataset"
+        :class="isSelected(i) ? 'selected' : ''"
+        @startSelection="onStartSelection"
+        @endSelection="onEndSelection"
+        @selectEntity="onSelectEntity"
+        @changeEntityLabel="onChangeEntityLabel"
+        @removeEntity="onRemoveEntity"
+        @reset="onReset"
       />
+    </div>
   </div>
 </template>
 
@@ -129,15 +123,6 @@ export default {
       discard: "entities/datasets/discardAnnotations",
     }),
 
-    async onChangeRecordStatus(status) {
-      switch (status) {
-        case "Discarded":
-          await this.discard({ dataset: this.dataset, records: [this.record] });
-          break;
-        default:
-          console.warn("waT?", status);
-      }
-    },
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
@@ -221,7 +206,7 @@ export default {
   @include font-size(16px);
   line-height: 1.6em;
   .list__item--annotation-mode & {
-    padding-left: 4em;
+    padding-left: 65px;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="empty">
     <span class="empty__content">
-      <h1 class="empty__title">{{ emptyTitle }}</h1>
+      <h1 class="empty__title">{{ title }}</h1>
     </span>
   </div>
 </template>
@@ -9,8 +9,9 @@
 <script>
 export default {
   props: {
-    emptyTitle: {
+    title: {
       type: String,
+      default: "0 results found",
     },
   },
 };
