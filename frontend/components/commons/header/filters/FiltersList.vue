@@ -217,6 +217,9 @@ $number-size: 18px;
     display: flex;
     &__sort {
       margin-left: auto;
+        @include media(">desktopLarge") {
+          margin-right: 290px !important;
+        }
     }
     &__content {
       width: 450px;
@@ -229,6 +232,9 @@ $number-size: 18px;
       max-height: 550px;
       &--sort {
         right: 0;
+        @include media(">desktopLarge") {
+          right: 290px;
+        }
       }
       &--large {
         width: 910px;
