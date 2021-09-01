@@ -16,12 +16,17 @@
       @click="addNewField"
       >add field +</a
     >
-    <re-button
-      v-if="selectedFields.length"
-      class="discarded sort__button button-primary--small"
-      @click="apply"
-      >Apply</re-button
-    >
+    <div class="sort__buttons">
+      <re-button
+        class="button-tertiary--small button-tertiary--outline"
+        @click="cancel"
+        >Cancel</re-button>
+      <re-button
+        class="button-primary--small"
+        @click="apply"
+        >Apply</re-button
+      >
+    </div>
   </div>
 </template>
 
@@ -31,6 +36,9 @@ export default {
     sortOptions: {
       type: Array,
       required: true,
+    },
+    sort: {
+      type: Array,
     },
   },
   data: () => {
@@ -47,6 +55,10 @@ export default {
       );
     },
   },
+  mounted() {
+    this.numberOfSortFields = this.sort.length === 0 ? 1 : this.sort.length;
+    this.selectedFields = [...this.sort];
+  },
   methods: {
     addNewField() {
       this.numberOfSortFields += 1;
@@ -56,7 +68,6 @@ export default {
       if (this.numberOfSortFields > 1) {
         this.numberOfSortFields -= 1;
       }
-      this.apply();
     },
     onAddSortField(index, option, direction) {
       const item = {
@@ -69,6 +80,9 @@ export default {
     apply() {
       this.$emit("sortBy", this.selectedFields);
     },
+    cancel() {
+      this.$emit("closeSort");
+    }
   },
 };
 </script>
@@ -76,10 +90,16 @@ export default {
 <style lang="scss" scoped>
 .sort {
   margin-bottom: 0.5em;
-  &__button {
-    margin-left: auto;
-    margin-right: 0;
-    margin-bottom: 0;
+  &__buttons {
+    display: flex;
+    margin-top: 1.5em;
+    button {
+      margin-bottom: 0;
+    }
+    button:first-child {
+      margin-left: auto;
+      margin-right: 0.5em;
+    }
   }
   &__add-button {
     margin-top: 1em;

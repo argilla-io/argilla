@@ -1,5 +1,5 @@
 <template>
-  <div v-click-outside="onClickOutside" class="filters">
+  <div v-click-outside="close" class="filters">
     <div class="filters__tabs">
       <p
         v-for="group in groups"
@@ -24,7 +24,7 @@
       </p>
     </div>
     <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content">
-      <SortList :sort-options="filterList" @sortBy="onSortBy" />
+      <SortList :sort-options="filterList" :sort="dataset.sort" @closeSort="close" @sortBy="onSortBy" />
     </div>
     <div v-for="group in groups" :key="group">
       <div
@@ -172,7 +172,7 @@ export default {
     },
   },
   methods: {
-    onClickOutside() {
+    close() {
       this.initialVisibleGroup = undefined;
     },
     itemsAppliedOnGroup(group) {
@@ -190,7 +190,7 @@ export default {
       }
     },
     onApply(filter, values) {
-      this.initialVisibleGroup = undefined;
+      this.close();
       if (filter.group === "Metadata") {
         this.$emit("applyMetaFilter", { filter: filter.key, values });
       } else {
@@ -198,6 +198,7 @@ export default {
       }
     },
     onSortBy(sortList) {
+      this.close();
       this.$emit("applySortBy", sortList);
     },
   },

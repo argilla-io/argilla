@@ -59,9 +59,20 @@ export default {
     defaultSortedBy: undefined,
     defaultSortedByDir: "asc",
   }),
+  mounted() {
+    this.getSortDirection();
+  },
+  updated() {
+    this.getSortDirection();
+  },
   methods: {
     onVisibility(value) {
       this.visible = value;
+    },
+    getSortDirection() {
+      if (this.selectedField) {
+        this.defaultSortedByDir = this.selectedField.order;
+      }
     },
     selectSortDirection() {
       this.defaultSortedByDir === "asc"

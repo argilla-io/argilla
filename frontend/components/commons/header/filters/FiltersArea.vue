@@ -89,18 +89,6 @@ export default {
     onClearAllFilters() {
       this.search({ dataset: this.dataset, query: {} });
     },
-    onDefaultSort() {
-      this.search({
-        dataset: this.dataset,
-        sort: [],
-      });
-    },
-    onSort(sortKey, sortOrder) {
-      this.search({
-        dataset: this.dataset,
-        sort: [{ by: sortKey, order: sortOrder }],
-      });
-    },
   },
 };
 </script>
