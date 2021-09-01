@@ -9,7 +9,7 @@ T = TypeVar("T", bound="User")
 
 @attr.s(auto_attribs=True)
 class User:
-    """ Base user model """
+    """Base user model"""
 
     username: str
     email: Union[Unset, str] = UNSET

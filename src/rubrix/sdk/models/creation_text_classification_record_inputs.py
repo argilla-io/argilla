@@ -9,7 +9,7 @@ T = TypeVar("T", bound="CreationTextClassificationRecordInputs")
 
 @attr.s(auto_attribs=True)
 class CreationTextClassificationRecordInputs:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Union[str, List[str]]] = attr.ib(
         init=False, factory=dict

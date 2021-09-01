@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ScoreRange")
 
 @attr.s(auto_attribs=True)
 class ScoreRange:
-    """ Score range filter """
+    """Score range filter"""
 
     from_: Union[Unset, float] = 0.0
     to: Union[Unset, float] = UNSET

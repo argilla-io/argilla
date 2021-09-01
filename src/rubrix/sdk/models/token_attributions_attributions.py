@@ -7,7 +7,7 @@ T = TypeVar("T", bound="TokenAttributionsAttributions")
 
 @attr.s(auto_attribs=True)
 class TokenAttributionsAttributions:
-    """  """
+    """ """
 
     additional_properties: Dict[str, float] = attr.ib(init=False, factory=dict)
 

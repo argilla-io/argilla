@@ -11,7 +11,7 @@ T = TypeVar("T", bound="TokenClassificationAggregationsPredictedMentions")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAggregationsPredictedMentions:
-    """  """
+    """ """
 
     additional_properties: Dict[
         str, TokenClassificationAggregationsPredictedMentionsAdditionalProperty

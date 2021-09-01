@@ -11,7 +11,7 @@ T = TypeVar("T", bound="TextClassificationSearchAggregationsMetadata")
 
 @attr.s(auto_attribs=True)
 class TextClassificationSearchAggregationsMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[
         str, TextClassificationSearchAggregationsMetadataAdditionalProperty

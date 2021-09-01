@@ -9,7 +9,7 @@ T = TypeVar("T", bound="TextClassificationQueryMetadata")
 
 @attr.s(auto_attribs=True)
 class TextClassificationQueryMetadata:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Union[str, List[str]]] = attr.ib(
         init=False, factory=dict

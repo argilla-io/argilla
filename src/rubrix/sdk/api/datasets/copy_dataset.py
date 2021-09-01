@@ -90,7 +90,7 @@ def sync(
     name: str,
     json_body: CopyDatasetRequest,
 ) -> Optional[Union[Dataset, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Closes a dataset. This operation will releases backend resources
+    """Creates a dataset copy and its tags/metadata info
 
     Parameters
     ----------
@@ -134,7 +134,7 @@ async def asyncio(
     name: str,
     json_body: CopyDatasetRequest,
 ) -> Optional[Union[Dataset, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Closes a dataset. This operation will releases backend resources
+    """Creates a dataset copy and its tags/metadata info
 
     Parameters
     ----------

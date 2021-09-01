@@ -14,7 +14,7 @@ T = TypeVar("T", bound="Dataset")
 
 @attr.s(auto_attribs=True)
 class Dataset:
-    """ Dataset used for response output """
+    """Dataset used for response output"""
 
     name: str
     task: TaskType

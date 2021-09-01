@@ -7,7 +7,7 @@ T = TypeVar("T", bound="ApiStatusElasticsearch")
 
 @attr.s(auto_attribs=True)
 class ApiStatusElasticsearch:
-    """  """
+    """ """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
