@@ -1,5 +1,5 @@
 <template>
-  <div v-click-outside="onClickOutside" class="filters">
+  <div v-click-outside="close" class="filters">
     <div class="filters__tabs">
       <p
         v-for="group in groups"
@@ -14,6 +14,17 @@
           >({{ itemsAppliedOnGroup(group) }})</span
         >
       </p>
+      <p class="filters__tabs__sort"
+        :class="{
+          active: initialVisibleGroup === 'sort',
+        }"
+        @click="selectGroup('sort')"
+      >
+        Sort
+      </p>
+    </div>
+    <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content filters__tabs__content--sort">
+      <SortList :sort-options="filterList" :sort="dataset.sort" @closeSort="close" @sortBy="onSortBy" />
     </div>
     <div v-for="group in groups" :key="group">
       <div
@@ -161,7 +172,7 @@ export default {
     },
   },
   methods: {
-    onClickOutside() {
+    close() {
       this.initialVisibleGroup = undefined;
     },
     itemsAppliedOnGroup(group) {
@@ -179,12 +190,16 @@ export default {
       }
     },
     onApply(filter, values) {
-      this.initialVisibleGroup = undefined;
+      this.close();
       if (filter.group === "Metadata") {
         this.$emit("applyMetaFilter", { filter: filter.key, values });
       } else {
         this.$emit("applyFilter", { filter: filter.key, values });
       }
+    },
+    onSortBy(sortList) {
+      this.close();
+      this.$emit("applySortBy", sortList);
     },
   },
 };
@@ -200,6 +215,12 @@ $number-size: 18px;
   z-index: 2;
   &__tabs {
     display: flex;
+    &__sort {
+      margin-left: auto;
+        @include media(">desktopLarge") {
+          margin-right: 290px !important;
+        }
+    }
     &__content {
       width: 450px;
       position: absolute;
@@ -209,6 +230,12 @@ $number-size: 18px;
       padding: 3em 3em 2em 3em;
       border-radius: 5px;
       max-height: 550px;
+      &--sort {
+        right: 0;
+        @include media(">desktopLarge") {
+          right: 290px;
+        }
+      }
       &--large {
         width: 910px;
         max-height: 80vh;
@@ -246,11 +273,5 @@ $number-size: 18px;
 .filter {
   display: block;
   margin-bottom: 1em;
-  &__sort {
-    // max-width: 144px;
-    min-width: 150px;
-    margin-right: 0;
-    margin-left: 1em;
-  }
 }
 </style>
