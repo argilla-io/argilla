@@ -19,6 +19,13 @@ class ExtendedEsRecordDataFieldNames(str, Enum):
     text_annotated = "text_annotated"
 
 
+class Text2TextPrediction(BaseModel):
+    """Represents a text prediction/annotation and its score"""
+
+    text: str
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
+
+
 class Text2TextAnnotation(BaseAnnotation):
     """
     Annotation class for text2text tasks
@@ -26,15 +33,12 @@ class Text2TextAnnotation(BaseAnnotation):
     Attributes:
     -----------
 
-    text: str
-        the annotation text
+    sentences: str
+        List of sentence predictions/annotations
 
-    score: float
-        the annotation score
     """
 
-    text: str
-    score: float = Field(default=1.0, ge=0.0, le=1.0)
+    sentences: List[Text2TextPrediction]
 
 
 class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
@@ -57,12 +61,7 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
 
     @property
     def predicted(self) -> Optional[PredictionStatus]:
-        if self.predicted_as and self.annotated_as:
-            return (
-                PredictionStatus.OK
-                if set(self.predicted_as) == set(self.annotated_as)
-                else PredictionStatus.KO
-            )
+        """Won't apply"""
         return None
 
     @property
@@ -70,19 +69,27 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
         return self.text
 
     @property
-    def predicted_as(self) -> Optional[str]:
-        return self.prediction.text if self.prediction else None
+    def predicted_as(self) -> Optional[List[str]]:
+        return (
+            [sentence.text for sentence in self.prediction.sentences]
+            if self.prediction
+            else None
+        )
 
     @property
-    def annotated_as(self) -> Optional[str]:
-        return self.annotation.text if self.annotation else None
+    def annotated_as(self) -> Optional[List[str]]:
+        return (
+            [sentence.text for sentence in self.annotation.sentences]
+            if self.annotation
+            else None
+        )
 
     @property
     def scores(self) -> List[float]:
         """Values of prediction scores"""
         if not self.prediction:
             return []
-        return [self.prediction.score]
+        return [sentence.score for sentence in self.prediction.sentences]
 
     @validator("text")
     def validate_text(cls, text: Dict[str, Any]):
