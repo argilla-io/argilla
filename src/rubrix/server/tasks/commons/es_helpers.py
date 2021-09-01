@@ -1,6 +1,9 @@
 import math
 from typing import Any, Dict, List, Optional, Union
 
+from stopwordsiso import stopwords
+
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
@@ -8,11 +11,8 @@ from rubrix.server.datasets.dao import (
 from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
-    TaskStatus,
+    SortableField, TaskStatus,
 )
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from stopwordsiso import stopwords
-
 from .api import EsRecordDataFieldNames
 
 SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
@@ -86,6 +86,21 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
         ],
     },
 }
+
+def sort_by2elasticsearch(
+    sort: List[SortableField], valid_fields: Optional[List[str]] = None
+) -> List[Dict[str, Any]]:
+    valid_fields = valid_fields or []
+    result = []
+    for sortable_field in sort:
+        if valid_fields:
+            assert sortable_field.id.split(".")[0] in valid_fields, (
+                f"Wrong sort id {sortable_field.id}. Valid values are"
+                f"[{valid_fields}]"
+            )
+        result.append({sortable_field.id: {"order": sortable_field.order}})
+    return result
+
 
 
 def parse_aggregations(

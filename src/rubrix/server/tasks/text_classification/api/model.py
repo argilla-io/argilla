@@ -9,6 +9,7 @@ from rubrix.server.tasks.commons.api.model import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
+    SortableField,
     TaskStatus,
     TaskType,
 )
@@ -185,9 +186,13 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             [label.score for label in self.prediction.labels]
             if self.multi_label
             else [
-                self._max_class_prediction(
-                    self.prediction, multi_label=self.multi_label
-                ).score
+                prediction_class.score
+                for prediction_class in [
+                    self._max_class_prediction(
+                        self.prediction, multi_label=self.multi_label
+                    )
+                ]
+                if prediction_class
             ]
         )
 
@@ -357,9 +362,13 @@ class TextClassificationSearchRequest(BaseModel):
 
     query: TextClassificationQuery
         The search query configuration
+
+    sort:
+        The sort order list
     """
 
     query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
+    sort: List[SortableField] = Field(default_factory=list)
 
 
 class TextClassificationSearchAggregations(BaseModel):

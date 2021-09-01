@@ -10,6 +10,7 @@ from uuid import uuid4
 from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
 
@@ -26,6 +27,18 @@ class EsRecordDataFieldNames(str, Enum):
     score = "score"
     words = "words"
     event_timestamp = "event_timestamp"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class SortableField(BaseModel):
+    """Sortable field structure"""
+
+    id: str
+    order: SortOrder = SortOrder.asc
 
 
 class BulkResponse(BaseModel):

@@ -1,4 +1,6 @@
-from rubrix.server.tasks.commons import BulkResponse
+import pytest
+
+from rubrix.server.tasks.commons import BulkResponse, SortableField
 from rubrix.server.tasks.token_classification import (
     TokenClassificationQuery,
     TokenClassificationSearchRequest,
@@ -44,6 +46,36 @@ def test_search_special_characters():
     results = TokenClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
 
+
+def test_some_sort():
+    dataset = "test_some_sort"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    expected_text = "This is a text with !"
+    records = [
+        TokenClassificationRecord.parse_obj(data)
+        for data in [
+            {
+                "tokens": expected_text.split(" "),
+                "raw_text": expected_text,
+            }
+        ]
+    ]
+    client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkData(
+            tags={"env": "test", "class": "text classification"},
+            metadata={"config": {"the": "config"}},
+            records=records,
+        ).dict(by_alias=True),
+    )
+
+    with pytest.raises(AssertionError):
+        client.post(
+            f"/api/datasets/{dataset}/TokenClassification:search",
+            json=TokenClassificationSearchRequest(
+                sort=[SortableField(id="babba")],
+            ).dict(),
+        )
 
 
 def test_create_records_for_token_classification():

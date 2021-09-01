@@ -12,13 +12,16 @@ class RecordSearch(BaseModel):
 
     query:
         The elasticsearch search query portion
-
+    sort:
+        The elasticsearch sort order
     aggregations:
         The elasticsearch search aggregations
     """
 
     query: Optional[Dict[str, Any]]
+    sort: List[Dict[str,Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
+
 
 
 class RecordSearchResults(BaseModel):

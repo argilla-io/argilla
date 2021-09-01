@@ -181,7 +181,7 @@ class DatasetRecordsDAO:
             "size": size,
             "from": record_from,
             "query": search.query or {"match_all": {}},
-            "sort": [{"_id": {"order": "asc"}}],  # TODO: Sort by event timestamp?
+            "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": search_aggregations or {},
         }
         results = self._es.search(index=records_index, query=es_query, size=size)

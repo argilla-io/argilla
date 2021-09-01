@@ -125,7 +125,8 @@ def search_records(
     result = service.search(
         dataset=name,
         owner=current_user.current_group,
-        search=query,
+        query=query,
+        sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
     )
