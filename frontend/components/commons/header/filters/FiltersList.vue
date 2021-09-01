@@ -14,7 +14,7 @@
           >({{ itemsAppliedOnGroup(group) }})</span
         >
       </p>
-      <p
+      <p class="filters__tabs__sort"
         :class="{
           active: initialVisibleGroup === 'sort',
         }"
@@ -23,7 +23,7 @@
         Sort
       </p>
     </div>
-    <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content">
+    <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content filters__tabs__content--sort">
       <SortList :sort-options="filterList" :sort="dataset.sort" @closeSort="close" @sortBy="onSortBy" />
     </div>
     <div v-for="group in groups" :key="group">
@@ -215,6 +215,9 @@ $number-size: 18px;
   z-index: 2;
   &__tabs {
     display: flex;
+    &__sort {
+      margin-left: auto;
+    }
     &__content {
       width: 450px;
       position: absolute;
@@ -224,6 +227,9 @@ $number-size: 18px;
       padding: 3em 3em 2em 3em;
       border-radius: 5px;
       max-height: 550px;
+      &--sort {
+        right: 0;
+      }
       &--large {
         width: 910px;
         max-height: 80vh;
@@ -261,11 +267,5 @@ $number-size: 18px;
 .filter {
   display: block;
   margin-bottom: 1em;
-  &__sort {
-    // max-width: 144px;
-    min-width: 150px;
-    margin-right: 0;
-    margin-left: 1em;
-  }
 }
 </style>
