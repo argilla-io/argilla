@@ -165,6 +165,67 @@ class TokenClassificationRecord(BaseModel):
         )
 
 
+class Text2TextRecord(BaseModel):
+    """Record for a text to text task
+
+    Args:
+        text:
+            The input of the record
+        prediction:
+            A list of strings or tuples containing predictions for the input text.
+            If tuples, the first entry is the predicted text, the second entry is its corresponding score.
+        annotation:
+            A string representing the expected output text for the given input text.
+        prediction_agent:
+            Name of the prediction agent.
+        annotation_agent:
+            Name of the annotation agent.
+        id:
+            The id of the record. By default (None), we will generate a unique ID for you.
+        metadata:
+            Meta data for the record. Defaults to `{}`.
+        status:
+            The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
+            If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
+        event_timestamp:
+            The timestamp of the record.
+    """
+
+    text: str
+
+    prediction: Optional[List[Union[str, Tuple[str, float]]]] = None
+    annotation: Optional[str] = None
+    prediction_agent: Optional[str] = None
+    annotation_agent: Optional[str] = None
+
+    id: Optional[Union[int, str]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    status: Optional[str] = None
+    event_timestamp: Optional[datetime.datetime] = None
+
+    @validator("prediction")
+    def prediction_as_tuples(
+        cls, prediction: Optional[List[Union[str, Tuple[str, float]]]]
+    ):
+        """Preprocess the predictions and wraps them in a tuple if needed"""
+        if prediction is None:
+            return prediction
+        if all([isinstance(pred, tuple) for pred in prediction]):
+            return prediction
+        return [(text, 1.0) for text in prediction]
+
+    @validator("metadata", pre=True)
+    def check_value_length(cls, metadata):
+        return _limit_metadata_values(metadata)
+
+    def __init__(self, *args, **kwargs):
+        """Custom init to handle dynamic defaults"""
+        super().__init__(*args, **kwargs)
+        self.status = self.status or (
+            "Default" if self.annotation is None else "Validated"
+        )
+
+
 def _limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
     """Checks metadata values length and apply value truncation for large values"""
     new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
@@ -176,4 +237,4 @@ def _limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
     return new_value
 
 
-Record = Union[TextClassificationRecord, TokenClassificationRecord]
+Record = Union[TextClassificationRecord, TokenClassificationRecord, Text2TextRecord]
