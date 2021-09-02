@@ -12,7 +12,7 @@ from rubrix._constants import MAX_KEYWORD_LENGTH
 
 
 class BulkResponse(BaseModel):
-    """Data info for bulk results.
+    """Summary response when logging records to the Rubrix server.
 
     Args:
         dataset:
@@ -42,17 +42,6 @@ class TokenAttributions(BaseModel):
 
     token: str
     attributions: Dict[str, float] = Field(default_factory=dict)
-
-
-def limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
-    """Checks metadata values length and apply value truncation for large values"""
-    new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
-    if new_value != metadata:
-        warnings.warn(
-            "Some metadata values exceed the max length. "
-            f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
-        )
-    return new_value
 
 
 class TextClassificationRecord(BaseModel):
@@ -110,7 +99,7 @@ class TextClassificationRecord(BaseModel):
 
     @validator("metadata", pre=True)
     def check_value_length(cls, metadata):
-        return limit_metadata_values(metadata)
+        return _limit_metadata_values(metadata)
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""
@@ -130,7 +119,7 @@ class TokenClassificationRecord(BaseModel):
         tokens:
             The tokenized input of the record. We use this to guide the annotation process
             and to cross-check the spans of your `prediction`/`annotation`.
-        prediction
+        prediction:
             A list of tuples containing the predictions for the record. The first entry of the tuple is the name of
             predicted entity, the second and third entry correspond to the start and stop character index of the entity.
         annotation:
@@ -166,7 +155,7 @@ class TokenClassificationRecord(BaseModel):
 
     @validator("metadata", pre=True)
     def check_value_length(cls, metadata):
-        return limit_metadata_values(metadata)
+        return _limit_metadata_values(metadata)
 
     def __init__(self, *args, **kwargs):
         """Custom init to handle dynamic defaults"""
@@ -174,6 +163,17 @@ class TokenClassificationRecord(BaseModel):
         self.status = self.status or (
             "Default" if self.annotation is None else "Validated"
         )
+
+
+def _limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """Checks metadata values length and apply value truncation for large values"""
+    new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
+    if new_value != metadata:
+        warnings.warn(
+            "Some metadata values exceed the max length. "
+            f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
+        )
+    return new_value
 
 
 Record = Union[TextClassificationRecord, TokenClassificationRecord]
