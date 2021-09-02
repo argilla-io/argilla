@@ -1,6 +1,6 @@
 .. _webapp_reference:
 
-Rubrix UI webapp
+Rubrix webapp UI
 ================
 This section contains a quick overview of Rubrix web-app's User Interface (UI).
 
