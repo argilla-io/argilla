@@ -18,10 +18,7 @@ from rubrix import (
     TextClassificationRecord,
     TokenClassificationRecord,
 )
-from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
-from rubrix.sdk.api.token_classification import (
-    bulk_records as token_classification_bulk,
-)
+import rubrix.sdk.api.text_classification.bulk_records
 from rubrix.sdk.models import (
     TextClassificationBulkData,
     TextClassificationBulkDataMetadata,
@@ -85,7 +82,7 @@ def mock_response_text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        text_classification_bulk, "sync_detailed", mock_get
+        "rubrix.client.text_classification_sync_detailed", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -119,7 +116,7 @@ def mock_response_token(monkeypatch):
         )
 
     monkeypatch.setattr(
-        token_classification_bulk, "sync_detailed", mock_get
+        "rubrix.client.token_classification_sync_detailed", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -249,7 +246,7 @@ def mock_wrong_bulk_response(monkeypatch):
             parsed={"error": "the error message "},
         )
 
-    monkeypatch.setattr(text_classification_bulk, "sync_detailed", mock)
+    monkeypatch.setattr("rubrix.client.text_classification_sync_detailed", mock)
 
 
 def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
