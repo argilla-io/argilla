@@ -297,18 +297,6 @@ class RubrixClient:
 
         return models.TextClassificationRecord.from_dict(model_dict)
 
-    def delete(self, name: str):
-        """
-        Delete a dataset with given name
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        """
-        response = delete_dataset.sync_detailed(client=self._client, name=name)
-        _check_response_errors(response)
-
     @staticmethod
     def _token_classification_sdk_to_record(
         sdk: Union[models.TokenClassificationRecord, Dict[str, Any]]
@@ -381,11 +369,22 @@ class RubrixClient:
         return models.TokenClassificationRecord.from_dict(model_dict)
 
     def copy(self, source: str, target: str):
+        """Makes a copy of the `source` dataset and saves it as `target`"""
         response = copy_dataset.sync_detailed(
             client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
         )
         if response.status_code == 409:
-            raise RuntimeError(f"Already created an dataset with name {target}")
+            raise RuntimeError(f"A dataset with name '{target}' already exists.")
+
+    def delete(self, name: str):
+        """Delete a dataset with given name
+
+        Args:
+            name:
+                The dataset name
+        """
+        response = delete_dataset.sync_detailed(client=self._client, name=name)
+        _check_response_errors(response)
 
 
 def _check_response_errors(response: Response) -> None:
