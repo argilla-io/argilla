@@ -158,7 +158,7 @@ def test_log_with_annotation(monkeypatch):
 
 
 @pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
-def test_text_classification_record_to_sdk(annotation):
+def test_text_classification_client_to_sdk(annotation):
     token_attributions = [
         TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
     ]
@@ -175,12 +175,12 @@ def test_text_classification_record_to_sdk(annotation):
         status="Default",
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
-    sdk_record = RubrixClient._text_classification_record_to_sdk(record)
+    sdk_record = RubrixClient._text_classification_client_to_sdk(record)
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
-def test_token_classification_record_to_sdk():
+def test_token_classification_client_to_sdk():
     record = TokenClassificationRecord(
         text="test text",
         tokens=["test", "text"],
@@ -193,7 +193,7 @@ def test_token_classification_record_to_sdk():
         status="Default",
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
-    sdk_record = RubrixClient._token_classification_record_to_sdk(record)
+    sdk_record = RubrixClient._token_classification_client_to_sdk(record)
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
