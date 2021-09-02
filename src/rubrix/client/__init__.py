@@ -36,26 +36,26 @@ from rubrix.sdk.types import Response
 class RubrixClient:
     """Class definition for Rubrix Client"""
 
-    _LOGGER = logging.getLogger(__name__)  # _LOGGER intialization
+    _LOGGER = logging.getLogger(__name__)
 
-    MAX_CHUNK_SIZE = 5000  # Larger sizzes will trigger a warning
+    # Larger sizes will trigger a warning
+    MAX_CHUNK_SIZE = 5000
 
     def __init__(
         self,
         api_url: str,
-        timeout: int,
-        api_key: Optional[str] = None,
+        api_key: str,
+        timeout: int = 60,
     ):
         """Client setup function.
 
-        Parameters
-        ----------
-        api_url : str
-            Address from which the API is serving. It will use the default UVICORN address as default
-        api_key : str
-            Authentification token. A non-secured logging will be considered the default case.
-        timeout : int
-            Seconds to considered a connection timeout. Optional
+        Args:
+            api_url:
+                Address from which the API is serving.
+            api_key:
+                Authentication token.
+            timeout:
+                Seconds to considered a connection timeout.
         """
 
         self._client = None  # Variable to store the client after the init
@@ -65,10 +65,9 @@ class RubrixClient:
         except ConnectionRefusedError:
             raise Exception("Connection Refused: cannot connect to the API.")
 
-        if response.status_code != 200:  # Incorrect authentication
-            # default
+        if response.status_code != 200:
             raise Exception(
-                "Connection error: Indetermined error connecting to Rubrix Server. "
+                "Connection error: Undetermined error connecting to the Rubrix Server. "
                 "The API answered with a {} code: {}".format(
                     response.status_code, response.content
                 )
@@ -79,7 +78,7 @@ class RubrixClient:
 
         whoami_response_status = whoami.sync_detailed(client=self._client).status_code
         if whoami_response_status == 401:
-            raise Exception("Authentification error: invalid credentials.")
+            raise Exception("Authentication error: invalid credentials.")
 
     def log(
         self,
@@ -89,26 +88,22 @@ class RubrixClient:
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
     ) -> BulkResponse:
-        """
-        Register a set of logs into Rubrix
+        """Log records to Rubrix.
 
-        Parameters
-        ----------
-        records:
-            The data records list.
-        name:
-            The dataset name
-        tags:
-            A set of tags related to dataset. Optional
-        metadata:
-            A set of extra info for dataset. Optional
-        chunk_size:
-            The default chunk size for data bulk
+        Args:
+            records:
+                The records to be logged.
+            name:
+                The dataset name.
+            tags:
+                A set of tags related to the dataset.
+            metadata:
+                A set of extra info for the dataset.
+            chunk_size:
+                Records are logged in chunks to the Rubrix server, this defines their sizes.
 
-        Returns
-        -------
-        BulkResponse
-            If successful, with a summary response from the API.
+        Returns:
+            A summary response from the API.
 
         """
 
@@ -151,6 +146,8 @@ class RubrixClient:
             tags = models.TokenClassificationBulkDataTags.from_dict(tags)
             metadata = models.TokenClassificationBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._token_classification_record_to_sdk
+
+        elif record_type is Text2TextRecord
 
         # Record type is not recognised
         else:
