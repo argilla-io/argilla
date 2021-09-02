@@ -16,8 +16,17 @@ from rubrix.client.models import (
     TextClassificationRecord,
     TokenAttributions,
     TokenClassificationRecord,
+    Text2TextRecord,
 )
 from rubrix.sdk import AuthenticatedClient, models
+from rubrix.sdk.models.text2_text_record import Text2TextRecord as Text2TextRecordSdk
+from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
+from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
+from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
+from rubrix.sdk.models.text2_text_query import Text2TextQuery
+from rubrix.sdk.api.text_to_text.bulk_records import (
+    sync_detailed as text2text_sync_detailed,
+)
 from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
 from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
 from rubrix.sdk.api.token_classification import (
@@ -147,7 +156,12 @@ class RubrixClient:
             metadata = models.TokenClassificationBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._token_classification_record_to_sdk
 
-        elif record_type is Text2TextRecord
+        elif record_type is Text2TextRecord:
+            bulk_class = Text2TextBulkData
+            bulk_records_function = text2text_sync_detailed
+            tags = Text2TextBulkDataTags.from_dict(tags)
+            metadata = Text2TextBulkDataMetadata.from_dict(metadata)
+            to_sdk_model = self._text2text_record_to_sdk
 
         # Record type is not recognised
         else:
@@ -211,9 +225,15 @@ class RubrixClient:
 
             map_fn = self._token_classification_sdk_to_record
             request_class = TokenClassificationQuery
+        elif task == TaskType.TEXTTOTEXT:
+            from rubrix.sdk.api.text_to_text import _get_dataset_data
+
+            map_fn = self._text2text_sdk_to_record
+            request_class = Text2TextQuery
         else:
             raise ValueError(
-                f"Sorry, load method is only allowed with token and text classification"
+                f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
+                f"{[TaskType.TEXTCLASSIFICATION, TaskType.TOKENCLASSIFICATION, TaskType.TEXTTOTEXT]}"
             )
         response = _get_dataset_data.sync_detailed(
             client=self._client,
@@ -380,6 +400,70 @@ class RubrixClient:
             model_dict["event_timestamp"] = record.event_timestamp.isoformat()
 
         return models.TokenClassificationRecord.from_dict(model_dict)
+
+    @staticmethod
+    def _text2text_client_to_sdk(record: Text2TextRecord) -> Text2TextRecordSdk:
+        """Returns the sdk model of the record given its client model"""
+        model_dict = {
+            "text": record.text,
+            "status": record.status,
+        }
+        if record.prediction is not None:
+            sentences = [
+                {"text": text, "score": score} for text, score in record.prediction
+            ]
+            model_dict["prediction"] = {
+                "agent": record.prediction_agent or "None",
+                "sentences": sentences,
+            }
+        if record.annotation is not None:
+            sentence = {"text": record.annotation, "score": 1.0}
+            model_dict["annotation"] = {
+                "agent": record.annotation_agent or "None",
+                "sentences": [sentence],
+            }
+
+        if record.id is not None:
+            model_dict["id"] = record.id
+        if record.metadata is not None:
+            model_dict["metadata"] = record.metadata
+        if record.event_timestamp is not None:
+            model_dict["event_timestamp"] = record.event_timestamp.isoformat()
+
+        return Text2TextRecordSdk.from_dict(model_dict)
+
+    @staticmethod
+    def _text2text_sdk_to_client(
+        record: Union[Text2TextRecordSdk, Dict[str, Any]]
+    ) -> Text2TextRecord:
+        """Returns the client model of the record given its sdk model"""
+        if isinstance(record, Text2TextRecordSdk):
+            record = record.to_dict()
+
+        record_client = Text2TextRecord(
+            text=record.get("text"),
+            id=record.get("id"),
+            event_timestamp=record.get("event_timestamp"),
+            status=record.get("status"),
+            metadata=record.get("metadata") or {},
+            prediction=[
+                (pred["text"], pred.get("score"))
+                for pred in record["prediction"]["sentences"]
+            ]
+            if record.get("prediction")
+            else None,
+            prediction_agent=record["prediction"].get("agent")
+            if record.get("prediction")
+            else None,
+            annotation=record["annotation"]["sentences"][0]["text"]
+            if record.get("annotation")
+            else None,
+            annotation_agent=record["annotation"].get("agent")
+            if record.get("annotation")
+            else None,
+        )
+
+        return record_client
 
     def copy(self, source: str, target: str):
         """Makes a copy of the `source` dataset and saves it as `target`"""
