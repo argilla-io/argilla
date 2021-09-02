@@ -182,6 +182,19 @@ class RubrixClient:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
     ) -> pandas.DataFrame:
+        """Load dataset data to a pandas DataFrame.
+
+        Args:
+            name:
+                The dataset name.
+            ids:
+                If provided, load dataset records with given ids.
+            limit:
+                The number of records to retrieve.
+
+        Returns:
+            The dataset as a pandas Dataframe.
+        """
         from rubrix.sdk.api.datasets import get_dataset
 
         response = get_dataset.sync_detailed(client=self._client, name=name)
