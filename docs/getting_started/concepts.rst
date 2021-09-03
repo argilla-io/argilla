@@ -130,7 +130,7 @@ Metada will hold extra information that you want your record to have: if it belo
 Methods
 -------
 
-To find more information about these methods, please check out the :ref:`api`.
+To find more information about these methods, please check out the :ref:`python_client`.
 
 rb.init
 ^^^^^^^
