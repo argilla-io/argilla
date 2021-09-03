@@ -224,9 +224,14 @@ export default {
     ul {
       list-style: none;
       background: $lighter-color;
-      padding: 0 1em;
+      padding: 0;
       display: inline-block;
       position: absolute;
+      top: 50px;
+      left: 0;
+      a {
+        display: inline;
+      }
     }
     a {
       outline: none;
