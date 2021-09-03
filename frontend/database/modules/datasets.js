@@ -59,16 +59,18 @@ function configuredRouteParams() {
     sort: JSON.parse($nuxt.$route.query.sort || "[]"),
     task: $nuxt.$route.query.task,
     allowAnnotation: $nuxt.$route.query.allowAnnotation || false,
+    pagination: JSON.parse($nuxt.$route.query.pagination),
   };
 }
 
-function displayQueryParams({ query, sort, task, enableAnnotation }) {
+function displayQueryParams({ query, sort, task, enableAnnotation, pagination }) {
   $nuxt.$router.push({
     query: {
       query: JSON.stringify(query),
       sort: JSON.stringify(sort),
       task: task,
       allowAnnotation: enableAnnotation,
+      pagination: JSON.stringify(pagination),
     },
   });
 }
@@ -239,10 +241,10 @@ const actions = {
       await ObservationDataset.api().get(`/datasets/${name}`);
     }
     ds = ObservationDataset.find(name);
-    const { task, allowAnnotation } = configuredRouteParams();
+    const { task, allowAnnotation, pagination } = configuredRouteParams();
     DatasetViewSettings.insert({
       data: ObservationDataset.all().map((ds) => ({
-        pagination: { id: ds.name },
+        pagination: pagination ? pagination : { id: ds.name },
         id: ds.name,
         annotationEnabled: allowAnnotation === "true" ? true : false,
       })),
@@ -298,21 +300,21 @@ const actions = {
       size: DEFAULT_QUERY_SIZE,
     });
     const viewSettings = DatasetViewSettings.query().first();
+    return await dispatch("resetPagination", { dataset });
     displayQueryParams({
       query: searchQuery,
       sort,
       task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
+      pagination: viewSettings.pagination,
     });
-    return await dispatch("resetPagination", { dataset });
   },
 
   async resetPagination(_, { dataset }) {
+    const { pagination } = configuredRouteParams();
     return await Pagination.update({
       where: dataset.name,
-      data: {
-        page: 1,
-      },
+      data: pagination,
     });
   },
 
@@ -322,6 +324,7 @@ const actions = {
       sort: dataset.sort,
       task: dataset.task,
       enableAnnotation: value,
+      pagination: dataset.viewSettings.pagination,
     });
     return await DatasetViewSettings.update({
       where: dataset.name,
@@ -341,7 +344,7 @@ const actions = {
     });
   },
 
-  async fetchMoreRecords({ dispatch }, { dataset }) {
+  async paginate({ dispatch }, { dataset, size, from }) {
     const loadedRecords = dataset.results.records.length;
     const prefetchPaginationSize =
       dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
@@ -349,7 +352,8 @@ const actions = {
     const newPagination = await Pagination.update({
       where: dataset.name,
       data: {
-        page: dataset.viewSettings.pagination.page + 1,
+        page: from,
+        size: size,
       },
     });
 
@@ -359,22 +363,41 @@ const actions = {
         viewSettings: { ...dataset.viewSettings, pagination: newPagination },
       },
     });
-
-    if (
-      // Prefetch data before reach the end of pagination
-      loadedRecords < dataset.results.total &&
-      loadedRecords <= prefetchPaginationSize
-    ) {
-      dispatch(
-        `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
-        {
-          dataset: newDataset,
-          from: loadedRecords,
-          size: 2 * DEFAULT_QUERY_SIZE,
-        },
-        { root: true }
-      );
-    }
+    displayQueryParams({
+      query: dataset.query,
+      sort: dataset.sort,
+      task: dataset.task,
+      enableAnnotation: dataset.annotationEnabled,
+      pagination: {
+        ...dataset.viewSettings.pagination,
+        page: from,
+        size: size,
+      }
+    });
+    dispatch(
+      `entities/${toSnakeCase(dataset.task)}/paginate`,
+      {
+        dataset: newDataset,
+        from: from,
+        size: size,
+      },
+      { root: true }
+    );
+    // if (
+    //   // Prefetch data before reach the end of pagination
+    //   loadedRecords < dataset.results.total &&
+    //   loadedRecords <= prefetchPaginationSize
+    // ) {
+    //   dispatch(
+    //     `entities/${toSnakeCase(dataset.task)}/paginate`,
+    //     {
+    //       dataset: newDataset,
+    //       from: from,
+    //       size: size,
+    //     },
+    //     { root: true }
+    //   );
+    // }
   },
 };
 

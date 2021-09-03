@@ -1,32 +1,23 @@
 <template>
   <div class="list">
     <slot name="header" />
-    <VueAutoVirtualScrollList
-      id="scroll"
+    <div
       ref="scroll"
-      :key="dataset.name"
-      style="width: 100%"
-      class="virtual-scroll"
-      :total-height="1200"
-      :default-height="100"
+      id="scroll"
+      class="results-scroll"
     >
       <div
-        v-for="(item, index) in visibleRecords"
-        :key="index"
+        v-for="item in visibleRecords"
+        :key="item.id"
         class="list__li"
       >
         <results-record v-if="item" :dataset="dataset" :item="item">
           <slot name="record" :record="item" />
         </results-record>
       </div>
-      <ReShowMoreData
-        v-if="moreDataAvailable"
-        :items="visibleRecords.length"
-        :total="dataset.results.total"
-        :more-data-size="dataset.viewSettings.pagination.size"
-        @moredata="onShowMoreData"
-      />
-    </VueAutoVirtualScrollList>
+        <RePagination :paginationSize="dataset.viewSettings.pagination.size" :totalItems="dataset.results.total" :totalPages="Math.ceil(dataset.results.total / dataset.viewSettings.pagination.size)"
+        :currentPage="dataset.viewSettings.pagination.page" @changePage="onPagination" />
+    </div>
   </div>
 </template>
 <script>
@@ -65,7 +56,7 @@ export default {
 
   methods: {
     ...mapActions({
-      fetchMoreRecords: "entities/datasets/fetchMoreRecords",
+      paginate: "entities/datasets/paginate",
     }),
     onScroll() {
       if (this.$refs.scroll.scrollTop > 100) {
@@ -76,9 +67,14 @@ export default {
           .classList.remove("fixed-header");
       }
     },
-    async onShowMoreData() {
-      this.fetchMoreRecords({
+    async onPagination(page, size) {
+      this.$nextTick(() => {
+          this.$refs.scroll.scrollTop = 0;
+      });
+      this.paginate({
         dataset: this.dataset,
+        from: page,
+        size: size,
       });
     },
   },
@@ -92,9 +88,10 @@ export default {
   position: relative;
   margin-bottom: 0;
   list-style: none;
-  .virtual-scroll {
+  .results-scroll {
     padding-top: 1em;
     height: 100vh !important;
+    overflow: auto;
   }
   &__li {
     padding-bottom: 2px;
