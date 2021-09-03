@@ -9,11 +9,6 @@ dependencies:
 # tests
 - pytest
 - pytest-cov
-# docs
-- sphinx==4.0.1
-- sphinx_rtd_theme==0.5.2
-- nbsphinx==0.8.5
-- pandoc==2.12
 # we need this to ensure syntax highlighting in the notebook code cells for the docs
 - ipython
 # for building the frontend
@@ -21,7 +16,11 @@ dependencies:
 - pip:
     # build python sdk
     - openapi-python-client~=0.8.0
-    # install rubrix in editable mode
-    - -e .[server]
-    # sphinx og
+    # docs
+    - sphinx==4.1.2
+    - sphinx_rtd_theme==0.5.2
+    - nbsphinx==0.8.7
+    - pandoc==2.12
     - sphinxext.opengraph==0.4.2
+    # install Rubrix in editable mode
+    - -e .[server]
