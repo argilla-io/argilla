@@ -64,7 +64,7 @@ const actions = {
             ...dataset.$toJson(),
             results: {
               ...dataset.results,
-              records: dataset.results.records.concat(data.records),
+              records: data.records,
             },
           };
         },
