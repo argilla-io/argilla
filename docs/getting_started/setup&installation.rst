@@ -25,13 +25,13 @@ Then you can install Rubrix with ``pip``\ :
 
 There are two ways to launch the webapp:
 
-a. Using `docker-compose <https://docs.docker.com/compose/>`_ (**recommended**).
+a. Using `docker-compose <https://docs.docker.com/compose/>`__ (**recommended**).
 b. Executing the server code manually
 
 a) Using ``docker-compose`` (recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`_.
+For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`__.
 
 Then, create a folder:
 
@@ -46,24 +46,24 @@ and launch the docker-contained web app with the following command:
    wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
 
 This is the recommended way because it automatically includes an
-`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance, Rubrix's main persistent layer.
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`__ instance, Rubrix's main persistent layer.
 
 b) Executing the server code manually
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When executing the server code manually you need to provide an
-`Elasticsearch <https://www.elastic.co/elasticsearch/>`_ instance yourself.
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`__ instance yourself.
 This method may be preferred if you
 (1) want to avoid or cannot use ``Docker``,
 (2) have an existing Elasticsearch service, or
 (3) want to have full control over your Elasticsearch configuration.
 
 1. First you need to install
-   `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html>`_
+   `Elasticsearch <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html>`__
    (we recommend version 7.10) and launch an Elasticsearch instance.
    For MacOS and Windows there are
-   `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`_ and a
-   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`_, respectively.
+   `Homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html>`__ and a
+   `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html>`__, respectively.
 
 2. Install the Rubrix Python library together with its server dependencies:
 
@@ -96,9 +96,9 @@ The following code will log one record into a data set called ``example-dataset`
        name='example-dataset'
    )
 
-If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`_ , you will find your first data set.
+If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`__ , you will find your first data set.
 **The default username and password are** ``rubrix`` **and** ``1234`` (see the :ref:`user management guide <user-management>` to configure this).
-You can also check the REST API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`_.
+You can also check the REST API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
 
 Congratulations! You are ready to start working with Rubrix.
 
