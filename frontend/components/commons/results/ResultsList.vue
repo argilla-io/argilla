@@ -9,7 +9,7 @@
       :default-height="100"
       :total-height="1200"
     >
-      <div v-for="item in visibleRecords" :key="item.id" class="list__li">
+      <div v-for="(item, index) in visibleRecords" :key="index" class="list__li">
         <results-record v-if="item" :dataset="dataset" :item="item">
           <slot name="record" :record="item" />
         </results-record>

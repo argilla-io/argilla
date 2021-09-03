@@ -306,20 +306,24 @@ const actions = {
       size: DEFAULT_QUERY_SIZE,
     });
     const viewSettings = DatasetViewSettings.query().first();
+    const { pagination } = configuredRouteParams();
     displayQueryParams({
       query: searchQuery,
       sort,
       task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
+      pagination: pagination,
     });
-    return await dispatch("resetPagination", { dataset });
+    return await dispatch("resetPagination", { dataset, pagination });
   },
 
-  async resetPagination(_, { dataset }) {
-    const { pagination } = configuredRouteParams();
+  async resetPagination(_, { dataset, pagination }) {
     return await Pagination.update({
       where: dataset.name,
-      data: pagination,
+      data: {
+        ...pagination,
+        page: dataset.query ? 1 : pagination.page,
+      },
     });
   },
 
