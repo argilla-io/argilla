@@ -171,7 +171,7 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Reference
    :hidden:
 
-   reference/python_client_api
+   reference/python_client
    reference/rubrix_webapp_reference
 
 .. toctree::
