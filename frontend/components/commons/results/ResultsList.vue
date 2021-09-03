@@ -81,7 +81,7 @@ export default {
       });
       this.paginate({
         dataset: this.dataset,
-        from: page,
+        page: page,
         size: size,
       });
     },

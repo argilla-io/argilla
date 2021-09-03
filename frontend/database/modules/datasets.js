@@ -51,7 +51,7 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 60;
+const DEFAULT_QUERY_SIZE = 20;
 
 function configuredRouteParams() {
   return {
@@ -63,7 +63,13 @@ function configuredRouteParams() {
   };
 }
 
-function displayQueryParams({ query, sort, task, enableAnnotation, pagination }) {
+function displayQueryParams({
+  query,
+  sort,
+  task,
+  enableAnnotation,
+  pagination,
+}) {
   $nuxt.$router.push({
     query: {
       query: JSON.stringify(query),
@@ -343,7 +349,7 @@ const actions = {
     });
   },
 
-  async paginate({ dispatch }, { dataset, size, from }) {
+  async paginate({ dispatch }, { dataset, size, page }) {
     // const loadedRecords = dataset.results.records.length;
     // const prefetchPaginationSize =
     //   dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
@@ -351,7 +357,7 @@ const actions = {
     const newPagination = await Pagination.update({
       where: dataset.name,
       data: {
-        page: from,
+        page: page,
         size: size,
       },
     });
@@ -369,15 +375,15 @@ const actions = {
       enableAnnotation: dataset.annotationEnabled,
       pagination: {
         ...dataset.viewSettings.pagination,
-        page: from,
+        page: page,
         size: size,
-      }
+      },
     });
     dispatch(
       `entities/${toSnakeCase(dataset.task)}/paginate`,
       {
         dataset: newDataset,
-        from: from,
+        from: (page - 1) * size,
         size: size,
       },
       { root: true }
