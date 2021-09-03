@@ -1,11 +1,7 @@
 <template>
   <div class="list">
     <slot name="header" />
-    <div
-      ref="scroll"
-      id="scroll"
-      class="results-scroll"
-    >
+    <VueAutoVirtualScrollList ref="scroll" id="scroll" :key="dataset.name" class="results-scroll" :default-height="100" :total-height="1200">
       <div
         v-for="item in visibleRecords"
         :key="item.id"
@@ -15,9 +11,9 @@
           <slot name="record" :record="item" />
         </results-record>
       </div>
-        <RePagination :paginationSize="dataset.viewSettings.pagination.size" :totalItems="dataset.results.total" :totalPages="Math.ceil(dataset.results.total / dataset.viewSettings.pagination.size)"
-        :currentPage="dataset.viewSettings.pagination.page" @changePage="onPagination" />
-    </div>
+      <RePagination :paginationSize="dataset.viewSettings.pagination.size" :totalItems="dataset.results.total" :totalPages="Math.ceil(dataset.results.total / dataset.viewSettings.pagination.size)"
+      :currentPage="dataset.viewSettings.pagination.page" @changePage="onPagination" />
+    </VueAutoVirtualScrollList>
   </div>
 </template>
 <script>
@@ -26,12 +22,12 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
-      scrollComponent: undefined,
+      scrollComponent: undefined
     };
   },
   computed: {
@@ -40,7 +36,7 @@ export default {
     },
     moreDataAvailable() {
       return this.visibleRecords.length < this.dataset.results.total;
-    },
+    }
   },
   mounted() {
     const scroll = document.getElementById("scroll");
@@ -56,7 +52,7 @@ export default {
 
   methods: {
     ...mapActions({
-      paginate: "entities/datasets/paginate",
+      paginate: "entities/datasets/paginate"
     }),
     onScroll() {
       if (this.$refs.scroll.scrollTop > 100) {
@@ -69,15 +65,15 @@ export default {
     },
     async onPagination(page, size) {
       this.$nextTick(() => {
-          this.$refs.scroll.scrollTop = 0;
+        document.getElementById("scroll").scrollTop = 0;
       });
       this.paginate({
         dataset: this.dataset,
         from: page,
-        size: size,
+        size: size
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>

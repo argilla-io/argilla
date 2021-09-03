@@ -59,7 +59,7 @@ function configuredRouteParams() {
     sort: JSON.parse($nuxt.$route.query.sort || "[]"),
     task: $nuxt.$route.query.task,
     allowAnnotation: $nuxt.$route.query.allowAnnotation || false,
-    pagination: JSON.parse($nuxt.$route.query.pagination),
+    pagination: JSON.parse($nuxt.$route.query.pagination || "{}"),
   };
 }
 
@@ -241,10 +241,10 @@ const actions = {
       await ObservationDataset.api().get(`/datasets/${name}`);
     }
     ds = ObservationDataset.find(name);
-    const { task, allowAnnotation, pagination } = configuredRouteParams();
+    const { task, allowAnnotation } = configuredRouteParams();
     DatasetViewSettings.insert({
       data: ObservationDataset.all().map((ds) => ({
-        pagination: pagination ? pagination : { id: ds.name },
+        pagination: { id: ds.name },
         id: ds.name,
         annotationEnabled: allowAnnotation === "true" ? true : false,
       })),
@@ -300,14 +300,13 @@ const actions = {
       size: DEFAULT_QUERY_SIZE,
     });
     const viewSettings = DatasetViewSettings.query().first();
-    return await dispatch("resetPagination", { dataset });
     displayQueryParams({
       query: searchQuery,
       sort,
       task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
-      pagination: viewSettings.pagination,
     });
+    return await dispatch("resetPagination", { dataset });
   },
 
   async resetPagination(_, { dataset }) {
@@ -345,9 +344,9 @@ const actions = {
   },
 
   async paginate({ dispatch }, { dataset, size, from }) {
-    const loadedRecords = dataset.results.records.length;
-    const prefetchPaginationSize =
-      dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
+    // const loadedRecords = dataset.results.records.length;
+    // const prefetchPaginationSize =
+    //   dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
 
     const newPagination = await Pagination.update({
       where: dataset.name,
