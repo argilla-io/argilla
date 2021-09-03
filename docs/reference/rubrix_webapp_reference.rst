@@ -1,7 +1,7 @@
 .. _webapp_reference:
 
-Rubrix webapp UI
-================
+Web App UI
+==========
 This section contains a quick overview of Rubrix web-app's User Interface (UI).
 
 The web-app has two main pages: the **Home** page and the **Dataset** page.
