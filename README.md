@@ -1,4 +1,3 @@
-
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" style="height: 100px"/>
 </p>
@@ -39,14 +38,14 @@ Key features:
 
 - **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
-- **Beyond hand labeling workflows**: Classical hand labeling workflows are costly and inefficient, but human supervision is essential. Easily combine active learning, bulk-labeling, zero-shot models, and weak-supervision into **novel data annotation workflows**.
+- **Beyond hand labeling workflows**: Classical hand labeling workflows are costly and inefficient, but human supervision is essential. Easily combine hand labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision into **novel data annotation workflows**.
 
 
 ## Example
 
 This is an example for logging model predictions from a 🤗 transformers text classification pipeline:
 
-![Rubrix Intro](https://github.com/recognai/rubrix-materials/raw/main/zeroshot.gif)
+https://user-images.githubusercontent.com/1107111/132260911-66360375-ff77-41b6-8b86-d9d521d17f6e.mp4
 
 
 ```python
