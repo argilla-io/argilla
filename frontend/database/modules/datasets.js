@@ -383,7 +383,7 @@ const actions = {
         size: size,
       },
     });
-    dispatch(
+    await dispatch(
       `entities/${toSnakeCase(dataset.task)}/paginate`,
       {
         dataset: newDataset,

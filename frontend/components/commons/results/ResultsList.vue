@@ -67,7 +67,7 @@ export default {
       paginate: "entities/datasets/paginate",
     }),
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 100) {
+      if (this.$refs.scroll.scrollTop > 10) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
@@ -76,14 +76,12 @@ export default {
       }
     },
     async onPagination(page, size) {
-      this.$nextTick(() => {
-        document.getElementById("scroll").scrollTop = 0;
-      });
-      this.paginate({
+      await this.paginate({
         dataset: this.dataset,
         page: page,
         size: size,
-      });
+      })
+      document.getElementById("scroll").scrollTop = 0;
     },
   },
 };
@@ -100,6 +98,12 @@ export default {
     padding-top: 1em;
     height: 100vh !important;
     overflow: auto;
+    padding-left: 4em;
+    padding-right: calc(4em + 45px);
+    @include media(">desktopLarge") {
+      width: 100%;
+      padding-right: calc(294px + 45px + 4em) 
+    }
   }
   &__li {
     padding-bottom: 2px;
