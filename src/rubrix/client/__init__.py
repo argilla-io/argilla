@@ -24,15 +24,13 @@ from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
 from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
 from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
 from rubrix.sdk.models.text2_text_query import Text2TextQuery
-from rubrix.sdk.api.text_to_text.bulk_records import (
-    sync_detailed as text2text_sync_detailed,
-)
+from rubrix.sdk.api.text_to_text import bulk_records as text_to_text_bulk_records
 from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
-from rubrix.sdk.api.text_classification.bulk_records import (
-    sync_detailed as text_classification_sync_detailed,
+from rubrix.sdk.api.text_classification import (
+    bulk_records as text_classification_bulk_records,
 )
-from rubrix.sdk.api.token_classification.bulk_records import (
-    sync_detailed as token_classification_sync_detailed,
+from rubrix.sdk.api.token_classification import (
+    bulk_records as token_classification_bulk_records,
 )
 from rubrix.sdk.api.users import whoami
 from rubrix.sdk.models import (
@@ -42,6 +40,16 @@ from rubrix.sdk.models import (
 )
 from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from rubrix.sdk.types import Response
+from rubrix.sdk.api.datasets import get_dataset
+from rubrix.sdk.api.text_classification import (
+    _get_dataset_data as text_classification_get_dataset_data,
+)
+from rubrix.sdk.api.token_classification import (
+    _get_dataset_data as token_classification_get_dataset_data,
+)
+from rubrix.sdk.api.text_to_text import (
+    _get_dataset_data as text_to_text_get_dataset_data,
+)
 
 
 class RubrixClient:
@@ -146,21 +154,21 @@ class RubrixClient:
         # Check record type
         if record_type is TextClassificationRecord:
             bulk_class = models.TextClassificationBulkData
-            bulk_records_function = text_classification_sync_detailed
+            bulk_records_function = text_classification_bulk_records.sync_detailed
             tags = models.TextClassificationBulkDataTags.from_dict(tags)
             metadata = models.TextClassificationBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._text_classification_client_to_sdk
 
         elif record_type is TokenClassificationRecord:
             bulk_class = models.TokenClassificationBulkData
-            bulk_records_function = token_classification_sync_detailed
+            bulk_records_function = token_classification_bulk_records.sync_detailed
             tags = models.TokenClassificationBulkDataTags.from_dict(tags)
             metadata = models.TokenClassificationBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._token_classification_client_to_sdk
 
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
-            bulk_records_function = text2text_sync_detailed
+            bulk_records_function = text_to_text_bulk_records.sync_detailed
             tags = Text2TextBulkDataTags.from_dict(tags)
             metadata = Text2TextBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._text2text_client_to_sdk
@@ -173,7 +181,7 @@ class RubrixClient:
             )
 
         for i in range(0, len(records), chunk_size):
-            chunk = records[i: i + chunk_size]
+            chunk = records[i : i + chunk_size]
 
             response = bulk_records_function(
                 client=self._client,
@@ -211,33 +219,36 @@ class RubrixClient:
         Returns:
             The dataset as a pandas Dataframe.
         """
-        from rubrix.sdk.api.datasets import get_dataset
-
         response = get_dataset.sync_detailed(client=self._client, name=name)
         _check_response_errors(response)
         task = response.parsed.task
 
-        if task == TaskType.TEXTCLASSIFICATION:
-            from rubrix.sdk.api.text_classification import _get_dataset_data
+        task_config = {
+            TaskType.TEXTCLASSIFICATION: (
+                text_classification_get_dataset_data,
+                self._text_classification_sdk_to_client,
+                TextClassificationQuery,
+            ),
+            TaskType.TOKENCLASSIFICATION: (
+                token_classification_get_dataset_data,
+                self._token_classification_sdk_to_client,
+                TokenClassificationQuery,
+            ),
+            TaskType.TEXTTOTEXT: (
+                text_to_text_get_dataset_data,
+                self._text_classification_sdk_to_client,
+                Text2TextQuery,
+            ),
+        }
 
-            map_fn = self._text_classification_sdk_to_client
-            request_class = TextClassificationQuery
-        elif task == TaskType.TOKENCLASSIFICATION:
-            from rubrix.sdk.api.token_classification import _get_dataset_data
-
-            map_fn = self._token_classification_sdk_to_client
-            request_class = TokenClassificationQuery
-        elif task == TaskType.TEXTTOTEXT:
-            from rubrix.sdk.api.text_to_text import _get_dataset_data
-
-            map_fn = self._text2text_sdk_to_client
-            request_class = Text2TextQuery
-        else:
+        try:
+            get_dataset_data, map_fn, request_class = task_config[task]
+        except KeyError:
             raise ValueError(
                 f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
                 f"{[TaskType.TEXTCLASSIFICATION, TaskType.TOKENCLASSIFICATION, TaskType.TEXTTOTEXT]}"
             )
-        response = _get_dataset_data.sync_detailed(
+        response = get_dataset_data.sync_detailed(
             client=self._client,
             name=name,
             request=request_class(ids=ids or []),
@@ -409,7 +420,7 @@ class RubrixClient:
 
     @staticmethod
     def _text2text_sdk_to_client(
-            record: Union[Text2TextRecordSdk, Dict[str, Any]]
+        record: Union[Text2TextRecordSdk, Dict[str, Any]]
     ) -> Text2TextRecord:
         """Returns the client model of the record given its sdk model"""
         if isinstance(record, Text2TextRecordSdk):
