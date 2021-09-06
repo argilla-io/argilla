@@ -274,7 +274,7 @@ const actions = {
 
   async search({ getters, dispatch }, { dataset, query, sort }) {
     query = query || {};
-    sort = sort || [];
+    sort = sort || dataset.sort || [];
 
     const metadata = { ...(dataset.query || {}).metadata, ...query.metadata };
     Object.keys(metadata).forEach((key) => {
@@ -288,7 +288,7 @@ const actions = {
     }
     const searchQuery =
       Object.keys(query).length === 0
-        ? query
+        ? { ...dataset.query, ...query }
         : { ...dataset.query, ...query, metadata };
     const entity = getters.datasetEntity(dataset);
     await entity.dispatch("search", {
