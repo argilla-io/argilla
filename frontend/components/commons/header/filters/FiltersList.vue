@@ -217,8 +217,9 @@ $number-size: 18px;
     display: flex;
     &__sort {
       margin-left: auto;
+      margin-right: 2em !important;
         @include media(">desktopLarge") {
-          margin-right: 290px !important;
+          margin-right: calc(290px + 2em) !important;
         }
     }
     &__content {
@@ -259,9 +260,6 @@ $number-size: 18px;
       margin-right: 1em;
       color: $font-secondary;
       @include font-size(15px);
-      &:last-child {
-        margin-right: 0;
-      }
       &.active {
         background: palette(grey, smooth);
         color: $primary-color;

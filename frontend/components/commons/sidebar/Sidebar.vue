@@ -121,6 +121,9 @@ export default {
 <style lang="scss" scoped>
 $sidebar-button-size: 45px;
 .sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
   background: palette(grey, verylight);
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;

@@ -24,10 +24,15 @@ export default {
 <style lang="scss" scoped>
 .container {
   @extend %container;
-  margin: 0 auto;
-  padding: 4em;
+  margin: 0 auto auto 0;
   padding-top: 0;
   padding-bottom: 0;
+  padding-left: 4em;
+  padding-right: calc(4em + 45px);
+  @include media(">desktopLarge") {
+    width: 100%;
+    padding-right: calc(294px + 45px + 4em)
+  }
 }
 .global-actions {
   display: flex;
@@ -48,9 +53,6 @@ export default {
     background: $bg;
     border: none;
     min-height: 70px;
-  }
-  @include media(">desktopLarge") {
-    width: calc(100% - 294px);
   }
 }
 </style>
