@@ -43,10 +43,20 @@ Key features:
 
 ## Example
 
-This is an example for logging model predictions from a 🤗 transformers text classification pipeline:
+Let's see Rubrix in action with a quick example: *Bootstraping annotation work with a zero-shot classifier* 
 
-https://user-images.githubusercontent.com/1107111/132260911-66360375-ff77-41b6-8b86-d9d521d17f6e.mp4
+Ingredients:
 
+- A zero-shot classifier from 🤗 transformers.
+- A dataset containing news
+
+What we're going to do:
+
+1. Make predictions with the zero-shot classifier.
+2. Use Rubrix UI for filtering records predicted as `Business` with high probability.
+3. Use the bulk-labeling feature for labeling 15 records as `Business`.
+
+https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4
 
 ```python
 from transformers import pipeline
