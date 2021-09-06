@@ -143,7 +143,7 @@ class RubrixClient:
                 self.MAX_CHUNK_SIZE,
             )
 
-        # Divided into Text and Token Classification Bulks
+        # Check record type
         if record_type is TextClassificationRecord:
             bulk_class = models.TextClassificationBulkData
             bulk_records_function = text_classification_sync_detailed
