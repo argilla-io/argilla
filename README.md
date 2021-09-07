@@ -6,9 +6,9 @@
     ·
     <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
     ·
-    <a href="https://docs.rubrix.ml">Docs</a>
-    ·
     <a href="https://github.com/recognai/rubrix/#quick-links">Quick links</a>
+    ·
+    <a href="https://docs.rubrix.ml">Docs</a>
 </p>
 
 <p align="left">
@@ -49,7 +49,7 @@ Key features:
 
 - **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
-- **Beyond hand labeling**: Classical hand labeling workflows are costly and inefficient, but human supervision is essential. Easily combine hand labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision into **novel data annotation workflows**.
+- **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision into **novel data annotation workflows**.
 
 
 ## Example
