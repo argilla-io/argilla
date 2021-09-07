@@ -51,7 +51,7 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 60;
+const DEFAULT_QUERY_SIZE = 20;
 
 function configuredRouteParams() {
   return {
@@ -59,16 +59,24 @@ function configuredRouteParams() {
     sort: JSON.parse($nuxt.$route.query.sort || "[]"),
     task: $nuxt.$route.query.task,
     allowAnnotation: $nuxt.$route.query.allowAnnotation || false,
+    pagination: JSON.parse($nuxt.$route.query.pagination || "{}"),
   };
 }
 
-function displayQueryParams({ query, sort, task, enableAnnotation }) {
+function displayQueryParams({
+  query,
+  sort,
+  task,
+  enableAnnotation,
+  pagination,
+}) {
   $nuxt.$router.push({
     query: {
       query: JSON.stringify(query),
       sort: JSON.stringify(sort),
       task: task,
       allowAnnotation: enableAnnotation,
+      pagination: JSON.stringify(pagination),
     },
   });
 }
@@ -300,20 +308,23 @@ const actions = {
       size: DEFAULT_QUERY_SIZE,
     });
     const viewSettings = DatasetViewSettings.query().first();
+    const { pagination } = configuredRouteParams();
     displayQueryParams({
       query,
       sort,
       task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
+      pagination: pagination,
     });
-    return await dispatch("resetPagination", { dataset });
+    return await dispatch("resetPagination", { dataset, pagination });
   },
 
-  async resetPagination(_, { dataset }) {
+  async resetPagination(_, { dataset, pagination }) {
     return await Pagination.update({
       where: dataset.name,
       data: {
-        page: 1,
+        ...pagination,
+        page: dataset.query ? 1 : pagination.page,
       },
     });
   },
@@ -324,6 +335,7 @@ const actions = {
       sort: dataset.sort,
       task: dataset.task,
       enableAnnotation: value,
+      pagination: dataset.viewSettings.pagination,
     });
     return await DatasetViewSettings.update({
       where: dataset.name,
@@ -343,15 +355,16 @@ const actions = {
     });
   },
 
-  async fetchMoreRecords({ dispatch }, { dataset }) {
-    const loadedRecords = dataset.results.records.length;
-    const prefetchPaginationSize =
-      dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
+  async paginate({ dispatch }, { dataset, size, page }) {
+    // const loadedRecords = dataset.results.records.length;
+    // const prefetchPaginationSize =
+    //   dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
 
     const newPagination = await Pagination.update({
       where: dataset.name,
       data: {
-        page: dataset.viewSettings.pagination.page + 1,
+        page: page,
+        size: size,
       },
     });
 
@@ -361,22 +374,41 @@ const actions = {
         viewSettings: { ...dataset.viewSettings, pagination: newPagination },
       },
     });
-
-    if (
-      // Prefetch data before reach the end of pagination
-      loadedRecords < dataset.results.total &&
-      loadedRecords <= prefetchPaginationSize
-    ) {
-      dispatch(
-        `entities/${toSnakeCase(dataset.task)}/fetchMoreRecords`,
-        {
-          dataset: newDataset,
-          from: loadedRecords,
-          size: 2 * DEFAULT_QUERY_SIZE,
-        },
-        { root: true }
-      );
-    }
+    displayQueryParams({
+      query: dataset.query,
+      sort: dataset.sort,
+      task: dataset.task,
+      enableAnnotation: dataset.annotationEnabled,
+      pagination: {
+        ...dataset.viewSettings.pagination,
+        page: page,
+        size: size,
+      },
+    });
+    await dispatch(
+      `entities/${toSnakeCase(dataset.task)}/paginate`,
+      {
+        dataset: newDataset,
+        from: (page - 1) * size,
+        size: size,
+      },
+      { root: true }
+    );
+    // if (
+    //   // Prefetch data before reach the end of pagination
+    //   loadedRecords < dataset.results.total &&
+    //   loadedRecords <= prefetchPaginationSize
+    // ) {
+    //   dispatch(
+    //     `entities/${toSnakeCase(dataset.task)}/paginate`,
+    //     {
+    //       dataset: newDataset,
+    //       from: from,
+    //       size: size,
+    //     },
+    //     { root: true }
+    //   );
+    // }
   },
 };
 

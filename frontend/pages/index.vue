@@ -1,43 +1,40 @@
 <template>
   <div>
     <ReLoading v-if="$fetchState.pending" />
-    <div class="wrapper" v-else>
+    <div v-else class="wrapper">
       <div class="main">
         <ReTopbarBrand>
           <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
         </ReTopbarBrand>
         <div class="container">
-        <div class="interactions">
-          <ReSearchBar @input="onSearch" />
-        </div>
-        <Error
-          v-if="$fetchState.error"
-          link="/"
-          where="datasets"
-          :error="$fetchState.error"
-        />
-        <div>
-          <ReTableInfo
-            :data="datasets"
-            :sorted-order="sortedOrder"
-            :sorted-by-field="sortedByField"
-            :actions="actions"
-            :columns="tableColumns"
-            :query-search="querySearch"
-            :global-actions="false"
-            search-on="name"
-            :show-modal="showModal"
-            @sort-column="onSortColumns"
-            @onActionClicked="onActionClicked"
-            @close-modal="closeModal"
+          <div class="interactions">
+            <ReSearchBar @input="onSearch" />
+          </div>
+          <Error
+            v-if="$fetchState.error"
+            link="/"
+            where="datasets"
+            :error="$fetchState.error"
           />
+          <div>
+            <ReTableInfo
+              :data="datasets"
+              :sorted-order="sortedOrder"
+              :sorted-by-field="sortedByField"
+              :actions="actions"
+              :columns="tableColumns"
+              :query-search="querySearch"
+              :global-actions="false"
+              search-on="name"
+              :show-modal="showModal"
+              @sort-column="onSortColumns"
+              @onActionClicked="onActionClicked"
+              @close-modal="closeModal"
+            />
+          </div>
         </div>
       </div>
-      </div>
-      <Sidebar
-        sidebarType="base"
-        @refresh="$fetch"
-      />
+      <Sidebar sidebar-type="base" @refresh="$fetch" />
     </div>
   </div>
 </template>
@@ -150,6 +147,7 @@ export default {
   @extend %container;
   padding-top: 0.2em;
   padding-bottom: 0;
+  padding-right: calc(4em + 45px);
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;

@@ -7,7 +7,6 @@
         </ReTopbarBrand>
         <component :is="currentTaskHeader" :dataset="dataset" />
       </section>
-      <div class="container">
         <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
           <Results :dataset="dataset" />
           <SideBarPanel
@@ -23,7 +22,6 @@
             </div>
           </SideBarPanel>
         </div>
-      </div>
     </div>
     <sidebar
       :dataset="dataset"
@@ -132,31 +130,11 @@ export default {
 }
 
 .grid {
-  @include grid($flex-wrap: nowrap, $gutter: 2em);
+  position: relative;
   margin: 0;
   .fixed-header & {
     ::v-deep .virtual-scroll {
       padding-top: 3em;
-    }
-    .sidebar {
-      padding-top: 3em;
-      &.TokenClassification {
-        padding-top: 7.5em;
-      }
-    }
-  }
-  &--editable {
-    .fixed-header & {
-      ::v-deep .virtual-scroll,
-      .sidebar {
-        padding-top: 8.4em;
-      }
-      .sidebar {
-        padding-top: 8.4em;
-        &.TokenClassification {
-          padding-top: 12.4em;
-        }
-      }
     }
   }
 }

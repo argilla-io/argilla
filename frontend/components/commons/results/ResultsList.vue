@@ -5,26 +5,25 @@
       id="scroll"
       ref="scroll"
       :key="dataset.name"
-      style="width: 100%"
-      class="virtual-scroll"
-      :total-height="1200"
+      class="results-scroll"
       :default-height="100"
+      :total-height="1200"
     >
-      <div
-        v-for="(item, index) in visibleRecords"
-        :key="index"
-        class="list__li"
-      >
+      <div v-for="(item, index) in visibleRecords" :key="index" class="list__li">
         <results-record v-if="item" :dataset="dataset" :item="item">
           <slot name="record" :record="item" />
         </results-record>
       </div>
-      <ReShowMoreData
-        v-if="moreDataAvailable"
-        :items="visibleRecords.length"
-        :total="dataset.results.total"
-        :more-data-size="dataset.viewSettings.pagination.size"
-        @moredata="onShowMoreData"
+      <RePagination
+        :pagination-size="dataset.viewSettings.pagination.size"
+        :total-items="dataset.results.total"
+        :total-pages="
+          Math.ceil(
+            dataset.results.total / dataset.viewSettings.pagination.size
+          )
+        "
+        :current-page="dataset.viewSettings.pagination.page"
+        @changePage="onPagination"
       />
     </VueAutoVirtualScrollList>
   </div>
@@ -65,10 +64,10 @@ export default {
 
   methods: {
     ...mapActions({
-      fetchMoreRecords: "entities/datasets/fetchMoreRecords",
+      paginate: "entities/datasets/paginate",
     }),
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 100) {
+      if (this.$refs.scroll.scrollTop > 10) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
@@ -76,10 +75,13 @@ export default {
           .classList.remove("fixed-header");
       }
     },
-    async onShowMoreData() {
-      this.fetchMoreRecords({
+    async onPagination(page, size) {
+      await this.paginate({
         dataset: this.dataset,
-      });
+        page: page,
+        size: size,
+      })
+      document.getElementById("scroll").scrollTop = 0;
     },
   },
 };
@@ -92,9 +94,16 @@ export default {
   position: relative;
   margin-bottom: 0;
   list-style: none;
-  .virtual-scroll {
+  .results-scroll {
     padding-top: 1em;
     height: 100vh !important;
+    overflow: auto;
+    padding-left: 4em;
+    padding-right: calc(4em + 45px);
+    @include media(">desktopLarge") {
+      width: 100%;
+      padding-right: calc(294px + 45px + 4em) 
+    }
   }
   &__li {
     padding-bottom: 2px;

@@ -51,7 +51,7 @@ const actions = {
     );
   },
 
-  async fetchMoreRecords(store, { dataset, size, from }) {
+  async paginate(store, { dataset, size, from }) {
     return await TokenClassificationDataset.api().post(
       `/datasets/${dataset.name}/TokenClassification:search?limit=${size}&from=${from}`,
       {
@@ -64,7 +64,7 @@ const actions = {
             ...dataset.$toJson(),
             results: {
               ...dataset.results,
-              records: dataset.results.records.concat(data.records),
+              records: data.records,
             },
           };
         },
