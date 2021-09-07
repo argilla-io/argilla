@@ -55,7 +55,7 @@
         </ul>
         <div
           v-if="multiLabel && filterSearch(options, searchText).length"
-          class="filter__buttons"
+          class="selector__buttons"
         >
           <ReButton
             class="button-tertiary--small button-tertiary--outline"
@@ -137,6 +137,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+
 .selector {
   &__option {
     display: block;
@@ -157,6 +158,14 @@ export default {
     cursor: pointer;
     &:hover {
       color: $secondary-color;
+    }
+  }
+  &__buttons {
+    margin-top: 1em;
+    text-align: right;
+    display: flex;
+    & > * {
+      margin-right: 0.5em;
     }
   }
   ::v-deep .dropdown__content {
