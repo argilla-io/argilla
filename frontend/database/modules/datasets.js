@@ -4,6 +4,7 @@ import { Notification } from "@/models/Notifications";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
+import {Base64} from 'js-base64';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,8 +56,8 @@ const DEFAULT_QUERY_SIZE = 60;
 
 function configuredRouteParams() {
   return {
-    query: JSON.parse($nuxt.$route.query.query || "{}"),
-    sort: JSON.parse($nuxt.$route.query.sort || "[]"),
+    query: JSON.parse($nuxt.$route.query.query ? Base64.decode($nuxt.$route.query.query) : '{}'),
+    sort: JSON.parse($nuxt.$route.query.sort ? Base64.decode($nuxt.$route.query.sort) : '[]'),
     task: $nuxt.$route.query.task,
     allowAnnotation: $nuxt.$route.query.allowAnnotation || false,
   };
@@ -65,8 +66,8 @@ function configuredRouteParams() {
 function displayQueryParams({ query, sort, task, enableAnnotation }) {
   $nuxt.$router.push({
     query: {
-      query: JSON.stringify(query),
-      sort: JSON.stringify(sort),
+      query: Base64.encodeURI(JSON.stringify(query)),
+      sort: Base64.encodeURI(JSON.stringify(sort)),
       task: task,
       allowAnnotation: enableAnnotation,
     },

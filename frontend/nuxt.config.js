@@ -120,5 +120,12 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
+    // parseQuery: function (q) {
+    //   return atob(require('qs').parse(q, {encode: false}));
+    // },
+    // stringifyQuery: function (q) {
+    //   var r = btoa(require('qs').stringify(q, {encode: false}));
+    //   return r ? '?' + r : '';
+    // }
   },
 };
