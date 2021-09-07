@@ -17,11 +17,9 @@ from rubrix import (
     BulkResponse,
     TextClassificationRecord,
     TokenClassificationRecord,
+    Text2TextRecord,
 )
-from rubrix.sdk.api.text_classification import bulk_records as text_classification_bulk
-from rubrix.sdk.api.token_classification import (
-    bulk_records as token_classification_bulk,
-)
+import rubrix.sdk.api.text_classification.bulk_records
 from rubrix.sdk.models import (
     TextClassificationBulkData,
     TextClassificationBulkDataMetadata,
@@ -30,6 +28,9 @@ from rubrix.sdk.models import (
     TokenClassificationBulkDataMetadata,
     TokenClassificationBulkDataTags,
 )
+from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
+from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
+from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
 from rubrix.sdk.types import Response
 
 
@@ -57,15 +58,7 @@ def mock_response_200(monkeypatch):
 
 @pytest.fixture
 def mock_response_text(monkeypatch):
-    """Mock_get method from the class, and monkeypatch application.
-
-    It will text classification response from the API.
-
-    Parameters
-    ----------
-    monkeypatch
-        Mockup function
-    """
+    """Mock log response for TextClassification records"""
 
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
@@ -85,21 +78,13 @@ def mock_response_text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        text_classification_bulk, "sync_detailed", mock_get
+        "rubrix.client.text_classification_bulk_records.sync_detailed", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
 @pytest.fixture
 def mock_response_token(monkeypatch):
-    """Mock_get method from the class, and monkeypatch application.
-
-    It will token classification response from the API.
-
-    Parameters
-    ----------
-    monkeypatch
-        Mockup function
-    """
+    """Mock log response for TokenClassification records"""
 
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
@@ -119,7 +104,34 @@ def mock_response_token(monkeypatch):
         )
 
     monkeypatch.setattr(
-        token_classification_bulk, "sync_detailed", mock_get
+        "rubrix.client.token_classification_bulk_records.sync_detailed", mock_get
+    )  # apply the monkeypatch for requests.get to mock_get
+
+
+@pytest.fixture
+def mock_response_text2text(monkeypatch):
+    """Mock log response for Text2Text records"""
+
+    _response = BulkResponse(dataset="test", processed=500, failed=0)
+
+    def mock_get(*args, json_body: Text2TextBulkData, **kwargs):
+        assert isinstance(json_body.metadata, Text2TextBulkDataMetadata)
+        assert isinstance(json_body.tags, Text2TextBulkDataTags)
+        return Response(
+            status_code=200,
+            content=b"Everything's fine",
+            headers={
+                "date": "Tue, 09 Mar 2021 10:18:23 GMT",
+                "server": "uvicorn",
+                "content-length": "43",
+                "content-type": "application/json",
+            },
+            parsed=_response,
+        )
+
+    monkeypatch.setattr(
+        "rubrix.client.text_to_text_bulk_records.sync_detailed",
+        mock_get,
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -190,6 +202,40 @@ def test_token_classification(mock_response_200, mock_response_token):
     )
 
 
+def test_text2text(mock_response_200, mock_response_text2text):
+    """Testing text2text with log function
+
+    It checks a Response is generated.
+
+    Parameters
+    ----------
+    mock_response_200
+        Mocked correct http response, emulating API init
+    mock_response_token
+        Mocked response given by the sync method, emulating the log of data
+    """
+    records = [
+        Text2TextRecord(
+            text="Super test",
+            prediction=[("test", 0.5)],
+            annotation="test",
+            prediction_agent="spacy",
+            annotation_agent="recognai",
+            metadata={"model": "spacy_es_core_news_sm"},
+            id=1,
+        )
+    ]
+
+    assert (
+        rubrix.log(
+            name="test",
+            records=records[0],
+            tags={"type": "text2text", "lang": "spanish"},
+        )
+        == BulkResponse(dataset="test", processed=500, failed=0)
+    )
+
+
 def test_no_name(mock_response_200):
     """Testing classification with no input name
 
@@ -249,7 +295,7 @@ def mock_wrong_bulk_response(monkeypatch):
             parsed={"error": "the error message "},
         )
 
-    monkeypatch.setattr(text_classification_bulk, "sync_detailed", mock)
+    monkeypatch.setattr("rubrix.client.text_classification_bulk_records.sync_detailed", mock)
 
 
 def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
