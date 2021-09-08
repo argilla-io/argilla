@@ -114,25 +114,17 @@ After a few iterations of data annotation, we can load the Rubrix dataset and cr
 In this example, let's transform it into a Hugging Face dataset to suppose we'll be training a Hugging Face pre-trained model.
 
 ```python
-from datasets import Dataset
-
+# load the Rubrix dataset as a pandas DataFrame
 rb_df = rb.load(name='news_zeroshot')
 
 # filter annotated records
 rb_df = rb_df[rb_df.status == "Validated"]
 
 # select text input and the annotated label
-rb_df['text'] = rb_df.inputs.transform(lambda r: r['text'])
-
-# labels can be a list (for supporting multi-label text classifiers)
-rb_df['labels'] = rb_df.annotation.transform(lambda r: r[0])
-
-
-# create 🤗 dataset from pandas with labels as numeric ids
-label2id = {label: i for i,label in enumerate(labels)}
-train_ds = Dataset.from_pandas(rb_df[['text', 'labels']])
-train_ds = train_ds.map(lambda example: {'labels': label2id[example['labels']]})
-```
+train_df = pd.DataFrame({
+    "text": rb_df.inputs.transform(lambda r: r["text"]),
+    "label": rb_df.annotation,
+})
 
 ## Architecture
 
