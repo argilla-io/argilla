@@ -25,7 +25,7 @@ Rubrix is designed to enable novel, human-in-the loop workflows involving data s
 
 We've tried to make Rubrix easy, fun and seamless to use with your favourite libraries while keeping it scalable and flexible. Rubrix's main components are:
 
-* a **Python library**  to enable data scientists, data engineers and DevOps roles to build bridges between data, models and users, which you can install with ``pip``.
+* a **Python client**  to enable data scientists, data engineers and DevOps roles to build bridges between data, models and users, which you can install with ``pip``.
 * a **web application** for exploring, curating and labelling data, which you can launch using ``Docker`` or with a local installation.
 * a **REST API** for storing, retrieving and searching human annotations and model predictions, which is part of Rubrix's installation.
 
