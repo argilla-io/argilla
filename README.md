@@ -61,7 +61,7 @@ Let's see Rubrix in action with a quick example: *Bootstraping data annotation w
 **Why**: 
 
 - The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
-- The same workflow can be applied if there's a pre-trained "supervised" model which fits your categories but you need to fine-tune for your own use case. For example, fine-tuning a sentiment classifier for a highly specific type of messages.
+- The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
 
 **Ingredients**:
 
