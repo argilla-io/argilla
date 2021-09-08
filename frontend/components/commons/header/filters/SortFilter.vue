@@ -74,10 +74,21 @@ export default {
   computed: {
     filteredSortOptions() {
       if (this.searchText === undefined) {
-        return this.sortOptions;
+        return this.formatSortOptions;
       }
-      let filtered = this.sortOptions.filter((opt) => opt.name.toLowerCase().match(this.searchText.toLowerCase()));
+      let filtered = this.formatSortOptions.filter((opt) => opt.name.toLowerCase().match(this.searchText.toLowerCase()));
       return filtered;
+    },
+    formatSortOptions() {
+      return this.sortOptions.map(opt => {
+        if (opt.group.toLowerCase() === 'metadata') {
+          return {
+            ...opt,
+            name: `Metadata.${opt.name}`
+          }
+        }
+        return opt;
+      })
     }
   },
   methods: {
