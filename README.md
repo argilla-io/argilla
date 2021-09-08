@@ -72,12 +72,12 @@ Let's see Rubrix in action with a quick example: *Bootstraping data annotation w
 **What are we going to do**:
 
 1. Make predictions and log them into a Rubrix dataset.
-2. Use Rubrix UI to explore, filter, and annotate some examples.
+2. Use the Rubrix web app to explore, filter, and annotate some examples.
 3. Load the annotated examples and create a training set, which you can then use to train a supervised classifier.
 
 ### 1. Predict and log
 
-Let's load the zero-shot pipeline and the dataset (we are using the AGNews dataset for demonstration, but this could be your own dataset). Then, let's go over the dataset records and log them using `rb.log()`. This will create a Rubrix dataset, accesible from the UI.
+Let's load the zero-shot pipeline and the dataset (we are using the AGNews dataset for demonstration, but this could be your own dataset). Then, let's go over the dataset records and log them using `rb.log()`. This will create a Rubrix dataset, accesible from the web app.
 
 ```python
 from transformers import pipeline
@@ -90,15 +90,15 @@ dataset = load_dataset("ag_news", split='test[0:100]')
 
 labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
-for record in dataset:
-    prediction = model(record['text'], labels)
+for item in dataset:
+    prediction = model(item['text'], labels)
 
-    item = rb.TextClassificationRecord(
-        inputs=record["text"],
+    record = rb.TextClassificationRecord(
+        inputs=item["text"],
         prediction=list(zip(prediction['labels'], prediction['scores']))
     )
 
-    rb.log(item, name="news_zeroshot")
+    rb.log(record, name="news_zeroshot")
 ```
 
 ### 2. Explore, Filter and Label
@@ -109,9 +109,7 @@ https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8
 
 
 ### 3. Load and create a training set
-After a few iterations of data annotation, we can load the Rubrix dataset and create a training set for training. At this step, there're many options: you can use any NLP library to train a supervised model, you can train a few-shot text classifier (e.g., Flair TARS model), etc.
-
-In this example, let's transform it into a Hugging Face dataset to suppose we'll be training a Hugging Face pre-trained model.
+After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
 ```python
 # load the Rubrix dataset as a pandas DataFrame
@@ -125,15 +123,16 @@ train_df = pd.DataFrame({
     "text": rb_df.inputs.transform(lambda r: r["text"]),
     "label": rb_df.annotation,
 })
+```
 
 ## Architecture
 
 Rubrix main components are:
 
-- **Rubrix Python library**: Python client to log, load, copy and delete Rubrix datasets from Python.
+- **Rubrix Python client**: Python client to log, load, copy and delete Rubrix datasets.
 - **Rubrix server**: FastAPI REST service for reading and writing data.
-- **Elasticsearch**: The storage layer and search engine powering the API and UI.
-- **Rubrix UI**: Easy-to-use UI for data exploration and annotation.
+- **Elasticsearch**: The storage layer and search engine powering the API and the web app.
+- **Rubrix web app**: Easy-to-use web application for data exploration and annotation.
 
 ![](docs/images/rubrix_intro.svg)
 
@@ -145,8 +144,8 @@ Rubrix main components are:
 | 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
 | 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
 | 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
-| 📱 **[UI reference](https://rubrix.rtfd.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
-| 🐍 **[Python API docs](https://rubrix.rtfd.io/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
+| 📱 **[Web app reference](https://rubrix.rtfd.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
+| 🐍 **[Python client API](https://rubrix.rtfd.io/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
 | 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
 | 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
 | 🤗 **[Hugging Face tutorial](https://rubrix.rtfd.io/en/stable/tutorials/01-huggingface.html)** | Using Rubrix with 🤗`transformers` and `datasets` |
@@ -173,7 +172,7 @@ pip install rubrix
 
 ### 2. Launch the web app
 
-There are two ways to launch the webapp:
+There are two ways to launch the web app:
 
 - a) Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
 - b) Executing the server code manually
@@ -205,13 +204,13 @@ When executing the server code manually you need to provide an [Elasticsearch](h
    For MacOS and Windows there are
    [Homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html) and a
    [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html), respectively.
-2. Install the Rubrix Python library together with its server dependencies:
+2. Install the Python client together with its server dependencies:
 
 ```bash
 pip install rubrix[server]
 ```
 
-3. Launch a local instance of the Rubrix web app
+3. Launch a local instance of the web app
 
 ```bash
 python -m rubrix.server
@@ -233,7 +232,7 @@ rb.log(
 )
 ```
 
-If you go to your Rubrix app at http://localhost:6900/, you should see your first dataset.
+If you go to your Rubrix web app at http://localhost:6900/, you should see your first dataset.
 **The default username and password are ``rubrix`` and ``1234``**.
 You can also check the REST API docs at http://localhost:6900/api/docs.
 
