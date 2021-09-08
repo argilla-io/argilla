@@ -1,7 +1,7 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<h4> Python framework to explore, label, and monitor data for NLP</h4>
+<p> Python framework to explore, label, and monitor data for NLP</p>
 <p align="left">
     <a href="https://github.com/recognai/rubrix/#example">Usage example</a>
     ·
