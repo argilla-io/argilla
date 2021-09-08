@@ -20,12 +20,9 @@
       <re-button
         class="button-tertiary--small button-tertiary--outline"
         @click="cancel"
-        >Cancel</re-button>
-      <re-button
-        class="button-primary--small"
-        @click="apply"
-        >Apply</re-button
+        >Cancel</re-button
       >
+      <re-button class="button-primary--small" @click="apply">Apply</re-button>
     </div>
   </div>
 </template>
@@ -82,7 +79,7 @@ export default {
     },
     cancel() {
       this.$emit("closeSort");
-    }
+    },
   },
 };
 </script>

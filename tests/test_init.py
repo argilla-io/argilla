@@ -131,7 +131,7 @@ def test_init_incorrect(mock_response_500):
     rubrix._client = None  # assert empty client
     with pytest.raises(
         Exception,
-        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
     ):
         rubrix.init()
 
@@ -165,7 +165,7 @@ def test_init_token_incorrect(mock_response_500):
     rubrix._client = None  # assert empty client
     with pytest.raises(
         Exception,
-        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
     ):
         rubrix.init(api_key="422")
 
@@ -181,7 +181,7 @@ def test_init_token_auth_fail(mock_response_token_401):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    with pytest.raises(Exception, match="Authentification error: invalid credentials."):
+    with pytest.raises(Exception, match="Authentication error: invalid credentials."):
         rubrix.init(api_url="fake_url", api_key="422")
 
 

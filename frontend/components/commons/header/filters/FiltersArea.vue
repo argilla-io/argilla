@@ -69,6 +69,7 @@ export default {
     async onApplySortBy(sortList) {
       await this.search({
         dataset: this.dataset,
+        query: this.dataset.query,
         sort: sortList,
       });
     },
@@ -86,8 +87,8 @@ export default {
         values: this.dataset.query.metadata[filter].filter((f) => f !== value),
       });
     },
-    onClearAllFilters() {
-      this.search({ dataset: this.dataset, query: {} });
+    async onClearAllFilters() {
+      await this.search({ dataset: this.dataset, query: {} });
     },
   },
 };

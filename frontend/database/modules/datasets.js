@@ -275,7 +275,7 @@ const actions = {
 
   async search({ getters, dispatch }, { dataset, query, sort }) {
     query = query || {};
-    sort = sort || [];
+    sort = sort || dataset.sort || [];
 
     const metadata = { ...(dataset.query || {}).metadata, ...query.metadata };
     Object.keys(metadata).forEach((key) => {
@@ -287,20 +287,22 @@ const actions = {
     if (Array.isArray(query.predicted) && query.predicted.length > 0) {
       query.predicted = query.predicted[0];
     }
-    const searchQuery =
+
+    query =
       Object.keys(query).length === 0
-        ? query
+        ? {}
         : { ...dataset.query, ...query, metadata };
+
     const entity = getters.datasetEntity(dataset);
     await entity.dispatch("search", {
       dataset,
-      query: searchQuery,
+      query,
       sort,
       size: DEFAULT_QUERY_SIZE,
     });
     const viewSettings = DatasetViewSettings.query().first();
     displayQueryParams({
-      query: searchQuery,
+      query,
       sort,
       task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
