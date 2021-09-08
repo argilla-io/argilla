@@ -68,7 +68,9 @@ export default {
     },
     onAddSortField(index, option, direction) {
       const item = {
-        id: option.group == "Metadata" ? "metadata." + option.id : option.id,
+        id: option.group.toLowerCase() === 'metadata' 
+          ? "metadata." + option.id
+          : option.id,
         name: option.name,
         order: direction,
       };
