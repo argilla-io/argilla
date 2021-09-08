@@ -60,7 +60,7 @@ Let's see Rubrix in action with a quick example: *Bootstraping data annotation w
 
 **Why**: 
 
-- The availability of pre-trained language models with zero-shot capabilities (i.e., no need to train it for your own use case) means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained model.
+- The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
 - The same workflow can be applied if there's a pre-trained "supervised" model which fits your categories but you need to fine-tune for your own use case. For example, fine-tuning a sentiment classifier for a highly specific type of messages.
 
 **Ingredients**:
@@ -72,7 +72,7 @@ Let's see Rubrix in action with a quick example: *Bootstraping data annotation w
 **What are we going to do**:
 
 1. Make predictions and log them into a Rubrix dataset.
-2. Use Rubrix UI for filtering records predicted as `Business` with high probability. Use the bulk-labeling feature for labeling 15 records as `Business`.
+2. Use Rubrix UI to explore, filter, and annotate some examples.
 3. Load the annotated examples and create a training set, which you can then use to train a supervised classifier.
 
 ### 1. Predict and log
@@ -103,13 +103,15 @@ for record in dataset:
 
 ### 2. Explore, Filter and Label
 
-Now we can access our Rubrix dataset and start annotating data. Let's filter the records predicted as `Business` with high probability and use the bulk-labeling feature for labeling 15 records as `Business`:
+Now let's access our Rubrix dataset and start annotating data. Let's filter the records predicted as `Business` with high probability and use the bulk-labeling feature for labeling 15 records as `Business`:
 
 https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4
 
 
 ### 3. Load and create a training set
-After a round of data annotation, we can load the Rubrix dataset and transform it into a 🤗 dataset for training a supervised classifier.
+After a few iterations of data annotation, we can load the Rubrix dataset and create a training set for training. At this step, there're many options: you can use any NLP library to train a supervised model, you can train a few-shot text classifier (e.g., Flair TARS model), etc.
+
+In this example, let's transform it into a Hugging Face dataset to suppose we'll be training a Hugging Face pre-trained model.
 
 ```python
 from datasets import Dataset
