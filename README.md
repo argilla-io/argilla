@@ -1,8 +1,9 @@
 <p align="left">
-    <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" style="height: 50px"/>
+    <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
+<h4> Python framework to explore, label, and monitor data for NLP</h4>
 <p align="left">
-    <a href="https://github.com/recognai/rubrix/#example">Example usage</a>
+    <a href="https://github.com/recognai/rubrix/#example">Usage example</a>
     ·
     <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
     ·
@@ -36,6 +37,7 @@
 </p>
 
 https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4
+<p align="center">Example: Named Entity Recognition data exploration and annotation with spaCy and the IMDB dataset</p>
 
 ## What is Rubrix?
 
