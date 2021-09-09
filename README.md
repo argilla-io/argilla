@@ -29,8 +29,8 @@
     <a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
     </a>
-    <a href="https://twitter.com/recogn_ai">
-        <img alt="CI" src="https://img.shields.io/twitter/follow/recogn_ai.svg?style=social&label=Follow">
+    <a href="https://twitter.com/rubrixml">
+        <img alt="CI" src="https://img.shields.io/twitter/follow/rubrixml.svg?style=social&label=Follow">
     </a>
     <!--img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix?sort=semver"-->
     
