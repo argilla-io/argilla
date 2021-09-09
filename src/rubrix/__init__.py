@@ -28,6 +28,16 @@ _client: Optional[
 ] = None  # Client will be stored here to pass it through functions
 
 
+def _client_instance() -> RubrixClient:
+    """Checks module instance client and init if not initialized."""
+
+    global _client
+    # Calling a by-default-init if it was not called before
+    if _client is None:
+        init()
+    return _client
+
+
 def init(
     api_url: Optional[str] = None,
     api_key: Optional[str] = None,
@@ -135,16 +145,6 @@ def copy(dataset: str, name_of_copy: str):
         >>> df = rb.load("new_dataset")
     """
     _client_instance().copy(source=dataset, target=name_of_copy)
-
-
-def _client_instance() -> RubrixClient:
-    """Checks module instance client and init if not initialized."""
-
-    global _client
-    # Calling a by-default-init if it was not called before
-    if _client is None:
-        init()
-    return _client
 
 
 def load(

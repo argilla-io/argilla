@@ -15,17 +15,17 @@
         </results-record>
       </div>
       <div slot="pagination">
-      <RePagination
-        :pagination-size="dataset.viewSettings.pagination.size"
-        :total-items="dataset.results.total"
-        :total-pages="
-          Math.ceil(
-            dataset.results.total / dataset.viewSettings.pagination.size
-          )
-        "
-        :current-page="dataset.viewSettings.pagination.page"
-        @changePage="onPagination"
-      />
+        <RePagination
+          :pagination-size="dataset.viewSettings.pagination.size"
+          :total-items="dataset.results.total"
+          :total-pages="
+            Math.ceil(
+              dataset.results.total / dataset.viewSettings.pagination.size
+            )
+          "
+          :current-page="dataset.viewSettings.pagination.page"
+          @changePage="onPagination"
+        />
       </div>
     </VueAutoVirtualScrollList>
   </div>

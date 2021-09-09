@@ -1,14 +1,12 @@
-.. _api:
+.. _python_client:
 
-Python client API
-=================
+Python client
+=============
 
-Here we describe the python client API of Rubrix that we divide into two basic modules:
+Here we describe the Python client of Rubrix that we divide into two basic modules:
 
 - Methods: These methods make up the interface to interact with Rubrix's REST API.
 - Models: You need to wrap your data in these data models for Rubrix to understand it.
-
-.. _test:
 
 Methods
 -------

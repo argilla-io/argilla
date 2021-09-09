@@ -19,6 +19,23 @@
           </li>
         </ul>
       </div>
+      <a href="#" @click="showOptions = !showOptions">
+        {{ paginationSize }}
+        <svgicon name="drop-down" width="12" height="12" />
+      </a>
+      <ul v-if="showOptions">
+        <li>
+          <a
+            v-for="item in availableItemsPerPage.filter(
+              (i) => i !== paginationSize
+            )"
+            :key="item"
+            href="#"
+            @click.prevent="changePageSize(item)"
+            >{{ item }}</a
+          >
+        </li>
+      </ul>
     </div>
     <div class="pagination" v-if="totalItems > paginationSize">
       <a
@@ -78,7 +95,8 @@
     </div>
     <div class="pagination__info">
       Records:
-      <strong>{{ paginationSize * currentPage - (paginationSize - 1) }}-{{
+      <strong>
+      {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
         paginationSize * currentPage > totalItems
           ? totalItems
           : paginationSize * currentPage
@@ -116,6 +134,7 @@ export default {
     availableItemsPerPage: {
       type: Array,
       default: () => [1, 5, 10, 20, 50],
+      default: 20,
     },
   },
   data() {
@@ -194,6 +213,10 @@ $pagination-size: 45px;
   &__arrow {
     color: $lighter-color;
     background: $primary-color;
+    padding-bottom: 3em;
+  }
+  &__arrow {
+    color: palette(grey, medium);
     text-decoration: none;
     display: flex;
     align-items: center;

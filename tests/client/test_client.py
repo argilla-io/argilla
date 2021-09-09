@@ -9,6 +9,7 @@ from rubrix import (
     TextClassificationRecord,
     TokenAttributions,
     TokenClassificationRecord,
+    Text2TextRecord,
 )
 from rubrix.sdk.models import TextClassificationSearchResults
 from time import sleep
@@ -158,7 +159,7 @@ def test_log_with_annotation(monkeypatch):
 
 
 @pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
-def test_text_classification_record_to_sdk(annotation):
+def test_text_classification_client_to_sdk(annotation):
     token_attributions = [
         TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
     ]
@@ -175,12 +176,12 @@ def test_text_classification_record_to_sdk(annotation):
         status="Default",
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
-    sdk_record = RubrixClient._text_classification_record_to_sdk(record)
+    sdk_record = RubrixClient._text_classification_client_to_sdk(record)
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
-def test_token_classification_record_to_sdk():
+def test_token_classification_client_to_sdk():
     record = TokenClassificationRecord(
         text="test text",
         tokens=["test", "text"],
@@ -193,9 +194,34 @@ def test_token_classification_record_to_sdk():
         status="Default",
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
-    sdk_record = RubrixClient._token_classification_record_to_sdk(record)
+    sdk_record = RubrixClient._token_classification_client_to_sdk(record)
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
+
+
+def test_token_classification_client_to_sdk():
+    record = Text2TextRecord(
+        text="test text",
+        prediction=["test prediction"],
+        annotation="test annotation",
+        prediction_agent="test_model",
+        annotation_agent="test_annotator",
+        id=1,
+        metadata={"metadata": "test"},
+        status="Default",
+        event_timestamp=datetime.datetime(2000, 1, 1),
+    )
+
+    assert isinstance(record.prediction[0], tuple)
+    assert record.prediction[0][1] == pytest.approx(1.0)
+
+    sdk_record = RubrixClient._text2text_client_to_sdk(record)
+
+    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
+
+    client_record = RubrixClient._text2text_sdk_to_client(sdk_record)
+
+    assert record == client_record
 
 
 def test_create_ds_with_wrong_name(monkeypatch):
@@ -285,7 +311,6 @@ def test_text_classifier_with_inputs_list(monkeypatch):
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["inputs"]["text"] == expected_inputs
-
 
 
 def test_load_with_ids_list(monkeypatch):

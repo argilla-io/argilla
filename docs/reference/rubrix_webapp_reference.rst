@@ -1,7 +1,7 @@
 .. _webapp_reference:
 
-Rubrix UI
-=========
+Web App UI
+==========
 This section contains a quick overview of Rubrix web-app's User Interface (UI).
 
 The web-app has two main pages: the **Home** page and the **Dataset** page.
@@ -64,6 +64,57 @@ Elasticsearch's query DSL supports **escaping special characters** that are part
 To escape these character use the \\ before the character. For example to search for (1+1):2 use the query:
 
 ``\(1\+1\)\:2``
+
+Elasticsearch fields
+^^^^^^^^^^^^^^^^^^^^
+
+Below you can find a summary of available fields which can be used for the query DSL as well as for building Kibana Dashboards: common fields to all record types, and those specific to certain record types:
+
++-----------------+
+| Common fields   |
++=================+
+| annotated_as    |
++-----------------+
+| annotated_by    |
++-----------------+
+| event_timestamp |
++-----------------+
+| id              |
++-----------------+
+| last_updated    |
++-----------------+
+| metadata.*      |
++-----------------+
+| multi_label     |
++-----------------+
+| predicted       |
++-----------------+
+| predicted_as    |
++-----------------+
+| predicted_by    |
++-----------------+
+| status          |
++-----------------+
+| words           |
++-----------------+
+
+
++----------------------------+
+| Text classification fields |
++============================+
+| inputs.*                   |
++----------------------------+
+| score                      |
++----------------------------+
+
+
++------------------------------+
+| Tokens classification fields |
++==============================+
+| tokens                       |
++------------------------------+
+
+
 
 Predictions filters
 ^^^^^^^^^^^^^^^^^^^
