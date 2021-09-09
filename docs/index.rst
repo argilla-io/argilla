@@ -8,9 +8,8 @@ Welcome to Rubrix
 =================
 
 .. raw:: html
-   <video width="100%" controls>
-   <source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4">
-   </video>
+   
+   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4"></video>
 
 
 What's Rubrix?
@@ -55,6 +54,26 @@ Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`
 
    pip install rubrix transformers datasets torch
 
+Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
+
+
+**Why**: 
+
+- The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
+- The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
+
+**Ingredients**:
+
+- A zero-shot classifier from the 🤗 Hub: `typeform/distilbert-base-uncased-mnli`
+- A dataset containing news
+- A set of target categories: `Business`, `Sports`, etc.
+
+**What are we going to do**:
+
+1. Make predictions and log them into a Rubrix dataset.
+2. Use the Rubrix web app to explore, filter, and annotate some examples.
+3. Load the annotated examples and create a training set, which you can then use to train a supervised classifier.
+
 
 Use your favourite editor or a Jupyter notebook to run the following:
 
@@ -68,8 +87,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
    dataset = load_dataset("ag_news", split='test[0:100]')
 
-   # Our labels are: ['World', 'Sports', 'Business', 'Sci/Tech']
-   labels = dataset.features["label"].names
+   labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
    for record in dataset:
        prediction = model(record['text'], labels) 
@@ -77,14 +95,34 @@ Use your favourite editor or a Jupyter notebook to run the following:
        item = rb.TextClassificationRecord(
            inputs=record["text"],
            prediction=list(zip(prediction['labels'], prediction['scores'])), 
-           annotation=labels[record["label"]]
        )
 
-       rb.log(item, name="ag_news_zeroshot")
+       rb.log(item, name="news_zeroshot")
+
 
 Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
+.. raw:: html
+   
+   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4" type="video/mp4"></video>
+
+
+After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
+
+.. code-block:: python
+
+   # load the Rubrix dataset as a pandas DataFrame
+   rb_df = rb.load(name='news_zeroshot')
+
+   # filter annotated records
+   rb_df = rb_df[rb_df.status == "Validated"]
+
+   # select text input and the annotated label
+   train_df = pd.DataFrame({
+      "text": rb_df.inputs.transform(lambda r: r["text"]),
+      "label": rb_df.annotation,
+   })
 
 Use cases
 ---------
