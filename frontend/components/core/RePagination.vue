@@ -1,24 +1,24 @@
 <template>
   <div class="pagination__container">
     <div v-click-outside="closePageSizeSelector" class="pagination__selector">
-      <span class="pagination__selector__title">Page size:</span>
-      <a href="#" @click="showOptions = !showOptions">
-        {{ paginationSize }}
-        <svgicon name="drop-down" width="12" height="12" />
-      </a>
-      <ul v-if="showOptions">
-        <li>
-          <a
-            v-for="item in availableItemsPerPage.filter(
-              (i) => i !== paginationSize
-            )"
-            :key="item"
-            href="#"
-            @click.prevent="changePageSize(item)"
-            >{{ item }}</a
-          >
-        </li>
-      </ul>
+      <span class="pagination__selector__title">Records per page:</span>
+      <div class="pagination__selector__content">
+        <a href="#" @click="showOptions = !showOptions">
+          {{ paginationSize }}
+          <svgicon name="drop-down" width="12" height="12" />
+        </a>
+        <ul v-if="showOptions">
+          <li>
+            <a
+              v-for="item in availableItemsPerPage"
+              :key="item"
+              href="#"
+              @click.prevent="changePageSize(item)"
+              >{{ item }}</a
+            >
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="pagination" v-if="totalItems > paginationSize">
       <a
@@ -27,7 +27,7 @@
         :class="currentPage <= 1 ? 'is-disabled' : null"
         @click.prevent="prevPage"
       >
-        <svgicon name="chev-left" width="14" height="14" />
+        <svgicon name="chev-left" width="14" height="14" /> Prev
       </a>
       <ul class="pagination__numbers">
         <li v-if="totalPages > 1 && !pages.includes(1)">
@@ -73,17 +73,17 @@
         :class="currentPage >= totalPages ? 'is-disabled' : null"
         @click.prevent="nextPage"
       >
-        <svgicon name="chev-right" width="14" height="14" />
+        Next <svgicon name="chev-right" width="14" height="14" />
       </a>
     </div>
     <div class="pagination__info">
-      <strong>Records:</strong>
-      {{ paginationSize * currentPage - (paginationSize - 1) }} -
-      {{
+      Records:
+      <strong>{{ paginationSize * currentPage - (paginationSize - 1) }}-{{
         paginationSize * currentPage > totalItems
           ? totalItems
           : paginationSize * currentPage
       }}
+      </strong>
       of {{ totalItems }}
     </div>
   </div>
@@ -111,11 +111,11 @@ export default {
     },
     paginationSize: {
       type: Number,
-      default: 20,
+      default: 5,
     },
     availableItemsPerPage: {
       type: Array,
-      default: () => [5, 20, 50],
+      default: () => [1, 5, 10, 20, 50],
     },
   },
   data() {
@@ -137,6 +137,13 @@ export default {
     },
   },
   methods: {
+    keyDown(event) {
+      if (event.keyCode === 39) {
+        this.nextPage()
+      } else if (event.keyCode === 37) {
+        this.prevPage()
+      }
+    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.$emit("changePage", this.currentPage + 1, this.paginationSize);
@@ -162,9 +169,16 @@ export default {
       this.showOptions = false;
     },
   },
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
+  },
 };
 </script>
 <style lang="scss" scoped>
+$pagination-size: 45px;
 .pagination {
   $self: &;
   display: flex;
@@ -175,21 +189,35 @@ export default {
     display: flex;
     align-items: center;
     padding-top: 3em;
-    padding-bottom: 3em;
+    padding-bottom: 12em;
   }
   &__arrow {
-    color: palette(grey, medium);
+    color: $lighter-color;
+    background: $primary-color;
     text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 10px * 5;
+    height: $pagination-size;
     padding: 0 10px * 2.5;
     transition: color 200ms ease-in-out;
     outline: none;
+    border-radius: 3px;
+    &--next {
+      margin-left: 1em;
+      svg {
+        margin-left: 1em;
+      }
+    }
+    &--prev {
+      margin-right: 1em;
+      svg {
+        margin-right: 1em;
+      }
+    }
     &.is-disabled {
       pointer-events: none;
-      opacity: 0.4;
+      opacity: 0;
     }
   }
   &__numbers {
@@ -198,39 +226,58 @@ export default {
     list-style: none;
     padding-left: 0;
     #{$self}__number {
+      color: $primary-color;
       display: flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      width: 10px * 5;
-      height: 10px * 5;
+      width: $pagination-size;
+      height: $pagination-size;
       outline: none;
       &:hover {
-        color: palette(grey, medium);
+        color: $font-secondary-dark;
       }
       &.is-current {
-        color: white;
-        background: palette(grey, medium);
+        color: $font-secondary-dark;
+        border: 2px solid $font-secondary-dark;
       }
     }
   }
   &__selector {
     position: relative;
     margin-right: 3em;
+    display: flex;
+    align-items: center;
+    &__content {
+      position: relative;
+      & > a {
+        color: $secondary-color;
+        border: 1px solid palette(grey, smooth);
+      }
+    }
     &__title {
       display: block;
       margin-bottom: 0.5em;
+      color: $font-secondary-dark;
+      margin-right: 1em;
     }
     ul {
       list-style: none;
       background: $lighter-color;
       padding: 0;
-      display: inline-block;
+      display: block;
       position: absolute;
-      top: 50px;
+      top: 2em;
       left: 0;
+      right: 0;
+      border: 2px solid $primary-color;
       a {
-        display: inline;
+        display: block;
+        color: $font-secondary-dark;
+        &:hover {
+          background: palette(grey, smooth);
+          color: $secondary-color;
+        }
       }
     }
     a {
@@ -238,8 +285,9 @@ export default {
       display: block;
       text-decoration: none;
       background: $lighter-color;
-      padding: 0.5em 1em;
+      padding: 0.4em 1em;
       .svg-icon {
+        fill: $primary-color;
         margin-left: 1em;
       }
     }
@@ -247,6 +295,7 @@ export default {
   &__info {
     margin-left: auto;
     margin-right: 0;
+    color: $font-secondary-dark;
   }
 }
 </style>

@@ -14,6 +14,7 @@
           <slot name="record" :record="item" />
         </results-record>
       </div>
+      <div slot="pagination">
       <RePagination
         :pagination-size="dataset.viewSettings.pagination.size"
         :total-items="dataset.results.total"
@@ -25,6 +26,7 @@
         :current-page="dataset.viewSettings.pagination.page"
         @changePage="onPagination"
       />
+      </div>
     </VueAutoVirtualScrollList>
   </div>
 </template>

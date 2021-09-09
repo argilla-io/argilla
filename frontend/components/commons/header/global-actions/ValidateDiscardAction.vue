@@ -94,7 +94,6 @@ export default {
   &__select {
     margin-left: 0.8em;
     ::v-deep .dropdown__header {
-      border-radius: 5px;
       max-height: 33px;
       background: $lighter-color;
       border-width: 1px;
@@ -103,7 +102,7 @@ export default {
     }
   }
   &__button {
-    border-radius: 5px;
+    border-radius: 0;
     height: 33px;
     border: none;
     min-width: 80px;

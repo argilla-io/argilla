@@ -186,6 +186,7 @@ export default {
         <div style={{ width: "100%", height: `${spaceBefore}px` }} />
         {items}
         <div style={{ width: "100%", height: `${spaceAfter}px` }} />
+        { this.$slots.pagination }
       </div>
     );
   },
