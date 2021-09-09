@@ -4,37 +4,32 @@
    contain the root `toctree` directive.
 
 
-First steps with Rubrix
-=======================
-Welcome to Rubrix's documentation.
+Welcome to Rubrix
+=================
+
+.. raw:: html
+   <video width="100%" controls>
+   <source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4">
+   </video>
+
 
 What's Rubrix?
 --------------
 
-`Rubrix <https://rubrix.ml>`_ is a free and open-source tool for tracking and iterating on data for AI projects. 
+`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
 
-With Rubrix, you can:
+Key features:
 
+- **Open**: Rubrix is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
-* **Monitor** the predictions of deployed models.
-* **Collect** ground-truth data for starting up a project or evolving an existing one.
-* **Iterate** on ground-truth data and predictions to debug, track and improve your models over time.
-* **Build** custom applications and dashboards on top of your model predictions and ground-truth data.
+- **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions, and collect more data to improve your model over time. Rubrix is designed to close this gap, enabling you to **iterate as much as you need**.
 
-Rubrix is designed to enable novel, human-in-the loop workflows involving data scientists, subject matter experts and data engineers for curating, understanding and evolving data for AI and data science projects.
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
-We've tried to make Rubrix easy, fun and seamless to use with your favourite libraries while keeping it scalable and flexible. Rubrix's main components are:
-
-* a **Python client**  to enable data scientists, data engineers and DevOps roles to build bridges between data, models and users, which you can install with ``pip``.
-* a **web application** for exploring, curating and labelling data, which you can launch using ``Docker`` or with a local installation.
-* a **REST API** for storing, retrieving and searching human annotations and model predictions, which is part of Rubrix's installation.
+- **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 
-.. image:: images/rubrix_intro.svg
-   :alt: images/rubrix_intro.svg
-
-
-Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we will be adding support for speech recognition and computer vision soon. 
+Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we'll be adding support for speech recognition and computer vision soon. 
 
 Quickstart
 ----------
@@ -90,9 +85,6 @@ Use your favourite editor or a Jupyter notebook to run the following:
 Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
-.. raw:: html
-
-   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif?raw=true">
 
 Use cases
 ---------
@@ -102,16 +94,6 @@ Use cases
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.
 * **Explainability:** log things like token attributions to understand your model predictions.
-* **App development:** get a powerful search-based API on top of your model predictions and ground truth data.
-
-Design Principles
------------------
-
-Rubrix's design is:
-
-* **Agnostic**: you can use Rubrix with any library or framework, no need to implement any interface or modify your existing toolbox and workflows.
-* **Flexible:**  Rubrix does not make any strong assumption about your input data, so you can log and structure your data as it fits your use case.
-* **Minimalistic:** Rubrix is built around a small set of concepts and methods.
 
 Next steps
 ----------
@@ -137,7 +119,6 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Getting Started
    :hidden:
 
-   self
    getting_started/setup&installation
    getting_started/concepts
    getting_started/supported_tasks
