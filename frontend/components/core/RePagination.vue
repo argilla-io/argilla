@@ -19,23 +19,6 @@
           </li>
         </ul>
       </div>
-      <a href="#" @click="showOptions = !showOptions">
-        {{ paginationSize }}
-        <svgicon name="drop-down" width="12" height="12" />
-      </a>
-      <ul v-if="showOptions">
-        <li>
-          <a
-            v-for="item in availableItemsPerPage.filter(
-              (i) => i !== paginationSize
-            )"
-            :key="item"
-            href="#"
-            @click.prevent="changePageSize(item)"
-            >{{ item }}</a
-          >
-        </li>
-      </ul>
     </div>
     <div class="pagination" v-if="totalItems > paginationSize">
       <a
@@ -134,7 +117,6 @@ export default {
     availableItemsPerPage: {
       type: Array,
       default: () => [1, 5, 10, 20, 50],
-      default: 20,
     },
   },
   data() {
@@ -156,13 +138,6 @@ export default {
     },
   },
   methods: {
-    keyDown(event) {
-      if (event.keyCode === 39) {
-        this.nextPage()
-      } else if (event.keyCode === 37) {
-        this.prevPage()
-      }
-    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.$emit("changePage", this.currentPage + 1, this.paginationSize);
@@ -188,12 +163,6 @@ export default {
       this.showOptions = false;
     },
   },
-  created() {
-    window.addEventListener("keydown", this.keyDown);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -213,10 +182,6 @@ $pagination-size: 45px;
   &__arrow {
     color: $lighter-color;
     background: $primary-color;
-    padding-bottom: 3em;
-  }
-  &__arrow {
-    color: palette(grey, medium);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -226,6 +191,9 @@ $pagination-size: 45px;
     transition: color 200ms ease-in-out;
     outline: none;
     border-radius: 3px;
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
     &--next {
       margin-left: 1em;
       svg {

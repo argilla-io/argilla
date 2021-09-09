@@ -51,7 +51,7 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 5;
+const DEFAULT_QUERY_SIZE = 20;
 
 function configuredRouteParams() {
   return {

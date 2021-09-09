@@ -14,19 +14,17 @@
           <slot name="record" :record="item" />
         </results-record>
       </div>
-      <div slot="pagination">
-        <RePagination
-          :pagination-size="dataset.viewSettings.pagination.size"
-          :total-items="dataset.results.total"
-          :total-pages="
-            Math.ceil(
-              dataset.results.total / dataset.viewSettings.pagination.size
-            )
-          "
-          :current-page="dataset.viewSettings.pagination.page"
-          @changePage="onPagination"
-        />
-      </div>
+      <RePagination
+        :pagination-size="dataset.viewSettings.pagination.size"
+        :total-items="dataset.results.total"
+        :total-pages="
+          Math.ceil(
+            dataset.results.total / dataset.viewSettings.pagination.size
+          )
+        "
+        :current-page="dataset.viewSettings.pagination.page"
+        @changePage="onPagination"
+      />
     </VueAutoVirtualScrollList>
   </div>
 </template>
@@ -68,6 +66,14 @@ export default {
     ...mapActions({
       paginate: "entities/datasets/paginate",
     }),
+    keyDown(event) {
+      let { page, size } = this.dataset.viewSettings.pagination;
+      if (event.keyCode === 39 && page < this.dataset.results.total / size) {
+        this.onPagination(page + 1, size);
+      } else if (event.keyCode === 37 && page > 1) {
+        this.onPagination(page - 1, size);
+      }
+    },
     onScroll() {
       if (this.$refs.scroll.scrollTop > 10) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
@@ -85,6 +91,12 @@ export default {
       })
       document.getElementById("scroll").scrollTop = 0;
     },
+  },
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
   },
 };
 </script>
