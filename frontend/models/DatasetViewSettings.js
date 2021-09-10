@@ -8,6 +8,7 @@ class Pagination extends Model {
       id: this.string(null),
       size: this.number(5),
       page: this.number(1),
+      pageSizeOptions: this.attr([1, 5, 10, 20]),
     };
   }
 

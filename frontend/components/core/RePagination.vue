@@ -20,7 +20,7 @@
         </ul>
       </div>
     </div>
-    <div class="pagination" v-if="totalItems > paginationSize">
+    <div v-if="totalItems > paginationSize" class="pagination">
       <a
         href="#"
         class="pagination__arrow pagination__arrow--prev"
@@ -79,11 +79,11 @@
     <div class="pagination__info">
       Records:
       <strong>
-      {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
-        paginationSize * currentPage > totalItems
-          ? totalItems
-          : paginationSize * currentPage
-      }}
+        {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
+          paginationSize * currentPage > totalItems
+            ? totalItems
+            : paginationSize * currentPage
+        }}
       </strong>
       of {{ totalItems }}
     </div>
@@ -95,28 +95,20 @@ import "assets/icons/chev-right";
 import "assets/icons/drop-down";
 export default {
   props: {
-    totalPages: {
-      type: Number,
-      default: 5,
-    },
     totalItems: {
       type: Number,
+      required: true,
     },
-    currentPage: {
-      type: Number,
-      default: 1,
+    paginationSettings: {
+      type: Object,
+      required: true,
     },
-    rangeOfPages: {
-      type: Number,
-      default: 2,
-    },
-    paginationSize: {
+    visiblePagesRange: {
       type: Number,
       default: 5,
-    },
-    availableItemsPerPage: {
-      type: Array,
-      default: () => [1, 5, 10, 20],
+      validator: function (value) {
+        return value > 1 && !(value % 2 == 0);
+      },
     },
   },
   data() {
@@ -125,18 +117,32 @@ export default {
     };
   },
   computed: {
+    totalPages() {
+      return Math.ceil(this.totalItems / this.paginationSettings.size);
+    },
+    paginationSize() {
+      return this.paginationSettings.size;
+    },
+    availableItemsPerPage() {
+      return this.paginationSettings.pageSizeOptions;
+    },
+    currentPage() {
+      return this.paginationSettings.page;
+    },
     pages() {
-      let start = this.currentPage - this.rangeOfPages;
+      const rangeOfPages = (this.visiblePagesRange - 1) / 2;
+      let start = this.currentPage - rangeOfPages;
       start = start > 0 ? start : 1;
-      let end = this.currentPage + this.rangeOfPages;
+      let end = this.currentPage + rangeOfPages;
       end = end < this.totalPages ? end : this.totalPages;
       var pages = [];
-      for (var i = start; i <= end; i++) {
+      for (var i = start;i <= end;i++) {
         pages.push(i);
       }
       return pages;
     },
   },
+
   methods: {
     nextPage() {
       if (this.currentPage < this.totalPages) {

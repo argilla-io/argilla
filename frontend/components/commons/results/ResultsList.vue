@@ -9,20 +9,18 @@
       :default-height="100"
       :total-height="1200"
     >
-      <div v-for="(item, index) in visibleRecords" :key="index" class="list__li">
+      <div
+        v-for="(item, index) in visibleRecords"
+        :key="index"
+        class="list__li"
+      >
         <results-record v-if="item" :dataset="dataset" :item="item">
           <slot name="record" :record="item" />
         </results-record>
       </div>
       <RePagination
-        :pagination-size="dataset.viewSettings.pagination.size"
         :total-items="dataset.results.total"
-        :total-pages="
-          Math.ceil(
-            dataset.results.total / dataset.viewSettings.pagination.size
-          )
-        "
-        :current-page="dataset.viewSettings.pagination.page"
+        :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
       />
     </VueAutoVirtualScrollList>
@@ -61,7 +59,12 @@ export default {
     if (this.scrollComponent)
       this.scrollComponent.removeEventListener("scroll", this.onScroll);
   },
-
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
+  },
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
@@ -88,15 +91,9 @@ export default {
         dataset: this.dataset,
         page: page,
         size: size,
-      })
+      });
       document.getElementById("scroll").scrollTop = 0;
     },
-  },
-  created() {
-    window.addEventListener("keydown", this.keyDown);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
   },
 };
 </script>
@@ -116,7 +113,7 @@ export default {
     padding-right: calc(4em + 45px);
     @include media(">desktopLarge") {
       width: 100%;
-      padding-right: calc(294px + 45px + 4em) 
+      padding-right: calc(294px + 45px + 4em);
     }
   }
   &__li {
