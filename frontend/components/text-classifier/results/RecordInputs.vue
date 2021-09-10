@@ -9,7 +9,7 @@
           :query-text="queryText"
           :explain="explanation[index]"
         />
-        <LazyRecordString :query-text="queryText" :text="text" />
+        <LazyRecordString v-else :query-text="queryText" :text="text" />
       </span>
     </span>
   </div>
