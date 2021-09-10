@@ -79,11 +79,11 @@
     <div class="pagination__info">
       Records:
       <strong>
-      {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
+      {{ paginationSize * currentPage - (paginationSize - 1) }}<span v-if="paginationSize > 1">-{{
         paginationSize * currentPage > totalItems
           ? totalItems
           : paginationSize * currentPage
-      }}
+      }}</span>
       </strong>
       of {{ totalItems }}
     </div>
@@ -116,7 +116,7 @@ export default {
     },
     availableItemsPerPage: {
       type: Array,
-      default: () => [1, 5, 10, 20, 50],
+      default: () => [1, 5, 10, 20],
     },
   },
   data() {
