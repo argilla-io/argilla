@@ -49,6 +49,12 @@ export default {
 .help {
   clear: both;
   margin-top: 1em;
+  padding-left: 4em;
+  padding-right: calc(4em + 45px);
+  @include media(">desktopLarge") {
+    width: 100%;
+    padding-right: calc(294px + 45px + 4em) 
+  }
   .fixed-header & {
     display: none;
   }
