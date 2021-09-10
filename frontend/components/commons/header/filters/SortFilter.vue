@@ -10,14 +10,19 @@
         <span v-else>Sort by</span>
       </span>
       <div slot="dropdown-content">
+        <input
+          v-model="searchText"
+          class="filter-options"
+          type="text"
+          autofocus
+          placeholder="Search..."
+        />
         <ul>
-          <span v-for="option in sortOptions" :key="option.text">
-            <ul @click="addField(option)">
-              <li>
+          <li v-for="option in filteredSortOptions" :key="option.text">
+              <a href="#" @click.prevent="addField(option)">
                 {{ option.name }}
-              </li>
-            </ul>
-          </span>
+              </a>
+          </li>
         </ul>
       </div>
     </FilterDropdown>
@@ -58,12 +63,33 @@ export default {
     visible: false,
     defaultSortedBy: undefined,
     defaultSortedByDir: "asc",
+    searchText: undefined,
   }),
   mounted() {
     this.getSortDirection();
   },
   updated() {
     this.getSortDirection();
+  },
+  computed: {
+    filteredSortOptions() {
+      if (this.searchText === undefined) {
+        return this.formatSortOptions;
+      }
+      let filtered = this.formatSortOptions.filter((opt) => opt.name.toLowerCase().match(this.searchText.toLowerCase()));
+      return filtered;
+    },
+    formatSortOptions() {
+      return this.sortOptions.map(opt => {
+        if (opt.group.toLowerCase() === 'metadata') {
+          return {
+            ...opt,
+            name: `Metadata.${opt.name}`
+          }
+        }
+        return opt;
+      })
+    }
   },
   methods: {
     onVisibility(value) {
@@ -113,6 +139,9 @@ export default {
   .dropdown {
     width: 100%;
     max-width: 280px;
+    a {
+      text-decoration: none;
+    }
   }
 }
 </style>

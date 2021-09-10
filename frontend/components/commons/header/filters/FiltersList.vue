@@ -16,11 +16,14 @@
       </p>
       <p class="filters__tabs__sort"
         :class="{
-          active: initialVisibleGroup === 'sort',
+          active: initialVisibleGroup === 'sort' || dataset.sort.length,
         }"
         @click="selectGroup('sort')"
       >
         Sort
+        <span v-if="dataset.sort.length"
+          >({{ dataset.sort.length }})</span
+        >
       </p>
     </div>
     <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content filters__tabs__content--sort">
