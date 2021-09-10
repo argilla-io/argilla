@@ -4,37 +4,31 @@
    contain the root `toctree` directive.
 
 
-First steps with Rubrix
-=======================
-Welcome to Rubrix's documentation.
+Welcome to Rubrix
+=================
+
+.. raw:: html
+   
+   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4"></video>
+
 
 What's Rubrix?
 --------------
 
-`Rubrix <https://rubrix.ml>`_ is a free and open-source tool for tracking and iterating on data for AI projects. 
+`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
 
-With Rubrix, you can:
+Key features:
 
+- **Open**: Rubrix is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
-* **Monitor** the predictions of deployed models.
-* **Collect** ground-truth data for starting up a project or evolving an existing one.
-* **Iterate** on ground-truth data and predictions to debug, track and improve your models over time.
-* **Build** custom applications and dashboards on top of your model predictions and ground-truth data.
+- **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions, and collect more data to improve your model over time. Rubrix is designed to close this gap, enabling you to **iterate as much as you need**.
 
-Rubrix is designed to enable novel, human-in-the loop workflows involving data scientists, subject matter experts and data engineers for curating, understanding and evolving data for AI and data science projects.
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
-We've tried to make Rubrix easy, fun and seamless to use with your favourite libraries while keeping it scalable and flexible. Rubrix's main components are:
-
-* a **Python client**  to enable data scientists, data engineers and DevOps roles to build bridges between data, models and users, which you can install with ``pip``.
-* a **web application** for exploring, curating and labelling data, which you can launch using ``Docker`` or with a local installation.
-* a **REST API** for storing, retrieving and searching human annotations and model predictions, which is part of Rubrix's installation.
+- **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 
-.. image:: images/rubrix_intro.svg
-   :alt: images/rubrix_intro.svg
-
-
-Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we will be adding support for speech recognition and computer vision soon. 
+Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we'll be adding support for speech recognition and computer vision soon. 
 
 Quickstart
 ----------
@@ -60,6 +54,26 @@ Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`
 
    pip install rubrix transformers datasets torch
 
+Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
+
+
+**Why**: 
+
+- The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
+- The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
+
+**Ingredients**:
+
+- A zero-shot classifier from the 🤗 Hub: `typeform/distilbert-base-uncased-mnli`
+- A dataset containing news
+- A set of target categories: `Business`, `Sports`, etc.
+
+**What are we going to do**:
+
+1. Make predictions and log them into a Rubrix dataset.
+2. Use the Rubrix web app to explore, filter, and annotate some examples.
+3. Load the annotated examples and create a training set, which you can then use to train a supervised classifier.
+
 
 Use your favourite editor or a Jupyter notebook to run the following:
 
@@ -73,8 +87,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
    dataset = load_dataset("ag_news", split='test[0:100]')
 
-   # Our labels are: ['World', 'Sports', 'Business', 'Sci/Tech']
-   labels = dataset.features["label"].names
+   labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
    for record in dataset:
        prediction = model(record['text'], labels) 
@@ -82,17 +95,34 @@ Use your favourite editor or a Jupyter notebook to run the following:
        item = rb.TextClassificationRecord(
            inputs=record["text"],
            prediction=list(zip(prediction['labels'], prediction['scores'])), 
-           annotation=labels[record["label"]]
        )
 
-       rb.log(item, name="ag_news_zeroshot")
+       rb.log(item, name="news_zeroshot")
+
 
 Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
 .. raw:: html
+   
+   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4" type="video/mp4"></video>
 
-   <img style="width:100%;" src="https://github.com/dvsrepo/imgs/blob/main/0shot_explore.gif?raw=true">
+
+After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
+
+.. code-block:: python
+
+   # load the Rubrix dataset as a pandas DataFrame
+   rb_df = rb.load(name='news_zeroshot')
+
+   # filter annotated records
+   rb_df = rb_df[rb_df.status == "Validated"]
+
+   # select text input and the annotated label
+   train_df = pd.DataFrame({
+      "text": rb_df.inputs.transform(lambda r: r["text"]),
+      "label": rb_df.annotation,
+   })
 
 Use cases
 ---------
@@ -102,16 +132,6 @@ Use cases
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.
 * **Explainability:** log things like token attributions to understand your model predictions.
-* **App development:** get a powerful search-based API on top of your model predictions and ground truth data.
-
-Design Principles
------------------
-
-Rubrix's design is:
-
-* **Agnostic**: you can use Rubrix with any library or framework, no need to implement any interface or modify your existing toolbox and workflows.
-* **Flexible:**  Rubrix does not make any strong assumption about your input data, so you can log and structure your data as it fits your use case.
-* **Minimalistic:** Rubrix is built around a small set of concepts and methods.
 
 Next steps
 ----------
@@ -137,7 +157,6 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Getting Started
    :hidden:
 
-   self
    getting_started/setup&installation
    getting_started/concepts
    getting_started/supported_tasks
