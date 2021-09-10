@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import "assets/icons/help";
 export default {
   data: () => ({
     showHelpPanel: false,
