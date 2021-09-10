@@ -9,20 +9,18 @@
       :default-height="100"
       :total-height="1200"
     >
-      <div v-for="(item, index) in visibleRecords" :key="index" class="list__li">
+      <div
+        v-for="(item, index) in visibleRecords"
+        :key="index"
+        class="list__li"
+      >
         <results-record v-if="item" :dataset="dataset" :item="item">
           <slot name="record" :record="item" />
         </results-record>
       </div>
       <RePagination
-        :pagination-size="dataset.viewSettings.pagination.size"
         :total-items="dataset.results.total"
-        :total-pages="
-          Math.ceil(
-            dataset.results.total / dataset.viewSettings.pagination.size
-          )
-        "
-        :current-page="dataset.viewSettings.pagination.page"
+        :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
       />
     </VueAutoVirtualScrollList>
@@ -61,11 +59,24 @@ export default {
     if (this.scrollComponent)
       this.scrollComponent.removeEventListener("scroll", this.onScroll);
   },
-
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
+  },
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
     }),
+    keyDown(event) {
+      let { page, size } = this.dataset.viewSettings.pagination;
+      if (event.keyCode === 39 && page < this.dataset.results.total / size) {
+        this.onPagination(page + 1, size);
+      } else if (event.keyCode === 37 && page > 1) {
+        this.onPagination(page - 1, size);
+      }
+    },
     onScroll() {
       if (this.$refs.scroll.scrollTop > 10) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
@@ -80,7 +91,7 @@ export default {
         dataset: this.dataset,
         page: page,
         size: size,
-      })
+      });
       document.getElementById("scroll").scrollTop = 0;
     },
   },
@@ -102,7 +113,7 @@ export default {
     padding-right: calc(4em + 45px);
     @include media(">desktopLarge") {
       width: 100%;
-      padding-right: calc(294px + 45px + 4em) 
+      padding-right: calc(294px + 45px + 4em);
     }
   }
   &__li {
