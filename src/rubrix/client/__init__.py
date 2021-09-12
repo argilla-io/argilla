@@ -295,7 +295,7 @@ class RubrixClient:
             else None,
             explanation={
                 key: [TokenAttributions(**attribution) for attribution in attributions]
-                for key, attributions in record["explanation"]
+                for key, attributions in record["explanation"].items()
             }
             if record.get("explanation")
             else None,
