@@ -236,7 +236,7 @@ class RubrixClient:
             ),
             TaskType.TEXTTOTEXT: (
                 text_to_text_get_dataset_data,
-                self._text_classification_sdk_to_client,
+                self._text2text_sdk_to_client,
                 Text2TextQuery,
             ),
         }
