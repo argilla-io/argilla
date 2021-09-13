@@ -24,7 +24,7 @@ from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
 from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
 from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
 from rubrix.sdk.models.text2_text_query import Text2TextQuery
-from rubrix.sdk.api.text_to_text import bulk_records as text_to_text_bulk_records
+from rubrix.sdk.api.text2_text import bulk_records as text2text_bulk_records
 from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
 from rubrix.sdk.api.text_classification import (
     bulk_records as text_classification_bulk_records,
@@ -47,8 +47,8 @@ from rubrix.sdk.api.text_classification import (
 from rubrix.sdk.api.token_classification import (
     _get_dataset_data as token_classification_get_dataset_data,
 )
-from rubrix.sdk.api.text_to_text import (
-    _get_dataset_data as text_to_text_get_dataset_data,
+from rubrix.sdk.api.text2_text import (
+    _get_dataset_data as text2text_get_dataset_data,
 )
 
 
@@ -168,7 +168,7 @@ class RubrixClient:
 
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
-            bulk_records_function = text_to_text_bulk_records.sync_detailed
+            bulk_records_function = text2text_bulk_records.sync_detailed
             tags = Text2TextBulkDataTags.from_dict(tags)
             metadata = Text2TextBulkDataMetadata.from_dict(metadata)
             to_sdk_model = self._text2text_client_to_sdk
@@ -234,8 +234,8 @@ class RubrixClient:
                 self._token_classification_sdk_to_client,
                 TokenClassificationQuery,
             ),
-            TaskType.TEXTTOTEXT: (
-                text_to_text_get_dataset_data,
+            TaskType.TEXT2TEXT: (
+                text2text_get_dataset_data,
                 self._text2text_sdk_to_client,
                 Text2TextQuery,
             ),
@@ -246,7 +246,7 @@ class RubrixClient:
         except KeyError:
             raise ValueError(
                 f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
-                f"{[TaskType.TEXTCLASSIFICATION, TaskType.TOKENCLASSIFICATION, TaskType.TEXTTOTEXT]}"
+                f"{[TaskType.TEXTCLASSIFICATION, TaskType.TOKENCLASSIFICATION, TaskType.TEXT2TEXT]}"
             )
         response = get_dataset_data.sync_detailed(
             client=self._client,
