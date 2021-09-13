@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""Rubrix Client Init Method
-
-Methods for using the Rubrix Client, called from the module init file.
-"""
-
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -19,6 +12,11 @@ Methods for using the Rubrix Client, called from the module init file.
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""Rubrix Client Init Method
+
+Methods for using the Rubrix Client, called from the module init file.
+"""
 
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Union
