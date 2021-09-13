@@ -8,9 +8,6 @@ from ..models.token_classification_aggregations_annotated_as import (
 from ..models.token_classification_aggregations_annotated_by import (
     TokenClassificationAggregationsAnnotatedBy,
 )
-from ..models.token_classification_aggregations_confidence import (
-    TokenClassificationAggregationsConfidence,
-)
 from ..models.token_classification_aggregations_mentions import (
     TokenClassificationAggregationsMentions,
 )
@@ -28,6 +25,9 @@ from ..models.token_classification_aggregations_predicted_by import (
 )
 from ..models.token_classification_aggregations_predicted_mentions import (
     TokenClassificationAggregationsPredictedMentions,
+)
+from ..models.token_classification_aggregations_score import (
+    TokenClassificationAggregationsScore,
 )
 from ..models.token_classification_aggregations_status import (
     TokenClassificationAggregationsStatus,
@@ -73,7 +73,7 @@ class TokenClassificationAggregations:
     predicted_by: Union[TokenClassificationAggregationsPredictedBy, Unset] = UNSET
     status: Union[TokenClassificationAggregationsStatus, Unset] = UNSET
     predicted: Union[TokenClassificationAggregationsPredicted, Unset] = UNSET
-    confidence: Union[TokenClassificationAggregationsConfidence, Unset] = UNSET
+    score: Union[TokenClassificationAggregationsScore, Unset] = UNSET
     words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
     metadata: Union[TokenClassificationAggregationsMetadata, Unset] = UNSET
     predicted_mentions: Union[
@@ -107,9 +107,9 @@ class TokenClassificationAggregations:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted.to_dict()
 
-        confidence: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.confidence, Unset):
-            confidence = self.confidence.to_dict()
+        score: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.score, Unset):
+            score = self.score.to_dict()
 
         words: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.words, Unset):
@@ -142,8 +142,8 @@ class TokenClassificationAggregations:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if confidence is not UNSET:
-            field_dict["confidence"] = confidence
+        if score is not UNSET:
+            field_dict["score"] = score
         if words is not UNSET:
             field_dict["words"] = words
         if metadata is not UNSET:
@@ -196,12 +196,10 @@ class TokenClassificationAggregations:
         if not isinstance(_predicted, Unset):
             predicted = TokenClassificationAggregationsPredicted.from_dict(_predicted)
 
-        confidence: Union[TokenClassificationAggregationsConfidence, Unset] = UNSET
-        _confidence = d.pop("confidence", UNSET)
-        if not isinstance(_confidence, Unset):
-            confidence = TokenClassificationAggregationsConfidence.from_dict(
-                _confidence
-            )
+        score: Union[TokenClassificationAggregationsScore, Unset] = UNSET
+        _score = d.pop("score", UNSET)
+        if not isinstance(_score, Unset):
+            score = TokenClassificationAggregationsScore.from_dict(_score)
 
         words: Union[TokenClassificationAggregationsWords, Unset] = UNSET
         _words = d.pop("words", UNSET)
@@ -236,7 +234,7 @@ class TokenClassificationAggregations:
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
-            confidence=confidence,
+            score=score,
             words=words,
             metadata=metadata,
             predicted_mentions=predicted_mentions,

@@ -8,9 +8,6 @@ from ..models.text_classification_search_aggregations_annotated_as import (
 from ..models.text_classification_search_aggregations_annotated_by import (
     TextClassificationSearchAggregationsAnnotatedBy,
 )
-from ..models.text_classification_search_aggregations_confidence import (
-    TextClassificationSearchAggregationsConfidence,
-)
 from ..models.text_classification_search_aggregations_metadata import (
     TextClassificationSearchAggregationsMetadata,
 )
@@ -22,6 +19,9 @@ from ..models.text_classification_search_aggregations_predicted_as import (
 )
 from ..models.text_classification_search_aggregations_predicted_by import (
     TextClassificationSearchAggregationsPredictedBy,
+)
+from ..models.text_classification_search_aggregations_score import (
+    TextClassificationSearchAggregationsScore,
 )
 from ..models.text_classification_search_aggregations_status import (
     TextClassificationSearchAggregationsStatus,
@@ -63,7 +63,7 @@ class TextClassificationSearchAggregations:
     predicted_by: Union[TextClassificationSearchAggregationsPredictedBy, Unset] = UNSET
     status: Union[TextClassificationSearchAggregationsStatus, Unset] = UNSET
     predicted: Union[TextClassificationSearchAggregationsPredicted, Unset] = UNSET
-    confidence: Union[TextClassificationSearchAggregationsConfidence, Unset] = UNSET
+    score: Union[TextClassificationSearchAggregationsScore, Unset] = UNSET
     words: Union[TextClassificationSearchAggregationsWords, Unset] = UNSET
     metadata: Union[TextClassificationSearchAggregationsMetadata, Unset] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -93,9 +93,9 @@ class TextClassificationSearchAggregations:
         if not isinstance(self.predicted, Unset):
             predicted = self.predicted.to_dict()
 
-        confidence: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.confidence, Unset):
-            confidence = self.confidence.to_dict()
+        score: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.score, Unset):
+            score = self.score.to_dict()
 
         words: Union[Unset, Dict[str, Any]] = UNSET
         if not isinstance(self.words, Unset):
@@ -120,8 +120,8 @@ class TextClassificationSearchAggregations:
             field_dict["status"] = status
         if predicted is not UNSET:
             field_dict["predicted"] = predicted
-        if confidence is not UNSET:
-            field_dict["confidence"] = confidence
+        if score is not UNSET:
+            field_dict["score"] = score
         if words is not UNSET:
             field_dict["words"] = words
         if metadata is not UNSET:
@@ -180,12 +180,10 @@ class TextClassificationSearchAggregations:
                 _predicted
             )
 
-        confidence: Union[TextClassificationSearchAggregationsConfidence, Unset] = UNSET
-        _confidence = d.pop("confidence", UNSET)
-        if not isinstance(_confidence, Unset):
-            confidence = TextClassificationSearchAggregationsConfidence.from_dict(
-                _confidence
-            )
+        score: Union[TextClassificationSearchAggregationsScore, Unset] = UNSET
+        _score = d.pop("score", UNSET)
+        if not isinstance(_score, Unset):
+            score = TextClassificationSearchAggregationsScore.from_dict(_score)
 
         words: Union[TextClassificationSearchAggregationsWords, Unset] = UNSET
         _words = d.pop("words", UNSET)
@@ -204,7 +202,7 @@ class TextClassificationSearchAggregations:
             predicted_by=predicted_by,
             status=status,
             predicted=predicted,
-            confidence=confidence,
+            score=score,
             words=words,
             metadata=metadata,
         )
