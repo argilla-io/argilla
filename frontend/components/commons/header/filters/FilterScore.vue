@@ -2,13 +2,13 @@
   <div class="filter__row">
     <p class="filter__label">{{ filter.name }}:</p>
     <div
-      class="filter__item filter__item--confidence"
-      :class="{ 'filter__item--open': confidenceExpanded }"
-      @click="expandConfidence"
+      class="filter__item filter__item--score"
+      :class="{ 'filter__item--open': scoreExpanded }"
+      @click="expandScore"
     >
-      <div class="confidence-content">
+      <div class="score-content">
         <vega-lite
-          class="confidence"
+          class="score"
           :data="options"
           :autosize="autosize"
           :config="config"
@@ -18,15 +18,15 @@
       </div>
     </div>
     <div
-      v-if="confidenceExpanded"
+      v-if="scoreExpanded"
       v-click-outside="onClose"
-      class="filter__item filter__item--confidence"
-      :class="{ expanded: confidenceExpanded }"
+      class="filter__item filter__item--score"
+      :class="{ expanded: scoreExpanded }"
     >
-      <div class="confidence-content">
+      <div class="score-content">
         <p class="range__panel">{{ min }}% to {{ max }}%</p>
         <vega-lite
-          class="confidence"
+          class="score"
           :data="options"
           :autosize="autosize"
           :config="config"
@@ -35,10 +35,10 @@
         />
         <div class="range__container">
           <ReRange
-            v-if="confidenceExpanded"
+            v-if="scoreExpanded"
             ref="slider"
             v-bind="rangeOptions"
-            v-model="confidenceRanges"
+            v-model="scoreRanges"
           ></ReRange>
         </div>
       </div>
@@ -48,9 +48,7 @@
           @click="onClose()"
           >Cancel</ReButton
         >
-        <ReButton
-          class="button-primary--small"
-          @click="onApplyConfidenceRange()"
+        <ReButton class="button-primary--small" @click="onApplyscoreRange"
           >Apply</ReButton
         >
       </div>
@@ -67,7 +65,7 @@ export default {
     },
   },
   data: () => ({
-    confidenceExpanded: false,
+    scoreExpanded: false,
     rangeOptions: {
       height: 4,
       dotSize: 20,
@@ -76,7 +74,7 @@ export default {
       interval: 1,
       show: true,
     },
-    confidenceRanges: [],
+    scoreRanges: [],
     autosize: {
       type: "none",
       resize: true,
@@ -117,37 +115,37 @@ export default {
       return test;
     },
     visible() {
-      return this.confidenceExpanded;
+      return this.scoreExpanded;
     },
     min() {
-      return this.confidenceRanges[0];
+      return this.scoreRanges[0];
     },
     max() {
-      return this.confidenceRanges[1];
+      return this.scoreRanges[1];
     },
   },
   created() {
-    this.confidenceRanges = [this.rangeOptions.min, this.rangeOptions.max];
+    this.scoreRanges = [this.rangeOptions.min, this.rangeOptions.max];
   },
   methods: {
-    expandConfidence() {
-      this.confidenceExpanded = true;
+    expandScore() {
+      this.scoreExpanded = true;
     },
-    onApplyConfidenceRange() {
+    onApplyscoreRange() {
       this.$emit("apply", this.filter, {
         from: this.min * 0.01,
         to: this.max * 0.01,
       });
-      this.confidenceExpanded = false;
+      this.scoreExpanded = false;
     },
     onClose() {
-      this.confidenceExpanded = false;
+      this.scoreExpanded = false;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-.filter__item--confidence {
+.filter__item--score {
   position: relative;
   text-align: left;
   transition: border 0.2s ease;
@@ -184,7 +182,7 @@ export default {
   .button-clear {
     display: none;
   }
-  .confidence-content {
+  .score-content {
     width: 100%;
     padding-right: 0.8em;
     padding-left: 0.8em;
@@ -230,7 +228,7 @@ export default {
     &:after {
       content: none;
     }
-    .confidence {
+    .score {
       ::v-deep svg {
         max-width: 100%;
         height: 100px !important;
@@ -256,7 +254,7 @@ export default {
   &__row {
     display: flex;
     align-items: center;
-    .filter__item--confidence:not(.expanded) {
+    .filter__item--score:not(.expanded) {
       margin-right: 0;
       margin-left: auto;
       width: 220px;

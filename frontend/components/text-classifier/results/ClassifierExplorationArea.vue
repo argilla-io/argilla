@@ -1,10 +1,6 @@
 <template>
   <div>
-    <LabelPill
-      class="predictions"
-      :labels="showLabels"
-      :show-confidence="true"
-    />
+    <LabelPill class="predictions" :labels="showLabels" :show-score="true" />
   </div>
 </template>
 <script>

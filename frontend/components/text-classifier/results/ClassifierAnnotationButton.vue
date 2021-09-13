@@ -6,9 +6,9 @@
       </span>
       <div class="annotation-button-data__info">
         <ReNumeric
-          v-if="!label.selected && decorateConfidence(label.confidence) > 0"
-          class="annotation-button-data__confidence"
-          :value="decorateConfidence(label.confidence)"
+          v-if="!label.selected && decorateScore(label.score) > 0"
+          class="annotation-button-data__score"
+          :value="decorateScore(label.score)"
           type="%"
           :decimals="2"
         ></ReNumeric>
@@ -58,8 +58,8 @@ export default {
     },
   },
   methods: {
-    decorateConfidence(confidence) {
-      return confidence * 100;
+    decorateScore(score) {
+      return score * 100;
     },
     toggleCheck() {
       if (!this.disabled) {
@@ -152,7 +152,7 @@ $annotation-button-touch-size: 48px;
         }
       }
       .annotation-button-data__text,
-      .annotation-button-data__confidence {
+      .annotation-button-data__score {
         color: $lighter-color;
         animation: pulse-font 0.5s;
       }
@@ -174,7 +174,7 @@ $annotation-button-touch-size: 48px;
         transform: translateY(0);
         transition: all 0.3s ease;
       }
-      &__confidence {
+      &__score {
         width: 40px;
         @include font-size(12px);
         display: inline-block;

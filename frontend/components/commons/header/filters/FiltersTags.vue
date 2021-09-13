@@ -48,7 +48,7 @@ export default {
       { id: "predicted_as", name: "Predicted as" },
       { id: "predicted_by", name: "Predicted by" },
       { id: "predicted", name: "Predicted" },
-      { id: "confidence", name: "Confidence" },
+      { id: "score", name: "Score" },
       { id: "status", name: "Status" },
       { id: "multi_label", name: "Multilabel" },
       { id: "text", name: "Search" },
@@ -58,7 +58,7 @@ export default {
     formattedFilters() {
       const filters = this.filters.flatMap(({ id, name }) => {
         let value = this.dataset.query[id];
-        if (id === "confidence" && value) {
+        if (id === "score" && value) {
           value = {
             from: Math.round(value.from * 100) / 100,
             to: Math.round(value.to * 100) / 100,

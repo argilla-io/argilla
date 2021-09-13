@@ -65,7 +65,7 @@ export default {
         let newLabels = this.isMultiLabelRecord ? filterAppliedLabels : labels;
         newLabels = newLabels.map((label) => ({
           class: label,
-          confidence: 1.0,
+          score: 1.0,
         }));
         return {
           ...record,
@@ -102,4 +102,3 @@ export default {
   },
 };
 </script>
-

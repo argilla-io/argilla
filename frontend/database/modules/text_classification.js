@@ -44,7 +44,7 @@ const actions = {
           agent: annotatedBy,
           labels: values.map((label) => ({
             class: label,
-            confidence: 1.0,
+            score: 1.0,
           })),
         },
       };
@@ -74,7 +74,35 @@ const actions = {
         dataTransformer: ({ data }) => {
           return {
             ...dataset,
-            results: data,
+            results: {
+              ...data,
+              aggregations: {
+                score: (data.aggregations || {}).confidence,
+                ...data.aggregations,
+              },
+              records: data.records.map(
+                // TODO: remove backward
+                ({ prediction, annotation, ...record }) => {
+                  if (prediction) {
+                    prediction.labels = prediction.labels.map(
+                      ({ confidence, ...label }) => ({
+                        score: confidence,
+                        ...label,
+                      })
+                    );
+                  }
+                  if (annotation) {
+                    annotation.labels = annotation.labels.map(
+                      ({ confidence, ...label }) => ({
+                        score: confidence,
+                        ...label,
+                      })
+                    );
+                  }
+                  return { ...record, prediction, annotation };
+                }
+              ),
+            },
             globalResults: globalResultsData,
             query,
             sort,

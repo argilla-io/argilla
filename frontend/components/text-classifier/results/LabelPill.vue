@@ -14,10 +14,10 @@
       :title="label.class"
     >
       <span class="pill__text">{{ label.class }} </span>
-      <span v-if="showConfidence" class="pill__confidence">
+      <span v-if="showScore" class="pill__score">
         <ReNumeric
-          class="radio-data__confidence"
-          :value="decorateConfidence(label.confidence)"
+          class="radio-data__score"
+          :value="decorateScore(label.score)"
           type="%"
           :decimals="2"
         ></ReNumeric>
@@ -37,21 +37,23 @@ export default {
     },
     predicted: {
       type: String,
+      default: undefined,
     },
-    showConfidence: {
+    showScore: {
       type: Boolean,
       default: false,
     },
     annotationLabels: {
       type: Array,
+      default: () => [],
     },
   },
   methods: {
-    decorateConfidence(confidence) {
-      return confidence * 100;
+    decorateScore(score) {
+      return score * 100;
     },
     isAnnotated(label) {
-      return label.confidence > 0.5 ? true : false;
+      return label.score > 0.5 ? true : false;
     },
   },
 };
@@ -111,7 +113,7 @@ export default {
     font-weight: bold;
     border: 1px solid palette(grey, smooth);
     border-radius: 5px;
-    &__confidence {
+    &__score {
       margin-right: 0;
       margin-left: auto;
     }
@@ -134,7 +136,7 @@ export default {
     white-space: nowrap;
     overflow: hidden;
   }
-  &__confidence {
+  &__score {
     font-weight: bold;
     margin-left: 1em;
   }

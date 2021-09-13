@@ -87,7 +87,7 @@ export default {
   computed: {
     sortedLabels() {
       const labels = [...this.labels];
-      return labels.sort((a, b) => (a.confidence > b.confidence ? -1 : 1));
+      return labels.sort((a, b) => (a.score > b.score ? -1 : 1));
     },
     dropdownSortedLabels() {
       let labels = this.sortedLabels.slice(this.maxLabelsShown);
@@ -119,8 +119,8 @@ export default {
     onVisibility(visible) {
       this.visible = visible;
     },
-    decorateConfidence(confidence) {
-      return confidence * 100;
+    decorateScore(score) {
+      return score * 100;
     },
   },
 };

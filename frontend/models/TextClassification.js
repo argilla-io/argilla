@@ -13,13 +13,16 @@ class TextClassificationRecord extends BaseRecord {
 }
 
 class TextClassificationSearchQuery extends BaseSearchQuery {
-  confidence;
+  score;
 
   constructor(data) {
-    const { confidence, ...superData } = data;
+    const { score, confidence, ...superData } = data;
     super(superData);
-
-    this.confidence = confidence;
+    this.score = score;
+    // TODO: remove backward compatibility
+    if (confidence) {
+      this.score = confidence;
+    }
   }
 }
 

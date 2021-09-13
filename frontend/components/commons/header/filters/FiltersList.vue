@@ -14,20 +14,27 @@
           >({{ itemsAppliedOnGroup(group) }})</span
         >
       </p>
-      <p class="filters__tabs__sort"
+      <p
+        class="filters__tabs__sort"
         :class="{
           active: initialVisibleGroup === 'sort' || dataset.sort.length,
         }"
         @click="selectGroup('sort')"
       >
         Sort
-        <span v-if="dataset.sort.length"
-          >({{ dataset.sort.length }})</span
-        >
+        <span v-if="dataset.sort.length">({{ dataset.sort.length }})</span>
       </p>
     </div>
-    <div v-if="initialVisibleGroup === 'sort'" class="filters__tabs__content filters__tabs__content--sort">
-      <SortList :sort-options="filterList" :sort="dataset.sort" @closeSort="close" @sortBy="onSortBy" />
+    <div
+      v-if="initialVisibleGroup === 'sort'"
+      class="filters__tabs__content filters__tabs__content--sort"
+    >
+      <SortList
+        :sort-options="filterList"
+        :sort="dataset.sort"
+        @closeSort="close"
+        @sortBy="onSortBy"
+      />
     </div>
     <div v-for="group in groups" :key="group">
       <div
@@ -49,7 +56,7 @@
             :filter="filter"
             @apply="onApply"
           />
-          <FilterConfidence
+          <FilterScore
             v-else
             class="filter"
             :filter="filter"
@@ -87,9 +94,9 @@ export default {
         placeholder: "Select yes/no",
       },
       {
-        key: "confidence",
-        name: "Confidence",
-        type: "confidence",
+        key: "score",
+        name: "Score",
+        type: "score",
         group: "Predictions",
       },
       {
@@ -142,7 +149,7 @@ export default {
             options: aggregations[filter.key],
             selected: this.dataset.query[filter.key],
             disabled:
-              (filter.key === "confidence" && this.isMultiLabelRecord) ||
+              (filter.key === "score" && this.isMultiLabelRecord) ||
               !aggregations[filter.key] ||
               !Object.entries(aggregations[filter.key]).length ||
               Object.values(aggregations[filter.key]).every(isZero),
@@ -221,9 +228,9 @@ $number-size: 18px;
     &__sort {
       margin-left: auto;
       margin-right: 2em !important;
-        @include media(">desktopLarge") {
-          margin-right: calc(290px + 2em) !important;
-        }
+      @include media(">desktopLarge") {
+        margin-right: calc(290px + 2em) !important;
+      }
     }
     &__content {
       width: 450px;
