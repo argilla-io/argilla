@@ -343,7 +343,7 @@ class TokenClassificationAggregations(BaseModel):
     predicted_by: Dict[str, int] = Field(default_factory=dict)
     status: Dict[str, int] = Field(default_factory=dict)
     predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
+    score: Dict[str, int] = Field(default_factory=dict)
     words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
     predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
