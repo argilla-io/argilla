@@ -57,7 +57,7 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
     @classmethod
     def task(cls) -> TaskType:
         """The task type"""
-        return TaskType.text_to_text
+        return TaskType.text2text
 
     @property
     def predicted(self) -> Optional[PredictionStatus]:

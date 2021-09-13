@@ -95,7 +95,7 @@ class TaskType(str, Enum):
 
     text_classification = "TextClassification"
     token_classification = "TokenClassification"
-    text_to_text = "TextToText"
+    text2text = "Text2Text"
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 

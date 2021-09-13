@@ -22,7 +22,7 @@ from rubrix.server.tasks.text2text.service.service import (
     text2text_service,
 )
 
-TASK_TYPE = TaskType.text_to_text
+TASK_TYPE = TaskType.text2text
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
