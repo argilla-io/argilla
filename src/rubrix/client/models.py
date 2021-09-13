@@ -1,7 +1,3 @@
-"""
-This module contains the data models for the interface
-"""
-
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -16,6 +12,10 @@ This module contains the data models for the interface
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""
+This module contains the data models for the interface
+"""
 
 import datetime
 import warnings
