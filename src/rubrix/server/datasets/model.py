@@ -1,7 +1,3 @@
-"""
-Dataset models definition
-"""
-
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -16,6 +12,10 @@ Dataset models definition
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""
+Dataset models definition
+"""
 
 from datetime import datetime
 from typing import Any, Dict

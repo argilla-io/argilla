@@ -1,7 +1,3 @@
-"""
-Common helper functions
-"""
-
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -16,6 +12,10 @@ Common helper functions
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""
+Common helper functions
+"""
 
 from typing import Any, Dict, List, Optional
 

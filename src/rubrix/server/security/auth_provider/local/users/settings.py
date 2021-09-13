@@ -1,6 +1,3 @@
-"""
-User environment variables settings definition
-"""
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -15,6 +12,10 @@ User environment variables settings definition
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""
+User environment variables settings definition
+"""
 
 from pydantic import BaseSettings
 

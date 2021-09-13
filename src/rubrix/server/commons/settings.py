@@ -1,6 +1,3 @@
-"""
-Common environment vars / settings
-"""
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -15,6 +12,10 @@ Common environment vars / settings
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""
+Common environment vars / settings
+"""
 
 from typing import List
 

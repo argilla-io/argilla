@@ -1,5 +1,3 @@
-""" Contains all the data models used in inputs/outputs """
-
 #  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
@@ -14,6 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+""" Contains all the data models used in inputs/outputs """
 
 from .api_info import ApiInfo
 from .api_status import ApiStatus
