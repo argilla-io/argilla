@@ -4,7 +4,7 @@ from enum import Enum
 class TaskType(str, Enum):
     TEXTCLASSIFICATION = "TextClassification"
     TOKENCLASSIFICATION = "TokenClassification"
-    TEXTTOTEXT = "TextToText"
+    TEXT2TEXT = "Text2Text"
     MULTITASKTEXTTOKENCLASSIFICATION = "MultitaskTextTokenClassification"
 
     def __str__(self) -> str:

@@ -16,7 +16,7 @@ def _get_kwargs(
     json_body: Optional[Text2TextQuery] = None,
     limit: Optional[int] = None,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TextToText/data".format(
+    url = "{}/api/datasets/{name}/Text2Text/data".format(
         client.base_url, name=name
     )
 

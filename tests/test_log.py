@@ -130,7 +130,7 @@ def mock_response_text2text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.text_to_text_bulk_records.sync_detailed",
+        "rubrix.client.text2text_bulk_records.sync_detailed",
         mock_get,
     )  # apply the monkeypatch for requests.get to mock_get
 
