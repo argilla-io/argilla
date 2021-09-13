@@ -19,9 +19,9 @@
         />
         <ul>
           <li v-for="option in filteredSortOptions" :key="option.text">
-              <a href="#" @click.prevent="addField(option)">
-                {{ option.name }}
-              </a>
+            <a href="#" @click.prevent="addField(option)">
+              {{ option.name }}
+            </a>
           </li>
         </ul>
       </div>
@@ -65,31 +65,33 @@ export default {
     defaultSortedByDir: "asc",
     searchText: undefined,
   }),
-  mounted() {
-    this.getSortDirection();
-  },
-  updated() {
-    this.getSortDirection();
-  },
   computed: {
     filteredSortOptions() {
       if (this.searchText === undefined) {
         return this.formatSortOptions;
       }
-      let filtered = this.formatSortOptions.filter((opt) => opt.name.toLowerCase().match(this.searchText.toLowerCase()));
+      let filtered = this.formatSortOptions.filter((opt) =>
+        opt.name.toLowerCase().match(this.searchText.toLowerCase())
+      );
       return filtered;
     },
     formatSortOptions() {
-      return this.sortOptions.map(opt => {
-        if (opt.group.toLowerCase() === 'metadata') {
+      return this.sortOptions.map((opt) => {
+        if (opt.group.toLowerCase() === "metadata") {
           return {
             ...opt,
-            name: `Metadata.${opt.name}`
-          }
+            name: `Metadata.${opt.name}`,
+          };
         }
         return opt;
-      })
-    }
+      });
+    },
+  },
+  mounted() {
+    this.getSortDirection();
+  },
+  updated() {
+    this.getSortDirection();
   },
   methods: {
     onVisibility(value) {
