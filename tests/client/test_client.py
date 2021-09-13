@@ -199,7 +199,7 @@ def test_token_classification_client_to_sdk():
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
-def test_token_classification_client_to_sdk():
+def test_text2text_client_to_sdk():
     record = Text2TextRecord(
         text="test text",
         prediction=["test prediction"],
@@ -348,3 +348,25 @@ def test_token_classification_spans(monkeypatch):
 
     item.prediction = [("test", 0, 4)]
     rubrix.log(item, name=dataset)
+
+
+def test_load_text2text(monkeypatch):
+    mocking_client(monkeypatch)
+    records = [
+        Text2TextRecord(
+            text="test text",
+            prediction=["test prediction"],
+            annotation="test annotation",
+            prediction_agent="test_model",
+            annotation_agent="test_annotator",
+            id=str(i),
+            metadata={"metadata": "test"},
+            status="Default",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+        )
+        for i in range(0, 100)
+    ]
+
+    rubrix.log(records, name="test_load_text2text")
+    df = rubrix.load(name="test_load_text2text")
+    assert len(df) == 100

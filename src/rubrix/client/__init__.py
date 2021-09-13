@@ -236,7 +236,7 @@ class RubrixClient:
             ),
             TaskType.TEXTTOTEXT: (
                 text_to_text_get_dataset_data,
-                self._text_classification_sdk_to_client,
+                self._text2text_sdk_to_client,
                 Text2TextQuery,
             ),
         }
@@ -295,7 +295,7 @@ class RubrixClient:
             else None,
             explanation={
                 key: [TokenAttributions(**attribution) for attribution in attributions]
-                for key, attributions in record["explanation"]
+                for key, attributions in record["explanation"].items()
             }
             if record.get("explanation")
             else None,
