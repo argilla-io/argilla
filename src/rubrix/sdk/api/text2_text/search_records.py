@@ -3,23 +3,31 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ...client import AuthenticatedClient
-from ...models.bulk_response import BulkResponse
 from ...models.error_message import ErrorMessage
 from ...models.http_validation_error import HTTPValidationError
-from ...models.text2_text_bulk_data import Text2TextBulkData
-from ...types import Response
+from ...models.text2_text_search_request import Text2TextSearchRequest
+from ...models.text2_text_search_results import Text2TextSearchResults
+from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Text2TextBulkData,
+    json_body: Text2TextSearchRequest,
+    limit: Union[Unset, int] = 50,
+    from_: Union[Unset, int] = 0,
 ) -> Dict[str, Any]:
-    url = "{}/api/datasets/{name}/TextToText:bulk".format(client.base_url, name=name)
+    url = "{}/api/datasets/{name}/Text2Text:search".format(client.base_url, name=name)
 
     headers: Dict[str, Any] = client.get_headers()
     cookies: Dict[str, Any] = client.get_cookies()
+
+    params: Dict[str, Any] = {
+        "limit": limit,
+        "from": from_,
+    }
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     json_json_body = json_body.to_dict()
 
@@ -29,14 +37,17 @@ def _get_kwargs(
         "cookies": cookies,
         "timeout": client.get_timeout(),
         "json": json_json_body,
+        "params": params,
     }
 
 
 def _parse_response(
     *, response: httpx.Response
-) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
+) -> Optional[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     if response.status_code == 200:
-        response_200 = BulkResponse.from_dict(response.json())
+        response_200 = Text2TextSearchResults.from_dict(response.json())
 
         return response_200
     if response.status_code == 404:
@@ -56,7 +67,9 @@ def _parse_response(
 
 def _build_response(
     *, response: httpx.Response
-) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
+) -> Response[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     return Response(
         status_code=response.status_code,
         content=response.content,
@@ -69,12 +82,18 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Text2TextBulkData,
-) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
+    json_body: Text2TextSearchRequest,
+    limit: Union[Unset, int] = 50,
+    from_: Union[Unset, int] = 0,
+) -> Response[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
         json_body=json_body,
+        limit=limit,
+        from_=from_,
     )
 
     response = httpx.post(
@@ -88,31 +107,39 @@ def sync(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Text2TextBulkData,
-) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Includes a chunk of record data with provided dataset bulk information
+    json_body: Text2TextSearchRequest,
+    limit: Union[Unset, int] = 50,
+    from_: Union[Unset, int] = 0,
+) -> Optional[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
+    """Searches data from dataset
 
     Parameters
     ----------
     name:
         The dataset name
-    bulk:
-        The bulk data
+    search:
+        THe search query request
+    pagination:
+        The pagination params
     service:
-        the Service
+        The dataset records service
     datasets:
         The dataset service
     current_user:
-        Current request user
+        The current request user
 
     Returns
     -------
-        Bulk response data"""
+        The search results data"""
 
     return sync_detailed(
         client=client,
         name=name,
         json_body=json_body,
+        limit=limit,
+        from_=from_,
     ).parsed
 
 
@@ -120,12 +147,18 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Text2TextBulkData,
-) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
+    json_body: Text2TextSearchRequest,
+    limit: Union[Unset, int] = 50,
+    from_: Union[Unset, int] = 0,
+) -> Response[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
     kwargs = _get_kwargs(
         client=client,
         name=name,
         json_body=json_body,
+        limit=limit,
+        from_=from_,
     )
 
     async with httpx.AsyncClient() as _client:
@@ -138,31 +171,39 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     name: str,
-    json_body: Text2TextBulkData,
-) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    """Includes a chunk of record data with provided dataset bulk information
+    json_body: Text2TextSearchRequest,
+    limit: Union[Unset, int] = 50,
+    from_: Union[Unset, int] = 0,
+) -> Optional[
+    Union[Text2TextSearchResults, ErrorMessage, ErrorMessage, HTTPValidationError]
+]:
+    """Searches data from dataset
 
     Parameters
     ----------
     name:
         The dataset name
-    bulk:
-        The bulk data
+    search:
+        THe search query request
+    pagination:
+        The pagination params
     service:
-        the Service
+        The dataset records service
     datasets:
         The dataset service
     current_user:
-        Current request user
+        The current request user
 
     Returns
     -------
-        Bulk response data"""
+        The search results data"""
 
     return (
         await asyncio_detailed(
             client=client,
             name=name,
             json_body=json_body,
+            limit=limit,
+            from_=from_,
         )
     ).parsed
