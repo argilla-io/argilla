@@ -10,7 +10,7 @@
       :total-height="1200"
     >
       <template v-if="showLoader">
-        <results-loading :width="width"/>
+        <results-loading :width="width" :size="dataset.viewSettings.pagination.size"/>
       </template>
       <template v-else>
         <div
@@ -95,9 +95,9 @@ export default {
       }
     },
     async onPagination(page, size) {
-      // document.getElementById("scroll").scrollTop = 0;
       this.width = 0;
       this.showLoader = true;
+      document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,

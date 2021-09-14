@@ -1,6 +1,9 @@
 <template>
     <div class="loading">
-      <span class="line" :style="{width: `${width}%`}"></span>
+      <span class="line" :style="{minWidth: `${width}%`}"></span>
+      <div v-for="i in size" :key="i">
+        <div class="record"></div>
+      </div>
     </div>
 </template>
 <script>
@@ -9,14 +12,16 @@ export default {
     width: {
       type: Number,
       default: 0
+    },
+    size: {
+      type: Number,
+      default: 0
     }
   },
 };
 </script>
 <style lang="scss" scoped>
 .loading {
-  min-height: 100vh;
-  background: white;
   position: relative;
 }
 .line {
@@ -26,6 +31,13 @@ export default {
   left: 0;
   background: $primary-color;
   animation: load 0.5s linear infinite;
+}
+.record {
+  min-height: 150px;
+  display: block;
+  width: 100%;
+  background: white;
+  margin-bottom: 2px;
 }
 @keyframes load {
   0% {
