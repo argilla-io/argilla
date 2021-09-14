@@ -1,6 +1,9 @@
 <template>
   <div>
-    <filters-area :dataset="dataset" />
+    <div>
+      <filters-area :dataset="dataset" />
+      <explain-help-info v-if="isExplainedRecord" />
+    </div>
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -30,6 +33,9 @@ export default {
     },
   },
   computed: {
+    isExplainedRecord() {
+      return this.dataset.results.records.some((record) => record.explanation);
+    },
     showAnnotationMode() {
       return this.dataset.viewSettings.annotationEnabled;
     },
