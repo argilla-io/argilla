@@ -14,7 +14,7 @@
       class="sort__add-button"
       href="#"
       @click="addNewField"
-      >add field +</a
+      >+ Add another field</a
     >
     <div class="sort__buttons">
       <re-button
