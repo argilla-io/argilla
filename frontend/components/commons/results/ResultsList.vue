@@ -10,12 +10,12 @@
       :total-height="1200"
     >
       <template v-if="showLoader">
-        <results-loading :width="width" :size="dataset.viewSettings.pagination.size"/>
+        <results-loading :size="dataset.viewSettings.pagination.size" />
       </template>
       <template v-else>
         <div
-          v-cloak
           v-for="(item, index) in visibleRecords"
+          v-cloak
           :key="index"
           class="list__li"
         >
@@ -45,7 +45,6 @@ export default {
     return {
       scrollComponent: undefined,
       showLoader: false,
-      width: 0,
     };
   },
   computed: {
@@ -95,15 +94,13 @@ export default {
       }
     },
     async onPagination(page, size) {
-      this.width = 0;
       this.showLoader = true;
       document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,
         size: size,
-      })
-      this.width = 100;
+      });
       this.showLoader = false;
     },
   },
