@@ -1,6 +1,6 @@
 <template>
   <div v-if="annotationsProgress">
-    <p class="sidebar__title">AnnotationProgress</p>
+    <p class="sidebar__title">Annotation progress</p>
     <div class="progress__info">
       <p class="progress__info__text">Total annotations</p>
       <span class="progress__info__percent">{{ progress }}%</span>
