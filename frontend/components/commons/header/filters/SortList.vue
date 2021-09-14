@@ -14,7 +14,7 @@
       class="sort__add-button"
       href="#"
       @click="addNewField"
-      >add field +</a
+      >+ Add another field</a
     >
     <div class="sort__buttons">
       <re-button
@@ -97,9 +97,9 @@ export default {
     button {
       margin-bottom: 0;
     }
-    button:first-child {
-      margin-left: auto;
-      margin-right: 0.5em;
+    button:last-child {
+      margin-right: auto;
+      margin-left: 0.5em;
     }
   }
   &__add-button {

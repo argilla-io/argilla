@@ -236,7 +236,10 @@ export default {
     }
     .filter__buttons {
       margin-top: 2em;
-      display: block;
+      display: flex;
+      .re-button {
+        margin-right: 0.5em;
+      }
     }
     .range {
       display: block;

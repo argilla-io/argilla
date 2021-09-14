@@ -20,7 +20,7 @@
           active: initialVisibleGroup === 'sort' || dataset.sort.length,
         }"
         @click="selectGroup('sort')"
-      >
+      ><svgicon name="sort" width="14" height="14" />
         Sort
         <span v-if="dataset.sort.length">({{ dataset.sort.length }})</span>
       </p>
@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import "assets/icons/sort";
 export default {
   props: {
     dataset: {
@@ -225,13 +226,6 @@ $number-size: 18px;
   z-index: 2;
   &__tabs {
     display: flex;
-    &__sort {
-      margin-left: auto;
-      margin-right: 2em !important;
-      @include media(">desktopLarge") {
-        margin-right: calc(290px + 2em) !important;
-      }
-    }
     &__content {
       width: 450px;
       position: absolute;
@@ -258,6 +252,11 @@ $number-size: 18px;
             padding-right: 1em;
           }
         }
+      }
+    }
+    &__sort {
+      svg {
+        margin-right: 0.3em;
       }
     }
     p {
