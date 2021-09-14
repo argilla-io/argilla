@@ -2,11 +2,11 @@ from typing import Any, Dict, List, Type, TypeVar
 
 import attr
 
-T = TypeVar("T", bound="TokenClassificationAggregationsConfidence")
+T = TypeVar("T", bound="TokenClassificationAggregationsScore")
 
 
 @attr.s(auto_attribs=True)
-class TokenClassificationAggregationsConfidence:
+class TokenClassificationAggregationsScore:
     """ """
 
     additional_properties: Dict[str, int] = attr.ib(init=False, factory=dict)
@@ -22,10 +22,10 @@ class TokenClassificationAggregationsConfidence:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        token_classification_aggregations_confidence = cls()
+        token_classification_aggregations_score = cls()
 
-        token_classification_aggregations_confidence.additional_properties = d
-        return token_classification_aggregations_confidence
+        token_classification_aggregations_score.additional_properties = d
+        return token_classification_aggregations_score
 
     @property
     def additional_keys(self) -> List[str]:

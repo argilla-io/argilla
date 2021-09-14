@@ -45,15 +45,15 @@ def test_too_long_label():
         )
 
 
-def test_confidence_integrity():
+def test_score_integrity():
     data = {
         "multi_label": False,
         "inputs": {"data": "My cool data"},
         "prediction": {
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.3},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.3},
+                {"class": "B", "score": 0.9},
             ],
         },
     }
@@ -69,14 +69,14 @@ def test_confidence_integrity():
 
     data["multi_label"] = False
     data["prediction"]["labels"] = [
-        {"class": "B", "confidence": 0.9},
+        {"class": "B", "score": 0.9},
     ]
     record = TextClassificationRecord.parse_obj(data)
     assert record is not None
 
     data["prediction"]["labels"] = [
-        {"class": "B", "confidence": 0.10000000012},
-        {"class": "B", "confidence": 0.90000000002},
+        {"class": "B", "score": 0.10000000012},
+        {"class": "B", "score": 0.90000000002},
     ]
     record = TextClassificationRecord.parse_obj(data)
     assert record is not None
@@ -90,8 +90,8 @@ def test_prediction_ok_cases():
         "prediction": {
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.3},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.3},
+                {"class": "B", "score": 0.9},
             ],
         },
     }
@@ -102,8 +102,8 @@ def test_prediction_ok_cases():
         **{
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 1},
-                {"class": "B", "confidence": 1},
+                {"class": "A", "score": 1},
+                {"class": "B", "score": 1},
             ],
         },
     )
@@ -113,8 +113,8 @@ def test_prediction_ok_cases():
         **{
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.9},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.9},
+                {"class": "B", "score": 0.9},
             ],
         },
     )
@@ -124,12 +124,12 @@ def test_prediction_ok_cases():
     assert record.predicted is None
 
 
-def test_confidence_ranges():
+def test_score_ranges():
     with pytest.raises(ValidationError, match="less than or equal to 1.0"):
-        ClassPrediction(class_label="BB", confidence=100)
+        ClassPrediction(class_label="BB", score=100)
 
     with pytest.raises(ValidationError, match="greater than or equal to 0.0"):
-        ClassPrediction(class_label="BB", confidence=-100)
+        ClassPrediction(class_label="BB", score=-100)
 
 
 def test_predicted_as_with_no_labels():

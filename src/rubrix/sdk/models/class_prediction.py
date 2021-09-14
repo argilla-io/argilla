@@ -22,13 +22,13 @@ class ClassPrediction:
         this probability should be 1.0"""
 
     class_: Union[str, int]
-    confidence: Union[Unset, float] = 1.0
+    score: Union[Unset, float] = 1.0
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         class_ = self.class_
 
-        confidence = self.confidence
+        score = self.score
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -37,8 +37,8 @@ class ClassPrediction:
                 "class": class_,
             }
         )
-        if confidence is not UNSET:
-            field_dict["confidence"] = confidence
+        if score is not UNSET:
+            field_dict["score"] = score
 
         return field_dict
 
@@ -53,11 +53,11 @@ class ClassPrediction:
 
         class_ = _parse_class_(d.pop("class"))
 
-        confidence = d.pop("confidence", UNSET)
+        score = d.pop("score", UNSET)
 
         class_prediction = cls(
             class_=class_,
-            confidence=confidence,
+            score=score,
         )
 
         class_prediction.additional_properties = d

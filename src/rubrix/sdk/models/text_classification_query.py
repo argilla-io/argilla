@@ -45,7 +45,7 @@ class TextClassificationQuery:
     annotated_as: Union[Unset, List[str]] = UNSET
     annotated_by: Union[Unset, List[str]] = UNSET
     predicted_by: Union[Unset, List[str]] = UNSET
-    confidence: Union[ScoreRange, Unset] = UNSET
+    score: Union[ScoreRange, Unset] = UNSET
     status: Union[Unset, List[TaskStatus]] = UNSET
     predicted: Union[Unset, PredictionStatus] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
@@ -80,9 +80,9 @@ class TextClassificationQuery:
         if not isinstance(self.predicted_by, Unset):
             predicted_by = self.predicted_by
 
-        confidence: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.confidence, Unset):
-            confidence = self.confidence.to_dict()
+        score: Union[Unset, Dict[str, Any]] = UNSET
+        if not isinstance(self.score, Unset):
+            score = self.score.to_dict()
 
         status: Union[Unset, List[Any]] = UNSET
         if not isinstance(self.status, Unset):
@@ -113,8 +113,8 @@ class TextClassificationQuery:
             field_dict["annotated_by"] = annotated_by
         if predicted_by is not UNSET:
             field_dict["predicted_by"] = predicted_by
-        if confidence is not UNSET:
-            field_dict["confidence"] = confidence
+        if score is not UNSET:
+            field_dict["score"] = score
         if status is not UNSET:
             field_dict["status"] = status
         if predicted is not UNSET:
@@ -153,10 +153,10 @@ class TextClassificationQuery:
 
         predicted_by = cast(List[str], d.pop("predicted_by", UNSET))
 
-        confidence: Union[ScoreRange, Unset] = UNSET
-        _confidence = d.pop("confidence", UNSET)
-        if not isinstance(_confidence, Unset):
-            confidence = ScoreRange.from_dict(_confidence)
+        score: Union[ScoreRange, Unset] = UNSET
+        _score = d.pop("score", UNSET)
+        if not isinstance(_score, Unset):
+            score = ScoreRange.from_dict(_score)
 
         status = []
         _status = d.pop("status", UNSET)
@@ -178,7 +178,7 @@ class TextClassificationQuery:
             annotated_as=annotated_as,
             annotated_by=annotated_by,
             predicted_by=predicted_by,
-            confidence=confidence,
+            score=score,
             status=status,
             predicted=predicted,
         )

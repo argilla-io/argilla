@@ -31,9 +31,9 @@ def test_create_records_for_text_classification_with_multi_label(monkeypatch):
                 "prediction": {
                     "agent": "test",
                     "labels": [
-                        {"class": "Test", "confidence": 0.6},
-                        {"class": "Mocking", "confidence": 0.7},
-                        {"class": "NoClass", "confidence": 0.2},
+                        {"class": "Test", "score": 0.6},
+                        {"class": "Mocking", "score": 0.7},
+                        {"class": "NoClass", "score": 0.2},
                     ],
                 },
             },
@@ -45,9 +45,9 @@ def test_create_records_for_text_classification_with_multi_label(monkeypatch):
                 "prediction": {
                     "agent": "test",
                     "labels": [
-                        {"class": "Test", "confidence": 0.6},
-                        {"class": "Mocking", "confidence": 0.7},
-                        {"class": "NoClass", "confidence": 0.2},
+                        {"class": "Test", "score": 0.6},
+                        {"class": "Mocking", "score": 0.7},
+                        {"class": "NoClass", "score": 0.2},
                     ],
                 },
             },
@@ -117,8 +117,8 @@ def test_create_records_for_text_classification():
                     "prediction": {
                         "agent": "test",
                         "labels": [
-                            {"class": "Test", "confidence": 0.3},
-                            {"class": "Mocking", "confidence": 0.7},
+                            {"class": "Test", "score": 0.3},
+                            {"class": "Mocking", "score": 0.7},
                         ],
                     },
                 }
@@ -166,9 +166,9 @@ def test_partial_record_update():
             "prediction": {
                 "agent": "test",
                 "labels": [
-                    {"class": "Positive", "confidence": 0.6},
-                    {"class": "Negative", "confidence": 0.3},
-                    {"class": "Other", "confidence": 0.1},
+                    {"class": "Positive", "score": 0.6},
+                    {"class": "Negative", "score": 0.3},
+                    {"class": "Other", "score": 0.1},
                 ],
             },
         }
@@ -226,9 +226,9 @@ def test_partial_record_update():
             "prediction": {
                 "agent": "test",
                 "labels": [
-                    {"class": "Positive", "confidence": 0.6},
-                    {"class": "Negative", "confidence": 0.3},
-                    {"class": "Other", "confidence": 0.1},
+                    {"class": "Positive", "score": 0.6},
+                    {"class": "Negative", "score": 0.3},
+                    {"class": "Other", "score": 0.1},
                 ],
             },
             "annotation": {
@@ -343,8 +343,8 @@ def test_disable_aggregations_when_scroll():
                         "prediction": {
                             "agent": "test",
                             "labels": [
-                                {"class": "Test", "confidence": 0.3},
-                                {"class": "Mocking", "confidence": 0.7},
+                                {"class": "Test", "score": 0.3},
+                                {"class": "Mocking", "score": 0.7},
                             ],
                         },
                     }
@@ -384,8 +384,8 @@ def test_include_event_timestamp():
                         "prediction": {
                             "agent": "test",
                             "labels": [
-                                {"class": "Test", "confidence": 0.3},
-                                {"class": "Mocking", "confidence": 0.7},
+                                {"class": "Test", "score": 0.3},
+                                {"class": "Mocking", "score": 0.7},
                             ],
                         },
                     }

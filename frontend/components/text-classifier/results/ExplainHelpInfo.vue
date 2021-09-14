@@ -20,8 +20,8 @@
       </p>
       <p>
         Model predictions can be correct or incorrect, as indicated by the green
-        or red labels assigned to the predictions together with their
-        confidence. Given this attributions work as follows:
+        or red labels assigned to the predictions together with their score.
+        Given this attributions work as follows:
       </p>
       <p>
         [0,+1] <strong>Positive attributions</strong> will have the same colour

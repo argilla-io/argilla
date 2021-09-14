@@ -52,7 +52,7 @@ export default {
       const labelsDict = {};
 
       this.dataset.labels.forEach((label) => {
-        labelsDict[label] = { confidence: 0, selected: false };
+        labelsDict[label] = { score: 0, selected: false };
       });
 
       let annotationLabels = this.annotationLabels.map((label) => {
@@ -64,7 +64,7 @@ export default {
 
       this.predictionLabels.concat(annotationLabels).forEach((label) => {
         labelsDict[label.class] = {
-          confidence: label.confidence,
+          score: label.score,
           selected: label.selected,
         };
       });
@@ -72,7 +72,7 @@ export default {
       return Object.keys(labelsDict).map((label) => {
         return {
           class: label,
-          confidence: labelsDict[label].confidence,
+          score: labelsDict[label].score,
           selected: labelsDict[label].selected,
         };
       });
@@ -122,7 +122,7 @@ export default {
             annotation: {
               labels: labels.map((label) => ({
                 class: label,
-                confidence: 1.0,
+                score: 1.0,
               })),
             },
           },

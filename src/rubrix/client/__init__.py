@@ -281,7 +281,7 @@ class RubrixClient:
             status=record.get("status"),
             metadata=record.get("metadata") or {},
             prediction=[
-                (label["class"], label["confidence"])
+                (label["class"], label["score"])
                 for label in record["prediction"]["labels"]
             ]
             if record.get("prediction")
@@ -313,8 +313,8 @@ class RubrixClient:
         }
         if record.prediction is not None:
             labels = [
-                {"class": label, "confidence": confidence}
-                for label, confidence in record.prediction
+                {"class": label, "score": score}
+                for label, score in record.prediction
             ]
             model_dict["prediction"] = {
                 "agent": record.prediction_agent or "None",
@@ -326,7 +326,7 @@ class RubrixClient:
                 if isinstance(record.annotation, list)
                 else [record.annotation]
             )
-            gold_labels = [{"class": label, "confidence": 1.0} for label in annotations]
+            gold_labels = [{"class": label, "score": 1.0} for label in annotations]
             model_dict["annotation"] = {
                 "agent": record.annotation_agent or "None",
                 "labels": gold_labels,

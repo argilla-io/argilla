@@ -44,7 +44,7 @@ export default {
     sortOptions: [
       { filter: "annotated_as", text: "Annotated as", range: ["A", "Z"] },
       { filter: "predicted_as", text: "Predicted as", range: ["A", "Z"] },
-      { filter: "confidence", text: "Confidence", range: ["0", "1"] },
+      { filter: "score", text: "Score", range: ["0", "1"] },
     ],
   }),
   methods: {

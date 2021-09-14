@@ -32,7 +32,7 @@ class ClassPrediction(BaseModel):
     """
 
     class_label: Union[str, int] = Field(alias="class")
-    score: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @validator("class_label")
     def check_label_length(cls, class_label):
@@ -345,7 +345,7 @@ class TextClassificationQuery(BaseModel):
     annotated_as: List[str] = Field(default_factory=list)
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
-    score: Optional[ScoreRange] = Field(default=None, alias="confidence")
+    score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
@@ -401,7 +401,7 @@ class TextClassificationSearchAggregations(BaseModel):
     predicted_by: Dict[str, int] = Field(default_factory=dict)
     status: Dict[str, int] = Field(default_factory=dict)
     predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
+    score: Dict[str, int] = Field(default_factory=dict)
     words: Dict[str, int] = Field(default_factory=dict)
     metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
