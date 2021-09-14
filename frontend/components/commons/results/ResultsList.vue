@@ -9,15 +9,21 @@
       :default-height="100"
       :total-height="1200"
     >
-      <div
-        v-for="(item, index) in visibleRecords"
-        :key="index"
-        class="list__li"
-      >
-        <results-record v-if="item" :dataset="dataset" :item="item">
-          <slot name="record" :record="item" />
-        </results-record>
-      </div>
+      <template v-if="showLoader">
+        <results-loading :size="dataset.viewSettings.pagination.size" />
+      </template>
+      <template v-else>
+        <div
+          v-for="(item, index) in visibleRecords"
+          v-cloak
+          :key="index"
+          class="list__li"
+        >
+          <results-record v-if="item" :dataset="dataset" :item="item">
+            <slot name="record" :record="item" />
+          </results-record>
+        </div>
+      </template>
       <RePagination
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
@@ -38,6 +44,7 @@ export default {
   data() {
     return {
       scrollComponent: undefined,
+      showLoader: false,
     };
   },
   computed: {
@@ -87,12 +94,14 @@ export default {
       }
     },
     async onPagination(page, size) {
+      this.showLoader = true;
+      document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,
         size: size,
       });
-      document.getElementById("scroll").scrollTop = 0;
+      this.showLoader = false;
     },
   },
 };
