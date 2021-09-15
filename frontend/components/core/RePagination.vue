@@ -27,7 +27,7 @@
         :class="currentPage <= 1 ? 'is-disabled' : null"
         @click.prevent="prevPage"
       >
-        <svgicon name="chev-left" width="14" height="14" /> Prev
+        <svgicon name="chev-left" width="8" height="8" /> Prev
       </a>
       <ul class="pagination__numbers">
         <li v-if="totalPages > 1 && !pages.includes(1)">
@@ -73,7 +73,7 @@
         :class="currentPage >= totalPages ? 'is-disabled' : null"
         @click.prevent="nextPage"
       >
-        Next <svgicon name="chev-right" width="14" height="14" />
+        Next <svgicon name="chev-right" width="8" height="8" />
       </a>
     </div>
     <div class="pagination__info">
@@ -172,7 +172,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$pagination-size: 45px;
+$pagination-size: 30px;
 .pagination {
   $self: &;
   display: flex;
@@ -193,7 +193,7 @@ $pagination-size: 45px;
     align-items: center;
     justify-content: center;
     height: $pagination-size;
-    padding: 0 10px * 2.5;
+    padding: 0 10px;
     transition: color 200ms ease-in-out;
     outline: none;
     border-radius: 3px;
@@ -203,13 +203,13 @@ $pagination-size: 45px;
     &--next {
       margin-left: 1em;
       svg {
-        margin-left: 1em;
+        margin-left: 0.5em;
       }
     }
     &--prev {
       margin-right: 1em;
       svg {
-        margin-right: 1em;
+        margin-right: 0.5em;
       }
     }
     &.is-disabled {
