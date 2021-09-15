@@ -3,9 +3,6 @@
     <div class="filters__content">
       <div class="container">
         <div class="filters__row">
-          <HeaderTitle v-if="dataset.results.records" :dataset="dataset" />
-        </div>
-        <div class="filters__row">
           <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
           <FiltersList
             :dataset="dataset"

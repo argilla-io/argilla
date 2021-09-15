@@ -1,8 +1,11 @@
 <template>
   <div>
-    <header-title title="Token Classification" v-if="dataset.results.records" :dataset="dataset" />
+    <header-title
+      v-if="dataset.results.records"
+      title="Text2Text"
+      :dataset="dataset"
+    />
     <filters-area :dataset="dataset" />
-    <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
@@ -10,7 +13,6 @@
         @validate-records="onValidate"
       >
       </validate-discard-action>
-      <create-new-action @new-label="onNewLabel" />
     </global-actions>
   </div>
 </template>
@@ -19,22 +21,15 @@ import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
-      required: true,
       type: Object,
+      required: true,
     },
   },
-  computed: {
-    showAnnotationMode() {
-      return this.dataset.viewSettings.annotationEnabled;
-    },
-  },
-
   methods: {
     ...mapActions({
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-
     async onDiscard(records) {
       await this.discard({
         dataset: this.dataset,
@@ -44,21 +39,7 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
-        records: records.map((record) => ({
-          ...record,
-          annotation: {
-            ...(record.annotation || record.prediction),
-            agent: this.$auth.user,
-          },
-        })),
-      });
-    },
-    async onNewLabel(label) {
-      await this.dataset.$dispatch("setEntities", {
-        dataset: this.dataset,
-        entities: [
-          ...new Set([...this.dataset.entities.map((ent) => ent.text), label]),
-        ],
+        records: records,
       });
     },
   },

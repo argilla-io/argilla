@@ -3,19 +3,17 @@
     <div class="tabs__buttons">
       <button
         v-for="tab in tabs"
-        :key="tab.name"
+        :key="tab"
         :class="[
           'tab',
-          { active: activeTab.name === tab.name || tabs.length === 1 },
+          { active: activeTab === tab || tabs.length === 1 },
         ]"
         @click="changeTab(tab)"
       >
         <span
-          >{{ tab.name
-          }}<span>
-            {{ numberOfItems(tab) ? `(${numberOfItems(tab)})` : "" }}</span
-          ></span
-        >
+          >{{ tab
+          }}
+        </span>
       </button>
     </div>
     <slot />
@@ -23,7 +21,7 @@
 </template>
 <script>
 export default {
-  props: ["tabs", "tabItems", "numberOfItems", "activeTab"],
+  props: ["tabs", "activeTab"],
   data: () => ({}),
   methods: {
     changeTab(tab) {
@@ -34,18 +32,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tabs {
-  position: relative;
-  text-align: left;
-  align-items: center;
-  @include font-size(15px);
-  display: flex;
   &__buttons {
     display: inline;
-    &:hover {
-      .active {
-        border-bottom: 3px solid transparent;
-      }
-    }
+    position: relative;
+    text-align: left;
+    align-items: center;
+    @include font-size(15px);
+    display: flex;
   }
   &__links {
     margin-right: 0;
@@ -86,6 +79,9 @@ export default {
   &:hover {
     border-bottom: 3px solid $primary-color !important;
     transition: border-color 0.4s ease;
+    & ~ .active {
+      border-bottom: 3px solid transparent;
+    }
   }
 }
 

@@ -27,6 +27,10 @@ class TokenClassificationRecord extends BaseRecord {
     this.raw_text = raw_text;
     this.visualTokens = visualTokens;
   }
+
+  recordTitle() {
+    return this.raw_text;
+  }
 }
 
 class TokenClassificationSearchQuery extends BaseSearchQuery {

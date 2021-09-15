@@ -1,7 +1,7 @@
 <template>
-  <div class="filters__title">
-    <h2 class="filters__title__info">
-      {{ taskName }} records ({{ dataset.results.total }})
+  <div class="container">
+    <h2 class="title">
+      {{ title }} records ({{ dataset.results.total }})
     </h2>
   </div>
 </template>
@@ -13,33 +13,29 @@ export default {
       default: () => {},
       type: Object,
     },
-  },
-  computed: {
-    taskName() {
-      if (this.dataset.task === "TokenClassification") {
-        return "Token Classification";
-      } else if (this.dataset.task === "TextClassification") {
-        return "Text Classification";
-      }
-      return false;
-    },
-  },
+    title: {
+      type: String,
+      required: true,
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
-.filters {
-  &__title {
-    font-weight: normal;
-    margin-right: auto;
-    &__info {
-      font-weight: normal;
-      @include font-size(16px);
-      color: $font-secondary-dark;
-      white-space: nowrap;
-      display: flex;
-      margin: 0.83em 0;
-      align-items: center;
-    }
+.container {
+  @extend %container;
+  padding-top: 1em;
+  padding-bottom: 0;
+  .fixed-header & {
+    display: none;
   }
+}
+.title {
+  font-weight: normal;
+  @include font-size(16px);
+  color: $font-secondary-dark;
+  white-space: nowrap;
+  display: flex;
+  margin: 0.5em 0;
+  align-items: center;
 }
 </style>
