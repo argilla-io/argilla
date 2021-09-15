@@ -13,13 +13,13 @@ class Text2TextRecord extends BaseRecord {
 }
 
 class Text2TextSearchQuery extends BaseSearchQuery {
-  confidence;
+  score;
 
   constructor(data) {
-    const { confidence, ...superData } = data;
+    const { score, ...superData } = data;
     super(superData);
 
-    this.confidence = confidence;
+    this.score = score;
   }
 }
 
