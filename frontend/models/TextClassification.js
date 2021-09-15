@@ -10,6 +10,10 @@ class TextClassificationRecord extends BaseRecord {
     this.explanation = explanation;
     this.multi_label = multi_label;
   }
+
+  recordTitle() {
+    return this.inputs;
+  }
 }
 
 class TextClassificationSearchQuery extends BaseSearchQuery {

@@ -25,6 +25,10 @@ class BaseRecord {
     this.status = status;
     this.selected = selected || false;
   }
+
+  recordTitle() {
+    throw new Error("Method 'recordTitle()' must be implemented.");
+  }
 }
 
 class BaseSearchQuery {

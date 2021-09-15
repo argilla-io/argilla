@@ -7,8 +7,9 @@ class Text2TextRecord extends BaseRecord {
   constructor({ text, ...superData }) {
     super(superData);
     this.text = text;
-    // this.explanation = explanation;
-    // this.multi_label = multi_label;
+  }
+  recordTitle() {
+    return this.text;
   }
 }
 
