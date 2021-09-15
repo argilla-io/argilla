@@ -1,4 +1,4 @@
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
+import { ObservationDataset } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 
 class Text2TextRecord extends BaseRecord {
@@ -28,9 +28,7 @@ class Text2TextSearchResults extends BaseSearchResults {
     super({
       total,
       aggregations,
-      records: (records || []).map(
-        (record) => new Text2TextRecord(record)
-      ),
+      records: (records || []).map((record) => new Text2TextRecord(record)),
     });
   }
 }
@@ -45,10 +43,7 @@ class Text2TextDataset extends ObservationDataset {
         return new Text2TextSearchQuery(data);
       }),
       sort: this.attr([]),
-      results: this.attr(
-        {},
-        (data) => new Text2TextSearchResults(data)
-      ),
+      results: this.attr({}, (data) => new Text2TextSearchResults(data)),
       globalResults: this.attr({}),
     };
   }

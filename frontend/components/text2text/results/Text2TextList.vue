@@ -1,21 +1,41 @@
 <template>
-    <div :class="[editable ? 'content--editable': null, showScore ? 'content--has-score': null, 'content']">
+  <div
+    :class="[
+      editable ? 'content--editable' : null,
+      showScore ? 'content--has-score' : null,
+      'content',
+    ]"
+  >
     <span v-for="(sentence, index) in list" :key="index">
       <div v-if="itemNumber === index">
-        <p class="content__text" :contenteditable="editable" @input="input">{{sentence.text}}</p>
-        <div class="content__score" v-if="showScore">
-        <re-numeric  :value="decorateScore(sentence.score)" type="%" :decimals="2"></re-numeric>
-      </div>
+        <p class="content__text" :contenteditable="editable" @input="input">
+          {{ sentence.text }}
+        </p>
+        <div v-if="showScore" class="content__score">
+          <re-numeric
+            :value="decorateScore(sentence.score)"
+            type="%"
+            :decimals="2"
+          ></re-numeric>
+        </div>
       </div>
     </span>
     <div v-if="!list.length">
       <p class="content__text" :contenteditable="editable" @input="input"></p>
     </div>
-    <div class="content__buttons" v-if="list.length > 1">
-      <a :class="itemNumber <= 0 ? 'disabled' : null" href="#" @click.prevent="showitemNumber(--itemNumber)">
+    <div v-if="list.length > 1" class="content__buttons">
+      <a
+        :class="itemNumber <= 0 ? 'disabled' : null"
+        href="#"
+        @click.prevent="showitemNumber(--itemNumber)"
+      >
         <svgicon name="chev-left" width="15" height="15" color="#4A4A4A" />
       </a>
-      <a :class="list.length <= itemNumber + 1 ? 'disabled' : null" href="#" @click.prevent="showitemNumber(++itemNumber)">
+      <a
+        :class="list.length <= itemNumber + 1 ? 'disabled' : null"
+        href="#"
+        @click.prevent="showitemNumber(++itemNumber)"
+      >
         <svgicon name="chev-right" width="15" height="15" color="#4A4A4A" />
       </a>
     </div>
@@ -27,33 +47,33 @@ export default {
   props: {
     list: {
       type: Array,
-      required: true
+      required: true,
     },
     editable: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showScore: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data: () => {
     return {
       itemNumber: 0,
-    }
+    };
   },
   methods: {
     showitemNumber(index) {
       this.itemNumber = index;
     },
     input(e) {
-      this.$emit('input', e.target.innerText)
+      this.$emit("input", e.target.innerText);
     },
     decorateScore(score) {
       return score * 100;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -107,5 +127,3 @@ export default {
   }
 }
 </style>
-
-

@@ -2,23 +2,25 @@
   <div class="record">
     <div class="record--left record__item">
       <record-string-text-2-text
-        :query-text="dataset.query.text" :text="record.text"
+        :query-text="dataset.query.text"
+        :text="record.text"
       />
       <text-2-text-annotation-area
         v-if="annotationEnabled"
-        :prediction="predictionSentences" 
+        :prediction="predictionSentences"
         :annotation="annotationSentences"
         @annotate="onAnnotate"
       />
-      <text-2-text-exploration-area v-else :prediction="predictionSentences" :annotation="annotationSentences" />
+      <text-2-text-exploration-area
+        v-else
+        :prediction="[]"
+        :annotation="annotationSentences"
+      />
     </div>
   </div>
 </template>
 <script>
-import {
-  Text2TextRecord,
-  Text2TextDataset,
-} from "@/models/Text2Text";
+import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
 import { mapActions } from "vuex";
 export default {
   props: {

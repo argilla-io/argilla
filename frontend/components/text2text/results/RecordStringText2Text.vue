@@ -20,10 +20,7 @@
         ></svgicon>
       </re-button>
 
-      <span
-        class="record__content"
-        v-html="$highlightSearch(queryText, text)"
-      >
+      <span class="record__content" v-html="$highlightSearch(queryText, text)">
       </span>
     </span>
   </span>

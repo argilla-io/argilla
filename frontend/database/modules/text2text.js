@@ -1,4 +1,3 @@
-import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 
 const getters = {};

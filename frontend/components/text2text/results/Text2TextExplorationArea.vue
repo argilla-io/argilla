@@ -1,6 +1,10 @@
 <template>
   <div>
-    <re-tabs @change-tab="onChangeTab" :tabs="availableTabs" :activeTab="showTab">
+    <re-tabs
+      :tabs="availableTabs"
+      :active-tab="showTab"
+      @change-tab="onChangeTab"
+    >
       <div>
         <template v-if="showTab === 'Prediction'">
           <text-2-text-list :show-score="true" :list="prediction" />
@@ -19,30 +23,30 @@ export default {
   props: {
     annotation: {
       type: Array,
-      required: true
+      required: true,
     },
     prediction: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   data: () => ({
-    showTab: "Prediction",
-    predictionNumber: 0
+    predictionNumber: 0,
   }),
   computed: {
+    showTab() {
+      return this.availableTabs.includes('Prediction') ? 'Prediction' : 'Annotation';
+    },
     availableTabs() {
       let tabs = [];
       if (this.prediction.length) {
         tabs.push("Prediction");
-      } else {
-        this.showTab = "Annotation";
       }
       if (this.annotation.length) {
         tabs.push("Annotation");
       }
       return tabs;
-    }
+    },
   },
   methods: {
     onChangeTab(tab) {
@@ -53,9 +57,8 @@ export default {
     },
     decorateScore(score) {
       return score * 100;
-    }
-  }
+    },
+  },
 };
 </script>
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
