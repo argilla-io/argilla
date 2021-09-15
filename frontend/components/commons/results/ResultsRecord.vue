@@ -34,7 +34,7 @@
       <Metadata
         :applied-filters="dataset.query.metadata"
         :metadata-items="item.metadata"
-        :inputs="item.inputs"
+        :title="item.inputs || item.text"
         @metafilterApply="onApplyMetadataFilter"
         @cancel="closeMetadata"
       />

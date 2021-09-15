@@ -1,6 +1,7 @@
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
+import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -35,6 +36,11 @@ const getters = {
           .withAllRecursive()
           .whereId(name)
           .first();
+      case "Text2Text":
+        return Text2TextDataset.query()
+          .withAllRecursive()
+          .whereId(name)
+          .first();
       default:
         console.warn("WRONG!!!");
     }
@@ -47,6 +53,8 @@ const getters = {
         return TextClassificationDataset;
       case "TokenClassification":
         return TokenClassificationDataset;
+      case "Text2Text":
+        return Text2TextDataset;
     }
     return undefined;
   },

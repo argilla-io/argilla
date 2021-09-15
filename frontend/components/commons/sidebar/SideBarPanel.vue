@@ -41,6 +41,12 @@ export default {
     display: block !important;
     right: calc(4em + 45px);
   }
+    &.annotation.Text2Text {
+      top: -75px;
+      .fixed-header & {
+        margin-top: 15em;
+      }
+    }
     &.annotation.TextClassification {
       top: -75px;
       .fixed-header & {
@@ -51,6 +57,12 @@ export default {
       top: -75px;
       .fixed-header & {
         margin-top: 19em;
+      }
+    }
+    &.explore.Text2Text {
+      top: 0;
+      .fixed-header & {
+        margin-top: 4em;
       }
     }
     &.explore.TextClassification {

@@ -20,6 +20,8 @@ export default {
         return "Token Classification";
       } else if (this.dataset.task === "TextClassification") {
         return "Text Classification";
+      } else if (this.dataset.task === "Text2Text") {
+        return "Text2Text";
       }
       return false;
     },
