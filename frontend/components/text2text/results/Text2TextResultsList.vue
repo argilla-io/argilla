@@ -4,16 +4,12 @@
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
-    <template slot="header">
-      <explain-help-info v-if="isExplainedRecord" />
-    </template>
     <template slot="record" slot-scope="results">
       <RecordText2Text
         :dataset="dataset"
         :record="results.record"
         @onShowMetadata="onShowMetadata"
       />
-      <!--<RecordTokenClassification :dataset="dataset" :record="results.record" />-->
     </template>
   </results-list>
 </template>
@@ -28,11 +24,6 @@ export default {
   data: () => ({
     selectedMetadataItem: undefined,
   }),
-  computed: {
-    isExplainedRecord() {
-      return this.dataset.results.records.some((record) => record.explanation);
-    },
-  },
   methods: {
     onShowMetadata(id) {
       this.selectedMetadataItem = id;
