@@ -1,5 +1,6 @@
 <template>
   <div>
+    <header-title title="Text2Text" v-if="dataset.results.records" :dataset="dataset" />
     <filters-area :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action

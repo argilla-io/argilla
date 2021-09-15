@@ -1,9 +1,7 @@
 <template>
   <div>
-    <div>
-      <filters-area :dataset="dataset" />
-      <explain-help-info v-if="isExplainedRecord" />
-    </div>
+    <header-title title="Text Classification" v-if="dataset.results.records" :dataset="dataset" />
+    <filters-area :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"

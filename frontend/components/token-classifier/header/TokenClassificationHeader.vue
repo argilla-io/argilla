@@ -1,5 +1,6 @@
 <template>
   <div>
+    <header-title title="Token Classification" v-if="dataset.results.records" :dataset="dataset" />
     <filters-area :dataset="dataset" />
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
