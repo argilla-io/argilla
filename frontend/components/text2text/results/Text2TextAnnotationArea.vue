@@ -1,51 +1,49 @@
 <template>
-  <div>
-    <div class="content" v-for="(sentence, index) in annotation" :key="index">
-      <p contenteditable="true" @input="onInput">{{sentence.text}}</p>
+    <div>
+    <div v-if="annotation.length">
+      <text-2-text-list :list="annotation" @input="onInput" :editable="true" />
     </div>
-    <re-button class="button button-primary" @click="annotate">Save</re-button>
+    <div v-else-if="prediction.length">
+      <text-2-text-list :list="prediction" @input="onInput" :editable="true" />
+    </div>
+    <div v-else>
+      <text-2-text-list :list="[]" @input="onInput" :editable="true" />
+    </div>
+    <re-button class="button button-primary" @click="annotate">Validate</re-button>
   </div>
 </template>
 <script>
-
 export default {
   props: {
     annotation: {
       type: Array,
-      required: true,
+      required: true
     },
+    prediction: {
+      type: Array,
+      required: true
+    }
   },
   data: () => ({
-    newSentence: undefined,
+    newSentence: undefined
   }),
   methods: {
-    onInput(e) {
-      this.newSentence = e.target.innerText;
+    onInput(sentence) {
+      this.newSentence = sentence;
     },
     annotate() {
       if (this.newSentence) {
         let newS = {
           score: 1,
-          text: this.newSentence,
-        }
+          text: this.newSentence
+        };
         this.$emit("annotate", { sentences: [newS] });
       }
-    },
+    }
   }
 };
 </script>
 <style lang="scss" scoped>
-.content {
-  border: 1px solid $primary-color;
-  font-family: monospace;
-  margin-bottom: 1em;
-  margin-top: 1em;
-  p {
-    padding: 1em;
-    margin: 0;
-    outline: none;
-  }
-}
 .button {
   display: block;
 }

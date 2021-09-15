@@ -19,18 +19,8 @@
           height="14"
         ></svgicon>
       </re-button>
-      <div v-if="isList(text)">
-        <div v-for="item in text" :key="item.index">
-          <span
-            class="record__content"
-            v-html="$highlightSearch(queryText, item)"
-          >
-          </span>
-        </div>
-      </div>
 
       <span
-        v-else
         class="record__content"
         v-html="$highlightSearch(queryText, text)"
       >
@@ -64,9 +54,6 @@ export default {
     this.calculateScrollHeight();
   },
   methods: {
-    isList(record) {
-      return Array.isArray(record);
-    },
     calculateScrollHeight() {
       if (this.$refs.list) {
         const padding = 2;

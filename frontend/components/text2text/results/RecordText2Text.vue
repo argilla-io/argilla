@@ -1,15 +1,16 @@
 <template>
   <div class="record">
     <div class="record--left record__item">
-      <RecordStringText2Text
+      <record-string-text-2-text
         :query-text="dataset.query.text" :text="record.text"
       />
-      <Text2TextAnnotationArea
+      <text-2-text-annotation-area
         v-if="annotationEnabled"
+        :prediction="predictionSentences" 
         :annotation="annotationSentences"
         @annotate="onAnnotate"
       />
-      <Text2TextExplorationArea v-else :prediction="predictionSentences" :annotation="annotationSentences" />
+      <text-2-text-exploration-area v-else :prediction="predictionSentences" :annotation="annotationSentences" />
     </div>
   </div>
 </template>
