@@ -31,12 +31,13 @@ export default {
     },
   },
   data: () => ({
+    showTab: "Prediction",
     predictionNumber: 0,
   }),
+  mounted() {
+    this.showTab = this.availableTabs.includes('Prediction') ? 'Prediction' : 'Annotation'
+  },
   computed: {
-    showTab() {
-      return this.availableTabs.includes('Prediction') ? 'Prediction' : 'Annotation';
-    },
     availableTabs() {
       let tabs = [];
       if (this.prediction.length) {
