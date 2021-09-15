@@ -7,7 +7,10 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from brotli_asgi import BrotliMiddleware
+
 from pydantic import ValidationError
+
 from rubrix import __version__ as rubrix_version
 from rubrix.server.commons.errors import (
     common_exception_handler,
@@ -18,7 +21,6 @@ from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
-
 from .commons.settings import settings as api_settings
 from .routes import api_router
 
@@ -33,6 +35,8 @@ def configure_middleware(app: FastAPI):
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.add_middleware(BrotliMiddleware, minimum_size=512, quality=7)
 
 
 def configure_api_exceptions(api: FastAPI):
