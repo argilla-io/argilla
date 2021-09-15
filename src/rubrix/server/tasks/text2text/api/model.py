@@ -9,7 +9,7 @@ from rubrix.server.tasks.commons.api.model import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
-    TaskStatus,
+    SortableField, TaskStatus,
     TaskType,
 )
 
@@ -197,9 +197,13 @@ class Text2TextSearchRequest(BaseModel):
 
     query: Text2TextQuery
         The search query configuration
+
+    sort:
+        The sort order list
     """
 
     query: Text2TextQuery = Field(default_factory=Text2TextQuery)
+    sort: List[SortableField] = Field(default_factory=list)
 
 
 class Text2TextSearchAggregations(BaseModel):
