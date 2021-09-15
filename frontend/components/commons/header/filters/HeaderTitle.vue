@@ -24,7 +24,10 @@ export default {
 .container {
   @extend %container;
   padding-top: 1em;
-  padding-bottom: 0
+  padding-bottom: 0;
+  .fixed-header & {
+    display: none;
+  }
 }
 .title {
   font-weight: normal;
