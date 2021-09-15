@@ -8,7 +8,7 @@
       </p>
     </div>
     <NuxtLink class="re-button" :to="link">
-      <svgicon name="chev-left" width="15" height="15" color="#4A4A4A" />
+      <svgicon name="chev-left" width="8" height="8" color="#4A4A4A" />
       Back
     </NuxtLink>
   </div>
@@ -92,13 +92,13 @@ export default {
 
 .re-button {
   display: inline-block;
-  min-height: 40px;
-  line-height: 40px;
-  min-width: 150px;
+  min-height: 30px;
+  line-height: 30px;
+  min-width: auto;
   background: transparent;
   text-align: center;
   border: 1px solid $font-medium-color;
-  padding: 0 2em;
+  padding: 0 1em 0 1.5em;
   position: relative;
   font-weight: 600;
   color: $font-medium-color;
@@ -111,7 +111,7 @@ export default {
   }
   .svg-icon {
     position: absolute;
-    left: 12px;
+    left: 8px;
     top: 12px;
   }
 }
