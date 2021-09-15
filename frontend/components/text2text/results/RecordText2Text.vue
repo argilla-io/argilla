@@ -13,7 +13,7 @@
       />
       <text-2-text-exploration-area
         v-else
-        :prediction="[]"
+        :prediction="predictionSentences"
         :annotation="annotationSentences"
       />
     </div>
