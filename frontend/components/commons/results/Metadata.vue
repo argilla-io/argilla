@@ -1,13 +1,18 @@
 <template>
   <div class="metadata">
-    <p
-      v-for="name in inputs"
-      :key="name.index"
-      class="metadata__title"
-      :title="name"
-    >
-      <span v-if="!Array.isArray(name)">{{ name | truncate(100) }}</span>
-    </p>
+    <div v-if="typeof title === 'object'">
+      <p
+        v-for="name in title"
+        :key="name.index"
+        class="metadata__title"
+        :title="name"
+      >
+        <span v-if="!Array.isArray(name)">{{ name | truncate(100) }}</span>
+      </p>
+    </div>
+    <div v-else>
+      <p class="metadata__title">{{title}}</p>
+    </div>
     <div class="metadata__container">
       <div v-for="(value, key) in sortedMetadataItems" :key="key">
         <div
@@ -65,8 +70,8 @@ export default {
       type: Object,
       required: true,
     },
-    inputs: {
-      type: Object,
+    title: {
+      type: [Object, String],
       required: true,
     },
     appliedFilters: {
@@ -158,13 +163,16 @@ export default {
   &__block {
     padding: 1em 0;
     margin-right: 0.5em;
+    color: $font-dark-color;
+    font-weight: 600;
     &__item {
       word-break: break-word;
       min-width: 200px;
       text-align: left;
       white-space: pre-line;
+      color: palette(grey, medium);
+      font-weight: normal;
       &:first-child {
-        color: $font-dark-color;
         margin-bottom: 0.5em;
         .--selected & {
           color: $secondary-color;
@@ -184,6 +192,7 @@ export default {
     text-align: right;
     margin-top: 2em;
     .re-button {
+      margin-left: 0.5em;
       margin-bottom: 0;
       display: inline-block;
     }
