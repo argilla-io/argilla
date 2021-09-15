@@ -164,12 +164,14 @@ export default {
     padding: 1em 0;
     margin-right: 0.5em;
     color: $font-dark-color;
+    font-weight: 600;
     &__item {
       word-break: break-word;
       min-width: 200px;
       text-align: left;
       white-space: pre-line;
       color: palette(grey, medium);
+      font-weight: normal;
       &:first-child {
         margin-bottom: 0.5em;
         .--selected & {
