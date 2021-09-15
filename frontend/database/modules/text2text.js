@@ -56,7 +56,7 @@ const actions = {
     return await Text2TextDataset.api().post(
       `/datasets/${dataset.name}/Text2Text:search?limit=${size}`,
       {
-        query: { ...query, query_inputs: query.text },
+        query: { ...query, query_text: query.text },
         sort,
       },
       {
@@ -78,7 +78,7 @@ const actions = {
     return await Text2TextDataset.api().post(
       `/datasets/${dataset.name}/Text2Text:search?limit=${size}&from=${from}`,
       {
-        query: { ...dataset.query, query_inputs: dataset.query.text },
+        query: { ...dataset.query, query_text: dataset.query.text },
         sort: dataset.sort,
       },
       {
