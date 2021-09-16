@@ -20,7 +20,8 @@
           active: initialVisibleGroup === 'sort' || dataset.sort.length,
         }"
         @click="selectGroup('sort')"
-      ><svgicon name="sort" width="14" height="14" />
+      >
+        <svgicon name="sort" width="14" height="14" />
         Sort
         <span v-if="dataset.sort.length">({{ dataset.sort.length }})</span>
       </p>
@@ -160,6 +161,8 @@ export default {
       const metadataFilters =
         aggregations.metadata &&
         Object.keys(aggregations.metadata).map((key) => {
+          const filterContent = aggregations.metadata[key];
+
           return {
             key: key,
             name: key,
@@ -167,10 +170,8 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: aggregations.metadata[key],
-            selected: this.dataset.query.metadata
-              ? this.dataset.query.metadata[key] || []
-              : [],
+            options: typeof filterContent === "object" ? [] : filterContent,
+            selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
       const sortedMetadataFilters =
