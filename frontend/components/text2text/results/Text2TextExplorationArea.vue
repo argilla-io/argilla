@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="annotation.length || prediction.length">
     <re-tabs
       :tabs="availableTabs"
       :active-tab="showTab"
