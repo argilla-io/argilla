@@ -9,7 +9,8 @@ from rubrix.server.tasks.commons.api.model import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
-    SortableField, TaskStatus,
+    SortableField,
+    TaskStatus,
     TaskType,
 )
 
@@ -37,6 +38,11 @@ class Text2TextAnnotation(BaseAnnotation):
         List of sentence predictions/annotations
 
     """
+
+    @validator("sentences")
+    def sort_sentences_by_score(cls, sentences: List[Text2TextPrediction]):
+        """Sort provided sentences by score desc"""
+        return sorted(sentences, key=lambda x: x.score, reverse=True)
 
     sentences: List[Text2TextPrediction]
 
