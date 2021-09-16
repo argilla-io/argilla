@@ -246,7 +246,7 @@ class Text2TextSearchAggregations(BaseModel):
     status: Dict[str, int] = Field(default_factory=dict)
     predicted: Dict[str, int] = Field(default_factory=dict)
     score: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
 
 class Text2TextSearchResults(BaseModel):

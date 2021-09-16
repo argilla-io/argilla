@@ -391,7 +391,7 @@ class TextClassificationSearchAggregations(BaseModel):
         Occurrence info about task prediction status
     words: Dict[str, int]
         The word cloud aggregations
-    metadata: Dict[str, Dict[str, int]]
+    metadata: Dict[str, Dict[str, Any]]
         The metadata fields aggregations
     """
 
@@ -403,7 +403,7 @@ class TextClassificationSearchAggregations(BaseModel):
     predicted: Dict[str, int] = Field(default_factory=dict)
     score: Dict[str, int] = Field(default_factory=dict)
     words: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
     class Config:
         allow_population_by_field_name = True
