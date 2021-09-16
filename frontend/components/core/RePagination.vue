@@ -186,8 +186,9 @@ $pagination-size: 30px;
     padding-bottom: 12em;
   }
   &__arrow {
-    color: $lighter-color;
-    background: $primary-color;
+    transition: all 0.3s ease-in-out;
+    color: $font-secondary;
+    background: transparent;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -197,8 +198,12 @@ $pagination-size: 30px;
     transition: color 200ms ease-in-out;
     outline: none;
     border-radius: 3px;
+    svg {
+      margin-top: 1px;
+    }
     &:hover {
-      background: darken($primary-color, 10%);
+      transition: all 0.3s ease-in-out;
+      background: palette(grey, smooth);;
     }
     &--next {
       margin-left: 1em;
@@ -223,20 +228,21 @@ $pagination-size: 30px;
     list-style: none;
     padding-left: 0;
     #{$self}__number {
-      color: $primary-color;
+      color: $font-secondary;
       display: flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
       width: $pagination-size;
       height: $pagination-size;
+      margin: auto 0.5em;
       outline: none;
       &:hover {
         color: $font-secondary-dark;
       }
       &.is-current {
-        color: $font-secondary-dark;
-        border: 2px solid $font-secondary-dark;
+        pointer-events: none;
+        background: palette(grey, smooth);
       }
     }
   }
