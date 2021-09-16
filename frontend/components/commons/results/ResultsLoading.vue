@@ -26,7 +26,7 @@ export default {
   top: 0;
   left: 0;
   background: $primary-color;
-  animation: load 0.5s linear infinite;
+  animation: load 0.8s ease-in-out infinite;
 }
 .record {
   min-height: 150px;
