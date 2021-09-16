@@ -54,7 +54,7 @@ class TextClassificationSearchAggregations:
         Occurrence info about task prediction status
     words: Dict[str, int]
         The word cloud aggregations
-    metadata: Dict[str, Dict[str, int]]
+    metadata: Dict[str, Dict[str, Any]]
         The metadata fields aggregations"""
 
     predicted_as: Union[TextClassificationSearchAggregationsPredictedAs, Unset] = UNSET
