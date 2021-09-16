@@ -222,12 +222,14 @@ $number-size: 18px;
   $this: &;
   position: relative;
   display: inline-block;
-  width: 100%;
   z-index: 2;
   &__tabs {
     display: flex;
     &__content {
       width: 450px;
+      left: 0;
+      right: 0;
+      margin: auto;
       position: absolute;
       top: calc(100% + 1em);
       box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
@@ -235,12 +237,6 @@ $number-size: 18px;
       padding: 3em 3em 2em 3em;
       border-radius: 5px;
       max-height: 550px;
-      &--sort {
-        right: 0;
-        @include media(">desktopLarge") {
-          right: 290px;
-        }
-      }
       &--large {
         width: 910px;
         max-height: 80vh;
