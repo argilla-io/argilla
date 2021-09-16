@@ -179,6 +179,7 @@ $pagination-size: 30px;
   justify-content: center;
   align-items: center;
   margin: auto;
+  font-weight: 600;
   &__container {
     display: flex;
     align-items: center;
@@ -227,7 +228,9 @@ $pagination-size: 30px;
     align-items: center;
     list-style: none;
     padding-left: 0;
+    @include font-size(16px);
     #{$self}__number {
+      transition: all 0.3s ease-in-out;
       color: $font-secondary;
       display: flex;
       align-items: center;
@@ -238,11 +241,12 @@ $pagination-size: 30px;
       margin: auto 0.5em;
       outline: none;
       &:hover {
-        color: $font-secondary-dark;
+        transition: all 0.3s ease-in-out;
+        background: palette(grey, smooth);
       }
       &.is-current {
         pointer-events: none;
-        background: palette(grey, smooth);
+        color: $font-secondary-dark;
       }
     }
   }
