@@ -71,8 +71,8 @@ export default {
         ...option,
         id:
           option.group.toLowerCase() === "metadata"
-            ? "metadata." + option.id
-            : option.id,
+            ? "metadata." + option.key
+            : option.key,
         name: option.name,
         order: direction,
       };
