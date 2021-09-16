@@ -11,7 +11,8 @@ from rubrix.server.datasets.dao import (
 from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
-    SortableField, TaskStatus,
+    SortableField,
+    TaskStatus,
 )
 from .api import EsRecordDataFieldNames
 
@@ -87,6 +88,7 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
     },
 }
 
+
 def sort_by2elasticsearch(
     sort: List[SortableField], valid_fields: Optional[List[str]] = None
 ) -> List[Dict[str, Any]]:
@@ -102,7 +104,6 @@ def sort_by2elasticsearch(
     return result
 
 
-
 def parse_aggregations(
     es_aggregations: Dict[str, Any] = None
 ) -> Optional[Dict[str, Any]]:
@@ -110,6 +111,20 @@ def parse_aggregations(
 
     if es_aggregations is None:
         return None
+
+    def is_extended_stats_aggregation(aggr_data) -> bool:
+        for metric in [
+            "count",
+            "min",
+            "max",
+            "avg",
+            "sum",
+            "variance",
+            "std_deviation",
+        ]:
+            if metric not in aggr_data:
+                return False
+        return True
 
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
@@ -127,6 +142,8 @@ def parse_aggregations(
     for key, values in es_aggregations.items() or {}:
         if "buckets" in values:
             result[key] = parse_buckets(values["buckets"])
+        elif is_extended_stats_aggregation(values):
+            result[key] = {"rubrix:stats": values}  # statistical aggregations
         else:
             result.update(parse_buckets([values]))
     return result
@@ -370,6 +387,9 @@ class aggregations:
                         "order": {"_count": "desc"},
                     }
                 }
+            if field_type in ["float", "long"]:
+                # TODO: Revise boxplot (since elasticsearch version 7.11 and not sure for opensearch)
+                return {"extended_stats": {"field": field_name}}
             return None  # TODO: revise elasticsearch aggregations for API match
 
         if not fields_definitions:

@@ -190,3 +190,49 @@ def test_multiple_mentions_in_same_record():
     assert results.aggregations.predicted_mentions[entity_a]["This"] == 2
     assert "is" in results.aggregations.predicted_mentions[entity_b]
     assert results.aggregations.predicted_mentions[entity_b]["is"] == 1
+
+
+def test_show_not_aggregable_metadata_fields():
+    dataset = "test_show_not_aggregable_metadata_fields"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkData(
+            records=[
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 1.3, "field_two": 2},
+                    },
+                ),
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 2.3, "field_two": 300},
+                    },
+                ),
+                TokenClassificationRecord.parse_obj(
+                    {
+                        "tokens": "This is a text".split(" "),
+                        "raw_text": "This is a text",
+                        "metadata": {"field_one": 11.333, "field_two": -10},
+                    },
+                ),
+            ],
+        ).dict(by_alias=True),
+    )
+
+    assert response.status_code == 200, response.json()
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TokenClassification:search",
+        json={},
+    )
+    assert response.status_code == 200, response.json()
+    results = TokenClassificationSearchResults.parse_obj(response.json())
+    assert len(results.aggregations.metadata) == 2
+    assert "field_one" in results.aggregations.metadata
+    assert "rubrix:stats" in results.aggregations.metadata["field_one"]
