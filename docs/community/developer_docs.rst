@@ -3,6 +3,8 @@ Developer documentation
 
 Here we provide some guides for the development of *Rubrix*.
 
+.. _development-setup:
+
 Development setup
 -----------------
 

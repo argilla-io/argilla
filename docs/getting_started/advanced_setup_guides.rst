@@ -6,7 +6,7 @@
 Advanced setup guides
 =====================
 
-Here we provide some advanced setup guides, in case you want to use docker, configure your own Elasticsearch instance or manage the users in your Rubrix server.
+Here we provide some advanced setup guides, in case you want to use docker, configure your own Elasticsearch instance, manage the users in your Rubrix server, or install the cutting-edge master version.
 
 .. _using-docker:
 
@@ -268,3 +268,37 @@ You can reload the *rubrix* service to refresh the container:
     docker-compose up -d rubrix
 
 If everything went well, the configured users can now log in and their annotations will be tracked with their usernames.
+
+.. _install-from-master:
+
+Install from master
+-------------------
+
+If you want the cutting-edge version of *Rubrix* with the latest changes and experimental features, follow the steps below in your terminal.
+**Be aware that this version might be unstable!**
+
+First, you need to install the master version of our python client:
+
+.. code-block:: shell
+
+    pip install -U git+https://github.com/recognai/rubrix.git
+
+Then, the easiest way to get the master version of our web app up and running is via docker-compose:
+
+.. code-block:: shell
+
+    # get the docker-compose yaml file
+    mkdir rubrix && cd rubrix
+    wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml
+    # use the master image of the rubrix container instead of the latest
+    sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yml
+    # start all services
+    docker-compose up
+
+If you want to use vanilla docker (and have your own Elasticsearch instance running), you can just use our master image:
+
+.. code-block:: shell
+
+    docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name rubrix recognai/rubrix:master
+
+If you want to execute the server code of the master branch manually, we refer you to our :ref:`development-setup`.
