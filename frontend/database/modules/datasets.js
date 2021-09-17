@@ -302,6 +302,7 @@ const actions = {
       dataset,
       query,
       sort,
+      size: pagination.size,
     });
 
     if (pagination && pagination.page > 1) {
@@ -346,18 +347,16 @@ const actions = {
     });
 
     const viewSettings = DatasetViewSettings.query().first();
+    const newPagination = { ...(viewSettings.pagination || {}), size: size };
     displayQueryParams({
       query,
       sort,
       enableAnnotation: viewSettings.annotationEnabled,
-      pagination: viewSettings.pagination,
+      pagination: newPagination,
     });
     await Pagination.update({
       where: dataset.name,
-      data: {
-        ...viewSettings.pagination,
-        page: 1,
-      },
+      data: newPagination,
     });
     return entity.find(dataset.name);
   },
