@@ -42,13 +42,15 @@
         v-if="initialVisibleGroup === group"
         :class="[
           'filters__tabs__content',
-          filterList.filter((f) => f.group === group).length > 6
+          searchableFilterList.filter((f) => f.group === group).length > 6
             ? 'filters__tabs__content--large'
             : '',
         ]"
       >
         <span
-          v-for="filter in filterList.filter((f) => f.group === group)"
+          v-for="filter in searchableFilterList.filter(
+            (f) => f.group === group
+          )"
           :key="filter.id"
         >
           <SelectFilter
@@ -132,8 +134,13 @@ export default {
     ],
   }),
   computed: {
+    searchableFilterList() {
+      return this.filterList.filter((f) => {
+        return f.options && Object.keys(f.options).length > 0;
+      });
+    },
     groups() {
-      return [...new Set(this.filterList.map((f) => f.group))];
+      return [...new Set(this.searchableFilterList.map((f) => f.group))];
     },
     isMultiLabelRecord() {
       return this.dataset.results.records.some((record) => record.multi_label);
@@ -170,7 +177,8 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: typeof filterContent === "object" ? [] : filterContent,
+            options:
+              typeof filterContent === "object" ? undefined : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
