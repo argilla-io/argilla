@@ -264,6 +264,8 @@ $pagination-size: 30px;
       &.is-current {
         pointer-events: none;
         color: $font-secondary-dark;
+        font-weight: 700;
+        background: palette(grey, smooth);
       }
     }
   }
