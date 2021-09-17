@@ -346,14 +346,15 @@ const actions = {
       size: size,
     });
 
-    const viewSettings = DatasetViewSettings.query().first();
-    const newPagination = { ...(viewSettings.pagination || {}), size: size };
+    const viewSettings = DatasetViewSettings.find(dataset.name);
+    const newPagination = { size: size, page: 1 };
     displayQueryParams({
       query,
       sort,
       enableAnnotation: viewSettings.annotationEnabled,
       pagination: newPagination,
     });
+
     await Pagination.update({
       where: dataset.name,
       data: newPagination,
