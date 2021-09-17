@@ -192,7 +192,7 @@ $annotation-button-touch-size: 48px;
         transition: all 0.3s ease;
       }
       &__score {
-        width: 40px;
+        min-width: 40px;
         @include font-size(12px);
         display: inline-block;
         text-align: center;
