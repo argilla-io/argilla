@@ -38,11 +38,10 @@ function toSnakeCase(e) {
 const getters = {
   byName: () => (name) => {
     const ds = ObservationDataset.find(name);
-    const { task } = configuredRouteParams();
     if (ds === null) {
       return undefined;
     }
-    switch (task || ds.task) {
+    switch (ds.task) {
       case "TextClassification":
         return TextClassificationDataset.query()
           .withAllRecursive()
@@ -77,31 +76,21 @@ const getters = {
   },
 };
 
-const DEFAULT_QUERY_SIZE = 20;
-
 function configuredRouteParams() {
-  const { query, sort, task, allowAnnotation, pagination } = $nuxt.$route.query;
+  const { query, sort, allowAnnotation, pagination } = $nuxt.$route.query;
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
-    task: task,
     allowAnnotation: allowAnnotation || false,
-    pagination: JSON.parse(pagination ? Base64.decode(pagination) : "{}"),
+    pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
   };
 }
 
-function displayQueryParams({
-  query,
-  sort,
-  task,
-  enableAnnotation,
-  pagination,
-}) {
+function displayQueryParams({ query, sort, enableAnnotation, pagination }) {
   $nuxt.$router.push({
     query: {
       query: Base64.encodeURI(JSON.stringify(query)),
       sort: Base64.encodeURI(JSON.stringify(sort)),
-      task: task,
       allowAnnotation: enableAnnotation,
       pagination: Base64.encodeURI(JSON.stringify(pagination)),
     },
@@ -274,8 +263,8 @@ const actions = {
       await ObservationDataset.api().get(`/datasets/${name}`);
     }
     ds = ObservationDataset.find(name);
-    const { task, allowAnnotation } = configuredRouteParams();
-    DatasetViewSettings.insert({
+    const { allowAnnotation } = configuredRouteParams();
+    await DatasetViewSettings.insert({
       data: ObservationDataset.all().map((ds) => ({
         pagination: { id: ds.name },
         id: ds.name,
@@ -284,7 +273,17 @@ const actions = {
     });
     return await dispatch("loadViewByTask", {
       dataset: ds,
-      value: task || ds.task,
+      value: ds.task,
+    });
+  },
+
+  async loadViewByTask(_, { dataset, value }) {
+    await ObservationDataset.dispatch("load", { ...dataset, task: value });
+    return await ObservationDataset.update({
+      where: dataset.name,
+      data: {
+        task: value,
+      },
     });
   },
 
@@ -298,16 +297,26 @@ const actions = {
       return undefined;
     }
 
-    const { query, sort } = configuredRouteParams();
-
-    return await dispatch("search", {
+    const { query, sort, pagination } = configuredRouteParams();
+    const loadedDataset = await dispatch("search", {
       dataset,
       query,
       sort,
+      size: pagination.size,
     });
+
+    if (pagination && pagination.page > 1) {
+      return await dispatch("paginate", {
+        dataset: loadedDataset,
+        size: pagination.size,
+        page: pagination.page,
+      });
+    }
+
+    return loadedDataset;
   },
 
-  async search({ getters, dispatch }, { dataset, query, sort }) {
+  async search({ getters }, { dataset, query, sort, size }) {
     query = query || {};
     sort = sort || dataset.sort || [];
 
@@ -327,40 +336,35 @@ const actions = {
         ? {}
         : { ...dataset.query, ...query, metadata };
 
+    size = size || new Pagination().size;
+
     const entity = getters.datasetEntity(dataset);
     await entity.dispatch("search", {
       dataset,
       query,
       sort,
-      size: DEFAULT_QUERY_SIZE,
+      size: size,
     });
+
     const viewSettings = DatasetViewSettings.query().first();
-    const { pagination } = configuredRouteParams();
+    const newPagination = { ...(viewSettings.pagination || {}), size: size };
     displayQueryParams({
       query,
       sort,
-      task: dataset.task,
       enableAnnotation: viewSettings.annotationEnabled,
-      pagination: pagination,
+      pagination: newPagination,
     });
-    return await dispatch("resetPagination", { dataset, pagination });
-  },
-
-  async resetPagination(_, { dataset, pagination }) {
-    return await Pagination.update({
+    await Pagination.update({
       where: dataset.name,
-      data: {
-        ...pagination,
-        page: dataset.query ? 1 : pagination.page,
-      },
+      data: newPagination,
     });
+    return entity.find(dataset.name);
   },
 
   async enableAnnotation(_, { dataset, value }) {
     displayQueryParams({
       query: dataset.query,
       sort: dataset.sort,
-      task: dataset.task,
       enableAnnotation: value,
       pagination: dataset.viewSettings.pagination,
     });
@@ -372,21 +376,7 @@ const actions = {
     });
   },
 
-  async loadViewByTask(_, { dataset, value }) {
-    await ObservationDataset.dispatch("load", { ...dataset, task: value });
-    return await ObservationDataset.update({
-      where: dataset.name,
-      data: {
-        task: value,
-      },
-    });
-  },
-
   async paginate({ dispatch }, { dataset, size, page }) {
-    // const loadedRecords = dataset.results.records.length;
-    // const prefetchPaginationSize =
-    //   dataset.visibleRecords.length + dataset.viewSettings.pagination.size;
-
     const newPagination = await Pagination.update({
       where: dataset.name,
       data: {
@@ -404,38 +394,22 @@ const actions = {
     displayQueryParams({
       query: dataset.query,
       sort: dataset.sort,
-      task: dataset.task,
       enableAnnotation: dataset.annotationEnabled,
       pagination: {
-        ...dataset.viewSettings.pagination,
-        page: page,
-        size: size,
+        ...newPagination,
+        page,
+        size,
       },
     });
     await dispatch(
       `entities/${toSnakeCase(dataset.task)}/paginate`,
       {
         dataset: newDataset,
-        from: (page - 1) * size,
-        size: size,
+        from: newPagination.from,
+        size,
       },
       { root: true }
     );
-    // if (
-    //   // Prefetch data before reach the end of pagination
-    //   loadedRecords < dataset.results.total &&
-    //   loadedRecords <= prefetchPaginationSize
-    // ) {
-    //   dispatch(
-    //     `entities/${toSnakeCase(dataset.task)}/paginate`,
-    //     {
-    //       dataset: newDataset,
-    //       from: from,
-    //       size: size,
-    //     },
-    //     { root: true }
-    //   );
-    // }
   },
 };
 
