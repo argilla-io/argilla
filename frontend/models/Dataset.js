@@ -40,7 +40,7 @@ class ObservationDataset extends Model {
   get visibleRecords() {
     return this.results.records.slice(
       0,
-      this.viewSettings.pagination.size * this.viewSettings.pagination.page
+      this.viewSettings.pagination.size
     );
   }
 }
