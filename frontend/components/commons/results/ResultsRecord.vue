@@ -124,21 +124,6 @@ export default {
             records: [record],
           });
           break;
-        case "Edited":
-          await this.editAnnotations({
-            dataset: this.dataset,
-            records: [
-              {
-                ...record,
-                status: "Edited",
-                annotation: {
-                  agent: this.$auth.user,
-                  labels: [],
-                },
-              },
-            ],
-          });
-          break;
         default:
           console.warn("waT?", status);
       }
