@@ -168,4 +168,7 @@ export default {
     outline: none;
   }
 }
+.button {
+  display: block;
+}
 </style>
