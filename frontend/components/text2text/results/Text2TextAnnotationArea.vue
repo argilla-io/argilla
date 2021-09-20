@@ -18,17 +18,14 @@
 <template>
   <div>
     <div v-if="annotation.length">
-      <text-2-text-list :list="annotation" :editable="true" @input="onInput" />
+      <text-2-text-list :list="annotation" :editable="true" @annotate="onAnnotate" />
     </div>
     <div v-else-if="prediction.length">
-      <text-2-text-list :list="prediction" :editable="true" @input="onInput" />
+      <text-2-text-list :list="prediction" :editable="true" @annotate="onAnnotate" />
     </div>
     <div v-else>
-      <text-2-text-list :list="[]" :editable="true" @input="onInput" />
+      <text-2-text-list :list="[]" :editable="true" @annotate="onAnnotate" />
     </div>
-    <re-button class="button button-primary" @click="annotate"
-      >Validate</re-button
-    >
   </div>
 </template>
 <script>
@@ -44,26 +41,13 @@ export default {
     },
   },
   data: () => ({
-    newSentence: undefined,
   }),
   methods: {
-    onInput(sentence) {
-      this.newSentence = sentence;
-    },
-    annotate() {
-      if (this.newSentence) {
-        let newS = {
-          score: 1,
-          text: this.newSentence,
-        };
-        this.$emit("annotate", { sentences: [newS] });
-      }
+    onAnnotate(annotation) {
+      this.$emit("annotate", annotation);
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-.button {
-  display: block;
-}
 </style>

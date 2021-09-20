@@ -16,6 +16,7 @@
   -->
 
 <template>
+  <div>
   <div
     :class="[
       editable ? 'content--editable' : null,
@@ -57,6 +58,10 @@
       </a>
     </div>
   </div>
+    <re-button v-if="editable" class="button button-primary" @click="annotate"
+    >Validate</re-button
+  >
+  </div>
 </template>
 
 <script>
@@ -78,17 +83,37 @@ export default {
   data: () => {
     return {
       itemNumber: 0,
+      newSentence: undefined
     };
+  },
+  mounted() {
+    if (this.list[this.itemNumber]) {
+      this.newSentence = this.list[this.itemNumber].text;
+    }
+  },
+  updated() {
+    if (this.list[this.itemNumber]) {
+      this.newSentence = this.list[this.itemNumber].text;
+    }
   },
   methods: {
     showitemNumber(index) {
       this.itemNumber = index;
     },
     input(e) {
-      this.$emit("input", e.target.innerText);
+      this.newSentence = e.target.innerText;
     },
     decorateScore(score) {
       return score * 100;
+    },
+    annotate() {
+      if (this.newSentence) {
+        let newS = {
+          score: 1,
+          text: this.newSentence,
+        };
+        this.$emit("annotate", { sentences: [newS] });
+      }
     },
   },
 };
@@ -142,5 +167,8 @@ export default {
     margin: 0;
     outline: none;
   }
+}
+.button {
+  display: block;
 }
 </style>
