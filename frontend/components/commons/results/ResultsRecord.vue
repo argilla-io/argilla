@@ -110,33 +110,18 @@ export default {
       });
     },
 
-    async onChangeRecordStatus(status) {
+    async onChangeRecordStatus(status, record) {
       switch (status) {
         case "Validated":
           await this.validate({
             dataset: this.dataset,
-            records: [this.record],
+            records: [record],
           });
           break;
         case "Discarded":
           await this.discard({
             dataset: this.dataset,
-            records: [this.record],
-          });
-          break;
-        case "Edited":
-          await this.editAnnotations({
-            dataset: this.dataset,
-            records: [
-              {
-                ...this.record,
-                status: "Edited",
-                annotation: {
-                  agent: this.$auth.user,
-                  labels: [],
-                },
-              },
-            ],
+            records: [record],
           });
           break;
         default:
