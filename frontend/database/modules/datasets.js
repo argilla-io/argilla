@@ -339,24 +339,27 @@ const actions = {
     size = size || new Pagination().size;
 
     const entity = getters.datasetEntity(dataset);
-    DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        loading: true,
-      },
-    })
-    await entity.dispatch("search", {
-      dataset,
-      query,
-      sort,
-      size: size,
-    });
-    DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        loading: false,
-      },
-    })
+    try {
+      DatasetViewSettings.update({
+        where: dataset.name,
+        data: {
+          loading: true,
+        },
+      })
+      await entity.dispatch("search", {
+        dataset,
+        query,
+        sort,
+        size: size,
+      });
+    } finally {
+      DatasetViewSettings.update({
+        where: dataset.name,
+        data: {
+          loading: false,
+        },
+      })
+    }
 
     const viewSettings = DatasetViewSettings.find(dataset.name);
     const newPagination = { size: size, page: 1 };
@@ -414,27 +417,30 @@ const actions = {
         size,
       },
     });
-    DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        loading: true,
-      },
-    })
-    await dispatch(
-      `entities/${toSnakeCase(dataset.task)}/paginate`,
-      {
-        dataset: newDataset,
-        from: newPagination.from,
-        size,
-      },
-      { root: true }
-    );
-    DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        loading: false,
-      },
-    })
+    try {
+      DatasetViewSettings.update({
+        where: dataset.name,
+        data: {
+          loading: true,
+        },
+      })
+      await dispatch(
+        `entities/${toSnakeCase(dataset.task)}/paginate`,
+        {
+          dataset: newDataset,
+          from: newPagination.from,
+          size,
+        },
+        { root: true }
+      );
+    } finally {
+      DatasetViewSettings.update({
+        where: dataset.name,
+        data: {
+          loading: false,
+        },
+      })
+    }
   },
 };
 
