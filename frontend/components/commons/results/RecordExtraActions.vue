@@ -73,9 +73,7 @@ export default {
   methods: {
     onChangeRecordStatus(status) {
       if (this.record.status !== status) {
-        this.$emit("onChangeRecordStatus", status);
-      } else {
-        this.$emit("onChangeRecordStatus", "Edited");
+        this.$emit("onChangeRecordStatus", status, this.record);
       }
     },
   },
