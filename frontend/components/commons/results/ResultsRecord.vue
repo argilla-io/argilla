@@ -124,7 +124,7 @@ export default {
             records: [record],
           });
           break;
-        case "Edited" && this.dataset.task !== 'Text2Text':
+        case "Edited":
           await this.editAnnotations({
             dataset: this.dataset,
             records: [
