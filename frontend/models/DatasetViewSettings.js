@@ -42,6 +42,7 @@ export default class DatasetViewSettings extends Model {
       id: this.string(null),
       pagination: this.hasOne(Pagination, "id"),
       annotationEnabled: this.boolean(false),
+      loading: this.boolean(false),
     };
   }
 }

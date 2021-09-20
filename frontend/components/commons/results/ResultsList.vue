@@ -61,10 +61,12 @@ export default {
   data() {
     return {
       scrollComponent: undefined,
-      showLoader: false,
     };
   },
   computed: {
+    showLoader() {
+      return this.dataset.viewSettings.loading
+    },
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
@@ -111,14 +113,12 @@ export default {
       }
     },
     async onPagination(page, size) {
-      this.showLoader = true;
       document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,
         size: size,
       });
-      this.showLoader = false;
     },
   },
 };
