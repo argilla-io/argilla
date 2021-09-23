@@ -153,7 +153,7 @@ export default {
       let end = this.currentPage + rangeOfPages;
       end = end < this.totalPages ? end : this.totalPages;
       var pages = [];
-      for (var i = start;i <= end;i++) {
+      for (var i = start; i <= end; i++) {
         pages.push(i);
       }
       return pages;
@@ -221,7 +221,7 @@ $pagination-size: 30px;
     }
     &:hover {
       transition: all 0.3s ease-in-out;
-      background: palette(grey, smooth);;
+      background: palette(grey, smooth);
     }
     &--next {
       margin-left: 1em;

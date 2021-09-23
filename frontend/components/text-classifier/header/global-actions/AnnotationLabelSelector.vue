@@ -154,7 +154,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
 .selector {
   &__option {
     display: block;

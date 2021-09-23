@@ -48,7 +48,7 @@ export default {
   padding-right: calc(4em + 45px);
   @include media(">desktopLarge") {
     width: 100%;
-    padding-right: calc(294px + 45px + 4em)
+    padding-right: calc(294px + 45px + 4em);
   }
 }
 .global-actions {

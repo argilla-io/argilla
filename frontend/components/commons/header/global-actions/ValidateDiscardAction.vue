@@ -16,7 +16,12 @@
   -->
 
 <template>
-  <div class="validate-discard-actions" :class="[selectedRecords.length ? '' : 'validate-discard-actions--disabled']">
+  <div
+    class="validate-discard-actions"
+    :class="[
+      selectedRecords.length ? '' : 'validate-discard-actions--disabled',
+    ]"
+  >
     <ReCheckbox v-model="allSelected" class="list__item__checkbox"></ReCheckbox>
     <slot name="first" :selectedRecords="selectedRecords" />
     <ReButton class="validate-discard-actions__button" @click="onValidate"

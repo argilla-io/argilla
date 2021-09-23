@@ -21,16 +21,10 @@
       <button
         v-for="tab in tabs"
         :key="tab"
-        :class="[
-          'tab',
-          { active: activeTab === tab || tabs.length === 1 },
-        ]"
+        :class="['tab', { active: activeTab === tab || tabs.length === 1 }]"
         @click="changeTab(tab)"
       >
-        <span
-          >{{ tab
-          }}
-        </span>
+        <span>{{ tab }} </span>
       </button>
     </div>
     <slot />

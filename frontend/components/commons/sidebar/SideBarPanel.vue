@@ -58,42 +58,42 @@ export default {
     display: block !important;
     right: calc(4em + 45px);
   }
-    &.annotation.Text2Text {
-      top: -75px;
-      .fixed-header & {
-        margin-top: 15em;
-      }
+  &.annotation.Text2Text {
+    top: -75px;
+    .fixed-header & {
+      margin-top: 15em;
     }
-    &.annotation.TextClassification {
-      top: -75px;
-      .fixed-header & {
-        margin-top: 15em;
-      }
+  }
+  &.annotation.TextClassification {
+    top: -75px;
+    .fixed-header & {
+      margin-top: 15em;
     }
-    &.annotation.TokenClassification {
-      top: -75px;
-      .fixed-header & {
-        margin-top: 19em;
-      }
+  }
+  &.annotation.TokenClassification {
+    top: -75px;
+    .fixed-header & {
+      margin-top: 19em;
     }
-    &.explore.Text2Text {
-      top: 0;
-      .fixed-header & {
-        margin-top: 4em;
-      }
+  }
+  &.explore.Text2Text {
+    top: 0;
+    .fixed-header & {
+      margin-top: 4em;
     }
-    &.explore.TextClassification {
-      top: 0;
-      .fixed-header & {
-        margin-top: 4em;
-      }
+  }
+  &.explore.TextClassification {
+    top: 0;
+    .fixed-header & {
+      margin-top: 4em;
     }
-    &.explore.TokenClassification {
-      top: 0;
-      .fixed-header & {
-        margin-top: 9em;
-      }
+  }
+  &.explore.TokenClassification {
+    top: 0;
+    .fixed-header & {
+      margin-top: 9em;
     }
+  }
   &__content {
     border-radius: 2px;
     @include font-size(13px);
