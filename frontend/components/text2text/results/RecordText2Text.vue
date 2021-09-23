@@ -94,6 +94,12 @@ export default {
     display: block;
     @include font-size(16px);
     line-height: 1.6em;
+    &:hover {
+      ::v-deep .button-primary--outline, ::v-deep .button-clear {
+        opacity: 1 !important;
+        transition: opacity 0.5s ease-in-out 0.2s !important;
+      }
+    }
   }
   &--left {
     width: 100%;

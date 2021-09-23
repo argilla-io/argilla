@@ -18,10 +18,10 @@
 <template>
   <div>
     <div
-      :class="annotationEnabled ? 'list__item--annotation-mode' : 'list__item'"
+      :class="[annotationEnabled ? 'list__item--annotation-mode' : 'list__item', item.status === 'Discarded' ? 'discarded' : null]"
     >
       <div
-        v-if="annotationEnabled && item.status !== 'Default'"
+        v-if="annotationEnabled && item.status !== 'Default' && dataset.task !== 'Text2Text'"
         class="list__li__status"
       >
         {{ item.status }}
@@ -36,6 +36,7 @@
       <RecordExtraActions
         :allow-change-status="annotationEnabled"
         :record="item"
+        :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata"
       />
@@ -167,6 +168,7 @@ export default {
     border-radius: 3px;
     display: inline-block;
     width: 100%;
+    transition: 0.3s ease-in-out;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
@@ -174,6 +176,10 @@ export default {
     &--annotation-mode {
       // padding-left: 4em;
       @extend .list__item !optional;
+      &.discarded {
+        background: #ffffff9c;
+        transition: 0.3s ease-in-out;
+      }
     }
     &__checkbox.re-checkbox {
       position: absolute;
