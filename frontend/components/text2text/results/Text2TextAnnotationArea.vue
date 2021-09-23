@@ -16,21 +16,46 @@
   -->
 
 <template>
-  <div>
-    <div v-if="annotation.length">
-      <text-2-text-list :list="annotation" :editable="true" @annotate="onAnnotate" />
+  <div v-click-outside="clickOutside">
+    <div v-if="annotation.length && currentSentence === 'Annotation'">
+      <text-2-text-list
+        :status="status"
+        :predictions-length="prediction.length"
+        :has-annotation-and-predictions="hasAnnotationAndPredictions"
+        :sentences-origin="currentSentence"
+        :list="annotation"
+        :editable="true"
+        @get-sentences="onGetSentences"
+        @annotate="onAnnotate"
+      />
     </div>
-    <div v-else-if="prediction.length">
-      <text-2-text-list :list="prediction" :editable="true" @annotate="onAnnotate" />
+    <div v-else-if="prediction.length && currentSentence === 'Prediction'">
+      <text-2-text-list
+        :predictions-length="prediction.length"
+        :has-annotation-and-predictions="hasAnnotationAndPredictions"
+        :sentences-origin="currentSentence"
+        :list="prediction"
+        :editable="true"
+        @get-sentences="onGetSentences"
+        @annotate="onAnnotate"
+      />
     </div>
     <div v-else>
-      <text-2-text-list :list="[]" :editable="true" @annotate="onAnnotate" />
+      <text-2-text-list
+        :has-annotation-and-predictions="hasAnnotationAndPredictions"
+        :list="[]"
+        :editable="true"
+        @annotate="onAnnotate"
+      />
     </div>
   </div>
 </template>
 <script>
 export default {
   props: {
+    status: {
+      type: String,
+    },
     annotation: {
       type: Array,
       required: true,
@@ -40,14 +65,35 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-  }),
+  data: () => {
+    return {
+      currentSentence: "Annotation",
+    };
+  },
+  computed: {
+    hasAnnotationAndPredictions() {
+      return this.prediction.length && this.annotation.length ? true : false;
+    },
+  },
+  mounted() {
+    if (!this.annotation.length && this.prediction.length) {
+      this.currentSentence = "Prediction";
+    }
+  },
   methods: {
     onAnnotate(annotation) {
       this.$emit("annotate", annotation);
+      this.currentSentence = "Annotation";
+    },
+    onGetSentences() {
+      this.currentSentence !== "Annotation"
+        ? (this.currentSentence = "Annotation")
+        : (this.currentSentence = "Prediction");
+    },
+    clickOutside() {
+      this.currentSentence = "Annotation";
     },
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
