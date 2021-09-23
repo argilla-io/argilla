@@ -136,6 +136,7 @@
 </template>
 
 <script>
+import "assets/icons/pencil";
 export default {
   props: {
     list: {
