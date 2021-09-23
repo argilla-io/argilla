@@ -16,55 +16,135 @@
   -->
 
 <template>
-  <div>
-  <div
-    :class="[
-      editable ? 'content--editable' : null,
-      showScore ? 'content--has-score' : null,
-      'content',
-    ]"
-  >
-    <span v-for="(sentence, index) in list" :key="index">
-      <div v-if="itemNumber === index">
-        <p class="content__text" :contenteditable="editable" @input="input">
-          {{ sentence.text }}
-        </p>
-        <div v-if="showScore" class="content__score">
-          <re-numeric
-            :value="decorateScore(sentence.score)"
-            type="%"
-            :decimals="2"
-          ></re-numeric>
+  <div v-click-outside="clickOutside">
+    <svgicon
+      v-if="editionMode || !list.length"
+      class="content__editable-mode"
+      color="#D8D8D8"
+      name="pencil"
+      width="18"
+      height="18"
+    />
+    <div
+      :class="[
+        'content',
+        hasAnnotationAndPredictions ? 'content--separator' : null,
+        !editable ? 'content--exploration-mode' : 'content--annotation-mode',
+      ]"
+    >
+      <div
+        :class="[
+          editionMode || !list.length
+            ? 'content--editable'
+            : 'content--non-editable',
+          showScore ? 'content--has-score' : null,
+        ]"
+      >
+        <span v-for="(sentence, index) in list" :key="sentence.text">
+          <div v-if="itemNumber === index">
+            <div class="content__edition-area">
+              <p
+                id="text"
+                ref="text"
+                class="content__text"
+                :contenteditable="editable && editionMode"
+                placeholder="Type your text"
+                @input="input"
+              >
+                {{ sentence.text }}
+              </p>
+              <span v-if="editionMode"
+                ><strong>shift Enter</strong> to validate</span
+              >
+            </div>
+            <div class="content__footer">
+              <div v-if="showScore" class="content__score">
+                Score:
+                <re-numeric
+                  :value="decorateScore(sentence.score)"
+                  type="%"
+                  :decimals="2"
+                ></re-numeric>
+              </div>
+              <div v-if="list.length > 1" class="content__nav-buttons">
+                <a
+                  :class="itemNumber <= 0 ? 'disabled' : null"
+                  href="#"
+                  @click.prevent="showitemNumber(--itemNumber)"
+                >
+                  <svgicon
+                    name="chev-left"
+                    width="8"
+                    height="8"
+                    color="#4C4EA3"
+                  />
+                </a>
+                {{ itemNumber + 1 }} of {{ list.length }}
+                <a
+                  :class="list.length <= itemNumber + 1 ? 'disabled' : null"
+                  href="#"
+                  @click.prevent="showitemNumber(++itemNumber)"
+                >
+                  <svgicon
+                    name="chev-right"
+                    width="8"
+                    height="8"
+                    color="#4C4EA3"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        </span>
+
+        <div v-if="!list.length">
+          <p
+            class="content__text"
+            :contenteditable="editable"
+            placeholder="Type your text"
+            @input="input"
+          ></p>
         </div>
       </div>
-    </span>
-    <div v-if="!list.length">
-      <p class="content__text" :contenteditable="editable" @input="input"></p>
+      <div class="content__buttons">
+        <re-button
+          v-if="newSentence && editable"
+          :class="[
+            'button-primary',
+            status === 'Validated' && !editionMode ? 'active' : null,
+          ]"
+          @click="annotate"
+          >{{ status === "Validated" ? "Validated" : "Validate" }}</re-button
+        >
+        <re-button
+          v-if="!editionMode && editable && newSentence && list.length"
+          class="button-primary--outline"
+          @click="edit()"
+          >Edit</re-button
+        >
+        <re-button
+          v-if="editionMode && editable && newSentence"
+          class="button-primary--outline"
+          @click="back()"
+          >Back</re-button
+        >
+        <re-button
+          v-if="hasAnnotationAndPredictions && !editionMode"
+          class="button-clear"
+          @click="getSentences()"
+          >{{
+            sentencesOrigin === "Annotation"
+              ? `View predictions (${predictionsLength})`
+              : "View annotation"
+          }}</re-button
+        >
+      </div>
     </div>
-    <div v-if="list.length > 1" class="content__buttons">
-      <a
-        :class="itemNumber <= 0 ? 'disabled' : null"
-        href="#"
-        @click.prevent="showitemNumber(--itemNumber)"
-      >
-        <svgicon name="chev-left" width="15" height="15" color="#4A4A4A" />
-      </a>
-      <a
-        :class="list.length <= itemNumber + 1 ? 'disabled' : null"
-        href="#"
-        @click.prevent="showitemNumber(++itemNumber)"
-      >
-        <svgicon name="chev-right" width="15" height="15" color="#4A4A4A" />
-      </a>
-    </div>
-  </div>
-    <re-button v-if="editable" class="button button-primary" @click="annotate"
-    >Validate</re-button
-  >
   </div>
 </template>
 
 <script>
+import "assets/icons/pencil";
 export default {
   props: {
     list: {
@@ -79,34 +159,81 @@ export default {
       type: Boolean,
       default: false,
     },
+    hasAnnotationAndPredictions: {
+      type: Boolean,
+      default: true,
+    },
+    predictionsLength: {
+      type: Number,
+    },
+    sentencesOrigin: {
+      type: String,
+    },
+    status: {
+      type: String,
+    },
   },
   data: () => {
     return {
       itemNumber: 0,
-      newSentence: undefined
+      newSentence: undefined,
+      editionMode: false,
+      shiftPressed: false,
+      shiftKey: undefined,
     };
   },
   mounted() {
-    if (this.list[this.itemNumber]) {
-      this.newSentence = this.list[this.itemNumber].text;
-    }
+    this.getText();
   },
   updated() {
-    if (this.list[this.itemNumber]) {
-      this.newSentence = this.list[this.itemNumber].text;
-    }
+    this.getText();
+    this.focus();
+  },
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+    window.addEventListener("keyup", this.keyUp);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
+    window.addEventListener("keyup", this.keyUp);
   },
   methods: {
+    getText() {
+      if (this.$refs.text && this.$refs.text[0]) {
+        this.newSentence = this.$refs.text[0].innerText;
+      }
+    },
     showitemNumber(index) {
       this.itemNumber = index;
     },
     input(e) {
       this.newSentence = e.target.innerText;
     },
+    edit() {
+      this.editionMode = true;
+    },
+    focus() {
+      this.$nextTick(() => {
+        if (this.$refs.text && this.$refs.text[0]) {
+          this.$refs.text[0].focus();
+        }
+      });
+    },
+    back() {
+      this.itemNumber = 0;
+      this.editionMode = false;
+    },
+    getSentences() {
+      this.itemNumber = 0;
+      this.editionMode = false;
+      this.$emit("get-sentences");
+    },
     decorateScore(score) {
       return score * 100;
     },
     annotate() {
+      this.itemNumber = 0;
+      this.editionMode = false;
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -115,57 +242,168 @@ export default {
         this.$emit("annotate", { sentences: [newS] });
       }
     },
+    keyUp(event) {
+      if (this.shiftKey === event.key) {
+        this.shiftPressed = false;
+      }
+    },
+    keyDown(event) {
+      if (event.shiftKey) {
+        this.shiftKey = event.key;
+        this.shiftPressed = true;
+      }
+      const enter = event.key === "Enter";
+      if (this.shiftPressed && this.editionMode && enter) {
+        this.annotate();
+      }
+    },
+    clickOutside() {
+      this.editionMode = false;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+[contenteditable="true"] {
+  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
+  border-radius: 3px 3px 3px 3px;
+}
+[contenteditable="true"]:empty:before {
+  color: palette(grey, verylight);
+  content: attr(placeholder);
+  pointer-events: none;
+  display: block; /* For Firefox */
+}
 .content {
   position: relative;
-  border: 1px solid $primary-color;
+  display: flex;
   margin-bottom: 1em;
+  margin-top: 1em;
+  align-items: flex-start;
+  &--exploration-mode {
+    align-items: flex-end;
+  }
+  &--separator {
+    border-top: 1px solid palette(grey, light);
+    padding-top: 1em;
+  }
   &--editable {
-    margin-top: 1em;
-    font-family: monospace;
+    width: 100%;
+    p {
+      padding: 0.6em;
+      margin: 0;
+      outline: none;
+    }
+  }
+  &--non-editable {
+    width: 100%;
+    p {
+      margin: 0;
+      outline: none;
+    }
   }
   &--has-score {
     .content__text {
       padding-right: 4em;
     }
   }
-  &__score {
+  &__text {
+    color: black;
+  }
+  &__editable-mode {
     position: absolute;
     top: 1em;
     right: 1em;
-    border-radius: 3px;
+  }
+  &__edition-area {
+    position: relative;
+    span {
+      position: absolute;
+      top: 0.75em;
+      right: 0.75em;
+      @include font-size(12px);
+      color: palette(grey, verylight);
+    }
+  }
+  &__score {
     @include font-size(12px);
     padding: 0 0.3em;
-    border: 1px solid palette(grey, smooth);
+    margin-right: auto;
+    span {
+      font-weight: bold;
+      margin-left: 1em;
+      @include font-size(14px);
+    }
+  }
+  &__footer {
+    margin-top: 2em;
+    display: flex;
+    align-items: center;
   }
   &__buttons {
-    margin: 1em;
+    min-width: 120px;
+    margin-left: 2em;
     text-align: right;
+    .re-button {
+      min-height: 38px;
+      line-height: 38px;
+      display: block;
+      margin-bottom: 0;
+      margin-right: 0;
+      margin-left: auto;
+      &.active {
+        background: $font-secondary;
+        pointer-events: none;
+        cursor: pointer;
+      }
+      &.button-primary--outline {
+        min-height: 36px;
+        line-height: 36px;
+        color: $font-secondary;
+        border-color: $font-secondary;
+      }
+      &.button-clear {
+        color: $font-secondary;
+        min-height: 2em;
+        line-height: 2em;
+      }
+      & + .re-button {
+        margin-top: 1em;
+      }
+    }
+  }
+  &__nav-buttons {
+    @include font-size(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
     a {
       height: 20px;
       width: 20px;
-      border-radius: 50%;
-      color: white;
       line-height: 20px;
       text-align: center;
-      margin-left: 0.5em;
+      border-radius: 3px;
+      text-align: center;
+      margin-left: 1.5em;
+      margin-right: 1.5em;
       display: inline-block;
       text-decoration: none;
+      outline: none;
       @include font-size(13px);
+      background: transparent;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        background: palette(grey, smooth);
+        transition: all 0.2s ease-in-out;
+      }
       &.disabled {
         opacity: 0.2;
         pointer-events: none;
       }
     }
-  }
-  p {
-    padding: 1em;
-    margin: 0;
-    outline: none;
   }
 }
 .button {

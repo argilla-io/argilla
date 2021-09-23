@@ -17,9 +17,7 @@
 
 <template>
   <div class="container">
-    <h2 class="title">
-      {{ title }} records ({{ dataset.results.total }})
-    </h2>
+    <h2 class="title">{{ title }} records ({{ dataset.results.total }})</h2>
   </div>
 </template>
 
@@ -33,8 +31,8 @@ export default {
     title: {
       type: String,
       required: true,
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>

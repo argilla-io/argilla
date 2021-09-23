@@ -26,6 +26,7 @@
         v-if="annotationEnabled"
         :prediction="predictionSentences"
         :annotation="annotationSentences"
+        :status="record.status"
         @annotate="onAnnotate"
       />
       <text-2-text-exploration-area
@@ -90,14 +91,13 @@ export default {
 .record {
   display: flex;
   &__item {
-    margin-right: 1em;
     display: block;
     @include font-size(16px);
     line-height: 1.6em;
   }
   &--left {
     width: 100%;
-    padding: 2em 6em 0.5em 2em;
+    padding: 2em 2em 0.5em 2em;
     .list__item--annotation-mode & {
       padding-left: 65px;
     }

@@ -345,7 +345,7 @@ const actions = {
         data: {
           loading: true,
         },
-      })
+      });
       await entity.dispatch("search", {
         dataset,
         query,
@@ -358,7 +358,7 @@ const actions = {
         data: {
           loading: false,
         },
-      })
+      });
     }
 
     const viewSettings = DatasetViewSettings.find(dataset.name);
@@ -423,7 +423,7 @@ const actions = {
         data: {
           loading: true,
         },
-      })
+      });
       await dispatch(
         `entities/${toSnakeCase(dataset.task)}/paginate`,
         {
@@ -439,7 +439,7 @@ const actions = {
         data: {
           loading: false,
         },
-      })
+      });
     }
   },
 };

@@ -65,7 +65,7 @@ export default {
   },
   computed: {
     showLoader() {
-      return this.dataset.viewSettings.loading
+      return this.dataset.viewSettings.loading;
     },
     visibleRecords() {
       return this.dataset.visibleRecords;

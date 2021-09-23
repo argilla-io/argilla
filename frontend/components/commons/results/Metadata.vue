@@ -28,7 +28,7 @@
       </p>
     </div>
     <div v-else>
-      <p class="metadata__title">{{title}}</p>
+      <p class="metadata__title">{{ title }}</p>
     </div>
     <div class="metadata__container">
       <div v-for="(value, key) in sortedMetadataItems" :key="key">

@@ -135,6 +135,9 @@ export default {
   }
   &__content {
     word-break: break-word;
+    margin-right: 6em;
+    display: block;
+    color: palette(grey, medium);
   }
 }
 </style>

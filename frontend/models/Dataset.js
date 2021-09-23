@@ -38,10 +38,7 @@ class ObservationDataset extends Model {
   }
 
   get visibleRecords() {
-    return this.results.records.slice(
-      0,
-      this.viewSettings.pagination.size
-    );
+    return this.results.records.slice(0, this.viewSettings.pagination.size);
   }
 }
 

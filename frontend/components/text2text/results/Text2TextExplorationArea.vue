@@ -16,26 +16,31 @@
   -->
 
 <template>
-  <div v-if="annotation.length || prediction.length">
-    <re-tabs
-      :tabs="availableTabs"
-      :active-tab="showTab"
-      @change-tab="onChangeTab"
-    >
-      <div>
-        <template v-if="showTab === 'Prediction'">
-          <text-2-text-list :show-score="true" :list="prediction" />
-        </template>
-        <template v-if="showTab === 'Annotation'">
-          <text-2-text-list :list="annotation" />
-        </template>
-      </div>
-    </re-tabs>
+  <div>
+    <div v-if="annotation.length && currentSentence === 'Annotation'">
+      <text-2-text-list
+        :predictions-length="prediction.length"
+        :has-annotation-and-predictions="hasAnnotationAndPredictions"
+        :sentences-origin="currentSentence"
+        :list="annotation"
+        :editable="false"
+        @get-sentences="onGetSentences"
+      />
+    </div>
+    <div v-else-if="prediction.length && currentSentence === 'Prediction'">
+      <text-2-text-list
+        :predictions-length="prediction.length"
+        :show-score="true"
+        :has-annotation-and-predictions="hasAnnotationAndPredictions"
+        :sentences-origin="currentSentence"
+        :list="prediction"
+        :editable="false"
+        @get-sentences="onGetSentences"
+      />
+    </div>
   </div>
 </template>
 <script>
-import "assets/icons/chev-left";
-import "assets/icons/chev-right";
 export default {
   props: {
     annotation: {
@@ -47,31 +52,26 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    showTab: "Prediction",
-    predictionNumber: 0,
-  }),
-  mounted() {
-    this.showTab = this.availableTabs.includes('Prediction') ? 'Prediction' : 'Annotation'
+  data: () => {
+    return {
+      currentSentence: "Annotation",
+    };
   },
   computed: {
-    availableTabs() {
-      let tabs = [];
-      if (this.prediction.length) {
-        tabs.push("Prediction");
-      }
-      if (this.annotation.length) {
-        tabs.push("Annotation");
-      }
-      return tabs;
+    hasAnnotationAndPredictions() {
+      return this.prediction.length && this.annotation.length ? true : false;
     },
   },
+  mounted() {
+    if (!this.annotation.length && this.prediction.length) {
+      this.currentSentence = "Prediction";
+    }
+  },
   methods: {
-    onChangeTab(tab) {
-      this.showTab = tab;
-    },
-    showPredictionNumber(index) {
-      this.predictionNumber = index;
+    onGetSentences() {
+      this.currentSentence !== "Annotation"
+        ? (this.currentSentence = "Annotation")
+        : (this.currentSentence = "Prediction");
     },
     decorateScore(score) {
       return score * 100;
