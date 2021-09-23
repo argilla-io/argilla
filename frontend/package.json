@@ -12,7 +12,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
-    "generate-icons": "vsvg -s ./static/icons -t ./assets/icons",
+    "generate-icons": "vsvg -s ./static/icons -t ./assets/icons --tpl ./assets/icon-template.js.tmp",
     "lint": "eslint --ext .js,.vue --ignore-path .eslintignore  .",
     "lintfix": "eslint --fix --ext .js,.vue --ignore-path .eslintignore  .",
     "precommit": "yarn lintfix",
