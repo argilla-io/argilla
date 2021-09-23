@@ -1,4 +1,3 @@
-
 /*
  * coding=utf-8
  * Copyright 2021-present, the Recognai S.L. team.
