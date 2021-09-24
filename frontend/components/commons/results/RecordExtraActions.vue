@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="record__extra-actions">
+  <div class="record__extra-actions" v-if="task !== 'Text2Text'">
     <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
       <span>View metadata</span>
     </div>
@@ -30,10 +30,28 @@
       </div>
     </template>
   </div>
+  <div v-else class="record__extra-actions--text2text" v-click-outside="close">
+    <a class="extra-actions__button" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="40" height="20" color="#b7b7b7" /></a>
+    <div class="extra-actions__content" v-if="open">
+      <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
+        <span>View metadata</span>
+      </div>
+      <template v-if="allowChangeStatus">
+        <div
+          v-for="status in allowedStatusActions"
+          :key="status.key"
+          @click="onChangeRecordStatus(status.key)"
+        >
+          <span>{{ status.name }}</span>
+        </div>
+      </template>
+    </div>
+  </div>
 </template>
 
 <script>
 import { BaseRecord } from "@/models/Common";
+import "assets/icons/kebab-menu-h";
 
 export default {
   props: {
@@ -45,6 +63,10 @@ export default {
       type: BaseRecord,
       required: true,
     },
+    task: {
+      type: String,
+      required: true,
+    },
   },
   data: () => ({
     statusActions: [
@@ -54,6 +76,7 @@ export default {
         class: "discard",
       },
     ],
+    open: false,
   }),
   computed: {
     hasMetadata() {
@@ -76,6 +99,9 @@ export default {
         this.$emit("onChangeRecordStatus", status, this.record);
       }
     },
+    close() {
+      this.open = false
+    }
   },
 };
 </script>
@@ -90,6 +116,11 @@ export default {
     margin-bottom: 1.5em;
     @include font-size(13px);
     padding-left: 2.3em;
+    &--text2text {
+      position: absolute;
+      top: 1em;
+      right: 1em;
+    }
     .list__item--annotation-mode & {
       padding-left: 65px;
     }
@@ -114,6 +145,28 @@ export default {
     & > * {
       display: inline-block;
       cursor: pointer;
+    }
+  }
+}
+.extra-actions {
+  position: relative;
+  &__button {
+    text-align: right;
+    outline: none;
+  }
+  &__content {
+    position: absolute;
+    right: 0;
+    background: white;
+    border-radius: 3px;
+    box-shadow: $shadow;
+    padding: 1em 1em 0 1em;
+    min-width: 135px;
+    span {
+      color: $font-secondary;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 1em;
     }
   }
 }

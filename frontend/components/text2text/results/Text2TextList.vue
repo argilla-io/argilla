@@ -17,14 +17,6 @@
 
 <template>
   <div v-click-outside="clickOutside">
-    <svgicon
-      v-if="editionMode || !list.length"
-      class="content__editable-mode"
-      color="#D8D8D8"
-      name="pencil"
-      width="18"
-      height="18"
-    />
     <div
       :class="[
         'content',
@@ -41,7 +33,7 @@
         ]"
       >
         <span v-for="(sentence, index) in list" :key="sentence.text">
-          <div v-if="itemNumber === index">
+          <div class="content__sentences" v-if="itemNumber === index">
             <div class="content__edition-area">
               <p
                 id="text"
@@ -79,7 +71,7 @@
                     color="#4C4EA3"
                   />
                 </a>
-                {{ itemNumber + 1 }} of {{ list.length }}
+                {{ itemNumber + 1 }} of {{ list.length }} predictions
                 <a
                   :class="list.length <= itemNumber + 1 ? 'disabled' : null"
                   href="#"
@@ -114,7 +106,7 @@
             status === 'Validated' && !editionMode ? 'active' : null,
           ]"
           @click="annotate"
-          >{{ status === "Validated" ? "Validated" : "Validate" }}</re-button
+          >{{ status === "Validated" && !editionMode ? "Validated" : "Validate" }}</re-button
         >
         <re-button
           v-if="!editionMode && editable && newSentence && list.length"
@@ -268,6 +260,9 @@ export default {
 [contenteditable="true"] {
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
   border-radius: 3px 3px 3px 3px;
+  &:focus + span {
+    display: block;
+  }
 }
 [contenteditable="true"]:empty:before {
   color: palette(grey, verylight);
@@ -280,7 +275,6 @@ export default {
   display: flex;
   margin-bottom: 1em;
   margin-top: 1em;
-  align-items: flex-start;
   &--exploration-mode {
     align-items: flex-end;
   }
@@ -308,22 +302,24 @@ export default {
       padding-right: 4em;
     }
   }
+  &__sentences {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
   &__text {
     color: black;
-  }
-  &__editable-mode {
-    position: absolute;
-    top: 1em;
-    right: 1em;
   }
   &__edition-area {
     position: relative;
     span {
       position: absolute;
-      top: 0.75em;
-      right: 0.75em;
+      top: 100%;
+      right: 0;
       @include font-size(12px);
       color: palette(grey, verylight);
+      margin-top: 0.5em;
+      display: none;
     }
   }
   &__score {
@@ -331,13 +327,15 @@ export default {
     padding: 0 0.3em;
     margin-right: auto;
     span {
-      font-weight: bold;
+      font-weight: 600;
       margin-left: 1em;
       @include font-size(14px);
     }
   }
   &__footer {
-    margin-top: 2em;
+    padding-top: 2em;
+    margin-top: auto;
+    margin-bottom: 0;
     display: flex;
     align-items: center;
   }
@@ -362,11 +360,15 @@ export default {
         line-height: 36px;
         color: $font-secondary;
         border-color: $font-secondary;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out 0.2s;
       }
       &.button-clear {
         color: $font-secondary;
         min-height: 2em;
         line-height: 2em;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out 0.2s;
       }
       & + .re-button {
         margin-top: 1em;

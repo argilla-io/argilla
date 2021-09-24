@@ -36,6 +36,7 @@
         :sentences-origin="currentSentence"
         :list="prediction"
         :editable="true"
+        :show-score="true"
         @get-sentences="onGetSentences"
         @annotate="onAnnotate"
       />
