@@ -18,16 +18,18 @@
 <template>
   <div v-click-outside="close" class="filters">
     <div class="filters__list">
-      <div class="filters__list__item"
-        v-for="group in groups"
-        :key="group"
-      ><p @click="selectGroup(group)" :class="{
-          active: initialVisibleGroup === group || itemsAppliedOnGroup(group),
-        }"><svgicon v-if="group === 'sort'" name="sort" width="14" height="14" />
-        {{ group }}
-        <span v-if="itemsAppliedOnGroup(group)"
-          >({{ itemsAppliedOnGroup(group) }})</span
+      <div v-for="group in groups" :key="group" class="filters__list__item">
+        <p
+          :class="{
+            active: initialVisibleGroup === group || itemsAppliedOnGroup(group),
+          }"
+          @click="selectGroup(group)"
         >
+          <svgicon v-if="group === 'sort'" name="sort" width="14" height="14" />
+          {{ group }}
+          <span v-if="itemsAppliedOnGroup(group)"
+            >({{ itemsAppliedOnGroup(group) }})</span
+          >
         </p>
         <div
           v-if="initialVisibleGroup === group"
@@ -57,7 +59,7 @@
               @apply="onApply"
             />
           </span>
-          <SortList 
+          <SortList
             v-if="initialVisibleGroup === 'sort'"
             :sort-options="filterList"
             :sort="dataset.sort"
@@ -76,8 +78,8 @@ export default {
   props: {
     dataset: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   data: () => {
     return {
@@ -88,74 +90,77 @@ export default {
           name: "Predicted as",
           type: "select",
           group: "Predictions",
-          placeholder: "Select labels"
+          placeholder: "Select labels",
         },
         {
           key: "predicted",
           name: "Predicted ok",
           type: "select",
           group: "Predictions",
-          placeholder: "Select yes/no"
+          placeholder: "Select yes/no",
         },
         {
           key: "score",
           name: "Score",
           type: "score",
-          group: "Predictions"
+          group: "Predictions",
         },
         {
           key: "predicted_by",
           name: "Predicted by",
           type: "select",
           group: "Predictions",
-          placeholder: "Select agents"
+          placeholder: "Select agents",
         },
         {
           key: "annotated_as",
           name: "Annotated as",
           type: "select",
           group: "Annotations",
-          placeholder: "Select labels"
+          placeholder: "Select labels",
         },
         {
           key: "annotated_by",
           name: "Annotated by",
           type: "select",
           group: "Annotations",
-          placeholder: "Select labels"
+          placeholder: "Select labels",
         },
         {
           key: "status",
           name: "Status",
           type: "select",
           group: "Status",
-          placeholder: "Select options"
+          placeholder: "Select options",
         },
         {
           key: "sort",
           name: "Sort",
           type: "sort",
-          group: "Sort"
-        }
-      ]
-    }
+          group: "Sort",
+        },
+      ],
+    };
   },
   computed: {
     searchableFilterList() {
-      return this.filterList.filter(f => {
+      return this.filterList.filter((f) => {
         return f.options && Object.keys(f.options).length > 0;
       });
     },
     groups() {
-      return [...new Set(this.searchableFilterList.map(f => f.group)), "sort"];
+      return [
+        ...new Set(this.searchableFilterList.map((f) => f.group)),
+        "sort",
+      ];
     },
     isMultiLabelRecord() {
-      return this.dataset.results.records.some(record => record.multi_label);
+      return this.dataset.results.records.some((record) => record.multi_label);
     },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
-        .map(filter => {
+        .map((filter) => {
           function isZero(number) {
             return number === 0;
           }
@@ -168,15 +173,14 @@ export default {
               (filter.key === "score" && this.isMultiLabelRecord) ||
               !aggregations[filter.key] ||
               !Object.entries(aggregations[filter.key]).length ||
-              Object.values(aggregations[filter.key]).every(isZero)
+              Object.values(aggregations[filter.key]).every(isZero),
           };
         })
         .filter(({ disabled }) => !disabled);
       const metadataFilters =
         aggregations.metadata &&
-        Object.keys(aggregations.metadata).map(key => {
+        Object.keys(aggregations.metadata).map((key) => {
           const filterContent = aggregations.metadata[key];
-
           return {
             key: key,
             name: key,
@@ -184,20 +188,18 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options:
-              typeof filterContent === "Object" ? undefined : filterContent,
-            selected: (this.dataset.query.metadata || {})[key] || []
+            options: filterContent,
+            selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
       const sortedMetadataFilters =
         (metadataFilters &&
-          metadataFilters.sort(
-            (a, b) => (a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1)
+          metadataFilters.sort((a, b) =>
+            a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
-              console.log(sortedMetadataFilters)
       return [...filters, ...sortedMetadataFilters];
-    }
+    },
   },
   methods: {
     close() {
@@ -205,9 +207,9 @@ export default {
     },
     itemsAppliedOnGroup(group) {
       return this.filterList
-        .filter(f => f.group === group)
-        .flatMap(f => f.selected)
-        .filter(f => f).length;
+        .filter((f) => f.group === group)
+        .flatMap((f) => f.selected)
+        .filter((f) => f).length;
     },
     selectGroup(group) {
       this.initialVisibleGroup = group;
@@ -223,8 +225,8 @@ export default {
     onSortBy(sortList) {
       this.$emit("applySortBy", sortList);
       this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
