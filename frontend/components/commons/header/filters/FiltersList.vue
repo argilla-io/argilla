@@ -17,72 +17,56 @@
 
 <template>
   <div v-click-outside="close" class="filters">
-    <div class="filters__tabs">
-      <p
-        v-for="group in groups"
-        :key="group"
-        :class="{
-          active: initialVisibleGroup === group || itemsAppliedOnGroup(group),
-        }"
-        @click="selectGroup(group)"
-      >
-        {{ group }}
-        <span v-if="itemsAppliedOnGroup(group)"
-          >({{ itemsAppliedOnGroup(group) }})</span
+    <div class="filters__list">
+      <div v-for="group in groups" :key="group" class="filters__list__item">
+        <p
+          :class="{
+            active: initialVisibleGroup === group || itemsAppliedOnGroup(group),
+          }"
+          @click="selectGroup(group)"
         >
-      </p>
-      <p
-        class="filters__tabs__sort"
-        :class="{
-          active: initialVisibleGroup === 'sort' || dataset.sort.length,
-        }"
-        @click="selectGroup('sort')"
-      >
-        <svgicon name="sort" width="14" height="14" />
-        Sort
-        <span v-if="dataset.sort.length">({{ dataset.sort.length }})</span>
-      </p>
-    </div>
-    <div
-      v-if="initialVisibleGroup === 'sort'"
-      class="filters__tabs__content filters__tabs__content--sort"
-    >
-      <SortList
-        :sort-options="filterList"
-        :sort="dataset.sort"
-        @closeSort="close"
-        @sortBy="onSortBy"
-      />
-    </div>
-    <div v-for="group in groups" :key="group">
-      <div
-        v-if="initialVisibleGroup === group"
-        :class="[
-          'filters__tabs__content',
-          searchableFilterList.filter((f) => f.group === group).length > 6
-            ? 'filters__tabs__content--large'
-            : '',
-        ]"
-      >
-        <span
-          v-for="filter in searchableFilterList.filter(
-            (f) => f.group === group
-          )"
-          :key="filter.id"
+          <svgicon v-if="group === 'sort'" name="sort" width="14" height="14" />
+          {{ group }}
+          <span v-if="itemsAppliedOnGroup(group)"
+            >({{ itemsAppliedOnGroup(group) }})</span
+          >
+        </p>
+        <div
+          v-if="initialVisibleGroup === group"
+          :class="[
+            'filters__list__content',
+            searchableFilterList.filter((f) => f.group === group).length > 6
+              ? 'filters__list__content--large'
+              : '',
+          ]"
         >
-          <SelectFilter
-            v-if="filter.type === 'select'"
-            class="filter"
-            :filter="filter"
-            @apply="onApply"
+          <span
+            v-for="filter in searchableFilterList.filter(
+              (f) => f.group === group
+            )"
+            :key="filter.id"
+          >
+            <SelectFilter
+              v-if="filter.type === 'select'"
+              class="filter"
+              :filter="filter"
+              @apply="onApply"
+            />
+            <FilterScore
+              v-else-if="filter.type === 'score'"
+              class="filter"
+              :filter="filter"
+              @apply="onApply"
+            />
+          </span>
+          <SortList
+            v-if="initialVisibleGroup === 'sort'"
+            :sort-options="filterList"
+            :sort="dataset.sort"
+            @closeSort="close"
+            @sortBy="onSortBy"
           />
-          <FilterScore
-            v-else
-            class="filter"
-            :filter="filter"
-            @apply="onApply"
-          />
-        </span>
+        </div>
       </div>
     </div>
   </div>
@@ -97,59 +81,67 @@ export default {
       default: () => ({}),
     },
   },
-  data: () => ({
-    initialVisibleGroup: undefined,
-    filters: [
-      {
-        key: "predicted_as",
-        name: "Predicted as",
-        type: "select",
-        group: "Predictions",
-        placeholder: "Select labels",
-      },
-      {
-        key: "predicted",
-        name: "Predicted ok",
-        type: "select",
-        group: "Predictions",
-        placeholder: "Select yes/no",
-      },
-      {
-        key: "score",
-        name: "Score",
-        type: "score",
-        group: "Predictions",
-      },
-      {
-        key: "predicted_by",
-        name: "Predicted by",
-        type: "select",
-        group: "Predictions",
-        placeholder: "Select agents",
-      },
-      {
-        key: "annotated_as",
-        name: "Annotated as",
-        type: "select",
-        group: "Annotations",
-        placeholder: "Select labels",
-      },
-      {
-        key: "annotated_by",
-        name: "Annotated by",
-        type: "select",
-        group: "Annotations",
-        placeholder: "Select labels",
-      },
-      {
-        key: "status",
-        name: "Status",
-        type: "select",
-        group: "Status",
-        placeholder: "Select options",
-      },
-    ],
-  }),
+  data: () => {
+    return {
+      initialVisibleGroup: undefined,
+      filters: [
+        {
+          key: "predicted_as",
+          name: "Predicted as",
+          type: "select",
+          group: "Predictions",
+          placeholder: "Select labels",
+        },
+        {
+          key: "predicted",
+          name: "Predicted ok",
+          type: "select",
+          group: "Predictions",
+          placeholder: "Select yes/no",
+        },
+        {
+          key: "score",
+          name: "Score",
+          type: "score",
+          group: "Predictions",
+        },
+        {
+          key: "predicted_by",
+          name: "Predicted by",
+          type: "select",
+          group: "Predictions",
+          placeholder: "Select agents",
+        },
+        {
+          key: "annotated_as",
+          name: "Annotated as",
+          type: "select",
+          group: "Annotations",
+          placeholder: "Select labels",
+        },
+        {
+          key: "annotated_by",
+          name: "Annotated by",
+          type: "select",
+          group: "Annotations",
+          placeholder: "Select labels",
+        },
+        {
+          key: "status",
+          name: "Status",
+          type: "select",
+          group: "Status",
+          placeholder: "Select options",
+        },
+        {
+          key: "sort",
+          name: "Sort",
+          type: "sort",
+          group: "Sort",
+        },
+      ],
+    };
+  },
   computed: {
     searchableFilterList() {
       return this.filterList.filter((f) => {
@@ -157,7 +149,10 @@ export default {
       });
     },
     groups() {
-      return [...new Set(this.searchableFilterList.map((f) => f.group))];
+      return [
+        ...new Set(this.searchableFilterList.map((f) => f.group)),
+        "sort",
+      ];
     },
     isMultiLabelRecord() {
       return this.dataset.results.records.some((record) => record.multi_label);
@@ -186,7 +181,6 @@ export default {
         aggregations.metadata &&
         Object.keys(aggregations.metadata).map((key) => {
           const filterContent = aggregations.metadata[key];
-
           return {
             key: key,
             name: key,
@@ -194,8 +188,7 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options:
-              typeof filterContent === "object" ? undefined : filterContent,
+            options: typeof filterContent === "object" ? undefined : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
@@ -221,22 +214,17 @@ export default {
     selectGroup(group) {
       this.initialVisibleGroup = group;
     },
-    setInitialGroup() {
-      if (!this.groups.includes(this.initialVisibleGroup)) {
-        this.initialVisibleGroup = this.groups[0];
-      }
-    },
     onApply(filter, values) {
-      this.close();
       if (filter.group === "Metadata") {
         this.$emit("applyMetaFilter", { filter: filter.key, values });
       } else {
         this.$emit("applyFilter", { filter: filter.key, values });
       }
+      this.close();
     },
     onSortBy(sortList) {
-      this.close();
       this.$emit("applySortBy", sortList);
+      this.close();
     },
   },
 };
@@ -249,7 +237,7 @@ $number-size: 18px;
   position: relative;
   display: inline-block;
   z-index: 2;
-  &__tabs {
+  &__list {
     display: flex;
     &__content {
       width: 450px;
@@ -275,6 +263,9 @@ $number-size: 18px;
           }
         }
       }
+    }
+    &__item {
+      position: relative;
     }
     &__sort {
       svg {
