@@ -188,7 +188,7 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: filterContent,
+            options: typeof filterContent === "object" ? undefined : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
