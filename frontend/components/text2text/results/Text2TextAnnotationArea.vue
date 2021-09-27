@@ -25,6 +25,7 @@
         :sentences-origin="currentSentence"
         :list="annotation"
         :editable="true"
+        @edition-mode="onEditionMode"
         @get-sentences="onGetSentences"
         @annotate="onAnnotate"
       />
@@ -94,6 +95,9 @@ export default {
     clickOutside() {
       this.currentSentence = "Annotation";
     },
+    onEditionMode(e) {
+      this.$emit('edition-mode', e);
+    }
   },
 };
 </script>

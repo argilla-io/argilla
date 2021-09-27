@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-click-outside="clickOutside">
+  <div>
     <div
       :class="[
         'content',
@@ -35,16 +35,13 @@
         <span v-for="(sentence, index) in list" :key="sentence.text">
           <div class="content__sentences" v-if="itemNumber === index">
             <div class="content__edition-area">
-              <p
-                id="text"
+              <p :key="refresh"
                 ref="text"
                 class="content__text"
                 :contenteditable="editable && editionMode"
                 placeholder="Type your text"
                 @input="input"
-              >
-                {{ sentence.text }}
-              </p>
+              >{{ sentence.text }}</p>
               <span v-if="editionMode"
                 ><strong>shift Enter</strong> to validate</span
               >
@@ -172,6 +169,7 @@ export default {
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
+      refresh: 1,
     };
   },
   mounted() {
@@ -203,6 +201,7 @@ export default {
     },
     edit() {
       this.editionMode = true;
+      this.$emit('edition-mode', this.editionMode);
     },
     focus() {
       this.$nextTick(() => {
@@ -212,12 +211,14 @@ export default {
       });
     },
     back() {
-      this.itemNumber = 0;
       this.editionMode = false;
+      this.$emit('edition-mode', this.editionMode);
+      this.refresh++;
     },
     getSentences() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.$emit('edition-mode', this.editionMode);
       this.$emit("get-sentences");
     },
     decorateScore(score) {
@@ -226,6 +227,7 @@ export default {
     annotate() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.$emit('edition-mode', this.editionMode);
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -248,10 +250,7 @@ export default {
       if (this.shiftPressed && this.editionMode && enter) {
         this.annotate();
       }
-    },
-    clickOutside() {
-      this.editionMode = false;
-    },
+    }
   },
 };
 </script>
@@ -309,6 +308,7 @@ export default {
   }
   &__text {
     color: black;
+    white-space: pre-wrap;
   }
   &__edition-area {
     position: relative;

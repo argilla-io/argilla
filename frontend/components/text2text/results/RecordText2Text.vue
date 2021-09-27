@@ -28,6 +28,7 @@
         :annotation="annotationSentences"
         :status="record.status"
         @annotate="onAnnotate"
+        @edition-mode="onEditionMode"
       />
       <text-2-text-exploration-area
         v-else
@@ -39,6 +40,7 @@
 </template>
 <script>
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
+import { Pagination } from "@/models/DatasetViewSettings";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -83,6 +85,14 @@ export default {
         ],
       });
     },
+    async onEditionMode(editionMode) {
+      await Pagination.update({
+          where: this.dataset.name,
+          data: {
+            allowShortCut: !editionMode,
+          },
+        });
+      }
   },
 };
 </script>
