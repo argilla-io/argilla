@@ -188,7 +188,9 @@ export default {
             group: "Metadata",
             placeholder: "Select options",
             id: key,
-            options: typeof filterContent === "object" ? undefined : filterContent,
+            options: Object.keys(filterContent).includes("rubrix:stats")
+              ? undefined
+              : filterContent,
             selected: (this.dataset.query.metadata || {})[key] || [],
           };
         });
