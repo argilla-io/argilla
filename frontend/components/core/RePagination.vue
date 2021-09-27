@@ -102,7 +102,7 @@
             : paginationSize * currentPage
         }}
       </strong>
-      of {{ totalItems }}
+      of {{ totalItems | formatNumber }}
     </div>
   </div>
 </template>

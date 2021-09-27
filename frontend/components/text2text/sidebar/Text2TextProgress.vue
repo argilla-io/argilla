@@ -21,7 +21,7 @@
       <div v-for="(counter, label) in getInfo" :key="label">
         <div v-if="counter > 0" class="info">
           <label>{{ label }}</label>
-          <span class="records-number">{{ counter }}</span>
+          <span class="records-number">{{ counter | formatNumber }}</span>
         </div>
       </div>
     </div>
