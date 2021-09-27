@@ -25,7 +25,7 @@ T = TypeVar("T", bound="TokenClassificationAnnotation")
 
 @attr.s(auto_attribs=True)
 class TokenClassificationAnnotation:
-    """Annotation class for rToken classification problem
+    """Annotation class for the Token classification task.
 
     Attributes:
     -----------

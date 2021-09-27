@@ -13,9 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
+
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="EntitySpan")
 
@@ -34,17 +36,21 @@ class EntitySpan:
     end: int
         character end position, must be higher than the starting character.
     label: str
-        the label related to tokens that conforms the entity span"""
+        the label related to tokens that conforms the entity span
+    score:
+        A higher score means, the model/annotator is more confident about its predicted/annotated entity."""
 
     start: int
     end: int
     label: str
+    score: Union[Unset, float] = 1.0
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         start = self.start
         end = self.end
         label = self.label
+        score = self.score
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -55,6 +61,8 @@ class EntitySpan:
                 "label": label,
             }
         )
+        if score is not UNSET:
+            field_dict["score"] = score
 
         return field_dict
 
@@ -67,10 +75,13 @@ class EntitySpan:
 
         label = d.pop("label")
 
+        score = d.pop("score", UNSET)
+
         entity_span = cls(
             start=start,
             end=end,
             label=label,
+            score=score,
         )
 
         entity_span.additional_properties = d
