@@ -74,7 +74,7 @@ export default {
       return this.visibleRecords.length < this.dataset.results.total;
     },
     allowShortCut() {
-      return this.dataset.viewSettings.pagination.allowShortCut;
+      return this.dataset.viewSettings.pagination.allowKeyboardPagination;
     }
   },
   mounted() {
