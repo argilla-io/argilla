@@ -92,6 +92,7 @@ export default {
     },
 
     async onAnnotate({ sentences }) {
+      this.sentencesOrigin = "Annotation";
       await this.validate({
         dataset: this.dataset,
         agent: this.$auth.user,
