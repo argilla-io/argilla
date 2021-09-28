@@ -17,16 +17,16 @@
 
 <template>
   <ReInputContainer class="searchbar">
-    <ReInput v-model="filter" placeholder="Search datasets" />
     <svgicon v-if="!filter" name="search" width="20" height="40" />
     <svgicon
       v-else
       class="searchbar__button"
       name="cross"
-      width="14"
+      width="20"
       height="14"
       @click="filter = undefined"
     />
+    <ReInput v-model="filter" placeholder="Search datasets" />
   </ReInputContainer>
 </template>
 <script>
@@ -61,7 +61,7 @@ export default {
   @include font-size(14px);
   .svg-icon {
     fill: $primary-color;
-    margin: auto;
+    margin: auto 1em auto 1em;
   }
   &__button {
     cursor: pointer;

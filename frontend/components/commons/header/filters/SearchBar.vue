@@ -22,21 +22,21 @@
       :class="['searchbar__container', { active: query.length }]"
     >
       <ReInputContainer class="searchbar">
+        <svgicon v-if="!query.length" name="search" width="20" height="40" />
+        <svgicon
+          v-else
+          class="searchbar__button"
+          name="cross"
+          width="20"
+          height="14"
+          @click="query = ''"
+        />
         <ReInput
           ref="input"
           v-model="query"
           class="searchbar__input"
           placeholder="Search records"
           @focus="activeDropdown()"
-        />
-        <svgicon v-if="!query.length" name="search" width="20" height="40" />
-        <svgicon
-          v-else
-          class="searchbar__button"
-          name="cross"
-          width="14"
-          height="14"
-          @click="query = ''"
         />
       </ReInputContainer>
       <div
@@ -258,8 +258,7 @@ export default {
   // }
   .svg-icon {
     fill: $primary-color;
-    margin: auto;
-    order: 2;
+    margin: auto 1em auto 1em;
   }
   &__button {
     cursor: pointer;

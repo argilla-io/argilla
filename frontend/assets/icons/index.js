@@ -14,13 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /* eslint-disable */
 require('./back')
 require('./brand-isotipo')
 require('./brand-recognai')
 require('./check')
+require('./chev-bottom')
 require('./chev-left')
 require('./chev-right')
+require('./chev-top')
 require('./clasifier')
 require('./clip')
 require('./copy')
@@ -45,6 +48,7 @@ require('./help')
 require('./hipo')
 require('./ignore')
 require('./info')
+require('./kebab-menu-h')
 require('./list')
 require('./lock')
 require('./logout')

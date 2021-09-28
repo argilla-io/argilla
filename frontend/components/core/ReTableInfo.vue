@@ -45,6 +45,7 @@
                 @click="sort(column)"
               >
                 {{ column.name }}
+                <svgicon color="#4C4EA3" width="7" height="7" :name="sortedBy === column.field && sortOrder === 'desc' ? 'chev-top' : 'chev-bottom'" />
               </button>
             </div>
           </div>
@@ -187,6 +188,8 @@ import "assets/icons/delete";
 import "assets/icons/refresh";
 import "assets/icons/copy";
 import "assets/icons/datasource";
+import "assets/icons/chev-top";
+import "assets/icons/chev-bottom";
 export default {
   props: {
     data: {
@@ -316,10 +319,10 @@ export default {
     },
     sort(column) {
       this.$emit("sort-column", column.field, this.sortOrder);
+      this.sortedBy = column.field;
       if (column.field === this.sortedBy) {
         this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
       }
-      this.sortedBy = column.field;
     },
     filteredResultsByGroup(group) {
       if (this.groupBy) {
@@ -419,19 +422,8 @@ export default {
       padding-right: 0;
       color: $font-secondary;
       @include font-size(14px);
-      &.active.desc {
-        &:after {
-          transform: rotate(180deg);
-          transform-origin: 50% 100%;
-        }
-      }
-      &:after {
-        content: "▾";
-        display: inline-block;
-        height: 10px;
-        width: 16px;
-        box-sizing: inherit;
-        text-align: center;
+      .svg-icon {
+        margin-left: 0.5em;
       }
     }
   }
