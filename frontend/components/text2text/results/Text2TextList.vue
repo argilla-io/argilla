@@ -42,9 +42,8 @@
                 :contenteditable="editable && editionMode"
                 placeholder="Type your text"
                 @input="input"
-              >
-                {{ sentence.text }}
-              </p>
+                v-html="sentence.text"
+              ></p>
               <span v-if="editionMode"
                 ><strong>shift Enter</strong> to validate</span
               >
@@ -331,6 +330,8 @@ export default {
   &__text {
     color: black;
     white-space: pre-wrap;
+    display: inline-block;
+    width: 100%;
   }
   &__edition-area {
     position: relative;
