@@ -26,25 +26,24 @@
     >
       <div
         :class="[
-          editionMode || !list.length
+          editionMode || !sentences.length
             ? 'content--editable'
             : 'content--non-editable',
           showScore ? 'content--has-score' : null,
         ]"
       >
-        <span v-for="(sentence, index) in list" :key="sentence.text">
-          <div class="content__sentences" v-if="itemNumber === index">
+        <span v-for="(sentence, index) in sentences" :key="sentence.text">
+          <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__edition-area">
               <p
-                id="text"
+                :key="refresh"
                 ref="text"
                 class="content__text"
                 :contenteditable="editable && editionMode"
                 placeholder="Type your text"
                 @input="input"
-              >
-                {{ sentence.text }}
-              </p>
+                v-html="sentence.text"
+              ></p>
               <span v-if="editionMode"
                 ><strong>shift Enter</strong> to validate</span
               >
@@ -58,7 +57,7 @@
                   :decimals="2"
                 ></re-numeric>
               </div>
-              <div v-if="list.length > 1" class="content__nav-buttons">
+              <div v-if="sentences.length > 1" class="content__nav-buttons">
                 <a
                   :class="itemNumber <= 0 ? 'disabled' : null"
                   href="#"
@@ -71,9 +70,11 @@
                     color="#4C4EA3"
                   />
                 </a>
-                {{ itemNumber + 1 }} of {{ list.length }} predictions
+                {{ itemNumber + 1 }} of {{ sentences.length }} predictions
                 <a
-                  :class="list.length <= itemNumber + 1 ? 'disabled' : null"
+                  :class="
+                    sentences.length <= itemNumber + 1 ? 'disabled' : null
+                  "
                   href="#"
                   @click.prevent="showitemNumber(++itemNumber)"
                 >
@@ -89,7 +90,7 @@
           </div>
         </span>
 
-        <div v-if="!list.length">
+        <div v-if="!sentences.length">
           <p
             class="content__text"
             :contenteditable="editable"
@@ -103,13 +104,15 @@
           v-if="newSentence && editable"
           :class="[
             'button-primary',
-            status === 'Validated' && !editionMode ? 'active' : null,
+            status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
           ]"
           @click="annotate"
-          >{{ status === "Validated" && !editionMode ? "Validated" : "Validate" }}</re-button
+          >{{
+            status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
+          }}</re-button
         >
         <re-button
-          v-if="!editionMode && editable && newSentence && list.length"
+          v-if="!editionMode && editable && newSentence && sentences.length"
           class="button-primary--outline"
           @click="edit()"
           >Edit</re-button
@@ -123,7 +126,7 @@
         <re-button
           v-if="hasAnnotationAndPredictions && !editionMode"
           class="button-clear"
-          @click="getSentences()"
+          @click="changeVisibleSentences"
           >{{
             sentencesOrigin === "Annotation"
               ? `View predictions (${predictionsLength})`
@@ -139,30 +142,25 @@
 import "assets/icons/pencil";
 export default {
   props: {
-    list: {
+    predictions: {
       type: Array,
+      required: true,
+    },
+    annotations: {
+      type: Array,
+      required: true,
+    },
+    sentencesOrigin: {
+      type: String,
+      default: undefined,
+    },
+    status: {
+      type: String,
       required: true,
     },
     editable: {
       type: Boolean,
       default: false,
-    },
-    showScore: {
-      type: Boolean,
-      default: false,
-    },
-    hasAnnotationAndPredictions: {
-      type: Boolean,
-      default: true,
-    },
-    predictionsLength: {
-      type: Number,
-    },
-    sentencesOrigin: {
-      type: String,
-    },
-    status: {
-      type: String,
     },
   },
   data: () => {
@@ -172,7 +170,28 @@ export default {
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
+      refresh: 1,
     };
+  },
+  computed: {
+    predictionsLength() {
+      return this.predictions.length;
+    },
+    showScore() {
+      return this.sentencesOrigin === "Prediction";
+    },
+    sentences() {
+      if (this.sentencesOrigin === "Annotation") {
+        return this.annotations;
+      }
+      if (this.sentencesOrigin === "Prediction") {
+        return this.predictions;
+      }
+      return [];
+    },
+    hasAnnotationAndPredictions() {
+      return this.predictions.length && this.annotations.length;
+    },
   },
   mounted() {
     this.getText();
@@ -203,6 +222,7 @@ export default {
     },
     edit() {
       this.editionMode = true;
+      this.$emit("edition-mode", this.editionMode);
     },
     focus() {
       this.$nextTick(() => {
@@ -212,13 +232,15 @@ export default {
       });
     },
     back() {
-      this.itemNumber = 0;
       this.editionMode = false;
+      this.$emit("edition-mode", this.editionMode);
+      this.refresh++;
     },
-    getSentences() {
+    changeVisibleSentences() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("get-sentences");
+      this.$emit("edition-mode", this.editionMode);
+      this.$emit("change-visible-sentences");
     },
     decorateScore(score) {
       return score * 100;
@@ -226,6 +248,7 @@ export default {
     annotate() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.$emit("edition-mode", this.editionMode);
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -250,8 +273,9 @@ export default {
       }
     },
     clickOutside() {
+      this.itemNumber = 0;
       this.editionMode = false;
-    },
+    }
   },
 };
 </script>
@@ -309,6 +333,9 @@ export default {
   }
   &__text {
     color: black;
+    white-space: pre-wrap;
+    display: inline-block;
+    width: 100%;
   }
   &__edition-area {
     position: relative;

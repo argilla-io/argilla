@@ -177,7 +177,7 @@ export default {
       // padding-left: 4em;
       @extend .list__item !optional;
       &.discarded {
-        background: #ffffff9c;
+        opacity: 0.5;
         transition: 0.3s ease-in-out;
       }
     }
