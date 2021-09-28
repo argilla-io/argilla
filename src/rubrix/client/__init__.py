@@ -410,10 +410,9 @@ class RubrixClient:
         if record.prediction is not None:
             entities = []
             for pred in record.prediction:
-                try:
-                    ent = {"label": pred[0], "start": pred[1], "end": pred[2], "score": pred[3]}
-                except IndexError:
-                    ent = {"label": pred[0], "start": pred[1], "end": pred[2]}
+                ent = {"label": pred[0], "start": pred[1], "end": pred[2], "score": pred[3]} 
+                    if len(pred) == 4 
+                    else  {"label": pred[0], "start": pred[1], "end": pred[2]}
                 entities.append(ent)
             model_dict["prediction"] = {
                 "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
