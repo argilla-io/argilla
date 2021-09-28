@@ -104,11 +104,11 @@
           v-if="newSentence && editable"
           :class="[
             'button-primary',
-            status === 'Validated' && !editionMode ? 'active' : null,
+            status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
           ]"
           @click="annotate"
           >{{
-            status === "Validated" && !editionMode ? "Validated" : "Validate"
+            status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
           }}</re-button
         >
         <re-button
