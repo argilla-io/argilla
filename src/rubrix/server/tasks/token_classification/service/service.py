@@ -14,10 +14,17 @@
 #  limitations under the License.
 
 import datetime
+from typing import Any, Dict, Iterable, List, Optional
+
 from fastapi import Depends
+
 from rubrix import MAX_KEYWORD_LENGTH
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
-from rubrix.server.tasks.commons import BulkResponse, EsRecordDataFieldNames, SortableField
+from rubrix.server.tasks.commons import (
+    BulkResponse,
+    EsRecordDataFieldNames,
+    SortableField,
+)
 from rubrix.server.tasks.commons.dao import (
     extends_index_dynamic_templates,
     extends_index_properties,
@@ -32,25 +39,35 @@ from rubrix.server.tasks.commons.es_helpers import (
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
+    PREDICTED_ENTITIES_ES_FIELD_NAME,
     PREDICTED_MENTIONS_ES_FIELD_NAME,
     TokenClassificationAggregations,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
-from typing import Any, Dict, Iterable, List, Optional
 
 extends_index_properties(
     {
         "tokens": {"type": "text"},
-        "predicted_mentions": {"type": "nested"},
-        "mentions": {"type": "nested"},
+        PREDICTED_MENTIONS_ES_FIELD_NAME: {"type": "nested"},
+        MENTIONS_ES_FIELD_NAME: {"type": "nested"},
+        PREDICTED_ENTITIES_ES_FIELD_NAME: {
+            "type": "nested",
+            "properties": {
+                "score": {"type": "float"},
+                "label": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+            },
+        },
     }
 )
 
 extends_index_dynamic_templates(
     {
-        "mentions": {
+        MENTIONS_ES_FIELD_NAME: {
             "path_match": "*mentions.*",
             "mapping": {
                 "type": "keyword",

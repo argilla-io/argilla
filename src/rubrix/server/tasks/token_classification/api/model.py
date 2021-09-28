@@ -29,8 +29,10 @@ from rubrix.server.tasks.commons import (
 )
 from rubrix._constants import MAX_KEYWORD_LENGTH
 
+PREDICTED_ENTITIES_ES_FIELD_NAME = "predicted_entities"
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
+
 
 
 class EntitySpan(BaseModel):
@@ -177,7 +179,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def scores(self) -> List[float]:
         if not self.prediction:
             return []
-        return [ent.score for ent in self._predicted_entities()]
+        return [self.prediction.score]
 
     @property
     def words(self) -> str:
@@ -185,6 +187,11 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
+            # See ../service/service.py
+            PREDICTED_ENTITIES_ES_FIELD_NAME: [
+                {"score": ent.score, "label": ent.label}
+                for ent in self._predicted_entities()
+            ],
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
                 {"mention": mention, "entity": entity}
                 for mention, entity in self._predicted_mentions()
