@@ -75,7 +75,7 @@ export default {
     },
     allowShortCut() {
       return this.dataset.viewSettings.pagination.allowKeyboardPagination;
-    }
+    },
   },
   mounted() {
     const scroll = document.getElementById("scroll");
@@ -99,6 +99,7 @@ export default {
       paginate: "entities/datasets/paginate",
     }),
     keyDown(event) {
+      // TODO: move to RePagination when fixed
       if (this.allowShortCut) {
         let { page, size } = this.dataset.viewSettings.pagination;
         if (event.keyCode === 39 && page < this.dataset.results.total / size) {
