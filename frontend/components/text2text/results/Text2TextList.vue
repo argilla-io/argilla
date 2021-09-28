@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div v-click-outside="clickOutside">
     <div
       :class="[
         'content',
@@ -272,6 +272,10 @@ export default {
         this.annotate();
       }
     },
+    clickOutside() {
+      this.itemNumber = 0;
+      this.editionMode = false;
+    }
   },
 };
 </script>
