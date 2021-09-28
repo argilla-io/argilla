@@ -410,7 +410,7 @@ class RubrixClient:
                 for pred in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent,
+                "agent": record.prediction_agent or "None",
                 "entities": entities,
             }
         if record.annotation is not None:
@@ -419,7 +419,7 @@ class RubrixClient:
                 for ann in record.annotation
             ]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent,
+                "agent": record.annotation_agent or "None",
                 "entities": gold_entities,
             }
         if record.id is not None:

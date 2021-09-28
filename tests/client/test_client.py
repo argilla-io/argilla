@@ -196,14 +196,15 @@ def test_text_classification_client_to_sdk(annotation):
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
-def test_token_classification_client_to_sdk():
+@pytest.mark.parametrize("agent", ["test_agent", None])
+def test_token_classification_client_to_sdk(agent):
     record = TokenClassificationRecord(
         text="test text",
         tokens=["test", "text"],
         prediction=[("label", 0, 5)],
         annotation=[("label", 0, 5)],
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
+        prediction_agent=agent,
+        annotation_agent=agent,
         id=1,
         metadata={"metadata": "test"},
         status="Default",
