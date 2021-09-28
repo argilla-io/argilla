@@ -61,7 +61,7 @@
               class="re-checkbox--dark"
               :value="optionName"
             >
-              {{ optionName }} ({{ recordsCounter }})
+              {{ optionName }} ({{ recordsCounter | formatNumber }})
             </ReCheckbox>
           </li>
           <li

@@ -54,6 +54,7 @@ export default {
     { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
+    { src: "~/plugins/filters.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -137,12 +138,5 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
-    // parseQuery: function (q) {
-    //   return atob(require('qs').parse(q, {encode: false}));
-    // },
-    // stringifyQuery: function (q) {
-    //   var r = btoa(require('qs').stringify(q, {encode: false}));
-    //   return r ? '?' + r : '';
-    // }
   },
 };

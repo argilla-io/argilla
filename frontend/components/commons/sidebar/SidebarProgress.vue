@@ -23,8 +23,8 @@
       <span class="progress__info__percent">{{ progress }}%</span>
     </div>
     <div class="progress__numbers">
-      <span>{{ totalAnnotated }}</span
-      >/{{ total }}
+      <span>{{ totalAnnotated | formatNumber }}</span
+      >/{{ total | formatNumber }}
     </div>
     <ReProgress
       re-mode="determinate"
@@ -38,14 +38,14 @@
           <span class="color-bullet validated"></span>
           <label>Validated</label>
           <span class="records-number">
-            {{ totalValidated }}
+            {{ totalValidated | formatNumber }}
           </span>
         </div>
         <div class="info">
           <span class="color-bullet discarded"></span>
           <label>Discarded</label>
           <span class="records-number">
-            {{ totalDiscarded }}
+            {{ totalDiscarded | formatNumber }}
           </span>
         </div>
         <slot></slot>

@@ -21,21 +21,21 @@
     <div class="info total">
       <label>Total records</label>
       <span class="records-number">
-        {{ total }}
+        {{ total | formatNumber }}
       </span>
     </div>
     <div class="info">
       <span class="color-bullet ok"></span>
       <label>Predicted ok</label>
       <span class="records-number">
-        {{ predicted.ok }}
+        {{ predicted.ok | formatNumber }}
       </span>
     </div>
     <div class="info">
       <span class="color-bullet ko"></span>
       <label>Predicted ko</label>
       <span class="records-number">
-        {{ predicted.ko }}
+        {{ predicted.ko | formatNumber }}
       </span>
     </div>
   </div>

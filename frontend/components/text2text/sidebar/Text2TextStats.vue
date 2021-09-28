@@ -32,7 +32,7 @@
         <div v-for="(counter, keyword) in getKeywords" :key="keyword">
           <div v-if="counter > 0" class="info">
             <label>{{ keyword }}</label>
-            <span class="records-number">{{ counter }}</span>
+            <span class="records-number">{{ counter | formatNumber }}</span>
           </div>
         </div>
       </div>

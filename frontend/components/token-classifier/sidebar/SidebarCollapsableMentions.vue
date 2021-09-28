@@ -24,7 +24,7 @@
     >
       <label>{{ item[0] }}</label>
       <span class="records-number">
-        <strong>{{ item[1] }}</strong>
+        <strong>{{ item[1] | formatNumber }}</strong>
       </span>
     </div>
     <a

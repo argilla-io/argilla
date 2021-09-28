@@ -37,7 +37,6 @@
     "vue-vega": "^1.0.0-alpha.13"
   },
   "devDependencies": {
-    "prettier": "^2.2.1",
     "axios-mock-adapter": "^1.19.0",
     "babel-eslint": "^10.1.0",
     "cypress": "^6.2.1",
@@ -46,6 +45,7 @@
     "eslint-loader": "^4.0.2",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.4.1"
+    "eslint-plugin-vue": "^7.4.1",
+    "prettier": "^2.2.1"
   }
 }

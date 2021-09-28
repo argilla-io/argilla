@@ -27,7 +27,7 @@
             ]"
             >{{ label }}</label
           >
-          <span class="records-number">{{ counter }}</span>
+          <span class="records-number">{{ counter | formatNumber }}</span>
         </div>
       </div>
     </div>
