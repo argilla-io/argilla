@@ -29,10 +29,8 @@ from rubrix.server.tasks.commons import (
 )
 from rubrix._constants import MAX_KEYWORD_LENGTH
 
-PREDICTED_ENTITIES_ES_FIELD_NAME = "predicted_entities"
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
-
 
 
 class EntitySpan(BaseModel):
@@ -188,21 +186,17 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def extended_fields(self) -> Dict[str, Any]:
         return {
             # See ../service/service.py
-            PREDICTED_ENTITIES_ES_FIELD_NAME: [
-                {"score": ent.score, "label": ent.label}
-                for ent in self._predicted_entities()
-            ],
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
+                {"mention": mention, "entity": entity.label, "score": entity.score}
                 for mention, entity in self._predicted_mentions()
             ],
             MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
+                {"mention": mention, "entity": entity.label}
                 for mention, entity in self._mentions()
             ],
         }
 
-    def _predicted_mentions(self) -> List[Tuple[str, str]]:
+    def _predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
@@ -210,7 +204,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             ).items()
         ]
 
-    def _mentions(self) -> List[Tuple[str, str]]:
+    def _mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
@@ -230,9 +224,11 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return set()
         return set(self.prediction.entities)
 
-    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> Dict[str, str]:
+    def __mentions_from_entities__(
+        self, entities: Set[EntitySpan]
+    ) -> Dict[str, EntitySpan]:
         return {
-            mention: entity.label
+            mention: entity
             for entity in entities
             for mention in [self.text[entity.start : entity.end]]
         }

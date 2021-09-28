@@ -39,7 +39,6 @@ from rubrix.server.tasks.commons.es_helpers import (
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
-    PREDICTED_ENTITIES_ES_FIELD_NAME,
     PREDICTED_MENTIONS_ES_FIELD_NAME,
     TokenClassificationAggregations,
     TokenClassificationQuery,
@@ -50,13 +49,29 @@ from rubrix.server.tasks.token_classification.api.model import (
 extends_index_properties(
     {
         "tokens": {"type": "text"},
-        PREDICTED_MENTIONS_ES_FIELD_NAME: {"type": "nested"},
-        MENTIONS_ES_FIELD_NAME: {"type": "nested"},
-        PREDICTED_ENTITIES_ES_FIELD_NAME: {
+        PREDICTED_MENTIONS_ES_FIELD_NAME: {
             "type": "nested",
             "properties": {
                 "score": {"type": "float"},
-                "label": {
+                "mention": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+                "entity": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+            },
+        },
+        MENTIONS_ES_FIELD_NAME: {
+            "type": "nested",
+            "properties": {
+                "score": {"type": "float"},
+                "mention": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+                "entity": {
                     "type": "keyword",
                     "ignore_above": MAX_KEYWORD_LENGTH,
                 },
@@ -64,19 +79,6 @@ extends_index_properties(
         },
     }
 )
-
-extends_index_dynamic_templates(
-    {
-        MENTIONS_ES_FIELD_NAME: {
-            "path_match": "*mentions.*",
-            "mapping": {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-        }
-    },
-)
-
 
 def as_elasticsearch(search: TokenClassificationQuery) -> Dict[str, Any]:
     """Build an elasticsearch query part from search query"""
