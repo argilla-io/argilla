@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import datetime
+import socket
+
 import httpx
 import pandas
 import pytest
@@ -211,6 +213,10 @@ def test_token_classification_client_to_sdk(agent):
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
     sdk_record = RubrixClient._token_classification_client_to_sdk(record)
+
+    if agent is None:
+        assert sdk_record.prediction.agent == socket.gethostname()
+        assert sdk_record.annotation.agent == socket.gethostname()
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
