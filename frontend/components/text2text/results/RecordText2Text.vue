@@ -22,19 +22,18 @@
         :query-text="dataset.query.text"
         :text="record.text"
       />
-      <text-2-text-annotation-area
-        v-if="annotationEnabled"
-        :prediction="predictionSentences"
-        :annotation="annotationSentences"
-        :status="record.status"
-        @annotate="onAnnotate"
-        @edition-mode="onEditionMode"
-      />
-      <text-2-text-exploration-area
-        v-else
-        :prediction="predictionSentences"
-        :annotation="annotationSentences"
-      />
+      <div v-click-outside="clickOutside">
+        <text-2-text-list
+          :status="record.status"
+          :predictions="predictionSentences"
+          :annotations="annotationSentences"
+          :sentences-origin="sentencesOrigin"
+          :editable="annotationEnabled"
+          @edition-mode="onEditionMode"
+          @change-visible-sentences="onChangeSentences"
+          @annotate="onAnnotate"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -53,7 +52,9 @@ export default {
       required: true,
     },
   },
-  data: () => ({}),
+  data: () => ({
+    sentencesOrigin: undefined,
+  }),
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -65,10 +66,30 @@ export default {
       return this.record.prediction ? this.record.prediction.sentences : [];
     },
   },
+  mounted() {
+    this.initializeSentenceOrigin();
+  },
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
     }),
+
+    initializeSentenceOrigin() {
+      if (this.annotationSentences.length) {
+        this.sentencesOrigin = "Annotation";
+      } else if (this.predictionSentences.length) {
+        this.sentencesOrigin = "Prediction";
+      }
+    },
+
+    onChangeSentences() {
+      this.sentencesOrigin !== "Annotation"
+        ? (this.sentencesOrigin = "Annotation")
+        : (this.sentencesOrigin = "Prediction");
+    },
+    clickOutside() {
+      this.initializeSentenceOrigin();
+    },
 
     async onAnnotate({ sentences }) {
       await this.validate({
@@ -87,12 +108,12 @@ export default {
     },
     async onEditionMode(editionMode) {
       await Pagination.update({
-          where: this.dataset.name,
-          data: {
-            allowShortCut: !editionMode,
-          },
-        });
-      }
+        where: this.dataset.name,
+        data: {
+          allowKeyboardPagination: !editionMode,
+        },
+      });
+    },
   },
 };
 </script>
@@ -105,7 +126,8 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
     &:hover {
-      ::v-deep .button-primary--outline, ::v-deep .button-clear {
+      ::v-deep .button-primary--outline,
+      ::v-deep .button-clear {
         opacity: 1 !important;
         transition: opacity 0.5s ease-in-out 0.2s !important;
       }
