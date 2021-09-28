@@ -329,8 +329,7 @@ class RubrixClient:
         }
         if record.prediction is not None:
             labels = [
-                {"class": label, "score": score}
-                for label, score in record.prediction
+                {"class": label, "score": score} for label, score in record.prediction
             ]
             model_dict["prediction"] = {
                 "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
@@ -410,9 +409,16 @@ class RubrixClient:
         if record.prediction is not None:
             entities = []
             for pred in record.prediction:
-                ent = {"label": pred[0], "start": pred[1], "end": pred[2], "score": pred[3]} 
-                    if len(pred) == 4 
-                    else  {"label": pred[0], "start": pred[1], "end": pred[2]}
+                ent = (
+                    {
+                        "label": pred[0],
+                        "start": pred[1],
+                        "end": pred[2],
+                        "score": pred[3],
+                    }
+                    if len(pred) == 4
+                    else {"label": pred[0], "start": pred[1], "end": pred[2]}
+                )
                 entities.append(ent)
             model_dict["prediction"] = {
                 "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
