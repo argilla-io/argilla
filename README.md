@@ -10,7 +10,10 @@
     <a href="https://github.com/recognai/rubrix/#quick-links">Quick links</a>
     ·
     <a href="https://docs.rubrix.ml">Docs</a>
+    ·
+    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111615.png" alt="Slack" width="1.5%"> Join the Rubrix community on Slack</a>
 </p>
+
 
 <p align="left">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -52,6 +55,92 @@ Key features:
 - **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
+
+## Get started
+
+To get started you need to follow three steps:
+
+1. Install the Python client
+2. Launch the web app
+3. Start logging data
+   
+### 1. Install the Python client
+
+You can install the Python client with `pip`:
+
+```bash
+pip install rubrix
+```
+
+### 2. Launch the web app
+
+There are two ways to launch the web app:
+
+- a) Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
+- b) Executing the server code manually
+
+#### a) Using docker-compose (recommended)
+
+Create a folder:
+
+```bash
+mkdir rubrix && cd rubrix
+```
+
+and launch the docker-contained web app with the following command:
+
+```bash
+wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
+```
+
+This is the recommended way because it automatically includes an
+[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
+
+#### b) Executing the server code manually
+
+When executing the server code manually you need to provide an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance yourself.
+
+1. First you need to install
+   [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html)
+   (we recommend version 7.10) and launch an Elasticsearch instance.
+   For MacOS and Windows there are
+   [Homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html) and a
+   [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html), respectively.
+2. Install the Python client together with its server dependencies:
+
+```bash
+pip install rubrix[server]
+```
+
+3. Launch a local instance of the web app
+
+```bash
+python -m rubrix.server
+```
+
+By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
+But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
+
+### 3. Start logging data
+
+The following code will log one record into a data set called `example-dataset`:
+
+```python
+import rubrix as rb
+
+rb.log(
+    rb.TextClassificationRecord(inputs="My first Rubrix example"),
+    name='example-dataset'
+)
+```
+
+If you go to your Rubrix web app at http://localhost:6900/, you should see your first dataset.
+**The default username and password are ``rubrix`` and ``1234``**.
+You can also check the REST API docs at http://localhost:6900/api/docs.
+
+Congratulations! You are ready to start working with Rubrix. You can continue reading a working example below.
+
+To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
 
 
 ## Example
@@ -154,91 +243,7 @@ Rubrix main components are:
 | 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
 | 🧪 **[Knowledge graph tutorial](https://rubrix.rtfd.io/en/stable/tutorials/03-kglab_pytorch_geometric.html)** | How to use Rubrix with `kglab` & `pytorch_geometric` |
 
-## Get started
 
-To get started you need to follow three steps:
-
-1. Install the Python client
-2. Launch the web app
-3. Start logging data
-   
-### 1. Install the Python client
-
-You can install the Python client with `pip`:
-
-```bash
-pip install rubrix
-```
-
-### 2. Launch the web app
-
-There are two ways to launch the web app:
-
-- a) Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
-- b) Executing the server code manually
-
-#### a) Using docker-compose (recommended)
-
-Create a folder:
-
-```bash
-mkdir rubrix && cd rubrix
-```
-
-and launch the docker-contained web app with the following command:
-
-```bash
-wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
-```
-
-This is the recommended way because it automatically includes an
-[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
-
-#### b) Executing the server code manually
-
-When executing the server code manually you need to provide an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance yourself.
-
-1. First you need to install
-   [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html)
-   (we recommend version 7.10) and launch an Elasticsearch instance.
-   For MacOS and Windows there are
-   [Homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html) and a
-   [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html), respectively.
-2. Install the Python client together with its server dependencies:
-
-```bash
-pip install rubrix[server]
-```
-
-3. Launch a local instance of the web app
-
-```bash
-python -m rubrix.server
-```
-
-By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
-But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
-
-### 3. Start logging data
-
-The following code will log one record into a data set called `example-dataset`:
-
-```python
-import rubrix as rb
-
-rb.log(
-    rb.TextClassificationRecord(inputs="My first Rubrix example"),
-    name='example-dataset'
-)
-```
-
-If you go to your Rubrix web app at http://localhost:6900/, you should see your first dataset.
-**The default username and password are ``rubrix`` and ``1234``**.
-You can also check the REST API docs at http://localhost:6900/api/docs.
-
-Congratulations! You are ready to start working with Rubrix.
-
-To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
 
 ## Community
 As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
