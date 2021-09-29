@@ -71,9 +71,9 @@ class TextClassificationRecord(BaseModel):
         annotation:
             A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         prediction_agent:
-            Name of the prediction agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation_agent:
-            Name of the annotation agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         multi_label:
             Is the prediction/annotation for a multi label classification task? Defaults to `False`.
         explanation:
@@ -141,9 +141,9 @@ class TokenClassificationRecord(BaseModel):
             A list of tuples containing annotations (gold labels) for the record. The first entry of the tuple is the
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
         prediction_agent:
-            Name of the prediction agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation_agent:
-            Name of the annotation agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
@@ -192,9 +192,9 @@ class Text2TextRecord(BaseModel):
         annotation:
             A string representing the expected output text for the given input text.
         prediction_agent:
-            Name of the prediction agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation_agent:
-            Name of the annotation agent.
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:

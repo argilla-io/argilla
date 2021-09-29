@@ -19,6 +19,7 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 import logging
+import socket
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
@@ -72,6 +73,8 @@ class RubrixClient:
 
     # Larger sizes will trigger a warning
     MAX_CHUNK_SIZE = 5000
+
+    MACHINE_NAME = socket.gethostname()
 
     def __init__(
         self,
@@ -330,7 +333,7 @@ class RubrixClient:
                 for label, score in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent or "None",
+                "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
                 "labels": labels,
             }
         if record.annotation is not None:
@@ -341,7 +344,7 @@ class RubrixClient:
             )
             gold_labels = [{"class": label, "score": 1.0} for label in annotations]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent or "None",
+                "agent": record.annotation_agent or RubrixClient.MACHINE_NAME,
                 "labels": gold_labels,
             }
             model_dict["status"] = record.status or "Validated"
@@ -410,7 +413,7 @@ class RubrixClient:
                 for pred in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent,
+                "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
                 "entities": entities,
             }
         if record.annotation is not None:
@@ -419,7 +422,7 @@ class RubrixClient:
                 for ann in record.annotation
             ]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent,
+                "agent": record.annotation_agent or RubrixClient.MACHINE_NAME,
                 "entities": gold_entities,
             }
         if record.id is not None:
@@ -474,13 +477,13 @@ class RubrixClient:
                 {"text": text, "score": score} for text, score in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent or "None",
+                "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
                 "sentences": sentences,
             }
         if record.annotation is not None:
             sentence = {"text": record.annotation, "score": 1.0}
             model_dict["annotation"] = {
-                "agent": record.annotation_agent or "None",
+                "agent": record.annotation_agent or RubrixClient.MACHINE_NAME,
                 "sentences": [sentence],
             }
 

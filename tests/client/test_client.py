@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import datetime
+import socket
+
 import httpx
 import pandas
 import pytest
@@ -196,20 +198,25 @@ def test_text_classification_client_to_sdk(annotation):
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
-def test_token_classification_client_to_sdk():
+@pytest.mark.parametrize("agent", ["test_agent", None])
+def test_token_classification_client_to_sdk(agent):
     record = TokenClassificationRecord(
         text="test text",
         tokens=["test", "text"],
         prediction=[("label", 0, 5)],
         annotation=[("label", 0, 5)],
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
+        prediction_agent=agent,
+        annotation_agent=agent,
         id=1,
         metadata={"metadata": "test"},
         status="Default",
         event_timestamp=datetime.datetime(2000, 1, 1),
     )
     sdk_record = RubrixClient._token_classification_client_to_sdk(record)
+
+    if agent is None:
+        assert sdk_record.prediction.agent == socket.gethostname()
+        assert sdk_record.annotation.agent == socket.gethostname()
 
     assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
