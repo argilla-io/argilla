@@ -48,7 +48,7 @@ def list_datasets(
     -------
         A list of datasets visibles by current user
     """
-    return service.list(owners=current_user.user_groups)
+    return service.list(owners=current_user.default_team)
 
 
 @router.get(
@@ -82,7 +82,7 @@ def get_dataset(
 
     """
     return Dataset.parse_obj(
-        service.find_by_name(name, owner=current_user.current_group)
+        service.find_by_name(name, owner=current_user.default_team)
     )
 
 
@@ -120,7 +120,7 @@ def update_dataset(
     - NotAuthorizedError if user cannot access the found dataset
 
     """
-    return service.update(name, data=update_request, owner=current_user.current_group)
+    return service.update(name, data=update_request, owner=current_user.default_team)
 
 
 @router.delete(
@@ -145,7 +145,7 @@ def delete_dataset(
         The current user
 
     """
-    service.delete(name, owner=current_user.current_group)
+    service.delete(name, owner=current_user.default_team)
 
 
 @router.put(
@@ -170,7 +170,7 @@ def close_dataset(
         The current user
 
     """
-    service.close_dataset(name, owner=current_user.current_group)
+    service.close_dataset(name, owner=current_user.default_team)
 
 
 @router.put(
@@ -195,7 +195,7 @@ def open_dataset(
         The current user
 
     """
-    service.open_dataset(name, owner=current_user.current_group)
+    service.open_dataset(name, owner=current_user.default_team)
 
 
 @router.put(
@@ -227,5 +227,5 @@ def copy_dataset(
     """
 
     return service.copy_dataset(
-        name=name, owner=current_user.current_group, data=copy_request
+        name=name, owner=current_user.default_team, data=copy_request
     )

@@ -25,11 +25,11 @@ class User(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    user_groups: List[str] = None
+    teams: List[str] = None
 
     @property
-    def current_group(self) -> Optional[str]:
-        return self.user_groups[0] if self.user_groups else None
+    def default_team(self) -> Optional[str]:
+        return self.teams[0] if self.teams else None
 
 
 class Token(BaseModel):
