@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <LabelPill class="predictions" :labels="showLabels" :show-score="true" />
+    <LabelPill class="predictions" :predicted-as="predictedAs" :labels="showLabels" :show-score="true" />
   </div>
 </template>
 <script>
@@ -29,6 +29,10 @@ export default {
       type: Array,
       required: true,
     },
+    predictedAs: {
+      type: Array,
+      required: true,
+    }
   },
   data: () => ({
     maxLabels: 16,

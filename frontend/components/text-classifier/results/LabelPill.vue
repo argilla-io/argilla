@@ -27,7 +27,7 @@
     <p
       v-for="label in labels"
       :key="label.index"
-      :class="['pill', isAnnotated(label) ? 'active' : '']"
+      :class="['pill', isPredictedAs(label) ? 'active' : '']"
       :title="label.class"
     >
       <span class="pill__text">{{ label.class }} </span>
@@ -52,6 +52,9 @@ export default {
       type: Array,
       required: true,
     },
+    predictedAs: {
+      type: Array,
+    },
     predicted: {
       type: String,
       default: undefined,
@@ -69,8 +72,8 @@ export default {
     decorateScore(score) {
       return score * 100;
     },
-    isAnnotated(label) {
-      return label.score > 0.5 ? true : false;
+    isPredictedAs(label) {
+      return this.predictedAs ? this.predictedAs.includes(label.class) : null;
     },
   },
 };

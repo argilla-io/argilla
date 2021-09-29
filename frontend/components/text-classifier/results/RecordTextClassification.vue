@@ -34,7 +34,7 @@
         @annotate="onAnnotate"
         @edit="onEdit"
       />
-      <ClassifierExplorationArea v-else :labels="predictionLabels" />
+      <ClassifierExplorationArea v-else :labels="predictionLabels" :predicted-as="record.predicted_as" />
     </div>
     <div v-if="!annotationEnabled" class="record__labels">
       <LabelPill
