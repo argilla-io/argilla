@@ -137,7 +137,7 @@ class TokenClassificationRecord(BaseModel):
         prediction:
             A list of tuples containing the predictions for the record. The first entry of the tuple is the name of
             predicted entity, the second and third entry correspond to the start and stop character index of the entity.
-            The fourth entry is optional and corresponds to the score of the entity.
+            EXPERIMENTAL: The fourth entry is optional and corresponds to the score of the entity.
         annotation:
             A list of tuples containing annotations (gold labels) for the record. The first entry of the tuple is the
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
