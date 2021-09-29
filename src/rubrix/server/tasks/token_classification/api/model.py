@@ -23,7 +23,8 @@ from rubrix.server.tasks.commons import (
     BaseRecord,
     PredictionStatus,
     ScoreRange,
-    SortableField, TaskStatus,
+    SortableField,
+    TaskStatus,
     TaskType,
 )
 from rubrix._constants import MAX_KEYWORD_LENGTH
@@ -47,11 +48,14 @@ class EntitySpan(BaseModel):
         character end position, must be higher than the starting character.
     label: str
         the label related to tokens that conforms the entity span
+    score:
+        A higher score means, the model/annotator is more confident about its predicted/annotated entity.
     """
 
     start: int
     end: int
     label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @validator("end")
     def check_span_offset(cls, end: int, values):
@@ -66,8 +70,7 @@ class EntitySpan(BaseModel):
 
 
 class TokenClassificationAnnotation(BaseAnnotation):
-    """
-    Annotation class for rToken classification problem
+    """Annotation class for the Token classification task.
 
     Attributes:
     -----------
@@ -121,7 +124,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         if annotation:
             tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
-                mention = text[entity.start: entity.end]
+                mention = text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
 
                 idx = 0
@@ -134,7 +137,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                         and current_mention
                         and jdx <= len(tokens)
                     ):
-                        current_mention = current_mention[len(current_token):]
+                        current_mention = current_mention[len(current_token) :]
                         current_mention = current_mention.lstrip()
                         jdx += 1
                         if jdx < len(tokens):
@@ -172,7 +175,6 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     @property
     def scores(self) -> List[float]:
-        """Values of prediction scores"""
         if not self.prediction:
             return []
         return [self.prediction.score]
@@ -183,17 +185,18 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
+            # See ../service/service.py
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
+                {"mention": mention, "entity": entity.label, "score": entity.score}
                 for mention, entity in self._predicted_mentions()
             ],
             MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
+                {"mention": mention, "entity": entity.label}
                 for mention, entity in self._mentions()
             ],
         }
 
-    def _predicted_mentions(self) -> List[Tuple[str, str]]:
+    def _predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
@@ -201,7 +204,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             ).items()
         ]
 
-    def _mentions(self) -> List[Tuple[str, str]]:
+    def _mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
@@ -221,11 +224,13 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return set()
         return set(self.prediction.entities)
 
-    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> Dict[str, str]:
+    def __mentions_from_entities__(
+        self, entities: Set[EntitySpan]
+    ) -> Dict[str, EntitySpan]:
         return {
-            mention: entity.label
+            mention: entity
             for entity in entities
-            for mention in [self.text[entity.start: entity.end]]
+            for mention in [self.text[entity.start : entity.end]]
         }
 
     class Config:
@@ -320,6 +325,7 @@ class TokenClassificationSearchRequest(BaseModel):
     sort:
         The sort by order in search results
     """
+
     query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
     sort: List[SortableField] = Field(default_factory=list)
 
