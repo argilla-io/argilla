@@ -23,11 +23,11 @@
         :id="label.class"
         :key="label.class"
         v-model="selectedLabels"
-        :allow-multiple="multiLabel"
+        :allow-multiple="record.multi_label"
         :label="label"
         :class="[
           'label-button',
-          selectedLabels.includes(label) ? 'active' : '',
+          selectedLabels.includes(label.class) ? 'selected' : '',
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -66,7 +66,7 @@
           :id="label.class"
           :key="label.class"
           v-model="selectedLabels"
-          :allow-multiple="multiLabel"
+          :allow-multiple="record.multi_label"
           :label="label"
           :class="['label-button']"
           :data-title="label.class"
@@ -83,12 +83,12 @@ import "assets/icons/ignore";
 
 export default {
   props: {
-    labels: {
-      type: Array,
+    record: {
+      type: Object,
       required: true,
     },
-    multiLabel: {
-      type: Boolean,
+    dataset: {
+      type: Object,
       required: true,
     },
   },
@@ -102,6 +102,43 @@ export default {
     selectedLabels: [],
   }),
   computed: {
+    datasetLabels() {
+      const labels = {};
+      this.dataset.labels.forEach((label) => {
+        labels[label] = { score: 0, selected: false };
+      });
+      return labels;
+    },
+    labels() {
+      const labelsDict = { ...this.datasetLabels };
+      let annotationLabels = this.annotationLabels.map((label) => {
+        return {
+          ...label,
+          selected: true,
+        };
+      });
+
+      this.predictionLabels.concat(annotationLabels).forEach((label) => {
+        labelsDict[label.class] = {
+          score: label.score,
+          selected: label.selected,
+        };
+      });
+
+      return Object.keys(labelsDict).map((label) => {
+        return {
+          class: label,
+          score: labelsDict[label].score,
+          selected: labelsDict[label].selected,
+        };
+      });
+    },
+    annotationLabels() {
+      return this.record.annotation ? this.record.annotation.labels : [];
+    },
+    predictionLabels() {
+      return this.record.prediction ? this.record.prediction.labels : [];
+    },
     sortedLabels() {
       const labels = [...this.labels];
       return labels.sort((a, b) => (a.score > b.score ? -1 : 1));

@@ -17,18 +17,17 @@
 
 <template>
   <div>
-    <LabelPill class="predictions" :labels="showLabels" :show-score="true" />
+    <LabelPill class="predictions" :predicted-as="predictedAs" :labels="showLabels" :show-score="true" />
   </div>
 </template>
 <script>
-import "assets/icons/ignore";
 
 export default {
   props: {
-    labels: {
-      type: Array,
+    record: {
+      type: Object,
       required: true,
-    },
+    }
   },
   data: () => ({
     maxLabels: 16,
@@ -39,6 +38,12 @@ export default {
         return this.labels.slice(0, this.maxLabels);
       }
       return this.labels;
+    },
+    labels() {
+      return this.record.prediction ? this.record.prediction.labels : [];
+    },
+    predictedAs() {
+      return this.record.predicted_as;
     },
   },
 };

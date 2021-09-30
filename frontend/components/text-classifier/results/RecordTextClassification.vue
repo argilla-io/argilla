@@ -26,27 +26,30 @@
         :explanation="record.explanation"
         :query-text="dataset.query.text"
       />
-      <!-- record annotation area -->
       <ClassifierAnnotationArea
         v-if="annotationEnabled"
-        :labels="labelsForAnnotation"
-        :multi-label="record.multi_label"
+        :dataset="dataset"
+        :record="record"
         @annotate="onAnnotate"
         @edit="onEdit"
       />
-      <ClassifierExplorationArea v-else :labels="predictionLabels" />
+      <ClassifierExplorationArea v-else :record="record" />
     </div>
     <div v-if="!annotationEnabled" class="record__labels">
-      <LabelPill
-        v-if="record.annotation && !annotationEnabled"
-        class="annotations"
-        :labels="record.annotation.labels"
-        :predicted="record.predicted"
-      />
+      <svgicon
+        v-if="record.predicted"
+        :class="['icon__predicted', record.predicted]"
+        width="20"
+        height="20"
+        :name="record.predicted ? 'predicted-ko' : 'predicted-ok'"
+      ></svgicon>
+      <re-tag v-for="label in record.annotation.labels" :key="label.class" bg-color="#f5f5f6" :name="label.class" />
     </div>
   </div>
 </template>
 <script>
+import "assets/icons/predicted-ok";
+import "assets/icons/predicted-ko";
 import {
   TextClassificationRecord,
   TextClassificationDataset,
@@ -65,43 +68,8 @@ export default {
   },
   data: () => ({}),
   computed: {
-    labelsForAnnotation() {
-      const labelsDict = {};
-
-      this.dataset.labels.forEach((label) => {
-        labelsDict[label] = { score: 0, selected: false };
-      });
-
-      let annotationLabels = this.annotationLabels.map((label) => {
-        return {
-          ...label,
-          selected: true,
-        };
-      });
-
-      this.predictionLabels.concat(annotationLabels).forEach((label) => {
-        labelsDict[label.class] = {
-          score: label.score,
-          selected: label.selected,
-        };
-      });
-
-      return Object.keys(labelsDict).map((label) => {
-        return {
-          class: label,
-          score: labelsDict[label].score,
-          selected: labelsDict[label].selected,
-        };
-      });
-    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
-    },
-    annotationLabels() {
-      return this.record.annotation ? this.record.annotation.labels : [];
-    },
-    predictionLabels() {
-      return this.record.prediction ? this.record.prediction.labels : [];
     },
   },
   methods: {
@@ -167,6 +135,26 @@ export default {
     width: 170px;
     flex-shrink: 0;
     margin-bottom: -3em;
+    display: block;
+    height: 100%;
+    overflow: auto;
+    text-align: right;
+    padding: 1em;
+  }
+}
+.icon {
+  &__predicted {
+    display: block;
+    text-align: right;
+    margin-right: 0;
+    margin-left: auto;
+    margin-bottom: 1em;
+    &.ko {
+      fill: $error;
+    }
+    &.ok {
+      fill: $success;
+    }
   }
 }
 </style>
