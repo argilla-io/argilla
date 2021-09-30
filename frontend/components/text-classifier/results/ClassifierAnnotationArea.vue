@@ -102,13 +102,15 @@ export default {
     selectedLabels: [],
   }),
   computed: {
-    labels() {
-      const labelsDict = {};
-
+    datasetLabels() {
+      const labels = {};
       this.dataset.labels.forEach((label) => {
-        labelsDict[label] = { score: 0, selected: false };
+        labels[label] = { score: 0, selected: false };
       });
-
+      return labels;
+    },
+    labels() {
+      const labelsDict = { ...this.datasetLabels };
       let annotationLabels = this.annotationLabels.map((label) => {
         return {
           ...label,
@@ -138,7 +140,6 @@ export default {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
     sortedLabels() {
-      console.log(...this.labels)
       const labels = [...this.labels];
       return labels.sort((a, b) => (a.score > b.score ? -1 : 1));
     },
