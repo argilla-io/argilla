@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-click-outside="clickOutside">
+  <div>
     <div
       :class="[
         'content',
@@ -43,9 +43,22 @@
                 placeholder="Type your text"
                 @input="input"
                 v-html="sentence.text"
+                @click="edit()"
               ></p>
               <span v-if="editionMode"
                 ><strong>shift Enter</strong> to validate</span
+              >
+            </div>
+            <div class="content__buttons">
+              <re-button
+                v-if="hasAnnotationAndPredictions && !editionMode"
+                class="button-clear"
+                @click="changeVisibleSentences"
+                >{{
+                  sentencesOrigin === "Annotation"
+                    ? `View predictions (${predictionsLength})`
+                    : "Back to annotation"
+                }}</re-button
               >
             </div>
             <div class="content__footer">
@@ -86,6 +99,31 @@
                   />
                 </a>
               </div>
+              <div class="content__actions-buttons">
+                <re-button
+                  v-if="!editionMode && editable && newSentence && sentences.length"
+                  class="button-primary--outline"
+                  @click="edit()"
+                  >Edit</re-button
+                >
+                <re-button
+                  v-if="editionMode && editable && newSentence"
+                  class="button-primary--outline"
+                  @click="back()"
+                  >Back</re-button
+                >
+                <re-button
+                  v-if="newSentence && editable"
+                  :class="[
+                    'button-primary',
+                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
+                  ]"
+                  @click="annotate"
+                  >{{
+                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
+                  }}</re-button
+                >
+              </div>
             </div>
           </div>
         </span>
@@ -99,41 +137,6 @@
           ></p>
         </div>
       </div>
-      <div class="content__buttons">
-        <re-button
-          v-if="newSentence && editable"
-          :class="[
-            'button-primary',
-            status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
-          ]"
-          @click="annotate"
-          >{{
-            status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
-          }}</re-button
-        >
-        <re-button
-          v-if="!editionMode && editable && newSentence && sentences.length"
-          class="button-primary--outline"
-          @click="edit()"
-          >Edit</re-button
-        >
-        <re-button
-          v-if="editionMode && editable && newSentence"
-          class="button-primary--outline"
-          @click="back()"
-          >Back</re-button
-        >
-        <re-button
-          v-if="hasAnnotationAndPredictions && !editionMode"
-          class="button-clear"
-          @click="changeVisibleSentences"
-          >{{
-            sentencesOrigin === "Annotation"
-              ? `View predictions (${predictionsLength})`
-              : "View annotation"
-          }}</re-button
-        >
-      </div>
     </div>
   </div>
 </template>
@@ -144,24 +147,24 @@ export default {
   props: {
     predictions: {
       type: Array,
-      required: true,
+      required: true
     },
     annotations: {
       type: Array,
-      required: true,
+      required: true
     },
     sentencesOrigin: {
       type: String,
-      default: undefined,
+      default: undefined
     },
     status: {
       type: String,
-      required: true,
+      required: true
     },
     editable: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data: () => {
     return {
@@ -170,7 +173,7 @@ export default {
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
-      refresh: 1,
+      refresh: 1
     };
   },
   computed: {
@@ -191,7 +194,7 @@ export default {
     },
     hasAnnotationAndPredictions() {
       return this.predictions.length && this.annotations.length;
-    },
+    }
   },
   mounted() {
     this.getText();
@@ -252,7 +255,7 @@ export default {
       if (this.newSentence) {
         let newS = {
           score: 1,
-          text: this.newSentence,
+          text: this.newSentence
         };
         this.$emit("annotate", { sentences: [newS] });
       }
@@ -276,7 +279,7 @@ export default {
       this.itemNumber = 0;
       this.editionMode = false;
     }
-  },
+  }
 };
 </script>
 
@@ -297,7 +300,6 @@ export default {
 .content {
   position: relative;
   display: flex;
-  margin-bottom: 1em;
   margin-top: 1em;
   &--exploration-mode {
     align-items: flex-end;
@@ -312,6 +314,9 @@ export default {
       padding: 0.6em;
       margin: 0;
       outline: none;
+    }
+    .re-button {
+      opacity: 1 !important;
     }
   }
   &--non-editable {
@@ -330,6 +335,7 @@ export default {
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: 140px;
   }
   &__text {
     color: black;
@@ -339,6 +345,7 @@ export default {
   }
   &__edition-area {
     position: relative;
+    margin-right: 140px;
     span {
       position: absolute;
       top: 100%;
@@ -353,6 +360,7 @@ export default {
     @include font-size(12px);
     padding: 0 0.3em;
     margin-right: auto;
+    min-width: 20%;
     span {
       font-weight: 600;
       margin-left: 1em;
@@ -360,16 +368,32 @@ export default {
     }
   }
   &__footer {
-    padding-top: 2em;
+    padding-top: 3em;
     margin-top: auto;
     margin-bottom: 0;
     display: flex;
     align-items: center;
   }
   &__buttons {
-    min-width: 120px;
-    margin-left: 2em;
-    text-align: right;
+    position: absolute;
+    top: 1em;
+    right: 0;
+    .button-clear {
+      color: $font-secondary;
+      min-height: 2em;
+      line-height: 2em;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out 0.2s;
+      &:hover {
+        color: darken($font-secondary, 10%);
+      }
+    }
+  }
+  &__actions-buttons {
+    margin-right: 0;
+    margin-left: auto;
+    display: flex;
+    min-width: 20%;
     .re-button {
       min-height: 38px;
       line-height: 38px;
@@ -390,15 +414,12 @@ export default {
         opacity: 0;
         transition: opacity 0.3s ease-in-out 0.2s;
       }
-      &.button-clear {
-        color: $font-secondary;
-        min-height: 2em;
-        line-height: 2em;
+      &.button-primary:not(.active) {
         opacity: 0;
         transition: opacity 0.3s ease-in-out 0.2s;
       }
       & + .re-button {
-        margin-top: 1em;
+        margin-left: 1em;
       }
     }
   }
@@ -429,7 +450,7 @@ export default {
         transition: all 0.2s ease-in-out;
       }
       &.disabled {
-        opacity: 0.2;
+        opacity: 0;
         pointer-events: none;
       }
     }
