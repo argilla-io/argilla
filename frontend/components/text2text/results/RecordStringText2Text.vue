@@ -135,7 +135,7 @@ export default {
   }
   &__content {
     word-break: break-word;
-    margin-right: 6em;
+    margin-right: 140px;
     display: block;
     color: palette(grey, medium);
   }

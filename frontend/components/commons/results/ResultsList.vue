@@ -149,7 +149,7 @@ export default {
     }
   }
   &__li {
-    padding-bottom: 2px;
+    padding-bottom: 10px;
     position: relative;
   }
 }

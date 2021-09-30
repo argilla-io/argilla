@@ -18,7 +18,7 @@
 <template>
   <div>
     <div
-      :class="[annotationEnabled ? 'list__item--annotation-mode' : 'list__item', item.status === 'Discarded' ? 'discarded' : null]"
+      :class="[annotationEnabled ? 'list__item--annotation-mode' : 'list__item', dataset.task,  item.status === 'Discarded' ? 'discarded' : null]"
     >
       <div
         v-if="annotationEnabled && item.status !== 'Default' && dataset.task !== 'Text2Text'"
@@ -154,13 +154,6 @@ export default {
       right: 1em;
       font-style: italic;
     }
-    &.--discarded {
-      ::v-deep .record,
-      ::v-deep .feedback-interactions {
-        opacity: 0.3;
-        pointer-events: none;
-      }
-    }
   }
   &__item {
     position: relative;
@@ -169,6 +162,14 @@ export default {
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
+    border: 1px solid white;
+    &:hover {
+      border: 1px solid palette(grey, smooth);
+      .record__extra-actions--text2text {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
@@ -176,9 +177,14 @@ export default {
     &--annotation-mode {
       // padding-left: 4em;
       @extend .list__item !optional;
-      &.discarded {
+      // TODO: make global when other tasks are ready
+      &.discarded.Text2Text {
         opacity: 0.5;
         transition: 0.3s ease-in-out;
+        &:hover {
+          opacity: 1;
+          transition: 0.3s ease-in-out;
+        }
       }
     }
     &__checkbox.re-checkbox {

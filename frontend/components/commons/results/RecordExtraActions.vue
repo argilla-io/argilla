@@ -31,7 +31,7 @@
     </template>
   </div>
   <div v-else class="record__extra-actions--text2text" v-click-outside="close">
-    <a class="extra-actions__button" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="40" height="20" color="#b7b7b7" /></a>
+    <a class="extra-actions__button" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3" /></a>
     <div class="extra-actions__content" v-if="open">
       <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
         <span>View metadata</span>
@@ -117,9 +117,11 @@ export default {
     @include font-size(13px);
     padding-left: 2.3em;
     &--text2text {
+      opacity: 0;
+      pointer-events: none;
       position: absolute;
       top: 1em;
-      right: 1em;
+      right: 2em;
     }
     .list__item--annotation-mode & {
       padding-left: 65px;
@@ -157,16 +159,28 @@ export default {
   &__content {
     position: absolute;
     right: 0;
+    top: 2em;
     background: white;
     border-radius: 3px;
-    box-shadow: $shadow;
-    padding: 1em 1em 0 1em;
+    box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+    padding: 3px;
     min-width: 135px;
-    span {
-      color: $font-secondary;
+    div {
+      padding: 0.5em;
+      color: $font-secondary-dark;
       cursor: pointer;
       display: block;
-      margin-bottom: 1em;
+      border-bottom: 1px solid palette(grey, smooth);
+      border-radius: 3px;
+      background: white;
+      transition: background 0.3s ease-in-out;
+      &:last-child {
+        border-bottom: none;
+      }
+      &:hover {
+        transition: background 0.3s ease-in-out;
+        background: palette(grey, smooth);
+      }
     }
   }
 }

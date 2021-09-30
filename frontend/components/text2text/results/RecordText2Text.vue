@@ -16,14 +16,15 @@
   -->
 
 <template>
-  <div class="record">
+  <div class="record" v-click-outside="clickOutside">
     <div class="record--left record__item">
       <record-string-text-2-text
         :query-text="dataset.query.text"
         :text="record.text"
       />
-      <div v-click-outside="clickOutside">
+      <div>
         <text-2-text-list
+          ref="list"
           :status="record.status"
           :predictions="predictionSentences"
           :annotations="annotationSentences"
@@ -88,6 +89,7 @@ export default {
         : (this.sentencesOrigin = "Prediction");
     },
     clickOutside() {
+      this.$refs.list.clickOutside()
       this.initializeSentenceOrigin();
     },
 
@@ -127,6 +129,7 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
     &:hover {
+      ::v-deep .button-primary,
       ::v-deep .button-primary--outline,
       ::v-deep .button-clear {
         opacity: 1 !important;
@@ -136,7 +139,7 @@ export default {
   }
   &--left {
     width: 100%;
-    padding: 2em 2em 0.5em 2em;
+    padding: 2em;
     .list__item--annotation-mode & {
       padding-left: 65px;
     }
