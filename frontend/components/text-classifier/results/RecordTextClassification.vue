@@ -29,12 +29,12 @@
       <!-- record annotation area -->
       <ClassifierAnnotationArea
         v-if="annotationEnabled"
-        :labels="labelsForAnnotation"
-        :multi-label="record.multi_label"
+        :dataset="dataset"
+        :record="record"
         @annotate="onAnnotate"
         @edit="onEdit"
       />
-      <ClassifierExplorationArea v-else :labels="predictionLabels" :predicted-as="record.predicted_as" />
+      <ClassifierExplorationArea v-else :record="record" />
     </div>
     <div v-if="!annotationEnabled" class="record__labels">
       <LabelPill
@@ -65,43 +65,8 @@ export default {
   },
   data: () => ({}),
   computed: {
-    labelsForAnnotation() {
-      const labelsDict = {};
-
-      this.dataset.labels.forEach((label) => {
-        labelsDict[label] = { score: 0, selected: false };
-      });
-
-      let annotationLabels = this.annotationLabels.map((label) => {
-        return {
-          ...label,
-          selected: true,
-        };
-      });
-
-      this.predictionLabels.concat(annotationLabels).forEach((label) => {
-        labelsDict[label.class] = {
-          score: label.score,
-          selected: label.selected,
-        };
-      });
-
-      return Object.keys(labelsDict).map((label) => {
-        return {
-          class: label,
-          score: labelsDict[label].score,
-          selected: labelsDict[label].selected,
-        };
-      });
-    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
-    },
-    annotationLabels() {
-      return this.record.annotation ? this.record.annotation.labels : [];
-    },
-    predictionLabels() {
-      return this.record.prediction ? this.record.prediction.labels : [];
     },
   },
   methods: {

@@ -25,12 +25,8 @@ import "assets/icons/ignore";
 
 export default {
   props: {
-    labels: {
-      type: Array,
-      required: true,
-    },
-    predictedAs: {
-      type: Array,
+    record: {
+      type: Object,
       required: true,
     }
   },
@@ -43,6 +39,12 @@ export default {
         return this.labels.slice(0, this.maxLabels);
       }
       return this.labels;
+    },
+    labels() {
+      return this.record.prediction ? this.record.prediction.labels : [];
+    },
+    predictedAs() {
+      return this.record.predicted_as;
     },
   },
 };
