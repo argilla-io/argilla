@@ -138,6 +138,7 @@ export default {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
     sortedLabels() {
+      console.log(...this.labels)
       const labels = [...this.labels];
       return labels.sort((a, b) => (a.score > b.score ? -1 : 1));
     },

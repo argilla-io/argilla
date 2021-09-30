@@ -21,7 +21,6 @@
   </div>
 </template>
 <script>
-import "assets/icons/ignore";
 
 export default {
   props: {

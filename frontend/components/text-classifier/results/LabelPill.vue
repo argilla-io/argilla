@@ -17,13 +17,6 @@
 
 <template>
   <div>
-    <svgicon
-      v-if="predicted"
-      :class="['icon__predicted', predicted]"
-      width="20"
-      height="20"
-      :name="predicted ? 'predicted-ko' : 'predicted-ok'"
-    ></svgicon>
     <p
       v-for="label in labels"
       :key="label.index"
@@ -44,8 +37,6 @@
 </template>
 
 <script>
-import "assets/icons/predicted-ok";
-import "assets/icons/predicted-ko";
 export default {
   props: {
     labels: {
@@ -54,10 +45,6 @@ export default {
     },
     predictedAs: {
       type: Array,
-    },
-    predicted: {
-      type: String,
-      default: undefined,
     },
     showScore: {
       type: Boolean,
@@ -92,28 +79,6 @@ export default {
   margin-bottom: 0;
   border: 1px solid transparent;
   margin-right: 0.5em;
-}
-.annotations {
-  position: absolute;
-  right: 0;
-  top: 0;
-  display: block;
-  height: 100%;
-  overflow: auto;
-  text-align: right;
-  padding: 1em;
-  .pill {
-    text-align: left;
-    display: inline-block;
-    background: palette(grey, bg);
-    border: none;
-    display: inline-block;
-    border-radius: 10px;
-    &__text {
-      word-break: break-all;
-      white-space: break-spaces;
-    }
-  }
 }
 .predictions {
   margin-top: 1em;
@@ -162,21 +127,6 @@ export default {
   }
   &.active {
     border-color: $secondary-color;
-  }
-}
-.icon {
-  &__predicted {
-    display: block;
-    text-align: right;
-    margin-right: 0;
-    margin-left: auto;
-    margin-bottom: 1em;
-    &.ko {
-      fill: $error;
-    }
-    &.ok {
-      fill: $success;
-    }
   }
 }
 </style>
