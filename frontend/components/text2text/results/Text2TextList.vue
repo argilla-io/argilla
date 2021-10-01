@@ -235,8 +235,10 @@ export default {
       this.newSentence = e.target.innerText;
     },
     edit() {
-      this.editionMode = true;
-      this.$emit("edition-mode", this.editionMode);
+      if (this.editable) {
+        this.editionMode = true;
+        this.$emit("edition-mode", this.editionMode);
+      }
     },
     focus() {
       this.$nextTick(() => {
