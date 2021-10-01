@@ -21,14 +21,8 @@
       <span class="annotation-button-data__text" :title="label.class"
         >{{ label.class }}
       </span>
-      <div class="annotation-button-data__info">
-        <ReNumeric
-          v-if="!label.selected && decorateScore(label.score) > 0"
-          class="annotation-button-data__score"
-          :value="decorateScore(label.score)"
-          type="%"
-          :decimals="2"
-        ></ReNumeric>
+      <div class="annotation-button-data__info" v-if="!label.selected && label.score > 0">
+        <span>{{ label.score | percent }}</span>
       </div>
     </label>
     <div
@@ -75,9 +69,6 @@ export default {
     },
   },
   methods: {
-    decorateScore(score) {
-      return score * 100;
-    },
     toggleCheck() {
       if (!this.disabled) {
         let checked = this.areChecked.slice();
