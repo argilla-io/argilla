@@ -366,7 +366,7 @@ $marginRight: 200px;
     display: inline-block;
     width: 100%;
     &--no-sentences {
-      max-width: calc(100% - $marginRight);
+      max-width: calc(100% - #{$marginRight});
     }
   }
   &__edition-area {
