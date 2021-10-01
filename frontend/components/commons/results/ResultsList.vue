@@ -41,12 +41,13 @@
           </results-record>
         </div>
       </template>
-      <RePagination
-        :total-items="dataset.results.total"
-        :pagination-settings="dataset.viewSettings.pagination"
-        @changePage="onPagination"
-      />
     </VueAutoVirtualScrollList>
+    <RePagination
+      :total-items="dataset.results.total"
+      :pagination-settings="dataset.viewSettings.pagination"
+      :allowKeyboardPagination="allowKeyboardPagination"
+      @changePage="onPagination"
+    />
   </div>
 </template>
 <script>
@@ -73,7 +74,7 @@ export default {
     moreDataAvailable() {
       return this.visibleRecords.length < this.dataset.results.total;
     },
-    allowShortCut() {
+    allowKeyboardPagination() {
       return this.dataset.viewSettings.pagination.allowKeyboardPagination;
     },
   },
@@ -88,27 +89,10 @@ export default {
     if (this.scrollComponent)
       this.scrollComponent.removeEventListener("scroll", this.onScroll);
   },
-  created() {
-    window.addEventListener("keydown", this.keyDown);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
-  },
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
     }),
-    keyDown(event) {
-      // TODO: move to RePagination when fixed
-      if (this.allowShortCut) {
-        let { page, size } = this.dataset.viewSettings.pagination;
-        if (event.keyCode === 39 && page < this.dataset.results.total / size) {
-          this.onPagination(page + 1, size);
-        } else if (event.keyCode === 37 && page > 1) {
-          this.onPagination(page - 1, size);
-        }
-      }
-    },
     onScroll() {
       if (this.$refs.scroll.scrollTop > 10) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
@@ -139,6 +123,7 @@ export default {
   list-style: none;
   .results-scroll {
     padding-top: 1em;
+    padding-bottom: 5em;
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
