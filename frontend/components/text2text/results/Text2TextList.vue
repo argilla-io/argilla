@@ -34,6 +34,7 @@
       >
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="itemNumber === index" class="content__sentences">
+            <p class="content__sentences__title">{{sentencesOrigin}}</p>
             <div class="content__edition-area">
               <p
                 :key="refresh"
@@ -56,8 +57,8 @@
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
-                    ? `View predictions (${predictionsLength})`
-                    : "Back to annotation"
+                    ? editable ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
+                    : editable ? "Back to annotation" : "View annotation"
                 }}</re-button
               >
             </div>
@@ -70,7 +71,7 @@
                   :decimals="2"
                 ></re-numeric>
               </div>
-              <div v-if="sentences.length > 1" class="content__nav-buttons">
+              <div v-if="sentences.length && sentencesOrigin === 'Prediction'" class="content__nav-buttons">
                 <a
                   :class="itemNumber <= 0 ? 'disabled' : null"
                   href="#"
@@ -130,11 +131,26 @@
 
         <div v-if="!sentences.length">
           <p
-            class="content__text"
+            class="content__text content__text--no-sentences"
             :contenteditable="editable"
             placeholder="Type your text"
             @input="input"
           ></p>
+            <div class="content__footer">
+              <div class="content__actions-buttons">
+                <re-button
+                  v-if="newSentence && editable"
+                  :class="[
+                    'button-primary',
+                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
+                  ]"
+                  @click="annotate"
+                  >{{
+                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
+                  }}</re-button
+                >
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -284,6 +300,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$marginRight: 200px;
 [contenteditable="true"] {
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
   border-radius: 3px 3px 3px 3px;
@@ -336,16 +353,25 @@ export default {
     display: flex;
     flex-direction: column;
     min-height: 140px;
+    &__title {
+      color: palette(grey, verylight);
+      @include font-size(12px);
+      font-weight: 600;
+      margin: 0;
+    }
   }
   &__text {
     color: black;
     white-space: pre-wrap;
     display: inline-block;
     width: 100%;
+    &--no-sentences {
+      max-width: calc(100% - #{$marginRight});
+    }
   }
   &__edition-area {
     position: relative;
-    margin-right: 140px;
+    margin-right: $marginRight;
     span {
       position: absolute;
       top: 100%;
@@ -413,6 +439,7 @@ export default {
         border-color: $font-secondary;
         opacity: 0;
         transition: opacity 0.3s ease-in-out 0.2s;
+        min-width: auto;
       }
       &.button-primary:not(.active) {
         opacity: 0;
@@ -433,7 +460,7 @@ export default {
     a {
       height: 20px;
       width: 20px;
-      line-height: 20px;
+      line-height: 19px;
       text-align: center;
       border-radius: 3px;
       text-align: center;

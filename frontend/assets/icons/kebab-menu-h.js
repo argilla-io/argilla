@@ -19,9 +19,9 @@
 var icon = require('vue-svgicon')
 icon.register({
   'kebab-menu-h': {
-    width: 13,
-    height: 16,
-    viewBox: '0 0 13 16',
-    data: '<path pid="0" fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>'
+    width: 12,
+    height: 4,
+    viewBox: '0 0 12 4',
+    data: '<text transform="translate(-1139 -222)" fill="#4C4EA3" fill-rule="evenodd" font-family="OpenSans-Bold, Open Sans" font-size="14" font-weight="bold"><tspan x="1139" y="225">…</tspan></text>'
   }
 })
