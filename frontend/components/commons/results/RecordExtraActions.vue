@@ -38,11 +38,12 @@
       </div>
       <template v-if="allowChangeStatus">
         <div
+          :class="record.status === 'Discarded' ? 'disabled' : null"
           v-for="status in allowedStatusActions"
           :key="status.key"
           @click="onChangeRecordStatus(status.key)"
         >
-          <span>{{ status.name }}</span>
+          <span>{{record.status === 'Discarded' ? 'Discarded' : status.name }}</span>
         </div>
       </template>
     </div>
@@ -165,6 +166,9 @@ export default {
     box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
     padding: 3px;
     min-width: 135px;
+    .disabled {
+      pointer-events: none;
+    }
     div {
       padding: 0.5em;
       color: $font-secondary-dark;
