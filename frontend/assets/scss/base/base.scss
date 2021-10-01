@@ -42,10 +42,9 @@ body {
   font-size: $base-font-size;
   line-height: $base-line-height;
   background: $bg;
-  &.fixed-header {
-    max-height: 100vh;
-    overflow: hidden;
-  }
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 a,
