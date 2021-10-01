@@ -13,7 +13,6 @@ Vue.filter("formatNumber", function (value) {
 });
 
 Vue.filter("percent", function (value) {
-  console.log(value)
   const formatter = new Intl.NumberFormat(locale.length ? locale[0] : 'en', {
     style: 'percent',
     minimumFractionDigits: 2,
