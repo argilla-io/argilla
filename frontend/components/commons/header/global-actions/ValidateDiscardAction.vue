@@ -136,8 +136,7 @@ export default {
     background: $lighter-color;
     border: 1px solid $line-smooth-color;
     cursor: pointer;
-    &:hover,
-    &:focus {
+    &:hover {
       border-color: $primary-color;
     }
     &:first-of-type {

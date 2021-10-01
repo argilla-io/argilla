@@ -34,7 +34,7 @@
       >
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="itemNumber === index" class="content__sentences">
-            <p class="content__sentences__title">{{sentencesOrigin}}</p>
+            <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
             <div class="content__edition-area">
               <p
                 :key="refresh"
