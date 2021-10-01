@@ -20,7 +20,7 @@
     <p class="sidebar__title">Annotation progress</p>
     <div class="progress__info">
       <p class="progress__info__text">Total annotations</p>
-      <span class="progress__info__percent">{{ progress }}%</span>
+      <span class="progress__info__percent">{{ progress | percent }}</span>
     </div>
     <div class="progress__numbers">
       <span>{{ totalAnnotated | formatNumber }}</span
@@ -94,9 +94,9 @@ export default {
     },
     progress() {
       return (
-        (((this.totalValidated || 0) + (this.totalDiscarded || 0)) * 100) /
+        (((this.totalValidated || 0) + (this.totalDiscarded || 0))) /
         this.total
-      ).toFixed(2);
+      )
     },
     annotationIsEnabled() {
       return this.dataset.viewSettings.annotationEnabled;

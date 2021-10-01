@@ -64,12 +64,7 @@
             </div>
             <div class="content__footer">
               <div v-if="showScore" class="content__score">
-                Score:
-                <re-numeric
-                  :value="decorateScore(sentence.score)"
-                  type="%"
-                  :decimals="2"
-                ></re-numeric>
+                Score:<span>{{ sentence.score | percent }}</span>
               </div>
               <div v-if="sentences.length && sentencesOrigin === 'Prediction'" class="content__nav-buttons">
                 <a
@@ -260,9 +255,6 @@ export default {
       this.editionMode = false;
       this.$emit("edition-mode", this.editionMode);
       this.$emit("change-visible-sentences");
-    },
-    decorateScore(score) {
-      return score * 100;
     },
     annotate() {
       this.itemNumber = 0;

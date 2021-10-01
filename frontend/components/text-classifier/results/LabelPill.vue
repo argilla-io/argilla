@@ -25,12 +25,7 @@
     >
       <span class="pill__text">{{ label.class }} </span>
       <span v-if="showScore" class="pill__score">
-        <ReNumeric
-          class="radio-data__score"
-          :value="decorateScore(label.score)"
-          type="%"
-          :decimals="2"
-        ></ReNumeric>
+        <span class="radio-data__score">{{ label.score | percent }}</span>
       </span>
     </p>
   </div>
@@ -56,9 +51,6 @@ export default {
     },
   },
   methods: {
-    decorateScore(score) {
-      return score * 100;
-    },
     isPredictedAs(label) {
       return this.predictedAs ? this.predictedAs.includes(label.class) : null;
     },
