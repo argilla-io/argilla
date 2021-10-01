@@ -76,10 +76,18 @@ export default {
     }),
 
     initializeSentenceOrigin() {
-      if (this.annotationSentences.length) {
-        this.sentencesOrigin = "Annotation";
-      } else if (this.predictionSentences.length) {
-        this.sentencesOrigin = "Prediction";
+      if (this.annotationEnabled) {
+        if (this.annotationSentences.length) {
+          this.sentencesOrigin = "Annotation";
+        } else if (this.predictionSentences.length) {
+          this.sentencesOrigin = "Prediction";
+        }
+      } else {
+        if (this.predictionSentences.length) {
+          this.sentencesOrigin = "Prediction";
+        } else if (this.annotationSentences.length) {
+          this.sentencesOrigin = "Annotation";
+        }        
       }
     },
 
