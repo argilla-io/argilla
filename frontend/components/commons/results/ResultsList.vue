@@ -131,6 +131,7 @@ export default {
     .--annotation & {
       padding-top: 240px;
     }
+     // TODO: Revise when new fixed header is ready
     .TokenClassification.--annotation & {
       padding-top: 300px;
       .fixed-header & {
