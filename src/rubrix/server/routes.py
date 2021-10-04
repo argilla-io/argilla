@@ -22,6 +22,7 @@ from fastapi import APIRouter
 from rubrix.server.commons.errors import ErrorMessage
 
 from .datasets import api as datasets
+from .metrics import api as metrics
 from .info import api as info
 from .tasks import api as tasks
 from .users import api as users
@@ -36,5 +37,5 @@ api_router = APIRouter(
 
 dependencies = []
 
-for router in [users.router, datasets.router, info.router, tasks.router]:
+for router in [users.router, datasets.router, metrics.router, info.router, tasks.router]:
     api_router.include_router(router, dependencies=dependencies)
