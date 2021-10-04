@@ -17,6 +17,7 @@ import httpx
 import pytest
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.models import BulkResponse
 from rubrix.client.sdk.text_classification.api import bulk
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -45,3 +46,4 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_data)
 
     assert response.status_code == 200
+    assert isinstance(response.parsed, BulkResponse)

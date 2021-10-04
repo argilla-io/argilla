@@ -23,7 +23,6 @@ def test_bulk_data_schema(helpers):
     client_schema = TextClassificationBulkData.schema()
     server_schema = ServerTextClassificationBulkData.schema()
 
-    # we do not care about the doc strings (aka descriptions in the schema)
     assert helpers.remove_description(client_schema) == helpers.remove_description(
         server_schema
     )
