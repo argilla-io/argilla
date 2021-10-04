@@ -15,8 +15,6 @@
 
 import os
 
-from fastapi.testclient import TestClient
-from rubrix.server.server import app
 from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification.api import (
     TaskType,
