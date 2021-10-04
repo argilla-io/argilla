@@ -18,7 +18,7 @@ import pytest
 
 class Helpers:
     def remove_description(self, schema: dict):
-        """Removes the 'description' key from a model schema"""
+        """Removes the 'description' key from a model schema. We do not care about the doc strings."""
         if "description" in schema:
             del schema["description"]
         for value in schema.values():
