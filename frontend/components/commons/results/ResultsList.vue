@@ -25,6 +25,7 @@
       class="results-scroll"
       :default-height="100"
       :total-height="1200"
+      :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
     >
       <template v-if="showLoader">
         <results-loading :size="dataset.viewSettings.pagination.size" />
@@ -45,7 +46,7 @@
     <RePagination
       :total-items="dataset.results.total"
       :pagination-settings="dataset.viewSettings.pagination"
-      :allowKeyboardPagination="allowKeyboardPagination"
+      :allow-keyboard-pagination="allowKeyboardPagination"
       @changePage="onPagination"
     />
   </div>
@@ -94,7 +95,7 @@ export default {
       paginate: "entities/datasets/paginate",
     }),
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 10) {
+      if (this.$refs.scroll.scrollTop > 0) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
@@ -128,25 +129,6 @@ export default {
     overflow: auto;
     padding-left: 4em;
     padding-right: calc(4em + 45px);
-    .--annotation & {
-      padding-top: 240px;
-    }
-     // TODO: Revise when new fixed header is ready
-    .TokenClassification.--annotation & {
-      padding-top: 300px;
-      .fixed-header & {
-        padding-top: 190px !important;
-      }
-    }
-    .TokenClassification.--exploration & {
-      padding-top: 240px;
-      .fixed-header & {
-        padding-top: 150px !important;
-      }
-    }
-    .fixed-header & {
-      padding-top: 120px !important;
-    }
     @include media(">desktopLarge") {
       width: 100%;
       padding-right: calc(294px + 45px + 4em);

@@ -194,9 +194,6 @@ export default {
   margin-left: auto;
   pointer-events: all;
   border-radius: 5px;
-  .fixed-header & {
-    height: 40px;
-  }
   &__container {
     position: relative;
     max-width: 280px;
