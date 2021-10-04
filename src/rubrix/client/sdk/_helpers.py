@@ -21,27 +21,23 @@ from rubrix.client.sdk.commons.models import HTTPValidationError
 from rubrix.client.sdk.commons.models import Response
 
 
-def build_response(
+def build_bulk_response(
     response: httpx.Response,
-) -> Response[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[BulkResponse, ErrorMessage, HTTPValidationError]]:
+
+    parsed_response = None
+    if response.status_code == 200:
+        parsed_response = BulkResponse(**response.json())
+    elif response.status_code == 404:
+        parsed_response = ErrorMessage(**response.json())
+    elif response.status_code == 500:
+        parsed_response = ErrorMessage(**response.json())
+    elif response.status_code == 422:
+        parsed_response = HTTPValidationError(**response.json())
+
     return Response(
         status_code=response.status_code,
         content=response.content,
         headers=response.headers,
-        parsed=_parse_response(response=response),
+        parsed=parsed_response,
     )
-
-
-def _parse_response(
-    response: httpx.Response,
-) -> Optional[Union[BulkResponse, ErrorMessage, ErrorMessage, HTTPValidationError]]:
-    if response.status_code == 200:
-        return BulkResponse(**response.json())
-    if response.status_code == 404:
-        return ErrorMessage(**response.json())
-    if response.status_code == 500:
-        return ErrorMessage(**response.json())
-    if response.status_code == 422:
-        return HTTPValidationError(**response.json())
-
-    return None

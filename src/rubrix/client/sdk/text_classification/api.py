@@ -16,7 +16,7 @@
 import httpx
 from httpx import Response
 
-from rubrix.client.sdk._helpers import build_response
+from rubrix.client.sdk._helpers import build_bulk_response
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
 
@@ -38,4 +38,4 @@ def bulk(
         json=json_body.dict(exclude_unset=True),
     )
 
-    return build_response(response)
+    return build_bulk_response(response)
