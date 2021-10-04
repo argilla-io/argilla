@@ -446,6 +446,14 @@ class ElasticsearchWrapper(LoggingMixin):
             index=index, body={"settings": {"index.blocks.write": read_only}}
         )
 
+    def create_field_mapping(
+        self, index: str, field_name: str, type: str, **extra_args
+    ):
+        self.__client__.indices.put_mapping(
+            index=index,
+            body={"properties": {field_name: {"type": type, **extra_args}}},
+        )
+
 
 _instance = None  # The singleton instance
 
