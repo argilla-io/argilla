@@ -58,40 +58,28 @@ export default {
     display: block !important;
     right: calc(4em + 45px);
   }
-  &.annotation.Text2Text {
-    top: -75px;
+  &.annotation {
+    top: 158px;
     .fixed-header & {
-      margin-top: 15em;
+      top: 120px;
     }
   }
-  &.annotation.TextClassification {
-    top: -75px;
+  &.explore {
+    top: 166px;
     .fixed-header & {
-      margin-top: 15em;
+      top: 50px;
     }
   }
   &.annotation.TokenClassification {
-    top: -75px;
+    top: 215px;
     .fixed-header & {
-      margin-top: 19em;
-    }
-  }
-  &.explore.Text2Text {
-    top: 0;
-    .fixed-header & {
-      margin-top: 4em;
-    }
-  }
-  &.explore.TextClassification {
-    top: 0;
-    .fixed-header & {
-      margin-top: 4em;
+      top: 170px;
     }
   }
   &.explore.TokenClassification {
-    top: 0;
+    top: 225px;
     .fixed-header & {
-      margin-top: 9em;
+      top: 110px;
     }
   }
   &__content {

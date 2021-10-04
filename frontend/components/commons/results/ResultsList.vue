@@ -122,12 +122,30 @@ export default {
   margin-bottom: 0;
   list-style: none;
   .results-scroll {
-    padding-top: 1em;
+    padding-top: 180px;
     padding-bottom: 5em;
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
     padding-right: calc(4em + 45px);
+    .--annotation & {
+      padding-top: 240px;
+    }
+    .TokenClassification.--annotation & {
+      padding-top: 300px;
+      .fixed-header & {
+        padding-top: 190px !important;
+      }
+    }
+    .TokenClassification.--exploration & {
+      padding-top: 240px;
+      .fixed-header & {
+        padding-top: 150px !important;
+      }
+    }
+    .fixed-header & {
+      padding-top: 120px !important;
+    }
     @include media(">desktopLarge") {
       width: 100%;
       padding-right: calc(294px + 45px + 4em);

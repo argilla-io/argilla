@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="app">
+  <div :class="[ 'app', currentTask, annotationEnabled ? '--annotation' : '--exploration' ]">
     <div class="app__content">
       <section ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
@@ -165,12 +165,12 @@ export default {
   right: 0;
   left: 0;
   transform: translateY(0);
+  position: fixed;
+  background: $bg;
   .fixed-header & {
     // top: -265px;
     // transition: transform 0.2s ease-in-out;
     // transform: translateY(10px);
-    position: fixed;
-    background: $bg;
     z-index: 2;
     box-shadow: 1px 1px 6px $font-medium-color;
     ::v-deep .filters,
