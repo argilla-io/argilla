@@ -19,11 +19,15 @@ This module contains the data models for the interface
 
 import datetime
 import warnings
+import socket
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, validator
 from rubrix.server.commons.helpers import limit_value_length
 from rubrix._constants import MAX_KEYWORD_LENGTH
+
+
+MACHINE_NAME = socket.gethostname()
 
 
 class BulkResponse(BaseModel):
@@ -94,8 +98,8 @@ class TextClassificationRecord(BaseModel):
 
     prediction: Optional[List[Tuple[str, float]]] = None
     annotation: Optional[Union[str, List[str]]] = None
-    prediction_agent: Optional[str] = None
-    annotation_agent: Optional[str] = None
+    prediction_agent: str = MACHINE_NAME
+    annotation_agent: str = MACHINE_NAME
     multi_label: bool = False
 
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -159,10 +163,12 @@ class TokenClassificationRecord(BaseModel):
     text: str
     tokens: List[str]
 
-    prediction: Optional[List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]] = None
+    prediction: Optional[
+        List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+    ] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
-    prediction_agent: Optional[str] = None
-    annotation_agent: Optional[str] = None
+    prediction_agent: str = MACHINE_NAME
+    annotation_agent: str = MACHINE_NAME
 
     id: Optional[Union[int, str]] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -211,8 +217,8 @@ class Text2TextRecord(BaseModel):
 
     prediction: Optional[List[Union[str, Tuple[str, float]]]] = None
     annotation: Optional[str] = None
-    prediction_agent: Optional[str] = None
-    annotation_agent: Optional[str] = None
+    prediction_agent: str = MACHINE_NAME
+    annotation_agent: str = MACHINE_NAME
 
     id: Optional[Union[int, str]] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
