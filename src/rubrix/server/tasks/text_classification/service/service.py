@@ -96,17 +96,10 @@ class TextClassificationService:
         records: List[CreationTextClassificationRecord],
     ):
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
-
-        db_records = []
-        now = datetime.datetime.now()
-        for record in records:
-            db_record = TextClassificationRecord.parse_obj(record)
-            db_record.last_updated = now
-            db_records.append(db_record.dict(exclude_none=True))
-
         failed = self.__dao__.add_records(
             dataset=dataset,
-            records=db_records,
+            records=records,
+            record_class=TextClassificationRecord
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
