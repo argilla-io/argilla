@@ -26,12 +26,11 @@ from rubrix.server.tasks.commons import (
     SortableField,
 )
 from rubrix.server.tasks.commons.dao import (
-    extends_index_dynamic_templates,
     extends_index_properties,
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import (
+from rubrix.server.commons.es_helpers import (
     aggregations,
     filters,
     sort_by2elasticsearch,
@@ -79,6 +78,7 @@ extends_index_properties(
         },
     }
 )
+
 
 def as_elasticsearch(search: TokenClassificationQuery) -> Dict[str, Any]:
     """Build an elasticsearch query part from search query"""
@@ -204,8 +204,7 @@ class TokenClassificationService:
                     ],
                 ),
                 aggregations={
-                    **aggregations.nested_aggregation(
-                        name=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                    PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
                         inner_aggregation=aggregations.bidimentional_terms_aggregations(
                             name=PREDICTED_MENTIONS_ES_FIELD_NAME,
@@ -213,8 +212,7 @@ class TokenClassificationService:
                             field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME + ".mention",
                         ),
                     ),
-                    **aggregations.nested_aggregation(
-                        name=MENTIONS_ES_FIELD_NAME,
+                    MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=MENTIONS_ES_FIELD_NAME,
                         inner_aggregation=aggregations.bidimentional_terms_aggregations(
                             name=MENTIONS_ES_FIELD_NAME,

@@ -17,37 +17,19 @@ import json
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends
+
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.tasks.commons import TaskType
-
 from .model import DatasetDB
-
-DATASETS_INDEX_NAME = f".rubrix.datasets-v0"
-DATASETS_RECORDS_INDEX_NAME = ".rubrix.dataset.{}.records-v0"
-
-
-DATASETS_INDEX_TEMPLATE = {
-    "index_patterns": [DATASETS_INDEX_NAME],
-    "settings": {"number_of_shards": 1},
-    "mappings": {
-        "properties": {
-            "tags": {
-                "type": "nested",
-                "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "text"},
-                },
-            },
-            "metadata": {
-                "type": "nested",
-                "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "text"},
-                },
-            },
-        }
-    },
-}
+from ..commons import es_helpers
+from ..commons.errors import WrongInputParamError
+from ..commons.es_helpers import aggregations
+from ..commons.es_settings import (
+    DATASETS_INDEX_NAME,
+    DATASETS_INDEX_TEMPLATE,
+    DATASETS_RECORDS_INDEX_NAME,
+)
+from ..metrics.model import DatasetMetricDB
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -110,7 +92,7 @@ class DatasetsDAO:
             index=DATASETS_INDEX_NAME,
             query=query,
         )
-        return [self._es_doc_to_observation_dataset(doc) for doc in docs]
+        return [self._es_doc_to_dataset(doc) for doc in docs]
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
         """
@@ -129,7 +111,7 @@ class DatasetsDAO:
         self._es.add_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset.id,
-            document=self._observation_dataset_to_es_doc(dataset),
+            document=self._dataset_to_es_doc(dataset),
         )
 
         self._es.create_index(
@@ -160,7 +142,7 @@ class DatasetsDAO:
         self._es.update_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset_id,
-            document=self._observation_dataset_to_es_doc(dataset),
+            document=self._dataset_to_es_doc(dataset),
         )
         return dataset
 
@@ -214,10 +196,10 @@ class DatasetsDAO:
                 )
 
             document = results[0]
-        return self._es_doc_to_observation_dataset(document) if document else None
+        return self._es_doc_to_dataset(document) if document else None
 
     @staticmethod
-    def _es_doc_to_observation_dataset(doc: Dict[str, Any]) -> DatasetDB:
+    def _es_doc_to_dataset(doc: Dict[str, Any]) -> DatasetDB:
         """Transforms a stored elasticsearch document into a `DatasetDB`"""
 
         def __key_value_list_to_dict__(
@@ -238,7 +220,7 @@ class DatasetsDAO:
         )
 
     @staticmethod
-    def _observation_dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
+    def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
         def __dict_to_key_value_list__(data: Dict[str, Any]) -> List[Dict[str, Any]]:
             return [
                 {"key": key, "value": json.dumps(value)} for key, value in data.items()
@@ -258,7 +240,7 @@ class DatasetsDAO:
         self._es.add_document(
             index=DATASETS_INDEX_NAME,
             doc_id=target.id,
-            document=self._observation_dataset_to_es_doc(target),
+            document=self._dataset_to_es_doc(target),
         )
         index_from = dataset_records_index(source.id)
         index_to = dataset_records_index(target.id)
@@ -271,6 +253,47 @@ class DatasetsDAO:
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open_index(dataset_records_index(dataset.id))
+
+    def generate_dataset_metric_spec(
+        self, dataset: DatasetDB, metric: DatasetMetricDB
+    ) -> Dict[str, Any]:
+        """Generate a metric.spec object by using metric dataset field and dataset configuration"""
+
+        index = dataset_records_index(dataset.id)
+
+        field_mappings = self._es.get_field_mapping(index, field_name=metric.field)
+        if metric.field not in field_mappings:
+            raise WrongInputParamError(
+                f"Provide field {metric.field} doesn't exist in dataset index"
+            )
+        index_mapping = self._es.get_mapping(index)
+        nested_field_path = es_helpers.find_nested_field_path(
+            metric.field, mapping_definition=index_mapping
+        )
+
+        if field_mappings[metric.field] == "keyword":
+            aggregation = aggregations.terms_aggregation(metric.field)
+        elif field_mappings[metric.field] == "float":
+            aggregation = aggregations.histogram_aggregation(
+                metric.field, interval=0.01
+            )
+        elif field_mappings[metric.field] == "long":
+            aggregation = aggregations.histogram_aggregation(metric.field, interval=1)
+        else:
+            # TODO: Another kind of aggregations
+            raise WrongInputParamError(
+                f"""Provided field {metric.field} does not support simple metrics definition. """
+                """Please, used spec field for advanced/custom metric definition"""
+            )
+
+        return (
+            aggregations.nested_aggregation(
+                nested_path=nested_field_path,
+                inner_aggregation=aggregation,
+            )
+            if nested_field_path
+            else aggregation
+        )
 
 
 _instance: Optional[DatasetsDAO] = None

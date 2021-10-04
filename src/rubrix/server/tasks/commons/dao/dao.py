@@ -24,7 +24,7 @@ from rubrix.server.datasets.dao import (
 )
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
-from rubrix.server.tasks.commons.es_helpers import (
+from rubrix.server.commons.es_helpers import (
     DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,

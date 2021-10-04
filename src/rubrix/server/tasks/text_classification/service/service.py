@@ -24,7 +24,7 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import filters, sort_by2elasticsearch
+from rubrix.server.commons.es_helpers import filters, sort_by2elasticsearch
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     TextClassificationQuery,
