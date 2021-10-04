@@ -120,6 +120,10 @@ export default {
       type: Object,
       required: true,
     },
+    allowKeyboardPagination: {
+      type: Boolean,
+      required: true,
+    },
     visiblePagesRange: {
       type: Number,
       default: 5,
@@ -159,7 +163,12 @@ export default {
       return pages;
     },
   },
-
+  created() {
+    window.addEventListener("keydown", this.keyDown);
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.keyDown);
+  },
   methods: {
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -185,6 +194,15 @@ export default {
     closePageSizeSelector() {
       this.showOptions = false;
     },
+    keyDown(event) {
+      if (this.allowKeyboardPagination) {
+        if (event.keyCode === 39) {
+          this.nextPage()
+        } else if (event.keyCode === 37) {
+          this.prevPage()
+        }
+      }
+    },
   },
 };
 </script>
@@ -198,10 +216,20 @@ $pagination-size: 30px;
   margin: auto;
   font-weight: 600;
   &__container {
+    padding-left: 4em;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
-    padding-top: 3em;
-    padding-bottom: 12em;
+    background: palette(grey, light);
+    border-top: 1px solid palette(grey, smooth);
+    padding-right: calc(4em + 45px);
+    @include media(">desktopLarge") {
+      width: 100%;
+      padding-right: calc(294px + 45px + 4em);
+    }
   }
   &__arrow {
     transition: all 0.3s ease-in-out;
@@ -293,7 +321,7 @@ $pagination-size: 30px;
       padding: 0;
       display: block;
       position: absolute;
-      top: 2em;
+      bottom: 2em;
       left: 0;
       right: 0;
       border: 2px solid $primary-color;
