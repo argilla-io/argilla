@@ -18,9 +18,11 @@ Dataset models definition
 """
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from pydantic import BaseModel, Field
+
+from rubrix.server.metrics.model import DatasetMetricDB
 from rubrix.server.tasks.commons import TaskType
 
 
@@ -59,7 +61,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     pass
 
 
-class DatasetDB(CreationDatasetRequest):
+class BaseDatasetDB(CreationDatasetRequest):
     """
     Low level dataset data model
 
@@ -88,7 +90,11 @@ class DatasetDB(CreationDatasetRequest):
         return self.name
 
 
-class Dataset(DatasetDB):
+class DatasetDB(BaseDatasetDB):
+    metrics: List[DatasetMetricDB] = Field(default_factory=list)
+
+
+class Dataset(BaseDatasetDB):
     """Dataset used for response output"""
 
     pass
