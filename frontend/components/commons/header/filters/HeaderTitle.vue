@@ -45,11 +45,11 @@ export default {
   }
 }
 .title {
+  display: flex;
   font-weight: normal;
   @include font-size(16px);
   color: $font-secondary-dark;
   white-space: nowrap;
-  display: flex;
   margin: 0.5em 0;
   align-items: center;
 }
