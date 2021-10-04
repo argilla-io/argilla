@@ -53,7 +53,7 @@ from rubrix.sdk.models import (
 )
 from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from rubrix.sdk.types import Response
-from rubrix.sdk.api.datasets import get_dataset
+from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.sdk.api.text_classification import (
     _get_dataset_data as text_classification_get_dataset_data,
 )
@@ -229,7 +229,7 @@ class RubrixClient:
         Returns:
             The dataset as a pandas Dataframe.
         """
-        response = get_dataset.sync_detailed(client=self._client, name=name)
+        response = get_dataset(client=self._client, name=name)
         _check_response_errors(response)
         task = response.parsed.task
 
