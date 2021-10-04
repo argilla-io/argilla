@@ -42,7 +42,11 @@ def test_create_records_for_text_classification_with_multi_label(monkeypatch):
                 "id": 0,
                 "inputs": {"data": "my data"},
                 "multi_label": True,
-                "metadata": {"field_one": "value one", "field_two": "value 2"},
+                "metadata": {
+                    "field_one": "value one",
+                    "field_two": "value 2",
+                    "one_more": [{"a": 1, "b": 2}],
+                },
                 "prediction": {
                     "agent": "test",
                     "labels": [
@@ -335,10 +339,18 @@ def test_some_sort_by():
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
-    assert (
-        list(map(lambda r: r.id, results.records))
-        == [14, 19, 24, 29, 34, 39, 4, 44, 49, 54]
-    )
+    assert list(map(lambda r: r.id, results.records)) == [
+        14,
+        19,
+        24,
+        29,
+        34,
+        39,
+        4,
+        44,
+        49,
+        54,
+    ]
 
 
 def test_disable_aggregations_when_scroll():

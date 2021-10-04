@@ -153,7 +153,7 @@ class DatasetRecordsDAO:
             now = datetime.datetime.utcnow()
 
         for r in records:
-            metadata_values.update(r.metadata)
+            metadata_values.update(r.metadata or {})
             db_record = record_class.parse_obj(r)
             if now:
                 db_record.last_updated = now
