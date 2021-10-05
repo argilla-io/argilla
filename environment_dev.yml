@@ -23,5 +23,7 @@ dependencies:
     - sphinx_rtd_theme==0.5.2
     - nbsphinx==0.8.7
     - sphinxext.opengraph==0.4.2
+    # code formatting
+    - pre-commit==2.15.0
     # install Rubrix in editable mode
     - -e .[server]
