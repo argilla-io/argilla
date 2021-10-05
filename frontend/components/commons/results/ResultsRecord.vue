@@ -18,10 +18,18 @@
 <template>
   <div>
     <div
-      :class="[annotationEnabled ? 'list__item--annotation-mode' : 'list__item', dataset.task,  item.status === 'Discarded' ? 'discarded' : null]"
+      :class="[
+        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
+        item.status === 'Discarded' ? 'discarded' : null,
+      ]"
     >
+      <!-- TODO: make global, remove task reference -->
       <div
-        v-if="annotationEnabled && item.status !== 'Default' && dataset.task !== 'Text2Text'"
+        v-if="
+          annotationEnabled &&
+          item.status !== 'Default' &&
+          dataset.task !== 'Text2Text'
+        "
         class="list__li__status"
       >
         {{ item.status }}
@@ -177,8 +185,7 @@ export default {
     &--annotation-mode {
       // padding-left: 4em;
       @extend .list__item !optional;
-      // TODO: make global when other tasks are ready
-      &.discarded.Text2Text {
+      &.discarded {
         opacity: 0.5;
         transition: 0.3s ease-in-out;
         &:hover {
@@ -193,26 +200,6 @@ export default {
       top: 1.2em;
       width: auto;
     }
-  }
-}
-.show-record-number {
-  position: fixed;
-  overflow: scroll;
-  top: 7em;
-  right: 1em;
-  background: $lighter-color;
-  border-radius: 10px;
-  min-height: 30px;
-  line-height: 30px;
-  padding: 0 0.5em;
-  display: none;
-  span {
-    @include font-size(20px);
-    margin-right: 10px;
-    color: $line-smooth-color;
-  }
-  .fixed-header & {
-    display: block;
   }
 }
 

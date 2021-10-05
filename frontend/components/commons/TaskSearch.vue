@@ -16,9 +16,15 @@
   -->
 
 <template>
-  <div :class="[ 'app', currentTask, annotationEnabled ? '--annotation' : '--exploration' ]">
+  <div
+    :class="[
+      'app',
+      currentTask,
+      annotationEnabled ? '--annotation' : '--exploration',
+    ]"
+  >
     <div class="app__content">
-      <section ref="header" class="header">
+      <section id="header" ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
           <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
         </ReTopbarBrand>
@@ -50,6 +56,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
   props: {
@@ -62,6 +69,7 @@ export default {
     sidebarInfoType: "progress",
     sidebarVisible: false,
     width: window.innerWidth,
+    headerHeight: undefined,
   }),
   computed: {
     currentTask() {
@@ -91,6 +99,9 @@ export default {
       this.width = window.innerWidth;
     };
   },
+  mounted() {
+    this.setHeaderHeight();
+  },
   methods: {
     ...mapActions({
       fetchDataset: "entities/datasets/fetchByName",
@@ -102,6 +113,19 @@ export default {
         dataset: this.dataset,
         value: this.annotationEnabled ? false : true,
       });
+    },
+    setHeaderHeight() {
+      const header = this.$refs.header;
+      const resize_ob = new ResizeObserver(() => {
+        this.headerHeight = header.offsetHeight;
+        DatasetViewSettings.update({
+          where: this.dataset.name,
+          data: {
+            headerHeight: this.headerHeight,
+          },
+        });
+      });
+      resize_ob.observe(header);
     },
     onRefresh() {
       this.search({
@@ -168,28 +192,34 @@ export default {
   position: fixed;
   background: $bg;
   .fixed-header & {
-    // top: -265px;
-    // transition: transform 0.2s ease-in-out;
-    // transform: translateY(10px);
+    animation: header-fixed 0.3s ease-in-out;
     z-index: 2;
     box-shadow: 1px 1px 6px $font-medium-color;
-    ::v-deep .filters,
-    ::v-deep .filters__switch,
-    ::v-deep .filter--sort,
     ::v-deep .filters__title,
     ::v-deep .topbar {
       display: none;
-    }
-    ::v-deep .filters__content {
-      padding: 0;
     }
     ::v-deep .global-actions {
       margin-top: 0;
       padding-top: 0;
       background: $bg;
       border: none;
-      min-height: 70px;
+      min-height: 60px;
     }
+  }
+  .fixed-header .--annotation & {
+    ::v-deep .filters__area {
+      display: none;
+    }
+  }
+}
+
+@keyframes header-fixed {
+  0% {
+    transform: translateY(-150px);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 

@@ -16,7 +16,10 @@
   -->
 
 <template>
-  <aside :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']">
+  <aside
+    :style="{ top: topPosition }"
+    :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']"
+  >
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
         <slot></slot>
@@ -35,6 +38,11 @@ export default {
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
+    },
+    topPosition() {
+      return this.annotationEnabled
+        ? `${this.dataset.viewSettings.headerHeight - 60}px`
+        : `${this.dataset.viewSettings.headerHeight + 10}px`;
     },
   },
 };
@@ -58,29 +66,8 @@ export default {
     display: block !important;
     right: calc(4em + 45px);
   }
-  &.annotation {
-    top: 158px;
-    .fixed-header & {
-      top: 120px;
-    }
-  }
-  &.explore {
-    top: 166px;
-    .fixed-header & {
-      top: 50px;
-    }
-  }
-  &.annotation.TokenClassification {
-    top: 215px;
-    .fixed-header & {
-      top: 170px;
-    }
-  }
-  &.explore.TokenClassification {
-    top: 225px;
-    .fixed-header & {
-      top: 110px;
-    }
+  .fixed-header .--annotation & {
+    margin-top: 70px;
   }
   &__content {
     border-radius: 2px;
