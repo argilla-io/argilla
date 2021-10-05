@@ -22,6 +22,8 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
+    BaseSearchResults,
+    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -227,59 +229,23 @@ class Text2TextSearchRequest(BaseModel):
     sort: List[SortableField] = Field(default_factory=list)
 
 
-class Text2TextSearchAggregations(BaseModel):
+class Text2TextSearchAggregations(BaseSearchResultsAggregations):
     """
-    API for result aggregations
+    Extends base aggregation with predicted and annotated text
 
     Attributes:
     -----------
-    words: Dict[str, int]
-        The word cloud aggregations for input text
     predicted_text: Dict[str, int]
         The word cloud aggregations for predicted text
     annotated_text: Dict[str, int]
         The word cloud aggregations for annotated text
-    annotated_by: Dict[str, int]
-        Occurrence info about more relevant annotation agent terms
-    predicted_by: Dict[str, int]
-        Occurrence info about more relevant prediction agent terms
-    status: Dict[str, int]
-        Occurrence info about task status
-    predicted: Dict[str, int]
-        Occurrence info about task prediction status
-    metadata: Dict[str, Dict[str, int]]
-        The metadata fields aggregations
     """
 
-    words: Dict[str, int] = Field(default_factory=dict)
     predicted_text: Dict[str, int] = Field(default_factory=dict)
     annotated_text: Dict[str, int] = Field(default_factory=dict)
 
-    annotated_by: Dict[str, int] = Field(default_factory=dict)
-    predicted_by: Dict[str, int] = Field(default_factory=dict)
 
-    status: Dict[str, int] = Field(default_factory=dict)
-    predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-
-
-class Text2TextSearchResults(BaseModel):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total number of records
-    records: List[Text2TextRecord]
-        The selected records to return
-    aggregations: Text2TextSearchAggregations
-        SearchRequest aggregations (if no pagination)
-
-    """
-
-    total: int = 0
-    records: List[Text2TextRecord] = Field(default_factory=list)
-    aggregations: Text2TextSearchAggregations = None
+class Text2TextSearchResults(
+    BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
+):
+    pass

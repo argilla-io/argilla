@@ -21,6 +21,8 @@ from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
+    BaseSearchResults,
+    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -330,63 +332,23 @@ class TokenClassificationSearchRequest(BaseModel):
     sort: List[SortableField] = Field(default_factory=list)
 
 
-class TokenClassificationAggregations(BaseModel):
+class TokenClassificationAggregations(BaseSearchResultsAggregations):
     """
-    API for result aggregations
+    Extends base aggregation with mentions
 
     Attributes:
     -----------
-    predicted_as: Dict[str, int]
-        Occurrence info about more relevant predicted terms
-    annotated_as: Dict[str, int]
-        Occurrence info about more relevant annotated terms
-    annotated_by: Dict[str, int]
-        Occurrence info about more relevant annotation agent terms
-    predicted_by: Dict[str, int]
-        Occurrence info about more relevant prediction agent terms
-    status: Dict[str, int]
-        Occurrence info about task status
-    predicted: Dict[str, int]
-        Occurrence info about task prediction status
-    words: WordCloudAggregations
-        The word cloud aggregations
-    metadata: Dict[str, Dict[str, int]]
-        The metadata fields aggregations
     mentions: Dict[str,Dict[str,int]]
         The annotated entity spans
     predicted_mentions: Dict[str,Dict[str,int]]
         The prediction entity spans
     """
 
-    predicted_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_by: Dict[str, int] = Field(default_factory=dict)
-    predicted_by: Dict[str, int] = Field(default_factory=dict)
-    status: Dict[str, int] = Field(default_factory=dict)
-    predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict)
-    words: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
     mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class TokenClassificationSearchResults(BaseModel):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total number of records
-    records: List[TokenClassificationRecord]
-        The selected records to return
-    aggregations: TokenClassificationAggregations
-        SearchRequest aggregations (if no pagination)
-
-    """
-
-    total: int = 0
-    records: List[TokenClassificationRecord] = Field(default_factory=list)
-    aggregations: Optional[TokenClassificationAggregations] = None
+class TokenClassificationSearchResults(
+    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
+):
+    pass
