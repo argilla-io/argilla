@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from rubrix.server.metrics.model import DatasetMetricResults
+
 
 class RecordSearch(BaseModel):
     """
@@ -34,9 +36,8 @@ class RecordSearch(BaseModel):
     """
 
     query: Optional[Dict[str, Any]]
-    sort: List[Dict[str,Any]] = Field(default_factory=list)
+    sort: List[Dict[str, Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
-
 
 
 class RecordSearchResults(BaseModel):
@@ -56,6 +57,8 @@ class RecordSearchResults(BaseModel):
         The words cloud aggregations
     metadata: Optional[Dict[str, int]]
         Metadata fields aggregations
+    metrics: Optional[List[DatasetMetricResults]]
+        Calculated metrics for search
     """
 
     total: int
@@ -63,3 +66,4 @@ class RecordSearchResults(BaseModel):
     aggregations: Optional[Dict[str, Dict[str, Any]]] = Field(default_factory=dict)
     words: Optional[Dict[str, int]] = None
     metadata: Optional[Dict[str, int]] = None
+    metrics: Optional[List[DatasetMetricResults]] = Field(default_factory=list)
