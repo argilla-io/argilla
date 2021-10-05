@@ -19,6 +19,7 @@ Methods for using the Rubrix Client, called from the module init file.
 """
 
 import logging
+import socket
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
@@ -63,6 +64,8 @@ from rubrix.sdk.api.token_classification import (
 from rubrix.sdk.api.text2_text import (
     _get_dataset_data as text2text_get_dataset_data,
 )
+
+MACHINE_NAME = socket.gethostname()
 
 
 class RubrixClient:
@@ -327,7 +330,7 @@ class RubrixClient:
                 )
                 entities.append(ent)
             model_dict["prediction"] = {
-                "agent": record.prediction_agent,
+                "agent": record.prediction_agent or MACHINE_NAME,
                 "entities": entities,
             }
         if record.annotation is not None:
@@ -336,7 +339,7 @@ class RubrixClient:
                 for ann in record.annotation
             ]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent,
+                "agent": record.annotation_agent or MACHINE_NAME,
                 "entities": gold_entities,
             }
         if record.id is not None:
@@ -391,13 +394,13 @@ class RubrixClient:
                 {"text": text, "score": score} for text, score in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent,
+                "agent": record.prediction_agent or MACHINE_NAME,
                 "sentences": sentences,
             }
         if record.annotation is not None:
             sentence = {"text": record.annotation, "score": 1.0}
             model_dict["annotation"] = {
-                "agent": record.annotation_agent,
+                "agent": record.annotation_agent or MACHINE_NAME,
                 "sentences": [sentence],
             }
 

@@ -12,7 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import socket
+from datetime import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -29,6 +30,8 @@ from rubrix.client.sdk.commons.models import PredictionStatus
 from rubrix.client.sdk.commons.models import ScoreRange
 from rubrix.client.sdk.commons.models import TaskStatus
 from rubrix.client.sdk.commons.models import UpdateDatasetRequest
+
+MACHINE_NAME = socket.gethostname()
 
 
 class ClassPrediction(BaseModel):
@@ -95,7 +98,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         }
         if record.prediction is not None:
             model_dict["prediction"] = {
-                "agent": record.prediction_agent,
+                "agent": record.prediction_agent or MACHINE_NAME,
                 "labels": [
                     {"class": label, "score": score}
                     for label, score in record.prediction
@@ -109,7 +112,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             )
             gold_labels = [{"class": label, "score": 1.0} for label in annotations]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent,
+                "agent": record.annotation_agent or MACHINE_NAME,
                 "labels": gold_labels,
             }
             model_dict["status"] = record.status or "Validated"
