@@ -19,17 +19,15 @@ from typing import Any, Dict, List, Optional, Union
 from stopwordsiso import stopwords
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
 from rubrix.server.commons.settings import settings
-from rubrix.server.datasets.dao import (
-    DATASETS_RECORDS_INDEX_NAME,
-)
 from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
     SortableField,
     TaskStatus,
 )
-from .api import EsRecordDataFieldNames
+from rubrix.server.tasks.commons.api import EsRecordDataFieldNames
 
 SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
 DATASETS_RECORDS_INDEX_TEMPLATE = {
@@ -144,11 +142,15 @@ def parse_aggregations(
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, doc_count = bucket.pop("key", None), bucket.pop("doc_count")
+            key, doc_count, meta = (
+                bucket.pop("key", None),
+                bucket.pop("doc_count", 0),
+                bucket.pop("meta", None),
+            )
             if len(bucket) == 1 and not ("from" in bucket or "to" in bucket):
                 k = [k for k in bucket if k not in ["key", "doc_count"]][0]
                 parsed.update({key or k: parse_buckets(bucket[k].get("buckets", []))})
-            else:
+            elif key:
                 parsed.update({key: doc_count})
 
         return parsed
@@ -305,44 +307,48 @@ class aggregations:
     DEFAULT_AGGREGATION_SIZE = 100
 
     @staticmethod
-    def nested_aggregation(
-        name: str, nested_path: str, inner_aggregation: Dict[str, Any]
-    ):
-        return {name: {"nested": {"path": nested_path}, "aggs": inner_aggregation}}
+    def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
+        return {
+            "meta": {
+                "kind": list(inner_aggregation.values())[0]["meta"]["kind"],
+            },
+            "nested": {"path": nested_path},
+            "aggs": inner_aggregation,
+        }
 
     @staticmethod
     def bidimentional_terms_aggregations(
-        name: str, field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
+        field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
     ):
         return {
-            name: {
-                "terms": {
-                    "field": field_name_x,
-                    "size": size,
-                    "order": {"_count": "desc"},
-                },
-                "aggs": {
-                    field_name_y: {
-                        "terms": {
-                            "field": field_name_y,
-                            "size": size,
-                            "order": {"_count": "desc"},
-                        }
-                    }
-                },
-            }
+            **aggregations.terms_aggregation(field_name_x, size=size),
+            "meta": {"kind": "2d-terms"},
+            "aggs": {
+                field_name_y: aggregations.terms_aggregation(field_name_y, size=size)
+            },
         }
 
     @staticmethod
     def terms_aggregation(field_name: str, size: int = DEFAULT_AGGREGATION_SIZE):
         return {
-            field_name: {
-                "terms": {
-                    "field": field_name,
-                    "size": size,
-                    "order": {"_count": "desc"},
-                }
-            }
+            "meta": {"kind": "terms"},
+            "terms": {
+                "field": field_name,
+                "size": size,
+                "order": {"_count": "desc"},
+            },
+        }
+
+    @staticmethod
+    def histogram_aggregation(field_name: str, interval: float = 0.1):
+        return {
+            "meta": {
+                "kind": "histogram",
+            },
+            "histogram": {
+                "field": field_name,
+                "interval": interval,
+            },
         }
 
     @staticmethod
@@ -505,3 +511,46 @@ class aggregations:
                 }
             }
         }
+
+
+def find_nested_field_path(
+    field_name: str, mapping_definition: Dict[str, Any]
+) -> Optional[str]:
+    """
+    Given a field name, find the nested path if any related to field name
+    definition in provided mapping definition
+
+    Parameters
+    ----------
+    field_name:
+        The field name
+    mapping_definition:
+        A mapping definition where field name is defined
+
+    Returns
+    -------
+        The found nested path if any, None otherwise
+    """
+
+    def build_flatten_properties_map(
+        properties: Dict[str, Any], prefix: str = ""
+    ) -> Dict[str, Any]:
+        results = {}
+        for prop_name, prop_value in properties.items():
+            if prefix:
+                prop_name = f"{prefix}.{prop_name}"
+            if "type" in prop_value:
+                results[prop_name] = prop_value["type"]
+            if "properties" in prop_value:
+                results.update(
+                    build_flatten_properties_map(
+                        prop_value["properties"], prefix=prop_name
+                    )
+                )
+        return results
+
+    properties_map = build_flatten_properties_map(mapping_definition)
+    for prop in properties_map:
+        if properties_map[prop] == "nested" and field_name.startswith(prop):
+            return prop
+    return None

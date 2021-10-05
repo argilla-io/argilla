@@ -26,7 +26,7 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import (
+from rubrix.server.commons.es_helpers import (
     aggregations,
     filters,
     sort_by2elasticsearch,
@@ -174,12 +174,10 @@ class Text2TextService:
                     ],
                 ),
                 aggregations={
-                    **aggregations.terms_aggregation(
-                        ExtendedEsRecordDataFieldNames.text_predicted
-                    ),
-                    **aggregations.terms_aggregation(
-                        ExtendedEsRecordDataFieldNames.text_predicted
-                    ),
+                        ExtendedEsRecordDataFieldNames.text_predicted: aggregations.terms_aggregation(
+                            ExtendedEsRecordDataFieldNames.text_predicted
+                        )
+
                 },
             ),
             size=size,
@@ -188,6 +186,7 @@ class Text2TextService:
         return Text2TextSearchResults(
             total=results.total,
             records=[Text2TextRecord.parse_obj(r) for r in results.records],
+            metrics=results.metrics,
             aggregations=Text2TextSearchAggregations(
                 **results.aggregations,
                 words=results.words,

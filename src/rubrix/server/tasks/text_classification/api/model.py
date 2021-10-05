@@ -17,18 +17,21 @@ from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
+
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict
 from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
+    BaseSearchResults,
+    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
     SortableField,
     TaskStatus,
     TaskType,
 )
-from rubrix._constants import MAX_KEYWORD_LENGTH
 
 
 class ClassPrediction(BaseModel):
@@ -386,60 +389,11 @@ class TextClassificationSearchRequest(BaseModel):
     sort: List[SortableField] = Field(default_factory=list)
 
 
-class TextClassificationSearchAggregations(BaseModel):
-    """
-    API for result aggregations
-
-    Attributes:
-    -----------
-    predicted_as: Dict[str, int]
-        Occurrence info about more relevant predicted terms
-    annotated_as: Dict[str, int]
-        Occurrence info about more relevant annotated terms
-    annotated_by: Dict[str, int]
-        Occurrence info about more relevant annotation agent terms
-    predicted_by: Dict[str, int]
-        Occurrence info about more relevant prediction agent terms
-    status: Dict[str, int]
-        Occurrence info about task status
-    predicted: Dict[str, int]
-        Occurrence info about task prediction status
-    words: Dict[str, int]
-        The word cloud aggregations
-    metadata: Dict[str, Dict[str, Any]]
-        The metadata fields aggregations
-    """
-
-    predicted_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_by: Dict[str, int] = Field(default_factory=dict)
-    predicted_by: Dict[str, int] = Field(default_factory=dict)
-    status: Dict[str, int] = Field(default_factory=dict)
-    predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict)
-    words: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-
-    class Config:
-        allow_population_by_field_name = True
+class TextClassificationSearchAggregations(BaseSearchResultsAggregations):
+    pass
 
 
-class TextClassificationSearchResults(BaseModel):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total number of records
-    records: List[TextClassificationRecord]
-        The selected records to return
-    aggregations: TextClassificationAggregations
-        SearchRequest aggregations (if no pagination)
-
-    """
-
-    total: int = 0
-    records: List[TextClassificationRecord] = Field(default_factory=list)
-    aggregations: TextClassificationSearchAggregations = None
+class TextClassificationSearchResults(
+    BaseSearchResults[TextClassificationRecord, TextClassificationSearchAggregations]
+):
+    pass

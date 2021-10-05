@@ -81,7 +81,9 @@ def get_dataset(
         - NotAuthorizedError if user cannot access the found dataset
 
     """
-    return service.find_by_name(name, owner=current_user.current_group)
+    return Dataset.parse_obj(
+        service.find_by_name(name, owner=current_user.current_group)
+    )
 
 
 @router.patch(

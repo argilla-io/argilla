@@ -26,12 +26,11 @@ from rubrix.server.tasks.commons import (
     SortableField,
 )
 from rubrix.server.tasks.commons.dao import (
-    extends_index_dynamic_templates,
     extends_index_properties,
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.es_helpers import (
+from rubrix.server.commons.es_helpers import (
     aggregations,
     filters,
     sort_by2elasticsearch,
@@ -198,23 +197,25 @@ class TokenClassificationService:
                     ],
                 ),
                 aggregations={
-                    **aggregations.nested_aggregation(
-                        name=PREDICTED_MENTIONS_ES_FIELD_NAME,
+                    PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
-                            name=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                            field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME + ".entity",
-                            field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME + ".mention",
-                        ),
+                        inner_aggregation={
+                            PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
+                                field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME
+                                + ".entity",
+                                field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME
+                                + ".mention",
+                            )
+                        },
                     ),
-                    **aggregations.nested_aggregation(
-                        name=MENTIONS_ES_FIELD_NAME,
+                    MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
-                            name=MENTIONS_ES_FIELD_NAME,
-                            field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
-                            field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
-                        ),
+                        inner_aggregation={
+                            MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
+                                field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
+                                field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
+                            )
+                        },
                     ),
                 },
             ),
@@ -224,6 +225,7 @@ class TokenClassificationService:
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
+            metrics=results.metrics,
             aggregations=TokenClassificationAggregations(
                 **results.aggregations,
                 words=results.words,

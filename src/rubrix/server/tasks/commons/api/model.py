@@ -29,6 +29,7 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
+from rubrix.server.metrics.model import DatasetMetricResults
 
 
 class EsRecordDataFieldNames(str, Enum):
@@ -145,10 +146,10 @@ class PredictionStatus(str, Enum):
     KO = "ko"
 
 
-T = TypeVar("T", bound=BaseAnnotation)
+Annotation = TypeVar("Annotation", bound=BaseAnnotation)
 
 
-class BaseRecord(GenericModel, Generic[T]):
+class BaseRecord(GenericModel, Generic[Annotation]):
     """
     Minimal dataset record information
 
@@ -168,8 +169,8 @@ class BaseRecord(GenericModel, Generic[T]):
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[T] = None
-    annotation: Optional[T] = None
+    prediction: Optional[Annotation] = None
+    annotation: Optional[Annotation] = None
 
     @validator("id", always=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -274,6 +275,69 @@ class BaseRecord(GenericModel, Generic[T]):
             EsRecordDataFieldNames.words: self.words,
             **self.extended_fields(),
         }
+
+
+class BaseSearchResultsAggregations(BaseModel):
+
+    """
+    API for result aggregations
+
+    Attributes:
+    -----------
+    predicted_as: Dict[str, int]
+        Occurrence info about more relevant predicted terms
+    annotated_as: Dict[str, int]
+        Occurrence info about more relevant annotated terms
+    annotated_by: Dict[str, int]
+        Occurrence info about more relevant annotation agent terms
+    predicted_by: Dict[str, int]
+        Occurrence info about more relevant prediction agent terms
+    status: Dict[str, int]
+        Occurrence info about task status
+    predicted: Dict[str, int]
+        Occurrence info about task prediction status
+    words: Dict[str, int]
+        The word cloud aggregations
+    metadata: Dict[str, Dict[str, Any]]
+        The metadata fields aggregations
+    """
+
+    predicted_as: Dict[str, int] = Field(default_factory=dict)
+    annotated_as: Dict[str, int] = Field(default_factory=dict)
+    annotated_by: Dict[str, int] = Field(default_factory=dict)
+    predicted_by: Dict[str, int] = Field(default_factory=dict)
+    status: Dict[str, int] = Field(default_factory=dict)
+    predicted: Dict[str, int] = Field(default_factory=dict)
+    score: Dict[str, int] = Field(default_factory=dict)
+    words: Dict[str, int] = Field(default_factory=dict)
+    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
+
+Record = TypeVar("Record", bound=BaseRecord)
+Aggregations = TypeVar("Aggregations", bound=BaseSearchResultsAggregations)
+
+
+class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
+    """
+    API search results
+
+    Attributes:
+    -----------
+
+    total:
+        The total number of records
+    records:
+        The selected records to return
+    aggregations:
+        Requested aggregations
+    metrics:
+        Requested metrics
+    """
+
+    total: int = 0
+    records: List[Record] = Field(default_factory=list)
+    aggregations: Aggregations = None
+    metrics: List[DatasetMetricResults] = Field(default_factory=list)
 
 
 class ScoreRange(BaseModel):

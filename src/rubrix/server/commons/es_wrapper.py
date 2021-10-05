@@ -277,12 +277,29 @@ class ElasticsearchWrapper(LoggingMixin):
         )
         return len(failed)
 
+    def get_mapping(self, index: str) -> Dict[str, Any]:
+        """
+        Return the configured index mapping
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.13/indices-get-mapping.html>`
+
+        """
+        try:
+            response = self.__client__.indices.get_mapping(
+                index=index,
+                ignore_unavailable=False,
+                include_type_name=True,
+            )
+            return list(response[index]["mappings"].values())[0]["properties"]
+        except NotFoundError:
+            return {}
+
     def get_field_mapping(self, index: str, field_name: str) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
         consist on a dictionary with full field name as key and its type as value
 
-        See <http://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html>
+        See <http://www.elastic.co/guide/en/elasticsearch/reference/7.13/indices-get-field-mapping.html>
 
         Parameters
         ----------

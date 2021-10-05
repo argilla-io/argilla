@@ -17,12 +17,12 @@ from datetime import datetime
 from typing import List, Optional
 
 from fastapi import Depends
+
 from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
 )
-
 from .dao import DatasetsDAO, create_datasets_dao
 from .model import (
     CopyDatasetRequest,
@@ -32,6 +32,7 @@ from .model import (
     TaskType,
     UpdateDatasetRequest,
 )
+from ..metrics.model import DatasetMetric, DatasetMetricDB
 
 
 class DatasetsService:
@@ -97,7 +98,7 @@ class DatasetsService:
         created_dataset = self.__dao__.create_dataset(db_dataset)
         return Dataset.parse_obj(created_dataset)
 
-    def find_by_name(self, name: str, owner: Optional[str]) -> Dataset:
+    def find_by_name(self, name: str, owner: Optional[str]) -> DatasetDB:
         """
         Find a dataset by name
 
@@ -118,11 +119,9 @@ class DatasetsService:
         found = self.__dao__.find_by_name(name, owner=owner)
         if not found:
             raise EntityNotFoundError(name=name, type=Dataset)
-
         if found.owner and owner and found.owner != owner:
             raise ForbiddenOperationError()
-
-        return Dataset(**found.dict()) if found else None
+        return found
 
     def delete(self, name: str, owner: Optional[str]):
         """
@@ -164,11 +163,7 @@ class DatasetsService:
             The updated dataset
         """
 
-        found = self.__dao__.find_by_name(name, owner=owner)
-        if not found:
-            raise EntityNotFoundError(name=name, type=Dataset)
-        if found.owner and owner and found.owner != owner:
-            raise ForbiddenOperationError()
+        found = self.find_by_name(name, owner)
 
         data.tags = {**found.tags, **data.tags}
         data.metadata = {**found.metadata, **data.metadata}
@@ -249,6 +244,34 @@ class DatasetsService:
     def open_dataset(self, name: str, owner: Optional[str]):
         found = self.find_by_name(name, owner)
         self.__dao__.open(found)
+
+    def get_dataset_metrics(
+        self, name: str, owner: Optional[str]
+    ) -> List[DatasetMetricDB]:
+        found = self.find_by_name(name, owner)
+        return found.metrics
+
+    def add_dataset_metric(
+        self, name: str, owner: Optional[str], metric: DatasetMetricDB
+    ) -> DatasetMetricDB:
+        found = self.find_by_name(name, owner)
+        for ds_metric in found.metrics:
+            if ds_metric.name == metric.name:
+                raise EntityAlreadyExistsError(metric.name, DatasetMetric)
+        if not metric.spec:
+            metric.spec = self.__dao__.generate_dataset_metric_spec(found, metric)
+        found.metrics.append(metric)
+        self.__dao__.update_dataset(found)
+        return metric
+
+    def delete_dataset_metric(
+        self, name: str, owner: Optional[str], metric_id: str
+    ) -> None:
+        found = self.find_by_name(name, owner)
+        if metric_id not in [m.id for m in found.metrics]:
+            raise EntityNotFoundError(metric_id, DatasetMetric)
+        found.metrics = [m for m in found.metrics if m.id != metric_id]
+        self.__dao__.update_dataset(found)
 
 
 _instance: Optional[DatasetsService] = None

@@ -26,9 +26,10 @@ from rubrix.server.datasets.dao import (
     dataset_records_index,
 )
 from rubrix.server.datasets.model import DatasetDB
+from rubrix.server.metrics.model import DatasetMetricResults
 from rubrix.server.tasks.commons import BaseRecord
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
-from rubrix.server.tasks.commons.es_helpers import (
+from rubrix.server.commons.es_helpers import (
     DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,
@@ -211,6 +212,7 @@ class DatasetRecordsDAO:
                 **aggregations.words_cloud(),
                 **aggregations.score(),  # TODO: calculate score directly from dataset
                 **aggregations.custom_fields(metadata_fields),
+                **{metric.id: metric.spec for metric in dataset.metrics},
             }
             if record_from == 0
             else None
@@ -245,6 +247,18 @@ class DatasetRecordsDAO:
 
             result.words = parsed_aggregations.pop("words")
             result.metadata = parsed_aggregations.pop("metadata", {})
+
+            metrics_results = [
+                DatasetMetricResults(
+                    id=metric.id,
+                    name=metric.name,
+                    description=metric.description,
+                    kind=metric.spec.get("meta", {"kind": "custom"})["kind"],
+                    results=parsed_aggregations.pop(metric.id),
+                )
+                for metric in dataset.metrics
+            ]
+            result.metrics = metrics_results
             result.aggregations = parsed_aggregations
         return result
 
