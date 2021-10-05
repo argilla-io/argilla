@@ -130,7 +130,6 @@ def search_records(
 
     """
 
-    datasets.find_by_name(name, owner=current_user.current_group)
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
 
@@ -211,8 +210,7 @@ async def stream_data(
 
     """
     query = query or TokenClassificationQuery()
-    found = datasets.find_by_name(name, owner=current_user.current_group)
-    data_stream = service.read_dataset(found.name, owner=found.owner, query=query)
+    data_stream = service.read_dataset(name, owner=current_user.current_group, query=query)
 
     return scan_data_response(
         data_stream=data_stream,
