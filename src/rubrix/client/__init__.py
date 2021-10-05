@@ -63,8 +63,6 @@ from rubrix.sdk.api.text2_text import (
     _get_dataset_data as text2text_get_dataset_data,
 )
 
-MACHINE_NAME = socket.gethostname()
-
 
 class RubrixClient:
     """Class definition for Rubrix Client"""
@@ -73,6 +71,8 @@ class RubrixClient:
 
     # Larger sizes will trigger a warning
     MAX_CHUNK_SIZE = 5000
+
+    MACHINE_NAME = socket.gethostname()
 
     def __init__(
         self,
@@ -331,7 +331,7 @@ class RubrixClient:
                 )
                 entities.append(ent)
             model_dict["prediction"] = {
-                "agent": record.prediction_agent or MACHINE_NAME,
+                "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
                 "entities": entities,
             }
         if record.annotation is not None:
@@ -340,7 +340,7 @@ class RubrixClient:
                 for ann in record.annotation
             ]
             model_dict["annotation"] = {
-                "agent": record.annotation_agent or MACHINE_NAME,
+                "agent": record.annotation_agent or RubrixClient.MACHINE_NAME,
                 "entities": gold_entities,
             }
         if record.id is not None:
@@ -395,13 +395,13 @@ class RubrixClient:
                 {"text": text, "score": score} for text, score in record.prediction
             ]
             model_dict["prediction"] = {
-                "agent": record.prediction_agent or MACHINE_NAME,
+                "agent": record.prediction_agent or RubrixClient.MACHINE_NAME,
                 "sentences": sentences,
             }
         if record.annotation is not None:
             sentence = {"text": record.annotation, "score": 1.0}
             model_dict["annotation"] = {
-                "agent": record.annotation_agent or MACHINE_NAME,
+                "agent": record.annotation_agent or RubrixClient.MACHINE_NAME,
                 "sentences": [sentence],
             }
 
