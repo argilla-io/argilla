@@ -20,10 +20,10 @@
     <div
       :class="[
         annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
-        dataset.task,
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
+      <!-- TODO: make global, remove task reference -->
       <div
         v-if="
           annotationEnabled &&
@@ -185,8 +185,7 @@ export default {
     &--annotation-mode {
       // padding-left: 4em;
       @extend .list__item !optional;
-      // TODO: make global when other tasks are ready
-      &.discarded.Text2Text {
+      &.discarded {
         opacity: 0.5;
         transition: 0.3s ease-in-out;
         &:hover {
