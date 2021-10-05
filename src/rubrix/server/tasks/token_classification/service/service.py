@@ -206,19 +206,23 @@ class TokenClassificationService:
                 aggregations={
                     PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
-                            name=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                            field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME + ".entity",
-                            field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME + ".mention",
-                        ),
+                        inner_aggregation={
+                            PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
+                                field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME
+                                + ".entity",
+                                field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME
+                                + ".mention",
+                            )
+                        },
                     ),
                     MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation=aggregations.bidimentional_terms_aggregations(
-                            name=MENTIONS_ES_FIELD_NAME,
-                            field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
-                            field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
-                        ),
+                        inner_aggregation={
+                            MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
+                                field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
+                                field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
+                            )
+                        },
                     ),
                 },
             ),

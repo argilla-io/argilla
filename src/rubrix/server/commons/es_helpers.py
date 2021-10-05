@@ -142,11 +142,15 @@ def parse_aggregations(
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, doc_count = bucket.pop("key", None), bucket.pop("doc_count")
+            key, doc_count, meta = (
+                bucket.pop("key", None),
+                bucket.pop("doc_count", 0),
+                bucket.pop("meta", None),
+            )
             if len(bucket) == 1 and not ("from" in bucket or "to" in bucket):
                 k = [k for k in bucket if k not in ["key", "doc_count"]][0]
                 parsed.update({key or k: parse_buckets(bucket[k].get("buckets", []))})
-            else:
+            elif key:
                 parsed.update({key: doc_count})
 
         return parsed
@@ -304,44 +308,48 @@ class aggregations:
 
     @staticmethod
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
-        return {"nested": {"path": nested_path}, "aggs": inner_aggregation}
+        return {
+            "meta": {
+                "kind": "nested." + list(inner_aggregation.values())[0]["meta"]["kind"],
+            },
+            "nested": {"path": nested_path},
+            "aggs": inner_aggregation,
+        }
 
     @staticmethod
     def bidimentional_terms_aggregations(
-        name: str, field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
+        field_name_x: str, field_name_y: str, size=DEFAULT_AGGREGATION_SIZE
     ):
         return {
-            name: {
-                "terms": {
-                    "field": field_name_x,
-                    "size": size,
-                    "order": {"_count": "desc"},
-                },
-                "aggs": {
-                    field_name_y: {
-                        "terms": {
-                            "field": field_name_y,
-                            "size": size,
-                            "order": {"_count": "desc"},
-                        }
-                    }
-                },
-            }
+            **aggregations.terms_aggregation(field_name_x, size=size),
+            "meta": {"kind": "terms-2d"},
+            "aggs": {
+                field_name_y: aggregations.terms_aggregation(field_name_y, size=size)
+            },
         }
 
     @staticmethod
     def terms_aggregation(field_name: str, size: int = DEFAULT_AGGREGATION_SIZE):
         return {
+            "meta": {"kind": "terms"},
             "terms": {
                 "field": field_name,
                 "size": size,
                 "order": {"_count": "desc"},
-            }
+            },
         }
 
     @staticmethod
     def histogram_aggregation(field_name: str, interval: float = 0.1):
-        return {"histogram": {"field": field_name, "interval": interval}}
+        return {
+            "meta": {
+                "kind": "histogram",
+            },
+            "histogram": {
+                "field": field_name,
+                "interval": interval,
+            },
+        }
 
     @staticmethod
     def predicted_by(size: int = DEFAULT_AGGREGATION_SIZE):
