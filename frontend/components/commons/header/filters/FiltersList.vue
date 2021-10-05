@@ -151,7 +151,7 @@ export default {
     groups() {
       return [
         ...new Set(this.searchableFilterList.map((f) => f.group)),
-        "sort",
+        "Sort",
       ];
     },
     isMultiLabelRecord() {
