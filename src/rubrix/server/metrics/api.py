@@ -68,5 +68,5 @@ def delete_dataset_metric(
     user: User = Depends(auth.get_user),
 ) -> None:
     return datasets.delete_dataset_metric(
-        name, owner=user.current_group, metric_name=metric
+        name, owner=user.current_group, metric_id=metric
     )

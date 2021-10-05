@@ -5,7 +5,9 @@ from pydantic import BaseModel, Field
 
 
 class DatasetMetricCreation(BaseModel):
+    id: str = Field(..., description="The metric id")
     name: str = Field(..., description="The metric name")
+    description: str = Field(None, description="Descriptive text for dataset metric")
     field: str = Field(
         None, description="The dataset field used for calculate the metric"
     )
@@ -24,3 +26,10 @@ class DatasetMetricDB(DatasetMetricCreation):
 
 class DatasetMetric(DatasetMetricCreation):
     pass
+
+
+class DatasetMetricResults(DatasetMetricCreation):
+    kind: str
+    results: Dict[str, Any] = Field(
+        default_factory=dict, description="Whatever data the metric calculated"
+    )

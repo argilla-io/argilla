@@ -265,12 +265,12 @@ class DatasetsService:
         return metric
 
     def delete_dataset_metric(
-        self, name: str, owner: Optional[str], metric_name: str
+        self, name: str, owner: Optional[str], metric_id: str
     ) -> None:
         found = self.find_by_name(name, owner)
-        if metric_name not in [m.name for m in found.metrics]:
-            raise EntityNotFoundError(metric_name, DatasetMetric)
-        found.metrics = [m for m in found.metrics if m.name != metric_name]
+        if metric_id not in [m.id for m in found.metrics]:
+            raise EntityNotFoundError(metric_id, DatasetMetric)
+        found.metrics = [m for m in found.metrics if m.id != metric_id]
         self.__dao__.update_dataset(found)
 
 
