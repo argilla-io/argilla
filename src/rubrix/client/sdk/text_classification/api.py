@@ -12,16 +12,21 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List
+from typing import Optional
 from typing import Union
 
 import httpx
 from rubrix.client.sdk._helpers import build_bulk_response
+from rubrix.client.sdk._helpers import build_data_response
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import BulkResponse
 from rubrix.client.sdk.commons.models import ErrorMessage
 from rubrix.client.sdk.commons.models import HTTPValidationError
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
+from rubrix.client.sdk.text_classification.models import TextClassificationQuery
+from rubrix.client.sdk.text_classification.models import TextClassificationRecord
 
 
 def bulk(
@@ -42,3 +47,25 @@ def bulk(
     )
 
     return build_bulk_response(response)
+
+
+def data(
+    client: AuthenticatedClient,
+    name: str,
+    request: Optional[TextClassificationQuery] = None,
+    limit: Optional[int] = None,
+) -> Response[Union[List[TextClassificationRecord], HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/{name}/TextClassification/data".format(
+        client.base_url, name=name
+    )
+
+    with httpx.stream(
+        "POST",
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=None,
+        params={"limit": limit},
+        json=request.dict() if request else {},
+    ) as response:
+        return build_data_response(response=response, data_type=TextClassificationRecord)

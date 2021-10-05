@@ -12,7 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Union, Optional
+import json
+from typing import Union, TypeVar, Type, List
 
 import httpx
 from rubrix.client.sdk.commons.models import BulkResponse
@@ -38,6 +39,34 @@ def build_bulk_response(
     return Response(
         status_code=response.status_code,
         content=response.content,
+        headers=response.headers,
+        parsed=parsed_response,
+    )
+
+
+T = TypeVar("T")
+
+
+def build_data_response(
+        response: httpx.Response,
+        data_type: Type[T]
+) -> Response[Union[List[T], HTTPValidationError, ErrorMessage]]:
+    if 200 <= response.status_code < 400:
+        parsed_response = [
+            data_type(**json.loads(r)) for r in response.iter_lines()
+        ]
+    else:
+        content = next(response.iter_lines())
+        data = json.loads(content)
+        parsed_response = (
+            HTTPValidationError(**data)
+            if response.status_code == 422
+            else ErrorMessage(**data)
+        )
+
+    return Response(
+        status_code=response.status_code,
+        content=b"",
         headers=response.headers,
         parsed=parsed_response,
     )
