@@ -36,11 +36,25 @@ def test_flatten_metadata():
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
 
 
+def test_metadata_with_object_list():
+    data = {
+        "inputs": {"text": "bogh"},
+        "metadata": {
+            "mails": [
+                {"subject": "Mail One", "body": "This is a large text body"},
+                {"subject": "Mail Two", "body": "This is a large text body"},
+            ]
+        },
+    }
+    record = TextClassificationRecord.parse_obj(data)
+    assert list(record.metadata.keys()) == ["mails"]
+
+
 def test_too_long_metadata():
     record = TextClassificationRecord.parse_obj(
         {
             "inputs": {"text": "bogh"},
-            "metadata": {"too_long": "a"*1000},
+            "metadata": {"too_long": "a" * 1000},
         }
     )
 
@@ -54,7 +68,7 @@ def test_too_long_label():
                 "inputs": {"text": "bogh"},
                 "prediction": {
                     "agent": "test",
-                    "labels": [{"class": "a"*1000}],
+                    "labels": [{"class": "a" * 1000}],
                 },
             }
         )

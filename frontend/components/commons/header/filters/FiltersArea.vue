@@ -28,12 +28,6 @@
             @applySortBy="onApplySortBy"
           ></FiltersList>
         </div>
-        <FiltersTags
-          :dataset="dataset"
-          @clearFilter="onClearFilter"
-          @clearMetaFilter="onClearMetaFilter"
-          @clearAll="onClearAllFilters"
-        />
       </div>
     </div>
   </div>
@@ -87,23 +81,6 @@ export default {
         sort: sortList,
       });
     },
-    onClearFilter(filter, value) {
-      this.onApplyFilter({
-        filter,
-        values: Array.isArray(this.dataset.query[filter])
-          ? this.dataset.query[filter].filter((e) => e !== value)
-          : undefined,
-      });
-    },
-    onClearMetaFilter(filter, value) {
-      this.onApplyMetaFilter({
-        filter,
-        values: this.dataset.query.metadata[filter].filter((f) => f !== value),
-      });
-    },
-    async onClearAllFilters() {
-      await this.search({ dataset: this.dataset, query: {} });
-    },
   },
 };
 </script>
@@ -144,24 +121,15 @@ export default {
     align-items: center;
   }
   &__content {
-    padding: 1em 0 0.5em 0;
+    padding: 1em 0;
     position: relative;
     z-index: 2;
+    .fixed-header & {
+      padding: 0.5em 0;
+    }
   }
   &__searchbar {
     margin-right: 2em;
-    .fixed-header & {
-      transition: position 0.5s ease 2s;
-      pointer-events: none;
-      position: absolute;
-      right: 0;
-      left: 0;
-      top: 0;
-      height: 42px;
-      margin-left: auto;
-      margin-right: auto;
-      padding-right: 4em;
-    }
   }
   &--disabled {
     ::v-deep * {

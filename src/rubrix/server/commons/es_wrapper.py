@@ -227,7 +227,7 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        self.__client__.delete(index=index, id=doc_id)
+        self.__client__.delete(index=index, id=doc_id, refresh=True)
 
     def add_documents(
         self,
@@ -461,6 +461,14 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         self.__client__.indices.put_settings(
             index=index, body={"settings": {"index.blocks.write": read_only}}
+        )
+
+    def create_field_mapping(
+        self, index: str, field_name: str, type: str, **extra_args
+    ):
+        self.__client__.indices.put_mapping(
+            index=index,
+            body={"properties": {field_name: {"type": type, **extra_args}}},
         )
 
 
