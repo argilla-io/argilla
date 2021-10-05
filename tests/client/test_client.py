@@ -24,7 +24,6 @@ import rubrix
 from rubrix import (
     RubrixClient,
     TextClassificationRecord,
-    TokenAttributions,
     TokenClassificationRecord,
     Text2TextRecord,
 )
@@ -173,8 +172,6 @@ def test_log_with_annotation(monkeypatch):
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["status"] == "Discarded"
-
-
 
 
 @pytest.mark.parametrize("include_score, agent", [(False, "test_agent"), (True, None)])
