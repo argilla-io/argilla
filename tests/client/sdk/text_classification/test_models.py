@@ -19,10 +19,15 @@ import pytest
 from rubrix.client.models import TextClassificationRecord
 from rubrix.client.models import TokenAttributions
 from rubrix.client.sdk.text_classification.models import (
-    TextClassificationBulkData,
     CreationTextClassificationRecord,
+    TextClassificationAnnotation,
+    ClassPrediction,
 )
+from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
 from rubrix.client.sdk.text_classification.models import TextClassificationQuery
+from rubrix.client.sdk.text_classification.models import (
+    TextClassificationRecord as SdkTextClassificationRecord,
+)
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationBulkData as ServerTextClassificationBulkData,
 )
@@ -96,5 +101,31 @@ def test_from_client_agent(agent, expected):
     assert sdk_record.annotation.agent == expected
 
 
-def test_to_client():
-    raise NotImplementedError
+@pytest.mark.parametrize(
+    "multi_label,expected", [(False, "label1"), (True, ["label1"])]
+)
+def test_to_client(multi_label, expected):
+    annotation = TextClassificationAnnotation(
+        labels=[ClassPrediction(**{"class": "label1"})], agent="agent"
+    )
+    prediction = TextClassificationAnnotation(
+        labels=[
+            ClassPrediction(**{"class": "label1", "score": 0.5}),
+            ClassPrediction(**{"class": "label2", "score": 0.5}),
+        ],
+        agent="agent",
+    )
+
+    sdk_record = SdkTextClassificationRecord(
+        inputs={"text": "test"},
+        annotation=annotation,
+        prediction=prediction,
+        multi_label=multi_label,
+    )
+
+    record = sdk_record.to_client()
+
+    assert record.prediction == [("label1", 0.5), ("label2", 0.5)]
+    assert record.prediction_agent == "agent"
+    assert record.annotation_agent == "agent"
+    assert record.annotation == expected
