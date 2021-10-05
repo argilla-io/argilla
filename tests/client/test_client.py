@@ -19,7 +19,6 @@ import socket
 import httpx
 import pandas
 import pytest
-import requests
 import rubrix
 from rubrix import (
     RubrixClient,
@@ -36,8 +35,6 @@ from tests.server.test_helpers import client
 
 
 def mocking_client(monkeypatch):
-    # monkeypatch.setattr(requests, "get", client.get)
-    # monkeypatch.setattr(requests, "post", client.post)
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)
