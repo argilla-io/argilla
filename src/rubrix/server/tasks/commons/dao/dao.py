@@ -14,8 +14,11 @@
 #  limitations under the License.
 
 import dataclasses
+import datetime
+from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 from fastapi import Depends
+
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.datasets.dao import (
@@ -23,13 +26,16 @@ from rubrix.server.datasets.dao import (
     dataset_records_index,
 )
 from rubrix.server.datasets.model import DatasetDB
+from rubrix.server.tasks.commons import BaseRecord
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 from rubrix.server.tasks.commons.es_helpers import (
     DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,
 )
-from typing import Any, Dict, Iterable, List, Optional
+
+
+DBRecord = TypeVar("DBRecord", bound=BaseRecord)
 
 
 @dataclasses.dataclass
@@ -119,7 +125,8 @@ class DatasetRecordsDAO:
     def add_records(
         self,
         dataset: DatasetDB,
-        records: List[Dict[str, Any]],
+        records: List[BaseRecord],
+        record_class: Type[DBRecord],
     ) -> int:
         """
         Add records to dataset
@@ -130,16 +137,36 @@ class DatasetRecordsDAO:
             The dataset
         records:
             The list of records
-
+        record_class:
+            Record class used to convert records to
         Returns
         -------
             The number of failed records
 
         """
+
+        now = None
+        documents = []
+        metadata_values = {}
+
+        if "last_updated" in record_class.schema()["properties"]:
+            now = datetime.datetime.utcnow()
+
+        for r in records:
+            metadata_values.update(r.metadata or {})
+            db_record = record_class.parse_obj(r)
+            if now:
+                db_record.last_updated = now
+            documents.append(db_record.dict(exclude_none=True))
+
+        index_name = dataset_records_index(dataset.id)
+
+        self._es.create_index(index=index_name)
+        self._configure_metadata_fields(index_name, metadata_values)
         return self._es.add_documents(
-            index=dataset_records_index(dataset.id),
-            documents=records,
-            doc_id=lambda r: r.get("id"),
+            index=index_name,
+            documents=documents,
+            doc_id=lambda _record: _record.get("id"),
         )
 
     def search_records(
@@ -249,6 +276,17 @@ class DatasetRecordsDAO:
         )
         for doc in docs:
             yield doc["_source"]
+
+    def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
+        def detect_nested_type(v: Any) -> bool:
+            """Returns True if value match as nested value"""
+            return isinstance(v, list) and isinstance(v[0], dict)
+
+        for field, value in metadata_values.items():
+            if detect_nested_type(value):
+                self._es.create_field_mapping(
+                    index, field_name=f"metadata.{field}", type="nested"
+                )
 
 
 _instance: Optional[DatasetRecordsDAO] = None
