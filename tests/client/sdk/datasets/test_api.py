@@ -28,7 +28,7 @@ def sdk_client():
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
 
 
-def test_get_dataset(create_empty_text_classification_test_dataset, sdk_client, monkeypatch):
+def test_get_dataset(sdk_client, monkeypatch):
     monkeypatch.setattr(httpx, "get", client.get)
 
     # create test dataset
