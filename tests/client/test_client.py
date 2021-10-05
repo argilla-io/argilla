@@ -36,19 +36,13 @@ from tests.server.test_helpers import client
 
 
 def mocking_client(monkeypatch):
-    monkeypatch.setattr(requests, "get", client.get)
-    monkeypatch.setattr(requests, "post", client.post)
+    # monkeypatch.setattr(requests, "get", client.get)
+    # monkeypatch.setattr(requests, "post", client.post)
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)
     monkeypatch.setattr(httpx, "put", client.put)
-
-    def stream_mock(*args, url: str, **kwargs):
-        if "POST" in args:
-            return client.post(url, stream=True, **kwargs)
-        return client.get(url, stream=True, **kwargs)
-
-    monkeypatch.setattr(httpx, "stream", stream_mock)
+    monkeypatch.setattr(httpx, "stream", client.stream)
 
 
 def test_log_something(monkeypatch):
