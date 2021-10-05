@@ -227,7 +227,7 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        self.__client__.delete(index=index, id=doc_id)
+        self.__client__.delete(index=index, id=doc_id, refresh=True)
 
     def add_documents(
         self,
