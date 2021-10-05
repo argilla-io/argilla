@@ -32,9 +32,14 @@ from rubrix.client.models import (
     TokenClassificationRecord,
     Text2TextRecord,
 )
-from rubrix.client.sdk.text_classification.models import CreationTextClassificationRecord
+from rubrix.client.sdk.text_classification.models import (
+    CreationTextClassificationRecord,
+)
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
 from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
+from rubrix.client.sdk.text_classification.api import data as text_classification_data
+from rubrix.client.sdk.datasets.models import TaskType
+from rubrix.client.sdk.text_classification.models import TextClassificationQuery
 from rubrix.sdk import AuthenticatedClient, models
 from rubrix.sdk.models.text2_text_record import Text2TextRecord as Text2TextRecordSdk
 from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
@@ -47,17 +52,10 @@ from rubrix.sdk.api.token_classification import (
     bulk_records as token_classification_bulk_records,
 )
 from rubrix.sdk.api.users import whoami
-from rubrix.sdk.models import (
-    TaskType,
-    TextClassificationQuery,
-    TokenClassificationQuery,
-)
+from rubrix.sdk.models import TokenClassificationQuery
 from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
 from rubrix.sdk.types import Response
 from rubrix.client.sdk.datasets.api import get_dataset
-from rubrix.sdk.api.text_classification import (
-    _get_dataset_data as text_classification_get_dataset_data,
-)
 from rubrix.sdk.api.token_classification import (
     _get_dataset_data as token_classification_get_dataset_data,
 )
@@ -237,18 +235,18 @@ class RubrixClient:
         task = response.parsed.task
 
         task_config = {
-            TaskType.TEXTCLASSIFICATION: (
-                text_classification_get_dataset_data,
-                self._text_classification_sdk_to_client,
+            TaskType.text_classification: (
+                text_classification_data,
+                None,
                 TextClassificationQuery,
             ),
-            TaskType.TOKENCLASSIFICATION: (
-                token_classification_get_dataset_data,
+            TaskType.token_classification: (
+                token_classification_get_dataset_data.sync_detailed,
                 self._token_classification_sdk_to_client,
                 TokenClassificationQuery,
             ),
-            TaskType.TEXT2TEXT: (
-                text2text_get_dataset_data,
+            TaskType.text2text: (
+                text2text_get_dataset_data.sync_detailed,
                 self._text2text_sdk_to_client,
                 Text2TextQuery,
             ),
@@ -261,12 +259,15 @@ class RubrixClient:
                 f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
                 f"{[TaskType.TEXTCLASSIFICATION, TaskType.TOKENCLASSIFICATION, TaskType.TEXT2TEXT]}"
             )
-        response = get_dataset_data.sync_detailed(
+        response = get_dataset_data(
             client=self._client,
             name=name,
             request=request_class(ids=ids or []),
             limit=limit,
         )
+
+        if task == TaskType.text_classification:
+            return pandas.DataFrame(map(lambda r: r.to_client().dict(), response.parsed))
 
         return pandas.DataFrame(map(lambda r: r.dict(), map(map_fn, response.parsed)))
 
