@@ -44,5 +44,13 @@ class SecuredClient:
         headers = {**self._header, **request_headers}
         return self._client.put(*args, headers=headers, **kwargs)
 
+    def stream(self, *args, **kwargs):
+        request_headers = kwargs.pop("headers", {})
+        headers = {**self._header, **request_headers}
+        method = kwargs.pop("method")
+        if method == "POST":
+            return self._client.post(*args, headers=headers, stream=True, **kwargs)
+        raise NotImplementedError
+
 
 client = SecuredClient(TestClient(app))

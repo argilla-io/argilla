@@ -60,7 +60,7 @@ def data(
     )
 
     with httpx.stream(
-        "POST",
+        method="POST",
         url=url,
         headers=client.get_headers(),
         cookies=client.get_cookies(),

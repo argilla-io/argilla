@@ -18,9 +18,10 @@ import pytest
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import BulkResponse
-from rubrix.client.sdk.text_classification.api import bulk
+from rubrix.client.sdk.text_classification.api import bulk, data
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
+    TextClassificationRecord,
 )
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
 from tests.server.test_helpers import client
@@ -47,3 +48,24 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
 
     assert response.status_code == 200
     assert isinstance(response.parsed, BulkResponse)
+
+
+def test_data(sdk_client, monkeypatch):
+    # TODO: Not sure how to test the streaming part of the response here
+    monkeypatch.setattr(httpx, "stream", client.stream)
+
+    # create test dataset
+    records = [
+        CreationTextClassificationRecord(inputs={"text": "test"}) for _ in range(3)
+    ]
+    bulk_data = TextClassificationBulkData(records=records)
+    dataset_name = "test_dataset"
+    client.delete(f"/api/datasets/{dataset_name}")
+    client.post(
+        f"/api/datasets/{dataset_name}/TextClassification:bulk",
+        json=bulk_data.dict(by_alias=True),
+    )
+
+    response = data(sdk_client, name=dataset_name, limit=2)
+    assert isinstance(response.parsed[0], TextClassificationRecord)
+    assert len(response.parsed) == 2
