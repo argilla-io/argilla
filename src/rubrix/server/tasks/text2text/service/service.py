@@ -193,6 +193,7 @@ class Text2TextService:
         return Text2TextSearchResults(
             total=results.total,
             records=[Text2TextRecord.parse_obj(r) for r in results.records],
+            metrics=results.metrics,
             aggregations=Text2TextSearchAggregations(
                 **results.aggregations,
                 words=results.words,

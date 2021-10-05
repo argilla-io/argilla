@@ -232,6 +232,7 @@ class TokenClassificationService:
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
+            metrics=results.metrics,
             aggregations=TokenClassificationAggregations(
                 **results.aggregations,
                 words=results.words,

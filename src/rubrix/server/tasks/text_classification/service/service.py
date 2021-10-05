@@ -168,6 +168,7 @@ class TextClassificationService:
         return TextClassificationSearchResults(
             total=results.total,
             records=[TextClassificationRecord.parse_obj(r) for r in results.records],
+            metrics=results.metrics,
             aggregations=TextClassificationSearchAggregations(
                 **results.aggregations,
                 words=results.words,
