@@ -175,27 +175,6 @@ def test_log_with_annotation(monkeypatch):
     assert records[0]["status"] == "Discarded"
 
 
-@pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
-def test_text_classification_client_to_sdk(annotation):
-    token_attributions = [
-        TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
-    ]
-    record = TextClassificationRecord(
-        inputs={"text": "test"},
-        prediction=[("label1", 0.5), ("label2", 0.5)],
-        annotation=annotation,
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
-        multi_label=True,
-        explanation={"text": token_attributions},
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-    sdk_record = RubrixClient._text_classification_client_to_sdk(record)
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
 @pytest.mark.parametrize("include_score, agent", [(False, "test_agent"), (True, None)])
