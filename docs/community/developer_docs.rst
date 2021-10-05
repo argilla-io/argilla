@@ -24,7 +24,7 @@ To keep your fork's master branch up to date with our repo you should add it as 
 
     git remote add upstream https://github.com/recognai/rubrix.git
 
-Now go ahead and create a new conda environment in which the development will take place and activate it.
+Now go ahead and create a new conda environment in which the development will take place and activate it:
 
 .. code-block:: bash
 
