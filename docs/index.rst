@@ -176,15 +176,14 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Tutorials
    :hidden:
 
-   tutorials/01-huggingface
+   tutorials/01-labeling-finetuning
    tutorials/02-spacy
    tutorials/03-kglab_pytorch_geometric
    tutorials/04-snorkel
    tutorials/05-active_learning
-   tutorials/06-labeling-finetuning
-   tutorials/07-find_label_errors
-   tutorials/08-zeroshot_ner
-   tutorials/error-analysis-using-loss
+   tutorials/06-find_label_errors
+   tutorials/07-zeroshot_ner
+   tutorials/08-error_analysis_using_loss
 
 .. toctree::
    :maxdepth: 3
