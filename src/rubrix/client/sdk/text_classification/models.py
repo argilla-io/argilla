@@ -21,8 +21,9 @@ from typing import Union
 
 from pydantic import BaseModel
 from pydantic import Field
-
-from rubrix.client.models import TextClassificationRecord
+from rubrix.client.models import (
+    TextClassificationRecord as ClientTextClassificationRecord,
+)
 from rubrix.client.models import TokenAttributions as ClientTokenAttributions
 from rubrix.client.sdk.commons.models import BaseAnnotation
 from rubrix.client.sdk.commons.models import BaseRecord
@@ -53,7 +54,48 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
-    def to_client(self) -> TextClassificationRecord:
+    @classmethod
+    def from_client(cls, record: ClientTextClassificationRecord):
+        prediction = None
+        if record.prediction is not None:
+            prediction = TextClassificationAnnotation(
+                labels=[
+                    ClassPrediction(**{"class": label, "score": score})
+                    for label, score in record.prediction
+                ],
+                agent=record.prediction_agent or MACHINE_NAME,
+            )
+
+        annotation = None
+        if record.annotation is not None:
+            annotation_list = (
+                record.annotation
+                if isinstance(record.annotation, list)
+                else [record.annotation]
+            )
+            annotation = TextClassificationAnnotation(
+                labels=[ClassPrediction(**{"class": label}) for label in annotation_list],
+                agent=record.annotation_agent or MACHINE_NAME,
+            )
+
+        return cls(
+            inputs=record.inputs,
+            prediction=prediction,
+            annotation=annotation,
+            multi_label=record.multi_label,
+            status=record.status,
+            explanation=record.explanation,
+            id=record.id,
+            metadata=record.metadata,
+            event_timestamp=record.event_timestamp,
+        )
+
+
+class TextClassificationRecord(CreationTextClassificationRecord):
+    last_updated: datetime = None
+    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def to_client(self) -> ClientTextClassificationRecord:
         """Returns the client model"""
         annotations = (
             [label.class_label for label in self.annotation.labels]
@@ -63,7 +105,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         if annotations and not self.multi_label:
             annotations = annotations[0]
 
-        return TextClassificationRecord(
+        return ClientTextClassificationRecord(
             id=self.id,
             event_timestamp=self.event_timestamp,
             inputs=self.inputs,
@@ -88,47 +130,6 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             if self.explanation
             else None,
         )
-
-    @classmethod
-    def from_client(cls, record: TextClassificationRecord):
-        model_dict = {
-            "inputs": record.inputs,
-            "multi_label": record.multi_label,
-            "status": record.status,
-        }
-        if record.prediction is not None:
-            model_dict["prediction"] = {
-                "agent": record.prediction_agent or MACHINE_NAME,
-                "labels": [
-                    {"class": label, "score": score}
-                    for label, score in record.prediction
-                ],
-            }
-        if record.annotation is not None:
-            annotations = (
-                record.annotation
-                if isinstance(record.annotation, list)
-                else [record.annotation]
-            )
-            gold_labels = [{"class": label, "score": 1.0} for label in annotations]
-            model_dict["annotation"] = {
-                "agent": record.annotation_agent or MACHINE_NAME,
-                "labels": gold_labels,
-            }
-            model_dict["status"] = record.status or "Validated"
-        if record.explanation is not None:
-            model_dict["explanation"] = {
-                key: [attribution.dict() for attribution in value]
-                for key, value in record.explanation.items()
-            }
-        if record.id is not None:
-            model_dict["id"] = record.id
-        if record.metadata is not None:
-            model_dict["metadata"] = record.metadata
-        if record.event_timestamp is not None:
-            model_dict["event_timestamp"] = record.event_timestamp.isoformat()
-
-        return cls(**model_dict)
 
 
 class TextClassificationBulkData(UpdateDatasetRequest):
