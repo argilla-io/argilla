@@ -24,18 +24,22 @@ To keep your fork's master branch up to date with our repo you should add it as 
 
     git remote add upstream https://github.com/recognai/rubrix.git
 
-Now go ahead and create a new conda environment in which the development will take place and activate it:
+Now go ahead and create a new conda environment in which the development will take place and activate it.
 
 .. code-block:: bash
 
     conda env create -f environment_dev.yml
     conda activate rubrix
 
-Once you activated the environment, it is time to install *Rubrix* in editable mode with its server dependencies:
+
+In the new environment *Rubrix* will already be installed in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#install-editable>`_ with all its server dependencies.
+
+To keep a consistent code format, we use `pre-commit <https://pre-commit.com/>`_ hooks.
+You can install them by simply running:
 
 .. code-block:: bash
 
-    pip install -e .[server]
+    pre-commit install
 
 The last step is to build the static UI files in case you want to work on the UI:
 
