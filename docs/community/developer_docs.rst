@@ -31,11 +31,15 @@ Now go ahead and create a new conda environment in which the development will ta
     conda env create -f environment_dev.yml
     conda activate rubrix
 
-Once you activated the environment, it is time to install *Rubrix* in editable mode with its server dependencies:
+
+In the new environment *Rubrix* will already be installed in `editable mode <https://pip.pypa.io/en/stable/cli/pip_install/#install-editable>`_ with all its server dependencies.
+
+To keep a consistent code format, we use `pre-commit <https://pre-commit.com/>`_ hooks.
+You can install them by simply running:
 
 .. code-block:: bash
 
-    pip install -e .[server]
+    pre-commit install
 
 The last step is to build the static UI files in case you want to work on the UI:
 

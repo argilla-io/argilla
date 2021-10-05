@@ -10,3 +10,6 @@ addopts = "--cov=rubrix --cov-report=xml"
 testpaths = [
     "tests"
 ]
+
+[tool.isort]
+profile = "black"
