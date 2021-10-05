@@ -310,7 +310,7 @@ class aggregations:
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
         return {
             "meta": {
-                "kind": "nested." + list(inner_aggregation.values())[0]["meta"]["kind"],
+                "kind": list(inner_aggregation.values())[0]["meta"]["kind"],
             },
             "nested": {"path": nested_path},
             "aggs": inner_aggregation,
@@ -322,7 +322,7 @@ class aggregations:
     ):
         return {
             **aggregations.terms_aggregation(field_name_x, size=size),
-            "meta": {"kind": "terms-2d"},
+            "meta": {"kind": "2d-terms"},
             "aggs": {
                 field_name_y: aggregations.terms_aggregation(field_name_y, size=size)
             },
