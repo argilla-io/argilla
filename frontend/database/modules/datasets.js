@@ -404,7 +404,9 @@ const actions = {
     const newDataset = await dataset.constructor.update({
       where: dataset.name,
       data: {
-        viewSettings: { ...dataset.viewSettings, pagination: newPagination },
+        viewSettings: { 
+          pagination: newPagination 
+        },
       },
     });
     displayQueryParams({
