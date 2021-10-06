@@ -35,7 +35,7 @@
       />
       <ClassifierExplorationArea v-else :record="record" />
     </div>
-    <div v-if="!annotationEnabled" class="record__labels">
+    <div v-if="!annotationEnabled && record.annotation" class="record__labels">
       <svgicon
         v-if="record.predicted"
         :class="['icon__predicted', record.predicted]"
