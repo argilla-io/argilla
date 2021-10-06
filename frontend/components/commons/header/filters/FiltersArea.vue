@@ -26,6 +26,8 @@
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
             @applySortBy="onApplySortBy"
+            @removeAllMetadataFilters="onRemoveAllMetadataFilters"
+            @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
         </div>
       </div>
@@ -73,6 +75,16 @@ export default {
         dataset: this.dataset,
         query: { metadata: { [filter]: values } },
       });
+    },
+    async onRemoveAllMetadataFilters(filters) {
+      let query = {};
+      filters.forEach((f) => query[f.key] = []);
+      await this.search({ dataset: this.dataset, query: { metadata: query } });
+    },
+    async onRemoveFiltersByGroup(filters) {
+      let query = {};
+      filters.forEach((f) => query[f.key] = f.key === 'score' ? undefined : []);
+      await this.search({ dataset: this.dataset, query: query });
     },
     async onApplySortBy(sortList) {
       await this.search({

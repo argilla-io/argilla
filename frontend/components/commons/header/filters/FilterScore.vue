@@ -17,10 +17,19 @@
 
 <template>
   <div class="filter__row">
+    <svgicon
+      v-if="filter.selected"
+      title="remove field"
+      class="filter__remove-button"
+      name="cross"
+      width="14"
+      height="14"
+      @click="onRemovescoreRange()"
+    />
     <p class="filter__label">{{ filter.name }}:</p>
     <div
       class="filter__item filter__item--score"
-      :class="{ 'filter__item--open': scoreExpanded }"
+      :class="{ 'filter__item--open': scoreExpanded, 'highlighted' : filter.selected }"
       @click="expandScore"
     >
       <div class="score-content">
@@ -155,6 +164,10 @@ export default {
       });
       this.scoreExpanded = false;
     },
+    onRemovescoreRange() {
+      this.$emit("apply", this.filter, undefined);
+      this.scoreExpanded = false;
+    },
     onClose() {
       this.scoreExpanded = false;
     },
@@ -173,7 +186,7 @@ export default {
   align-items: center;
   padding: 0 1em;
   transition: all 0.2s ease;
-  border-radius: 0;
+  border-radius: 3px;
   &:hover,
   &:focus {
     border: 2px solid $primary-color;
@@ -224,18 +237,21 @@ export default {
     height: 30px !important;
     max-width: 90%;
   }
+  &.highlighted {
+    border-color: $primary-color;
+  }
   &.expanded {
     margin-top: 10px;
     position: absolute;
     top: 0;
     background: $lighter-color;
-    padding: 0.8em 0.8em 0 0.8em;
+    padding: 20px 20px 10px 20px;
     min-height: auto;
     height: auto;
     min-height: auto;
     transition: height 0.1s ease-in-out;
     overflow: visible;
-    border-radius: 2px;
+    border-radius: 3px;
     z-index: 4;
     width: 400px;
     max-width: 100vw;
@@ -254,8 +270,14 @@ export default {
     .filter__buttons {
       margin-top: 2em;
       display: flex;
-      .re-button {
+      & > * {
+        display: block;
+        width: 100%;
         margin-right: 0.5em;
+        min-height: 38px;
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
     .range {
@@ -270,14 +292,19 @@ export default {
   }
 }
 .filter {
-  position: relative;
+  &__remove-button {
+    position: absolute;
+    left: 20px;
+    margin-right: 1em;
+    cursor: pointer;
+  }
   &__row {
     display: flex;
     align-items: center;
     .filter__item--score:not(.expanded) {
       margin-right: 0;
       margin-left: auto;
-      width: 220px;
+      width: 270px;
     }
   }
 }

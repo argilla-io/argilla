@@ -68,7 +68,7 @@ export default {
     border: 2px solid $line-smooth-color;
     display: flex;
     align-items: center;
-    padding: 0 1em;
+    padding: 0 20px;
     transition: all 0.2s ease;
     border-radius: 3px;
     &:after {
@@ -124,12 +124,12 @@ export default {
   }
   &__content {
     position: absolute;
-    top: 4em;
+    top: 50px;
     left: 0;
     margin-top: 0;
     background: $lighter-color;
     border: 2px solid $primary-color;
-    padding: 0 1em 0 1em;
+    padding: 10px 20px 10px 20px;
     z-index: 3;
     transform: translate(0);
     right: auto;
@@ -142,7 +142,7 @@ export default {
       max-height: 240px;
       overflow-y: auto;
       margin: 0 -1em 0 -1em;
-      padding: 0 1em;
+      padding: 0 1em 1em 1em;
     }
     li {
       padding: 0.4em 0;
@@ -152,7 +152,7 @@ export default {
   &--open {
     pointer-events: all;
     .dropdown__content {
-      min-width: 220px;
+      min-width: 270px;
     }
   }
   input {
@@ -183,14 +183,21 @@ export default {
       display: block;
     }
     .dropdown__header {
-      border: 2px solid $primary-color;
-      background: $lighter-color;
+      border: 2px solid palette(grey, light);
+      background: palette(grey, light);
       &:after {
         visibility: hidden;
       }
       .tag-icon {
         display: none;
       }
+    }
+    .dropdown__content {
+      border: 2px solid palette(grey, light);
+      background: palette(grey, light);
+    }
+    .filter-options {
+      background: palette(grey, light);
     }
   }
   .re-checkbox {
