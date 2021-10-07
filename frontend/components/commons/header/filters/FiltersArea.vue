@@ -20,7 +20,11 @@
     <div class="filters__content">
       <div class="container">
         <div class="filters__row">
-          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" :dataset="dataset" />
+          <SearchBar
+            class="filters__searchbar"
+            :dataset="dataset"
+            @submit="onTextQuerySearch"
+          />
           <FiltersList
             :dataset="dataset"
             @applyFilter="onApplyFilter"
@@ -68,6 +72,9 @@ export default {
       this.search({ dataset: this.dataset, query: { text } });
     },
     onApplyFilter({ filter, values }) {
+      if (!values.length) {
+        values = undefined;
+      }
       this.search({ dataset: this.dataset, query: { [filter]: values } });
     },
     onApplyMetaFilter({ filter, values }) {
@@ -78,12 +85,14 @@ export default {
     },
     async onRemoveAllMetadataFilters(filters) {
       let query = {};
-      filters.forEach((f) => query[f.key] = []);
+      filters.forEach((f) => (query[f.key] = []));
       await this.search({ dataset: this.dataset, query: { metadata: query } });
     },
     async onRemoveFiltersByGroup(filters) {
       let query = {};
-      filters.forEach((f) => query[f.key] = f.key === 'score' ? undefined : []);
+      filters.forEach(
+        (f) => (query[f.key] = f.key === "score" ? undefined : [])
+      );
       await this.search({ dataset: this.dataset, query: query });
     },
     async onApplySortBy(sortList) {
