@@ -62,7 +62,6 @@ export default {
   z-index: 2;
   @include media(">desktopLarge") {
     margin-left: 1em;
-    margin-top: 1em;
     display: block !important;
     right: calc(4em + 45px);
   }
