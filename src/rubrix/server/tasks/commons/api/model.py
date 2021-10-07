@@ -83,7 +83,9 @@ class PaginationParams:
     """Query pagination params"""
 
     limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(0, ge=0, alias="from", description="Record sequence from")
+    from_: int = Query(
+        0, ge=0, le=10000, alias="from", description="Record sequence from"
+    )
 
 
 class BaseAnnotation(BaseModel):
