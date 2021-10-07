@@ -16,6 +16,7 @@
  */
 
 import { Model } from "@vuex-orm/core";
+
 import DatasetViewSettings from "./DatasetViewSettings";
 
 const USER_DATA_METADATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1";
@@ -24,6 +25,24 @@ class ObservationDataset extends Model {
   static entity = "datasets";
 
   static primaryKey = "name";
+
+  static #registeredDatasetClasses = {};
+
+  static registerTaskDataset(task, datasetClass) {
+    this.#registeredDatasetClasses[task] = datasetClass;
+  }
+
+  static getClassDatasetForTask(taskName) {
+    return this.#registeredDatasetClasses[taskName];
+  }
+
+  getTaskDatasetClass() {
+    return ObservationDataset.getClassDatasetForTask(this.task);
+  }
+
+  get visibleRecords() {
+    return this.results.records.slice(0, this.viewSettings.pagination.size);
+  }
 
   static fields() {
     return {
@@ -35,10 +54,6 @@ class ObservationDataset extends Model {
       last_updated: this.string(null),
       viewSettings: this.hasOne(DatasetViewSettings, "id"),
     };
-  }
-
-  get visibleRecords() {
-    return this.results.records.slice(0, this.viewSettings.pagination.size);
   }
 }
 

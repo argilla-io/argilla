@@ -31,16 +31,16 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   layout: "app",
   async fetch() {
-    await this.loadByName(this.datasetName);
+    await this.fetchByName(this.datasetName);
   },
   computed: {
     ...mapGetters({
-      getByName: "entities/datasets/byName",
+      findByName: "entities/datasets/findByName",
     }),
 
     dataset() {
       // This computed data makes that store updates could be shown here
-      return this.getByName(this.datasetName);
+      return this.findByName(this.datasetName);
     },
     datasetName() {
       return this.$route.params.id;
@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      loadByName: "entities/datasets/fetchByName",
+      fetchByName: "entities/datasets/fetchByName",
     }),
   },
 };

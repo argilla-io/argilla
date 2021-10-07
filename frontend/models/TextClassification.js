@@ -21,7 +21,13 @@ import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 class TextClassificationRecord extends BaseRecord {
   inputs;
 
-  constructor({ inputs, explanation, multi_label, predicted_as, ...superData }) {
+  constructor({
+    inputs,
+    explanation,
+    multi_label,
+    predicted_as,
+    ...superData
+  }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
@@ -94,6 +100,11 @@ class TextClassificationDataset extends ObservationDataset {
     return uniqueLabels;
   }
 }
+
+ObservationDataset.registerTaskDataset(
+  "TextClassification",
+  TextClassificationDataset
+);
 
 export {
   TextClassificationDataset,
