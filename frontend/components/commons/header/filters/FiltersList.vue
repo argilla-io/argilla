@@ -161,9 +161,6 @@ export default {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
         .map((filter) => {
-          function isZero(number) {
-            return number === 0;
-          }
           return {
             ...filter,
             id: filter.key,
@@ -172,8 +169,7 @@ export default {
             disabled:
               (filter.key === "score" && this.isMultiLabelRecord) ||
               !aggregations[filter.key] ||
-              !Object.entries(aggregations[filter.key]).length ||
-              Object.values(aggregations[filter.key]).every(isZero),
+              !Object.entries(aggregations[filter.key]).length,
           };
         })
         .filter(({ disabled }) => !disabled);

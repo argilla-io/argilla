@@ -66,6 +66,9 @@ export default {
       this.search({ dataset: this.dataset, query: { text } });
     },
     onApplyFilter({ filter, values }) {
+      if (Array.isArray(values) && !values.length) {
+        values = undefined;
+      }
       this.search({ dataset: this.dataset, query: { [filter]: values } });
     },
     onApplyMetaFilter({ filter, values }) {
