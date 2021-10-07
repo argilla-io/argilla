@@ -20,7 +20,7 @@
     <div class="filters__content">
       <div class="container">
         <div class="filters__row">
-          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
+          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" :dataset="dataset" />
           <FiltersList
             :dataset="dataset"
             @applyFilter="onApplyFilter"
