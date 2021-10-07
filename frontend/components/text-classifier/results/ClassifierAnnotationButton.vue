@@ -51,14 +51,19 @@ export default {
   data() {
     return {
       checked: this.value || false,
+      clicking: false,
     };
   },
   computed: {
+    selected() {
+      return this.label.selected;
+    },
     classes() {
       return {
         active: Array.isArray(this.areChecked)
           ? this.areChecked.includes(this.value)
           : this.checked,
+        clicking: this.clicking,
         disabled: this.disabled,
       };
     },
@@ -67,11 +72,15 @@ export default {
     value() {
       this.checked = !!this.value;
     },
+    selected() {
+      this.clicking = false;
+    }
   },
   methods: {
     toggleCheck() {
       if (!this.disabled) {
-        let checked = this.areChecked.slice();
+        this.clicking = true;
+        let checked = this.areChecked;
         const found = checked.indexOf(this.value);
         if (found >= 0) {
           checked.splice(found, 1);
@@ -123,10 +132,25 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       color: $darker-color;
     }
-    &.active {
+    &.selected {
       .button {
         background: $secondary-color;
         border: 1px solid $secondary-color;
+      }
+      transition: all 0.02s ease-in-out;
+      box-shadow: none; // Animate the size, outside
+      &:after {
+        display: none !important;
+      }
+      .annotation-button-data__text,
+      .annotation-button-data__score {
+        color: $lighter-color;
+      }
+    }
+    &.clicking {
+      .button {
+        background: $secondary-color;
+        border: 1px solid $line-smooth-color;;
       }
       transition: all 0.02s ease-in-out;
       box-shadow: none; // Animate the size, outside
@@ -163,6 +187,9 @@ $annotation-button-touch-size: 48px;
       .annotation-button-data__score {
         color: $lighter-color;
         animation: pulse-font 0.5s;
+      }
+      .annotation-button-data__info {
+        display: none;
       }
     }
     .annotation-button-data {
@@ -212,13 +239,4 @@ $annotation-button-touch-size: 48px;
   }
 }
 
-// .re-annotation-button.checked {
-//   .annotation-button-container {
-//     &:after {
-//       opacity: 1;
-//       transform: scale3D(1, 1, 1);
-//       transition: $swift-ease-out;
-//     }
-//   }
-// }
 </style>
