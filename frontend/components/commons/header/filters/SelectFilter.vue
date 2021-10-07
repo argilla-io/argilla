@@ -194,7 +194,7 @@ export default {
     text-align: right;
     display: flex;
     & > * {
-      display: block;
+      display: block !important;
       width: 100%;
       margin-right: 0.5em;
       min-height: 38px;
