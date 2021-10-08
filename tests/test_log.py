@@ -77,8 +77,6 @@ def mock_response_text(monkeypatch):
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
     def mock_get(*args, json_body: TextClassificationBulkData, **kwargs):
-        assert isinstance(json_body.metadata, TextClassificationBulkDataMetadata)
-        assert isinstance(json_body.tags, TextClassificationBulkDataTags)
         return Response(
             status_code=200,
             content=b"Everything's fine",
@@ -92,7 +90,7 @@ def mock_response_text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.text_classification_bulk_records.sync_detailed", mock_get
+        "rubrix.client.text_classification_bulk", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -309,7 +307,7 @@ def mock_wrong_bulk_response(monkeypatch):
             parsed={"error": "the error message "},
         )
 
-    monkeypatch.setattr("rubrix.client.text_classification_bulk_records.sync_detailed", mock)
+    monkeypatch.setattr("rubrix.client.text_classification_bulk", mock)
 
 
 def test_wrong_response(mock_response_200, mock_wrong_bulk_response):

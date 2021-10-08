@@ -125,7 +125,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
 
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
-    explanation: Dict[str, List[TokenAttributions]] = None
+    explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
     _SCORE_DEVIATION_ERROR: ClassVar[float] = 0.001
 
@@ -317,7 +317,7 @@ class TextClassificationBulkData(UpdateDatasetRequest):
     Attributes:
     -----------
 
-    records: List[TextClassificationRecord]
+    records: List[CreationTextClassificationRecord]
         The text classification record list
 
     """
