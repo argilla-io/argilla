@@ -184,14 +184,14 @@ export default {
   background: $lighter-color;
   width: auto;
   height: 45px;
-  border: 2px solid $line-smooth-color;
+  border: 1px solid $line-smooth-color;
   align-items: center;
   padding: 0 1em;
   transition: all 0.2s ease;
   border-radius: 3px;
   &:hover,
   &:focus {
-    border: 2px solid $primary-color;
+    border: 1px solid $primary-color;
     background: $lighter-color;
     transition: border 0.2s ease, background 0.2s ease;
   }

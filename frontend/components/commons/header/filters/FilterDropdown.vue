@@ -65,7 +65,7 @@ export default {
     height: 100%;
     width: auto;
     height: 45px;
-    border: 2px solid $line-smooth-color;
+    border: 1px solid $line-smooth-color;
     display: flex;
     align-items: center;
     padding: 0 20px;
@@ -128,7 +128,7 @@ export default {
     left: 0;
     margin-top: 0;
     background: $lighter-color;
-    border: 2px solid $primary-color;
+    border: 1px solid $primary-color;
     padding: 10px 20px 10px 20px;
     z-index: 3;
     transform: translate(0);
@@ -183,7 +183,7 @@ export default {
       display: block;
     }
     .dropdown__header {
-      border: 2px solid palette(grey, light);
+      border: 1px solid palette(grey, light);
       background: palette(grey, light);
       &:after {
         visibility: hidden;
@@ -193,7 +193,7 @@ export default {
       }
     }
     .dropdown__content {
-      border: 2px solid palette(grey, light);
+      border: 1px solid palette(grey, light);
       background: palette(grey, light);
     }
     .filter-options {
@@ -212,7 +212,7 @@ export default {
       &__header {
         &:hover,
         &:focus {
-          border: 2px solid $primary-color;
+          border: 1px solid $primary-color;
           background: $lighter-color;
         }
       }
