@@ -228,13 +228,14 @@ async function _paginate({ dataset, size, page }) {
 
   try {
     await _updateViewSettings({ id: dataset.name, data: { loading: true } });
-    await _callSearchApi({
+    const results = await _callSearchApi({
       dataset,
       query: dataset.query,
       sort: dataset.sort,
       size,
       from: pagination.from,
     });
+    await _updateTaskDataset({ dataset, data: { results } });
   } finally {
     await _updateViewSettings({
       id: dataset.name,
@@ -363,7 +364,7 @@ async function _updateTaskDataset({ dataset, data }) {
     datasetResults.aggregations = globalResults.aggregations;
   }
 
-  if (results && results.aggregations) {
+  if (dataResults && dataResults.aggregations) {
     datasetResults.aggregations = initializeObjectDeep(
       datasetResults.aggregations || {}
     );
@@ -530,7 +531,6 @@ const actions = {
 
     return settings;
   },
-
 
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
