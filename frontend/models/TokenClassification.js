@@ -109,6 +109,11 @@ class TokenClassificationDataset extends ObservationDataset {
   }
 }
 
+ObservationDataset.registerTaskDataset(
+  "TokenClassification",
+  TokenClassificationDataset
+);
+
 export {
   TokenClassificationDataset,
   TokenClassificationRecord,

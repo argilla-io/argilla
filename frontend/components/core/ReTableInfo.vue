@@ -98,6 +98,10 @@
                       {{ itemValue(item, column)[key] }}
                     </p>
                   </span>
+                  <span v-else-if="column.type === 'task'">
+                    {{ itemValue(item, column) }} <span class="table-info__tag" v-if="itemValue(item, column) === 'Text2Text'">Experimental</span>
+                  </span
+                  >
                   <span v-else>{{ itemValue(item, column) }}</span>
                 </span>
               </span>
@@ -446,11 +450,20 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      &:nth-last-of-type(-n + 3) {
+      // text-overflow: ellipsis;
+      // overflow: hidden;
+      &:nth-last-of-type(-n + 2) {
         max-width: 120px;
       }
+      &:nth-last-of-type(3) {
+        max-width: 180px;
+      }
+      &:nth-of-type(2) {
+        min-width: 30%;
+      }
+      // .task span {
+      //   display: flex;
+      // }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
@@ -460,6 +473,16 @@ export default {
       margin-right: 1em;
       fill: $font-medium-color;
     }
+  }
+  &__tag {
+    background: palette(grey, dark);
+    display: inline-block;
+    border-radius: 3px;
+    color: $lighter-color;
+    @include font-size(12px);
+    box-shadow: 0 1px 4px 1px rgba(222,222,222,0.50);
+    padding: 0.1em 0.5em;
+    margin-left: 1em;
   }
   // &__item:not(.disabled) {
   //   &:hover,
@@ -528,8 +551,7 @@ export default {
       border-radius: 10px;
       margin-right: 0.5em;
       margin-top: 0;
-      float: left;
-      clear: both;
+      word-break: break-all;
       &:last-child {
         margin-bottom: 0;
       }
