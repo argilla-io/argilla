@@ -42,7 +42,7 @@ export default {
       return this.annotationsProgress.annotatedAs;
     },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
+      return AnnotationProgress.find(this.dataset.name);
     },
   },
 };

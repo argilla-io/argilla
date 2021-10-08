@@ -56,7 +56,6 @@
 
 <script>
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { ObservationDataset } from "@/models/Dataset";
 export default {
   // TODO clean and typify
   props: {
@@ -65,17 +64,12 @@ export default {
       required: true,
     },
   },
-  async fetch() {
-    await ObservationDataset.dispatch("refreshAnnotationProgress", {
-      dataset: this.dataset,
-    });
-  },
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
+      return AnnotationProgress.find(this.dataset.name);
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -94,9 +88,8 @@ export default {
     },
     progress() {
       return (
-        (((this.totalValidated || 0) + (this.totalDiscarded || 0))) /
-        this.total
-      )
+        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) / this.total
+      );
     },
     annotationIsEnabled() {
       return this.dataset.viewSettings.annotationEnabled;

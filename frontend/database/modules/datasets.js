@@ -17,66 +17,133 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
-import { Notification } from "@/models/Notifications";
-import { Text2TextDataset } from "@/models/Text2Text";
-import { TextClassificationDataset } from "@/models/TextClassification";
-import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { Base64 } from "js-base64";
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+const isObject = (obj) => obj && typeof obj === "object";
+
+function initializeObjectDeep(object, defaultValue = 0) {
+  const result = {};
+
+  Object.keys(object).forEach((key) => {
+    const oVal = object[key];
+
+    if (isObject(oVal)) {
+      result[key] = initializeObjectDeep(oVal);
+    } else {
+      result[key] = defaultValue;
+    }
+  });
+  return result;
 }
 
-function toSnakeCase(e) {
-  return e
-    .match(/([A-Z])/g)
-    .reduce((str, c) => str.replace(new RegExp(c), "_" + c.toLowerCase()), e)
-    .substring(e.slice(0, 1).match(/([A-Z])/g) ? 1 : 0);
+function mergeObjectsDeep(...objects) {
+  return objects.reduce((prev, obj) => {
+    Object.keys(obj).forEach((key) => {
+      const pVal = prev[key];
+      const oVal = obj[key];
+
+      if (Array.isArray(pVal) && Array.isArray(oVal)) {
+        prev[key] = oVal;
+      } else if (isObject(pVal) && isObject(oVal)) {
+        prev[key] = mergeObjectsDeep(pVal, oVal);
+      } else {
+        prev[key] = oVal;
+      }
+    });
+
+    return prev;
+  }, {});
 }
 
-const getters = {
-  byName: () => (name) => {
-    const ds = ObservationDataset.find(name);
-    if (ds === null) {
-      return undefined;
-    }
-    switch (ds.task) {
-      case "TextClassification":
-        return TextClassificationDataset.query()
-          .withAllRecursive()
-          .whereId(name)
-          .first();
-      case "TokenClassification":
-        return TokenClassificationDataset.query()
-          .withAllRecursive()
-          .whereId(name)
-          .first();
-      case "Text2Text":
-        return Text2TextDataset.query()
-          .withAllRecursive()
-          .whereId(name)
-          .first();
-      default:
-        console.warn("WRONG!!!");
-    }
-    return undefined;
-  },
+async function _getOrFetchDataset(name) {
+  /**
+   * Find locally a dataset by its name and fetch from backend if not found
+   */
+  let ds = ObservationDataset.find(name);
+  if (ds !== null) {
+    return ds;
+  }
+  await ObservationDataset.api().get(`/datasets/${name}`);
+  return await _getOrFetchDataset(name);
+}
 
-  datasetEntity: () => (ds) => {
-    switch (ds.task) {
-      case "TextClassification":
-        return TextClassificationDataset;
-      case "TokenClassification":
-        return TokenClassificationDataset;
-      case "Text2Text":
-        return Text2TextDataset;
-    }
-    return undefined;
-  },
-};
+async function _fetchAnnotationProgress(dataset) {
+  const { total, aggregations } = await _querySearch({
+    dataset,
+    query: {},
+    size: 0,
+  });
 
-function configuredRouteParams() {
+  return await _updateAnnotationProgress({
+    id: dataset.name,
+    total,
+    aggregations,
+  });
+}
+
+async function _loadTaskDataset(dataset) {
+  /**
+   * Loads a specific dataset for records observation
+   */
+  if (dataset.task === null) {
+    throw Error("Wrong dataset task initialization");
+  }
+
+  const { query, sort, pagination } = _configuredRouteParams();
+  let _dataset = await _search({
+    dataset,
+    query,
+    sort,
+    size: pagination.size,
+  });
+
+  const { total, aggregations } = _dataset.globalResults;
+  if (total === undefined || aggregations === undefined) {
+    const globalResults = await _querySearch({
+      dataset: _dataset,
+      query: {},
+      size: 0,
+    });
+
+    _dataset = await _updateTaskDataset({
+      dataset: _dataset,
+      data: { globalResults },
+    });
+  }
+
+  if (pagination && pagination.page > 1) {
+    await _paginate({
+      dataset: _dataset,
+      size: pagination.size,
+      page: pagination.page,
+    });
+  }
+
+  return _dataset;
+}
+
+async function _configureDatasetViewSettings(
+  datasetName,
+  enableAnnotationMode
+) {
+  /**
+   * Initialize dataset view settings
+   */
+  // TODO: Maybe check if settings already exists
+  await DatasetViewSettings.insert({
+    data: {
+      pagination: { id: datasetName },
+      id: datasetName,
+      annotationEnabled: enableAnnotationMode === "true" ? true : false,
+    },
+  });
+}
+
+function _configuredRouteParams() {
+  /**
+   * Read the route query params: query, sort, allowAnnotation and pagination
+   */
   const { query, sort, allowAnnotation, pagination } = $nuxt.$route.query;
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
@@ -86,7 +153,13 @@ function configuredRouteParams() {
   };
 }
 
-function displayQueryParams({ query, sort, enableAnnotation, pagination }) {
+function _displayQueryParams({ query, sort, enableAnnotation, pagination }) {
+  /**
+   * Set different route query params
+   */
+
+  // TODO: merge values. Allow partial definition
+
   $nuxt.$router.push({
     query: {
       query: Base64.encodeURI(JSON.stringify(query)),
@@ -97,32 +170,267 @@ function displayQueryParams({ query, sort, enableAnnotation, pagination }) {
   });
 }
 
+function _normalizeSearchQuery({ query, dataset }) {
+  /**
+   * Prepare a query merging query params and already stored dataset query params
+   */
+  const metadata = { ...(dataset.query || {}).metadata, ...query.metadata };
+  Object.keys(metadata).forEach((key) => {
+    if (metadata[key].length <= 0) {
+      delete metadata[key];
+    }
+  });
+
+  if (Array.isArray(query.predicted) && query.predicted.length > 0) {
+    query.predicted = query.predicted[0];
+  }
+
+  return Object.keys(query).length === 0
+    ? {}
+    : { ...dataset.query, ...query, metadata };
+}
+
+async function _updateViewSettings({ id, data }) {
+  /**
+   * Wraps view settings updates
+   */
+  await DatasetViewSettings.update({
+    where: id,
+    data: data,
+  });
+}
+
+async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
+  const { response } = await ObservationDataset.api().post(
+    `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
+    {
+      query: { ...query, query_text: query.text },
+      sort,
+    },
+    {
+      save: false,
+    }
+  );
+  return response.data;
+}
+
+async function _querySearch({ dataset, query, sort, size }) {
+  const save = size == 0 ? false : true;
+  const results = await _callSearchApi({ dataset, query, sort, size });
+  if (save) {
+    await _updateTaskDataset({ dataset, data: { results, query, sort } });
+  }
+  return results;
+}
+
+async function _paginate({ dataset, size, page }) {
+  const pagination = new Pagination({ size, page });
+
+  try {
+    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await _callSearchApi({
+      dataset,
+      query: dataset.query,
+      sort: dataset.sort,
+      size,
+      from: pagination.from,
+    });
+  } finally {
+    await _updateViewSettings({
+      id: dataset.name,
+      data: { loading: false },
+    });
+    await _updatePagination({
+      id: dataset.name,
+      size,
+      page,
+    });
+    _displayQueryParams({
+      /**
+       * Set different route query params
+       */
+      query: dataset.query,
+      sort: dataset.sort,
+      enableAnnotation: dataset.annotationEnabled,
+      pagination,
+    });
+  }
+}
+
+async function _search({ dataset, query, sort, size }) {
+  query = _normalizeSearchQuery({ query: query || {}, dataset });
+  sort = sort || dataset.sort || [];
+  size = size || new Pagination().size;
+
+  try {
+    await _updateViewSettings({ id: dataset.name, data: { loading: true } });
+    await _querySearch({ dataset, query, sort, size });
+  } finally {
+    await _updateViewSettings({ id: dataset.name, data: { loading: false } });
+  }
+
+  const viewSettings = DatasetViewSettings.find(dataset.name);
+  const { page } = await _updatePagination({
+    id: dataset.name,
+    size,
+    page: 1,
+  });
+
+  _displayQueryParams({
+    /**
+     * Set different route query params
+     */
+    query,
+    sort,
+    enableAnnotation: viewSettings.annotationEnabled,
+    pagination: { size, page },
+  });
+
+  const entity = dataset.getTaskDatasetClass();
+  return entity.find(dataset.name);
+}
+
+async function _updateAnnotationProgress({ id, total, aggregations }) {
+  return await AnnotationProgress.insertOrUpdate({
+    data: {
+      id,
+      total,
+      validated: aggregations.status.Validated,
+      discarded: aggregations.status.Discarded,
+      annotatedAs: aggregations.annotated_as,
+    },
+  });
+}
+
+async function _persistRecords({ dataset, records }) {
+  await ObservationDataset.api().post(
+    `/datasets/${dataset.name}/${dataset.task}:bulk`,
+    {
+      records,
+    },
+    {
+      save: false,
+    }
+  );
+}
+
+async function _updateDatasetRecords({
+  dataset,
+  records,
+  persistBackend = false,
+}) {
+  if (records.length === 0) {
+    return;
+  }
+  let aggregations = {};
+  const entity = dataset.getTaskDatasetClass();
+  if (persistBackend) {
+    await _persistRecords({
+      dataset,
+      records,
+    });
+  }
+
+  _fetchAnnotationProgress(dataset);
+
+  return await entity.update({
+    where: dataset.name,
+    data: {
+      ...dataset,
+      results: {
+        ...dataset.results,
+        aggregations: {
+          ...dataset.results.aggregations,
+          ...aggregations,
+        },
+        records: dataset.results.records.map((record) => {
+          const found = records.find((r) => r.id === record.id);
+          return found || record;
+        }),
+      },
+    },
+  });
+}
+
+async function _updateTaskDataset({ dataset, data }) {
+  const entity = dataset.getTaskDatasetClass();
+  const { globalResults, results } = data;
+
+  let datasetResults = dataset.$toJson().results || {};
+  let dataResults = results || {};
+
+  if (globalResults && globalResults.aggregations) {
+    datasetResults.aggregations = globalResults.aggregations;
+  }
+
+  if (results && results.aggregations) {
+    datasetResults.aggregations = initializeObjectDeep(
+      datasetResults.aggregations || {}
+    );
+  }
+
+  await entity.insertOrUpdate({
+    where: dataset.name,
+    data: {
+      ...dataset,
+      ...data,
+      results: mergeObjectsDeep(datasetResults, dataResults),
+    },
+  });
+  return entity.find(dataset.name);
+}
+
+async function _updatePagination({ id, size, page }) {
+  const pagination = await Pagination.update({
+    where: id,
+    data: { size, page },
+  });
+
+  return pagination;
+}
+
+const getters = {
+  findByName: () => (name) => {
+    const ds = ObservationDataset.find(name);
+    if (ds === null) {
+      throw Error("Not found dataset named " + name);
+    }
+
+    return ds
+      .getTaskDatasetClass()
+      .query()
+      .withAllRecursive()
+      .whereId(name)
+      .first();
+  },
+};
+
 const actions = {
-  async editAnnotations({ dispatch }, { dataset, records }) {
+  async editAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,
       selected: false,
       status: "Edited",
     }));
-    return await dispatch("updateRecords", {
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
     });
   },
-  async discardAnnotations({ dispatch }, { dataset, records }) {
+  async discardAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,
       selected: false,
       status: "Discarded",
     }));
-    await dispatch("updateRecords", {
+    await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
     });
   },
-  async validateAnnotations({ dispatch }, { dataset, records, agent }) {
+  async validateAnnotations(_, { dataset, records, agent }) {
     const newRecords = records.map((record) => ({
       ...record,
       annotation: {
@@ -132,7 +440,7 @@ const actions = {
       selected: false,
       status: "Validated",
     }));
-    return await dispatch("updateRecords", {
+    return _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
@@ -160,287 +468,71 @@ const actions = {
   },
 
   async deleteDataset(_, { name }) {
-    return await ObservationDataset.api().delete(`/datasets/${name}`, {
-      delete: name,
-    });
-  },
-
-  async exportAnnotations(_, { name }) {
-    const result = await ObservationDataset.api().post(
-      `/datasets/${name}/snapshots`,
+    const deleteResults = await ObservationDataset.api().delete(
+      `/datasets/${name}`,
       {
-        save: false,
+        delete: name,
       }
     );
-
-    const data = result.response.data;
-    if (result.response.status >= 400) {
-      return Notification.dispatch("notify", {
-        message: data,
-        type: "error",
-      });
-    }
-
-    return Notification.dispatch("notify", {
-      message: `The export is finished, <strong>${data.id}</strong> is accessible at:<br/> <strong>${data.uri}</strong>`,
-      type: "success",
-    });
+    return deleteResults;
   },
 
-  async refreshAnnotationProgress({ getters }, { dataset }) {
-    await sleep(1000); // TODO: Elasticsearch flush delay (change approach)
-
-    const entity = getters.datasetEntity(dataset);
-    const {
-      response: {
-        data: { total, aggregations },
-      },
-    } = await entity.dispatch("search", {
-      dataset,
-      query: {},
-      size: 0, // Disable persistence
-    });
-
-    return await AnnotationProgress.insertOrUpdate({
-      data: {
-        id: dataset.name + dataset.task,
-        total: total,
-        validated: aggregations.status.Validated,
-        discarded: aggregations.status.Discarded,
-        annotatedAs: aggregations.annotated_as,
-      },
-    });
+  async refreshAnnotationProgress(_, dataset) {
+    return await _fetchAnnotationProgress(dataset);
   },
 
-  async updateRecords(
-    { getters, dispatch },
-    { dataset, records, persistBackend = false }
-  ) {
-    if (records.length === 0) {
-      return;
-    }
-    let aggregations = {};
-    const entity = getters.datasetEntity(dataset);
-    if (persistBackend) {
-      await entity.dispatch("updateRecords", {
-        dataset,
-        records,
-      });
-    }
-
-    dispatch("refreshAnnotationProgress", { dataset });
-
-    return await entity.update({
-      where: dataset.name,
-      data: {
-        ...dataset,
-        results: {
-          ...dataset.results,
-          aggregations: {
-            ...dataset.results.aggregations,
-            ...aggregations,
-          },
-          records: dataset.results.records.map((record) => {
-            const found = records.find((r) => r.id === record.id);
-            return found || record;
-          }),
-        },
-      },
-    });
-  },
   async fetchAll() {
     /**
      * Fetch all observation datasets from backend
      */
     return await ObservationDataset.api().get("/datasets/");
   },
-  async fetchByName({ dispatch }, name) {
+  async fetchByName(_, name) {
     /**
      * Fetch a observation dataset by name
      */
-    let ds = ObservationDataset.find(name);
-    if (ds === null) {
-      await ObservationDataset.api().get(`/datasets/${name}`);
-    }
-    ds = ObservationDataset.find(name);
-    const { allowAnnotation } = configuredRouteParams();
-    await DatasetViewSettings.insert({
-      data: ObservationDataset.all().map((ds) => ({
-        pagination: { id: ds.name },
-        id: ds.name,
-        annotationEnabled: allowAnnotation === "true" ? true : false,
-      })),
+    const ds = await _getOrFetchDataset(name);
+    const { allowAnnotation } = _configuredRouteParams();
+    await _configureDatasetViewSettings(ds.name, allowAnnotation);
+    const dataset = await _loadTaskDataset(ds);
+    await _updateAnnotationProgress({
+      id: name,
+      total: dataset.globalResults.total,
+      aggregations: dataset.globalResults.aggregations,
     });
-    return await dispatch("loadViewByTask", {
-      dataset: ds,
-      value: ds.task,
-    });
+
+    return dataset;
   },
 
-  async loadViewByTask(_, { dataset, value }) {
-    await ObservationDataset.dispatch("load", { ...dataset, task: value });
-    return await ObservationDataset.update({
-      where: dataset.name,
-      data: {
-        task: value,
-      },
-    });
+  async load(_, dataset) {
+    return await _loadTaskDataset(dataset);
   },
 
-  async load({ dispatch }, dataset) {
-    /**
-     * Loads a specific dataset for records observation
-     */
-    if (dataset.task === null) {
-      // TODO: Error handling
-      console.warn("wat!?", dataset);
-      return undefined;
-    }
-
-    const { query, sort, pagination } = configuredRouteParams();
-    const loadedDataset = await dispatch("search", {
-      dataset,
-      query,
-      sort,
-      size: pagination.size,
-    });
-
-    if (pagination && pagination.page > 1) {
-      return await dispatch("paginate", {
-        dataset: loadedDataset,
-        size: pagination.size,
-        page: pagination.page,
-      });
-    }
-
-    return loadedDataset;
-  },
-
-  async search({ getters }, { dataset, query, sort, size }) {
-    query = query || {};
-    sort = sort || dataset.sort || [];
-
-    const metadata = { ...(dataset.query || {}).metadata, ...query.metadata };
-    Object.keys(metadata).forEach((key) => {
-      if (metadata[key].length <= 0) {
-        delete metadata[key];
-      }
-    });
-
-    if (Array.isArray(query.predicted) && query.predicted.length > 0) {
-      query.predicted = query.predicted[0];
-    }
-
-    query =
-      Object.keys(query).length === 0
-        ? {}
-        : { ...dataset.query, ...query, metadata };
-
-    size = size || new Pagination().size;
-
-    const entity = getters.datasetEntity(dataset);
-    try {
-      DatasetViewSettings.update({
-        where: dataset.name,
-        data: {
-          loading: true,
-        },
-      });
-      await entity.dispatch("search", {
-        dataset,
-        query,
-        sort,
-        size: size,
-      });
-    } finally {
-      DatasetViewSettings.update({
-        where: dataset.name,
-        data: {
-          loading: false,
-        },
-      });
-    }
-
-    const viewSettings = DatasetViewSettings.find(dataset.name);
-    const newPagination = { size: size, page: 1 };
-    displayQueryParams({
-      query,
-      sort,
-      enableAnnotation: viewSettings.annotationEnabled,
-      pagination: newPagination,
-    });
-
-    await Pagination.update({
-      where: dataset.name,
-      data: newPagination,
-    });
-    return entity.find(dataset.name);
+  async search(_, { dataset, query, sort, size }) {
+    return await _search({ dataset, query, sort, size });
   },
 
   async enableAnnotation(_, { dataset, value }) {
-    displayQueryParams({
+    const settings = await _updateViewSettings({
+      id: dataset.name,
+      data: { annotationEnabled: value },
+    });
+
+    _displayQueryParams({
+      /**
+       * Set different route query params
+       */
       query: dataset.query,
       sort: dataset.sort,
       enableAnnotation: value,
-      pagination: dataset.viewSettings.pagination,
+      pagination: Pagination.find(dataset.name),
     });
-    return await DatasetViewSettings.update({
-      where: dataset.name,
-      data: {
-        annotationEnabled: value,
-      },
-    });
+
+    return settings;
   },
 
-  async paginate({ dispatch }, { dataset, size, page }) {
-    const newPagination = await Pagination.update({
-      where: dataset.name,
-      data: {
-        page: page,
-        size: size,
-      },
-    });
-
-    const newDataset = await dataset.constructor.update({
-      where: dataset.name,
-      data: {
-        viewSettings: { ...dataset.viewSettings, pagination: newPagination },
-      },
-    });
-    displayQueryParams({
-      query: dataset.query,
-      sort: dataset.sort,
-      enableAnnotation: dataset.annotationEnabled,
-      pagination: {
-        ...newPagination,
-        page,
-        size,
-      },
-    });
-    try {
-      DatasetViewSettings.update({
-        where: dataset.name,
-        data: {
-          loading: true,
-        },
-      });
-      await dispatch(
-        `entities/${toSnakeCase(dataset.task)}/paginate`,
-        {
-          dataset: newDataset,
-          from: newPagination.from,
-          size,
-        },
-        { root: true }
-      );
-    } finally {
-      DatasetViewSettings.update({
-        where: dataset.name,
-        data: {
-          loading: false,
-        },
-      });
-    }
+  async paginate(_, { dataset, size, page }) {
+    await _paginate({ dataset, size, page });
   },
 };
 
