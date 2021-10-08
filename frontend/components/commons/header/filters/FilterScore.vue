@@ -150,8 +150,10 @@ export default {
       return this.scoreRanges[1];
     },
   },
-  created() {
-    this.scoreRanges = [this.rangeOptions.min, this.rangeOptions.max];
+  beforeMount() {
+    let from = this.filter.selected ? this.filter.selected.from * 100 : this.rangeOptions.min;
+    let to = this.filter.selected ? this.filter.selected.to * 100 : this.rangeOptions.max;
+    this.scoreRanges = [from, to];
   },
   methods: {
     expandScore() {
@@ -238,7 +240,7 @@ export default {
     max-width: 90%;
   }
   &.highlighted {
-    border-color: $primary-color;
+    border: 1px solid $primary-color;
   }
   &.expanded {
     margin-top: 10px;
@@ -256,7 +258,7 @@ export default {
     width: 400px;
     max-width: 100vw;
     min-height: 210px;
-    border: 2px solid $primary-color;
+    border: 1px solid $primary-color;
     pointer-events: all;
     &:after {
       content: none;
