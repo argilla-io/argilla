@@ -15,10 +15,9 @@
 from typing import Union
 
 import httpx
+
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.models import ErrorMessage
-from rubrix.client.sdk.commons.models import HTTPValidationError
-from rubrix.client.sdk.commons.models import Response
+from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.datasets.models import Dataset
 
 
@@ -58,5 +57,3 @@ def _build_response(
         headers=response.headers,
         parsed=parsed_response,
     )
-
-    pass
