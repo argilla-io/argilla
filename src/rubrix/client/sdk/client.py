@@ -13,10 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Dict
+
 from pydantic import BaseModel, Field
 
 from rubrix._constants import API_KEY_HEADER_NAME
-from typing import Dict
 
 
 class Client(BaseModel):
@@ -46,5 +47,5 @@ class AuthenticatedClient(Client):
         return {
             "Authorization": f"Bearer {self.token}",  # Backward compatibility
             API_KEY_HEADER_NAME: self.token,
-            **self.headers,
+            **super().get_headers(),
         }
