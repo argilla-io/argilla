@@ -1,4 +1,5 @@
 #  coding=utf-8
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,29 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 import json
-from typing import Union, TypeVar, Type, List
+from typing import List, Type, TypeVar, Union
 
 import httpx
-from rubrix.client.sdk.commons.models import BulkResponse
-from rubrix.client.sdk.commons.models import ErrorMessage
-from rubrix.client.sdk.commons.models import HTTPValidationError
-from rubrix.client.sdk.commons.models import Response
+
+from rubrix.client.sdk.commons.models import (
+    BulkResponse,
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 
 
 def build_bulk_response(
@@ -48,13 +64,10 @@ T = TypeVar("T")
 
 
 def build_data_response(
-        response: httpx.Response,
-        data_type: Type[T]
+    response: httpx.Response, data_type: Type[T]
 ) -> Response[Union[List[T], HTTPValidationError, ErrorMessage]]:
     if 200 <= response.status_code < 400:
-        parsed_response = [
-            data_type(**json.loads(r)) for r in response.iter_lines()
-        ]
+        parsed_response = [data_type(**json.loads(r)) for r in response.iter_lines()]
     else:
         content = next(response.iter_lines())
         data = json.loads(content)

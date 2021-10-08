@@ -12,21 +12,23 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import List, Optional, Union
 
 import httpx
-from rubrix.client.sdk._helpers import build_bulk_response
-from rubrix.client.sdk._helpers import build_data_response
+
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.models import BulkResponse
-from rubrix.client.sdk.commons.models import ErrorMessage
-from rubrix.client.sdk.commons.models import HTTPValidationError
-from rubrix.client.sdk.commons.models import Response
-from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
-from rubrix.client.sdk.text_classification.models import TextClassificationQuery
-from rubrix.client.sdk.text_classification.models import TextClassificationRecord
+from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response
+from rubrix.client.sdk.commons.models import (
+    BulkResponse,
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
+from rubrix.client.sdk.text_classification.models import (
+    TextClassificationBulkData,
+    TextClassificationQuery,
+    TextClassificationRecord,
+)
 
 
 def bulk(
@@ -68,4 +70,6 @@ def data(
         params={"limit": limit},
         json=request.dict() if request else {},
     ) as response:
-        return build_data_response(response=response, data_type=TextClassificationRecord)
+        return build_data_response(
+            response=response, data_type=TextClassificationRecord
+        )
