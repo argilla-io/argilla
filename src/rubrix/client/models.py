@@ -174,7 +174,9 @@ class TokenClassificationRecord(BaseModel):
     text: str
     tokens: List[str]
 
-    prediction: Optional[List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]] = None
+    prediction: Optional[
+        List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+    ] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     prediction_agent: Optional[str] = None
     annotation_agent: Optional[str] = None

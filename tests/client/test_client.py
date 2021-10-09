@@ -19,12 +19,10 @@ import socket
 import httpx
 import pandas
 import pytest
-import requests
 import rubrix
 from rubrix import (
     RubrixClient,
     TextClassificationRecord,
-    TokenAttributions,
     TokenClassificationRecord,
     Text2TextRecord,
 )
@@ -37,19 +35,11 @@ from tests.server.test_helpers import client
 
 
 def mocking_client(monkeypatch):
-    monkeypatch.setattr(requests, "get", client.get)
-    monkeypatch.setattr(requests, "post", client.post)
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)
     monkeypatch.setattr(httpx, "put", client.put)
-
-    def stream_mock(*args, url: str, **kwargs):
-        if "POST" in args:
-            return client.post(url, stream=True, **kwargs)
-        return client.get(url, stream=True, **kwargs)
-
-    monkeypatch.setattr(httpx, "stream", stream_mock)
+    monkeypatch.setattr(httpx, "stream", client.stream)
 
 
 def test_log_something(monkeypatch):
@@ -173,29 +163,6 @@ def test_log_with_annotation(monkeypatch):
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["status"] == "Discarded"
-
-
-@pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
-def test_text_classification_client_to_sdk(annotation):
-    token_attributions = [
-        TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
-    ]
-    record = TextClassificationRecord(
-        inputs={"text": "test"},
-        prediction=[("label1", 0.5), ("label2", 0.5)],
-        annotation=annotation,
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
-        multi_label=True,
-        explanation={"text": token_attributions},
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-    sdk_record = RubrixClient._text_classification_client_to_sdk(record)
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
 
 
 @pytest.mark.parametrize("include_score, agent", [(False, "test_agent"), (True, None)])
