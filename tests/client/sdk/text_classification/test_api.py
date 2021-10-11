@@ -15,21 +15,15 @@
 
 import httpx
 import pytest
-from rubrix._constants import DEFAULT_API_KEY
-from rubrix.client.sdk.client import AuthenticatedClient
+
 from rubrix.client.sdk.commons.models import BulkResponse
 from rubrix.client.sdk.text_classification.api import bulk, data
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
+    TextClassificationBulkData,
     TextClassificationRecord,
 )
-from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
 from tests.server.test_helpers import client
-
-
-@pytest.fixture
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
 
 
 @pytest.fixture
