@@ -93,6 +93,9 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
+    globalHeaderHeight() {
+      return this.dataset.viewSettings.headerHeight
+    }
   },
   updated() {
     window.onresize = () => {
@@ -101,6 +104,13 @@ export default {
   },
   mounted() {
     this.setHeaderHeight();
+  },
+  watch: {
+    globalHeaderHeight() {
+      if (this.globalHeaderHeight !== this.headerHeight) {
+        this.headerHeightUpdate();
+      }
+    }
   },
   methods: {
     ...mapActions({
@@ -114,16 +124,11 @@ export default {
         value: this.annotationEnabled ? false : true,
       });
     },
-    setHeaderHeight() {
+    async setHeaderHeight() {
       const header = this.$refs.header;
       const resize_ob = new ResizeObserver(() => {
         this.headerHeight = header.offsetHeight;
-        DatasetViewSettings.update({
-          where: this.dataset.name,
-          data: {
-            headerHeight: this.headerHeight,
-          },
-        });
+        this.headerHeightUpdate();
       });
       resize_ob.observe(header);
     },
@@ -131,6 +136,14 @@ export default {
       this.search({
         dataset: this.dataset,
         query: this.dataset.query,
+      });
+    },
+    headerHeightUpdate() {
+      DatasetViewSettings.update({
+        where: this.dataset.name,
+        data: {
+          headerHeight: this.headerHeight,
+        },
       });
     },
     onShowSidebarInfo(info) {
