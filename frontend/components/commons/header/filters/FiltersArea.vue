@@ -21,8 +21,8 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
-            class="filters__searchbar"
             :dataset="dataset"
+            class="filters__searchbar"
             @submit="onTextQuerySearch"
           />
           <FiltersList
