@@ -21,11 +21,12 @@ This module contains the interface to access Rubrix's REST API.
 import logging
 import os
 import re
-from rubrix._constants import DEFAULT_API_KEY
 from typing import Iterable
 
 import pandas
 import pkg_resources
+
+from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
 from rubrix.client.models import *
 
@@ -122,7 +123,7 @@ def log(
 
     Examples:
         >>> import rubrix as rb
-        ... record = rb.TextClassificationRecord(
+        >>> record = rb.TextClassificationRecord(
         ...     inputs={"text": "my first rubrix example"},
         ...     prediction=[('spam', 0.8), ('ham', 0.2)]
         ... )
@@ -155,8 +156,8 @@ def copy(dataset: str, name_of_copy: str):
 
     Examples:
         >>> import rubrix as rb
-        ... rb.copy("my_dataset", name_of_copy="new_dataset")
-        >>> df = rb.load("new_dataset")
+        >>> rb.copy("my_dataset", name_of_copy="new_dataset")
+        >>> dataframe = rb.load("new_dataset")
     """
     _client_instance().copy(source=dataset, target=name_of_copy)
 
