@@ -123,13 +123,20 @@ export default {
   },
   watch: {
     appliedFilters() {
-      this.selectedOptions = this.appliedFilters;
+      this.updateOptions();
     },
   },
   mounted() {
-    this.selectedOptions = this.appliedFilters;
+    this.updateOptions();
   },
   methods: {
+    updateOptions() {
+      if (typeof this.appliedFilters === "string")
+        this.selectedOptions = [this.appliedFilters];
+      else {
+        this.selectedOptions = this.appliedFilters;
+      }
+    },
     onVisibility(value) {
       this.visible = value;
       this.searchText = undefined;
