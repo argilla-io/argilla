@@ -27,7 +27,6 @@
         :record="results.record"
         @onShowMetadata="onShowMetadata"
       />
-      <!--<RecordTokenClassification :dataset="dataset" :record="results.record" />-->
     </template>
   </results-list>
 </template>

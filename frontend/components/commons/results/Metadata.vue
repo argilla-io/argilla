@@ -173,7 +173,7 @@ export default {
     }
     &.--disabled {
       color: $secondary-color;
-      opacity: 0.4;
+      opacity: 0.3;
       pointer-events: none;
     }
   }
@@ -185,6 +185,7 @@ export default {
     &__item {
       word-break: break-word;
       min-width: 200px;
+      max-width: 300px;
       text-align: left;
       white-space: pre-line;
       color: palette(grey, medium);
@@ -198,7 +199,7 @@ export default {
     }
     &__button {
       .--selected & {
-        color: $secondary-color;
+        color: $secondary-color !important;
       }
       margin: auto 0 auto auto;
       overflow: visible;
@@ -208,10 +209,16 @@ export default {
     display: block;
     text-align: right;
     margin-top: 2em;
+    display: flex;
     .re-button {
-      margin-left: 0.5em;
+      margin-right: 0.5em;
       margin-bottom: 0;
       display: inline-block;
+      width: 100%;
+      min-height: 38px;
+      &:last-child() {
+        margin-right: 0;
+      }
     }
   }
 }

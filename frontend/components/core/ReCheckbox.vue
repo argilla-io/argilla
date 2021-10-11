@@ -211,7 +211,7 @@ $checkbox-color-dark: $primary-color;
   .dropdown--filter & {
     height: auto;
     padding-right: 2em;
-    white-space: nowrap;
+    white-space: normal;
     text-transform: none;
   }
 }

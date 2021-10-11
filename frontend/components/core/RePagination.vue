@@ -324,7 +324,7 @@ $pagination-size: 30px;
       bottom: 2em;
       left: 0;
       right: 0;
-      border: 2px solid $primary-color;
+      border: 1px solid $primary-color;
       a {
         display: block;
         color: $font-secondary-dark;
