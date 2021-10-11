@@ -27,11 +27,13 @@
         :label="label"
         :class="[
           'label-button',
-          selectedLabels.includes(label.class) ? 'selected' : '',
+          selectedLabels.includes(label.class) && !clicking ? 'selected' : null,
+          selectedLabels.includes(label.class) && record.multi_label ? 'selected' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
         @change="updateLabels"
+        @clicking="onClicking"
       >
       </ClassifierAnnotationButton>
     </transition-group>
@@ -72,6 +74,7 @@
           :data-title="label.class"
           :value="label.class"
           @change="updateLabels"
+          @clicking="onClicking"
         >
         </ClassifierAnnotationButton>
       </template>
@@ -100,6 +103,7 @@ export default {
     dropdownLabels: undefined,
     visible: undefined,
     selectedLabels: [],
+    clicking: false,
   }),
   computed: {
     datasetLabels() {
@@ -176,6 +180,9 @@ export default {
     decorateScore(score) {
       return score * 100;
     },
+    onClicking(isClicking) {
+      this.clicking = isClicking;
+    }
   },
 };
 </script>

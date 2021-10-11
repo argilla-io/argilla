@@ -73,12 +73,14 @@ export default {
       this.checked = !!this.value;
     },
     selected() {
-      this.clicking = false;
+      this.clicking = false,
+      this.$emit('clicking', false);
     }
   },
   methods: {
     toggleCheck() {
       if (!this.disabled) {
+        this.$emit('clicking', true);
         this.clicking = true;
         let checked = this.areChecked;
         const found = checked.indexOf(this.value);
