@@ -91,10 +91,10 @@ class TextClassificationRecord(BaseModel):
 
     Examples:
         >>> import rubrix as rb
-        ... record = rb.TextClassificationRecord(
+        >>> record = rb.TextClassificationRecord(
         ...     inputs={"text": "my first rubrix example"},
         ...     prediction=[('spam', 0.8), ('ham', 0.2)]
-        >>> )
+        ... )
     """
 
     inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
@@ -164,11 +164,11 @@ class TokenClassificationRecord(BaseModel):
     
     Examples:
         >>> import rubrix as rb
-        ... record = rb.TokenClassificationRecord(
+        >>> record = rb.TokenClassificationRecord(
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
         ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
-        >>> )
+        ... )
     """
 
     text: str
@@ -225,10 +225,10 @@ class Text2TextRecord(BaseModel):
     
     Examples:
         >>> import rubrix as rb
-        ... record = rb.Text2TextRecord(
+        >>> record = rb.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
         ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
-        >>> )    
+        ... )    
     """
 
     text: str
