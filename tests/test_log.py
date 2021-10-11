@@ -20,32 +20,23 @@ Interaction with the client will be mocked, as this test are independent from th
 which could or could not be mounted.
 """
 
+import logging
 from typing import cast
 
 import httpx
 import pytest
-import rubrix
-import logging
 
+import rubrix
 from rubrix import (
     BulkResponse,
+    Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
-    Text2TextRecord,
 )
-import rubrix.sdk.api.text_classification.bulk_records
-from rubrix.sdk.models import (
-    TextClassificationBulkData,
-    TextClassificationBulkDataMetadata,
-    TextClassificationBulkDataTags,
-    TokenClassificationBulkData,
-    TokenClassificationBulkDataMetadata,
-    TokenClassificationBulkDataTags,
-)
+from rubrix.client.sdk.commons.models import Response
 from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
 from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
 from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
-from rubrix.sdk.types import Response
 
 
 @pytest.fixture
@@ -74,9 +65,7 @@ def mock_response_200(monkeypatch):
 def mock_response_text(monkeypatch):
     """Mock log response for TextClassification records"""
 
-    _response = BulkResponse(dataset="test", processed=500, failed=0)
-
-    def mock_get(*args, json_body: TextClassificationBulkData, **kwargs):
+    def mock_get(*args, **kwargs):
         return Response(
             status_code=200,
             content=b"Everything's fine",
@@ -86,7 +75,7 @@ def mock_response_text(monkeypatch):
                 "content-length": "43",
                 "content-type": "application/json",
             },
-            parsed=_response,
+            parsed=BulkResponse(dataset="test", processed=500, failed=0),
         )
 
     monkeypatch.setattr(
@@ -98,11 +87,7 @@ def mock_response_text(monkeypatch):
 def mock_response_token(monkeypatch):
     """Mock log response for TokenClassification records"""
 
-    _response = BulkResponse(dataset="test", processed=500, failed=0)
-
-    def mock_get(*args, json_body: TokenClassificationBulkData, **kwargs):
-        assert isinstance(json_body.metadata, TokenClassificationBulkDataMetadata)
-        assert isinstance(json_body.tags, TokenClassificationBulkDataTags)
+    def mock_get(*args, **kwargs):
         return Response(
             status_code=200,
             content=b"Everything's fine",
@@ -112,11 +97,11 @@ def mock_response_token(monkeypatch):
                 "content-length": "43",
                 "content-type": "application/json",
             },
-            parsed=_response,
+            parsed=BulkResponse(dataset="test", processed=500, failed=0),
         )
 
     monkeypatch.setattr(
-        "rubrix.client.token_classification_bulk_records.sync_detailed", mock_get
+        "rubrix.client.token_classification_bulk", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -147,17 +132,15 @@ def mock_response_text2text(monkeypatch):
     )  # apply the monkeypatch for requests.get to mock_get
 
 
-def test_text_classification(mock_response_200, mock_response_text):
+def test_text_classification(mock_response_text):
     """Testing text classification with log function
 
     It checks a Response is generated.
 
     Parameters
     ----------
-    mock_response_200
-        Mocked correct http response, emulating API init
     mock_response_text
-        Mocked response given by the sync method, emulating the log of data
+        Mocked response for the text_classification bulk API call
     """
     records = [
         TextClassificationRecord(
@@ -179,17 +162,15 @@ def test_text_classification(mock_response_200, mock_response_text):
     )
 
 
-def test_token_classification(mock_response_200, mock_response_token):
+def test_token_classification(mock_response_token):
     """Testing token classification with log function
 
     It checks a Response is generated.
 
     Parameters
     ----------
-    mock_response_200
-        Mocked correct http response, emulating API init
     mock_response_token
-        Mocked response given by the sync method, emulating the log of data
+        Mocked response for the token_classification bulk API call
     """
     records = [
         TokenClassificationRecord(
