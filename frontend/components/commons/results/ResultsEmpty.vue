@@ -41,7 +41,7 @@ export default {
   width: 100%;
   display: flex;
   margin-top: 0;
-  height: calc(100vh - 400px);
+  height: 100vh;
   #{$this}__content {
     align-items: center;
     margin: auto;

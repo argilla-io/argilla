@@ -16,6 +16,8 @@
  */
 
 /* eslint-disable */
+require('./arrow-bottom')
+require('./arrow-top')
 require('./back')
 require('./brand-isotipo')
 require('./brand-recognai')

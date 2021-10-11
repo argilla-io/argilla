@@ -17,6 +17,15 @@
 
 <template>
   <div class="sort">
+    <svgicon
+      v-if="selectedField"
+      title="remove field"
+      class="sort__remove-button"
+      name="cross"
+      width="14"
+      height="14"
+      @click="removeField()"
+    />
     <FilterDropdown
       :class="{ highlighted: visible }"
       :visible="visible"
@@ -49,22 +58,15 @@
       class="sort__direction"
       @click="selectSortDirection()"
     >
-      {{ defaultSortedByDir === "asc" ? "↑" : "↓" }}
+      <svgicon width="17" height="24" :name="defaultSortedByDir === 'asc' ? 'arrow-top' : 'arrow-bottom'" />
     </p>
-    <svgicon
-      v-if="selectedField"
-      title="remove field"
-      class="sort__remove-button"
-      name="cross"
-      width="14"
-      height="14"
-      @click="removeField()"
-    />
   </div>
 </template>
 
 <script>
 import "assets/icons/cross";
+import "assets/icons/arrow-top";
+import "assets/icons/arrow-bottom";
 export default {
   props: {
     sortOptions: {
@@ -142,16 +144,20 @@ export default {
   display: flex;
   align-items: center;
   &__remove-button {
-    margin-left: 1em;
+    position: absolute;
+    left: 20px;
+    margin-right: 1em;
     cursor: pointer;
   }
   &__direction {
+    position: relative;
     padding: 0.5em;
     @include font-size(20px);
     margin: 0 0 0 0.5em;
     background: palette(grey, light);
     border-radius: 5px;
     min-width: 50px;
+    min-height: 45px;
     text-align: center;
     cursor: pointer;
   }

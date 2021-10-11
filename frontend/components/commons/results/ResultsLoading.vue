@@ -50,7 +50,7 @@ export default {
   display: block;
   width: 100%;
   background: white;
-  margin-bottom: 2px;
+  margin-bottom: 10px;
 }
 @keyframes load {
   0% {

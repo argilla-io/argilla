@@ -181,8 +181,16 @@ function _normalizeSearchQuery({ query, dataset }) {
     }
   });
 
-  if (Array.isArray(query.predicted) && query.predicted.length > 0) {
-    query.predicted = query.predicted[0];
+  if (query.predicted === false) {
+    query.predicted = undefined;
+  }
+
+  if (Array.isArray(query.predicted)) {
+    if (query.predicted.length > 1) {
+      query.predicted = undefined;
+    } else {
+      query.predicted = query.predicted[0];
+    }
   }
 
   return Object.keys(query).length === 0
@@ -228,13 +236,14 @@ async function _paginate({ dataset, size, page }) {
 
   try {
     await _updateViewSettings({ id: dataset.name, data: { loading: true } });
-    await _callSearchApi({
+    const results = await _callSearchApi({
       dataset,
       query: dataset.query,
       sort: dataset.sort,
       size,
       from: pagination.from,
     });
+    await _updateTaskDataset({ dataset, data: { results } });
   } finally {
     await _updateViewSettings({
       id: dataset.name,
@@ -363,7 +372,7 @@ async function _updateTaskDataset({ dataset, data }) {
     datasetResults.aggregations = globalResults.aggregations;
   }
 
-  if (results && results.aggregations) {
+  if (dataResults && dataResults.aggregations) {
     datasetResults.aggregations = initializeObjectDeep(
       datasetResults.aggregations || {}
     );

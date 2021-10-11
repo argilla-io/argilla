@@ -165,7 +165,7 @@ export default {
   border: 1px solid $secondary-color;
   border-radius: 0;
   box-shadow: none;
-  max-width: 520px;
+  max-width: 400px;
   ::v-deep .modal__title {
     color: $secondary-color;
   }

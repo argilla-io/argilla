@@ -198,14 +198,14 @@ export default {
   &--outline {
     @extend .button-tertiary;
     background: transparent;
-    border: 1px solid $line-smooth-color;
-    color: $font-medium-color;
+    border: 1px solid $primary-color;
+    color: $primary-color;
     text-transform: none;
     &:hover,
     &:focus {
       background: transparent;
-      border-color: darken($line-smooth-color, 10%);
-      color: darken($font-medium-color, 10%);
+      border-color: darken($primary-color, 10%);
+      color: darken($primary-color, 10%);
     }
     &[disabled] {
       background-color: transparent;

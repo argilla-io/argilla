@@ -33,13 +33,13 @@
       @click="addNewField"
       >+ Add another field</a
     >
-    <div class="sort__buttons">
+    <div class="sort__buttons" v-if="selectedFields.length">
       <re-button
         class="button-tertiary--small button-tertiary--outline"
         @click="cancel"
         >Cancel</re-button
       >
-      <re-button class="button-primary--small" @click="apply">Apply</re-button>
+      <re-button class="button-primary--small" @click="apply">Filter</re-button>
     </div>
   </div>
 </template>
@@ -111,15 +111,18 @@ export default {
   &__buttons {
     display: flex;
     margin-top: 1.5em;
-    button {
-      margin-bottom: 0;
-    }
-    button:last-child {
-      margin-right: auto;
-      margin-left: 0.5em;
+    & > * {
+      display: block;
+      width: 100%;
+      margin-right: 0.5em;
+      min-height: 38px;
+      &:last-child {
+        margin-right: 0;
+      }
     }
   }
   &__add-button {
+    @include font-size(13px);
     margin-top: 1em;
     color: $primary-color;
     outline: none;

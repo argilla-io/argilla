@@ -25,7 +25,7 @@
           }"
           @click="selectGroup(group)"
         >
-          <svgicon v-if="group === 'sort'" name="sort" width="14" height="14" />
+          <svgicon v-if="group === 'Sort'" name="sort" width="14" height="14" />
           {{ group }}
           <span v-if="itemsAppliedOnGroup(group)"
             >({{ itemsAppliedOnGroup(group) }})</span
@@ -38,6 +38,7 @@
             searchableFilterList.filter((f) => f.group === group).length > 6
               ? 'filters__list__content--large'
               : '',
+            group === 'Sort' ? 'filters__list__content--sort' : null,
           ]"
         >
           <span
@@ -59,8 +60,9 @@
               @apply="onApply"
             />
           </span>
+          <a class="filters__list__button" href="#" v-if="initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1" @click.prevent="removeFiltersByGroup(group)">Remove all filters</a>
           <SortList
-            v-if="initialVisibleGroup === 'sort'"
+            v-if="initialVisibleGroup === 'Sort'"
             :sort-options="filterList"
             :sort="dataset.sort"
             @closeSort="close"
@@ -220,6 +222,15 @@ export default {
       }
       this.close();
     },
+    removeFiltersByGroup(group) {
+      const filtersInGroup = this.filterList.filter((f) => f.group === group);
+      if (group === "Metadata") {
+        this.$emit("removeAllMetadataFilters", filtersInGroup);
+      } else {
+        this.$emit("removeFiltersByGroup", filtersInGroup);
+      }
+      this.close();
+    },
     onSortBy(sortList) {
       this.$emit("applySortBy", sortList);
       this.close();
@@ -238,7 +249,7 @@ $number-size: 18px;
   &__list {
     display: flex;
     &__content {
-      width: 450px;
+      width: 455px;
       left: 0;
       right: 0;
       margin: auto;
@@ -246,9 +257,12 @@ $number-size: 18px;
       top: calc(100% + 1em);
       box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
       background: $lighter-color;
-      padding: 3em 3em 2em 3em;
+      padding: 20px 20px 10px 4em;
       border-radius: 5px;
       max-height: 550px;
+      &--sort {
+        max-width: 410px;
+      }
       &--large {
         width: 910px;
         max-height: 80vh;
@@ -269,6 +283,14 @@ $number-size: 18px;
       svg {
         margin-right: 0.3em;
       }
+    }
+    &__button {
+      color: $font-secondary;
+      @include font-size(13px);
+      text-decoration: none;
+      margin-bottom: 10px;
+      display: block;
+      font-weight: 600;
     }
     p {
       cursor: pointer;
