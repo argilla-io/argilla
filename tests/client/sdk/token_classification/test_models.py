@@ -81,6 +81,7 @@ def test_from_client_agent(agent, expected):
     )
     sdk_record = CreationTokenClassificationRecord.from_client(record)
 
+    assert sdk_record.prediction.agent == expected
     assert sdk_record.annotation.agent == expected
 
 
