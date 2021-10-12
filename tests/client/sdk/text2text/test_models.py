@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import socket
+from datetime import datetime
 
 import pytest
 
@@ -103,6 +104,7 @@ def test_to_client():
         text="test",
         prediction=prediction,
         annotation=prediction,
+        event_timestamp=datetime(2000, 1, 1),
     )
 
     record = sdk_record.to_client()

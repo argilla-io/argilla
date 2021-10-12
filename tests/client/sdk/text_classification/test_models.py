@@ -122,6 +122,7 @@ def test_to_client(multi_label, expected):
         annotation=annotation,
         prediction=prediction,
         multi_label=multi_label,
+        event_timestamp=datetime(2000, 1, 1),
     )
 
     record = sdk_record.to_client()
