@@ -34,9 +34,6 @@ from rubrix import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.commons.models import Response
-from rubrix.sdk.models.text2_text_bulk_data import Text2TextBulkData
-from rubrix.sdk.models.text2_text_bulk_data_metadata import Text2TextBulkDataMetadata
-from rubrix.sdk.models.text2_text_bulk_data_tags import Text2TextBulkDataTags
 
 
 @pytest.fixture
@@ -111,9 +108,7 @@ def mock_response_text2text(monkeypatch):
 
     _response = BulkResponse(dataset="test", processed=500, failed=0)
 
-    def mock_get(*args, json_body: Text2TextBulkData, **kwargs):
-        assert isinstance(json_body.metadata, Text2TextBulkDataMetadata)
-        assert isinstance(json_body.tags, Text2TextBulkDataTags)
+    def mock_get(*args, **kwargs):
         return Response(
             status_code=200,
             content=b"Everything's fine",
@@ -127,7 +122,7 @@ def mock_response_text2text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.text2text_bulk_records.sync_detailed",
+        "rubrix.client.text2text_bulk",
         mock_get,
     )  # apply the monkeypatch for requests.get to mock_get
 
@@ -195,17 +190,15 @@ def test_token_classification(mock_response_token):
     )
 
 
-def test_text2text(mock_response_200, mock_response_text2text):
+def test_text2text(mock_response_text2text):
     """Testing text2text with log function
 
     It checks a Response is generated.
 
     Parameters
     ----------
-    mock_response_200
-        Mocked correct http response, emulating API init
-    mock_response_token
-        Mocked response given by the sync method, emulating the log of data
+    mock_response_text2text
+        Mocked response for the text2text bulk API call
     """
     records = [
         Text2TextRecord(

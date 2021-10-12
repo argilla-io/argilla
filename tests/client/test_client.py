@@ -165,31 +165,6 @@ def test_log_with_annotation(monkeypatch):
     assert records[0]["status"] == "Discarded"
 
 
-def test_text2text_client_to_sdk():
-    record = Text2TextRecord(
-        text="test text",
-        prediction=["test prediction"],
-        annotation="test annotation",
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-
-    assert isinstance(record.prediction[0], tuple)
-    assert record.prediction[0][1] == pytest.approx(1.0)
-
-    sdk_record = RubrixClient._text2text_client_to_sdk(record)
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
-
-    client_record = RubrixClient._text2text_sdk_to_client(sdk_record)
-
-    assert record == client_record
-
-
 def test_create_ds_with_wrong_name(monkeypatch):
     mocking_client(monkeypatch)
     dataset_name = "Test Create_ds_with_wrong_name"
