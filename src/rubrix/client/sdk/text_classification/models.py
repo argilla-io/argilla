@@ -12,27 +12,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import socket
 from datetime import datetime
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
+
 from rubrix.client.models import (
     TextClassificationRecord as ClientTextClassificationRecord,
 )
 from rubrix.client.models import TokenAttributions as ClientTokenAttributions
-from rubrix.client.sdk.commons.models import BaseAnnotation
-from rubrix.client.sdk.commons.models import BaseRecord
-from rubrix.client.sdk.commons.models import PredictionStatus
-from rubrix.client.sdk.commons.models import ScoreRange
-from rubrix.client.sdk.commons.models import TaskStatus
-from rubrix.client.sdk.commons.models import UpdateDatasetRequest
-
-MACHINE_NAME = socket.gethostname()
+from rubrix.client.sdk.commons.models import (
+    MACHINE_NAME,
+    BaseAnnotation,
+    BaseRecord,
+    PredictionStatus,
+    ScoreRange,
+    TaskStatus,
+    UpdateDatasetRequest,
+)
 
 
 class ClassPrediction(BaseModel):
@@ -74,7 +71,9 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
                 else [record.annotation]
             )
             annotation = TextClassificationAnnotation(
-                labels=[ClassPrediction(**{"class": label}) for label in annotation_list],
+                labels=[
+                    ClassPrediction(**{"class": label}) for label in annotation_list
+                ],
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 

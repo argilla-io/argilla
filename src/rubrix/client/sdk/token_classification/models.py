@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import socket
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -23,6 +22,7 @@ from rubrix.client.models import (
     TokenClassificationRecord as ClientTokenClassificationRecord,
 )
 from rubrix.client.sdk.commons.models import (
+    MACHINE_NAME,
     BaseAnnotation,
     BaseRecord,
     PredictionStatus,
@@ -30,8 +30,6 @@ from rubrix.client.sdk.commons.models import (
     TaskStatus,
     UpdateDatasetRequest,
 )
-
-MACHINE_NAME = socket.gethostname()
 
 
 class EntitySpan(BaseModel):
