@@ -46,7 +46,7 @@ def bulk(
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
-        json=json_body.dict(exclude_unset=True),
+        json=json_body.dict(by_alias=True),
     )
 
     return build_bulk_response(response)
