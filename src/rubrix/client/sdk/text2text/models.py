@@ -18,7 +18,9 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from rubrix.client.models import Text2TextRecord as ClientText2TextRecord
 from rubrix.client.sdk.commons.models import (
+    MACHINE_NAME,
     BaseAnnotation,
     BaseRecord,
     PredictionStatus,
@@ -40,10 +42,58 @@ class Text2TextAnnotation(BaseAnnotation):
 class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
     text: str
 
+    @classmethod
+    def from_client(cls, record: ClientText2TextRecord):
+        prediction = None
+        if record.prediction is not None:
+            prediction = Text2TextAnnotation(
+                sentences=[
+                    Text2TextPrediction(text=pred[0], score=pred[1])
+                    if isinstance(pred, tuple)
+                    else Text2TextPrediction(text=pred)
+                    for pred in record.prediction
+                ],
+                agent=record.prediction_agent or MACHINE_NAME,
+            )
+        annotation = None
+        if record.annotation is not None:
+            annotation = Text2TextAnnotation(
+                sentences=[Text2TextPrediction(text=record.annotation)],
+                agent=record.annotation_agent or MACHINE_NAME,
+            )
+
+        return cls(
+            text=record.text,
+            prediction=prediction,
+            annotation=annotation,
+            status=record.status,
+            metadata=record.metadata,
+            id=record.id,
+            event_timestamp=record.event_timestamp,
+        )
+
 
 class Text2TextRecord(CreationText2TextRecord):
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def to_client(self) -> ClientText2TextRecord:
+        return ClientText2TextRecord(
+            text=self.text,
+            prediction=[
+                (sentence.text, sentence.score)
+                for sentence in self.prediction.sentences
+            ]
+            if self.prediction
+            else None,
+            prediction_agent=self.prediction.agent if self.prediction else None,
+            annotation=self.annotation.sentences[0].text if self.annotation else None,
+            annotation_agent=self.annotation.agent if self.annotation else None,
+            status=self.status,
+            metadata=self.metadata,
+            id=self.id,
+            event_timestamp=self.event_timestamp,
+        )
 
 
 class Text2TextBulkData(UpdateDatasetRequest):
