@@ -90,7 +90,7 @@ class Text2TextRecord(CreationText2TextRecord):
             annotation=self.annotation.sentences[0].text if self.annotation else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
             status=self.status,
-            metadata=self.metadata,
+            metadata=self.metadata or {},
             id=self.id,
             event_timestamp=self.event_timestamp,
         )
