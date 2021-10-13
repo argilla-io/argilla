@@ -17,15 +17,13 @@ from datetime import datetime
 import httpx
 import pytest
 
-from rubrix.client.models import (
-    TokenClassificationRecord as ClientTokenClassificationRecord,
-)
+from rubrix.client.models import Text2TextRecord as ClientText2TextRecord
 from rubrix.client.sdk.commons.models import BulkResponse
-from rubrix.client.sdk.token_classification.api import bulk, data
-from rubrix.client.sdk.token_classification.models import (
-    CreationTokenClassificationRecord,
-    TokenClassificationBulkData,
-    TokenClassificationRecord,
+from rubrix.client.sdk.text2text.api import bulk, data
+from rubrix.client.sdk.text2text.models import (
+    CreationText2TextRecord,
+    Text2TextBulkData,
+    Text2TextRecord,
 )
 from tests.server.test_helpers import client
 
@@ -33,12 +31,11 @@ from tests.server.test_helpers import client
 @pytest.fixture
 def bulk_data():
     records = [
-        ClientTokenClassificationRecord(
-            text="a raw text",
-            tokens=["a", "raw", "text"],
-            prediction=[("test", 2, 5, 0.9)],
+        ClientText2TextRecord(
+            text="test",
+            prediction=[("prueba", 0.5), ("intento", 0.5)],
             prediction_agent="agent",
-            annotation=[("test", 2, 5)],
+            annotation="prueba",
             annotation_agent="agent",
             id=i,
             metadata={"mymetadata": "str"},
@@ -48,8 +45,8 @@ def bulk_data():
         for i in range(3)
     ]
 
-    return TokenClassificationBulkData(
-        records=[CreationTokenClassificationRecord.from_client(rec) for rec in records],
+    return Text2TextBulkData(
+        records=[CreationText2TextRecord.from_client(rec) for rec in records],
         tags={"Mytag": "tag"},
         metadata={"MyMetadata": 5},
     )
@@ -73,10 +70,10 @@ def test_data(sdk_client, bulk_data, monkeypatch):
     dataset_name = "test_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
     client.post(
-        f"/api/datasets/{dataset_name}/TokenClassification:bulk",
+        f"/api/datasets/{dataset_name}/Text2Text:bulk",
         json=bulk_data.dict(by_alias=True),
     )
 
     response = data(sdk_client, name=dataset_name, limit=2)
-    assert isinstance(response.parsed[0], TokenClassificationRecord)
+    assert isinstance(response.parsed[0], Text2TextRecord)
     assert len(response.parsed) == 2

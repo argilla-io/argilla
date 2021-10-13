@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import socket
+from datetime import datetime
 
 import pytest
 
@@ -81,6 +82,7 @@ def test_from_client_agent(agent, expected):
     )
     sdk_record = CreationTokenClassificationRecord.from_client(record)
 
+    assert sdk_record.prediction.agent == expected
     assert sdk_record.annotation.agent == expected
 
 
@@ -94,6 +96,7 @@ def test_to_client():
         tokens=["this", "is", "a", "test", "text"],
         annotation=prediction,
         prediction=prediction,
+        event_timestamp=datetime(2000, 1, 1),
     )
 
     record = sdk_record.to_client()

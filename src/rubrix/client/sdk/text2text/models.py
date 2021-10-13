@@ -12,15 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.client.models import (
-    TokenClassificationRecord as ClientTokenClassificationRecord,
-)
+from rubrix.client.models import Text2TextRecord as ClientText2TextRecord
 from rubrix.client.sdk.commons.models import (
     MACHINE_NAME,
     BaseAnnotation,
@@ -32,102 +30,87 @@ from rubrix.client.sdk.commons.models import (
 )
 
 
-class EntitySpan(BaseModel):
-    start: int
-    end: int
-    label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
+class Text2TextPrediction(BaseModel):
+    text: str
     score: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
-class TokenClassificationAnnotation(BaseAnnotation):
-    entities: List[EntitySpan] = Field(default_factory=list)
-    score: Optional[float] = None
+class Text2TextAnnotation(BaseAnnotation):
+    sentences: List[Text2TextPrediction]
 
 
-class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
-    tokens: List[str]
-    text: str = Field(alias="raw_text")
+class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
+    text: str
 
     @classmethod
-    def from_client(cls, record: ClientTokenClassificationRecord):
+    def from_client(cls, record: ClientText2TextRecord):
         prediction = None
         if record.prediction is not None:
-            prediction = TokenClassificationAnnotation(
-                entities=[
-                    EntitySpan(label=ent[0], start=ent[1], end=ent[2])
-                    if len(ent) == 3
-                    else EntitySpan(
-                        label=ent[0], start=ent[1], end=ent[2], score=ent[3]
-                    )
-                    for ent in record.prediction
+            prediction = Text2TextAnnotation(
+                sentences=[
+                    Text2TextPrediction(text=pred[0], score=pred[1])
+                    if isinstance(pred, tuple)
+                    else Text2TextPrediction(text=pred)
+                    for pred in record.prediction
                 ],
-                agent=record.annotation_agent or MACHINE_NAME,
+                agent=record.prediction_agent or MACHINE_NAME,
             )
-
         annotation = None
         if record.annotation is not None:
-            annotation = TokenClassificationAnnotation(
-                entities=[
-                    EntitySpan(label=ent[0], start=ent[1], end=ent[2])
-                    for ent in record.annotation
-                ],
+            annotation = Text2TextAnnotation(
+                sentences=[Text2TextPrediction(text=record.annotation)],
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
         return cls(
-            tokens=record.tokens,
-            raw_text=record.text,
+            text=record.text,
             prediction=prediction,
             annotation=annotation,
             status=record.status,
-            id=record.id,
             metadata=record.metadata,
+            id=record.id,
             event_timestamp=record.event_timestamp,
         )
 
 
-class TokenClassificationRecord(CreationTokenClassificationRecord):
+class Text2TextRecord(CreationText2TextRecord):
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
-    def to_client(self) -> ClientTokenClassificationRecord:
-        return ClientTokenClassificationRecord(
+    def to_client(self) -> ClientText2TextRecord:
+        return ClientText2TextRecord(
             text=self.text,
-            tokens=self.tokens,
             prediction=[
-                (ent.label, ent.start, ent.end, ent.score)
-                for ent in self.prediction.entities
+                (sentence.text, sentence.score)
+                for sentence in self.prediction.sentences
             ]
             if self.prediction
             else None,
             prediction_agent=self.prediction.agent if self.prediction else None,
-            annotation=[
-                (ent.label, ent.start, ent.end) for ent in self.annotation.entities
-            ]
-            if self.annotation
-            else None,
+            annotation=self.annotation.sentences[0].text if self.annotation else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
-            id=self.id,
-            event_timestamp=self.event_timestamp,
             status=self.status,
             metadata=self.metadata or {},
+            id=self.id,
+            event_timestamp=self.event_timestamp,
         )
 
 
-class TokenClassificationBulkData(UpdateDatasetRequest):
-    records: List[CreationTokenClassificationRecord]
+class Text2TextBulkData(UpdateDatasetRequest):
+    records: List[CreationText2TextRecord]
 
 
-class TokenClassificationQuery(BaseModel):
+class Text2TextQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
-    predicted_as: List[str] = Field(default_factory=list)
-    annotated_as: List[str] = Field(default_factory=list)
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
+
     score: Optional[ScoreRange] = Field(default=None)
+
     status: List[TaskStatus] = Field(default_factory=list)
+
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+    metadata: Optional[Dict[str, Union[str, List[str]]]] = None

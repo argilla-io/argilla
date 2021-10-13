@@ -16,15 +16,15 @@ import socket
 from datetime import datetime
 
 import pytest
-from rubrix.client.models import TextClassificationRecord
-from rubrix.client.models import TokenAttributions
+
+from rubrix.client.models import TextClassificationRecord, TokenAttributions
 from rubrix.client.sdk.text_classification.models import (
+    ClassPrediction,
     CreationTextClassificationRecord,
     TextClassificationAnnotation,
-    ClassPrediction,
+    TextClassificationBulkData,
+    TextClassificationQuery,
 )
-from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
-from rubrix.client.sdk.text_classification.models import TextClassificationQuery
 from rubrix.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
 )
@@ -99,6 +99,7 @@ def test_from_client_agent(agent, expected):
     sdk_record = CreationTextClassificationRecord.from_client(record)
 
     assert sdk_record.annotation.agent == expected
+    assert sdk_record.prediction.agent == expected
 
 
 @pytest.mark.parametrize(
@@ -121,6 +122,7 @@ def test_to_client(multi_label, expected):
         annotation=annotation,
         prediction=prediction,
         multi_label=multi_label,
+        event_timestamp=datetime(2000, 1, 1),
     )
 
     record = sdk_record.to_client()

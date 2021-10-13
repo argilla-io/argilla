@@ -12,10 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from datetime import datetime
 
 import httpx
 import pytest
 
+from rubrix.client.models import (
+    TextClassificationRecord as ClientTextClassificationRecord,
+)
+from rubrix.client.models import TokenAttributions
 from rubrix.client.sdk.commons.models import BulkResponse
 from rubrix.client.sdk.text_classification.api import bulk, data
 from rubrix.client.sdk.text_classification.models import (
@@ -28,8 +33,30 @@ from tests.server.test_helpers import client
 
 @pytest.fixture
 def bulk_data():
+    explanation = {
+        "text": [TokenAttributions(token="test", attributions={"test": 0.5})]
+    }
+    records = [
+        ClientTextClassificationRecord(
+            inputs="test",
+            prediction=[("test", 0.5)],
+            prediction_agent="agent",
+            annotation="test1",
+            annotation_agent="agent",
+            multi_label=False,
+            explanation=explanation,
+            id=i,
+            metadata={"mymetadata": "str"},
+            event_timestamp=datetime(2020, 1, 1),
+            status="Validated",
+        )
+        for i in range(3)
+    ]
+
     return TextClassificationBulkData(
-        records=[CreationTextClassificationRecord(inputs={"text": "test"})]
+        records=[CreationTextClassificationRecord.from_client(rec) for rec in records],
+        tags={"Mytag": "tag"},
+        metadata={"MyMetadata": 5},
     )
 
 
@@ -44,15 +71,10 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
     assert isinstance(response.parsed, BulkResponse)
 
 
-def test_data(sdk_client, monkeypatch):
+def test_data(bulk_data, sdk_client, monkeypatch):
     # TODO: Not sure how to test the streaming part of the response here
     monkeypatch.setattr(httpx, "stream", client.stream)
 
-    # create test dataset
-    records = [
-        CreationTextClassificationRecord(inputs={"text": "test"}) for _ in range(3)
-    ]
-    bulk_data = TextClassificationBulkData(records=records)
     dataset_name = "test_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
     client.post(
