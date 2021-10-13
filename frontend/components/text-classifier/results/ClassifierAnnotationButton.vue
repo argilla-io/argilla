@@ -55,9 +55,6 @@ export default {
     };
   },
   computed: {
-    selected() {
-      return this.label.selected;
-    },
     classes() {
       return {
         active: Array.isArray(this.areChecked)
@@ -72,9 +69,11 @@ export default {
     value() {
       this.checked = !!this.value;
     },
-    selected() {
-      this.clicking = false,
-      this.$emit('clicking', false);
+   label() {
+     if (this.label.selected === undefined) {
+        this.clicking = false;
+        this.$emit('clicking', false);
+      }
     }
   },
   methods: {

@@ -19,7 +19,7 @@
   <div :class="['feedback-interactions']" class="feedback-interactions__items">
     <transition-group name="list" tag="div">
       <ClassifierAnnotationButton
-        v-for="label in sortedLabels"
+        v-for="label in sortedLabels.slice(0, maxLabelsShown)"
         :id="label.class"
         :key="`${label.class}-${label.score}`"
         v-model="selectedLabels"
@@ -261,19 +261,16 @@ export default {
   display: inline-block;
   margin-right: 10px;
 }
-// .list-move {
-//   transition: transform 1s;
-// }
 .list-enter-active,
 .list-leave-active {
-  transition: all 0.6s;
+  transition: all 1s;
 }
 .list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
   opacity: 0;
   transform: translateX(30px);
   // position: absolute !important;
   display: flex;
-  // justify-content: space-around;
+  justify-content: space-around;
   align-items: center;
 }
 </style>
