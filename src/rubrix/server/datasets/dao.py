@@ -289,7 +289,7 @@ class DatasetsDAO:
         return (
             aggregations.nested_aggregation(
                 nested_path=nested_field_path,
-                inner_aggregation=aggregation,
+                inner_aggregation={metric.id: aggregation},
             )
             if nested_field_path
             else aggregation
