@@ -339,7 +339,6 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
     total: int = 0
     records: List[Record] = Field(default_factory=list)
     aggregations: Aggregations = None
-    metrics: List[DatasetMetricResults] = Field(default_factory=list)
 
 
 class ScoreRange(BaseModel):
