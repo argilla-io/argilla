@@ -206,25 +206,4 @@ export default {
     cursor: default;
   }
 }
-.dropdown--sortable {
-  &.dropdown--open {
-    .dropdown {
-      &__header {
-        &:hover,
-        &:focus {
-          border: 1px solid $primary-color;
-          background: $lighter-color;
-        }
-      }
-    }
-  }
-  .dropdown {
-    &__header {
-      min-width: 140px;
-    }
-    &__selectables {
-      display: inline-block !important;
-    }
-  }
-}
 </style>
