@@ -212,7 +212,6 @@ class DatasetRecordsDAO:
                 **aggregations.words_cloud(),
                 **aggregations.score(),  # TODO: calculate score directly from dataset
                 **aggregations.custom_fields(metadata_fields),
-                **{metric.id: metric.spec for metric in dataset.metrics},
             }
             if record_from == 0
             else None
