@@ -321,9 +321,10 @@ class aggregations:
 
     @staticmethod
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
+        inner_meta = list(inner_aggregation.values())[0].get("meta", {})
         return {
             "meta": {
-                "kind": list(inner_aggregation.values())[0]["meta"]["kind"],
+                "kind": inner_meta.get("kind", "custom"),
             },
             "nested": {"path": nested_path},
             "aggs": inner_aggregation,
