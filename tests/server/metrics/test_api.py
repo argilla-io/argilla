@@ -12,13 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from time import sleep
 
-from rubrix.server.metrics.model import DatasetMetric, DatasetMetricCreation
+from rubrix.server.metrics.model import (
+    DatasetMetric,
+    DatasetMetricCreation,
+)
 from rubrix.server.tasks.text_classification import (
     TextClassificationBulkData,
     TextClassificationRecord,
-    TextClassificationSearchResults,
 )
 
 from tests.server.test_helpers import client
@@ -74,13 +75,6 @@ def test_dataset_metrics():
 
     metrics = [DatasetMetric.parse_obj(m) for m in metrics]
     assert metrics[0].id == metric_id
-
-    response = client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
-    ).json()
-    results = TextClassificationSearchResults.parse_obj(response)
-    assert len(results.metrics) == 1
-    assert results.metrics[0].id == metric_id
 
     assert (
         client.delete(f"/api/datasets/{dataset}/metrics/{metric_id}").status_code == 200
