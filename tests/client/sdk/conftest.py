@@ -15,6 +15,9 @@
 
 import pytest
 
+from rubrix._constants import DEFAULT_API_KEY
+from rubrix.client.sdk.client import AuthenticatedClient
+
 
 class Helpers:
     def remove_description(self, schema: dict):
@@ -30,3 +33,8 @@ class Helpers:
 @pytest.fixture(scope="session")
 def helpers():
     return Helpers()
+
+
+@pytest.fixture(scope="session")
+def sdk_client():
+    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)

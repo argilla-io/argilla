@@ -18,33 +18,28 @@ import httpx
 import pytest
 
 from rubrix.client.models import (
-    TextClassificationRecord as ClientTextClassificationRecord,
+    TokenClassificationRecord as ClientTokenClassificationRecord,
 )
-from rubrix.client.models import TokenAttributions
 from rubrix.client.sdk.commons.models import BulkResponse
-from rubrix.client.sdk.text_classification.api import bulk, data
-from rubrix.client.sdk.text_classification.models import (
-    CreationTextClassificationRecord,
-    TextClassificationBulkData,
-    TextClassificationRecord,
+from rubrix.client.sdk.token_classification.api import bulk, data
+from rubrix.client.sdk.token_classification.models import (
+    CreationTokenClassificationRecord,
+    TokenClassificationBulkData,
+    TokenClassificationRecord,
 )
 from tests.server.test_helpers import client
 
 
 @pytest.fixture
 def bulk_data():
-    explanation = {
-        "text": [TokenAttributions(token="test", attributions={"test": 0.5})]
-    }
     records = [
-        ClientTextClassificationRecord(
-            inputs="test",
-            prediction=[("test", 0.5)],
+        ClientTokenClassificationRecord(
+            text="a raw text",
+            tokens=["a", "raw", "text"],
+            prediction=[("test", 2, 5, 0.9)],
             prediction_agent="agent",
-            annotation="test1",
+            annotation=[("test", 2, 5)],
             annotation_agent="agent",
-            multi_label=False,
-            explanation=explanation,
             id=i,
             metadata={"mymetadata": "str"},
             event_timestamp=datetime(2020, 1, 1),
@@ -53,8 +48,8 @@ def bulk_data():
         for i in range(3)
     ]
 
-    return TextClassificationBulkData(
-        records=[CreationTextClassificationRecord.from_client(rec) for rec in records],
+    return TokenClassificationBulkData(
+        records=[CreationTokenClassificationRecord.from_client(rec) for rec in records],
         tags={"Mytag": "tag"},
         metadata={"MyMetadata": 5},
     )
@@ -71,17 +66,17 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
     assert isinstance(response.parsed, BulkResponse)
 
 
-def test_data(bulk_data, sdk_client, monkeypatch):
+def test_data(sdk_client, bulk_data, monkeypatch):
     # TODO: Not sure how to test the streaming part of the response here
     monkeypatch.setattr(httpx, "stream", client.stream)
 
     dataset_name = "test_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
     client.post(
-        f"/api/datasets/{dataset_name}/TextClassification:bulk",
+        f"/api/datasets/{dataset_name}/TokenClassification:bulk",
         json=bulk_data.dict(by_alias=True),
     )
 
     response = data(sdk_client, name=dataset_name, limit=2)
-    assert isinstance(response.parsed[0], TextClassificationRecord)
+    assert isinstance(response.parsed[0], TokenClassificationRecord)
     assert len(response.parsed) == 2

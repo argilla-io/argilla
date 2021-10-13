@@ -24,21 +24,19 @@ from rubrix.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
-from rubrix.client.sdk.text_classification.models import (
-    TextClassificationBulkData,
-    TextClassificationQuery,
-    TextClassificationRecord,
+from rubrix.client.sdk.text2text.models import (
+    Text2TextBulkData,
+    Text2TextQuery,
+    Text2TextRecord,
 )
 
 
 def bulk(
     client: AuthenticatedClient,
     name: str,
-    json_body: TextClassificationBulkData,
+    json_body: Text2TextBulkData,
 ) -> Response[Union[BulkResponse, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/datasets/{name}/TextClassification:bulk".format(
-        client.base_url, name=name
-    )
+    url = "{}/api/datasets/{name}/Text2Text:bulk".format(client.base_url, name=name)
 
     response = httpx.post(
         url=url,
@@ -54,12 +52,10 @@ def bulk(
 def data(
     client: AuthenticatedClient,
     name: str,
-    request: Optional[TextClassificationQuery] = None,
+    request: Optional[Text2TextQuery] = None,
     limit: Optional[int] = None,
-) -> Response[Union[List[TextClassificationRecord], HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/{name}/TextClassification/data".format(
-        client.base_url, name=name
-    )
+) -> Response[Union[List[Text2TextRecord], HTTPValidationError, ErrorMessage]]:
+    url = "{}/api/datasets/{name}/Text2Text/data".format(client.base_url, name=name)
 
     with httpx.stream(
         method="POST",
@@ -70,6 +66,4 @@ def data(
         params={"limit": limit},
         json=request.dict() if request else {},
     ) as response:
-        return build_data_response(
-            response=response, data_type=TextClassificationRecord
-        )
+        return build_data_response(response=response, data_type=Text2TextRecord)

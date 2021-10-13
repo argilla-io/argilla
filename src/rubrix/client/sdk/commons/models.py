@@ -12,20 +12,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import socket
 from datetime import datetime
 from enum import Enum
-from typing import Any, MutableMapping, List
-from typing import Dict
-from typing import Generic
-from typing import Optional
-from typing import TypeVar
-from typing import Union
+from typing import Any, Dict, Generic, List, MutableMapping, Optional, TypeVar, Union
 from uuid import uuid4
 
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
+
+MACHINE_NAME = socket.gethostname()
 
 
 class TaskStatus(str, Enum):
@@ -49,6 +45,13 @@ class BaseRecord(GenericModel, Generic[T]):
     status: Optional[TaskStatus] = None
     prediction: Optional[T] = None
     annotation: Optional[T] = None
+
+    # this is a small hack to get a json-compatible serialization on cls.dict(), which we use for the httpx calls.
+    # they want to build this feature into pydantic, see https://github.com/samuelcolvin/pydantic/issues/1409
+    @validator("event_timestamp")
+    def datetime_to_isoformat(cls, v: Optional[datetime]):
+        if v is not None:
+            return v.isoformat()
 
 
 class UpdateDatasetRequest(BaseModel):
