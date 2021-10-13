@@ -33,11 +33,17 @@
         :value="value"
         :checked="checked"
       />
+      <svgicon
+        color="#fffff"
+        width="12"
+        name="check2"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import "assets/icons/check2";
 export default {
   model: {
     prop: "areChecked",
@@ -113,50 +119,6 @@ $checkbox-color-dark: $primary-color;
       cursor: pointer;
     }
   }
-  &.--custom {
-    display: block;
-    @extend %clearfix;
-    margin-right: 0;
-    input {
-      display: none;
-      &:checked + label {
-        &:after {
-          opacity: 1;
-          transform: scale3D(1, 1, 1);
-          transition: $swift-ease-out;
-        }
-      }
-    }
-    label {
-      position: relative;
-      display: block;
-      margin-left: 25px;
-      &:before {
-        top: 2px;
-        border-radius: 1px;
-        border: 1px solid $darker-color;
-        transition: $swift-ease-out;
-        width: 15px;
-        height: 15px;
-        position: absolute;
-        left: -25px;
-        transition: $swift-ease-in;
-        content: " ";
-      }
-      &:after {
-        opacity: 0;
-        width: 11px;
-        height: 11px;
-        background: $darker-color;
-        position: absolute;
-        left: -23px;
-        top: 4px;
-        transform: scale3D(0.15, 0.15, 1);
-        transition: $swift-ease-in;
-        content: "";
-      }
-    }
-  }
   .checkbox-container {
     width: $checkbox-size;
     min-width: $checkbox-size;
@@ -164,23 +126,19 @@ $checkbox-color-dark: $primary-color;
     position: relative;
     border-radius: 1px;
     border: 1px solid $checkbox-color;
-    background: $lighter-color;
-    transition: $swift-ease-out;
+    text-align: center;
+    vertical-align: middle;
+    text-align: center;
+    .svg-icon {
+      fill: $lighter-color;
+      transform: scale(0);
+      transition: all 0.2s ease-in-out;
+      display: block;
+      margin: auto;
+      margin-top: 2px;
+    }
     &:focus {
       outline: none;
-    }
-    &:after {
-      border-radius: 1px;
-      opacity: 0;
-      width: 16px;
-      height: 16px;
-      background: $primary-color;
-      position: absolute;
-      left: 1px;
-      top: 1px;
-      transform: scale3D(0.15, 0.15, 1);
-      transition: $swift-ease-in;
-      content: "";
     }
     input {
       position: absolute;
@@ -199,7 +157,7 @@ $checkbox-color-dark: $primary-color;
       }
     }
     .checkbox-container {
-      border: 1px solid palette(grey);
+      border: 1px solid $primary-color;
       &:after {
         background: $checkbox-color-dark;
       }
@@ -218,10 +176,11 @@ $checkbox-color-dark: $primary-color;
 
 .re-checkbox.checked {
   .checkbox-container {
-    &:after {
-      opacity: 1;
-      transform: scale3D(1, 1, 1);
-      transition: $swift-ease-out;
+    background: $primary-color;
+    border: 1px solid $primary-color;
+    .svg-icon {
+      transform: scale(1);
+      transition: all 0.2s ease-in-out;
     }
   }
 }
