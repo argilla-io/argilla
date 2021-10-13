@@ -31,7 +31,7 @@
     </template>
   </div>
   <div v-else class="record__extra-actions--text2text" v-click-outside="close">
-    <a class="extra-actions__button" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3" /></a>
+    <a class="extra-actions__button" v-if="hasMetadata || allowChangeStatus" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3" /></a>
     <div class="extra-actions__content" v-if="open">
       <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
         <span>View metadata</span>

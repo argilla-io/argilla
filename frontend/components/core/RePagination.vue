@@ -22,7 +22,7 @@
       <div class="pagination__selector__content">
         <a href="#" @click="showOptions = !showOptions">
           {{ paginationSize }}
-          <svgicon name="drop-down" width="12" height="12" />
+          <svgicon name="drop-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
           <li>
@@ -109,7 +109,7 @@
 <script>
 import "assets/icons/chev-left";
 import "assets/icons/chev-right";
-import "assets/icons/drop-down";
+import "assets/icons/drop-up";
 export default {
   props: {
     totalItems: {
@@ -226,6 +226,7 @@ $pagination-size: 30px;
     background: palette(grey, light);
     border-top: 1px solid palette(grey, smooth);
     padding-right: calc(4em + 45px);
+    min-height: 63px;
     @include media(">desktopLarge") {
       width: 100%;
       padding-right: calc(294px + 45px + 4em);
@@ -343,6 +344,7 @@ $pagination-size: 30px;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;
+        margin-bottom: 2px;
       }
     }
   }
