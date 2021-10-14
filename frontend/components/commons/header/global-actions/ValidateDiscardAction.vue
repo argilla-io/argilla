@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     onDiscard() {
       this.$emit("discard-records", this.selectedRecords);

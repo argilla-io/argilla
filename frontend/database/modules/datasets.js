@@ -427,6 +427,12 @@ const actions = {
       persistBackend: true,
     });
   },
+  async updateDatasetRecords(_, { dataset, records }) {
+    return await _updateDatasetRecords({
+      dataset,
+      records
+    });
+  },
   async discardAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,
