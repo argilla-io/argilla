@@ -20,7 +20,7 @@ from fastapi import Depends
 
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.tasks.commons import TaskType
-from .model import DatasetDB
+
 from ..commons import es_helpers
 from ..commons.errors import WrongInputParamError
 from ..commons.es_helpers import aggregations
@@ -29,7 +29,9 @@ from ..commons.es_settings import (
     DATASETS_INDEX_TEMPLATE,
     DATASETS_RECORDS_INDEX_NAME,
 )
+from ..commons.settings import settings
 from ..metrics.model import DatasetMetricDB
+from .model import DatasetDB
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -67,7 +69,7 @@ class DatasetsDAO:
         self._es.create_index_template(
             name=DATASETS_INDEX_NAME,
             template=DATASETS_INDEX_TEMPLATE,
-            force_recreate=True,
+            force_recreate=not settings.disable_es_index_template_creation,
         )
         self._es.create_index(DATASETS_INDEX_NAME)
 

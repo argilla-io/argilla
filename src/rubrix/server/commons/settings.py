@@ -46,6 +46,10 @@ class ApiSettings(BaseSettings):
 
     es_records_index_replicas:
         Configures the number of shard replicas for dataset records index creation. Default=0
+
+    disable_es_index_template_creation: (DISABLE_ES_INDEX_TEMPLATE_CREATION env var)
+         Allowing advanced users to create their own es index settings and mappings. Default=False
+
     """
 
     only_bulk_api: bool = False
@@ -56,6 +60,7 @@ class ApiSettings(BaseSettings):
 
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
+    disable_es_index_template_creation: bool = False
 
 
 settings = ApiSettings()
