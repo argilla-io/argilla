@@ -153,7 +153,6 @@ export default {
     updateRecordEntities(entities) {
       this.updateRecords({
         dataset: this.dataset,
-        updateMetrics: false,
         records: [
           {
             ...this.record,
