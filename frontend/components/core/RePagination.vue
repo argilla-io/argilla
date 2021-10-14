@@ -94,7 +94,6 @@
       </a>
     </div>
     <div class="pagination__info">
-      Records:
       <strong>
         {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
           paginationSize * currentPage > totalItems
@@ -274,7 +273,7 @@ $pagination-size: 30px;
     align-items: center;
     list-style: none;
     padding-left: 0;
-    @include font-size(16px);
+    @include font-size(14px);
     #{$self}__number {
       transition: all 0.3s ease-in-out;
       color: $font-secondary;
@@ -282,10 +281,11 @@ $pagination-size: 30px;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      width: $pagination-size;
+      min-width: $pagination-size;
       height: $pagination-size;
       margin: auto 0.5em;
       outline: none;
+      padding: 5px;
       &:hover {
         transition: all 0.3s ease-in-out;
         background: palette(grey, smooth);
@@ -327,19 +327,14 @@ $pagination-size: 30px;
       right: 0;
       box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
       border-radius: 3px;
+      margin: 2px;
       a {
         display: block;
         color: $font-secondary-dark;
+        border-radius: 1px;
+        margin: 2px;
         &:hover {
           background: palette(grey, smooth);
-        }
-        &:first-child {
-          border-top-left-radius: 3px;
-          border-top-right-radius: 3px;
-        }
-        &:last-child {
-          border-bottom-left-radius: 3px;
-          border-bottom-right-radius: 3px;
         }
       }
     }
