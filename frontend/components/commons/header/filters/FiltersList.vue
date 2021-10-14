@@ -302,6 +302,9 @@ $number-size: 18px;
       margin-right: 1em;
       color: $font-secondary;
       @include font-size(15px);
+      &:hover {
+        background: palette(grey, smooth);
+      }
       &.active {
         background: palette(grey, smooth);
         color: $primary-color;

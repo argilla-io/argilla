@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-/* eslint-disable */
+ /* eslint-disable */
 require('./arrow-bottom')
 require('./arrow-top')
 require('./back')
 require('./brand-isotipo')
 require('./brand-recognai')
 require('./check')
+require('./check2')
 require('./chev-bottom')
 require('./chev-left')
 require('./chev-right')

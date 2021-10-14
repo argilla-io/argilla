@@ -124,8 +124,8 @@ export default {
   list-style: none;
   .results-scroll {
     padding-top: 180px;
-    padding-bottom: 5em;
-    height: 100vh !important;
+    padding-bottom: 63px;
+    height: calc(100vh - 63px) !important;
     overflow: auto;
     padding-left: 4em;
     padding-right: calc(4em + 45px);

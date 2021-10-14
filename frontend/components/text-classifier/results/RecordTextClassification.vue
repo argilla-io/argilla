@@ -130,10 +130,8 @@ export default {
   }
   &__labels {
     position: relative;
-    border-left: 1px solid palette(grey, bg);
     margin-left: 2em;
     width: 170px;
-    flex-shrink: 0;
     margin-bottom: -3em;
     display: block;
     height: 100%;

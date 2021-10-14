@@ -22,7 +22,7 @@
       <div class="pagination__selector__content">
         <a href="#" @click="showOptions = !showOptions">
           {{ paginationSize }}
-          <svgicon name="drop-down" width="12" height="12" />
+          <svgicon name="drop-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
           <li>
@@ -109,7 +109,7 @@
 <script>
 import "assets/icons/chev-left";
 import "assets/icons/chev-right";
-import "assets/icons/drop-down";
+import "assets/icons/drop-up";
 export default {
   props: {
     totalItems: {
@@ -145,7 +145,7 @@ export default {
       return this.paginationSettings.size;
     },
     availableItemsPerPage() {
-      return this.paginationSettings.pageSizeOptions;
+      return this.paginationSettings.pageSizeOptions.filter(p => p !== this.paginationSize);
     },
     currentPage() {
       return this.paginationSettings.page;
@@ -226,6 +226,7 @@ $pagination-size: 30px;
     background: palette(grey, light);
     border-top: 1px solid palette(grey, smooth);
     padding-right: calc(4em + 45px);
+    min-height: 63px;
     @include media(">desktopLarge") {
       width: 100%;
       padding-right: calc(294px + 45px + 4em);
@@ -324,25 +325,34 @@ $pagination-size: 30px;
       bottom: 2em;
       left: 0;
       right: 0;
-      border: 1px solid $primary-color;
+      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      border-radius: 3px;
       a {
         display: block;
         color: $font-secondary-dark;
         &:hover {
           background: palette(grey, smooth);
-          color: $secondary-color;
+        }
+        &:first-child {
+          border-top-left-radius: 3px;
+          border-top-right-radius: 3px;
+        }
+        &:last-child {
+          border-bottom-left-radius: 3px;
+          border-bottom-right-radius: 3px;
         }
       }
     }
     a {
-      outline: none;
       display: block;
+      outline: none;
       text-decoration: none;
       background: $lighter-color;
-      padding: 0.4em 1em;
+      padding: 0.5em 1em;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;
+        margin-bottom: 2px;
       }
     }
   }

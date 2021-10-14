@@ -27,6 +27,7 @@
       @click="removeField()"
     />
     <FilterDropdown
+      class="dropdown--filter"
       :class="{ highlighted: visible }"
       :visible="visible"
       @visibility="onVisibility"

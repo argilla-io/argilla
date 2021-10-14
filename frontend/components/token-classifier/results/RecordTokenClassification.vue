@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
     }),
 

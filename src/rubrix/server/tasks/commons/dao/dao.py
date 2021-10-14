@@ -256,6 +256,7 @@ class DatasetRecordsDAO:
                     results=parsed_aggregations.pop(metric.id),
                 )
                 for metric in dataset.metrics
+                if metric.id in parsed_aggregations
             ]
             result.metrics = metrics_results
             result.aggregations = parsed_aggregations
