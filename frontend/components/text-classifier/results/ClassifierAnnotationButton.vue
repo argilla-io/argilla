@@ -71,7 +71,7 @@ export default {
   methods: {
     toggleCheck() {
       if (!this.disabled) {
-        let checked = this.areChecked.slice();
+        let checked = this.areChecked;
         const found = checked.indexOf(this.value);
         if (found >= 0) {
           checked.splice(found, 1);
@@ -126,7 +126,7 @@ $annotation-button-touch-size: 48px;
     &.active {
       .button {
         background: $secondary-color;
-        border: 1px solid $secondary-color;
+        border: 1px solid $line-smooth-color;;
       }
       transition: all 0.02s ease-in-out;
       box-shadow: none; // Animate the size, outside
@@ -163,6 +163,9 @@ $annotation-button-touch-size: 48px;
       .annotation-button-data__score {
         color: $lighter-color;
         animation: pulse-font 0.5s;
+      }
+      .annotation-button-data__info {
+        display: none;
       }
     }
     .annotation-button-data {
@@ -212,13 +215,4 @@ $annotation-button-touch-size: 48px;
   }
 }
 
-// .re-annotation-button.checked {
-//   .annotation-button-container {
-//     &:after {
-//       opacity: 1;
-//       transform: scale3D(1, 1, 1);
-//       transition: $swift-ease-out;
-//     }
-//   }
-// }
 </style>
