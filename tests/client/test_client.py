@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import datetime
-import socket
 from time import sleep
 from typing import Iterable
 
@@ -24,12 +23,10 @@ import pytest
 
 import rubrix
 from rubrix import (
-    RubrixClient,
     Text2TextRecord,
     TextClassificationRecord,
-    TokenClassificationRecord,
 )
-from rubrix.sdk.models import TextClassificationSearchResults
+from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client
 
@@ -56,7 +53,7 @@ def test_log_something(monkeypatch):
     assert response.failed == 0
 
     response = client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
-    results = TextClassificationSearchResults.from_dict(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"

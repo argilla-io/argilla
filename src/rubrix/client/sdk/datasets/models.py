@@ -29,11 +29,18 @@ class TaskType(str, Enum):
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 
-class Dataset(BaseModel):
+class BaseDatasetModel(BaseModel):
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     name: str = Field(regex="^(?!-|_)[a-z0-9-_]+$")
+
+
+class Dataset(BaseDatasetModel):
     task: TaskType
     owner: str = None
     created_at: datetime = None
     last_updated: datetime = None
+
+
+class CopyDatasetRequest(BaseDatasetModel):
+    pass
