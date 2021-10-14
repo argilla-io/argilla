@@ -154,6 +154,9 @@ export default {
     },
     onCancel() {
       this.visible = false;
+      this.searchText = undefined;
+      this.searchTextValue = undefined;
+      this.selectedOptions = this.appliedFilters;
     },
     filterOptions(options, text) {
       if (text === undefined) {

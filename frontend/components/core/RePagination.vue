@@ -145,7 +145,7 @@ export default {
       return this.paginationSettings.size;
     },
     availableItemsPerPage() {
-      return this.paginationSettings.pageSizeOptions;
+      return this.paginationSettings.pageSizeOptions.filter(p => p !== this.paginationSize);
     },
     currentPage() {
       return this.paginationSettings.page;
@@ -325,22 +325,30 @@ $pagination-size: 30px;
       bottom: 2em;
       left: 0;
       right: 0;
-      border: 1px solid $primary-color;
+      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      border-radius: 3px;
       a {
         display: block;
         color: $font-secondary-dark;
         &:hover {
           background: palette(grey, smooth);
-          color: $secondary-color;
+        }
+        &:first-child {
+          border-top-left-radius: 3px;
+          border-top-right-radius: 3px;
+        }
+        &:last-child {
+          border-bottom-left-radius: 3px;
+          border-bottom-right-radius: 3px;
         }
       }
     }
     a {
-      outline: none;
       display: block;
+      outline: none;
       text-decoration: none;
       background: $lighter-color;
-      padding: 0.4em 1em;
+      padding: 0.5em 1em;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;
