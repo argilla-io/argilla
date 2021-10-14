@@ -51,7 +51,6 @@ export default {
   data() {
     return {
       checked: this.value || false,
-      clicking: false,
     };
   },
   computed: {
@@ -60,7 +59,6 @@ export default {
         active: Array.isArray(this.areChecked)
           ? this.areChecked.includes(this.value)
           : this.checked,
-        clicking: this.clicking,
         disabled: this.disabled,
       };
     },
@@ -69,18 +67,10 @@ export default {
     value() {
       this.checked = !!this.value;
     },
-   label() {
-     if (this.label.selected === undefined) {
-        this.clicking = false;
-        this.$emit('clicking', false);
-      }
-    }
   },
   methods: {
     toggleCheck() {
       if (!this.disabled) {
-        this.$emit('clicking', true);
-        this.clicking = true;
         let checked = this.areChecked;
         const found = checked.indexOf(this.value);
         if (found >= 0) {
@@ -133,22 +123,7 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       color: $darker-color;
     }
-    &.selected {
-      .button {
-        background: $secondary-color;
-        border: 1px solid $secondary-color;
-      }
-      transition: all 0.02s ease-in-out;
-      box-shadow: none; // Animate the size, outside
-      &:after {
-        display: none !important;
-      }
-      .annotation-button-data__text,
-      .annotation-button-data__score {
-        color: $lighter-color;
-      }
-    }
-    &.clicking {
+    &.active {
       .button {
         background: $secondary-color;
         border: 1px solid $line-smooth-color;;

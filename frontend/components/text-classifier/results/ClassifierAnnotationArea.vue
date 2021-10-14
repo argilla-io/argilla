@@ -17,23 +17,21 @@
 
 <template>
   <div :class="['feedback-interactions']" class="feedback-interactions__items">
-    <transition-group name="list" tag="div">
+    <transition-group name="list" tag="div" >
       <ClassifierAnnotationButton
         v-for="label in sortedLabels.slice(0, maxLabelsShown)"
         :id="label.class"
-        :key="`${label.class}-${label.score}`"
+        :key="`${label.class}`"
         v-model="selectedLabels"
         :allow-multiple="record.multi_label"
         :label="label"
         :class="[
           'label-button',
-          selectedLabels.includes(label.class) && !clicking ? 'selected' : null,
-          selectedLabels.includes(label.class) && record.multi_label ? 'selected' : null,
+          selectedLabels.includes(label.class) ? 'selected' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
         @change="updateLabels"
-        @clicking="onClicking"
       >
       </ClassifierAnnotationButton>
     </transition-group>
@@ -74,7 +72,6 @@
           :data-title="label.class"
           :value="label.class"
           @change="updateLabels"
-          @clicking="onClicking"
         >
         </ClassifierAnnotationButton>
       </template>
@@ -103,7 +100,6 @@ export default {
     dropdownLabels: undefined,
     visible: undefined,
     selectedLabels: [],
-    clicking: false,
   }),
   computed: {
     datasetLabels() {
@@ -157,11 +153,15 @@ export default {
       return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
   },
-  updated() {
-    this.selectedLabels = this.appliedLabels;
-  },
   mounted() {
     this.selectedLabels = this.appliedLabels;
+  },
+  watch: {
+    appliedLabels(o, n) {
+      if (o.some(l => n.indexOf(l) === -1)) {
+        this.selectedLabels = this.appliedLabels;
+      }
+    }
   },
   methods: {
     updateLabels() {
@@ -172,6 +172,7 @@ export default {
       }
     },
     annotate() {
+      this.annotating = true;
       this.$emit("annotate", { labels: this.selectedLabels });
     },
     onVisibility(visible) {
@@ -180,9 +181,6 @@ export default {
     decorateScore(score) {
       return score * 100;
     },
-    onClicking(isClicking) {
-      this.clicking = isClicking;
-    }
   },
 };
 </script>
@@ -263,7 +261,7 @@ export default {
 }
 .list-enter-active,
 .list-leave-active {
-  transition: all 1s;
+  transition: all 0.5s;
 }
 .list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
   opacity: 0;
