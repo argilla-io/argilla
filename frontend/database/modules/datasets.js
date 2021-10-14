@@ -338,9 +338,8 @@ async function _updateDatasetRecords({
       dataset,
       records,
     });
+    _fetchAnnotationProgress(dataset);
   }
-
-  _fetchAnnotationProgress(dataset);
 
   return await entity.update({
     where: dataset.name,
@@ -430,7 +429,7 @@ const actions = {
   async updateDatasetRecords(_, { dataset, records }) {
     return await _updateDatasetRecords({
       dataset,
-      records
+      records,
     });
   },
   async discardAnnotations(_, { dataset, records }) {
