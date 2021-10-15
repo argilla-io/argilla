@@ -44,6 +44,11 @@ class SecuredClient:
         headers = {**self._header, **request_headers}
         return self._client.put(*args, headers=headers, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        request_headers = kwargs.pop("headers", {})
+        headers = {**self._header, **request_headers}
+        return self._client.patch(*args, headers=headers, **kwargs)
+
     def stream(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
         headers = {**self._header, **request_headers}
