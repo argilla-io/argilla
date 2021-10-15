@@ -89,7 +89,7 @@
             Cancel
           </ReButton>
           <ReButton class="button-primary--small" @click="onApply">
-            Apply
+            Filter
           </ReButton>
         </div>
       </div>
