@@ -322,7 +322,7 @@ $pagination-size: 30px;
       padding: 0;
       display: block;
       position: absolute;
-      bottom: 2em;
+      bottom: 3em;
       left: 0;
       right: 0;
       box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
