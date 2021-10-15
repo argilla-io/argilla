@@ -23,3 +23,11 @@ def test_default_team():
 
     test_user = User(username="test", teams=["team"])
     assert test_user.default_team == test_user.username
+
+
+def test_check_team_with_default():
+    admin = User(username="admin")
+    assert admin.check_teams([]) == []
+
+    test_user = User(username="test", teams=["a"])
+    assert test_user.check_teams([]) == ["a", test_user.username]

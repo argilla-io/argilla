@@ -36,7 +36,7 @@ class User(BaseModel):
     def check_teams(self, teams: List[str]) -> List[str]:
         """
         Given a list of teams, apply a belongs to validation for each team. Then, return
-        original list if any, else user teams.
+        original list if any, else user teams (including personal/default one)
 
         Parameters
         ----------
@@ -49,7 +49,7 @@ class User(BaseModel):
 
         """
         if not teams:
-            return self.teams
+            return self.teams + [self.default_team] if self.teams else []
         for team in teams:
             self.check_team(team)
         return teams
