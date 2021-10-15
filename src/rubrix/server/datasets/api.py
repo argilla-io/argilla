@@ -21,18 +21,9 @@ from typing import List
 
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService, create_dataset_service
+from ..commons.api import TeamsQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
-
-
-@dataclass
-class DatasetQueryParams:
-    """Common dataset query params"""
-
-    team: str = Query(
-        None,
-        description="The team where dataset belongs to. If not provided default user team will be used",
-    )
 
 
 @router.get(
@@ -75,7 +66,7 @@ def list_datasets(
 )
 def get_dataset(
     name: str,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -114,7 +105,7 @@ def get_dataset(
 def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -153,7 +144,7 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -181,7 +172,7 @@ def delete_dataset(
 )
 def close_dataset(
     name: str,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -209,7 +200,7 @@ def close_dataset(
 )
 def open_dataset(
     name: str,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -240,7 +231,7 @@ def open_dataset(
 def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
-    ds_params: DatasetQueryParams = Depends(),
+    ds_params: TeamsQueryParams = Depends(),
     service: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:

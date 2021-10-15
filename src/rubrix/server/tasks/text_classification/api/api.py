@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import itertools
+
+from rubrix.server.commons.api import TeamsQueryParams
 from rubrix.server.security.model import User
 from typing import Iterable, Optional
 
@@ -22,7 +24,6 @@ from fastapi.responses import StreamingResponse
 from rubrix.server.datasets.model import CreationDatasetRequest
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.security import auth
-from rubrix.server.tasks.commons import TeamsQueryParams
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (

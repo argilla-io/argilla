@@ -79,16 +79,6 @@ class BulkResponse(BaseModel):
 
 
 @dataclass
-class TeamsQueryParams:
-    """Common teams query params"""
-
-    team: str = Query(
-        None,
-        description="The team where dataset belongs to. If not provided default user team will be used",
-    )
-
-
-@dataclass
 class PaginationParams:
     """Query pagination params"""
 
