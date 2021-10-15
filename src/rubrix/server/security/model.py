@@ -31,7 +31,7 @@ class User(BaseModel):
 
     @property
     def default_team(self) -> Optional[str]:
-        return self.teams[0] if self.teams else None
+        return self.username if self.teams else None
 
     def check_teams(self, teams: List[str]) -> List[str]:
         """

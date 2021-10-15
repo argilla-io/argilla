@@ -14,3 +14,12 @@ def test_check_user_teams():
     assert user.check_teams(expected_teams) == expected_teams
     with pytest.raises(ForbiddenOperationError):
         assert user.check_teams(["not-found-team"])
+
+
+def test_default_team():
+
+    user = User(username="admin")
+    assert user.default_team == None
+
+    test_user = User(username="test", teams=["team"])
+    assert test_user.default_team == test_user.username
