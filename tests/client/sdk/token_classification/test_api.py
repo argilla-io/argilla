@@ -66,7 +66,8 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
     assert isinstance(response.parsed, BulkResponse)
 
 
-def test_data(sdk_client, bulk_data, monkeypatch):
+@pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])
+def test_data(limit, expected, sdk_client, bulk_data, monkeypatch):
     # TODO: Not sure how to test the streaming part of the response here
     monkeypatch.setattr(httpx, "stream", client.stream)
 
@@ -77,6 +78,6 @@ def test_data(sdk_client, bulk_data, monkeypatch):
         json=bulk_data.dict(by_alias=True),
     )
 
-    response = data(sdk_client, name=dataset_name, limit=2)
+    response = data(sdk_client, name=dataset_name, limit=limit)
     assert isinstance(response.parsed[0], TokenClassificationRecord)
-    assert len(response.parsed) == 2
+    assert len(response.parsed) == expected
