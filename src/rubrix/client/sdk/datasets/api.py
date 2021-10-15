@@ -18,7 +18,7 @@ import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
-from rubrix.client.sdk.datasets.models import Dataset
+from rubrix.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
 
 def get_dataset(
@@ -35,6 +35,45 @@ def get_dataset(
     )
 
     return _build_response(response=response)
+
+
+def copy_dataset(
+    client: AuthenticatedClient,
+    name: str,
+    json_body: CopyDatasetRequest,
+) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
+    url = "{}/api/datasets/{name}:copy".format(client.base_url, name=name)
+
+    response = httpx.put(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+        json=json_body.dict(by_alias=True),
+    )
+
+    return _build_response(response=response)
+
+
+def delete_dataset(
+    client: AuthenticatedClient,
+    name: str,
+) -> httpx.Response:
+    url = "{}/api/datasets/{name}".format(client.base_url, name=name)
+
+    response = httpx.delete(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=response.json(),
+    )
 
 
 def _build_response(

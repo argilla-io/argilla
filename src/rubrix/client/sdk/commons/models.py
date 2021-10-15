@@ -72,7 +72,7 @@ class ScoreRange(BaseModel):
 R = TypeVar("R")
 
 
-class Response(GenericModel, Generic[T]):
+class Response(GenericModel, Generic[R]):
     status_code: int
     content: bytes
     headers: MutableMapping[str, str]

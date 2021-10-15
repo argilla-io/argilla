@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import datetime
-import socket
 from time import sleep
 from typing import Iterable
 
@@ -24,12 +23,10 @@ import pytest
 
 import rubrix
 from rubrix import (
-    RubrixClient,
     Text2TextRecord,
     TextClassificationRecord,
-    TokenClassificationRecord,
 )
-from rubrix.sdk.models import TextClassificationSearchResults
+from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client
 
@@ -56,7 +53,7 @@ def test_log_something(monkeypatch):
     assert response.failed == 0
 
     response = client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
-    results = TextClassificationSearchResults.from_dict(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"
@@ -97,6 +94,53 @@ def test_not_found_response(monkeypatch):
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found")
+
+
+def test_log_without_name(monkeypatch):
+    mocking_client(monkeypatch)
+    with pytest.raises(
+        Exception, match="Empty project name has been passed as argument."
+    ):
+        rubrix.log(
+            TextClassificationRecord(
+                inputs={"text": "This is a single record. Only this. No more."}
+            ),
+            name=None,
+        )
+
+
+def test_log_passing_empty_records_list(monkeypatch):
+    mocking_client(monkeypatch)
+
+    with pytest.raises(
+        Exception, match="Empty record list has been passed as argument."
+    ):
+        rubrix.log(records=[], name="ds")
+
+
+@pytest.mark.parametrize(
+    "status,match",
+    [
+        (401,"Unauthorized error: invalid credentials. The API answered with a 401 code"),
+        (403, "Forbidden error: you have not been authorised to access this dataset. "),
+        (404, "Not found error. The API answered with a"),
+        (422, "Unprocessable entity error: Something is wrong in your records. "),
+        (429, "Request error: API cannot answer. "),
+        (500, "Connection error: API is not responding. "),
+    ],
+)
+def test_delete_with_errors(monkeypatch, status, match):
+    mocking_client(monkeypatch)
+
+    def send_mock_response_with_http_status(status: int):
+        def inner(*args, **kwargs):
+            return httpx.Response(status_code=status, json={"message": "Mock"})
+
+        return inner
+
+    with pytest.raises(Exception, match=match):
+        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
+        rubrix.delete("dataset")
 
 
 def test_single_record(monkeypatch):

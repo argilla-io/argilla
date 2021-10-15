@@ -33,34 +33,38 @@ from rubrix.client.models import (
     TokenAttributions,
     TokenClassificationRecord,
 )
-from rubrix.client.sdk.datasets.api import get_dataset
-from rubrix.client.sdk.datasets.models import TaskType
-from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
-from rubrix.client.sdk.text2text.api import data as text2text_data
+from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.models import Response
+from rubrix.client.sdk.users.api import whoami
+from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
+from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
+from rubrix.client.sdk.text2text.api import (
+    bulk as text2text_bulk,
+    data as text2text_data,
+)
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
     Text2TextQuery,
 )
-from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
-from rubrix.client.sdk.text_classification.api import data as text_classification_data
+from rubrix.client.sdk.text_classification.api import (
+    bulk as text_classification_bulk,
+    data as text_classification_data,
+)
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.api import bulk as token_classification_bulk
-from rubrix.client.sdk.token_classification.api import data as token_classification_data
+from rubrix.client.sdk.token_classification.api import (
+    bulk as token_classification_bulk,
+    data as token_classification_data,
+)
 from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
     TokenClassificationQuery,
 )
-from rubrix.sdk import AuthenticatedClient
-from rubrix.sdk.api.datasets import copy_dataset, delete_dataset
-from rubrix.sdk.api.users import whoami
-from rubrix.sdk.models.copy_dataset_request import CopyDatasetRequest
-from rubrix.sdk.types import Response
 
 
 class RubrixClient:
@@ -108,7 +112,7 @@ class RubrixClient:
             base_url=api_url, token=api_key, timeout=timeout
         )
 
-        whoami_response_status = whoami.sync_detailed(client=self._client).status_code
+        whoami_response_status = whoami(client=self._client).status_code
         if whoami_response_status == 401:
             raise Exception("Authentication error: invalid credentials.")
 
@@ -156,7 +160,7 @@ class RubrixClient:
         # However, a desired check can be placed to create a custom chunk_size when that limit is exceeded
         if chunk_size > self.MAX_CHUNK_SIZE:
             self._LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout erros may ocurr.
+                """The introduced chunk size is noticeably large, timeout errors may occur.
                 Consider a chunk size smaller than %s""",
                 self.MAX_CHUNK_SIZE,
             )
@@ -265,7 +269,7 @@ class RubrixClient:
 
     def copy(self, source: str, target: str):
         """Makes a copy of the `source` dataset and saves it as `target`"""
-        response = copy_dataset.sync_detailed(
+        response = copy_dataset(
             client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
         )
         if response.status_code == 409:
@@ -278,7 +282,7 @@ class RubrixClient:
             name:
                 The dataset name
         """
-        response = delete_dataset.sync_detailed(client=self._client, name=name)
+        response = delete_dataset(client=self._client, name=name)
         _check_response_errors(response)
 
 
