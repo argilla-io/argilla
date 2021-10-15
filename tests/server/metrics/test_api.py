@@ -78,6 +78,12 @@ def test_dataset_metrics():
     assert metrics[0].id == metric_id
 
     response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric", json={}
+    )
+
+    assert response.status_code == 404
+
+    response = client.post(
         f"/api/datasets/TextClassification/{dataset}/metrics/{metric_id}", json={}
     ).json()
     results = DatasetMetricResults.parse_obj(response)

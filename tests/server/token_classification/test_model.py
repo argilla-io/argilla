@@ -19,7 +19,7 @@ from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
     TokenClassificationAnnotation,
-    TokenClassificationRecord,
+    TokenClassificationQuery, TokenClassificationRecord,
 )
 
 
@@ -107,3 +107,7 @@ def test_entity_label_too_long():
                 ],
             ),
         )
+
+def test_query_as_elasticsearch():
+    query = TokenClassificationQuery(ids=[1, 2, 3])
+    assert query.as_elasticsearch() == {"ids": {"values": query.ids}}
