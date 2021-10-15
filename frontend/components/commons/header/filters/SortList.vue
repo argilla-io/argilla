@@ -33,7 +33,7 @@
       @click="addNewField"
       >+ Add another field</a
     >
-    <div class="sort__buttons" v-if="selectedFields.length">
+    <div class="sort__buttons" v-if="sort.length || selectedFields.length">
       <re-button
         class="button-tertiary--small button-tertiary--outline"
         @click="cancel"
