@@ -16,6 +16,7 @@
 from rubrix.server.metrics.model import (
     DatasetMetric,
     DatasetMetricCreation,
+    DatasetMetricResults,
 )
 from rubrix.server.tasks.text_classification import (
     TextClassificationBulkData,
@@ -76,6 +77,18 @@ def test_dataset_metrics():
     metrics = [DatasetMetric.parse_obj(m) for m in metrics]
     assert metrics[0].id == metric_id
 
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric", json={}
+    )
+
+    assert response.status_code == 404
+
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/metrics/{metric_id}", json={}
+    ).json()
+    results = DatasetMetricResults.parse_obj(response)
+    assert results.id == metric_id
+    assert results.results
     assert (
         client.delete(f"/api/datasets/{dataset}/metrics/{metric_id}").status_code == 200
     )

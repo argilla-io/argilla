@@ -13,8 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import datetime
+from typing import Iterable, List, Optional
+
 from fastapi import Depends
+
+from rubrix.server.commons.es_helpers import sort_by2elasticsearch
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.tasks.commons import (
     BulkResponse,
@@ -24,7 +27,6 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.commons.es_helpers import filters, sort_by2elasticsearch
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     TextClassificationQuery,
@@ -32,47 +34,10 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
-from typing import Any, Dict, Iterable, List, Optional
 
 extends_index_dynamic_templates(
     {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
 )
-
-
-def query2elasticsearch(search: TextClassificationQuery) -> Dict[str, Any]:
-    """Build an elasticsearch query part from search query"""
-
-    if search.ids:
-        return {"ids": {"values": search.ids}}
-
-    all_filters = filters.metadata(search.metadata)
-    query_filters = [
-        query_filter
-        for query_filter in [
-            filters.predicted_as(search.predicted_as),
-            filters.predicted_by(search.predicted_by),
-            filters.annotated_as(search.annotated_as),
-            filters.annotated_by(search.annotated_by),
-            filters.status(search.status),
-            filters.predicted(search.predicted),
-            filters.score(search.score),
-        ]
-        if query_filter
-    ]
-    query_text = filters.text_query(search.query_text)
-    all_filters.extend(query_filters)
-
-    return {
-        "bool": {
-            "must": query_text or {"match_all": {}},
-            "filter": {
-                "bool": {
-                    "should": all_filters,
-                    "minimum_should_match": len(all_filters),
-                }
-            },
-        }
-    }
 
 
 class TextClassificationService:
@@ -97,9 +62,7 @@ class TextClassificationService:
     ):
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         failed = self.__dao__.add_records(
-            dataset=dataset,
-            records=records,
-            record_class=TextClassificationRecord
+            dataset=dataset, records=records, record_class=TextClassificationRecord
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -139,7 +102,7 @@ class TextClassificationService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=query2elasticsearch(query),
+                query=query.as_elasticsearch(),
                 sort=sort_by2elasticsearch(
                     sort_by,
                     valid_fields=[
@@ -193,7 +156,7 @@ class TextClassificationService:
         """
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query2elasticsearch(query))
+            dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
             yield TextClassificationRecord.parse_obj(db_record)
 

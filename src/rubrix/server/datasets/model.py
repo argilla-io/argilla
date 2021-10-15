@@ -18,7 +18,7 @@ Dataset models definition
 """
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -92,6 +92,11 @@ class BaseDatasetDB(CreationDatasetRequest):
 
 class DatasetDB(BaseDatasetDB):
     metrics: List[DatasetMetricDB] = Field(default_factory=list)
+
+    def get_metric_by_id(self, metric_id: str) -> Optional[DatasetMetricDB]:
+        for m in self.metrics:
+            if metric_id == m.id:
+                return m
 
 
 class Dataset(BaseDatasetDB):

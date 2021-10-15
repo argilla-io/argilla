@@ -59,40 +59,6 @@ extends_index_properties(
 )
 
 
-def as_elasticsearch(search: Text2TextQuery) -> Dict[str, Any]:
-    """Build an elasticsearch query part from search query"""
-
-    if search.ids:
-        return {"ids": {"values": search.ids}}
-
-    all_filters = filters.metadata(search.metadata)
-    query_filters = [
-        query_filter
-        for query_filter in [
-            filters.predicted_by(search.predicted_by),
-            filters.annotated_by(search.annotated_by),
-            filters.status(search.status),
-            filters.predicted(search.predicted),
-            filters.score(search.score),
-        ]
-        if query_filter
-    ]
-    query_text = filters.text_query(search.query_text)
-    all_filters.extend(query_filters)
-
-    return {
-        "bool": {
-            "must": query_text or {"match_all": {}},
-            "filter": {
-                "bool": {
-                    "should": all_filters,
-                    "minimum_should_match": len(all_filters),
-                }
-            },
-        }
-    }
-
-
 class Text2TextService:
     """
     Text2text service
@@ -158,7 +124,7 @@ class Text2TextService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=as_elasticsearch(query),
+                query=query.as_elasticsearch(),
                 sort=sort_by2elasticsearch(
                     sort_by,
                     valid_fields=[
@@ -174,10 +140,9 @@ class Text2TextService:
                     ],
                 ),
                 aggregations={
-                        ExtendedEsRecordDataFieldNames.text_predicted: aggregations.terms_aggregation(
-                            ExtendedEsRecordDataFieldNames.text_predicted
-                        )
-
+                    ExtendedEsRecordDataFieldNames.text_predicted: aggregations.terms_aggregation(
+                        ExtendedEsRecordDataFieldNames.text_predicted
+                    )
                 },
             ),
             size=size,
@@ -218,7 +183,7 @@ class Text2TextService:
         """
         dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=as_elasticsearch(query))
+            dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
             yield Text2TextRecord.parse_obj(db_record)
 
