@@ -265,6 +265,7 @@ class RubrixClient:
             limit=limit,
         )
 
+        _check_response_errors(response)
         return pandas.DataFrame(map(lambda r: r.to_client().dict(), response.parsed))
 
     def copy(self, source: str, target: str):
