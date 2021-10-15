@@ -44,7 +44,7 @@ jobs:
         run: pip install .[server]
       - name: Run tests 📈
         run: 
-          pytest
+          pytest --cov=rubrix --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:
