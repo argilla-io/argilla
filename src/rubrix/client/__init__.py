@@ -160,7 +160,7 @@ class RubrixClient:
         # However, a desired check can be placed to create a custom chunk_size when that limit is exceeded
         if chunk_size > self.MAX_CHUNK_SIZE:
             self._LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout erros may ocurr.
+                """The introduced chunk size is noticeably large, timeout errors may occur.
                 Consider a chunk size smaller than %s""",
                 self.MAX_CHUNK_SIZE,
             )
