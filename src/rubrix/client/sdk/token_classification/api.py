@@ -70,7 +70,7 @@ def data(
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=None,
-        params={"limit": limit},
+        params={"limit": limit} if limit else None,
         json=request.dict() if request else {},
     ) as response:
         return build_data_response(
