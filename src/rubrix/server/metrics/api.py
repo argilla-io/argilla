@@ -3,6 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 
+from rubrix.server.commons.api import TeamsQueryParams
 from rubrix.server.datasets.service import DatasetsService, create_dataset_service
 from rubrix.server.metrics.model import (
     DatasetMetric,
@@ -25,10 +26,13 @@ router = APIRouter(tags=["metrics"], prefix="/datasets")
 )
 def get_dataset_metrics(
     name: str,
+    teams_query: TeamsQueryParams = Depends(),
     datasets: DatasetsService = Depends(create_dataset_service),
     user: User = Depends(auth.get_user),
 ) -> List[DatasetMetric]:
-    metrics = datasets.get_dataset_metrics(name, owner=user.current_group)
+    metrics = datasets.get_dataset_metrics(
+        name, owner=user.check_team(teams_query.team)
+    )
     return [DatasetMetric.parse_obj(m) for m in metrics]
 
 
@@ -41,12 +45,13 @@ def get_dataset_metrics(
 def create_dataset_metric(
     name: str,
     request: DatasetMetricCreation,
+    teams_query: TeamsQueryParams = Depends(),
     datasets: DatasetsService = Depends(create_dataset_service),
     user: User = Depends(auth.get_user),
 ) -> DatasetMetric:
     result = datasets.add_dataset_metric(
         name,
-        owner=user.current_group,
+        owner=user.check_team(teams_query.team),
         metric=DatasetMetricDB(
             **request.dict(),
             created_by=user.username,
@@ -64,9 +69,10 @@ def create_dataset_metric(
 def delete_dataset_metric(
     name: str,
     metric: str,
+    teams_query: TeamsQueryParams = Depends(),
     datasets: DatasetsService = Depends(create_dataset_service),
     user: User = Depends(auth.get_user),
 ) -> None:
     return datasets.delete_dataset_metric(
-        name, owner=user.current_group, metric_id=metric
+        name, owner=user.check_team(teams_query.team), metric_id=metric
     )

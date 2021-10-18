@@ -21,6 +21,7 @@ from .commons.task_factory import TaskFactory, _TaskConfig
 from .text2text import Text2TextQuery, api as text2text
 from .text_classification import TextClassificationQuery, api as text_classification
 from .token_classification import TokenClassificationQuery, api as token_classification
+from ..commons.api import TeamsQueryParams
 from ..metrics.model import DatasetMetricResults
 from ..security import auth
 from ..security.model import User
@@ -50,12 +51,13 @@ def build_task_metrics_endpoint(task_router: APIRouter, cfg: _TaskConfig):
         name: str,
         metric_id: str,
         request: cfg.query,
+        teams_query: TeamsQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         task_service: TaskService = Depends(TaskService.get_instance),
     ):
         return task_service.calculate_metrics(
             dataset=name,
-            owner=current_user.current_group,
+            owner=current_user.check_team(teams_query.team),
             metric_id=metric_id,
             query=request,
         )

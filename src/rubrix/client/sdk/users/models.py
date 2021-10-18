@@ -10,9 +10,5 @@ class User(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    user_groups: List[str] = None
-
-    @property
-    def current_group(self) -> Optional[str]:
-        return self.user_groups[0] if self.user_groups else None
+    teams: List[str] = None
 
