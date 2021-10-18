@@ -27,11 +27,13 @@ class User(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    teams: List[str] = None
+    teams: Optional[List[str]] = None
 
     @property
     def default_team(self) -> Optional[str]:
-        return self.username if self.teams else None
+        if self.teams is None:
+            return None
+        return self.username
 
     def check_teams(self, teams: List[str]) -> List[str]:
         """
@@ -48,11 +50,16 @@ class User(BaseModel):
             Original team names if user belongs to them
 
         """
-        if not teams:
-            return self.teams + [self.default_team] if self.teams else []
-        for team in teams:
-            self.check_team(team)
-        return teams
+        if teams:
+            for team in teams:
+                self.check_team(team)
+            return teams
+
+        if self.teams is None:
+            return []
+        return self.teams + [self.default_team]
+
+
 
     def check_team(self, team: str) -> str:
         """
