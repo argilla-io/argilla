@@ -21,7 +21,7 @@ from rubrix.server.tasks.text_classification import TextClassificationBulkData
 from tests.server.test_helpers import client
 
 
-def test_delete_dataset(name: str):
+def test_delete_dataset():
     dataset = "test_delete_dataset"
     create_mock_dataset(dataset)
 
@@ -87,11 +87,17 @@ def test_open_and_close_dataset():
 
     assert client.put(f"/api/datasets/{dataset}:close").status_code == 200
 
-    with pytest.raises(elasticsearch.exceptions.RequestError, match="index_closed_exception"):
+    with pytest.raises(
+        elasticsearch.exceptions.RequestError, match="index_closed_exception"
+    ):
         client.post(f"/api/datasets/{dataset}/TextClassification:search")
 
     assert client.put(f"/api/datasets/{dataset}:open").status_code == 200
-    assert client.post(f"/api/datasets/{dataset}/TextClassification:search").status_code == 200
+    assert (
+        client.post(f"/api/datasets/{dataset}/TextClassification:search").status_code
+        == 200
+    )
+
 
 def delete_dataset(dataset):
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
