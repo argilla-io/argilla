@@ -56,7 +56,7 @@ def test_list_datasets():
 
     create_mock_dataset(dataset)
 
-    response = client.get(f"/api/datasets")
+    response = client.get("/api/datasets/")
     assert response.status_code == 200
 
     datasets = [Dataset.parse_obj(item) for item in response.json()]
