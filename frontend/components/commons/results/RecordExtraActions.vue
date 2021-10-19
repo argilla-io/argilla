@@ -16,20 +16,28 @@
   -->
 
 <template>
-  <div class="record__extra-actions" v-click-outside="close">
-    <a class="extra-actions__button" v-if="hasMetadata || allowChangeStatus" href="#" @click.prevent="open =! open"><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3" /></a>
-    <div class="extra-actions__content" v-if="open">
+  <div v-click-outside="close" class="record__extra-actions">
+    <a
+      v-if="hasMetadata || allowChangeStatus"
+      class="extra-actions__button"
+      href="#"
+      @click.prevent="open = !open"
+      ><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3"
+    /></a>
+    <div v-if="open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="$emit('onShowMetadata')">
         <span>View metadata</span>
       </div>
       <template v-if="allowChangeStatus">
         <div
-          :class="record.status === 'Discarded' ? 'disabled' : null"
           v-for="status in allowedStatusActions"
           :key="status.key"
+          :class="record.status === 'Discarded' ? 'disabled' : null"
           @click="onChangeRecordStatus(status.key)"
         >
-          <span>{{record.status === 'Discarded' ? 'Discarded' : status.name }}</span>
+          <span>{{
+            record.status === "Discarded" ? "Discarded" : status.name
+          }}</span>
         </div>
       </template>
     </div>
@@ -57,6 +65,7 @@ export default {
   },
   data: () => ({
     statusActions: [
+      // TODO: Do we need this? Just the discard action should be allowed here
       {
         name: "Discard",
         key: "Discarded",
@@ -81,14 +90,15 @@ export default {
     },
   },
   methods: {
+    // TODO: call vuex-actions here instead of trigger event
     onChangeRecordStatus(status) {
       if (this.record.status !== status) {
         this.$emit("onChangeRecordStatus", status, this.record);
       }
     },
     close() {
-      this.open = false
-    }
+      this.open = false;
+    },
   },
 };
 </script>
@@ -121,7 +131,7 @@ export default {
     top: 2em;
     background: white;
     border-radius: 3px;
-    box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
     padding: 3px;
     min-width: 135px;
     .disabled {
