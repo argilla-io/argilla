@@ -414,18 +414,6 @@ const getters = {
 };
 
 const actions = {
-  async editAnnotations(_, { dataset, records }) {
-    const newRecords = records.map((record) => ({
-      ...record,
-      selected: false,
-      status: "Edited",
-    }));
-    return await _updateDatasetRecords({
-      dataset,
-      records: newRecords,
-      persistBackend: true,
-    });
-  },
   async updateDatasetRecords(_, { dataset, records }) {
     return await _updateDatasetRecords({
       dataset,

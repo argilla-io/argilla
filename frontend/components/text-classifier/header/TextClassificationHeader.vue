@@ -129,12 +129,10 @@ export default {
       });
     },
     async onNewLabel(newLabel) {
-      if (this.isTextClassification) {
-        await this.dataset.$dispatch("setLabels", {
-          dataset: this.dataset,
-          labels: [...new Set([...this.dataset.labels, newLabel])],
-        });
-      }
+      await this.dataset.$dispatch("setLabels", {
+        dataset: this.dataset,
+        labels: [...new Set([...this.dataset.labels, newLabel])],
+      });
     },
   },
 };

@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 import itertools
+
+from rubrix.server.commons.api import TeamsQueryParams
 from rubrix.server.security.model import User
 from typing import Iterable, Optional
 
@@ -52,6 +54,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: Text2TextBulkData,
+    teams_query: TeamsQueryParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(create_dataset_service),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -65,6 +68,8 @@ def bulk_records(
         The dataset name
     bulk:
         The bulk data
+    teams_query:
+        Common task query params
     service:
         the Service
     datasets:
@@ -78,15 +83,15 @@ def bulk_records(
     """
 
     task = TASK_TYPE
-
+    owner = current_user.check_team(teams_query.team)
     datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        owner=current_user.current_group,
+        owner=owner,
         task=task,
     )
     result = service.add_records(
         dataset=name,
-        owner=current_user.current_group,
+        owner=owner,
         records=bulk.records,
     )
     return BulkResponse(
@@ -105,6 +110,7 @@ def bulk_records(
 def search_records(
     name: str,
     search: Text2TextSearchRequest = None,
+    teams_query: TeamsQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(create_dataset_service),
@@ -117,6 +123,8 @@ def search_records(
     ----------
     name:
         The dataset name
+    teams_query:
+        The task common query params
     search:
         THe search query request
     pagination:
@@ -139,7 +147,7 @@ def search_records(
 
     result = service.search(
         dataset=name,
-        owner=current_user.current_group,
+        owner=current_user.default_team,
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -189,6 +197,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[Text2TextQuery] = None,
+    teams_query: TeamsQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(create_dataset_service),
@@ -203,6 +212,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
+    teams_query:
+        The task common query params
     limit:
         The load number of records limit. Optional
     service:
@@ -215,7 +226,7 @@ async def stream_data(
     """
     query = query or Text2TextQuery()
     data_stream = service.read_dataset(
-        name, owner=current_user.current_group, query=query
+        name, owner=current_user.check_team(teams_query.team), query=query
     )
 
     return scan_data_response(
