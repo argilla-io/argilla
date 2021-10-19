@@ -31,7 +31,6 @@
         :dataset="dataset"
         :record="record"
         @annotate="onAnnotate"
-        @edit="onEdit"
       />
       <ClassifierExplorationArea v-else :record="record" />
     </div>
@@ -75,24 +74,7 @@ export default {
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
-      edit: "entities/datasets/editAnnotations",
     }),
-
-    async onEdit({ labels }) {
-      await this.edit({
-        dataset: this.dataset,
-        records: [
-          {
-            ...this.record,
-            status: "Edited",
-            annotation: {
-              agent: this.$auth.user,
-              labels,
-            },
-          },
-        ],
-      });
-    },
 
     async onAnnotate({ labels }) {
       await this.validate({
@@ -101,9 +83,7 @@ export default {
         records: [
           {
             ...this.record,
-            status: ["Discarded", "Validated"].includes(this.record.status)
-              ? "Edited"
-              : this.record.status,
+            status: this.record.status,
             annotation: {
               labels: labels.map((label) => ({
                 class: label,
@@ -126,18 +106,19 @@ export default {
     padding: 2em 2em 0.5em 2em;
     .list__item--annotation-mode & {
       padding-left: 65px;
+      padding-right: 200px;
     }
   }
   &__labels {
     position: relative;
     margin-left: 2em;
-    width: 170px;
+    width: 200px;
     margin-bottom: -3em;
     display: block;
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 1em;
+    padding: 4em 2em 1em 1em;
   }
 }
 .icon {
@@ -147,6 +128,7 @@ export default {
     margin-right: 0;
     margin-left: auto;
     margin-bottom: 1em;
+    transform: scaleX(-1);
     &.ko {
       fill: $error;
     }
