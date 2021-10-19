@@ -23,8 +23,8 @@
       ref="scroll"
       :key="dataset.name"
       class="results-scroll"
-      :default-height="100"
       :total-height="1200"
+      :default-height="100"
       :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
     >
       <template v-if="showLoader">
@@ -72,9 +72,6 @@ export default {
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
-    moreDataAvailable() {
-      return this.visibleRecords.length < this.dataset.results.total;
-    },
     allowKeyboardPagination() {
       return this.dataset.viewSettings.pagination.allowKeyboardPagination;
     },
@@ -101,6 +98,7 @@ export default {
         document
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
+
       }
     },
     async onPagination(page, size) {
@@ -123,12 +121,13 @@ export default {
   margin-bottom: 0;
   list-style: none;
   .results-scroll {
-    padding-top: 180px;
-    padding-bottom: 63px;
-    height: calc(100vh - 63px) !important;
+    height: 100vh !important;
     overflow: auto;
+    padding-bottom: 163px;
+    padding-top: 180px;
     padding-left: 4em;
     padding-right: calc(4em + 45px);
+    transition: padding 0s ease-in-out 0.1s;
     @include media(">desktopLarge") {
       width: 100%;
       padding-right: calc(294px + 45px + 4em);

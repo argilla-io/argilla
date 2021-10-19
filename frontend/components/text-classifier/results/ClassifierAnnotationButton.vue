@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="re-annotation-button" :class="classes">
+  <div class="re-annotation-button" :class="[classes, allowMultiple ? 'multiple' : 'single']">
     <label :for="id" class="button" @click.prevent="toggleCheck">
       <span class="annotation-button-data__text" :title="label.class"
         >{{ label.class }}
@@ -123,17 +123,26 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       color: $darker-color;
     }
-    &.active {
+    &.bordered {
       .button {
-        background: $secondary-color;
-        border: 1px solid $line-smooth-color;;
+        border: 1px solid $secondary-color;
       }
+    }
+    &.active {
       transition: all 0.02s ease-in-out;
       box-shadow: none; // Animate the size, outside
       animation: pulse 0.4s;
       transform: scale3d(1, 1, 1);
       -webkit-font-smoothing: antialiased;
       transform: translate3d(1, 1, 1); // z-index: 1;
+      .button {
+        background: $secondary-color;
+        border: 1px solid $line-smooth-color;
+      }
+      &.single {
+        pointer-events: none;
+        cursor: pointer;
+      }
       &:after {
         display: none !important;
       }

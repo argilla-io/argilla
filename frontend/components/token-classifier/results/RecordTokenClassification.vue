@@ -17,7 +17,7 @@
 
 <template>
   <div class="record">
-    <div v-if="textSpans.length" ref="list">
+    <div v-if="textSpans.length" ref="list" class="content__input">
       <TextSpan
         v-for="(token, i) in textSpans"
         :key="i"
@@ -34,6 +34,18 @@
         @reset="onReset"
       />
     </div>
+    <div class="content__actions-buttons" v-if="annotationEnabled">
+      <re-button
+        :class="[
+          'button-primary',
+          record.status === 'Validated' ? 'active' : null,
+        ]"
+        @click="onValidate(record)"
+        >{{
+          record.status === "Validated" ? "Validated" : "Validate"
+        }}</re-button
+      >
+    </div>
   </div>
 </template>
 
@@ -44,17 +56,17 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true,
+      required: true
     },
     record: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
-  data: function () {
+  data: function() {
     return {
       selectionStart: undefined,
-      selectionEnd: undefined,
+      selectionEnd: undefined
     };
   },
   computed: {
@@ -81,11 +93,11 @@ export default {
       const normalizedEntities = (entities, tokens) => {
         const tokenForChar = (character, tokens) => {
           const tokenIdx = tokens.findIndex(
-            (token) => token.start <= character && character < token.end
+            token => token.start <= character && character < token.end
           );
           return tokenIdx >= 0 ? tokenIdx : undefined;
         };
-        return entities.map((entity) => {
+        return entities.map(entity => {
           const start_token = tokenForChar(entity.start, tokens);
           const end_token = tokenForChar(entity.end - 1, tokens);
           return entity.start_token && entity.end_token
@@ -102,7 +114,7 @@ export default {
       );
       while (idx < this.record.visualTokens.length) {
         const entity = entities.find(
-          (entity) => entity.start_token <= idx && idx < entity.end_token
+          entity => entity.start_token <= idx && idx < entity.end_token
         );
         if (entity) {
           textSpans.push({
@@ -113,7 +125,7 @@ export default {
             ),
             start: entity.start,
             end: entity.end,
-            agent: this.agent,
+            agent: this.agent
           });
           idx = entity.end_token;
         } else {
@@ -123,7 +135,7 @@ export default {
             tokens: [token],
             start: token.start,
             end: token.end,
-            agent: this.agent,
+            agent: this.agent
           });
           idx++;
         }
@@ -132,12 +144,13 @@ export default {
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
-    },
+    }
   },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       discard: "entities/datasets/discardAnnotations",
+      validate: "entities/datasets/validateAnnotations"
     }),
 
     onReset() {
@@ -156,16 +169,30 @@ export default {
         records: [
           {
             ...this.record,
-            selected: true,
+            // selected: true,
             status: "Edited",
             annotation: {
               entities,
-              agent: this.$auth.user,
-            },
-          },
-        ],
+              agent: this.$auth.user
+            }
+          }
+        ]
       });
       this.onReset();
+    },
+    async onValidate(record) {
+      await this.validate({
+        dataset: this.dataset,
+        records: [
+          {
+            ...record,
+            annotation: {
+              ...(record.annotation || record.prediction),
+              agent: this.$auth.user,
+            },
+          }
+        ]
+      });
     },
     onSelectEntity(entity) {
       const from = Math.min(this.selectionStart, this.selectionEnd);
@@ -177,12 +204,12 @@ export default {
       entities.push({
         start: startToken.start,
         end: endToken.end,
-        label: entity,
+        label: entity
       });
       this.updateRecordEntities(entities);
     },
     onChangeEntityLabel(entity, newLabel) {
-      let entities = this.entities.map((ent) => {
+      let entities = this.entities.map(ent => {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
@@ -193,7 +220,7 @@ export default {
     },
     onRemoveEntity(entity) {
       const found = this.entities.findIndex(
-        (ent) =>
+        ent =>
           ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
@@ -209,21 +236,59 @@ export default {
         return true;
       }
       return false;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
 .record {
-  padding: 2em 2em 0.5em 2em;
+  padding: 2em;
   display: block;
   margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
+  &:hover {
+    .button-primary:not(.active) {
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out 0.2s;
+    }
+  }
   .list__item--annotation-mode & {
     padding-left: 65px;
+  }
+}
+.content {
+  &__input {
+    padding-right: 200px;
+  }
+  &__actions-buttons {
+    margin-right: 0;
+    margin-left: auto;
+    display: flex;
+    min-width: 20%;
+    .re-button {
+      min-height: 38px;
+      line-height: 38px;
+      display: block;
+      margin-bottom: 0;
+      margin-right: 0;
+      margin-left: auto;
+      &.active {
+        opacity: 0.8;
+        background: $font-secondary;
+        pointer-events: none;
+        cursor: pointer;
+      }
+      &.button-primary:not(.active) {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out 0.2s;
+      }
+      & + .re-button {
+        margin-left: 1em;
+      }
+    }
   }
 }
 </style>

@@ -23,17 +23,6 @@
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
-      <!-- TODO: make global, remove task reference -->
-      <div
-        v-if="
-          annotationEnabled &&
-          item.status !== 'Default' &&
-          dataset.task !== 'Text2Text'
-        "
-        class="list__li__status"
-      >
-        {{ item.status }}
-      </div>
       <ReCheckbox
         v-if="annotationEnabled"
         class="list__checkbox"
@@ -98,7 +87,6 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       search: "entities/datasets/search",
-      editAnnotations: "entities/datasets/editAnnotations",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
@@ -155,14 +143,6 @@ export default {
     top: 1.2em;
     width: auto;
   }
-  &__li {
-    &__status {
-      position: absolute;
-      top: 1em;
-      right: 1em;
-      font-style: italic;
-    }
-  }
   &__item {
     position: relative;
     background: $lighter-color;
@@ -173,7 +153,7 @@ export default {
     border: 1px solid white;
     &:hover {
       border: 1px solid palette(grey, smooth);
-      .record__extra-actions--text2text {
+      .record__extra-actions {
         opacity: 1;
         pointer-events: all;
       }

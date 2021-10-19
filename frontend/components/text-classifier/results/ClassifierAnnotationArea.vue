@@ -27,7 +27,7 @@
         :label="label"
         :class="[
           'label-button',
-          selectedLabels.includes(label.class) ? 'selected' : null,
+          predictedAs.includes(label.class) ? 'bordered' : null
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -68,7 +68,10 @@
           v-model="selectedLabels"
           :allow-multiple="record.multi_label"
           :label="label"
-          :class="['label-button']"
+          :class="[
+            'label-button',
+            predictedAs.includes(label.class) ? 'bordered' : null
+          ]"
           :data-title="label.class"
           :value="label.class"
           @change="updateLabels"
@@ -152,6 +155,9 @@ export default {
     appliedLabels() {
       return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
+    predictedAs() {
+      return this.record.predicted_as;
+    },
   },
   mounted() {
     this.selectedLabels = this.appliedLabels;
@@ -165,11 +171,7 @@ export default {
   },
   methods: {
     updateLabels() {
-      if (this.selectedLabels.length > 0) {
-        this.annotate();
-      } else {
-        this.$emit("edit", { labels: [] });
-      }
+      this.annotate();
     },
     annotate() {
       this.annotating = true;

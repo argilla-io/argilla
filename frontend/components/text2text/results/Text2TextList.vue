@@ -422,6 +422,7 @@ $marginRight: 200px;
       margin-right: 0;
       margin-left: auto;
       &.active {
+        opacity: 0.8;
         background: $font-secondary;
         pointer-events: none;
         cursor: pointer;
