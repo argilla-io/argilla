@@ -8,14 +8,14 @@ Welcome to Rubrix
 =================
 
 .. raw:: html
-   
+
    <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4"></video>
 
 
 What's Rubrix?
 --------------
 
-`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
+`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects.
 
 Key features:
 
@@ -23,12 +23,12 @@ Key features:
 
 - **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions, and collect more data to improve your model over time. Rubrix is designed to close this gap, enabling you to **iterate as much as you need**.
 
-- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**.
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 
-Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we'll be adding support for speech recognition and computer vision soon. 
+Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we'll be adding support for speech recognition and computer vision soon.
 
 Quickstart
 ----------
@@ -37,7 +37,7 @@ Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``
 
 
 Make sure you have ``Docker`` installed and run (check the :ref:`setup and installation section <setup-and-installation>` for a more detailed installation process):
-   
+
 .. code-block:: bash
 
    mkdir rubrix && cd rubrix
@@ -45,7 +45,7 @@ Make sure you have ``Docker`` installed and run (check the :ref:`setup and insta
 And then run:
 
 .. code-block:: bash
-   
+
    wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
 
 Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`` libraries for this example):
@@ -57,7 +57,7 @@ Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
 
 
-**Why**: 
+**Why**:
 
 - The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
 - The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
@@ -80,7 +80,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 .. code-block:: python
 
    from transformers import pipeline
-   from datasets import load_dataset  
+   from datasets import load_dataset
    import rubrix as rb
 
    model = pipeline('zero-shot-classification', model="typeform/squeezebert-mnli")
@@ -90,11 +90,11 @@ Use your favourite editor or a Jupyter notebook to run the following:
    labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
    for record in dataset:
-       prediction = model(record['text'], labels) 
+       prediction = model(record['text'], labels)
 
        item = rb.TextClassificationRecord(
            inputs=record["text"],
-           prediction=list(zip(prediction['labels'], prediction['scores'])), 
+           prediction=list(zip(prediction['labels'], prediction['scores'])),
        )
 
        rb.log(item, name="news_zeroshot")
@@ -104,7 +104,7 @@ Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <htt
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
 .. raw:: html
-   
+
    <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4" type="video/mp4"></video>
 
 
@@ -170,7 +170,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/streamlit_guide
    guides/cookbook
    guides/task_examples
-   
+
 .. toctree::
    :maxdepth: 3
    :caption: Tutorials
@@ -184,6 +184,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/06-find_label_errors
    tutorials/07-zeroshot_ner
    tutorials/08-error_analysis_using_loss
+   tutorials/zeroshot_data_annotation
 
 .. toctree::
    :maxdepth: 3
@@ -201,4 +202,3 @@ You can join the conversation on our Github page and our Github forum.
    community/developer_docs
    Github page <https://github.com/recognai/rubrix>
    Discussion forum <https://github.com/recognai/rubrix/discussions>
-
