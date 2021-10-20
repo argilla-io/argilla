@@ -333,15 +333,7 @@ async function _updateDatasetRecords({
   }
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
-  if (persistBackend) {
-    await _persistRecords({
-      dataset,
-      records,
-    });
-    _fetchAnnotationProgress(dataset);
-  }
-
-  return await entity.update({
+  const updatedDataset = await entity.update({
     where: dataset.name,
     data: {
       ...dataset,
@@ -358,6 +350,16 @@ async function _updateDatasetRecords({
       },
     },
   });
+
+  if (persistBackend) {
+    await _persistRecords({
+      dataset,
+      records,
+    });
+    _fetchAnnotationProgress(dataset);
+  }
+
+  return updatedDataset;
 }
 
 async function _updateTaskDataset({ dataset, data }) {
