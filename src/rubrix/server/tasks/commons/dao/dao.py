@@ -19,22 +19,20 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 from fastapi import Depends
 
+from rubrix.server.commons.es_helpers import (
+    DATASETS_RECORDS_INDEX_TEMPLATE,
+    aggregations,
+    parse_aggregations,
+)
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
     dataset_records_index,
 )
-from rubrix.server.datasets.model import DatasetDB
-from rubrix.server.metrics.model import DatasetMetricResults
+from rubrix.server.datasets.model import BaseDatasetDB
 from rubrix.server.tasks.commons import BaseRecord
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
-from rubrix.server.commons.es_helpers import (
-    DATASETS_RECORDS_INDEX_TEMPLATE,
-    aggregations,
-    parse_aggregations,
-)
-
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
 
@@ -125,7 +123,7 @@ class DatasetRecordsDAO:
 
     def add_records(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         records: List[BaseRecord],
         record_class: Type[DBRecord],
     ) -> int:
@@ -172,7 +170,7 @@ class DatasetRecordsDAO:
 
     def search_records(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         search: Optional[RecordSearch] = None,
         size: int = 100,
         record_from: int = 0,
@@ -210,7 +208,7 @@ class DatasetRecordsDAO:
                 **aggregations.status(),
                 **aggregations.predicted(),
                 **aggregations.words_cloud(),
-                **aggregations.score(),  # TODO: calculate score directly from dataset
+                **aggregations.score(),
                 **aggregations.custom_fields(metadata_fields),
             }
             if record_from == 0
@@ -244,27 +242,14 @@ class DatasetRecordsDAO:
                 parsed_aggregations, stop_keys=["metadata"]
             )
 
-            result.words = parsed_aggregations.pop("words")
+            result.words = parsed_aggregations.pop("words", {})
             result.metadata = parsed_aggregations.pop("metadata", {})
-
-            metrics_results = [
-                DatasetMetricResults(
-                    id=metric.id,
-                    name=metric.name,
-                    description=metric.description,
-                    kind=metric.spec.get("meta", {"kind": "custom"})["kind"],
-                    results=parsed_aggregations.pop(metric.id),
-                )
-                for metric in dataset.metrics
-                if metric.id in parsed_aggregations
-            ]
-            result.metrics = metrics_results
             result.aggregations = parsed_aggregations
         return result
 
     def scan_dataset(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         search: Optional[RecordSearch] = None,
     ) -> Iterable[Dict[str, Any]]:
         """

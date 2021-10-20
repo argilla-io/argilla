@@ -17,8 +17,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.metrics.model import DatasetMetricResults
-
 
 class RecordSearch(BaseModel):
     """
@@ -66,4 +64,3 @@ class RecordSearchResults(BaseModel):
     aggregations: Optional[Dict[str, Dict[str, Any]]] = Field(default_factory=dict)
     words: Optional[Dict[str, int]] = None
     metadata: Optional[Dict[str, int]] = None
-    metrics: Optional[List[DatasetMetricResults]] = Field(default_factory=list)

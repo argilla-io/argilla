@@ -20,18 +20,13 @@ from fastapi import Depends
 
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.tasks.commons import TaskType
-
-from ..commons import es_helpers
-from ..commons.errors import WrongInputParamError
-from ..commons.es_helpers import aggregations
+from .model import DatasetDB
 from ..commons.es_settings import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
     DATASETS_RECORDS_INDEX_NAME,
 )
 from ..commons.settings import settings
-from ..metrics.model import DatasetMetricDB
-from .model import DatasetDB
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -255,47 +250,6 @@ class DatasetsDAO:
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open_index(dataset_records_index(dataset.id))
-
-    def generate_dataset_metric_spec(
-        self, dataset: DatasetDB, metric: DatasetMetricDB
-    ) -> Dict[str, Any]:
-        """Generate a metric.spec object by using metric dataset field and dataset configuration"""
-
-        index = dataset_records_index(dataset.id)
-
-        field_mappings = self._es.get_field_mapping(index, field_name=metric.field)
-        if metric.field not in field_mappings:
-            raise WrongInputParamError(
-                f"Provide field {metric.field} doesn't exist in dataset index"
-            )
-        index_mapping = self._es.get_mapping(index)
-        nested_field_path = es_helpers.find_nested_field_path(
-            metric.field, mapping_definition=index_mapping
-        )
-
-        if field_mappings[metric.field] == "keyword":
-            aggregation = aggregations.terms_aggregation(metric.field)
-        elif field_mappings[metric.field] == "float":
-            aggregation = aggregations.histogram_aggregation(
-                metric.field, interval=0.01
-            )
-        elif field_mappings[metric.field] == "long":
-            aggregation = aggregations.histogram_aggregation(metric.field, interval=1)
-        else:
-            # TODO: Another kind of aggregations
-            raise WrongInputParamError(
-                f"""Provided field {metric.field} does not support simple metrics definition. """
-                """Please, used spec field for advanced/custom metric definition"""
-            )
-
-        return (
-            aggregations.nested_aggregation(
-                nested_path=nested_field_path,
-                inner_aggregation={metric.id: aggregation},
-            )
-            if nested_field_path
-            else aggregation
-        )
 
 
 _instance: Optional[DatasetsDAO] = None
