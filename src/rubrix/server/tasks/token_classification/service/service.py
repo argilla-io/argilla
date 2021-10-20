@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Iterable, List, Optional
+from typing import Iterable, List
 
 from fastapi import Depends
 
@@ -22,19 +22,17 @@ from rubrix.server.commons.es_helpers import (
     aggregations,
     sort_by2elasticsearch,
 )
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
-    TaskType,
 )
 from rubrix.server.tasks.commons.dao import (
     extends_index_properties,
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.task_factory import TaskFactory
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
@@ -88,19 +86,15 @@ class TokenClassificationService:
 
     def __init__(
         self,
-        datasets: DatasetsService,
         dao: DatasetRecordsDAO,
     ):
-        self.__datasets__ = datasets
         self.__dao__ = dao
 
     def add_records(
         self,
-        dataset: str,
-        owner: Optional[str],
+        dataset: Dataset,
         records: List[CreationTokenClassificationRecord],
     ):
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         failed = self.__dao__.add_records(
             dataset=dataset, records=records, record_class=TokenClassificationRecord
         )
@@ -108,8 +102,7 @@ class TokenClassificationService:
 
     def search(
         self,
-        dataset: str,
-        owner: Optional[str],
+        dataset: Dataset,
         query: TokenClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -121,9 +114,7 @@ class TokenClassificationService:
         Parameters
         ----------
         dataset:
-            The dataset name
-        owner:
-            The dataset owner
+            The records dataset
         query:
             The search parameters
         sort_by:
@@ -138,8 +129,6 @@ class TokenClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
-
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
@@ -187,7 +176,6 @@ class TokenClassificationService:
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            metrics=results.metrics,
             aggregations=TokenClassificationAggregations(
                 **results.aggregations,
                 words=results.words,
@@ -199,8 +187,7 @@ class TokenClassificationService:
 
     def read_dataset(
         self,
-        dataset: str,
-        owner: Optional[str],
+        dataset: Dataset,
         query: TokenClassificationQuery,
     ) -> Iterable[TokenClassificationRecord]:
         """
@@ -217,7 +204,6 @@ class TokenClassificationService:
             the provided query filters. Optional
 
         """
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         for db_record in self.__dao__.scan_dataset(
             dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
@@ -226,8 +212,8 @@ class TokenClassificationService:
 
 _instance = None
 
+
 def token_classification_service(
-    datasets: DatasetsService = Depends(create_dataset_service),
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
 ) -> TokenClassificationService:
     """
@@ -246,5 +232,5 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(datasets=datasets, dao=dao)
+        _instance = TokenClassificationService(dao=dao)
     return _instance

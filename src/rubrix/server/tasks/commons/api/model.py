@@ -29,7 +29,6 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
-from rubrix.server.metrics.model import DatasetMetricResults
 
 
 class EsRecordDataFieldNames(str, Enum):

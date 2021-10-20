@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.metrics.model import DatasetMetricDB
 from rubrix.server.tasks.commons import TaskType
 
 
@@ -58,7 +57,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     Request body for copy dataset operation
     """
 
-    pass
+    target_team: Optional[str] = None
 
 
 class BaseDatasetDB(CreationDatasetRequest):
@@ -91,12 +90,7 @@ class BaseDatasetDB(CreationDatasetRequest):
 
 
 class DatasetDB(BaseDatasetDB):
-    metrics: List[DatasetMetricDB] = Field(default_factory=list)
-
-    def get_metric_by_id(self, metric_id: str) -> Optional[DatasetMetricDB]:
-        for m in self.metrics:
-            if metric_id == m.id:
-                return m
+    pass
 
 
 class Dataset(BaseDatasetDB):

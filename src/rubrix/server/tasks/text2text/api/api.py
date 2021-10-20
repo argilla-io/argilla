@@ -14,25 +14,24 @@
 #  limitations under the License.
 
 import itertools
-
-from rubrix.server.commons.api import TeamsQueryParams
-from rubrix.server.security.model import User
 from typing import Iterable, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
-from rubrix.server.datasets.model import CreationDatasetRequest
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+
+from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
+from rubrix.server.security.model import User
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text2text.api.model import (
+    Text2TextBulkData,
     Text2TextQuery,
     Text2TextRecord,
-    Text2TextRecordDB,
-    Text2TextSearchResults,
-    Text2TextBulkData,
     Text2TextSearchRequest,
+    Text2TextSearchResults,
 )
 from rubrix.server.tasks.text2text.service.service import (
     Text2TextService,
@@ -56,7 +55,7 @@ def bulk_records(
     bulk: Text2TextBulkData,
     teams_query: TeamsQueryParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -83,15 +82,14 @@ def bulk_records(
     """
 
     task = TASK_TYPE
-    owner = current_user.check_team(teams_query.team)
-    datasets.upsert(
+    dataset = datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        owner=owner,
         task=task,
+        user=current_user,
+        team=teams_query.team,
     )
     result = service.add_records(
-        dataset=name,
-        owner=owner,
+        dataset=dataset,
         records=bulk.records,
     )
     return BulkResponse(
@@ -113,7 +111,7 @@ def search_records(
     teams_query: TeamsQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Text2TextSearchResults:
     """
@@ -144,10 +142,9 @@ def search_records(
 
     search = search or Text2TextSearchRequest()
     query = search.query or Text2TextQuery()
-
+    dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
     result = service.search(
-        dataset=name,
-        owner=current_user.default_team,
+        dataset=Dataset.parse_obj(dataset),
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -200,7 +197,7 @@ async def stream_data(
     teams_query: TeamsQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: Text2TextService = Depends(text2text_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
@@ -225,9 +222,8 @@ async def stream_data(
 
     """
     query = query or Text2TextQuery()
-    data_stream = service.read_dataset(
-        name, owner=current_user.check_team(teams_query.team), query=query
-    )
+    dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
+    data_stream = service.read_dataset(Dataset.parse_obj(dataset), query=query)
 
     return scan_data_response(
         data_stream=data_stream,
