@@ -12,15 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from dataclasses import dataclass
 
-from fastapi import APIRouter, Depends, Query, Security
-from rubrix.server.security import auth
-from rubrix.server.security.model import User
 from typing import List
 
+from fastapi import APIRouter, Depends, Query, Security
+
+from rubrix.server.security import auth
+from rubrix.server.security.model import User
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
-from .service import DatasetsService, create_dataset_service
+from .service import DatasetsService
 from ..commons.api import TeamsQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
@@ -36,7 +36,7 @@ def list_datasets(
     teams: List[str] = Query(
         None, alias="team", description="A list of teams used for retrieve datasets"
     ),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
     """
@@ -55,7 +55,7 @@ def list_datasets(
     -------
         A list of datasets visibles by current user
     """
-    return service.list(owners=current_user.check_teams(teams))
+    return service.list(user=current_user, teams=teams)
 
 
 @router.get(
@@ -67,7 +67,7 @@ def list_datasets(
 def get_dataset(
     name: str,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -92,7 +92,7 @@ def get_dataset(
 
     """
     return Dataset.parse_obj(
-        service.find_by_name(name, owner=current_user.check_team(ds_params.team))
+        service.find_by_name(name, user=current_user, team=ds_params.team)
     )
 
 
@@ -106,7 +106,7 @@ def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -134,7 +134,10 @@ def update_dataset(
 
     """
     return service.update(
-        name, data=update_request, owner=current_user.check_team(ds_params.team)
+        name,
+        data=update_request,
+        user=current_user,
+        team=ds_params.team,
     )
 
 
@@ -145,7 +148,7 @@ def update_dataset(
 def delete_dataset(
     name: str,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -163,7 +166,7 @@ def delete_dataset(
         The current user
 
     """
-    service.delete(name, owner=current_user.check_team(ds_params.team))
+    service.delete(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -173,7 +176,7 @@ def delete_dataset(
 def close_dataset(
     name: str,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -191,7 +194,7 @@ def close_dataset(
         The current user
 
     """
-    service.close_dataset(name, owner=current_user.check_team(ds_params.team))
+    service.close_dataset(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -201,7 +204,7 @@ def close_dataset(
 def open_dataset(
     name: str,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -219,7 +222,7 @@ def open_dataset(
         The current user
 
     """
-    service.open_dataset(name, owner=current_user.check_team(ds_params.team))
+    service.open_dataset(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -232,7 +235,7 @@ def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
     ds_params: TeamsQueryParams = Depends(),
-    service: DatasetsService = Depends(create_dataset_service),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -254,5 +257,5 @@ def copy_dataset(
     """
 
     return service.copy_dataset(
-        name=name, owner=current_user.check_team(ds_params.team), data=copy_request
+        name=name, data=copy_request, user=current_user, team=ds_params.team
     )
