@@ -97,7 +97,9 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
             A list of metric info availables for given dataset
 
         """
-        dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
+        dataset = datasets.find_by_name(
+            name, task=cfg.task, user=current_user, team=teams_query.team
+        )
         metrics = metrics.get_dataset_metrics(dataset=dataset)
         return [MetricInfo.parse_obj(metric) for metric in metrics]
 
@@ -143,7 +145,9 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
             The metric summary for a given dataset
 
         """
-        dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
+        dataset = datasets.find_by_name(
+            name, task=cfg.task, user=current_user, team=teams_query.team
+        )
         return metrics.summarize_metric(
             dataset=dataset,
             owner=current_user.check_team(teams_query.team),

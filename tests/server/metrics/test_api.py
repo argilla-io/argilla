@@ -26,6 +26,37 @@ from rubrix.server.tasks.token_classification import (
 from tests.server.test_helpers import client
 
 
+def test_wrong_dataset_metrics():
+    text = "This is a text"
+    records = [
+        Text2TextRecord.parse_obj(data)
+        for data in [
+            {"text": text},
+            {"text": text},
+            {"text": text},
+            {"text": text},
+        ]
+    ]
+    request = Text2TextBulkData(records=records)
+    dataset = "test_wrong_dataset_metrics"
+
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        client.post(
+            f"/api/datasets/{dataset}/Text2Text:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+
+    response = client.get(f"/api/datasets/TokenClassification/{dataset}/metrics")
+    assert response.status_code == 400
+    response = client.post(
+        f"/api/datasets/TokenClassification/{dataset}/metrics/a-metric:summary", json={}
+    )
+    assert response.status_code == 400
+
+
 def test_dataset_for_text2text():
     text = "This is a text"
     records = [
