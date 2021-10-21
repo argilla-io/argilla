@@ -30,6 +30,7 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
+from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text2text.api.model import (
     CreationText2TextRecord,
     ExtendedEsRecordDataFieldNames,
@@ -67,14 +68,17 @@ class Text2TextService:
     def __init__(
         self,
         dao: DatasetRecordsDAO,
+        metrics: MetricsService,
     ):
         self.__dao__ = dao
+        self.__metrics__ = metrics
 
     def add_records(
         self,
         dataset: Dataset,
         records: List[CreationText2TextRecord],
     ):
+        self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
             dataset=dataset,
             records=records,
@@ -178,6 +182,7 @@ _instance = None
 
 def text2text_service(
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+    metrics: MetricsService = Depends(MetricsService.get_instance),
 ) -> Text2TextService:
     """
     Creates a dataset record service instance
@@ -186,6 +191,8 @@ def text2text_service(
     ----------
     dao:
         The dataset records dao dependency
+    metrics:
+        The metrics service
 
     Returns
     -------
@@ -193,5 +200,5 @@ def text2text_service(
     """
     global _instance
     if not _instance:
-        _instance = Text2TextService(dao=dao)
+        _instance = Text2TextService(dao=dao, metrics=metrics)
     return _instance

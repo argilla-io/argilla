@@ -19,7 +19,6 @@ from fastapi import Depends
 
 from rubrix.server.commons.es_helpers import sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
-from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
@@ -28,6 +27,7 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
+from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     TextClassificationQuery,
@@ -50,14 +50,17 @@ class TextClassificationService:
     def __init__(
         self,
         dao: DatasetRecordsDAO,
+        metrics: MetricsService,
     ):
         self.__dao__ = dao
+        self.__metrics__ = metrics
 
     def add_records(
         self,
         dataset: Dataset,
         records: List[CreationTextClassificationRecord],
     ):
+        self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
             dataset=dataset, records=records, record_class=TextClassificationRecord
         )
@@ -154,16 +157,17 @@ _instance = None
 
 def text_classification_service(
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+    metrics: MetricsService = Depends(MetricsService.get_instance),
 ) -> TextClassificationService:
     """
     Creates a dataset record service instance
 
     Parameters
     ----------
-    datasets:
-        The datasets service dependency
     dao:
         The dataset records dao dependency
+    metrics:
+        The metrics service
 
     Returns
     -------
@@ -171,5 +175,5 @@ def text_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TextClassificationService(dao=dao)
+        _instance = TextClassificationService(dao=dao, metrics=metrics)
     return _instance
