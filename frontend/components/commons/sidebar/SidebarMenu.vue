@@ -17,52 +17,52 @@
 
 <template>
   <div class="sidebar">
-    <div v-if="sidebarType !== 'base'" class="sidebar__info">
-      <p>Mode</p>
-      <a class="sidebar__info__button"
-        v-if="isDatasetView"
-        href="#"
-        data-title="Explore"
-        @click="$emit('onChangeMode', 'explore')"
-      >
-        <svgicon
-          v-show="!annotationMode"
-          class="sidebar__info__icon-help"
-          name="check3"
-        ></svgicon>
-        <svgicon name="explore-view"></svgicon>
-      </a>
-      <a class="sidebar__info__button"
-        v-if="isDatasetView"
-        href="#"
-        data-title="Annotate"
-        @click="$emit('onChangeMode', 'annotate')"
-      >
-        <svgicon
-          v-show="annotationMode"
-          class="sidebar__info__icon-help"
-          name="check3"
-        ></svgicon>
-        <svgicon name="annotate-view"></svgicon>
-      </a>
-    </div>
-    <div v-if="isDatasetView && sidebarType !== 'base'" class="sidebar__info">
-      <p>Metrics</p>
-      <a
-        v-for="sidebarInfo in sidebarInfoOptions"
-        :key="sidebarInfo.id"
-        class="sidebar__info__button"
-        href="#"
-        :data-title="sidebarInfo.tooltip"
-        @click.prevent="showSidebarInfo(sidebarInfo.id)"
-      >
-        <svgicon v-if="visibleSidebarInfo === sidebarInfo.id"
-          class="sidebar__info__icon-help"
-          name="double-chev"
-        ></svgicon>
-        <svgicon :name="sidebarInfo.icon"></svgicon>
-      </a>
-    </div>
+    <template v-if="isDatasetView">
+      <div class="sidebar__info">
+        <p>Mode</p>
+        <a class="sidebar__info__button"
+          href="#"
+          data-title="Explore"
+          @click="$emit('onEnableAnnotationView', false)"
+        >
+          <svgicon
+            v-show="!annotationMode"
+            class="sidebar__info__icon-help"
+            name="check3"
+          ></svgicon>
+          <svgicon name="explore-view"></svgicon>
+        </a>
+        <a class="sidebar__info__button"
+          href="#"
+          data-title="Annotate"
+          @click="$emit('onEnableAnnotationView', true)"
+        >
+          <svgicon
+            v-show="annotationMode"
+            class="sidebar__info__icon-help"
+            name="check3"
+          ></svgicon>
+          <svgicon name="annotate-view"></svgicon>
+        </a>
+      </div>
+      <div class="sidebar__info">
+        <p>Metrics</p>
+        <a
+          v-for="sidebarInfo in sidebarInfoOptions"
+          :key="sidebarInfo.id"
+          class="sidebar__info__button"
+          href="#"
+          :data-title="sidebarInfo.tooltip"
+          @click.prevent="showSidebarInfo(sidebarInfo.id)"
+        >
+          <svgicon v-if="visibleSidebarInfo === sidebarInfo.id"
+            class="sidebar__info__icon-help"
+            name="double-chev"
+          ></svgicon>
+          <svgicon :name="sidebarInfo.icon"></svgicon>
+        </a>
+      </div>
+    </template>
     <div class="sidebar__info">
       <p>Refresh</p>
       <a href="#" @click.prevent="$emit('refresh')">
@@ -88,10 +88,6 @@ export default {
       requried: false,
       default: undefined
     },
-    sidebarType: {
-      type: String,
-      default: undefined     
-    }
   },
   data: () => {
     return {
@@ -140,12 +136,14 @@ export default {
       if (this.visibleSidebarInfo !== info) {
         this.visibleSidebarInfo = info;
         this.$emit("showSidebarInfo", info);
+        // TODO: Use media queries
       } else if (this.width <= 1500) {
         this.visibleSidebarInfo = undefined;
         this.$emit("showSidebarInfo", info);
       }
     },
     getVisibleSidebarInfo() {
+      // TODO: Use media queries
       if (this.width > 1500) {
         if (this.annotationEnabled) {
           this.visibleSidebarInfo = "progress";

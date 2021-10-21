@@ -52,7 +52,7 @@
           </div>
         </div>
       </div>
-      <sidebar-menu sidebar-type="base" @refresh="$fetch" />
+      <sidebar-menu @refresh="$fetch" />
     </div>
   </div>
 </template>
