@@ -92,7 +92,7 @@ def get_dataset(
 
     """
     return Dataset.parse_obj(
-        service.find_by_name(name, user=current_user, team=ds_params.team)
+        service.find_by_name(name, task=None, user=current_user, team=ds_params.team)
     )
 
 
