@@ -26,6 +26,11 @@ class F1Metric(PythonMetric):
         from sklearn.metrics import f1_score
         from sklearn.preprocessing import MultiLabelBinarizer
 
+        if not (
+            "predicted_as" in query_df.columns and "annotated_as" in query_df.columns
+        ):
+            return {}
+
         df = query_df[["predicted_as", "annotated_as"]].dropna()
         df = df[
             df.apply(
