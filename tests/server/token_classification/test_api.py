@@ -25,8 +25,36 @@ from rubrix.server.tasks.token_classification.api import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
-
 from tests.server.test_helpers import client
+
+
+def test_load_as_different_task():
+    dataset = "test_load_as_different_task"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    expected_text = "This is a text with !"
+    records = [
+        TokenClassificationRecord.parse_obj(data)
+        for data in [
+            {
+                "tokens": expected_text.split(" "),
+                "raw_text": expected_text,
+            }
+        ]
+    ]
+    client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=TokenClassificationBulkData(
+            tags={"env": "test", "class": "text classification"},
+            metadata={"config": {"the": "config"}},
+            records=records,
+        ).dict(by_alias=True),
+    )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={},
+    )
+    assert response.status_code == 400
 
 
 def test_search_special_characters():
