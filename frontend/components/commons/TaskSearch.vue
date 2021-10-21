@@ -157,7 +157,7 @@ export default {
   background: $bg;
   ::v-deep .header__filters {
     position: relative;
-    z-index: 0;
+    z-index: 2;
   }
   .fixed-header & {
     animation: header-fixed 0.3s ease-in-out;
