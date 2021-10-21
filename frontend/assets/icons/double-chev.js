@@ -18,10 +18,10 @@
 /* eslint-disable */
 var icon = require('vue-svgicon')
 icon.register({
-  'progress': {
-    width: 25,
-    height: 25,
-    viewBox: '0 0 25 25',
-    data: '<g _fill="#333346" fill-rule="nonzero"><circle pid="0" cx="1.563" cy="12.5" r="1.563"/><circle pid="1" transform="rotate(-60 3.124 7.033)" cx="3.124" cy="7.033" r="1.563"/><circle pid="2" transform="rotate(-30 7.03 3.128)" cx="7.03" cy="3.128" r="1.563"/><circle pid="3" transform="rotate(-60 7.03 21.872)" cx="7.03" cy="21.872" r="1.563"/><circle pid="4" transform="rotate(-30 3.128 17.967)" cx="3.128" cy="17.967" r="1.563"/><path pid="5" d="M12.5 0v3.125a9.375 9.375 0 010 18.75V25C19.404 25 25 19.404 25 12.5S19.404 0 12.5 0z"/></g>'
+  'double-chev': {
+    width: 11,
+    height: 7,
+    viewBox: '0 0 11 7',
+    data: '<g _fill="#686A6D" fill-rule="nonzero"><path pid="0" d="M7 6.767L7.25 7l3.5-3.267L11 3.5l-.25-.233L7.25 0 7 .233 10.5 3.5zM4 6.767L3.75 7 .25 3.733 0 3.5l.25-.233L3.75 0 4 .233.5 3.5z"/></g>'
   }
 })

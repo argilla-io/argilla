@@ -132,7 +132,6 @@ export default {
     top: -1em;
     left: 0;
     right: 0;
-    z-index: 2;
     .fixed-header & {
       border-bottom: 1px solid $line-light-color;
     }
@@ -144,7 +143,6 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
-    z-index: 2;
     .fixed-header & {
       padding: 0.5em 0;
     }

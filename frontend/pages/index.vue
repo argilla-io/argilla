@@ -22,6 +22,7 @@
       <div class="main">
         <ReTopbarBrand>
           <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
+          <user />
         </ReTopbarBrand>
         <div class="container">
           <div class="interactions">
@@ -51,7 +52,7 @@
           </div>
         </div>
       </div>
-      <Sidebar sidebar-type="base" @refresh="$fetch" />
+      <sidebar-menu @refresh="$fetch" />
     </div>
   </div>
 </template>

@@ -198,12 +198,26 @@
     height: 0;
     overflow: hidden;
   }
-  &:hover:after {
-    width: auto;
-    height: auto;
-    opacity: 1;
-    transition: opacity 0.2s ease 1s;
-    z-index: 2;
+  &:before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 0; 
+    height: 0; 
+    opacity: 0;
+  }
+  &:hover{
+    &:after {
+      width: auto;
+      height: auto;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+    &:before {
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
   }
 }
 %hastooltip-colored {

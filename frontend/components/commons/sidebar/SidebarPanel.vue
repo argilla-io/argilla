@@ -53,14 +53,17 @@ export default {
   border-radius: 5px;
   width: 280px;
   position: absolute;
-  right: 3.5em;
+  right: 100px;
   background: white;
   padding: 1em 2em;
-  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
   overflow: auto;
   transition: top 0.2s ease-in-out;
-  z-index: 2;
+  border: 1px solid palette(grey, smooth);
+  box-shadow: 0 1px 9px 0 palette(grey, smooth);
+  border-radius: 3px;
+  z-index: 1;
   @include media(">desktopLarge") {
+    box-shadow: none;
     margin-left: 1em;
     display: block !important;
     right: calc(4em + 45px);
@@ -73,17 +76,6 @@ export default {
     @include font-size(13px);
     &:first-child {
       padding-top: 0;
-    }
-    p {
-      display: flex;
-      align-items: flex-end;
-      @include font-size(18px);
-      margin-top: 0;
-      margin-bottom: 2em;
-      font-weight: 600;
-      svg {
-        margin-right: 1em;
-      }
     }
   }
 }

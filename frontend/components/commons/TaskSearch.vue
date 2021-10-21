@@ -27,31 +27,15 @@
       <section id="header" ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
           <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
+          <user />
         </ReTopbarBrand>
+        <task-sidebar :dataset="dataset" />
         <component :is="currentTaskHeader" :dataset="dataset" />
       </section>
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
         <Results :dataset="dataset" />
-        <SideBarPanel
-          v-if="sidebarVisible || width > 1500"
-          :dataset="dataset"
-          :class="dataset.task"
-        >
-          <div v-show="sidebarInfoType === 'progress'">
-            <component :is="currentTaskProgress" :dataset="dataset" />
-          </div>
-          <div v-show="sidebarInfoType === 'stats'">
-            <component :is="currentTaskStats" :dataset="dataset" />
-          </div>
-        </SideBarPanel>
       </div>
     </div>
-    <sidebar
-      :dataset="dataset"
-      @refresh="onRefresh"
-      @showSidebarInfo="onShowSidebarInfo"
-      @onChangeMode="onChangeMode"
-    />
   </div>
 </template>
 <script>
@@ -66,9 +50,6 @@ export default {
     },
   },
   data: () => ({
-    sidebarInfoType: "progress",
-    sidebarVisible: false,
-    width: window.innerWidth,
     headerHeight: undefined,
   }),
   computed: {
@@ -84,23 +65,12 @@ export default {
     currentTaskHeader() {
       return this.currentTask + "Header";
     },
-    currentTaskProgress() {
-      return this.currentTask + "Progress";
-    },
-    currentTaskStats() {
-      return this.currentTask + "Stats";
-    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight
     }
-  },
-  updated() {
-    window.onresize = () => {
-      this.width = window.innerWidth;
-    };
   },
   mounted() {
     this.setHeaderHeight();
@@ -115,15 +85,7 @@ export default {
   methods: {
     ...mapActions({
       fetchDataset: "entities/datasets/fetchByName",
-      enableAnnotation: "entities/datasets/enableAnnotation",
-      search: "entities/datasets/search",
     }),
-    async onChangeMode() {
-      await this.enableAnnotation({
-        dataset: this.dataset,
-        value: this.annotationEnabled ? false : true,
-      });
-    },
     async setHeaderHeight() {
       const header = this.$refs.header;
       const resize_ob = new ResizeObserver(() => {
@@ -131,12 +93,6 @@ export default {
         this.headerHeightUpdate();
       });
       resize_ob.observe(header);
-    },
-    onRefresh() {
-      this.search({
-        dataset: this.dataset,
-        query: this.dataset.query,
-      });
     },
     headerHeightUpdate() {
       DatasetViewSettings.update({
@@ -146,14 +102,6 @@ export default {
         },
       });
     },
-    onShowSidebarInfo(info) {
-      if (this.sidebarInfoType !== info) {
-        this.sidebarVisible = true;
-      } else {
-        this.sidebarVisible = !this.sidebarVisible;
-      }
-      this.sidebarInfoType = info;
-    },
   },
 };
 </script>
@@ -162,6 +110,9 @@ export default {
   display: flex;
   &__content {
     width: 100%;
+    .fixed-header & {
+      z-index: 3
+    }
   }
 }
 .container {
@@ -186,6 +137,7 @@ export default {
 .grid {
   position: relative;
   margin: 0;
+  z-index: 0;
   .fixed-header & {
     ::v-deep .virtual-scroll {
       padding-top: 3em;
@@ -195,7 +147,6 @@ export default {
 
 .header {
   opacity: 1;
-  z-index: 1;
   position: relative;
   transition: none;
   top: 0;
@@ -204,6 +155,10 @@ export default {
   transform: translateY(0);
   position: fixed;
   background: $bg;
+  z-index: 1;
+  ::v-deep .header__filters {
+    position: relative;
+  }
   .fixed-header & {
     animation: header-fixed 0.3s ease-in-out;
     z-index: 2;

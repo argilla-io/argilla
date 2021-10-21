@@ -48,14 +48,15 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  min-height: 45px;
+  min-height: 56px;
   position: relative;
   background: $primary-color;
   border-bottom: 1px solid $line-light-color;
   color: $lighter-color;
-  @extend %container;
   padding-top: 0;
   padding-bottom: 0;
+  padding-right: 2em;
+  padding-left: 4em;
   a {
     text-decoration: none;
   }

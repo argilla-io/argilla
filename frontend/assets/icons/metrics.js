@@ -19,9 +19,9 @@
 var icon = require('vue-svgicon')
 icon.register({
   'metrics': {
-    width: 17,
-    height: 25,
-    viewBox: '0 0 17 25',
-    data: '<g _fill="#4C4EA3" fill-rule="evenodd"><path pid="0" d="M0 5h5v20H0zM6 0h5v25H6zM12 10h5v15h-5z"/></g>'
+    width: 23,
+    height: 18,
+    viewBox: '0 0 23 18',
+    data: '<path pid="0" d="M19.545.32v17.308h3.214V.321h-3.214zM6.723 2.888v14.741h3.214V2.888H6.723zm6.417 2.567v12.174h3.202V5.454H13.14zM.318 8.009v9.62h3.203v-9.62H.318z" _fill="#333346" fill-rule="nonzero"/>'
   }
 })
