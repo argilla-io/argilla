@@ -45,6 +45,7 @@ class BaseRecord(GenericModel, Generic[T]):
     status: Optional[TaskStatus] = None
     prediction: Optional[T] = None
     annotation: Optional[T] = None
+    metrics: Dict[str, Any] = Field(default_factory=dict)
 
     # this is a small hack to get a json-compatible serialization on cls.dict(), which we use for the httpx calls.
     # they want to build this feature into pydantic, see https://github.com/samuelcolvin/pydantic/issues/1409
