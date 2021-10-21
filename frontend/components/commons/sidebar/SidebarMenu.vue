@@ -102,7 +102,7 @@ export default {
         },
         {
           id: "stats",
-          tooltip: "stats",
+          tooltip: "Stats",
           icon: "metrics"
         }
       ]
