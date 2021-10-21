@@ -131,46 +131,13 @@ class MetricsService:
                 _metric, metric_params, dataset=dataset, query=query
             )
         elif isinstance(_metric, PythonMetric):
-            df = self._load_data(dataset, query)
-            return _metric.apply(df)
+            records = self.__dao__.scan_dataset(
+                dataset,
+                search=RecordSearch(query=query.as_elasticsearch() if query else None),
+            )
+            return _metric.apply(records)
 
         raise WrongInputParamError(f"Cannot process {metric} of type {type(_metric)}")
-
-    def _load_data(
-        self, dataset: BaseDatasetDB, query: Optional[GenericQuery], limit: int = 10000
-    ) -> pd.DataFrame:
-        """
-        Load a set of records from dataset with filtered query.
-
-        For the sake of memory performance, the results will be limited to specified limit
-
-        Parameters
-        ----------
-        dataset:
-            The records dataset
-        query:
-            The filter to apply to dataset
-        limit:
-            A given limit for results
-
-        Returns
-        -------
-            A dataframe with filtered dataset records
-        """
-        data = [
-            record
-            for record in zip(
-                range(limit or 10000),
-                self.__dao__.scan_dataset(
-                    dataset,
-                    search=RecordSearch(
-                        query=query.as_elasticsearch() if query else None
-                    ),
-                ),
-            )
-        ]
-        # TODO: Use another lib than pandas for the sake of memory performance
-        return pd.DataFrame(data)
 
     def _handle_elasticsearch_metric(
         self,

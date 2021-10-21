@@ -1,6 +1,9 @@
-from typing import Any, ClassVar, List
+from functools import lru_cache
+from typing import Any, ClassVar, Dict, Iterable, List
 
 import pandas as pd
+from sklearn.metrics import f1_score
+from sklearn.preprocessing import MultiLabelBinarizer
 
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
@@ -22,23 +25,23 @@ class F1Metric(PythonMetric):
 
     multi_label: bool = False
 
-    def apply(self, query_df: pd.DataFrame) -> Any:
-        from sklearn.metrics import f1_score
-        from sklearn.preprocessing import MultiLabelBinarizer
-
+    def apply(self, records: Iterable[Dict[str, Any]]) -> Any:
+        query_df = pd.DataFrame(
+            filter(
+                lambda r: all(
+                    [
+                        len(r.get(field, [])) > 0
+                        for field in ["predicted_as", "annotated_as"]
+                    ]
+                ),
+                records,
+            )
+        )
         if not (
             "predicted_as" in query_df.columns and "annotated_as" in query_df.columns
         ):
             return {}
-
         df = query_df[["predicted_as", "annotated_as"]].dropna()
-        df = df[
-            df.apply(
-                lambda d: len(d["predicted_as"]) > 0 and len(d["annotated_as"]) > 0,
-                axis=1,
-            )
-        ]
-
         ds_labels = set()
         df.predicted_as.map(lambda labels: [ds_labels.add(l) for l in labels])
         df.annotated_as.map(lambda labels: [ds_labels.add(l) for l in labels])

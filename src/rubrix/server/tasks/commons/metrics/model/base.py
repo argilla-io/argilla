@@ -1,11 +1,8 @@
-from abc import ABCMeta
-from typing import Any, ClassVar, Dict, Generic, List, Optional, TypeVar
+from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, TypeVar
 
-import pandas as pd
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from rubrix.server.commons import es_helpers
 from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons import BaseRecord
 
@@ -25,14 +22,14 @@ class PythonMetric(BaseMetric):
     A metric definition which will be calculated using raw queried data
     """
 
-    def apply(self, query_df: pd.DataFrame) -> Any:
+    def apply(self, records: Iterable[Dict[str, Any]]) -> Any:
         """
         Metric calculation method.
 
         Parameters
         ----------
-        query_df:
-            The filtered records data represented
+        records:
+            The matched records
 
         Returns
         -------
