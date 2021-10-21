@@ -144,7 +144,9 @@ def search_records(
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
 
-    dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
     result = service.search(
         dataset=Dataset.parse_obj(dataset),
         query=query,
@@ -224,7 +226,9 @@ async def stream_data(
 
     """
     query = query or TokenClassificationQuery()
-    dataset = datasets.find_by_name(name, user=current_user, team=teams_query.team)
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
     data_stream = service.read_dataset(dataset=Dataset.parse_obj(dataset), query=query)
 
     return scan_data_response(
