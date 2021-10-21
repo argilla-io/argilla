@@ -195,35 +195,39 @@ class DatasetRecordsDAO:
         """
         search = search or RecordSearch()
         records_index = dataset_records_index(dataset.id)
-        metadata_fields = self._es.get_field_mapping(
-            index=records_index, field_name="metadata.*"
-        )
-        search_aggregations = (
-            {
-                **(search.aggregations or {}),
-                **aggregations.predicted_as(),
-                **aggregations.predicted_by(),
-                **aggregations.annotated_as(),
-                **aggregations.annotated_by(),
-                **aggregations.status(),
-                **aggregations.predicted(),
-                **aggregations.words_cloud(),
-                **aggregations.score(),
-                **aggregations.custom_fields(metadata_fields),
-            }
-            if record_from == 0
-            else None
+
+        aggregation_requests = (
+            {**(search.aggregations or {})} if record_from == 0 else None
         )
 
+        if aggregation_requests is not None and search.include_default_aggregations:
+            aggregation_requests.update(
+                {
+                    **aggregations.predicted_as(),
+                    **aggregations.predicted_by(),
+                    **aggregations.annotated_as(),
+                    **aggregations.annotated_by(),
+                    **aggregations.status(),
+                    **aggregations.predicted(),
+                    **aggregations.words_cloud(),
+                    **aggregations.score(),
+                    **aggregations.custom_fields(
+                        self._es.get_field_mapping(
+                            index=records_index, field_name="metadata.*"
+                        )
+                    ),
+                }
+            )
+
         if record_from > 0:
-            search_aggregations = None
+            aggregation_requests = None
 
         es_query = {
             "size": size,
             "from": record_from,
             "query": search.query or {"match_all": {}},
             "sort": search.sort or [{"_id": {"order": "asc"}}],
-            "aggs": search_aggregations or {},
+            "aggs": aggregation_requests or {},
         }
         results = self._es.search(index=records_index, query=es_query, size=size)
 
@@ -245,6 +249,7 @@ class DatasetRecordsDAO:
             result.words = parsed_aggregations.pop("words", {})
             result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
+
         return result
 
     def scan_dataset(
