@@ -22,6 +22,7 @@ from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
+    WrongTaskError,
 )
 from .dao import DatasetsDAO, create_datasets_dao
 from .model import (
@@ -126,12 +127,14 @@ class DatasetsService:
             task=task,
             owner=owner,
             created_at=date_now,
-            last_updated=date_now
+            last_updated=date_now,
         )
         created_dataset = self.__dao__.create_dataset(db_dataset)
         return Dataset.parse_obj(created_dataset)
 
-    def find_by_name(self, name: str, user: User, team: Optional[str]) -> DatasetDB:
+    def find_by_name(
+        self, name: str, task: Optional[TaskType], user: User, team: Optional[str]
+    ) -> DatasetDB:
         """
         Find a dataset by name
 
@@ -139,6 +142,8 @@ class DatasetsService:
         ----------
         name:
             The dataset name
+        task:
+            Related dataset task
         user:
             The current user
         team:
@@ -157,6 +162,8 @@ class DatasetsService:
             raise EntityNotFoundError(name=name, type=Dataset)
         if found.owner and owner and found.owner != owner:
             raise ForbiddenOperationError()
+        if task and found.task != task:
+            raise WrongTaskError(f"Provided task {task} cannot be applied to dataset")
         return found
 
     def delete(self, name: str, user: User, team: Optional[str]):
@@ -205,7 +212,7 @@ class DatasetsService:
             The updated dataset
         """
 
-        found = self.find_by_name(name, user, team=team)
+        found = self.find_by_name(name, task=None, user=user, team=team)
 
         data.tags = {**found.tags, **data.tags}
         data.metadata = {**found.metadata, **data.metadata}
@@ -280,12 +287,12 @@ class DatasetsService:
 
         """
         try:
-            self.find_by_name(data.name, user=user, team=team)
+            self.find_by_name(data.name, task=None, user=user, team=team)
             raise EntityAlreadyExistsError(name=data.name, type=Dataset)
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 
-        found = self.find_by_name(name, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, team=team)
         date_now = datetime.utcnow()
         current_team = user.check_team(team)
         created_dataset = DatasetDB(
@@ -324,7 +331,7 @@ class DatasetsService:
             The team where dataset belongs to
 
         """
-        found = self.find_by_name(name, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, team=team)
         self.__dao__.close(found)
 
     def open_dataset(self, name: str, user: User, team: Optional[str]):
@@ -342,5 +349,5 @@ class DatasetsService:
             The team where dataset belongs to
 
         """
-        found = self.find_by_name(name, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, team=team)
         self.__dao__.open(found)
