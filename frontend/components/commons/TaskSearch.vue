@@ -29,7 +29,7 @@
           <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
           <user />
         </ReTopbarBrand>
-        <sidebar :dataset="dataset" />
+        <task-sidebar :dataset="dataset" />
         <component :is="currentTaskHeader" :dataset="dataset" />
       </section>
       <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
