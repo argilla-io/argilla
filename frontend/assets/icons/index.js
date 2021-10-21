@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
- /* eslint-disable */
+/* eslint-disable */
+require('./annotate-view')
 require('./arrow-bottom')
 require('./arrow-top')
 require('./back')
@@ -23,6 +24,7 @@ require('./brand-isotipo')
 require('./brand-recognai')
 require('./check')
 require('./check2')
+require('./check3')
 require('./chev-bottom')
 require('./chev-left')
 require('./chev-right')
@@ -35,12 +37,14 @@ require('./cross')
 require('./datasource')
 require('./datasources')
 require('./delete')
+require('./double-chev')
 require('./drop-down')
 require('./drop-up')
 require('./dropbox')
 require('./edit')
 require('./editable')
 require('./error')
+require('./explore-view')
 require('./export')
 require('./external-link')
 require('./external')
