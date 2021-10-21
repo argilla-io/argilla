@@ -27,11 +27,13 @@
       <section id="header" ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
           <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
+          <user />
         </ReTopbarBrand>
-        <component :is="currentTaskHeader" :dataset="dataset" />
-      </section>
-      <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
-        <Results :dataset="dataset" />
+        <sidebar-menu
+          :dataset="dataset"
+          @refresh="onRefresh"
+          @showSidebarInfo="onShowSidebarInfo"
+          @onChangeMode="onChangeMode" />
         <SideBarPanel
           v-if="sidebarVisible || width > 1500"
           :dataset="dataset"
@@ -44,14 +46,12 @@
             <component :is="currentTaskStats" :dataset="dataset" />
           </div>
         </SideBarPanel>
+        <component :is="currentTaskHeader" :dataset="dataset" />
+      </section>
+      <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
+        <Results :dataset="dataset" />
       </div>
     </div>
-    <sidebar
-      :dataset="dataset"
-      @refresh="onRefresh"
-      @showSidebarInfo="onShowSidebarInfo"
-      @onChangeMode="onChangeMode"
-    />
   </div>
 </template>
 <script>
@@ -70,6 +70,7 @@ export default {
     sidebarVisible: false,
     width: window.innerWidth,
     headerHeight: undefined,
+    user: undefined,
   }),
   computed: {
     currentTask() {
@@ -104,6 +105,13 @@ export default {
   },
   mounted() {
     this.setHeaderHeight();
+    if (this.width > 1500) {
+      if (this.annotationEnabled) {
+        this.sidebarInfoType = "progress";
+      } else {
+        this.sidebarInfoType = "stats";
+      }
+    }
   },
   watch: {
     globalHeaderHeight() {
@@ -118,10 +126,16 @@ export default {
       enableAnnotation: "entities/datasets/enableAnnotation",
       search: "entities/datasets/search",
     }),
-    async onChangeMode() {
+    async onChangeMode(value) {
+      let enable;
+      if (value === 'annotate') {
+        enable = true
+      } else if (value === 'explore') {
+        enable = false
+      }
       await this.enableAnnotation({
         dataset: this.dataset,
-        value: this.annotationEnabled ? false : true,
+        value: enable,
       });
     },
     async setHeaderHeight() {
@@ -162,6 +176,9 @@ export default {
   display: flex;
   &__content {
     width: 100%;
+    .fixed-header & {
+      z-index: 3
+    }
   }
 }
 .container {
@@ -204,6 +221,10 @@ export default {
   transform: translateY(0);
   position: fixed;
   background: $bg;
+  ::v-deep .header__filters {
+    position: relative;
+    z-index: 0;
+  }
   .fixed-header & {
     animation: header-fixed 0.3s ease-in-out;
     z-index: 2;

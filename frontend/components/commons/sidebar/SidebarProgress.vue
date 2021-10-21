@@ -137,7 +137,7 @@ label {
   }
 }
 .scroll {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 500px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
