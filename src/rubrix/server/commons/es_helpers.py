@@ -348,7 +348,7 @@ class aggregations:
             "meta": {"kind": "terms"},
             "terms": {
                 "field": field_name,
-                "size": size,
+                "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
                 "order": {"_count": "desc"},
             },
         }
@@ -361,7 +361,7 @@ class aggregations:
             },
             "histogram": {
                 "field": field_name,
-                "interval": interval,
+                "interval": interval or 0.1,
             },
         }
 
