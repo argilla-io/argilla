@@ -167,9 +167,9 @@ $color: #333346;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
   min-height: 100vh;
-  z-index: 2;
   min-width: 90px;
   border-left: 1px solid palette(grey, smooth);
+  z-index: 2;
   .fixed-header & {
     top: 0;
   }
@@ -197,6 +197,8 @@ $color: #333346;
     }
   }
   &__info {
+    position: relative;
+    z-index: 1;
     margin-bottom: 5em;
     &__icon-help {
       left: 5px;

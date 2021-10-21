@@ -54,15 +54,13 @@ export default {
       this.width = window.innerWidth;
     };
   },
-  mounted() {
-    // TODO: Use media queries
-    if (this.width > 1500) {
-      if (this.annotationEnabled) {
-        this.sidebarInfoType = "progress";
-      } else {
-        this.sidebarInfoType = "stats";
-      }
+  watch: {
+    annotationEnabled() {
+      this.getSidebarType();
     }
+  },
+  mounted() {
+    this.getSidebarType();
   },
   methods: {
     ...mapActions({
@@ -74,6 +72,16 @@ export default {
         dataset: this.dataset,
         query: this.dataset.query,
       });
+    },
+    getSidebarType() {
+      // TODO: Use media queries
+      if (this.width > 1500) {
+        if (this.annotationEnabled) {
+          this.sidebarInfoType = "progress";
+        } else {
+          this.sidebarInfoType = "stats";
+        }
+      }
     },
     async onEnableAnnotationView(value) {
       await this.enableAnnotation({

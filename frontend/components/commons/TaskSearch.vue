@@ -137,6 +137,7 @@ export default {
 .grid {
   position: relative;
   margin: 0;
+  z-index: 0;
   .fixed-header & {
     ::v-deep .virtual-scroll {
       padding-top: 3em;
@@ -146,7 +147,6 @@ export default {
 
 .header {
   opacity: 1;
-  z-index: 1;
   position: relative;
   transition: none;
   top: 0;
@@ -155,9 +155,9 @@ export default {
   transform: translateY(0);
   position: fixed;
   background: $bg;
+  z-index: 1;
   ::v-deep .header__filters {
     position: relative;
-    z-index: 1;
   }
   .fixed-header & {
     animation: header-fixed 0.3s ease-in-out;
