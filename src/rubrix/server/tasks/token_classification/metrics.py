@@ -29,7 +29,12 @@ class SentenceLength(ElasticsearchMetric):
     length_field: str
 
     def aggregation_request(self, interval: int) -> Dict[str, Any]:
-        return aggregations.histogram_aggregation(self.length_field, interval=interval)
+        return aggregations.histogram_aggregation(
+            self.length_field, interval=interval or 1
+        )
+
+
+_DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 
 class EntityTags(NestedPathElasticsearchMetric):
@@ -44,8 +49,12 @@ class EntityTags(NestedPathElasticsearchMetric):
 
     tags_field: str
 
-    def inner_aggregation(self, size: int = 10) -> Dict[str, Any]:
-        return {"tags": aggregations.terms_aggregation(self.tags_field, size=size)}
+    def inner_aggregation(self, size: int) -> Dict[str, Any]:
+        return {
+            "tags": aggregations.terms_aggregation(
+                self.tags_field, size=size or _DEFAULT_MAX_ENTITY_BUCKET
+            )
+        }
 
 
 class EntityDensity(NestedPathElasticsearchMetric):
@@ -53,10 +62,10 @@ class EntityDensity(NestedPathElasticsearchMetric):
 
     density_field: str
 
-    def inner_aggregation(self, interval: float = 0.1) -> Dict[str, Any]:
+    def inner_aggregation(self, interval: float) -> Dict[str, Any]:
         return {
             "density": aggregations.histogram_aggregation(
-                field_name=self.density_field, interval=interval
+                field_name=self.density_field, interval=interval or 0.01
             )
         }
 
@@ -66,10 +75,10 @@ class MentionLength(NestedPathElasticsearchMetric):
 
     length_field: str
 
-    def inner_aggregation(self, interval: int = 1) -> Dict[str, Any]:
+    def inner_aggregation(self, interval: int) -> Dict[str, Any]:
         return {
             "mention_length": aggregations.histogram_aggregation(
-                self.length_field, interval=interval
+                self.length_field, interval=interval or 1
             )
         }
 
@@ -95,9 +104,10 @@ class MentionConsistency(NestedPathElasticsearchMetric):
 
     def inner_aggregation(
         self,
-        size: int = 20,
-        entity_size: int = 10,
+        size: int,
+        entity_size: int = _DEFAULT_MAX_ENTITY_BUCKET,
     ) -> Dict[str, Any]:
+        size = size or 50
         return {
             "consistency": {
                 **aggregations.terms_aggregation(self.mention_field, size=size),
@@ -109,7 +119,7 @@ class MentionConsistency(NestedPathElasticsearchMetric):
                     "sortby_entities_count": {
                         "bucket_sort": {
                             "sort": [{"count": {"order": "desc"}}],
-                            "size": entity_size,
+                            "size": size,
                         }
                     },
                 },
@@ -129,7 +139,7 @@ class MentionConsistency(NestedPathElasticsearchMetric):
             for mention, mention_aggs in aggregation_result.items()
         ]
         result.sort(key=lambda m: len(m["entities"]), reverse=True)
-        return { "metions": result }
+        return {"mentions": result}
 
 
 class TokenClassificationMetrics(BaseTaskMetrics):
