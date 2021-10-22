@@ -7,6 +7,9 @@ from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons import BaseRecord
 
 
+GenericRecord = TypeVar("GenericRecord", bound=BaseRecord)
+
+
 class BaseMetric(BaseModel):
     """
     Base model for rubrix dataset metrics summaries
@@ -17,12 +20,12 @@ class BaseMetric(BaseModel):
     description: str = None
 
 
-class PythonMetric(BaseMetric):
+class PythonMetric(BaseMetric, Generic[GenericRecord]):
     """
     A metric definition which will be calculated using raw queried data
     """
 
-    def apply(self, records: Iterable[Dict[str, Any]]) -> Any:
+    def apply(self, records: Iterable[GenericRecord]) -> Dict[str, Any]:
         """
         Metric calculation method.
 
@@ -49,7 +52,7 @@ class ElasticsearchMetric(BaseMetric):
         """
         raise NotImplementedError()
 
-    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Any:
+    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse the es aggregation result. Override this method
         for result customization
@@ -78,7 +81,7 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
 
     nested_path: str
 
-    def inner_aggregation(self, *args, **kwargs):
+    def inner_aggregation(self, *args, **kwargs) -> Dict[str, Any]:
         """The specific aggregation definition"""
         raise NotImplementedError()
 
@@ -88,9 +91,6 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
             nested_path=self.nested_path,
             inner_aggregation=self.inner_aggregation(*args, **kwargs),
         )
-
-
-GenericRecord = TypeVar("GenericRecord", bound=BaseRecord)
 
 
 class BaseTaskMetrics(GenericModel, Generic[GenericRecord]):
