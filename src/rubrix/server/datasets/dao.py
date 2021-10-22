@@ -26,7 +26,6 @@ from ..commons.es_settings import (
     DATASETS_INDEX_TEMPLATE,
     DATASETS_RECORDS_INDEX_NAME,
 )
-from ..commons.settings import settings
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -113,7 +112,7 @@ class DatasetsDAO:
 
         self._es.create_index(
             index=dataset_records_index(dataset.id),
-            force_recreate=not settings.disable_es_index_template_creation,
+            force_recreate=True,
         )
         return dataset
 

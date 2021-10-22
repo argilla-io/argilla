@@ -26,6 +26,7 @@ from rubrix.server.commons.es_helpers import (
 )
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
+from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.dao import (
     DATASETS_RECORDS_INDEX_NAME,
     dataset_records_index,
@@ -118,7 +119,7 @@ class DatasetRecordsDAO:
         self._es.create_index_template(
             name=DATASETS_RECORDS_INDEX_NAME,
             template=template,
-            force_recreate=True,
+            force_recreate=not settings.disable_es_index_template_creation,
         )
 
     def add_records(
