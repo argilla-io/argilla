@@ -1,7 +1,5 @@
-from functools import lru_cache
 from typing import Any, ClassVar, Dict, Iterable, List
 
-import pandas as pd
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
@@ -26,43 +24,41 @@ class F1Metric(PythonMetric):
     multi_label: bool = False
 
     def apply(self, records: Iterable[Dict[str, Any]]) -> Any:
-        query_df = pd.DataFrame(
-            filter(
-                lambda r: all(
-                    [
-                        len(r.get(field, [])) > 0
-                        for field in ["predicted_as", "annotated_as"]
-                    ]
-                ),
-                records,
-            )
+        filtered_records = filter(
+            lambda r: all(
+                [
+                    len(r.get(field, [])) > 0
+                    for field in ["predicted_as", "annotated_as"]
+                ]
+            ),
+            records,
         )
-        if not (
-            "predicted_as" in query_df.columns and "annotated_as" in query_df.columns
-        ):
-            return {}
-        df = query_df[["predicted_as", "annotated_as"]].dropna()
+
+        filtered_records = list(filtered_records)
         ds_labels = set()
-        df.predicted_as.map(lambda labels: [ds_labels.add(l) for l in labels])
-        df.annotated_as.map(lambda labels: [ds_labels.add(l) for l in labels])
+        # TODO: This must be precalculated with using a global dataset metric
+        for record in filtered_records:
+            for label in record["predicted_as"] + record["annotated_as"]:
+                ds_labels.add(label)
+
+        if not len(ds_labels):
+            return {}
 
         labels_mapping = {label: i for i, label in enumerate(ds_labels)}
-        if not labels_mapping:
-            return {}
-
         y_true, y_pred = ([], [])
-        for array, column in [(y_true, "annotated_as"), (y_pred, "predicted_as")]:
-            array.extend(
-                df[column]
-                .map(
-                    lambda x: labels_mapping[x[0]]
-                    if not self.multi_label
-                    else [labels_mapping[l] for l in x]
-                )
-                .values
-            )
+        for record in filtered_records:
+            annotations = record["annotated_as"]
+            predictions = record["predicted_as"]
+
+            if not self.multi_label:
+                annotations = annotations[:1]
+                predictions = predictions[:1]
+
+            y_true.extend([labels_mapping[label] for label in annotations])
+            y_pred.extend([labels_mapping[label] for label in predictions])
+
         if self.multi_label:
-            mlb = MultiLabelBinarizer(list(labels_mapping.values()))
+            mlb = MultiLabelBinarizer(classes=list(labels_mapping.values()))
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
 
@@ -82,7 +78,7 @@ class F1Metric(PythonMetric):
             )
         }
 
-        return {"micro": micro, "macro": macro, **per_label}
+        return {"micro": micro, "macro": macro,  "per_label": per_label}
 
 
 class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
