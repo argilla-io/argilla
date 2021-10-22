@@ -135,7 +135,8 @@ class MetricsService:
                 dataset,
                 search=RecordSearch(query=query.as_elasticsearch() if query else None),
             )
-            return _metric.apply(records)
+            record_class = TaskFactory.get_task_record(dataset.task)
+            return _metric.apply(map(record_class.parse_obj, records))
 
         raise WrongInputParamError(f"Cannot process {metric} of type {type(_metric)}")
 

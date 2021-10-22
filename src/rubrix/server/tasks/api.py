@@ -19,30 +19,41 @@ from rubrix.server.tasks.token_classification.metrics import TokenClassification
 from .commons import TaskType
 from .commons.metrics.api import configure_metrics_endpoints
 from .commons.task_factory import TaskFactory
-from .text2text import Text2TextQuery, api as text2text
+from .text2text import Text2TextQuery, Text2TextRecord, api as text2text
 from .text2text.metrics import Text2TextMetrics
-from .text_classification import TextClassificationQuery, api as text_classification
+from .text_classification import (
+    TextClassificationQuery,
+    TextClassificationRecord,
+    api as text_classification,
+)
 from .text_classification.metrics import TextClassificationMetrics
-from .token_classification import TokenClassificationQuery, api as token_classification
+from .token_classification import (
+    TokenClassificationQuery,
+    TokenClassificationRecord,
+    api as token_classification,
+)
 
 router = APIRouter()
 
 TaskFactory.register_task(
     task_type=TaskType.token_classification,
     query_request=TokenClassificationQuery,
+    record_class=TokenClassificationRecord,
     metrics=TokenClassificationMetrics,
 )
 
 TaskFactory.register_task(
     task_type=TaskType.text_classification,
     query_request=TextClassificationQuery,
+    record_class=TextClassificationRecord,
     metrics=TextClassificationMetrics,
 )
 
 TaskFactory.register_task(
     task_type=TaskType.text2text,
     query_request=Text2TextQuery,
-    metrics=Text2TextMetrics
+    record_class=Text2TextRecord,
+    metrics=Text2TextMetrics,
 )
 
 
