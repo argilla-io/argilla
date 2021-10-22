@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
@@ -31,7 +32,6 @@ from rubrix.server.tasks.commons import (
     TaskStatus,
     TaskType,
 )
-from rubrix._constants import MAX_KEYWORD_LENGTH
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -171,11 +171,11 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     @property
     def predicted_as(self) -> List[str]:
-        return [ent.label for ent in self._predicted_entities()]
+        return [ent.label for ent in self.predicted_entities()]
 
     @property
     def annotated_as(self) -> List[str]:
-        return [ent.label for ent in self._entities()]
+        return [ent.label for ent in self.annotated_entities()]
 
     @property
     def scores(self) -> List[float]:
@@ -189,40 +189,41 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
+            **super().extended_fields(),
             # See ../service/service.py
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
                 {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self._predicted_mentions()
+                for mention, entity in self.predicted_mentions()
             ],
             MENTIONS_ES_FIELD_NAME: [
                 {"mention": mention, "entity": entity.label}
-                for mention, entity in self._mentions()
+                for mention, entity in self.annotated_mentions()
             ],
         }
 
-    def _predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
+    def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
-                self._predicted_entities()
+                self.predicted_entities()
             ).items()
         ]
 
-    def _mentions(self) -> List[Tuple[str, EntitySpan]]:
+    def annotated_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
-                self._entities()
+                self.annotated_entities()
             ).items()
         ]
 
-    def _entities(self) -> Set[EntitySpan]:
+    def annotated_entities(self) -> Set[EntitySpan]:
         """Shortcut for real annotated entities, if provided"""
         if self.annotation is None:
             return set()
         return set(self.annotation.entities)
 
-    def _predicted_entities(self) -> Set[EntitySpan]:
+    def predicted_entities(self) -> Set[EntitySpan]:
         """Predicted entities"""
         if self.prediction is None:
             return set()

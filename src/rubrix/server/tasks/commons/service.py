@@ -8,11 +8,7 @@ class TaskService:
 
     _INSTANCE = None
 
-    def __init__(
-        self,
-        datasets: DatasetsService,
-        dao: DatasetRecordsDAO,
-    ):
+    def __init__(self, datasets: DatasetsService, dao: DatasetRecordsDAO):
         self.__datasets__ = datasets
         self.__dao__ = dao
 

@@ -15,25 +15,51 @@
 
 from fastapi import APIRouter
 
+from rubrix.server.tasks.token_classification.metrics import TokenClassificationMetrics
 from .commons import TaskType
+from .commons.metrics.api import configure_metrics_endpoints
 from .commons.task_factory import TaskFactory
-from .text2text import Text2TextQuery, api as text2text
-from .text_classification import TextClassificationQuery, api as text_classification
-from .token_classification import TokenClassificationQuery, api as token_classification
+from .text2text import Text2TextQuery, Text2TextRecord, api as text2text
+from .text2text.metrics import Text2TextMetrics
+from .text_classification import (
+    TextClassificationQuery,
+    TextClassificationRecord,
+    api as text_classification,
+)
+from .text_classification.metrics import TextClassificationMetrics
+from .token_classification import (
+    TokenClassificationQuery,
+    TokenClassificationRecord,
+    api as token_classification,
+)
 
 router = APIRouter()
 
-
 TaskFactory.register_task(
-    task_type=TaskType.token_classification, query_request=TokenClassificationQuery
+    task_type=TaskType.token_classification,
+    query_request=TokenClassificationQuery,
+    record_class=TokenClassificationRecord,
+    metrics=TokenClassificationMetrics,
 )
 
 TaskFactory.register_task(
-    task_type=TaskType.text_classification, query_request=TextClassificationQuery
+    task_type=TaskType.text_classification,
+    query_request=TextClassificationQuery,
+    record_class=TextClassificationRecord,
+    metrics=TextClassificationMetrics,
 )
 
-TaskFactory.register_task(task_type=TaskType.text2text, query_request=Text2TextQuery)
+TaskFactory.register_task(
+    task_type=TaskType.text2text,
+    query_request=Text2TextQuery,
+    record_class=Text2TextRecord,
+    metrics=Text2TextMetrics,
+)
 
 
 for task_api in [text_classification, token_classification, text2text]:
+    cfg = TaskFactory.get_task_by_task_type(task_api.TASK_TYPE)
+    if cfg:
+        configure_metrics_endpoints(task_api.router, cfg)
+
     router.include_router(task_api.router)

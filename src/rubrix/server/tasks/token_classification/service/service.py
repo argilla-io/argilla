@@ -33,6 +33,7 @@ from rubrix.server.tasks.commons.dao import (
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
+from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
@@ -87,14 +88,17 @@ class TokenClassificationService:
     def __init__(
         self,
         dao: DatasetRecordsDAO,
+        metrics: MetricsService,
     ):
         self.__dao__ = dao
+        self.__metrics__ = metrics
 
     def add_records(
         self,
         dataset: Dataset,
         records: List[CreationTokenClassificationRecord],
     ):
+        self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
             dataset=dataset, records=records, record_class=TokenClassificationRecord
         )
@@ -215,6 +219,7 @@ _instance = None
 
 def token_classification_service(
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+    metrics: MetricsService = Depends(MetricsService.get_instance),
 ) -> TokenClassificationService:
     """
     Creates a dataset record service instance
@@ -232,5 +237,8 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(dao=dao)
+        _instance = TokenClassificationService(
+            dao=dao,
+            metrics=metrics
+        )
     return _instance

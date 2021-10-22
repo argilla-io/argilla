@@ -172,6 +172,7 @@ class BaseRecord(GenericModel, Generic[Annotation]):
     status: Optional[TaskStatus] = None
     prediction: Optional[Annotation] = None
     annotation: Optional[Annotation] = None
+    metrics: Dict[str, Any] = Field(default_factory=dict)
 
     @validator("id", always=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -331,8 +332,6 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
         The selected records to return
     aggregations:
         Requested aggregations
-    metrics:
-        Requested metrics
     """
 
     total: int = 0
