@@ -64,7 +64,7 @@ class DatasetsDAO:
         self._es.create_index_template(
             name=DATASETS_INDEX_NAME,
             template=DATASETS_INDEX_TEMPLATE,
-            force_recreate=not settings.disable_es_index_template_creation,
+            force_recreate=True,
         )
         self._es.create_index(DATASETS_INDEX_NAME)
 
@@ -113,7 +113,7 @@ class DatasetsDAO:
 
         self._es.create_index(
             index=dataset_records_index(dataset.id),
-            force_recreate=True,
+            force_recreate=not settings.disable_es_index_template_creation,
         )
         return dataset
 
