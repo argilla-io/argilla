@@ -128,9 +128,17 @@ export default {
     padding-left: 4em;
     padding-right: calc(4em + 45px);
     transition: padding 0s ease-in-out 0.1s;
-    @include media(">desktopLarge") {
+    .--metrics & {
+      @include media(">desktop") {
+        width: 100%;
+        padding-right: calc(294px + 100px);
+        transition: padding 0.1s ease-in-out;
+      }
+    }
+    @include media(">desktop") {
+      transition: padding 0.1s ease-in-out;
       width: 100%;
-      padding-right: calc(294px + 45px + 4em);
+      padding-right: 100px;
     }
   }
   &__li {

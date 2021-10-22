@@ -21,6 +21,7 @@
       'app',
       currentTask,
       annotationEnabled ? '--annotation' : '--exploration',
+      areMetricsVisible ? '--metrics' : null
     ]"
   >
     <div class="app__content">
@@ -61,6 +62,9 @@ export default {
         { link: { path: "/" }, name: "Datasets" },
         { link: this.$route.fullPath, name: this.dataset.name },
       ];
+    },
+    areMetricsVisible() {
+      return this.dataset.viewSettings.visibleMetrics;
     },
     currentTaskHeader() {
       return this.currentTask + "Header";

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="header__filters">>
+  <div class="header__filters">
     <header-title title="Token Classification" v-if="dataset.results.records" :dataset="dataset" />
     <filters-area :dataset="dataset" />
     <entities-header :dataset="dataset" />

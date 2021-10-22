@@ -45,6 +45,7 @@ export default class DatasetViewSettings extends Model {
       annotationEnabled: this.boolean(false),
       loading: this.boolean(false),
       headerHeight: this.number(140),
+      visibleMetrics: this.boolean(false),
     };
   }
 }

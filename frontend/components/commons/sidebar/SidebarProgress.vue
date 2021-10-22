@@ -103,6 +103,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 label {
@@ -137,7 +138,7 @@ label {
   }
 }
 .scroll {
-  max-height: calc(100vh - 500px);
+  max-height: calc(100vh - 480px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
@@ -188,7 +189,13 @@ label {
     @include font-size(15px);
     align-items: center;
     color: $font-secondary-dark;
+    font-weight: 600;
+    margin-bottom: 1.5em;
+    &__text {
+      margin: 0;
+    }
     &__percent {
+      margin-top: 0;
       margin-right: 0;
       margin-left: auto;
     }
@@ -199,6 +206,7 @@ label {
     @include font-size(18px);
     span {
       @include font-size(40px);
+      font-weight: 700;
     }
   }
 }

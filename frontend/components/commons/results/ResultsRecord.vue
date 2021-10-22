@@ -146,7 +146,7 @@ export default {
   &__item {
     position: relative;
     background: $lighter-color;
-    border-radius: 3px;
+    border-radius: 1px;
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
