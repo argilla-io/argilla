@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, Iterable, List
+from typing import Any, ClassVar, Iterable, List
 
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -23,22 +23,13 @@ class F1Metric(PythonMetric):
 
     multi_label: bool = False
 
-    def apply(self, records: Iterable[Dict[str, Any]]) -> Any:
-        filtered_records = filter(
-            lambda r: all(
-                [
-                    len(r.get(field, [])) > 0
-                    for field in ["predicted_as", "annotated_as"]
-                ]
-            ),
-            records,
-        )
-
+    def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
+        filtered_records = filter(lambda r: r.predicted is not None, records)
         filtered_records = list(filtered_records)
         ds_labels = set()
         # TODO: This must be precalculated with using a global dataset metric
         for record in filtered_records:
-            for label in record["predicted_as"] + record["annotated_as"]:
+            for label in record.predicted_as + record.annotated_as:
                 ds_labels.add(label)
 
         if not len(ds_labels):
@@ -47,8 +38,8 @@ class F1Metric(PythonMetric):
         labels_mapping = {label: i for i, label in enumerate(ds_labels)}
         y_true, y_pred = ([], [])
         for record in filtered_records:
-            annotations = record["annotated_as"]
-            predictions = record["predicted_as"]
+            annotations = record.predicted_as
+            predictions = record.annotated_as
 
             if not self.multi_label:
                 annotations = annotations[:1]
@@ -78,7 +69,7 @@ class F1Metric(PythonMetric):
             )
         }
 
-        return {"micro": micro, "macro": macro,  "per_label": per_label}
+        return {"micro": micro, "macro": macro, "per_label": per_label}
 
 
 class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):

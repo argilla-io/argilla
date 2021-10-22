@@ -116,7 +116,7 @@ class MentionConsistency(NestedPathElasticsearchMetric):
             }
         }
 
-    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Any:
+    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         """Simplifies the aggregation result sorting by worst mention consistency"""
         result = [
             {
@@ -129,7 +129,7 @@ class MentionConsistency(NestedPathElasticsearchMetric):
             for mention, mention_aggs in aggregation_result.items()
         ]
         result.sort(key=lambda m: len(m["entities"]), reverse=True)
-        return result
+        return { "metions": result }
 
 
 class TokenClassificationMetrics(BaseTaskMetrics):
