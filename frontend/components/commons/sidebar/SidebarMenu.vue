@@ -50,7 +50,7 @@
         <a
           v-for="sidebarInfo in sidebarInfoOptions"
           :key="sidebarInfo.id"
-          class="sidebar__info__button"
+          :class="['sidebar__info__button', visibleSidebarInfo === sidebarInfo.id ? 'active' : null]"
           href="#"
           :data-title="sidebarInfo.tooltip"
           @click.prevent="showSidebarInfo(sidebarInfo.id)"
@@ -118,7 +118,6 @@ export default {
   },
   watch: {
     annotationEnabled(newValue) {
-      this.getVisibleSidebarInfo();
       this.annotationMode = newValue;
     }
   },
@@ -128,30 +127,17 @@ export default {
     };
   },
   mounted() {
-    this.getVisibleSidebarInfo();
     this.annotationMode = this.annotationEnabled;
   },
   methods: {
     showSidebarInfo(info) {
+      this.$emit("showSidebarInfo", info);
       if (this.visibleSidebarInfo !== info) {
         this.visibleSidebarInfo = info;
-        this.$emit("showSidebarInfo", info);
-        // TODO: Use media queries
-      } else if (this.width <= 1500) {
+      } else {
         this.visibleSidebarInfo = undefined;
-        this.$emit("showSidebarInfo", info);
       }
     },
-    getVisibleSidebarInfo() {
-      // TODO: Use media queries
-      if (this.width > 1500) {
-        if (this.annotationEnabled) {
-          this.visibleSidebarInfo = "progress";
-        } else {
-          this.visibleSidebarInfo = "stats";
-        }
-      }
-    }
   }
 };
 </script>
@@ -192,9 +178,6 @@ $color: #333346;
     height: 24px;
     margin-bottom: 1.5em;
     fill: $color;
-    &.inactive {
-      opacity: 0.15;
-    }
   }
   &__info {
     position: relative;
@@ -212,7 +195,7 @@ $color: #333346;
     }
   }
 }
-a[data-title] {
+a[data-title]:not(.active) {
   @extend %hastooltip;
   &:after {
     padding: 0.5em 1em;
@@ -228,7 +211,7 @@ a[data-title] {
   }
   &:before {
     right: calc(100% + 3px);
-    top: 0.5em;
+    top: 0.65em;
     border-top: 7px solid transparent;
     border-bottom: 7px solid transparent;
     border-left: 7px solid $color;

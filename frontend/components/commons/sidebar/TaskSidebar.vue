@@ -7,7 +7,7 @@
       @onEnableAnnotationView="onEnableAnnotationView" />
       <!-- TODO: Use media queries -->
     <sidebar-panel
-      v-if="sidebarVisible || width > 1500"
+      v-if="sidebarVisible"
       :dataset="dataset"
       :class="dataset.task"
     >
@@ -23,6 +23,7 @@
  
 <script>
 import { mapActions } from "vuex";
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     dataset: {
@@ -54,14 +55,6 @@ export default {
       this.width = window.innerWidth;
     };
   },
-  watch: {
-    annotationEnabled() {
-      this.getSidebarType();
-    }
-  },
-  mounted() {
-    this.getSidebarType();
-  },
   methods: {
     ...mapActions({
       enableAnnotation: "entities/datasets/enableAnnotation",
@@ -72,16 +65,6 @@ export default {
         dataset: this.dataset,
         query: this.dataset.query,
       });
-    },
-    getSidebarType() {
-      // TODO: Use media queries
-      if (this.width > 1500) {
-        if (this.annotationEnabled) {
-          this.sidebarInfoType = "progress";
-        } else {
-          this.sidebarInfoType = "stats";
-        }
-      }
     },
     async onEnableAnnotationView(value) {
       await this.enableAnnotation({
@@ -96,6 +79,12 @@ export default {
         this.sidebarVisible = !this.sidebarVisible;
       }
       this.sidebarInfoType = info;
+      DatasetViewSettings.update({
+        where: this.dataset.name,
+        data: {
+          visibleMetrics: this.sidebarVisible,
+        },
+      });
     },
   },
 };

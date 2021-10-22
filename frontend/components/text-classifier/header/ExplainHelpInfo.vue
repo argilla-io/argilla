@@ -70,10 +70,16 @@ export default {
   margin-bottom: 1em;
   padding-left: 4em;
   padding-right: calc(4em + 45px);
-
-  @include media(">desktopLarge") {
+  .--metrics & {
+    @include media(">desktop") {
+      transition: padding 0.1s ease-in-out;
+      padding-right: calc(294px + 100px);
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
     width: 100%;
-    padding-right: calc(294px + 45px + 4em);
+    padding-right: 100px;
   }
   .fixed-header & {
     display: none;
