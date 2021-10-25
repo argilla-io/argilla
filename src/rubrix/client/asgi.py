@@ -54,7 +54,7 @@ def text_classification_mapper(inputs, outputs):
         prediction=[
             (label, score)
             for label, score in zip(
-                outputs.get("labels", []), outputs.get("probabilities", [])
+                outputs.get("labels", []), outputs.get("scores", [])
             )
         ],
         event_timestamp=datetime.datetime.now(),
