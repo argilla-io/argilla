@@ -22,10 +22,7 @@ import pandas
 import pytest
 
 import rubrix
-from rubrix import (
-    Text2TextRecord,
-    TextClassificationRecord,
-)
+from rubrix import Text2TextRecord, TextClassificationRecord
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client
@@ -121,7 +118,10 @@ def test_log_passing_empty_records_list(monkeypatch):
 @pytest.mark.parametrize(
     "status,match",
     [
-        (401,"Unauthorized error: invalid credentials. The API answered with a 401 code"),
+        (
+            401,
+            "Unauthorized error: invalid credentials. The API answered with a 401 code",
+        ),
         (403, "Forbidden error: you have not been authorised to access this dataset. "),
         (404, "Not found error. The API answered with a"),
         (422, "Unprocessable entity error: Something is wrong in your records. "),
@@ -139,7 +139,9 @@ def test_delete_with_errors(monkeypatch, status, match):
         return inner
 
     with pytest.raises(Exception, match=match):
-        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
+        monkeypatch.setattr(
+            httpx, "delete", send_mock_response_with_http_status(status)
+        )
         rubrix.delete("dataset")
 
 
@@ -308,6 +310,26 @@ def test_load_with_ids_list(monkeypatch):
     create_some_data_for_text_classification(dataset, n=expected_data)
     ds = rubrix.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
+
+
+@pytest.mark.parametrize("return_pandas", [True, False])
+def test_load_return_pandas(monkeypatch, return_pandas):
+    mocking_client(monkeypatch)
+    dataset = "test_sorted_load"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 3
+    create_some_data_for_text_classification(dataset, n=expected_data)
+
+    if return_pandas:
+        records = rubrix.load(name=dataset)
+        assert isinstance(records, pandas.DataFrame)
+        assert list(records.id) == [0, 1, 2, 3]
+    else:
+        records = rubrix.load(name=dataset, return_pandas=False)
+        assert isinstance(records[0], TextClassificationRecord)
+        assert [record.id for record in records] == [0, 1, 2, 3]
 
 
 def test_token_classification_spans(monkeypatch):
