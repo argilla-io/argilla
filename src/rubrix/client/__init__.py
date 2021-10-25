@@ -35,36 +35,30 @@ from rubrix.client.models import (
 )
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import Response
-from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
-from rubrix.client.sdk.text2text.api import (
-    bulk as text2text_bulk,
-    data as text2text_data,
-)
+from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
+from rubrix.client.sdk.text2text.api import data as text2text_data
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
     Text2TextQuery,
 )
-from rubrix.client.sdk.text_classification.api import (
-    bulk as text_classification_bulk,
-    data as text_classification_data,
-)
+from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
+from rubrix.client.sdk.text_classification.api import data as text_classification_data
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.api import (
-    bulk as token_classification_bulk,
-    data as token_classification_data,
-)
+from rubrix.client.sdk.token_classification.api import bulk as token_classification_bulk
+from rubrix.client.sdk.token_classification.api import data as token_classification_data
 from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
     TokenClassificationQuery,
 )
+from rubrix.client.sdk.users.api import whoami
 
 
 class RubrixClient:
@@ -215,7 +209,8 @@ class RubrixClient:
         name: str,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-    ) -> pandas.DataFrame:
+        return_pandas: bool = True,
+    ) -> Union[pandas.DataFrame, List[Record]]:
         """Load dataset data to a pandas DataFrame.
 
         Args:
@@ -225,6 +220,8 @@ class RubrixClient:
                 If provided, load dataset records with given ids.
             limit:
                 The number of records to retrieve.
+            return_pandas:
+                If True, return a pandas DataFrame. If False, return a list of records.
 
         Returns:
             The dataset as a pandas Dataframe.
@@ -266,7 +263,14 @@ class RubrixClient:
         )
 
         _check_response_errors(response)
-        return pandas.DataFrame(map(lambda r: r.to_client().dict(), response.parsed))
+
+        records_sorted_by_id = sorted(
+            [record.to_client() for record in response.parsed], key=lambda x: x.id
+        )
+
+        if return_pandas:
+            return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
+        return records_sorted_by_id
 
     def copy(self, source: str, target: str):
         """Makes a copy of the `source` dataset and saves it as `target`"""

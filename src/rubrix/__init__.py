@@ -166,7 +166,8 @@ def load(
     name: str,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
-) -> pandas.DataFrame:
+    return_pandas: bool = True,
+) -> Union[pandas.DataFrame, List[Record]]:
     """Load dataset data to a pandas DataFrame.
 
     Args:
@@ -176,6 +177,8 @@ def load(
             If provided, load dataset records with given ids.
         limit:
             The number of records to retrieve.
+        return_pandas:
+            If True, return a pandas DataFrame. If False, return a list of records.
 
     Returns:
         The dataset as a pandas Dataframe.
@@ -184,7 +187,9 @@ def load(
         >>> import rubrix as rb
         >>> dataframe = rb.load(name="example-dataset")
     """
-    return _client_instance().load(name=name, limit=limit, ids=ids)
+    return _client_instance().load(
+        name=name, limit=limit, ids=ids, return_pandas=return_pandas
+    )
 
 
 def delete(name: str) -> None:
