@@ -80,16 +80,7 @@ export default {
     }),
     async onSelectLabels(labels, selectedRecords) {
       const records = selectedRecords.map((record) => {
-        const appliedLabels = record.annotation
-          ? [...record.annotation.labels]
-          : [];
-
-        const filterAppliedLabels = labels.filter(
-          (l) => appliedLabels.map((label) => label.class).indexOf(l) === -1
-        );
-
-        let newLabels = this.isMultiLabelRecord ? filterAppliedLabels : labels;
-        newLabels = newLabels.map((label) => ({
+        let newLabels = labels.map((label) => ({
           class: label,
           score: 1.0,
         }));
@@ -97,9 +88,7 @@ export default {
           ...record,
           annotation: {
             agent: this.$auth.user,
-            labels: this.isMultiLabelRecord
-              ? [...appliedLabels, ...newLabels]
-              : newLabels,
+            labels: newLabels,
           },
         };
       });
