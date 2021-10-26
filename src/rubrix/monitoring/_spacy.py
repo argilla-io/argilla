@@ -1,5 +1,4 @@
-import asyncio
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
 import rubrix as rb
 from rubrix import TokenClassificationRecord
@@ -12,6 +11,7 @@ try:
     from spacy.tokens import Doc
 except ModuleNotFoundError:
     Language = None
+    Doc = None
 
 
 def doc2token_classification(
@@ -63,7 +63,7 @@ class _SpacyNERMonitor(BaseMonitor):
         for r in results:
             metadata = {}
             if as_tuples:
-                doc, metadata =r   # context
+                doc, metadata = r  # context
             else:
                 doc = r
             self.run_separate(self.__log_to_rubrix__(doc, metadata))

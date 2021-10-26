@@ -29,7 +29,8 @@ import pkg_resources
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
 from rubrix.client.models import *
-from rubrix.client.monitoring.model_monitoring import monitoring
+from rubrix.monitoring.model_monitoring import monitoring
+
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
 except pkg_resources.DistributionNotFound:
