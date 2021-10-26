@@ -1,17 +1,21 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TypeVar
 
 import rubrix as rb
 from rubrix import TokenClassificationRecord
 
 # Conditional modules
-from rubrix.client.monitoring.base import BaseMonitor
+from rubrix.monitoring.base import BaseMonitor
+
+class _MissingType:
+    pass
+
 
 try:
     from spacy import Language
     from spacy.tokens import Doc
 except ModuleNotFoundError:
-    Language = None
-    Doc = None
+    Language = _MissingType
+    Doc = _MissingType
 
 
 def doc2token_classification(
@@ -53,12 +57,12 @@ class _SpacyNERMonitor(BaseMonitor):
             record,
             name=self.dataset,
             tags={k: v for k, v in self.__wrapped__.meta.items() if isinstance(v, str)},
-            metadata=self.model.meta,
+            metadata=self.__model__.meta,
         )
 
     def pipe(self, *args, **kwargs):
         as_tuples = kwargs.get("as_tuples")
-        results = self.model.pipe(*args, **kwargs)
+        results = self.__model__.pipe(*args, **kwargs)
 
         for r in results:
             metadata = {}
