@@ -172,21 +172,11 @@
     transform: none !important;
   }
 }
-%tooltip-colored {
-  padding: 0.2em 0.5em;
-  color: $primary-color;
-  background: palette(grey, bg);
-  font-family: $ff;
-  @include font-size(13px);
-  position: absolute;
-  margin: auto;
-  transform: translateX(50%);
-  max-width: 266px;
-  overflow-wrap: break-word;
-  pointer-events: none;
-  z-index: 2;
-  white-space: nowrap;
-  border-radius: 2px;
+%activetooltip {
+  &:after {
+    content: attr(data-title);
+    @extend %tooltip;
+  }  
 }
 %hastooltip {
   &:after {
@@ -218,23 +208,5 @@
       opacity: 1;
       transition: opacity 0.2s ease;
     }
-  }
-}
-%hastooltip-colored {
-  &:after {
-    content: attr(data-title);
-    @extend %tooltip-colored;
-    opacity: 0;
-    z-index: -1;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-  }
-  &:hover:after {
-    width: auto;
-    height: auto;
-    opacity: 1;
-    transition: opacity 0.2s ease 0.2s;
-    z-index: 2;
   }
 }

@@ -16,18 +16,30 @@
   -->
 
 <template>
-  <ul class="breadcrumbs">
-    <li>
-      <NuxtLink
-        v-for="breadcrumb in breadcrumbs"
-        :key="breadcrumb.name"
-        class="breadcrumbs__item"
-        :to="breadcrumb.link"
-      >
-        {{ breadcrumb.name }}
-      </NuxtLink>
-    </li>
-  </ul>
+  <div class="breadcrumbs">
+    <ul>
+      <li>
+        <NuxtLink
+          v-for="breadcrumb in breadcrumbs"
+          :key="breadcrumb.name"
+          class="breadcrumbs__item"
+          :to="breadcrumb.link"
+        >
+          {{ breadcrumb.name }}
+        </NuxtLink>
+      </li>
+    </ul>
+    <re-action-tooltip tooltip="Copied">
+      <a v-if="copyButton" class="breadcrumbs__copy" href="#" @click.prevent="copyDatasetName(breadcrumbs[breadcrumbs.length - 1].name)">
+        <svgicon
+          color="#ffffff"
+          name="copy"
+          width="12"
+          height="13"
+        />
+      </a>
+    </re-action-tooltip>
+  </div>
 </template>
 
 <script>
@@ -36,7 +48,22 @@ export default {
     breadcrumbs: {
       type: Array,
     },
+    copyButton: {
+      type: Boolean,
+      default: false,
+    }
   },
+  methods: {
+    copyDatasetName(name) {
+      const myTemporaryInputElement = document.createElement("input");
+      myTemporaryInputElement.type = "text";
+      myTemporaryInputElement.className = "hidden-input";
+      myTemporaryInputElement.value = name;
+      document.body.appendChild(myTemporaryInputElement);
+      myTemporaryInputElement.select();
+      document.execCommand("Copy");
+    }
+  }
 };
 </script>
 
@@ -44,10 +71,14 @@ export default {
 .breadcrumbs {
   margin-right: auto;
   margin-left: 1em;
-  display: inline-block;
-  list-style: none;
-  padding-left: 0;
-  font-weight: normal;
+  display: flex;
+  align-items: center;
+  ul {
+    display: inline-block;
+    padding-left: 0;
+    font-weight: normal;
+    list-style: none;    
+  }
   &__item {
     margin: auto 0.5em auto auto;
     color: $lighter-color;

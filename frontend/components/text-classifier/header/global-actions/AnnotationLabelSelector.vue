@@ -84,7 +84,7 @@
             class="button-primary--small"
             @click="selected(selectedOptions)"
           >
-            Apply
+            Annotate
           </ReButton>
         </div>
       </template>
@@ -177,11 +177,16 @@ export default {
     }
   }
   &__buttons {
-    margin-top: 1em;
-    text-align: right;
+    margin-top: 2em;
     display: flex;
     & > * {
+      display: block;
+      width: 100%;
       margin-right: 0.5em;
+      min-height: 38px;
+      &:last-child {
+        margin-right: 0;
+      }
     }
   }
   ::v-deep .dropdown__content {

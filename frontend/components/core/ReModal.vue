@@ -114,7 +114,7 @@ export default {
   transition: opacity 0.3s ease;
   pointer-events: none;
   cursor: default;
-  background: rgba(0, 0, 0, 0.1);
+  // background: rgba(0, 0, 0, 0.1);
 }
 
 .modal-wrapper {
@@ -144,7 +144,7 @@ export default {
 }
 .modal-primary {
   box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-  border-radius: 0;
+  border-radius: 3px;
   max-width: 520px;
   ::v-deep .modal__title {
     font-weight: normal;
@@ -162,9 +162,8 @@ export default {
   }
 }
 .modal-secondary {
-  border: 1px solid $secondary-color;
-  border-radius: 0;
-  box-shadow: none;
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
   max-width: 400px;
   ::v-deep .modal__title {
     color: $secondary-color;

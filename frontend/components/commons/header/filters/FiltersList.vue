@@ -212,7 +212,11 @@ export default {
         .filter((f) => f).length;
     },
     selectGroup(group) {
-      this.initialVisibleGroup = group;
+      if (this.initialVisibleGroup === group) {
+        this.initialVisibleGroup = undefined;
+      } else {
+        this.initialVisibleGroup = group;
+      }
     },
     onApply(filter, values) {
       if (filter.group === "Metadata") {
@@ -264,15 +268,15 @@ $number-size: 18px;
         max-width: 410px;
       }
       &--large {
-        width: 910px;
+        // width: 910px;
         max-height: 80vh;
         overflow: auto;
         & > span {
-          display: inline-block;
-          width: 50%;
-          &:nth-child(2n + 1) {
-            padding-right: 1em;
-          }
+          // display: inline-block;
+          // width: 50%;
+          // &:nth-child(2n + 1) {
+          //   padding-right: 1em;
+          // }
         }
       }
     }

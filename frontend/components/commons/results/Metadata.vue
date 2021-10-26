@@ -31,26 +31,24 @@
       <p class="metadata__title">{{ title }}</p>
     </div>
     <div class="metadata__container">
-      <div v-for="(value, key) in sortedMetadataItems" :key="key">
-        <div
-          :class="[
+      <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
+        <div :class="[
             'metadata__blocks',
-            { '--selected': isFilterSelected(key, value) },
-            { '--disabled': isFilterApplied(key, value) },
-          ]"
-        >
-          <div class="metadata__block">
-            {{ key }}
-            <div class="metadata__block__item">
-              {{ value }}
-            </div>
-          </div>
-          <ReButton
-            class="metadata__block__button button-clear"
-            @click="addFilter(key, value)"
-          >
-            Filter
-          </ReButton>
+            { '--disabled': isApplied(item) },
+          ]">
+            <ReCheckbox
+              :id="item[0]"
+              v-model="selectedMetadata"
+              class="re-checkbox--dark"
+              :value="item[0]"
+            >
+              <div class="metadata__key">
+                {{ item[0] }}
+                <div class="metadata__value">
+                  {{ item[1] }}
+                </div>
+              </div>
+            </ReCheckbox>
         </div>
       </div>
     </div>
@@ -62,11 +60,10 @@
         Cancel
       </ReButton>
       <ReButton
-        :disabled="disableButton"
         class="button-primary--small"
         @click="applySelectedFilters()"
       >
-        Apply
+        Filter
       </ReButton>
     </div>
   </div>
@@ -87,19 +84,17 @@ export default {
       type: Object,
       required: true,
     },
+    appliedFilters: {
+      type: Object,
+    },
     title: {
       type: [Object, String],
       required: true,
     },
-    appliedFilters: {
-      type: Object,
-      default: () => ({}),
-    },
   },
   data: () => ({
-    selectedKeys: [],
-    metadata: {},
-    disableButton: true,
+    selectedMetadata: [],
+
   }),
   computed: {
     sortedMetadataItems() {
@@ -107,35 +102,34 @@ export default {
         .sort()
         .reduce((r, k) => ((r[k] = this.metadataItems[k]), r), {});
     },
+    formatSortedMetadataItems() {
+      return Object.entries(this.sortedMetadataItems);
+    },
+  },
+  mounted() {
+    if (this.appliedFilters) {
+      Object.keys(this.appliedFilters).map((key) => {
+        if (this.appliedFilters[key].includes(this.metadataItems[key])) {
+          this.selectedMetadata.push(key);
+        };
+      });
+    };
   },
   methods: {
-    addFilter(key, value) {
-      let meta = { ...this.metadata };
-      meta[key] ? (meta[key] = undefined) : (meta[key] = value);
-      this.metadata = Object.fromEntries(
-        Object.entries(meta).filter(([, value]) => value)
-      );
-      this.disableButton = false;
-    },
     applySelectedFilters() {
+      const filters = {};
+      this.selectedMetadata.map((key) => {
+        filters[key] = this.metadataItems[key];
+      })
       this.$emit(
         "metafilterApply",
-        Object.fromEntries(
-          Object.entries(this.metadata).map(([k, v]) => [
-            k,
-            (this.appliedFilters[k] || []).concat([v]),
-          ])
-        )
+        filters,
       );
-      this.disableButton = true;
     },
-    isFilterSelected(key, value) {
-      return this.metadata[key] || [].indexOf(value) !== -1 ? true : false;
-    },
-    isFilterApplied(key, value) {
-      return this.appliedFilters && this.appliedFilters[key]
-        ? this.appliedFilters[key].includes(value)
-        : false;
+    isApplied(item) {
+      if (this.appliedFilters) {
+        return Object.keys(this.appliedFilters).includes(item[0]);
+      };
     },
   },
 };
@@ -150,7 +144,7 @@ export default {
   &__title {
     color: $font-dark-color;
     font-weight: 600;
-    margin-top: 0;
+    margin-top: 2em;
     margin-right: 2em;
     white-space: pre-line;
     display: none;
@@ -166,15 +160,20 @@ export default {
   }
   &__blocks {
     display: flex;
-    border-bottom: 1px solid $line-smooth-color;
     align-items: center;
-    &.--selected {
-      color: $secondary-color;
-    }
     &.--disabled {
-      color: $secondary-color;
-      opacity: 0.3;
+      opacity: 0.5;
       pointer-events: none;
+      cursor: default;
+    }
+    .re-checkbox--dark {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      margin-right: 0;
+    }
+    ::v-deep .checkbox-label {
+      height: auto !important;
     }
   }
   &__block {
@@ -190,20 +189,16 @@ export default {
       white-space: pre-line;
       color: palette(grey, medium);
       font-weight: normal;
-      &:first-child {
-        margin-bottom: 0.5em;
-        .--selected & {
-          color: $secondary-color;
-        }
-      }
+      line-height: 1em;
     }
-    &__button {
-      .--selected & {
-        color: $secondary-color !important;
-      }
-      margin: auto 0 auto auto;
-      overflow: visible;
-    }
+  }
+  &__key {
+    display: block;
+    margin-bottom: 0.5em;
+  }
+  &__value {
+    display: block;
+    margin-bottom: 0.5em;
   }
   &__buttons {
     display: block;
