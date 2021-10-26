@@ -77,8 +77,8 @@ export default {
       },
     ],
     actions: [
-      { name: "delete", icon: "delete", tooltip: "Delete" },
-      { name: "copy", icon: "copy", tooltip: "Copy link" },
+      { name: "delete", icon: "delete", title: "Delete dataset" },
+      { name: "copy", icon: "copy", title: "Copy url to clipboard", tooltip: "Copied" },
     ],
     externalLinks: [
       {
@@ -112,6 +112,9 @@ export default {
         case "copy":
           this.copyUrl(rowId);
           break;
+        case "copy-name":
+          this.copyName(rowId);
+          break;
         case "confirm-delete":
           this.deleteDataset(rowId);
           break;
@@ -125,13 +128,18 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
+    copyName(id) {
+      this.copy(id);
+    },
     copyUrl(id) {
       const route = `${window.origin}${this.$route.path}${id}`;
-      const textToCopy = route;
+      this.copy(route);
+    },
+    copy(id) {
       const myTemporaryInputElement = document.createElement("input");
       myTemporaryInputElement.type = "text";
       myTemporaryInputElement.className = "hidden-input";
-      myTemporaryInputElement.value = textToCopy;
+      myTemporaryInputElement.value = id;
       document.body.appendChild(myTemporaryInputElement);
       myTemporaryInputElement.select();
       document.execCommand("Copy");

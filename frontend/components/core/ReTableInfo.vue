@@ -21,19 +21,6 @@
       <div class="table-info__header">
         <slot name="columns">
           <div class="table-info__item">
-            <div v-if="globalActions">
-              <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
-              <ReButton
-                :disabled="!selectedItems.length"
-                class="
-                  button-tertiary--outline button-tertiary--small
-                  table-info__header__button
-                "
-                @click="$emit('confirm-delete-multiple')"
-              >
-                Delete
-              </ReButton>
-            </div>
             <div
               v-for="(column, key) in columns"
               :key="key"
@@ -79,11 +66,27 @@
                 class="table-info__item__col"
               >
                 <span :class="column.class">
-                  <span
-                    v-if="column.type === 'link'"
-                    @click="onActionClicked(item.kind, item.name)"
-                    >{{ itemValue(item, column) }}</span
-                  >
+                  <span v-if="column.type === 'link'">
+                    <a href="#"
+                      @click.prevent="onActionClicked(item.kind, item.name)"
+                      >{{ itemValue(item, column) }}
+                    </a>
+                    <re-action-tooltip tooltip="Copied">
+                      <ReButton
+                        title="Copy to clipboard"
+                        @click.prevent="onActionClicked('copy-name', item.name)"
+                        class="table-info__actions__button button-icon"
+                      >
+                        <svgicon
+                          name="copy"
+                          width="12"
+                          height="13"
+                        />
+                      </ReButton>
+                    </re-action-tooltip>
+                    
+                  </span>
+
                   <ReDate
                     v-else-if="column.type === 'date'"
                     class="table-info__meta"
@@ -106,25 +109,17 @@
                 </span>
               </span>
               <div v-if="visibleActions" class="table-info__actions">
-                <ReButton
-                  v-for="action in filterActions"
-                  :key="action.index"
-                  :data-title="action.tooltip"
-                  class="
-                    --hasTooltip-colored
-                    table-info__actions__button
-                    button-icon
-                  "
-                  :class="action.class"
-                  @click="onActionClicked(action.name, item.name)"
-                >
-                  <svgicon
-                    v-if="action.icon !== undefined"
-                    :name="action.icon"
-                    width="26"
-                    height="20"
-                  />
-                </ReButton>
+                <re-action-tooltip v-for="action in filterActions" :key="action.index" :tooltip="action.tooltip">
+                  <ReButton :title="action.title" @click="onActionClicked(action.name, item.name)" class="table-info__actions__button button-icon">
+                    <svgicon
+                      v-if="action.icon !== undefined"
+                      :name="action.icon"
+                      width="12"
+                      height="13"
+                    />
+                  </ReButton>
+                </re-action-tooltip>
+
               </div>
               <ReModal
                 :modal-custom="true"
@@ -498,7 +493,7 @@ export default {
     right: 2em;
     &__button {
       position: relative;
-      margin-left: 1em;
+      margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
         fill: $primary-color;
@@ -511,10 +506,25 @@ export default {
   }
   &__title {
     display: block;
-    color: $primary-color;
     @include font-size(15px);
     cursor: pointer;
     word-break: break-word;
+    display: flex;
+    align-items: center;
+    .button-icon {
+      margin-left: 5px;
+      padding: 0;
+      margin-bottom: 2px;
+      .svg-icon {
+        fill: $font-medium-color;
+      }
+    }
+    a {
+      text-decoration: none;
+      &:hover {
+        color: $primary-color;
+      }
+    }
   }
   &__meta {
     font-weight: lighter;
@@ -589,8 +599,8 @@ export default {
   margin-right: 2em;
 }
 
-.--hasTooltip-colored {
-  @extend %hastooltip-colored;
+.--show-tooltip {
+  @extend %activetooltip;
   @extend %tooltip--left;
 }
 </style>

@@ -24,12 +24,12 @@
   >
     <ReCheckbox v-model="allSelected" class="list__item__checkbox"></ReCheckbox>
     <slot name="first" :selectedRecords="selectedRecords" />
-    <ReButton class="validate-discard-actions__button" @click="onValidate"
-      >Validate</ReButton
-    >
-    <ReButton class="validate-discard-actions__button" @click="onDiscard"
-      >Discard</ReButton
-    >
+      <ReButton class="validate-discard-actions__button" @click="onValidate"
+        >Validate</ReButton
+      >
+      <ReButton class="validate-discard-actions__button" @click="onDiscard"
+        >Discard</ReButton
+      >
     <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
@@ -121,10 +121,16 @@ export default {
       border-width: 1px;
       color: $font-secondary;
       font-weight: bold;
+      min-width: 170px;
+    }
+    ::v-deep .dropdown__content {
+      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      border: none;
     }
   }
   &__button {
-    border-radius: 0;
+    border-radius: 3px;
     height: 33px;
     border: none;
     min-width: 80px;

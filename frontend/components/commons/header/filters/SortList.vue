@@ -39,7 +39,7 @@
         @click="cancel"
         >Cancel</re-button
       >
-      <re-button class="button-primary--small" @click="apply">Filter</re-button>
+      <re-button class="button-primary--small" @click="apply">Sort</re-button>
     </div>
   </div>
 </template>

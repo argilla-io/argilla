@@ -27,7 +27,7 @@
     <div class="app__content">
       <section id="header" ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
-          <ReBreadcrumbs :breadcrumbs="breadcrumbs" />
+          <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copyButton="true" />
           <user />
         </ReTopbarBrand>
         <task-sidebar :dataset="dataset" />
@@ -40,6 +40,7 @@
   </div>
 </template>
 <script>
+import "assets/icons/copy";
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
@@ -142,6 +143,9 @@ export default {
   position: relative;
   margin: 0;
   z-index: 0;
+  .--fixed & {
+    z-index: 2;
+  }
   .fixed-header & {
     ::v-deep .virtual-scroll {
       padding-top: 3em;
