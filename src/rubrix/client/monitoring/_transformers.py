@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 
 
 class _TextClassificationMonitor(BaseMonitor):
-    """Configures monitoring over hugging-face text classification pipelines"""
+    """Configures monitoring over Hugging Face text classification pipelines"""
 
     async def __log_to_rubrix__(
         self,

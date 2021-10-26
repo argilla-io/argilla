@@ -25,9 +25,9 @@ def doc2token_classification(
     doc:
         The spacy doc
     agent:
-        Agent to use for prediction. Could be the model path or model lang + model version
+        Agent to use for the prediction_agent field. Could be the model path or model lang + model version
     metadata:
-        Extra meta data linked to record in rubrix
+        Extra metadata linked to Rubrix record
 
     """
     entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
@@ -41,7 +41,7 @@ def doc2token_classification(
 
 
 class _SpacyNERMonitor(BaseMonitor):
-    """An Spacy Language wrapper for nlp NER monitoring in rubrix"""
+    """A spaCy Language wrapper for NLP NER monitoring in Rubrix"""
 
     async def __log_to_rubrix__(
         self, doc: Doc, metadata: Optional[Dict[str, Any]] = None
