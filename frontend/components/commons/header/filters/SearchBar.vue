@@ -21,7 +21,7 @@
       :class="['searchbar__container', { active: query }]"
     >
       <ReInputContainer class="searchbar">
-        <svgicon v-if="!query" name="search" width="20" height="40" />
+        <svgicon v-if="!query && !dataset.query.text" name="search" width="20" height="40" />
         <svgicon
           v-else
           class="searchbar__button"
