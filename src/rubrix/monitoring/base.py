@@ -3,7 +3,7 @@ import random
 
 import wrapt
 
-from rubrix.client.monitoring.helpers import start_loop_in_thread
+from rubrix.monitoring.helpers import start_loop_in_thread
 
 _LOGGING_LOOP = None
 
@@ -42,7 +42,7 @@ class BaseMonitor(wrapt.ObjectProxy):
         self.sample_rate = sample_rate
 
     @property
-    def model(self):
+    def __model__(self):
         """Return the monitored task model"""
         return self.__wrapped__
 

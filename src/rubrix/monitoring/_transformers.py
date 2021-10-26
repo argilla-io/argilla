@@ -3,13 +3,18 @@ from typing import Any, Dict, List, Tuple
 import rubrix
 
 from rubrix import TextClassificationRecord
-from rubrix.client.monitoring.base import BaseMonitor
+from rubrix.monitoring.base import BaseMonitor
+
+
+class _MissingType:
+    pass
+
 
 try:
 
     from transformers import Pipeline, TextClassificationPipeline
 except ModuleNotFoundError:
-    pass
+    TextClassificationPipeline = _MissingType
 
 
 class _TextClassificationMonitor(BaseMonitor):
@@ -21,11 +26,13 @@ class _TextClassificationMonitor(BaseMonitor):
     ):
         """Register a list of tuples including inputs and its predictions for text classification task"""
         records = []
+        config = self.__model__.model.config
+        agent = config.name_or_path
+
         for input_, metadata, predictions in data:
             if isinstance(predictions, dict):
                 predictions = [predictions]
 
-            agent = self.model.model.__class__.__name__
             record = TextClassificationRecord(
                 inputs=input_,
                 prediction=[
@@ -37,11 +44,22 @@ class _TextClassificationMonitor(BaseMonitor):
             )
             records.append(record)
 
-        rubrix.log(records, name=self.dataset, tags={"task": self.model.task})
+        rubrix.log(
+            records,
+            name=self.dataset,
+            tags={
+                "name": config.name_or_path,
+                "transformers_version": config.transformers_version
+                or config.to_dict().get("transformers_version"),
+                "model_type": config.model_type,
+                "task": self.__model__.task,
+            },
+            metadata=config.to_dict(),
+        )
 
     def __call__(self, inputs, *args, **kwargs):
         metadata = kwargs.pop("metadata", None)
-        batch_predictions = self.model(inputs, *args, **kwargs)
+        batch_predictions = self.__model__(inputs, *args, **kwargs)
         try:
             if not isinstance(inputs, list):
                 inputs = [inputs]
