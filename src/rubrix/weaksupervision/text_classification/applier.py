@@ -76,7 +76,7 @@ class Applier:
         for n, record in tqdm(
             enumerate(records),
             total=len(records),
-            disable=None if progress_bar else True,
+            disable=not progress_bar,
         ):
             for m, rule in enumerate(self._rules):
                 weak_label = rule(record)
