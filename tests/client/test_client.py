@@ -312,6 +312,19 @@ def test_load_with_ids_list(monkeypatch):
     assert len(ds) == 2
 
 
+def test_load_with_query(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_load_with_query"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 4
+    create_some_data_for_text_classification(dataset, n=expected_data)
+    ds = rubrix.load(name=dataset, query="id:1")
+    assert len(ds) == 1
+    assert ds.id.iloc[0] == 1
+
+
 @pytest.mark.parametrize("as_pandas", [True, False])
 def test_load_as_pandas(monkeypatch, as_pandas):
     mocking_client(monkeypatch)
