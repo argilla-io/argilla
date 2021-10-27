@@ -148,3 +148,6 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    class Config:
+        allow_population_by_field_name = True
