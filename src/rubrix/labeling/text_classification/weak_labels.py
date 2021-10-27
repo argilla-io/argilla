@@ -164,21 +164,27 @@ class WeakLabels:
     def matrix(self) -> np.ndarray:
         return self._matrix
 
-    @property
     def train_matrix(self) -> np.ndarray:
-        raise NotImplementedError
+        """Returns part of the weak label `self.matrix` that has NO corresponding annotation."""
+        return self._matrix[self._annotation_array == self._label2int["None"]]
 
-    @property
     def test_matrix(self) -> np.ndarray:
-        raise NotImplementedError
+        """Returns part of the weak label `self.matrix` that has A corresponding annotation."""
+        return self._matrix[self._annotation_array != self._label2int["None"]]
 
-    def annotation(self, pad: bool = False) -> np.ndarray:
-        if pad:
+    def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
+        """Returns the annotation labels as an array of integers.
+
+        Args:
+            exclude_missing_annotations: If True, excludes missing annotations,
+                that is all entries with the `self.label2int["None"]` int.
+        """
+        if not exclude_missing_annotations:
             return self._annotation_array
         return self._annotation_array[self._annotation_array != self._label2int["None"]]
 
     def summary(self, annotation: np.ndarray) -> pd.DataFrame:
-        """Return a summary of the rules given a weak label matrix.
+        """Returns a summary of the rules given a weak label matrix.
 
         - coverage:
         - overlaps:
