@@ -112,7 +112,7 @@
                   v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
                   class="button-primary"
                   @click="annotate"
-                  >Validate</re-button
+                  >Save</re-button
                 >
               </div>
             </div>
@@ -132,7 +132,7 @@
                   v-if="newSentence && editable && editionMode"
                   class="button-primary"
                   @click="annotate"
-                  >Validate</re-button
+                  >Save</re-button
                 >
               </div>
             </div>

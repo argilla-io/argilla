@@ -38,7 +38,7 @@
       <re-button v-if="record.status !== 'Validated'"
         class="Validated"
         @click="onValidate(record)"
-        >Validate"</re-button>  
+        >Save"</re-button>  
     </div>
   </div>
 </template>
