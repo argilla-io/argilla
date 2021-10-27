@@ -15,6 +15,7 @@
 from typing import Callable, List, Optional
 
 import httpx
+import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
@@ -22,8 +23,8 @@ from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.weaksupervision.text_classification.applier import Applier
-from rubrix.weaksupervision.text_classification.rule import Rule
+from rubrix.labeling.text_classification.rule import Rule
+from rubrix.labeling.text_classification.weak_labels import WeakLabels
 from tests.server.test_helpers import client
 
 
@@ -72,14 +73,24 @@ def rules() -> List[Callable]:
 
 
 @pytest.mark.parametrize(
-    "label2int, expected",
+    "label2int, expected_label2int, expected_matrix",
     [
-        (None, ["negative", "positive", "None"]),
-        ({"negative": 0, "positive": 1, "None": -1}, [0, 1, -1]),
-        ({"negative": 0, "positive": 1}, None),
+        (
+            None,
+            {"None": -1, "negative": 0, "positive": 1},
+            np.array([[0, -1, -1], [-1, 1, 1]], dtype=np.short),
+        ),
+        ({}, None, None),
+        (
+            {"None": -100, "negative": 50, "positive": 100},
+            {"None": -100, "negative": 50, "positive": 100},
+            np.array([[50, -100, -100], [-100, 100, 100]], dtype=np.short),
+        ),
     ],
 )
-def test_apply(monkeypatch, log_dataset, rules, label2int, expected):
+def test_apply(
+    monkeypatch, log_dataset, rules, label2int, expected_label2int, expected_matrix
+):
     def mock_apply(self, *args, **kwargs):
         self._matching_ids = [2]
 
@@ -88,21 +99,15 @@ def test_apply(monkeypatch, log_dataset, rules, label2int, expected):
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "stream", client.stream)
 
-    applier = Applier(rules=rules)
-
-    if expected is None:
+    if label2int == {}:
         with pytest.raises(KeyError):
-            applier(log_dataset, label2int)
+            WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
         return
 
-    weak_label_matrix = applier(log_dataset, label2int)
+    weak_labels = WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
 
-    assert weak_label_matrix.shape == (2, 3)
-    assert weak_label_matrix[0, 0] == expected[0]
-    assert weak_label_matrix[1, 1] == weak_label_matrix[1, 2] == expected[1]
-    assert (
-        weak_label_matrix[0, 1]
-        == weak_label_matrix[0, 2]
-        == weak_label_matrix[1, 0]
-        == expected[2]
-    )
+    # check that all `Rule.apply`s are called
+    assert weak_labels._rules[-1]._matching_ids == [2]
+
+    assert weak_labels.label2int == expected_label2int
+    assert (weak_labels.matrix == expected_matrix).all()

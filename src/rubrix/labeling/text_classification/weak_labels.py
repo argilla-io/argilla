@@ -81,7 +81,7 @@ class WeakLabels:
         weak_label_matrix = np.empty(
             (len(self._records), len(self._rules)), dtype=np.short
         )
-        default_label2int = {}
+        default_label2int = {"None": -1}
 
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
@@ -104,7 +104,8 @@ class WeakLabels:
                     try:
                         weak_label = default_label2int[weak_label]
                     except KeyError:
-                        default_label2int[weak_label] = len(default_label2int)
+                        # we already have "None" -> we need to subtract 1
+                        default_label2int[weak_label] = len(default_label2int) - 1
                         weak_label = default_label2int[weak_label]
 
                 weak_label_matrix[n, m] = weak_label
@@ -114,6 +115,10 @@ class WeakLabels:
     @property
     def records(self) -> List[TextClassificationRecord]:
         return self._records
+
+    @property
+    def label2int(self) -> Dict[str, int]:
+        return self._label2int
 
     @property
     def matrix(self) -> np.ndarray:
