@@ -133,3 +133,29 @@ def test_apply(
     assert weak_labels.label2int == expected_label2int
     assert (weak_labels.matrix == expected_matrix).all()
     assert (weak_labels._annotation_array == expected_annotation_array).all()
+
+
+def test_train_test_annotation(monkeypatch):
+    def mock_load(*args, **kwargs):
+        return [TextClassificationRecord(inputs="test")]
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    def mock_apply(self, *args, **kwargs):
+        weak_label_matrix = np.array([[0, 1], [-1, 0]], dtype=np.short)
+        annotation_array = np.array([-1, 0], dtype=np.short)
+        label2int = {"None": -1, "negative": 0, "positive": 1}
+        return weak_label_matrix, annotation_array, label2int
+
+    monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+    weak_labels = WeakLabels(rules=[], dataset="mock")
+
+    assert (weak_labels.train_matrix() == np.array([[0, 1]], dtype=np.short)).all()
+    assert (weak_labels.test_matrix() == np.array([[-1, 0]], dtype=np.short)).all()
+    assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
+    assert (
+        weak_labels.annotation(pad=True) == np.array([[-1, 0]], dtype=np.short)
+    ).all()
