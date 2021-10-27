@@ -7,7 +7,7 @@ from ._transformers import TextClassificationPipeline, classifier_monitor
 _LOGGER = logging.getLogger(__name__)
 
 
-def monitoring(task_model: Any, dataset: str, sample_rate: float = 0.3):
+def monitor(task_model: Any, dataset: str, sample_rate: float = 0.3):
     if isinstance(task_model, Language):
         return ner_monitor(task_model, dataset=dataset, sample_rate=sample_rate)
     if isinstance(task_model, TextClassificationPipeline):
