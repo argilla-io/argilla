@@ -29,14 +29,6 @@
           </p>
           <div v-if="!modalCustom" />
           <slot />
-          <ReButton
-            v-if="modalCloseButton"
-            class="modal-close"
-            @click="$emit('close-modal')"
-          >
-            <span class="modal-close__text">close</span>
-            <svgicon name="cross" width="10" height="auto" />
-          </ReButton>
         </div>
       </div>
     </transition>
@@ -135,7 +127,7 @@ export default {
   margin: 0px auto;
   padding: 1.5em;
   background-color: $lighter-color;
-  border-radius: 4px;
+  border-radius: 3px;
   box-shadow: 0px 2px 4px 3px rgba(0, 0, 0, 0.27);
   transition: $swift-ease-in-out;
   position: relative;
@@ -153,35 +145,25 @@ export default {
   ::v-deep .modal__text {
     margin-bottom: 2em;
   }
-  .modal-close {
-    color: $primary-color;
-    font-weight: 600;
-    &__text {
-      margin-right: 10px;
-    }
-  }
 }
 .modal-secondary {
   box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
   border-radius: 3px;
   max-width: 400px;
-  ::v-deep .modal__title {
-    color: $secondary-color;
-  }
   ::v-deep .modal__text {
     margin-bottom: 2em;
-  }
-  .modal-close {
-    color: $secondary-color;
-    font-weight: 600;
-    &__text {
-      margin-right: 10px;
-    }
   }
 }
 
 ::v-deep .modal-buttons {
-  text-align: right;
+  display: flex;
+  .re-button {
+    width: 100%;
+    margin-bottom: 0;
+    &:last-child {
+      margin-left: 1em;
+    }
+  }
 }
 ::v-deep .modal__title {
   @include font-size(14px);
@@ -224,20 +206,16 @@ export default {
   opacity: 0;
 }
 
-.modal-buttons {
-  text-align: right;
-}
-
-.modal-close {
-  border: 0;
-  background: $lighter-color;
-  color: $font-medium-color;
-  position: absolute;
-  top: 0.5em;
-  right: 0.5em;
-  outline: none;
-  cursor: pointer;
-}
+// .modal-close {
+//   border: 0;
+//   background: $lighter-color;
+//   color: $font-medium-color;
+//   position: absolute;
+//   top: 0.5em;
+//   right: 0.5em;
+//   outline: none;
+//   cursor: pointer;
+// }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {
