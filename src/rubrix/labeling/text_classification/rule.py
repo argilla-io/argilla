@@ -19,12 +19,16 @@ from rubrix import TextClassificationRecord
 
 
 class Rule:
-    """A rule (labeling function) in form of an ElasticSearch query
+    """A rule (labeling function) in form of an ElasticSearch query.
 
     Args:
-        query: A ElasticSearch query with the
-            [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        label: The label associated to the query
+        query: An ElasticSearch query with the
+            [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input).
+        label: The label associated to the query.
+
+    Examples:
+        >>> urgent_rule = Rule(query="inputs.text:(urgent AND immediately)", label="urgent")
+        >>> not_urgent_rule = Rule(query="inputs.text:(NOT urgent) AND metadata.title_length>20", label="not urgent")
     """
 
     def __init__(self, query: str, label: str):
@@ -36,7 +40,7 @@ class Rule:
         """Apply the rule to a dataset and save matching ids of the records.
 
         Args:
-            dataset: The name of the dataset
+            dataset: The name of the dataset.
         """
         records = rb.load(name=dataset, query=self._query, as_pandas=False)
 
@@ -56,7 +60,7 @@ class Rule:
         """
         if self._matching_ids is None:
             raise RuleNotAppliedError(
-                "Rule was still not applied. Please call `self.apply(dataset)` first"
+                "Rule was still not applied. Please call `self.apply(dataset)` first."
             )
 
         if record.id in self._matching_ids:
