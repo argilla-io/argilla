@@ -24,7 +24,11 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationBulkData,
 )
 from rubrix.labeling.text_classification.rule import Rule
-from rubrix.labeling.text_classification.weak_labels import WeakLabels
+from rubrix.labeling.text_classification.weak_labels import (
+    MissingAnnotationLabelError,
+    MissingWeakLabelError,
+    WeakLabels,
+)
 from tests.server.test_helpers import client
 
 
@@ -39,12 +43,16 @@ def log_dataset() -> str:
                 "annotation": {
                     "labels": [{"class": label, "score": 1}],
                     "agent": "test",
-                },
+                }
+                if label is not None
+                else None,
                 "id": idx,
             }
         )
         for text, label, idx in zip(
-            ["negative", "positive"], ["negative", "positive"], [1, 2]
+            ["negative", "positive", "positive"],
+            ["negative", "positive", None],
+            [1, 2, 3],
         )
     ]
     client.post(
@@ -73,23 +81,32 @@ def rules() -> List[Callable]:
 
 
 @pytest.mark.parametrize(
-    "label2int, expected_label2int, expected_matrix",
+    "label2int, expected_label2int, expected_matrix, expected_annotation_array",
     [
         (
             None,
             {"None": -1, "negative": 0, "positive": 1},
-            np.array([[0, -1, -1], [-1, 1, 1]], dtype=np.short),
+            np.array([[0, -1, -1], [-1, 1, 1], [-1, 1, -1]], dtype=np.short),
+            np.array([0, 1, -1], dtype=np.short),
         ),
-        ({}, None, None),
         (
-            {"None": -100, "negative": 50, "positive": 100},
-            {"None": -100, "negative": 50, "positive": 100},
-            np.array([[50, -100, -100], [-100, 100, 100]], dtype=np.short),
+            {"None": -10, "negative": 50, "positive": 10},
+            {"None": -10, "negative": 50, "positive": 10},
+            np.array([[50, -10, -10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short),
+            np.array([50, 10, -10], dtype=np.short),
         ),
+        ({}, None, None, None),
+        ({"negative": 0, "positive": 1}, None, None, None),
     ],
 )
 def test_apply(
-    monkeypatch, log_dataset, rules, label2int, expected_label2int, expected_matrix
+    monkeypatch,
+    log_dataset,
+    rules,
+    label2int,
+    expected_label2int,
+    expected_matrix,
+    expected_annotation_array,
 ):
     def mock_apply(self, *args, **kwargs):
         self._matching_ids = [2]
@@ -100,7 +117,11 @@ def test_apply(
     monkeypatch.setattr(httpx, "stream", client.stream)
 
     if label2int == {}:
-        with pytest.raises(KeyError):
+        with pytest.raises(MissingAnnotationLabelError):
+            WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
+        return
+    elif label2int == {"negative": 0, "positive": 1}:
+        with pytest.raises(MissingWeakLabelError):
             WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
         return
 
@@ -111,3 +132,4 @@ def test_apply(
 
     assert weak_labels.label2int == expected_label2int
     assert (weak_labels.matrix == expected_matrix).all()
+    assert (weak_labels._annotation_array == expected_annotation_array).all()
