@@ -164,18 +164,24 @@ def copy(dataset: str, name_of_copy: str):
 
 def load(
     name: str,
+    query: Optional[str] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
-) -> pandas.DataFrame:
+    as_pandas: bool = True,
+) -> Union[pandas.DataFrame, List[Record]]:
     """Load dataset data to a pandas DataFrame.
 
     Args:
         name:
             The dataset name.
+        query:
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
         ids:
             If provided, load dataset records with given ids.
         limit:
             The number of records to retrieve.
+        as_pandas:
+            If True, return a pandas DataFrame. If False, return a list of records.
 
     Returns:
         The dataset as a pandas Dataframe.
@@ -184,7 +190,9 @@ def load(
         >>> import rubrix as rb
         >>> dataframe = rb.load(name="example-dataset")
     """
-    return _client_instance().load(name=name, limit=limit, ids=ids)
+    return _client_instance().load(
+        name=name, query=query, limit=limit, ids=ids, as_pandas=as_pandas
+    )
 
 
 def delete(name: str) -> None:
