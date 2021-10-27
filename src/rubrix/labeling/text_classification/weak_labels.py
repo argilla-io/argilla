@@ -42,7 +42,7 @@ class WeakLabels:
         MissingAnnotationLabelError: When provided with a `label2int` dict,
             and an annotation label is not present in its keys.
 
-    Example:
+    Examples:
         Get the weak label matrix and a summary of the applied rules:
 
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
