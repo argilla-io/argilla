@@ -207,6 +207,7 @@ class RubrixClient:
     def load(
         self,
         name: str,
+        query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         as_pandas: bool = True,
@@ -216,6 +217,8 @@ class RubrixClient:
         Args:
             name:
                 The dataset name.
+            query:
+                An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
             ids:
                 If provided, load dataset records with given ids.
             limit:
@@ -258,7 +261,7 @@ class RubrixClient:
         response = get_dataset_data(
             client=self._client,
             name=name,
-            request=request_class(ids=ids or []),
+            request=request_class(ids=ids or [], query_text=query),
             limit=limit,
         )
 
