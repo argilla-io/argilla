@@ -209,7 +209,7 @@ class RubrixClient:
         name: str,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        return_pandas: bool = True,
+        as_pandas: bool = True,
     ) -> Union[pandas.DataFrame, List[Record]]:
         """Load dataset data to a pandas DataFrame.
 
@@ -220,11 +220,11 @@ class RubrixClient:
                 If provided, load dataset records with given ids.
             limit:
                 The number of records to retrieve.
-            return_pandas:
+            as_pandas:
                 If True, return a pandas DataFrame. If False, return a list of records.
 
         Returns:
-            The dataset as a pandas Dataframe.
+            The dataset as a pandas Dataframe, or a list of records.
         """
         response = get_dataset(client=self._client, name=name)
         _check_response_errors(response)
@@ -268,7 +268,7 @@ class RubrixClient:
             [record.to_client() for record in response.parsed], key=lambda x: x.id
         )
 
-        if return_pandas:
+        if as_pandas:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
         return records_sorted_by_id
 

@@ -312,8 +312,8 @@ def test_load_with_ids_list(monkeypatch):
     assert len(ds) == 2
 
 
-@pytest.mark.parametrize("return_pandas", [True, False])
-def test_load_return_pandas(monkeypatch, return_pandas):
+@pytest.mark.parametrize("as_pandas", [True, False])
+def test_load_as_pandas(monkeypatch, as_pandas):
     mocking_client(monkeypatch)
     dataset = "test_sorted_load"
     client.delete(f"/api/datasets/{dataset}")
@@ -322,12 +322,13 @@ def test_load_return_pandas(monkeypatch, return_pandas):
     expected_data = 3
     create_some_data_for_text_classification(dataset, n=expected_data)
 
-    if return_pandas:
+    # Check that the default value is True
+    if as_pandas:
         records = rubrix.load(name=dataset)
         assert isinstance(records, pandas.DataFrame)
         assert list(records.id) == [0, 1, 2, 3]
     else:
-        records = rubrix.load(name=dataset, return_pandas=False)
+        records = rubrix.load(name=dataset, as_pandas=False)
         assert isinstance(records[0], TextClassificationRecord)
         assert [record.id for record in records] == [0, 1, 2, 3]
 
