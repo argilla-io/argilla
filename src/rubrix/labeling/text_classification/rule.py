@@ -30,9 +30,7 @@ class Rule:
     """
 
     def __init__(self, query: str, label: str):
-        self._query: TextClassificationQuery = TextClassificationQuery(
-            query_inputs=query
-        )
+        self._query: TextClassificationQuery = TextClassificationQuery(query_text=query)
         self._label = label
         self._matching_ids = None
 
@@ -47,11 +45,9 @@ class Rule:
         Args:
             dataset: The name of the dataset
         """
-        client = rb._client_instance()._client
-        response = data(client=client, name=dataset, request=self._query)
-        _check_response_errors(response)
+        records = rb.load(name=dataset, query=self._query, as_pandas=False)
 
-        self._matching_ids = [record.id for record in response.parsed]
+        self._matching_ids = [record.id for record in records]
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:
         if self._matching_ids is None:
