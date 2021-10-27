@@ -26,7 +26,7 @@ class BaseMonitor(wrapt.ObjectProxy):
         Rubrix dataset name
 
     sample_rate:
-        Portion or data to store in rubrix. Default = 0.2
+        The portion of the data to store in Rubrix. Default = 0.2
 
     """
 

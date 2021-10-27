@@ -22,7 +22,7 @@ def doc2token_classification(
     doc: Doc, agent: str, metadata: Optional[Dict[str, Any]]
 ) -> TokenClassificationRecord:
     """
-    Converts a spaCy 2 into a token classification record
+    Converts a spaCy `Doc` into a token classification record
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ def doc2token_classification(
     agent:
         Agent to use for the prediction_agent field. Could be the model path or model lang + model version
     metadata:
-        Extra metadata linked to Rubrix record
+        Passed on to the `rubrix.TokenClassificationRecord`.
 
     """
     entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
