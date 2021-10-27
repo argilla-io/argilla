@@ -148,6 +148,9 @@ export default {
     margin-right: 2em;
     white-space: pre-line;
     display: none;
+    &:first-child {
+      margin-top: 0;
+    }
     &:nth-child(-n + 5) {
       display: block;
     }

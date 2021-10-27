@@ -258,14 +258,6 @@ export default {
   }
 }
 
-.modal-buttons {
-  .re-button {
-    margin-bottom: 0;
-    &:last-child {
-      margin-left: 1em;
-    }
-  }
-}
 
 // .button-group {
 //     display: flex;

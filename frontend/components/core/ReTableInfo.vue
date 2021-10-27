@@ -124,7 +124,7 @@
               <ReModal
                 :modal-custom="true"
                 :prevent-body-scroll="true"
-                modal-class="modal-primary"
+                modal-class="modal-secondary"
                 :modal-visible="showModal === item.name"
                 modal-position="modal-center"
                 @close-modal="$emit('close-modal')"
@@ -587,16 +587,6 @@ export default {
       border-radius: 2px;
     }
   }
-}
-
-.modal-buttons {
-  text-align: right;
-}
-.modal__title {
-  color: $font-dark-color;
-  font-weight: 600;
-  margin-top: 0;
-  margin-right: 2em;
 }
 
 .--show-tooltip {
