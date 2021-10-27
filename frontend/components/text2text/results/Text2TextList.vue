@@ -278,6 +278,7 @@ export default {
     clickOutside() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.refresh++;
     }
   }
 };
