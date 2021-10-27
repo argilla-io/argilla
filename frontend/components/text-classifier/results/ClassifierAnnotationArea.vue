@@ -207,6 +207,9 @@ export default {
     flex-flow: wrap;
     margin-left: -1%;
     margin-right: -1%;
+    .list__item--annotation-mode & {
+      padding-right: 200px;
+    }
   }
 }
 ::v-deep .dropdown__header {

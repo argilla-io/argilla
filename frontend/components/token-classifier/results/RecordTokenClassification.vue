@@ -35,16 +35,10 @@
       />
     </div>
     <div class="content__actions-buttons" v-if="annotationEnabled">
-      <re-button
-        :class="[
-          'button-primary',
-          record.status === 'Validated' ? 'active' : null,
-        ]"
+      <re-button v-if="record.status !== 'Validated'"
+        class="button-primary"
         @click="onValidate(record)"
-        >{{
-          record.status === "Validated" ? "Validated" : "Validate"
-        }}</re-button
-      >
+        >Save</re-button>  
     </div>
   </div>
 </template>
@@ -169,7 +163,7 @@ export default {
         records: [
           {
             ...this.record,
-            // selected: true,
+            selected: true,
             status: "Edited",
             annotation: {
               entities,
@@ -188,8 +182,8 @@ export default {
             ...record,
             annotation: {
               ...(record.annotation || record.prediction),
-              agent: this.$auth.user,
-            },
+              agent: this.$auth.user
+            }
           }
         ]
       });
@@ -249,12 +243,6 @@ export default {
   white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
-  &:hover {
-    .button-primary:not(.active) {
-      opacity: 1 !important;
-      transition: opacity 0.3s ease-in-out 0.2s;
-    }
-  }
   .list__item--annotation-mode & {
     padding-left: 65px;
   }
@@ -275,16 +263,6 @@ export default {
       margin-bottom: 0;
       margin-right: 0;
       margin-left: auto;
-      &.active {
-        opacity: 0.8;
-        background: $font-secondary;
-        pointer-events: none;
-        cursor: pointer;
-      }
-      &.button-primary:not(.active) {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out 0.2s;
-      }
       & + .re-button {
         margin-left: 1em;
       }

@@ -33,6 +33,13 @@
         @annotate="onAnnotate"
       />
       <ClassifierExplorationArea v-else :record="record" />
+      <div v-if="annotationEnabled" class="content__actions-buttons">
+        <re-button v-if="record.status !== 'Validated'"
+          class="button-primary"
+          @click="onValidate(record)"
+          >Save</re-button
+        >
+      </div>
     </div>
     <div v-if="!annotationEnabled && record.annotation" class="record__labels">
       <svgicon
@@ -75,7 +82,6 @@ export default {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
     }),
-
     async onAnnotate({ labels }) {
       await this.validate({
         dataset: this.dataset,
@@ -94,6 +100,22 @@ export default {
         ],
       });
     },
+    async onValidate(record) {
+      let modelPrediction = {};
+      modelPrediction.labels = record.predicted_as.map((pred) => ({class: pred, score: 1}));
+      await this.validate({
+        dataset: this.dataset,
+        records: [
+          {
+            ...record,
+            annotation: {
+              ...(record.annotation || modelPrediction),
+              agent: this.$auth.user
+            }
+          }
+        ]
+      });
+    },
   },
 };
 </script>
@@ -103,10 +125,9 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 2em 2em 0.5em 2em;
+    padding: 2em;
     .list__item--annotation-mode & {
       padding-left: 65px;
-      padding-right: 200px;
     }
   }
   &__labels {
@@ -134,6 +155,25 @@ export default {
     }
     &.ok {
       fill: $success;
+    }
+  }
+}
+.content {
+  &__actions-buttons {
+    margin-right: 0;
+    margin-left: auto;
+    display: flex;
+    min-width: 20%;
+    .re-button {
+      min-height: 38px;
+      line-height: 38px;
+      display: block;
+      margin-bottom: 0;
+      margin-right: 0;
+      margin-left: auto;
+      & + .re-button {
+        margin-left: 1em;
+      }
     }
   }
 }

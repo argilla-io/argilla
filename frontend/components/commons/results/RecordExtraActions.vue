@@ -134,6 +134,7 @@ export default {
     box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
     padding: 3px;
     min-width: 135px;
+    z-index: 1;
     .disabled {
       pointer-events: none;
     }
