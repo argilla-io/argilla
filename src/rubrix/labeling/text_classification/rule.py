@@ -16,21 +16,19 @@ from typing import Optional
 
 import rubrix as rb
 from rubrix import TextClassificationRecord
-from rubrix.client import _check_response_errors
-from rubrix.client.sdk.text_classification.api import data
-from rubrix.client.sdk.text_classification.models import TextClassificationQuery
 
 
 class Rule:
     """A rule (labeling function) in form of an ElasticSearch query
 
     Args:
-        query: A ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+        query: A ElasticSearch query with the
+            [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
         label: The label associated to the query
     """
 
     def __init__(self, query: str, label: str):
-        self._query: TextClassificationQuery = TextClassificationQuery(query_text=query)
+        self._query = query
         self._label = label
         self._matching_ids = None
 
@@ -50,6 +48,17 @@ class Rule:
         self._matching_ids = [record.id for record in records]
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:
+        """Check if the given record is among the matching ids from the `self.apply` call.
+
+        Args:
+            record: The record to be labelled.
+
+        Returns:
+            A label if the record id is among the matching ids, otherwise None.
+
+        Raises:
+            `RuleNotAppliedError` if the rule was not applied to the dataset before.
+        """
         if self._matching_ids is None:
             raise RuleNotAppliedError(
                 "Rule was still not applied. Please call `self.apply(dataset)` first"
