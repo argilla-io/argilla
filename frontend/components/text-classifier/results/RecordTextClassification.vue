@@ -82,7 +82,6 @@ export default {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
     }),
-
     async onAnnotate({ labels }) {
       await this.validate({
         dataset: this.dataset,
@@ -99,6 +98,22 @@ export default {
             },
           },
         ],
+      });
+    },
+    async onValidate(record) {
+      let modelPrediction = {};
+      modelPrediction.labels = record.predicted_as.map((pred) => ({class: pred, score: 1}));
+      await this.validate({
+        dataset: this.dataset,
+        records: [
+          {
+            ...record,
+            annotation: {
+              ...(record.annotation || modelPrediction),
+              agent: this.$auth.user
+            }
+          }
+        ]
       });
     },
   },
