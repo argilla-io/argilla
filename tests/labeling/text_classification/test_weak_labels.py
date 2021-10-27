@@ -157,5 +157,6 @@ def test_train_test_annotation(monkeypatch):
     assert (weak_labels.test_matrix() == np.array([[-1, 0]], dtype=np.short)).all()
     assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
     assert (
-        weak_labels.annotation(pad=True) == np.array([[-1, 0]], dtype=np.short)
+        weak_labels.annotation(exclude_missing_annotations=False)
+        == np.array([[-1, 0]], dtype=np.short)
     ).all()
