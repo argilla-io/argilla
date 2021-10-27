@@ -109,7 +109,7 @@
                   >Back</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                  v-if="newSentence && editable && (editionMode || sentencesOrigin !== 'Annotation')"
                   class="button-primary"
                   @click="annotate"
                   >Save</re-button

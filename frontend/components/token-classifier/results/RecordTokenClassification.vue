@@ -36,9 +36,9 @@
     </div>
     <div class="content__actions-buttons" v-if="annotationEnabled">
       <re-button v-if="record.status !== 'Validated'"
-        class="Validated"
+        class="button-primary"
         @click="onValidate(record)"
-        >Save"</re-button>  
+        >Save</re-button>  
     </div>
   </div>
 </template>
