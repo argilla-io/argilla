@@ -109,15 +109,10 @@
                   >Back</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable"
-                  :class="[
-                    'button-primary',
-                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
-                  ]"
+                  v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                  class="button-primary"
                   @click="annotate"
-                  >{{
-                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
-                  }}</re-button
+                  >Validate</re-button
                 >
               </div>
             </div>
@@ -134,15 +129,10 @@
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="newSentence && editable"
-                  :class="[
-                    'button-primary',
-                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
-                  ]"
+                  v-if="newSentence && editable && editionMode"
+                  class="button-primary"
                   @click="annotate"
-                  >{{
-                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
-                  }}</re-button
+                  >Validate</re-button
                 >
               </div>
             </div>
@@ -316,8 +306,14 @@ $marginRight: 200px;
     align-items: flex-end;
   }
   &--separator {
-    border-top: 1px solid palette(grey, light);
     padding-top: 1em;
+    &:before {
+      content: "";
+      border-top: 1px solid palette(grey, light);
+      width: calc(100% - 200px);
+      position: absolute;
+      top: 0;
+    }
   }
   &--editable {
     width: 100%;
@@ -421,12 +417,6 @@ $marginRight: 200px;
       margin-bottom: 0;
       margin-right: 0;
       margin-left: auto;
-      &.active {
-        opacity: 0.8;
-        background: $font-secondary;
-        pointer-events: none;
-        cursor: pointer;
-      }
       &.button-primary--outline {
         min-height: 36px;
         line-height: 36px;
@@ -435,10 +425,6 @@ $marginRight: 200px;
         opacity: 0;
         transition: opacity 0.3s ease-in-out 0.2s;
         min-width: auto;
-      }
-      &.button-primary:not(.active) {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out 0.2s;
       }
       & + .re-button {
         margin-left: 1em;

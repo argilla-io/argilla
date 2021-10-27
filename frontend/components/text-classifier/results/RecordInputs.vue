@@ -63,6 +63,9 @@ export default {
 .record {
   white-space: pre-line;
   display: block;
+  .list__item--annotation-mode & {
+    padding-right: 200px;
+  }
   &__key {
     font-weight: 600;
     margin-right: 0.5em;
