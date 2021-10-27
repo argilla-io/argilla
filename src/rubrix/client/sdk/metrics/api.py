@@ -27,7 +27,6 @@ def get_dataset_metrics(
     return build_data_response(response, data_type=MetricInfo)
 
 
-@lru_cache()
 def calculate_metric(
     client: AuthenticatedClient,
     name: str,
