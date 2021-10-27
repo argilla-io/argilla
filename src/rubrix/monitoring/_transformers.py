@@ -1,23 +1,19 @@
 from typing import Any, Dict, List, Tuple
 
 import rubrix
-
 from rubrix import TextClassificationRecord
 from rubrix.monitoring.base import BaseMonitor
-
-
-class _MissingType:
-    pass
-
+from rubrix.monitoring.types import MissingType
 
 try:
 
     from transformers import Pipeline, TextClassificationPipeline
 except ModuleNotFoundError:
-    TextClassificationPipeline = _MissingType
+    TextClassificationPipeline = MissingType
+    Pipeline = MissingType
 
 
-class _TextClassificationMonitor(BaseMonitor):
+class TextClassificationMonitor(BaseMonitor):
     """Configures monitoring over Hugging Face text classification pipelines"""
 
     async def __log_to_rubrix__(
@@ -84,4 +80,4 @@ class _TextClassificationMonitor(BaseMonitor):
 
 def classifier_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Pipeline:
     assert isinstance(pl, TextClassificationPipeline)
-    return _TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+    return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)

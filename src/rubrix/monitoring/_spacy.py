@@ -1,56 +1,53 @@
-from typing import Any, Dict, Optional, TypeVar
+from typing import Any, Dict, Optional
 
 import rubrix as rb
 from rubrix import TokenClassificationRecord
 
 # Conditional modules
 from rubrix.monitoring.base import BaseMonitor
-
-class _MissingType:
-    pass
-
+from rubrix.monitoring.types import MissingType
 
 try:
     from spacy import Language
     from spacy.tokens import Doc
 except ModuleNotFoundError:
-    Language = _MissingType
-    Doc = _MissingType
+    Language = MissingType
+    Doc = MissingType
 
 
-def doc2token_classification(
-    doc: Doc, agent: str, metadata: Optional[Dict[str, Any]]
-) -> TokenClassificationRecord:
-    """
-    Converts a spaCy `Doc` into a token classification record
-
-    Parameters
-    ----------
-    doc:
-        The spacy doc
-    agent:
-        Agent to use for the prediction_agent field. Could be the model path or model lang + model version
-    metadata:
-        Passed on to the `rubrix.TokenClassificationRecord`.
-
-    """
-    entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
-    return TokenClassificationRecord(
-        text=doc.text,
-        tokens=[t.text for t in doc],
-        metadata=metadata or {},
-        prediction_agent=agent,
-        prediction=entities,
-    )
-
-
-class _SpacyNERMonitor(BaseMonitor):
+class SpacyNERMonitor(BaseMonitor):
     """A spaCy Language wrapper for NLP NER monitoring in Rubrix"""
+
+    @staticmethod
+    def doc2token_classification(
+        doc: Doc, agent: str, metadata: Optional[Dict[str, Any]]
+    ) -> TokenClassificationRecord:
+        """
+        Converts a spaCy `Doc` into a token classification record
+
+        Parameters
+        ----------
+        doc:
+            The spacy doc
+        agent:
+            Agent to use for the prediction_agent field. Could be the model path or model lang + model version
+        metadata:
+            Passed on to the `rubrix.TokenClassificationRecord`.
+
+        """
+        entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
+        return TokenClassificationRecord(
+            text=doc.text,
+            tokens=[t.text for t in doc],
+            metadata=metadata or {},
+            prediction_agent=agent,
+            prediction=entities,
+        )
 
     async def __log_to_rubrix__(
         self, doc: Doc, metadata: Optional[Dict[str, Any]] = None
     ):
-        record = doc2token_classification(
+        record = self.doc2token_classification(
             doc, agent=str(self.__wrapped__.path), metadata=metadata
         )
         rb.log(
@@ -84,4 +81,4 @@ class _SpacyNERMonitor(BaseMonitor):
 
 
 def ner_monitor(nlp: Language, dataset: str, sample_rate: float) -> Language:
-    return _SpacyNERMonitor(nlp, dataset=dataset, sample_rate=sample_rate)
+    return SpacyNERMonitor(nlp, dataset=dataset, sample_rate=sample_rate)
