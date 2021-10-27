@@ -16,14 +16,14 @@ from rubrix.server.tasks.token_classification import (
 )
 
 
-class SentenceLength(ElasticsearchMetric):
+class TokensLength(ElasticsearchMetric):
     """
-    Summarizes the sentence length metric into an histogram
+    Summarizes the tokens length metric into an histogram
 
     Attributes:
     -----------
     length_field:
-        The elasticsearch field where sentence length is stored
+        The elasticsearch field where tokens length is stored
     """
 
     length_field: str
@@ -187,9 +187,9 @@ class TokenClassificationMetrics(BaseTaskMetrics):
                 )
             )
 
-        def mention_density(mention_length: int, sentence_length: int) -> float:
+        def mention_density(mention_length: int, tokens_length: int) -> float:
             """Calculate mention density"""
-            return (1.0 * mention_length) / sentence_length
+            return (1.0 * mention_length) / tokens_length
 
         return [
             TokenClassificationMetrics.MentionMetrics(
@@ -197,7 +197,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
                 entity=entity.label,
                 score=entity.score,
                 capitalness=mention_capitalness(mention),
-                density=mention_density(_mention_length, sentence_length=len(tokens)),
+                density=mention_density(_mention_length, tokens_length=len(tokens)),
                 length=_mention_length,
             )
             for mention, entity in mentions
@@ -266,7 +266,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         chars2tokens = cls.build_chars2tokens_map(record)
 
         return {
-            "sentence_length": len(record.tokens),
+            "tokens_length": len(record.tokens),
             "mentions.predicted": cls.mentions_metrics(
                 mentions=record.predicted_mentions(),
                 tokens=record.tokens,
@@ -280,16 +280,16 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         }
 
     metrics: ClassVar[List[BaseMetric]] = [
-        SentenceLength(
-            id="sentence_length",
-            name="Sentence tokens length",
+        TokensLength(
+            id="tokens_length",
+            name="Tokens length",
             description="Calculates tokens length",
-            length_field="metrics.sentence_length",
+            length_field="metrics.tokens_length",
         ),
         EntityDensity(
             id="entity_density",
             name="Mention entity density",
-            description="Calculates relation between mention tokens and sentence tokens",
+            description="Calculates relation between mention tokens and tokens in text",
             nested_path="metrics.mentions.predicted",
             density_field="metrics.mentions.predicted.density",
         ),
@@ -317,7 +317,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         MentionConsistency(
             id="mention_consistency",
             name="Mention entity consistency",
-            description="Calculates top k-mentions with more entity variability",
+            description="Calculates entity variability for top k-mentions",
             nested_path="metrics.mentions.predicted",
             mention_field="metrics.mentions.predicted.mention",
             entity_field="metrics.mentions.predicted.entity",
