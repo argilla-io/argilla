@@ -16,11 +16,12 @@ import httpx
 import pytest
 
 from rubrix import load
+from rubrix.client.models import TextClassificationRecord
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.weaksupervision.text_classification.rule import Rule, RuleNotAppliedError
+from rubrix.labeling.text_classification.rule import Rule, RuleNotAppliedError
 from tests.server.test_helpers import client
 
 
@@ -54,17 +55,24 @@ def log_dataset() -> str:
 
 
 def test_apply(monkeypatch, log_dataset):
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "stream", client.stream)
-
-    records = load(log_dataset, return_pandas=False)
-
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
-        rule(records[0])
+        rule(TextClassificationRecord(inputs="test"))
+
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "stream", client.stream)
 
     rule.apply(log_dataset)
     assert rule._matching_ids == [1]
 
+
+def test_call(monkeypatch, log_dataset):
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "stream", client.stream)
+
+    rule = Rule(query="inputs.text:(NOT positive)", label="negative")
+    rule.apply(log_dataset)
+
+    records = load(log_dataset, as_pandas=False)
     assert rule(records[0]) == "negative"
     assert rule(records[1]) is None
