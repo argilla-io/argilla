@@ -32,11 +32,6 @@ class Rule:
         self._label = label
         self._matching_ids = None
 
-    @classmethod
-    def load(cls):
-        """Load a rule defined in the Rubrix web app."""
-        raise NotImplementedError
-
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
 
