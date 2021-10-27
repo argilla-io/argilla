@@ -26,7 +26,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
-from typing import List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import httpx
 
@@ -80,6 +80,26 @@ def build_data_response(
     return Response(
         status_code=response.status_code,
         content=b"",
+        headers=response.headers,
+        parsed=parsed_response,
+    )
+
+
+def build_raw_response(
+    response: httpx.Response,
+) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
+
+    parsed_response = response.json()
+    if response.status_code == 404:
+        parsed_response = ErrorMessage(**parsed_response)
+    elif response.status_code == 500:
+        parsed_response = ErrorMessage(**parsed_response)
+    elif response.status_code == 422:
+        parsed_response = HTTPValidationError(**parsed_response)
+
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
         headers=response.headers,
         parsed=parsed_response,
     )
