@@ -27,8 +27,8 @@ class WeakLabels:
     """Computes the weak labels of a dataset given a list of rules.
 
     Args:
-        rules: A list of rules (labeling functions).
-        dataset: Name of the dataset.
+        rules: A list of rules (labeling functions). They must return a string, or `None` in case of abstention.
+        dataset: Name of the dataset to which the rules will be applied.
         ids: An optional list of record ids to filter the dataset.
         query: An optional ElasticSearch query with the
             [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
@@ -43,11 +43,21 @@ class WeakLabels:
             and an annotation label is not present in its keys.
 
     Example:
+        Get the weak label matrix and a summary of the applied rules:
+
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
         ...     return "Positive" if "awesome" in record.inputs["text"] else None
         >>> weak_labels = WeakLabels(rules=[awesome_rule], dataset="my_dataset")
-        >>> weak_label_matrix = weak_labels.matrix
+        >>> weak_labels.matrix
         >>> weak_labels.summary()
+
+        Use snorkel's LabelModel:
+
+        >>> from snorkel.labeling.model import LabelModel
+        >>> label_model = LabelModel()
+        >>> label_model.fit(L_train=weak_labels.train_matrix())
+        >>> label_model.score(L=weak_labels.test_matrix(), Y=weak_labels.annotation())
+        >>> label_model.predict(L=weak_labels.train_matrix())
     """
 
     def __init__(
@@ -99,69 +109,60 @@ class WeakLabels:
             (len(self._records), len(self._rules)), dtype=np.short
         )
         annotation_array = np.empty(len(self._records), dtype=np.short)
-        default_label2int = {"None": -1}
+        _label2int = {"None": -1} if label2int is None else label2int
 
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
         ):
-            # fill annotation array
-            annotation = record.annotation
-            if annotation is None:
-                annotation = "None"
+            # First: fill annotation array
+            annotation = record.annotation or "None"
 
-            # If a label2int is defined we want to raise an error if the weak label or annotation label is missing!
-            if label2int is not None:
-                try:
-                    annotation = label2int[annotation]
-                except KeyError as error:
+            try:
+                annotation = _label2int[annotation]
+            except KeyError as error:
+                # When a label2int was provided, we want to raise an error if the label is missing!
+                if label2int is not None:
                     raise MissingAnnotationLabelError(
                         f"The annotation label '{annotation}' is missing in the `label2int` dict {label2int}"
                     ) from error
-            else:
-                try:
-                    annotation = default_label2int[annotation]
-                except KeyError:
-                    # we already have "None" -> we need to subtract 1
-                    default_label2int[annotation] = len(default_label2int) - 1
-                    annotation = default_label2int[annotation]
+                # we already have "None" -> we need to subtract 1
+                _label2int[annotation] = len(_label2int) - 1
+                annotation = _label2int[annotation]
 
             annotation_array[n] = annotation
 
-            # fill weak label matrix
+            # Second: fill weak label matrix
             for m, rule in enumerate(self._rules):
-                weak_label = rule(record)
-                if weak_label is None:
-                    weak_label = "None"
+                weak_label = rule(record) or "None"
 
-                if label2int is not None:
-                    try:
-                        weak_label = label2int[weak_label]
-                    except KeyError as error:
+                try:
+                    weak_label = _label2int[weak_label]
+                except KeyError as error:
+                    if label2int is not None:
                         raise MissingWeakLabelError(
                             f"A rule returned the weak label '{weak_label}', "
                             f"but it is missing in the `label2int` dict {label2int}"
                         ) from error
-                else:
-                    try:
-                        weak_label = default_label2int[weak_label]
-                    except KeyError:
-                        default_label2int[weak_label] = len(default_label2int) - 1
-                        weak_label = default_label2int[weak_label]
+                    _label2int[weak_label] = len(_label2int) - 1
+                    weak_label = _label2int[weak_label]
 
                 weak_label_matrix[n, m] = weak_label
 
-        return weak_label_matrix, annotation_array, label2int or default_label2int
+        return weak_label_matrix, annotation_array, _label2int
 
     @property
     def records(self) -> List[TextClassificationRecord]:
+        """The records corresponding to the weak labels."""
         return self._records
 
     @property
     def label2int(self) -> Dict[str, int]:
+        """The dictionary that maps the weak/annotation labels to integers."""
         return self._label2int
 
     @property
     def matrix(self) -> np.ndarray:
+        """The weak label matrix."""
         return self._matrix
 
     def train_matrix(self) -> np.ndarray:
