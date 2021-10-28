@@ -85,6 +85,27 @@ def build_data_response(
     )
 
 
+def build_list_response(
+    response: httpx.Response,
+    item_class: Type[T],
+) -> Response[Union[List[T], HTTPValidationError, ErrorMessage]]:
+    parsed_response = response.json()
+
+    if 200 <= response.status_code < 400:
+        parsed_response = [item_class(**r) for r in parsed_response]
+    elif response.status_code == 422:
+        parsed_response = HTTPValidationError.parse_obj(parsed_response)
+    else:
+        parsed_response = ErrorMessage.parse_obj(parsed_response)
+
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=parsed_response,
+    )
+
+
 def build_raw_response(
     response: httpx.Response,
 ) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:

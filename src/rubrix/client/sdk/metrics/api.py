@@ -4,7 +4,10 @@ from typing import Any, Dict, List, Union
 import httpx
 
 from rubrix.client import AuthenticatedClient, Response
-from rubrix.client.sdk.commons.api import build_data_response, build_raw_response
+from rubrix.client.sdk.commons.api import (
+    build_list_response,
+    build_raw_response,
+)
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError
 from rubrix.client.sdk.metrics.models import MetricInfo
 
@@ -24,7 +27,7 @@ def get_dataset_metrics(
         timeout=client.get_timeout(),
     )
 
-    return build_data_response(response, data_type=MetricInfo)
+    return build_list_response(response, item_class=MetricInfo)
 
 
 def calculate_metric(
@@ -32,17 +35,15 @@ def calculate_metric(
     name: str,
     task: str,
     metric: str,
-    interval: float,
-    size: int,
+    **query_params,
 ) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/datasets/{task}/{name}/metrics/{metric}:summary?interval={interval}&size={size}".format(
-        client.base_url,
-        name=name,
-        task=task,
-        metric=metric,
-        interval=interval,
-        size=size,
+    url = "{}/api/datasets/{task}/{name}/metrics/{metric}:summary".format(
+        client.base_url, task=task, name=name, metric=metric
     )
+
+    query_params = {k: v for k, v in query_params.items() if v is not None}
+    if query_params:
+        url += "?" + "&".join([f"{k}={v}" for k, v in query_params.items()])
 
     response = httpx.post(
         url=url,
