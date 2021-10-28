@@ -34,4 +34,4 @@ def test_classifier_monitoring(monkeypatch):
     sentiment_classifier(texts)
     df = rubrix.load(dataset)
     assert len(df) == 2
-    assert df.inputs.values.tolist() == [{"text": text} for text in texts]
+    assert set([r["text"] for r in df.inputs.values.tolist()]) == set(texts)
