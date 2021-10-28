@@ -186,6 +186,7 @@
 import "assets/icons/delete";
 import "assets/icons/refresh";
 import "assets/icons/copy";
+import "assets/icons/copy-url";
 import "assets/icons/datasource";
 import "assets/icons/chev-top";
 import "assets/icons/chev-bottom";
@@ -496,7 +497,7 @@ export default {
       margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
-        fill: $primary-color;
+        fill: palette(grey, dark);
         margin-right: 0;
       }
       & + #{$this} {

@@ -78,7 +78,7 @@ export default {
     ],
     actions: [
       { name: "delete", icon: "delete", title: "Delete dataset" },
-      { name: "copy", icon: "copy", title: "Copy url to clipboard", tooltip: "Copied" },
+      { name: "copy", icon: "copy-url", title: "Copy url to clipboard", tooltip: "Copied" },
     ],
     externalLinks: [
       {

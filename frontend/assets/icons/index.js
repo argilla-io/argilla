@@ -16,7 +16,6 @@
  */
 
 /* eslint-disable */
-
 require('./annotate-view')
 require('./arrow-bottom')
 require('./arrow-top')
@@ -32,6 +31,7 @@ require('./chev-right')
 require('./chev-top')
 require('./clasifier')
 require('./clip')
+require('./copy-url')
 require('./copy')
 require('./create-datasource')
 require('./cross')
