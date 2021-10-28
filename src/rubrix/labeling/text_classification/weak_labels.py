@@ -33,14 +33,14 @@ class WeakLabels:
         query: An optional ElasticSearch query with the
             [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
             to filter the dataset.
-        label2int: An optional dict, mapping the labels to integers.
-            Use the string "None" to refer to the return type `None`.
+        label2int: An optional dict, mapping the labels to integers. The return type `None` is automatically
+            mapped to -1. By default, we will construct a mapping on the fly when applying the rules.
 
     Raises:
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
-        MissingWeakLabelError: When provided with a `label2int` dict, and a weak label is not present in its keys.
-        MissingAnnotationLabelError: When provided with a `label2int` dict,
-            and an annotation label is not present in its keys.
+        MissingLabelError: When provided with a `label2int` dict, and a
+            weak label or annotation label is not present in its keys.
+        Label2IntError: If the provided `label2int` dict contains the reserved key 'None' or the reserved value -1.
 
     Examples:
         Get the weak label matrix and a summary of the applied rules:
@@ -71,6 +71,20 @@ class WeakLabels:
         self._rules = rules
         self._dataset = dataset
 
+        # check label2int mapping
+        if label2int is not None:
+            if "None" in label2int:
+                raise Label2IntError(
+                    f"Found the reserved 'None' key in the provided label2int dict: {label2int}. "
+                    "Please remove it or use another string for this label."
+                )
+            if any(i == -1 for i in label2int.values()):
+                raise Label2IntError(
+                    f"Found the reserved value -1 in the provided label2int dict: {label2int}. "
+                    "Please remove it or use another value for this label."
+                )
+
+        # load records and check compatibility
         self._records: List[TextClassificationRecord] = load(
             dataset, query=query, ids=ids, as_pandas=False
         )
@@ -79,6 +93,7 @@ class WeakLabels:
                 "Multi-label text classification is not yet supported."
             )
 
+        # apply rules -> create the weak label matrix, annotation array, final label2int mapping
         self._matrix, self._annotation_array, self._label2int = self._apply_rules(
             label2int
         )
@@ -95,21 +110,21 @@ class WeakLabels:
             The weak label matrix, the annotation array and their label2int mapping.
 
         Raises:
-            MissingWeakLabelError: When provided with a `label2int` dict, and a weak label is not present in its keys.
-            MissingAnnotationLabelError: When provided with a `label2int` dict,
-                and an annotation label is not present in its keys.
+            MissingLabelError: When provided with a `label2int` dict, and a
+                weak label or annotation label is not present in its keys.
         """
         # call apply on the ElasticSearch rules
         for rule in tqdm(self._rules, desc="Preparing rules"):
             if isinstance(rule, Rule):
                 rule.apply(self._dataset)
 
-        # create weak label matrix
+        # create weak label matrix, annotation array, final label2int
         weak_label_matrix = np.empty(
             (len(self._records), len(self._rules)), dtype=np.short
         )
         annotation_array = np.empty(len(self._records), dtype=np.short)
-        _label2int = {"None": -1} if label2int is None else label2int
+        _label2int = label2int or {}
+        _label2int["None"] = -1
 
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
@@ -122,7 +137,7 @@ class WeakLabels:
             except KeyError as error:
                 # When a label2int was provided, we want to raise an error if the label is missing!
                 if label2int is not None:
-                    raise MissingAnnotationLabelError(
+                    raise MissingLabelError(
                         f"The annotation label '{annotation}' is missing in the `label2int` dict {label2int}"
                     ) from error
                 # we already have "None" -> we need to subtract 1
@@ -139,7 +154,7 @@ class WeakLabels:
                     weak_label = _label2int[weak_label]
                 except KeyError as error:
                     if label2int is not None:
-                        raise MissingWeakLabelError(
+                        raise MissingLabelError(
                             f"A rule returned the weak label '{weak_label}', "
                             f"but it is missing in the `label2int` dict {label2int}"
                         ) from error
@@ -194,12 +209,14 @@ class WeakLabels:
 
         Args:
             annotation: An optional array with ints holding the annotations.
-                By default we will use `self.annotation(pad=True)`.
+                By default we will use `self.annotation(exclude_missing_annotations=False)`.
 
         Returns:
             A summary DataFrame with coverage, overlaps and conflicts of the rules.
             If the dataset contains annotated records, we also provide the precision of each rule.
         """
+        self._matrix.sum(axis=1)
+
         raise NotImplementedError
 
     def bucket(self, labels: List[str], rules: List[int]) -> pd.DataFrame:
@@ -210,13 +227,13 @@ class WeakLabelsError(Exception):
     pass
 
 
+class Label2IntError(WeakLabelsError):
+    pass
+
+
 class MultiLabelError(WeakLabelsError):
     pass
 
 
-class MissingAnnotationLabelError(WeakLabelsError):
-    pass
-
-
-class MissingWeakLabelError(WeakLabelsError):
+class MissingLabelError(WeakLabelsError):
     pass

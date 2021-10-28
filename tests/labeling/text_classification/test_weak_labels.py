@@ -25,8 +25,7 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.labeling.text_classification.rule import Rule
 from rubrix.labeling.text_classification.weak_labels import (
-    MissingAnnotationLabelError,
-    MissingWeakLabelError,
+    MissingLabelError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -80,23 +79,27 @@ def rules() -> List[Callable]:
     return [rule1, rule2, rule3]
 
 
+def test_multi_label_error():
+    raise NotImplementedError
+
+
 @pytest.mark.parametrize(
     "label2int, expected_label2int, expected_matrix, expected_annotation_array",
     [
         (
             None,
             {"None": -1, "negative": 0, "positive": 1},
-            np.array([[0, -1, -1], [-1, 1, 1], [-1, 1, -1]], dtype=np.short),
+            np.array([[0, -1, 1], [-1, 1, 1], [-1, 1, -1]], dtype=np.short),
             np.array([0, 1, -1], dtype=np.short),
         ),
         (
-            {"None": -10, "negative": 50, "positive": 10},
-            {"None": -10, "negative": 50, "positive": 10},
-            np.array([[50, -10, -10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short),
-            np.array([50, 10, -10], dtype=np.short),
+            {"negative": 50, "positive": 10},
+            {"None": -1, "negative": 50, "positive": 10},
+            np.array([[50, -1, 10], [-1, 10, 10], [-1, 10, -1]], dtype=np.short),
+            np.array([50, 10, -1], dtype=np.short),
         ),
         ({}, None, None, None),
-        ({"negative": 0, "positive": 1}, None, None, None),
+        ({"negative": 0}, None, None, None),
     ],
 )
 def test_apply(
@@ -109,7 +112,7 @@ def test_apply(
     expected_annotation_array,
 ):
     def mock_apply(self, *args, **kwargs):
-        self._matching_ids = [2]
+        self._matching_ids = [1, 2]
 
     monkeypatch.setattr(Rule, "apply", mock_apply)
 
@@ -117,18 +120,20 @@ def test_apply(
     monkeypatch.setattr(httpx, "stream", client.stream)
 
     if label2int == {}:
-        with pytest.raises(MissingAnnotationLabelError):
+        with pytest.raises(MissingLabelError) as error:
             WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
+        assert "annotation label" in str(error)
         return
-    elif label2int == {"negative": 0, "positive": 1}:
-        with pytest.raises(MissingWeakLabelError):
+    elif label2int == {"negative": 0}:
+        with pytest.raises(MissingLabelError) as error:
             WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
+        assert "weak label" in str(error)
         return
 
     weak_labels = WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
 
     # check that all `Rule.apply`s are called
-    assert weak_labels._rules[-1]._matching_ids == [2]
+    assert weak_labels._rules[-1]._matching_ids == [1, 2]
 
     assert weak_labels.label2int == expected_label2int
     assert (weak_labels.matrix == expected_matrix).all()
