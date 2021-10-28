@@ -184,25 +184,147 @@ class WeakLabels:
             return self._annotation_array
         return self._annotation_array[self._annotation_array != self._label2int["None"]]
 
-    def summary(self, annotation: np.ndarray) -> pd.DataFrame:
-        """Returns a summary of the rules given a weak label matrix.
+    def summary(
+        self,
+        normalize_by_coverage: bool = True,
+        annotation: Optional[np.ndarray] = None,
+    ) -> pd.DataFrame:
+        """Returns following summary statistics for each rule:
 
-        - coverage:
-        - overlaps:
-        - conflicts:
-        - precision:
+        - polarity: Set of unique labels returned by the rule, excluding "None" (abstain).
+        - coverage: Fraction of the records labeled by the rule.
+        - overlaps: Fraction of the records labeled by the rule together with at least one other rule.
+        - conflicts: Fraction of the records where the rule disagrees with at least one other rule.
+        - correct: Number of records the rule labeled correctly (if annotations are available).
+        - incorrect: Number of records the rule labels incorrectly (if annotations are available).
+        - precision: Fraction of correct labels given by the rule (if annotations are available).
+            The precision does not penalize the rule for abstains.
 
         Args:
+            normalize_by_coverage: Normalize the overlaps and conflicts by the respective coverage.
             annotation: An optional array with ints holding the annotations.
                 By default we will use `self.annotation(exclude_missing_annotations=False)`.
 
         Returns:
-            A summary DataFrame with coverage, overlaps and conflicts of the rules.
-            If the dataset contains annotated records, we also provide the precision of each rule.
+            A summary DataFrame with polarity, coverage, overlaps and conflicts of the rules.
+            If annotated records are available, we also provide the precision of the rules.
         """
-        self._matrix.sum(axis=1)
+        has_weak_label = self._matrix != self._label2int["None"]
 
-        raise NotImplementedError
+        # polarity
+        polarity = [
+            set(
+                np.unique(
+                    self._matrix[:, i][self._matrix[:, i] != self._label2int["None"]]
+                )
+            )
+            for i in range(len(self._rules))
+        ]
+        polarity.append(set().union(*polarity))
+
+        # coverage
+        coverage = has_weak_label.sum(axis=0) / len(self._records)
+        coverage = np.append(
+            coverage,
+            (has_weak_label.sum(axis=1) > 0).sum() / len(self._records),
+        )
+
+        # overlaps
+        has_overlaps = has_weak_label.sum(axis=1) > 1
+        overlaps = self._compute_overlaps_conflicts(
+            has_weak_label, has_overlaps, coverage, normalize_by_coverage
+        )
+
+        # conflicts
+        # TODO: For a lot of records (~1e6), this could become slow ... not sure if there is a vectorized solution.
+        has_conflicts = np.apply_along_axis(
+            lambda x: len(np.unique(x[x != self._label2int["None"]])) > 1,
+            axis=1,
+            arr=self._matrix,
+        )
+        conflicts = self._compute_overlaps_conflicts(
+            has_weak_label, has_conflicts, coverage, normalize_by_coverage
+        )
+
+        # index for the summary
+        # TODO: Get better names
+        index = [f"rule{i}" for i in range(len(self._rules))] + ["total"]
+
+        # only add correct, incorrect and precision if we have annotations
+        if any(self._annotation_array != self._label2int["None"]) or annotation:
+            correct, incorrect = self._compute_correct_incorrect(
+                has_weak_label, annotation or self._annotation_array
+            )
+            precision = np.nan_to_num(correct / (correct + incorrect))
+
+            return pd.DataFrame(
+                {
+                    "polarity": polarity,
+                    "coverage": coverage,
+                    "overlaps": overlaps,
+                    "conflicts": conflicts,
+                    "correct": correct,
+                    "incorrect": incorrect,
+                    "precision": precision,
+                },
+                index=index,
+            )
+
+        return pd.DataFrame(
+            {
+                "polarity": polarity,
+                "coverage": coverage,
+                "overlaps": overlaps,
+                "conflicts": conflicts,
+            },
+            index=index,
+        )
+
+    def _compute_overlaps_conflicts(
+        self,
+        has_weak_label: np.ndarray,
+        has_overlaps_or_conflicts: np.ndarray,
+        coverage: np.ndarray,
+        normalize_by_coverage: bool,
+    ) -> np.ndarray:
+        """Helper method to compute the overlaps/conflicts and optionally normalize them by the respective coverage"""
+        overlaps_or_conflicts = (
+            has_weak_label
+            * np.repeat(has_overlaps_or_conflicts, len(self._rules)).reshape(
+                has_weak_label.shape
+            )
+        ).sum(axis=0) / len(self._records)
+        # total
+        overlaps_or_conflicts = np.append(
+            overlaps_or_conflicts, has_overlaps_or_conflicts.sum() / len(self._records)
+        )
+
+        if normalize_by_coverage:
+            overlaps_or_conflicts /= coverage
+            return np.nan_to_num(overlaps_or_conflicts)
+
+        return overlaps_or_conflicts
+
+    def _compute_correct_incorrect(
+        self, has_weak_label: np.ndarray, annotation: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
+        # correct
+        correct_with_abstain = (
+            np.repeat(annotation, len(self._rules)).reshape(self._matrix.shape)
+            == self._matrix
+        )
+        correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
+
+        # incorrect
+        incorrect_with_abstain = (
+            np.repeat(annotation, len(self._rules)).reshape(self._matrix.shape)
+            != self._matrix
+        )
+        incorrect = np.where(has_weak_label, incorrect_with_abstain, False).sum(axis=0)
+
+        # add totals at the end
+        return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
 
     def bucket(self, labels: List[str], rules: List[int]) -> pd.DataFrame:
         raise NotImplementedError
