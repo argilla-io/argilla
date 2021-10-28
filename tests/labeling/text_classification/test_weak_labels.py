@@ -16,6 +16,7 @@ from typing import Callable, List, Optional
 
 import httpx
 import numpy as np
+import pandas as pd
 import pytest
 
 from rubrix import TextClassificationRecord
@@ -174,3 +175,65 @@ def test_train_test_annotation(monkeypatch):
         weak_labels.annotation(exclude_missing_annotations=False)
         == np.array([[-1, 0]], dtype=np.short)
     ).all()
+
+
+def test_summary(monkeypatch):
+    def mock_load(*args, **kwargs):
+        return [TextClassificationRecord(inputs="test")] * 4
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    def mock_apply(self, *args, **kwargs):
+        weak_label_matrix = np.array(
+            [[0, 1, -1], [-1, 0, -1], [-1, -1, -1], [1, 1, -1]], dtype=np.short
+        )
+        annotation_array = np.array([-1, -1, -1, -1], dtype=np.short)
+        label2int = {"None": -1, "negative": 0, "positive": 1}
+        return weak_label_matrix, annotation_array, label2int
+
+    monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+    weak_labels = WeakLabels(
+        rules=[lambda: None, lambda: None, lambda: None], dataset="mock"
+    )
+
+    summary = weak_labels.summary()
+    expected = pd.DataFrame(
+        {
+            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
+            "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
+            "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
+        },
+        index=["rule0", "rule1", "rule2", "total"],
+    )
+    pd.testing.assert_frame_equal(summary, expected)
+
+    summary = weak_labels.summary(normalize_by_coverage=True)
+    expected = pd.DataFrame(
+        {
+            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
+            "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
+            "conflicts": [1.0 / 2, 1.0 / 3, 0, 1.0 / 3],
+        },
+        index=["rule0", "rule1", "rule2", "total"],
+    )
+    pd.testing.assert_frame_equal(summary, expected)
+
+    summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
+    expected = pd.DataFrame(
+        {
+            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
+            "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
+            "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
+            "correct": [1, 2, 0, 3],
+            "incorrect": [1, 0, 0, 1],
+            "precision": [1.0 / 2, 2 / 2, 0, 3.0 / 4],
+        },
+        index=["rule0", "rule1", "rule2", "total"],
+    )
+    pd.testing.assert_frame_equal(summary, expected)
