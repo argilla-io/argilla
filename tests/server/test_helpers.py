@@ -12,11 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import httpx
+from starlette.testclient import TestClient
 
 from rubrix._constants import API_KEY_HEADER_NAME
 from rubrix.server.security.auth_provider.local.settings import settings
 from rubrix.server.server import app
-from starlette.testclient import TestClient
 
 
 class SecuredClient:
@@ -64,3 +65,11 @@ class SecuredClient:
 
 
 client = SecuredClient(TestClient(app))
+
+
+def mocking_client(monkeypatch, client):
+    monkeypatch.setattr(httpx, "post", client.post)
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "delete", client.delete)
+    monkeypatch.setattr(httpx, "put", client.put)
+    monkeypatch.setattr(httpx, "stream", client.stream)
