@@ -305,7 +305,7 @@ def test_load_with_ids_list(monkeypatch):
 
 
 def test_load_with_query(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_with_query"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -319,7 +319,7 @@ def test_load_with_query(monkeypatch):
 
 @pytest.mark.parametrize("as_pandas", [True, False])
 def test_load_as_pandas(monkeypatch, as_pandas):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_sorted_load"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
