@@ -119,10 +119,6 @@ export default {
       type: Object,
       required: true,
     },
-    allowKeyboardPagination: {
-      type: Boolean,
-      required: true,
-    },
     visiblePagesRange: {
       type: Number,
       default: 5,
@@ -194,7 +190,8 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
-      if (this.allowKeyboardPagination) {
+      const elem = document.querySelector('body');
+      if (elem === document.activeElement) {
         if (event.keyCode === 39) {
           this.nextPage()
         } else if (event.keyCode === 37) {
