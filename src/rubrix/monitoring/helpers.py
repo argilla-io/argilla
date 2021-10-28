@@ -8,7 +8,7 @@ def start_loop_in_thread():
         loop.run_forever()
 
     new_loop = asyncio.new_event_loop()
-    t = Thread(target=start_loop, args=(new_loop,))
+    t = Thread(target=start_loop, args=(new_loop,), daemon=True)
     t.start()
 
     return new_loop
