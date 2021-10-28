@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Callable, Dict
 
 from pydantic import BaseModel
@@ -12,7 +13,7 @@ class MetricSummary(BaseModel):
         try:
             return self.build_visualization()
         except ModuleNotFoundError:
-            raise RuntimeError(
+            warnings.warn(
                 "Please, install plotly in order to use this feature\n"
                 "%>pip install plotly"
             )
