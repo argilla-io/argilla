@@ -39,7 +39,6 @@
 </template>
 <script>
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
-import { Pagination } from "@/models/DatasetViewSettings";
 import { mapActions } from "vuex";
 export default {
   props: {
