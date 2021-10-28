@@ -22,6 +22,6 @@ icon.register({
     width: 12,
     height: 4,
     viewBox: '0 0 12 4',
-    data: '<text transform="translate(-1139 -222)" fill="#4C4EA3" fill-rule="evenodd" font-family="OpenSans-Bold, Open Sans" font-size="14" font-weight="bold"><tspan x="1139" y="225">…</tspan></text>'
+    data: '<text transform="translate(-1139 -222)" fill="#4A4A4A" fill-rule="evenodd" font-family="OpenSans-Bold, Open Sans" font-size="14" font-weight="bold"><tspan x="1139" y="225">…</tspan></text>'
   }
 })
