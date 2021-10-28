@@ -169,6 +169,8 @@ export default {
             options: aggregations[filter.key],
             selected: this.dataset.query[filter.key],
             disabled:
+              (filter.key === "annotated_as" && this.dataset.task === "Text2Text") ||
+              (filter.key === "predicted_as" && this.dataset.task === "Text2Text") ||
               (filter.key === "score" && this.isMultiLabelRecord) ||
               !aggregations[filter.key] ||
               !Object.entries(aggregations[filter.key]).length,
