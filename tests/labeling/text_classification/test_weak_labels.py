@@ -26,6 +26,7 @@ from rubrix.client.sdk.text_classification.models import (
 from rubrix.labeling.text_classification.rule import Rule
 from rubrix.labeling.text_classification.weak_labels import (
     MissingLabelError,
+    MultiLabelError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -79,8 +80,16 @@ def rules() -> List[Callable]:
     return [rule1, rule2, rule3]
 
 
-def test_multi_label_error():
-    raise NotImplementedError
+def test_multi_label_error(monkeypatch, rules):
+    def mock_load(*args, **kwargs):
+        return [TextClassificationRecord(inputs="test", multi_label=True)]
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    with pytest.raises(MultiLabelError):
+        WeakLabels(rules, dataset="mock")
 
 
 @pytest.mark.parametrize(
@@ -93,10 +102,10 @@ def test_multi_label_error():
             np.array([0, 1, -1], dtype=np.short),
         ),
         (
-            {"negative": 50, "positive": 10},
-            {"None": -1, "negative": 50, "positive": 10},
-            np.array([[50, -1, 10], [-1, 10, 10], [-1, 10, -1]], dtype=np.short),
-            np.array([50, 10, -1], dtype=np.short),
+            {"None": -10, "negative": 50, "positive": 10},
+            {"None": -10, "negative": 50, "positive": 10},
+            np.array([[50, -10, 10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short),
+            np.array([50, 10, -10], dtype=np.short),
         ),
         ({}, None, None, None),
         ({"negative": 0}, None, None, None),
