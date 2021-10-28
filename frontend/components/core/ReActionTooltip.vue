@@ -38,7 +38,7 @@ export default {
     padding: 0.1em 0.5em;
     white-space: nowrap;
     left: 0;
-    top: 100%;
+    top: calc(100% + 10px);
     &__container {
       position: relative;
     }
