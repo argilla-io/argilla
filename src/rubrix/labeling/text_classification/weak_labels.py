@@ -166,11 +166,19 @@ class WeakLabels:
         return self._matrix
 
     def train_matrix(self) -> np.ndarray:
-        """Returns part of the weak label `self.matrix` that has NO corresponding annotation."""
+        """Returns part of the weak label `self.matrix` that has NO corresponding annotation.
+
+        Returns:
+            The train weak label matrix.
+        """
         return self._matrix[self._annotation_array == self._label2int["None"]]
 
     def test_matrix(self) -> np.ndarray:
-        """Returns part of the weak label `self.matrix` that has A corresponding annotation."""
+        """Returns part of the weak label `self.matrix` that has A corresponding annotation.
+
+        Returns:
+            The test weak label matrix.
+        """
         return self._matrix[self._annotation_array != self._label2int["None"]]
 
     def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
@@ -179,6 +187,9 @@ class WeakLabels:
         Args:
             exclude_missing_annotations: If True, excludes missing annotations,
                 that is all entries with the `self.label2int["None"]` int.
+
+        Returns:
+            The annotation array of integers.
         """
         if not exclude_missing_annotations:
             return self._annotation_array
@@ -206,8 +217,7 @@ class WeakLabels:
                 By default we will use `self.annotation(exclude_missing_annotations=False)`.
 
         Returns:
-            A summary DataFrame with polarity, coverage, overlaps and conflicts of the rules.
-            If annotated records are available, we also provide the precision of the rules.
+            The summary statistics for each rule in a pandas DataFrame.
         """
         has_weak_label = self._matrix != self._label2int["None"]
 
@@ -236,7 +246,7 @@ class WeakLabels:
         )
 
         # conflicts
-        # TODO: For a lot of records (~1e6), this could become slow ... not sure if there is a vectorized solution.
+        # TODO: For a lot of records (~1e6), this could become slow (~10s) ... a vectorized solution would be better.
         has_conflicts = np.apply_along_axis(
             lambda x: len(np.unique(x[x != self._label2int["None"]])) > 1,
             axis=1,
