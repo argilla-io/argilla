@@ -43,7 +43,7 @@ jobs:
       - name: Install rubrix 🧊
         run: pip install .[server]
       - name: Run tests 📈
-        run:
+        run: |
           pip install "spacy~=3.1.0" "transformers[torch]" -qqq
           python -m spacy download en_core_web_sm
           pytest --cov=rubrix --cov-report=xml
