@@ -186,7 +186,7 @@ class WeakLabels:
 
     def summary(
         self,
-        normalize_by_coverage: bool = True,
+        normalize_by_coverage: bool = False,
         annotation: Optional[np.ndarray] = None,
     ) -> pd.DataFrame:
         """Returns following summary statistics for each rule:
@@ -251,9 +251,13 @@ class WeakLabels:
         index = [f"rule{i}" for i in range(len(self._rules))] + ["total"]
 
         # only add correct, incorrect and precision if we have annotations
-        if any(self._annotation_array != self._label2int["None"]) or annotation:
+        if (
+            any(self._annotation_array != self._label2int["None"])
+            or annotation is not None
+        ):
             correct, incorrect = self._compute_correct_incorrect(
-                has_weak_label, annotation or self._annotation_array
+                has_weak_label,
+                annotation if annotation is not None else self._annotation_array,
             )
             precision = np.nan_to_num(correct / (correct + incorrect))
 
@@ -309,19 +313,21 @@ class WeakLabels:
         self, has_weak_label: np.ndarray, annotation: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
-        # correct
-        correct_with_abstain = (
-            np.repeat(annotation, len(self._rules)).reshape(self._matrix.shape)
-            == self._matrix
+        annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(
+            self._matrix.shape
         )
+
+        # correct
+        correct_with_abstain = annotation_matrix == self._matrix
         correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
 
         # incorrect
-        incorrect_with_abstain = (
-            np.repeat(annotation, len(self._rules)).reshape(self._matrix.shape)
-            != self._matrix
-        )
-        incorrect = np.where(has_weak_label, incorrect_with_abstain, False).sum(axis=0)
+        incorrect_with_abstain = annotation_matrix != self._matrix
+        incorrect = np.where(
+            has_weak_label & (annotation_matrix != self._label2int["None"]),
+            incorrect_with_abstain,
+            False,
+        ).sum(axis=0)
 
         # add totals at the end
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
