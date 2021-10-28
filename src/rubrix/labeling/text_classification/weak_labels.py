@@ -33,14 +33,13 @@ class WeakLabels:
         query: An optional ElasticSearch query with the
             [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
             to filter the dataset.
-        label2int: An optional dict, mapping the labels to integers. The return type `None` is automatically
-            mapped to -1. By default, we will construct a mapping on the fly when applying the rules.
+        label2int: An optional dict, mapping the labels to integers. Use the string "None" to refer to the return
+            type `None` (abstention). By default, we will construct a mapping on the fly when applying the rules.
 
     Raises:
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
         MissingLabelError: When provided with a `label2int` dict, and a
             weak label or annotation label is not present in its keys.
-        Label2IntError: If the provided `label2int` dict contains the reserved key 'None' or the reserved value -1.
 
     Examples:
         Get the weak label matrix and a summary of the applied rules:
@@ -70,19 +69,6 @@ class WeakLabels:
     ):
         self._rules = rules
         self._dataset = dataset
-
-        # check label2int mapping
-        if label2int is not None:
-            if "None" in label2int:
-                raise Label2IntError(
-                    f"Found the reserved 'None' key in the provided label2int dict: {label2int}. "
-                    "Please remove it or use another string for this label."
-                )
-            if any(i == -1 for i in label2int.values()):
-                raise Label2IntError(
-                    f"Found the reserved value -1 in the provided label2int dict: {label2int}. "
-                    "Please remove it or use another value for this label."
-                )
 
         # load records and check compatibility
         self._records: List[TextClassificationRecord] = load(
@@ -123,8 +109,7 @@ class WeakLabels:
             (len(self._records), len(self._rules)), dtype=np.short
         )
         annotation_array = np.empty(len(self._records), dtype=np.short)
-        _label2int = label2int or {}
-        _label2int["None"] = -1
+        _label2int = {"None": -1} if label2int is None else label2int
 
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
@@ -224,10 +209,6 @@ class WeakLabels:
 
 
 class WeakLabelsError(Exception):
-    pass
-
-
-class Label2IntError(WeakLabelsError):
     pass
 
 
