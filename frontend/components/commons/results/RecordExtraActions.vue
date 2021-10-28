@@ -22,7 +22,7 @@
       class="extra-actions__button"
       href="#"
       @click.prevent="open = !open"
-      ><svgicon name="kebab-menu-h" width="20" height="20" color="#4C4EA3"
+      ><svgicon name="kebab-menu-h" width="20" height="20" color="#4A4A4A"
     /></a>
     <div v-if="open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="$emit('onShowMetadata')">

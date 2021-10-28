@@ -16,12 +16,18 @@
   -->
 
 <template>
-  <div class="re-annotation-button" :class="[classes, allowMultiple ? 'multiple' : 'single']">
+  <div
+    class="re-annotation-button"
+    :class="[classes, allowMultiple ? 'multiple' : 'single']"
+  >
     <label :for="id" class="button" @click.prevent="toggleCheck">
       <span class="annotation-button-data__text" :title="label.class"
         >{{ label.class }}
       </span>
-      <div class="annotation-button-data__info" v-if="!label.selected && label.score > 0">
+      <div
+        v-if="!label.selected && label.score > 0"
+        class="annotation-button-data__info"
+      >
         <span>{{ label.score | percent }}</span>
       </div>
     </label>
@@ -223,5 +229,4 @@ $annotation-button-touch-size: 48px;
     line-height: $annotation-button-size;
   }
 }
-
 </style>

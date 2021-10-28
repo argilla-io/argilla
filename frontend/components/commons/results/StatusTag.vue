@@ -24,7 +24,7 @@ export default {
 <style scoped lang="scss">
 .status-tag {
   position: absolute;
-  top: 4em;
+  top: 3.1em;
   right: 2em;
   display: flex;
   align-items: center;

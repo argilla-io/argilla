@@ -257,8 +257,8 @@ export default {
     display: flex;
     min-width: 20%;
     .re-button {
-      min-height: 38px;
-      line-height: 38px;
+      min-height: 32px;
+      line-height: 32px;
       display: block;
       margin-bottom: 0;
       margin-right: 0;
