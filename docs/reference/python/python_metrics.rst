@@ -3,10 +3,10 @@
 Metrics (Experimental)
 ======================
 
-Here we describe the available of Rubrix:
+Here we describe the available metrics in Rubrix:
 
 - Text classification: Metrics for text classification
-- Token classification: Metrics defined for token classification
+- Token classification: Metrics for token classification
 
 Text classification
 -------------------
