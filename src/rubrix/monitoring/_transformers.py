@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 class TextClassificationMonitor(BaseMonitor):
     """Configures monitoring over Hugging Face text classification pipelines"""
 
-    async def __log_to_rubrix__(
+    def _log2rubrix(
         self,
         data: List[Tuple[str, Dict[str, Any], List[Any]]],
     ):
@@ -72,12 +72,13 @@ class TextClassificationMonitor(BaseMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self.run_separate(self.__log_to_rubrix__(filtered_data))
+                self.log_async(filtered_data)
 
         finally:
             return batch_predictions
 
 
-def classifier_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Pipeline:
-    assert isinstance(pl, TextClassificationPipeline)
+def classifier_monitor(
+    pl: TextClassificationPipeline, dataset: str, sample_rate: float
+) -> Pipeline:
     return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)

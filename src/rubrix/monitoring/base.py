@@ -3,6 +3,7 @@ import random
 
 import wrapt
 
+import rubrix
 from rubrix.monitoring.helpers import start_loop_in_thread
 
 _LOGGING_LOOP = None
@@ -50,6 +51,14 @@ class BaseMonitor(wrapt.ObjectProxy):
         """Return True if a record should be logged to rubrix"""
         return random.uniform(0.0, 1.0) <= self.sample_rate
 
-    def run_separate(self, coroutine):
+    def _log2rubrix(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def log_async(self, *args, **kwargs):
+        wrapped_func = self._log2rubrix
         loop = _get_current_loop()
-        asyncio.run_coroutine_threadsafe(coroutine, loop)
+
+        async def f():
+            return wrapped_func(*args, **kwargs)
+
+        asyncio.run_coroutine_threadsafe(f, loop)

@@ -3,11 +3,11 @@ from typing import Any, Dict, Optional
 import rubrix as rb
 from rubrix import TokenClassificationRecord
 
-# Conditional modules
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
 try:
+    # Conditional modules
     from spacy import Language
     from spacy.tokens import Doc
 except ModuleNotFoundError:
@@ -44,9 +44,7 @@ class SpacyNERMonitor(BaseMonitor):
             prediction=entities,
         )
 
-    async def __log_to_rubrix__(
-        self, doc: Doc, metadata: Optional[Dict[str, Any]] = None
-    ):
+    def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
         record = self.doc2token_classification(
             doc, agent=str(self.__wrapped__.path), metadata=metadata
         )
@@ -67,7 +65,8 @@ class SpacyNERMonitor(BaseMonitor):
                 doc, metadata = r  # context
             else:
                 doc = r
-            self.run_separate(self.__log_to_rubrix__(doc, metadata))
+            if self.is_record_accepted():
+                self.log_async(doc, metadata)
             yield r
 
     def __call__(self, *args, **kwargs):
@@ -75,7 +74,7 @@ class SpacyNERMonitor(BaseMonitor):
         doc = self.__wrapped__(*args, **kwargs)
         try:
             if self.is_record_accepted():
-                self.run_separate(self.__log_to_rubrix__(doc, metadata))
+                self.log_async(doc, metadata)
         finally:
             return doc
 
