@@ -46,7 +46,6 @@
     <RePagination
       :total-items="dataset.results.total"
       :pagination-settings="dataset.viewSettings.pagination"
-      :allow-keyboard-pagination="allowKeyboardPagination"
       @changePage="onPagination"
     />
   </div>
@@ -71,9 +70,6 @@ export default {
     },
     visibleRecords() {
       return this.dataset.visibleRecords;
-    },
-    allowKeyboardPagination() {
-      return this.dataset.viewSettings.pagination.allowKeyboardPagination;
     },
   },
   mounted() {

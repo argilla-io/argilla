@@ -227,7 +227,6 @@ export default {
     edit() {
       if (this.editable) {
         this.editionMode = true;
-        this.$emit("edition-mode", this.editionMode);
       }
     },
     focus() {
@@ -239,19 +238,16 @@ export default {
     },
     back() {
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       this.refresh++;
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       this.$emit("change-visible-sentences");
     },
     annotate() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       if (this.newSentence) {
         let newS = {
           score: 1,

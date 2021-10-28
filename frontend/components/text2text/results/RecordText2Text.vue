@@ -30,7 +30,6 @@
           :annotations="annotationSentences"
           :sentences-origin="sentencesOrigin"
           :editable="annotationEnabled"
-          @edition-mode="onEditionMode"
           @change-visible-sentences="onChangeSentences"
           @annotate="onAnnotate"
         />
@@ -115,14 +114,6 @@ export default {
             },
           },
         ],
-      });
-    },
-    async onEditionMode(editionMode) {
-      await Pagination.update({
-        where: this.dataset.name,
-        data: {
-          allowKeyboardPagination: !editionMode,
-        },
       });
     },
   },
