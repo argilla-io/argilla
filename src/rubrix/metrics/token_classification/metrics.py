@@ -20,6 +20,23 @@ def tokens_length(name: str, interval: int = 1) -> MetricSummary:
     )
 
 
+def mention_length(name: str, interval: int = 1) -> MetricSummary:
+    current_client = client()
+
+    metric = current_client.calculate_metric(
+        name, metric="mention_length", interval=interval
+    )
+
+    return MetricSummary(
+        data=metric.results,
+        build_visualization=lambda: helpers.histogram(
+            metric.results,
+            title=metric.description,
+            x_legend="# tokens",
+        ),
+    )
+
+
 def entity_tags(name: str, entities: int = 50) -> MetricSummary:
     current_client = client()
 
