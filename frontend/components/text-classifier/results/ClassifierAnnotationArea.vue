@@ -17,7 +17,7 @@
 
 <template>
   <div :class="['feedback-interactions']" class="feedback-interactions__items">
-    <transition-group name="list" tag="div" >
+    <transition-group name="list" tag="div">
       <ClassifierAnnotationButton
         v-for="label in sortedLabels.slice(0, maxLabelsShown)"
         :id="label.class"
@@ -27,7 +27,7 @@
         :label="label"
         :class="[
           'label-button',
-          predictedAs.includes(label.class) ? 'bordered' : null
+          predictedAs.includes(label.class) ? 'bordered' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -70,7 +70,7 @@
           :label="label"
           :class="[
             'label-button',
-            predictedAs.includes(label.class) ? 'bordered' : null
+            predictedAs.includes(label.class) ? 'bordered' : null,
           ]"
           :data-title="label.class"
           :value="label.class"
@@ -159,22 +159,26 @@ export default {
       return this.record.predicted_as;
     },
   },
+  watch: {
+    appliedLabels(o, n) {
+      if (o.some((l) => n.indexOf(l) === -1)) {
+        this.selectedLabels = this.appliedLabels;
+      }
+    },
+  },
   mounted() {
     this.selectedLabels = this.appliedLabels;
   },
-  watch: {
-    appliedLabels(o, n) {
-      if (o.some(l => n.indexOf(l) === -1)) {
-        this.selectedLabels = this.appliedLabels;
-      }
-    }
-  },
   methods: {
-    updateLabels() {
-      this.annotate();
+    updateLabels(labels) {
+      if (this.record.multi_label || labels.length > 0) {
+        this.annotate();
+      } else this.resetRecord();
+    },
+    resetRecord() {
+      this.$emit("resetRecord", this.record);
     },
     annotate() {
-      this.annotating = true;
       this.$emit("annotate", { labels: this.selectedLabels });
     },
     onVisibility(visible) {
