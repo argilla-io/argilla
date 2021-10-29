@@ -17,9 +17,9 @@
 
 <template>
   <div v-if="annotationsProgress">
-    <p class="sidebar__title">Annotation progress</p>
+    <p class="sidebar__title">Progress</p>
     <div class="progress__info">
-      <p class="progress__info__text">Total annotations</p>
+      <p class="progress__info__text">Total</p>
       <span class="progress__info__percent">{{ progress | percent }}</span>
     </div>
     <div class="progress__numbers">
