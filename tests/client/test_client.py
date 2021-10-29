@@ -25,19 +25,11 @@ import rubrix
 from rubrix import Text2TextRecord, TextClassificationRecord
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
-from tests.server.test_helpers import client
-
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+from tests.server.test_helpers import client, mocking_client
 
 
 def test_log_something(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test-dataset"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -57,7 +49,7 @@ def test_log_something(monkeypatch):
 
 
 def test_load_limits(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_limits"
     api_ds_prefix = f"/api/datasets/{dataset}"
     client.delete(api_ds_prefix)
@@ -75,7 +67,7 @@ def test_load_limits(monkeypatch):
 
 
 def test_log_records_with_too_long_text(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_records_with_too_long_text"
     client.delete(f"/api/datasets/{dataset_name}")
     item = TextClassificationRecord(
@@ -86,7 +78,7 @@ def test_log_records_with_too_long_text(monkeypatch):
 
 
 def test_not_found_response(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     not_found_match = "Not found error. The API answered with a 404 code"
 
     with pytest.raises(Exception, match=not_found_match):
@@ -94,7 +86,7 @@ def test_not_found_response(monkeypatch):
 
 
 def test_log_without_name(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     with pytest.raises(
         Exception, match="Empty project name has been passed as argument."
     ):
@@ -107,7 +99,7 @@ def test_log_without_name(monkeypatch):
 
 
 def test_log_passing_empty_records_list(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
 
     with pytest.raises(
         Exception, match="Empty record list has been passed as argument."
@@ -130,7 +122,7 @@ def test_log_passing_empty_records_list(monkeypatch):
     ],
 )
 def test_delete_with_errors(monkeypatch, status, match):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
 
     def send_mock_response_with_http_status(status: int):
         def inner(*args, **kwargs):
@@ -146,7 +138,7 @@ def test_delete_with_errors(monkeypatch, status, match):
 
 
 def test_single_record(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_single_records"
     client.delete(f"/api/datasets/{dataset_name}")
     item = TextClassificationRecord(
@@ -157,7 +149,7 @@ def test_single_record(monkeypatch):
 
 
 def test_passing_wrong_iterable_data(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_single_records"
     client.delete(f"/api/datasets/{dataset_name}")
     with pytest.raises(Exception, match="Unknown record type passed"):
@@ -165,7 +157,7 @@ def test_passing_wrong_iterable_data(monkeypatch):
 
 
 def test_log_with_generator(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_with_generator"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -177,7 +169,7 @@ def test_log_with_generator(monkeypatch):
 
 
 def test_log_with_annotation(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_with_annotation"
     client.delete(f"/api/datasets/{dataset_name}")
     rubrix.log(
@@ -212,7 +204,7 @@ def test_log_with_annotation(monkeypatch):
 
 
 def test_create_ds_with_wrong_name(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "Test Create_ds_with_wrong_name"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -229,7 +221,7 @@ def test_create_ds_with_wrong_name(monkeypatch):
 
 
 def test_delete_dataset(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_delete_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -252,7 +244,7 @@ def test_delete_dataset(monkeypatch):
 
 
 def test_dataset_copy(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
 
@@ -279,7 +271,7 @@ def test_dataset_copy(monkeypatch):
 
 
 def test_text_classifier_with_inputs_list(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_text_classifier_with_inputs_list"
     client.delete(f"/api/datasets/{dataset}")
 
@@ -301,7 +293,7 @@ def test_text_classifier_with_inputs_list(monkeypatch):
 
 
 def test_load_with_ids_list(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_with_ids_list"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -313,7 +305,7 @@ def test_load_with_ids_list(monkeypatch):
 
 
 def test_load_with_query(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_with_query"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -327,7 +319,7 @@ def test_load_with_query(monkeypatch):
 
 @pytest.mark.parametrize("as_pandas", [True, False])
 def test_load_as_pandas(monkeypatch, as_pandas):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_sorted_load"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -347,7 +339,7 @@ def test_load_as_pandas(monkeypatch, as_pandas):
 
 
 def test_token_classification_spans(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_token_classification_with_consecutive_spans"
     texto = "Esto es una prueba"
     item = rubrix.TokenClassificationRecord(
@@ -372,7 +364,7 @@ def test_token_classification_spans(monkeypatch):
 
 
 def test_load_text2text(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     records = [
         Text2TextRecord(
             text="test text",

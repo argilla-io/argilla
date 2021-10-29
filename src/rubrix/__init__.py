@@ -29,6 +29,7 @@ import pkg_resources
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
 from rubrix.client.models import *
+from rubrix.monitoring.model_monitor import monitor
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
