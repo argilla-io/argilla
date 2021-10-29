@@ -29,9 +29,14 @@ def test_classifier_monitoring(monkeypatch):
     assert df.inputs.values.tolist() == [{"text": expected_text}]
 
     rubrix.delete(dataset)
-
     texts = ["This is a text", "And another text here"]
     sentiment_classifier(texts)
     df = rubrix.load(dataset)
     assert len(df) == 2
     assert set([r["text"] for r in df.inputs.values.tolist()]) == set(texts)
+
+    rubrix.delete(dataset)
+    sentiment_classifier(expected_text, metadata={"some": "metadata"})
+    df = rubrix.load(dataset)
+    assert len(df) == 1
+    assert df.metadata.values.tolist()[0] == {"some": "metadata"}
