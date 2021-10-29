@@ -152,7 +152,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     ):
         if status == TaskStatus.validated and not multi_label:
             assert (
-                len(annotation.labels) > 0
+                annotation and len(annotation.labels) > 0
             ), "Annotation must include some label for validated records"
 
     @classmethod
