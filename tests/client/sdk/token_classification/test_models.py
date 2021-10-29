@@ -69,32 +69,39 @@ def test_from_client_prediction(prediction, expected):
 
 
 @pytest.mark.parametrize(
-    "agent,expected", [(None, socket.gethostname()), ("agent", "agent")]
+    "pred_agent,annot_agent,pred_expected,annot_expected",
+    [
+        (None, None, socket.gethostname(), socket.gethostname()),
+        ("pred_agent", "annot_agent", "pred_agent", "annot_agent"),
+    ],
 )
-def test_from_client_agent(agent, expected):
+def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expected):
     record = TokenClassificationRecord(
         text="this is a test text",
         tokens=["this", "is", "a", "test", "text"],
         prediction=[("label", 0, 4)],
         annotation=[("label", 0, 4)],
-        prediction_agent=agent,
-        annotation_agent=agent,
+        prediction_agent=pred_agent,
+        annotation_agent=annot_agent,
     )
     sdk_record = CreationTokenClassificationRecord.from_client(record)
 
-    assert sdk_record.prediction.agent == expected
-    assert sdk_record.annotation.agent == expected
+    assert sdk_record.prediction.agent == pred_expected
+    assert sdk_record.annotation.agent == annot_expected
 
 
 def test_to_client():
     prediction = TokenClassificationAnnotation(
-        entities=[EntitySpan(label="label1", start=0, end=4)], agent="agent"
+        entities=[EntitySpan(label="pred_label", start=0, end=4)], agent="pred_agent"
+    )
+    annotation = TokenClassificationAnnotation(
+        entities=[EntitySpan(label="annot_label", start=5, end=7)], agent="annot_agent"
     )
 
     sdk_record = SdkTokenClassificationRecord(
         raw_text="this is a test text",
         tokens=["this", "is", "a", "test", "text"],
-        annotation=prediction,
+        annotation=annotation,
         prediction=prediction,
         event_timestamp=datetime(2000, 1, 1),
     )
@@ -102,7 +109,7 @@ def test_to_client():
     record = sdk_record.to_client()
 
     assert isinstance(record, TokenClassificationRecord)
-    assert record.prediction == [("label1", 0, 4, 1.0)]
-    assert record.prediction_agent == "agent"
-    assert record.annotation == [("label1", 0, 4)]
-    assert record.annotation_agent == "agent"
+    assert record.prediction == [("pred_label", 0, 4, 1.0)]
+    assert record.prediction_agent == "pred_agent"
+    assert record.annotation == [("annot_label", 5, 7)]
+    assert record.annotation_agent == "annot_agent"
