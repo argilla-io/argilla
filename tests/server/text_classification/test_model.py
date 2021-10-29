@@ -198,3 +198,24 @@ def test_predicted_ok_for_multilabel_unordered():
     )
 
     assert record.predicted == PredictionStatus.OK
+
+
+def test_validate_without_labels_for_single_label():
+    with pytest.raises(
+        ValidationError, match="Annotation must include some label for validated records"
+    ):
+        record = TextClassificationRecord(
+            inputs={"text": "The text"},
+            status=TaskStatus.validated,
+            prediction=TextClassificationAnnotation(
+                agent="test",
+                labels=[
+                    ClassPrediction(class_label="C", score=0.3),
+                ],
+            ),
+            annotation=TextClassificationAnnotation(
+                agent="test_ok",
+                labels=[],
+            ),
+        )
+        print(record)
