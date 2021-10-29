@@ -150,7 +150,7 @@ def test_apply(
     assert (weak_labels._annotation_array == expected_annotation_array).all()
 
 
-def test_records_train_test_annotation(monkeypatch):
+def test_props_and_train_test_annotation(monkeypatch):
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(inputs="test")]
 
@@ -166,10 +166,15 @@ def test_records_train_test_annotation(monkeypatch):
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
 
-    weak_labels = WeakLabels(rules=[], dataset="mock")
+    weak_labels = WeakLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
 
+    # records property
     assert len(weak_labels.records) == 1
     assert isinstance(weak_labels.records[0], TextClassificationRecord)
+
+    # rules property
+    assert len(weak_labels.rules) == 2
+    assert weak_labels.rules[0](None) == "mock"
 
     assert (weak_labels.train_matrix() == np.array([[0, 1]], dtype=np.short)).all()
     assert (weak_labels.test_matrix() == np.array([[-1, 0]], dtype=np.short)).all()

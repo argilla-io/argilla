@@ -151,6 +151,11 @@ class WeakLabels:
         return weak_label_matrix, annotation_array, _label2int
 
     @property
+    def rules(self) -> List[Callable]:
+        """The rules (labeling functions) that were used to produce the weak labels."""
+        return self._rules
+
+    @property
     def records(self) -> List[TextClassificationRecord]:
         """The records corresponding to the weak labels."""
         return self._records
@@ -166,7 +171,7 @@ class WeakLabels:
         return self._matrix
 
     def train_matrix(self) -> np.ndarray:
-        """Returns part of the weak label `self.matrix` that has NO corresponding annotation.
+        """Returns the part of the weak label `self.matrix` that has NO corresponding annotations.
 
         Returns:
             The train weak label matrix.
@@ -174,7 +179,7 @@ class WeakLabels:
         return self._matrix[self._annotation_array == self._label2int["None"]]
 
     def test_matrix(self) -> np.ndarray:
-        """Returns part of the weak label `self.matrix` that has A corresponding annotation.
+        """Returns the part of the weak label `self.matrix` that has corresponding annotations.
 
         Returns:
             The test weak label matrix.
@@ -186,7 +191,7 @@ class WeakLabels:
 
         Args:
             exclude_missing_annotations: If True, excludes missing annotations,
-                that is all entries with the `self.label2int["None"]` int.
+                that is all entries with the `self.label2int["None"]` integer.
 
         Returns:
             The annotation array of integers.
@@ -342,7 +347,19 @@ class WeakLabels:
         # add totals at the end
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
 
-    def bucket(self, labels: List[str], rules: List[int]) -> pd.DataFrame:
+    def filter_records(
+        self, labels: Optional[List[str]] = None, rules: Optional[List[int]] = None
+    ) -> pd.DataFrame:
+        """Filters and returns a subset of the records as a pandas DataFrame.
+
+        Args:
+            labels: Filter the records for which one of the weak labels, or the annotation label, is in `labels`.
+            rules: Filter the records for which one of the rules in `rules` did not abstain. Refer to the rules with
+                their index in the weak label `self.matrix`, which is the same as their index in the `self.rules` list.
+
+        Returns:
+            The filtered records as a pandas DataFrame.
+        """
         raise NotImplementedError
 
 
