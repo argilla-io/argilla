@@ -442,7 +442,7 @@ const actions = {
           ...record,
           annotation: null,
           selected: false,
-          status: null,
+          status: "Default",
         },
       ],
       persistBackend: true,
