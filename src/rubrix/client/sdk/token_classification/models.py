@@ -61,7 +61,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                     )
                     for ent in record.prediction
                 ],
-                agent=record.annotation_agent or MACHINE_NAME,
+                agent=record.prediction_agent or MACHINE_NAME,
             )
 
         annotation = None
