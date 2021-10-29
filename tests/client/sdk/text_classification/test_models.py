@@ -102,8 +102,8 @@ def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expecte
     )
     sdk_record = CreationTextClassificationRecord.from_client(record)
 
-    assert sdk_record.annotation.agent == pred_expected
-    assert sdk_record.prediction.agent == annot_expected
+    assert sdk_record.annotation.agent == annot_expected
+    assert sdk_record.prediction.agent == pred_expected
 
 
 @pytest.mark.parametrize(
