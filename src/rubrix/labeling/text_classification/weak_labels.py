@@ -352,15 +352,35 @@ class WeakLabels:
     ) -> pd.DataFrame:
         """Filters and returns a subset of the records as a pandas DataFrame.
 
+        You can filter by labels or rules. If you provide both, we take the intersection of both filters.
+
         Args:
-            labels: Filter the records for which one of the weak labels, or the annotation label, is in `labels`.
-            rules: Filter the records for which one of the rules in `rules` did not abstain. Refer to the rules with
-                their index in the weak label `self.matrix`, which is the same as their index in the `self.rules` list.
+            labels: All of these labels are in the record's weak labels. If None, do not filter by labels.
+            rules: All of these rules did not abstain for the record. If None, do not filter by rules.
+                Refer to the rules with their index in the `self.rules` list.
 
         Returns:
             The filtered records as a pandas DataFrame.
         """
-        raise NotImplementedError
+        # get labels mask
+        if labels is not None:
+            labels = [self._label2int[label] for label in labels]
+            idx_by_labels = np.isin(self._matrix, labels).sum(axis=1) >= len(labels)
+        else:
+            idx_by_labels = np.ones_like(self._records).astype(bool)
+
+        # get rule mask
+        if rules is not None:
+            idx_by_rules = (self._matrix[:, rules] != self._label2int["None"]).sum(
+                axis=1
+            ) == len(rules)
+        else:
+            idx_by_rules = np.ones_like(self._records).astype(bool)
+
+        # apply mask
+        filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
+
+        return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
 
 
 class WeakLabelsError(Exception):
