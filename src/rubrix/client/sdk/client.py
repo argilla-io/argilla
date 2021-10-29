@@ -49,3 +49,6 @@ class AuthenticatedClient(Client):
             API_KEY_HEADER_NAME: self.token,
             **super().get_headers(),
         }
+
+    def __hash__(self):
+        return hash((self.base_url, self.token))

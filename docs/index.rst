@@ -187,12 +187,13 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/zeroshot_data_annotation
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Reference
    :hidden:
 
-   reference/python_client
+   reference/python/index
    reference/rubrix_webapp_reference
+
 
 .. toctree::
    :maxdepth: 2

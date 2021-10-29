@@ -25,6 +25,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 import httpx
 import pandas
 
+from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
     BulkResponse,
     Record,
@@ -37,8 +38,12 @@ from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
-from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
-from rubrix.client.sdk.text2text.api import data as text2text_data
+from rubrix.client.sdk.metrics.api import calculate_metric, get_dataset_metrics
+from rubrix.client.sdk.metrics.models import MetricInfo
+from rubrix.client.sdk.text2text.api import (
+    bulk as text2text_bulk,
+    data as text2text_data,
+)
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
@@ -292,6 +297,47 @@ class RubrixClient:
         """
         response = delete_dataset(client=self._client, name=name)
         _check_response_errors(response)
+
+    def dataset_metrics(self, name: str) -> List[MetricInfo]:
+        response = get_dataset(self._client, name)
+        _check_response_errors(response)
+
+        response = get_dataset_metrics(
+            self._client, name=name, task=response.parsed.task
+        )
+        _check_response_errors(response)
+
+        return response.parsed
+
+    def get_metric(self, name: str, metric: str) -> Optional[MetricInfo]:
+        metrics = self.dataset_metrics(name)
+        for metric_ in metrics:
+            if metric_.id == metric:
+                return metric_
+
+    def calculate_metric(
+        self,
+        name: str,
+        metric: str,
+        interval: Optional[float] = None,
+        size: Optional[int] = None,
+    ) -> MetricResults:
+        response = get_dataset(self._client, name)
+        _check_response_errors(response)
+
+        metric_ = self.get_metric(name, metric=metric)
+        assert metric_ is not None, f"Metric {metric} not found !!!"
+
+        response = calculate_metric(
+            self._client,
+            name=name,
+            task=response.parsed.task,
+            metric=metric,
+            interval=interval,
+            size=size,
+        )
+        _check_response_errors(response)
+        return MetricResults(**metric_.dict(), results=response.parsed)
 
 
 def _check_response_errors(response: Response) -> None:

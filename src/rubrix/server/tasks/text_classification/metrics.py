@@ -42,11 +42,12 @@ class F1Metric(PythonMetric):
             predictions = record.annotated_as
 
             if not self.multi_label:
-                annotations = annotations[:1]
-                predictions = predictions[:1]
+                y_true.append(labels_mapping[annotations[0]])
+                y_pred.append(labels_mapping[predictions[0]])
 
-            y_true.extend([labels_mapping[label] for label in annotations])
-            y_pred.extend([labels_mapping[label] for label in predictions])
+            else:
+                y_true.append([labels_mapping[label] for label in annotations])
+                y_pred.append([labels_mapping[label] for label in predictions])
 
         if self.multi_label:
             mlb = MultiLabelBinarizer(classes=list(labels_mapping.values()))
