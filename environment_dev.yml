@@ -20,7 +20,7 @@ dependencies:
     - openapi-python-client~=0.8.0
     # docs
     - sphinx==4.1.2
-    - sphinx_rtd_theme==0.5.2
+    - sphinx_rtd_theme==1.0.0
     - nbsphinx==0.8.7
     - sphinxext.opengraph==0.4.2
     # code formatting
