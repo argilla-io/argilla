@@ -434,6 +434,20 @@ const actions = {
       persistBackend: true,
     });
   },
+  async resetRecord(_, { dataset, record }) {
+    return await _updateDatasetRecords({
+      dataset,
+      records: [
+        {
+          ...record,
+          annotation: null,
+          selected: false,
+          status: "Default",
+        },
+      ],
+      persistBackend: true,
+    });
+  },
   async validateAnnotations(_, { dataset, records, agent }) {
     const newRecords = records.map((record) => ({
       ...record,

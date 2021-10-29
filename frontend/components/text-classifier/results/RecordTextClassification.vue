@@ -31,10 +31,12 @@
         :dataset="dataset"
         :record="record"
         @annotate="onAnnotate"
+        @resetRecord="onResetRecord"
       />
       <ClassifierExplorationArea v-else :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
-        <re-button v-if="record.status !== 'Validated'"
+        <re-button
+          v-if="record.status !== 'Validated'"
           class="button-primary"
           @click="onValidate(record)"
           >Save</re-button
@@ -49,7 +51,12 @@
         height="20"
         :name="record.predicted ? 'predicted-ko' : 'predicted-ok'"
       ></svgicon>
-      <re-tag v-for="label in record.annotation.labels" :key="label.class" bg-color="#f5f5f6" :name="label.class" />
+      <re-tag
+        v-for="label in record.annotation.labels"
+        :key="label.class"
+        bg-color="#f5f5f6"
+        :name="label.class"
+      />
     </div>
   </div>
 </template>
@@ -80,16 +87,20 @@ export default {
   },
   methods: {
     ...mapActions({
-      validate: "entities/datasets/validateAnnotations",
+      validateAnnotations: "entities/datasets/validateAnnotations",
+      resetRecord: "entities/datasets/resetRecord",
     }),
+    async onResetRecord() {
+      await this.resetRecord({ dataset: this.dataset, record: this.record });
+    },
+
     async onAnnotate({ labels }) {
-      await this.validate({
+      await this.validateAnnotations({
         dataset: this.dataset,
         agent: this.$auth.user,
         records: [
           {
             ...this.record,
-            status: this.record.status,
             annotation: {
               labels: labels.map((label) => ({
                 class: label,
@@ -102,18 +113,22 @@ export default {
     },
     async onValidate(record) {
       let modelPrediction = {};
-      modelPrediction.labels = record.predicted_as.map((pred) => ({class: pred, score: 1}));
-      await this.validate({
+      modelPrediction.labels = record.predicted_as.map((pred) => ({
+        class: pred,
+        score: 1,
+      }));
+      // TODO: do not validate records without labels
+      await this.validateAnnotations({
         dataset: this.dataset,
         records: [
           {
             ...record,
             annotation: {
               ...(record.annotation || modelPrediction),
-              agent: this.$auth.user
-            }
-          }
-        ]
+              agent: this.$auth.user,
+            },
+          },
+        ],
       });
     },
   },

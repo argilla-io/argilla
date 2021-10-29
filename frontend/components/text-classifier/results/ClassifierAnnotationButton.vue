@@ -145,10 +145,7 @@ $annotation-button-touch-size: 48px;
         background: $secondary-color;
         border: 1px solid $line-smooth-color;
       }
-      &.single {
-        pointer-events: none;
-        cursor: pointer;
-      }
+
       &:after {
         display: none !important;
       }
