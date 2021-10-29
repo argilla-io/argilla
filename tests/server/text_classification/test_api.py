@@ -31,7 +31,7 @@ from rubrix.server.tasks.text_classification.api import (
 from tests.server.test_helpers import client
 
 
-def test_create_records_for_text_classification_with_multi_label(monkeypatch):
+def test_create_records_for_text_classification_with_multi_label():
     dataset = "test_create_records_for_text_classification_with_multi_label"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
