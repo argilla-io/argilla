@@ -246,3 +246,42 @@ def test_summary(monkeypatch):
         index=["rule0", "rule1", "rule2", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
+
+
+def test_filter_records(
+    monkeypatch,
+):
+    def mock_load(*args, **kwargs):
+        return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    def mock_apply(self, *args, **kwargs):
+        weak_label_matrix = np.array(
+            [[0, 1, -1], [2, 0, -1], [-1, -1, -1], [1, 1, -1], [-1, 0, 2]],
+            dtype=np.short,
+        )
+        annotation_array = np.array([0, 1, -1, 2, 0], dtype=np.short)
+        label2int = {"None": -1, "negative": 0, "positive": 1, "neutral": 2}
+        return weak_label_matrix, annotation_array, label2int
+
+    monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+    weak_labels = WeakLabels(rules=[lambda x: None] * 3, dataset="mock")
+
+    assert weak_labels.filter_records().id.tolist() == [0, 1, 2, 3, 4]
+    assert weak_labels.filter_records(labels=["positive"]).id.tolist() == [0, 3]
+    assert weak_labels.filter_records(labels=["negative", "neutral"]).id.tolist() == [
+        1,
+        4,
+    ]
+    assert weak_labels.filter_records(rules=[0]).id.tolist() == [0, 1, 3]
+    assert weak_labels.filter_records(rules=[0, 1]).id.tolist() == [0, 1, 3]
+    assert weak_labels.filter_records(labels=["negative"], rules=[1]).id.tolist() == [
+        0,
+        1,
+        4,
+    ]
+    assert weak_labels.filter_records(labels=["positive"], rules=[2]).empty
