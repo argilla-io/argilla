@@ -357,7 +357,7 @@ class TextClassificationQuery(BaseModel):
 
     ids: Optional[List[Union[str, int]]]
 
-    query_text: str = Field(default=None, alias="query_inputs")
+    query_text: str = Field(default=None)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
@@ -367,9 +367,6 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-    class Config:
-        allow_population_by_field_name = True
 
     def as_elasticsearch(self) -> Dict[str, Any]:
         """Build an elasticsearch query part from search query"""
