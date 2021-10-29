@@ -24,15 +24,15 @@ from rubrix.labeling.text_classification.rule import Rule
 
 
 class WeakLabels:
-    """Computes the weak labels of a dataset given a list of rules.
+    """Computes the weak labels of a dataset by applying a given list of rules.
 
     Args:
         rules: A list of rules (labeling functions). They must return a string, or `None` in case of abstention.
         dataset: Name of the dataset to which the rules will be applied.
-        ids: An optional list of record ids to filter the dataset.
+        ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
             [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-            to filter the dataset.
+            to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Use the string "None" to refer to the return
             type `None` (abstention). By default, we will construct a mapping on the fly when applying the rules.
 
