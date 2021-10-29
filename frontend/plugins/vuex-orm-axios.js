@@ -28,18 +28,30 @@ export default ({ $axios, app }) => {
       app.$auth.logout();
     }
 
-    if (code === 400) {
-      // Add more erros once are better handled
-      return Notification.dispatch("notify", {
-        message:
-          "Error: " + JSON.stringify(error.response.data.detail || error),
-        type: "error",
-      });
+    switch (code) {
+      case 400:
+        Notification.dispatch("notify", {
+          message:
+            "Error: " + JSON.stringify(error.response.data.detail || error),
+          type: "error",
+        });
+        break;
+      case 422:
+        error.response.data.detail.forEach(({ msg }) => {
+          Notification.dispatch("notify", {
+            message: "Error: " + msg || "Unknown",
+            type: "error",
+          });
+        });
+
+        break;
+      default:
+        Notification.dispatch("notify", {
+          message: error,
+          type: "error",
+        });
     }
 
-    return Notification.dispatch("notify", {
-      message: error,
-      type: "error",
-    });
+    throw error;
   });
 };
