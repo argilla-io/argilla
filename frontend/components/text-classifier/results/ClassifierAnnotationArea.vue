@@ -173,13 +173,13 @@ export default {
     updateLabels(labels) {
       if (this.record.multi_label || labels.length > 0) {
         this.annotate();
-      } else this.resetRecord();
+      } else this.resetAnnotations();
     },
-    resetRecord() {
-      this.$emit("resetRecord", this.record);
+    resetAnnotations() {
+      this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("annotate", { labels: this.selectedLabels });
+      this.$emit("validate", { labels: this.selectedLabels });
     },
     onVisibility(visible) {
       this.visible = visible;

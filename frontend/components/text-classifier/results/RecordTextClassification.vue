@@ -30,8 +30,8 @@
         v-if="annotationEnabled"
         :dataset="dataset"
         :record="record"
-        @annotate="onAnnotate"
-        @resetRecord="onResetRecord"
+        @validate="validateLabels"
+        @reset="resetLabels"
       />
       <ClassifierExplorationArea v-else :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
@@ -88,13 +88,24 @@ export default {
   methods: {
     ...mapActions({
       validateAnnotations: "entities/datasets/validateAnnotations",
-      resetRecord: "entities/datasets/resetRecord",
+      resetAnnotations: "entities/datasets/resetAnnotations",
     }),
-    async onResetRecord() {
-      await this.resetRecord({ dataset: this.dataset, record: this.record });
+    async resetLabels() {
+      await this.resetAnnotations({
+        dataset: this.dataset,
+        agent: this.$auth.user,
+        records: [
+          {
+            ...this.record,
+            annotation: {
+              labels: [],
+            },
+          },
+        ],
+      });
     },
 
-    async onAnnotate({ labels }) {
+    async validateLabels({ labels }) {
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: this.$auth.user,
