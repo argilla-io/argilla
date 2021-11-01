@@ -157,7 +157,7 @@ class DatasetRecordsDAO:
             db_record = record_class.parse_obj(r)
             if now:
                 db_record.last_updated = now
-            documents.append(db_record.dict(exclude_none=True))
+            documents.append(db_record.dict(exclude_none=False))
 
         index_name = dataset_records_index(dataset.id)
 
@@ -239,7 +239,7 @@ class DatasetRecordsDAO:
 
         result = RecordSearchResults(
             total=total,
-            records=[doc["_source"] for doc in docs],
+            records=list(map(self.esdoc2record, docs)),
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
@@ -280,7 +280,10 @@ class DatasetRecordsDAO:
             dataset_records_index(dataset.id), query=es_query
         )
         for doc in docs:
-            yield doc["_source"]
+            yield self.esdoc2record(doc)
+
+    def esdoc2record(self, doc):
+        return {**doc["_source"], "id": doc["_id"]}
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def detect_nested_type(v: Any) -> bool:
