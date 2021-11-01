@@ -166,7 +166,7 @@ class BaseRecord(GenericModel, Generic[Annotation]):
 
     """
 
-    id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
+    id: Optional[Union[int, str]] = Field(None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
