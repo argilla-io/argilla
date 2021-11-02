@@ -69,7 +69,7 @@ class WeakLabels:
     ):
         self._rules = rules
         self._rules_name2index = {
-            # covers our Rule class as well as snorkel's LabelingFunction class
+            # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
             getattr(rule, "name", None)
             or getattr(rule, "__name__", None)
             or f"rule_{i}": i
