@@ -17,7 +17,11 @@
 
 <template>
   <div class="header__filters">
-    <header-title title="Token Classification" v-if="dataset.results.records" :dataset="dataset" />
+    <header-title
+      v-if="dataset.results.records"
+      title="Token Classification"
+      :dataset="dataset"
+    />
     <filters-area :dataset="dataset" />
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
@@ -61,11 +65,11 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: records.map((record) => ({
           ...record,
           annotation: {
             ...(record.annotation || record.prediction),
-            agent: this.$auth.user,
           },
         })),
       });

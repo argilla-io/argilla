@@ -68,8 +68,10 @@ export default {
       return this.record.prediction ? this.record.prediction.sentences : [];
     },
     initialAnnotations() {
-      return this.initialRecord.annotation ? this.initialRecord.annotation.sentences : [];
-    }
+      return this.initialRecord.annotation
+        ? this.initialRecord.annotation.sentences
+        : [];
+    },
   },
   mounted() {
     this.initializeSentenceOrigin();
@@ -93,7 +95,7 @@ export default {
           this.sentencesOrigin = "Prediction";
         } else if (this.annotationSentences.length) {
           this.sentencesOrigin = "Annotation";
-        }        
+        }
       }
     },
 
@@ -112,9 +114,9 @@ export default {
             status: "Edited",
             annotation: {
               sentences,
-            }
-          }
-        ]
+            },
+          },
+        ],
       });
     },
     async onResetInitialRecord() {
@@ -124,8 +126,8 @@ export default {
           {
             ...this.initialRecord,
             selected: false,
-          }
-        ]
+          },
+        ],
       });
     },
     async onAnnotate({ sentences }) {
@@ -134,16 +136,14 @@ export default {
         ...this.record,
         status: "Validated",
         annotation: {
-          agent: this.$auth.user,
           sentences,
         },
-      }
+      };
       this.initialRecord = newRecord;
       await this.validate({
         dataset: this.dataset,
-        records: [
-          newRecord,
-        ],
+        agent: this.$auth.user,
+        records: [newRecord],
       });
     },
   },

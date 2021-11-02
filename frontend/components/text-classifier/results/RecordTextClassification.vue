@@ -131,12 +131,12 @@ export default {
       // TODO: do not validate records without labels
       await this.validateAnnotations({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: [
           {
             ...record,
             annotation: {
               ...(record.annotation || modelPrediction),
-              agent: this.$auth.user,
             },
           },
         ],
