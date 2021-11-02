@@ -34,7 +34,19 @@
       >
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="itemNumber === index" class="content__sentences">
-            <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
+            <div class="content__group">
+              <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
+              <re-button
+                v-if="hasAnnotationAndPredictions && !editionMode"
+                class="button-clear"
+                @click="changeVisibleSentences"
+                >{{
+                  sentencesOrigin === "Annotation"
+                    ? editable ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
+                    : editable ? "Back to annotation" : "View annotation"
+                }}</re-button
+              >
+            </div>
             <div class="content__edition-area">
               <p
                 :key="refresh"
@@ -48,18 +60,6 @@
               ></p>
               <span v-if="editionMode"
                 ><strong>shift Enter</strong> to save</span
-              >
-            </div>
-            <div class="content__buttons">
-              <re-button
-                v-if="hasAnnotationAndPredictions && !editionMode"
-                class="button-clear"
-                @click="changeVisibleSentences"
-                >{{
-                  sentencesOrigin === "Annotation"
-                    ? editable ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
-                    : editable ? "Back to annotation" : "View annotation"
-                }}</re-button
               >
             </div>
             <div class="content__footer">
@@ -95,13 +95,7 @@
                   />
                 </a>
               </div>
-              <div class="content__actions-buttons">
-                <re-button
-                  v-if="!editionMode && editable && newSentence && sentences.length"
-                  class="button-primary--outline"
-                  @click="edit()"
-                  >Edit</re-button
-                >
+              <div class="content__footer__buttons">
                 <re-button
                   v-if="editionMode && editable && newSentence"
                   class="button-primary--outline"
@@ -109,12 +103,26 @@
                   >Back</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable && (editionMode || sentencesOrigin !== 'Annotation')"
+                  v-if="newSentence && editable && editionMode"
                   class="button-primary"
                   @click="annotate"
-                  >{{status === "Edited" ? "Save" : "Validate"}}</re-button
+                  >Save</re-button
                 >
               </div>
+            </div>
+            <div class="content__actions-buttons">
+              <re-button
+                v-if="!editionMode && editable && newSentence && sentences.length"
+                :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
+                @click="edit()"
+                >Edit</re-button
+              >
+              <re-button
+                v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                class="button-primary"
+                @click="annotate"
+                >Validate</re-button
+              >
             </div>
           </div>
         </span>
@@ -389,15 +397,27 @@ $marginRight: 200px;
     margin-bottom: 0;
     display: flex;
     align-items: center;
+    width: calc(100% - 200px);
+    &__buttons {
+      margin: 0 0 0 auto;
+      display: flex;
+
+      .re-button {
+        margin-bottom: 0;
+        &:last-child {
+          margin-left: 6px;
+        }
+      }
+    }
   }
-  &__buttons {
-    position: absolute;
-    top: 1em;
-    right: 0;
+  &__group {
+    width: calc(100% - 200px);
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5em;
     .button-clear {
+      margin: auto 0 auto auto;
       color: palette(grey, dark);
-      min-height: 2em;
-      line-height: 2em;
       opacity: 0;
       transition: opacity 0.3s ease-in-out 0.2s;
       &:hover {
@@ -410,6 +430,10 @@ $marginRight: 200px;
     margin-left: auto;
     display: flex;
     min-width: 20%;
+    .edit {
+      opacity: 0;
+      pointer-events: none;
+    }
     .re-button {
       min-height: 32px;
       line-height: 32px;
