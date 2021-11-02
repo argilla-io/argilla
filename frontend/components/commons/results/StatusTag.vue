@@ -1,7 +1,7 @@
 <template>
     <span :class="['status-tag', title]">
-      <svgicon v-if="title === 'Validated'"
-        name="check"
+      <svgicon
+        :name="title === 'Validated' ? 'check' : null || title === 'Edited' ? 'clock' : null || title === 'Discarded' ? 'forbidden' : null"
         width="12"
         height="12"
         color="#ffffff"
@@ -12,6 +12,8 @@
 
 <script>
 import "assets/icons/check";
+import "assets/icons/clock";
+import "assets/icons/forbidden";
 export default {
   props: {
     title: {
@@ -24,8 +26,8 @@ export default {
 <style scoped lang="scss">
 .status-tag {
   position: absolute;
-  top: 3.1em;
-  right: 2em;
+  top: 1em;
+  right: 4em;
   display: flex;
   align-items: center;
   background: $secondary-color;
@@ -36,7 +38,10 @@ export default {
   font-weight: 600;
   z-index: 0;
   &.Edited {
-    background: orange
+    background: #BB720A;
+  }
+  &.Discarded {
+    background: #70767F;
   }
   .svg-icon {
     margin-right: 0.5em;
