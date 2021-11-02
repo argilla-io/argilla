@@ -76,6 +76,8 @@ def rules(monkeypatch) -> List[Callable]:
         if "positive" in record.inputs["text"]:
             return "positive"
 
+    rule2.__name__ = ""
+
     def mock_apply(self, *args, **kwargs):
         self._matching_ids = {1: None, 2: None}
 
@@ -222,7 +224,7 @@ def test_summary(monkeypatch, rules):
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
         },
-        index=["first_rule", "rule2", "rubrix_rule", "total"],
+        index=["first_rule", "rule_1", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 
@@ -234,7 +236,7 @@ def test_summary(monkeypatch, rules):
             "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
             "conflicts": [1.0 / 2, 1.0 / 3, 0, 1.0 / 3],
         },
-        index=["first_rule", "rule2", "rubrix_rule", "total"],
+        index=["first_rule", "rule_1", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 
@@ -249,14 +251,12 @@ def test_summary(monkeypatch, rules):
             "incorrect": [1, 0, 0, 1],
             "precision": [1.0 / 2, 2 / 2, 0, 3.0 / 4],
         },
-        index=["first_rule", "rule2", "rubrix_rule", "total"],
+        index=["first_rule", "rule_1", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 
 
-def test_show_records(
-    monkeypatch,
-):
+def test_show_records(monkeypatch, rules):
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
 
@@ -275,7 +275,7 @@ def test_show_records(
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
 
-    weak_labels = WeakLabels(rules=[lambda x: None] * 3, dataset="mock")
+    weak_labels = WeakLabels(rules=rules, dataset="mock")
 
     assert weak_labels.show_records().id.tolist() == [0, 1, 2, 3, 4]
     assert weak_labels.show_records(labels=["positive"]).id.tolist() == [0, 3]
@@ -284,10 +284,10 @@ def test_show_records(
         4,
     ]
     assert weak_labels.show_records(rules=[0]).id.tolist() == [0, 1, 3]
-    assert weak_labels.show_records(rules=[0, 1]).id.tolist() == [0, 1, 3]
+    assert weak_labels.show_records(rules=[0, "rule_1"]).id.tolist() == [0, 1, 3]
     assert weak_labels.show_records(labels=["negative"], rules=[1]).id.tolist() == [
         0,
         1,
         4,
     ]
-    assert weak_labels.show_records(labels=["positive"], rules=[2]).empty
+    assert weak_labels.show_records(labels=["positive"], rules=["rubrix_rule"]).empty

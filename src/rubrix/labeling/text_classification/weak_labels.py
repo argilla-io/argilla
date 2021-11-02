@@ -68,6 +68,13 @@ class WeakLabels:
         label2int: Optional[Dict[Optional[str], int]] = None,
     ):
         self._rules = rules
+        self._rules_name2index = {
+            # covers our Rule class as well as snorkel's LabelingFunction class
+            getattr(rule, "name", None)
+            or getattr(rule, "__name__", None)
+            or f"rule_{i}": i
+            for i, rule in enumerate(self._rules)
+        }
         self._dataset = dataset
 
         # load records and check compatibility
@@ -264,11 +271,7 @@ class WeakLabels:
         )
 
         # index for the summary
-        index = [
-            # covers our Rule class as well as snorkel's LabelingFunction class
-            getattr(rule, "name", None) or rule.__name__
-            for rule in self._rules
-        ] + ["total"]
+        index = list(self._rules_name2index.keys()) + ["total"]
 
         # only add correct, incorrect and precision if we have annotations
         if (
@@ -353,7 +356,9 @@ class WeakLabels:
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
 
     def show_records(
-        self, labels: Optional[List[str]] = None, rules: Optional[List[int]] = None
+        self,
+        labels: Optional[List[str]] = None,
+        rules: Optional[List[Union[str, int]]] = None,
     ) -> pd.DataFrame:
         """Shows records in a pandas DataFrame, optionally filtered by weak labels and non-abstaining rules.
 
@@ -362,7 +367,7 @@ class WeakLabels:
         Args:
             labels: All of these labels are in the record's weak labels. If None, do not filter by labels.
             rules: All of these rules did not abstain for the record. If None, do not filter by rules.
-                Refer to the rules with their index in the ``self.rules`` list.
+                You can refer to the rules by their (function) name or by their index in the ``self.rules`` list.
 
         Returns:
             The optionally filtered records as a pandas DataFrame.
@@ -376,6 +381,10 @@ class WeakLabels:
 
         # get rule mask
         if rules is not None:
+            rules = [
+                self._rules_name2index[rule] if isinstance(rule, str) else rule
+                for rule in rules
+            ]
             idx_by_rules = (self._matrix[:, rules] != self._label2int[None]).sum(
                 axis=1
             ) == len(rules)
