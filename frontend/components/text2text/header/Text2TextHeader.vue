@@ -44,18 +44,19 @@ export default {
   },
   methods: {
     ...mapActions({
-      discard: "entities/datasets/discardAnnotations",
-      validate: "entities/datasets/validateAnnotations",
+      discardAnnotations: "entities/datasets/discardAnnotations",
+      validateAnnotations: "entities/datasets/validateAnnotations",
     }),
     async onDiscard(records) {
-      await this.discard({
+      await this.discardAnnotations({
         dataset: this.dataset,
         records: records,
       });
     },
     async onValidate(records) {
-      await this.validate({
+      await this.validateAnnotations({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: records,
       });
     },
