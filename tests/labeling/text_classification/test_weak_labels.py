@@ -98,18 +98,19 @@ def test_multi_label_error(monkeypatch, rules):
     [
         (
             None,
-            {"None": -1, "negative": 0, "positive": 1},
+            {None: -1, "negative": 0, "positive": 1},
             np.array([[0, -1, 1], [-1, 1, 1], [-1, 1, -1]], dtype=np.short),
             np.array([0, 1, -1], dtype=np.short),
         ),
         (
-            {"None": -10, "negative": 50, "positive": 10},
-            {"None": -10, "negative": 50, "positive": 10},
+            {None: -10, "negative": 50, "positive": 10},
+            {None: -10, "negative": 50, "positive": 10},
             np.array([[50, -10, 10], [-10, 10, 10], [-10, 10, -10]], dtype=np.short),
             np.array([50, 10, -10], dtype=np.short),
         ),
         ({}, None, None, None),
-        ({"negative": 0}, None, None, None),
+        ({None: -1}, None, None, None),
+        ({None: -1, "negative": 0}, None, None, None),
     ],
 )
 def test_apply(
@@ -132,9 +133,14 @@ def test_apply(
     if label2int == {}:
         with pytest.raises(MissingLabelError) as error:
             WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
+        assert "required abstention label" in str(error)
+        return
+    elif label2int == {None: -1}:
+        with pytest.raises(MissingLabelError) as error:
+            WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
         assert "annotation label" in str(error)
         return
-    elif label2int == {"negative": 0}:
+    elif label2int == {None: -1, "negative": 0}:
         with pytest.raises(MissingLabelError) as error:
             WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
         assert "weak label" in str(error)

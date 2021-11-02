@@ -33,8 +33,8 @@ class WeakLabels:
         query: An optional ElasticSearch query with the
             `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
             to filter the dataset before applying the rules.
-        label2int: An optional dict, mapping the labels to integers. Use the string "None" to refer to the return
-            type ``None`` (abstention). By default, we will construct a mapping on the fly when applying the rules.
+        label2int: An optional dict, mapping the labels to integers. Remember that the return type ``None`` means
+            abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
 
     Raises:
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
@@ -65,7 +65,7 @@ class WeakLabels:
         dataset: str,
         ids: Optional[List[Union[int, str]]] = None,
         query: Optional[str] = None,
-        label2int: Optional[Dict[str, int]] = None,
+        label2int: Optional[Dict[Optional[str], int]] = None,
     ):
         self._rules = rules
         self._dataset = dataset
@@ -109,31 +109,33 @@ class WeakLabels:
             (len(self._records), len(self._rules)), dtype=np.short
         )
         annotation_array = np.empty(len(self._records), dtype=np.short)
-        _label2int = {"None": -1} if label2int is None else label2int
+        _label2int = {None: -1} if label2int is None else label2int
+        if None not in _label2int:
+            raise MissingLabelError(
+                "Your provided `label2int` mapping does not contain the required abstention label `None`."
+            )
 
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
         ):
             # First: fill annotation array
-            annotation = record.annotation or "None"
-
             try:
-                annotation = _label2int[annotation]
+                annotation = _label2int[record.annotation]
             except KeyError as error:
                 # When a label2int was provided, we want to raise an error if the label is missing!
                 if label2int is not None:
                     raise MissingLabelError(
-                        f"The annotation label '{annotation}' is missing in the `label2int` dict {label2int}"
+                        f"The annotation label '{record.annotation}' is missing in the `label2int` dict {label2int}"
                     ) from error
-                # we already have "None" -> we need to subtract 1
-                _label2int[annotation] = len(_label2int) - 1
-                annotation = _label2int[annotation]
+                # we already have `None` -> we need to subtract 1
+                _label2int[record.annotation] = len(_label2int) - 1
+                annotation = _label2int[record.annotation]
 
             annotation_array[n] = annotation
 
             # Second: fill weak label matrix
             for m, rule in enumerate(self._rules):
-                weak_label = rule(record) or "None"
+                weak_label = rule(record)
 
                 try:
                     weak_label = _label2int[weak_label]
@@ -161,7 +163,7 @@ class WeakLabels:
         return self._records
 
     @property
-    def label2int(self) -> Dict[str, int]:
+    def label2int(self) -> Dict[Optional[str], int]:
         """The dictionary that maps the weak/annotation labels to integers."""
         return self._label2int
 
@@ -176,7 +178,7 @@ class WeakLabels:
         Returns:
             The train weak label matrix.
         """
-        return self._matrix[self._annotation_array == self._label2int["None"]]
+        return self._matrix[self._annotation_array == self._label2int[None]]
 
     def test_matrix(self) -> np.ndarray:
         """Returns the part of the weak label ``self.matrix`` that has corresponding annotations.
@@ -184,21 +186,21 @@ class WeakLabels:
         Returns:
             The test weak label matrix.
         """
-        return self._matrix[self._annotation_array != self._label2int["None"]]
+        return self._matrix[self._annotation_array != self._label2int[None]]
 
     def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
         """Returns the annotation labels as an array of integers.
 
         Args:
             exclude_missing_annotations: If True, excludes missing annotations,
-                that is all entries with the ``self.label2int["None"]`` integer.
+                that is all entries with the ``self.label2int[None]`` integer.
 
         Returns:
             The annotation array of integers.
         """
         if not exclude_missing_annotations:
             return self._annotation_array
-        return self._annotation_array[self._annotation_array != self._label2int["None"]]
+        return self._annotation_array[self._annotation_array != self._label2int[None]]
 
     def summary(
         self,
@@ -224,13 +226,13 @@ class WeakLabels:
         Returns:
             The summary statistics for each rule in a pandas DataFrame.
         """
-        has_weak_label = self._matrix != self._label2int["None"]
+        has_weak_label = self._matrix != self._label2int[None]
 
         # polarity
         polarity = [
             set(
                 np.unique(
-                    self._matrix[:, i][self._matrix[:, i] != self._label2int["None"]]
+                    self._matrix[:, i][self._matrix[:, i] != self._label2int[None]]
                 )
             )
             for i in range(len(self._rules))
@@ -253,7 +255,7 @@ class WeakLabels:
         # conflicts
         # TODO: For a lot of records (~1e6), this could become slow (~10s) ... a vectorized solution would be better.
         has_conflicts = np.apply_along_axis(
-            lambda x: len(np.unique(x[x != self._label2int["None"]])) > 1,
+            lambda x: len(np.unique(x[x != self._label2int[None]])) > 1,
             axis=1,
             arr=self._matrix,
         )
@@ -267,7 +269,7 @@ class WeakLabels:
 
         # only add correct, incorrect and precision if we have annotations
         if (
-            any(self._annotation_array != self._label2int["None"])
+            any(self._annotation_array != self._label2int[None])
             or annotation is not None
         ):
             correct, incorrect = self._compute_correct_incorrect(
@@ -339,7 +341,7 @@ class WeakLabels:
         # incorrect
         incorrect_with_abstain = annotation_matrix != self._matrix
         incorrect = np.where(
-            has_weak_label & (annotation_matrix != self._label2int["None"]),
+            has_weak_label & (annotation_matrix != self._label2int[None]),
             incorrect_with_abstain,
             False,
         ).sum(axis=0)
@@ -371,7 +373,7 @@ class WeakLabels:
 
         # get rule mask
         if rules is not None:
-            idx_by_rules = (self._matrix[:, rules] != self._label2int["None"]).sum(
+            idx_by_rules = (self._matrix[:, rules] != self._label2int[None]).sum(
                 axis=1
             ) == len(rules)
         else:
