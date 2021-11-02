@@ -29,9 +29,9 @@ def test_spacy_ner_monitor(monkeypatch):
     assert df.text.unique().tolist() == ["This is a text"]
 
     rb.delete(dataset)
-    list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
+    list(nlp.pipe([("This is a text", {"meta": "data"})] * 100, as_tuples=True))
 
     df = rb.load(dataset)
-    assert 1 <= len(df) <= 5
+    assert 1 < len(df) <= 20
     for metadata in df.metadata.values.tolist():
         assert metadata == {"meta": "data"}
