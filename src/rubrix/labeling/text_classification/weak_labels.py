@@ -347,12 +347,12 @@ class WeakLabels:
         # add totals at the end
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
 
-    def filter_records(
+    def show_records(
         self, labels: Optional[List[str]] = None, rules: Optional[List[int]] = None
     ) -> pd.DataFrame:
-        """Filters and returns a subset of the records as a pandas DataFrame.
+        """Shows records in a pandas DataFrame, optionally filtered by weak labels and non-abstaining rules.
 
-        You can filter by labels or rules. If you provide both, we take the intersection of both filters.
+        If you provide both ``labels`` and ``rules``, we take the intersection of both filters.
 
         Args:
             labels: All of these labels are in the record's weak labels. If None, do not filter by labels.
@@ -360,7 +360,7 @@ class WeakLabels:
                 Refer to the rules with their index in the ``self.rules`` list.
 
         Returns:
-            The filtered records as a pandas DataFrame.
+            The optionally filtered records as a pandas DataFrame.
         """
         # get labels mask
         if labels is not None:
