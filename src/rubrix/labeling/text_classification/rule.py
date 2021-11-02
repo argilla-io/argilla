@@ -22,13 +22,17 @@ class Rule:
     """A rule (labeling function) in form of an ElasticSearch query.
 
     Args:
-        query: An ElasticSearch query with the
-            [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input).
+        query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_.
         label: The label associated to the query.
 
     Examples:
+        >>> import rubrix as rb
         >>> urgent_rule = Rule(query="inputs.text:(urgent AND immediately)", label="urgent")
         >>> not_urgent_rule = Rule(query="inputs.text:(NOT urgent) AND metadata.title_length>20", label="not urgent")
+        >>> not_urgent_rule.apply("my_dataset")
+        >>> my_dataset_records = rb.load(name="my_dataset", as_pandas=False)
+        >>> not_urgent_rule(my_dataset_records[0])
+        True
     """
 
     def __init__(self, query: str, label: str):
@@ -47,7 +51,7 @@ class Rule:
         self._matching_ids = [record.id for record in records]
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:
-        """Check if the given record is among the matching ids from the `self.apply` call.
+        """Check if the given record is among the matching ids from the ``self.apply`` call.
 
         Args:
             record: The record to be labelled.
