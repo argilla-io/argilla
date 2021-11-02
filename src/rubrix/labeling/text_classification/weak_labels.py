@@ -46,7 +46,8 @@ class WeakLabels:
 
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
         ...     return "Positive" if "awesome" in record.inputs["text"] else None
-        >>> weak_labels = WeakLabels(rules=[awesome_rule], dataset="my_dataset")
+        >>> another_rule = Rule(query="good OR best", label="Positive")
+        >>> weak_labels = WeakLabels(rules=[awesome_rule, another_rule], dataset="my_dataset")
         >>> weak_labels.matrix
         >>> weak_labels.summary()
 
