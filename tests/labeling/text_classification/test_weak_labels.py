@@ -167,7 +167,7 @@ def test_props_and_train_test_annotation(monkeypatch):
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array([[0, 1], [-1, 0]], dtype=np.short)
         annotation_array = np.array([-1, 0], dtype=np.short)
-        label2int = {"None": -1, "negative": 0, "positive": 1}
+        label2int = {None: -1, "negative": 0, "positive": 1}
         return weak_label_matrix, annotation_array, label2int
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
@@ -206,7 +206,7 @@ def test_summary(monkeypatch):
         # weak_label_matrix = np.random.randint(-1, 30, (int(1e5), 50), dtype=np.short)
         annotation_array = np.array([-1, -1, -1, -1], dtype=np.short)
         # annotation_array = np.random.randint(-1, 30, int(1e5), dtype=np.short)
-        label2int = {"None": -1, "negative": 0, "positive": 1}
+        label2int = {None: -1, "negative": 0, "positive": 1}
         # label2int = {k: v for k, v in zip(["None"]+list(range(30)), list(range(-1, 30)))}
         return weak_label_matrix, annotation_array, label2int
 
@@ -270,7 +270,7 @@ def test_show_records(
             dtype=np.short,
         )
         annotation_array = np.array([0, 1, -1, 2, 0], dtype=np.short)
-        label2int = {"None": -1, "negative": 0, "positive": 1, "neutral": 2}
+        label2int = {None: -1, "negative": 0, "positive": 1, "neutral": 2}
         return weak_label_matrix, annotation_array, label2int
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
