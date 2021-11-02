@@ -37,7 +37,7 @@
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata"
       />
-      <status-tag v-if="annotationEnabled && item.status === 'Validated'" :title="item.status"></status-tag>
+      <status-tag v-if="annotationEnabled && item.status !== 'Default' && item.status !== 'Discarded'" :title="item.status"></status-tag>
     </div>
     <LazyReModal
       modal-class="modal-secondary"

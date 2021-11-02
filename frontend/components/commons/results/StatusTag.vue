@@ -1,12 +1,12 @@
 <template>
-    <span class="status-tag">
-      <svgicon
+    <span :class="['status-tag', title]">
+      <svgicon v-if="title === 'Validated'"
         name="check"
         width="12"
         height="12"
         color="#ffffff"
       ></svgicon>
-      {{title}}
+      {{title === 'Edited' ? 'Pending' : title}}
     </span>
 </template>
 
@@ -35,6 +35,9 @@ export default {
   @include font-size(12px);
   font-weight: 600;
   z-index: 0;
+  &.Edited {
+    background: orange
+  }
   .svg-icon {
     margin-right: 0.5em;
   }

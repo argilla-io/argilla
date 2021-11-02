@@ -47,7 +47,7 @@
                 @click="edit()"
               ></p>
               <span v-if="editionMode"
-                ><strong>shift Enter</strong> to validate</span
+                ><strong>shift Enter</strong> to save</span
               >
             </div>
             <div class="content__buttons">
@@ -112,7 +112,7 @@
                   v-if="newSentence && editable && (editionMode || sentencesOrigin !== 'Annotation')"
                   class="button-primary"
                   @click="annotate"
-                  >Save</re-button
+                  >{{status === "Edited" ? "Save" : "Validate"}}</re-button
                 >
               </div>
             </div>
@@ -120,19 +120,24 @@
         </span>
 
         <div v-if="!sentences.length">
-          <p
-            class="content__text content__text--no-sentences"
-            :contenteditable="editable"
-            placeholder="Type your text"
-            @input="input"
-          ></p>
+           <div class="content__edition-area">
+            <p 
+              class="content__text"
+              :contenteditable="editable"
+              placeholder="Type your text"
+              @input="input"
+            ></p>
+              <span v-if="editable"
+                ><strong>shift Enter</strong> to save</span
+              >
+            </div>
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="newSentence && editable && editionMode"
+                  v-if="newSentence && editable"
                   class="button-primary"
                   @click="annotate"
-                  >Save</re-button
+                  >Validate</re-button
                 >
               </div>
             </div>
@@ -202,7 +207,6 @@ export default {
   },
   updated() {
     this.getText();
-    this.focus();
   },
   created() {
     window.addEventListener("keydown", this.keyDown);
@@ -222,11 +226,17 @@ export default {
       this.itemNumber = index;
     },
     input(e) {
+      let newS = {
+        score: 1,
+        text: e.target.innerText
+      };
       this.newSentence = e.target.innerText;
+      this.$emit('update-record', { sentences: [newS] });
     },
     edit() {
       if (this.editable) {
         this.editionMode = true;
+        this.focus();
       }
     },
     focus() {
@@ -239,6 +249,7 @@ export default {
     back() {
       this.editionMode = false;
       this.refresh++;
+      this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
@@ -271,11 +282,6 @@ export default {
         this.annotate();
       }
     },
-    clickOutside() {
-      this.itemNumber = 0;
-      this.editionMode = false;
-      this.refresh++;
-    }
   }
 };
 </script>
@@ -352,9 +358,6 @@ $marginRight: 200px;
     white-space: pre-wrap;
     display: inline-block;
     width: 100%;
-    &--no-sentences {
-      max-width: calc(100% - #{$marginRight});
-    }
   }
   &__edition-area {
     position: relative;
