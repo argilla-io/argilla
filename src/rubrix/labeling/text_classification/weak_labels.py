@@ -27,18 +27,18 @@ class WeakLabels:
     """Computes the weak labels of a dataset by applying a given list of rules.
 
     Args:
-        rules: A list of rules (labeling functions). They must return a string, or `None` in case of abstention.
+        rules: A list of rules (labeling functions). They must return a string, or ``None`` in case of abstention.
         dataset: Name of the dataset to which the rules will be applied.
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
             to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Use the string "None" to refer to the return
-            type `None` (abstention). By default, we will construct a mapping on the fly when applying the rules.
+            type ``None`` (abstention). By default, we will construct a mapping on the fly when applying the rules.
 
     Raises:
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
-        MissingLabelError: When provided with a `label2int` dict, and a
+        MissingLabelError: When provided with a ``label2int`` dict, and a
             weak label or annotation label is not present in its keys.
 
     Examples:
@@ -96,7 +96,7 @@ class WeakLabels:
             The weak label matrix, the annotation array and their label2int mapping.
 
         Raises:
-            MissingLabelError: When provided with a `label2int` dict, and a
+            MissingLabelError: When provided with a ``label2int`` dict, and a
                 weak label or annotation label is not present in its keys.
         """
         # call apply on the ElasticSearch rules
@@ -171,7 +171,7 @@ class WeakLabels:
         return self._matrix
 
     def train_matrix(self) -> np.ndarray:
-        """Returns the part of the weak label `self.matrix` that has NO corresponding annotations.
+        """Returns the part of the weak label ``self.matrix`` that has NO corresponding annotations.
 
         Returns:
             The train weak label matrix.
@@ -179,7 +179,7 @@ class WeakLabels:
         return self._matrix[self._annotation_array == self._label2int["None"]]
 
     def test_matrix(self) -> np.ndarray:
-        """Returns the part of the weak label `self.matrix` that has corresponding annotations.
+        """Returns the part of the weak label ``self.matrix`` that has corresponding annotations.
 
         Returns:
             The test weak label matrix.
@@ -191,7 +191,7 @@ class WeakLabels:
 
         Args:
             exclude_missing_annotations: If True, excludes missing annotations,
-                that is all entries with the `self.label2int["None"]` integer.
+                that is all entries with the ``self.label2int["None"]`` integer.
 
         Returns:
             The annotation array of integers.
@@ -207,19 +207,19 @@ class WeakLabels:
     ) -> pd.DataFrame:
         """Returns following summary statistics for each rule:
 
-        - polarity: Set of unique labels returned by the rule, excluding "None" (abstain).
-        - coverage: Fraction of the records labeled by the rule.
-        - overlaps: Fraction of the records labeled by the rule together with at least one other rule.
-        - conflicts: Fraction of the records where the rule disagrees with at least one other rule.
-        - correct: Number of records the rule labeled correctly (if annotations are available).
-        - incorrect: Number of records the rule labels incorrectly (if annotations are available).
-        - precision: Fraction of correct labels given by the rule (if annotations are available).
-            The precision does not penalize the rule for abstains.
+        - **polarity**: Set of unique labels returned by the rule, excluding "None" (abstain).
+        - **coverage**: Fraction of the records labeled by the rule.
+        - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
+        - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
+        - **correct**: Number of records the rule labeled correctly (if annotations are available).
+        - **incorrect**: Number of records the rule labels incorrectly (if annotations are available).
+        - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
+
 
         Args:
             normalize_by_coverage: Normalize the overlaps and conflicts by the respective coverage.
             annotation: An optional array with ints holding the annotations.
-                By default we will use `self.annotation(exclude_missing_annotations=False)`.
+                By default we will use ``self.annotation(exclude_missing_annotations=False)``.
 
         Returns:
             The summary statistics for each rule in a pandas DataFrame.
@@ -357,7 +357,7 @@ class WeakLabels:
         Args:
             labels: All of these labels are in the record's weak labels. If None, do not filter by labels.
             rules: All of these rules did not abstain for the record. If None, do not filter by rules.
-                Refer to the rules with their index in the `self.rules` list.
+                Refer to the rules with their index in the ``self.rules`` list.
 
         Returns:
             The filtered records as a pandas DataFrame.

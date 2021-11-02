@@ -32,7 +32,7 @@ class Rule:
         >>> not_urgent_rule.apply("my_dataset")
         >>> my_dataset_records = rb.load(name="my_dataset", as_pandas=False)
         >>> not_urgent_rule(my_dataset_records[0])
-        True
+        "not urgent"
     """
 
     def __init__(self, query: str, label: str):
@@ -60,7 +60,7 @@ class Rule:
             A label if the record id is among the matching ids, otherwise None.
 
         Raises:
-            `RuleNotAppliedError` if the rule was not applied to the dataset before.
+            RuleNotAppliedError: If the rule was not applied to the dataset before.
         """
         if self._matching_ids is None:
             raise RuleNotAppliedError(
