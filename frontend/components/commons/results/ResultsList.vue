@@ -23,8 +23,8 @@
       ref="scroll"
       :key="dataset.name"
       class="results-scroll"
-      :default-height="100"
       :total-height="1200"
+      :default-height="100"
       :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
     >
       <template v-if="showLoader">
@@ -46,7 +46,6 @@
     <RePagination
       :total-items="dataset.results.total"
       :pagination-settings="dataset.viewSettings.pagination"
-      :allow-keyboard-pagination="allowKeyboardPagination"
       @changePage="onPagination"
     />
   </div>
@@ -72,12 +71,6 @@ export default {
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
-    moreDataAvailable() {
-      return this.visibleRecords.length < this.dataset.results.total;
-    },
-    allowKeyboardPagination() {
-      return this.dataset.viewSettings.pagination.allowKeyboardPagination;
-    },
   },
   mounted() {
     const scroll = document.getElementById("scroll");
@@ -101,6 +94,7 @@ export default {
         document
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
+
       }
     },
     async onPagination(page, size) {
@@ -123,15 +117,24 @@ export default {
   margin-bottom: 0;
   list-style: none;
   .results-scroll {
-    padding-top: 180px;
-    padding-bottom: 5em;
     height: 100vh !important;
     overflow: auto;
+    padding-bottom: 163px;
+    padding-top: 180px;
     padding-left: 4em;
     padding-right: calc(4em + 45px);
-    @include media(">desktopLarge") {
+    transition: padding 0s ease-in-out 0.1s;
+    .--metrics & {
+      @include media(">desktop") {
+        width: 100%;
+        padding-right: calc(294px + 100px);
+        transition: padding 0.1s ease-in-out;
+      }
+    }
+    @include media(">desktop") {
+      transition: padding 0.1s ease-in-out;
       width: 100%;
-      padding-right: calc(294px + 45px + 4em);
+      padding-right: 100px;
     }
   }
   &__li {

@@ -21,19 +21,6 @@
       <div class="table-info__header">
         <slot name="columns">
           <div class="table-info__item">
-            <div v-if="globalActions">
-              <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
-              <ReButton
-                :disabled="!selectedItems.length"
-                class="
-                  button-tertiary--outline button-tertiary--small
-                  table-info__header__button
-                "
-                @click="$emit('confirm-delete-multiple')"
-              >
-                Delete
-              </ReButton>
-            </div>
             <div
               v-for="(column, key) in columns"
               :key="key"
@@ -79,11 +66,27 @@
                 class="table-info__item__col"
               >
                 <span :class="column.class">
-                  <span
-                    v-if="column.type === 'link'"
-                    @click="onActionClicked(item.kind, item.name)"
-                    >{{ itemValue(item, column) }}</span
-                  >
+                  <span v-if="column.type === 'link'">
+                    <a href="#"
+                      @click.prevent="onActionClicked(item.kind, item.name)"
+                      >{{ itemValue(item, column) }}
+                    </a>
+                    <re-action-tooltip tooltip="Copied">
+                      <ReButton
+                        title="Copy to clipboard"
+                        @click.prevent="onActionClicked('copy-name', item.name)"
+                        class="table-info__actions__button button-icon"
+                      >
+                        <svgicon
+                          name="copy"
+                          width="12"
+                          height="13"
+                        />
+                      </ReButton>
+                    </re-action-tooltip>
+                    
+                  </span>
+
                   <ReDate
                     v-else-if="column.type === 'date'"
                     class="table-info__meta"
@@ -98,34 +101,30 @@
                       {{ itemValue(item, column)[key] }}
                     </p>
                   </span>
+                  <span v-else-if="column.type === 'task'">
+                    {{ itemValue(item, column) }} <span class="table-info__tag" v-if="itemValue(item, column) === 'Text2Text'">Experimental</span>
+                  </span
+                  >
                   <span v-else>{{ itemValue(item, column) }}</span>
                 </span>
               </span>
               <div v-if="visibleActions" class="table-info__actions">
-                <ReButton
-                  v-for="action in filterActions"
-                  :key="action.index"
-                  :data-title="action.tooltip"
-                  class="
-                    --hasTooltip-colored
-                    table-info__actions__button
-                    button-icon
-                  "
-                  :class="action.class"
-                  @click="onActionClicked(action.name, item.name)"
-                >
-                  <svgicon
-                    v-if="action.icon !== undefined"
-                    :name="action.icon"
-                    width="26"
-                    height="20"
-                  />
-                </ReButton>
+                <re-action-tooltip v-for="action in filterActions" :key="action.index" :tooltip="action.tooltip">
+                  <ReButton :title="action.title" @click="onActionClicked(action.name, item.name)" class="table-info__actions__button button-icon">
+                    <svgicon
+                      v-if="action.icon !== undefined"
+                      :name="action.icon"
+                      width="12"
+                      height="13"
+                    />
+                  </ReButton>
+                </re-action-tooltip>
+
               </div>
               <ReModal
                 :modal-custom="true"
                 :prevent-body-scroll="true"
-                modal-class="modal-primary"
+                modal-class="modal-secondary"
                 :modal-visible="showModal === item.name"
                 modal-position="modal-center"
                 @close-modal="$emit('close-modal')"
@@ -187,6 +186,7 @@
 import "assets/icons/delete";
 import "assets/icons/refresh";
 import "assets/icons/copy";
+import "assets/icons/copy-url";
 import "assets/icons/datasource";
 import "assets/icons/chev-top";
 import "assets/icons/chev-bottom";
@@ -446,11 +446,20 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      &:nth-last-of-type(-n + 3) {
+      // text-overflow: ellipsis;
+      // overflow: hidden;
+      &:nth-last-of-type(-n + 2) {
         max-width: 120px;
       }
+      &:nth-last-of-type(3) {
+        max-width: 180px;
+      }
+      &:nth-of-type(2) {
+        min-width: 30%;
+      }
+      // .task span {
+      //   display: flex;
+      // }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
@@ -460,6 +469,16 @@ export default {
       margin-right: 1em;
       fill: $font-medium-color;
     }
+  }
+  &__tag {
+    background: palette(grey, dark);
+    display: inline-block;
+    border-radius: 3px;
+    color: $lighter-color;
+    @include font-size(12px);
+    box-shadow: 0 1px 4px 1px rgba(222,222,222,0.50);
+    padding: 0.1em 0.5em;
+    margin-left: 1em;
   }
   // &__item:not(.disabled) {
   //   &:hover,
@@ -475,10 +494,10 @@ export default {
     right: 2em;
     &__button {
       position: relative;
-      margin-left: 1em;
+      margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
-        fill: $primary-color;
+        fill: palette(grey, dark);
         margin-right: 0;
       }
       & + #{$this} {
@@ -488,10 +507,25 @@ export default {
   }
   &__title {
     display: block;
-    color: $primary-color;
     @include font-size(15px);
     cursor: pointer;
     word-break: break-word;
+    display: flex;
+    align-items: center;
+    .button-icon {
+      margin-left: 5px;
+      padding: 0;
+      margin-bottom: 2px;
+      .svg-icon {
+        fill: $font-medium-color;
+      }
+    }
+    a {
+      text-decoration: none;
+      &:hover {
+        color: $primary-color;
+      }
+    }
   }
   &__meta {
     font-weight: lighter;
@@ -528,8 +562,7 @@ export default {
       border-radius: 10px;
       margin-right: 0.5em;
       margin-top: 0;
-      float: left;
-      clear: both;
+      word-break: break-all;
       &:last-child {
         margin-bottom: 0;
       }
@@ -557,18 +590,8 @@ export default {
   }
 }
 
-.modal-buttons {
-  text-align: right;
-}
-.modal__title {
-  color: $font-dark-color;
-  font-weight: 600;
-  margin-top: 0;
-  margin-right: 2em;
-}
-
-.--hasTooltip-colored {
-  @extend %hastooltip-colored;
+.--show-tooltip {
+  @extend %activetooltip;
   @extend %tooltip--left;
 }
 </style>

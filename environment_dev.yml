@@ -25,5 +25,9 @@ dependencies:
     - sphinxext.opengraph==0.4.2
     # code formatting
     - pre-commit==2.15.0
+    # extra test dependencies
+    - spacy==3.1.0
+    - transformers[torch]
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
     # install Rubrix in editable mode
     - -e .[server]

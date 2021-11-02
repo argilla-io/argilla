@@ -12,16 +12,111 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from time import sleep
+import pytest
 
-from rubrix.server.metrics.model import DatasetMetric, DatasetMetricCreation
+from rubrix.server.tasks.text2text import Text2TextBulkData, Text2TextRecord
 from rubrix.server.tasks.text_classification import (
     TextClassificationBulkData,
     TextClassificationRecord,
-    TextClassificationSearchResults,
 )
-
+from rubrix.server.tasks.token_classification import (
+    TokenClassificationBulkData,
+    TokenClassificationRecord,
+)
 from tests.server.test_helpers import client
+
+
+def test_wrong_dataset_metrics():
+    text = "This is a text"
+    records = [
+        Text2TextRecord.parse_obj(data)
+        for data in [
+            {"text": text},
+            {"text": text},
+            {"text": text},
+            {"text": text},
+        ]
+    ]
+    request = Text2TextBulkData(records=records)
+    dataset = "test_wrong_dataset_metrics"
+
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        client.post(
+            f"/api/datasets/{dataset}/Text2Text:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+
+    response = client.get(f"/api/datasets/TokenClassification/{dataset}/metrics")
+    assert response.status_code == 400
+    response = client.post(
+        f"/api/datasets/TokenClassification/{dataset}/metrics/a-metric:summary", json={}
+    )
+    assert response.status_code == 400
+
+
+def test_dataset_for_text2text():
+    text = "This is a text"
+    records = [
+        Text2TextRecord.parse_obj(data)
+        for data in [
+            {"text": text},
+            {"text": text},
+            {"text": text},
+            {"text": text},
+        ]
+    ]
+    request = Text2TextBulkData(records=records)
+    dataset = "test_dataset_for_text2text"
+
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        client.post(
+            f"/api/datasets/{dataset}/Text2Text:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+
+    metrics = client.get(f"/api/datasets/Text2Text/{dataset}/metrics").json()
+    assert len(metrics) == 0
+
+
+def test_dataset_for_token_classification():
+    text = "This is a text"
+    records = [
+        TokenClassificationRecord.parse_obj(data)
+        for data in [
+            {"text": text, "tokens": text.split(" ")},
+            {"text": text, "tokens": text.split(" ")},
+            {"text": text, "tokens": text.split(" ")},
+            {"text": text, "tokens": text.split(" ")},
+        ]
+    ]
+
+    request = TokenClassificationBulkData(records=records)
+    dataset = "test_dataset_for_token_classification"
+
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    assert (
+        client.post(
+            f"/api/datasets/{dataset}/TokenClassification:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+    metrics = client.get(f"/api/datasets/TokenClassification/{dataset}/metrics").json()
+    assert len(metrics) > 0
+
+    for metric in metrics:
+        response = client.post(
+            f"/api/datasets/TokenClassification/{dataset}/metrics/{metric['id']}:summary",
+            json={},
+        )
+        assert response.status_code == 200
 
 
 def test_dataset_metrics():
@@ -55,36 +150,20 @@ def test_dataset_metrics():
         == 200
     )
 
-    metric_id = "test-metric-001"
-    assert (
-        client.post(
-            f"/api/datasets/{dataset}/metrics",
-            json=DatasetMetricCreation(
-                id=metric_id,
-                name="A simple test metric",
-                description="Large description for a test metric",
-                field="metadata.textLength",
-            ).dict(),
-        ).status_code
-        == 200
-    )
-    metrics = client.get(f"/api/datasets/{dataset}/metrics").json()
+    metrics = client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
-    assert len(metrics) == 1
-
-    metrics = [DatasetMetric.parse_obj(m) for m in metrics]
-    assert metrics[0].id == metric_id
+    assert len(metrics) == 2
 
     response = client.post(
-        f"/api/datasets/{dataset}/TextClassification:search", json={}
-    ).json()
-    results = TextClassificationSearchResults.parse_obj(response)
-    assert len(results.metrics) == 1
-    assert results.metrics[0].id == metric_id
+        f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric:summary",
+        json={},
+    )
 
-    assert (
-        client.delete(f"/api/datasets/{dataset}/metrics/{metric_id}").status_code == 200
-    )
-    assert (
-        client.delete(f"/api/datasets/{dataset}/metrics/{metric_id}").status_code == 404
-    )
+    assert response.status_code == 404
+
+    for metric in metrics:
+        response = client.post(
+            f"/api/datasets/TextClassification/{dataset}/metrics/{metric['id']}:summary",
+            json={},
+        )
+        assert response.status_code == 200

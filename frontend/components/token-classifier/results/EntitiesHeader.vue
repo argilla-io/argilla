@@ -100,8 +100,16 @@ export default {
     margin-bottom: 1em;
     padding: 0 4em;
     width: calc(100% - 120px);
-    @include media(">desktopLarge") {
-      width: calc(100% - 360px);
+    .--metrics & {
+      @include media(">desktop") {
+        padding-right: calc(294px + 100px);
+        transition: padding 0.1s ease-in-out;
+      }
+    }
+    @include media(">desktop") {
+      transition: padding 0.1s ease-in-out;
+      width: 100%;
+      padding-right: 100px;
     }
     &__button {
       margin-top: 0.3em;

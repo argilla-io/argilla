@@ -13,13 +13,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import datetime
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Iterable, List
 
 from fastapi import Depends
 
 from rubrix import MAX_KEYWORD_LENGTH
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+from rubrix.server.commons.es_helpers import (
+    aggregations,
+    sort_by2elasticsearch,
+)
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
@@ -30,11 +33,7 @@ from rubrix.server.tasks.commons.dao import (
 )
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.commons.es_helpers import (
-    aggregations,
-    filters,
-    sort_by2elasticsearch,
-)
+from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
@@ -80,42 +79,6 @@ extends_index_properties(
 )
 
 
-def as_elasticsearch(search: TokenClassificationQuery) -> Dict[str, Any]:
-    """Build an elasticsearch query part from search query"""
-
-    if search.ids:
-        return {"ids": {"values": search.ids}}
-
-    all_filters = filters.metadata(search.metadata)
-    query_filters = [
-        query_filter
-        for query_filter in [
-            filters.predicted_as(search.predicted_as),
-            filters.predicted_by(search.predicted_by),
-            filters.annotated_as(search.annotated_as),
-            filters.annotated_by(search.annotated_by),
-            filters.status(search.status),
-            filters.predicted(search.predicted),
-            filters.score(search.score),
-        ]
-        if query_filter
-    ]
-    query_text = filters.text_query(search.query_text)
-    all_filters.extend(query_filters)
-
-    return {
-        "bool": {
-            "must": query_text or {"match_all": {}},
-            "filter": {
-                "bool": {
-                    "should": all_filters,
-                    "minimum_should_match": len(all_filters),
-                }
-            },
-        }
-    }
-
-
 class TokenClassificationService:
     """
     Token classification service
@@ -124,30 +87,26 @@ class TokenClassificationService:
 
     def __init__(
         self,
-        datasets: DatasetsService,
         dao: DatasetRecordsDAO,
+        metrics: MetricsService,
     ):
-        self.__datasets__ = datasets
         self.__dao__ = dao
+        self.__metrics__ = metrics
 
     def add_records(
         self,
-        dataset: str,
-        owner: Optional[str],
+        dataset: Dataset,
         records: List[CreationTokenClassificationRecord],
     ):
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
+        self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
-            dataset=dataset,
-            records=records,
-            record_class=TokenClassificationRecord
+            dataset=dataset, records=records, record_class=TokenClassificationRecord
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
     def search(
         self,
-        dataset: str,
-        owner: Optional[str],
+        dataset: Dataset,
         query: TokenClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -159,9 +118,7 @@ class TokenClassificationService:
         Parameters
         ----------
         dataset:
-            The dataset name
-        owner:
-            The dataset owner
+            The records dataset
         query:
             The search parameters
         sort_by:
@@ -176,12 +133,10 @@ class TokenClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
-
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=as_elasticsearch(query),
+                query=query.as_elasticsearch(),
                 sort=sort_by2elasticsearch(
                     sort_by,
                     valid_fields=[
@@ -225,7 +180,6 @@ class TokenClassificationService:
         return TokenClassificationSearchResults(
             total=results.total,
             records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            metrics=results.metrics,
             aggregations=TokenClassificationAggregations(
                 **results.aggregations,
                 words=results.words,
@@ -237,9 +191,8 @@ class TokenClassificationService:
 
     def read_dataset(
         self,
-        dataset: str,
-        owner: Optional[str],
-        query: Optional[TokenClassificationQuery] = None,
+        dataset: Dataset,
+        query: TokenClassificationQuery,
     ) -> Iterable[TokenClassificationRecord]:
         """
         Scan a dataset records
@@ -249,15 +202,14 @@ class TokenClassificationService:
         dataset:
             The dataset name
         owner:
-            The dataset owner. Optional
+            The dataset owner
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
 
         """
-        dataset = self.__datasets__.find_by_name(dataset, owner=owner)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=as_elasticsearch(query))
+            dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
             yield TokenClassificationRecord.parse_obj(db_record)
 
@@ -266,8 +218,8 @@ _instance = None
 
 
 def token_classification_service(
-    datasets: DatasetsService = Depends(create_dataset_service),
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+    metrics: MetricsService = Depends(MetricsService.get_instance),
 ) -> TokenClassificationService:
     """
     Creates a dataset record service instance
@@ -285,5 +237,8 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(datasets=datasets, dao=dao)
+        _instance = TokenClassificationService(
+            dao=dao,
+            metrics=metrics
+        )
     return _instance

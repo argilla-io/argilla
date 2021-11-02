@@ -67,6 +67,8 @@ class Text2TextDataset extends ObservationDataset {
   }
 }
 
+ObservationDataset.registerTaskDataset("Text2Text", Text2TextDataset);
+
 export {
   Text2TextDataset,
   Text2TextRecord,

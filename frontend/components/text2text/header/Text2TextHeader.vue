@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="header__filters">
     <header-title
       v-if="dataset.results.records"
       title="Text2Text"

@@ -1,0 +1,13 @@
+
+<svg width="11px" height="7px" viewBox="0 0 11 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="right-menu" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="OK" transform="translate(-1196.000000, -304.000000)" fill="#686A6D" fill-rule="nonzero">
+            <g id="Group-23" transform="translate(1196.000000, 73.000000)">
+                <g id="Group-29" transform="translate(0.000000, 231.000000)">
+                    <polygon id="Shape" transform="translate(9.000000, 3.500000) scale(-1, 1) rotate(180.000000) translate(-9.000000, -3.500000) " points="7 0.233333333 7.25 0 10.75 3.26666667 11 3.5 10.75 3.73333333 7.25 7 7 6.76666667 10.5 3.5"></polygon>
+                    <polygon id="Shape" transform="translate(2.000000, 3.500000) rotate(180.000000) translate(-2.000000, -3.500000) " points="0 0.233333333 0.25 0 3.75 3.26666667 4 3.5 3.75 3.73333333 0.25 7 0 6.76666667 3.5 3.5"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

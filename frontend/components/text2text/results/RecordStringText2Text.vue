@@ -133,9 +133,12 @@ export default {
       overflow: hidden;
     }
   }
+  &__scroll--large {
+    position: relative;
+    width: calc(100% - 200px);
+  }
   &__content {
     word-break: break-word;
-    margin-right: 200px;
     display: block;
     color: palette(grey, medium);
   }

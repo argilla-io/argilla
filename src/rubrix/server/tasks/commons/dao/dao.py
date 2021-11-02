@@ -19,22 +19,21 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 from fastapi import Depends
 
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
-from rubrix.server.commons.helpers import unflatten_dict
-from rubrix.server.datasets.dao import (
-    DATASETS_RECORDS_INDEX_NAME,
-    dataset_records_index,
-)
-from rubrix.server.datasets.model import DatasetDB
-from rubrix.server.metrics.model import DatasetMetricResults
-from rubrix.server.tasks.commons import BaseRecord
-from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 from rubrix.server.commons.es_helpers import (
     DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,
 )
-
+from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
+from rubrix.server.commons.helpers import unflatten_dict
+from rubrix.server.commons.settings import settings
+from rubrix.server.datasets.dao import (
+    DATASETS_RECORDS_INDEX_NAME,
+    dataset_records_index,
+)
+from rubrix.server.datasets.model import BaseDatasetDB
+from rubrix.server.tasks.commons import BaseRecord
+from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
 
@@ -120,12 +119,12 @@ class DatasetRecordsDAO:
         self._es.create_index_template(
             name=DATASETS_RECORDS_INDEX_NAME,
             template=template,
-            force_recreate=True,
+            force_recreate=not settings.disable_es_index_template_creation,
         )
 
     def add_records(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         records: List[BaseRecord],
         record_class: Type[DBRecord],
     ) -> int:
@@ -172,7 +171,7 @@ class DatasetRecordsDAO:
 
     def search_records(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         search: Optional[RecordSearch] = None,
         size: int = 100,
         record_from: int = 0,
@@ -197,36 +196,39 @@ class DatasetRecordsDAO:
         """
         search = search or RecordSearch()
         records_index = dataset_records_index(dataset.id)
-        metadata_fields = self._es.get_field_mapping(
-            index=records_index, field_name="metadata.*"
-        )
-        search_aggregations = (
-            {
-                **(search.aggregations or {}),
-                **aggregations.predicted_as(),
-                **aggregations.predicted_by(),
-                **aggregations.annotated_as(),
-                **aggregations.annotated_by(),
-                **aggregations.status(),
-                **aggregations.predicted(),
-                **aggregations.words_cloud(),
-                **aggregations.score(),  # TODO: calculate score directly from dataset
-                **aggregations.custom_fields(metadata_fields),
-                **{metric.id: metric.spec for metric in dataset.metrics},
-            }
-            if record_from == 0
-            else None
+
+        aggregation_requests = (
+            {**(search.aggregations or {})} if record_from == 0 else None
         )
 
+        if aggregation_requests is not None and search.include_default_aggregations:
+            aggregation_requests.update(
+                {
+                    **aggregations.predicted_as(),
+                    **aggregations.predicted_by(),
+                    **aggregations.annotated_as(),
+                    **aggregations.annotated_by(),
+                    **aggregations.status(),
+                    **aggregations.predicted(),
+                    **aggregations.words_cloud(),
+                    **aggregations.score(),
+                    **aggregations.custom_fields(
+                        self._es.get_field_mapping(
+                            index=records_index, field_name="metadata.*"
+                        )
+                    ),
+                }
+            )
+
         if record_from > 0:
-            search_aggregations = None
+            aggregation_requests = None
 
         es_query = {
             "size": size,
             "from": record_from,
             "query": search.query or {"match_all": {}},
             "sort": search.sort or [{"_id": {"order": "asc"}}],
-            "aggs": search_aggregations or {},
+            "aggs": aggregation_requests or {},
         }
         results = self._es.search(index=records_index, query=es_query, size=size)
 
@@ -245,26 +247,15 @@ class DatasetRecordsDAO:
                 parsed_aggregations, stop_keys=["metadata"]
             )
 
-            result.words = parsed_aggregations.pop("words")
+            result.words = parsed_aggregations.pop("words", {})
             result.metadata = parsed_aggregations.pop("metadata", {})
-
-            metrics_results = [
-                DatasetMetricResults(
-                    id=metric.id,
-                    name=metric.name,
-                    description=metric.description,
-                    kind=metric.spec.get("meta", {"kind": "custom"})["kind"],
-                    results=parsed_aggregations.pop(metric.id),
-                )
-                for metric in dataset.metrics
-            ]
-            result.metrics = metrics_results
             result.aggregations = parsed_aggregations
+
         return result
 
     def scan_dataset(
         self,
-        dataset: DatasetDB,
+        dataset: BaseDatasetDB,
         search: Optional[RecordSearch] = None,
     ) -> Iterable[Dict[str, Any]]:
         """

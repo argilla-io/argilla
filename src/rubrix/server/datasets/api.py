@@ -13,13 +13,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import APIRouter, Depends, Security
-from rubrix.server.security import auth
-from rubrix.server.security.model import User
 from typing import List
 
+from fastapi import APIRouter, Depends, Query, Security
+
+from rubrix.server.security import auth
+from rubrix.server.security.model import User
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
-from .service import DatasetsService, create_dataset_service
+from .service import DatasetsService
+from ..commons.api import TeamsQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
@@ -31,7 +33,10 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 def list_datasets(
-    service: DatasetsService = Depends(create_dataset_service),
+    teams: List[str] = Query(
+        None, alias="team", description="A list of teams used for retrieve datasets"
+    ),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
     """
@@ -39,6 +44,8 @@ def list_datasets(
 
     Parameters
     ----------
+    teams:
+        A list of teams used for retrieve datasets
     service:
         The datasets service
     current_user:
@@ -48,7 +55,7 @@ def list_datasets(
     -------
         A list of datasets visibles by current user
     """
-    return service.list(owners=current_user.user_groups)
+    return service.list(user=current_user, teams=teams)
 
 
 @router.get(
@@ -59,7 +66,8 @@ def list_datasets(
 )
 def get_dataset(
     name: str,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -69,6 +77,8 @@ def get_dataset(
     ----------
     name:
         The dataset name
+    ds_params:
+        Common dataset query params
     service:
         Datasets service
     current_user:
@@ -82,7 +92,7 @@ def get_dataset(
 
     """
     return Dataset.parse_obj(
-        service.find_by_name(name, owner=current_user.current_group)
+        service.find_by_name(name, task=None, user=current_user, team=ds_params.team)
     )
 
 
@@ -95,7 +105,8 @@ def get_dataset(
 def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -107,6 +118,8 @@ def update_dataset(
         The dataset name
     update_request:
         The fields to update
+    ds_params:
+        Common dataset query params
     service:
         The datasets service
     current_user:
@@ -120,7 +133,12 @@ def update_dataset(
     - NotAuthorizedError if user cannot access the found dataset
 
     """
-    return service.update(name, data=update_request, owner=current_user.current_group)
+    return service.update(
+        name,
+        data=update_request,
+        user=current_user,
+        team=ds_params.team,
+    )
 
 
 @router.delete(
@@ -129,7 +147,8 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -139,13 +158,15 @@ def delete_dataset(
     ----------
     name:
         The dataset name
+    ds_params:
+        Common dataset query params
     service:
         The datasets service
     current_user:
         The current user
 
     """
-    service.delete(name, owner=current_user.current_group)
+    service.delete(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -154,7 +175,8 @@ def delete_dataset(
 )
 def close_dataset(
     name: str,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -164,13 +186,15 @@ def close_dataset(
     ----------
     name:
         The dataset name
+    ds_params:
+        Common dataset query params
     service:
         The datasets service
     current_user:
         The current user
 
     """
-    service.close_dataset(name, owner=current_user.current_group)
+    service.close_dataset(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -179,7 +203,8 @@ def close_dataset(
 )
 def open_dataset(
     name: str,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
     """
@@ -189,13 +214,15 @@ def open_dataset(
     ----------
     name:
         The dataset name
+    ds_params:
+        Common dataset query params
     service:
         The datasets service
     current_user:
         The current user
 
     """
-    service.open_dataset(name, owner=current_user.current_group)
+    service.open_dataset(name, user=current_user, team=ds_params.team)
 
 
 @router.put(
@@ -207,7 +234,8 @@ def open_dataset(
 def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
-    service: DatasetsService = Depends(create_dataset_service),
+    ds_params: TeamsQueryParams = Depends(),
+    service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
     """
@@ -219,6 +247,8 @@ def copy_dataset(
         The dataset name
     copy_request:
         The copy request data
+    ds_params:
+        Common dataset query params
     service:
         The datasets service
     current_user:
@@ -227,5 +257,5 @@ def copy_dataset(
     """
 
     return service.copy_dataset(
-        name=name, owner=current_user.current_group, data=copy_request
+        name=name, data=copy_request, user=current_user, team=ds_params.team
     )

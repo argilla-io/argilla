@@ -19,6 +19,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_helpers import filters
 from rubrix.server.commons.helpers import flatten_dict
 from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
@@ -125,7 +126,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
 
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
-    explanation: Dict[str, List[TokenAttributions]] = None
+    explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
     _SCORE_DEVIATION_ERROR: ClassVar[float] = 0.001
 
@@ -133,10 +134,26 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     def validate_record(cls, values):
         """fastapi validator method"""
         prediction = values.get("prediction", None)
+        annotation = values.get("annotation", None)
+        status = values.get("status")
         multi_label = values.get("multi_label", False)
 
         cls._check_score_integrity(prediction, multi_label)
+        cls._check_annotation_integrity(annotation, multi_label, status)
+
         return values
+
+    @classmethod
+    def _check_annotation_integrity(
+        cls,
+        annotation: TextClassificationAnnotation,
+        multi_label: bool,
+        status: TaskStatus,
+    ):
+        if status == TaskStatus.validated and not multi_label:
+            assert (
+                annotation and len(annotation.labels) > 0
+            ), "Annotation must include some label for validated records"
 
     @classmethod
     def _check_score_integrity(
@@ -317,7 +334,7 @@ class TextClassificationBulkData(UpdateDatasetRequest):
     Attributes:
     -----------
 
-    records: List[TextClassificationRecord]
+    records: List[CreationTextClassificationRecord]
         The text classification record list
 
     """
@@ -356,7 +373,7 @@ class TextClassificationQuery(BaseModel):
 
     ids: Optional[List[Union[str, int]]]
 
-    query_text: str = Field(default=None, alias="query_inputs")
+    query_text: str = Field(default=None)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
@@ -367,8 +384,40 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    class Config:
-        allow_population_by_field_name = True
+    def as_elasticsearch(self) -> Dict[str, Any]:
+        """Build an elasticsearch query part from search query"""
+
+        if self.ids:
+            return {"ids": {"values": self.ids}}
+
+        all_filters = filters.metadata(self.metadata)
+        query_filters = [
+            query_filter
+            for query_filter in [
+                filters.predicted_as(self.predicted_as),
+                filters.predicted_by(self.predicted_by),
+                filters.annotated_as(self.annotated_as),
+                filters.annotated_by(self.annotated_by),
+                filters.status(self.status),
+                filters.predicted(self.predicted),
+                filters.score(self.score),
+            ]
+            if query_filter
+        ]
+        query_text = filters.text_query(self.query_text)
+        all_filters.extend(query_filters)
+
+        return {
+            "bool": {
+                "must": query_text or {"match_all": {}},
+                "filter": {
+                    "bool": {
+                        "should": all_filters,
+                        "minimum_should_match": len(all_filters),
+                    }
+                },
+            }
+        }
 
 
 class TextClassificationSearchRequest(BaseModel):

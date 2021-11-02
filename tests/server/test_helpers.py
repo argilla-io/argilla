@@ -12,11 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import httpx
+from starlette.testclient import TestClient
 
 from rubrix._constants import API_KEY_HEADER_NAME
 from rubrix.server.security.auth_provider.local.settings import settings
 from rubrix.server.server import app
-from starlette.testclient import TestClient
 
 
 class SecuredClient:
@@ -44,5 +45,31 @@ class SecuredClient:
         headers = {**self._header, **request_headers}
         return self._client.put(*args, headers=headers, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        request_headers = kwargs.pop("headers", {})
+        headers = {**self._header, **request_headers}
+        return self._client.patch(*args, headers=headers, **kwargs)
+
+    def stream(self, *args, **kwargs):
+        request_headers = kwargs.pop("headers", {})
+        headers = {**self._header, **request_headers}
+        method = kwargs.pop("method", None)
+        if method is None:
+            args = list(args)
+            method = args.pop(0)
+        if method == "POST":
+            return self._client.post(*args, headers=headers, stream=True, **kwargs)
+        if method == "GET":
+            return self._client.get(*args, headers=headers, stream=True, **kwargs)
+        raise NotImplementedError
+
 
 client = SecuredClient(TestClient(app))
+
+
+def mocking_client(monkeypatch, client):
+    monkeypatch.setattr(httpx, "post", client.post)
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "delete", client.delete)
+    monkeypatch.setattr(httpx, "put", client.put)
+    monkeypatch.setattr(httpx, "stream", client.stream)

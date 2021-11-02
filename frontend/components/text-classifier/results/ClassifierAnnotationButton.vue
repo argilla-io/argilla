@@ -16,12 +16,18 @@
   -->
 
 <template>
-  <div class="re-annotation-button" :class="classes">
+  <div
+    class="re-annotation-button"
+    :class="[classes, allowMultiple ? 'multiple' : 'single']"
+  >
     <label :for="id" class="button" @click.prevent="toggleCheck">
       <span class="annotation-button-data__text" :title="label.class"
         >{{ label.class }}
       </span>
-      <div class="annotation-button-data__info" v-if="!label.selected && label.score > 0">
+      <div
+        v-if="!label.selected && label.score > 0"
+        class="annotation-button-data__info"
+      >
         <span>{{ label.score | percent }}</span>
       </div>
     </label>
@@ -71,7 +77,7 @@ export default {
   methods: {
     toggleCheck() {
       if (!this.disabled) {
-        let checked = this.areChecked.slice();
+        let checked = this.areChecked;
         const found = checked.indexOf(this.value);
         if (found >= 0) {
           checked.splice(found, 1);
@@ -123,17 +129,23 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       color: $darker-color;
     }
-    &.active {
+    &.bordered {
       .button {
-        background: $secondary-color;
         border: 1px solid $secondary-color;
       }
+    }
+    &.active {
       transition: all 0.02s ease-in-out;
       box-shadow: none; // Animate the size, outside
       animation: pulse 0.4s;
       transform: scale3d(1, 1, 1);
       -webkit-font-smoothing: antialiased;
       transform: translate3d(1, 1, 1); // z-index: 1;
+      .button {
+        background: $secondary-color;
+        border: 1px solid $line-smooth-color;
+      }
+
       &:after {
         display: none !important;
       }
@@ -163,6 +175,9 @@ $annotation-button-touch-size: 48px;
       .annotation-button-data__score {
         color: $lighter-color;
         animation: pulse-font 0.5s;
+      }
+      .annotation-button-data__info {
+        display: none;
       }
     }
     .annotation-button-data {
@@ -211,14 +226,4 @@ $annotation-button-touch-size: 48px;
     line-height: $annotation-button-size;
   }
 }
-
-// .re-annotation-button.checked {
-//   .annotation-button-container {
-//     &:after {
-//       opacity: 1;
-//       transform: scale3D(1, 1, 1);
-//       transition: $swift-ease-out;
-//     }
-//   }
-// }
 </style>

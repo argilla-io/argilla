@@ -63,6 +63,9 @@ export default {
     fill: $primary-color;
     margin: auto 1em auto 1em;
   }
+  &:hover {
+    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
+  }
   &__button {
     cursor: pointer;
   }

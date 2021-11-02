@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="header__filters">
     <header-title
       v-if="dataset.results.records"
       title="Text Classification"
@@ -80,16 +80,7 @@ export default {
     }),
     async onSelectLabels(labels, selectedRecords) {
       const records = selectedRecords.map((record) => {
-        const appliedLabels = record.annotation
-          ? [...record.annotation.labels]
-          : [];
-
-        const filterAppliedLabels = labels.filter(
-          (l) => appliedLabels.map((label) => label.class).indexOf(l) === -1
-        );
-
-        let newLabels = this.isMultiLabelRecord ? filterAppliedLabels : labels;
-        newLabels = newLabels.map((label) => ({
+        let newLabels = labels.map((label) => ({
           class: label,
           score: 1.0,
         }));
@@ -97,9 +88,7 @@ export default {
           ...record,
           annotation: {
             agent: this.$auth.user,
-            labels: this.isMultiLabelRecord
-              ? [...appliedLabels, ...newLabels]
-              : newLabels,
+            labels: newLabels,
           },
         };
       });
@@ -112,18 +101,27 @@ export default {
       });
     },
     async onValidate(records) {
+
       await this.validate({
         dataset: this.dataset,
-        records: records,
+        records: records.map((record) => {
+          let modelPrediction = {};
+          modelPrediction.labels = record.predicted_as.map((pred) => ({class: pred, score: 1}));
+          return {
+            ...record,
+            annotation: {
+              ...(record.annotation || modelPrediction),
+              agent: this.$auth.user,
+            },
+          }
+        }),
       });
     },
     async onNewLabel(newLabel) {
-      if (this.isTextClassification) {
-        await this.dataset.$dispatch("setLabels", {
-          dataset: this.dataset,
-          labels: [...new Set([...this.dataset.labels, newLabel])],
-        });
-      }
+      await this.dataset.$dispatch("setLabels", {
+        dataset: this.dataset,
+        labels: [...new Set([...this.dataset.labels, newLabel])],
+      });
     },
   },
 };

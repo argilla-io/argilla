@@ -14,14 +14,16 @@
 #  limitations under the License.
 
 import itertools
-from rubrix.server.security.model import User
 from typing import Iterable, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
-from rubrix.server.datasets.model import CreationDatasetRequest
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+
+from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
+from rubrix.server.security.model import User
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
@@ -51,8 +53,9 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TextClassificationBulkData,
+    teams_query: TeamsQueryParams = Depends(),
     service: TextClassificationService = Depends(text_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -64,6 +67,8 @@ def bulk_records(
         The dataset name
     bulk:
         The bulk data
+    teams_query:
+        Team query params
     service:
         the Service
     datasets:
@@ -77,15 +82,14 @@ def bulk_records(
     """
 
     task = TASK_TYPE
-
-    datasets.upsert(
+    dataset = datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        owner=current_user.current_group,
         task=task,
+        user=current_user,
+        team=teams_query.team,
     )
     result = service.add_records(
-        dataset=name,
-        owner=current_user.current_group,
+        dataset=dataset,
         records=bulk.records,
     )
     return BulkResponse(
@@ -104,9 +108,10 @@ def bulk_records(
 def search_records(
     name: str,
     search: TextClassificationSearchRequest = None,
+    teams_query: TeamsQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TextClassificationService = Depends(text_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TextClassificationSearchResults:
     """
@@ -117,7 +122,9 @@ def search_records(
     name:
         The dataset name
     search:
-        THe search query request
+        The search query request
+    teams_query:
+        The teams query params
     pagination:
         The pagination params
     service:
@@ -135,10 +142,11 @@ def search_records(
 
     search = search or TextClassificationSearchRequest()
     query = search.query or TextClassificationQuery()
-
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
     result = service.search(
-        dataset=name,
-        owner=current_user.current_group,
+        dataset=Dataset.parse_obj(dataset),
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -188,9 +196,10 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TextClassificationQuery] = None,
+    teams_query: TeamsQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TextClassificationService = Depends(text_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
@@ -202,6 +211,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
+    teams_query:
+        The teams query params
     limit:
         The load number of records limit. Optional
     service:
@@ -213,8 +224,10 @@ async def stream_data(
 
     """
     query = query or TextClassificationQuery()
-
-    data_stream = service.read_dataset(name, owner=current_user.current_group, query=query)
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
+    data_stream = service.read_dataset(Dataset.parse_obj(dataset), query=query)
 
     return scan_data_response(
         data_stream=data_stream,

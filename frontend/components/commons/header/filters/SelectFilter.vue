@@ -17,6 +17,15 @@
 
 <template>
   <div class="filter__row">
+    <svgicon
+      v-if="appliedFilters.length"
+      title="remove field"
+      class="filter__remove-button"
+      name="cross"
+      width="14"
+      height="14"
+      @click="onRemove()"
+    />
     <p class="filter__label" :title="filter.name">{{ filter.name }}:</p>
     <FilterDropdown
       :class="{ highlighted: visible || appliedFilters.length }"
@@ -80,7 +89,7 @@
             Cancel
           </ReButton>
           <ReButton class="button-primary--small" @click="onApply">
-            Apply
+            Filter
           </ReButton>
         </div>
       </div>
@@ -114,13 +123,20 @@ export default {
   },
   watch: {
     appliedFilters() {
-      this.selectedOptions = this.appliedFilters;
+      this.updateOptions();
     },
   },
   mounted() {
-    this.selectedOptions = this.appliedFilters;
+    this.updateOptions();
   },
   methods: {
+    updateOptions() {
+      if (typeof this.appliedFilters === "string")
+        this.selectedOptions = [this.appliedFilters];
+      else {
+        this.selectedOptions = this.appliedFilters;
+      }
+    },
     onVisibility(value) {
       this.visible = value;
       this.searchText = undefined;
@@ -131,8 +147,16 @@ export default {
       this.selectedOptions = [];
       this.visible = false;
     },
+    onRemove() {
+      this.$emit("apply", this.filter, []);
+      this.selectedOptions = [];
+      this.visible = false;
+    },
     onCancel() {
       this.visible = false;
+      this.searchText = undefined;
+      this.searchTextValue = undefined;
+      this.selectedOptions = this.appliedFilters;
     },
     filterOptions(options, text) {
       if (text === undefined) {
@@ -164,7 +188,7 @@ export default {
     .dropdown {
       margin-right: 0;
       margin-left: auto;
-      width: 220px;
+      width: 270px;
       flex-shrink: 0;
     }
   }
@@ -180,8 +204,20 @@ export default {
     text-align: right;
     display: flex;
     & > * {
+      display: block !important;
+      width: 100%;
       margin-right: 0.5em;
+      min-height: 38px;
+      &:last-child {
+        margin-right: 0;
+      }
     }
+  }
+  &__remove-button {
+    position: absolute;
+    left: 20px;
+    margin-right: 1em;
+    cursor: pointer;
   }
 }
 

@@ -14,46 +14,22 @@
 #  limitations under the License.
 
 import datetime
-import socket
+from time import sleep
+from typing import Iterable
 
 import httpx
 import pandas
 import pytest
-import requests
+
 import rubrix
-from rubrix import (
-    RubrixClient,
-    TextClassificationRecord,
-    TokenAttributions,
-    TokenClassificationRecord,
-    Text2TextRecord,
-)
-from rubrix.sdk.models import TextClassificationSearchResults
-from time import sleep
-from typing import Iterable
-
+from rubrix import Text2TextRecord, TextClassificationRecord
+from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
-from tests.server.test_helpers import client
-
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(requests, "get", client.get)
-    monkeypatch.setattr(requests, "post", client.post)
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-
-    def stream_mock(*args, url: str, **kwargs):
-        if "POST" in args:
-            return client.post(url, stream=True, **kwargs)
-        return client.get(url, stream=True, **kwargs)
-
-    monkeypatch.setattr(httpx, "stream", stream_mock)
+from tests.server.test_helpers import client, mocking_client
 
 
 def test_log_something(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test-dataset"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -66,14 +42,14 @@ def test_log_something(monkeypatch):
     assert response.failed == 0
 
     response = client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
-    results = TextClassificationSearchResults.from_dict(response.json())
+    results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert len(results.records) == 1
     assert results.records[0].inputs["text"] == "This is a test"
 
 
 def test_load_limits(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_limits"
     api_ds_prefix = f"/api/datasets/{dataset}"
     client.delete(api_ds_prefix)
@@ -91,7 +67,7 @@ def test_load_limits(monkeypatch):
 
 
 def test_log_records_with_too_long_text(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_records_with_too_long_text"
     client.delete(f"/api/datasets/{dataset_name}")
     item = TextClassificationRecord(
@@ -102,15 +78,67 @@ def test_log_records_with_too_long_text(monkeypatch):
 
 
 def test_not_found_response(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     not_found_match = "Not found error. The API answered with a 404 code"
 
     with pytest.raises(Exception, match=not_found_match):
         rubrix.load(name="not-found")
 
 
+def test_log_without_name(monkeypatch):
+    mocking_client(monkeypatch, client)
+    with pytest.raises(
+        Exception, match="Empty project name has been passed as argument."
+    ):
+        rubrix.log(
+            TextClassificationRecord(
+                inputs={"text": "This is a single record. Only this. No more."}
+            ),
+            name=None,
+        )
+
+
+def test_log_passing_empty_records_list(monkeypatch):
+    mocking_client(monkeypatch, client)
+
+    with pytest.raises(
+        Exception, match="Empty record list has been passed as argument."
+    ):
+        rubrix.log(records=[], name="ds")
+
+
+@pytest.mark.parametrize(
+    "status,match",
+    [
+        (
+            401,
+            "Unauthorized error: invalid credentials. The API answered with a 401 code",
+        ),
+        (403, "Forbidden error: you have not been authorised to access this dataset. "),
+        (404, "Not found error. The API answered with a"),
+        (422, "Unprocessable entity error: Something is wrong in your records. "),
+        (429, "Request error: API cannot answer. "),
+        (500, "Connection error: API is not responding. "),
+    ],
+)
+def test_delete_with_errors(monkeypatch, status, match):
+    mocking_client(monkeypatch, client)
+
+    def send_mock_response_with_http_status(status: int):
+        def inner(*args, **kwargs):
+            return httpx.Response(status_code=status, json={"message": "Mock"})
+
+        return inner
+
+    with pytest.raises(Exception, match=match):
+        monkeypatch.setattr(
+            httpx, "delete", send_mock_response_with_http_status(status)
+        )
+        rubrix.delete("dataset")
+
+
 def test_single_record(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_single_records"
     client.delete(f"/api/datasets/{dataset_name}")
     item = TextClassificationRecord(
@@ -121,7 +149,7 @@ def test_single_record(monkeypatch):
 
 
 def test_passing_wrong_iterable_data(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_single_records"
     client.delete(f"/api/datasets/{dataset_name}")
     with pytest.raises(Exception, match="Unknown record type passed"):
@@ -129,7 +157,7 @@ def test_passing_wrong_iterable_data(monkeypatch):
 
 
 def test_log_with_generator(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_with_generator"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -141,7 +169,7 @@ def test_log_with_generator(monkeypatch):
 
 
 def test_log_with_annotation(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_log_with_annotation"
     client.delete(f"/api/datasets/{dataset_name}")
     rubrix.log(
@@ -175,79 +203,8 @@ def test_log_with_annotation(monkeypatch):
     assert records[0]["status"] == "Discarded"
 
 
-@pytest.mark.parametrize("annotation", ["gold_label", ["multi_label1", "multi_label2"]])
-def test_text_classification_client_to_sdk(annotation):
-    token_attributions = [
-        TokenAttributions(token="test", attributions={"label1": 1.0, "label2": 2.0})
-    ]
-    record = TextClassificationRecord(
-        inputs={"text": "test"},
-        prediction=[("label1", 0.5), ("label2", 0.5)],
-        annotation=annotation,
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
-        multi_label=True,
-        explanation={"text": token_attributions},
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-    sdk_record = RubrixClient._text_classification_client_to_sdk(record)
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
-
-
-@pytest.mark.parametrize("include_score, agent", [(False, "test_agent"), (True, None)])
-def test_token_classification_client_to_sdk(include_score, agent):
-    record = TokenClassificationRecord(
-        text="test text",
-        tokens=["test", "text"],
-        prediction=[("label", 0, 5, 0.9)] if include_score else [("label", 0, 5)],
-        annotation=[("label", 0, 5)],
-        prediction_agent=agent,
-        annotation_agent=agent,
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-    sdk_record = RubrixClient._token_classification_client_to_sdk(record)
-
-    if agent is None:
-        assert sdk_record.prediction.agent == socket.gethostname()
-        assert sdk_record.annotation.agent == socket.gethostname()
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
-
-
-def test_text2text_client_to_sdk():
-    record = Text2TextRecord(
-        text="test text",
-        prediction=["test prediction"],
-        annotation="test annotation",
-        prediction_agent="test_model",
-        annotation_agent="test_annotator",
-        id=1,
-        metadata={"metadata": "test"},
-        status="Default",
-        event_timestamp=datetime.datetime(2000, 1, 1),
-    )
-
-    assert isinstance(record.prediction[0], tuple)
-    assert record.prediction[0][1] == pytest.approx(1.0)
-
-    sdk_record = RubrixClient._text2text_client_to_sdk(record)
-
-    assert sdk_record.event_timestamp == datetime.datetime(2000, 1, 1)
-
-    client_record = RubrixClient._text2text_sdk_to_client(sdk_record)
-
-    assert record == client_record
-
-
 def test_create_ds_with_wrong_name(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "Test Create_ds_with_wrong_name"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -264,7 +221,7 @@ def test_create_ds_with_wrong_name(monkeypatch):
 
 
 def test_delete_dataset(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset_name = "test_delete_dataset"
     client.delete(f"/api/datasets/{dataset_name}")
 
@@ -287,7 +244,7 @@ def test_delete_dataset(monkeypatch):
 
 
 def test_dataset_copy(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
 
@@ -314,7 +271,7 @@ def test_dataset_copy(monkeypatch):
 
 
 def test_text_classifier_with_inputs_list(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_text_classifier_with_inputs_list"
     client.delete(f"/api/datasets/{dataset}")
 
@@ -336,7 +293,7 @@ def test_text_classifier_with_inputs_list(monkeypatch):
 
 
 def test_load_with_ids_list(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_load_with_ids_list"
     client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -347,8 +304,42 @@ def test_load_with_ids_list(monkeypatch):
     assert len(ds) == 2
 
 
+def test_load_with_query(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_load_with_query"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 4
+    create_some_data_for_text_classification(dataset, n=expected_data)
+    ds = rubrix.load(name=dataset, query="id:1")
+    assert len(ds) == 1
+    assert ds.id.iloc[0] == 1
+
+
+@pytest.mark.parametrize("as_pandas", [True, False])
+def test_load_as_pandas(monkeypatch, as_pandas):
+    mocking_client(monkeypatch, client)
+    dataset = "test_sorted_load"
+    client.delete(f"/api/datasets/{dataset}")
+    sleep(1)
+
+    expected_data = 3
+    create_some_data_for_text_classification(dataset, n=expected_data)
+
+    # Check that the default value is True
+    if as_pandas:
+        records = rubrix.load(name=dataset)
+        assert isinstance(records, pandas.DataFrame)
+        assert list(records.id) == [0, 1, 2, 3]
+    else:
+        records = rubrix.load(name=dataset, as_pandas=False)
+        assert isinstance(records[0], TextClassificationRecord)
+        assert [record.id for record in records] == [0, 1, 2, 3]
+
+
 def test_token_classification_spans(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     dataset = "test_token_classification_with_consecutive_spans"
     texto = "Esto es una prueba"
     item = rubrix.TokenClassificationRecord(
@@ -373,7 +364,7 @@ def test_token_classification_spans(monkeypatch):
 
 
 def test_load_text2text(monkeypatch):
-    mocking_client(monkeypatch)
+    mocking_client(monkeypatch, client)
     records = [
         Text2TextRecord(
             text="test text",

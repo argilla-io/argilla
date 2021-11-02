@@ -30,10 +30,18 @@
         v-if="annotationEnabled"
         :dataset="dataset"
         :record="record"
-        @annotate="onAnnotate"
-        @edit="onEdit"
+        @validate="validateLabels"
+        @reset="resetLabels"
       />
       <ClassifierExplorationArea v-else :record="record" />
+      <div v-if="annotationEnabled" class="content__actions-buttons">
+        <re-button
+          v-if="record.status !== 'Validated'"
+          class="button-primary"
+          @click="onValidate(record)"
+          >Save</re-button
+        >
+      </div>
     </div>
     <div v-if="!annotationEnabled && record.annotation" class="record__labels">
       <svgicon
@@ -43,7 +51,12 @@
         height="20"
         :name="record.predicted ? 'predicted-ko' : 'predicted-ok'"
       ></svgicon>
-      <re-tag v-for="label in record.annotation.labels" :key="label.class" bg-color="#f5f5f6" :name="label.class" />
+      <re-tag
+        v-for="label in record.annotation.labels"
+        :key="label.class"
+        bg-color="#f5f5f6"
+        :name="label.class"
+      />
     </div>
   </div>
 </template>
@@ -74,41 +87,56 @@ export default {
   },
   methods: {
     ...mapActions({
-      validate: "entities/datasets/validateAnnotations",
-      edit: "entities/datasets/editAnnotations",
+      validateAnnotations: "entities/datasets/validateAnnotations",
+      resetAnnotations: "entities/datasets/resetAnnotations",
     }),
-
-    async onEdit({ labels }) {
-      await this.edit({
+    async resetLabels() {
+      await this.resetAnnotations({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: [
           {
             ...this.record,
-            status: "Edited",
             annotation: {
-              agent: this.$auth.user,
-              labels,
+              labels: [],
             },
           },
         ],
       });
     },
 
-    async onAnnotate({ labels }) {
-      await this.validate({
+    async validateLabels({ labels }) {
+      await this.validateAnnotations({
         dataset: this.dataset,
         agent: this.$auth.user,
         records: [
           {
             ...this.record,
-            status: ["Discarded", "Validated"].includes(this.record.status)
-              ? "Edited"
-              : this.record.status,
             annotation: {
               labels: labels.map((label) => ({
                 class: label,
                 score: 1.0,
               })),
+            },
+          },
+        ],
+      });
+    },
+    async onValidate(record) {
+      let modelPrediction = {};
+      modelPrediction.labels = record.predicted_as.map((pred) => ({
+        class: pred,
+        score: 1,
+      }));
+      // TODO: do not validate records without labels
+      await this.validateAnnotations({
+        dataset: this.dataset,
+        records: [
+          {
+            ...record,
+            annotation: {
+              ...(record.annotation || modelPrediction),
+              agent: this.$auth.user,
             },
           },
         ],
@@ -123,23 +151,21 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 2em 2em 0.5em 2em;
+    padding: 2em;
     .list__item--annotation-mode & {
       padding-left: 65px;
     }
   }
   &__labels {
     position: relative;
-    border-left: 1px solid palette(grey, bg);
     margin-left: 2em;
-    width: 170px;
-    flex-shrink: 0;
+    width: 200px;
     margin-bottom: -3em;
     display: block;
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 1em;
+    padding: 4em 2em 1em 1em;
   }
 }
 .icon {
@@ -149,11 +175,31 @@ export default {
     margin-right: 0;
     margin-left: auto;
     margin-bottom: 1em;
+    transform: scaleX(-1);
     &.ko {
       fill: $error;
     }
     &.ok {
       fill: $success;
+    }
+  }
+}
+.content {
+  &__actions-buttons {
+    margin-right: 0;
+    margin-left: auto;
+    display: flex;
+    min-width: 20%;
+    .re-button {
+      min-height: 32px;
+      line-height: 32px;
+      display: block;
+      margin-bottom: 0;
+      margin-right: 0;
+      margin-left: auto;
+      & + .re-button {
+        margin-left: 1em;
+      }
     }
   }
 }

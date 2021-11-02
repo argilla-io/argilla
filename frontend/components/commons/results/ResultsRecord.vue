@@ -23,17 +23,6 @@
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
-      <!-- TODO: make global, remove task reference -->
-      <div
-        v-if="
-          annotationEnabled &&
-          item.status !== 'Default' &&
-          dataset.task !== 'Text2Text'
-        "
-        class="list__li__status"
-      >
-        {{ item.status }}
-      </div>
       <ReCheckbox
         v-if="annotationEnabled"
         class="list__checkbox"
@@ -48,6 +37,7 @@
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata"
       />
+      <status-tag v-if="annotationEnabled && item.status === 'Validated'" :title="item.status"></status-tag>
     </div>
     <LazyReModal
       modal-class="modal-secondary"
@@ -96,9 +86,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateRecords",
+      updateRecords: "entities/datasets/updateDatasetRecords",
       search: "entities/datasets/search",
-      editAnnotations: "entities/datasets/editAnnotations",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
@@ -155,25 +144,17 @@ export default {
     top: 1.2em;
     width: auto;
   }
-  &__li {
-    &__status {
-      position: absolute;
-      top: 1em;
-      right: 1em;
-      font-style: italic;
-    }
-  }
   &__item {
     position: relative;
     background: $lighter-color;
-    border-radius: 3px;
+    border-radius: 1px;
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid white;
     &:hover {
       border: 1px solid palette(grey, smooth);
-      .record__extra-actions--text2text {
+      .record__extra-actions {
         opacity: 1;
         pointer-events: all;
       }

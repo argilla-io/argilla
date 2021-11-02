@@ -142,17 +142,30 @@ def parse_aggregations(
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, doc_count, meta = (
+            key, doc_count, meta, _from, _to = (
                 bucket.pop("key", None),
                 bucket.pop("doc_count", 0),
                 bucket.pop("meta", None),
+                bucket.pop("from", None),
+                bucket.pop("to", None),
             )
-            if len(bucket) == 1 and not ("from" in bucket or "to" in bucket):
-                k = [k for k in bucket if k not in ["key", "doc_count"]][0]
+            if len(bucket) == 1 and not (_from or _to):
+                k = [k for k in bucket][0]
                 parsed.update({key or k: parse_buckets(bucket[k].get("buckets", []))})
+            elif len(bucket) > 1:
+                key_metrics = {}
+                for metric_key, metric in list(bucket.items()):
+                    if "buckets" in metric:
+                        key_metrics.update(
+                            {metric_key: parse_buckets(metric.get("buckets", []))}
+                        )
+                    else:
+                        metric_values = list(metric.values())
+                        value = metric_values[0] if len(metric_values) == 1 else metric
+                        key_metrics[metric_key] = value
+                parsed.update({key: key_metrics})
             elif key:
                 parsed.update({key: doc_count})
-
         return parsed
 
     result = {}
@@ -162,7 +175,7 @@ def parse_aggregations(
         elif is_extended_stats_aggregation(values):
             result[key] = {"rubrix:stats": values}  # statistical aggregations
         else:
-            result.update(parse_buckets([values]))
+            result[key] = list(parse_buckets([values]).values())[0]
     return result
 
 
@@ -308,9 +321,10 @@ class aggregations:
 
     @staticmethod
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
+        inner_meta = list(inner_aggregation.values())[0].get("meta", {})
         return {
             "meta": {
-                "kind": list(inner_aggregation.values())[0]["meta"]["kind"],
+                "kind": inner_meta.get("kind", "custom"),
             },
             "nested": {"path": nested_path},
             "aggs": inner_aggregation,
@@ -334,7 +348,7 @@ class aggregations:
             "meta": {"kind": "terms"},
             "terms": {
                 "field": field_name,
-                "size": size,
+                "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
                 "order": {"_count": "desc"},
             },
         }
@@ -347,7 +361,7 @@ class aggregations:
             },
             "histogram": {
                 "field": field_name,
-                "interval": interval,
+                "interval": interval or 0.1,
             },
         }
 

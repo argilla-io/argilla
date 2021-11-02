@@ -18,11 +18,10 @@ Dataset models definition
 """
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.metrics.model import DatasetMetricDB
 from rubrix.server.tasks.commons import TaskType
 
 
@@ -58,7 +57,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     Request body for copy dataset operation
     """
 
-    pass
+    target_team: Optional[str] = None
 
 
 class BaseDatasetDB(CreationDatasetRequest):
@@ -91,7 +90,7 @@ class BaseDatasetDB(CreationDatasetRequest):
 
 
 class DatasetDB(BaseDatasetDB):
-    metrics: List[DatasetMetricDB] = Field(default_factory=list)
+    pass
 
 
 class Dataset(BaseDatasetDB):

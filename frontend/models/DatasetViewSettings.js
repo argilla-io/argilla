@@ -26,7 +26,6 @@ class Pagination extends Model {
       size: this.number(5),
       page: this.number(1),
       pageSizeOptions: this.attr([1, 5, 10, 20]),
-      allowKeyboardPagination: this.boolean(true),
     };
   }
 
@@ -45,6 +44,7 @@ export default class DatasetViewSettings extends Model {
       annotationEnabled: this.boolean(false),
       loading: this.boolean(false),
       headerHeight: this.number(140),
+      visibleMetrics: this.boolean(false),
     };
   }
 }

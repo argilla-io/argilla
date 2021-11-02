@@ -14,13 +14,21 @@
 #  limitations under the License.
 
 import itertools
+from typing import Iterable, Optional
+
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
-from rubrix.server.datasets.model import CreationDatasetRequest
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+
+from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
-from rubrix.server.tasks.commons import BulkResponse, PaginationParams, TaskType
+from rubrix.server.tasks.commons import (
+    BulkResponse,
+    PaginationParams,
+    TaskType,
+)
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationBulkData,
@@ -33,7 +41,6 @@ from rubrix.server.tasks.token_classification.service.service import (
     TokenClassificationService,
     token_classification_service,
 )
-from typing import Iterable, Optional
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -50,8 +57,9 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
+    teams_query: TeamsQueryParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -75,14 +83,14 @@ def bulk_records(
         Bulk response data
     """
 
-    datasets.upsert(
+    dataset = datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        owner=current_user.current_group,
+        user=current_user,
+        team=teams_query.team,
         task=TASK_TYPE,
     )
     result = service.add_records(
-        dataset=name,
-        owner=current_user.current_group,
+        dataset=dataset,
         records=bulk.records,
     )
     return BulkResponse(
@@ -101,9 +109,10 @@ def bulk_records(
 def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
+    teams_query: TeamsQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TokenClassificationSearchResults:
     """
@@ -115,6 +124,8 @@ def search_records(
         The dataset name
     search:
         THe search query request
+    teams_query:
+        The teams query params
     pagination:
         The pagination params
     service:
@@ -133,9 +144,11 @@ def search_records(
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
 
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
     result = service.search(
-        dataset=name,
-        owner=current_user.current_group,
+        dataset=Dataset.parse_obj(dataset),
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -185,9 +198,10 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TokenClassificationQuery] = None,
+    teams_query: TeamsQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
@@ -199,6 +213,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
+    teams_query:
+        The teams query params
     limit:
         The load number of records limit. Optional
     service:
@@ -210,7 +226,10 @@ async def stream_data(
 
     """
     query = query or TokenClassificationQuery()
-    data_stream = service.read_dataset(name, owner=current_user.current_group, query=query)
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+    )
+    data_stream = service.read_dataset(dataset=Dataset.parse_obj(dataset), query=query)
 
     return scan_data_response(
         data_stream=data_stream,

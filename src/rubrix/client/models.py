@@ -88,6 +88,13 @@ class TextClassificationRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
+
+    Examples:
+        >>> import rubrix as rb
+        >>> record = rb.TextClassificationRecord(
+        ...     inputs={"text": "my first rubrix example"},
+        ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+        ... )
     """
 
     inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
@@ -154,12 +161,22 @@ class TokenClassificationRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
+    
+    Examples:
+        >>> import rubrix as rb
+        >>> record = rb.TokenClassificationRecord(
+        ...     text = "Michael is a professor at Harvard",
+        ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
+        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
+        ... )
     """
 
     text: str
     tokens: List[str]
 
-    prediction: Optional[List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]] = None
+    prediction: Optional[
+        List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+    ] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     prediction_agent: Optional[str] = None
     annotation_agent: Optional[str] = None
@@ -205,6 +222,13 @@ class Text2TextRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
+    
+    Examples:
+        >>> import rubrix as rb
+        >>> record = rb.Text2TextRecord(
+        ...     text="My name is Sarah and I love my dog.",
+        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
+        ... )    
     """
 
     text: str

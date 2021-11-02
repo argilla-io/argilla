@@ -109,15 +109,10 @@
                   >Back</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable"
-                  :class="[
-                    'button-primary',
-                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
-                  ]"
+                  v-if="newSentence && editable && (editionMode || sentencesOrigin !== 'Annotation')"
+                  class="button-primary"
                   @click="annotate"
-                  >{{
-                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
-                  }}</re-button
+                  >Save</re-button
                 >
               </div>
             </div>
@@ -134,15 +129,10 @@
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="newSentence && editable"
-                  :class="[
-                    'button-primary',
-                    status === 'Validated' && sentencesOrigin === 'Annotation' && !editionMode ? 'active' : null,
-                  ]"
+                  v-if="newSentence && editable && editionMode"
+                  class="button-primary"
                   @click="annotate"
-                  >{{
-                    status === "Validated" && sentencesOrigin === 'Annotation' && !editionMode ? "Validated" : "Validate"
-                  }}</re-button
+                  >Save</re-button
                 >
               </div>
             </div>
@@ -237,7 +227,6 @@ export default {
     edit() {
       if (this.editable) {
         this.editionMode = true;
-        this.$emit("edition-mode", this.editionMode);
       }
     },
     focus() {
@@ -249,19 +238,16 @@ export default {
     },
     back() {
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       this.refresh++;
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       this.$emit("change-visible-sentences");
     },
     annotate() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("edition-mode", this.editionMode);
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -288,6 +274,7 @@ export default {
     clickOutside() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.refresh++;
     }
   }
 };
@@ -316,8 +303,14 @@ $marginRight: 200px;
     align-items: flex-end;
   }
   &--separator {
-    border-top: 1px solid palette(grey, light);
     padding-top: 1em;
+    &:before {
+      content: "";
+      border-top: 1px solid palette(grey, light);
+      width: calc(100% - 200px);
+      position: absolute;
+      top: 0;
+    }
   }
   &--editable {
     width: 100%;
@@ -399,13 +392,13 @@ $marginRight: 200px;
     top: 1em;
     right: 0;
     .button-clear {
-      color: $font-secondary;
+      color: palette(grey, dark);
       min-height: 2em;
       line-height: 2em;
       opacity: 0;
       transition: opacity 0.3s ease-in-out 0.2s;
       &:hover {
-        color: darken($font-secondary, 10%);
+        color: darken(palette(grey, dark), 10%);
       }
     }
   }
@@ -415,32 +408,14 @@ $marginRight: 200px;
     display: flex;
     min-width: 20%;
     .re-button {
-      min-height: 38px;
-      line-height: 38px;
+      min-height: 32px;
+      line-height: 32px;
       display: block;
       margin-bottom: 0;
       margin-right: 0;
       margin-left: auto;
-      &.active {
-        background: $font-secondary;
-        pointer-events: none;
-        cursor: pointer;
-      }
-      &.button-primary--outline {
-        min-height: 36px;
-        line-height: 36px;
-        color: $font-secondary;
-        border-color: $font-secondary;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out 0.2s;
-        min-width: auto;
-      }
-      &.button-primary:not(.active) {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out 0.2s;
-      }
       & + .re-button {
-        margin-left: 1em;
+        margin-left: 6px;
       }
     }
   }

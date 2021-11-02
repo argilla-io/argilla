@@ -20,12 +20,18 @@
     <div class="filters__content">
       <div class="container">
         <div class="filters__row">
-          <SearchBar class="filters__searchbar" @submit="onTextQuerySearch" />
+          <SearchBar
+            class="filters__searchbar"
+            :dataset="dataset"
+            @submit="onTextQuerySearch"
+          />
           <FiltersList
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
             @applySortBy="onApplySortBy"
+            @removeAllMetadataFilters="onRemoveAllMetadataFilters"
+            @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
         </div>
       </div>
@@ -66,6 +72,9 @@ export default {
       this.search({ dataset: this.dataset, query: { text } });
     },
     onApplyFilter({ filter, values }) {
+      if (Array.isArray(values) && !values.length) {
+        values = undefined;
+      }
       this.search({ dataset: this.dataset, query: { [filter]: values } });
     },
     onApplyMetaFilter({ filter, values }) {
@@ -73,6 +82,18 @@ export default {
         dataset: this.dataset,
         query: { metadata: { [filter]: values } },
       });
+    },
+    async onRemoveAllMetadataFilters(filters) {
+      let query = {};
+      filters.forEach((f) => (query[f.key] = []));
+      await this.search({ dataset: this.dataset, query: { metadata: query } });
+    },
+    async onRemoveFiltersByGroup(filters) {
+      let query = {};
+      filters.forEach(
+        (f) => (query[f.key] = f.key === "score" ? undefined : [])
+      );
+      await this.search({ dataset: this.dataset, query: query });
     },
     async onApplySortBy(sortList) {
       await this.search({
@@ -111,7 +132,6 @@ export default {
     top: -1em;
     left: 0;
     right: 0;
-    z-index: 2;
     .fixed-header & {
       border-bottom: 1px solid $line-light-color;
     }
@@ -123,7 +143,6 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
-    z-index: 2;
     .fixed-header & {
       padding: 0.5em 0;
     }

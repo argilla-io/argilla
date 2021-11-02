@@ -13,13 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Type
+from typing import Optional, Type
 
 from fastapi import HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel, ValidationError
-from pydantic.error_wrappers import ErrorWrapper
 
 
 class ErrorMessage(BaseModel):
@@ -64,9 +63,10 @@ class InactiveUserError(HTTPException):
 class ForbiddenOperationError(HTTPException):
     """Forbidden operation"""
 
-    def __init__(self):
+    def __init__(self, message: Optional[str] = None):
         super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Operation not allowed"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=message or "Operation not allowed",
         )
 
 
@@ -95,6 +95,13 @@ class EntityAlreadyExistsError(HTTPException):
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Already created entity {name} of type {type.__name__}",
         )
+
+
+class WrongTaskError(HTTPException):
+    """Error raised when provided task cannot be processed with requested entity"""
+
+    def __init__(self, detail: str):
+        super().__init__(detail=detail, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 class EntityNotFoundError(HTTPException):

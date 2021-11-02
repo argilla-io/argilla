@@ -29,7 +29,6 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
-from rubrix.server.metrics.model import DatasetMetricResults
 
 
 class EsRecordDataFieldNames(str, Enum):
@@ -83,7 +82,9 @@ class PaginationParams:
     """Query pagination params"""
 
     limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(0, ge=0, alias="from", description="Record sequence from")
+    from_: int = Query(
+        0, ge=0, le=10000, alias="from", description="Record sequence from"
+    )
 
 
 class BaseAnnotation(BaseModel):
@@ -128,7 +129,7 @@ class TaskStatus(str, Enum):
     """
 
     default = "Default"
-    edited = "Edited"
+    edited = "Edited"  # TODO: DEPRECATE
     discarded = "Discarded"
     validated = "Validated"
 
@@ -171,6 +172,7 @@ class BaseRecord(GenericModel, Generic[Annotation]):
     status: Optional[TaskStatus] = None
     prediction: Optional[Annotation] = None
     annotation: Optional[Annotation] = None
+    metrics: Dict[str, Any] = Field(default_factory=dict)
 
     @validator("id", always=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -330,14 +332,11 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
         The selected records to return
     aggregations:
         Requested aggregations
-    metrics:
-        Requested metrics
     """
 
     total: int = 0
     records: List[Record] = Field(default_factory=list)
     aggregations: Aggregations = None
-    metrics: List[DatasetMetricResults] = Field(default_factory=list)
 
 
 class ScoreRange(BaseModel):

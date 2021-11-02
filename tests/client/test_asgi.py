@@ -41,8 +41,8 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
     def mock_predict(data: Dict[str, Any]):
         return JSONResponse(
             content=[
-                {"labels": ["A", "B"], "probabilities": [0.9, 0.1]},
-                {"labels": ["A", "B"], "probabilities": [0.9, 0.1]},
+                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
+                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
             ]
         )
 

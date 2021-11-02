@@ -17,6 +17,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from rubrix.server.commons.errors import ForbiddenOperationError
+
 
 class User(BaseModel):
     """Base user model"""
@@ -25,11 +27,58 @@ class User(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    user_groups: List[str] = None
+    teams: Optional[List[str]] = None
 
     @property
-    def current_group(self) -> Optional[str]:
-        return self.user_groups[0] if self.user_groups else None
+    def default_team(self) -> Optional[str]:
+        if self.teams is None:
+            return None
+        return self.username
+
+    def check_teams(self, teams: List[str]) -> List[str]:
+        """
+        Given a list of teams, apply a belongs to validation for each team. Then, return
+        original list if any, else user teams (including personal/default one)
+
+        Parameters
+        ----------
+        teams:
+            A list of team names
+
+        Returns
+        -------
+            Original team names if user belongs to them
+
+        """
+        if teams:
+            for team in teams:
+                self.check_team(team)
+            return teams
+
+        if self.teams is None:
+            return []
+        return self.teams + [self.default_team]
+
+
+
+    def check_team(self, team: str) -> str:
+        """
+        Given a team name, check if user belongs to it, raising a error if not.
+
+        Parameters
+        ----------
+        team
+
+        Returns
+        -------
+            The original team name if user belongs to it
+
+        """
+        if not team:
+            return self.default_team
+        if team not in self.teams:
+            raise ForbiddenOperationError(f"Missing or protected team {team}")
+        return team
 
 
 class Token(BaseModel):

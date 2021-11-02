@@ -21,13 +21,13 @@
       <ClassifierAnnotationButton
         v-for="label in sortedLabels.slice(0, maxLabelsShown)"
         :id="label.class"
-        :key="label.class"
+        :key="`${label.class}`"
         v-model="selectedLabels"
         :allow-multiple="record.multi_label"
         :label="label"
         :class="[
           'label-button',
-          selectedLabels.includes(label.class) ? 'selected' : '',
+          predictedAs.includes(label.class) ? 'bordered' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -68,7 +68,10 @@
           v-model="selectedLabels"
           :allow-multiple="record.multi_label"
           :label="label"
-          :class="['label-button']"
+          :class="[
+            'label-button',
+            predictedAs.includes(label.class) ? 'bordered' : null,
+          ]"
           :data-title="label.class"
           :value="label.class"
           @change="updateLabels"
@@ -152,23 +155,31 @@ export default {
     appliedLabels() {
       return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
+    predictedAs() {
+      return this.record.predicted_as;
+    },
   },
-  updated() {
-    this.selectedLabels = this.appliedLabels;
+  watch: {
+    appliedLabels(o, n) {
+      if (o.some((l) => n.indexOf(l) === -1)) {
+        this.selectedLabels = this.appliedLabels;
+      }
+    },
   },
   mounted() {
     this.selectedLabels = this.appliedLabels;
   },
   methods: {
-    updateLabels() {
-      if (this.selectedLabels.length > 0) {
+    updateLabels(labels) {
+      if (this.record.multi_label || labels.length > 0) {
         this.annotate();
-      } else {
-        this.$emit("edit", { labels: [] });
-      }
+      } else this.resetAnnotations();
+    },
+    resetAnnotations() {
+      this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("annotate", { labels: this.selectedLabels });
+      this.$emit("validate", { labels: this.selectedLabels });
     },
     onVisibility(visible) {
       this.visible = visible;
@@ -200,6 +211,9 @@ export default {
     flex-flow: wrap;
     margin-left: -1%;
     margin-right: -1%;
+    .list__item--annotation-mode & {
+      padding-right: 200px;
+    }
   }
 }
 ::v-deep .dropdown__header {
@@ -256,7 +270,7 @@ export default {
 }
 .list-enter-active,
 .list-leave-active {
-  transition: all 1s;
+  transition: all 0.5s;
 }
 .list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
   opacity: 0;

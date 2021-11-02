@@ -65,10 +65,10 @@ export default {
     height: 100%;
     width: auto;
     height: 45px;
-    border: 2px solid $line-smooth-color;
+    border: 1px solid $line-smooth-color;
     display: flex;
     align-items: center;
-    padding: 0 1em;
+    padding: 0 20px;
     transition: all 0.2s ease;
     border-radius: 3px;
     &:after {
@@ -124,12 +124,12 @@ export default {
   }
   &__content {
     position: absolute;
-    top: 4em;
+    top: 50px;
     left: 0;
     margin-top: 0;
     background: $lighter-color;
-    border: 2px solid $primary-color;
-    padding: 0 1em 0 1em;
+    border: 1px solid $primary-color;
+    padding: 10px 20px 10px 20px;
     z-index: 3;
     transform: translate(0);
     right: auto;
@@ -142,7 +142,7 @@ export default {
       max-height: 240px;
       overflow-y: auto;
       margin: 0 -1em 0 -1em;
-      padding: 0 1em;
+      padding: 0 1em 1em 1em;
     }
     li {
       padding: 0.4em 0;
@@ -152,7 +152,7 @@ export default {
   &--open {
     pointer-events: all;
     .dropdown__content {
-      min-width: 220px;
+      min-width: 270px;
     }
   }
   input {
@@ -183,8 +183,8 @@ export default {
       display: block;
     }
     .dropdown__header {
-      border: 2px solid $primary-color;
-      background: $lighter-color;
+      border: 1px solid palette(grey, light);
+      background: palette(grey, light);
       &:after {
         visibility: hidden;
       }
@@ -192,32 +192,18 @@ export default {
         display: none;
       }
     }
+    .dropdown__content {
+      border: 1px solid palette(grey, light);
+      background: palette(grey, light);
+    }
+    .filter-options {
+      background: palette(grey, light);
+    }
   }
   .re-checkbox {
     margin: 0;
     width: 100% !important;
     cursor: default;
-  }
-}
-.dropdown--sortable {
-  &.dropdown--open {
-    .dropdown {
-      &__header {
-        &:hover,
-        &:focus {
-          border: 2px solid $primary-color;
-          background: $lighter-color;
-        }
-      }
-    }
-  }
-  .dropdown {
-    &__header {
-      min-width: 140px;
-    }
-    &__selectables {
-      display: inline-block !important;
-    }
   }
 }
 </style>

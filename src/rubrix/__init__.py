@@ -21,13 +21,15 @@ This module contains the interface to access Rubrix's REST API.
 import logging
 import os
 import re
-from rubrix._constants import DEFAULT_API_KEY
 from typing import Iterable
 
 import pandas
 import pkg_resources
+
+from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
 from rubrix.client.models import *
+from rubrix.monitoring.model_monitor import monitor
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
@@ -122,7 +124,7 @@ def log(
 
     Examples:
         >>> import rubrix as rb
-        ... record = rb.TextClassificationRecord(
+        >>> record = rb.TextClassificationRecord(
         ...     inputs={"text": "my first rubrix example"},
         ...     prediction=[('spam', 0.8), ('ham', 0.2)]
         ... )
@@ -155,26 +157,32 @@ def copy(dataset: str, name_of_copy: str):
 
     Examples:
         >>> import rubrix as rb
-        ... rb.copy("my_dataset", name_of_copy="new_dataset")
-        >>> df = rb.load("new_dataset")
+        >>> rb.copy("my_dataset", name_of_copy="new_dataset")
+        >>> dataframe = rb.load("new_dataset")
     """
     _client_instance().copy(source=dataset, target=name_of_copy)
 
 
 def load(
     name: str,
+    query: Optional[str] = None,
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
-) -> pandas.DataFrame:
+    as_pandas: bool = True,
+) -> Union[pandas.DataFrame, List[Record]]:
     """Load dataset data to a pandas DataFrame.
 
     Args:
         name:
             The dataset name.
+        query:
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
         ids:
             If provided, load dataset records with given ids.
         limit:
             The number of records to retrieve.
+        as_pandas:
+            If True, return a pandas DataFrame. If False, return a list of records.
 
     Returns:
         The dataset as a pandas Dataframe.
@@ -183,7 +191,9 @@ def load(
         >>> import rubrix as rb
         >>> dataframe = rb.load(name="example-dataset")
     """
-    return _client_instance().load(name=name, limit=limit, ids=ids)
+    return _client_instance().load(
+        name=name, query=query, limit=limit, ids=ids, as_pandas=as_pandas
+    )
 
 
 def delete(name: str) -> None:

@@ -17,9 +17,9 @@
 
 <template>
   <div v-if="annotationsProgress">
-    <p class="sidebar__title">Annotation progress</p>
+    <p class="sidebar__title">Progress</p>
     <div class="progress__info">
-      <p class="progress__info__text">Total annotations</p>
+      <p class="progress__info__text">Total</p>
       <span class="progress__info__percent">{{ progress | percent }}</span>
     </div>
     <div class="progress__numbers">
@@ -56,7 +56,6 @@
 
 <script>
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { ObservationDataset } from "@/models/Dataset";
 export default {
   // TODO clean and typify
   props: {
@@ -65,17 +64,12 @@ export default {
       required: true,
     },
   },
-  async fetch() {
-    await ObservationDataset.dispatch("refreshAnnotationProgress", {
-      dataset: this.dataset,
-    });
-  },
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
+      return AnnotationProgress.find(this.dataset.name);
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -94,9 +88,8 @@ export default {
     },
     progress() {
       return (
-        (((this.totalValidated || 0) + (this.totalDiscarded || 0))) /
-        this.total
-      )
+        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) / this.total
+      );
     },
     annotationIsEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -110,6 +103,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 label {
@@ -144,7 +138,7 @@ label {
   }
 }
 .scroll {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 480px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
@@ -195,7 +189,13 @@ label {
     @include font-size(15px);
     align-items: center;
     color: $font-secondary-dark;
+    font-weight: 600;
+    margin-bottom: 1.5em;
+    &__text {
+      margin: 0;
+    }
     &__percent {
+      margin-top: 0;
       margin-right: 0;
       margin-left: auto;
     }
@@ -206,6 +206,7 @@ label {
     @include font-size(18px);
     span {
       @include font-size(40px);
+      font-weight: 700;
     }
   }
 }

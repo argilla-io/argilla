@@ -30,7 +30,6 @@
           :annotations="annotationSentences"
           :sentences-origin="sentencesOrigin"
           :editable="annotationEnabled"
-          @edition-mode="onEditionMode"
           @change-visible-sentences="onChangeSentences"
           @annotate="onAnnotate"
         />
@@ -40,7 +39,6 @@
 </template>
 <script>
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
-import { Pagination } from "@/models/DatasetViewSettings";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -117,14 +115,6 @@ export default {
         ],
       });
     },
-    async onEditionMode(editionMode) {
-      await Pagination.update({
-        where: this.dataset.name,
-        data: {
-          allowKeyboardPagination: !editionMode,
-        },
-      });
-    },
   },
 };
 </script>
@@ -137,7 +127,6 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
     &:hover {
-      ::v-deep .button-primary,
       ::v-deep .button-primary--outline,
       ::v-deep .button-clear {
         opacity: 1 !important;

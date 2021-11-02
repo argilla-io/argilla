@@ -22,7 +22,7 @@
       <div class="pagination__selector__content">
         <a href="#" @click="showOptions = !showOptions">
           {{ paginationSize }}
-          <svgicon name="drop-down" width="12" height="12" />
+          <svgicon name="drop-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
           <li>
@@ -94,7 +94,6 @@
       </a>
     </div>
     <div class="pagination__info">
-      Records:
       <strong>
         {{ paginationSize * currentPage - (paginationSize - 1) }}-{{
           paginationSize * currentPage > totalItems
@@ -109,7 +108,7 @@
 <script>
 import "assets/icons/chev-left";
 import "assets/icons/chev-right";
-import "assets/icons/drop-down";
+import "assets/icons/drop-up";
 export default {
   props: {
     totalItems: {
@@ -118,10 +117,6 @@ export default {
     },
     paginationSettings: {
       type: Object,
-      required: true,
-    },
-    allowKeyboardPagination: {
-      type: Boolean,
       required: true,
     },
     visiblePagesRange: {
@@ -145,7 +140,7 @@ export default {
       return this.paginationSettings.size;
     },
     availableItemsPerPage() {
-      return this.paginationSettings.pageSizeOptions;
+      return this.paginationSettings.pageSizeOptions.filter(p => p !== this.paginationSize);
     },
     currentPage() {
       return this.paginationSettings.page;
@@ -195,7 +190,8 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
-      if (this.allowKeyboardPagination) {
+      const elem = document.querySelector('body');
+      if (elem === document.activeElement) {
         if (event.keyCode === 39) {
           this.nextPage()
         } else if (event.keyCode === 37) {
@@ -226,9 +222,10 @@ $pagination-size: 30px;
     background: palette(grey, light);
     border-top: 1px solid palette(grey, smooth);
     padding-right: calc(4em + 45px);
-    @include media(">desktopLarge") {
+    min-height: 63px;
+    @include media(">desktop") {
       width: 100%;
-      padding-right: calc(294px + 45px + 4em);
+      padding-right: 100px;
     }
   }
   &__arrow {
@@ -273,7 +270,7 @@ $pagination-size: 30px;
     align-items: center;
     list-style: none;
     padding-left: 0;
-    @include font-size(16px);
+    @include font-size(14px);
     #{$self}__number {
       transition: all 0.3s ease-in-out;
       color: $font-secondary;
@@ -281,10 +278,11 @@ $pagination-size: 30px;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      width: $pagination-size;
+      min-width: $pagination-size;
       height: $pagination-size;
       margin: auto 0.5em;
       outline: none;
+      padding: 5px;
       &:hover {
         transition: all 0.3s ease-in-out;
         background: palette(grey, smooth);
@@ -321,28 +319,32 @@ $pagination-size: 30px;
       padding: 0;
       display: block;
       position: absolute;
-      bottom: 2em;
+      bottom: 3em;
       left: 0;
       right: 0;
-      border: 2px solid $primary-color;
+      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      border-radius: 3px;
+      margin: 2px;
       a {
         display: block;
         color: $font-secondary-dark;
+        border-radius: 1px;
+        margin: 2px;
         &:hover {
           background: palette(grey, smooth);
-          color: $secondary-color;
         }
       }
     }
     a {
-      outline: none;
       display: block;
+      outline: none;
       text-decoration: none;
       background: $lighter-color;
-      padding: 0.4em 1em;
+      padding: 0.5em 1em;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;
+        margin-bottom: 2px;
       }
     }
   }
