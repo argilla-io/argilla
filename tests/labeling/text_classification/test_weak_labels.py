@@ -122,7 +122,7 @@ def test_apply(
     expected_annotation_array,
 ):
     def mock_apply(self, *args, **kwargs):
-        self._matching_ids = [1, 2]
+        self._matching_ids = {1: None, 2: None}
 
     monkeypatch.setattr(Rule, "apply", mock_apply)
 
@@ -143,7 +143,7 @@ def test_apply(
     weak_labels = WeakLabels(rules=rules, dataset=log_dataset, label2int=label2int)
 
     # check that all `Rule.apply`s are called
-    assert weak_labels._rules[-1]._matching_ids == [1, 2]
+    assert weak_labels._rules[-1]._matching_ids == {1: None, 2: None}
 
     assert weak_labels.label2int == expected_label2int
     assert (weak_labels.matrix == expected_matrix).all()
@@ -248,7 +248,7 @@ def test_summary(monkeypatch):
     pd.testing.assert_frame_equal(summary, expected)
 
 
-def test_filter_records(
+def test_show_records(
     monkeypatch,
 ):
     def mock_load(*args, **kwargs):
@@ -271,17 +271,17 @@ def test_filter_records(
 
     weak_labels = WeakLabels(rules=[lambda x: None] * 3, dataset="mock")
 
-    assert weak_labels.filter_records().id.tolist() == [0, 1, 2, 3, 4]
-    assert weak_labels.filter_records(labels=["positive"]).id.tolist() == [0, 3]
-    assert weak_labels.filter_records(labels=["negative", "neutral"]).id.tolist() == [
+    assert weak_labels.show_records().id.tolist() == [0, 1, 2, 3, 4]
+    assert weak_labels.show_records(labels=["positive"]).id.tolist() == [0, 3]
+    assert weak_labels.show_records(labels=["negative", "neutral"]).id.tolist() == [
         1,
         4,
     ]
-    assert weak_labels.filter_records(rules=[0]).id.tolist() == [0, 1, 3]
-    assert weak_labels.filter_records(rules=[0, 1]).id.tolist() == [0, 1, 3]
-    assert weak_labels.filter_records(labels=["negative"], rules=[1]).id.tolist() == [
+    assert weak_labels.show_records(rules=[0]).id.tolist() == [0, 1, 3]
+    assert weak_labels.show_records(rules=[0, 1]).id.tolist() == [0, 1, 3]
+    assert weak_labels.show_records(labels=["negative"], rules=[1]).id.tolist() == [
         0,
         1,
         4,
     ]
-    assert weak_labels.filter_records(labels=["positive"], rules=[2]).empty
+    assert weak_labels.show_records(labels=["positive"], rules=[2]).empty

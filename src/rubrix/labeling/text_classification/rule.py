@@ -48,7 +48,7 @@ class Rule:
         """
         records = rb.load(name=dataset, query=self._query, as_pandas=False)
 
-        self._matching_ids = [record.id for record in records]
+        self._matching_ids = {record.id: None for record in records}
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:
         """Check if the given record is among the matching ids from the ``self.apply`` call.
@@ -67,7 +67,11 @@ class Rule:
                 "Rule was still not applied. Please call `self.apply(dataset)` first."
             )
 
-        if record.id in self._matching_ids:
+        try:
+            self._matching_ids[record.id]
+        except KeyError:
+            return None
+        else:
             return self._label
 
 

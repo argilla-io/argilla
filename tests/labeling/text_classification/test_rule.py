@@ -63,7 +63,7 @@ def test_apply(monkeypatch, log_dataset):
     monkeypatch.setattr(httpx, "stream", client.stream)
 
     rule.apply(log_dataset)
-    assert rule._matching_ids == [1]
+    assert rule._matching_ids == {1: None}
 
 
 def test_call(monkeypatch, log_dataset):
