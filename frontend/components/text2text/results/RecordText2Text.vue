@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="record" v-click-outside="clickOutside">
+  <div class="record">
     <div class="record--left record__item">
       <record-string-text-2-text
         :query-text="dataset.query.text"
@@ -27,10 +27,12 @@
           ref="list"
           :status="record.status"
           :predictions="predictionSentences"
-          :annotations="annotationSentences"
+          :annotations="initialAnnotations"
           :sentences-origin="sentencesOrigin"
           :editable="annotationEnabled"
+          @update-record="updateRecordSentences"
           @change-visible-sentences="onChangeSentences"
+          @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
         />
       </div>
@@ -53,6 +55,7 @@ export default {
   },
   data: () => ({
     sentencesOrigin: undefined,
+    initialRecord: {},
   }),
   computed: {
     annotationEnabled() {
@@ -64,12 +67,19 @@ export default {
     predictionSentences() {
       return this.record.prediction ? this.record.prediction.sentences : [];
     },
+    initialAnnotations() {
+      return this.initialRecord.annotation
+        ? this.initialRecord.annotation.sentences
+        : [];
+    },
   },
   mounted() {
     this.initializeSentenceOrigin();
+    this.initialRecord = Object.assign({}, this.record);
   },
   methods: {
     ...mapActions({
+      updateRecords: "entities/datasets/updateDatasetRecords",
       validate: "entities/datasets/validateAnnotations",
     }),
 
@@ -85,7 +95,7 @@ export default {
           this.sentencesOrigin = "Prediction";
         } else if (this.annotationSentences.length) {
           this.sentencesOrigin = "Annotation";
-        }        
+        }
       }
     },
 
@@ -94,25 +104,46 @@ export default {
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
     },
-    clickOutside() {
-      this.$refs.list.clickOutside()
-      this.initializeSentenceOrigin();
-    },
-
-    async onAnnotate({ sentences }) {
-      this.sentencesOrigin = "Annotation";
-      await this.validate({
+    async updateRecordSentences({ sentences }) {
+      await this.updateRecords({
         dataset: this.dataset,
-        agent: this.$auth.user,
         records: [
           {
             ...this.record,
-            status: "Validated",
+            selected: true,
+            status: "Edited",
             annotation: {
               sentences,
             },
           },
         ],
+      });
+    },
+    async onResetInitialRecord() {
+      await this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.initialRecord,
+            selected: false,
+          },
+        ],
+      });
+    },
+    async onAnnotate({ sentences }) {
+      this.sentencesOrigin = "Annotation";
+      const newRecord = {
+        ...this.record,
+        status: "Validated",
+        annotation: {
+          sentences,
+        },
+      };
+      this.initialRecord = newRecord;
+      await this.validate({
+        dataset: this.dataset,
+        agent: this.$auth.user,
+        records: [newRecord],
       });
     },
   },

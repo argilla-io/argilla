@@ -87,12 +87,15 @@ export default {
         return {
           ...record,
           annotation: {
-            agent: this.$auth.user,
             labels: newLabels,
           },
         };
       });
-      await this.validate({ dataset: this.dataset, records: records });
+      await this.validate({
+        dataset: this.dataset,
+        agent: this.$auth.user,
+        records: records,
+      });
     },
     async onDiscard(records) {
       await this.discard({
@@ -101,19 +104,21 @@ export default {
       });
     },
     async onValidate(records) {
-
       await this.validate({
         dataset: this.dataset,
+        agent: this.$auth.user,
         records: records.map((record) => {
           let modelPrediction = {};
-          modelPrediction.labels = record.predicted_as.map((pred) => ({class: pred, score: 1}));
+          modelPrediction.labels = record.predicted_as.map((pred) => ({
+            class: pred,
+            score: 1,
+          }));
           return {
             ...record,
             annotation: {
               ...(record.annotation || modelPrediction),
-              agent: this.$auth.user,
             },
-          }
+          };
         }),
       });
     },
