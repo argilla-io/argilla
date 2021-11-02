@@ -134,10 +134,26 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     def validate_record(cls, values):
         """fastapi validator method"""
         prediction = values.get("prediction", None)
+        annotation = values.get("annotation", None)
+        status = values.get("status")
         multi_label = values.get("multi_label", False)
 
         cls._check_score_integrity(prediction, multi_label)
+        cls._check_annotation_integrity(annotation, multi_label, status)
+
         return values
+
+    @classmethod
+    def _check_annotation_integrity(
+        cls,
+        annotation: TextClassificationAnnotation,
+        multi_label: bool,
+        status: TaskStatus,
+    ):
+        if status == TaskStatus.validated and not multi_label:
+            assert (
+                annotation and len(annotation.labels) > 0
+            ), "Annotation must include some label for validated records"
 
     @classmethod
     def _check_score_integrity(
