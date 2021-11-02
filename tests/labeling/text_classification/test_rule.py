@@ -54,6 +54,14 @@ def log_dataset() -> str:
     return dataset_name
 
 
+@pytest.mark.parametrize(
+    "name,expected", [(None, "query_string"), ("test_name", "test_name")]
+)
+def test_name(name, expected):
+    rule = Rule(query="query_string", label="mock", name=name)
+    assert rule.name == expected
+
+
 def test_apply(monkeypatch, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):

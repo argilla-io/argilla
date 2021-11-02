@@ -24,10 +24,12 @@ class Rule:
     Args:
         query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_.
         label: The label associated to the query.
+        name: An optional name for the rule to be used as identifier in the
+            `rubrix.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
 
     Examples:
         >>> import rubrix as rb
-        >>> urgent_rule = Rule(query="inputs.text:(urgent AND immediately)", label="urgent")
+        >>> urgent_rule = Rule(query="inputs.text:(urgent AND immediately)", label="urgent", name="urgent_rule")
         >>> not_urgent_rule = Rule(query="inputs.text:(NOT urgent) AND metadata.title_length>20", label="not urgent")
         >>> not_urgent_rule.apply("my_dataset")
         >>> my_dataset_records = rb.load(name="my_dataset", as_pandas=False)
@@ -35,10 +37,18 @@ class Rule:
         "not urgent"
     """
 
-    def __init__(self, query: str, label: str):
+    def __init__(self, query: str, label: str, name: Optional[str] = None):
         self._query = query
         self._label = label
+        self._name = name
         self._matching_ids = None
+
+    @property
+    def name(self):
+        """The name of the rule."""
+        if self._name is not None:
+            return self._name
+        return self._query
 
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
