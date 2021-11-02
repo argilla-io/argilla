@@ -30,16 +30,10 @@ export default ({ $axios, app }) => {
 
     switch (code) {
       case 400:
-        Notification.dispatch("notify", {
-          message:
-            "Error: " + JSON.stringify(error.response.data.detail || error),
-          type: "error",
-        });
-        break;
       case 422:
-        error.response.data.detail.forEach(({ msg }) => {
+        (error.response.data.detail || [undefined]).forEach(({ msg }) => {
           Notification.dispatch("notify", {
-            message: "Error: " + msg || "Unknown",
+            message: "Error: " + (msg || "Unknown"),
             type: "error",
           });
         });
