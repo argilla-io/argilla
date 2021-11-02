@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import rubrix
@@ -37,6 +38,7 @@ class TextClassificationMonitor(BaseMonitor):
                 ],
                 prediction_agent=agent,
                 metadata=metadata or {},
+                event_timestamp=datetime.utcnow()
             )
             records.append(record)
 
