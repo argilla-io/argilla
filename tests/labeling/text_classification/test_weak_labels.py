@@ -66,9 +66,9 @@ def log_dataset() -> str:
     return dataset_name
 
 
-@pytest.fixture(scope="module")
-def rules() -> List[Callable]:
-    def rule1(record: TextClassificationRecord) -> Optional[str]:
+@pytest.fixture
+def rules(monkeypatch) -> List[Callable]:
+    def first_rule(record: TextClassificationRecord) -> Optional[str]:
         if "negative" in record.inputs["text"]:
             return "negative"
 
@@ -76,9 +76,14 @@ def rules() -> List[Callable]:
         if "positive" in record.inputs["text"]:
             return "positive"
 
-    rule3 = Rule(query="mock", label="positive")
+    def mock_apply(self, *args, **kwargs):
+        self._matching_ids = {1: None, 2: None}
 
-    return [rule1, rule2, rule3]
+    monkeypatch.setattr(Rule, "apply", mock_apply)
+
+    rubrix_rule = Rule(query="mock", label="positive", name="rubrix_rule")
+
+    return [first_rule, rule2, rubrix_rule]
 
 
 def test_multi_label_error(monkeypatch, rules):
@@ -122,11 +127,6 @@ def test_apply(
     expected_matrix,
     expected_annotation_array,
 ):
-    def mock_apply(self, *args, **kwargs):
-        self._matching_ids = {1: None, 2: None}
-
-    monkeypatch.setattr(Rule, "apply", mock_apply)
-
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "stream", client.stream)
 
@@ -191,7 +191,7 @@ def test_props_and_train_test_annotation(monkeypatch):
     ).all()
 
 
-def test_summary(monkeypatch):
+def test_summary(monkeypatch, rules):
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(inputs="test")] * 4
 
@@ -212,7 +212,7 @@ def test_summary(monkeypatch):
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
 
-    weak_labels = WeakLabels(rules=[lambda: None] * 3, dataset="mock")
+    weak_labels = WeakLabels(rules=rules, dataset="mock")
 
     summary = weak_labels.summary()
     expected = pd.DataFrame(
@@ -222,7 +222,7 @@ def test_summary(monkeypatch):
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
         },
-        index=["rule0", "rule1", "rule2", "total"],
+        index=["first_rule", "rule2", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 
@@ -234,7 +234,7 @@ def test_summary(monkeypatch):
             "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
             "conflicts": [1.0 / 2, 1.0 / 3, 0, 1.0 / 3],
         },
-        index=["rule0", "rule1", "rule2", "total"],
+        index=["first_rule", "rule2", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 
@@ -249,7 +249,7 @@ def test_summary(monkeypatch):
             "incorrect": [1, 0, 0, 1],
             "precision": [1.0 / 2, 2 / 2, 0, 3.0 / 4],
         },
-        index=["rule0", "rule1", "rule2", "total"],
+        index=["first_rule", "rule2", "rubrix_rule", "total"],
     )
     pd.testing.assert_frame_equal(summary, expected)
 

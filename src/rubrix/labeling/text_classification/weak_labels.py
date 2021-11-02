@@ -264,8 +264,11 @@ class WeakLabels:
         )
 
         # index for the summary
-        # TODO: Get better names
-        index = [f"rule{i}" for i in range(len(self._rules))] + ["total"]
+        index = [
+            # covers our Rule class as well as snorkel's LabelingFunction class
+            getattr(rule, "name", None) or rule.__name__
+            for rule in self._rules
+        ] + ["total"]
 
         # only add correct, incorrect and precision if we have annotations
         if (
