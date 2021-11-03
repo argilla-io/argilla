@@ -140,8 +140,8 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     position: absolute;
-    left: 1.2em;
-    top: 1.2em;
+    left: 1.4em;
+    top: 2.2em;
     width: auto;
   }
   &__item {

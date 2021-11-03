@@ -29,7 +29,7 @@
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
           :sentences-origin="sentencesOrigin"
-          :editable="annotationEnabled"
+          :annotation-enabled="annotationEnabled"
           @update-record="updateRecordSentences"
           @change-visible-sentences="onChangeSentences"
           @reset-initial-record="onResetInitialRecord"
@@ -166,7 +166,7 @@ export default {
   }
   &--left {
     width: 100%;
-    padding: 2em;
+    padding: 44px 20px 20px 20px;
     .list__item--annotation-mode & {
       padding-left: 65px;
     }
