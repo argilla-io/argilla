@@ -118,7 +118,7 @@
                 >Edit</re-button
               >
               <re-button
-                v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                v-if="!editionMode && newSentence && editable && sentencesOrigin !== 'Annotation'"
                 class="button-primary"
                 @click="annotate"
                 >Validate</re-button
@@ -418,7 +418,6 @@ $marginRight: 200px;
     .button-clear {
       margin: auto 0 auto auto;
       color: palette(grey, dark);
-      opacity: 0;
       transition: opacity 0.3s ease-in-out 0.2s;
       &:hover {
         color: darken(palette(grey, dark), 10%);
