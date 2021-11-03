@@ -37,9 +37,6 @@ class HuggingFaceMonitor(BaseMonitor):
         agent = config.name_or_path
 
         for input_, metadata, predictions in data:
-            if not isinstance(predictions, list):
-                predictions = [predictions]
-
             record = TextClassificationRecord(
                 inputs=input_,
                 prediction=[
@@ -78,7 +75,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
         *args,
         **kwargs
     ):
-        metadata = kwargs.pop("metadata", None)
+        metadata = (kwargs.pop("metadata", None) or {}).copy()
         hypothesis_template = kwargs.get("hypothesis_template", "@default")
         multi_label = kwargs.get("multi_label", False)
         batch_predictions = self.__model__(sequences, candidate_labels, *args, **kwargs)

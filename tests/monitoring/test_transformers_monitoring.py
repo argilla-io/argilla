@@ -4,8 +4,24 @@ import pytest
 
 import rubrix
 from rubrix import TextClassificationRecord
+from rubrix.monitoring._transformers import huggingface_monitor
 from tests.monitoring.helpers import mock_monitor
 from tests.server.test_helpers import client, mocking_client
+
+
+def test_classifier_monitoring_with_all_scores(
+    client_mock, classifier_monitor_all_scores, classifier_dataset
+):
+    rubrix.delete(classifier_dataset)
+
+    expected_text = "This is a text, yeah"
+    classifier_monitor_all_scores(expected_text)
+
+    df = rubrix.load(classifier_dataset)
+    assert len(df) == 1
+    record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
+    assert record.inputs == {"text": expected_text}
+    assert len(record.prediction) > 1
 
 
 def test_classifier_monitoring(client_mock, classifier_monitor, classifier_dataset):
@@ -16,7 +32,9 @@ def test_classifier_monitoring(client_mock, classifier_monitor, classifier_datas
 
     df = rubrix.load(classifier_dataset)
     assert len(df) == 1
-    assert df.inputs.values.tolist() == [{"text": expected_text}]
+    record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
+    assert record.inputs == {"text": expected_text}
+    assert len(record.prediction) == 1
 
     rubrix.delete(classifier_dataset)
     texts = ["This is a text", "And another text here"]
@@ -32,9 +50,29 @@ def test_classifier_monitoring(client_mock, classifier_monitor, classifier_datas
     assert df.metadata.values.tolist()[0] == {"some": "metadata"}
 
 
+def test_cannot_monitor_instance():
+    class MockModel:
+        pass
+
+    whatever_model = MockModel()
+    monitor = huggingface_monitor(whatever_model, dataset="dataset",sample_rate=0.1)
+    assert whatever_model == monitor
+
+
 @pytest.fixture
 def classifier_dataset():
     return "classifier_dataset"
+
+
+@pytest.fixture
+def classifier_monitor_all_scores(
+    sentiment_classifier_all_scores, classifier_dataset, monkeypatch
+):
+    monitor = rubrix.monitor(
+        sentiment_classifier_all_scores, dataset=classifier_dataset, sample_rate=1.0
+    )
+    mock_monitor(monitor, monkeypatch)
+    return monitor
 
 
 @pytest.fixture
@@ -53,7 +91,18 @@ def sentiment_classifier():
     return pipeline(
         model="distilbert-base-uncased-finetuned-sst-2-english",
         task="sentiment-analysis",
-        return_all_scores=True
+        return_all_scores=False,
+    )
+
+
+@pytest.fixture(scope="session")
+def sentiment_classifier_all_scores():
+    from transformers import pipeline
+
+    return pipeline(
+        model="distilbert-base-uncased-finetuned-sst-2-english",
+        task="sentiment-analysis",
+        return_all_scores=True,
     )
 
 
@@ -218,3 +267,30 @@ def test_monitor_zero_shot_with_text_array(
         labels=labels,
         hypothesis=hypothesis,
     )
+
+
+@pytest.mark.parametrize(
+    ("text", "labels", "hypothesis"),
+    zero_shot_inputs(),
+)
+def test_monitor_zero_shot_passing_metadata(
+    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+):
+    rubrix.delete(dataset)
+    expected_metadata = {"type": "test"}
+    mocked_monitor(
+        text,
+        candidate_labels=labels,
+        hypothesis_template=hypothesis,
+        metadata=expected_metadata,
+    )
+
+    df = rubrix.load(dataset)
+    assert len(df) == 1
+
+    record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
+    assert record.metadata == {
+        **expected_metadata,
+        "labels": labels,
+        "hypothesis_template": hypothesis,
+    }
