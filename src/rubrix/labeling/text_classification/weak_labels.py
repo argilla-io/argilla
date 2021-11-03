@@ -48,16 +48,16 @@ class WeakLabels:
         ...     return "Positive" if "awesome" in record.inputs["text"] else None
         >>> another_rule = Rule(query="good OR best", label="Positive")
         >>> weak_labels = WeakLabels(rules=[awesome_rule, another_rule], dataset="my_dataset")
-        >>> weak_labels.matrix
+        >>> weak_labels.matrix()
         >>> weak_labels.summary()
 
         Use snorkel's LabelModel:
 
         >>> from snorkel.labeling.model import LabelModel
         >>> label_model = LabelModel()
-        >>> label_model.fit(L_train=weak_labels.train_matrix())
-        >>> label_model.score(L=weak_labels.test_matrix(), Y=weak_labels.annotation())
-        >>> label_model.predict(L=weak_labels.train_matrix())
+        >>> label_model.fit(L_train=weak_labels.matrix(has_annotation=False))
+        >>> label_model.score(L=weak_labels.matrix(has_annotation=True), Y=weak_labels.annotation())
+        >>> label_model.predict(L=weak_labels.matrix(has_annotation=False))
     """
 
     def __init__(
@@ -167,11 +167,6 @@ class WeakLabels:
         return self._rules
 
     @property
-    def records(self) -> List[TextClassificationRecord]:
-        """The records corresponding to the weak labels."""
-        return self._records
-
-    @property
     def label2int(self) -> Dict[Optional[str], int]:
         """The dictionary that maps weak/annotation labels to integers."""
         return self._label2int
@@ -181,26 +176,42 @@ class WeakLabels:
         """The dictionary that maps integers to weak/annotation labels."""
         return self._int2label
 
-    @property
-    def matrix(self) -> np.ndarray:
-        """The weak label matrix."""
+    def matrix(self, has_annotation: Optional[bool] = None) -> np.ndarray:
+        """Returns the weak label matrix, or optionally just a part of it.
+
+        Args:
+            has_annotation: If True, return only the part of the matrix that has a corresponding annotation.
+                If False, return only the part of the matrix that has NOT a corresponding annotation.
+                By default, we return the whole weak label matrix.
+
+        Returns:
+            The weak label matrix, or optionally just a part of it.
+        """
+        if has_annotation is True:
+            return self._matrix[self._annotation_array != self._label2int[None]]
+        if has_annotation is False:
+            return self._matrix[self._annotation_array == self._label2int[None]]
+
         return self._matrix
 
-    def train_matrix(self) -> np.ndarray:
-        """Returns the part of the weak label ``self.matrix`` that has NO corresponding annotations.
+    def records(
+        self, has_annotation: Optional[bool] = None
+    ) -> List[TextClassificationRecord]:
+        """Returns the records corresponding to the weak label matrix.
+
+        Args:
+            has_annotation: If True, return only the records that have an annotation. If False, return only the records
+                that have NO annotation. By default, we return all the records.
 
         Returns:
-            The train weak label matrix.
+            A list of records, or optionally just a part of them.
         """
-        return self._matrix[self._annotation_array == self._label2int[None]]
+        if has_annotation is True:
+            return [rec for rec in self._records if rec.annotation is not None]
+        if has_annotation is False:
+            return [rec for rec in self._records if rec.annotation is None]
 
-    def test_matrix(self) -> np.ndarray:
-        """Returns the part of the weak label ``self.matrix`` that has corresponding annotations.
-
-        Returns:
-            The test weak label matrix.
-        """
-        return self._matrix[self._annotation_array != self._label2int[None]]
+        return self._records
 
     def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
         """Returns the annotation labels as an array of integers.
@@ -214,6 +225,7 @@ class WeakLabels:
         """
         if not exclude_missing_annotations:
             return self._annotation_array
+
         return self._annotation_array[self._annotation_array != self._label2int[None]]
 
     def summary(

@@ -155,13 +155,18 @@ def test_apply(
 
     assert weak_labels.label2int == expected_label2int
     assert weak_labels.int2label == {v: k for k, v in expected_label2int.items()}
-    assert (weak_labels.matrix == expected_matrix).all()
+    assert (weak_labels.matrix() == expected_matrix).all()
     assert (weak_labels._annotation_array == expected_annotation_array).all()
 
 
-def test_props_and_train_test_annotation(monkeypatch):
+def test_rules_matrix_records_annotation(monkeypatch):
+    expected_records = [
+        TextClassificationRecord(inputs="test without annot"),
+        TextClassificationRecord(inputs="test with annot", annotation="positive"),
+    ]
+
     def mock_load(*args, **kwargs):
-        return [TextClassificationRecord(inputs="test")]
+        return expected_records
 
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -178,15 +183,21 @@ def test_props_and_train_test_annotation(monkeypatch):
     weak_labels = WeakLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
 
     # records property
-    assert len(weak_labels.records) == 1
-    assert isinstance(weak_labels.records[0], TextClassificationRecord)
+    assert len(weak_labels.records()) == 2
+    assert weak_labels.records(has_annotation=True) == [expected_records[1]]
+    assert weak_labels.records(has_annotation=False) == [expected_records[0]]
+    assert isinstance(weak_labels.records()[0], TextClassificationRecord)
 
     # rules property
     assert len(weak_labels.rules) == 2
     assert weak_labels.rules[0](None) == "mock"
 
-    assert (weak_labels.train_matrix() == np.array([[0, 1]], dtype=np.short)).all()
-    assert (weak_labels.test_matrix() == np.array([[-1, 0]], dtype=np.short)).all()
+    assert (
+        weak_labels.matrix(has_annotation=False) == np.array([[0, 1]], dtype=np.short)
+    ).all()
+    assert (
+        weak_labels.matrix(has_annotation=True) == np.array([[-1, 0]], dtype=np.short)
+    ).all()
     assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
     assert (
         weak_labels.annotation(exclude_missing_annotations=False)
