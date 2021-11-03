@@ -352,11 +352,18 @@ async function _updateDatasetRecords({
   });
 
   if (persistBackend) {
-    await _persistRecords({
-      dataset,
-      records,
-    });
-    _fetchAnnotationProgress(dataset);
+    try {
+      await _persistRecords({
+        dataset,
+        records,
+      });
+      _fetchAnnotationProgress(dataset);
+    } catch (error) {
+      await entity.update({
+        where: dataset.name,
+        data: dataset,
+      });
+    }
   }
 
   return updatedDataset;
