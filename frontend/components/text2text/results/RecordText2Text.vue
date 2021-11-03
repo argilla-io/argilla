@@ -29,7 +29,7 @@
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
           :sentences-origin="sentencesOrigin"
-          :annotationEnabled="annotationEnabled"
+          :annotation-enabled="annotationEnabled"
           @update-record="updateRecordSentences"
           @change-visible-sentences="onChangeSentences"
           @reset-initial-record="onResetInitialRecord"

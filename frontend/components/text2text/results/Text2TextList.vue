@@ -21,12 +21,12 @@
       :class="[
         'content',
         hasAnnotationAndPredictions ? 'content--separator' : null,
-        !editable ? 'content--exploration-mode' : 'content--annotation-mode',
+        !annotationEnabled ? 'content--exploration-mode' : 'content--annotation-mode',
       ]"
     >
       <div
         :class="[
-          annotationEnabled || !sentences.length
+          editionMode || !sentences.length
             ? 'content--editable'
             : 'content--non-editable',
           showScore ? 'content--has-score' : null,
@@ -35,15 +35,15 @@
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
-              <p v-if="!annotationEnabled" class="content__sentences__title">{{sentencesOrigin}}</p>
+              <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
               <re-button
-                v-if="hasAnnotationAndPredictions && !annotationEnabled"
+                v-if="hasAnnotationAndPredictions && !editionMode"
                 class="button-clear"
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
-                    ? editable ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
-                    : editable ? "Back to annotation" : "View annotation"
+                    ? annotationEnabled ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
+                    : annotationEnabled ? "Back to annotation" : "View annotation"
                 }}</re-button
               >
             </div>
@@ -52,17 +52,17 @@
                 :key="refresh"
                 ref="text"
                 class="content__text"
-                :contenteditable="editable && annotationEnabled"
+                :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
                 @input="input"
                 v-html="sentence.text"
                 @click="edit()"
               ></p>
-              <span v-if="annotationEnabled"
+              <span v-if="editionMode"
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
-            <div class="content__edit__buttons" v-if="annotationEnabled && editable && newSentence">
+            <div class="content__edit__buttons" v-if="editionMode && annotationEnabled && newSentence">
               <re-button
                 class="button-primary--outline"
                 @click="back()"
@@ -74,48 +74,50 @@
                 >Save</re-button
               >
             </div>
-            <div v-if="!annotationEnabled && sentencesOrigin === 'Prediction'" class="content__footer">
-              <div v-if="showScore" class="content__score">
-                Score: {{ sentence.score | percent }}
-              </div>
-              <div v-if="sentences.length && sentencesOrigin === 'Prediction'" class="content__nav-buttons">
-                <a
-                  :class="itemNumber <= 0 ? 'disabled' : null"
-                  href="#"
-                  @click.prevent="showitemNumber(--itemNumber)"
-                >
-                  <svgicon
-                    name="chev-left"
-                    width="8"
-                    height="8"
-                    color="#4C4EA3"
-                  />
-                </a>
-                {{ itemNumber + 1 }} of {{ sentences.length }} predictions
-                <a
-                  :class="
-                    sentences.length <= itemNumber + 1 ? 'disabled' : null
-                  "
-                  href="#"
-                  @click.prevent="showitemNumber(++itemNumber)"
-                >
-                  <svgicon
-                    name="chev-right"
-                    width="8"
-                    height="8"
-                    color="#4C4EA3"
-                  />
-                </a>
-              </div>
-              <div v-if="!annotationEnabled" class="content__actions-buttons">
+            <div v-if="!editionMode" class="content__footer">
+              <template v-if="sentencesOrigin === 'Prediction'">
+                <div v-if="showScore" class="content__score">
+                  Score: {{ sentence.score | percent }}
+                </div>
+                <div v-if="sentences.length" class="content__nav-buttons">
+                  <a
+                    :class="itemNumber <= 0 ? 'disabled' : null"
+                    href="#"
+                    @click.prevent="showitemNumber(--itemNumber)"
+                  >
+                    <svgicon
+                      name="chev-left"
+                      width="8"
+                      height="8"
+                      color="#4C4EA3"
+                    />
+                  </a>
+                  {{ itemNumber + 1 }} of {{ sentences.length }} predictions
+                  <a
+                    :class="
+                      sentences.length <= itemNumber + 1 ? 'disabled' : null
+                    "
+                    href="#"
+                    @click.prevent="showitemNumber(++itemNumber)"
+                  >
+                    <svgicon
+                      name="chev-right"
+                      width="8"
+                      height="8"
+                      color="#4C4EA3"
+                    />
+                  </a>
+                </div>
+              </template>
+              <div class="content__actions-buttons" v-if="newSentence && annotationEnabled">
                 <re-button
-                  v-if="editable && newSentence && sentences.length"
-                  :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
+                  v-if="sentences.length"
+                  :class="['edit', allowValidation ? 'button-primary--outline' : 'button-primary']"
                   @click="edit()"
                   >Edit</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                  v-if="allowValidation"
                   class="button-primary"
                   @click="annotate"
                   >Validate</re-button
@@ -129,18 +131,18 @@
            <div class="content__edition-area">
             <p 
               class="content__text"
-              :contenteditable="editable"
+              :contenteditable="annotationEnabled"
               placeholder="Type your text"
               @input="input"
             ></p>
-              <span v-if="editable"
+              <span v-if="annotationEnabled"
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="newSentence && editable"
+                  v-if="newSentence && annotationEnabled"
                   class="button-primary"
                   @click="annotate"
                   >Validate</re-button
@@ -173,7 +175,7 @@ export default {
       type: String,
       required: true
     },
-    editable: {
+    annotationEnabled: {
       type: Boolean,
       default: false
     }
@@ -182,7 +184,7 @@ export default {
     return {
       itemNumber: 0,
       newSentence: undefined,
-      annotationEnabled: false,
+      editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
       refresh: 1
@@ -206,6 +208,9 @@ export default {
     },
     hasAnnotationAndPredictions() {
       return this.predictions.length && this.annotations.length;
+    },
+    allowValidation() {
+      return this.sentencesOrigin === 'Prediction' || this.status === 'Discarded'
     }
   },
   mounted() {
@@ -240,8 +245,8 @@ export default {
       this.$emit('update-record', { sentences: [newS] });
     },
     edit() {
-      if (this.editable) {
-        this.annotationEnabled = true;
+      if (this.annotationEnabled) {
+        this.editionMode = true;
         this.focus();
       }
     },
@@ -253,18 +258,18 @@ export default {
       });
     },
     back() {
-      this.annotationEnabled = false;
+      this.editionMode = false;
       this.refresh++;
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
-      this.annotationEnabled = false;
+      this.editionMode = false;
       this.$emit("change-visible-sentences");
     },
     annotate() {
       this.itemNumber = 0;
-      this.annotationEnabled = false;
+      this.editionMode = false;
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -284,7 +289,7 @@ export default {
         this.shiftPressed = true;
       }
       const enter = event.key === "Enter";
-      if (this.shiftPressed && this.annotationEnabled && enter) {
+      if (this.shiftPressed && this.editionMode && enter) {
         this.annotate();
       }
     },
