@@ -39,6 +39,7 @@
           v-if="record.status !== 'Validated'"
           class="button-primary"
           @click="onValidate(record)"
+          :disabled="!record.annotation && !record.prediction"
           >Validate</re-button
         >
       </div>
