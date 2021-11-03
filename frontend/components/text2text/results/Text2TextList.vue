@@ -118,7 +118,7 @@
                 >Edit</re-button
               >
               <re-button
-                v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
+                v-if="!editionMode && newSentence && editable && sentencesOrigin !== 'Annotation'"
                 class="button-primary"
                 @click="annotate"
                 >Validate</re-button
