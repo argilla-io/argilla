@@ -106,17 +106,9 @@ export default {
 <style lang="scss" scoped>
 .record {
   &__extra-actions {
-    // line-height: 1;
-    // text-align: left;
-    // color: $font-secondary;
-    // margin-top: 0.5em;
-    // margin-bottom: 1.5em;
-    // @include font-size(13px);
-    opacity: 0;
-    pointer-events: none;
     position: absolute;
-    top: 1em;
-    right: 2em;
+    top: 1.5em;
+    right: 1em;
   }
 }
 .extra-actions {
@@ -124,6 +116,9 @@ export default {
   &__button {
     text-align: right;
     outline: none;
+    .svg-icon {
+      transform: rotate(90deg);
+    }
   }
   &__content {
     position: absolute;

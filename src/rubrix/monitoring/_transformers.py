@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 from pydantic import BaseModel
@@ -45,6 +46,7 @@ class HuggingFaceMonitor(BaseMonitor):
                 prediction_agent=agent,
                 metadata=metadata or {},
                 multi_label=multi_label,
+                event_timestamp=datetime.utcnow(),
             )
             records.append(record)
 

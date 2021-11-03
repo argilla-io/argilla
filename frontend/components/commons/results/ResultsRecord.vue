@@ -37,7 +37,7 @@
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata"
       />
-      <status-tag v-if="annotationEnabled && item.status === 'Validated'" :title="item.status"></status-tag>
+      <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
     </div>
     <LazyReModal
       modal-class="modal-secondary"
@@ -154,7 +154,7 @@ export default {
     border: 1px solid white;
     &:hover {
       border: 1px solid palette(grey, smooth);
-      .record__extra-actions {
+      ::v-deep .edit {
         opacity: 1;
         pointer-events: all;
       }

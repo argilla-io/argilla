@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 import rubrix as rb
@@ -42,6 +43,7 @@ class SpacyNERMonitor(BaseMonitor):
             metadata=metadata or {},
             prediction_agent=agent,
             prediction=entities,
+            event_timestamp=datetime.utcnow()
         )
 
     def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
