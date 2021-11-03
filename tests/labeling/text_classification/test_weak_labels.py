@@ -154,6 +154,7 @@ def test_apply(
     assert weak_labels._rules[-1]._matching_ids == {1: None, 2: None}
 
     assert weak_labels.label2int == expected_label2int
+    assert weak_labels.int2label == {v: k for k, v in expected_label2int.items()}
     assert (weak_labels.matrix == expected_matrix).all()
     assert (weak_labels._annotation_array == expected_annotation_array).all()
 
@@ -219,7 +220,12 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary()
     expected = pd.DataFrame(
         {
-            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "polarity": [
+                {"negative", "positive"},
+                {"negative", "positive"},
+                set(),
+                {"negative", "positive"},
+            ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
@@ -231,7 +237,12 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(normalize_by_coverage=True)
     expected = pd.DataFrame(
         {
-            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "polarity": [
+                {"negative", "positive"},
+                {"negative", "positive"},
+                set(),
+                {"negative", "positive"},
+            ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
             "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
             "conflicts": [1.0 / 2, 1.0 / 3, 0, 1.0 / 3],
@@ -243,7 +254,12 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
     expected = pd.DataFrame(
         {
-            "polarity": [{0, 1}, {0, 1}, set(), {0, 1}],
+            "polarity": [
+                {"negative", "positive"},
+                {"negative", "positive"},
+                set(),
+                {"negative", "positive"},
+            ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],

@@ -91,6 +91,7 @@ class WeakLabels:
         self._matrix, self._annotation_array, self._label2int = self._apply_rules(
             label2int
         )
+        self._int2label = {v: k for k, v in self._label2int.items()}
 
     def _apply_rules(
         self, label2int: Optional[Dict[str, int]]
@@ -172,8 +173,13 @@ class WeakLabels:
 
     @property
     def label2int(self) -> Dict[Optional[str], int]:
-        """The dictionary that maps the weak/annotation labels to integers."""
+        """The dictionary that maps weak/annotation labels to integers."""
         return self._label2int
+
+    @property
+    def int2label(self) -> Dict[int, Optional[str]]:
+        """The dictionary that maps integers to weak/annotation labels."""
+        return self._int2label
 
     @property
     def matrix(self) -> np.ndarray:
@@ -239,7 +245,8 @@ class WeakLabels:
         # polarity
         polarity = [
             set(
-                np.unique(
+                self._int2label[integer]
+                for integer in np.unique(
                     self._matrix[:, i][self._matrix[:, i] != self._label2int[None]]
                 )
             )
