@@ -16,6 +16,21 @@ def histogram(data, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     return bar(data, title, x_legend, y_legend)
 
 
+def tree_map(labels, parents, values, title: str = "Tree"):
+    import plotly.graph_objects as go
+
+    fig = go.Figure(
+        go.Treemap(
+            labels=labels,
+            parents=parents,
+            values=values,
+        )
+    )
+    fig.update_layout(title=title, margin=dict(t=50, l=0, r=0, b=0))
+
+    return fig
+
+
 def multilevel_pie(labels, parents, values, title: str = "Pie"):
     import plotly.graph_objects as go
 

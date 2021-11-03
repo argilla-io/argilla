@@ -37,22 +37,22 @@ class TokensLength(ElasticsearchMetric):
 _DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 
-class EntityTags(NestedPathElasticsearchMetric):
+class EntityLabels(NestedPathElasticsearchMetric):
     """
-    Calculates the entity tags distribution
+    Computes the entity labels distribution
 
     Attributes:
     -----------
-    tags_field:
+    labels_field:
         The elasticsearch field where tags are stored
     """
 
-    tags_field: str
+    labels_field: str
 
     def inner_aggregation(self, size: int) -> Dict[str, Any]:
         return {
-            "tags": aggregations.terms_aggregation(
-                self.tags_field, size=size or _DEFAULT_MAX_ENTITY_BUCKET
+            "labels": aggregations.terms_aggregation(
+                self.labels_field, size=size or _DEFAULT_MAX_ENTITY_BUCKET
             )
         }
 
@@ -84,7 +84,7 @@ class MentionLength(NestedPathElasticsearchMetric):
 
 
 class EntityCapitalness(NestedPathElasticsearchMetric):
-    """Calculates the mention capitalness distribution"""
+    """Computes the mention capitalness distribution"""
 
     capitalness_field: str
 
@@ -96,26 +96,34 @@ class EntityCapitalness(NestedPathElasticsearchMetric):
         }
 
 
-class MentionConsistency(NestedPathElasticsearchMetric):
-    """Calculates the mention consistence distribution"""
+class EntityConsistency(NestedPathElasticsearchMetric):
+    """Computes the entity consistency distribution"""
 
     mention_field: str
-    entity_field: str
+    labels_field: str
 
     def inner_aggregation(
         self,
         size: int,
+        interval: int = 2,
         entity_size: int = _DEFAULT_MAX_ENTITY_BUCKET,
     ) -> Dict[str, Any]:
         size = size or 50
+        interval = int(max(interval or 2, 2))
         return {
             "consistency": {
                 **aggregations.terms_aggregation(self.mention_field, size=size),
                 "aggs": {
                     "entities": aggregations.terms_aggregation(
-                        self.entity_field, size=entity_size
+                        self.labels_field, size=entity_size
                     ),
-                    "count": {"cardinality": {"field": self.entity_field}},
+                    "count": {"cardinality": {"field": self.labels_field}},
+                    "entities_variability_filter": {
+                        "bucket_selector": {
+                            "buckets_path": {"numLabels": "count"},
+                            "script": f"params.numLabels >= {interval}",
+                        }
+                    },
                     "sortby_entities_count": {
                         "bucket_sort": {
                             "sort": [{"count": {"order": "desc"}}],
@@ -132,12 +140,13 @@ class MentionConsistency(NestedPathElasticsearchMetric):
             {
                 "mention": mention,
                 "entities": [
-                    {"entity": entity, "count": count}
+                    {"label": entity, "count": count}
                     for entity, count in mention_aggs["entities"].items()
                 ],
             }
             for mention, mention_aggs in aggregation_result.items()
         ]
+        # TODO: filter by entities threshold
         result.sort(key=lambda m: len(m["entities"]), reverse=True)
         return {"mentions": result}
 
@@ -149,7 +158,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         """Mention metrics model"""
 
         mention: str
-        entity: str
+        label: str
         score: float = Field(ge=0.0)
         capitalness: str = Field(...)
         density: float = Field(ge=0.0)
@@ -161,10 +170,10 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         tokens: List[str],
         chars2tokens: Dict[int, int],
     ) -> List[MentionMetrics]:
-        """Given a list of mentions with its entity spans, calculate all required metrics"""
+        """Given a list of mentions with its entity spans, Compute all required metrics"""
 
         def mention_capitalness(mention: str) -> str:
-            """Calculate mention capitalness"""
+            """Compute mention capitalness"""
             mention = mention.strip()
             if mention.upper() == mention:
                 return "UPPER"
@@ -175,7 +184,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             return "MIDDLE"
 
         def mention_length(entity: EntitySpan, chars2token_map: Dict[int, int]) -> int:
-            """Calculate mention tokens length"""
+            """Compute mention tokens length"""
             return len(
                 set(
                     [
@@ -188,13 +197,13 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             )
 
         def mention_density(mention_length: int, tokens_length: int) -> float:
-            """Calculate mention density"""
+            """Compute mention density"""
             return (1.0 * mention_length) / tokens_length
 
         return [
             TokenClassificationMetrics.MentionMetrics(
                 mention=mention,
-                entity=entity.label,
+                label=entity.label,
                 score=entity.score,
                 capitalness=mention_capitalness(mention),
                 density=mention_density(_mention_length, tokens_length=len(tokens)),
@@ -246,7 +255,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             "type": "nested",
             "properties": {
                 "mention": {"type": "keyword"},
-                "entity": {"type": "keyword"},
+                "label": {"type": "keyword"},
                 "score": {"type": "float"},
                 "capitalness": {"type": "keyword"},
                 "density": {"type": "float"},
@@ -262,7 +271,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
 
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
-        """Calculate metrics at record level"""
+        """Compute metrics at record level"""
         chars2tokens = cls.build_chars2tokens_map(record)
 
         return {
@@ -283,43 +292,43 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         TokensLength(
             id="tokens_length",
             name="Tokens length",
-            description="Calculates tokens length",
+            description="Computes the text length measured in number of tokens",
             length_field="metrics.tokens_length",
         ),
         EntityDensity(
             id="entity_density",
             name="Mention entity density",
-            description="Calculates relation between mention tokens and tokens in text",
+            description="Computes the ratio between the number of all entity tokens and tokens in the text",
             nested_path="metrics.mentions.predicted",
             density_field="metrics.mentions.predicted.density",
         ),
-        EntityTags(
-            id="entity_tags",
-            name="Entity tags",
-            description="The entity tags distribution",
+        EntityLabels(
+            id="entity_labels",
+            name="Entity labels",
+            description="Entity labels distribution",
             nested_path="metrics.mentions.predicted",
-            tags_field="metrics.mentions.predicted.entity",
+            labels_field="metrics.mentions.predicted.label",
         ),
         EntityCapitalness(
             id="entity_capitalness",
             name="Mention entity capitalness",
-            description="Calculate capitalized information for mentions",
+            description="Compute capitalization information of entity mentions",
             nested_path="metrics.mentions.predicted",
             capitalness_field="metrics.mentions.predicted.capitalness",
         ),
         MentionLength(
             id="mention_length",
             name="Mention length",
-            description="The token level mention length",
+            description="Computes the length of the entity mention measured in number of tokens",
             nested_path="metrics.mentions.predicted",
             length_field="metrics.mentions.predicted.length",
         ),
-        MentionConsistency(
-            id="mention_consistency",
-            name="Mention entity consistency",
-            description="Calculates entity variability for top k-mentions",
+        EntityConsistency(
+            id="entity_consistency",
+            name="Entity label consistency",
+            description="Computes entity label variability for top-k entity mentions",
             nested_path="metrics.mentions.predicted",
             mention_field="metrics.mentions.predicted.mention",
-            entity_field="metrics.mentions.predicted.entity",
+            labels_field="metrics.mentions.predicted.label",
         ),
     ]

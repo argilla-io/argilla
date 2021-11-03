@@ -4,7 +4,7 @@ from rubrix.metrics.models import MetricSummary
 
 
 def f1(name: str) -> MetricSummary:
-    """Calculates the single label f1 metric for a dataset
+    """Computes the single label f1 metric for a dataset
 
     Args:
         name:
@@ -32,7 +32,7 @@ def f1(name: str) -> MetricSummary:
 
 
 def f1_multilabel(name: str) -> MetricSummary:
-    """Calculates the multi-label label f1 metric for a dataset
+    """Computes the multi-label label f1 metric for a dataset
 
     Args:
         name:

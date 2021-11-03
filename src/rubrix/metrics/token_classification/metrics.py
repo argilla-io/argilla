@@ -4,7 +4,7 @@ from rubrix.metrics.models import MetricSummary
 
 
 def tokens_length(name: str, interval: int = 1) -> MetricSummary:
-    """Calculates the tokens length distribution
+    """Computes the tokens length distribution
 
     Args:
         name:
@@ -38,7 +38,7 @@ def tokens_length(name: str, interval: int = 1) -> MetricSummary:
 
 
 def mention_length(name: str, interval: int = 1) -> MetricSummary:
-    """Calculates the mention tokens length distribution
+    """Computes mentions length distribution (in number of tokens)
 
     Args:
         name:
@@ -71,27 +71,27 @@ def mention_length(name: str, interval: int = 1) -> MetricSummary:
     )
 
 
-def entity_tags(name: str, entities: int = 50) -> MetricSummary:
-    """Calculates the entity tags distribution
+def entity_labels(name: str, labels: int = 50) -> MetricSummary:
+    """Computes the entity labels distribution
 
     Args:
         name:
             The dataset name.
-        entities:
+        labels:
             The number of top entities to retrieve. Lower numbers will be better performants
 
     Returns:
         The summary for entity tags distribution
 
     Examples:
-        >>> from rubrix.metrics.token_classification import entity_tags
-        >>> summary = entity_tags(name="example-dataset", entities=10)
+        >>> from rubrix.metrics.token_classification import entity_labels
+        >>> summary = entity_labels(name="example-dataset", labels=10)
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """
     current_client = client()
 
-    metric = current_client.calculate_metric(name, metric="entity_tags", size=entities)
+    metric = current_client.calculate_metric(name, metric="entity_labels", size=labels)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -103,7 +103,7 @@ def entity_tags(name: str, entities: int = 50) -> MetricSummary:
 
 
 def entity_density(name: str, interval: float = 0.005) -> MetricSummary:
-    """Calculates the entity density distribution. Then entity density is calculated at
+    """Computes the entity density distribution. Then entity density is calculated at
     record level for each mention as ``mention_length/tokens_length``
 
     Args:
@@ -135,8 +135,8 @@ def entity_density(name: str, interval: float = 0.005) -> MetricSummary:
 
 
 def entity_capitalness(name: str) -> MetricSummary:
-    """Calculates the entity capitalness. The entity capitalness splits the entity
-    mention shape in 4 grous:
+    """Computes the entity capitalness. The entity capitalness splits the entity
+    mention shape in 4 groups:
 
         ``UPPER``: All charactes in entity mention are upper case
 
@@ -170,29 +170,36 @@ def entity_capitalness(name: str) -> MetricSummary:
     )
 
 
-def mention_consistency(name: str, mentions: int = 10):
-    """Calculates the entity consistency for top mentions in dataset.
-    The entity consistency defines entity variability for a given mention. For example, a mention `first` identified
+def entity_consistency(name: str, mentions: int = 10, threshold: int = 2):
+    """Computes the consistency for top entity mentions in the dataset.
+
+    Entity consistency defines the label variability for a given mention. For example, a mention `first` identified
     in the whole dataset as `Cardinal`, `Person` and `Time` is less consistent than a mention `Peter` identified as
-    `Person` in the whole dataset.
+    `Person` in the dataset.
 
     Args:
         name:
             The dataset name.
         mentions:
-            The number of top mentions top retrieve
+            The number of top mentions to retrieve
+        threshold:
+            The entity variability threshold (Must be greater or equal to 2)
 
     Returns:
         The summary entity capitalness distribution
 
     Examples:
-        >>> from rubrix.metrics.token_classification import mention_consistency
-        >>> summary = entity_capitalness(name="example-dataset")
+        >>> from rubrix.metrics.token_classification import entity_consistency
+        >>> summary = entity_consistency(name="example-dataset")
         >>> summary.visualize()
     """
+    if threshold < 2:
+        # TODO: Warning???
+        threshold = 2
+
     current_client = client()
     metric = current_client.calculate_metric(
-        name, metric="mention_consistency", size=mentions
+        name, metric="entity_consistency", size=mentions, interval=threshold
     )
     labels = ["Mentions"]
     parents = [""]
@@ -202,13 +209,13 @@ def mention_consistency(name: str, mentions: int = 10):
         parents.append("Mentions")
         values.append(len(mention["entities"]))
         for entity in mention["entities"]:
-            labels.append(entity["entity"])
+            labels.append(entity["label"])
             parents.append(mention["mention"])
             values.append(1)
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.multilevel_pie(
+        visualization=lambda: helpers.tree_map(
             labels, parents, values, title=metric.description
         ),
     )

@@ -171,6 +171,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/task_examples
    guides/weak-supervision
    guides/streamlit_guide
+   guides/metrics
 
 .. toctree::
    :maxdepth: 3

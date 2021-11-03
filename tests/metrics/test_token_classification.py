@@ -1,13 +1,14 @@
 import httpx
 
+import rubrix
 import rubrix as rb
 from rubrix.metrics.token_classification import (
     tokens_length,
     mention_length,
     entity_density,
     entity_capitalness,
-    mention_consistency,
-    entity_tags,
+    entity_consistency,
+    entity_labels,
 )
 from tests.server.test_helpers import client
 
@@ -37,6 +38,18 @@ def log_some_data(dataset: str):
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
             ),
+            rb.TokenClassificationRecord(
+                id=3,
+                text=text,
+                tokens=tokens,
+                prediction=[("NUMBER", 3, 8)],
+            ),
+            rb.TokenClassificationRecord(
+                id=4,
+                text=text,
+                tokens=tokens,
+                prediction=[("PERSON", 3, 8)],
+            ),
         ],
         name=dataset,
     )
@@ -49,7 +62,7 @@ def test_tokens_length(monkeypatch):
 
     results = tokens_length(dataset)
     assert results
-    assert results.data == {"4.0": 2}
+    assert results.data == {"4.0": 4}
     results.visualize()
 
 
@@ -60,7 +73,7 @@ def test_mentions_length(monkeypatch):
 
     results = mention_length(dataset)
     assert results
-    assert results.data == {"1.0": 2}
+    assert results.data == {"1.0": 4}
     results.visualize()
 
 
@@ -71,42 +84,50 @@ def test_entity_density(monkeypatch):
 
     results = entity_density(dataset)
     assert results
-    assert results.data == {"0.25": 2}
+    assert results.data == {"0.25": 4}
     results.visualize()
 
 
-def test_entity_tags(monkeypatch):
+def test_entity_labels(monkeypatch):
     mocking_client(monkeypatch)
-    dataset = "test_entity_tags"
+    dataset = "test_entity_labels"
     log_some_data(dataset)
 
-    results = entity_tags(dataset)
+    results = entity_labels(dataset)
     assert results
-    assert results.data == {'CARDINAL': 2}
+    assert results.data == {"CARDINAL": 2, "NUMBER": 1, "PERSON": 1}
     results.visualize()
 
 
 def test_entity_capitalness(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_entity_capitalness"
+    rubrix.delete(dataset)
     log_some_data(dataset)
 
     results = entity_capitalness(dataset)
     assert results
-    assert results.data == {"LOWER": 2}
+    assert results.data == {"LOWER": 4}
     results.visualize()
 
 
-def test_mention_consistency(monkeypatch):
+def test_entity_consistency(monkeypatch):
     mocking_client(monkeypatch)
-    dataset = "test_mention_consistency"
+    dataset = "test_entity_consistency"
     log_some_data(dataset)
 
-    results = mention_consistency(dataset)
+    results = entity_consistency(dataset, threshold=2)
     assert results
     assert results.data == {
         "mentions": [
-            {"entities": [{"count": 2, "entity": "CARDINAL"}], "mention": "first"}
+            {
+                "mention": "first",
+                "entities": [
+                    {"count": 2, "label": "CARDINAL"},
+                    {"count": 1, "label": "NUMBER"},
+                    {"count": 1, "label": "PERSON"},
+                ]
+            }
         ]
     }
     results.visualize()

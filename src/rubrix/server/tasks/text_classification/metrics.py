@@ -13,7 +13,7 @@ from rubrix.server.tasks.text_classification import TextClassificationRecord
 
 class F1Metric(PythonMetric):
     """
-    A basic f1 calculation for text classification
+    A basic f1 computation for text classification
 
     Attributes:
     -----------
@@ -77,10 +77,10 @@ class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = [
-        F1Metric(id="F1", name="F1 Metric for single class", description=""),
+        F1Metric(id="F1", name="F1 Metric for single-class", description=""),
         F1Metric(
             id="MultiLabelF1",
-            name="F1 Metric for multi-class task",
+            name="F1 Metric for multi-class ",
             description="",
             multi_label=True,
         ),

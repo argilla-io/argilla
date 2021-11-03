@@ -47,6 +47,21 @@ nbsphinx_execute = "never"
 # Hide input/output prompts (cell counts)
 nbsphinx_prolog = """
 .. raw:: html
+    
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js'></script>
+    <script>require=requirejs;</script>
+    <script>
+        requirejs.config({
+            paths: { 
+                'plotly': ['https://cdn.plot.ly/plotly-latest.min']
+            },
+        });
+        if(!window.Plotly) {
+            {
+                require(['plotly'], function(plotly) {window.Plotly=plotly;});
+            }
+        }
+    </script>
 
     <style>
         .nbinput .prompt,
