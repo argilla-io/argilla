@@ -39,6 +39,7 @@
           v-if="record.status !== 'Validated'"
           class="button-primary"
           @click="onValidate(record)"
+          :disabled="!allowValidate"
           >Validate</re-button
         >
       </div>
@@ -83,6 +84,9 @@ export default {
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
+    },
+    allowValidate() {
+      return this.record.annotation || this.record.prediction || this.record.multi_label;
     },
   },
   methods: {
