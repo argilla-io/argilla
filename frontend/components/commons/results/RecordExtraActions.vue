@@ -108,7 +108,7 @@ export default {
   &__extra-actions {
     position: absolute;
     top: 1.5em;
-    right: 1em;
+    right: 0.9em;
   }
 }
 .extra-actions {
@@ -122,7 +122,7 @@ export default {
   }
   &__content {
     position: absolute;
-    right: 0;
+    right: 0.7em;
     top: 2em;
     background: white;
     border-radius: 3px;

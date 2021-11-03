@@ -49,7 +49,7 @@
         :class="['icon__predicted', record.predicted]"
         width="20"
         height="20"
-        :name="record.predicted ? 'predicted-ko' : 'predicted-ok'"
+        :name="record.predicted === 'ko' ? 'predicted-ko' : 'predicted-ok'"
       ></svgicon>
       <re-tag
         v-for="label in record.annotation.labels"
@@ -151,7 +151,7 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 2em;
+    padding: 44px 20px 20px 20px;
     .list__item--annotation-mode & {
       padding-left: 65px;
     }
@@ -165,7 +165,7 @@ export default {
     height: 100%;
     overflow: auto;
     text-align: right;
-    padding: 4em 2em 1em 1em;
+    padding: 4em 1.4em 1em 1em;
   }
 }
 .icon {
@@ -175,8 +175,8 @@ export default {
     margin-right: 0;
     margin-left: auto;
     margin-bottom: 1em;
-    transform: scaleX(-1);
     &.ko {
+      transform: scaleX(-1);
       fill: $error;
     }
     &.ok {

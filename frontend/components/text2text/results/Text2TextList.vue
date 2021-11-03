@@ -62,9 +62,23 @@
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
-            <div class="content__footer">
+            <div class="content__edit__buttons" v-if="editionMode">
+              <re-button
+                v-if="editionMode && editable && newSentence"
+                class="button-primary--outline"
+                @click="back()"
+                >Back</re-button
+              >
+              <re-button
+                v-if="newSentence && editable && editionMode"
+                class="button-primary"
+                @click="annotate"
+                >Save</re-button
+              >
+            </div>
+            <div v-if="!editionMode && sentencesOrigin === 'Prediction'" class="content__footer">
               <div v-if="showScore" class="content__score">
-                Score:<span>{{ sentence.score | percent }}</span>
+                Score: {{ sentence.score | percent }}
               </div>
               <div v-if="sentences.length && sentencesOrigin === 'Prediction'" class="content__nav-buttons">
                 <a
@@ -95,34 +109,20 @@
                   />
                 </a>
               </div>
-              <div class="content__footer__buttons">
+              <div v-if="!editionMode" class="content__actions-buttons">
                 <re-button
-                  v-if="editionMode && editable && newSentence"
-                  class="button-primary--outline"
-                  @click="back()"
-                  >Back</re-button
+                  v-if="editable && newSentence && sentences.length"
+                  :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
+                  @click="edit()"
+                  >Edit</re-button
                 >
                 <re-button
-                  v-if="newSentence && editable && editionMode"
+                  v-if="newSentence && editable && sentencesOrigin !== 'Annotation'"
                   class="button-primary"
                   @click="annotate"
-                  >Save</re-button
+                  >Validate</re-button
                 >
               </div>
-            </div>
-            <div class="content__actions-buttons">
-              <re-button
-                v-if="!editionMode && editable && newSentence && sentences.length"
-                :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
-                @click="edit()"
-                >Edit</re-button
-              >
-              <re-button
-                v-if="!editionMode && newSentence && editable && sentencesOrigin !== 'Annotation'"
-                class="button-primary"
-                @click="annotate"
-                >Validate</re-button
-              >
             </div>
           </div>
         </span>
@@ -355,9 +355,8 @@ $marginRight: 200px;
     flex-direction: column;
     min-height: 140px;
     &__title {
-      color: palette(grey, verylight);
-      @include font-size(12px);
-      font-weight: 600;
+      @include font-size(13px);
+      color: palette(grey, medium);
       margin: 0;
     }
   }
@@ -381,34 +380,30 @@ $marginRight: 200px;
     }
   }
   &__score {
-    @include font-size(12px);
-    padding: 0 0.3em;
+    @include font-size(13px);
     margin-right: auto;
     min-width: 20%;
-    span {
-      font-weight: 600;
-      margin-left: 1em;
-      @include font-size(14px);
-    }
+    color: palette(grey, medium);
   }
-  &__footer {
-    padding-top: 3em;
-    margin-top: auto;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    width: calc(100% - 200px);
+  &__edit {
     &__buttons {
-      margin: 0 0 0 auto;
+      margin: 2.5em 200px 0 auto;
       display: flex;
-
       .re-button {
         margin-bottom: 0;
         &:last-child {
+          transition: margin 0s ease;
           margin-left: 6px;
         }
       }
     }
+  }
+  &__footer {
+    padding-top: 2em;
+    margin-top: auto;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
   }
   &__group {
     width: calc(100% - 200px);
@@ -416,6 +411,7 @@ $marginRight: 200px;
     align-items: center;
     margin-bottom: 0.5em;
     .button-clear {
+      @include font-size(13px);
       margin: auto 0 auto auto;
       color: palette(grey, dark);
       transition: opacity 0.3s ease-in-out 0.2s;
@@ -428,7 +424,6 @@ $marginRight: 200px;
     margin-right: 0;
     margin-left: auto;
     display: flex;
-    min-width: 20%;
     .edit {
       opacity: 0;
       pointer-events: none;
@@ -446,12 +441,13 @@ $marginRight: 200px;
     }
   }
   &__nav-buttons {
-    @include font-size(12px);
+    @include font-size(13px);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: auto;
     margin-left: auto;
+    color: palette(grey, medium);
     a {
       height: 20px;
       width: 20px;

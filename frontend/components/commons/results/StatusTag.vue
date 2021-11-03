@@ -27,7 +27,7 @@ export default {
 .status-tag {
   position: absolute;
   top: 1em;
-  right: 4em;
+  right: 3.6em;
   display: flex;
   align-items: center;
   background: $secondary-color;
