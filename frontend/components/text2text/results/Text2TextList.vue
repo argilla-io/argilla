@@ -26,7 +26,7 @@
     >
       <div
         :class="[
-          editionMode || !sentences.length
+          annotationEnabled || !sentences.length
             ? 'content--editable'
             : 'content--non-editable',
           showScore ? 'content--has-score' : null,
@@ -35,9 +35,9 @@
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
-              <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
+              <p v-if="!annotationEnabled" class="content__sentences__title">{{sentencesOrigin}}</p>
               <re-button
-                v-if="hasAnnotationAndPredictions && !editionMode"
+                v-if="hasAnnotationAndPredictions && !annotationEnabled"
                 class="button-clear"
                 @click="changeVisibleSentences"
                 >{{
@@ -52,31 +52,29 @@
                 :key="refresh"
                 ref="text"
                 class="content__text"
-                :contenteditable="editable && editionMode"
+                :contenteditable="editable && annotationEnabled"
                 placeholder="Type your text"
                 @input="input"
                 v-html="sentence.text"
                 @click="edit()"
               ></p>
-              <span v-if="editionMode"
+              <span v-if="annotationEnabled"
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
-            <div class="content__edit__buttons" v-if="editionMode">
+            <div class="content__edit__buttons" v-if="annotationEnabled && editable && newSentence">
               <re-button
-                v-if="editionMode && editable && newSentence"
                 class="button-primary--outline"
                 @click="back()"
                 >Back</re-button
               >
               <re-button
-                v-if="newSentence && editable && editionMode"
                 class="button-primary"
                 @click="annotate"
                 >Save</re-button
               >
             </div>
-            <div v-if="!editionMode && sentencesOrigin === 'Prediction'" class="content__footer">
+            <div v-if="!annotationEnabled && sentencesOrigin === 'Prediction'" class="content__footer">
               <div v-if="showScore" class="content__score">
                 Score: {{ sentence.score | percent }}
               </div>
@@ -109,7 +107,7 @@
                   />
                 </a>
               </div>
-              <div v-if="!editionMode" class="content__actions-buttons">
+              <div v-if="!annotationEnabled" class="content__actions-buttons">
                 <re-button
                   v-if="editable && newSentence && sentences.length"
                   :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
@@ -184,7 +182,7 @@ export default {
     return {
       itemNumber: 0,
       newSentence: undefined,
-      editionMode: false,
+      annotationEnabled: false,
       shiftPressed: false,
       shiftKey: undefined,
       refresh: 1
@@ -243,7 +241,7 @@ export default {
     },
     edit() {
       if (this.editable) {
-        this.editionMode = true;
+        this.annotationEnabled = true;
         this.focus();
       }
     },
@@ -255,18 +253,18 @@ export default {
       });
     },
     back() {
-      this.editionMode = false;
+      this.annotationEnabled = false;
       this.refresh++;
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
-      this.editionMode = false;
+      this.annotationEnabled = false;
       this.$emit("change-visible-sentences");
     },
     annotate() {
       this.itemNumber = 0;
-      this.editionMode = false;
+      this.annotationEnabled = false;
       if (this.newSentence) {
         let newS = {
           score: 1,
@@ -286,7 +284,7 @@ export default {
         this.shiftPressed = true;
       }
       const enter = event.key === "Enter";
-      if (this.shiftPressed && this.editionMode && enter) {
+      if (this.shiftPressed && this.annotationEnabled && enter) {
         this.annotate();
       }
     },
