@@ -37,22 +37,22 @@ class TokensLength(ElasticsearchMetric):
 _DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 
-class EntityTags(NestedPathElasticsearchMetric):
+class EntityLabels(NestedPathElasticsearchMetric):
     """
-    Calculates the entity tags distribution
+    Calculates the entity labs distribution
 
     Attributes:
     -----------
-    tags_field:
+    labels_field:
         The elasticsearch field where tags are stored
     """
 
-    tags_field: str
+    labels_field: str
 
     def inner_aggregation(self, size: int) -> Dict[str, Any]:
         return {
-            "tags": aggregations.terms_aggregation(
-                self.tags_field, size=size or _DEFAULT_MAX_ENTITY_BUCKET
+            "labels": aggregations.terms_aggregation(
+                self.labels_field, size=size or _DEFAULT_MAX_ENTITY_BUCKET
             )
         }
 
@@ -96,11 +96,11 @@ class EntityCapitalness(NestedPathElasticsearchMetric):
         }
 
 
-class MentionConsistency(NestedPathElasticsearchMetric):
-    """Calculates the mention consistence distribution"""
+class EntityConsistency(NestedPathElasticsearchMetric):
+    """Calculates the entity consistence distribution"""
 
     mention_field: str
-    entity_field: str
+    labels_field: str
 
     def inner_aggregation(
         self,
@@ -113,9 +113,9 @@ class MentionConsistency(NestedPathElasticsearchMetric):
                 **aggregations.terms_aggregation(self.mention_field, size=size),
                 "aggs": {
                     "entities": aggregations.terms_aggregation(
-                        self.entity_field, size=entity_size
+                        self.labels_field, size=entity_size
                     ),
-                    "count": {"cardinality": {"field": self.entity_field}},
+                    "count": {"cardinality": {"field": self.labels_field}},
                     "sortby_entities_count": {
                         "bucket_sort": {
                             "sort": [{"count": {"order": "desc"}}],
@@ -132,12 +132,13 @@ class MentionConsistency(NestedPathElasticsearchMetric):
             {
                 "mention": mention,
                 "entities": [
-                    {"entity": entity, "count": count}
+                    {"label": entity, "count": count}
                     for entity, count in mention_aggs["entities"].items()
                 ],
             }
             for mention, mention_aggs in aggregation_result.items()
         ]
+        # TODO: filter by entities threshold
         result.sort(key=lambda m: len(m["entities"]), reverse=True)
         return {"mentions": result}
 
@@ -149,7 +150,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         """Mention metrics model"""
 
         mention: str
-        entity: str
+        label: str
         score: float = Field(ge=0.0)
         capitalness: str = Field(...)
         density: float = Field(ge=0.0)
@@ -194,7 +195,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         return [
             TokenClassificationMetrics.MentionMetrics(
                 mention=mention,
-                entity=entity.label,
+                label=entity.label,
                 score=entity.score,
                 capitalness=mention_capitalness(mention),
                 density=mention_density(_mention_length, tokens_length=len(tokens)),
@@ -246,7 +247,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             "type": "nested",
             "properties": {
                 "mention": {"type": "keyword"},
-                "entity": {"type": "keyword"},
+                "label": {"type": "keyword"},
                 "score": {"type": "float"},
                 "capitalness": {"type": "keyword"},
                 "density": {"type": "float"},
@@ -293,12 +294,12 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             nested_path="metrics.mentions.predicted",
             density_field="metrics.mentions.predicted.density",
         ),
-        EntityTags(
-            id="entity_tags",
-            name="Entity tags",
-            description="The entity tags distribution",
+        EntityLabels(
+            id="entity_labels",
+            name="Entity labels",
+            description="The entity labels distribution",
             nested_path="metrics.mentions.predicted",
-            tags_field="metrics.mentions.predicted.entity",
+            labels_field="metrics.mentions.predicted.label",
         ),
         EntityCapitalness(
             id="entity_capitalness",
@@ -314,12 +315,12 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             nested_path="metrics.mentions.predicted",
             length_field="metrics.mentions.predicted.length",
         ),
-        MentionConsistency(
-            id="mention_consistency",
-            name="Mention entity consistency",
+        EntityConsistency(
+            id="entity_consistency",
+            name="Entity label consistency",
             description="Calculates entity variability for top k-mentions",
             nested_path="metrics.mentions.predicted",
             mention_field="metrics.mentions.predicted.mention",
-            entity_field="metrics.mentions.predicted.entity",
+            labels_field="metrics.mentions.predicted.label",
         ),
     ]

@@ -71,27 +71,27 @@ def mention_length(name: str, interval: int = 1) -> MetricSummary:
     )
 
 
-def entity_tags(name: str, entities: int = 50) -> MetricSummary:
-    """Calculates the entity tags distribution
+def entity_labels(name: str, labels: int = 50) -> MetricSummary:
+    """Calculates the entity labels distribution
 
     Args:
         name:
             The dataset name.
-        entities:
+        labels:
             The number of top entities to retrieve. Lower numbers will be better performants
 
     Returns:
         The summary for entity tags distribution
 
     Examples:
-        >>> from rubrix.metrics.token_classification import entity_tags
-        >>> summary = entity_tags(name="example-dataset", entities=10)
+        >>> from rubrix.metrics.token_classification import entity_labels
+        >>> summary = entity_labels(name="example-dataset", labels=10)
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """
     current_client = client()
 
-    metric = current_client.calculate_metric(name, metric="entity_tags", size=entities)
+    metric = current_client.calculate_metric(name, metric="entity_labels", size=labels)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -170,8 +170,9 @@ def entity_capitalness(name: str) -> MetricSummary:
     )
 
 
-def mention_consistency(name: str, mentions: int = 10):
+def entity_consistency(name: str, mentions: int = 10):
     """Calculates the entity consistency for top mentions in dataset.
+
     The entity consistency defines entity variability for a given mention. For example, a mention `first` identified
     in the whole dataset as `Cardinal`, `Person` and `Time` is less consistent than a mention `Peter` identified as
     `Person` in the whole dataset.
@@ -186,13 +187,13 @@ def mention_consistency(name: str, mentions: int = 10):
         The summary entity capitalness distribution
 
     Examples:
-        >>> from rubrix.metrics.token_classification import mention_consistency
+        >>> from rubrix.metrics.token_classification import entity_consistency
         >>> summary = entity_capitalness(name="example-dataset")
         >>> summary.visualize()
     """
     current_client = client()
     metric = current_client.calculate_metric(
-        name, metric="mention_consistency", size=mentions
+        name, metric="entity_consistency", size=mentions
     )
     labels = ["Mentions"]
     parents = [""]
@@ -202,7 +203,7 @@ def mention_consistency(name: str, mentions: int = 10):
         parents.append("Mentions")
         values.append(len(mention["entities"]))
         for entity in mention["entities"]:
-            labels.append(entity["entity"])
+            labels.append(entity["label"])
             parents.append(mention["mention"])
             values.append(1)
 
