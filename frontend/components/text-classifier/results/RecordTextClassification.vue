@@ -93,15 +93,7 @@ export default {
     async resetLabels() {
       await this.resetAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user,
-        records: [
-          {
-            ...this.record,
-            annotation: {
-              labels: [],
-            },
-          },
-        ],
+        records: [this.record],
       });
     },
 
