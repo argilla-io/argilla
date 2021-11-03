@@ -184,6 +184,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/06-find_label_errors
    tutorials/07-zeroshot_ner
    tutorials/08-error_analysis_using_loss
+   tutorials/09-automatic_fastapi_log
    tutorials/zeroshot_data_annotation
 
 .. toctree::
