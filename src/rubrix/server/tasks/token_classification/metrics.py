@@ -170,10 +170,10 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         tokens: List[str],
         chars2tokens: Dict[int, int],
     ) -> List[MentionMetrics]:
-        """Given a list of mentions with its entity spans, calculate all required metrics"""
+        """Given a list of mentions with its entity spans, Compute all required metrics"""
 
         def mention_capitalness(mention: str) -> str:
-            """Calculate mention capitalness"""
+            """Compute mention capitalness"""
             mention = mention.strip()
             if mention.upper() == mention:
                 return "UPPER"
@@ -184,7 +184,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             return "MIDDLE"
 
         def mention_length(entity: EntitySpan, chars2token_map: Dict[int, int]) -> int:
-            """Calculate mention tokens length"""
+            """Compute mention tokens length"""
             return len(
                 set(
                     [
@@ -197,7 +197,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             )
 
         def mention_density(mention_length: int, tokens_length: int) -> float:
-            """Calculate mention density"""
+            """Compute mention density"""
             return (1.0 * mention_length) / tokens_length
 
         return [
@@ -271,7 +271,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
 
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
-        """Calculate metrics at record level"""
+        """Compute metrics at record level"""
         chars2tokens = cls.build_chars2tokens_map(record)
 
         return {
@@ -292,7 +292,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         TokensLength(
             id="tokens_length",
             name="Tokens length",
-            description="Computes the length measured in number of tokens",
+            description="Computes the text length measured in number of tokens",
             length_field="metrics.tokens_length",
         ),
         EntityDensity(
@@ -305,14 +305,14 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         EntityLabels(
             id="entity_labels",
             name="Entity labels",
-            description="The entity labels distribution",
+            description="Entity labels distribution",
             nested_path="metrics.mentions.predicted",
             labels_field="metrics.mentions.predicted.label",
         ),
         EntityCapitalness(
             id="entity_capitalness",
             name="Mention entity capitalness",
-            description="Calculate capitalized information for mentions",
+            description="Compute capitalization information of entity mentions",
             nested_path="metrics.mentions.predicted",
             capitalness_field="metrics.mentions.predicted.capitalness",
         ),
