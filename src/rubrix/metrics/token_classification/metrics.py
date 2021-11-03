@@ -4,7 +4,7 @@ from rubrix.metrics.models import MetricSummary
 
 
 def tokens_length(name: str, interval: int = 1) -> MetricSummary:
-    """Calculates the tokens length distribution
+    """Computes the tokens length distribution
 
     Args:
         name:
@@ -38,7 +38,7 @@ def tokens_length(name: str, interval: int = 1) -> MetricSummary:
 
 
 def mention_length(name: str, interval: int = 1) -> MetricSummary:
-    """Calculates the mention tokens length distribution
+    """Computes mentions length distribution (in number of tokens)
 
     Args:
         name:
@@ -72,7 +72,7 @@ def mention_length(name: str, interval: int = 1) -> MetricSummary:
 
 
 def entity_labels(name: str, labels: int = 50) -> MetricSummary:
-    """Calculates the entity labels distribution
+    """Computes the entity labels distribution
 
     Args:
         name:
@@ -103,7 +103,7 @@ def entity_labels(name: str, labels: int = 50) -> MetricSummary:
 
 
 def entity_density(name: str, interval: float = 0.005) -> MetricSummary:
-    """Calculates the entity density distribution. Then entity density is calculated at
+    """Computes the entity density distribution. Then entity density is calculated at
     record level for each mention as ``mention_length/tokens_length``
 
     Args:
@@ -135,8 +135,8 @@ def entity_density(name: str, interval: float = 0.005) -> MetricSummary:
 
 
 def entity_capitalness(name: str) -> MetricSummary:
-    """Calculates the entity capitalness. The entity capitalness splits the entity
-    mention shape in 4 grous:
+    """Computes the entity capitalness. The entity capitalness splits the entity
+    mention shape in 4 groups:
 
         ``UPPER``: All charactes in entity mention are upper case
 
@@ -171,17 +171,17 @@ def entity_capitalness(name: str) -> MetricSummary:
 
 
 def entity_consistency(name: str, mentions: int = 10, threshold: int = 2):
-    """Calculates the entity consistency for top mentions in dataset.
+    """Computes the consistency for top entity mentions in the dataset.
 
-    The entity consistency defines entity variability for a given mention. For example, a mention `first` identified
+    Entity consistency defines the label variability for a given mention. For example, a mention `first` identified
     in the whole dataset as `Cardinal`, `Person` and `Time` is less consistent than a mention `Peter` identified as
-    `Person` in the whole dataset.
+    `Person` in the dataset.
 
     Args:
         name:
             The dataset name.
         mentions:
-            The number of top mentions top retrieve
+            The number of top mentions to retrieve
         threshold:
             The entity variability threshold (Must be greater or equal to 2)
 

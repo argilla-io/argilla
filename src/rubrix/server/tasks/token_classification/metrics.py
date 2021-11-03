@@ -39,7 +39,7 @@ _DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 class EntityLabels(NestedPathElasticsearchMetric):
     """
-    Calculates the entity labs distribution
+    Computes the entity labels distribution
 
     Attributes:
     -----------
@@ -84,7 +84,7 @@ class MentionLength(NestedPathElasticsearchMetric):
 
 
 class EntityCapitalness(NestedPathElasticsearchMetric):
-    """Calculates the mention capitalness distribution"""
+    """Computes the mention capitalness distribution"""
 
     capitalness_field: str
 
@@ -97,7 +97,7 @@ class EntityCapitalness(NestedPathElasticsearchMetric):
 
 
 class EntityConsistency(NestedPathElasticsearchMetric):
-    """Calculates the entity consistence distribution"""
+    """Computes the entity consistency distribution"""
 
     mention_field: str
     labels_field: str
@@ -292,13 +292,13 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         TokensLength(
             id="tokens_length",
             name="Tokens length",
-            description="Calculates tokens length",
+            description="Computes the length measured in number of tokens",
             length_field="metrics.tokens_length",
         ),
         EntityDensity(
             id="entity_density",
             name="Mention entity density",
-            description="Calculates relation between mention tokens and tokens in text",
+            description="Computes the ratio between the number of all entity tokens and tokens in the text",
             nested_path="metrics.mentions.predicted",
             density_field="metrics.mentions.predicted.density",
         ),
@@ -319,14 +319,14 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         MentionLength(
             id="mention_length",
             name="Mention length",
-            description="The token level mention length",
+            description="Computes the length of the entity mention measured in number of tokens",
             nested_path="metrics.mentions.predicted",
             length_field="metrics.mentions.predicted.length",
         ),
         EntityConsistency(
             id="entity_consistency",
             name="Entity label consistency",
-            description="Calculates entity variability for top k-mentions",
+            description="Computes entity label variability for top-k entity mentions",
             nested_path="metrics.mentions.predicted",
             mention_field="metrics.mentions.predicted.mention",
             labels_field="metrics.mentions.predicted.label",
