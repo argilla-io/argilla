@@ -50,15 +50,6 @@ def test_classifier_monitoring(client_mock, classifier_monitor, classifier_datas
     assert df.metadata.values.tolist()[0] == {"some": "metadata"}
 
 
-def test_cannot_monitor_instance():
-    class MockModel:
-        pass
-
-    whatever_model = MockModel()
-    monitor = huggingface_monitor(whatever_model, dataset="dataset",sample_rate=0.1)
-    assert whatever_model == monitor
-
-
 @pytest.fixture
 def classifier_dataset():
     return "classifier_dataset"
