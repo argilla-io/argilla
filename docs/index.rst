@@ -167,9 +167,10 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Guides
    :hidden:
 
-   guides/streamlit_guide
    guides/cookbook
    guides/task_examples
+   guides/weak-supervision
+   guides/streamlit_guide
 
 .. toctree::
    :maxdepth: 3
