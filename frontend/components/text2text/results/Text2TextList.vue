@@ -418,7 +418,6 @@ $marginRight: 200px;
     .button-clear {
       margin: auto 0 auto auto;
       color: palette(grey, dark);
-      opacity: 0;
       transition: opacity 0.3s ease-in-out 0.2s;
       &:hover {
         color: darken(palette(grey, dark), 10%);
