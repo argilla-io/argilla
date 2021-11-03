@@ -170,7 +170,7 @@ def entity_capitalness(name: str) -> MetricSummary:
     )
 
 
-def entity_consistency(name: str, mentions: int = 10):
+def entity_consistency(name: str, mentions: int = 10, threshold: int = 2):
     """Calculates the entity consistency for top mentions in dataset.
 
     The entity consistency defines entity variability for a given mention. For example, a mention `first` identified
@@ -182,18 +182,24 @@ def entity_consistency(name: str, mentions: int = 10):
             The dataset name.
         mentions:
             The number of top mentions top retrieve
+        threshold:
+            The entity variability threshold (Must be greater or equal to 2)
 
     Returns:
         The summary entity capitalness distribution
 
     Examples:
         >>> from rubrix.metrics.token_classification import entity_consistency
-        >>> summary = entity_capitalness(name="example-dataset")
+        >>> summary = entity_consistency(name="example-dataset")
         >>> summary.visualize()
     """
+    if threshold < 2:
+        # TODO: Warning???
+        threshold = 2
+
     current_client = client()
     metric = current_client.calculate_metric(
-        name, metric="entity_consistency", size=mentions
+        name, metric="entity_consistency", size=mentions, interval=threshold
     )
     labels = ["Mentions"]
     parents = [""]
@@ -209,7 +215,7 @@ def entity_consistency(name: str, mentions: int = 10):
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.multilevel_pie(
+        visualization=lambda: helpers.tree_map(
             labels, parents, values, title=metric.description
         ),
     )

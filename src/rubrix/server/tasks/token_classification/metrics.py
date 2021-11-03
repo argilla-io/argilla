@@ -105,9 +105,11 @@ class EntityConsistency(NestedPathElasticsearchMetric):
     def inner_aggregation(
         self,
         size: int,
+        interval: int = 2,
         entity_size: int = _DEFAULT_MAX_ENTITY_BUCKET,
     ) -> Dict[str, Any]:
         size = size or 50
+        interval = int(max(interval or 2, 2))
         return {
             "consistency": {
                 **aggregations.terms_aggregation(self.mention_field, size=size),
@@ -116,6 +118,12 @@ class EntityConsistency(NestedPathElasticsearchMetric):
                         self.labels_field, size=entity_size
                     ),
                     "count": {"cardinality": {"field": self.labels_field}},
+                    "entities_variability_filter": {
+                        "bucket_selector": {
+                            "buckets_path": {"numLabels": "count"},
+                            "script": f"params.numLabels >= {interval}",
+                        }
+                    },
                     "sortby_entities_count": {
                         "bucket_sort": {
                             "sort": [{"count": {"order": "desc"}}],
