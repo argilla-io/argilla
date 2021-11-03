@@ -239,7 +239,7 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 2em;
+  padding: 44px 20px 20px 20px;
   display: block;
   margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;

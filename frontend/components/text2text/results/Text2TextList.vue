@@ -21,7 +21,7 @@
       :class="[
         'content',
         hasAnnotationAndPredictions ? 'content--separator' : null,
-        !editable ? 'content--exploration-mode' : 'content--annotation-mode',
+        !annotationEnabled ? 'content--exploration-mode' : 'content--annotation-mode',
       ]"
     >
       <div
@@ -42,8 +42,8 @@
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
-                    ? editable ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
-                    : editable ? "Back to annotation" : "View annotation"
+                    ? annotationEnabled ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
+                    : annotationEnabled ? "Back to annotation" : "View annotation"
                 }}</re-button
               >
             </div>
@@ -52,7 +52,7 @@
                 :key="refresh"
                 ref="text"
                 class="content__text"
-                :contenteditable="editable && editionMode"
+                :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
                 @input="input"
                 v-html="sentence.text"
@@ -62,67 +62,67 @@
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
-            <div class="content__footer">
-              <div v-if="showScore" class="content__score">
-                Score:<span>{{ sentence.score | percent }}</span>
-              </div>
-              <div v-if="sentences.length && sentencesOrigin === 'Prediction'" class="content__nav-buttons">
-                <a
-                  :class="itemNumber <= 0 ? 'disabled' : null"
-                  href="#"
-                  @click.prevent="showitemNumber(--itemNumber)"
-                >
-                  <svgicon
-                    name="chev-left"
-                    width="8"
-                    height="8"
-                    color="#4C4EA3"
-                  />
-                </a>
-                {{ itemNumber + 1 }} of {{ sentences.length }} predictions
-                <a
-                  :class="
-                    sentences.length <= itemNumber + 1 ? 'disabled' : null
-                  "
-                  href="#"
-                  @click.prevent="showitemNumber(++itemNumber)"
-                >
-                  <svgicon
-                    name="chev-right"
-                    width="8"
-                    height="8"
-                    color="#4C4EA3"
-                  />
-                </a>
-              </div>
-              <div class="content__footer__buttons">
-                <re-button
-                  v-if="editionMode && editable && newSentence"
-                  class="button-primary--outline"
-                  @click="back()"
-                  >Back</re-button
-                >
-                <re-button
-                  v-if="newSentence && editable && editionMode"
-                  class="button-primary"
-                  @click="annotate"
-                  >Save</re-button
-                >
-              </div>
-            </div>
-            <div class="content__actions-buttons">
+            <div class="content__edit__buttons" v-if="editionMode && annotationEnabled && newSentence">
               <re-button
-                v-if="!editionMode && editable && newSentence && sentences.length"
-                :class="['edit', sentencesOrigin !== 'Annotation' ? 'button-primary--outline' : 'button-primary']"
-                @click="edit()"
-                >Edit</re-button
+                class="button-primary--outline"
+                @click="back()"
+                >Back</re-button
               >
               <re-button
-                v-if="!editionMode && newSentence && editable && sentencesOrigin !== 'Annotation'"
                 class="button-primary"
                 @click="annotate"
-                >Validate</re-button
+                >Save</re-button
               >
+            </div>
+            <div v-if="!editionMode" class="content__footer">
+              <template v-if="sentencesOrigin === 'Prediction'">
+                <div v-if="showScore" class="content__score">
+                  Score: {{ sentence.score | percent }}
+                </div>
+                <div v-if="sentences.length" class="content__nav-buttons">
+                  <a
+                    :class="itemNumber <= 0 ? 'disabled' : null"
+                    href="#"
+                    @click.prevent="showitemNumber(--itemNumber)"
+                  >
+                    <svgicon
+                      name="chev-left"
+                      width="8"
+                      height="8"
+                      color="#4C4EA3"
+                    />
+                  </a>
+                  {{ itemNumber + 1 }} of {{ sentences.length }} predictions
+                  <a
+                    :class="
+                      sentences.length <= itemNumber + 1 ? 'disabled' : null
+                    "
+                    href="#"
+                    @click.prevent="showitemNumber(++itemNumber)"
+                  >
+                    <svgicon
+                      name="chev-right"
+                      width="8"
+                      height="8"
+                      color="#4C4EA3"
+                    />
+                  </a>
+                </div>
+              </template>
+              <div class="content__actions-buttons" v-if="newSentence && annotationEnabled">
+                <re-button
+                  v-if="sentences.length"
+                  :class="['edit', allowValidation ? 'button-primary--outline' : 'button-primary']"
+                  @click="edit()"
+                  >Edit</re-button
+                >
+                <re-button
+                  v-if="allowValidation"
+                  class="button-primary"
+                  @click="annotate"
+                  >Validate</re-button
+                >
+              </div>
             </div>
           </div>
         </span>
@@ -131,18 +131,18 @@
            <div class="content__edition-area">
             <p 
               class="content__text"
-              :contenteditable="editable"
+              :contenteditable="annotationEnabled"
               placeholder="Type your text"
               @input="input"
             ></p>
-              <span v-if="editable"
+              <span v-if="annotationEnabled"
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="newSentence && editable"
+                  v-if="newSentence && annotationEnabled"
                   class="button-primary"
                   @click="annotate"
                   >Validate</re-button
@@ -175,7 +175,7 @@ export default {
       type: String,
       required: true
     },
-    editable: {
+    annotationEnabled: {
       type: Boolean,
       default: false
     }
@@ -208,6 +208,9 @@ export default {
     },
     hasAnnotationAndPredictions() {
       return this.predictions.length && this.annotations.length;
+    },
+    allowValidation() {
+      return this.sentencesOrigin === 'Prediction' || this.status === 'Discarded'
     }
   },
   mounted() {
@@ -242,7 +245,7 @@ export default {
       this.$emit('update-record', { sentences: [newS] });
     },
     edit() {
-      if (this.editable) {
+      if (this.annotationEnabled) {
         this.editionMode = true;
         this.focus();
       }
@@ -355,9 +358,8 @@ $marginRight: 200px;
     flex-direction: column;
     min-height: 140px;
     &__title {
-      color: palette(grey, verylight);
-      @include font-size(12px);
-      font-weight: 600;
+      @include font-size(13px);
+      color: palette(grey, medium);
       margin: 0;
     }
   }
@@ -381,34 +383,30 @@ $marginRight: 200px;
     }
   }
   &__score {
-    @include font-size(12px);
-    padding: 0 0.3em;
+    @include font-size(13px);
     margin-right: auto;
     min-width: 20%;
-    span {
-      font-weight: 600;
-      margin-left: 1em;
-      @include font-size(14px);
-    }
+    color: palette(grey, medium);
   }
-  &__footer {
-    padding-top: 3em;
-    margin-top: auto;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    width: calc(100% - 200px);
+  &__edit {
     &__buttons {
-      margin: 0 0 0 auto;
+      margin: 2.5em 200px 0 auto;
       display: flex;
-
       .re-button {
         margin-bottom: 0;
         &:last-child {
+          transition: margin 0s ease;
           margin-left: 6px;
         }
       }
     }
+  }
+  &__footer {
+    padding-top: 2em;
+    margin-top: auto;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
   }
   &__group {
     width: calc(100% - 200px);
@@ -416,6 +414,7 @@ $marginRight: 200px;
     align-items: center;
     margin-bottom: 0.5em;
     .button-clear {
+      @include font-size(13px);
       margin: auto 0 auto auto;
       color: palette(grey, dark);
       transition: opacity 0.3s ease-in-out 0.2s;
@@ -428,7 +427,6 @@ $marginRight: 200px;
     margin-right: 0;
     margin-left: auto;
     display: flex;
-    min-width: 20%;
     .edit {
       opacity: 0;
       pointer-events: none;
@@ -446,12 +444,13 @@ $marginRight: 200px;
     }
   }
   &__nav-buttons {
-    @include font-size(12px);
+    @include font-size(13px);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: auto;
     margin-left: auto;
+    color: palette(grey, medium);
     a {
       height: 20px;
       width: 20px;
