@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -154,9 +154,9 @@ class TextClassificationMonitor(HuggingFaceMonitor):
             return batch_predictions
 
 
-def huggingface_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Pipeline:
+def huggingface_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Optional[Pipeline]:
     if isinstance(pl, TextClassificationPipeline):
         return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
     if isinstance(pl, ZeroShotClassificationPipeline):
         return ZeroShotMonitor(pl, dataset=dataset, sample_rate=sample_rate)
-    return pl
+    return None

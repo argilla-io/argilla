@@ -16,6 +16,10 @@ def _get_current_loop():
     return _LOGGING_LOOP
 
 
+class ModelNotSupportedError(Exception):
+    pass
+
+
 class BaseMonitor(wrapt.ObjectProxy):
     """
     A base monitor class for easy task model monitoring
