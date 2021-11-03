@@ -259,14 +259,18 @@ class ElasticsearchWrapper(LoggingMixin):
 
         def map_doc_2_action(doc: Dict[str, Any]) -> Dict[str, Any]:
             """Configures bulk action"""
-            return {
-                "_op_type": "update",
+            data = {
+                "_op_type": "index",
                 "_index": index,
-                "_id": doc_id(doc) if doc_id else doc["_id"],
                 "_routing": routing(doc) if routing else None,
-                "doc": doc,
-                "doc_as_upsert": True,
+                **doc,
             }
+
+            _id = doc_id(doc) if doc_id else None
+            if _id is not None:
+                data["_id"] = _id
+
+            return data
 
         success, failed = es_bulk(
             self.__client__,

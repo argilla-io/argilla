@@ -171,7 +171,7 @@ def test_log_with_generator(monkeypatch):
 def test_log_with_annotation(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset_name = "test_log_with_annotation"
-    client.delete(f"/api/datasets/{dataset_name}")
+    rubrix.delete(dataset_name)
     rubrix.log(
         TextClassificationRecord(
             id=0,
@@ -268,6 +268,45 @@ def test_dataset_copy(monkeypatch):
 
     with pytest.raises(Exception):
         rubrix.copy(dataset, name_of_copy=dataset_copy)
+
+
+def test_update_record(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_update_record"
+    client.delete(f"/api/datasets/{dataset}")
+
+    expected_inputs = ["This is a text"]
+    record = TextClassificationRecord(
+        id=0,
+        inputs=expected_inputs,
+        annotation_agent="test",
+        annotation=["T"],
+    )
+    rubrix.log(
+        record,
+        name=dataset,
+    )
+
+    df = rubrix.load(name=dataset)
+    records = df.to_dict(orient="records")
+    assert len(records) == 1
+    assert records[0]["annotation"] == "T"
+    # This record will replace the old one
+    record = TextClassificationRecord(
+        id=0,
+        inputs=expected_inputs,
+    )
+
+    rubrix.log(
+        record,
+        name=dataset,
+    )
+
+    df = rubrix.load(name=dataset)
+    records = df.to_dict(orient="records")
+    assert len(records) == 1
+    assert records[0]["annotation"] is None
+    assert records[0]["annotation_agent"] is None
 
 
 def test_text_classifier_with_inputs_list(monkeypatch):
@@ -380,6 +419,8 @@ def test_load_text2text(monkeypatch):
         for i in range(0, 100)
     ]
 
-    rubrix.log(records, name="test_load_text2text")
-    df = rubrix.load(name="test_load_text2text")
+    dataset = "test_load_text2text"
+    rubrix.delete(dataset)
+    rubrix.log(records, name=dataset)
+    df = rubrix.load(name=dataset)
     assert len(df) == 100
