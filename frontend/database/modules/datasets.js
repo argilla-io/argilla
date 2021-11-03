@@ -454,13 +454,10 @@ const actions = {
       persistBackend: true,
     });
   },
-  async resetAnnotations(_, { dataset, records, agent }) {
+  async resetAnnotations(_, { dataset, records }) {
     const newRecords = records.map((record) => ({
       ...record,
-      annotation: {
-        agent,
-        ...record.annotation,
-      },
+      annotation: null,
       selected: false,
       status: "Default",
     }));
