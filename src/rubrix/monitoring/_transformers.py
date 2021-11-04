@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import BaseModel
 
 import rubrix
 from rubrix import TextClassificationRecord
@@ -8,18 +10,27 @@ from rubrix.monitoring.types import MissingType
 
 try:
 
-    from transformers import Pipeline, TextClassificationPipeline
+    from transformers import (
+        Pipeline,
+        TextClassificationPipeline,
+        ZeroShotClassificationPipeline,
+    )
 except ModuleNotFoundError:
     TextClassificationPipeline = MissingType
     Pipeline = MissingType
+    ZeroShotClassificationPipeline = MissingType
 
 
-class TextClassificationMonitor(BaseMonitor):
-    """Configures monitoring over Hugging Face text classification pipelines"""
+class LabelPrediction(BaseModel):
+    label: str
+    score: float
 
+
+class HuggingFaceMonitor(BaseMonitor):
     def _log2rubrix(
         self,
-        data: List[Tuple[str, Dict[str, Any], List[Any]]],
+        data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
+        multi_label: bool = False,
     ):
         """Register a list of tuples including inputs and its predictions for text classification task"""
         records = []
@@ -27,24 +38,25 @@ class TextClassificationMonitor(BaseMonitor):
         agent = config.name_or_path
 
         for input_, metadata, predictions in data:
-            if isinstance(predictions, dict):
-                predictions = [predictions]
-
             record = TextClassificationRecord(
                 inputs=input_,
                 prediction=[
-                    (prediction["label"], prediction["score"])
-                    for prediction in predictions
+                    (prediction.label, prediction.score) for prediction in predictions
                 ],
                 prediction_agent=agent,
                 metadata=metadata or {},
-                event_timestamp=datetime.utcnow()
+                multi_label=multi_label,
+                event_timestamp=datetime.utcnow(),
             )
             records.append(record)
 
+        dataset_name = self.dataset
+        if multi_label:
+            dataset_name += "_multi"
+
         rubrix.log(
             records,
-            name=self.dataset,
+            name=dataset_name,
             tags={
                 "name": config.name_or_path,
                 "transformers_version": config.transformers_version
@@ -54,6 +66,62 @@ class TextClassificationMonitor(BaseMonitor):
             },
             metadata=config.to_dict(),
         )
+        pass
+
+
+class ZeroShotMonitor(HuggingFaceMonitor):
+    def __call__(
+        self,
+        sequences: Union[str, List[str]],
+        candidate_labels: List[str],
+        *args,
+        **kwargs
+    ):
+        metadata = (kwargs.pop("metadata", None) or {}).copy()
+        hypothesis_template = kwargs.get("hypothesis_template", "@default")
+        multi_label = kwargs.get("multi_label", False)
+        batch_predictions = self.__model__(sequences, candidate_labels, *args, **kwargs)
+        try:
+            if not isinstance(sequences, list):
+                sequences = [sequences]
+
+            predictions = batch_predictions
+            if not isinstance(batch_predictions, list):
+                predictions = [batch_predictions]
+
+            predictions = [
+                [
+                    LabelPrediction(label=label, score=score)
+                    for label, score in zip(prediction["labels"], prediction["scores"])
+                ]
+                for prediction in predictions
+            ]
+
+            if not metadata:
+                metadata = [{}] * len(sequences)
+            elif not isinstance(metadata, list):
+                metadata = [metadata]
+            for meta in metadata:
+                meta.update(
+                    {
+                        "labels": candidate_labels,
+                        "hypothesis_template": hypothesis_template,
+                    }
+                )
+            filtered_data = [
+                (input_, meta, predictions_)
+                for input_, meta, predictions_ in zip(sequences, metadata, predictions)
+                if self.is_record_accepted()
+            ]
+            if filtered_data:
+                self.log_async(filtered_data, multi_label=multi_label)
+
+        finally:
+            return batch_predictions
+
+
+class TextClassificationMonitor(HuggingFaceMonitor):
+    """Configures monitoring over Hugging Face text classification pipelines"""
 
     def __call__(self, inputs, *args, **kwargs):
         metadata = kwargs.pop("metadata", None)
@@ -66,10 +134,16 @@ class TextClassificationMonitor(BaseMonitor):
             elif not isinstance(metadata, list):
                 metadata = [metadata]
 
+            predictions_ = []
+            for pred in batch_predictions:
+                if isinstance(pred, dict):
+                    pred = [pred]
+                predictions_.append([LabelPrediction.parse_obj(p) for p in pred])
+
             filtered_data = [
                 (input_, meta, predictions)
                 for input_, meta, predictions in zip(
-                    inputs, metadata, batch_predictions
+                    inputs, metadata, predictions_
                 )
                 if self.is_record_accepted()
             ]
@@ -80,7 +154,9 @@ class TextClassificationMonitor(BaseMonitor):
             return batch_predictions
 
 
-def classifier_monitor(
-    pl: TextClassificationPipeline, dataset: str, sample_rate: float
-) -> Pipeline:
-    return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+def huggingface_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Optional[Pipeline]:
+    if isinstance(pl, TextClassificationPipeline):
+        return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+    if isinstance(pl, ZeroShotClassificationPipeline):
+        return ZeroShotMonitor(pl, dataset=dataset, sample_rate=sample_rate)
+    return None
