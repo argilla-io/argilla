@@ -65,4 +65,4 @@ class BaseMonitor(wrapt.ObjectProxy):
         async def f():
             return wrapped_func(*args, **kwargs)
 
-        asyncio.run_coroutine_threadsafe(f, loop)
+        asyncio.run_coroutine_threadsafe(f(), loop)
