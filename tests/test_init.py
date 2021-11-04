@@ -19,8 +19,10 @@ import os
 
 import httpx
 import pytest
+
 import rubrix
-from rubrix.client import AuthenticatedClient, RubrixClient
+from rubrix.client import RubrixClient
+from rubrix.client.sdk.client import AuthenticatedClient
 
 
 @pytest.fixture
