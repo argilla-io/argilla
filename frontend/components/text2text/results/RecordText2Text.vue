@@ -77,6 +77,13 @@ export default {
     this.initializeSentenceOrigin();
     this.initialRecord = Object.assign({}, this.record);
   },
+  watch: {
+    annotationEnabled(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.initializeSentenceOrigin();
+      }
+    }
+  },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",

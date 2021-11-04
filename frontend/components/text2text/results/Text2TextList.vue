@@ -384,8 +384,8 @@ $marginRight: 200px;
   }
   &__score {
     @include font-size(13px);
-    margin-right: auto;
-    min-width: 20%;
+    margin-right: 0;
+    min-width: 33%;
     color: palette(grey, medium);
   }
   &__edit {
@@ -448,8 +448,9 @@ $marginRight: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 33%;
     margin-right: auto;
-    margin-left: auto;
+    margin-left: 0;
     color: palette(grey, medium);
     a {
       height: 20px;
