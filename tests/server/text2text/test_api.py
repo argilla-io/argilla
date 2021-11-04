@@ -1,4 +1,4 @@
-from rubrix.client import Text2TextBulkData
+from rubrix.client.sdk.text2text.models import Text2TextBulkData
 from rubrix.server.tasks.commons import BulkResponse
 from rubrix.server.tasks.text2text import (
     CreationText2TextRecord,

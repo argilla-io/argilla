@@ -2,9 +2,9 @@ import httpx
 import pytest
 
 from rubrix import DEFAULT_API_KEY
-from rubrix.client import AuthenticatedClient, whoami
+from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
-
 from tests.server.test_helpers import client
 
 

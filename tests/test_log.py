@@ -76,7 +76,7 @@ def mock_response_text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.text_classification_bulk", mock_get
+        "rubrix.client.rubrix_client.text_classification_bulk", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -98,7 +98,7 @@ def mock_response_token(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.token_classification_bulk", mock_get
+        "rubrix.client.rubrix_client.token_classification_bulk", mock_get
     )  # apply the monkeypatch for requests.get to mock_get
 
 
@@ -122,7 +122,7 @@ def mock_response_text2text(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "rubrix.client.text2text_bulk",
+        "rubrix.client.rubrix_client.text2text_bulk",
         mock_get,
     )  # apply the monkeypatch for requests.get to mock_get
 
@@ -281,7 +281,7 @@ def mock_wrong_bulk_response(monkeypatch):
             parsed={"error": "the error message "},
         )
 
-    monkeypatch.setattr("rubrix.client.text_classification_bulk", mock)
+    monkeypatch.setattr("rubrix.client.rubrix_client.text_classification_bulk", mock)
 
 
 def test_wrong_response(mock_response_200, mock_wrong_bulk_response):

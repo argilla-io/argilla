@@ -1,6 +1,6 @@
 import httpx
 
-from rubrix.client import AuthenticatedClient
+from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.users.models import User
 
