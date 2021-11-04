@@ -36,10 +36,9 @@
       <ClassifierExplorationArea v-else :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <re-button
-          v-if="record.status !== 'Validated'"
+          v-if="allowValidate"
           class="button-primary"
           @click="onValidate(record)"
-          :disabled="!allowValidate"
           >Validate</re-button
         >
       </div>
@@ -86,7 +85,7 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
     allowValidate() {
-      return this.record.annotation || this.record.prediction || this.record.multi_label;
+      return this.record.status !== 'Validated' && (this.record.annotation || this.record.prediction || this.record.multi_label);
     },
   },
   methods: {
