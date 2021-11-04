@@ -78,8 +78,8 @@ export default {
     this.initialRecord = Object.assign({}, this.record);
   },
   watch: {
-    annotationEnabled(o, n) {
-      if (o !== n) {
+    annotationEnabled(oldValue, newValue) {
+      if (oldValue !== newValue) {
         this.initializeSentenceOrigin();
       }
     }
