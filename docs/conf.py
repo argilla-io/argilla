@@ -16,17 +16,25 @@
 
 
 # -- Project information -----------------------------------------------------
+import os
+
 import rubrix as rb
 
 project = "Rubrix"
 copyright = "2021, Recognai"
 author = "Recognai"
 
-# The full version, including alpha/beta/rc tags
-release = rb.__version__
+# Normally the full version, including alpha/beta/rc tags.
+# But since rtd changes some files during the build process, the scm version becomes dirty,
+# so we just want to display the major and minor version in the tab title of the browser.
+release = ".".join(rb.__version__.split(".")[0:2])
+
+# If on the master branch, set release and version to 'master'
+if "master" in os.popen("git branch --show-current").read():
+    release = "master"
 
 # The short X.Y version
-version = ".".join(rb.__version__.split(".")[0:2])
+version = release
 
 
 # -- General configuration ---------------------------------------------------
@@ -47,12 +55,12 @@ nbsphinx_execute = "never"
 # Hide input/output prompts (cell counts)
 nbsphinx_prolog = """
 .. raw:: html
-    
+
     <script src='http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js'></script>
     <script>require=requirejs;</script>
     <script>
         requirejs.config({
-            paths: { 
+            paths: {
                 'plotly': ['https://cdn.plot.ly/plotly-latest.min']
             },
         });
