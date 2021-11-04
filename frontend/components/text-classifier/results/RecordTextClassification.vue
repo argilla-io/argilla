@@ -85,7 +85,7 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
     allowValidate() {
-      return this.record.status !== 'Validated' and (this.record.annotation || this.record.prediction || this.record.multi_label);
+      return this.record.status !== 'Validated' && (this.record.annotation || this.record.prediction || this.record.multi_label);
     },
   },
   methods: {
