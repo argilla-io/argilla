@@ -155,7 +155,6 @@ export default {
     position: relative;
     margin-left: 2em;
     width: 200px;
-    margin-bottom: -3em;
     display: block;
     height: 100%;
     overflow: auto;
