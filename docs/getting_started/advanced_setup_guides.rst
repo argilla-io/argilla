@@ -139,7 +139,7 @@ Define a docker-compose.yaml
 
    services:
      rubrix:
-       image: recognai/rubrix
+       image: recognai/rubrix:v0.6.0
        ports:
          - "80:80"
        environment:
@@ -249,7 +249,7 @@ Then open the provided ``docker-compose.yaml`` and configure the *rubrix* servic
     # docker-compose.yaml
     services:
       rubrix:
-        image: recognai/rubrix:latest
+        image: recognai/rubrix:v0.6.0
         ports:
           - "6900:80"
         environment:
