@@ -267,7 +267,7 @@ class RubrixClient:
         _check_response_errors(response)
 
         records_sorted_by_id = sorted(
-            [record.to_client() for record in response.parsed], key=lambda x: x.id
+            [record.to_client() for record in response.parsed], key=lambda x: str(x.id)
         )
 
         if as_pandas:
