@@ -411,16 +411,18 @@ def test_load_text2text(monkeypatch):
             annotation="test annotation",
             prediction_agent="test_model",
             annotation_agent="test_annotator",
-            id=str(i),
+            id=(str(i) + "str") if i < 2 else i,  # test mixture of str/int
             metadata={"metadata": "test"},
             status="Default",
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
-        for i in range(0, 100)
+        for i in range(0, 5)
     ]
 
     dataset = "test_load_text2text"
     rubrix.delete(dataset)
     rubrix.log(records, name=dataset)
     df = rubrix.load(name=dataset)
-    assert len(df) == 100
+    assert len(df) == 5
+    # check sorting policy
+    assert sorted(df.id, key=lambda x: str(x)) == list(df.id)
