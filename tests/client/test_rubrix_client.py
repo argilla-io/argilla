@@ -437,7 +437,7 @@ def test_load_sort(monkeypatch):
         for i in ["1str", 1, 2, 11, "2str", "11str"]
     ]
 
-    dataset = "test_load_text2text"
+    dataset = "test_load_sort"
     rubrix.delete(dataset)
     rubrix.log(records, name=dataset)
 
