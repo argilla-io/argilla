@@ -343,7 +343,7 @@ class TextClassificationBulkData(UpdateDatasetRequest):
 
     @validator("records")
     def check_multi_label_integrity(cls, records: List[TextClassificationRecord]):
-        """Checks all records in batch has same multi-label configuration"""
+        """Checks all records in batch have same multi-label configuration"""
         if records:
             multi_label = records[0].multi_label
             for record in records[1:]:
