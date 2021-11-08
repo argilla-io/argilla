@@ -341,6 +341,17 @@ class TextClassificationBulkData(UpdateDatasetRequest):
 
     records: List[CreationTextClassificationRecord]
 
+    @validator("records")
+    def check_multi_label_integrity(cls, records: List[TextClassificationRecord]):
+        """Checks all records in batch have same multi-label configuration"""
+        if records:
+            multi_label = records[0].multi_label
+            for record in records[1:]:
+                assert (
+                    multi_label == record.multi_label
+                ), "All records must be single/multi labelled"
+        return records
+
 
 class TextClassificationQuery(BaseModel):
     """
