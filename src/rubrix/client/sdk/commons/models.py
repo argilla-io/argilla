@@ -32,7 +32,7 @@ class TaskStatus(str, Enum):
 
 
 class BaseAnnotation(BaseModel):
-    agent: str
+    agent: str = Field(max_length=64)
 
 
 T = TypeVar("T", bound=BaseAnnotation)

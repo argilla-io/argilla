@@ -99,7 +99,7 @@ class BaseAnnotation(BaseModel):
         or some other human-supervised automatic process.
     """
 
-    agent: str
+    agent: str = Field(max_length=64)
 
 
 class TaskType(str, Enum):
