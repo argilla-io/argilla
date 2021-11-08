@@ -60,6 +60,7 @@ class TextClassificationService:
         dataset: Dataset,
         records: List[CreationTextClassificationRecord],
     ):
+        self._check_multi_label_integrity(dataset, records)
         self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
             dataset=dataset, records=records, record_class=TextClassificationRecord
@@ -150,6 +151,22 @@ class TextClassificationService:
             dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
             yield TextClassificationRecord.parse_obj(db_record)
+
+    def _check_multi_label_integrity(
+        self, dataset: Dataset, records: List[TextClassificationRecord]
+    ):
+        # Fetch a single record
+        results = self.search(
+            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
+        )
+        if results.records:
+            is_multi_label = records[0].multi_label
+            assert is_multi_label == results.records[0].multi_label, (
+                "You cannot pass {labels_type} records for this dataset. "
+                "Stored records are {labels_type}".format(
+                    labels_type="multi-label" if is_multi_label else "single-label"
+                )
+            )
 
 
 _instance = None
