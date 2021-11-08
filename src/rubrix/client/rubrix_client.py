@@ -266,9 +266,12 @@ class RubrixClient:
 
         _check_response_errors(response)
 
-        records_sorted_by_id = sorted(
-            [record.to_client() for record in response.parsed], key=lambda x: x.id
-        )
+        records = [sdk_record.to_client() for sdk_record in response.parsed]
+        try:
+            records_sorted_by_id = sorted(records, key=lambda x: x.id)
+        # record ids can be a mix of int/str -> sort all as str type
+        except TypeError:
+            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
 
         if as_pandas:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
