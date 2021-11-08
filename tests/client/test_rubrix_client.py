@@ -411,16 +411,40 @@ def test_load_text2text(monkeypatch):
             annotation="test annotation",
             prediction_agent="test_model",
             annotation_agent="test_annotator",
-            id=str(i),
+            id=i,
             metadata={"metadata": "test"},
             status="Default",
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
-        for i in range(0, 100)
+        for i in range(0, 2)
     ]
 
     dataset = "test_load_text2text"
     rubrix.delete(dataset)
     rubrix.log(records, name=dataset)
+
     df = rubrix.load(name=dataset)
-    assert len(df) == 100
+    assert len(df) == 2
+
+
+def test_load_sort(monkeypatch):
+    mocking_client(monkeypatch, client)
+    records = [
+        TextClassificationRecord(
+            inputs="test text",
+            id=i,
+        )
+        for i in ["1str", 1, 2, 11, "2str", "11str"]
+    ]
+
+    dataset = "test_load_sort"
+    rubrix.delete(dataset)
+    rubrix.log(records, name=dataset)
+
+    # check sorting policies
+    df = rubrix.load(name=dataset)
+    assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
+    df = rubrix.load(name=dataset, ids=[1, 2, 11])
+    assert list(df.id) == [1, 2, 11]
+    df = rubrix.load(name=dataset, ids=["1str", "2str", "11str"])
+    assert list(df.id) == ["11str", "1str", "2str"]
