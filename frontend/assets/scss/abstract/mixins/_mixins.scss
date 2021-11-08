@@ -209,7 +209,6 @@
   width: 0;
   height: 0;
   border-style: solid;
-  -moz-transform: scale(0.9999);
   @if $direction==top {
     border-width: 0 $sizeV $sizeH $sizeV;
     border-color: transparent transparent $color transparent;
