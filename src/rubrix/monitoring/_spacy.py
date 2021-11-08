@@ -48,7 +48,7 @@ class SpacyNERMonitor(BaseMonitor):
 
     def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
         record = self.doc2token_classification(
-            doc, agent=str(self.__wrapped__.path), metadata=metadata
+            doc, agent=self.__wrapped__.path.name, metadata=metadata
         )
         rb.log(
             record,
