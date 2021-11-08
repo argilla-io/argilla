@@ -55,6 +55,16 @@ def log_some_data(dataset: str):
     )
 
 
+def test_search_by_nested_metric(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_search_by_nested_metric"
+    rb.delete(dataset)
+    log_some_data(dataset)
+
+    df = rb.load(dataset, query="metrics.mentions.predicted.capitalness: LOWER")
+    assert len(df) > 0
+
+
 def test_tokens_length(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_tokens_length"
@@ -126,7 +136,7 @@ def test_entity_consistency(monkeypatch):
                     {"count": 2, "label": "CARDINAL"},
                     {"count": 1, "label": "NUMBER"},
                     {"count": 1, "label": "PERSON"},
-                ]
+                ],
             }
         ]
     }
