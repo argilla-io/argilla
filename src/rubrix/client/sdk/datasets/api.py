@@ -22,7 +22,7 @@ from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, 
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
 
-@lru_cache()
+@lru_cache(maxsize=None)
 def get_dataset(
     client: AuthenticatedClient,
     name: str,
@@ -69,6 +69,9 @@ def delete_dataset(
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
+    # If everything was ok, we must clear local cache data
+    if response.status_code == 200:
+        get_dataset.cache_clear()
 
     return Response(
         status_code=response.status_code,
