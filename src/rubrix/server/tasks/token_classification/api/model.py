@@ -109,6 +109,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     @validator("text")
     def check_text_content(cls, text: str):
         assert text and text.strip(), "No text or empty text provided"
+        return text
 
     @root_validator(skip_on_failure=True)
     def data_validation(cls, values):
