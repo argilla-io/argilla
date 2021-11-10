@@ -34,7 +34,7 @@ from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
-from rubrix.client.sdk.metrics.api import calculate_metric, get_dataset_metrics
+from rubrix.client.sdk.metrics.api import compute_metric, get_dataset_metrics
 from rubrix.client.sdk.metrics.models import MetricInfo
 from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
 from rubrix.client.sdk.text2text.api import data as text2text_data
@@ -312,10 +312,11 @@ class RubrixClient:
             if metric_.id == metric:
                 return metric_
 
-    def calculate_metric(
+    def compute_metric(
         self,
         name: str,
         metric: str,
+        query: Optional[str] = None,
         interval: Optional[float] = None,
         size: Optional[int] = None,
     ) -> MetricResults:
@@ -325,11 +326,12 @@ class RubrixClient:
         metric_ = self.get_metric(name, metric=metric)
         assert metric_ is not None, f"Metric {metric} not found !!!"
 
-        response = calculate_metric(
+        response = compute_metric(
             self._client,
             name=name,
             task=response.parsed.task,
             metric=metric,
+            query=query,
             interval=interval,
             size=size,
         )
