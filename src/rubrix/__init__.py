@@ -130,16 +130,6 @@ def log(
         ... )
         >>> response = rb.log(record, name="example-dataset")
     """
-
-    # Records can be a single object or a list. In case it is a single object, we create a single-element list
-    # This check filter dictionaries and string based objects (that are iterables too but we don't want to
-    # wrap in a list)
-    if not (
-        isinstance(records, Iterable)
-        and not isinstance(records, (dict, str, bytes, *Record.__args__))
-    ):
-        records = [records]
-
     # noinspection PyTypeChecker,PydanticTypeChecker
     return _client_instance().log(
         records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size

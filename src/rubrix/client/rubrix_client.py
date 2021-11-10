@@ -111,7 +111,7 @@ class RubrixClient:
 
     def log(
         self,
-        records: Iterable[Record],
+        records: Union[Record, Iterable[Record]],
         name: str,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -138,6 +138,9 @@ class RubrixClient:
 
         if not name:
             raise Exception("Empty project name has been passed as argument.")
+
+        if isinstance(records, Record.__args__):
+            records = [records]
 
         records = list(records)
         tags = tags or {}
