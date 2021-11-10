@@ -8,12 +8,11 @@ dependencies:
 - pip>=20.3.0
 # pyparsing 3.0.5 seems to be buggy
 - pyparsing!=3.0.5
-# docs, pandoc needs conda ...
+# pandoc needs conda ...
 - pandoc==2.12
-# we need this to ensure syntax highlighting in the notebook code cells for the docs
+# we need this to ensure syntax highlighting in the notebook code cells
 - ipython
 - pip:
-    # docs
     - sphinx==4.1.2
     - sphinx_rtd_theme==0.5.2
     - nbsphinx==0.8.7
