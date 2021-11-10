@@ -18,8 +18,6 @@ dependencies:
 # for building the frontend
 - nodejs~=14.15.0
 - pip:
-    # build python sdk
-    - openapi-python-client~=0.8.0
     # docs
     - sphinx==4.1.2
     - sphinx_rtd_theme==0.5.2
