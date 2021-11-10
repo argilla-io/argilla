@@ -92,6 +92,9 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
             inner_aggregation=self.inner_aggregation(*args, **kwargs),
         )
 
+    def compound_nested_field(self, inner_field: str) -> str:
+        return f"{self.nested_path}.{inner_field}"
+
 
 class BaseTaskMetrics(GenericModel, Generic[GenericRecord]):
     """
