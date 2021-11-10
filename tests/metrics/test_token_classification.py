@@ -114,6 +114,7 @@ def test_entity_capitalness(monkeypatch):
 def test_entity_consistency(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_entity_consistency"
+    rubrix.delete(dataset)
     log_some_data(dataset)
 
     results = entity_consistency(dataset, threshold=2)
