@@ -103,10 +103,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     """
 
-    tokens: List[str]
+    tokens: List[str] = Field(min_items=1)
     text: str = Field(alias="raw_text")
 
-    @root_validator
+    @validator("text")
+    def check_text_content(cls, text: str):
+        assert text and text.strip(), "No text or empty text provided"
+        return text
+
+    @root_validator(skip_on_failure=True)
     def data_validation(cls, values):
         prediction = values.get("prediction")
         annotation = values.get("annotation")

@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.client.models import (
@@ -45,8 +45,13 @@ class TokenClassificationAnnotation(BaseAnnotation):
 
 
 class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
-    tokens: List[str]
+    tokens: List[str] = Field(min_items=1)
     text: str = Field(alias="raw_text")
+
+    @validator("text")
+    def check_text_content(cls, text: str):
+        assert text and text.strip(), "No text or empty text provided"
+        return text
 
     @classmethod
     def from_client(cls, record: ClientTokenClassificationRecord):
