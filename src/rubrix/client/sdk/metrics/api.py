@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
@@ -27,11 +27,12 @@ def get_dataset_metrics(
     return build_list_response(response, item_class=MetricInfo)
 
 
-def calculate_metric(
+def compute_metric(
     client: AuthenticatedClient,
     name: str,
     task: str,
     metric: str,
+    query: Optional[str] = None,
     **query_params,
 ) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/datasets/{task}/{name}/metrics/{metric}:summary".format(
@@ -47,7 +48,7 @@ def calculate_metric(
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
-        json={},  # TODO: parameterize !!!
+        json={"query_text": query},
     )
 
     return build_raw_response(response)

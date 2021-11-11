@@ -1,14 +1,18 @@
+from typing import Optional
+
 from rubrix import _client_instance as client
 from rubrix.metrics import helpers
 from rubrix.metrics.models import MetricSummary
 
 
-def f1(name: str) -> MetricSummary:
+def f1(name: str, query: Optional[str] = None) -> MetricSummary:
     """Computes the single label f1 metric for a dataset
 
     Args:
         name:
             The dataset name.
+        query:
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
 
     Returns:
         The f1 metric summary
@@ -20,7 +24,7 @@ def f1(name: str) -> MetricSummary:
         >>> summary.data # returns the raw result data
     """
     current_client = client()
-    metric = current_client.calculate_metric(name, metric="F1")
+    metric = current_client.compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -31,12 +35,14 @@ def f1(name: str) -> MetricSummary:
     )
 
 
-def f1_multilabel(name: str) -> MetricSummary:
+def f1_multilabel(name: str, query:Optional[str] = None) -> MetricSummary:
     """Computes the multi-label label f1 metric for a dataset
 
     Args:
         name:
             The dataset name.
+        query:
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
 
     Returns:
         The f1 metric summary
@@ -48,7 +54,7 @@ def f1_multilabel(name: str) -> MetricSummary:
         >>> summary.data # returns the raw result data
     """
     current_client = client()
-    metric = current_client.calculate_metric(name, metric="MultiLabelF1")
+    metric = current_client.compute_metric(name, metric="MultiLabelF1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
