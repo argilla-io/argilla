@@ -76,6 +76,11 @@ def test_mentions_length(monkeypatch):
     assert results.data == {"1.0": 4}
     results.visualize()
 
+    results = mention_length(dataset, level="char")
+    assert results
+    assert results.data == {"5.0": 4}
+    results.visualize()
+
 
 def test_entity_density(monkeypatch):
     mocking_client(monkeypatch)
@@ -114,6 +119,7 @@ def test_entity_capitalness(monkeypatch):
 def test_entity_consistency(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_entity_consistency"
+    rubrix.delete(dataset)
     log_some_data(dataset)
 
     results = entity_consistency(dataset, threshold=2)
@@ -126,7 +132,7 @@ def test_entity_consistency(monkeypatch):
                     {"count": 2, "label": "CARDINAL"},
                     {"count": 1, "label": "NUMBER"},
                     {"count": 1, "label": "PERSON"},
-                ]
+                ],
             }
         ]
     }
