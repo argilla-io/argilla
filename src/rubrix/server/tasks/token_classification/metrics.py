@@ -175,6 +175,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         capitalness: str = Field(...)
         density: float = Field(ge=0.0)
         tokens_length: int = Field(g=0)
+        chars_length: int = Field(g=0)
 
     @staticmethod
     def mentions_metrics(
@@ -222,6 +223,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
                 capitalness=mention_capitalness(mention),
                 density=mention_density(_tokens_length, tokens_length=len(tokens)),
                 tokens_length=_tokens_length,
+                chars_length=len(mention)
             )
             for mention, entity in mentions
             for _tokens_length in [
@@ -341,11 +343,18 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             capitalness_field="capitalness",
         ),
         MentionLength(
-            id="mention_length",
+            id="mention_token_length",
             name="Mention tokens length",
             description="Computes the length of the entity mention measured in number of tokens",
             nested_path=_PREDICTED_MENTIONS_NAMESPACE,
             length_field="tokens_length",
+        ),
+        MentionLength(
+            id="mention_char_length",
+            name="Mention characters length",
+            description="Computes the length of the entity mention measured in number of tokens",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            length_field="chars_length",
         ),
         EntityConsistency(
             id="entity_consistency",

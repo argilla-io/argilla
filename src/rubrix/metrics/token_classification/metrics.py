@@ -44,7 +44,7 @@ def tokens_length(
 
 
 def mention_length(
-    name: str, query: Optional[str] = None, interval: int = 1
+    name: str, query: Optional[str] = None, level: str = "token", interval: int = 1
 ) -> MetricSummary:
     """Computes mentions length distribution (in number of tokens)
 
@@ -53,6 +53,8 @@ def mention_length(
             The dataset name.
         query:
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+        level:
+            The mention length level. Accepted values are "token" and "char"
         interval:
             The bins or bucket for result histogram
 
@@ -66,9 +68,14 @@ def mention_length(
         >>> summary.data # the raw histogram data with bins of size 2
     """
     current_client = client()
+    level = (level or "token").lower().strip()
+    accepted_levels = ["token", "char"]
+    assert (
+        level in accepted_levels
+    ), f"Unexpected value for level. Accepted values are {accepted_levels}"
 
     metric = current_client.compute_metric(
-        name, metric="mention_length", query=query, interval=interval
+        name, metric=f"mention_{level}_length", query=query, interval=interval
     )
 
     return MetricSummary.new_summary(
@@ -76,7 +83,7 @@ def mention_length(
         visualization=lambda: helpers.histogram(
             metric.results,
             title=metric.description,
-            x_legend="# tokens",
+            x_legend=f"# {level}",
         ),
     )
 
