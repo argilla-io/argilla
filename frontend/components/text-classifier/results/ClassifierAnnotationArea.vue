@@ -67,11 +67,7 @@ export default {
   }),
   computed: {
     maxLabelsShown() {
-      if (this.selectedLabels.length > this.maxLabels) {
-        return this.selectedLabels.length
-      } else {
-        return this.maxLabels
-      }
+      return Math.max(this.selectedLabels.length, this.maxLabels); 
     },
     datasetLabels() {
       const labels = {};
