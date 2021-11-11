@@ -18,7 +18,7 @@
 <template>
   <div>
     <div
-      v-for="(item, index) in Object.entries(object[k]).slice(0, limit)"
+      v-for="(item, index) in sortedObject.slice(0, limit)"
       :key="index"
       class="info"
     >
@@ -28,7 +28,7 @@
       </span>
     </div>
     <a
-      v-if="limit !== 0 && Object.entries(object[k]).length > 3"
+      v-if="limit !== 0 && sortedObject.length > 3"
       class="sidebar__view-more"
       href="#"
       @click.prevent="$emit('limit', k)"
@@ -50,6 +50,11 @@ export default {
     k: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    sortedObject() {
+      return Object.entries(this.object[this.k]).sort(([,a],[,b]) => b-a);
     },
   },
 };
