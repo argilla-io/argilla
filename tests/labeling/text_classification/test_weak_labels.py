@@ -318,3 +318,43 @@ def test_show_records(monkeypatch, rules):
         4,
     ]
     assert weak_labels.show_records(labels=["positive"], rules=["rubrix_rule"]).empty
+
+
+def test_change_mapping(monkeypatch, rules):
+    def mock_load(*args, **kwargs):
+        return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    def mock_apply(self, *args, **kwargs):
+        weak_label_matrix = np.array(
+            [[0, 1, -1], [2, 0, -1], [-1, -1, -1], [1, 1, -1], [-1, 0, 2]],
+            dtype=np.short,
+        )
+        annotation_array = np.array([0, 1, -1, 2, 0], dtype=np.short)
+        label2int = {None: -1, "negative": 0, "positive": 1, "neutral": 2}
+        return weak_label_matrix, annotation_array, label2int
+
+    monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+    weak_labels = WeakLabels(rules=rules, dataset="mock")
+
+    with pytest.raises(MissingLabelError):
+        weak_labels.change_mapping({"negative": 2})
+
+    weak_labels.change_mapping(
+        {None: -10, "negative": 0, "positive": 10, "neutral": 20}
+    )
+    assert (
+        weak_labels.matrix()
+        == np.array(
+            [[0, 10, -10], [20, 0, -10], [-10, -10, -10], [10, 10, -10], [-10, 0, 20]],
+            dtype=np.short,
+        )
+    ).all()
+    assert (
+        weak_labels.annotation(exclude_missing_annotations=False)
+        == np.array([0, 10, -10, 20, 0], dtype=np.short)
+    ).all()
