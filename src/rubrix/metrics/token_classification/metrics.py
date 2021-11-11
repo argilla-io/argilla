@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, TypeVar, Union
 
 from rubrix import _client_instance as client
 from rubrix.metrics import helpers
@@ -43,8 +43,28 @@ def tokens_length(
     )
 
 
+Annotations = TypeVar("Annotations")
+Predictions = TypeVar("Predictions")
+
+_ACCEPTED_COMPUTE_FOR_VALUES = {
+    Annotations: "annotated",
+    Predictions: "predicted",
+}
+
+
+def _check_compute_for(compute_for) -> str:
+    try:
+        return _ACCEPTED_COMPUTE_FOR_VALUES[compute_for]
+    except KeyError:
+        raise f"Wrong compute_for value {compute_for}"
+
+
 def mention_length(
-    name: str, query: Optional[str] = None, level: str = "token", interval: int = 1
+    name: str,
+    query: Optional[str] = None,
+    level: str = "token",
+    compute_for: Union[Annotations, Predictions] = Predictions,
+    interval: int = 1,
 ) -> MetricSummary:
     """Computes mentions length distribution (in number of tokens)
 
@@ -55,6 +75,9 @@ def mention_length(
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
         level:
             The mention length level. Accepted values are "token" and "char"
+        compute_for:
+            Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``
         interval:
             The bins or bucket for result histogram
 
@@ -75,7 +98,10 @@ def mention_length(
     ), f"Unexpected value for level. Accepted values are {accepted_levels}"
 
     metric = current_client.compute_metric(
-        name, metric=f"mention_{level}_length", query=query, interval=interval
+        name,
+        metric=f"{_check_compute_for(compute_for)}_mention_{level}_length",
+        query=query,
+        interval=interval,
     )
 
     return MetricSummary.new_summary(
@@ -89,7 +115,10 @@ def mention_length(
 
 
 def entity_labels(
-    name: str, query: Optional[str] = None, labels: int = 50
+    name: str,
+    query: Optional[str] = None,
+    compute_for: Union[Annotations, Predictions] = Predictions,
+    labels: int = 50,
 ) -> MetricSummary:
     """Computes the entity labels distribution
 
@@ -98,6 +127,9 @@ def entity_labels(
             The dataset name.
         query:
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+        compute_for:
+            Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``
         labels:
             The number of top entities to retrieve. Lower numbers will be better performants
 
@@ -113,7 +145,10 @@ def entity_labels(
     current_client = client()
 
     metric = current_client.compute_metric(
-        name, metric="entity_labels", query=query, size=labels
+        name,
+        metric=f"{_check_compute_for(compute_for)}_entity_labels",
+        query=query,
+        size=labels,
     )
 
     return MetricSummary.new_summary(
@@ -126,7 +161,10 @@ def entity_labels(
 
 
 def entity_density(
-    name: str, query: Optional[str] = None, interval: float = 0.005
+    name: str,
+    query: Optional[str] = None,
+    compute_for: Union[Annotations, Predictions] = Predictions,
+    interval: float = 0.005,
 ) -> MetricSummary:
     """Computes the entity density distribution. Then entity density is calculated at
     record level for each mention as ``mention_length/tokens_length``
@@ -136,6 +174,9 @@ def entity_density(
             The dataset name.
         query:
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+        compute_for:
+            Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``
         interval:
             The interval for histogram. The entity density is defined in the range 0-1
 
@@ -149,7 +190,10 @@ def entity_density(
     """
     current_client = client()
     metric = current_client.compute_metric(
-        name, metric="entity_density", query=query, interval=interval
+        name,
+        metric=f"{_check_compute_for(compute_for)}_entity_density",
+        query=query,
+        interval=interval,
     )
 
     return MetricSummary.new_summary(
@@ -161,7 +205,11 @@ def entity_density(
     )
 
 
-def entity_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
+def entity_capitalness(
+    name: str,
+    query: Optional[str] = None,
+    compute_for: Union[Annotations, Predictions] = Predictions,
+) -> MetricSummary:
     """Computes the entity capitalness. The entity capitalness splits the entity
     mention shape in 4 groups:
 
@@ -178,7 +226,9 @@ def entity_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
             The dataset name.
         query:
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-
+        compute_for:
+            Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``
     Returns:
         The summary entity capitalness distribution
 
@@ -189,7 +239,9 @@ def entity_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
     """
     current_client = client()
     metric = current_client.compute_metric(
-        name, metric="entity_capitalness", query=query
+        name,
+        metric=f"{_check_compute_for(compute_for)}_entity_capitalness",
+        query=query,
     )
 
     return MetricSummary.new_summary(
@@ -202,7 +254,11 @@ def entity_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
 
 
 def entity_consistency(
-    name: str, query: Optional[str] = None, mentions: int = 10, threshold: int = 2
+    name: str,
+    query: Optional[str] = None,
+    compute_for: Union[Annotations, Predictions] = Predictions,
+    mentions: int = 10,
+    threshold: int = 2,
 ):
     """Computes the consistency for top entity mentions in the dataset.
 
@@ -215,6 +271,9 @@ def entity_consistency(
             The dataset name.
         query:
             An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+        compute_for:
+            Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``
         mentions:
             The number of top mentions to retrieve
         threshold:
@@ -235,7 +294,7 @@ def entity_consistency(
     current_client = client()
     metric = current_client.compute_metric(
         name,
-        metric="entity_consistency",
+        metric=f"{_check_compute_for(compute_for)}_entity_consistency",
         query=query,
         size=mentions,
         interval=threshold,
