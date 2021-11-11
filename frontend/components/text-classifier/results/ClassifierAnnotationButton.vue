@@ -184,7 +184,6 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       transition: transform 0.3s ease;
       &__text {
-        // max-width: calc(100% - 10px);
         max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
