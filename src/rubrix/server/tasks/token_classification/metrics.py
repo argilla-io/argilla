@@ -254,7 +254,8 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             ):
                 chars_map[idx] = current_token
             elif (
-                relative_idx >= len(record.tokens[current_token])
+                current_token + 1 < len(record.tokens)
+                and relative_idx >= len(record.tokens[current_token])
                 and char == record.tokens[current_token + 1][0]
             ):
                 current_token += 1
