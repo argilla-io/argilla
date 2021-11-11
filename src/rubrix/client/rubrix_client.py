@@ -209,7 +209,7 @@ class RubrixClient:
         progress_bar.close()
 
         # TODO: improve logging policy in library
-        print(f"Records logged to {self._client.base_url + '/' + name}")
+        print(f"{processed} records logged to {self._client.base_url + '/' + name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
