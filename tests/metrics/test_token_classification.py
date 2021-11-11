@@ -10,6 +10,7 @@ from rubrix.metrics.token_classification import (
     entity_consistency,
     entity_labels,
 )
+from rubrix.metrics.token_classification.metrics import Annotations, Predictions
 from tests.server.test_helpers import client
 
 
@@ -22,6 +23,7 @@ def mocking_client(monkeypatch):
 
 
 def log_some_data(dataset: str):
+    rubrix.delete(dataset)
     text = "My first rubrix example"
     tokens = text.split(" ")
     rb.log(
@@ -31,24 +33,28 @@ def log_some_data(dataset: str):
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
+                annotation=[("CARDINAL", 3, 8)],
             ),
             rb.TokenClassificationRecord(
                 id=2,
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
+                annotation=[("CARDINAL", 3, 8)],
             ),
             rb.TokenClassificationRecord(
                 id=3,
                 text=text,
                 tokens=tokens,
                 prediction=[("NUMBER", 3, 8)],
+                annotation=[("NUMBER", 3, 8)],
             ),
             rb.TokenClassificationRecord(
                 id=4,
                 text=text,
                 tokens=tokens,
                 prediction=[("PERSON", 3, 8)],
+                annotation=[("PERSON", 3, 8)],
             ),
         ],
         name=dataset,
@@ -81,6 +87,16 @@ def test_mentions_length(monkeypatch):
     assert results.data == {"5.0": 4}
     results.visualize()
 
+    results = mention_length(dataset, compute_for=Annotations)
+    assert results
+    assert results.data == {"1.0": 4}
+    results.visualize()
+
+    results = mention_length(dataset, compute_for=Annotations, level="char")
+    assert results
+    assert results.data == {"5.0": 4}
+    results.visualize()
+
 
 def test_entity_density(monkeypatch):
     mocking_client(monkeypatch)
@@ -92,13 +108,24 @@ def test_entity_density(monkeypatch):
     assert results.data == {"0.25": 4}
     results.visualize()
 
+    results = entity_density(dataset, compute_for=Annotations)
+    assert results
+    assert results.data == {"0.25": 4}
+    results.visualize()
+
 
 def test_entity_labels(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_entity_labels"
+
     log_some_data(dataset)
 
     results = entity_labels(dataset)
+    assert results
+    assert results.data == {"CARDINAL": 2, "NUMBER": 1, "PERSON": 1}
+    results.visualize()
+
+    results = entity_labels(dataset, compute_for=Annotations)
     assert results
     assert results.data == {"CARDINAL": 2, "NUMBER": 1, "PERSON": 1}
     results.visualize()
@@ -115,6 +142,11 @@ def test_entity_capitalness(monkeypatch):
     assert results.data == {"LOWER": 4}
     results.visualize()
 
+    results = entity_capitalness(dataset, compute_for=Annotations)
+    assert results
+    assert results.data == {"LOWER": 4}
+    results.visualize()
+
 
 def test_entity_consistency(monkeypatch):
     mocking_client(monkeypatch)
@@ -123,6 +155,22 @@ def test_entity_consistency(monkeypatch):
     log_some_data(dataset)
 
     results = entity_consistency(dataset, threshold=2)
+    assert results
+    assert results.data == {
+        "mentions": [
+            {
+                "mention": "first",
+                "entities": [
+                    {"count": 2, "label": "CARDINAL"},
+                    {"count": 1, "label": "NUMBER"},
+                    {"count": 1, "label": "PERSON"},
+                ],
+            }
+        ]
+    }
+    results.visualize()
+
+    results = entity_consistency(dataset, compute_for=Annotations, threshold=2)
     assert results
     assert results.data == {
         "mentions": [
