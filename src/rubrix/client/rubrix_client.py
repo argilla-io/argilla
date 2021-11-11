@@ -21,6 +21,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
 import pandas
+from tqdm.auto import tqdm
 
 from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
@@ -186,6 +187,7 @@ class RubrixClient:
 
         processed = 0
         failed = 0
+        progress_bar = tqdm(total=len(records))
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
 
@@ -202,6 +204,12 @@ class RubrixClient:
             _check_response_errors(response)
             processed += response.parsed.processed
             failed += response.parsed.failed
+
+            progress_bar.update(len(chunk))
+        progress_bar.close()
+
+        # TODO: improve logging policy in library
+        print(f"Records logged to {self._client.base_url + '/' + name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
