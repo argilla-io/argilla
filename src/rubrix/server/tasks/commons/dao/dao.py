@@ -293,7 +293,10 @@ class DatasetRecordsDAO:
         for field, value in metadata_values.items():
             if detect_nested_type(value):
                 self._es.create_field_mapping(
-                    index, field_name=f"metadata.{field}", type="nested"
+                    index,
+                    field_name=f"metadata.{field}",
+                    type="nested",
+                    include_in_root=True,
                 )
 
 

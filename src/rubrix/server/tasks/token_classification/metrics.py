@@ -254,6 +254,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         """Configure mentions as nested properties"""
         mentions_configuration = {
             "type": "nested",
+            "include_in_root": True,
             "properties": {
                 "mention": {"type": "keyword"},
                 "label": {"type": "keyword"},
