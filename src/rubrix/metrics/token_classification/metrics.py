@@ -233,21 +233,18 @@ def entity_consistency(
         size=mentions,
         interval=threshold,
     )
-    labels = ["Mentions"]
-    parents = [""]
-    values = [len(metric.results["mentions"])]
+    mentions = [mention["mention"] for mention in metric.results["mentions"]]
+    entities = {}
+
     for mention in metric.results["mentions"]:
-        labels.append(mention["mention"])
-        parents.append("Mentions")
-        values.append(len(mention["entities"]))
         for entity in mention["entities"]:
-            labels.append(entity["label"])
-            parents.append(mention["mention"])
-            values.append(1)
+            mentions_for_label = entities.get(entity["label"], [0] * len(mentions))
+            mentions_for_label[mentions.index(mention["mention"])] = entity["count"]
+            entities[entity["label"]] = mentions_for_label
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.tree_map(
-            labels, parents, values, title=metric.description
+        visualization=lambda: helpers.stacked_bar(
+            x=mentions, y_s=entities, title=metric.description
         ),
     )
