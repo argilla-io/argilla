@@ -83,3 +83,8 @@ def test_log_record_that_makes_me_cry(monkeypatch):
     )
     rubrix.delete(dataset)
     rubrix.log(record, name=dataset)
+
+    records = rubrix.load(dataset,as_pandas=False)
+    assert len(records) == 1
+    assert records[0].text == record.text
+    assert records[0].tokens == record.tokens
