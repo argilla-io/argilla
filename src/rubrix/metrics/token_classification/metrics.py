@@ -83,7 +83,7 @@ def mention_length(
         visualization=lambda: helpers.histogram(
             metric.results,
             title=metric.description,
-            x_legend="# tokens",
+            x_legend=f"# {level}",
         ),
     )
 
