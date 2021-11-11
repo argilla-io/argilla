@@ -41,6 +41,7 @@
         <a href="#" class="feedback-interactions__more"  v-else @click.prevent="hideHiddenLabels()">Show less</a>
       </template>
     </div>
+    <!-- only for testing -->
     <re-button style="margin-top: 30px" class="button-tertiary--small" @click="testA =! testA">TEST {{testA ? 'A' : 'B'}}</re-button>
   </div>
 </template>
