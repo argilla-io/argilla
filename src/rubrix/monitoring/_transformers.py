@@ -14,11 +14,13 @@ try:
         Pipeline,
         TextClassificationPipeline,
         ZeroShotClassificationPipeline,
+        __version__ as _transformers_version,
     )
 except ModuleNotFoundError:
     TextClassificationPipeline = MissingType
     Pipeline = MissingType
     ZeroShotClassificationPipeline = MissingType
+    _transformers_version = None
 
 
 class LabelPrediction(BaseModel):
@@ -27,6 +29,11 @@ class LabelPrediction(BaseModel):
 
 
 class HuggingFaceMonitor(BaseMonitor):
+    @staticmethod
+    def fetch_transformers_version(config) -> Optional[str]:
+        config_dict = config.to_dict()
+        return config_dict.get("transformers_version", _transformers_version)
+
     def _log2rubrix(
         self,
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
@@ -59,8 +66,7 @@ class HuggingFaceMonitor(BaseMonitor):
             name=dataset_name,
             tags={
                 "name": config.name_or_path,
-                "transformers_version": config.transformers_version
-                or config.to_dict().get("transformers_version"),
+                "transformers_version": self.fetch_transformers_version(config),
                 "model_type": config.model_type,
                 "task": self.__model__.task,
             },
@@ -79,7 +85,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
     ):
         metadata = (kwargs.pop("metadata", None) or {}).copy()
         hypothesis_template = kwargs.get("hypothesis_template", "@default")
-        multi_label = kwargs.get("multi_label", False)
+        multi_label = kwargs.get("multi_label", kwargs.get("multi_class", False))
         batch_predictions = self.__model__(sequences, candidate_labels, *args, **kwargs)
         try:
             if not isinstance(sequences, list):
@@ -142,9 +148,7 @@ class TextClassificationMonitor(HuggingFaceMonitor):
 
             filtered_data = [
                 (input_, meta, predictions)
-                for input_, meta, predictions in zip(
-                    inputs, metadata, predictions_
-                )
+                for input_, meta, predictions in zip(inputs, metadata, predictions_)
                 if self.is_record_accepted()
             ]
             if filtered_data:
@@ -154,7 +158,9 @@ class TextClassificationMonitor(HuggingFaceMonitor):
             return batch_predictions
 
 
-def huggingface_monitor(pl: Pipeline, dataset: str, sample_rate: float) -> Optional[Pipeline]:
+def huggingface_monitor(
+    pl: Pipeline, dataset: str, sample_rate: float
+) -> Optional[Pipeline]:
     if isinstance(pl, TextClassificationPipeline):
         return TextClassificationMonitor(pl, dataset=dataset, sample_rate=sample_rate)
     if isinstance(pl, ZeroShotClassificationPipeline):
