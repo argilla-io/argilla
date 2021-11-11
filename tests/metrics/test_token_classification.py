@@ -61,7 +61,7 @@ def test_search_by_nested_metric(monkeypatch):
     rb.delete(dataset)
     log_some_data(dataset)
 
-    df = rb.load(dataset, query="metrics.mentions.predicted.capitalness: LOWER")
+    df = rb.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
     assert len(df) > 0
 
 
