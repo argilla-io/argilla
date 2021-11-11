@@ -18,8 +18,6 @@
 <template>
   <div>
     <p
-      v-for="label in labels"
-      :key="label.index"
       :class="['pill', isPredictedAs(label) ? 'active' : '']"
       :title="label.class"
     >
@@ -34,8 +32,8 @@
 <script>
 export default {
   props: {
-    labels: {
-      type: Array,
+    label: {
+      type: Object,
       required: true,
     },
     predictedAs: {
@@ -60,47 +58,25 @@ export default {
 
 <style lang="scss" scoped>
 %pill {
-  display: inline-flex;
+  display: flex;
+  align-items: center;
   width: auto;
   background: transparent;
+  height: 40px;
+  line-height: 40px;
   color: $lighter-color;
   border-radius: 3px;
-  padding: 0.2em 1em;
+  padding: 0.2em 0.5em;
   @include font-size(14px);
-  margin-top: 0;
-  margin-bottom: 0;
   border: 1px solid transparent;
-  margin-right: 0.5em;
+  margin: 2.5px;
+  font-weight: 600;
 }
-.predictions {
-  margin-top: 1em;
-  display: flex;
-  flex-wrap: wrap;
-  margin-right: -0.8em;
-  margin-left: -0.8em;
-  .pill {
-    height: 40px;
-    line-height: 40px;
-    display: flex;
-    width: 240px;
-    align-items: center;
-    margin-left: 0.8em;
-    margin-right: 0.8em;
-    margin-bottom: 1.6em;
-    font-weight: bold;
-    border: 1px solid palette(grey, smooth);
-    border-radius: 5px;
-    &__score {
-      margin-right: 0;
-      margin-left: auto;
-    }
-  }
-}
+
 .pill {
   @extend %pill;
-  border: 1px solid $line-medium-color;
+  border: 1px solid palette(grey, smooth);
   color: $font-medium-color;
-  margin-bottom: 0.5em;
   line-height: 1.4em;
   &__container {
     display: flex;
@@ -114,11 +90,10 @@ export default {
     overflow: hidden;
   }
   &__score {
-    font-weight: bold;
     margin-left: 1em;
   }
   &.active {
-    border-color: $secondary-color;
+    background: #F4F5F6
   }
 }
 </style>
