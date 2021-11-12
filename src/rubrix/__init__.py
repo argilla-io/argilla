@@ -157,7 +157,7 @@ def load(
     limit: Optional[int] = None,
     as_pandas: bool = True,
 ) -> Union[pandas.DataFrame, List[Record]]:
-    """Load dataset data to a pandas DataFrame.
+    """Loads a dataset as a pandas DataFrame or a list of records.
 
     Args:
         name: The dataset name.
@@ -168,7 +168,7 @@ def load(
         as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
 
     Returns:
-        The dataset as a pandas Dataframe.
+        The dataset as a pandas Dataframe or a list of records.
 
     Examples:
         >>> import rubrix as rb
