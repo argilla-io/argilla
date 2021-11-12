@@ -279,6 +279,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
 
         mentions_configuration = {
             "type": "nested",
+            "include_in_root": True,
             "properties": {
                 key: {"type": resolve_type(info)}
                 for key, info in cls.MentionMetrics.schema()["properties"].items()

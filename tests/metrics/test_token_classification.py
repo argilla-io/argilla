@@ -61,6 +61,16 @@ def log_some_data(dataset: str):
     )
 
 
+def test_search_by_nested_metric(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_search_by_nested_metric"
+    rb.delete(dataset)
+    log_some_data(dataset)
+
+    df = rb.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
+    assert len(df) > 0
+
+
 def test_tokens_length(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_tokens_length"
@@ -97,7 +107,7 @@ def test_mentions_length(monkeypatch):
     assert results.data == {"5.0": 4}
     results.visualize()
 
-
+    
 def test_entity_density(monkeypatch):
     mocking_client(monkeypatch)
     dataset = "test_entity_density"

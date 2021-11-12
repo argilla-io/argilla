@@ -1,3 +1,6 @@
+from typing import Dict
+
+
 def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     import plotly.graph_objects as go
 
@@ -8,6 +11,28 @@ def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
         xaxis_title=x_legend,
         yaxis_title=y_legend,
     )
+    return fig
+
+
+def stacked_bar(
+    x: list,
+    y_s: Dict[str, list],
+    title: str = "Bar",
+    x_legend: str = "",
+    y_legend: str = "",
+):
+    import plotly.graph_objects as go
+
+    data = [go.Bar(name=name, x=x, y=y_values) for name, y_values in y_s.items()]
+
+    fig = go.Figure(data=data)
+    fig.update_layout(
+        title=title,
+        xaxis_title=x_legend,
+        yaxis_title=y_legend,
+        barmode="stack",
+    )
+
     return fig
 
 
