@@ -106,19 +106,17 @@ $annotation-button-touch-size: 48px;
     display: none;
   }
   &.label-button {
-    margin: auto auto 20px auto;
-    color: $darker-color;
+    margin: 2.5px;
+    color: $font-secondary-dark;
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
-    width: 100%;
     border-radius: 7px;
     .button {
       outline: none;
       cursor: pointer;
       border-radius: 5px;
-      background: $lighter-color;
-      border: 1px solid $line-smooth-color;
+      background: #F0F0FE;
       height: 40px;
       line-height: 40px;
       padding-left: 0.5em;
@@ -127,11 +125,13 @@ $annotation-button-touch-size: 48px;
       display: flex;
       font-weight: 600;
       overflow: hidden;
-      color: $darker-color;
+      color: $font-secondary-dark;
+      box-shadow: 0;
+      transition: all 0.2s ease-in-out;
     }
-    &.bordered {
+    &.predicted-label {
       .button {
-        border: 1px solid $secondary-color;
+        background: #D6D6FF;
       }
     }
     &.active {
@@ -142,8 +142,8 @@ $annotation-button-touch-size: 48px;
       -webkit-font-smoothing: antialiased;
       transform: translate3d(1, 1, 1); // z-index: 1;
       .button {
+        transition: all 0.02s ease-in-out;
         background: $secondary-color;
-        border: 1px solid $line-smooth-color;
       }
 
       &:after {
@@ -184,7 +184,7 @@ $annotation-button-touch-size: 48px;
       overflow: hidden;
       transition: transform 0.3s ease;
       &__text {
-        max-width: calc(100% - 10px);
+        max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
         display: inline-block;
@@ -193,7 +193,7 @@ $annotation-button-touch-size: 48px;
       }
       &__info {
         margin-right: 0;
-        margin-left: auto;
+        margin-left: 1em;
         transform: translateY(0);
         transition: all 0.3s ease;
       }
@@ -207,8 +207,9 @@ $annotation-button-touch-size: 48px;
       }
     }
     &:not(.active):hover {
-      box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4) !important;
-      border-color: $line-light-color;
+      .button {
+        box-shadow: 0 0 1px 0 rgba(212,212,212,0.50), inset 0 -2px 6px 1px #BBBCE0;
+      }
     }
   }
   &.disabled {

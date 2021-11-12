@@ -208,10 +208,14 @@ export default {
       this.initialVisibleGroup = undefined;
     },
     itemsAppliedOnGroup(group) {
-      return this.filterList
-        .filter((f) => f.group === group)
-        .flatMap((f) => f.selected)
-        .filter((f) => f).length;
+      if (group === "Sort") {
+        return this.dataset.sort.length
+      } else {
+        return this.filterList
+          .filter((f) => f.group === group)
+          .flatMap((f) => f.selected)
+          .filter((f) => f).length;
+      }
     },
     selectGroup(group) {
       if (this.initialVisibleGroup === group) {

@@ -16,38 +16,102 @@
   -->
 
 <template>
-  <div>
-    <LabelPill class="predictions" :predicted-as="predictedAs" :labels="showLabels" :show-score="true" />
+  <div v-if="labels.length">
+    <label-search v-if="labels.length >= maxLabels" @input="onSearchLabel" />
+    <div class="predictions">
+      <span v-for="label in visibleLabels" :key="label.index">
+        <LabelPill
+          :predicted-as="predictedAs"
+          :label="label"
+          :show-score="true"
+        />
+      </span>
+      <template v-if="visibleLabels.length >= maxLabels">
+        <a
+          v-if="visibleLabels.length !== labels.length"
+          href="#"
+          class="predictions__more"
+          @click.prevent="showHiddenLabels()"
+          >+{{ hiddenLabels.length }}</a
+        >
+        <a
+          v-else
+          href="#"
+          class="predictions__more"
+          @click.prevent="hideHiddenLabels()"
+          >Show less</a
+        >
+      </template>
+    </div>
   </div>
 </template>
 <script>
-
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     record: {
       type: Object,
       required: true,
-    }
+    },
   },
   data: () => ({
-    maxLabels: 16,
+    searchText: undefined,
+    maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
   }),
   computed: {
-    showLabels() {
-      if (this.labels.length > this.maxLabels) {
-        return this.labels.slice(0, this.maxLabels);
-      }
-      return this.labels;
-    },
     labels() {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
+    filteredLabels() {
+      return this.labels.filter((label) =>
+        label.class.toLowerCase().match(this.searchText)
+      );
+    },
+    visibleLabels() {
+      return this.filteredLabels.slice(0, this.maxLabels);
+    },
     predictedAs() {
       return this.record.predicted_as;
+    },
+    hiddenLabels() {
+      let labels = this.filteredLabels.slice(this.maxLabels);
+      return labels.filter((label) =>
+        label.class.toLowerCase().match(this.searchText)
+      );
+    },
+  },
+  methods: {
+    showHiddenLabels() {
+      this.maxLabels = this.filteredLabels.length;
+    },
+    hideHiddenLabels() {
+      this.maxLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
+    },
+    onSearchLabel(event) {
+      this.searchText = event;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-// @import "@recognai/re-commons/src/assets/scss/components/tooltip.scss";
+.predictions {
+  margin-top: 1.5em;
+  display: flex;
+  flex-wrap: wrap;
+  &__more {
+    align-self: center;
+    margin: 2.5px;
+    text-decoration: none;
+    font-weight: 600;
+    outline: none;
+    padding: 0.5em;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+    &:hover {
+      transition: all 0.2s ease-in-out;
+      background: palette(grey, smooth);
+    }
+  }
+}
 </style>
