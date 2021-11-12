@@ -59,10 +59,10 @@ def uninstall_snorkel(monkeypatch):
 
     saved_module = sys.modules["snorkel"]
     sys.modules["snorkel"] = None
-    importlib.reload(label_model)
+    importlib.reload(label_models)
     yield
     sys.modules["snorkel"] = saved_module
-    importlib.reload(label_model)
+    importlib.reload(label_models)
 
 
 def test_snorkel_not_installed(uninstall_snorkel):
@@ -119,7 +119,7 @@ def test_snorkel_fit(
         assert kwargs == {"passed_on": None}
 
     monkeypatch.setattr(
-        "rubrix.labeling.text_classification.label_model.SnorkelLabelModel.fit",
+        "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.fit",
         mock_fit,
     )
 
@@ -181,7 +181,7 @@ def test_snorkel_predict(
             return np.array([1]), np.array([[0.1, 0.8, 0.1]])
 
     monkeypatch.setattr(
-        "rubrix.labeling.text_classification.label_model.SnorkelLabelModel.predict",
+        "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.predict",
         mock_predict,
     )
 

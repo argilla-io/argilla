@@ -17,7 +17,7 @@ from typing import Dict, List
 import numpy as np
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import WeakLabels
+from rubrix.labeling.text_classification.weak_labels import WeakLabels
 
 try:
     import snorkel
