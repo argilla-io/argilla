@@ -12,73 +12,90 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import re
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 
 from rubrix.server.commons.errors import ForbiddenOperationError
+
+
+_ID_REGEX = re.compile(r"^[a-zA-Z0-9_\-]*$")
+_EMAIL_REGEX_PATTERN = (
+    "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:["
+    '\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:['
+    "a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4]["
+    "0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|["
+    "a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\["
+    "\x01-\x09\x0b\x0c\x0e-\x7f])+)\]) "
+)
 
 
 class User(BaseModel):
     """Base user model"""
 
-    username: str
-    email: Optional[str] = None
+    username: str = Field(regex=_ID_REGEX.pattern)
+    email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
-    teams: Optional[List[str]] = None
+    workspaces: Optional[List[str]] = None
+
+    @validator("workspaces", each_item=True)
+    def check_workspace_pattern(cls, workspace: str):
+        assert _ID_REGEX.match(
+            workspace
+        ), f"Wrong workspace format. Workspace must match pattern {_ID_REGEX.pattern}"
+        return workspace
 
     @property
-    def default_team(self) -> Optional[str]:
-        if self.teams is None:
+    def default_workspace(self) -> Optional[str]:
+        if self.workspaces is None:
             return None
         return self.username
 
-    def check_teams(self, teams: List[str]) -> List[str]:
+    def check_workspaces(self, workspaces: List[str]) -> List[str]:
         """
-        Given a list of teams, apply a belongs to validation for each team. Then, return
-        original list if any, else user teams (including personal/default one)
+        Given a list of workspaces, apply a belongs to validation for each one. Then, return
+        original list if any, else user workspaces (including private/default one)
 
         Parameters
         ----------
-        teams:
-            A list of team names
+        workspaces:
+            A list of workspace names
 
         Returns
         -------
-            Original team names if user belongs to them
+            Original workspace names if user belongs to them
 
         """
-        if teams:
-            for team in teams:
-                self.check_team(team)
-            return teams
+        if workspaces:
+            for workspace in workspaces:
+                self.check_workspace(workspace)
+            return workspaces
 
-        if self.teams is None:
+        if self.workspaces is None:
             return []
-        return self.teams + [self.default_team]
+        return self.workspaces + [self.default_workspace]
 
-
-
-    def check_team(self, team: str) -> str:
+    def check_workspace(self, workspace: str) -> str:
         """
-        Given a team name, check if user belongs to it, raising a error if not.
+        Given a workspace name, check if user belongs to it, raising a error if not.
 
         Parameters
         ----------
-        team
+        workspace:
+            Workspace to check
 
         Returns
         -------
-            The original team name if user belongs to it
+            The original workspace name if user belongs to it
 
         """
-        if not team:
-            return self.default_team
-        if team not in self.teams:
-            raise ForbiddenOperationError(f"Missing or protected team {team}")
-        return team
+        if not workspace:
+            return self.default_workspace
+        if workspace not in self.workspaces:
+            raise ForbiddenOperationError(f"Missing or protected workspace {workspace}")
+        return workspace
 
 
 class Token(BaseModel):
