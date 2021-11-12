@@ -37,6 +37,10 @@ class Pagination extends Model {
 export default class DatasetViewSettings extends Model {
   static entity = "view_settings";
 
+  static get MAX_VISIBLE_LABELS() {
+    return 7;
+  }
+
   static fields() {
     return {
       id: this.string(null),

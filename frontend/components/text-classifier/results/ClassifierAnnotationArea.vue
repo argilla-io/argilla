@@ -17,8 +17,14 @@
 
 <template>
   <div v-if="labels.length">
-    <label-search v-if="labels.length >= maxLabelsShown" @input="onSearchLabel"/>
-    <div :class="['feedback-interactions']" class="feedback-interactions__items">
+    <label-search
+      v-if="labels.length >= maxLabelsShown"
+      @input="onSearchLabel"
+    />
+    <div
+      :class="['feedback-interactions']"
+      class="feedback-interactions__items"
+    >
       <ClassifierAnnotationButton
         v-for="label in visibleLabels"
         :id="label.class"
@@ -36,17 +42,35 @@
         @change="updateLabels"
       >
       </ClassifierAnnotationButton>
-      <template v-if="visibleLabels.length >= maxLabelsShown">  
-        <a href="#" class="feedback-interactions__more" v-if="visibleLabels.length !== labels.length" @click.prevent="showHiddenLabels()">+{{hiddenLabels.length}}</a>
-        <a href="#" class="feedback-interactions__more"  v-else @click.prevent="hideHiddenLabels()">Show less</a>
+      <template v-if="visibleLabels.length >= maxLabelsShown">
+        <a
+          v-if="visibleLabels.length !== labels.length"
+          href="#"
+          class="feedback-interactions__more"
+          @click.prevent="showHiddenLabels()"
+          >+{{ hiddenLabels.length }}</a
+        >
+        <a
+          v-else
+          href="#"
+          class="feedback-interactions__more"
+          @click.prevent="hideHiddenLabels()"
+          >Show less</a
+        >
       </template>
     </div>
     <!-- only for testing -->
-    <re-button style="margin-top: 30px" class="button-tertiary--small" @click="testA =! testA">TEST {{testA ? 'A' : 'B'}}</re-button>
+    <re-button
+      style="margin-top: 30px"
+      class="button-tertiary--small"
+      @click="testA = !testA"
+      >TEST {{ testA ? "A" : "B" }}</re-button
+    >
   </div>
 </template>
 <script>
 import "assets/icons/ignore";
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
   props: {
@@ -62,12 +86,12 @@ export default {
   data: () => ({
     searchText: undefined,
     selectedLabels: [],
-    maxLabels: 7,
+    maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     testA: false,
   }),
   computed: {
     maxLabelsShown() {
-      return Math.max(this.selectedLabels.length, this.maxLabels); 
+      return Math.max(this.selectedLabels.length, this.maxLabels);
     },
     datasetLabels() {
       const labels = {};
@@ -106,16 +130,20 @@ export default {
       );
     },
     visibleLabels() {
-      const selected = this.filteredLabels.filter(l => l.selected);
+      const selected = this.filteredLabels.filter((l) => l.selected);
       let visible = this.filteredLabels.slice(0, this.maxLabelsShown);
-      const selectedVisibleItems = visible.filter(l => l.selected);
-      const selectedHiddenItems = this.filteredLabels.slice(this.maxLabelsShown).filter(l => l.selected);
+      const selectedVisibleItems = visible.filter((l) => l.selected);
+      const selectedHiddenItems = this.filteredLabels
+        .slice(this.maxLabelsShown)
+        .filter((l) => l.selected);
       if (selectedVisibleItems.length >= selected.length) {
         return visible;
       } else {
         visible.push(...selectedHiddenItems);
-        const removeItems = visible.filter(l => !l.selected).splice(0, selectedHiddenItems.length);
-        visible = visible.filter(item => !removeItems.includes(item));
+        const removeItems = visible
+          .filter((l) => !l.selected)
+          .splice(0, selectedHiddenItems.length);
+        visible = visible.filter((item) => !removeItems.includes(item));
         return visible;
       }
     },
@@ -129,7 +157,9 @@ export default {
       return this.filteredLabels.slice(this.maxLabelsShown);
     },
     appliedLabels() {
-      return this.filteredLabels.filter((l) => l.selected).map((label) => label.class);
+      return this.filteredLabels
+        .filter((l) => l.selected)
+        .map((label) => label.class);
     },
     predictedAs() {
       return this.record.predicted_as;
@@ -161,7 +191,7 @@ export default {
       this.maxLabels = this.filteredLabels.length;
     },
     hideHiddenLabels() {
-      this.maxLabels = 7;
+      this.maxLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     onSearchLabel(event) {
       this.searchText = event;
@@ -202,7 +232,7 @@ export default {
     display: inline-block;
     &:hover {
       transition: all 0.2s ease-in-out;
-      background: palette(grey, smooth)
+      background: palette(grey, smooth);
     }
   }
 }
