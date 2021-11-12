@@ -57,7 +57,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     Request body for copy dataset operation
     """
 
-    target_team: Optional[str] = None
+    target_workspace: Optional[str] = None
 
 
 class BaseDatasetDB(CreationDatasetRequest):

@@ -4,10 +4,10 @@ from fastapi import Query
 
 
 @dataclass
-class TeamsQueryParams:
+class WorkspaceQueryParams:
     """Common team query params"""
 
-    team: str = Query(
+    workspace: str = Query(
         None,
-        description="The team where dataset belongs to. If not provided default user team will be used",
+        description="The workspace where dataset belongs to. If not provided default user team will be used",
     )

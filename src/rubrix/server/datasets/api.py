@@ -21,7 +21,7 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService
-from ..commons.api import TeamsQueryParams
+from ..commons.api import WorkspaceQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
@@ -33,8 +33,10 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 def list_datasets(
-    teams: List[str] = Query(
-        None, alias="team", description="A list of teams used for retrieve datasets"
+    workspaces: List[str] = Query(
+        None,
+        alias="workspace",
+        description="A list of workspaces used for retrieve datasets",
     ),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -44,8 +46,8 @@ def list_datasets(
 
     Parameters
     ----------
-    teams:
-        A list of teams used for retrieve datasets
+    workspaces:
+        A list of workspaces used for retrieve datasets
     service:
         The datasets service
     current_user:
@@ -55,7 +57,7 @@ def list_datasets(
     -------
         A list of datasets visibles by current user
     """
-    return service.list(user=current_user, teams=teams)
+    return service.list(user=current_user, workspaces=workspaces)
 
 
 @router.get(
@@ -66,7 +68,7 @@ def list_datasets(
 )
 def get_dataset(
     name: str,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -92,7 +94,9 @@ def get_dataset(
 
     """
     return Dataset.parse_obj(
-        service.find_by_name(name, task=None, user=current_user, team=ds_params.team)
+        service.find_by_name(
+            name, task=None, user=current_user, workspace=ds_params.workspace
+        )
     )
 
 
@@ -105,7 +109,7 @@ def get_dataset(
 def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -137,7 +141,7 @@ def update_dataset(
         name,
         data=update_request,
         user=current_user,
-        team=ds_params.team,
+        workspace=ds_params.workspace,
     )
 
 
@@ -147,7 +151,7 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -166,7 +170,7 @@ def delete_dataset(
         The current user
 
     """
-    service.delete(name, user=current_user, team=ds_params.team)
+    service.delete(name, user=current_user, workspace=ds_params.workspace)
 
 
 @router.put(
@@ -175,7 +179,7 @@ def delete_dataset(
 )
 def close_dataset(
     name: str,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -194,7 +198,7 @@ def close_dataset(
         The current user
 
     """
-    service.close_dataset(name, user=current_user, team=ds_params.team)
+    service.close_dataset(name, user=current_user, workspace=ds_params.workspace)
 
 
 @router.put(
@@ -203,7 +207,7 @@ def close_dataset(
 )
 def open_dataset(
     name: str,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -222,7 +226,7 @@ def open_dataset(
         The current user
 
     """
-    service.open_dataset(name, user=current_user, team=ds_params.team)
+    service.open_dataset(name, user=current_user, workspace=ds_params.workspace)
 
 
 @router.put(
@@ -234,7 +238,7 @@ def open_dataset(
 def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
-    ds_params: TeamsQueryParams = Depends(),
+    ds_params: WorkspaceQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -257,5 +261,5 @@ def copy_dataset(
     """
 
     return service.copy_dataset(
-        name=name, data=copy_request, user=current_user, team=ds_params.team
+        name=name, data=copy_request, user=current_user, workspace=ds_params.workspace
     )

@@ -19,7 +19,7 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.commons.api import WorkspaceQueryParams
 from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
@@ -57,7 +57,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: WorkspaceQueryParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -71,6 +71,8 @@ def bulk_records(
         The dataset name
     bulk:
         The bulk data
+    common_params:
+        Common query params
     service:
         the Service
     datasets:
@@ -86,7 +88,7 @@ def bulk_records(
     dataset = datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
         user=current_user,
-        team=teams_query.team,
+        workspace=common_params.workspace,
         task=TASK_TYPE,
     )
     result = service.add_records(
@@ -109,7 +111,7 @@ def bulk_records(
 def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: WorkspaceQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -124,8 +126,8 @@ def search_records(
         The dataset name
     search:
         THe search query request
-    teams_query:
-        The teams query params
+    common_params:
+        Common query params
     pagination:
         The pagination params
     service:
@@ -145,7 +147,7 @@ def search_records(
     query = search.query or TokenClassificationQuery()
 
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
     )
     result = service.search(
         dataset=Dataset.parse_obj(dataset),
@@ -198,7 +200,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TokenClassificationQuery] = None,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: WorkspaceQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -213,8 +215,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
-    teams_query:
-        The teams query params
+    common_params:
+        Common query params
     limit:
         The load number of records limit. Optional
     service:
@@ -227,7 +229,7 @@ async def stream_data(
     """
     query = query or TokenClassificationQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
     )
     data_stream = service.read_dataset(dataset=Dataset.parse_obj(dataset), query=query)
 

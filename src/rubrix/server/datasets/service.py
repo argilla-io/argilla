@@ -68,7 +68,7 @@ class DatasetsService:
         self.__dao__ = dao
 
     def list(
-        self, user: User, teams: List[str], task_type: Optional[TaskType] = None
+        self, user: User, workspaces: List[str], task_type: Optional[TaskType] = None
     ) -> List[Dataset]:
         """
         List datasets for a list of owners and task types
@@ -77,7 +77,7 @@ class DatasetsService:
         ----------
         user:
             The request user
-        teams:
+        workspaces:
             A list of selected user teams
         task_type:
             The task type: Optional
@@ -86,7 +86,7 @@ class DatasetsService:
         -------
             A list of datasets
         """
-        owners = user.check_teams(teams)
+        owners = user.check_workspaces(workspaces)
 
         return [
             Dataset(**obs.dict())
@@ -99,7 +99,7 @@ class DatasetsService:
         dataset: CreationDatasetRequest,
         task: TaskType,
         user: User,
-        team: Optional[str],
+        workspace: Optional[str],
     ) -> Dataset:
         """
         Creates a datasets from given creation request
@@ -112,15 +112,15 @@ class DatasetsService:
             The dataset task
         user:
             The current user
-        team:
-            A user team selected for dataset creation
+        workspace:
+            The user workspace selected for dataset creation
 
         Returns
         -------
             The created dataset
 
         """
-        owner = user.check_team(team)
+        owner = user.check_workspace(workspace)
         date_now = datetime.utcnow()
         db_dataset = DatasetDB(
             **dataset.dict(by_alias=True),
@@ -133,7 +133,7 @@ class DatasetsService:
         return Dataset.parse_obj(created_dataset)
 
     def find_by_name(
-        self, name: str, task: Optional[TaskType], user: User, team: Optional[str]
+        self, name: str, task: Optional[TaskType], user: User, workspace: Optional[str]
     ) -> DatasetDB:
         """
         Find a dataset by name
@@ -146,8 +146,8 @@ class DatasetsService:
             Related dataset task
         user:
             The current user
-        team:
-            An user team where dataset belongs to
+        workspace:
+            The user workspace where dataset belongs to
 
         Returns
         -------
@@ -156,7 +156,7 @@ class DatasetsService:
             - ForbiddenOperationError if user cannot access the dataset
 
         """
-        owner = user.check_team(team)
+        owner = user.check_workspace(workspace)
         found = self.__dao__.find_by_name(name, owner=owner)
         if not found:
             raise EntityNotFoundError(name=name, type=Dataset)
@@ -166,7 +166,7 @@ class DatasetsService:
             raise WrongTaskError(f"Provided task {task} cannot be applied to dataset")
         return found
 
-    def delete(self, name: str, user: User, team: Optional[str]):
+    def delete(self, name: str, user: User, workspace: Optional[str]):
         """
         Deletes a dataset.
 
@@ -176,11 +176,11 @@ class DatasetsService:
             The dataset name
         user:
             The current user
-        team:
+        workspace:
             The team where dataset belongs to
 
         """
-        owner = user.check_team(team)
+        owner = user.check_workspace(workspace)
         found = self.__dao__.find_by_name(name, owner)
         if found:
             self.__dao__.delete_dataset(found)
@@ -190,7 +190,7 @@ class DatasetsService:
         name: str,
         data: UpdateDatasetRequest,
         user: User,
-        team: Optional[str],
+        workspace: Optional[str],
     ) -> Dataset:
         """
         Updates an existing dataset. Fields in update data are
@@ -204,15 +204,15 @@ class DatasetsService:
             The update fields
         user:
             The current user
-        team:
-            The team where dataset belongs to
+        workspace:
+            The workspace where dataset belongs to
 
         Returns
         -------
             The updated dataset
         """
 
-        found = self.find_by_name(name, task=None, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
 
         data.tags = {**found.tags, **data.tags}
         data.metadata = {**found.metadata, **data.metadata}
@@ -228,7 +228,7 @@ class DatasetsService:
         dataset: CreationDatasetRequest,
         task: TaskType,
         user: User,
-        team: Optional[str],
+        workspace: Optional[str],
     ) -> Dataset:
         """
         Inserts or updates the dataset. Updates only affects to updatable fields
@@ -242,7 +242,7 @@ class DatasetsService:
             if dataset already exists
         user:
             The current user
-        team:
+        workspace:
             The dataset where dataset belongs to
 
         Returns
@@ -256,17 +256,17 @@ class DatasetsService:
                 name=dataset.name,
                 data=UpdateDatasetRequest(tags=dataset.tags, metadata=dataset.metadata),
                 user=user,
-                team=team,
+                workspace=workspace,
             )
         except EntityNotFoundError:
-            return self.create(dataset=dataset, task=task, user=user, team=team)
+            return self.create(dataset=dataset, task=task, user=user, workspace=workspace)
 
     def copy_dataset(
         self,
         name: str,
         data: CopyDatasetRequest,
         user: User,
-        team: Optional[str],
+        workspace: Optional[str],
     ) -> Dataset:
         """
         Copies a dataset into another
@@ -279,26 +279,26 @@ class DatasetsService:
             A copy request configuration
         user:
             The current user
-        team:
-            The dataset where source dataset belongs to
+        workspace:
+            The workspace where source dataset belongs to
 
         Returns
         -------
 
         """
         try:
-            self.find_by_name(data.name, task=None, user=user, team=team)
+            self.find_by_name(data.name, task=None, user=user, workspace=workspace)
             raise EntityAlreadyExistsError(name=data.name, type=Dataset)
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 
-        found = self.find_by_name(name, task=None, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
         date_now = datetime.utcnow()
-        current_team = user.check_team(team)
+        current_team = user.check_workspace(workspace)
         created_dataset = DatasetDB(
             name=data.name,
             task=found.task,
-            owner=data.target_team or current_team,
+            owner=data.target_workspace or current_team,
             created_at=date_now,
             last_updated=date_now,
             tags={**found.tags, **data.tags},
@@ -316,7 +316,7 @@ class DatasetsService:
 
         return Dataset.parse_obj(created_dataset)
 
-    def close_dataset(self, name: str, user: User, team: Optional[str]):
+    def close_dataset(self, name: str, user: User, workspace: Optional[str]):
         """
         Closes a dataset. That means that all related dataset resources
         will be releases, but dataset cannot be explored
@@ -327,14 +327,14 @@ class DatasetsService:
             The dataset name
         user:
             The current user
-        team:
-            The team where dataset belongs to
+        workspace:
+            The workspace where dataset belongs to
 
         """
-        found = self.find_by_name(name, task=None, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
         self.__dao__.close(found)
 
-    def open_dataset(self, name: str, user: User, team: Optional[str]):
+    def open_dataset(self, name: str, user: User, workspace: Optional[str]):
         """
         Open a dataset. That means that all related dataset resources
         will be loaded and dataset will be ready for searches
@@ -345,9 +345,9 @@ class DatasetsService:
             The dataset name
         user:
             The current user
-        team:
-            The team where dataset belongs to
+        workspace:
+            The workspace where dataset belongs to
 
         """
-        found = self.find_by_name(name, task=None, user=user, team=team)
+        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
         self.__dao__.open(found)
