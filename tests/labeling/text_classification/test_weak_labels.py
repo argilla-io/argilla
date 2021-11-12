@@ -344,9 +344,9 @@ def test_change_mapping(monkeypatch, rules):
     with pytest.raises(MissingLabelError):
         weak_labels.change_mapping({"negative": 2})
 
-    weak_labels.change_mapping(
-        {None: -10, "negative": 0, "positive": 10, "neutral": 20}
-    )
+    new_mapping = {None: -10, "negative": 0, "positive": 10, "neutral": 20}
+    weak_labels.change_mapping(new_mapping)
+
     assert (
         weak_labels.matrix()
         == np.array(
@@ -358,3 +358,5 @@ def test_change_mapping(monkeypatch, rules):
         weak_labels.annotation(exclude_missing_annotations=False)
         == np.array([0, 10, -10, 20, 0], dtype=np.short)
     ).all()
+    assert weak_labels.label2int == new_mapping
+    assert weak_labels.int2label == {val: key for key, val in new_mapping.items()}
