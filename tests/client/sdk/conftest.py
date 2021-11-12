@@ -20,14 +20,21 @@ from rubrix.client.sdk.client import AuthenticatedClient
 
 
 class Helpers:
-    def remove_description(self, schema: dict):
-        """Removes the 'description' key from a model schema. We do not care about the doc strings."""
-        if "description" in schema:
-            del schema["description"]
+    def remove_key(self, schema: dict, key: str):
+        """Removes a key key from a model schema"""
+        if key in schema:
+            del schema[key]
         for value in schema.values():
             if isinstance(value, dict):
-                self.remove_description(value)
+                self.remove_key(value, key)
         return schema
+
+    def remove_description(self, schema: dict):
+        """Removes the 'description' key from a model schema. We do not care about the doc strings."""
+        return self.remove_key(schema, key="description")
+
+    def remove_pattern(self, schema: dict):
+        return self.remove_key(schema, key="pattern")
 
 
 @pytest.fixture(scope="session")
