@@ -4,8 +4,8 @@ from fastapi import Query
 
 
 @dataclass
-class WorkspaceQueryParams:
-    """Common team query params"""
+class CommonTaskQueryParams:
+    """Common task query params"""
 
     workspace: str = Query(
         None,

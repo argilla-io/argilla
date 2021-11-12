@@ -19,7 +19,7 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.commons.api import WorkspaceQueryParams
+from rubrix.server.commons.api import CommonTaskQueryParams
 from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
@@ -53,7 +53,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: Text2TextBulkData,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -108,7 +108,7 @@ def bulk_records(
 def search_records(
     name: str,
     search: Text2TextSearchRequest = None,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -196,7 +196,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[Text2TextQuery] = None,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),

@@ -21,7 +21,7 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService
-from ..commons.api import WorkspaceQueryParams
+from ..commons.api import CommonTaskQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
@@ -68,7 +68,7 @@ def list_datasets(
 )
 def get_dataset(
     name: str,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -109,7 +109,7 @@ def get_dataset(
 def update_dataset(
     name: str,
     update_request: UpdateDatasetRequest,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
@@ -151,7 +151,7 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -179,7 +179,7 @@ def delete_dataset(
 )
 def close_dataset(
     name: str,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -207,7 +207,7 @@ def close_dataset(
 )
 def open_dataset(
     name: str,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
@@ -238,7 +238,7 @@ def open_dataset(
 def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
-    ds_params: WorkspaceQueryParams = Depends(),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:

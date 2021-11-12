@@ -19,7 +19,7 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.commons.api import WorkspaceQueryParams
+from rubrix.server.commons.api import CommonTaskQueryParams
 from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
@@ -57,7 +57,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -111,7 +111,7 @@ def bulk_records(
 def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -200,7 +200,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TokenClassificationQuery] = None,
-    common_params: WorkspaceQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),

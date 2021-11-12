@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from pydantic import BaseModel, Field
 
-from rubrix.server.commons.api import WorkspaceQueryParams
+from rubrix.server.commons.api import CommonTaskQueryParams
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -71,7 +71,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
     )
     def get_dataset_metrics(
         name: str,
-        teams_query: WorkspaceQueryParams = Depends(),
+        teams_query: CommonTaskQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
@@ -113,7 +113,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         metric: str,
         query: cfg.query,
         metric_params: MetricSummaryParams = Depends(),
-        teams_query: WorkspaceQueryParams = Depends(),
+        teams_query: CommonTaskQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
