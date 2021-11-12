@@ -223,7 +223,7 @@ class TokenClassificationMetrics(BaseTaskMetrics):
                 capitalness=mention_capitalness(mention),
                 density=mention_density(_tokens_length, tokens_length=len(tokens)),
                 tokens_length=_tokens_length,
-                chars_length=len(mention)
+                chars_length=len(mention),
             )
             for mention, entity in mentions
             for _tokens_length in [
@@ -315,6 +315,98 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             },
         }
 
+    _PREDICTED_METRICS = [
+        EntityDensity(
+            id="predicted_entity_density",
+            name="Mention entity density for predictions",
+            description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            density_field="density",
+        ),
+        EntityLabels(
+            id="predicted_entity_labels",
+            name="Predicted entity labels",
+            description="Predicted entity labels distribution",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            labels_field="label",
+        ),
+        EntityCapitalness(
+            id="predicted_entity_capitalness",
+            name="Mention entity capitalness for predictions",
+            description="Compute capitalization information of predicted entity mentions",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            capitalness_field="capitalness",
+        ),
+        MentionLength(
+            id="predicted_mention_token_length",
+            name="Predicted mention tokens length",
+            description="Computes the length of the predicted entity mention measured in number of tokens",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            length_field="tokens_length",
+        ),
+        MentionLength(
+            id="predicted_mention_char_length",
+            name="Predicted mention characters length",
+            description="Computes the length of the predicted entity mention measured in number of tokens",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            length_field="chars_length",
+        ),
+        EntityConsistency(
+            id="predicted_entity_consistency",
+            name="Entity label consistency for predictions",
+            description="Computes entity label variability for top-k predicted entity mentions",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+            mention_field="value",
+            labels_field="label",
+        ),
+    ]
+
+    _ANNOTATED_METRICS = [
+        EntityDensity(
+            id="annotated_entity_density",
+            name="Mention entity density for annotations",
+            description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            density_field="density",
+        ),
+        EntityLabels(
+            id="annotated_entity_labels",
+            name="Annotated entity labels",
+            description="Annotated Entity labels distribution",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            labels_field="label",
+        ),
+        EntityCapitalness(
+            id="annotated_entity_capitalness",
+            name="Mention entity capitalness for annotations",
+            description="Compute capitalization information of annotated entity mentions",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            capitalness_field="capitalness",
+        ),
+        MentionLength(
+            id="annotated_mention_token_length",
+            name="Annotated mention tokens length",
+            description="Computes the length of the entity mention measured in number of tokens",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            length_field="tokens_length",
+        ),
+        MentionLength(
+            id="annotated_mention_char_length",
+            name="Annotated mention characters length",
+            description="Computes the length of the entity mention measured in number of tokens",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            length_field="chars_length",
+        ),
+        EntityConsistency(
+            id="annotated_entity_consistency",
+            name="Entity label consistency for annotations",
+            description="Computes entity label variability for top-k annotated entity mentions",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+            mention_field="value",
+            labels_field="label",
+        ),
+    ]
+
     metrics: ClassVar[List[BaseMetric]] = [
         TokensLength(
             id="tokens_length",
@@ -322,47 +414,6 @@ class TokenClassificationMetrics(BaseTaskMetrics):
             description="Computes the text length measured in number of tokens",
             length_field="metrics.tokens_length",
         ),
-        EntityDensity(
-            id="entity_density",
-            name="Mention entity density",
-            description="Computes the ratio between the number of all entity tokens and tokens in the text",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            density_field="density",
-        ),
-        EntityLabels(
-            id="entity_labels",
-            name="Entity labels",
-            description="Entity labels distribution",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            labels_field="label",
-        ),
-        EntityCapitalness(
-            id="entity_capitalness",
-            name="Mention entity capitalness",
-            description="Compute capitalization information of entity mentions",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            capitalness_field="capitalness",
-        ),
-        MentionLength(
-            id="mention_token_length",
-            name="Mention tokens length",
-            description="Computes the length of the entity mention measured in number of tokens",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            length_field="tokens_length",
-        ),
-        MentionLength(
-            id="mention_char_length",
-            name="Mention characters length",
-            description="Computes the length of the entity mention measured in number of tokens",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            length_field="chars_length",
-        ),
-        EntityConsistency(
-            id="entity_consistency",
-            name="Entity label consistency",
-            description="Computes entity label variability for top-k entity mentions",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            mention_field="value",
-            labels_field="label",
-        ),
+        *_PREDICTED_METRICS,
+        *_ANNOTATED_METRICS,
     ]
