@@ -28,12 +28,12 @@
           :status="record.status"
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
-          :sentences-origin="sentencesOrigin"
           :annotation-enabled="annotationEnabled"
+          :record-view-settings="record.recordViewSettings"
           @update-record="updateRecordSentences"
-          @change-visible-sentences="onChangeSentences"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
+          @update-view-config="onUpdateViewConfig"
         />
       </div>
     </div>
@@ -74,43 +74,13 @@ export default {
     },
   },
   mounted() {
-    this.initializeSentenceOrigin();
     this.initialRecord = Object.assign({}, this.record);
-  },
-  watch: {
-    annotationEnabled(oldValue, newValue) {
-      if (oldValue !== newValue) {
-        this.initializeSentenceOrigin();
-      }
-    }
   },
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
       validate: "entities/datasets/validateAnnotations",
     }),
-
-    initializeSentenceOrigin() {
-      if (this.annotationEnabled) {
-        if (this.annotationSentences.length) {
-          this.sentencesOrigin = "Annotation";
-        } else if (this.predictionSentences.length) {
-          this.sentencesOrigin = "Prediction";
-        }
-      } else {
-        if (this.predictionSentences.length) {
-          this.sentencesOrigin = "Prediction";
-        } else if (this.annotationSentences.length) {
-          this.sentencesOrigin = "Annotation";
-        }
-      }
-    },
-
-    onChangeSentences() {
-      this.sentencesOrigin !== "Annotation"
-        ? (this.sentencesOrigin = "Annotation")
-        : (this.sentencesOrigin = "Prediction");
-    },
     async updateRecordSentences({ sentences }) {
       await this.updateRecords({
         dataset: this.dataset,
@@ -121,6 +91,20 @@ export default {
             status: "Edited",
             annotation: {
               sentences,
+            },
+          },
+        ],
+      });
+    },
+    async onUpdateViewConfig(conf, value) {
+      await this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            recordViewSettings: {
+              ...this.record.recordViewSettings,
+              [conf]: value
             },
           },
         ],

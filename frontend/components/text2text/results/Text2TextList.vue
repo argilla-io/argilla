@@ -39,10 +39,10 @@
               <re-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
                 class="button-clear"
-                @click="changeVisibleSentences"
+                @click="changeSentencesOrigin"
                 >{{
                   sentencesOrigin === "Annotation"
-                    ? annotationEnabled ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
+                    ? annotationEnabled ? `View predictions (${predictions.length})` : `Back to predictions (${predictions.length})`
                     : annotationEnabled ? "Back to annotation" : "View annotation"
                 }}</re-button
               >
@@ -159,6 +159,9 @@
 import "assets/icons/pencil";
 export default {
   props: {
+    recordViewSettings: {
+      type: Object,
+    },
     predictions: {
       type: Array,
       required: true
@@ -166,10 +169,6 @@ export default {
     annotations: {
       type: Array,
       required: true
-    },
-    sentencesOrigin: {
-      type: String,
-      default: undefined
     },
     status: {
       type: String,
@@ -185,15 +184,41 @@ export default {
       itemNumber: 0,
       newSentence: undefined,
       editionMode: false,
+      sentencesOrigin: undefined,
       shiftPressed: false,
       shiftKey: undefined,
       refresh: 1
     };
   },
-  computed: {
-    predictionsLength() {
-      return this.predictions.length;
+  watch: {
+    annotationEnabled(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        // TODO: RESET OR MANTAIN STATE ??
+        this.initializeViewSettings();
+      }
     },
+    editionMode(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.$emit('update-view-config', 'editionMode', this.editionMode)
+      }
+    },
+    itemNumber(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.$emit('update-view-config', 'itemNumber', this.itemNumber)
+      }
+    },
+    newSentence(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.$emit('update-view-config', 'newSentence', this.newSentence)
+      }
+    },
+    sentencesOrigin(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.$emit('update-view-config', 'sentencesOrigin', this.sentencesOrigin)
+      }
+    },
+  },
+  computed: {
     showScore() {
       return this.sentencesOrigin === "Prediction";
     },
@@ -215,6 +240,8 @@ export default {
   },
   mounted() {
     this.getText();
+    this.initializeViewSetting();
+    this.getRecordViewSetting();
   },
   updated() {
     this.getText();
@@ -228,6 +255,28 @@ export default {
     window.addEventListener("keyup", this.keyUp);
   },
   methods: {
+    initializeViewSetting() {
+      this.itemNumber = 0;
+      this.editionMode = false;
+      if (this.annotationEnabled) {
+        if (this.annotations.length) {
+          this.sentencesOrigin = "Annotation";
+        } else if (this.predictions.length) {
+          this.sentencesOrigin = "Prediction";
+        }
+      } else {
+        if (this.predictions.length) {
+          this.sentencesOrigin = "Prediction";
+        } else if (this.annotations.length) {
+          this.sentencesOrigin = "Annotation";
+        }
+      }
+    },
+    getRecordViewSetting() {
+      this.recordViewSettings && Object.keys(this.recordViewSettings).forEach(key => {
+        this[key] = this.recordViewSettings[key];
+      })
+    },
     getText() {
       if (this.$refs.text && this.$refs.text[0]) {
         this.newSentence = this.$refs.text[0].innerText;
@@ -262,10 +311,12 @@ export default {
       this.refresh++;
       this.$emit('reset-initial-record')
     },
-    changeVisibleSentences() {
+    changeSentencesOrigin() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("change-visible-sentences");
+      this.sentencesOrigin !== "Annotation"
+        ? (this.sentencesOrigin = "Annotation")
+        : (this.sentencesOrigin = "Prediction");
     },
     annotate() {
       this.itemNumber = 0;
