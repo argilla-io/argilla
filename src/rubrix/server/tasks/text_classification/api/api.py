@@ -19,7 +19,7 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.commons.api import CommonTaskQueryParams
 from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
@@ -53,7 +53,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TextClassificationBulkData,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -67,8 +67,8 @@ def bulk_records(
         The dataset name
     bulk:
         The bulk data
-    teams_query:
-        Team query params
+    common_params:
+        Common query params
     service:
         the Service
     datasets:
@@ -86,7 +86,7 @@ def bulk_records(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
         task=task,
         user=current_user,
-        team=teams_query.team,
+        workspace=common_params.workspace,
     )
     result = service.add_records(
         dataset=dataset,
@@ -108,7 +108,7 @@ def bulk_records(
 def search_records(
     name: str,
     search: TextClassificationSearchRequest = None,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -123,8 +123,8 @@ def search_records(
         The dataset name
     search:
         The search query request
-    teams_query:
-        The teams query params
+    common_params:
+        Common query params
     pagination:
         The pagination params
     service:
@@ -143,7 +143,7 @@ def search_records(
     search = search or TextClassificationSearchRequest()
     query = search.query or TextClassificationQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
     )
     result = service.search(
         dataset=Dataset.parse_obj(dataset),
@@ -196,7 +196,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TextClassificationQuery] = None,
-    teams_query: TeamsQueryParams = Depends(),
+    common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TextClassificationService = Depends(text_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -211,8 +211,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
-    teams_query:
-        The teams query params
+    common_params:
+        Common query params
     limit:
         The load number of records limit. Optional
     service:
@@ -225,7 +225,7 @@ async def stream_data(
     """
     query = query or TextClassificationQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, team=teams_query.team
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
     )
     data_stream = service.read_dataset(Dataset.parse_obj(dataset), query=query)
 

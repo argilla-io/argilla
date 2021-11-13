@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from pydantic import BaseModel, Field
 
-from rubrix.server.commons.api import TeamsQueryParams
+from rubrix.server.commons.api import CommonTaskQueryParams
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -71,7 +71,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
     )
     def get_dataset_metrics(
         name: str,
-        teams_query: TeamsQueryParams = Depends(),
+        teams_query: CommonTaskQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
@@ -98,7 +98,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         """
         dataset = datasets.find_by_name(
-            name, task=cfg.task, user=current_user, team=teams_query.team
+            name, task=cfg.task, user=current_user, workspace=teams_query.workspace
         )
         metrics = metrics.get_dataset_metrics(dataset=dataset)
         return [MetricInfo.parse_obj(metric) for metric in metrics]
@@ -113,7 +113,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         metric: str,
         query: cfg.query,
         metric_params: MetricSummaryParams = Depends(),
-        teams_query: TeamsQueryParams = Depends(),
+        teams_query: CommonTaskQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
@@ -146,11 +146,11 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         """
         dataset = datasets.find_by_name(
-            name, task=cfg.task, user=current_user, team=teams_query.team
+            name, task=cfg.task, user=current_user, workspace=teams_query.workspace
         )
         return metrics.summarize_metric(
             dataset=dataset,
-            owner=current_user.check_team(teams_query.team),
+            owner=current_user.check_workspace(teams_query.workspace),
             metric=metric,
             query=query,
             **vars(metric_params),
