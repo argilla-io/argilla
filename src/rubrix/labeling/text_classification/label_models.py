@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import logging
 from typing import Dict, List
 
 import numpy as np
@@ -28,6 +29,8 @@ else:
     from snorkel.labeling.model import LabelModel as SnorkelLabelModel
     from snorkel.utils.lr_schedulers import LRSchedulerConfig
     from snorkel.utils.optimizers import OptimizerConfig
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class LabelModel:
@@ -208,14 +211,39 @@ class Snorkel(LabelModel):
 
         return records_with_prediction
 
-    def score(self, **kwargs) -> Dict[str, float]:
+    def score(self, tie_break_policy="abstain") -> Dict[str, float]:
+        """Returns some scores of the label model with respect to the annotated records.
 
-        raise NotImplementedError
+        Args:
+            tie_break_policy: Policy to break ties. You can choose among three policies:
+                - "abstain": Do not provide any prediction
+                - "random": randomly choose among tied option using deterministic hash
+                - "true-random": randomly choose among the tied options. NOTE: repeated runs may have slightly
+                    different results due to differences in broken ties
+                The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all of the labeling functions abstained.
 
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        # get predictions and probabilities
+        predictions, probabilities = self._model.predict(
+            L=self._weak_labels.matrix(has_annotation=True),
+            return_probs=True,
+            tie_break_policy=tie_break_policy,
+        )
 
-class LabelModelError(Exception):
-    pass
+        # metrics are only calculated for non-abstained data points
+        idx = predictions != -1
+        if not idx.all():
+            _LOGGER.warning(
+                "Metrics are only calculated over non-abstained predictions!"
+            )
 
+        # accuracy
+        metrics = {
+            "accuracy": (predictions[idx] == self._weak_labels.annotation()[idx]).sum()
+            / len(predictions[idx])
+        }
 
-class WrongAbstainIntegerError(LabelModelError):
-    pass
+        return metrics
