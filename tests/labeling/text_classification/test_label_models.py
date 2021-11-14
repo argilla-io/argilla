@@ -26,7 +26,7 @@ from rubrix.labeling.text_classification.label_models import LabelModel
 @pytest.fixture
 def weak_labels(monkeypatch):
     def mock_load(*args, **kwargs):
-        return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+        return [TextClassificationRecord(inputs="test", id=i) for i in range(4)]
 
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -34,16 +34,16 @@ def weak_labels(monkeypatch):
 
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array(
-            [[0, 1, -1], [2, 0, -1], [-1, -1, -1]],
+            [[0, 1, -1], [2, 0, -1], [-1, -1, -1], [0, 2, 2]],
             dtype=np.short,
         )
-        annotation_array = np.array([0, 1, -1], dtype=np.short)
+        annotation_array = np.array([0, 1, -1, 2], dtype=np.short)
         label2int = {None: -1, "negative": 0, "positive": 1, "neutral": 2}
         return weak_label_matrix, annotation_array, label2int
 
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
 
-    return WeakLabels(rules=[], dataset="mock")
+    return WeakLabels(rules=[lambda: None] * 3, dataset="mock")
 
 
 def test_weak_label_property():
@@ -124,7 +124,7 @@ def test_snorkel_fit(
     )
 
     if no_annotations:
-        weak_labels._annotation_array = np.array([-1, -1, -1], dtype=np.short)
+        weak_labels._annotation_array = np.array([-1, -1, -1, -1], dtype=np.short)
     label_model = Snorkel(weak_labels)
     label_model.fit(include_annotated_records=include_annotated_records, passed_on=None)
 
@@ -140,17 +140,22 @@ def test_snorkel_fit_automatically_added_kwargs(weak_labels, kwargs):
 @pytest.mark.parametrize(
     "policy,include_annotated_records,include_abstentions,expected",
     [
-        ("abstain", True, False, (1, ["positive"], [0.8])),
-        ("abstain", True, True, (3, [None, None, "positive"], [None, None, 0.8])),
+        ("abstain", True, False, (2, ["positive", "negative"], [0.8, 0.9])),
+        (
+            "abstain",
+            True,
+            True,
+            (4, [None, None, "positive", "negative"], [None, None, 0.8, 0.9]),
+        ),
         ("random", False, True, (1, ["positive"], [0.8])),
         (
             "random",
             True,
             True,
             (
-                3,
-                ["positive", "negative", "positive"],
-                [0.4 + 0.0001, 1.0 / 3 + 0.0001, 0.8],
+                4,
+                ["positive", "negative", "positive", "negative"],
+                [0.4 + 0.0001, 1.0 / 3 + 0.0001, 0.8, 0.9],
             ),
         ),
     ],
@@ -164,16 +169,19 @@ def test_snorkel_predict(
     expected,
 ):
     def mock_predict(self, L, return_probs, tie_break_policy, *args, **kwargs):
+        assert tie_break_policy == policy
+        assert return_probs is True
         if include_annotated_records:
-            assert len(L) == 3
-            preds = np.array([-1, -1, 1])
+            assert len(L) == 4
+            preds = np.array([-1, -1, 1, 0])
             if policy == "random":
-                preds = np.array([1, 0, 1])
+                preds = np.array([1, 0, 1, 0])
             return preds, np.array(
                 [
                     [0.4, 0.4, 0.2],
                     [1.0 / 3, 1.0 / 3, 1.0 / 3],
                     [0.1, 0.8, 0.1],
+                    [0.9, 0.05, 0.05],
                 ]
             )
         else:
@@ -201,8 +209,32 @@ def test_snorkel_predict(
     ] == expected[2]
 
 
-def test_snorkel_score():
-    raise NotImplementedError
+@pytest.mark.parametrize("policy,expected", [("abstain", 0.5), ("random", 2.0 / 3)])
+def test_snorkel_score(monkeypatch, weak_labels, policy, expected):
+    def mock_predict(self, L, return_probs, tie_break_policy):
+        assert (L == weak_labels.matrix(has_annotation=True)).all()
+        assert return_probs is True
+        assert tie_break_policy == policy
+        if policy == "abstain":
+            predictions = np.array([-1, 1, 0])
+        elif policy == "random":
+            predictions = np.array([0, 1, 0])
+        else:
+            raise ValueError("Untested policy!")
+
+        probabilities = None  # accuracy does not need probabs ...
+
+        return predictions, probabilities
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.predict",
+        mock_predict,
+    )
+
+    label_model = Snorkel(weak_labels)
+    assert label_model.score(tie_break_policy=policy)["accuracy"] == pytest.approx(
+        expected
+    )
 
 
 @pytest.fixture
@@ -234,6 +266,14 @@ def test_snorkel_integration(weak_labels_from_guide):
     weak_labels._matrix, weak_labels._annotation_array = matrix, annotation
 
     label_model = Snorkel(weak_labels_from_guide)
-    label_model.fit()
-    label_model.score()
-    label_model.predict()
+    label_model.fit(seed=43)
+
+    metrics = label_model.score()
+    assert metrics["accuracy"] == pytest.approx(0.824)
+
+    records = label_model.predict()
+    assert len(records) == 1586
+    assert records[0].prediction == [
+        ("SPAM", pytest.approx(0.5241533709668873)),
+        ("HAM", pytest.approx(0.47584662903311276)),
+    ]
