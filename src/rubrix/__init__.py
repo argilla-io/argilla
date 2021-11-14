@@ -65,14 +65,11 @@ def init(
     default values.
 
     Args:
-        api_url:
-            Address of the REST API. If `None` (default) and the env variable ``RUBRIX_API_URL`` is not set,
+        api_url: Address of the REST API. If `None` (default) and the env variable ``RUBRIX_API_URL`` is not set,
             it will default to `http://localhost:6900`.
-        api_key:
-            Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
+        api_key: Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
             is not set, it will default to `rubrix.apikey`.
-        timeout:
-            Wait `timeout` seconds for the connection to timeout. Default: 60.
+        timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
 
     Examples:
         >>> import rubrix as rb
@@ -104,20 +101,17 @@ def log(
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
     chunk_size: int = 500,
+    verbose: bool = True,
 ) -> BulkResponse:
     """Log Records to Rubrix.
 
     Args:
-        records:
-            The record or an iterable of records.
-        name:
-            The dataset name.
-        tags:
-            A dictionary of tags related to the dataset.
-        metadata:
-            A dictionary of extra info for the dataset.
-        chunk_size:
-            The chunk size for a data bulk.
+        records: The record or an iterable of records.
+        name: The dataset name.
+        tags: A dictionary of tags related to the dataset.
+        metadata: A dictionary of extra info for the dataset.
+        chunk_size: The chunk size for a data bulk.
+        verbose: If True, shows a progress bar and prints out quick summary at the end.
 
     Returns:
         Summary of the response from the REST API
@@ -132,7 +126,12 @@ def log(
     """
     # noinspection PyTypeChecker,PydanticTypeChecker
     return _client_instance().log(
-        records=records, name=name, tags=tags, metadata=metadata, chunk_size=chunk_size
+        records=records,
+        name=name,
+        tags=tags,
+        metadata=metadata,
+        chunk_size=chunk_size,
+        verbose=verbose,
     )
 
 
@@ -140,10 +139,8 @@ def copy(dataset: str, name_of_copy: str):
     """Creates a copy of a dataset including its tags and metadata
 
     Args:
-        dataset:
-            Name of the source dataset
-        name_of_copy:
-            Name of the copied dataset
+        dataset: Name of the source dataset
+        name_of_copy: Name of the copied dataset
 
     Examples:
         >>> import rubrix as rb
@@ -163,16 +160,12 @@ def load(
     """Load dataset data to a pandas DataFrame.
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        ids:
-            If provided, load dataset records with given ids.
-        limit:
-            The number of records to retrieve.
-        as_pandas:
-            If True, return a pandas DataFrame. If False, return a list of records.
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        ids: If provided, load dataset records with given ids.
+        limit: The number of records to retrieve.
+        as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
 
     Returns:
         The dataset as a pandas Dataframe.
@@ -190,8 +183,7 @@ def delete(name: str) -> None:
     """Delete a dataset.
 
     Args:
-        name:
-            The dataset name.
+        name: The dataset name.
 
     Examples:
         >>> import rubrix as rb
