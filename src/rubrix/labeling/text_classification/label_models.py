@@ -83,6 +83,14 @@ class Snorkel(LabelModel):
         verbose: Whether to show print statements
         device: What device to place the model on ('cpu' or 'cuda:0', for example).
             Passed on to the `torch.Tensor.to()` calls.
+
+    Examples:
+        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
+        >>> rule = Rule(query="good OR best", label="Positive")
+        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> label_model = Snorkel(weak_labels)
+        >>> label_model.fit()
+        >>> records = label_model.predict()
     """
 
     def __init__(
