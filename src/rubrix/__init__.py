@@ -111,7 +111,7 @@ def log(
         tags: A dictionary of tags related to the dataset.
         metadata: A dictionary of extra info for the dataset.
         chunk_size: The chunk size for a data bulk.
-        verbose: If True, shows a progress bar and prints out quick summary at the end.
+        verbose: If True, shows a progress bar and prints out a quick summary at the end.
 
     Returns:
         Summary of the response from the REST API

@@ -124,7 +124,7 @@ class RubrixClient:
             tags: A set of tags related to the dataset.
             metadata: A set of extra info for the dataset.
             chunk_size: Records are logged in chunks to the Rubrix server, this defines their sizes.
-            verbose: If True, shows a progress bar and prints out quick summary at the end.
+            verbose: If True, shows a progress bar and prints out a quick summary at the end.
 
         Returns:
             A summary response from the API.
