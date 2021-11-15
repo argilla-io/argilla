@@ -118,7 +118,7 @@ export default {
       });
     },
     sortedLabels() {
-      return this.labels.sort((a, b) => (a.score > b.score ? -1 : 1));
+      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
     },
     filteredLabels() {
       return this.sortedLabels.filter((label) =>
