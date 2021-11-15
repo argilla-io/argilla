@@ -16,9 +16,9 @@
   -->
 
 <template>
-  <div v-if="labels.length">
+  <div v-if="labels.length" class="annotation-area">
     <label-search
-      v-if="labels.length >= maxLabelsShown"
+      v-if="labels.length > maxLabelsShown"
       @input="onSearchLabel"
     />
     <div
@@ -35,7 +35,7 @@
         :class="[
           'label-button',
           predictedAs.includes(label.class) ? 'predicted-label' : null,
-          testA ? 'test' : null,
+          UXtest === 'a' ? 'test' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -51,7 +51,7 @@
           >+{{ hiddenLabels.length }}</a
         >
         <a
-          v-else
+          v-else-if="visibleLabels.length > maxLabelsShown"
           href="#"
           class="feedback-interactions__more"
           @click.prevent="hideHiddenLabels()"
@@ -59,13 +59,6 @@
         >
       </template>
     </div>
-    <!-- only for testing -->
-    <re-button
-      style="margin-top: 30px"
-      class="button-tertiary--small"
-      @click="testA = !testA"
-      >TEST {{ testA ? "A" : "B" }}</re-button
-    >
   </div>
 </template>
 <script>
@@ -87,7 +80,6 @@ export default {
     searchText: undefined,
     selectedLabels: [],
     maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-    testA: false,
   }),
   computed: {
     maxLabelsShown() {
@@ -110,8 +102,9 @@ export default {
       });
 
       this.predictionLabels.concat(annotationLabels).forEach((label) => {
+        const predictionLabel= this.predictionLabels.find(l => l.class === label.class);
         labelsDict[label.class] = {
-          score: label.score,
+          score: predictionLabel ? predictionLabel.score : 0,
           selected: label.selected,
         };
       });
@@ -124,8 +117,11 @@ export default {
         };
       });
     },
+    sortedLabels() {
+      return this.labels.sort((a, b) => (a.score > b.score ? -1 : 1));
+    },
     filteredLabels() {
-      return this.labels.filter((label) =>
+      return this.sortedLabels.filter((label) =>
         label.class.toLowerCase().match(this.searchText)
       );
     },
@@ -144,7 +140,7 @@ export default {
           .filter((l) => !l.selected)
           .splice(0, selectedHiddenItems.length);
         visible = visible.filter((item) => !removeItems.includes(item));
-        return visible;
+        return visible
       }
     },
     annotationLabels() {
@@ -164,6 +160,9 @@ export default {
     predictedAs() {
       return this.record.predicted_as;
     },
+    UXtest() {
+      return this.$route.query.UXtest;
+    }
   },
   watch: {
     appliedLabels(o, n) {
@@ -205,8 +204,11 @@ export default {
   min-width: 80px;
   max-width: 238px;
 }
+.annotation-area {
+  margin-top: 2em;
+}
 .feedback-interactions {
-  margin: 1.5em auto 0 auto;
+  margin: 0 auto 0 auto;
   padding-right: 0;
   // & > div {
   //   width: 100%;
@@ -240,6 +242,10 @@ export default {
   @extend %item;
   &.test {
     width: 24%;
+    ::v-deep .annotation-button-data__info {
+      margin-right: 0 !important;
+      margin-left: auto !important;
+    }
   }
 }
 </style>

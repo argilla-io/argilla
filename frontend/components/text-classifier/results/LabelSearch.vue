@@ -53,9 +53,7 @@ export default {
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
-  margin-right: auto;
-  margin-left: 0;
-  margin-top: 1.5em;
+  margin: 1.5em auto 0.5em 0;
   pointer-events: all;
   font-weight: 600;
   @include font-size(14px);

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="labels.length">
+  <div v-if="labels.length" class="exploration-area">
     <label-search v-if="labels.length >= maxLabels" @input="onSearchLabel" />
     <div class="predictions">
       <span v-for="label in visibleLabels" :key="label.index">
@@ -94,8 +94,10 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.exploration-area {
+  margin-top: 2em;
+}
 .predictions {
-  margin-top: 1.5em;
   display: flex;
   flex-wrap: wrap;
   &__more {

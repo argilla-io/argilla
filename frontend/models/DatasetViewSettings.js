@@ -38,7 +38,7 @@ export default class DatasetViewSettings extends Model {
   static entity = "view_settings";
 
   static get MAX_VISIBLE_LABELS() {
-    return 7;
+    return 10;
   }
 
   static fields() {
