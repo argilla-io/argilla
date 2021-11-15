@@ -238,8 +238,10 @@ def test_snorkel_score(monkeypatch, weak_labels, policy, expected):
 
 
 @pytest.fixture
-def weak_labels_from_guide(monkeypatch):
-    matrix_and_annotation = np.load("weak-supervision-guide-matrix.npy")
+def weak_labels_from_guide(monkeypatch, resources):
+    matrix_and_annotation = np.load(
+        str(resources / "weak-supervision-guide-matrix.npy")
+    )
     matrix, annotation = matrix_and_annotation[:, :-1], matrix_and_annotation[:, -1]
 
     def mock_load(*args, **kwargs):
@@ -260,11 +262,6 @@ def weak_labels_from_guide(monkeypatch):
 
 
 def test_snorkel_integration(weak_labels_from_guide):
-    matrix_and_annotation = np.load("weak-supervision-guide-matrix.npy")
-    matrix, annotation = matrix_and_annotation[:, :-1], matrix_and_annotation[:, -1]
-
-    weak_labels._matrix, weak_labels._annotation_array = matrix, annotation
-
     label_model = Snorkel(weak_labels_from_guide)
     label_model.fit(seed=43)
 
