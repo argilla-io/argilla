@@ -4,9 +4,16 @@ from pydantic import ValidationError
 from rubrix.server.commons.errors import ForbiddenOperationError
 from rubrix.server.security.model import User
 
+@pytest.mark.parametrize(
+    "email", ["my@email.com", "infra@recogn.ai"]
+)
+def test_valid_mail(email):
+    user = User(username="user", email=email)
+    assert user.email == email
+
 
 @pytest.mark.parametrize(
-    "wrong_email", ["non-valid-email", "wrong@mail", "@wrong" "wrong.mail"]
+    "wrong_email", ["non-valid-email", "wrong@mail",  "@wrong" "wrong.mail"]
 )
 def test_email_validator(wrong_email):
     with pytest.raises(ValidationError):
