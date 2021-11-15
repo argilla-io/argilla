@@ -90,7 +90,7 @@ export default {
     limit: 3,
     currentMentionsLength: 3,
     visible: false,
-    activeTab: "mentions",
+    activeTab: "predicted_mentions",
     filteredMentions: [],
     expandedMentionsGroup: undefined,
     selectedOption: {

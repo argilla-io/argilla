@@ -59,7 +59,10 @@ export default {
   },
   computed: {
     getKeywords() {
-      return this.dataset.results.aggregations.words;
+      const words = this.dataset.results.aggregations.words;
+      return Object.fromEntries(
+        Object.entries(words).sort((a, b) => b[1] - a[1])
+      );
     },
     options() {
       let options = [];
@@ -89,6 +92,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 label {

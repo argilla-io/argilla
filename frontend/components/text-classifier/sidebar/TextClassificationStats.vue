@@ -59,7 +59,10 @@ export default {
   },
   computed: {
     getKeywords() {
-      return this.dataset.results.aggregations.words;
+      const words = this.dataset.results.aggregations.words;
+      return Object.fromEntries(
+        Object.entries(words).sort((a, b) => b[1] - a[1])
+      );
     },
     options() {
       let options = [];
