@@ -193,7 +193,7 @@ export default {
       this.maxLabels = this.filteredLabels.length;
     },
     hideHiddenLabels() {
-      this.maxLabels = maxVisibleLabels;
+      this.maxLabels = this.maxVisibleLabels;
     },
     onSearchLabel(event) {
       this.searchText = event;
