@@ -79,7 +79,7 @@ class LabelModel:
 
 
 class Snorkel(LabelModel):
-    """The label model by [Snorkel](https://github.com/snorkel-team/snorkel/).
+    """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`_.
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
@@ -135,7 +135,7 @@ class Snorkel(LabelModel):
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`_.
-                They must not contain `L_train` or `Y_dev`, those are provided automatically.
+                They must not contain ``L_train`` or ``Y_dev``, those are provided automatically.
         """
         if "L_train" in kwargs or "Y_dev" in kwargs:
             raise ValueError(
@@ -163,10 +163,11 @@ class Snorkel(LabelModel):
             include_annotated_records: Whether or not to include annotated records.
             include_abstentions: Whether or not to include records in the output, for which the label model abstained.
             tie_break_policy: Policy to break ties. You can choose among three policies:
-                - "abstain": Do not provide any prediction
-                - "random": randomly choose among tied option using deterministic hash
-                - "true-random": randomly choose among the tied options. NOTE: repeated runs may have slightly
-                    different results due to differences in broken ties
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+                - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
+
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
 
@@ -216,16 +217,22 @@ class Snorkel(LabelModel):
 
         Args:
             tie_break_policy: Policy to break ties. You can choose among three policies:
-                - "abstain": Do not provide any prediction
-                - "random": randomly choose among tied option using deterministic hash
-                - "true-random": randomly choose among the tied options. NOTE: repeated runs may have slightly
-                    different results due to differences in broken ties
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+                - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
+
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
 
         Returns:
             A list of records that include the predictions of the label model.
         """
+        if self._weak_labels.annotation().size == 0:
+            raise ValueError(
+                "You need annotated records to compute scores/metrics for your label model."
+            )
+
         # get predictions and probabilities
         predictions, probabilities = self._model.predict(
             L=self._weak_labels.matrix(has_annotation=True),
