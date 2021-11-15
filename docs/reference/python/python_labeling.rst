@@ -22,3 +22,4 @@ Labeling tools for the text classification task.
 
 .. automodule:: rubrix.labeling.text_classification.label_models
    :members:
+   :exclude-members: MissingAnnotationError

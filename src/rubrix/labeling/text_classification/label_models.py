@@ -229,7 +229,7 @@ class Snorkel(LabelModel):
             A list of records that include the predictions of the label model.
         """
         if self._weak_labels.annotation().size == 0:
-            raise ValueError(
+            raise MissingAnnotationError(
                 "You need annotated records to compute scores/metrics for your label model."
             )
 
@@ -254,3 +254,11 @@ class Snorkel(LabelModel):
         }
 
         return metrics
+
+
+class LabelModelError(Exception):
+    pass
+
+
+class MissingAnnotationError(LabelModelError):
+    pass

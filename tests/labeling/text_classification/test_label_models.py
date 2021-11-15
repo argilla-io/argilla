@@ -20,7 +20,10 @@ import pytest
 
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification import Snorkel, WeakLabels
-from rubrix.labeling.text_classification.label_models import LabelModel
+from rubrix.labeling.text_classification.label_models import (
+    LabelModel,
+    MissingAnnotationError,
+)
 
 
 @pytest.fixture
@@ -235,6 +238,15 @@ def test_snorkel_score(monkeypatch, weak_labels, policy, expected):
     assert label_model.score(tie_break_policy=policy)["accuracy"] == pytest.approx(
         expected
     )
+
+
+def test_snorkel_score_without_annotations(weak_labels):
+    weak_labels._annotation_array = np.array([], dtype=np.short)
+    label_model = Snorkel(weak_labels)
+
+    with pytest.raises(MissingAnnotationError) as error:
+        label_model.score()
+        assert "need annotated records" in str(error)
 
 
 @pytest.fixture
