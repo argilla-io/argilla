@@ -56,6 +56,14 @@ def test_weak_label_property():
     assert label_model.weak_labels is weak_labels
 
 
+def test_abstract_methods():
+    label_model = label_models.LabelModel(None)
+    with pytest.raises(NotImplementedError):
+        label_model.fit()
+        label_model.score()
+        label_model.predict()
+
+
 @pytest.fixture
 def uninstall_snorkel(monkeypatch):
     saved_module = sys.modules["snorkel"]
