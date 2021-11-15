@@ -49,7 +49,6 @@ class BaseRecord {
 }
 
 class BaseSearchQuery {
-  multi_label;
   predicted_as;
   annotated_as;
   annotated_by;

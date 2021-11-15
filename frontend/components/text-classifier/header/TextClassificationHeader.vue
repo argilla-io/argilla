@@ -33,7 +33,7 @@
         <template slot="first" slot-scope="validateDiscard">
           <annotation-label-selector
             :class="'validate-discard-actions__select'"
-            :multi-label="isMultiLabelRecord"
+            :multi-label="isMultiLabel"
             :options="availableLabels"
             @selected="onSelectLabels($event, validateDiscard.selectedRecords)"
           />
@@ -59,8 +59,8 @@ export default {
     showAnnotationMode() {
       return this.dataset.viewSettings.annotationEnabled;
     },
-    isMultiLabelRecord() {
-      return this.dataset.visibleRecords.some((record) => record.multi_label);
+    isMultiLabel() {
+      return this.dataset.isMultiLabel;
     },
     availableLabels() {
       const record = this.dataset.results.records[0];

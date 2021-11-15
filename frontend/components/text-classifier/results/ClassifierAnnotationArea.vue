@@ -30,7 +30,7 @@
         :id="label.class"
         :key="`${label.class}`"
         v-model="selectedLabels"
-        :allow-multiple="record.multi_label"
+        :allow-multiple="isMultiLabel"
         :label="label"
         :class="[
           'label-button',
@@ -99,6 +99,9 @@ export default {
         labels[label] = { score: 0, selected: false };
       });
       return labels;
+    },
+    isMultiLabel() {
+      return this.dataset.isMultiLabel;
     },
     labels() {
       const labelsDict = { ...this.datasetLabels };
@@ -177,7 +180,7 @@ export default {
   },
   methods: {
     updateLabels(labels) {
-      if (this.record.multi_label || labels.length > 0) {
+      if (this.isMultiLabel || labels.length > 0) {
         this.annotate();
       } else this.resetAnnotations();
     },
