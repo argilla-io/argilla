@@ -60,7 +60,9 @@ def test_abstract_methods():
     label_model = label_models.LabelModel(None)
     with pytest.raises(NotImplementedError):
         label_model.fit()
+    with pytest.raises(NotImplementedError):
         label_model.score()
+    with pytest.raises(NotImplementedError):
         label_model.predict()
 
 
