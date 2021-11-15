@@ -35,7 +35,7 @@
         :class="[
           'label-button',
           predictedAs.includes(label.class) ? 'predicted-label' : null,
-          UXtest === 'a' ? 'test' : null,
+          UXtest === 'fixed-mode' ? 'fixed-mode' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -240,7 +240,7 @@ export default {
 }
 .label-button {
   @extend %item;
-  &.test {
+  &.fixed-mode {
     width: 24%;
     ::v-deep .annotation-button-data__info {
       margin-right: 0 !important;
