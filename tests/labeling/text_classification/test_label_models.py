@@ -19,11 +19,11 @@ import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import Snorkel, WeakLabels
-from rubrix.labeling.text_classification.label_models import (
-    LabelModel,
-    MissingAnnotationError,
-)
+
+# we importlib.reload the `label_models` module during the tests, so avoid loading namespaces from this module!
+# for example, don't do `from rubrix.labeling.text_classification.label_models import MissingAnnotationError`
+# instead do `from rubrix.labeling.text_classification import label_models; label_models.MissingAnnotationError`
+from rubrix.labeling.text_classification import Snorkel, WeakLabels, label_models
 
 
 @pytest.fixture
@@ -51,15 +51,13 @@ def weak_labels(monkeypatch):
 
 def test_weak_label_property():
     weak_labels = object()
-    label_model = LabelModel(weak_labels)
+    label_model = label_models.LabelModel(weak_labels)
 
     assert label_model.weak_labels is weak_labels
 
 
 @pytest.fixture
 def uninstall_snorkel(monkeypatch):
-    from rubrix.labeling.text_classification import label_models
-
     saved_module = sys.modules["snorkel"]
     sys.modules["snorkel"] = None
     importlib.reload(label_models)
@@ -69,7 +67,7 @@ def uninstall_snorkel(monkeypatch):
 
 
 def test_snorkel_not_installed(uninstall_snorkel):
-    with pytest.raises(ImportError) as error:
+    with pytest.raises(ModuleNotFoundError) as error:
         Snorkel(None)
         assert "pip install snorkel" in str(error)
 
@@ -244,7 +242,7 @@ def test_snorkel_score_without_annotations(weak_labels):
     weak_labels._annotation_array = np.array([], dtype=np.short)
     label_model = Snorkel(weak_labels)
 
-    with pytest.raises(MissingAnnotationError) as error:
+    with pytest.raises(label_models.MissingAnnotationError) as error:
         label_model.score()
         assert "need annotated records" in str(error)
 

@@ -22,7 +22,7 @@ from rubrix.labeling.text_classification.weak_labels import WeakLabels
 
 try:
     import snorkel
-except ImportError:
+except ModuleNotFoundError:
     SNORKEL_INSTALLED = False
 else:
     SNORKEL_INSTALLED = True
@@ -100,7 +100,7 @@ class Snorkel(LabelModel):
         self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
     ):
         if not SNORKEL_INSTALLED:
-            raise ImportError(
+            raise ModuleNotFoundError(
                 "'snorkel' must be installed! You can install 'snorkel' with the command: `pip install snorkel`"
             )
         super().__init__(weak_labels)
