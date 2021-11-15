@@ -18,7 +18,7 @@
 <template>
   <div v-if="labels.length" class="annotation-area">
     <label-search
-      v-if="labels.length > maxLabelsShown"
+      v-if="labels.length > maxVisibleLabels"
       @input="onSearchLabel"
     />
     <div
@@ -35,7 +35,7 @@
         :class="[
           'label-button',
           predictedAs.includes(label.class) ? 'predicted-label' : null,
-          UXtest === 'fixed-mode' ? 'fixed-mode' : null,
+          UXtest === 'fixed' ? 'fixed' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
@@ -51,7 +51,7 @@
           >+{{ hiddenLabels.length }}</a
         >
         <a
-          v-else-if="visibleLabels.length > maxLabelsShown"
+          v-else-if="visibleLabels.length > maxVisibleLabels"
           href="#"
           class="feedback-interactions__more"
           @click.prevent="hideHiddenLabels()"
@@ -82,6 +82,9 @@ export default {
     maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
   }),
   computed: {
+    maxVisibleLabels() {
+      return DatasetViewSettings.MAX_VISIBLE_LABELS
+    },
     maxLabelsShown() {
       return Math.max(this.selectedLabels.length, this.maxLabels);
     },
@@ -190,7 +193,7 @@ export default {
       this.maxLabels = this.filteredLabels.length;
     },
     hideHiddenLabels() {
-      this.maxLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
+      this.maxLabels = maxVisibleLabels;
     },
     onSearchLabel(event) {
       this.searchText = event;
@@ -240,7 +243,7 @@ export default {
 }
 .label-button {
   @extend %item;
-  &.fixed-mode {
+  &.fixed {
     width: 24%;
     ::v-deep .annotation-button-data__info {
       margin-right: 0 !important;
