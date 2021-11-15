@@ -80,12 +80,9 @@ class RubrixClient:
         """Client setup function.
 
         Args:
-            api_url:
-                Address from which the API is serving.
-            api_key:
-                Authentication token.
-            timeout:
-                Seconds to considered a connection timeout.
+            api_url: Address from which the API is serving.
+            api_key: Authentication token.
+            timeout: Seconds to considered a connection timeout.
         """
 
         self._client = None  # Variable to store the client after the init
@@ -117,24 +114,20 @@ class RubrixClient:
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
+        verbose: bool = True,
     ) -> BulkResponse:
         """Log records to Rubrix.
 
         Args:
-            records:
-                The records to be logged.
-            name:
-                The dataset name.
-            tags:
-                A set of tags related to the dataset.
-            metadata:
-                A set of extra info for the dataset.
-            chunk_size:
-                Records are logged in chunks to the Rubrix server, this defines their sizes.
+            records: The records to be logged.
+            name: The dataset name.
+            tags: A set of tags related to the dataset.
+            metadata: A set of extra info for the dataset.
+            chunk_size: Records are logged in chunks to the Rubrix server, this defines their sizes.
+            verbose: If True, shows a progress bar and prints out a quick summary at the end.
 
         Returns:
             A summary response from the API.
-
         """
 
         if not name:
@@ -187,7 +180,7 @@ class RubrixClient:
 
         processed = 0
         failed = 0
-        progress_bar = tqdm(total=len(records))
+        progress_bar = tqdm(total=len(records), disable=not verbose)
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
 
@@ -209,7 +202,8 @@ class RubrixClient:
         progress_bar.close()
 
         # TODO: improve logging policy in library
-        print(f"{processed} records logged to {self._client.base_url + '/' + name}")
+        if verbose:
+            print(f"{processed} records logged to {self._client.base_url + '/' + name}")
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
@@ -225,16 +219,12 @@ class RubrixClient:
         """Load dataset data to a pandas DataFrame.
 
         Args:
-            name:
-                The dataset name.
-            query:
-                An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-            ids:
-                If provided, load dataset records with given ids.
-            limit:
-                The number of records to retrieve.
-            as_pandas:
-                If True, return a pandas DataFrame. If False, return a list of records.
+            name: The dataset name.
+            query: An ElasticSearch query with the
+                `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            ids: If provided, load dataset records with given ids.
+            limit: The number of records to retrieve.
+            as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
 
         Returns:
             The dataset as a pandas Dataframe, or a list of records.
@@ -300,8 +290,7 @@ class RubrixClient:
         """Delete a dataset with given name
 
         Args:
-            name:
-                The dataset name
+            name: The dataset name
         """
         response = delete_dataset(client=self._client, name=name)
         _check_response_errors(response)

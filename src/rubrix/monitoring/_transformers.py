@@ -14,8 +14,8 @@ try:
         Pipeline,
         TextClassificationPipeline,
         ZeroShotClassificationPipeline,
-        __version__ as _transformers_version,
     )
+    from transformers import __version__ as _transformers_version
 except ModuleNotFoundError:
     TextClassificationPipeline = MissingType
     Pipeline = MissingType
@@ -71,6 +71,7 @@ class HuggingFaceMonitor(BaseMonitor):
                 "task": self.__model__.task,
             },
             metadata=config.to_dict(),
+            verbose=False,
         )
         pass
 

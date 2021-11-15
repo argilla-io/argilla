@@ -3,7 +3,6 @@ import random
 
 import wrapt
 
-import rubrix
 from rubrix.monitoring.helpers import start_loop_in_thread
 
 _LOGGING_LOOP = None

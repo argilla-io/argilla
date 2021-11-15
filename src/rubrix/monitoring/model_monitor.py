@@ -4,7 +4,6 @@ from typing import Any
 
 from ._spacy import Language, ner_monitor
 from ._transformers import Pipeline, huggingface_monitor
-from .base import ModelNotSupportedError
 
 _LOGGER = logging.getLogger(__name__)
 

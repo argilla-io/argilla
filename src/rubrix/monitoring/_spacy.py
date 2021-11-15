@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 import rubrix as rb
 from rubrix import TokenClassificationRecord
-
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
@@ -43,7 +42,7 @@ class SpacyNERMonitor(BaseMonitor):
             metadata=metadata or {},
             prediction_agent=agent,
             prediction=entities,
-            event_timestamp=datetime.utcnow()
+            event_timestamp=datetime.utcnow(),
         )
 
     def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
@@ -55,6 +54,7 @@ class SpacyNERMonitor(BaseMonitor):
             name=self.dataset,
             tags={k: v for k, v in self.__wrapped__.meta.items() if isinstance(v, str)},
             metadata=self.__model__.meta,
+            verbose=False,
         )
 
     def pipe(self, *args, **kwargs):
