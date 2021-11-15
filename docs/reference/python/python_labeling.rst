@@ -11,11 +11,14 @@ Text classification
 
 Labeling tools for the text classification task.
 
-.. automodule:: rubrix.labeling.text_classification.weak_labels
-   :members:
-   :exclude-members: WeakLabelsError, MultiLabelError, MissingLabelError
-
 .. automodule:: rubrix.labeling.text_classification.rule
    :members:
    :special-members: __call__
    :exclude-members: RuleNotAppliedError
+
+.. automodule:: rubrix.labeling.text_classification.weak_labels
+   :members:
+   :exclude-members: WeakLabelsError, MultiLabelError, MissingLabelError
+
+.. automodule:: rubrix.labeling.text_classification.label_models
+   :members:
