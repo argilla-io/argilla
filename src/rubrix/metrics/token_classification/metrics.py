@@ -1,4 +1,5 @@
-from typing import Optional, TypeVar, Union
+from enum import Enum
+from typing import Optional, Union
 
 from rubrix import _client_instance as client
 from rubrix.metrics import helpers
@@ -43,8 +44,13 @@ def tokens_length(
     )
 
 
-Annotations = TypeVar("Annotations")
-Predictions = TypeVar("Predictions")
+class ComputeFor(str, Enum):
+    ANNOTATIONS = "annotations"
+    PREDICTIONS = "predictions"
+
+
+Annotations = ComputeFor.ANNOTATIONS
+Predictions = ComputeFor.PREDICTIONS
 
 _ACCEPTED_COMPUTE_FOR_VALUES = {
     Annotations: "annotated",
@@ -54,16 +60,17 @@ _ACCEPTED_COMPUTE_FOR_VALUES = {
 
 def _check_compute_for(compute_for) -> str:
     try:
+        compute_for = compute_for.lower().strip()
         return _ACCEPTED_COMPUTE_FOR_VALUES[compute_for]
     except KeyError:
-        raise f"Wrong compute_for value {compute_for}"
+        raise RuntimeError(f"Wrong value [{compute_for}] for compute_for arg")
 
 
 def mention_length(
     name: str,
     query: Optional[str] = None,
     level: str = "token",
-    compute_for: Union[Annotations, Predictions] = Predictions,
+    compute_for: Union[str, ComputeFor] = Predictions,
     interval: int = 1,
 ) -> MetricSummary:
     """Computes mentions length distribution (in number of tokens)
@@ -117,7 +124,7 @@ def mention_length(
 def entity_labels(
     name: str,
     query: Optional[str] = None,
-    compute_for: Union[Annotations, Predictions] = Predictions,
+    compute_for: Union[str, ComputeFor] = Predictions,
     labels: int = 50,
 ) -> MetricSummary:
     """Computes the entity labels distribution
@@ -163,7 +170,7 @@ def entity_labels(
 def entity_density(
     name: str,
     query: Optional[str] = None,
-    compute_for: Union[Annotations, Predictions] = Predictions,
+    compute_for: Union[str, ComputeFor] = Predictions,
     interval: float = 0.005,
 ) -> MetricSummary:
     """Computes the entity density distribution. Then entity density is calculated at
@@ -208,7 +215,7 @@ def entity_density(
 def entity_capitalness(
     name: str,
     query: Optional[str] = None,
-    compute_for: Union[Annotations, Predictions] = Predictions,
+    compute_for: Union[str, ComputeFor] = Predictions,
 ) -> MetricSummary:
     """Computes the entity capitalness. The entity capitalness splits the entity
     mention shape in 4 groups:
@@ -256,7 +263,7 @@ def entity_capitalness(
 def entity_consistency(
     name: str,
     query: Optional[str] = None,
-    compute_for: Union[Annotations, Predictions] = Predictions,
+    compute_for: Union[str, ComputeFor] = Predictions,
     mentions: int = 10,
     threshold: int = 2,
 ):

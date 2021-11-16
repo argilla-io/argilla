@@ -4,6 +4,7 @@ import pytest
 import rubrix
 import rubrix as rb
 from rubrix.metrics.token_classification import (
+    Annotations,
     entity_capitalness,
     entity_consistency,
     entity_density,
@@ -12,7 +13,6 @@ from rubrix.metrics.token_classification import (
     mention_length,
     tokens_length,
 )
-from rubrix.metrics.token_classification.metrics import Annotations
 from tests.server.test_helpers import client
 
 
@@ -108,6 +108,22 @@ def test_mentions_length(monkeypatch):
     assert results
     assert results.data == {"5.0": 4}
     results.visualize()
+
+
+def test_compute_for_as_string(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_compute_for_as_string"
+    log_some_data(dataset)
+
+    results = entity_density(dataset, compute_for="Predictions")
+    assert results
+    assert results.data == {"0.25": 4}
+    results.visualize()
+
+    with pytest.raises(
+        RuntimeError, match="Wrong value \[not-found\] for compute_for arg"
+    ):
+        entity_density(dataset, compute_for="not-found")
 
 
 def test_entity_density(monkeypatch):
