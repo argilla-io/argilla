@@ -42,19 +42,19 @@
         @change="updateLabels"
       >
       </ClassifierAnnotationButton>
-      <template v-if="visibleLabels.length >= maxLabelsShown">
+      <template v-if="visibleLabels.length >= shownLabels">
         <a
-          v-if="visibleLabels.length !== labels.length"
+          v-if="visibleLabels.length < filteredLabels.length"
           href="#"
           class="feedback-interactions__more"
-          @click.prevent="showHiddenLabels()"
-          >+{{ hiddenLabels.length }}</a
+          @click.prevent="expandLabels()"
+          >+{{ filteredLabels.length - visibleLabels.length }}</a
         >
         <a
-          v-else-if="visibleLabels.length > maxVisibleLabels"
+          v-else-if="visibleLabels.length !== maxVisibleLabels"
           href="#"
           class="feedback-interactions__more"
-          @click.prevent="hideHiddenLabels()"
+          @click.prevent="collapseLabels()"
           >Show less</a
         >
       </template>
@@ -79,14 +79,11 @@ export default {
   data: () => ({
     searchText: undefined,
     selectedLabels: [],
-    maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
   }),
   computed: {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
-    },
-    maxLabelsShown() {
-      return Math.max(this.selectedLabels.length, this.maxLabels);
     },
     datasetLabels() {
       const labels = {};
@@ -132,7 +129,7 @@ export default {
     },
     visibleLabels() {
       return this.filteredLabels.filter(
-        (l, idx) => l.selected || idx < this.maxLabelsShown
+        (l, idx) => l.selected || idx < this.shownLabels
       );
     },
     annotationLabels() {
@@ -140,11 +137,6 @@ export default {
     },
     predictionLabels() {
       return this.record.prediction ? this.record.prediction.labels : [];
-    },
-    hiddenLabels() {
-      return this.filteredLabels.filter(
-        (l, idx) => !l.selected && idx >= this.maxLabelsShown
-      );
     },
     appliedLabels() {
       return this.filteredLabels
@@ -180,11 +172,11 @@ export default {
     annotate() {
       this.$emit("validate", { labels: this.selectedLabels });
     },
-    showHiddenLabels() {
-      this.maxLabels = this.filteredLabels.length;
+    expandLabels() {
+      this.shownLabels = this.filteredLabels.length;
     },
-    hideHiddenLabels() {
-      this.maxLabels = this.maxVisibleLabels;
+    collapseLabels() {
+      this.shownLabels = this.maxVisibleLabels;
     },
     onSearchLabel(event) {
       this.searchText = event;
