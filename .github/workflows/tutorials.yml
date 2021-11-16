@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: 3.8.10
       - name: Install pytest and nbmake
-        run: pip install pytest nbmake
+        run: pip install pytest nbmake ipywidgets
       - name: Install Rubrix
         run: pip install -U git+https://github.com/recognai/rubrix.git
       - name: Run active learning tutorial
