@@ -93,3 +93,33 @@ def multilevel_pie(labels, parents, values, title: str = "Pie"):
     fig.update_layout(title=title, margin=dict(t=50, l=0, r=0, b=0))
 
     return fig
+
+
+def token_classification_f1(data: Dict[str, float], title: str):
+    from plotly.subplots import make_subplots
+
+    fig = make_subplots(
+        rows=1, cols=3, subplot_titles=["macro average", "micro average", "per label"]
+    )
+
+    fig.add_bar(
+        x=[k.split("_")[0] for k, v in data.items() if "macro" in k],
+        y=[v for k, v in data.items() if "macro" in k],
+        row=1,
+        col=1,
+    )
+    fig.add_bar(
+        x=[k.split("_")[0] for k, v in data.items() if "micro" in k],
+        y=[v for k, v in data.items() if "micro" in k],
+        row=1,
+        col=2,
+    )
+    fig.add_bar(
+        x=[k for k, v in data.items() if "macro" not in k and "micro" not in k],
+        y=[v for k, v in data.items() if "macro" not in k and "micro" not in k],
+        row=1,
+        col=3,
+    )
+    fig.update_layout(showlegend=False, title_text=title)
+
+    return fig
