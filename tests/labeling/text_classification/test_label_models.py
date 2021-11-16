@@ -77,9 +77,8 @@ def uninstall_snorkel(monkeypatch):
 
 
 def test_snorkel_not_installed(uninstall_snorkel):
-    with pytest.raises(ModuleNotFoundError) as error:
+    with pytest.raises(ModuleNotFoundError, match="pip install snorkel"):
         Snorkel(None)
-        assert "pip install snorkel" in str(error)
 
 
 def test_snorkel_init(weak_labels):
@@ -143,9 +142,8 @@ def test_snorkel_fit(
 @pytest.mark.parametrize("kwargs", [{"L_train": None}, {"Y_dev": None}])
 def test_snorkel_fit_automatically_added_kwargs(weak_labels, kwargs):
     label_model = Snorkel(weak_labels)
-    with pytest.raises(ValueError) as error:
+    with pytest.raises(ValueError, match="provided automatically"):
         label_model.fit(**kwargs)
-        assert "provided automatically" in str(error)
 
 
 @pytest.mark.parametrize(
@@ -252,9 +250,10 @@ def test_snorkel_score_without_annotations(weak_labels):
     weak_labels._annotation_array = np.array([], dtype=np.short)
     label_model = Snorkel(weak_labels)
 
-    with pytest.raises(label_models.MissingAnnotationError) as error:
+    with pytest.raises(
+        label_models.MissingAnnotationError, match="need annotated records"
+    ):
         label_model.score()
-        assert "need annotated records" in str(error)
 
 
 @pytest.fixture
