@@ -1,4 +1,5 @@
 import httpx
+import pytest
 
 import rubrix
 import rubrix as rb
@@ -140,4 +141,36 @@ def test_entity_consistency(monkeypatch):
             }
         ]
     }
+    results.visualize()
+
+
+@pytest.mark.parametrize(
+    ("metric", "expected_results"),
+    [
+        (entity_consistency, {"mentions": []}),
+        (mention_length, {}),
+        (entity_density, {}),
+        (entity_capitalness, {}),
+        (entity_labels, {}),
+    ],
+)
+def test_metrics_without_data(metric, expected_results, monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_metrics_without_data"
+    rb.delete(dataset)
+
+    text = "M"
+    tokens = text.split(" ")
+    rb.log(
+        rb.TokenClassificationRecord(
+            id=1,
+            text=text,
+            tokens=tokens,
+        ),
+        name=dataset,
+    )
+
+    results = metric(dataset)
+    assert results
+    assert results.data == expected_results
     results.visualize()

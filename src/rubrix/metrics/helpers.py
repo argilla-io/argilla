@@ -1,5 +1,23 @@
+from typing import Dict
+
+
+def empty_visualization(message: str = "No data found"):
+    import plotly.graph_objects as go
+
+    fig = go.Figure()
+    fig.update_layout(
+        xaxis={"visible": False},
+        yaxis={"visible": False},
+        annotations=[{"text": message, "showarrow": False, "font": {"size": 30}}],
+    )
+    return fig
+
+
 def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     import plotly.graph_objects as go
+
+    if not data:
+        return empty_visualization()
 
     keys, values = zip(*data.items())
     fig = go.Figure(data=go.Bar(y=values, x=keys))
@@ -11,13 +29,44 @@ def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     return fig
 
 
-def histogram(data, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
+def stacked_bar(
+    x: list,
+    y_s: Dict[str, list],
+    title: str = "Bar",
+    x_legend: str = "",
+    y_legend: str = "",
+):
+    import plotly.graph_objects as go
+
+    if not x or not y_s:
+        return empty_visualization()
+
+    data = [go.Bar(name=name, x=x, y=y_values) for name, y_values in y_s.items()]
+
+    fig = go.Figure(data=data)
+    fig.update_layout(
+        title=title,
+        xaxis_title=x_legend,
+        yaxis_title=y_legend,
+        barmode="stack",
+    )
+
+    return fig
+
+
+def histogram(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
+    if not data:
+        return empty_visualization()
+
     data = {float(k): v for k, v in data.items()}
     return bar(data, title, x_legend, y_legend)
 
 
 def tree_map(labels, parents, values, title: str = "Tree"):
     import plotly.graph_objects as go
+
+    if not values:  # TODO: review condition
+        return empty_visualization()
 
     fig = go.Figure(
         go.Treemap(
