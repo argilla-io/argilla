@@ -84,6 +84,10 @@ class TextClassificationDataset extends ObservationDataset {
     };
   }
 
+  get isMultiLabel() {
+    return this.results.records.some((r) => r.multi_label);
+  }
+
   get labels() {
     const { labels } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
     const aggregations = this.globalResults.aggregations;

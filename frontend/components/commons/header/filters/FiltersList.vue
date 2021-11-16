@@ -60,7 +60,15 @@
               @apply="onApply"
             />
           </span>
-          <a class="filters__list__button" href="#" v-if="initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1" @click.prevent="removeFiltersByGroup(group)">Remove all filters</a>
+          <a
+            v-if="
+              initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
+            "
+            class="filters__list__button"
+            href="#"
+            @click.prevent="removeFiltersByGroup(group)"
+            >Remove all filters</a
+          >
           <SortList
             v-if="initialVisibleGroup === 'Sort'"
             :sort-options="filterList"
@@ -156,8 +164,8 @@ export default {
         "Sort",
       ];
     },
-    isMultiLabelRecord() {
-      return this.dataset.results.records.some((record) => record.multi_label);
+    isMultiLabel() {
+      return this.dataset.isMultiLabel;
     },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
@@ -169,9 +177,11 @@ export default {
             options: aggregations[filter.key],
             selected: this.dataset.query[filter.key],
             disabled:
-              (filter.key === "annotated_as" && this.dataset.task === "Text2Text") ||
-              (filter.key === "predicted_as" && this.dataset.task === "Text2Text") ||
-              (filter.key === "score" && this.isMultiLabelRecord) ||
+              (filter.key === "annotated_as" &&
+                this.dataset.task === "Text2Text") ||
+              (filter.key === "predicted_as" &&
+                this.dataset.task === "Text2Text") ||
+              (filter.key === "score" && this.isMultiLabel) ||
               !aggregations[filter.key] ||
               !Object.entries(aggregations[filter.key]).length,
           };
@@ -209,7 +219,7 @@ export default {
     },
     itemsAppliedOnGroup(group) {
       if (group === "Sort") {
-        return this.dataset.sort.length
+        return this.dataset.sort.length;
       } else {
         return this.filterList
           .filter((f) => f.group === group)
