@@ -56,7 +56,8 @@ def test_metrics_for_text_classification(monkeypatch):
     results.visualize()
 
 
-def test_f1_without_results():
+def test_f1_without_results(monkeypatch):
+    mocking_client(monkeypatch)
     dataset = "test_f1_without_results"
     import rubrix as rb
 
