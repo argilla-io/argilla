@@ -128,9 +128,19 @@ export default {
       );
     },
     visibleLabels() {
-      return this.filteredLabels.filter(
-        (l, idx) => l.selected || idx < this.shownLabels
-      );
+      const selectedLabels = this.filteredLabels.filter(l => l.selected).length;
+      const availableNonSelected = this.shownLabels < this.filteredLabels.length ? this.shownLabels - selectedLabels : this.shownLabels;
+      let nonSelected = 0;
+      return this.filteredLabels.filter((l) => {
+        if (l.selected) {
+          return l
+        } else {
+          if (nonSelected < availableNonSelected) {
+            nonSelected++
+            return l
+          }
+        }
+      });
     },
     annotationLabels() {
       return this.record.annotation ? this.record.annotation.labels : [];
