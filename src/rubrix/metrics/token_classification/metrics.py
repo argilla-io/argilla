@@ -314,3 +314,36 @@ def entity_consistency(
             x=mentions, y_s=entities, title=metric.description
         ),
     )
+
+
+def f1(name: str, query: Optional[str] = None) -> MetricSummary:
+    """Computes F1 metrics for a dataset based on entity-level.
+
+    Args:
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+
+    Returns:
+        The F1 metric summary containing precision, recall and the F1 score (averaged and per label).
+
+    Examples:
+        >>> from rubrix.metrics.token_classification import f1
+        >>> summary = f1(name="example-dataset")
+        >>> summary.visualize() # will plot three bar charts with the results
+        >>> summary.data # returns the raw result data
+
+        To display the results as a table:
+
+        >>> import pandas as pd
+        >>> pd.DataFrame(summary.data.values(), index=summary.data.keys())
+    """
+    current_client = client()
+    metric = current_client.compute_metric(name, metric="F1", query=query)
+
+    return MetricSummary.new_summary(
+        data=metric.results,
+        visualization=lambda: helpers.token_classification_f1(
+            metric.results, metric.description
+        ),
+    )

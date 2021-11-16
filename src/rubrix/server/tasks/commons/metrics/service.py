@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, TypeVar
 
-import pandas as pd
 from fastapi import Depends
 
 from rubrix.server.commons.errors import EntityNotFoundError, WrongInputParamError

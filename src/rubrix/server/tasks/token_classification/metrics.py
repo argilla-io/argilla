@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, List, Tuple
+from typing import Any, ClassVar, Dict, Iterable, List, Set, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -9,6 +9,7 @@ from rubrix.server.tasks.commons.metrics.model.base import (
     BaseTaskMetrics,
     ElasticsearchMetric,
     NestedPathElasticsearchMetric,
+    PythonMetric,
 )
 from rubrix.server.tasks.token_classification import (
     EntitySpan,
@@ -160,7 +161,100 @@ class EntityConsistency(NestedPathElasticsearchMetric):
         return {"mentions": result}
 
 
-class TokenClassificationMetrics(BaseTaskMetrics):
+class F1Metric(PythonMetric[TokenClassificationRecord]):
+    """The F1 metric based on entity-level.
+
+    We follow the convention of `CoNLL 2003 <https://aclanthology.org/W03-0419/>`_, where:
+    `"precision is the percentage of named entities found by the learning system that are correct.
+    Recall is the percentage of named entities present in the corpus that are found by the system.
+    A named entity is correct only if it is an exact match (...).”`
+    """
+
+    def apply(self, records: Iterable[TokenClassificationRecord]) -> Dict[str, Any]:
+        # store entities per label in dicts
+        predicted_entities = {}
+        annotated_entities = {}
+
+        # extract entities per label to dicts
+        for rec in records:
+            if rec.prediction:
+                self._add_entities_to_dict(rec.prediction.entities, predicted_entities)
+            if rec.annotation:
+                self._add_entities_to_dict(rec.annotation.entities, annotated_entities)
+
+        # store precision, recall, and f1 per label
+        per_label_metrics = {}
+
+        annotated_total, predicted_total, correct_total = 0, 0, 0
+        precision_macro, recall_macro = 0, 0
+        for label, annotated in annotated_entities.items():
+            predicted = predicted_entities.get(label, set())
+            correct = len(annotated & predicted)
+
+            # safe divides are used to cover the 0/0 cases
+            precision = self._safe_divide(correct, len(predicted))
+            recall = self._safe_divide(correct, len(annotated))
+            per_label_metrics.update(
+                {
+                    f"{label}_precision": precision,
+                    f"{label}_recall": recall,
+                    f"{label}_f1": self._safe_divide(
+                        2 * precision * recall, precision + recall
+                    ),
+                }
+            )
+
+            annotated_total += len(annotated)
+            predicted_total += len(predicted)
+            correct_total += correct
+
+            precision_macro += precision / len(annotated_entities)
+            recall_macro += recall / len(annotated_entities)
+
+        # store macro and micro averaged precision, recall and f1
+        averaged_metrics = {
+            "precision_macro": precision_macro,
+            "recall_macro": recall_macro,
+            "f1_macro": self._safe_divide(
+                2 * precision_macro * recall_macro, precision_macro + recall_macro
+            ),
+        }
+
+        precision_micro = self._safe_divide(correct_total, predicted_total)
+        recall_micro = self._safe_divide(correct_total, annotated_total)
+        averaged_metrics.update(
+            {
+                "precision_micro": precision_micro,
+                "recall_micro": recall_micro,
+                "f1_micro": self._safe_divide(
+                    2 * precision_micro * recall_micro, precision_micro + recall_micro
+                ),
+            }
+        )
+
+        return {**averaged_metrics, **per_label_metrics}
+
+    @staticmethod
+    def _add_entities_to_dict(
+        entities: List[EntitySpan], dictionary: Dict[str, Set[Tuple[int, int]]]
+    ):
+        """Helper function for the apply method."""
+        for ent in entities:
+            try:
+                dictionary[ent.label].add((ent.start, ent.end))
+            except KeyError:
+                dictionary[ent.label] = {(ent.start, ent.end)}
+
+    @staticmethod
+    def _safe_divide(numerator, denominator):
+        """Helper function for the apply method."""
+        try:
+            return numerator / denominator
+        except ZeroDivisionError:
+            return 0
+
+
+class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
     """Configured metrics for token classification"""
 
     _PREDICTED_MENTIONS_NAMESPACE = "metrics.predicted.mentions"
@@ -416,4 +510,10 @@ class TokenClassificationMetrics(BaseTaskMetrics):
         ),
         *_PREDICTED_METRICS,
         *_ANNOTATED_METRICS,
+        F1Metric(
+            id="F1",
+            name="F1 Metric based on entity-level",
+            description="F1 metrics based on entity-level (averaged and per label), "
+            "where only exact matches count (CoNNL 2003).",
+        ),
     ]
