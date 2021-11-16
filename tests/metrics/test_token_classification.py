@@ -4,14 +4,15 @@ import pytest
 import rubrix
 import rubrix as rb
 from rubrix.metrics.token_classification import (
-    tokens_length,
-    mention_length,
-    entity_density,
     entity_capitalness,
     entity_consistency,
+    entity_density,
     entity_labels,
+    f1,
+    mention_length,
+    tokens_length,
 )
-from rubrix.metrics.token_classification.metrics import Annotations, Predictions
+from rubrix.metrics.token_classification.metrics import Annotations
 from tests.server.test_helpers import client
 
 
@@ -227,4 +228,39 @@ def test_metrics_without_data(metric, expected_results, monkeypatch):
     results = metric(dataset)
     assert results
     assert results.data == expected_results
+    results.visualize()
+
+
+def test_metrics_for_text_classification(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_metrics_for_token_classification"
+
+    text = "test the f1 metric of the token classification task"
+    rb.log(
+        rb.TokenClassificationRecord(
+            id=1,
+            text=text,
+            tokens=text.split(),
+            prediction=[("a", 0, 4), ("b", 5, 8), ("b", 9, 11)],
+            annotation=[("a", 0, 4), ("b", 5, 8), ("a", 9, 11)],
+        ),
+        name=dataset,
+    )
+
+    results = f1(dataset)
+    assert results
+    assert results.data == {
+        "f1_macro": pytest.approx(0.75),
+        "f1_micro": pytest.approx(0.6666666666666666),
+        "a_f1": pytest.approx(0.6666666666666666),
+        "a_precision": pytest.approx(1.0),
+        "a_recall": pytest.approx(0.5),
+        "b_f1": pytest.approx(0.6666666666666666),
+        "b_precision": pytest.approx(0.5),
+        "b_recall": pytest.approx(1.0),
+        "precision_macro": pytest.approx(0.75),
+        "precision_micro": pytest.approx(0.6666666666666666),
+        "recall_macro": pytest.approx(0.75),
+        "recall_micro": pytest.approx(0.6666666666666666),
+    }
     results.visualize()
