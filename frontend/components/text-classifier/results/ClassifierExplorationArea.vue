@@ -26,22 +26,21 @@
           :show-score="true"
         />
       </span>
-      <template v-if="visibleLabels.length >= shownLabels">
-        <a
-          v-if="visibleLabels.length < filteredLabels.length"
-          href="#"
-          class="predictions__more"
-          @click.prevent="expandLabels()"
-          >+{{ filteredLabels.length - visibleLabels.length }}</a
-        >
-        <a
-          v-else-if="visibleLabels.length !== maxVisibleLabels"
-          href="#"
-          class="predictions__more"
-          @click.prevent="collapseLabels()"
-          >Show less</a
-        >
-      </template>
+
+      <a
+        v-if="visibleLabels.length < filteredLabels.length"
+        href="#"
+        class="predictions__more"
+        @click.prevent="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</a
+      >
+      <a
+        v-else-if="visibleLabels.length > maxVisibleLabels"
+        href="#"
+        class="predictions__more"
+        @click.prevent="collapseLabels()"
+        >Show less</a
+      >
     </div>
   </div>
 </template>
