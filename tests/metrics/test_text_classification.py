@@ -54,3 +54,29 @@ def test_metrics_for_text_classification(monkeypatch):
         "per_label": {"spam": 1.0, "ham": 1.0},
     }
     results.visualize()
+
+
+def test_f1_without_results():
+    dataset = "test_f1_without_results"
+    import rubrix as rb
+
+    rb.log(
+        [
+            rb.TextClassificationRecord(
+                id=1,
+                inputs={"text": "my first rubrix example"},
+            ),
+            rb.TextClassificationRecord(
+                id=2,
+                inputs={"text": "my first rubrix example"},
+            ),
+        ],
+        name=dataset,
+    )
+
+    from rubrix.metrics.text_classification import f1
+
+    results = f1(dataset)
+    assert results
+    assert results.data == {}
+    results.visualize()
