@@ -42,22 +42,21 @@
         @change="updateLabels"
       >
       </ClassifierAnnotationButton>
-      <template v-if="visibleLabels.length >= shownLabels">
-        <a
-          v-if="visibleLabels.length < filteredLabels.length"
-          href="#"
-          class="feedback-interactions__more"
-          @click.prevent="expandLabels()"
-          >+{{ filteredLabels.length - visibleLabels.length }}</a
-        >
-        <a
-          v-else-if="visibleLabels.length !== maxVisibleLabels"
-          href="#"
-          class="feedback-interactions__more"
-          @click.prevent="collapseLabels()"
-          >Show less</a
-        >
-      </template>
+
+      <a
+        v-if="visibleLabels.length < filteredLabels.length"
+        href="#"
+        class="feedback-interactions__more"
+        @click.prevent="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</a
+      >
+      <a
+        v-else-if="visibleLabels.length > maxVisibleLabels"
+        href="#"
+        class="feedback-interactions__more"
+        @click.prevent="collapseLabels()"
+        >Show less</a
+      >
     </div>
   </div>
 </template>
@@ -85,37 +84,34 @@ export default {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
-    datasetLabels() {
-      const labels = {};
-      this.dataset.labels.forEach((label) => {
-        labels[label] = { score: 0, selected: false };
-      });
-      return labels;
-    },
     labels() {
-      const labelsDict = { ...this.datasetLabels };
-      let annotationLabels = this.annotationLabels.map((label) => {
-        return {
-          ...label,
+      // Setup all record labels
+      const labels = Object.assign(
+        {},
+        ...this.dataset.labels.map((label) => ({
+          [label]: { score: 0, selected: false },
+        }))
+      );
+      // Update info with annotated ones
+      this.annotationLabels.forEach((label) => {
+        labels[label.class] = {
+          score: 0,
           selected: true,
         };
       });
-
-      this.predictionLabels.concat(annotationLabels).forEach((label) => {
-        const predictionLabel = this.predictionLabels.find(
-          (l) => l.class === label.class
-        );
-        labelsDict[label.class] = {
-          score: predictionLabel ? predictionLabel.score : 0,
-          selected: label.selected,
+      // Update info with predicted ones
+      this.predictionLabels.forEach((label) => {
+        const currentLabel = labels[label.class] || label;
+        labels[label.class] = {
+          ...currentLabel,
+          score: label.score,
         };
       });
-
-      return Object.keys(labelsDict).map((label) => {
+      // Dict -> list
+      return Object.entries(labels).map(([key, value]) => {
         return {
-          class: label,
-          score: labelsDict[label].score,
-          selected: labelsDict[label].selected,
+          class: key,
+          ...value,
         };
       });
     },
@@ -128,16 +124,20 @@ export default {
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(l => l.selected).length;
-      const availableNonSelected = this.shownLabels < this.filteredLabels.length ? this.shownLabels - selectedLabels : this.shownLabels;
+      const selectedLabels = this.filteredLabels.filter((l) => l.selected)
+        .length;
+      const availableNonSelected =
+        this.shownLabels < this.filteredLabels.length
+          ? this.shownLabels - selectedLabels
+          : this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
         if (l.selected) {
-          return l
+          return l;
         } else {
           if (nonSelected < availableNonSelected) {
-            nonSelected++
-            return l
+            nonSelected++;
+            return l;
           }
         }
       });
