@@ -25,7 +25,7 @@ jobs:
         run: pip install -U git+https://github.com/recognai/rubrix.git
       - name: Setup Rubrix
         run: |
-          sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yml
-          docker-compose -f "docker-compose.yml" up -d --build
+          sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
+          docker-compose -f "docker-compose.yaml" up -d --build
       - name: Run active learning tutorial
         run: pytest --nbmake docs/tutorials/05-active_learning.ipynb
