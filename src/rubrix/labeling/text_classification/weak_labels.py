@@ -37,6 +37,7 @@ class WeakLabels:
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
 
     Raises:
+        NoRecordsFoundError: When the filtered dataset is empty.
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
         MissingLabelError: When provided with a ``label2int`` dict, and a
             weak label or annotation label is not present in its keys.
@@ -82,6 +83,14 @@ class WeakLabels:
         self._records: List[TextClassificationRecord] = load(
             dataset, query=query, ids=ids, as_pandas=False
         )
+        if not self._records:
+            raise NoRecordsFoundError(
+                f"No records found in dataset '{dataset}'"
+                + (f" with query '{query}'" if query else "")
+                + (" and" if query and ids else "")
+                + (f" with ids {ids}." if ids else ".")
+            )
+
         if self._records[0].multi_label:
             raise MultiLabelError(
                 "Multi-label text classification is not yet supported."
@@ -450,6 +459,10 @@ class WeakLabels:
 
 
 class WeakLabelsError(Exception):
+    pass
+
+
+class NoRecordsFoundError(WeakLabelsError):
     pass
 
 
