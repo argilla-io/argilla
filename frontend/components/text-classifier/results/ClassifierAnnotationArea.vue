@@ -83,7 +83,7 @@ export default {
   }),
   computed: {
     maxVisibleLabels() {
-      return DatasetViewSettings.MAX_VISIBLE_LABELS
+      return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     maxLabelsShown() {
       return Math.max(this.selectedLabels.length, this.maxLabels);
@@ -105,7 +105,9 @@ export default {
       });
 
       this.predictionLabels.concat(annotationLabels).forEach((label) => {
-        const predictionLabel= this.predictionLabels.find(l => l.class === label.class);
+        const predictionLabel = this.predictionLabels.find(
+          (l) => l.class === label.class
+        );
         labelsDict[label.class] = {
           score: predictionLabel ? predictionLabel.score : 0,
           selected: label.selected,
@@ -129,22 +131,9 @@ export default {
       );
     },
     visibleLabels() {
-      const selected = this.filteredLabels.filter((l) => l.selected);
-      let visible = this.filteredLabels.slice(0, this.maxLabelsShown);
-      const selectedVisibleItems = visible.filter((l) => l.selected);
-      const selectedHiddenItems = this.filteredLabels
-        .slice(this.maxLabelsShown)
-        .filter((l) => l.selected);
-      if (selectedVisibleItems.length >= selected.length) {
-        return visible;
-      } else {
-        visible.push(...selectedHiddenItems);
-        const removeItems = visible
-          .filter((l) => !l.selected)
-          .splice(0, selectedHiddenItems.length);
-        visible = visible.filter((item) => !removeItems.includes(item));
-        return visible
-      }
+      return this.filteredLabels.filter(
+        (l, idx) => l.selected || idx < this.maxLabelsShown
+      );
     },
     annotationLabels() {
       return this.record.annotation ? this.record.annotation.labels : [];
@@ -153,7 +142,9 @@ export default {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
     hiddenLabels() {
-      return this.filteredLabels.slice(this.maxLabelsShown);
+      return this.filteredLabels.filter(
+        (l, idx) => !l.selected && idx >= this.maxLabelsShown
+      );
     },
     appliedLabels() {
       return this.filteredLabels
@@ -165,7 +156,7 @@ export default {
     },
     UXtest() {
       return this.$route.query.UXtest;
-    }
+    },
   },
   watch: {
     appliedLabels(o, n) {
