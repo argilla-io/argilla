@@ -416,6 +416,38 @@ class WeakLabels:
 
         return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
 
+    def change_mapping(self, label2int: Dict[str, int]):
+        """Allows you to change the mapping between labels and integers.
+
+        This will update the ``self.matrix`` as well as the ``self.annotation``.
+
+        Args:
+            label2int: New label to integer mapping. Must cover all previous labels.
+        """
+        # Check new label2int mapping
+        for label in self._label2int:
+            if label not in label2int:
+                raise MissingLabelError(
+                    f"The label '{label}' is missing in the new mapping."
+                )
+
+        # swap integers
+        for label in self._label2int:
+            self._matrix = np.where(
+                self._matrix == self._label2int[label],
+                label2int[label],
+                self._matrix,
+            )
+            self._annotation_array = np.where(
+                self._annotation_array == self._label2int[label],
+                label2int[label],
+                self._annotation_array,
+            )
+
+        # update mapping dicts
+        self._label2int = label2int.copy()
+        self._int2label = {val: key for key, val in self._label2int.items()}
+
 
 class WeakLabelsError(Exception):
     pass
