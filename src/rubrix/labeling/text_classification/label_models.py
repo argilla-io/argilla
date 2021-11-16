@@ -256,9 +256,5 @@ class Snorkel(LabelModel):
         return metrics
 
 
-class LabelModelError(Exception):
-    pass
-
-
-class MissingAnnotationError(LabelModelError):
+class MissingAnnotationError(Exception):
     pass

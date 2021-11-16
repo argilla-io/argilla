@@ -18,7 +18,7 @@ Labeling tools for the text classification task.
 
 .. automodule:: rubrix.labeling.text_classification.weak_labels
    :members:
-   :exclude-members: WeakLabelsError, MultiLabelError, MissingLabelError
+   :exclude-members: WeakLabelsError, NoRecordsFoundError, MultiLabelError, MissingLabelError
 
 .. automodule:: rubrix.labeling.text_classification.label_models
    :members:
