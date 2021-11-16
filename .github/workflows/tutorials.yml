@@ -1,0 +1,31 @@
+name: Tutorials
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  setup:
+    name: Setup Rubrix
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.8.10
+      - name: Install pytest and nbmake
+        run: pip install pytest nbmake
+      - name: Install Rubrix
+        run: pip install -U git+https://github.com/recognai/rubrix.git
+      - name: Setup Rubrix
+        run: |
+          sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yml
+          docker-compose -f "docker-compose.yml" up -d --build
+      - name: Run active learning tutorial
+        run: pytest --nbmake docs/tutorials/05-active_learning.ipynb
