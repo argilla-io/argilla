@@ -25,7 +25,7 @@
         >{{ label.class }}
       </span>
       <div
-        v-if="!label.selected && label.score > 0"
+        v-if="label.score > 0"
         class="annotation-button-data__info"
       >
         <span>{{ label.score | percent }}</span>
@@ -111,7 +111,7 @@ $annotation-button-touch-size: 48px;
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
-    border-radius: 7px;
+    border-radius: 8px;
     .button {
       outline: none;
       cursor: pointer;
@@ -177,7 +177,7 @@ $annotation-button-touch-size: 48px;
         animation: pulse-font 0.5s;
       }
       .annotation-button-data__info {
-        display: none;
+        color: $lighter-color;
       }
     }
     .annotation-button-data {

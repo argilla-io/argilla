@@ -159,7 +159,7 @@ export default {
   &__labels {
     position: relative;
     margin-left: 2em;
-    width: 200px;
+    width: 300px;
     display: block;
     height: 100%;
     overflow: auto;

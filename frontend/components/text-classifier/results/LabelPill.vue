@@ -65,7 +65,7 @@ export default {
   height: 40px;
   line-height: 40px;
   color: $lighter-color;
-  border-radius: 3px;
+  border-radius: 8px;
   padding: 0.2em 0.5em;
   @include font-size(14px);
   border: 1px solid transparent;

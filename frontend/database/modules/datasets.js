@@ -162,6 +162,7 @@ function _displayQueryParams({ query, sort, enableAnnotation, pagination }) {
 
   $nuxt.$router.push({
     query: {
+      ...$nuxt.$route.query,
       query: Base64.encodeURI(JSON.stringify(query)),
       sort: Base64.encodeURI(JSON.stringify(sort)),
       allowAnnotation: enableAnnotation,

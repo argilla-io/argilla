@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div v-if="labels.length">
-    <label-search v-if="labels.length >= maxLabels" @input="onSearchLabel" />
+  <div v-if="labels.length" class="exploration-area">
+    <label-search v-if="labels.length >= shownLabels" @input="onSearchLabel" />
     <div class="predictions">
       <span v-for="label in visibleLabels" :key="label.index">
         <LabelPill
@@ -26,22 +26,21 @@
           :show-score="true"
         />
       </span>
-      <template v-if="visibleLabels.length >= maxLabels">
-        <a
-          v-if="visibleLabels.length !== labels.length"
-          href="#"
-          class="predictions__more"
-          @click.prevent="showHiddenLabels()"
-          >+{{ hiddenLabels.length }}</a
-        >
-        <a
-          v-else
-          href="#"
-          class="predictions__more"
-          @click.prevent="hideHiddenLabels()"
-          >Show less</a
-        >
-      </template>
+
+      <a
+        v-if="visibleLabels.length < filteredLabels.length"
+        href="#"
+        class="predictions__more"
+        @click.prevent="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</a
+      >
+      <a
+        v-else-if="visibleLabels.length > maxVisibleLabels"
+        href="#"
+        class="predictions__more"
+        @click.prevent="collapseLabels()"
+        >Show less</a
+      >
     </div>
   </div>
 </template>
@@ -56,11 +55,14 @@ export default {
   },
   data: () => ({
     searchText: undefined,
-    maxLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
   }),
   computed: {
     labels() {
       return this.record.prediction ? this.record.prediction.labels : [];
+    },
+    maxVisibleLabels() {
+      return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     filteredLabels() {
       return this.labels.filter((label) =>
@@ -68,24 +70,18 @@ export default {
       );
     },
     visibleLabels() {
-      return this.filteredLabels.slice(0, this.maxLabels);
+      return this.filteredLabels.slice(0, this.shownLabels);
     },
     predictedAs() {
       return this.record.predicted_as;
     },
-    hiddenLabels() {
-      let labels = this.filteredLabels.slice(this.maxLabels);
-      return labels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText)
-      );
-    },
   },
   methods: {
-    showHiddenLabels() {
-      this.maxLabels = this.filteredLabels.length;
+    expandLabels() {
+      this.shownLabels = this.filteredLabels.length;
     },
-    hideHiddenLabels() {
-      this.maxLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
+    collapseLabels() {
+      this.shownLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     onSearchLabel(event) {
       this.searchText = event;
@@ -94,8 +90,10 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.exploration-area {
+  margin-top: 2em;
+}
 .predictions {
-  margin-top: 1.5em;
   display: flex;
   flex-wrap: wrap;
   &__more {
