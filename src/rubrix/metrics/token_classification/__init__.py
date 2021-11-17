@@ -6,4 +6,7 @@ from .metrics import (
     f1,
     mention_length,
     tokens_length,
+    ComputeFor,
+    Annotations,
+    Predictions,
 )
