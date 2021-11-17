@@ -121,7 +121,8 @@ def test_compute_for_as_string(monkeypatch):
     results.visualize()
 
     with pytest.raises(
-        RuntimeError, match="Wrong value \[not-found\] for compute_for arg"
+        ValueError,
+        match="not-found is not a valid ComputeFor, please select one of \['annotations', 'predictions'\]",
     ):
         entity_density(dataset, compute_for="not-found")
 

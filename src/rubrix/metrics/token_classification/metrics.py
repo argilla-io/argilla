@@ -44,9 +44,15 @@ def tokens_length(
     )
 
 
-class ComputeFor(str, Enum):
+class ComputeFor(Enum):
     ANNOTATIONS = "annotations"
     PREDICTIONS = "predictions"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
 
 
 Annotations = ComputeFor.ANNOTATIONS
@@ -58,12 +64,13 @@ _ACCEPTED_COMPUTE_FOR_VALUES = {
 }
 
 
-def _check_compute_for(compute_for) -> str:
-    try:
+def _check_compute_for(compute_for: Union[str, ComputeFor]) -> str:
+    if not compute_for:
+        compute_for = Predictions
+    if isinstance(compute_for, str):
         compute_for = compute_for.lower().strip()
-        return _ACCEPTED_COMPUTE_FOR_VALUES[compute_for]
-    except KeyError:
-        raise RuntimeError(f"Wrong value [{compute_for}] for compute_for arg")
+        compute_for = ComputeFor(compute_for)
+    return _ACCEPTED_COMPUTE_FOR_VALUES[compute_for]
 
 
 def mention_length(
