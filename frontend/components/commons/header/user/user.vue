@@ -12,9 +12,10 @@
         <div :class="[currentWorkspace === user.username ? 'active' : null, 'user__workspace__circle']">{{firstChar(user.username)}}</div>
         <p class="user__workspace__name">{{user.username}}<span>Private Workspace</span></p>
       </a>
+      <p v-if="user.workspaces">Team workspaces</p>
       <a href="#" @click="selectWorkspace(workspace)" class="user__workspace" v-for="workspace in user.workspaces" :key="workspace">
         <div :class="[currentWorkspace === workspace ? 'active' : null, 'user__workspace__circle']">{{firstChar(workspace)}}</div>
-        <p class="user__workspace__name">{{workspace}}<span>Team workspace</span></p>
+        <p class="user__workspace__name">{{workspace}}</p>
       </a>
       <a class="user__logout"
       href="#"
@@ -112,13 +113,22 @@ $buttonSize: 30px;
     margin-top: 0;
   }
   &__logout {
+    display: block;
     @include font-size(14px);
+    margin-top: 0.5em;
   }
   &__workspace {
     display: flex;
     align-items: center;
-    margin-bottom: 1em;
     outline: none !important;
+    padding: 0.7em;
+    margin: 0 -0.5em 0 -0.5em;
+    transition: background-color 0.3s ease-in-out;
+    border-radius: 3px;
+    &:hover {
+      background: #F5F5F5;
+      transition: background-color 0.3s ease-in-out;
+    }
     &__circle {
       @extend %circle;
       margin-right: 0.7em;
