@@ -22,6 +22,29 @@ import { Notification } from "@/models/Notifications";
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
 
+  $axios.interceptors.request.use((config) => {
+    const currentUser = app.$auth.user;
+
+    if (!currentUser) {
+      return config;
+    }
+
+    const currentWorkspace = app.$auth.$storage.getUniversal(
+      "current_workspace"
+    );
+
+    if (currentUser.username !== currentWorkspace) {
+      var wsQueryParam = "workspace=" + currentWorkspace;
+      if (config.url.includes("?")) {
+        wsQueryParam = "&" + wsQueryParam;
+      } else wsQueryParam = "?" + wsQueryParam;
+
+      config.url += wsQueryParam;
+    }
+
+    return config;
+  });
+
   $axios.onError((error) => {
     const code = parseInt(error.response && error.response.status);
     if (error instanceof ExpiredAuthSessionError || [401, 403].includes(code)) {
