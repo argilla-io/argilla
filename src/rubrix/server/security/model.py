@@ -61,14 +61,15 @@ class User(BaseModel):
             Original workspace names if user belongs to them
 
         """
+        workspaces = [w for w in workspaces or [] if w]
         if workspaces:
             for workspace in workspaces:
                 self.check_workspace(workspace)
             return workspaces
 
-        if self.workspaces is None:
+        if self.workspaces is None:  # Super user
             return []
-        return self.workspaces + [self.default_workspace]
+        return [self.default_workspace]
 
     def check_workspace(self, workspace: str) -> str:
         """
