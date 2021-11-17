@@ -4,16 +4,16 @@
     href="#"
     @click.prevent="showSelector()"
     >
-    {{firstChar(user.current_workspace ? user.current_workspace : user.username )}}
+    {{firstChar(currentWorkspace)}}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
       <p class="user__mail">{{user.email}}</p>
       <a href="#" @click="selectWorkspace(user.username)" class="user__workspace">
-        <div class="user__workspace__circle private">{{firstChar(user.username)}}</div>
+        <div :class="[currentWorkspace === user.username ? 'active' : null, 'user__workspace__circle']">{{firstChar(user.username)}}</div>
         <p class="user__workspace__name">{{user.username}}<span>Private Workspace</span></p>
       </a>
       <a href="#" @click="selectWorkspace(workspace)" class="user__workspace" v-for="workspace in user.workspaces" :key="workspace">
-        <div class="user__workspace__circle">{{firstChar(workspace)}}</div>
+        <div :class="[currentWorkspace === workspace ? 'active' : null, 'user__workspace__circle']">{{firstChar(workspace)}}</div>
         <p class="user__workspace__name">{{workspace}}<span>Team workspace</span></p>
       </a>
       <a class="user__logout"
@@ -36,6 +36,9 @@ export default {
   computed: {
     user() {
       return this.$auth.user;
+    },
+    currentWorkspace() {
+      return this.user.current_workspace ? this.user.current_workspace : this.user.username;
     }
   },
   methods: {
@@ -121,7 +124,7 @@ $buttonSize: 30px;
       margin-right: 0.7em;
       background: palette(grey, dark);
       color: $lighter-color;
-      &.private {
+      &.active {
         background: $primary-color;
       }
     }
