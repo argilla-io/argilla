@@ -96,9 +96,13 @@ export default {
 .predictions {
   display: flex;
   flex-wrap: wrap;
+  @include media(">desktopLarge") {
+    max-width: calc(60% + 200px);
+    margin-left: 0;
+  }
   &__more {
     align-self: center;
-    margin: 2.5px;
+    margin: 3.5px;
     text-decoration: none;
     font-weight: 600;
     outline: none;
@@ -108,7 +112,7 @@ export default {
     display: inline-block;
     &:hover {
       transition: all 0.2s ease-in-out;
-      background: palette(grey, smooth);
+      background: palette(grey, bg);
     }
   }
 }

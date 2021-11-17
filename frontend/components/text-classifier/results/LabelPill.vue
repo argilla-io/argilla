@@ -69,7 +69,7 @@ export default {
   padding: 0.2em 0.5em;
   @include font-size(14px);
   border: 1px solid transparent;
-  margin: 2.5px;
+  margin: 3.5px;
   font-weight: 600;
 }
 

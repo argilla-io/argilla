@@ -106,17 +106,16 @@ $annotation-button-touch-size: 48px;
     display: none;
   }
   &.label-button {
-    margin: 2.5px;
+    margin: 3.5px;
     color: $font-secondary-dark;
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
-    border-radius: 8px;
     .button {
       outline: none;
       cursor: pointer;
-      border-radius: 5px;
       background: #F0F0FE;
+      border-radius: 8px;
       height: 40px;
       line-height: 40px;
       padding-left: 0.5em;
@@ -137,7 +136,7 @@ $annotation-button-touch-size: 48px;
     &.active {
       transition: all 0.02s ease-in-out;
       box-shadow: none; // Animate the size, outside
-      animation: pulse 0.4s;
+      // animation: pulse 0.4s;
       transform: scale3d(1, 1, 1);
       -webkit-font-smoothing: antialiased;
       transform: translate3d(1, 1, 1); // z-index: 1;
@@ -174,7 +173,7 @@ $annotation-button-touch-size: 48px;
       .annotation-button-data__text,
       .annotation-button-data__score {
         color: $lighter-color;
-        animation: pulse-font 0.5s;
+        // animation: pulse-font 0.5s;
       }
       .annotation-button-data__info {
         color: $lighter-color;

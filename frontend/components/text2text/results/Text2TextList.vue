@@ -468,7 +468,7 @@ $marginRight: 200px;
       background: transparent;
       transition: all 0.2s ease-in-out;
       &:hover {
-        background: palette(grey, smooth);
+        background: palette(grey, bg);
         transition: all 0.2s ease-in-out;
       }
       &.disabled {

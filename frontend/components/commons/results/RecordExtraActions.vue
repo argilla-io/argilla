@@ -152,7 +152,7 @@ export default {
       }
       &:hover {
         transition: background 0.3s ease-in-out;
-        background: palette(grey, smooth);
+        background: palette(grey, bg);
       }
     }
   }
