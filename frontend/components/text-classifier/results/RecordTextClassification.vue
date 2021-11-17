@@ -54,7 +54,6 @@
       <re-tag
         v-for="label in record.annotation.labels"
         :key="label.class"
-        bg-color="#f5f5f6"
         :name="label.class"
       />
     </div>

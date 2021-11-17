@@ -22,8 +22,7 @@
       @input="onSearchLabel"
     />
     <div
-      :class="['feedback-interactions']"
-      class="feedback-interactions__items"
+      :class="[UXtest === 'fixed' ? 'fixed' : null, 'feedback-interactions']"
     >
       <ClassifierAnnotationButton
         v-for="label in visibleLabels"
@@ -209,21 +208,18 @@ export default {
 .feedback-interactions {
   margin: 0 auto 0 auto;
   padding-right: 0;
-  // & > div {
-  //   width: 100%;
-  // }
-  &__items {
-    // display: flex;
-    // flex-flow: wrap;
-    // margin-left: -1%;
-    // margin-right: -1%;
-    .list__item--annotation-mode & {
-      padding-right: 200px;
+  &:not(.fixed) {
+    @include media(">desktopLarge") {
+      max-width: calc(60% + 200px);
+      margin-left: 0;
     }
+  }
+  .list__item--annotation-mode & {
+    padding-right: 200px;
   }
   &__more {
     align-self: center;
-    margin: 2.5px;
+    margin: 3.5px;
     text-decoration: none;
     font-weight: 600;
     outline: none;
@@ -233,7 +229,7 @@ export default {
     display: inline-block;
     &:hover {
       transition: all 0.2s ease-in-out;
-      background: palette(grey, smooth);
+      background: palette(grey, bg);
     }
   }
 }
