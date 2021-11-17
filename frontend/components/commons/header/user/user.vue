@@ -1,28 +1,46 @@
 <template>
-  <div class="user" v-click-outside="close" v-if="$auth.loggedIn">
-    <a class="user__button"
-    href="#"
-    @click.prevent="showSelector()"
-    >
-    {{firstChar(currentWorkspace)}}
+  <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
+    <a class="user__button" href="#" @click.prevent="showSelector()">
+      {{ firstChar(currentWorkspace) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
-      <p class="user__mail">{{user.email}}</p>
-      <a href="#" @click="selectWorkspace(user.username)" class="user__workspace">
-        <div :class="[currentWorkspace === user.username ? 'active' : null, 'user__workspace__circle']">{{firstChar(user.username)}}</div>
-        <p class="user__workspace__name">{{user.username}}<span>Private Workspace</span></p>
+      <p class="user__mail">{{ user.email }}</p>
+      <a
+        href="#"
+        class="user__workspace"
+        @click="selectWorkspace(user.username)"
+      >
+        <div
+          :class="[
+            currentWorkspace === user.username ? 'active' : null,
+            'user__workspace__circle',
+          ]"
+        >
+          {{ firstChar(user.username) }}
+        </div>
+        <p class="user__workspace__name">
+          {{ user.username }}<span>Private Workspace</span>
+        </p>
       </a>
       <p v-if="user.workspaces">Team workspaces</p>
-      <a href="#" @click="selectWorkspace(workspace)" class="user__workspace" v-for="workspace in user.workspaces" :key="workspace">
-        <div :class="[currentWorkspace === workspace ? 'active' : null, 'user__workspace__circle']">{{firstChar(workspace)}}</div>
-        <p class="user__workspace__name">{{workspace}}</p>
-      </a>
-      <a class="user__logout"
-      href="#"
-      @click.prevent="logout()"
+      <a
+        v-for="workspace in user.workspaces"
+        :key="workspace"
+        href="#"
+        class="user__workspace"
+        @click="selectWorkspace(workspace)"
       >
-      Log out
+        <div
+          :class="[
+            currentWorkspace === workspace ? 'active' : null,
+            'user__workspace__circle',
+          ]"
+        >
+          {{ firstChar(workspace) }}
+        </div>
+        <p class="user__workspace__name">{{ workspace }}</p>
       </a>
+      <a class="user__logout" href="#" @click.prevent="logout()"> Log out </a>
     </div>
   </div>
 </template>
@@ -31,7 +49,7 @@
 export default {
   data: () => {
     return {
-      visibleSelector: false
+      visibleSelector: false,
     };
   },
   computed: {
@@ -39,8 +57,11 @@ export default {
       return this.$auth.user;
     },
     currentWorkspace() {
-      return this.$auth.$storage.syncUniversal('current_workspace') || this.user.username;
-    }
+      return this.$auth.$storage.syncUniversal(
+        "current_workspace",
+        this.user.username
+      );
+    },
   },
   methods: {
     firstChar(name) {
@@ -55,12 +76,13 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      this.$auth.$storage.removeUniversal('current_workspace')
+      await this.$auth.$storage.removeUniversal("current_workspace");
     },
     async selectWorkspace(workspace) {
-      this.$auth.$storage.setUniversal('current_workspace', workspace)
-    }
-  }
+      console.log(workspace);
+      await this.$auth.$storage.setUniversal("current_workspace", workspace);
+    },
+  },
 };
 </script>
 
@@ -127,7 +149,7 @@ $buttonSize: 30px;
     transition: background-color 0.3s ease-in-out;
     border-radius: 3px;
     &:hover {
-      background: #F5F5F5;
+      background: #f5f5f5;
       transition: background-color 0.3s ease-in-out;
     }
     &__circle {
@@ -154,4 +176,3 @@ $buttonSize: 30px;
   }
 }
 </style>
-
