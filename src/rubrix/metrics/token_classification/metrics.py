@@ -9,15 +9,13 @@ from rubrix.metrics.models import MetricSummary
 def tokens_length(
     name: str, query: Optional[str] = None, interval: int = 1
 ) -> MetricSummary:
-    """Computes the tokens length distribution
+    """Computes the text length distribution measured in number of tokens.
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        interval:
-            The bins or bucket for result histogram
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        interval: The bins or bucket for result histogram
 
     Returns:
         The summary for token distribution
@@ -80,20 +78,16 @@ def mention_length(
     compute_for: Union[str, ComputeFor] = Predictions,
     interval: int = 1,
 ) -> MetricSummary:
-    """Computes mentions length distribution (in number of tokens)
+    """Computes mentions length distribution (in number of tokens).
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        level:
-            The mention length level. Accepted values are "token" and "char"
-        compute_for:
-            Metric can be computed for annotations or predictions. Accepted values are
-            ``Annotations`` and ``Predictions``. Default to ``Predictions``
-        interval:
-            The bins or bucket for result histogram
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        level: The mention length level. Accepted values are "token" and "char"
+        compute_for: Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Defaults to ``Predictions``.
+        interval: The bins or bucket for result histogram
 
     Returns:
         The summary for mention token distribution
@@ -137,15 +131,12 @@ def entity_labels(
     """Computes the entity labels distribution
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        compute_for:
-            Metric can be computed for annotations or predictions. Accepted values are
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
-        labels:
-            The number of top entities to retrieve. Lower numbers will be better performants
+        labels: The number of top entities to retrieve. Lower numbers will be better performants
 
     Returns:
         The summary for entity tags distribution
@@ -184,15 +175,12 @@ def entity_density(
     record level for each mention as ``mention_length/tokens_length``
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        compute_for:
-            Metric can be computed for annotations or predictions. Accepted values are
-            ``Annotations`` and ``Predictions``. Default to ``Predictions``
-        interval:
-            The interval for histogram. The entity density is defined in the range 0-1
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        compute_for: Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``.
+        interval: The interval for histogram. The entity density is defined in the range 0-1.
 
     Returns:
         The summary entity density distribution
@@ -224,8 +212,7 @@ def entity_capitalness(
     query: Optional[str] = None,
     compute_for: Union[str, ComputeFor] = Predictions,
 ) -> MetricSummary:
-    """Computes the entity capitalness. The entity capitalness splits the entity
-    mention shape in 4 groups:
+    """Computes the entity capitalness. The entity capitalness splits the entity mention shape in 4 groups:
 
         ``UPPER``: All charactes in entity mention are upper case
 
@@ -236,13 +223,11 @@ def entity_capitalness(
         ``MIDDLE``: Some character in mention between first and last is capitalized
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        compute_for:
-            Metric can be computed for annotations or predictions. Accepted values are
-            ``Annotations`` and ``Predictions``. Default to ``Predictions``
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        compute_for: Metric can be computed for annotations or predictions. Accepted values are
+            ``Annotations`` and ``Predictions``. Default to ``Predictions``.
     Returns:
         The summary entity capitalness distribution
 
@@ -281,17 +266,13 @@ def entity_consistency(
     `Person` in the dataset.
 
     Args:
-        name:
-            The dataset name.
-        query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
-        compute_for:
-            Metric can be computed for annotations or predictions. Accepted values are
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
-        mentions:
-            The number of top mentions to retrieve
-        threshold:
-            The entity variability threshold (Must be greater or equal to 2)
+        mentions: The number of top mentions to retrieve.
+        threshold: The entity variability threshold (must be greater or equal to 2).
 
     Returns:
         The summary entity capitalness distribution
