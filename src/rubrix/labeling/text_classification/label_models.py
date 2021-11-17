@@ -227,6 +227,9 @@ class Snorkel(LabelModel):
 
         Returns:
             A list of records that include the predictions of the label model.
+
+        Raises:
+            MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
         if self._weak_labels.annotation().size == 0:
             raise MissingAnnotationError(
@@ -256,9 +259,5 @@ class Snorkel(LabelModel):
         return metrics
 
 
-class LabelModelError(Exception):
-    pass
-
-
-class MissingAnnotationError(LabelModelError):
+class MissingAnnotationError(Exception):
     pass

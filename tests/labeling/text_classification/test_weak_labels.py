@@ -28,6 +28,7 @@ from rubrix.labeling.text_classification.rule import Rule
 from rubrix.labeling.text_classification.weak_labels import (
     MissingLabelError,
     MultiLabelError,
+    NoRecordsFoundError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -88,7 +89,7 @@ def rules(monkeypatch) -> List[Callable]:
     return [first_rule, rule2, rubrix_rule]
 
 
-def test_multi_label_error(monkeypatch, rules):
+def test_multi_label_error(monkeypatch):
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(inputs="test", multi_label=True)]
 
@@ -97,7 +98,35 @@ def test_multi_label_error(monkeypatch, rules):
     )
 
     with pytest.raises(MultiLabelError):
-        WeakLabels(rules, dataset="mock")
+        WeakLabels(rules=[], dataset="mock")
+
+
+def test_no_records_found_error(monkeypatch):
+    def mock_load(*args, **kwargs):
+        return []
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    with pytest.raises(
+        NoRecordsFoundError, match="No records found in dataset 'mock'."
+    ):
+        WeakLabels(rules=[], dataset="mock")
+    with pytest.raises(
+        NoRecordsFoundError,
+        match="No records found in dataset 'mock' with query 'mock'.",
+    ):
+        WeakLabels(rules=[], dataset="mock", query="mock")
+    with pytest.raises(
+        NoRecordsFoundError, match="No records found in dataset 'mock' with ids \[-1\]."
+    ):
+        WeakLabels(rules=[], dataset="mock", ids=[-1])
+    with pytest.raises(
+        NoRecordsFoundError,
+        match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
+    ):
+        WeakLabels(rules=[], dataset="mock", query="mock", ids=[-1])
 
 
 @pytest.mark.parametrize(
