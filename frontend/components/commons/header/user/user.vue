@@ -39,7 +39,7 @@ export default {
       return this.$auth.user;
     },
     currentWorkspace() {
-      return this.user.current_workspace ? this.user.current_workspace : this.user.username;
+      return this.$auth.$storage.syncUniversal('current_workspace') || this.user.username;
     }
   },
   methods: {
@@ -55,9 +55,10 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
+      this.$auth.$storage.removeUniversal('current_workspace')
     },
     async selectWorkspace(workspace) {
-      this.$auth.setUser({ ...this.user, current_workspace: workspace });
+      this.$auth.$storage.setUniversal('current_workspace', workspace)
     }
   }
 };
