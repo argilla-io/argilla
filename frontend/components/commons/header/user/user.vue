@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   data: () => {
     return {
@@ -57,13 +58,13 @@ export default {
       return this.$auth.user;
     },
     currentWorkspace() {
-      return this.$auth.$storage.syncUniversal(
-        "current_workspace",
-        this.user.username
-      );
+      return this.$auth.user.current_workspace || this.$auth.user.username
     },
   },
   methods: {
+    ...mapActions({
+      fetchDatasets: "entities/datasets/fetchAll",
+    }),
     firstChar(name) {
       return name.charAt(0);
     },
@@ -76,11 +77,17 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      await this.$auth.$storage.removeUniversal("current_workspace");
+      await this.$auth.$storage.removeUniversal("user");
     },
     async selectWorkspace(workspace) {
-      console.log(workspace);
-      await this.$auth.$storage.setUniversal("current_workspace", workspace);
+      if (this.currentWorkspace !== workspace) {
+        const user = {
+          ...this.$auth.user,
+          current_workspace: workspace
+        }
+        await this.$auth.$storage.setUniversal("user", user);
+        await this.fetchDatasets()
+      }
     },
   },
 };
