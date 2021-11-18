@@ -33,7 +33,7 @@ export default ({ $axios, app }) => {
       "current_workspace"
     );
 
-    if (currentUser.username !== currentWorkspace) {
+    if (currentWorkspace && currentUser.username !== currentWorkspace) {
       var wsQueryParam = "workspace=" + currentWorkspace;
       if (config.url.includes("?")) {
         wsQueryParam = "&" + wsQueryParam;
