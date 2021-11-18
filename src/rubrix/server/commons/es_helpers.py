@@ -164,7 +164,7 @@ def parse_aggregations(
                         value = metric_values[0] if len(metric_values) == 1 else metric
                         key_metrics[metric_key] = value
                 parsed.update({key: key_metrics})
-            elif key:
+            elif key is not None:
                 parsed.update({key: doc_count})
         return parsed
 
