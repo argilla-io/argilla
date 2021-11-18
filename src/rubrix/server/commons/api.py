@@ -2,6 +2,8 @@ from dataclasses import dataclass
 
 from fastapi import Header, Query
 
+from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
+
 
 @dataclass
 class CommonTaskQueryParams:
@@ -13,7 +15,7 @@ class CommonTaskQueryParams:
         description="The workspace where dataset belongs to. If not provided default user team will be used",
     )
 
-    __workspace_header__: str = Header(None, alias="X-Rubrix-Workspace")
+    __workspace_header__: str = Header(None, alias=RUBRIX_WORKSPACE_HEADER_NAME)
 
     @property
     def workspace(self) -> str:
