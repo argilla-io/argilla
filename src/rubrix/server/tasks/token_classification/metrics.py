@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons.dao import extends_index_properties
+from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
     BaseTaskMetrics,
@@ -30,9 +31,11 @@ class TokensLength(ElasticsearchMetric):
     length_field: str
 
     def aggregation_request(self, interval: int) -> Dict[str, Any]:
-        return aggregations.histogram_aggregation(
-            self.length_field, interval=interval or 1
-        )
+        return {
+            self.id: aggregations.histogram_aggregation(
+                self.length_field, interval=interval or 1
+            )
+        }
 
 
 _DEFAULT_MAX_ENTITY_BUCKET = 1000
@@ -501,11 +504,11 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
         ),
     ]
 
-    metrics: ClassVar[List[BaseMetric]] = [
+    metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
         TokensLength(
             id="tokens_length",
             name="Tokens length",
-            description="Computes the text length measured in number of tokens",
+            description="Computes the text length distribution measured in number of tokens",
             length_field="metrics.tokens_length",
         ),
         *_PREDICTED_METRICS,

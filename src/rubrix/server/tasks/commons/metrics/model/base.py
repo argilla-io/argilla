@@ -87,10 +87,12 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
 
     def aggregation_request(self, *args, **kwargs) -> Dict[str, Any]:
         """Implements the common mechanism to define aggregations with nested fields"""
-        return aggregations.nested_aggregation(
-            nested_path=self.nested_path,
-            inner_aggregation=self.inner_aggregation(*args, **kwargs),
-        )
+        return {
+            self.id: aggregations.nested_aggregation(
+                nested_path=self.nested_path,
+                inner_aggregation=self.inner_aggregation(*args, **kwargs),
+            )
+        }
 
     def compound_nested_field(self, inner_field: str) -> str:
         return f"{self.nested_path}.{inner_field}"
@@ -161,3 +163,63 @@ class BaseTaskMetrics(GenericModel, Generic[GenericRecord]):
             A dict with calculated metrics fields
         """
         return {}
+
+
+class HistogramAggregation(ElasticsearchMetric):
+    """
+    Base elasticsearch histogram aggregation metric
+
+    Attributes
+    ----------
+    field:
+        The histogram field
+    script:
+        If provided, it will be used as scripted field
+        for aggregation
+    fixed_interval:
+        If provided, it will used ALWAYS as the histogram
+        aggregation interval
+    """
+
+    field: str
+    script: Optional[str] = None
+    fixed_interval: Optional[float] = None
+
+    def aggregation_request(self, interval: float) -> Dict[str, Any]:
+        if self.fixed_interval:
+            interval = self.fixed_interval
+        return {
+            self.id: aggregations.histogram_aggregation(
+                field_name=self.field, script=self.script, interval=interval
+            )
+        }
+
+
+class TermsAggregation(ElasticsearchMetric):
+    """
+    The base elasticsearch terms aggregation metric
+
+    Attributes
+    ----------
+
+    field:
+        The term field
+    fixed_size:
+        If provided, the size will use for terms aggregation
+    missing:
+        If provided, will use the value for docs results with missing value for field
+
+    """
+
+    field: str
+    fixed_size: Optional[int] = None
+    missing: Optional[str] = None
+
+    def aggregation_request(self, size: int) -> Dict[str, Any]:
+        if self.fixed_size:
+            size = self.fixed_size
+        return {
+            self.id: aggregations.terms_aggregation(
+                self.field, size=size, missing=self.missing
+            )
+        }
