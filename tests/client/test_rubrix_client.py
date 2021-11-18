@@ -427,6 +427,25 @@ def test_load_text2text(monkeypatch):
     assert len(df) == 2
 
 
+def test_client_workspace(monkeypatch):
+    mocking_client(monkeypatch, client)
+
+    ws = rubrix.active_workspace()
+    assert ws == "rubrix"
+
+    rubrix.set_workspace("other-workspace")
+    assert rubrix.active_workspace() == "other-workspace"
+
+    with pytest.raises(Exception, match="Must provide a workspace"):
+        rubrix.set_workspace(None)
+
+    # Mocking user
+    rubrix._client_instance().__current_user__.workspaces = ["a", "b"]
+
+    with pytest.raises(Exception, match="Wrong provided workspace c"):
+        rubrix.set_workspace("c")
+
+
 def test_load_sort(monkeypatch):
     mocking_client(monkeypatch, client)
     records = [
