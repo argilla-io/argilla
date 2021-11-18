@@ -63,6 +63,13 @@ def test_default_workspace():
     assert test_user.default_workspace == test_user.username
 
 
+def test_workspace_for_superuser():
+    user = User(username="admin")
+    assert user.default_workspace is None
+
+    assert user.check_workspace("some") == "some"
+    assert user.check_workspaces(["some"]) == ["some"]
+
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
