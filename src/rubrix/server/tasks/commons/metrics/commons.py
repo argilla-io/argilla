@@ -23,6 +23,7 @@ class CommonTasksMetrics:
             "with correct predictions vs records with incorrect prediction "
             "vs records with unknown prediction result",
             field=EsRecordDataFieldNames.predicted,
+            missing="unknown",
             fixed_size=3,
         ),
     ]
