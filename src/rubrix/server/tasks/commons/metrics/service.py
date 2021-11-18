@@ -165,7 +165,7 @@ class MetricsService:
 
         """
         metric_params = self._filter_metric_params(metric, metric_params)
-        metric_aggregation = {metric.id: metric.aggregation_request(**metric_params)}
+        metric_aggregation = metric.aggregation_request(**metric_params)
         results = self.__dao__.search_records(
             dataset,
             size=0,  # No records at all
@@ -175,7 +175,9 @@ class MetricsService:
                 include_default_aggregations=False,
             ),
         )
-        return metric.aggregation_result(results.aggregations[metric.id])
+        return metric.aggregation_result(
+            results.aggregations.get(metric.id, results.aggregations)
+        )
 
     @staticmethod
     def get_dataset_metrics(dataset: BaseDatasetDB) -> List[BaseMetric]:

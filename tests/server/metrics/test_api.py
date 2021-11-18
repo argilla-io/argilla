@@ -14,6 +14,7 @@
 #  limitations under the License.
 import pytest
 
+from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.text2text import Text2TextBulkData, Text2TextRecord
 from rubrix.server.tasks.text_classification import (
     TextClassificationBulkData,
@@ -24,6 +25,9 @@ from rubrix.server.tasks.token_classification import (
     TokenClassificationRecord,
 )
 from tests.server.test_helpers import client
+
+
+COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 
 
 def test_wrong_dataset_metrics():
@@ -81,7 +85,7 @@ def test_dataset_for_text2text():
     )
 
     metrics = client.get(f"/api/datasets/Text2Text/{dataset}/metrics").json()
-    assert len(metrics) == 0
+    assert len(metrics) == COMMON_METRICS_LENGTH
 
 
 def test_dataset_for_token_classification():
@@ -152,7 +156,7 @@ def test_dataset_metrics():
 
     metrics = client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
-    assert len(metrics) == 2
+    assert len(metrics) == COMMON_METRICS_LENGTH + 2
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric:summary",

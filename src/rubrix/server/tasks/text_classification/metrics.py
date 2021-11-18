@@ -3,6 +3,7 @@ from typing import Any, ClassVar, Iterable, List
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
+from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
     BaseTaskMetrics,
@@ -76,7 +77,7 @@ class F1Metric(PythonMetric):
 class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
-    metrics: ClassVar[List[BaseMetric]] = [
+    metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
         F1Metric(id="F1", name="F1 Metric for single-class", description=""),
         F1Metric(
             id="MultiLabelF1",
