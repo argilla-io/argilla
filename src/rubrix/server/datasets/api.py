@@ -33,11 +33,7 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     operation_id="list_datasets",
 )
 def list_datasets(
-    workspaces: List[str] = Query(
-        None,
-        alias="workspace",
-        description="A list of workspaces used for retrieve datasets",
-    ),
+    ds_params: CommonTaskQueryParams = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
@@ -46,8 +42,8 @@ def list_datasets(
 
     Parameters
     ----------
-    workspaces:
-        A list of workspaces used for retrieve datasets
+    ds_params:
+        Common task query params
     service:
         The datasets service
     current_user:
@@ -57,7 +53,10 @@ def list_datasets(
     -------
         A list of datasets visibles by current user
     """
-    return service.list(user=current_user, workspaces=workspaces)
+    return service.list(
+        user=current_user,
+        workspaces=[ds_params.workspace],
+    )
 
 
 @router.get(
