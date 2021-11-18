@@ -87,6 +87,8 @@ class User(BaseModel):
         """
         if not workspace:
             return self.default_workspace
+        if self.workspaces is None:
+            return workspace
         if workspace not in self.workspaces:
             raise ForbiddenOperationError(f"Missing or protected workspace {workspace}")
         return workspace
