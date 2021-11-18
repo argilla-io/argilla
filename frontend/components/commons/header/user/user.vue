@@ -58,7 +58,7 @@ export default {
       return this.$auth.user;
     },
     currentWorkspace() {
-      return this.$auth.user.current_workspace || this.$auth.user.username
+      return this.$auth.$storage.syncUniversal("current_workspace", this.user.username);
     },
   },
   methods: {
@@ -77,15 +77,11 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      await this.$auth.$storage.removeUniversal("user");
+      await this.$auth.$storage.removeUniversal("current_workspace");
     },
     async selectWorkspace(workspace) {
       if (this.currentWorkspace !== workspace) {
-        const user = {
-          ...this.$auth.user,
-          current_workspace: workspace
-        }
-        await this.$auth.$storage.setUniversal("user", user);
+        await this.$auth.$storage.setUniversal("current_workspace", workspace);
         await this.fetchDatasets()
       }
     },
