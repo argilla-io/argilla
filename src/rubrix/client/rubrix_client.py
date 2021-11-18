@@ -85,7 +85,7 @@ class RubrixClient:
         Args:
             api_url: Address from which the API is serving.
             api_key: Authentication token.
-            workspace: Client session active workspace.
+            workspace: Active workspace for this client session.
             timeout: Seconds to considered a connection timeout.
         """
 

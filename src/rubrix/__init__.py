@@ -70,8 +70,8 @@ def init(
             it will default to `http://localhost:6900`.
         api_key: Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
             is not set, it will default to `rubrix.apikey`.
-        workspace: Active user workspace used for client session. If `None` (default) and the
-            env variable ``RUBRIX_WORKSPACE`` is not set, it will default to user workspace
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the 
+            env variable ``RUBRIX_WORKSPACE`` is not set, it will default to the private user workspace.
         timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
 
     Examples:
@@ -101,20 +101,17 @@ def init(
     )
 
 
-def active_workspace() -> str:
-    """
-    Fetch the client session workspace
+def get_workspace() -> str:
+    """Returns the name of the active workspace for the current client session.
 
-    Returns
-    -------
-    The active session workspace
-
+    Returns:
+        The name of the active workspace as a string.
     """
     return _client_instance().active_workspace
 
 
 def set_workspace(ws: str) -> None:
-    """Set the client session workspace
+    """Sets the active workspace for the current client session.
 
     Args:
         ws: The new workspace
