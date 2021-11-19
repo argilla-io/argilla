@@ -134,46 +134,28 @@ $annotation-button-touch-size: 48px;
       }
     }
     &.active {
-      transition: all 0.02s ease-in-out;
-      box-shadow: none; // Animate the size, outside
-      // animation: pulse 0.4s;
+      transition: all 0.2s ease-in-out;
+      box-shadow: none;
       transform: scale3d(1, 1, 1);
       -webkit-font-smoothing: antialiased;
       transform: translate3d(1, 1, 1); // z-index: 1;
       .button {
-        transition: all 0.02s ease-in-out;
+        transition: all 0.2s ease-in-out;
         background: $secondary-color;
+        box-shadow: none;
       }
-
+      &:hover {
+        .button {
+          transition: all 0.2s ease-in-out;
+          box-shadow: 0 0 1px 0 rgba(212,212,212,0.50), inset 0 -2px 6px 0 #3B3C81;
+        }
+      }
       &:after {
         display: none !important;
-      }
-      @keyframes pulse {
-        0% {
-          transform: scale3d(1, 1, 1);
-        }
-        70% {
-          transform: scale3d(1.04, 1.04, 1.04);
-        }
-        100% {
-          transform: scale3d(1, 1, 1);
-        }
-      }
-      @keyframes pulse-font {
-        0% {
-          transform: scale3d(1, 1, 1);
-        }
-        70% {
-          transform: scale3d(1.06, 1.06, 1.06);
-        }
-        100% {
-          transform: scale3d(1, 1, 1);
-        }
       }
       .annotation-button-data__text,
       .annotation-button-data__score {
         color: $lighter-color;
-        // animation: pulse-font 0.5s;
       }
       .annotation-button-data__info {
         color: $lighter-color;
