@@ -51,22 +51,30 @@ export default {
   data: () => {
     return {
       visibleSelector: false,
+      currentWorkspace: undefined,
     };
   },
   computed: {
     user() {
       return this.$auth.user;
     },
+  },
+  mounted() {
+    this.currentWorkspace = this.$auth.$storage.syncUniversal("current_workspace", this.user.username);
+  },
+  watch: {
     currentWorkspace() {
-      return this.$auth.user.activeWorkspace || this.$auth.user.username;
-    },
+      this.$auth.$storage.setUniversal("current_workspace", this.currentWorkspace);
+    }
   },
   methods: {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
     firstChar(name) {
-      return name.charAt(0);
+      if (name) {
+        return name.charAt(0);
+      }
     },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
@@ -77,15 +85,11 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      await this.$auth.$storage.removeUniversal("user");
+      await this.$auth.$storage.removeUniversal("current_workspace");
     },
     async selectWorkspace(workspace) {
       if (this.currentWorkspace !== workspace) {
-        const user = {
-          ...this.$auth.user,
-          activeWorkspace: workspace,
-        };
-        await this.$auth.$storage.setUniversal("user", user);
+        this.currentWorkspace = workspace
         if (this.$router.currentRoute.name === "index") {
           return await this.fetchDatasets();
         }

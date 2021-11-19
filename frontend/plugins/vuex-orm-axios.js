@@ -29,7 +29,7 @@ export default ({ $axios, app }) => {
       return config;
     }
 
-    const currentWorkspace = app.$auth.user.activeWorkspace;
+    const currentWorkspace = app.$auth.$storage.syncUniversal("current_workspace");
 
     if (currentWorkspace && currentUser.username !== currentWorkspace) {
       var wsQueryParam = "workspace=" + currentWorkspace;
