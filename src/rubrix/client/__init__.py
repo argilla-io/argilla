@@ -13,10 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Rubrix Client Init Method
-
-Methods for using the Rubrix Client, called from the module init file.
-"""
+"""The Rubrix client, used by the rubrix.__init__ module"""
 
 import logging
 import socket
@@ -31,7 +28,6 @@ from rubrix.client.models import (
     Record,
     Text2TextRecord,
     TextClassificationRecord,
-    TokenAttributions,
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
@@ -40,10 +36,8 @@ from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dat
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics.api import calculate_metric, get_dataset_metrics
 from rubrix.client.sdk.metrics.models import MetricInfo
-from rubrix.client.sdk.text2text.api import (
-    bulk as text2text_bulk,
-    data as text2text_data,
-)
+from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
+from rubrix.client.sdk.text2text.api import data as text2text_data
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
@@ -272,9 +266,12 @@ class RubrixClient:
 
         _check_response_errors(response)
 
-        records_sorted_by_id = sorted(
-            [record.to_client() for record in response.parsed], key=lambda x: x.id
-        )
+        records = [sdk_record.to_client() for sdk_record in response.parsed]
+        try:
+            records_sorted_by_id = sorted(records, key=lambda x: x.id)
+        # record ids can be a mix of int/str -> sort all as str type
+        except TypeError:
+            records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
 
         if as_pandas:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
