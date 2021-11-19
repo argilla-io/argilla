@@ -22,20 +22,18 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, validator
-from rubrix.server.commons.helpers import limit_value_length
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.helpers import limit_value_length
 
 
 class BulkResponse(BaseModel):
     """Summary response when logging records to the Rubrix server.
 
     Args:
-        dataset:
-            The dataset name.
-        processed:
-            Number of records in bulk.
-        failed:
-            Number of failed records.
+        dataset: The dataset name.
+        processed: Number of records in bulk.
+        failed: Number of failed records.
     """
 
     dataset: str
@@ -49,10 +47,8 @@ class TokenAttributions(BaseModel):
     In the Rubrix app this is only supported for ``TextClassificationRecord`` and the ``multi_label=False`` case.
 
     Args:
-        token:
-            The input token.
-        attributions:
-            A dictionary containing label-attribution pairs.
+        token: The input token.
+        attributions: A dictionary containing label-attribution pairs.
     """
 
     token: str
@@ -88,6 +84,9 @@ class TextClassificationRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
+        metrics:
+            READ ONLY! Metrics at record level provided by the server when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
 
     Examples:
         >>> import rubrix as rb
@@ -111,6 +110,7 @@ class TextClassificationRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+    metrics: Optional[Dict[str, Any]] = None
 
     @validator("inputs", pre=True)
     def input_as_dict(cls, inputs):
@@ -161,7 +161,10 @@ class TokenClassificationRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
-    
+        metrics:
+            READ ONLY! Metrics at record level provided by the server when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
+
     Examples:
         >>> import rubrix as rb
         >>> record = rb.TokenClassificationRecord(
@@ -185,6 +188,7 @@ class TokenClassificationRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+    metrics: Optional[Dict[str, Any]] = None
 
     @validator("metadata", pre=True)
     def check_value_length(cls, metadata):
@@ -222,13 +226,16 @@ class Text2TextRecord(BaseModel):
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
         event_timestamp:
             The timestamp of the record.
-    
+        metrics:
+            READ ONLY! Metrics at record level provided by the server when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
+
     Examples:
         >>> import rubrix as rb
         >>> record = rb.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
         ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
-        ... )    
+        ... )
     """
 
     text: str
@@ -242,6 +249,7 @@ class Text2TextRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
+    metrics: Optional[Dict[str, Any]] = None
 
     @validator("prediction")
     def prediction_as_tuples(
