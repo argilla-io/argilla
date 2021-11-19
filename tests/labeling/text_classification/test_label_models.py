@@ -111,21 +111,15 @@ def test_snorkel_init_wrong_mapping(weak_labels, wrong_mapping):
 
 
 @pytest.mark.parametrize(
-    "include_annotated_records,no_annotations",
-    [(True, False), (False, True)],
+    "include_annotated_records",
+    [True, False],
 )
-def test_snorkel_fit(
-    monkeypatch, weak_labels, include_annotated_records, no_annotations
-):
-    def mock_fit(self, L_train, Y_dev, *args, **kwargs):
+def test_snorkel_fit(monkeypatch, weak_labels, include_annotated_records):
+    def mock_fit(self, L_train, *args, **kwargs):
         if include_annotated_records:
             assert (L_train == weak_labels.matrix()).all()
         else:
             assert (L_train == weak_labels.matrix(has_annotation=False)).all()
-        if no_annotations:
-            assert Y_dev is None
-        else:
-            assert (Y_dev == weak_labels.annotation()).all()
         assert kwargs == {"passed_on": None}
 
     monkeypatch.setattr(
@@ -133,17 +127,14 @@ def test_snorkel_fit(
         mock_fit,
     )
 
-    if no_annotations:
-        weak_labels._annotation_array = np.array([-1, -1, -1, -1], dtype=np.short)
     label_model = Snorkel(weak_labels)
     label_model.fit(include_annotated_records=include_annotated_records, passed_on=None)
 
 
-@pytest.mark.parametrize("kwargs", [{"L_train": None}, {"Y_dev": None}])
-def test_snorkel_fit_automatically_added_kwargs(weak_labels, kwargs):
+def test_snorkel_fit_automatically_added_kwargs(weak_labels):
     label_model = Snorkel(weak_labels)
     with pytest.raises(ValueError, match="provided automatically"):
-        label_model.fit(**kwargs)
+        label_model.fit(L_train=None)
 
 
 @pytest.mark.parametrize(
@@ -285,11 +276,11 @@ def test_snorkel_integration(weak_labels_from_guide):
     label_model.fit(seed=43)
 
     metrics = label_model.score()
-    assert metrics["accuracy"] == pytest.approx(0.824)
+    assert metrics["accuracy"] == pytest.approx(0.8947368421052632)
 
     records = label_model.predict()
-    assert len(records) == 1586
+    assert len(records) == 1177
     assert records[0].prediction == [
-        ("SPAM", pytest.approx(0.5241533709668873)),
-        ("HAM", pytest.approx(0.47584662903311276)),
+        ("SPAM", pytest.approx(0.5633776670811805)),
+        ("HAM", pytest.approx(0.4366223329188196)),
     ]

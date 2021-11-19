@@ -135,21 +135,18 @@ class Snorkel(LabelModel):
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`_.
-                They must not contain ``L_train`` or ``Y_dev``, those are provided automatically.
+                They must not contain ``L_train``, the label matrix is provided automatically.
         """
-        if "L_train" in kwargs or "Y_dev" in kwargs:
+        if "L_train" in kwargs:
             raise ValueError(
-                "Your kwargs must not contain 'L_train' or 'Y_dev', those are provided automatically."
+                "Your kwargs must not contain 'L_train', it is provided automatically."
             )
 
         l_train = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
-        y_dev = self._weak_labels.annotation()
 
-        self._model.fit(
-            L_train=l_train, Y_dev=None if y_dev.size == 0 else y_dev, **kwargs
-        )
+        self._model.fit(L_train=l_train, **kwargs)
 
     def predict(
         self,
