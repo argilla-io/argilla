@@ -40,6 +40,7 @@
   </div>
 </template>
 <script>
+import { getUsername } from "@/models/User";
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
 import { mapActions } from "vuex";
 export default {
@@ -149,7 +150,7 @@ export default {
       this.initialRecord = newRecord;
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
+        agent: getUsername(this.$auth),
         records: [newRecord],
       });
     },

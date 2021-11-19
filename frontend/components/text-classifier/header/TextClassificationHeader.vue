@@ -45,6 +45,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { getUsername } from "@/models/User";
 export default {
   props: {
     dataset: {
@@ -93,7 +94,7 @@ export default {
       });
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
+        agent: getUsername(this.$auth),
         records: records,
       });
     },
@@ -106,7 +107,7 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
+        agent: getUsername(this.$auth),
         records: records.map((record) => {
           let modelPrediction = {};
           modelPrediction.labels = record.predicted_as.map((pred) => ({

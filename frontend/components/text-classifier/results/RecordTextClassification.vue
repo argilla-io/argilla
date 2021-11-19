@@ -62,6 +62,7 @@
 <script>
 import "assets/icons/predicted-ok";
 import "assets/icons/predicted-ko";
+import { getUsername } from "@/models/User";
 import {
   TextClassificationRecord,
   TextClassificationDataset,
@@ -107,7 +108,7 @@ export default {
     async validateLabels({ labels }) {
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
+        agent: getUsername(this.$auth),
         records: [
           {
             ...this.record,
@@ -130,7 +131,7 @@ export default {
       // TODO: do not validate records without labels
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user.username,
+        agent: getUsername(this.$auth),
         records: [
           {
             ...record,

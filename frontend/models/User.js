@@ -17,6 +17,11 @@
 
 const CURRENT_WORKSPACE_FIELD = "currentWorkspace";
 
+
+function getUsername(auth) {
+  return auth.user.username;
+}
+
 async function getCurrentWorkspace(auth) {
   return await auth.$storage.syncUniversal(
     CURRENT_WORKSPACE_FIELD,
@@ -32,4 +37,4 @@ async function clearCurrentWorkspace(auth) {
   await auth.$storage.removeUniversal(CURRENT_WORKSPACE_FIELD);
 }
 
-export { getCurrentWorkspace, setCurrentWorkspace, clearCurrentWorkspace };
+export { getUsername, getCurrentWorkspace, setCurrentWorkspace, clearCurrentWorkspace };
