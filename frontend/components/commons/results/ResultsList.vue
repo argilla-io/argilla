@@ -76,6 +76,7 @@ export default {
       if (this.dataset.results.total > this.dataset.viewSettings.pagination.maxRecordsLimit) {
         return (this.dataset.viewSettings.pagination.page * this.dataset.viewSettings.pagination.size) === this.dataset.viewSettings.pagination.maxRecordsLimit;
       }
+      return false
     }
   },
   mounted() {
