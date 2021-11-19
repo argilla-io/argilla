@@ -430,11 +430,11 @@ def test_load_text2text(monkeypatch):
 def test_client_workspace(monkeypatch):
     mocking_client(monkeypatch, client)
 
-    ws = rubrix.active_workspace()
+    ws = rubrix.get_workspace()
     assert ws == "rubrix"
 
     rubrix.set_workspace("other-workspace")
-    assert rubrix.active_workspace() == "other-workspace"
+    assert rubrix.get_workspace() == "other-workspace"
 
     with pytest.raises(Exception, match="Must provide a workspace"):
         rubrix.set_workspace(None)
