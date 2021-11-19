@@ -136,9 +136,6 @@ $annotation-button-touch-size: 48px;
     &.active {
       transition: all 0.2s ease-in-out;
       box-shadow: none;
-      transform: scale3d(1, 1, 1);
-      -webkit-font-smoothing: antialiased;
-      transform: translate3d(1, 1, 1); // z-index: 1;
       .button {
         transition: all 0.2s ease-in-out;
         background: $secondary-color;
