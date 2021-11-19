@@ -57,6 +57,7 @@ def _client_instance() -> RubrixClient:
 def init(
     api_url: Optional[str] = None,
     api_key: Optional[str] = None,
+    workspace: Optional[str] = None,
     timeout: int = 60,
 ) -> None:
     """Init the python client.
@@ -69,6 +70,8 @@ def init(
             it will default to `http://localhost:6900`.
         api_key: Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
             is not set, it will default to `rubrix.apikey`.
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the 
+            env variable ``RUBRIX_WORKSPACE`` is not set, it will default to the private user workspace.
         timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
 
     Examples:
@@ -86,13 +89,34 @@ def init(
     # If an api_url is passed, tokens obtained via environ vars are disabled
     final_key = api_key or os.getenv("RUBRIX_API_KEY", DEFAULT_API_KEY)
 
+    workspace = workspace or os.getenv("RUBRIX_WORKSPACE")
+
     _LOGGER.info(f"Rubrix has been initialized on {final_api_url}")
 
     _client = RubrixClient(
         api_url=final_api_url,
         api_key=final_key,
+        workspace=workspace,
         timeout=timeout,
     )
+
+
+def get_workspace() -> str:
+    """Returns the name of the active workspace for the current client session.
+
+    Returns:
+        The name of the active workspace as a string.
+    """
+    return _client_instance().active_workspace
+
+
+def set_workspace(ws: str) -> None:
+    """Sets the active workspace for the current client session.
+
+    Args:
+        ws: The new workspace
+    """
+    _client_instance().set_workspace(ws)
 
 
 def log(

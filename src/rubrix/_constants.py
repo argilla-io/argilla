@@ -17,4 +17,6 @@ MAX_KEYWORD_LENGTH = 128
 
 API_KEY_HEADER_NAME = "X-Rubrix-Api-Key"
 
+RUBRIX_WORKSPACE_HEADER_NAME = "X-Rubrix-Workspace"
+
 DEFAULT_API_KEY = "rubrix.apikey"

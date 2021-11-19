@@ -23,6 +23,7 @@ import httpx
 import pandas
 from tqdm.auto import tqdm
 
+from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
 from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
     BulkResponse,
@@ -59,6 +60,7 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationQuery,
 )
 from rubrix.client.sdk.users.api import whoami
+from rubrix.client.sdk.users.models import User
 
 
 class RubrixClient:
@@ -75,6 +77,7 @@ class RubrixClient:
         self,
         api_url: str,
         api_key: str,
+        workspace: Optional[str] = None,
         timeout: int = 60,
     ):
         """Client setup function.
@@ -82,6 +85,7 @@ class RubrixClient:
         Args:
             api_url: Address from which the API is serving.
             api_key: Authentication token.
+            workspace: Active workspace for this client session.
             timeout: Seconds to considered a connection timeout.
         """
 
@@ -103,9 +107,36 @@ class RubrixClient:
             base_url=api_url, token=api_key, timeout=timeout
         )
 
-        whoami_response_status = whoami(client=self._client).status_code
+        response = whoami(client=self._client)
+
+        whoami_response_status = response.status_code
         if whoami_response_status == 401:
             raise Exception("Authentication error: invalid credentials.")
+
+        self.__current_user__: User = response.parsed
+        if workspace:
+            self.set_workspace(workspace)
+
+    def set_workspace(self, workspace: str):
+        """Changes/updates the current client session workspace"""
+        if workspace is None:
+            raise Exception("Must provide a workspace")
+
+        if (
+            workspace != self.active_workspace
+            and workspace != self.__current_user__.username
+        ):
+            user_workspaces = self.__current_user__.workspaces
+            if user_workspaces is not None and workspace not in user_workspaces:
+                raise Exception(f"Wrong provided workspace {workspace}")
+            self._client.headers[RUBRIX_WORKSPACE_HEADER_NAME] = workspace
+
+    @property
+    def active_workspace(self):
+        """Return the active workspace for client session"""
+        return self._client.headers.get(
+            RUBRIX_WORKSPACE_HEADER_NAME, self.__current_user__.username
+        )
 
     def log(
         self,
