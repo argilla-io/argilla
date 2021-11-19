@@ -1,6 +1,11 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
-    <a class="user__button" href="#" @click.prevent="showSelector()">
+    <a
+      v-if="currentWorkspace"
+      class="user__button"
+      href="#"
+      @click.prevent="showSelector()"
+    >
       {{ firstChar(currentWorkspace) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
@@ -47,6 +52,11 @@
 
 <script>
 import { mapActions } from "vuex";
+import {
+  getCurrentWorkspace,
+  setCurrentWorkspace,
+  clearCurrentWorkspace,
+} from "@/models/User";
 export default {
   data: () => {
     return {
@@ -59,22 +69,20 @@ export default {
       return this.$auth.user;
     },
   },
-  mounted() {
-    this.currentWorkspace = this.$auth.$storage.syncUniversal("current_workspace", this.user.username);
-  },
   watch: {
-    currentWorkspace() {
-      this.$auth.$storage.setUniversal("current_workspace", this.currentWorkspace);
-    }
+    async currentWorkspace() {
+      await setCurrentWorkspace(this.$auth, this.currentWorkspace);
+    },
+  },
+  async mounted() {
+    this.currentWorkspace = await getCurrentWorkspace(this.$auth);
   },
   methods: {
     ...mapActions({
       fetchDatasets: "entities/datasets/fetchAll",
     }),
     firstChar(name) {
-      if (name) {
-        return name.charAt(0);
-      }
+      return name.charAt(0);
     },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
@@ -85,11 +93,11 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      await this.$auth.$storage.removeUniversal("current_workspace");
+      await clearCurrentWorkspace(this.$auth);
     },
     async selectWorkspace(workspace) {
       if (this.currentWorkspace !== workspace) {
-        this.currentWorkspace = workspace
+        this.currentWorkspace = workspace;
         if (this.$router.currentRoute.name === "index") {
           return await this.fetchDatasets();
         }
