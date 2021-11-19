@@ -99,11 +99,13 @@ def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expecte
         annotation="label1",
         prediction_agent=pred_agent,
         annotation_agent=annot_agent,
+        metrics={"not_passed_on": 0},
     )
     sdk_record = CreationTextClassificationRecord.from_client(record)
 
     assert sdk_record.annotation.agent == annot_expected
     assert sdk_record.prediction.agent == pred_expected
+    assert sdk_record.metrics == {}
 
 
 @pytest.mark.parametrize(
@@ -127,6 +129,7 @@ def test_to_client(multi_label, expected):
         prediction=prediction,
         multi_label=multi_label,
         event_timestamp=datetime(2000, 1, 1),
+        metrics={"tokens_length": 42},
     )
 
     record = sdk_record.to_client()
@@ -135,3 +138,4 @@ def test_to_client(multi_label, expected):
     assert record.prediction_agent == "pred_agent"
     assert record.annotation_agent == "annot_agent"
     assert record.annotation == expected
+    assert record.metrics == {"tokens_length": 42}

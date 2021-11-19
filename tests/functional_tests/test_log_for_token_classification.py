@@ -84,7 +84,24 @@ def test_log_record_that_makes_me_cry(monkeypatch):
     rubrix.delete(dataset)
     rubrix.log(record, name=dataset)
 
-    records = rubrix.load(dataset,as_pandas=False)
+    records = rubrix.load(dataset, as_pandas=False)
     assert len(records) == 1
     assert records[0].text == record.text
     assert records[0].tokens == record.tokens
+    assert records[0].metrics == {
+        "annotated": {"mentions": []},
+        "predicted": {
+            "mentions": [
+                {
+                    "capitalness": "LOWER",
+                    "chars_length": 6,
+                    "density": 0.03225806451612903,
+                    "label": "ENG",
+                    "score": 1.0,
+                    "tokens_length": 1,
+                    "value": "access",
+                }
+            ]
+        },
+        "tokens_length": 31,
+    }

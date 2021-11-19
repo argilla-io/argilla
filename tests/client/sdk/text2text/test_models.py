@@ -65,6 +65,7 @@ def test_from_client_prediction(prediction, expected):
         prediction=prediction,
         annotation="texto de prueba para text2text",
         id=1,
+        metrics={"not_passed_on": 0},
     )
     sdk_record = CreationText2TextRecord.from_client(record)
 
@@ -72,6 +73,7 @@ def test_from_client_prediction(prediction, expected):
     assert all(
         [sentence.score == expected for sentence in sdk_record.prediction.sentences]
     )
+    assert sdk_record.metrics == {}
 
 
 @pytest.mark.parametrize(
@@ -116,6 +118,7 @@ def test_to_client():
         prediction=prediction,
         annotation=annotation,
         event_timestamp=datetime(2000, 1, 1),
+        metrics={"tokens_length": 42},
     )
 
     record = sdk_record.to_client()
@@ -124,3 +127,4 @@ def test_to_client():
     assert record.prediction_agent == "pred_agent"
     assert record.annotation == "annot_prueba"
     assert record.annotation_agent == "annot_agent"
+    assert record.metrics == {"tokens_length": 42}
