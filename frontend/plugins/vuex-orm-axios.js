@@ -18,9 +18,30 @@
 import { Model } from "@vuex-orm/core";
 import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { Notification } from "@/models/Notifications";
-
+import { getCurrentWorkspace } from "@/models/User";
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
+
+  $axios.interceptors.request.use(async (config) => {
+    const currentUser = app.$auth.user;
+
+    if (!currentUser) {
+      return config;
+    }
+
+    const currentWorkspace = await getCurrentWorkspace(app.$auth);
+
+    if (currentWorkspace && currentUser.username !== currentWorkspace) {
+      var wsQueryParam = "workspace=" + currentWorkspace;
+      if (config.url.includes("?")) {
+        wsQueryParam = "&" + wsQueryParam;
+      } else wsQueryParam = "?" + wsQueryParam;
+
+      config.url += wsQueryParam;
+    }
+
+    return config;
+  });
 
   $axios.onError((error) => {
     const code = parseInt(error.response && error.response.status);

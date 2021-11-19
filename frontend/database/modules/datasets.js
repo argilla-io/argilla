@@ -523,7 +523,7 @@ const actions = {
     /**
      * Fetch all observation datasets from backend
      */
-    return await ObservationDataset.api().get("/datasets/");
+    return await ObservationDataset.api().get("/datasets/", { persistBy: 'create' });
   },
   async fetchByName(_, name) {
     /**
