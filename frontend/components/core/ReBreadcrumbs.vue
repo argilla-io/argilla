@@ -32,7 +32,6 @@
     <re-action-tooltip tooltip="Copied">
       <a v-if="copyButton" class="breadcrumbs__copy" href="#" @click.prevent="copyDatasetName(breadcrumbs[breadcrumbs.length - 1].name)">
         <svgicon
-          color="#ffffff"
           name="copy"
           width="12"
           height="13"
@@ -78,6 +77,16 @@ export default {
     padding-left: 0;
     font-weight: normal;
     list-style: none;    
+  }
+  &__copy {
+    .svg-icon {
+      fill: $lighter-color;
+    }
+    &:active {
+      svg {
+        fill: #f2067a !important;
+      }
+    }
   }
   &__item {
     margin: auto 0.5em auto auto;

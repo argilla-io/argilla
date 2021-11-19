@@ -496,6 +496,11 @@ export default {
       position: relative;
       margin-left: 2em;
       padding: 0 !important;
+      &:active {
+        .svg-icon {
+          fill: $primary-color !important;
+        }        
+      }
       .svg-icon {
         fill: palette(grey, dark);
         margin-right: 0;
