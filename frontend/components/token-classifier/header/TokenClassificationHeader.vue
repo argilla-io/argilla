@@ -36,6 +36,7 @@
   </div>
 </template>
 <script>
+import { getUsername } from "@/models/User";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -65,7 +66,7 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: getUsername(this.$auth),
         records: records.map((record) => ({
           ...record,
           annotation: {
