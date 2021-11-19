@@ -25,6 +25,7 @@ def mocking_client(monkeypatch):
 def log_some_data(dataset: str):
     text = "My first rubrix example"
     tokens = text.split(" ")
+    rubrix.delete(dataset)
     rb.log(
         [
             rb.TokenClassificationRecord(
