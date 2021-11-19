@@ -56,7 +56,7 @@ export default {
     async onValidate(records) {
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: records,
       });
     },

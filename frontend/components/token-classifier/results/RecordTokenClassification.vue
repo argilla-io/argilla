@@ -169,7 +169,7 @@ export default {
             status: "Edited",
             annotation: {
               entities,
-              agent: this.$auth.user,
+              agent: this.$auth.user.username,
             },
           },
         ],
@@ -179,7 +179,7 @@ export default {
     async onValidate(record) {
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: [
           {
             ...record,

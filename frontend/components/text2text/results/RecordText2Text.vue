@@ -149,7 +149,7 @@ export default {
       this.initialRecord = newRecord;
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: [newRecord],
       });
     },

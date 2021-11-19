@@ -107,7 +107,7 @@ export default {
     async validateLabels({ labels }) {
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: [
           {
             ...this.record,
@@ -130,7 +130,7 @@ export default {
       // TODO: do not validate records without labels
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: [
           {
             ...record,

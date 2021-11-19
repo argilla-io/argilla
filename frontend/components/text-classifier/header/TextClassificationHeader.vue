@@ -93,7 +93,7 @@ export default {
       });
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: records,
       });
     },
@@ -106,7 +106,7 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: records.map((record) => {
           let modelPrediction = {};
           modelPrediction.labels = record.predicted_as.map((pred) => ({

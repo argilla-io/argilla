@@ -65,7 +65,7 @@ export default {
     async onValidate(records) {
       await this.validate({
         dataset: this.dataset,
-        agent: this.$auth.user,
+        agent: this.$auth.user.username,
         records: records.map((record) => ({
           ...record,
           annotation: {
