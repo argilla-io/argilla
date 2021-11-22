@@ -59,19 +59,16 @@ def test_log_records_with_empty_metadata_list(monkeypatch):
     dataset = "test_log_records_with_empty_metadata_list"
 
     rubrix.delete(dataset)
-    rubrix.log(
-        [
-            TextClassificationRecord(
-                inputs="The input text", metadata={"emptyList": []}
-            ),
-            TextClassificationRecord(inputs="The input text", metadata={"none": None}),
-        ],
-        name=dataset,
-    )
+    expected_records = [
+        TextClassificationRecord(inputs="The input text", metadata={"emptyList": []}),
+        TextClassificationRecord(inputs="The input text", metadata={"emptyTuple": ()}),
+        TextClassificationRecord(inputs="The input text", metadata={"emptyDict": {}}),
+        TextClassificationRecord(inputs="The input text", metadata={"none": None}),
+    ]
+    rubrix.log(expected_records, name=dataset)
 
     df = rubrix.load(dataset)
-    assert len(df) == 2
+    assert len(df) == len(expected_records)
 
     for meta in df.metadata.values.tolist():
         assert meta == {}
-
