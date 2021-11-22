@@ -247,9 +247,11 @@ def test_dataset_copy(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
+    new_workspace = "new-workspace"
 
     client.delete(f"/api/datasets/{dataset}")
     client.delete(f"/api/datasets/{dataset_copy}")
+    client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
 
     rubrix.log(
         TextClassificationRecord(
@@ -268,6 +270,12 @@ def test_dataset_copy(monkeypatch):
 
     with pytest.raises(Exception):
         rubrix.copy(dataset, name_of_copy=dataset_copy)
+
+    rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
+
+    rubrix.set_workspace(new_workspace)
+    df_copy = rubrix.load(dataset_copy)
+    assert df.equals(df_copy)
 
 
 def test_update_record(monkeypatch):
