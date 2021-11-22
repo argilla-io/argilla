@@ -62,10 +62,12 @@ def test_from_client_prediction(prediction, expected):
         text="this is a test text",
         tokens=["this", "is", "a", "test", "text"],
         prediction=prediction,
+        metrics={"not_passed_on": 0},
     )
     sdk_record = CreationTokenClassificationRecord.from_client(record)
 
     assert sdk_record.prediction.entities[0].score == pytest.approx(expected)
+    assert sdk_record.metrics == {}
 
 
 @pytest.mark.parametrize(
@@ -104,6 +106,7 @@ def test_to_client():
         annotation=annotation,
         prediction=prediction,
         event_timestamp=datetime(2000, 1, 1),
+        metrics={"tokens_length": 42},
     )
 
     record = sdk_record.to_client()
@@ -113,3 +116,4 @@ def test_to_client():
     assert record.prediction_agent == "pred_agent"
     assert record.annotation == [("annot_label", 5, 7)]
     assert record.annotation_agent == "annot_agent"
+    assert record.metrics == {"tokens_length": 42}
