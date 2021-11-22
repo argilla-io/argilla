@@ -309,10 +309,14 @@ class RubrixClient:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
         return records_sorted_by_id
 
-    def copy(self, source: str, target: str):
+    def copy(self, source: str, target: str, target_workspace: Optional[str] = None):
         """Makes a copy of the `source` dataset and saves it as `target`"""
         response = copy_dataset(
-            client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
+            client=self._client,
+            name=source,
+            json_body=CopyDatasetRequest(
+                name=target, target_workspace=target_workspace
+            ),
         )
         if response.status_code == 409:
             raise RuntimeError(f"A dataset with name '{target}' already exists.")

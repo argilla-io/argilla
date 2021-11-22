@@ -159,19 +159,20 @@ def log(
     )
 
 
-def copy(dataset: str, name_of_copy: str):
+def copy(dataset: str, name_of_copy: str, workspace: str = None):
     """Creates a copy of a dataset including its tags and metadata
 
     Args:
         dataset: Name of the source dataset
         name_of_copy: Name of the copied dataset
+        workspace: If provided, dataset will be copied to that workspace
 
     Examples:
         >>> import rubrix as rb
         >>> rb.copy("my_dataset", name_of_copy="new_dataset")
         >>> dataframe = rb.load("new_dataset")
     """
-    _client_instance().copy(source=dataset, target=name_of_copy)
+    _client_instance().copy(source=dataset, target=name_of_copy, target_workspace=workspace)
 
 
 def load(

@@ -15,7 +15,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from typing import Dict
 
 from pydantic import BaseModel
@@ -43,4 +43,4 @@ class Dataset(BaseDatasetModel):
 
 
 class CopyDatasetRequest(BaseDatasetModel):
-    pass
+    target_workspace: Optional[str] = None
