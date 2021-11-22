@@ -20,7 +20,9 @@ Common helper functions
 from typing import Any, Dict, List, Optional
 
 
-def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
+def flatten_dict(
+    data: Dict[str, Any], sep: str = ".", drop_empty: bool = False
+) -> Dict[str, Any]:
     """
     Flatten a data dictionary
 
@@ -30,6 +32,8 @@ def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
         The data dictionary
     sep:
         The generated key separator. Default="."
+    drop_empty:
+        If true, keys with empty lists or None values will be omitted
 
     Returns
     -------
@@ -37,9 +41,19 @@ def flatten_dict(data: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
         A flattened key dictionary
     """
 
+    def _is_empty_value(value: Any) -> bool:
+        if value is None:
+            return True
+        if isinstance(value, list) and len(value) == 0:
+            return True
+        return False
+
     def _flatten_internal_(_data: Dict[str, Any], _parent_key="", _sep="."):
         items = []
         for key, value in _data.items():
+            if drop_empty and _is_empty_value(value):
+                continue
+
             new_key = _parent_key + _sep + key if _parent_key else key
             try:
                 items.extend(_flatten_internal_(value, new_key, _sep=_sep).items())

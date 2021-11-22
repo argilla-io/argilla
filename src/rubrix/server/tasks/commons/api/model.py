@@ -197,7 +197,7 @@ class BaseRecord(GenericModel, Generic[Annotation]):
 
         """
         if metadata:
-            metadata = flatten_dict(metadata)
+            metadata = flatten_dict(metadata, drop_empty=True)
             metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
         return metadata
 
