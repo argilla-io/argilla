@@ -122,10 +122,10 @@ class RubrixClient:
         if workspace is None:
             raise Exception("Must provide a workspace")
 
-        if (
-            workspace != self.active_workspace
-            and workspace != self.__current_user__.username
-        ):
+        if workspace != self.active_workspace:
+            if workspace == self.__current_user__.username:
+                self._client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME, None)
+                return
             user_workspaces = self.__current_user__.workspaces
             if user_workspaces is not None and workspace not in user_workspaces:
                 raise Exception(f"Wrong provided workspace {workspace}")
