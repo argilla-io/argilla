@@ -273,9 +273,12 @@ def test_dataset_copy(monkeypatch):
 
     rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
 
-    rubrix.set_workspace(new_workspace)
-    df_copy = rubrix.load(dataset_copy)
-    assert df.equals(df_copy)
+    try:
+        rubrix.set_workspace(new_workspace)
+        df_copy = rubrix.load(dataset_copy)
+        assert df.equals(df_copy)
+    finally:
+        rubrix.init() # reset workspace
 
 
 def test_update_record(monkeypatch):
@@ -343,7 +346,6 @@ def test_load_with_ids_list(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset = "test_load_with_ids_list"
     client.delete(f"/api/datasets/{dataset}")
-    sleep(1)
 
     expected_data = 100
     create_some_data_for_text_classification(dataset, n=expected_data)
@@ -434,24 +436,29 @@ def test_load_text2text(monkeypatch):
     df = rubrix.load(name=dataset)
     assert len(df) == 2
 
-
 def test_client_workspace(monkeypatch):
     mocking_client(monkeypatch, client)
+    try:
 
-    ws = rubrix.get_workspace()
-    assert ws == "rubrix"
+        ws = rubrix.get_workspace()
+        assert ws == "rubrix"
 
-    rubrix.set_workspace("other-workspace")
-    assert rubrix.get_workspace() == "other-workspace"
+        rubrix.set_workspace("other-workspace")
+        assert rubrix.get_workspace() == "other-workspace"
 
-    with pytest.raises(Exception, match="Must provide a workspace"):
-        rubrix.set_workspace(None)
+        with pytest.raises(Exception, match="Must provide a workspace"):
+            rubrix.set_workspace(None)
 
-    # Mocking user
-    rubrix._client_instance().__current_user__.workspaces = ["a", "b"]
+        # Mocking user
+        rubrix._client_instance().__current_user__.workspaces = ["a", "b"]
 
-    with pytest.raises(Exception, match="Wrong provided workspace c"):
-        rubrix.set_workspace("c")
+        with pytest.raises(Exception, match="Wrong provided workspace c"):
+            rubrix.set_workspace("c")
+
+        rubrix.set_workspace("rubrix")
+        assert rubrix.get_workspace() == "rubrix"
+    finally:
+        rubrix.init() # reset workspace
 
 
 def test_load_sort(monkeypatch):
