@@ -53,7 +53,7 @@ If you have an Elasticsearch instance and want to share resources with other app
 All you need to take into account is:
 
 
-* Rubrix will create its ES indices with the following pattern ``.rubrix_*``. It's recommended to create a new role (e.g., rubrix) and provide it with all privileges for this index pattern.
+* Rubrix will create its ES indices with the following pattern ``.rubrix*``. It's recommended to create a new role (e.g., rubrix) and provide it with all privileges for this index pattern.
 
 * Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
 
@@ -67,7 +67,7 @@ You can provide the credentials using the following scheme:
 
 Below you can see a screenshot for setting up a new *rubrix* Role and its permissions:
 
-:raw-html-m2r:`<img src="https://user-images.githubusercontent.com/15624271/123934452-40e26000-d9ce-11eb-967d-a46a0b2afa1f.png"/>`
+:raw-html-m2r:`<img src="https://user-images.githubusercontent.com/2518789/142883104-f4f20cf0-34a0-47ff-8ee3-ab9f4644271c.png"/>`
 
 
 Deploy to aws instance using docker-machine
