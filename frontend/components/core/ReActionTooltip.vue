@@ -1,5 +1,5 @@
 <template>
-    <span class="tooltip__container" @click="active()">
+    <span :class="['tooltip__container', showTooltip ? 'active' : null]" @click="active()">
         <slot></slot>
         <span v-if="showTooltip && tooltip" class="tooltip">{{tooltip}}</span>
     </span>
@@ -41,6 +41,14 @@ export default {
     top: calc(100% + 10px);
     &__container {
       position: relative;
+      &.active {
+        ::v-deep svg {
+          fill: $primary-color !important;
+          .breadcrumbs & {
+            fill: #f2067a !important;
+          }
+        }
+      }
     }
   }
 </style>

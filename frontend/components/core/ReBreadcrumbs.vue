@@ -82,11 +82,6 @@ export default {
     .svg-icon {
       fill: $lighter-color;
     }
-    &:active {
-      svg {
-        fill: #f2067a !important;
-      }
-    }
   }
   &__item {
     margin: auto 0.5em auto auto;
