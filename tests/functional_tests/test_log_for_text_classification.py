@@ -5,7 +5,6 @@ from rubrix import TextClassificationRecord, TokenClassificationRecord
 from tests.server.test_helpers import client, mocking_client
 
 
-
 def test_log_records_with_multi_and_single_label_task(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset = "test_log_records_with_multi_and_single_label_task"
@@ -38,6 +37,7 @@ def test_log_records_with_multi_and_single_label_task(monkeypatch):
     with pytest.raises(Exception):
         rubrix.log(records[1], name=dataset)
 
+
 def test_delete_and_create_for_different_task(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset = "test_delete_and_create_for_different_task"
@@ -52,4 +52,26 @@ def test_delete_and_create_for_different_task(monkeypatch):
         TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")), name=dataset
     )
     rubrix.load(dataset)
+
+
+def test_log_records_with_empty_metadata_list(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_log_records_with_empty_metadata_list"
+
+    rubrix.delete(dataset)
+    rubrix.log(
+        [
+            TextClassificationRecord(
+                inputs="The input text", metadata={"emptyList": []}
+            ),
+            TextClassificationRecord(inputs="The input text", metadata={"none": None}),
+        ],
+        name=dataset,
+    )
+
+    df = rubrix.load(dataset)
+    assert len(df) == 2
+
+    for meta in df.metadata.values.tolist():
+        assert meta == {}
 
