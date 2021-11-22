@@ -1,13 +1,11 @@
 name: Tutorials
 
 on:
-  pull_request:
-    branches:
-      - 'master'
+  workflow_dispatch:
 
 jobs:
   setup:
-    name: Setup Rubrix
+    name: Active Learning with ModAL
     runs-on: ubuntu-latest
     defaults:
       run:
