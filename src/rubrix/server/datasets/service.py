@@ -259,7 +259,9 @@ class DatasetsService:
                 workspace=workspace,
             )
         except EntityNotFoundError:
-            return self.create(dataset=dataset, task=task, user=user, workspace=workspace)
+            return self.create(
+                dataset=dataset, task=task, user=user, workspace=workspace
+            )
 
     def copy_dataset(
         self,
@@ -286,27 +288,30 @@ class DatasetsService:
         -------
 
         """
+        dataset_workspace = data.target_workspace or workspace
+        dataset_workspace = user.check_workspace(dataset_workspace)
+
         try:
-            self.find_by_name(data.name, task=None, user=user, workspace=workspace)
-            raise EntityAlreadyExistsError(name=data.name, type=Dataset)
+            self.find_by_name(data.name, task=None, user=user, workspace=dataset_workspace)
+            raise EntityAlreadyExistsError(name=data.name, type=Dataset, workspace=dataset_workspace)
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 
         found = self.find_by_name(name, task=None, user=user, workspace=workspace)
         date_now = datetime.utcnow()
-        current_team = user.check_workspace(workspace)
+
         created_dataset = DatasetDB(
             name=data.name,
             task=found.task,
-            owner=data.target_workspace or current_team,
+            owner=dataset_workspace,
             created_at=date_now,
             last_updated=date_now,
             tags={**found.tags, **data.tags},
             metadata={
                 **found.metadata,
                 **data.metadata,
+                "source_workspace": workspace,
                 "copied_from": found.name,
-                "source_team": current_team,
             },
         )
         self.__dao__.copy(
