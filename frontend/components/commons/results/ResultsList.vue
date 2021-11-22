@@ -119,11 +119,13 @@ export default {
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
-    padding-bottom: 163px;
-    padding-top: 180px;
     padding-left: 4em;
+    padding-bottom: 61px;
     padding-right: calc(4em + 45px);
     transition: padding 0s ease-in-out 0.1s;
+    .fixed-header & {
+      padding-bottom: 200px;
+    }
     .--metrics & {
       @include media(">desktop") {
         width: 100%;
