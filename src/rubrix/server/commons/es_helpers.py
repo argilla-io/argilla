@@ -344,10 +344,17 @@ class aggregations:
 
     @staticmethod
     def terms_aggregation(
-        field_name: str,
+        field_name: str = None,
+        script: Union[str, Dict[str, Any]] = None,
         missing: Optional[str] = None,
         size: int = DEFAULT_AGGREGATION_SIZE,
     ):
+        assert field_name or script, "Either field name or script must be provided"
+        if script:
+            query_part = {"script": script}
+        else:
+            query_part = {"field": field_name}
+
         dynamic_args = {}
         if missing is not None:
             dynamic_args["missing"] = missing
@@ -355,7 +362,7 @@ class aggregations:
         return {
             "meta": {"kind": "terms"},
             "terms": {
-                "field": field_name,
+                **query_part,
                 "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
                 "order": {"_count": "desc"},
                 **dynamic_args,
@@ -364,7 +371,9 @@ class aggregations:
 
     @staticmethod
     def histogram_aggregation(
-        field_name: str = None, script: str = None, interval: float = 0.1
+        field_name: str = None,
+        script: Union[str, Dict[str, Any]] = None,
+        interval: float = 0.1,
     ):
 
         assert field_name or script, "Either field name or script must be provided"

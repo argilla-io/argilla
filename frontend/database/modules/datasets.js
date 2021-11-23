@@ -523,7 +523,9 @@ const actions = {
     /**
      * Fetch all observation datasets from backend
      */
-    return await ObservationDataset.api().get("/datasets/", { persistBy: 'create' });
+    return await ObservationDataset.api().get("/datasets/", {
+      persistBy: "create",
+    });
   },
   async fetchByName(_, name) {
     /**
@@ -533,6 +535,7 @@ const actions = {
     const { allowAnnotation } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, allowAnnotation);
     const dataset = await _loadTaskDataset(ds);
+    await dataset.initialize();
     await _updateAnnotationProgress({
       id: name,
       total: dataset.globalResults.total,

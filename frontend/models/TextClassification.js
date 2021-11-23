@@ -76,12 +76,26 @@ class TextClassificationDataset extends ObservationDataset {
         return new TextClassificationSearchQuery(data);
       }),
       sort: this.attr([]),
+      _labels: this.attr([]),
       results: this.attr(
         {},
         (data) => new TextClassificationSearchResults(data)
       ),
       globalResults: this.attr({}),
     };
+  }
+
+  async initialize() {
+    const { labels } = await this.fetchMetricSummary("dataset_labels");
+    const entity = this.getTaskDatasetClass();
+    await entity.insertOrUpdate({
+      where: this.name,
+      data: {
+        ...this,
+        _labels: labels,
+      },
+    });
+    return entity.find(this.name);
   }
 
   get isMultiLabel() {
@@ -96,6 +110,7 @@ class TextClassificationDataset extends ObservationDataset {
       ...new Set(
         (labels || [])
           .filter((l) => l && l.trim())
+          .concat(this._labels || [])
           .concat(Object.keys(aggregations.annotated_as))
           .concat(Object.keys(aggregations.predicted_as))
       ),

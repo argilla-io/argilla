@@ -156,7 +156,7 @@ def test_dataset_metrics():
 
     metrics = client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
-    assert len(metrics) == COMMON_METRICS_LENGTH + 2
+    assert len(metrics) == COMMON_METRICS_LENGTH + 3
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric:summary",

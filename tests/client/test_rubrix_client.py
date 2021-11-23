@@ -43,6 +43,8 @@ def test_log_something(monkeypatch):
     assert response.failed == 0
 
     response = client.post(f"/api/datasets/{dataset_name}/TextClassification:search")
+    assert response.status_code == 200, response.json()
+
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
     assert len(results.records) == 1

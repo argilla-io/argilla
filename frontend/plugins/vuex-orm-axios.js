@@ -58,7 +58,12 @@ export default ({ $axios, app }) => {
             type: "error",
           });
         });
-
+        break;
+      case 404:
+        Notification.dispatch("notify", {
+          message: "Warning: " + error.response.data.detail,
+          type: "warning",
+        });
         break;
       default:
         Notification.dispatch("notify", {
