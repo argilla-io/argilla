@@ -226,6 +226,7 @@ def test_rules_matrix_records_annotation(monkeypatch):
 
     # rules property
     assert len(weak_labels.rules) == 2
+    assert weak_labels._rules_name2index == {"rule_0": 0, "rule_1": 1}
     assert weak_labels.rules[0](None) == "mock"
 
     assert (

@@ -74,9 +74,16 @@ class WeakLabels:
         self._rules = rules
         self._rules_index2name = {
             # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
-            index: getattr(rule, "name", None)
-            or getattr(rule, "__name__", None)
-            or f"rule_{index}"
+            index: (
+                getattr(rule, "name", None)
+                or (
+                    getattr(rule, "__name__", None)
+                    # allow multiple lambda functions
+                    if getattr(rule, "__name__", None) != "<lambda>"
+                    else None
+                )
+                or f"rule_{index}"
+            )
             for index, rule in enumerate(rules)
         }
         # raise error if there are duplicates
