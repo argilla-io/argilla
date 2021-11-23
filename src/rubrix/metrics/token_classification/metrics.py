@@ -338,7 +338,5 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.token_classification_f1(
-            metric.results, metric.description
-        ),
+        visualization=lambda: helpers.f1(metric.results, metric.description),
     )

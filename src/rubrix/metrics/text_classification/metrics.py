@@ -28,14 +28,11 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.bar(
-            metric.results,
-            title=metric.description,
-        ),
+        visualization=lambda: helpers.f1(data=metric.results, title=metric.description),
     )
 
 
-def f1_multilabel(name: str, query:Optional[str] = None) -> MetricSummary:
+def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
     """Computes the multi-label label f1 metric for a dataset
 
     Args:
@@ -58,14 +55,5 @@ def f1_multilabel(name: str, query:Optional[str] = None) -> MetricSummary:
 
     return MetricSummary.new_summary(
         data=metric.results,
-        visualization=lambda: helpers.bar(
-            {
-                "micro": metric.results["micro"],
-                "macro": metric.results["macro"],
-                **metric.results["per_label"],
-            }
-            if metric.results
-            else metric.results,
-            title=metric.description,
-        ),
+        visualization=lambda: helpers.f1(data=metric.results, title=metric.description),
     )

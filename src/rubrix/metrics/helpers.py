@@ -95,7 +95,7 @@ def multilevel_pie(labels, parents, values, title: str = "Pie"):
     return fig
 
 
-def token_classification_f1(data: Dict[str, float], title: str):
+def f1(data: Dict[str, float], title: str):
     from plotly.subplots import make_subplots
 
     fig = make_subplots(
