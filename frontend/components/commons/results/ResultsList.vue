@@ -41,6 +41,7 @@
             <slot name="record" :record="item" />
           </results-record>
         </div>
+        <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
       </template>
     </VueAutoVirtualScrollList>
     <RePagination
@@ -71,6 +72,15 @@ export default {
     visibleRecords() {
       return this.dataset.visibleRecords;
     },
+    paginationLimit() {
+      return this.dataset.viewSettings.pagination.maxRecordsLimit;
+    },
+    isLastPagePaginable() {
+      if (this.dataset.results.total > this.paginationLimit) {
+        return (this.dataset.viewSettings.pagination.page * this.dataset.viewSettings.pagination.size) === this.dataset.viewSettings.pagination.maxRecordsLimit;
+      }
+      return false
+    }
   },
   mounted() {
     const scroll = document.getElementById("scroll");
