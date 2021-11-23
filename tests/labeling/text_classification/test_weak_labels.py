@@ -26,6 +26,7 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.labeling.text_classification.rule import Rule
 from rubrix.labeling.text_classification.weak_labels import (
+    DuplicatedRuleNameError,
     MissingLabelError,
     MultiLabelError,
     NoRecordsFoundError,
@@ -87,6 +88,12 @@ def rules(monkeypatch) -> List[Callable]:
     rubrix_rule = Rule(query="mock", label="positive", name="rubrix_rule")
 
     return [first_rule, rule2, rubrix_rule]
+
+
+def test_duplicated_rule_name_error():
+    rules = [Rule(query="mock", label="mock"), Rule(query="mock", label="not mock")]
+    with pytest.raises(DuplicatedRuleNameError, match="'mock': 2"):
+        WeakLabels(rules=rules, dataset="mock")
 
 
 def test_multi_label_error(monkeypatch):
