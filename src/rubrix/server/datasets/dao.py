@@ -176,7 +176,7 @@ class DatasetsDAO:
         document = self._es.get_document_by_id(
             index=DATASETS_INDEX_NAME, doc_id=dataset.id
         )
-        if not document:
+        if not document and owner is None:
             # We must search by name since we have no owner
             results = self._es.list_documents(
                 index=DATASETS_INDEX_NAME,

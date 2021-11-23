@@ -122,10 +122,10 @@ class RubrixClient:
         if workspace is None:
             raise Exception("Must provide a workspace")
 
-        if (
-            workspace != self.active_workspace
-            and workspace != self.__current_user__.username
-        ):
+        if workspace != self.active_workspace:
+            if workspace == self.__current_user__.username:
+                self._client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME, None)
+                return
             user_workspaces = self.__current_user__.workspaces
             if user_workspaces is not None and workspace not in user_workspaces:
                 raise Exception(f"Wrong provided workspace {workspace}")
@@ -309,10 +309,14 @@ class RubrixClient:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
         return records_sorted_by_id
 
-    def copy(self, source: str, target: str):
+    def copy(self, source: str, target: str, target_workspace: Optional[str] = None):
         """Makes a copy of the `source` dataset and saves it as `target`"""
         response = copy_dataset(
-            client=self._client, name=source, json_body=CopyDatasetRequest(name=target)
+            client=self._client,
+            name=source,
+            json_body=CopyDatasetRequest(
+                name=target, target_workspace=target_workspace
+            ),
         )
         if response.status_code == 409:
             raise RuntimeError(f"A dataset with name '{target}' already exists.")

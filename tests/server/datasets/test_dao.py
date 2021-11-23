@@ -35,7 +35,7 @@ def test_retrieve_ownered_dataset_for_no_owner_user():
     )
     assert dao.find_by_name(created.name, owner=created.owner) == created
     assert dao.find_by_name(created.name, owner=None) == created
-    assert dao.find_by_name(created.name, owner="me") == created
+    assert dao.find_by_name(created.name, owner="me") is None
 
 
 def test_close_dataset():

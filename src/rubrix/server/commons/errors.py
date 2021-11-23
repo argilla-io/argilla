@@ -87,13 +87,18 @@ class InvalidTextSearchError(HTTPException):
 class EntityAlreadyExistsError(HTTPException):
     """Error raised when entity was created"""
 
-    def __init__(self, name: str, type: Type):
+    def __init__(self, name: str, type: Type, workspace: Optional[str] = None):
         self.name = name
         self.type = Type
+        self.workspace = workspace
+
+        msg = f"Already created entity {name} of type {type.__name__}"
+        if self.workspace:
+            msg += f" in {workspace} workspace."
 
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Already created entity {name} of type {type.__name__}",
+            detail=msg,
         )
 
 
