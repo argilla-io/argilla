@@ -1,5 +1,6 @@
-from typing import Any, ClassVar, Iterable, List
+from typing import Any, ClassVar, Dict, Iterable, List, Optional
 
+from pydantic import Field
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
@@ -8,8 +9,9 @@ from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
     BaseTaskMetrics,
     PythonMetric,
+    TermsAggregation,
 )
-from rubrix.server.tasks.text_classification import TextClassificationRecord
+from rubrix.server.tasks.text_classification.api.model import TextClassificationRecord
 
 
 class F1Metric(PythonMetric):
@@ -74,6 +76,41 @@ class F1Metric(PythonMetric):
         return {"micro": micro, "macro": macro, "per_label": per_label}
 
 
+class DatasetLabels(TermsAggregation):
+    id: str = Field("dataset_labels", const=True)
+    name: str = Field("The dataset labels", const=True)
+    fixed_size: int = Field(1500, const=True)
+    script: Dict[str, Any] = Field(
+        {
+            "lang": "painless",
+            "source": """
+            def all_labels = [];
+            def predicted = doc.containsKey('prediction.labels.class_label.keyword') 
+                ? doc['prediction.labels.class_label.keyword'] : null;
+            def annotated = doc.containsKey('annotation.labels.class_label.keyword') 
+                ? doc['annotation.labels.class_label.keyword'] : null;
+            
+            if (predicted != null && predicted.size() > 0) {
+              for (int i = 0; i < predicted.length; i++) {  
+                all_labels.add(predicted[i])
+              }  
+            }
+            
+            if (annotated != null && annotated.size() > 0) {
+              for (int i = 0; i < annotated.length; i++) {  
+                all_labels.add(annotated[i])
+              }  
+            }
+            return all_labels;
+            """,
+        },
+        const=True,
+    )
+
+    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
+        return {"labels": [k for k in (aggregation_result or {}).keys()]}
+
+
 class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
@@ -85,4 +122,5 @@ class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
             description="",
             multi_label=True,
         ),
+        DatasetLabels(),
     ]
