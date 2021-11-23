@@ -18,7 +18,7 @@ Then you can install Rubrix with ``pip``\ :
 
 .. code-block:: bash
 
-   pip install rubrix==0.6.1
+   pip install rubrix==0.6.2
 
 2. Launch the web app
 ---------------------
@@ -69,7 +69,7 @@ This method may be preferred if you
 
 .. code-block:: bash
 
-   pip install rubrix[server]==0.6.1
+   pip install rubrix[server]==0.6.2
 
 3. Launch a local instance of the Rubrix web app
 

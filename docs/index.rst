@@ -52,7 +52,7 @@ Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`
 
 .. code-block:: bash
 
-   pip install rubrix==0.6.1 transformers datasets torch
+   pip install rubrix==0.6.2 transformers datasets torch
 
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
 
