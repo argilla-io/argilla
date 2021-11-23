@@ -1,4 +1,14 @@
-from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, TypeVar
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -182,7 +192,7 @@ class HistogramAggregation(ElasticsearchMetric):
     """
 
     field: str
-    script: Optional[str] = None
+    script: Optional[Union[str, Dict[str, Any]]] = None
     fixed_interval: Optional[float] = None
 
     def aggregation_request(self, interval: float) -> Dict[str, Any]:
@@ -204,6 +214,9 @@ class TermsAggregation(ElasticsearchMetric):
 
     field:
         The term field
+    script:
+        If provided, it will be used as scripted field
+        for aggregation
     fixed_size:
         If provided, the size will use for terms aggregation
     missing:
@@ -211,15 +224,16 @@ class TermsAggregation(ElasticsearchMetric):
 
     """
 
-    field: str
+    field: str = None
+    script: Union[str, Dict[str, Any]] = None
     fixed_size: Optional[int] = None
     missing: Optional[str] = None
 
-    def aggregation_request(self, size: int) -> Dict[str, Any]:
+    def aggregation_request(self, size: int = None) -> Dict[str, Any]:
         if self.fixed_size:
             size = self.fixed_size
         return {
             self.id: aggregations.terms_aggregation(
-                self.field, size=size, missing=self.missing
+                self.field, script=self.script, size=size, missing=self.missing
             )
         }
