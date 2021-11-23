@@ -24,7 +24,8 @@
           <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
           <user />
         </ReTopbarBrand>
-        <div class="container">
+        <datasets-empty v-if="!datasets.length"/>
+        <div v-else class="container">
           <div class="interactions">
             <ReSearchBar @input="onSearch" />
           </div>
