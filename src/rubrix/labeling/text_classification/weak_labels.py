@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from collections import Counter
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -37,6 +38,7 @@ class WeakLabels:
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
 
     Raises:
+        DuplicatedRuleNameError: When you provided multiple rules with the same name.
         NoRecordsFoundError: When the filtered dataset is empty.
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
         MissingLabelError: When provided with a ``label2int`` dict, and a
@@ -70,13 +72,24 @@ class WeakLabels:
         label2int: Optional[Dict[Optional[str], int]] = None,
     ):
         self._rules = rules
-        self._rules_name2index = {
+        self._rules_index2name = {
             # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
-            getattr(rule, "name", None)
+            index: getattr(rule, "name", None)
             or getattr(rule, "__name__", None)
-            or f"rule_{i}": i
-            for i, rule in enumerate(self._rules)
+            or f"rule_{index}"
+            for index, rule in enumerate(rules)
         }
+        # raise error if there are duplicates
+        counts = Counter(self._rules_index2name.values())
+        if len(counts.keys()) < len(rules):
+            raise DuplicatedRuleNameError(
+                f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
+                " Please make sure to provide unique rule names."
+            )
+        self._rules_name2index = {
+            val: key for key, val in self._rules_index2name.items()
+        }
+
         self._dataset = dataset
 
         # load records and check compatibility
@@ -459,6 +472,10 @@ class WeakLabels:
 
 
 class WeakLabelsError(Exception):
+    pass
+
+
+class DuplicatedRuleNameError(WeakLabelsError):
     pass
 
 
