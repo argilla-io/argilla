@@ -50,6 +50,18 @@ def test_metadata_with_object_list():
     assert list(record.metadata.keys()) == ["mails"]
 
 
+def test_single_label_with_multiple_annotation():
+
+    with pytest.raises(ValidationError, match="Single label record must include only one annotation label"):
+        TextClassificationRecord.parse_obj(
+            {
+                "inputs": {"text": "This is a text"},
+                "annotation": {"agent": "test", "labels": [{"class": "A"}, {"class": "B"}]},
+                "multi_label": False
+            }
+        )
+
+
 def test_too_long_metadata():
     record = TextClassificationRecord.parse_obj(
         {

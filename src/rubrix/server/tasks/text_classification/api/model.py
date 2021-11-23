@@ -155,6 +155,10 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
                 annotation and len(annotation.labels) > 0
             ), "Annotation must include some label for validated records"
 
+        if not multi_label and annotation:
+            assert len(annotation.labels) == 1, "Single label record must include only one annotation label"
+
+
     @classmethod
     def _check_score_integrity(
         cls, prediction: TextClassificationAnnotation, multi_label: bool
