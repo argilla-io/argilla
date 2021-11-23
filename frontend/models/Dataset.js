@@ -39,6 +39,23 @@ class ObservationDataset extends Model {
   getTaskDatasetClass() {
     return ObservationDataset.getClassDatasetForTask(this.task);
   }
+  async initialize() {}
+
+  async fetchMetricSummary(metricId) {
+    try {
+      const { response } = await ObservationDataset.api().post(
+        `/datasets/${this.task}/${this.name}/metrics/${metricId}:summary`,
+        {},
+        {
+          save: false,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return { labels: [] };
+    }
+  }
 
   get visibleRecords() {
     return this.results.records.slice(0, this.viewSettings.pagination.size);
