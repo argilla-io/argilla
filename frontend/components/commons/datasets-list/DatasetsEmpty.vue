@@ -1,21 +1,46 @@
 <template>
   <div class="datasets-empty">
-    <svgicon class="datasets-empty__icon" width="44" height="46" name="datasets-empty" />
+    <svgicon
+      class="datasets-empty__icon"
+      width="44"
+      height="46"
+      name="datasets-empty"
+    />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
-    <p class="datasets-empty__subtitle">The Rubrix web app allows you to log, explore and annotate your data.
-Start logging data with our Python client, or <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for more information.</p>
-    <re-code>import rubrix as rb
-
-rb.log(
-  rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
-  name='example-dataset'
-)</re-code>
+    <p class="datasets-empty__subtitle">
+      The Rubrix web app allows you to log, explore and annotate your data.
+      Start logging data with our Python client, or
+      <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
+      more information.
+    </p>
+    <re-code>{{ generateCodeSnippet(workspace) }}</re-code>
   </div>
 </template>
 
 <script>
 import "assets/icons/datasets-empty";
-export default {};
+export default {
+  props: {
+    workspace: {
+      required: true,
+      type: String,
+    },
+  },
+
+  methods: {
+    generateCodeSnippet(ws) {
+      return `import rubrix as rb
+
+rb.init("${window.location}", api_key="<YOUR_API_KEY>")
+rb.set_workspace("${ws}")
+
+rb.log(
+  rb.TextClassificationRecord(inputs="my first rubrix example"), 
+  name='example-dataset'
+)`;
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 .datasets-empty {
@@ -42,10 +67,9 @@ export default {};
       color: $primary-color;
       text-decoration: none;
       &:hover {
-        color: darken($primary-color, 10%)
+        color: darken($primary-color, 10%);
       }
     }
   }
 }
 </style>
-

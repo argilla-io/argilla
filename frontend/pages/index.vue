@@ -24,7 +24,7 @@
           <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: workspace }]" />
           <user />
         </ReTopbarBrand>
-        <datasets-empty v-if="!datasets.length"/>
+        <datasets-empty v-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
             <ReSearchBar @input="onSearch" />
@@ -79,7 +79,12 @@ export default {
     ],
     actions: [
       { name: "delete", icon: "delete", title: "Delete dataset" },
-      { name: "copy", icon: "copy-url", title: "Copy url to clipboard", tooltip: "Copied" },
+      {
+        name: "copy",
+        icon: "copy-url",
+        title: "Copy url to clipboard",
+        tooltip: "Copied",
+      },
     ],
     externalLinks: [
       {
@@ -103,7 +108,7 @@ export default {
       return this.auth.currentWorkspace;
     },
     ...mapState({
-      auth: 'auth'
+      auth: "auth",
     }),
   },
   methods: {
