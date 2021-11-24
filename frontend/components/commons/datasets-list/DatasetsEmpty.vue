@@ -21,23 +21,23 @@ export default {};
 .datasets-empty {
   text-align: center;
   margin: auto;
-  max-width: 460px;
-  margin-top: 15%;
+  margin-top: 12%;
   color: palette(grey, medium);
+  max-width: 610px;
+  line-height: 20px;
   &__icon {
     margin-bottom: 1em;
   }
   &__title {
-    margin-bottom: 1em;
-    margin-top: 0;
+    margin: 0 auto 1em auto;
     @include font-size(18px);
     font-weight: 300;
+    max-width: 500px;
   }
   &__subtitle {
-    margin-bottom: 1em;
-    margin-top: 0;
-    @include font-size(13px);
-    font-weight: 300;
+    margin: 0 auto 1em auto;
+    @include font-size(14px);
+    max-width: 500px;
     a {
       color: $primary-color;
       text-decoration: none;
@@ -46,11 +46,6 @@ export default {};
       }
     }
   }
-}
-.highlight {
-  background-color: #333346;
-  color: white;
-  padding: 1em !important;
 }
 </style>
 

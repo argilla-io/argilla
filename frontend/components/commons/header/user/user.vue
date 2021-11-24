@@ -103,6 +103,7 @@ export default {
         }
         return await this.$router.push("/");
       }
+      this.close();
     },
   },
 };
