@@ -43,19 +43,22 @@
         >
       </div>
     </div>
-    <div v-if="!annotationEnabled && record.annotation" class="record__labels">
-      <svgicon
-        v-if="record.predicted"
-        :class="['icon__predicted', record.predicted]"
-        width="20"
-        height="20"
-        :name="record.predicted === 'ko' ? 'predicted-ko' : 'predicted-ok'"
-      ></svgicon>
-      <re-tag
-        v-for="label in record.annotation.labels"
-        :key="label.class"
-        :name="label.class"
-      />
+
+    <div class="record__labels">
+      <template v-if="!annotationEnabled && record.annotation">
+        <svgicon
+          v-if="record.predicted"
+          :class="['icon__predicted', record.predicted]"
+          width="20"
+          height="20"
+          :name="record.predicted === 'ko' ? 'predicted-ko' : 'predicted-ok'"
+        ></svgicon>
+        <re-tag
+          v-for="label in record.annotation.labels"
+          :key="label.class"
+          :name="label.class"
+        />
+      </template>
     </div>
   </div>
 </template>
