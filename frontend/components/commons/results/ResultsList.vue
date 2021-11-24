@@ -18,32 +18,37 @@
 <template>
   <div class="list">
     <slot name="header" />
-    <VueAutoVirtualScrollList
-      id="scroll"
-      ref="scroll"
-      :key="dataset.name"
-      class="results-scroll"
-      :total-height="1200"
-      :default-height="100"
-      :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-    >
-      <template v-if="showLoader">
+    <div class="results-scroll" id="scroll">
+      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
         <results-loading :size="dataset.viewSettings.pagination.size" />
-      </template>
-      <template v-else>
-        <div
-          v-for="(item, index) in visibleRecords"
-          v-cloak
-          :key="index"
-          class="list__li"
-        >
-          <results-record v-if="item" :dataset="dataset" :item="item">
-            <slot name="record" :record="item" />
-          </results-record>
-        </div>
-        <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
-      </template>
-    </VueAutoVirtualScrollList>
+      </div>
+      <DynamicScroller
+        page-mode
+        class="scroller"
+        :items="visibleRecords"
+        :min-item-size="300"
+        :emit-update="true"
+        :buffer="200"
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+      > 
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            class="list__li"
+            :item="item"
+            :active="active"
+            key-field="id"
+            :index="index"
+          >
+            <results-record :key="item.id" :dataset="dataset" :item="item">
+              <slot name="record" :record="item" />
+            </results-record>
+          </DynamicScrollerItem>
+        </template>
+        <template #after>
+          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+        </template>
+      </DynamicScroller>
+    </div>
     <RePagination
       :total-items="dataset.results.total"
       :pagination-settings="dataset.viewSettings.pagination"
@@ -57,12 +62,12 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
-      scrollComponent: undefined,
+      scrollComponent: undefined
     };
   },
   computed: {
@@ -77,9 +82,13 @@ export default {
     },
     isLastPagePaginable() {
       if (this.dataset.results.total > this.paginationLimit) {
-        return (this.dataset.viewSettings.pagination.page * this.dataset.viewSettings.pagination.size) === this.dataset.viewSettings.pagination.maxRecordsLimit;
+        return (
+          this.dataset.viewSettings.pagination.page *
+            this.dataset.viewSettings.pagination.size ===
+          this.dataset.viewSettings.pagination.maxRecordsLimit
+        );
       }
-      return false
+      return false;
     }
   },
   mounted() {
@@ -95,16 +104,15 @@ export default {
   },
   methods: {
     ...mapActions({
-      paginate: "entities/datasets/paginate",
+      paginate: "entities/datasets/paginate"
     }),
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 0) {
+      if (document.getElementById("scroll").scrollTop > 0) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
-
       }
     },
     async onPagination(page, size) {
@@ -112,10 +120,10 @@ export default {
       await this.paginate({
         dataset: this.dataset,
         page: page,
-        size: size,
+        size: size
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -126,6 +134,9 @@ export default {
   position: relative;
   margin-bottom: 0;
   list-style: none;
+  // .scroller {
+  //   height: 100%;
+  // }
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
@@ -152,6 +163,7 @@ export default {
   &__li {
     padding-bottom: 10px;
     position: relative;
+    min-height: 100px;
   }
 }
 </style>

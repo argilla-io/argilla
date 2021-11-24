@@ -31,6 +31,7 @@
       ></ReCheckbox>
       <slot :record="item" />
       <RecordExtraActions
+        :key="item.id"
         :allow-change-status="annotationEnabled"
         :record="item"
         :task="dataset.task"
@@ -44,7 +45,7 @@
       modal-position="modal-center"
       :modal-custom="true"
       :prevent-body-scroll="true"
-      :modal-visible="showMetadata"
+      :modal-visible="idState.showMetadata"
       @close-modal="closeMetadata"
     >
       <Metadata
@@ -59,7 +60,15 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { IdState } from 'vue-virtual-scroller'
+
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.item.id,
+    }),
+  ],
   props: {
     dataset: {
       type: Object,
@@ -70,11 +79,10 @@ export default {
       required: true,
     },
   },
-  data() {
+  idState() {
     return {
-      selectedMetadataItem: this.metadataId,
       showMetadata: false,
-    };
+    }
   },
   computed: {
     annotationEnabled() {
@@ -128,10 +136,10 @@ export default {
     },
 
     onShowMetadata() {
-      this.showMetadata = true;
+      this.idState.showMetadata = true;
     },
     closeMetadata() {
-      this.showMetadata = false;
+      this.idState.showMetadata = false;
     },
   },
 };

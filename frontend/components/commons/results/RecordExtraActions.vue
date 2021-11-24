@@ -16,15 +16,15 @@
   -->
 
 <template>
-  <div v-click-outside="close" class="record__extra-actions">
+  <div v-click-outside="close" :key="record.id" class="record__extra-actions">
     <a
       v-if="hasMetadata || allowChangeStatus"
       class="extra-actions__button"
       href="#"
-      @click.prevent="open = !open"
+      @click.prevent="idState.open = !idState.open"
       ><svgicon name="kebab-menu-h" width="20" height="20" color="#4A4A4A"
     /></a>
-    <div v-if="open" class="extra-actions__content">
+    <div v-if="idState.open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="showMetadata()">
         <span>View metadata</span>
       </div>
@@ -47,8 +47,15 @@
 <script>
 import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu-h";
+import { IdState } from 'vue-virtual-scroller'
 
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     allowChangeStatus: {
       type: Boolean,
@@ -63,6 +70,11 @@ export default {
       required: true,
     },
   },
+  idState() {
+    return {
+      open: false,
+    }
+  },
   data: () => ({
     statusActions: [
       // TODO: Do we need this? Just the discard action should be allowed here
@@ -72,7 +84,6 @@ export default {
         class: "discard",
       },
     ],
-    open: false,
   }),
   computed: {
     hasMetadata() {
@@ -102,7 +113,7 @@ export default {
       this.close();
     },
     close() {
-      this.open = false;
+      this.idState.open = false;
     },
   },
 };
