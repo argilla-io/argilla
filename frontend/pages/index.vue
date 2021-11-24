@@ -21,7 +21,7 @@
     <div v-else class="wrapper">
       <div class="main">
         <ReTopbarBrand>
-          <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
+          <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: workspace }]" />
           <user />
         </ReTopbarBrand>
         <datasets-empty v-if="!datasets.length"/>
@@ -60,7 +60,7 @@
 
 <script>
 import { ObservationDataset } from "@/models/Dataset";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   layout: "app",
   data: () => ({
@@ -99,6 +99,12 @@ export default {
     datasets() {
       return ObservationDataset.all();
     },
+    workspace() {
+      return this.auth.currentWorkspace;
+    },
+    ...mapState({
+      auth: 'auth'
+    }),
   },
   methods: {
     ...mapActions({
