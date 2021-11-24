@@ -40,18 +40,36 @@ def test_metrics_for_text_classification(monkeypatch):
     results = f1(dataset)
     assert results
     assert results.data == {
-        "micro": 1.0,
-        "macro": 1.0,
-        "per_label": {"spam": 1.0, "ham": 1.0},
+        "0_f1": 1.0,
+        "0_precision": 1.0,
+        "0_recall": 1.0,
+        "1_f1": 1.0,
+        "1_precision": 1.0,
+        "1_recall": 1.0,
+        "f1_macro": 1.0,
+        "f1_micro": 1.0,
+        "precision_macro": 1.0,
+        "precision_micro": 1.0,
+        "recall_macro": 1.0,
+        "recall_micro": 1.0,
     }
     results.visualize()
 
     results = f1_multilabel(dataset)
     assert results
     assert results.data == {
-        "micro": 1.0,
-        "macro": 1.0,
-        "per_label": {"spam": 1.0, "ham": 1.0},
+        "0_f1": 1.0,
+        "0_precision": 1.0,
+        "0_recall": 1.0,
+        "1_f1": 1.0,
+        "1_precision": 1.0,
+        "1_recall": 1.0,
+        "f1_macro": 1.0,
+        "f1_micro": 1.0,
+        "precision_macro": 1.0,
+        "precision_micro": 1.0,
+        "recall_macro": 1.0,
+        "recall_micro": 1.0,
     }
     results.visualize()
 

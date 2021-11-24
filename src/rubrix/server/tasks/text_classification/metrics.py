@@ -1,7 +1,7 @@
 from typing import Any, ClassVar, Dict, Iterable, List, Optional
 
 from pydantic import Field
-from sklearn.metrics import f1_score
+from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
@@ -27,13 +27,11 @@ class F1Metric(PythonMetric):
     multi_label: bool = False
 
     def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
-        filtered_records = filter(lambda r: r.predicted is not None, records)
-        filtered_records = list(filtered_records)
-        ds_labels = set()
+        filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precalculated with using a global dataset metric
-        for record in filtered_records:
-            for label in record.predicted_as + record.annotated_as:
-                ds_labels.add(label)
+        ds_labels = {
+            label for record in filtered_records for label in record.annotated_as
+        }
 
         if not len(ds_labels):
             return {}
@@ -57,23 +55,36 @@ class F1Metric(PythonMetric):
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
 
-        micro = f1_score(y_true=y_true, y_pred=y_pred, average="micro")
-        macro = f1_score(y_true=y_true, y_pred=y_pred, average="macro")
+        micro_p, micro_r, micro_f, _ = precision_recall_fscore_support(
+            y_true=y_true, y_pred=y_pred, average="micro"
+        )
+        macro_p, macro_r, macro_f, _ = precision_recall_fscore_support(
+            y_true=y_true, y_pred=y_pred, average="macro"
+        )
 
-        reverse_labels_mapping = {v: k for k, v in labels_mapping.items()}
-        per_label = {
-            reverse_labels_mapping[i]: f1score
-            for i, f1score in enumerate(
-                f1_score(
-                    y_true=y_true,
-                    y_pred=y_pred,
-                    labels=list(labels_mapping.values()),
-                    average=None,
-                )
+        per_label = {}
+        for label, p, r, f, _ in zip(
+            labels_mapping.values(),
+            *precision_recall_fscore_support(
+                y_true=y_true,
+                y_pred=y_pred,
+                labels=list(labels_mapping.values()),
+                average=None,
+            ),
+        ):
+            per_label.update(
+                {f"{label}_precision": p, f"{label}_recall": r, f"{label}_f1": f}
             )
-        }
 
-        return {"micro": micro, "macro": macro, "per_label": per_label}
+        return {
+            "precision_macro": macro_p,
+            "recall_macro": macro_r,
+            "f1_macro": macro_f,
+            "precision_micro": micro_p,
+            "recall_micro": micro_r,
+            "f1_micro": micro_f,
+            **per_label,
+        }
 
 
 class DatasetLabels(TermsAggregation):
@@ -115,11 +126,15 @@ class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
-        F1Metric(id="F1", name="F1 Metric for single-class", description=""),
+        F1Metric(
+            id="F1",
+            name="F1 Metrics for single-label",
+            description="F1 Metrics for single-label (averaged and per label)",
+        ),
         F1Metric(
             id="MultiLabelF1",
-            name="F1 Metric for multi-class ",
-            description="",
+            name="F1 Metrics for multi-label",
+            description="F1 Metrics for multi-label (averaged and per label)",
             multi_label=True,
         ),
         DatasetLabels(),
