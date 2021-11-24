@@ -53,7 +53,6 @@ export default {
   },
   data: () => ({
     headerHeight: undefined,
-    workspace: undefined,
   }),
   computed: {
     currentTask() {
