@@ -1,6 +1,6 @@
 <template>
   <div class="datasets-empty">
-    <svgicon class="datasets-empty__icon" width="36" height="36" name="datasets-empty" />
+    <svgicon class="datasets-empty__icon" width="44" height="46" name="datasets-empty" />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
     <p class="datasets-empty__subtitle">The Rubrix web app allows you to log, explore and annotate your data.
 Start logging data with our Python client, or <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for more information.</p>
@@ -30,7 +30,7 @@ export default {};
   }
   &__title {
     margin: 0 auto 1em auto;
-    @include font-size(18px);
+    @include font-size(20px);
     font-weight: 300;
     max-width: 500px;
   }
