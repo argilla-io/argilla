@@ -44,8 +44,8 @@
       </div>
     </div>
 
-    <div class="record__labels">
-      <template v-if="!annotationEnabled && record.annotation">
+    <div v-if="!annotationEnabled" class="record__labels">
+      <template v-if="record.annotation">
         <svgicon
           v-if="record.predicted"
           :class="['icon__predicted', record.predicted]"
