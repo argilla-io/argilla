@@ -77,6 +77,9 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
+    ['nuxt-highlightjs', {
+      style: 'dracula'
+    }]
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
