@@ -1,0 +1,32 @@
+name: Tutorials
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: Active Learning with ModAL
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Setup Rubrix
+        run: |
+          sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
+          docker-compose -f "docker-compose.yaml" up -d --build
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.8.10
+      - name: Install pytest and nbmake
+        run: pip install pytest nbmake ipywidgets
+      - name: Install Rubrix
+        run: pip install -U git+https://github.com/recognai/rubrix.git
+      - name: Run active learning tutorial
+        run: pytest --nbmake docs/tutorials/05-active_learning.ipynb
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yaml" down
