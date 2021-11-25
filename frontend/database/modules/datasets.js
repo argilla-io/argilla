@@ -267,6 +267,19 @@ async function _paginate({ dataset, size, page }) {
   }
 }
 
+async function _refreshDatasetAggregations({ dataset }) {
+  const { aggregations } = await _querySearch({
+    dataset,
+    query: dataset.query,
+    size: 0,
+  });
+
+  return await _updateTaskDataset({
+    dataset,
+    data: { results: { aggregations } },
+  });
+}
+
 async function _search({ dataset, query, sort, size }) {
   query = _normalizeSearchQuery({ query: query || {}, dataset });
   sort = sort || dataset.sort || [];
@@ -578,6 +591,7 @@ const actions = {
   async refresh(_, { dataset }) {
     const pagination = Pagination.find(dataset.name);
     await _paginate({ dataset, size: pagination.size, page: pagination.page });
+    await _refreshDatasetAggregations({ dataset });
   },
 };
 
