@@ -113,7 +113,7 @@ async function _loadTaskDataset(dataset) {
   }
 
   if (pagination && pagination.page > 1) {
-    await _paginate({
+    return await _paginate({
       dataset: _dataset,
       size: pagination.size,
       page: pagination.page,
@@ -244,7 +244,7 @@ async function _paginate({ dataset, size, page }) {
       size,
       from: pagination.from,
     });
-    await _updateTaskDataset({ dataset, data: { results } });
+    return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
     await _updateViewSettings({
       id: dataset.name,
