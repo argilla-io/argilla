@@ -61,10 +61,7 @@ export default {
       search: "entities/datasets/search",
     }),
     onRefresh() {
-      this.search({
-        dataset: this.dataset,
-        query: this.dataset.query,
-      });
+      this.$nuxt.refresh()
     },
     async onEnableAnnotationView(value) {
       await this.enableAnnotation({
