@@ -270,8 +270,7 @@ async function _paginate({ dataset, size, page }) {
 async function _search({ dataset, query, sort, size }) {
   query = _normalizeSearchQuery({ query: query || {}, dataset });
   sort = sort || dataset.sort || [];
-  size = size || new Pagination().size;
-
+  size = size || Pagination.find(dataset.name).size;
   try {
     await _updateViewSettings({ id: dataset.name, data: { loading: true } });
     await _querySearch({ dataset, query, sort, size });
