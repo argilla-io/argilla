@@ -151,8 +151,7 @@ export default {
   }
   &__text {
     margin: 0;
-    color: $darker-color;
-    font-weight: normal;
+    color: palette(grey, medium);
     span {
       font-weight: bold;
       color: $primary-color;

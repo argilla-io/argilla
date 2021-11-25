@@ -21,10 +21,10 @@
     <div v-else class="wrapper">
       <div class="main">
         <ReTopbarBrand>
-          <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: 'Datasets' }]" />
+          <ReBreadcrumbs :breadcrumbs="[{ link: '/', name: workspace }]" />
           <user />
         </ReTopbarBrand>
-        <datasets-empty v-if="!datasets.length"/>
+        <datasets-empty v-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
             <ReSearchBar @input="onSearch" />
@@ -60,7 +60,7 @@
 
 <script>
 import { ObservationDataset } from "@/models/Dataset";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   layout: "app",
   data: () => ({
@@ -79,7 +79,12 @@ export default {
     ],
     actions: [
       { name: "delete", icon: "delete", title: "Delete dataset" },
-      { name: "copy", icon: "copy-url", title: "Copy url to clipboard", tooltip: "Copied" },
+      {
+        name: "copy",
+        icon: "copy-url",
+        title: "Copy url to clipboard",
+        tooltip: "Copied",
+      },
     ],
     externalLinks: [
       {
@@ -99,6 +104,12 @@ export default {
     datasets() {
       return ObservationDataset.all();
     },
+    workspace() {
+      return this.auth.currentWorkspace;
+    },
+    ...mapState({
+      auth: "auth",
+    }),
   },
   methods: {
     ...mapActions({
