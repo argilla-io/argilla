@@ -574,6 +574,11 @@ const actions = {
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
   },
+
+  async refresh(_, { dataset }) {
+    const pagination = Pagination.find(dataset.name);
+    await _paginate({ dataset, size: pagination.size, page: pagination.page });
+  },
 };
 
 export default {

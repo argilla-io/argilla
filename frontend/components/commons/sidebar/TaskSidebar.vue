@@ -4,8 +4,9 @@
       :dataset="dataset"
       @refresh="onRefresh"
       @showSidebarInfo="onShowSidebarInfo"
-      @onEnableAnnotationView="onEnableAnnotationView" />
-      <!-- TODO: Use media queries -->
+      @onEnableAnnotationView="onEnableAnnotationView"
+    />
+    <!-- TODO: Use media queries -->
     <sidebar-panel
       v-if="sidebarVisible"
       :dataset="dataset"
@@ -20,7 +21,7 @@
     </sidebar-panel>
   </div>
 </template>
- 
+
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
@@ -58,10 +59,12 @@ export default {
   methods: {
     ...mapActions({
       enableAnnotation: "entities/datasets/enableAnnotation",
-      search: "entities/datasets/search",
+      refresh: "entities/datasets/refresh",
     }),
     onRefresh() {
-      this.$nuxt.refresh()
+      this.refresh({
+        dataset: this.dataset,
+      });
     },
     async onEnableAnnotationView(value) {
       await this.enableAnnotation({
@@ -85,5 +88,4 @@ export default {
     },
   },
 };
- </script>
- 
+</script>
