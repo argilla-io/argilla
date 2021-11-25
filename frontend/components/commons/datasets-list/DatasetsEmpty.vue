@@ -8,12 +8,12 @@
     />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
     <p class="datasets-empty__subtitle">
-      The Rubrix web app allows you to log, explore and annotate your data.
+      The Rubrix web app allows you to log, explore and annotate your data.<br />
       Start logging data with our Python client, or
       <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
       more information.
     </p>
-    <re-code>{{ generateCodeSnippet(workspace) }}</re-code>
+    <re-code :code="generateCodeSnippet(workspace)"></re-code>
   </div>
 </template>
 
@@ -57,12 +57,12 @@ rb.log(
     margin: 0 auto 1em auto;
     @include font-size(20px);
     font-weight: 300;
-    max-width: 500px;
+    max-width: 520px;
   }
   &__subtitle {
     margin: 0 auto 1em auto;
     @include font-size(14px);
-    max-width: 500px;
+    max-width: 520px;
     a {
       color: $primary-color;
       text-decoration: none;
