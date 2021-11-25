@@ -283,7 +283,7 @@ async function _refreshDatasetAggregations({ dataset }) {
 async function _search({ dataset, query, sort, size }) {
   query = _normalizeSearchQuery({ query: query || {}, dataset });
   sort = sort || dataset.sort || [];
-  size = size || Pagination.find(dataset.name).size;
+  size = size || new Pagination().size;
   try {
     await _updateViewSettings({ id: dataset.name, data: { loading: true } });
     await _querySearch({ dataset, query, sort, size });
