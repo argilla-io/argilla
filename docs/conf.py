@@ -56,9 +56,9 @@ nbsphinx_execute = "never"
 nbsphinx_prolog = """
 .. raw:: html
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js'></script>
     <script>require=requirejs;</script>
     <script>
+        window.PlotlyConfig = {MathJaxConfig: 'local'}
         requirejs.config({
             paths: {
                 'plotly': ['https://cdn.plot.ly/plotly-latest.min']
