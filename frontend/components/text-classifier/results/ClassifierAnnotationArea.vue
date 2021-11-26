@@ -28,7 +28,7 @@
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
-        v-model="selectedLabels"
+        v-model="idState.selectedLabels"
         :allow-multiple="isMultiLabel"
         :label="label"
         :class="[
@@ -62,8 +62,15 @@
 <script>
 import "assets/icons/ignore";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { IdState } from 'vue-virtual-scroller'
 
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     record: {
       type: Object,
@@ -74,11 +81,13 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    searchText: undefined,
-    selectedLabels: [],
-    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-  }),
+  idState () {
+    return {
+      searchText: '',
+      selectedLabels: [],
+      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    }
+  },
   computed: {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
@@ -122,16 +131,16 @@ export default {
     },
     filteredLabels() {
       return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText)
+        label.class.toLowerCase().match(this.idState ? this.idState.searchText : undefined)
       );
     },
     visibleLabels() {
       const selectedLabels = this.filteredLabels.filter((l) => l.selected)
         .length;
       const availableNonSelected =
-        this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels - selectedLabels
-          : this.shownLabels;
+        this.idState.shownLabels < this.filteredLabels.length
+          ? this.idState.shownLabels - selectedLabels
+          : this.idState.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
         if (l.selected) {
@@ -165,12 +174,12 @@ export default {
   watch: {
     appliedLabels(o, n) {
       if (o.some((l) => n.indexOf(l) === -1)) {
-        this.selectedLabels = this.appliedLabels;
+        this.idState.selectedLabels = this.appliedLabels;
       }
     },
   },
   mounted() {
-    this.selectedLabels = this.appliedLabels;
+    this.idState.selectedLabels = this.appliedLabels;
   },
   methods: {
     updateLabels(labels) {
@@ -182,16 +191,16 @@ export default {
       this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("validate", { labels: this.selectedLabels });
+      this.$emit("validate", { labels: this.idState.selectedLabels });
     },
     expandLabels() {
-      this.shownLabels = this.filteredLabels.length;
+      this.idState.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
-      this.shownLabels = this.maxVisibleLabels;
+      this.idState.shownLabels = this.maxVisibleLabels;
     },
     onSearchLabel(event) {
-      this.searchText = event;
+      this.idState.searchText = event;
     },
   },
 };
