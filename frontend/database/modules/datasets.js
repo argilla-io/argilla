@@ -590,8 +590,12 @@ const actions = {
 
   async refresh(_, { dataset }) {
     const pagination = Pagination.find(dataset.name);
-    await _paginate({ dataset, size: pagination.size, page: pagination.page });
-    await _refreshDatasetAggregations({ dataset });
+    const paginatedDataset = await _paginate({
+      dataset,
+      size: pagination.size,
+      page: pagination.page,
+    });
+    await _refreshDatasetAggregations({ dataset: paginatedDataset });
   },
 };
 
