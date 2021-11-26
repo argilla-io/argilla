@@ -1,7 +1,6 @@
 /*
  * coding=utf-8
  * Copyright 2021-present, the Recognai S.L. team.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +202,7 @@ async function _updateViewSettings({ id, data }) {
   /**
    * Wraps view settings updates
    */
-  await DatasetViewSettings.update({
+  return await DatasetViewSettings.update({
     where: id,
     data: data,
   });
@@ -246,7 +245,7 @@ async function _paginate({ dataset, size, page }) {
     });
     return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
-    await _updateViewSettings({
+    const { annotationEnabled } = await _updateViewSettings({
       id: dataset.name,
       data: { loading: false },
     });
@@ -255,13 +254,14 @@ async function _paginate({ dataset, size, page }) {
       size,
       page,
     });
+
     _displayQueryParams({
       /**
        * Set different route query params
        */
       query: dataset.query,
       sort: dataset.sort,
-      enableAnnotation: dataset.annotationEnabled,
+      enableAnnotation: annotationEnabled,
       pagination,
     });
   }
@@ -309,7 +309,7 @@ async function _search({ dataset, query, sort, size }) {
   });
 
   const entity = dataset.getTaskDatasetClass();
-  return entity.find(dataset.name);
+  return entity.query().withAllRecursive().whereId(dataset.name).first();
 }
 
 async function _updateAnnotationProgress({ id, total, aggregations }) {
