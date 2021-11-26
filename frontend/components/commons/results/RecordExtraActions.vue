@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-click-outside="close" :key="record.id" class="record__extra-actions">
+  <div v-click-outside="close" :key="idState.open" class="record__extra-actions">
     <a
       v-if="hasMetadata || allowChangeStatus"
       class="extra-actions__button"
