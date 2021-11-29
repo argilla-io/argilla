@@ -137,7 +137,7 @@ jobs:
       - name: Install Rubrix
         run: pip install -U git+https://github.com/recognai/rubrix.git
       - name: Run tutorial
-        run: pytest --nbmake --nbmake-timeout=1200 docs/tutorials/08-error_analysis_using_loss.ipynb
+        run: pytest --nbmake docs/tutorials/08-error_analysis_using_loss.ipynb
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yaml" down
