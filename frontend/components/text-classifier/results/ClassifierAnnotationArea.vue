@@ -19,6 +19,7 @@
   <div v-if="labels.length" class="annotation-area">
     <label-search
       v-if="labels.length > maxVisibleLabels"
+      :searchText="idState.searchText"
       @input="onSearchLabel"
     />
     <div

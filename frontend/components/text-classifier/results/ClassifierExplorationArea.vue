@@ -17,7 +17,7 @@
 
 <template>
   <div v-if="labels.length" class="exploration-area">
-    <label-search v-if="labels.length >= shownLabels" @input="onSearchLabel" />
+    <label-search v-if="labels.length >= idState.shownLabels" :searchText="idState.searchText" @input="onSearchLabel" />
     <div class="predictions">
       <span v-for="label in visibleLabels" :key="label.index">
         <LabelPill
@@ -46,17 +46,27 @@
 </template>
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { IdState } from 'vue-virtual-scroller'
+
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     record: {
       type: Object,
       required: true,
     },
   },
-  data: () => ({
-    searchText: undefined,
-    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-  }),
+  idState () {
+    return {
+      searchText: '',
+      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    }
+  },
   computed: {
     labels() {
       return this.record.prediction ? this.record.prediction.labels : [];
@@ -66,11 +76,11 @@ export default {
     },
     filteredLabels() {
       return this.labels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText)
+        label.class.toLowerCase().match(this.idState.searchText)
       );
     },
     visibleLabels() {
-      return this.filteredLabels.slice(0, this.shownLabels);
+      return this.filteredLabels.slice(0, this.idState.shownLabels);
     },
     predictedAs() {
       return this.record.predicted_as;
@@ -78,13 +88,13 @@ export default {
   },
   methods: {
     expandLabels() {
-      this.shownLabels = this.filteredLabels.length;
+      this.idState.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
-      this.shownLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
+      this.idState.shownLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     onSearchLabel(event) {
-      this.searchText = event;
+      this.idState.searchText = event;
     },
   },
 };
