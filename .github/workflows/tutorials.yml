@@ -2,9 +2,6 @@ name: Tutorials
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - 'master'
 
 jobs:
   tut1:
