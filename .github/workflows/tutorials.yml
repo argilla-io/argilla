@@ -60,3 +60,30 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yaml" down
+
+  tut3:
+    name: Find label errors with cleanlab
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Setup Rubrix
+        run: |
+          sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
+          docker-compose -f "docker-compose.yaml" up -d --build
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.8.10
+      - name: Install pytest and nbmake
+        run: pip install pytest nbmake ipywidgets
+      - name: Install Rubrix
+        run: pip install -U git+https://github.com/recognai/rubrix.git
+      - name: Run tutorial
+        run: pytest --nbmake docs/tutorials/06-find_label_errors.ipynb
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yaml" down
