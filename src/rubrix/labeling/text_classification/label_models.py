@@ -23,12 +23,19 @@ from rubrix.labeling.text_classification.weak_labels import WeakLabels
 try:
     import snorkel
 except ModuleNotFoundError:
-    SNORKEL_INSTALLED = False
+    IS_SNORKEL_INSTALLED = False
 else:
-    SNORKEL_INSTALLED = True
+    IS_SNORKEL_INSTALLED = True
     from snorkel.labeling.model import LabelModel as SnorkelLabelModel
     from snorkel.utils.lr_schedulers import LRSchedulerConfig
     from snorkel.utils.optimizers import OptimizerConfig
+try:
+    import flyingsquid
+except ModuleNotFoundError:
+    IS_FLYINGSQUID_INSTALLED = False
+else:
+    IS_FLYINGSQUID_INSTALLED = True
+    from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -99,9 +106,10 @@ class Snorkel(LabelModel):
     def __init__(
         self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
     ):
-        if not SNORKEL_INSTALLED:
+        if not IS_SNORKEL_INSTALLED:
             raise ModuleNotFoundError(
-                "'snorkel' must be installed! You can install 'snorkel' with the command: `pip install snorkel`"
+                "'snorkel' must be installed to use the `Snorkel` label model! "
+                "You can install 'snorkel' with the command: `pip install snorkel`"
             )
         super().__init__(weak_labels)
 
@@ -254,6 +262,32 @@ class Snorkel(LabelModel):
         }
 
         return metrics
+
+
+class FlyingSquid(LabelModel):
+    """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`_.
+
+    Args:
+        weak_labels: A `WeakLabels` object containing the weak labels and records.
+        **kwargs: Passed on to the init of the FlyingSquid's
+            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`_.
+
+    Examples:
+        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
+        >>> rule = Rule(query="good OR best", label="Positive")
+        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> label_model = FlyingSquid(weak_labels)
+        >>> label_model.fit()
+        >>> records = label_model.predict()
+    """
+
+    def __init__(self, weak_labels, **kwargs):
+        if not IS_FLYINGSQUID_INSTALLED:
+            raise ModuleNotFoundError(
+                "'flyingsquid' must be installed to use the `FlyingSquid` label model! "
+                "You can install 'flyingsquid' with the command: `pip install flyingsquid`"
+            )
+        super().__init__(weak_labels)
 
 
 class MissingAnnotationError(Exception):
