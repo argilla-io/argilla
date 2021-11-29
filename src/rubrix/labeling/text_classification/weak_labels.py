@@ -453,22 +453,29 @@ class WeakLabels:
         Args:
             label2int: New label to integer mapping. Must cover all previous labels.
         """
-        # Check new label2int mapping
+        # save masks for swapping
+        label_masks = {}
+        annotation_masks = {}
+
         for label in self._label2int:
+            # Check new label2int mapping
             if label not in label2int:
                 raise MissingLabelError(
                     f"The label '{label}' is missing in the new mapping."
                 )
+            # compute masks
+            label_masks[label] = self._matrix == self._label2int[label]
+            annotation_masks[label] = self._annotation_array == self._label2int[label]
 
         # swap integers
         for label in self._label2int:
             self._matrix = np.where(
-                self._matrix == self._label2int[label],
+                label_masks[label],
                 label2int[label],
                 self._matrix,
             )
             self._annotation_array = np.where(
-                self._annotation_array == self._label2int[label],
+                annotation_masks[label],
                 label2int[label],
                 self._annotation_array,
             )
