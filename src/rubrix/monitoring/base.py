@@ -1,5 +1,6 @@
 import asyncio
 import random
+from typing import Dict, Optional
 
 import wrapt
 
@@ -34,7 +35,15 @@ class BaseMonitor(wrapt.ObjectProxy):
 
     """
 
-    def __init__(self, *args, dataset: str, sample_rate: float, **kwargs):
+    def __init__(
+        self,
+        *args,
+        dataset: str,
+        sample_rate: float,
+        agent: Optional[str] = None,
+        tags: Dict[str, str] = None,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
 
         assert dataset, "Missing dataset"
@@ -44,6 +53,8 @@ class BaseMonitor(wrapt.ObjectProxy):
 
         self.dataset = dataset
         self.sample_rate = sample_rate
+        self.agent = agent
+        self.tags = tags
 
     @property
     def __model__(self):
