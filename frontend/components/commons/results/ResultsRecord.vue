@@ -160,6 +160,7 @@ export default {
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid white;
+    min-height: 130px;
     &:hover {
       border: 1px solid palette(grey, smooth);
       ::v-deep .edit {

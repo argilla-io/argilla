@@ -35,13 +35,13 @@
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
           <div v-if="idState.itemNumber === index" class="content__sentences">
             <div class="content__group">
-              <p v-if="!idState.editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
+              <p v-if="!idState.editionMode" class="content__sentences__title">{{idState.sentencesOrigin}}</p>
               <re-button
                 v-if="hasAnnotationAndPredictions && !idState.editionMode"
                 class="button-clear"
                 @click="changeVisibleSentences"
                 >{{
-                  sentencesOrigin === "Annotation"
+                  idState.sentencesOrigin === "Annotation"
                     ? annotationEnabled ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
                     : annotationEnabled ? "Back to annotation" : "View annotation"
                 }}</re-button
@@ -55,7 +55,7 @@
                 :contenteditable="annotationEnabled && idState.editionMode"
                 placeholder="Type your text"
                 @input="input"
-                v-html="sentence.text"
+                v-html="idState.initialNewSentence || sentence.text"
                 @click="edit()"
               ></p>
               <span v-if="idState.editionMode"
@@ -75,7 +75,7 @@
               >
             </div>
             <div v-if="!idState.editionMode" class="content__footer">
-              <template v-if="sentencesOrigin === 'Prediction'">
+              <template v-if="idState.sentencesOrigin === 'Prediction'">
                 <div v-if="showScore" class="content__score">
                   Score: {{ sentence.score | percent }}
                 </div>
@@ -179,10 +179,6 @@ export default {
       type: Array,
       required: true
     },
-    sentencesOrigin: {
-      type: String,
-      default: undefined
-    },
     annotationEnabled: {
       type: Boolean,
       default: false
@@ -190,8 +186,10 @@ export default {
   },
   idState () {
     return {
+      sentencesOrigin: undefined,
       itemNumber: 0,
       newSentence: undefined,
+      initialNewSentence: undefined,
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
@@ -204,13 +202,13 @@ export default {
       return this.predictions.length;
     },
     showScore() {
-      return this.sentencesOrigin === "Prediction";
+      return this.idState.sentencesOrigin === "Prediction";
     },
     sentences() {
-      if (this.sentencesOrigin === "Annotation") {
+      if (this.idState.sentencesOrigin === "Annotation") {
         return this.annotations;
       }
-      if (this.sentencesOrigin === "Prediction") {
+      if (this.idState.sentencesOrigin === "Prediction") {
         return this.predictions;
       }
       return [];
@@ -219,13 +217,13 @@ export default {
       return this.predictions.length && this.annotations.length;
     },
     allowValidation() {
-      return this.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
+      return this.idState.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
     }
   },
   mounted() {
-    this.getText();
-  },
-  updated() {
+    if (this.idState.sentencesOrigin === undefined) {
+      this.initializeSentenceOrigin();
+    }
     this.getText();
   },
   created() {
@@ -236,10 +234,23 @@ export default {
     window.removeEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
   },
+  watch: {
+    annotationEnabled(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.initializeSentenceOrigin();
+        this.back();
+        this.idState.itemNumber = 0;
+      }
+    }
+  },
   methods: {
     getText() {
-      if (this.$refs.text && this.$refs.text[0]) {
-        this.idState.newSentence = this.$refs.text[0].innerText;
+      if (this.idState.newSentence === undefined) {
+        if (this.$refs.text && this.$refs.text[0]) {
+          this.idState.newSentence = this.$refs.text[0].innerText;
+        }
+      } else {
+        this.idState.initialNewSentence = this.idState.newSentence;
       }
     },
     showitemNumber(index) {
@@ -269,16 +280,35 @@ export default {
     back() {
       this.idState.editionMode = false;
       this.idState.refresh++;
+      this.idState.initialNewSentence = undefined,
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
       this.idState.itemNumber = 0;
       this.idState.editionMode = false;
-      this.$emit("change-visible-sentences");
+      this.idState.sentencesOrigin !== "Annotation"
+        ? (this.idState.sentencesOrigin = "Annotation")
+        : (this.idState.sentencesOrigin = "Prediction");
+    },
+    initializeSentenceOrigin() {
+      if (this.annotationEnabled) {
+        if (this.annotations.length) {
+          this.idState.sentencesOrigin = "Annotation";
+        } else if (this.predictions.length) {
+          this.idState.sentencesOrigin = "Prediction";
+        }
+      } else {
+        if (this.predictions.length) {
+          this.idState.sentencesOrigin = "Prediction";
+        } else if (this.annotations.length) {
+          this.idState.sentencesOrigin = "Annotation";
+        }
+      }
     },
     annotate() {
       this.idState.itemNumber = 0;
       this.idState.editionMode = false;
+      this.idState.sentencesOrigin = "Annotation";
       if (this.idState.newSentence) {
         let newS = {
           score: 1,

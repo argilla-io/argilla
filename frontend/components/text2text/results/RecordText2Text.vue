@@ -28,10 +28,8 @@
           :record="record"
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
-          :sentences-origin="idState.sentencesOrigin"
           :annotation-enabled="annotationEnabled"
           @update-record="updateRecordSentences"
-          @change-visible-sentences="onChangeSentences"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
         />
@@ -63,7 +61,6 @@ export default {
   },
   idState () {
     return {
-      sentencesOrigin: undefined,
       initialRecord: {},
     }
   },
@@ -84,15 +81,7 @@ export default {
     },
   },
   mounted() {
-    this.initializeSentenceOrigin();
-    this.idState.initialRecord = Object.assign({}, this.record);
-  },
-  watch: {
-    annotationEnabled(oldValue, newValue) {
-      if (oldValue !== newValue) {
-        this.initializeSentenceOrigin();
-      }
-    }
+    this.initializeInitialRecord();
   },
   methods: {
     ...mapActions({
@@ -100,26 +89,10 @@ export default {
       validate: "entities/datasets/validateAnnotations",
     }),
 
-    initializeSentenceOrigin() {
-      if (this.annotationEnabled) {
-        if (this.annotationSentences.length) {
-          this.idState.sentencesOrigin = "Annotation";
-        } else if (this.predictionSentences.length) {
-          this.idState.sentencesOrigin = "Prediction";
-        }
-      } else {
-        if (this.predictionSentences.length) {
-          this.idState.sentencesOrigin = "Prediction";
-        } else if (this.annotationSentences.length) {
-          this.idState.sentencesOrigin = "Annotation";
-        }
+    initializeInitialRecord() {
+      if (Object.entries(this.idState.initialRecord).length === 0){
+        this.idState.initialRecord = Object.assign({}, this.record);
       }
-    },
-
-    onChangeSentences() {
-      this.idState.sentencesOrigin !== "Annotation"
-        ? (this.idState.sentencesOrigin = "Annotation")
-        : (this.idState.sentencesOrigin = "Prediction");
     },
     async updateRecordSentences({ sentences }) {
       await this.updateRecords({
@@ -148,7 +121,6 @@ export default {
       });
     },
     async onAnnotate({ sentences }) {
-      this.idState.sentencesOrigin = "Annotation";
       const newRecord = {
         ...this.record,
         status: "Validated",

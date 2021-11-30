@@ -26,18 +26,19 @@
         page-mode
         class="scroller"
         :items="visibleRecords"
-        :min-item-size="300"
-        :emit-update="true"
+        :min-item-size="150"
         :buffer="200"
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
       > 
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
+            :watch-data="true"
             class="list__li"
             :item="item"
             :active="active"
             key-field="id"
             :index="index"
+            :data-index="index"
           >
             <results-record :key="item.id" :dataset="dataset" :item="item">
               <slot name="record" :record="item" />
@@ -163,7 +164,15 @@ export default {
   &__li {
     padding-bottom: 10px;
     position: relative;
-    min-height: 100px;
+    min-height: 150px;
+  }
+}
+</style>
+<style lang="scss">
+$maxItemsperPage: 20;
+@for $i from 0 through $maxItemsperPage {
+  .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {
+    z-index: $maxItemsperPage - $i
   }
 }
 </style>
