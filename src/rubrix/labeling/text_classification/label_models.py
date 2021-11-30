@@ -289,6 +289,41 @@ class FlyingSquid(LabelModel):
             )
         super().__init__(weak_labels)
 
+        self._models: List[FlyingSquidLabelModel] = []
+
+    def fit(self, include_annotated_records: bool = False, **kwargs):
+        """Fits the label model.
+
+        Args:
+            include_annotated_records: Whether or not to include annotated records in the training.
+            **kwargs: Passed on to the FlyingSquid's
+                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`_
+                method.
+        """
+        wl_matrix = self._weak_labels.matrix(has_annotation=include_annotated_records)
+        labels = [
+            label for label in self._weak_labels.label2int.keys() if label is not None
+        ]
+        nr_of_models = 1 if len(labels) == 2 else len(labels)
+
+        models = []
+        for i in range(nr_of_models):
+            model = FlyingSquidLabelModel(m=len(self._weak_labels.rules))
+            wl_matrix_i = wl_matrix.copy()
+
+            target_mask = wl_matrix_i == self._weak_labels.label2int[labels[i]]
+            abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
+            other_mask = (~target_mask) & (~abstain_mask)
+
+            wl_matrix_i[target_mask] = 1
+            wl_matrix_i[abstain_mask] = 0
+            wl_matrix_i[other_mask] = -1
+
+            model.fit(L_train=wl_matrix_i, **kwargs)
+            models.append(model)
+
+        self._models = models
+
 
 class MissingAnnotationError(Exception):
     pass
