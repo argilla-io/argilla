@@ -469,16 +469,8 @@ class WeakLabels:
 
         # swap integers
         for label in self._label2int:
-            self._matrix = np.where(
-                label_masks[label],
-                label2int[label],
-                self._matrix,
-            )
-            self._annotation_array = np.where(
-                annotation_masks[label],
-                label2int[label],
-                self._annotation_array,
-            )
+            self._matrix[label_masks[label]] = label2int[label]
+            self._annotation_array[annotation_masks[label]] = label2int[label]
 
         # update mapping dicts
         self._label2int = label2int.copy()
