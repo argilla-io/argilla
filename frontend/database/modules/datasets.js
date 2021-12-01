@@ -376,6 +376,7 @@ async function _updateDatasetRecords({
         where: dataset.name,
         data: dataset,
       });
+      throw error;
     }
   }
 
@@ -448,7 +449,7 @@ const actions = {
       selected: false,
       status: "Discarded",
     }));
-    await _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
@@ -474,7 +475,7 @@ const actions = {
       selected: false,
       status: "Default",
     }));
-    return _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
@@ -490,7 +491,7 @@ const actions = {
       selected: false,
       status: "Validated",
     }));
-    return _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
