@@ -142,12 +142,12 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                     current_mention = mention
                     jdx = idx
                     while (
-                        current_mention.startswith(current_token)
+                        current_mention.lstrip().startswith(current_token)
                         and current_mention
                         and jdx <= len(tokens)
                     ):
-                        current_mention = current_mention[len(current_token) :]
                         current_mention = current_mention.lstrip()
+                        current_mention = current_mention[len(current_token) :]
                         jdx += 1
                         if jdx < len(tokens):
                             current_token = tokens[jdx]
