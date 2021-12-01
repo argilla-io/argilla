@@ -58,7 +58,19 @@ export default {
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
-        records: records,
+        records: records.map((record) => {
+          let modelPrediction = {};
+          modelPrediction.sentences = [{
+            text: record.prediction.sentences[0].text,
+            score: 1,
+          }];
+          return {
+            ...record,
+            annotation: {
+              ...(record.annotation || modelPrediction),
+            },
+          };
+        }),
       });
     },
   },
