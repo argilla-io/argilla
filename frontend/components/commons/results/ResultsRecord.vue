@@ -36,39 +36,16 @@
         :record="item"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="onShowMetadata"
+        @onShowMetadata="onShowMetadata(item.id)"
       />
       <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
     </div>
-    <LazyReModal
-      modal-class="modal-secondary"
-      modal-position="modal-center"
-      :modal-custom="true"
-      :prevent-body-scroll="true"
-      :modal-visible="idState.showMetadata"
-      @close-modal="closeMetadata"
-    >
-      <Metadata
-        :applied-filters="dataset.query.metadata"
-        :metadata-items="item.metadata"
-        :title="item.recordTitle()"
-        @metafilterApply="onApplyMetadataFilter"
-        @cancel="closeMetadata"
-      />
-    </LazyReModal>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
-import { IdState } from 'vue-virtual-scroller'
 
 export default {
-  mixins: [
-    IdState({
-      // You can customize this
-      idProp: vm => vm.item.id,
-    }),
-  ],
   props: {
     dataset: {
       type: Object,
@@ -78,11 +55,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  idState() {
-    return {
-      showMetadata: false,
-    }
   },
   computed: {
     annotationEnabled() {
@@ -95,18 +67,9 @@ export default {
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
-      search: "entities/datasets/search",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-
-    async onApplyMetadataFilter(metadata) {
-      this.closeMetadata();
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: metadata },
-      });
-    },
     async onCheckboxChanged(checkboxStatus, id) {
       const record = this.visibleRecords.find((r) => r.id === id);
       await this.updateRecords({
@@ -134,12 +97,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-
-    onShowMetadata() {
-      this.idState.showMetadata = true;
-    },
-    closeMetadata() {
-      this.idState.showMetadata = false;
+    onShowMetadata(id) {
+      this.$emit('show-metadata', id)
     },
   },
 };

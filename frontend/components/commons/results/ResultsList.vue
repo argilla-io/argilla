@@ -40,7 +40,7 @@
             :index="index"
             :data-index="index"
           >
-            <results-record :key="item.id" :dataset="dataset" :item="item">
+            <results-record @show-metadata="onShowMetadata" :key="item.id" :dataset="dataset" :item="item">
               <slot name="record" :record="item" />
             </results-record>
           </DynamicScrollerItem>
@@ -49,6 +49,23 @@
           <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
         </template>
       </DynamicScroller>
+      <LazyReModal
+        modal-class="modal-secondary"
+        modal-position="modal-center"
+        :modal-custom="true"
+        :prevent-body-scroll="true"
+        :modal-visible="showMetadata !== undefined"
+        @close-modal="onCloseMetadata"
+      >
+        <Metadata
+          v-if="metadata"
+          :applied-filters="dataset.query.metadata"
+          :metadata-items="metadata"
+          :title="metadataTitle"
+          @metafilterApply="onApplyMetadataFilter"
+          @cancel="onCloseMetadata"
+        />
+      </LazyReModal>
     </div>
     <RePagination
       :total-items="dataset.results.total"
@@ -68,7 +85,8 @@ export default {
   },
   data() {
     return {
-      scrollComponent: undefined
+      scrollComponent: undefined,
+      showMetadata: undefined,
     };
   },
   computed: {
@@ -90,6 +108,16 @@ export default {
         );
       }
       return false;
+    },
+    metadata() {
+      if (this.visibleRecords.find(i => i.id === this.showMetadata)) {
+        return this.visibleRecords.find(i => i.id === this.showMetadata).metadata;
+      } else {
+        return false;
+      }
+    },
+    metadataTitle() {
+      return this.visibleRecords.find(i => i.id === this.showMetadata).recordTitle()
     }
   },
   mounted() {
@@ -105,7 +133,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      paginate: "entities/datasets/paginate"
+      paginate: "entities/datasets/paginate",
+      search: "entities/datasets/search",
     }),
     onScroll() {
       if (document.getElementById("scroll").scrollTop > 0) {
@@ -115,6 +144,19 @@ export default {
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
       }
+    },
+    async onApplyMetadataFilter(metadata) {
+      this.onCloseMetadata();
+      this.search({
+        dataset: this.dataset,
+        query: { metadata: metadata },
+      });
+    },
+    onShowMetadata(id) {
+      this.showMetadata = id;
+    },
+    onCloseMetadata() {
+      this.showMetadata = undefined;
     },
     async onPagination(page, size) {
       document.getElementById("scroll").scrollTop = 0;
@@ -135,9 +177,6 @@ export default {
   position: relative;
   margin-bottom: 0;
   list-style: none;
-  // .scroller {
-  //   height: 100%;
-  // }
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
