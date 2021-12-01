@@ -340,6 +340,7 @@ async function _updateDatasetRecords({
   dataset,
   records,
   persistBackend = false,
+  propagateError = false,
 }) {
   if (records.length === 0) {
     return;
@@ -376,7 +377,9 @@ async function _updateDatasetRecords({
         where: dataset.name,
         data: dataset,
       });
-      throw error;
+      if (propagateError) {
+        throw error;
+      }
     }
   }
 
@@ -443,7 +446,7 @@ const actions = {
       records,
     });
   },
-  async discardAnnotations(_, { dataset, records }) {
+  async discardAnnotations(_, { dataset, records, propagateError = false }) {
     const newRecords = records.map((record) => ({
       ...record,
       selected: false,
@@ -453,6 +456,7 @@ const actions = {
       dataset,
       records: newRecords,
       persistBackend: true,
+      propagateError,
     });
   },
   async resetRecord(_, { dataset, record }) {
@@ -481,7 +485,10 @@ const actions = {
       persistBackend: true,
     });
   },
-  async validateAnnotations(_, { dataset, records, agent }) {
+  async validateAnnotations(
+    _,
+    { dataset, records, agent, propagateError = false }
+  ) {
     const newRecords = records.map((record) => ({
       ...record,
       annotation: {
@@ -495,6 +502,7 @@ const actions = {
       dataset,
       records: newRecords,
       persistBackend: true,
+      propagateError,
     });
   },
 
