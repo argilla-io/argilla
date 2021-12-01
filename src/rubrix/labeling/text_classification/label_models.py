@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import hashlib
 import logging
 from typing import Dict, List
 
@@ -292,6 +293,14 @@ class FlyingSquid(LabelModel):
             )
         super().__init__(weak_labels)
 
+        if len(self._weak_labels.rules) < 3:
+            raise TooFewRulesError(
+                "The FlyingSquid label model needs at least three (independent) rules!"
+            )
+
+        self._labels = [
+            label for label in self._weak_labels.label2int.keys() if label is not None
+        ]
         self._models: List[FlyingSquidLabelModel] = []
 
     def fit(self, include_annotated_records: bool = False, **kwargs):
@@ -303,30 +312,148 @@ class FlyingSquid(LabelModel):
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`_
                 method.
         """
-        wl_matrix = self._weak_labels.matrix(has_annotation=include_annotated_records)
-        labels = [
-            label for label in self._weak_labels.label2int.keys() if label is not None
-        ]
-        nr_of_models = 1 if len(labels) == 2 else len(labels)
+        wl_matrix = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
 
         models = []
-        for i in range(nr_of_models):
+        # create a label model for each label (except for binary classification)
+        # much of the implementation is taken from wrench:
+        # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
+        # If binary, we only need one model
+        for i in range(1 if len(self._labels) == 2 else len(self._labels)):
             model = FlyingSquidLabelModel(m=len(self._weak_labels.rules))
-            wl_matrix_i = wl_matrix.copy()
-
-            target_mask = wl_matrix_i == self._weak_labels.label2int[labels[i]]
-            abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
-            other_mask = (~target_mask) & (~abstain_mask)
-
-            wl_matrix_i[target_mask] = 1
-            wl_matrix_i[abstain_mask] = 0
-            wl_matrix_i[other_mask] = -1
-
+            wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
             model.fit(L_train=wl_matrix_i, **kwargs)
             models.append(model)
 
         self._models = models
 
+    def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
+        """Helper function to copy and transform the weak label matrix with respect to a target label.
 
-class MissingAnnotationError(Exception):
+         FlyingSquid expects the matrix to contain -1, 0 and 1, which are mapped the following way:
+
+        - target label: -1
+        - abstain label: 0
+        - other label: 1
+
+        Args:
+            weak_label_matrix: The original weak label matrix
+            i: Index of the target label
+
+        Returns:
+            A copy of the weak label matrix, transformed with respect to the target label.
+        """
+        wl_matrix_i = weak_label_matrix.copy()
+
+        target_mask = wl_matrix_i == self._weak_labels.label2int[self._labels[i]]
+        abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
+        other_mask = (~target_mask) & (~abstain_mask)
+
+        wl_matrix_i[target_mask] = -1
+        wl_matrix_i[abstain_mask] = 0
+        wl_matrix_i[other_mask] = 1
+
+        return wl_matrix_i
+
+    def predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        verbose: bool = True,
+        tie_break_policy: str = "abstain",
+    ) -> List[TextClassificationRecord]:
+        """Applies the label model.
+
+        Args:
+            include_annotated_records: Whether or not to include annotated records.
+            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            verbose: If True, print out messages of the progress to stderr.
+            tie_break_policy: Policy to break ties. You can choose among three policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all of the labeling functions abstained.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        wl_matrix = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
+
+        # create predictions for each label (except for binary classification)
+        # much of the implementation is taken from wrench:
+        # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
+        # If binary, we only have one model
+        if len(self._labels) > 2:
+            probas = np.zeros((len(wl_matrix), len(self._labels)))
+            for i in range(len(self._labels)):
+                wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
+                probas[:, i] = self._models[i].predict_proba(L_matrix=wl_matrix_i)[:, 0]
+            probas = np.nan_to_num(probas, nan=-np.inf)  # handle NaN
+            probas = np.exp(probas) / np.sum(np.exp(probas), axis=1, keepdims=True)
+        else:
+            wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, 0)
+            probas = self._models[0].predict_proba(L_matrix=wl_matrix_i)
+
+        # add predictions to records
+        records_with_prediction = []
+        for i, prob, rec in zip(
+            range(len(probas)),
+            probas,
+            self._weak_labels.records(
+                has_annotation=None if include_annotated_records else False
+            ),
+        ):
+            # Check if model abstains, that is if the highest probability is assigned to more than one label
+            # 1.e-8 is taken from the abs tolerance of np.isclose
+            equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+            tie = False
+            if len(equal_prob_idx) > 1:
+                tie = True
+
+            if not include_abstentions and (tie and tie_break_policy == "abstain"):
+                continue
+
+            records_with_prediction.append(rec.copy(deep=True))
+
+            # set prediction to None when tie break policy == "abstain"
+            pred_for_rec = None
+            if not tie:
+                pred_for_rec = [
+                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                ]
+            elif tie_break_policy == "random":
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
+                    equal_prob_idx
+                )
+                prob[
+                    equal_prob_idx[random_idx]
+                ] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                pred_for_rec = [
+                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                ]
+
+            records_with_prediction[-1].prediction = pred_for_rec
+
+        return records_with_prediction
+
+    def score(self, *args, **kwargs) -> Dict:
+        """Evaluates the label model."""
+        raise NotImplementedError
+
+
+class LabelModelError(Exception):
+    pass
+
+
+class MissingAnnotationError(LabelModelError):
+    pass
+
+
+class TooFewRulesError(LabelModelError):
     pass
