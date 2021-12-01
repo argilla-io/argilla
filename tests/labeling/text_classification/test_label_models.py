@@ -23,7 +23,12 @@ from rubrix import TextClassificationRecord
 # we importlib.reload the `label_models` module during the tests, so avoid loading namespaces from this module!
 # for example, don't do `from rubrix.labeling.text_classification.label_models import MissingAnnotationError`
 # instead do `from rubrix.labeling.text_classification import label_models; label_models.MissingAnnotationError`
-from rubrix.labeling.text_classification import Snorkel, WeakLabels, label_models
+from rubrix.labeling.text_classification import (
+    FlyingSquid,
+    Snorkel,
+    WeakLabels,
+    label_models,
+)
 
 
 @pytest.fixture
@@ -286,9 +291,26 @@ def test_snorkel_integration(weak_labels_from_guide):
     ]
 
 
-def test_flying_squid_integration(weak_labels_from_guide):
+def test_flyingsquid_fit(weak_labels):
+    from flyingsquid.label_model import LabelModel
+
+    model = LabelModel(3)
+    model.fit(np.array([[1, 1], [1, 0], [0, 0]]))
+    return
+    print(model.predict_proba(np.array([[1, 1, 1]])))
+    return
+
+    label_model = FlyingSquid(weak_labels)
+    label_model.fit()
+    print(label_model._models[0].predict_proba(np.array([[-1, -1, -1], [1, 1, 1]])))
+
+
+def test_flyingsquid_integration(weak_labels_from_guide):
     label_model = FlyingSquid(weak_labels_from_guide)
     label_model.fit()
+    recs = label_model.predict(tie_break_policy="random", include_abstentions=True)
+    print(recs[:5])
+    return
 
     metrics = label_model.score()
     assert metrics["accuracy"] == pytest.approx(1)
