@@ -47,6 +47,9 @@ class LabelModel:
         weak_labels: Every label model implementation needs at least a `WeakLabels` instance.
     """
 
+    # When we break a tie, by how much shall we increase the probability of the winner?
+    _PROBABILITY_INCREASE_ON_TIE_BREAK = 0.0001
+
     def __init__(self, weak_labels: WeakLabels):
         self._weak_labels = weak_labels
 
@@ -207,7 +210,7 @@ class Snorkel(LabelModel):
             if pred != -1:
                 # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
                 if np.isclose(prob, prob.max()).sum() > 1:
-                    prob[pred] += 0.0001
+                    prob[pred] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                 pred_for_rec = [
                     (self._weak_labels.int2label[idx], prob[idx])
                     for idx in np.argsort(prob)[::-1]
