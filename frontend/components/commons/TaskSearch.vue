@@ -143,13 +143,8 @@ export default {
   position: relative;
   margin: 0;
   z-index: 0;
-  .--fixed & {
+  .--fixed:not(.fixed-header) & {
     z-index: 2;
-  }
-  .fixed-header & {
-    ::v-deep .virtual-scroll {
-      padding-top: 3em;
-    }
   }
 }
 
