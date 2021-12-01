@@ -220,7 +220,7 @@ class Snorkel(LabelModel):
 
         return records_with_prediction
 
-    def score(self, tie_break_policy="abstain") -> Dict[str, float]:
+    def score(self, tie_break_policy: str = "abstain") -> Dict[str, float]:
         """Returns some scores of the label model with respect to the annotated records.
 
         Args:
@@ -234,7 +234,7 @@ class Snorkel(LabelModel):
                 as is the case when all of the labeling functions abstained.
 
         Returns:
-            A list of records that include the predictions of the label model.
+            The scores/metrics as a dictionary.
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
