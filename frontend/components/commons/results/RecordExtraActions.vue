@@ -16,15 +16,15 @@
   -->
 
 <template>
-  <div v-click-outside="close" :key="idState.open" class="record__extra-actions">
+  <div v-click-outside="close" :key="open" class="record__extra-actions">
     <a
       v-if="hasMetadata || allowChangeStatus"
       class="extra-actions__button"
       href="#"
-      @click.prevent="idState.open = !idState.open"
+      @click.prevent="open = !open"
       ><svgicon name="kebab-menu-h" width="20" height="20" color="#4A4A4A"
     /></a>
-    <div v-if="idState.open" class="extra-actions__content">
+    <div v-if="open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="showMetadata()">
         <span>View metadata</span>
       </div>
@@ -86,6 +86,14 @@ export default {
     ],
   }),
   computed: {
+    open: {
+      get: function () {
+        return this.idState.open;
+      },
+      set: function (newValue) {
+        this.idState.open = newValue;
+      }
+    },
     hasMetadata() {
       const metadata = this.record.metadata;
       return metadata && Object.values(metadata).length;
@@ -113,7 +121,7 @@ export default {
       this.close();
     },
     close() {
-      this.idState.open = false;
+      this.open = false;
     },
   },
 };

@@ -19,7 +19,7 @@
   <div v-if="labels.length" class="annotation-area">
     <label-search
       v-if="labels.length > maxVisibleLabels"
-      :searchText="idState.searchText"
+      :searchText="searchText"
       @input="onSearchLabel"
     />
     <div
@@ -29,7 +29,7 @@
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
-        v-model="idState.selectedLabels"
+        v-model="selectedLabels"
         :allow-multiple="isMultiLabel"
         :label="label"
         :class="[
@@ -84,12 +84,36 @@ export default {
   },
   idState () {
     return {
-      searchText: '',
+      searchText: undefined,
       selectedLabels: [],
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     }
   },
   computed: {
+    searchText: {
+      get: function () {
+        return this.idState.searchText;
+      },
+      set: function (newValue) {
+        this.idState.searchText = newValue;
+      }
+    },
+    selectedLabels: {
+      get: function () {
+        return this.idState.selectedLabels;
+      },
+      set: function (newValue) {
+        this.idState.selectedLabels = newValue;
+      }
+    },
+    shownLabels: {
+      get: function () {
+        return this.idState.shownLabels;
+      },
+      set: function (newValue) {
+        this.idState.shownLabels = newValue;
+      }
+    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
@@ -132,16 +156,16 @@ export default {
     },
     filteredLabels() {
       return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.idState ? this.idState.searchText : undefined)
+        label.class.toLowerCase().match(this.idState ? this.searchText : undefined)
       );
     },
     visibleLabels() {
       const selectedLabels = this.filteredLabels.filter((l) => l.selected)
         .length;
       const availableNonSelected =
-        this.idState.shownLabels < this.filteredLabels.length
-          ? this.idState.shownLabels - selectedLabels
-          : this.idState.shownLabels;
+        this.shownLabels < this.filteredLabels.length
+          ? this.shownLabels - selectedLabels
+          : this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
         if (l.selected) {
@@ -175,12 +199,12 @@ export default {
   watch: {
     appliedLabels(o, n) {
       if (o.some((l) => n.indexOf(l) === -1)) {
-        this.idState.selectedLabels = this.appliedLabels;
+        this.selectedLabels = this.appliedLabels;
       }
     },
   },
   mounted() {
-    this.idState.selectedLabels = this.appliedLabels;
+    this.selectedLabels = this.appliedLabels;
   },
   methods: {
     updateLabels(labels) {
@@ -192,16 +216,16 @@ export default {
       this.$emit("reset", this.record);
     },
     annotate() {
-      this.$emit("validate", { labels: this.idState.selectedLabels });
+      this.$emit("validate", { labels: this.selectedLabels });
     },
     expandLabels() {
-      this.idState.shownLabels = this.filteredLabels.length;
+      this.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
-      this.idState.shownLabels = this.maxVisibleLabels;
+      this.shownLabels = this.maxVisibleLabels;
     },
     onSearchLabel(event) {
-      this.idState.searchText = event;
+      this.searchText = event;
     },
   },
 };

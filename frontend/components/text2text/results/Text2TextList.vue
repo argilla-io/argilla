@@ -26,22 +26,22 @@
     >
       <div
         :class="[
-          idState.editionMode || !sentences.length
+          editionMode || !sentences.length
             ? 'content--editable'
             : 'content--non-editable',
           showScore ? 'content--has-score' : null,
         ]"
       >
         <span v-for="(sentence, index) in sentences" :key="sentence.text">
-          <div v-if="idState.itemNumber === index" class="content__sentences">
+          <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
-              <p v-if="!idState.editionMode" class="content__sentences__title">{{idState.sentencesOrigin}}</p>
+              <p v-if="!editionMode" class="content__sentences__title">{{sentencesOrigin}}</p>
               <re-button
-                v-if="hasAnnotationAndPredictions && !idState.editionMode"
+                v-if="hasAnnotationAndPredictions && !editionMode"
                 class="button-clear"
                 @click="changeVisibleSentences"
                 >{{
-                  idState.sentencesOrigin === "Annotation"
+                  sentencesOrigin === "Annotation"
                     ? annotationEnabled ? `View predictions (${predictionsLength})` : `Back to predictions (${predictionsLength})`
                     : annotationEnabled ? "Back to annotation" : "View annotation"
                 }}</re-button
@@ -49,20 +49,20 @@
             </div>
             <div class="content__edition-area">
               <p
-                :key="idState.refresh"
+                :key="refresh"
                 ref="text"
                 class="content__text"
-                :contenteditable="annotationEnabled && idState.editionMode"
+                :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
                 @input="input"
-                v-html="idState.initialNewSentence || sentence.text"
+                v-html="initialNewSentence || sentence.text"
                 @click="edit()"
               ></p>
-              <span v-if="idState.editionMode"
+              <span v-if="editionMode"
                 ><strong>shift Enter</strong> to save</span
               >
             </div>
-            <div class="content__edit__buttons" v-if="idState.editionMode && annotationEnabled && idState.newSentence">
+            <div class="content__edit__buttons" v-if="editionMode && annotationEnabled && newSentence">
               <re-button
                 class="button-primary--outline"
                 @click="back()"
@@ -74,16 +74,16 @@
                 >Save</re-button
               >
             </div>
-            <div v-if="!idState.editionMode" class="content__footer">
-              <template v-if="idState.sentencesOrigin === 'Prediction'">
+            <div v-if="!editionMode" class="content__footer">
+              <template v-if="sentencesOrigin === 'Prediction'">
                 <div v-if="showScore" class="content__score">
                   Score: {{ sentence.score | percent }}
                 </div>
                 <div v-if="sentences.length" class="content__nav-buttons">
                   <a
-                    :class="idState.itemNumber <= 0 ? 'disabled' : null"
+                    :class="itemNumber <= 0 ? 'disabled' : null"
                     href="#"
-                    @click.prevent="showitemNumber(--idState.itemNumber)"
+                    @click.prevent="showitemNumber(--itemNumber)"
                   >
                     <svgicon
                       name="chev-left"
@@ -92,13 +92,13 @@
                       color="#4C4EA3"
                     />
                   </a>
-                  {{ idState.itemNumber + 1 }} of {{ sentences.length }} predictions
+                  {{ itemNumber + 1 }} of {{ sentences.length }} predictions
                   <a
                     :class="
-                      sentences.length <= idState.itemNumber + 1 ? 'disabled' : null
+                      sentences.length <= itemNumber + 1 ? 'disabled' : null
                     "
                     href="#"
-                    @click.prevent="showitemNumber(++idState.itemNumber)"
+                    @click.prevent="showitemNumber(++itemNumber)"
                   >
                     <svgicon
                       name="chev-right"
@@ -109,7 +109,7 @@
                   </a>
                 </div>
               </template>
-              <div class="content__actions-buttons" v-if="idState.newSentence && annotationEnabled">
+              <div class="content__actions-buttons" v-if="newSentence && annotationEnabled">
                 <re-button
                   v-if="sentences.length"
                   :class="['edit', allowValidation ? 'button-primary--outline' : 'button-primary']"
@@ -142,7 +142,7 @@
             <div class="content__footer">
               <div class="content__actions-buttons">
                 <re-button
-                  v-if="idState.newSentence && annotationEnabled"
+                  v-if="newSentence && annotationEnabled"
                   class="button-primary"
                   @click="annotate"
                   >Validate</re-button
@@ -196,19 +196,82 @@ export default {
       refresh: 1
     }
   },
-
   computed: {
+    sentencesOrigin: {
+      get: function () {
+        return this.idState.sentencesOrigin;
+      },
+      set: function (newValue) {
+        this.idState.sentencesOrigin = newValue;
+      }
+    },
+    itemNumber: {
+      get: function () {
+        return this.idState.itemNumber;
+      },
+      set: function (newValue) {
+        this.idState.itemNumber = newValue;
+      }
+    },
+    newSentence: {
+      get: function () {
+        return this.idState.newSentence;
+      },
+      set: function (newValue) {
+        this.idState.newSentence = newValue;
+      }
+    },
+    initialNewSentence: {
+      get: function () {
+        return this.idState.initialNewSentence;
+      },
+      set: function (newValue) {
+        this.idState.initialNewSentence = newValue;
+      }
+    },
+    editionMode: {
+      get: function () {
+        return this.idState.editionMode;
+      },
+      set: function (newValue) {
+        this.idState.editionMode = newValue;
+      }
+    },
+    shiftPressed: {
+      get: function () {
+        return this.idState.shiftPressed;
+      },
+      set: function (newValue) {
+        this.idState.shiftPressed = newValue;
+      }
+    },
+    shiftKey: {
+      get: function () {
+        return this.idState.shiftKey;
+      },
+      set: function (newValue) {
+        this.idState.shiftKey = newValue;
+      }
+    },
+    refresh: {
+      get: function () {
+        return this.idState.refresh;
+      },
+      set: function (newValue) {
+        this.idState.refresh = newValue;
+      }
+    },
     predictionsLength() {
       return this.predictions.length;
     },
     showScore() {
-      return this.idState.sentencesOrigin === "Prediction";
+      return this.sentencesOrigin === "Prediction";
     },
     sentences() {
-      if (this.idState.sentencesOrigin === "Annotation") {
+      if (this.sentencesOrigin === "Annotation") {
         return this.annotations;
       }
-      if (this.idState.sentencesOrigin === "Prediction") {
+      if (this.sentencesOrigin === "Prediction") {
         return this.predictions;
       }
       return [];
@@ -217,11 +280,11 @@ export default {
       return this.predictions.length && this.annotations.length;
     },
     allowValidation() {
-      return this.idState.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
+      return this.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
     }
   },
   mounted() {
-    if (this.idState.sentencesOrigin === undefined) {
+    if (this.sentencesOrigin === undefined) {
       this.initializeSentenceOrigin();
     }
     this.getText();
@@ -239,34 +302,34 @@ export default {
       if (oldValue !== newValue) {
         this.initializeSentenceOrigin();
         this.back();
-        this.idState.itemNumber = 0;
+        this.itemNumber = 0;
       }
     }
   },
   methods: {
     getText() {
-      if (this.idState.newSentence === undefined) {
+      if (this.newSentence === undefined) {
         if (this.$refs.text && this.$refs.text[0]) {
-          this.idState.newSentence = this.$refs.text[0].innerText;
+          this.newSentence = this.$refs.text[0].innerText;
         }
       } else {
-        this.idState.initialNewSentence = this.idState.newSentence;
+        this.initialNewSentence = this.newSentence;
       }
     },
     showitemNumber(index) {
-      this.idState.itemNumber = index;
+      this.itemNumber = index;
     },
     input(e) {
       let newS = {
         score: 1,
         text: e.target.innerText
       };
-      this.idState.newSentence = e.target.innerText;
+      this.newSentence = e.target.innerText;
       this.$emit('update-record', { sentences: [newS] });
     },
     edit() {
       if (this.annotationEnabled) {
-        this.idState.editionMode = true;
+        this.editionMode = true;
         this.focus();
       }
     },
@@ -278,57 +341,57 @@ export default {
       });
     },
     back() {
-      this.idState.editionMode = false;
-      this.idState.refresh++;
-      this.idState.initialNewSentence = undefined,
+      this.editionMode = false;
+      this.refresh++;
+      this.initialNewSentence = undefined,
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
-      this.idState.itemNumber = 0;
-      this.idState.editionMode = false;
-      this.idState.sentencesOrigin !== "Annotation"
-        ? (this.idState.sentencesOrigin = "Annotation")
-        : (this.idState.sentencesOrigin = "Prediction");
+      this.itemNumber = 0;
+      this.editionMode = false;
+      this.sentencesOrigin !== "Annotation"
+        ? (this.sentencesOrigin = "Annotation")
+        : (this.sentencesOrigin = "Prediction");
     },
     initializeSentenceOrigin() {
       if (this.annotationEnabled) {
         if (this.annotations.length) {
-          this.idState.sentencesOrigin = "Annotation";
+          this.sentencesOrigin = "Annotation";
         } else if (this.predictions.length) {
-          this.idState.sentencesOrigin = "Prediction";
+          this.sentencesOrigin = "Prediction";
         }
       } else {
         if (this.predictions.length) {
-          this.idState.sentencesOrigin = "Prediction";
+          this.sentencesOrigin = "Prediction";
         } else if (this.annotations.length) {
-          this.idState.sentencesOrigin = "Annotation";
+          this.sentencesOrigin = "Annotation";
         }
       }
     },
     annotate() {
-      this.idState.itemNumber = 0;
-      this.idState.editionMode = false;
-      this.idState.sentencesOrigin = "Annotation";
-      if (this.idState.newSentence) {
+      this.itemNumber = 0;
+      this.editionMode = false;
+      this.sentencesOrigin = "Annotation";
+      if (this.newSentence) {
         let newS = {
           score: 1,
-          text: this.idState.newSentence
+          text: this.newSentence
         };
         this.$emit("annotate", { sentences: [newS] });
       }
     },
     keyUp(event) {
-      if (this.idState.shiftKey === event.key) {
-        this.idState.shiftPressed = false;
+      if (this.shiftKey === event.key) {
+        this.shiftPressed = false;
       }
     },
     keyDown(event) {
       if (event.shiftKey) {
-        this.idState.shiftKey = event.key;
-        this.idState.shiftPressed = true;
+        this.shiftKey = event.key;
+        this.shiftPressed = true;
       }
       const enter = event.key === "Enter";
-      if (this.idState.shiftPressed && this.idState.editionMode && enter) {
+      if (this.shiftPressed && this.editionMode && enter) {
         this.annotate();
       }
     },

@@ -65,6 +65,14 @@ export default {
     }
   },
   computed: {
+    initialRecord: {
+      get: function () {
+        return this.idState.initialRecord;
+      },
+      set: function (newValue) {
+        this.idState.initialRecord = newValue;
+      }
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
@@ -75,8 +83,8 @@ export default {
       return this.record.prediction ? this.record.prediction.sentences : [];
     },
     initialAnnotations() {
-      return this.idState.initialRecord.annotation
-        ? this.idState.initialRecord.annotation.sentences
+      return this.initialRecord.annotation
+        ? this.initialRecord.annotation.sentences
         : [];
     },
   },
@@ -90,8 +98,8 @@ export default {
     }),
 
     initializeInitialRecord() {
-      if (Object.entries(this.idState.initialRecord).length === 0){
-        this.idState.initialRecord = Object.assign({}, this.record);
+      if (Object.entries(this.initialRecord).length === 0){
+        this.initialRecord = Object.assign({}, this.record);
       }
     },
     async updateRecordSentences({ sentences }) {
@@ -114,7 +122,7 @@ export default {
         dataset: this.dataset,
         records: [
           {
-            ...this.idState.initialRecord,
+            ...this.initialRecord,
             selected: false,
           },
         ],
@@ -128,7 +136,7 @@ export default {
           sentences,
         },
       };
-      this.idState.initialRecord = newRecord;
+      this.initialRecord = newRecord;
       await this.validate({
         dataset: this.dataset,
         agent: getUsername(this.$auth),

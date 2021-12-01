@@ -17,7 +17,7 @@
 
 <template>
   <div v-if="labels.length" class="exploration-area">
-    <label-search v-if="labels.length >= idState.shownLabels" :searchText="idState.searchText" @input="onSearchLabel" />
+    <label-search v-if="labels.length >= shownLabels" :searchText="searchText" @input="onSearchLabel" />
     <div class="predictions">
       <span v-for="label in visibleLabels" :key="label.index">
         <LabelPill
@@ -63,11 +63,27 @@ export default {
   },
   idState () {
     return {
-      searchText: '',
+      searchText: undefined,
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     }
   },
   computed: {
+    searchText: {
+      get: function () {
+        return this.idState.searchText;
+      },
+      set: function (newValue) {
+        this.idState.searchText = newValue;
+      }
+    },
+    shownLabels: {
+      get: function () {
+        return this.idState.shownLabels;
+      },
+      set: function (newValue) {
+        this.idState.shownLabels = newValue;
+      }
+    },
     labels() {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
@@ -76,11 +92,11 @@ export default {
     },
     filteredLabels() {
       return this.labels.filter((label) =>
-        label.class.toLowerCase().match(this.idState.searchText)
+        label.class.toLowerCase().match(this.searchText)
       );
     },
     visibleLabels() {
-      return this.filteredLabels.slice(0, this.idState.shownLabels);
+      return this.filteredLabels.slice(0, this.shownLabels);
     },
     predictedAs() {
       return this.record.predicted_as;
@@ -88,13 +104,13 @@ export default {
   },
   methods: {
     expandLabels() {
-      this.idState.shownLabels = this.filteredLabels.length;
+      this.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
-      this.idState.shownLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
+      this.shownLabels = DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
     onSearchLabel(event) {
-      this.idState.searchText = event;
+      this.searchText = event;
     },
   },
 };
