@@ -258,26 +258,8 @@ export default {
   }
 }
 
-
-// .button-group {
-//     display: flex;
-//     .re-button {
-//         min-height: 50px;
-//         width: 100%;
-//         margin: 2px;
-//         &:active {
-//             color: $lighter-color;
-//         }
-//         &.inactive {
-//             opacity: 0.5;
-//             &:hover {
-//                 opacity: 1;
-//             }
-//         }
-//     }
-// }
-
 .re-button {
+  font-family: $sff;
   .spinner {
     position: absolute;
     left: 1em;
