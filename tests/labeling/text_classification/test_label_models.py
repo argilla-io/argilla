@@ -299,7 +299,7 @@ class TestSnorkel:
 
 class TestFlyingSquid:
     def test_not_installed(self, uninstall_flyingsquid):
-        with pytest.raises(ModuleNotFoundError, match="pip install flyingsquid"):
+        with pytest.raises(ModuleNotFoundError, match="pip install pgmpy flyingsquid"):
             FlyingSquid(None)
 
     def test_init(self, weak_labels):
