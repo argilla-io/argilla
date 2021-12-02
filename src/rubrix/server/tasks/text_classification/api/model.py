@@ -43,13 +43,13 @@ class CreateLabelingRule(BaseModel):
     -----------
 
     query:
-        The rule es query
+        The ES query of the rule
 
     label: str
-        The linked rule label
+        The label associated with the rule
 
     description:
-        Description related to rule
+        A brief description of the rule
 
     """
 
@@ -65,16 +65,16 @@ class CreateLabelingRule(BaseModel):
 
 class LabelingRule(CreateLabelingRule):
     """
-    Adds read-only attributes to labeling rule
+    Adds read-only attributes to the labeling rule
 
     Attributes:
     -----------
 
     author:
-        Who has created the rule
+        Who created the rule
 
     created_at:
-        When rule was created
+        When was the rule created
 
     """
 

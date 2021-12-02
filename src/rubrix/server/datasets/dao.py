@@ -65,12 +65,12 @@ class DatasetsDAO:
         cls, es: ElasticsearchWrapper = Depends(create_es_wrapper)
     ) -> "DatasetsDAO":
         """
-        Get or creates the dao instance
+        Gets or creates the dao instance
 
         Parameters
         ----------
         es:
-            The elasticsearch wrapper dependency>
+            The elasticsearch wrapper dependency
 
         Returns
         -------

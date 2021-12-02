@@ -214,7 +214,7 @@ class TextClassificationService:
 
         Returns
         -------
-            A list of labeling rules create for a given dataset
+            A list of labeling rules for a given dataset
 
         """
         return self.__labeling__.list_rules(dataset)
@@ -238,7 +238,7 @@ class TextClassificationService:
         """
         Deletes a rule from a dataset.
 
-        Nothing happens if rule does exists in dataset.
+        Nothing happens if the rule does not exist in dataset.
 
         Parameters
         ----------
