@@ -36,7 +36,7 @@
         :record="item"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="onShowMetadata(item.id)"
+        @onShowMetadata="onShowMetadata(item)"
       />
       <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
     </div>
@@ -97,8 +97,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-    onShowMetadata(id) {
-      this.$emit('show-metadata', id)
+    onShowMetadata(record) {
+      this.$emit('show-metadata', record)
     },
   },
 };

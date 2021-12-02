@@ -54,14 +54,14 @@
         modal-position="modal-center"
         :modal-custom="true"
         :prevent-body-scroll="true"
-        :modal-visible="showMetadata !== undefined"
+        :modal-visible="selectedRecord !== undefined"
         @close-modal="onCloseMetadata"
       >
         <Metadata
-          v-if="metadata"
+          v-if="selectedRecord"
           :applied-filters="dataset.query.metadata"
-          :metadata-items="metadata"
-          :title="metadataTitle"
+          :metadata-items="selectedRecord.metadata"
+          :title="selectedRecord.recordTitle()"
           @metafilterApply="onApplyMetadataFilter"
           @cancel="onCloseMetadata"
         />
@@ -86,7 +86,7 @@ export default {
   data() {
     return {
       scrollComponent: undefined,
-      showMetadata: undefined,
+      selectedRecord: undefined,
     };
   },
   computed: {
@@ -109,16 +109,6 @@ export default {
       }
       return false;
     },
-    metadata() {
-      if (this.visibleRecords.find(i => i.id === this.showMetadata)) {
-        return this.visibleRecords.find(i => i.id === this.showMetadata).metadata;
-      } else {
-        return false;
-      }
-    },
-    metadataTitle() {
-      return this.visibleRecords.find(i => i.id === this.showMetadata).recordTitle()
-    }
   },
   mounted() {
     const scroll = document.getElementById("scroll");
@@ -152,11 +142,11 @@ export default {
         query: { metadata: metadata },
       });
     },
-    onShowMetadata(id) {
-      this.showMetadata = id;
+    onShowMetadata(record) {
+      this.selectedRecord = record;
     },
     onCloseMetadata() {
-      this.showMetadata = undefined;
+      this.selectedRecord = undefined;
     },
     async onPagination(page, size) {
       document.getElementById("scroll").scrollTop = 0;
