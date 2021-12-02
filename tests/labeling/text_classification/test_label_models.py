@@ -452,11 +452,11 @@ class TestFlyingSquid:
         label_model.fit()
 
         metrics = label_model.score()
-        assert metrics["accuracy"] == pytest.approx(1)
+        assert metrics["accuracy"] == pytest.approx(0.9282296650717703)
 
         records = label_model.predict()
         assert len(records) == 1177
         assert records[0].prediction == [
-            ("SPAM", pytest.approx(0.5633776670811805)),
-            ("HAM", pytest.approx(0.4366223329188196)),
+            ("SPAM", 0.8236983486087645),
+            ("HAM", 0.17630165139123552),
         ]
