@@ -156,7 +156,7 @@ export default {
     },
     filteredLabels() {
       return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.idState ? this.searchText : undefined)
+        label.class.toLowerCase().match(this.searchText)
       );
     },
     visibleLabels() {
@@ -194,13 +194,6 @@ export default {
     },
     UXtest() {
       return this.$route.query.UXtest;
-    },
-  },
-  watch: {
-    appliedLabels(o, n) {
-      if (o.some((l) => n.indexOf(l) === -1)) {
-        this.selectedLabels = this.appliedLabels;
-      }
     },
   },
   mounted() {
