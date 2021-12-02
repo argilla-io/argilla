@@ -97,19 +97,18 @@
   background: none;
   border: 0;
   border-radius: $button-radius;
-  font-family: $ff;
+  font-family: $sff;
   @include font-size(13px);
   font-style: inherit;
   font-variant: inherit;
   letter-spacing: inherit;
-  font-weight: 600;
+  font-weight: 500;
   line-height: $button-height;
   text-align: center;
   text-decoration: none;
   vertical-align: middle;
   white-space: nowrap;
   margin-bottom: 10px;
-  font-family: $ff;
   transition: all 0.4s $cb-fast;
   &:focus {
     outline: 0;

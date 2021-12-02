@@ -184,6 +184,7 @@ export default {
       width: 100%;
       margin-right: 0.5em;
       min-height: 38px;
+      justify-content: center;
       &:last-child {
         margin-right: 0;
       }

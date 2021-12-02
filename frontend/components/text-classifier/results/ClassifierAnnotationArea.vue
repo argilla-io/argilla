@@ -248,7 +248,8 @@ export default {
     align-self: center;
     margin: 3.5px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    font-family: $sff;
     outline: none;
     padding: 0.5em;
     border-radius: 5px;
