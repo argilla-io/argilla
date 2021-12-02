@@ -576,12 +576,15 @@ def test_dataset_with_rules():
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-        json=CreateLabelingRule(query="a query", description="Description").dict(),
+        json=CreateLabelingRule(
+            query="a query", description="Description", label="LALA"
+        ).dict(),
     )
     assert response.status_code == 200
 
     created_rule = LabelingRule.parse_obj(response.json())
     assert created_rule.query == "a query"
+    assert created_rule.label == "LALA"
     assert created_rule.description == "Description"
     assert created_rule.author == "rubrix"
 
@@ -598,7 +601,9 @@ def test_delete_dataset_rules():
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-        json=CreateLabelingRule(query="a query", description="Description").dict(),
+        json=CreateLabelingRule(
+            query="a query", label="TEST", description="Description"
+        ).dict(),
     )
     assert response.status_code == 200
 
@@ -616,7 +621,7 @@ def test_duplicated_dataset_rules():
     dataset = "test_duplicated_dataset_rules"
     log_some_records(dataset)
 
-    rule = CreateLabelingRule(query="a query")
+    rule = CreateLabelingRule(query="a query", label="TEST")
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
         json=rule.dict(),

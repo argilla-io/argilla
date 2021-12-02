@@ -261,7 +261,7 @@ async def fetch_labeling_rules(
         workspace=common_params.workspace,
     )
 
-    return service.get_labeling_rules(Dataset.parse_obj(dataset))
+    return list(service.get_labeling_rules(Dataset.parse_obj(dataset)))
 
 
 @router.post(f"{NEW_BASE_ENDPOINT}/labeling/rules", operation_id="create_rule")
@@ -283,13 +283,16 @@ async def create_rule(
         workspace=common_params.workspace,
     )
 
-    return service.add_labeling_rule(
-        Dataset.parse_obj(dataset),
-        rule=LabelingRule(
-            **rule.dict(),
-            author=current_user.username,
-        ),
+    rule = LabelingRule(
+        **rule.dict(),
+        author=current_user.username,
     )
+    service.add_labeling_rule(
+        Dataset.parse_obj(dataset),
+        rule=rule,
+    )
+
+    return rule
 
 
 @router.delete(

@@ -45,12 +45,16 @@ class CreateLabelingRule(BaseModel):
     query:
         The rule es query
 
+    label: str
+        The linked rule label
+
     description:
         Description related to rule
 
     """
 
     query: str
+    label: str
     description: Optional[str] = None
 
     @validator("query")
