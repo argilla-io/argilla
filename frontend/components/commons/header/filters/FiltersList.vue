@@ -322,6 +322,7 @@ $number-size: 18px;
       margin-right: 1em;
       color: $font-secondary;
       @include font-size(15px);
+      font-family: $sff;
       &:hover {
         background: palette(grey, smooth);
       }

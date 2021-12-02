@@ -120,7 +120,8 @@ export default {
       background: $lighter-color;
       border-width: 1px;
       color: $font-secondary;
-      font-weight: bold;
+      font-family: $sff;
+      font-weight: 500;
       min-width: 170px;
     }
     ::v-deep .dropdown__content {
@@ -137,7 +138,7 @@ export default {
     margin-left: 1em;
     margin-right: 1em;
     outline: none;
-    font-weight: 600;
+    font-weight: 500;
     color: $font-secondary;
     background: $lighter-color;
     border: 1px solid $line-smooth-color;

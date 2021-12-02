@@ -161,7 +161,7 @@ $color: #333346;
   }
   p {
     text-align: center;
-    font-weight: 700;
+    font-weight: 600;
     @include font-size(11px);
     color: $color;
   }
