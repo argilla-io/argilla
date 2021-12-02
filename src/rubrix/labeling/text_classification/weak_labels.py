@@ -246,8 +246,8 @@ class WeakLabels:
         """Returns the annotation labels as an array of integers.
 
         Args:
-            exclude_missing_annotations: If True, excludes missing annotations,
-                that is all entries with the ``self.label2int[None]`` integer.
+            exclude_missing_annotations: If True, excludes all entries with the ``self.label2int[None]`` integer,
+                that is all records for which there is an annotation missing.
 
         Returns:
             The annotation array of integers.
