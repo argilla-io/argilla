@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 import itertools
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
@@ -27,6 +27,8 @@ from rubrix.server.security.model import User
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
+    CreateLabelingRule,
+    LabelingRule,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
@@ -35,11 +37,11 @@ from rubrix.server.tasks.text_classification.api.model import (
 )
 from rubrix.server.tasks.text_classification.service.service import (
     TextClassificationService,
-    text_classification_service,
 )
 
 TASK_TYPE = TaskType.text_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+NEW_BASE_ENDPOINT = f"/{TASK_TYPE}/{{name}}"
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -54,7 +56,9 @@ def bulk_records(
     name: str,
     bulk: TextClassificationBulkData,
     common_params: CommonTaskQueryParams = Depends(),
-    service: TextClassificationService = Depends(text_classification_service),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
@@ -110,7 +114,9 @@ def search_records(
     search: TextClassificationSearchRequest = None,
     common_params: CommonTaskQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
-    service: TextClassificationService = Depends(text_classification_service),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TextClassificationSearchResults:
@@ -198,7 +204,9 @@ async def stream_data(
     query: Optional[TextClassificationQuery] = None,
     common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: TextClassificationService = Depends(text_classification_service),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
@@ -233,3 +241,76 @@ async def stream_data(
         data_stream=data_stream,
         limit=limit,
     )
+
+
+@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules", operation_id="fetch_labeling_rules")
+async def fetch_labeling_rules(
+    name: str,
+    common_params: CommonTaskQueryParams = Depends(),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> List[LabelingRule]:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    return service.get_labeling_rules(Dataset.parse_obj(dataset))
+
+
+@router.post(f"{NEW_BASE_ENDPOINT}/labeling/rules", operation_id="create_rule")
+async def create_rule(
+    name: str,
+    rule: CreateLabelingRule,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> LabelingRule:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    return service.add_labeling_rule(
+        Dataset.parse_obj(dataset),
+        rule=LabelingRule(
+            **rule.dict(),
+            author=current_user.username,
+        ),
+    )
+
+
+@router.delete(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="delete_rule"
+)
+async def delete_rule(
+    name: str,
+    query: str,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> None:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    service.delete_labeling_rule(Dataset.parse_obj(dataset), rule_query=query)

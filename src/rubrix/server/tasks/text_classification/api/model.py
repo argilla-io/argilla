@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, root_validator, validator
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.es_helpers import filters
 from rubrix.server.commons.helpers import flatten_dict
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
@@ -33,6 +33,63 @@ from rubrix.server.tasks.commons.api.model import (
     TaskStatus,
     TaskType,
 )
+
+
+class CreateLabelingRule(BaseModel):
+    """
+    Data model for labeling rules creation
+
+    Attributes:
+    -----------
+
+    query:
+        The rule es query
+
+    description:
+        Description related to rule
+
+    """
+
+    query: str
+    description: Optional[str] = None
+
+    @validator("query")
+    def strip_query(cls, query: str) -> str:
+        """Remove blank spaces for query"""
+        return query.strip()
+
+
+class LabelingRule(CreateLabelingRule):
+    """
+    Adds read-only attributes to labeling rule
+
+    Attributes:
+    -----------
+
+    author:
+        Who has created the rule
+
+    created_at:
+        When rule was created
+
+    """
+
+    author: str
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+
+class TextClassificationDatasetDB(DatasetDB):
+    """
+    A dataset class specialized for text classification task
+
+    Attributes:
+    -----------
+
+        rules:
+            A list of dataset labeling rules
+    """
+
+    rules: List[LabelingRule] = Field(default_factory=list)
 
 
 class ClassPrediction(BaseModel):
