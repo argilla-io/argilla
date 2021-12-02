@@ -64,16 +64,19 @@ export default {
       });
     },
     async onValidate(records) {
-      const filterRecords = records.filter(r => r.annotation || r.prediction);
       await this.validate({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
-        records: filterRecords.map((record) => ({
-          ...record,
-          annotation: {
-            ...(record.annotation || record.prediction),
-          },
-        })),
+        records: records.map((record) => {
+          const emptyEntities = {};
+          emptyEntities.entities = [];
+          return {
+            ...record,
+            annotation: {
+              ...(record.annotation || record.prediction || emptyEntities),
+            },
+          }
+        }),
       });
     },
     async onNewLabel(label) {

@@ -55,7 +55,7 @@ export default {
       });
     },
     async onValidate(records) {
-      const filteredRecords = records.filter(r => r.annotation);
+      const filteredRecords = records.filter(r => r.annotation || r.prediction);
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
