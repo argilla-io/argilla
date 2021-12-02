@@ -55,10 +55,11 @@ export default {
       });
     },
     async onValidate(records) {
+      const filteredRecords = records.filter(r => r.annotation);
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
-        records: records.map((record) => {
+        records: filteredRecords.map((record) => {
           let modelPrediction = {};
           modelPrediction.sentences = [{
             text: record.prediction.sentences[0].text,
@@ -67,7 +68,7 @@ export default {
           return {
             ...record,
             annotation: {
-              ...(record.annotation || record.prediction.sentences.length ? modelPrediction : undefined),
+              ...(record.annotation || modelPrediction),
             },
           };
         }),
