@@ -211,7 +211,14 @@ class Snorkel(LabelModel):
             if pred != -1:
                 # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
                 if np.isclose(prob, prob.max()).sum() > 1:
-                    prob[pred] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                    for idx in range(len(prob)):
+                        if idx == pred:
+                            prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                        else:
+                            prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                                len(prob) - 1
+                            )
+
                 pred_for_rec = [
                     (self._weak_labels.int2label[idx], prob[idx])
                     for idx in np.argsort(prob)[::-1]
