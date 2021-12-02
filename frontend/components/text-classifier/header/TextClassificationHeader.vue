@@ -105,19 +105,22 @@ export default {
       });
     },
     async onValidate(records) {
+      const filterdRecord = records.filter(r => r.annotation || r.predicted_as || r.multi_label)
       await this.validate({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
-        records: records.map((record) => {
+        records: filterdRecord.map((record) => {
           let modelPrediction = {};
           modelPrediction.labels = record.predicted_as.map((pred) => ({
             class: pred,
             score: 1,
           }));
+          const emptyLabels = {};
+          emptyLabels.labels = [];
           return {
             ...record,
             annotation: {
-              ...(record.annotation || modelPrediction),
+              ...(record.annotation || modelPrediction || emptyLabels),
             },
           };
         }),
