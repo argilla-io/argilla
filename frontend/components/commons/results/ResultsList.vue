@@ -18,32 +18,55 @@
 <template>
   <div class="list">
     <slot name="header" />
-    <VueAutoVirtualScrollList
-      id="scroll"
-      ref="scroll"
-      :key="dataset.name"
-      class="results-scroll"
-      :total-height="1200"
-      :default-height="100"
-      :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-    >
-      <template v-if="showLoader">
+    <div class="results-scroll" id="scroll">
+      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
         <results-loading :size="dataset.viewSettings.pagination.size" />
-      </template>
-      <template v-else>
-        <div
-          v-for="(item, index) in visibleRecords"
-          v-cloak
-          :key="index"
-          class="list__li"
-        >
-          <results-record v-if="item" :dataset="dataset" :item="item">
-            <slot name="record" :record="item" />
-          </results-record>
-        </div>
-        <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
-      </template>
-    </VueAutoVirtualScrollList>
+      </div>
+      <DynamicScroller
+        page-mode
+        class="scroller"
+        :items="visibleRecords"
+        :min-item-size="150"
+        :buffer="200"
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+      > 
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            :watch-data="true"
+            class="list__li"
+            :item="item"
+            :active="active"
+            key-field="id"
+            :index="index"
+            :data-index="index"
+          >
+            <results-record @show-metadata="onShowMetadata" :key="item.id" :dataset="dataset" :item="item">
+              <slot name="record" :record="item" />
+            </results-record>
+          </DynamicScrollerItem>
+        </template>
+        <template #after>
+          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+        </template>
+      </DynamicScroller>
+      <LazyReModal
+        modal-class="modal-secondary"
+        modal-position="modal-center"
+        :modal-custom="true"
+        :prevent-body-scroll="true"
+        :modal-visible="selectedRecord !== undefined"
+        @close-modal="onCloseMetadata"
+      >
+        <Metadata
+          v-if="selectedRecord"
+          :applied-filters="dataset.query.metadata"
+          :metadata-items="selectedRecord.metadata"
+          :title="selectedRecord.recordTitle()"
+          @metafilterApply="onApplyMetadataFilter"
+          @cancel="onCloseMetadata"
+        />
+      </LazyReModal>
+    </div>
     <RePagination
       :total-items="dataset.results.total"
       :pagination-settings="dataset.viewSettings.pagination"
@@ -57,12 +80,13 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
       scrollComponent: undefined,
+      selectedRecord: undefined,
     };
   },
   computed: {
@@ -77,10 +101,14 @@ export default {
     },
     isLastPagePaginable() {
       if (this.dataset.results.total > this.paginationLimit) {
-        return (this.dataset.viewSettings.pagination.page * this.dataset.viewSettings.pagination.size) === this.dataset.viewSettings.pagination.maxRecordsLimit;
+        return (
+          this.dataset.viewSettings.pagination.page *
+            this.dataset.viewSettings.pagination.size ===
+          this.dataset.viewSettings.pagination.maxRecordsLimit
+        );
       }
-      return false
-    }
+      return false;
+    },
   },
   mounted() {
     const scroll = document.getElementById("scroll");
@@ -96,26 +124,39 @@ export default {
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
+      search: "entities/datasets/search",
     }),
     onScroll() {
-      if (this.$refs.scroll.scrollTop > 0) {
+      if (document.getElementById("scroll").scrollTop > 0) {
         document.getElementsByTagName("body")[0].classList.add("fixed-header");
       } else {
         document
           .getElementsByTagName("body")[0]
           .classList.remove("fixed-header");
-
       }
+    },
+    async onApplyMetadataFilter(metadata) {
+      this.onCloseMetadata();
+      this.search({
+        dataset: this.dataset,
+        query: { metadata: metadata },
+      });
+    },
+    onShowMetadata(record) {
+      this.selectedRecord = record;
+    },
+    onCloseMetadata() {
+      this.selectedRecord = undefined;
     },
     async onPagination(page, size) {
       document.getElementById("scroll").scrollTop = 0;
       await this.paginate({
         dataset: this.dataset,
         page: page,
-        size: size,
+        size: size
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -152,6 +193,15 @@ export default {
   &__li {
     padding-bottom: 10px;
     position: relative;
+    min-height: 150px;
+  }
+}
+</style>
+<style lang="scss">
+$maxItemsperPage: 20;
+@for $i from 0 through $maxItemsperPage {
+  .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {
+    z-index: $maxItemsperPage - $i
   }
 }
 </style>

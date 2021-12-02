@@ -34,14 +34,22 @@ import "assets/icons/search";
 import "assets/icons/cross";
 
 export default {
-  data() {
-    return { filter: this.value };
+  props: {
+    searchText: {
+      type: String,
+      default: undefined,
+    }
   },
-  watch: {
-    filter(val) {
-      this.$emit("input", val);
-    },
-  },
+  computed: {
+    filter: {
+      get() {
+        return this.searchText
+      },
+      set(val) {
+        this.$emit('input', val)
+      }
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
