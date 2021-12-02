@@ -14,7 +14,8 @@
 #  limitations under the License.
 import hashlib
 import logging
-from typing import Dict, List
+from enum import Enum
+from typing import Dict, List, Union
 
 import numpy as np
 
@@ -39,6 +40,20 @@ else:
     from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class TieBreakPolicy(Enum):
+    """A tie break policy"""
+
+    ABSTAIN = "abstain"
+    RANDOM = "random"
+    TRUE_RANDOM = "true-random"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
 
 
 class LabelModel:
