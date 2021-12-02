@@ -142,8 +142,9 @@ def parse_aggregations(
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, doc_count, meta, _from, _to = (
+            key, key_as_string, doc_count, meta, _from, _to = (
                 bucket.pop("key", None),
+                bucket.pop("key_as_string", None),
                 bucket.pop("doc_count", 0),
                 bucket.pop("meta", None),
                 bucket.pop("from", None),
@@ -165,7 +166,7 @@ def parse_aggregations(
                         key_metrics[metric_key] = value
                 parsed.update({key: key_metrics})
             elif key is not None:
-                parsed.update({key: doc_count})
+                parsed.update({key_as_string or key: doc_count})
         return parsed
 
     result = {}
@@ -442,7 +443,7 @@ class aggregations:
         def __resolve_aggregation_for_field_type(
             field_type: str, field_name: str
         ) -> Optional[Dict[str, Any]]:
-            if field_type in ["keyword", "long", "integer"]:
+            if field_type in ["keyword", "long", "integer", "boolean"]:
                 return {
                     "terms": {
                         "field": field_name,
