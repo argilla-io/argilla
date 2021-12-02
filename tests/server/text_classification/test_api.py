@@ -19,6 +19,7 @@ import pytest
 
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
+from rubrix.server.tasks.text_classification import CreateLabelingRule, LabelingRule
 from rubrix.server.tasks.text_classification.api import (
     TextClassificationAnnotation,
     TextClassificationBulkData,
@@ -539,3 +540,91 @@ def test_wrong_text_query():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Failed to parse query [!]"
+
+
+def log_some_records(dataset: str):
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"text": "Esto es un ejemplo de texto"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+            ],
+        ).json(by_alias=True),
+    )
+    assert response.status_code == 200
+
+
+def test_dataset_without_rules():
+    dataset = "test_dataset_without_rules"
+    log_some_records(dataset)
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+
+
+def test_dataset_with_rules():
+    dataset = "test_dataset_with_rules"
+    log_some_records(dataset)
+
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=CreateLabelingRule(query="a query", description="Description").dict(),
+    )
+    assert response.status_code == 200
+
+    created_rule = LabelingRule.parse_obj(response.json())
+    assert created_rule.query == "a query"
+    assert created_rule.description == "Description"
+    assert created_rule.author == "rubrix"
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    assert response.status_code == 200
+    rules = list(map(LabelingRule.parse_obj, response.json()))
+    assert len(rules) == 1
+    assert rules[0] == created_rule
+
+
+def test_delete_dataset_rules():
+    dataset = "test_delete_dataset_rules"
+    log_some_records(dataset)
+
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=CreateLabelingRule(query="a query", description="Description").dict(),
+    )
+    assert response.status_code == 200
+
+    response = client.delete(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{'a query'}"
+    )
+    assert response.status_code == 200
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+
+
+def test_duplicated_dataset_rules():
+    dataset = "test_duplicated_dataset_rules"
+    log_some_records(dataset)
+
+    rule = CreateLabelingRule(query="a query")
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=rule.dict(),
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=rule.dict(),
+    )
+    assert response.status_code == 409
