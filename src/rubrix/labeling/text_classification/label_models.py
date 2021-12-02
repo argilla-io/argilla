@@ -179,7 +179,7 @@ class Snorkel(LabelModel):
         self,
         include_annotated_records: bool = False,
         include_abstentions: bool = False,
-        tie_break_policy: str = "abstain",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
     ) -> List[TextClassificationRecord]:
         """Returns a list of records that contain the predictions of the label model
 
@@ -198,13 +198,16 @@ class Snorkel(LabelModel):
         Returns:
             A list of records that include the predictions of the label model.
         """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
         # get predictions and probabilities
         predictions, probabilities = self._model.predict(
             L=self._weak_labels.matrix(
                 has_annotation=None if include_annotated_records else False
             ),
             return_probs=True,
-            tie_break_policy=tie_break_policy,
+            tie_break_policy=tie_break_policy.value,
         )
 
         # add predictions to records
@@ -243,7 +246,9 @@ class Snorkel(LabelModel):
 
         return records_with_prediction
 
-    def score(self, tie_break_policy: str = "abstain") -> Dict[str, float]:
+    def score(
+        self, tie_break_policy: Union[TieBreakPolicy, str] = "abstain"
+    ) -> Dict[str, float]:
         """Returns some scores of the label model with respect to the annotated records.
 
         Args:
@@ -262,6 +267,9 @@ class Snorkel(LabelModel):
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
         if self._weak_labels.annotation().size == 0:
             raise MissingAnnotationError(
                 "You need annotated records to compute scores/metrics for your label model."
@@ -271,7 +279,7 @@ class Snorkel(LabelModel):
         predictions, probabilities = self._model.predict(
             L=self._weak_labels.matrix(has_annotation=True),
             return_probs=True,
-            tie_break_policy=tie_break_policy,
+            tie_break_policy=tie_break_policy.value,
         )
 
         # metrics are only calculated for non-abstained data points
@@ -403,6 +411,13 @@ class FlyingSquid(LabelModel):
         Returns:
             A list of records that include the predictions of the label model.
         """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+        if tie_break_policy is TieBreakPolicy.TRUE_RANDOM:
+            raise NotImplementedError(
+                "The tie break policy 'true-random' is not implemented for FlyingSquid!"
+            )
+
         wl_matrix = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
