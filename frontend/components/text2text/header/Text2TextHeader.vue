@@ -67,7 +67,7 @@ export default {
           return {
             ...record,
             annotation: {
-              ...(record.annotation || modelPrediction),
+              ...(record.annotation || record.prediction.sentences.length ? modelPrediction : undefined),
             },
           };
         }),
