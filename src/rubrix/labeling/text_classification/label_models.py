@@ -430,12 +430,16 @@ class FlyingSquid(LabelModel):
             probas = np.zeros((len(wl_matrix), len(self._labels)))
             for i in range(len(self._labels)):
                 wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
-                probas[:, i] = self._models[i].predict_proba(L_matrix=wl_matrix_i)[:, 0]
+                probas[:, i] = self._models[i].predict_proba(
+                    L_matrix=wl_matrix_i, verbose=verbose
+                )[:, 0]
             probas = np.nan_to_num(probas, nan=-np.inf)  # handle NaN
             probas = np.exp(probas) / np.sum(np.exp(probas), axis=1, keepdims=True)
         else:
             wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, 0)
-            probas = self._models[0].predict_proba(L_matrix=wl_matrix_i)
+            probas = self._models[0].predict_proba(
+                L_matrix=wl_matrix_i, verbose=verbose
+            )
 
         # add predictions to records
         records_with_prediction = []
@@ -453,7 +457,9 @@ class FlyingSquid(LabelModel):
             if len(equal_prob_idx) > 1:
                 tie = True
 
-            if not include_abstentions and (tie and tie_break_policy == "abstain"):
+            if not include_abstentions and (
+                tie and tie_break_policy is TieBreakPolicy.ABSTAIN
+            ):
                 continue
 
             records_with_prediction.append(rec.copy(deep=True))
@@ -464,13 +470,17 @@ class FlyingSquid(LabelModel):
                 pred_for_rec = [
                     (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
                 ]
-            elif tie_break_policy == "random":
+            elif tie_break_policy is TieBreakPolicy.RANDOM:
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                prob[
-                    equal_prob_idx[random_idx]
-                ] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                for idx in range(len(prob)):
+                    if idx == equal_prob_idx[random_idx]:
+                        prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                    else:
+                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                            len(prob) - 1
+                        )
                 pred_for_rec = [
                     (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
                 ]
