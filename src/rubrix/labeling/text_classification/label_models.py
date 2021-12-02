@@ -33,6 +33,7 @@ else:
     from snorkel.utils.optimizers import OptimizerConfig
 try:
     import flyingsquid
+    import pgmpy
 except ModuleNotFoundError:
     IS_FLYINGSQUID_INSTALLED = False
 else:
@@ -319,7 +320,7 @@ class FlyingSquid(LabelModel):
         if not IS_FLYINGSQUID_INSTALLED:
             raise ModuleNotFoundError(
                 "'flyingsquid' must be installed to use the `FlyingSquid` label model! "
-                "You can install 'flyingsquid' with the command: `pip install flyingsquid`"
+                "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`"
             )
         super().__init__(weak_labels)
 
