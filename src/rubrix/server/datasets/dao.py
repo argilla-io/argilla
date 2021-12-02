@@ -14,8 +14,9 @@
 #  limitations under the License.
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
+import deprecated
 from fastapi import Depends
 
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
@@ -51,8 +52,34 @@ def dataset_records_index(dataset_id: str) -> str:
     return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
 
 
+BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
+
+
 class DatasetsDAO:
     """Datasets DAO"""
+
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls, es: ElasticsearchWrapper = Depends(create_es_wrapper)
+    ) -> "DatasetsDAO":
+        """
+        Get or creates the dao instance
+
+        Parameters
+        ----------
+        es:
+            The elasticsearch wrapper dependency>
+
+        Returns
+        -------
+            The dao instance
+
+        """
+        if cls._INSTANCE is None:
+            cls._INSTANCE = cls(es)
+        return cls._INSTANCE
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
@@ -157,6 +184,30 @@ class DatasetsDAO:
         finally:
             self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
 
+    def find_by_id(
+        self, dataset_id: str, ds_class: Type[BaseDatasetDB] = DatasetDB
+    ) -> Optional[BaseDatasetDB]:
+        """
+        Finds a dataset db by its id
+
+        Parameters
+        ----------
+        dataset_id:
+            The dataset id
+        ds_class:
+            Class used for data deserialization. Class could be an specialization
+            of DatasetDB. Default ``DatasetDB``
+
+        Returns
+        -------
+            The dataset instance if found. ``None`` otherwise
+        """
+        document = self._es.get_document_by_id(
+            index=DATASETS_INDEX_NAME, doc_id=dataset_id
+        )
+        if document:
+            return self._es_doc_to_dataset(document, ds_class=ds_class)
+
     def find_by_name(self, name: str, owner: Optional[str]) -> Optional[DatasetDB]:
         """
         Finds a dataset by name
@@ -195,7 +246,9 @@ class DatasetsDAO:
         return self._es_doc_to_dataset(document) if document else None
 
     @staticmethod
-    def _es_doc_to_dataset(doc: Dict[str, Any]) -> DatasetDB:
+    def _es_doc_to_dataset(
+        doc: Dict[str, Any], ds_class: Type[BaseDatasetDB] = DatasetDB
+    ) -> BaseDatasetDB:
         """Transforms a stored elasticsearch document into a `DatasetDB`"""
 
         def __key_value_list_to_dict__(
@@ -207,7 +260,7 @@ class DatasetsDAO:
         tags = source.pop("tags", [])
         metadata = source.pop("metadata", [])
 
-        return DatasetDB.parse_obj(
+        return ds_class.parse_obj(
             {
                 **source,
                 "tags": __key_value_list_to_dict__(tags),
@@ -254,6 +307,7 @@ class DatasetsDAO:
 _instance: Optional[DatasetsDAO] = None
 
 
+@deprecated.deprecated(reason="Use ``DatasetsDAO.get_instance`` class method instead")
 def create_datasets_dao(
     es: ElasticsearchWrapper = Depends(create_es_wrapper),
 ) -> DatasetsDAO:
