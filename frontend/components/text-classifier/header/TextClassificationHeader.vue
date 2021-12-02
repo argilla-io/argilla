@@ -105,7 +105,7 @@ export default {
       });
     },
     async onValidate(records) {
-      const filterdRecord = records.filter(r => r.annotation || record.predicted_as || record.multi_label)
+      const filterdRecord = records.filter(r => r.annotation || r.predicted_as || r.multi_label)
       await this.validate({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
