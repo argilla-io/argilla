@@ -400,7 +400,7 @@ class FlyingSquid(LabelModel):
             include_annotated_records: Whether or not to include annotated records.
             include_abstentions: Whether or not to include records in the output, for which the label model abstained.
             verbose: If True, print out messages of the progress to stderr.
-            tie_break_policy: Policy to break ties. You can choose among three policies:
+            tie_break_policy: Policy to break ties. You can choose among two policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -421,31 +421,13 @@ class FlyingSquid(LabelModel):
         wl_matrix = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
-
-        # create predictions for each label (except for binary classification)
-        # much of the implementation is taken from wrench:
-        # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
-        # If binary, we only have one model
-        if len(self._labels) > 2:
-            probas = np.zeros((len(wl_matrix), len(self._labels)))
-            for i in range(len(self._labels)):
-                wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
-                probas[:, i] = self._models[i].predict_proba(
-                    L_matrix=wl_matrix_i, verbose=verbose
-                )[:, 0]
-            probas = np.nan_to_num(probas, nan=-np.inf)  # handle NaN
-            probas = np.exp(probas) / np.sum(np.exp(probas), axis=1, keepdims=True)
-        else:
-            wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, 0)
-            probas = self._models[0].predict_proba(
-                L_matrix=wl_matrix_i, verbose=verbose
-            )
+        probabilities = self._predict(wl_matrix, verbose)
 
         # add predictions to records
         records_with_prediction = []
         for i, prob, rec in zip(
-            range(len(probas)),
-            probas,
+            range(len(probabilities)),
+            probabilities,
             self._weak_labels.records(
                 has_annotation=None if include_annotated_records else False
             ),
@@ -457,19 +439,19 @@ class FlyingSquid(LabelModel):
             if len(equal_prob_idx) > 1:
                 tie = True
 
+            # maybe skip record
             if not include_abstentions and (
                 tie and tie_break_policy is TieBreakPolicy.ABSTAIN
             ):
                 continue
 
-            records_with_prediction.append(rec.copy(deep=True))
-
-            # set prediction to None when tie break policy == "abstain"
-            pred_for_rec = None
             if not tie:
                 pred_for_rec = [
                     (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
                 ]
+            # resolve ties following the tie break policy
+            elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+                pred_for_rec = None
             elif tie_break_policy is TieBreakPolicy.RANDOM:
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
@@ -484,14 +466,121 @@ class FlyingSquid(LabelModel):
                 pred_for_rec = [
                     (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
                 ]
+            else:
+                raise NotImplementedError(
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                )
 
+            records_with_prediction.append(rec.copy(deep=True))
             records_with_prediction[-1].prediction = pred_for_rec
 
         return records_with_prediction
 
-    def score(self, *args, **kwargs) -> Dict:
-        """Evaluates the label model."""
-        raise NotImplementedError
+    def _predict(self, weak_label_matrix: np.ndarray, verbose: bool) -> np.ndarray:
+        """Helper function that calls the ``predict_proba`` method of FlyingSquid's label model.
+
+        Much of the implementation is taken from wrench:
+        https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
+
+        Args:
+            weak_label_matrix: The weak label matrix.
+            verbose: If True, print out messages of the progress to stderr.
+
+        Returns:
+            A matrix containing the probability for each label and record.
+        """
+        # create predictions for each label
+        if len(self._labels) > 2:
+            probas = np.zeros((len(weak_label_matrix), len(self._labels)))
+            for i in range(len(self._labels)):
+                wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, i)
+                probas[:, i] = self._models[i].predict_proba(
+                    L_matrix=wl_matrix_i, verbose=verbose
+                )[:, 0]
+            probas = np.nan_to_num(probas, nan=-np.inf)  # handle NaN
+            probas = np.exp(probas) / np.sum(np.exp(probas), axis=1, keepdims=True)
+        # if binary, we only have one model
+        else:
+            wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, 0)
+            probas = self._models[0].predict_proba(
+                L_matrix=wl_matrix_i, verbose=verbose
+            )
+
+        return probas
+
+    def score(
+        self,
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        verbose: bool = False,
+    ) -> Dict[str, float]:
+        """Returns some scores of the label model with respect to the annotated records.
+
+        Args:
+            tie_break_policy: Policy to break ties. You can choose among two policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all of the labeling functions abstained.
+            verbose: If True, print out messages of the progress to stderr.
+
+        Returns:
+            The scores/metrics as a dictionary.
+
+        Raises:
+            MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
+        """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+        if tie_break_policy is TieBreakPolicy.TRUE_RANDOM:
+            raise NotImplementedError(
+                "The tie break policy 'true-random' is not implemented for FlyingSquid!"
+            )
+
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+        probabilities = self._predict(wl_matrix, verbose)
+
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        is_tie = is_max.sum(axis=1) > 1
+
+        predictions = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotations = np.array(
+            [
+                self._labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
+        )
+
+        if not is_tie.any():
+            accuracy = (predictions == annotations).sum() / len(predictions)
+        # resolve ties
+        elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+            _LOGGER.warning(
+                "Metrics are only calculated over non-abstained predictions!"
+            )
+            accuracy = (predictions[~is_tie] == annotations[~is_tie]).sum() / (
+                ~is_tie
+            ).sum()
+        elif tie_break_policy is TieBreakPolicy.RANDOM:
+            for i in np.nonzero(is_tie)[0]:
+                equal_prob_idx = np.nonzero(is_max[i])[0]
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
+                    equal_prob_idx
+                )
+                predictions[i] = random_idx
+            accuracy = (predictions == annotations).sum() / len(predictions)
+        else:
+            raise NotImplementedError(
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+            )
+
+        return {"accuracy": accuracy}
 
 
 class LabelModelError(Exception):
