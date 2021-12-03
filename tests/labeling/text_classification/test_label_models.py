@@ -12,22 +12,19 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import importlib
 import sys
 
 import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-
-# we importlib.reload the `label_models` module during the tests, so avoid loading namespaces from this module!
-# for example, don't do `from rubrix.labeling.text_classification.label_models import MissingAnnotationError`
-# instead do `from rubrix.labeling.text_classification import label_models; label_models.MissingAnnotationError`
-from rubrix.labeling.text_classification import (
-    FlyingSquid,
-    Snorkel,
-    WeakLabels,
-    label_models,
+from rubrix.labeling.text_classification import FlyingSquid, Snorkel, WeakLabels
+from rubrix.labeling.text_classification.label_models import (
+    LabelModel,
+    MissingAnnotationError,
+    NotFittedError,
+    TieBreakPolicy,
+    TooFewRulesError,
 )
 
 
@@ -78,35 +75,20 @@ def weak_labels_from_guide(monkeypatch, resources):
     return WeakLabels(rules=[lambda x: "mock"] * matrix.shape[1], dataset="mock")
 
 
-@pytest.fixture
-def uninstall_snorkel(monkeypatch):
-    saved_module = sys.modules["snorkel"]
-    sys.modules["snorkel"] = None
-    importlib.reload(label_models)
-    yield
-    sys.modules["snorkel"] = saved_module
-    importlib.reload(label_models)
-
-
-@pytest.fixture
-def uninstall_flyingsquid(monkeypatch):
-    saved_module = sys.modules["flyingsquid"]
-    sys.modules["flyingsquid"] = None
-    importlib.reload(label_models)
-    yield
-    sys.modules["flyingsquid"] = saved_module
-    importlib.reload(label_models)
+def test_tie_break_policy_enum():
+    with pytest.raises(ValueError, match="mock is not a valid TieBreakPolicy"):
+        TieBreakPolicy("mock")
 
 
 class TestLabelModel:
     def test_weak_label_property(self):
         weak_labels = object()
-        label_model = label_models.LabelModel(weak_labels)
+        label_model = LabelModel(weak_labels)
 
         assert label_model.weak_labels is weak_labels
 
     def test_abstract_methods(self):
-        label_model = label_models.LabelModel(None)
+        label_model = LabelModel(None)
         with pytest.raises(NotImplementedError):
             label_model.fit()
         with pytest.raises(NotImplementedError):
@@ -116,7 +98,8 @@ class TestLabelModel:
 
 
 class TestSnorkel:
-    def test_not_installed(self, uninstall_snorkel):
+    def test_not_installed(self, monkeypatch):
+        monkeypatch.setitem(sys.modules, "snorkel", None)
         with pytest.raises(ModuleNotFoundError, match="pip install snorkel"):
             Snorkel(None)
 
@@ -160,7 +143,7 @@ class TestSnorkel:
             assert kwargs == {"passed_on": None}
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.fit",
+            "snorkel.labeling.model.LabelModel.fit",
             mock_fit,
         )
 
@@ -227,7 +210,7 @@ class TestSnorkel:
                 return np.array([1]), np.array([[0.1, 0.8, 0.1]])
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.predict",
+            "snorkel.labeling.model.LabelModel.predict",
             mock_predict,
         )
 
@@ -264,7 +247,7 @@ class TestSnorkel:
             return predictions, probabilities
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.SnorkelLabelModel.predict",
+            "snorkel.labeling.model.LabelModel.predict",
             mock_predict,
         )
 
@@ -277,9 +260,7 @@ class TestSnorkel:
         weak_labels._annotation_array = np.array([], dtype=np.short)
         label_model = Snorkel(weak_labels)
 
-        with pytest.raises(
-            label_models.MissingAnnotationError, match="need annotated records"
-        ):
+        with pytest.raises(MissingAnnotationError, match="need annotated records"):
             label_model.score()
 
     def test_integration(self, weak_labels_from_guide):
@@ -298,7 +279,8 @@ class TestSnorkel:
 
 
 class TestFlyingSquid:
-    def test_not_installed(self, uninstall_flyingsquid):
+    def test_not_installed(self, monkeypatch):
+        monkeypatch.setitem(sys.modules, "flyingsquid", None)
         with pytest.raises(ModuleNotFoundError, match="pip install pgmpy flyingsquid"):
             FlyingSquid(None)
 
@@ -307,7 +289,7 @@ class TestFlyingSquid:
         assert label_model._labels == ["negative", "positive", "neutral"]
 
         weak_labels._rules = weak_labels.rules[:2]
-        with pytest.raises(label_models.TooFewRulesError, match="at least three"):
+        with pytest.raises(TooFewRulesError, match="at least three"):
             FlyingSquid(weak_labels)
 
     @pytest.mark.parametrize("include_annotated,expected", [(False, 1), (True, 4)])
@@ -319,7 +301,7 @@ class TestFlyingSquid:
             assert kwargs["mock"] == "mock"
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.FlyingSquidLabelModel.fit",
+            "flyingsquid.label_model.LabelModel.fit",
             mock_fit,
         )
 
@@ -397,7 +379,7 @@ class TestFlyingSquid:
                 return expected["return"]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.FlyingSquidLabelModel.predict_proba",
+            "flyingsquid.label_model.LabelModel.predict_proba",
             MockPredict(),
         )
 
@@ -426,7 +408,7 @@ class TestFlyingSquid:
                 return np.array([[0.6, 0.4]])
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.label_models.FlyingSquidLabelModel.predict_proba",
+            "flyingsquid.label_model.LabelModel.predict_proba",
             MockPredict(),
         )
 
@@ -443,9 +425,59 @@ class TestFlyingSquid:
 
     def test_predict_not_implented_tbp(self, weak_labels):
         label_model = FlyingSquid(weak_labels)
+        label_model.fit()
 
         with pytest.raises(NotImplementedError, match="true-random"):
             label_model.predict(tie_break_policy="true-random")
+
+    def test_predict_not_fitted_error(self, weak_labels):
+        label_model = FlyingSquid(weak_labels)
+        with pytest.raises(NotFittedError, match="not fitted yet"):
+            label_model.predict()
+
+    def test_score_not_fitted_error(self, weak_labels):
+        label_model = FlyingSquid(weak_labels)
+        with pytest.raises(NotFittedError, match="not fitted yet"):
+            label_model.score()
+
+    def test_score(self, monkeypatch, weak_labels):
+        def mock_predict(self, weak_label_matrix, verbose):
+            assert verbose is False
+            assert len(weak_label_matrix) == 3
+            return np.array([[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]])
+
+        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
+
+        label_model = FlyingSquid(weak_labels)
+        metrics = label_model.score()
+
+        assert "accuracy" in metrics
+        assert metrics["accuracy"] == pytest.approx(1.0)
+
+    @pytest.mark.parametrize(
+        "tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)]
+    )
+    def test_score_tbp(self, monkeypatch, weak_labels, tbp, vrb, expected):
+        def mock_predict(self, weak_label_matrix, verbose):
+            assert verbose is vrb
+            assert len(weak_label_matrix) == 3
+            return np.array(
+                [[0.8, 0.1, 0.1], [0.4, 0.4, 0.2], [1 / 3.0, 1 / 3.0, 1 / 3.0]]
+            )
+
+        monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
+
+        label_model = FlyingSquid(weak_labels)
+        metrics = label_model.score(tie_break_policy=tbp, verbose=vrb)
+
+        assert metrics["accuracy"] == pytest.approx(expected)
+
+    def test_score_not_implemented_tbp(self, weak_labels):
+        label_model = FlyingSquid(weak_labels)
+        label_model.fit()
+
+        with pytest.raises(NotImplementedError, match="true-random"):
+            label_model.score(tie_break_policy="true-random")
 
     def test_integration(self, weak_labels_from_guide):
         label_model = FlyingSquid(weak_labels_from_guide)
