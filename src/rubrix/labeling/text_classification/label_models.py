@@ -22,24 +22,6 @@ import numpy as np
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels
 
-try:
-    import snorkel
-except ModuleNotFoundError:
-    IS_SNORKEL_INSTALLED = False
-else:
-    IS_SNORKEL_INSTALLED = True
-    from snorkel.labeling.model import LabelModel as SnorkelLabelModel
-    from snorkel.utils.lr_schedulers import LRSchedulerConfig
-    from snorkel.utils.optimizers import OptimizerConfig
-try:
-    import flyingsquid
-    import pgmpy
-except ModuleNotFoundError:
-    IS_FLYINGSQUID_INSTALLED = False
-else:
-    IS_FLYINGSQUID_INSTALLED = True
-    from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -126,11 +108,16 @@ class Snorkel(LabelModel):
     def __init__(
         self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
     ):
-        if not IS_SNORKEL_INSTALLED:
+        try:
+            import snorkel
+        except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'snorkel' must be installed to use the `Snorkel` label model! "
                 "You can install 'snorkel' with the command: `pip install snorkel`"
             )
+        else:
+            from snorkel.labeling.model import LabelModel as SnorkelLabelModel
+
         super().__init__(weak_labels)
 
         # Check if we need to change the weak labels to int mapping
@@ -317,11 +304,19 @@ class FlyingSquid(LabelModel):
     """
 
     def __init__(self, weak_labels, **kwargs):
-        if not IS_FLYINGSQUID_INSTALLED:
+        try:
+            import flyingsquid
+            import pgmpy
+        except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'flyingsquid' must be installed to use the `FlyingSquid` label model! "
                 "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`"
             )
+        else:
+            from flyingsquid.label_model import LabelModel as FlyingSquidLabelModel
+
+            self._FlyingSquidLabelModel = FlyingSquidLabelModel
+
         super().__init__(weak_labels)
 
         if len(self._weak_labels.rules) < 3:
@@ -353,7 +348,7 @@ class FlyingSquid(LabelModel):
         # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
         # If binary, we only need one model
         for i in range(1 if len(self._labels) == 2 else len(self._labels)):
-            model = FlyingSquidLabelModel(m=len(self._weak_labels.rules))
+            model = self._FlyingSquidLabelModel(m=len(self._weak_labels.rules))
             wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
             model.fit(L_train=wl_matrix_i, **kwargs)
             models.append(model)
@@ -414,10 +409,6 @@ class FlyingSquid(LabelModel):
         """
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
-        if tie_break_policy is TieBreakPolicy.TRUE_RANDOM:
-            raise NotImplementedError(
-                "The tie break policy 'true-random' is not implemented for FlyingSquid!"
-            )
 
         wl_matrix = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
@@ -534,10 +525,6 @@ class FlyingSquid(LabelModel):
         """
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
-        if tie_break_policy is TieBreakPolicy.TRUE_RANDOM:
-            raise NotImplementedError(
-                "The tie break policy 'true-random' is not implemented for FlyingSquid!"
-            )
 
         wl_matrix = self._weak_labels.matrix(has_annotation=True)
         probabilities = self._predict(wl_matrix, verbose)
