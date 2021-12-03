@@ -54,8 +54,8 @@
                 class="content__text"
                 :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
-                @input="input"
-                v-html="sentence.text"
+                @blur="input"
+                v-html="newSentence || sentence.text"
                 @click="edit()"
               ></p>
               <span v-if="editionMode"
@@ -189,7 +189,6 @@ export default {
       sentencesOrigin: undefined,
       itemNumber: 0,
       newSentence: undefined,
-      // initialNewSentence: undefined,
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
@@ -221,14 +220,6 @@ export default {
         this.idState.newSentence = newValue;
       }
     },
-    // initialNewSentence: {
-    //   get: function () {
-    //     return this.idState.initialNewSentence;
-    //   },
-    //   set: function (newValue) {
-    //     this.idState.initialNewSentence = newValue;
-    //   }
-    // },
     editionMode: {
       get: function () {
         return this.idState.editionMode;
@@ -284,12 +275,15 @@ export default {
     },
   },
   updated() {
-    this.getText();
+    if (this.$refs.text && this.$refs.text[0]) {
+      this.newSentence = this.$refs.text[0].innerText;
+    }
   },
   mounted() {
     if (this.sentencesOrigin === undefined) {
       this.initializeSentenceOrigin();
     }
+    //this.getText();
   },
   created() {
     window.addEventListener("keydown", this.keyDown);
@@ -310,11 +304,14 @@ export default {
   },
   methods: {
     getText() {
-      if (this.$refs.text && this.$refs.text[0]) {
-        this.newSentence = this.$refs.text[0].innerText;
+      if (this.newSentence === undefined) {
+        if (this.$refs.text && this.$refs.text[0]) {
+          this.newSentence = this.$refs.text[0].innerText;
+        }
       }
     },
     showitemNumber(index) {
+      this.newSentence = undefined;
       this.itemNumber = index;
     },
     input(e) {
@@ -341,10 +338,11 @@ export default {
     back() {
       this.editionMode = false;
       this.refresh++;
-      // this.initialNewSentence = undefined,
-      this.$emit('reset-initial-record')
+      this.newSentence = undefined;
+      this.$emit('reset-initial-record');
     },
     changeVisibleSentences() {
+      this.newSentence = undefined;
       this.itemNumber = 0;
       this.editionMode = false;
       this.sentencesOrigin !== "Annotation"
