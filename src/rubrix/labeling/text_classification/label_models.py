@@ -572,7 +572,7 @@ class FlyingSquid(LabelModel):
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                predictions[i] = random_idx
+                predictions[i] = equal_prob_idx[random_idx]
             accuracy = (predictions == annotations).sum() / len(predictions)
         else:
             raise NotImplementedError(
