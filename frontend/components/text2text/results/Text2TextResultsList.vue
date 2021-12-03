@@ -21,10 +21,10 @@
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
-    <template slot="record" slot-scope="results">
+    <template v-slot:record="{ record }">
       <RecordText2Text
         :dataset="dataset"
-        :record="results.record"
+        :record="record"
         @onShowMetadata="onShowMetadata"
       />
     </template>

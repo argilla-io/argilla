@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-click-outside="close" class="record__extra-actions">
+  <div v-click-outside="close" :key="open" class="record__extra-actions">
     <a
       v-if="hasMetadata || allowChangeStatus"
       class="extra-actions__button"
@@ -47,8 +47,15 @@
 <script>
 import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu-h";
+import { IdState } from 'vue-virtual-scroller'
 
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     allowChangeStatus: {
       type: Boolean,
@@ -63,6 +70,11 @@ export default {
       required: true,
     },
   },
+  idState() {
+    return {
+      open: false,
+    }
+  },
   data: () => ({
     statusActions: [
       // TODO: Do we need this? Just the discard action should be allowed here
@@ -72,9 +84,16 @@ export default {
         class: "discard",
       },
     ],
-    open: false,
   }),
   computed: {
+    open: {
+      get: function () {
+        return this.idState.open;
+      },
+      set: function (newValue) {
+        this.idState.open = newValue;
+      }
+    },
     hasMetadata() {
       const metadata = this.record.metadata;
       return metadata && Object.values(metadata).length;
