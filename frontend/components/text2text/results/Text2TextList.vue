@@ -55,7 +55,7 @@
                 :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
                 @input="input"
-                v-html="initialNewSentence || sentence.text"
+                v-html="sentence.text"
                 @click="edit()"
               ></p>
               <span v-if="editionMode"
@@ -189,7 +189,7 @@ export default {
       sentencesOrigin: undefined,
       itemNumber: 0,
       newSentence: undefined,
-      initialNewSentence: undefined,
+      // initialNewSentence: undefined,
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
@@ -221,14 +221,14 @@ export default {
         this.idState.newSentence = newValue;
       }
     },
-    initialNewSentence: {
-      get: function () {
-        return this.idState.initialNewSentence;
-      },
-      set: function (newValue) {
-        this.idState.initialNewSentence = newValue;
-      }
-    },
+    // initialNewSentence: {
+    //   get: function () {
+    //     return this.idState.initialNewSentence;
+    //   },
+    //   set: function (newValue) {
+    //     this.idState.initialNewSentence = newValue;
+    //   }
+    // },
     editionMode: {
       get: function () {
         return this.idState.editionMode;
@@ -281,17 +281,15 @@ export default {
     },
     allowValidation() {
       return this.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
-    }
+    },
   },
   updated() {
     this.getText();
-    // this.initializeSentenceOrigin();
   },
   mounted() {
     if (this.sentencesOrigin === undefined) {
       this.initializeSentenceOrigin();
     }
-    this.getText();
   },
   created() {
     window.addEventListener("keydown", this.keyDown);
@@ -309,19 +307,11 @@ export default {
         this.itemNumber = 0;
       }
     },
-    status(val) {
-      console.log(val)
-      this.initializeSentenceOrigin();
-    }
   },
   methods: {
     getText() {
-      if (this.newSentence === undefined) {
-        if (this.$refs.text && this.$refs.text[0]) {
-          this.newSentence = this.$refs.text[0].innerText;
-        }
-      } else {
-        this.initialNewSentence = this.newSentence;
+      if (this.$refs.text && this.$refs.text[0]) {
+        this.newSentence = this.$refs.text[0].innerText;
       }
     },
     showitemNumber(index) {
@@ -351,7 +341,7 @@ export default {
     back() {
       this.editionMode = false;
       this.refresh++;
-      this.initialNewSentence = undefined,
+      // this.initialNewSentence = undefined,
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
