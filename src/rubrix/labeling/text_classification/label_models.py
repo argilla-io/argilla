@@ -406,6 +406,9 @@ class FlyingSquid(LabelModel):
 
         Returns:
             A list of records that include the predictions of the label model.
+
+        Raises:
+            NotFittedError: If the label model was still not fitted.
         """
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
@@ -480,7 +483,14 @@ class FlyingSquid(LabelModel):
 
         Returns:
             A matrix containing the probability for each label and record.
+
+        Raises:
+            NotFittedError: If the label model was still not fitted.
         """
+        if not self._models:
+            raise NotFittedError(
+                "This FlyingSquid instance is not fitted yet. Call `fit` before using this model."
+            )
         # create predictions for each label
         if len(self._labels) > 2:
             probas = np.zeros((len(weak_label_matrix), len(self._labels)))
@@ -521,6 +531,7 @@ class FlyingSquid(LabelModel):
             The scores/metrics as a dictionary.
 
         Raises:
+            NotFittedError: If the label model was still not fitted.
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
         if isinstance(tie_break_policy, str):
@@ -580,4 +591,8 @@ class MissingAnnotationError(LabelModelError):
 
 
 class TooFewRulesError(LabelModelError):
+    pass
+
+
+class NotFittedError(LabelModelError):
     pass
