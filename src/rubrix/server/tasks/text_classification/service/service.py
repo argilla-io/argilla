@@ -30,10 +30,14 @@ from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
+    LabelingRule,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
+)
+from rubrix.server.tasks.text_classification.service.labeling_service import (
+    LabelingService,
 )
 
 extends_index_dynamic_templates(
@@ -47,13 +51,44 @@ class TextClassificationService:
 
     """
 
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+        labeling: LabelingService = Depends(LabelingService.get_instance),
+        metrics: MetricsService = Depends(MetricsService.get_instance),
+    ) -> "TextClassificationService":
+        """
+        Creates a service instance for text classification operations
+
+        Parameters
+        ----------
+        dao:
+            The dataset records dao dependency
+        labeling:
+            The labeling service dependency
+        metrics:
+            The metrics service dependency
+
+        Returns
+        -------
+            A dataset records service instance
+        """
+        if not cls._INSTANCE:
+            cls._INSTANCE = cls(dao, metrics, labeling=labeling)
+        return cls._INSTANCE
+
     def __init__(
         self,
         dao: DatasetRecordsDAO,
         metrics: MetricsService,
+        labeling: LabelingService,
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
+        self.__labeling__ = labeling
 
     def add_records(
         self,
@@ -168,29 +203,52 @@ class TextClassificationService:
                 )
             )
 
+    def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
+        """
+        Gets rules for a given dataset
 
-_instance = None
+        Parameters
+        ----------
+        dataset:
+            The dataset
 
+        Returns
+        -------
+            A list of labeling rules for a given dataset
 
-def text_classification_service(
-    dao: DatasetRecordsDAO = Depends(dataset_records_dao),
-    metrics: MetricsService = Depends(MetricsService.get_instance),
-) -> TextClassificationService:
-    """
-    Creates a dataset record service instance
+        """
+        return self.__labeling__.list_rules(dataset)
 
-    Parameters
-    ----------
-    dao:
-        The dataset records dao dependency
-    metrics:
-        The metrics service
+    def add_labeling_rule(self, dataset: Dataset, rule: LabelingRule) -> None:
+        """
+        Adds a labeling rule
 
-    Returns
-    -------
-        A dataset records service instance
-    """
-    global _instance
-    if not _instance:
-        _instance = TextClassificationService(dao=dao, metrics=metrics)
-    return _instance
+        Parameters
+        ----------
+        dataset:
+            The dataset
+
+        rule:
+            The rule
+
+        """
+        self.__labeling__.add_rule(dataset, rule)
+
+    def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
+        """
+        Deletes a rule from a dataset.
+
+        Nothing happens if the rule does not exist in dataset.
+
+        Parameters
+        ----------
+
+        dataset:
+            The dataset
+
+        rule_query:
+            The rule query
+
+        """
+        if rule_query.strip():
+            return self.__labeling__.delete_rule(dataset, rule_query)
