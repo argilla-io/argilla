@@ -324,10 +324,16 @@ class FlyingSquid(LabelModel):
                 "The FlyingSquid label model needs at least three (independent) rules!"
             )
 
+        if "m" in kwargs:
+            raise ValueError(
+                "Your kwargs must not contain 'm', it is provided automatically."
+            )
+
+        self._init_kwargs = kwargs
+        self._models: List[FlyingSquidLabelModel] = []
         self._labels = [
             label for label in self._weak_labels.label2int.keys() if label is not None
         ]
-        self._models: List[FlyingSquidLabelModel] = []
 
     def fit(self, include_annotated_records: bool = False, **kwargs):
         """Fits the label model.
@@ -348,7 +354,9 @@ class FlyingSquid(LabelModel):
         # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
         # If binary, we only need one model
         for i in range(1 if len(self._labels) == 2 else len(self._labels)):
-            model = self._FlyingSquidLabelModel(m=len(self._weak_labels.rules))
+            model = self._FlyingSquidLabelModel(
+                m=len(self._weak_labels.rules), **self._init_kwargs
+            )
             wl_matrix_i = self._copy_and_transform_wl_matrix(wl_matrix, i)
             model.fit(L_train=wl_matrix_i, **kwargs)
             models.append(model)

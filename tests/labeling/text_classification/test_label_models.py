@@ -288,6 +288,9 @@ class TestFlyingSquid:
         label_model = FlyingSquid(weak_labels)
         assert label_model._labels == ["negative", "positive", "neutral"]
 
+        with pytest.raises(ValueError, match="must not contain 'm'"):
+            FlyingSquid(weak_labels, m="mock")
+
         weak_labels._rules = weak_labels.rules[:2]
         with pytest.raises(TooFewRulesError, match="at least three"):
             FlyingSquid(weak_labels)
@@ -298,7 +301,6 @@ class TestFlyingSquid:
             if not include_annotated:
                 assert (kwargs["L_train"] == np.array([0, 0, 0])).all()
             assert len(kwargs["L_train"]) == expected
-            assert kwargs["mock"] == "mock"
 
         monkeypatch.setattr(
             "flyingsquid.label_model.LabelModel.fit",
@@ -306,9 +308,26 @@ class TestFlyingSquid:
         )
 
         label_model = FlyingSquid(weak_labels)
-        label_model.fit(include_annotated_records=include_annotated, mock="mock")
+        label_model.fit(include_annotated_records=include_annotated)
 
         assert len(label_model._models) == 3
+
+    def test_fit_init_kwargs(self, monkeypatch, weak_labels):
+        class MockLabelModel:
+            def __init__(self, m, mock):
+                assert m == len(weak_labels.rules)
+                assert mock == "mock"
+
+            def fit(self, L_train, mock):
+                assert mock == "mock_fit_kwargs"
+
+        monkeypatch.setattr(
+            "flyingsquid.label_model.LabelModel",
+            MockLabelModel,
+        )
+
+        label_model = FlyingSquid(weak_labels, mock="mock")
+        label_model.fit(mock="mock_fit_kwargs")
 
     @pytest.mark.parametrize(
         "policy,include_annotated_records,include_abstentions,verbose,expected",
