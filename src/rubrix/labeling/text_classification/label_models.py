@@ -303,7 +303,7 @@ class FlyingSquid(LabelModel):
         >>> records = label_model.predict()
     """
 
-    def __init__(self, weak_labels, **kwargs):
+    def __init__(self, weak_labels: WeakLabels, **kwargs):
         try:
             import flyingsquid
             import pgmpy
