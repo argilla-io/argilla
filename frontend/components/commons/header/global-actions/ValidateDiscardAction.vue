@@ -24,7 +24,7 @@
   >
     <ReCheckbox v-model="allSelected" class="list__item__checkbox"></ReCheckbox>
     <slot name="first" :selectedRecords="selectedRecords" />
-      <ReButton class="validate-discard-actions__button" @click="onValidate"
+      <ReButton :disabled="!allowValidation" class="validate-discard-actions__button" @click="onValidate"
         >Validate</ReButton
       >
       <ReButton class="validate-discard-actions__button" @click="onDiscard"
@@ -53,6 +53,9 @@ export default {
       type: String,
       default: "before",
     },
+    allowValidation: {
+      type: Boolean,    
+    }
   },
   data: () => ({
     allSelected: false,
@@ -142,6 +145,11 @@ export default {
     background: $lighter-color;
     border: 1px solid $line-smooth-color;
     cursor: pointer;
+    &[disabled] {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: pointer;
+    }
     &:hover {
       border-color: $primary-color;
     }
