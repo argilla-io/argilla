@@ -20,10 +20,12 @@ import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 
 class Text2TextRecord extends BaseRecord {
   text;
+  visibleSentence;
 
-  constructor({ text, ...superData }) {
+  constructor({ text, visibleSentence, ...superData }) {
     super(superData);
     this.text = text;
+    this.visibleSentence = visibleSentence;
   }
   recordTitle() {
     return this.text;
