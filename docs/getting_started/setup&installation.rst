@@ -12,7 +12,7 @@ In this guide, we will help you to get up and running with Rubrix. Basically, yo
 1. Install the Rubrix Python client
 ------------------------------------
 
-First, make sure you have Python 3.6 or above installed.
+First, make sure you have Python 3.7 or above installed.
 
 Then you can install Rubrix with ``pip``\ :
 
@@ -118,6 +118,3 @@ To continue learning we recommend you to:
 
 * Check our **Guides** and **Tutorials.**
 * Read about Rubrix's main :ref:`concepts`
-
-
-
