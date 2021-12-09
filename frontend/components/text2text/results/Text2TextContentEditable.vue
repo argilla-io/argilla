@@ -6,35 +6,26 @@
         class="content__text"
         :contenteditable="contentEditable"
         :placeholder="placeholder"
-        @input="$emit('text', $event)"
-        v-html="editableText"
+        @input="$emit('changeText', $event.target.innerText)"
         @click="$emit('edit')"
+        v-html="editableText"
       ></p>
-      <span v-if="editionMode"
-        ><strong>shift Enter</strong> to save</span
-      >
+      <span v-if="editionMode"><strong>shift Enter</strong> to save</span>
     </div>
-    <div class="content__edit__buttons" v-if="editionMode && annotationEnabled && editableText">
-      <re-button
-        class="button-primary--outline"
-        @click="$emit('back')"
+    <div
+      v-if="editionMode && annotationEnabled && editableText"
+      class="content__edit__buttons"
+    >
+      <re-button class="button-primary--outline" @click="$emit('back')"
         >Back</re-button
       >
-      <re-button
-        class="button-primary"
-        @click="annotate()"
-        >Save</re-button
-      >
+      <re-button class="button-primary" @click="annotate">Save</re-button>
     </div>
   </span>
 </template>
 <script>
 export default {
   props: {
-    contentEditable: {
-      type: Boolean,
-      required: true,
-    },
     annotationEnabled: {
       type: Boolean,
       required: true,
@@ -43,16 +34,13 @@ export default {
       type: Boolean,
       required: true,
     },
-    text: {
+    defaultText: {
       type: String,
       required: true,
     },
-    newSentence: {
-      type: String,
-      default: undefined,      
-    },
     placeholder: {
-      type: String,    
+      type: String,
+      default: "",
     },
   },
   data: () => {
@@ -60,14 +48,19 @@ export default {
       editableText: undefined,
       shiftPressed: false,
       shiftKey: undefined,
-    }
+    };
+  },
+  computed: {
+    contentEditable() {
+      return this.annotationEnabled && this.editionMode;
+    },
   },
   mounted() {
-      if (this.newSentence) {
-        this.editableText = this.newSentence;
-      } else {
-        this.editableText = this.text;
-      }
+    if (this.defaultText) {
+      this.editableText = this.defaultText;
+    } else {
+      this.editableText = this.text;
+    }
   },
   created() {
     window.addEventListener("keydown", this.keyDown);
@@ -79,7 +72,7 @@ export default {
   },
   methods: {
     annotate() {
-      this.$emit('annotate', this.editableText);
+      this.$emit("annotate", this.editableText);
     },
     keyUp(event) {
       if (this.shiftKey === event.key) {
@@ -96,8 +89,8 @@ export default {
         this.annotate();
       }
     },
-  }
-}
+  },
+};
 </script>
 <style lang="scss" scoped>
 $marginRight: 200px;
@@ -150,5 +143,3 @@ $marginRight: 200px;
   }
 }
 </style>
-
-
