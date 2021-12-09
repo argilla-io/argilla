@@ -6,7 +6,7 @@
         class="content__text"
         :contenteditable="contentEditable"
         :placeholder="placeholder"
-        @input="$emit('change-text', $event.target.innerText)"
+        @input="onInputText"
         @click="$emit('edit')"
         v-html="editableText"
       ></p>
@@ -71,8 +71,11 @@ export default {
     window.addEventListener("keyup", this.keyUp);
   },
   methods: {
+    onInputText(event) {
+      this.$emit("change-text", event.target.innerText);
+    },
     annotate() {
-      this.$emit("annotate", this.editableText);
+      this.$emit("annotate", this.defaultText);
     },
     keyUp(event) {
       if (this.shiftKey === event.key) {
