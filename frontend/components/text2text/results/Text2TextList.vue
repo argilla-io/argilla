@@ -34,7 +34,35 @@
           showScore ? 'content--has-score' : null,
         ]"
       >
-        <span v-for="(sentence, index) in sentences" :key="sentence.text">
+        <div v-if="!sentences.length">
+          <text-2-text-content-editable
+            :key="refresh"
+            :annotation-enabled="annotationEnabled"
+            :edition-mode="true"
+            :default-text="visibleSentence || ''"
+            placeholder="Type your text"
+            @back="back"
+            @edit="edit"
+            @annotate="onAnnotate"
+            @change-text="onTextChanged"
+          />
+          <div class="content__footer">
+            <div class="content__actions-buttons">
+              <re-button
+                v-if="visibleSentence && annotationEnabled"
+                class="button-primary"
+                @click="onAnnotate(visibleSentence)"
+                >Validate</re-button
+              >
+            </div>
+          </div>
+        </div>
+
+        <span
+          v-for="(sentence, index) in sentences"
+          v-else
+          :key="sentence.text"
+        >
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
               <p v-if="!editionMode" class="content__sentences__title">
@@ -59,12 +87,12 @@
               :key="refresh"
               :annotation-enabled="annotationEnabled"
               :edition-mode="editionMode"
-              :default-text="newSentence || sentence.text"
+              :default-text="visibleSentence || sentence.text || ''"
               :content-editable="annotationEnabled && editionMode"
               @back="back"
               @edit="edit"
               @annotate="onAnnotate"
-              @change-text="text"
+              @change-text="onTextChanged"
             />
             <div v-if="!editionMode" class="content__footer">
               <template v-if="sentencesOrigin === 'Prediction'">
@@ -116,37 +144,13 @@
                 <re-button
                   v-if="allowValidation"
                   class="button-primary"
-                  @click="onAnnotate(newSentence)"
+                  @click="onAnnotate(visibleSentence)"
                   >Validate</re-button
                 >
               </div>
             </div>
           </div>
         </span>
-
-        <div v-if="!sentences.length">
-          <text-2-text-content-editable
-            :key="refresh"
-            :annotation-enabled="annotationEnabled"
-            :edition-mode="true"
-            :default-text="newSentence || ''"
-            placeholder="Type your text"
-            @back="back"
-            @edit="edit"
-            @annotate="onAnnotate"
-            @change-text="text"
-          />
-          <div class="content__footer">
-            <div class="content__actions-buttons">
-              <re-button
-                v-if="newSentence && annotationEnabled"
-                class="button-primary"
-                @click="onAnnotate(newSentence)"
-                >Validate</re-button
-              >
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -206,13 +210,13 @@ export default {
         this.idState.itemNumber = newValue;
       },
     },
-    newSentence: {
+    visibleSentence: {
       get: function () {
-        return this.record.visibleSentence;
+        return this.record.lastEditedSentence;
       },
       set: function (newValue) {
         // eslint-disable-next-line vue/no-mutating-props
-        this.record.visibleSentence = newValue;
+        this.record.lastEditedSentence = newValue;
       },
     },
     editionMode: {
@@ -231,7 +235,7 @@ export default {
         this.idState.refresh = newValue;
       },
     },
-    textareaSentence() {
+    selectedSentence() {
       return (
         this.sentences[this.itemNumber] && this.sentences[this.itemNumber].text
       );
@@ -289,14 +293,14 @@ export default {
   methods: {
     showitemNumber(index) {
       this.itemNumber = index;
-      this.newSentence = this.textareaSentence;
+      this.visibleSentence = this.selectedSentence;
     },
-    text(newText) {
+    onTextChanged(newText) {
       let newS = {
         score: 1,
         text: newText,
       };
-      this.newSentence = newText;
+      this.visibleSentence = newText;
       this.$emit("update-record", { sentences: [newS] });
     },
     edit() {
@@ -307,7 +311,7 @@ export default {
     back() {
       this.editionMode = false;
       this.refresh++;
-      this.newSentence = this.textareaSentence;
+      this.visibleSentence = this.selectedSentence;
       this.$emit("reset-initial-record");
     },
     changeVisibleSentences() {
@@ -316,7 +320,7 @@ export default {
         : (this.sentencesOrigin = "Prediction");
       this.itemNumber = 0;
       this.editionMode = false;
-      this.newSentence = this.textareaSentence;
+      this.visibleSentence = this.selectedSentence;
     },
     initializeSentenceOrigin() {
       if (this.annotationEnabled) {
@@ -336,13 +340,13 @@ export default {
     onAnnotate(sentence) {
       let newS = {
         score: 1,
-        text: this.newSentence ? this.newSentence : sentence,
+        text: this.visibleSentence ? this.visibleSentence : sentence,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
       this.editionMode = false;
       this.sentencesOrigin = "Annotation";
-      this.newSentence = this.textareaSentence;
+      this.visibleSentence = this.selectedSentence;
     },
   },
 };
