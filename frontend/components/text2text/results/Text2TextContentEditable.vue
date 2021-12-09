@@ -6,7 +6,7 @@
         class="content__text"
         :contenteditable="contentEditable"
         :placeholder="placeholder"
-        @input="$emit('changeText', $event.target.innerText)"
+        @input="$emit('change-text', $event.target.innerText)"
         @click="$emit('edit')"
         v-html="editableText"
       ></p>
