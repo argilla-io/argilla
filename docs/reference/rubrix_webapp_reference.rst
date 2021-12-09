@@ -196,4 +196,4 @@ This mode enables users to add and modify annotations, while following the same 
    Rubrix Token Classification (NER) Annotation mode
 
 Annotation by different users will be saved with different annotation agents.
-To setup various users in your Rubrix server, please refer to our :ref:`user management guide <user-management>`.
+To setup various users in your Rubrix server, please refer to our `user management guide <../getting_started/user-management.ipynb>`_.

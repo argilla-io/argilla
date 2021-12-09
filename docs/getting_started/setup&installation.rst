@@ -97,7 +97,7 @@ The following code will log one record into a data set called ``example-dataset`
    )
 
 If you now go to your Rubrix app at `http://localhost:6900/ <http://localhost:6900/>`__ , you will find your first data set.
-**The default username and password are** ``rubrix`` **and** ``1234`` (see the :ref:`user management guide <user-management>` to configure this).
+**The default username and password are** ``rubrix`` **and** ``1234`` (see the `user management guide <user-management.ipynb>`_ to configure this).
 You can also check the REST API docs at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
 
 Congratulations! You are ready to start working with Rubrix.

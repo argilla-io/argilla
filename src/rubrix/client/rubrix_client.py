@@ -292,7 +292,7 @@ class RubrixClient:
         response = get_dataset_data(
             client=self._client,
             name=name,
-            request=request_class(ids=ids or [], query_text=query),
+            request=request_class(ids=ids, query_text=query),
             limit=limit,
         )
 
