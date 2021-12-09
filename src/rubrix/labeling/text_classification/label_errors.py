@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -28,6 +28,7 @@ class SortBy(Enum):
 
     LIKELIHOOD = "likelihood"
     PREDICTION = "prediction"
+    NONE = "none"
 
     @classmethod
     def _missing_(cls, value):
@@ -49,13 +50,19 @@ def find_label_errors(
 
     Args:
         records: A list of text classification records
-        sort_by: One of the two options
+        sort_by: One of the three options
             - "likelihood": sort the returned records by likelihood of containing a label error (most likely first)
             - "prediction": sort the returned records by the probability of the prediction (highest probability first)
+            - "none": do not sort the returned records
         **kwargs: Passed on to `cleanlab.pruning.get_noise_indices`
 
     Returns:
         A list of records containing potential annotation/label errors
+
+    Raises:
+        NoRecordsError: If none of the records has a prediction AND annotation.
+        MissingPredictionError: If a prediction is missing for one of the labels.
+        ValueError: If not supported kwargs are passed on, e.g. 'sorted_index_method'.
 
     Examples:
         >>> import rubrix as rb
@@ -75,15 +82,17 @@ def find_label_errors(
     if isinstance(sort_by, str):
         sort_by = SortBy(sort_by)
 
-    _check_and_update_kwargs(records[0], sort_by, kwargs)
-
-    # sort out only records with prediction and annotation
+    # select only records with prediction and annotation
     records = [rec for rec in records if rec.prediction and rec.annotation]
     if not records:
         raise NoRecordsError(
             "It seems that none of your records have a prediction AND annotation!"
         )
 
+    # check and update kwargs for get_noise_indices
+    _check_and_update_kwargs(records[0], sort_by, kwargs)
+
+    # construct "noisy" label vector and probability matrix of the predictions
     s, psx = _construct_s_and_psx(records)
 
     indices = get_noise_indices(s, psx, **kwargs)
@@ -91,11 +100,14 @@ def find_label_errors(
     return np.array(records)[indices].tolist()
 
 
-def _check_and_update_kwargs(record: TextClassificationRecord, sort_by: SortBy, kwargs):
+def _check_and_update_kwargs(
+    record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict
+):
     """Helper function to check and update the kwargs passed on cleanlab's `get_noise_indices`.
 
     Args:
         record: One of the records passed in the `find_label_error` function.
+        sort_by: The sorting policy.
         kwargs: The passed on kwargs.
 
     Raises:
@@ -108,6 +120,8 @@ def _check_and_update_kwargs(record: TextClassificationRecord, sort_by: SortBy, 
     kwargs["sorted_index_method"] = "normalized_margin"
     if sort_by is SortBy.PREDICTION:
         kwargs["sorted_index_method"] = "prob_given_label"
+    elif sort_by is SortBy.NONE:
+        kwargs["sorted_index_method"] = None
 
     if "multi_label" in kwargs:
         _LOGGER.warning(
