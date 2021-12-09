@@ -56,6 +56,11 @@ def find_label_errors(
 
     Returns:
         A list of records containing potential annotation/label errors
+
+    Examples:
+        >>> import rubrix as rb
+        >>> records = rb.load("my_dataset", as_pandas=False)
+        >>> records_with_label_errors = find_label_errors(records)
     """
     try:
         import cleanlab
