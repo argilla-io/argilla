@@ -25,13 +25,11 @@
       <div>
         <text-2-text-list
           ref="list"
-          :status="record.status"
+          :record="record"
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
-          :sentences-origin="sentencesOrigin"
           :annotation-enabled="annotationEnabled"
           @update-record="updateRecordSentences"
-          @change-visible-sentences="onChangeSentences"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
         />
@@ -40,10 +38,17 @@
   </div>
 </template>
 <script>
+import { IdState } from 'vue-virtual-scroller'
 import { getUsername } from "@/models/User";
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
 import { mapActions } from "vuex";
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     dataset: {
       type: Text2TextDataset,
@@ -54,11 +59,20 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    sentencesOrigin: undefined,
-    initialRecord: {},
-  }),
+  idState () {
+    return {
+      initialRecord: {},
+    }
+  },
   computed: {
+    initialRecord: {
+      get: function () {
+        return this.idState.initialRecord;
+      },
+      set: function (newValue) {
+        this.idState.initialRecord = newValue;
+      }
+    },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
     },
@@ -75,15 +89,7 @@ export default {
     },
   },
   mounted() {
-    this.initializeSentenceOrigin();
-    this.initialRecord = Object.assign({}, this.record);
-  },
-  watch: {
-    annotationEnabled(oldValue, newValue) {
-      if (oldValue !== newValue) {
-        this.initializeSentenceOrigin();
-      }
-    }
+    this.initializeInitialRecord();
   },
   methods: {
     ...mapActions({
@@ -91,26 +97,10 @@ export default {
       validate: "entities/datasets/validateAnnotations",
     }),
 
-    initializeSentenceOrigin() {
-      if (this.annotationEnabled) {
-        if (this.annotationSentences.length) {
-          this.sentencesOrigin = "Annotation";
-        } else if (this.predictionSentences.length) {
-          this.sentencesOrigin = "Prediction";
-        }
-      } else {
-        if (this.predictionSentences.length) {
-          this.sentencesOrigin = "Prediction";
-        } else if (this.annotationSentences.length) {
-          this.sentencesOrigin = "Annotation";
-        }
+    initializeInitialRecord() {
+      if (Object.entries(this.initialRecord).length === 0){
+        this.initialRecord = Object.assign({}, this.record);
       }
-    },
-
-    onChangeSentences() {
-      this.sentencesOrigin !== "Annotation"
-        ? (this.sentencesOrigin = "Annotation")
-        : (this.sentencesOrigin = "Prediction");
     },
     async updateRecordSentences({ sentences }) {
       await this.updateRecords({
@@ -139,7 +129,6 @@ export default {
       });
     },
     async onAnnotate({ sentences }) {
-      this.sentencesOrigin = "Annotation";
       const newRecord = {
         ...this.record,
         status: "Validated",

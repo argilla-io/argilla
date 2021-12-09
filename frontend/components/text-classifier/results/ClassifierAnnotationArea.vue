@@ -19,6 +19,7 @@
   <div v-if="labels.length" class="annotation-area">
     <label-search
       v-if="labels.length > maxVisibleLabels"
+      :searchText="searchText"
       @input="onSearchLabel"
     />
     <div
@@ -62,8 +63,15 @@
 <script>
 import "assets/icons/ignore";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { IdState } from 'vue-virtual-scroller'
 
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     record: {
       type: Object,
@@ -74,12 +82,38 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    searchText: undefined,
-    selectedLabels: [],
-    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-  }),
+  idState () {
+    return {
+      searchText: undefined,
+      selectedLabels: [],
+      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    }
+  },
   computed: {
+    searchText: {
+      get: function () {
+        return this.idState.searchText;
+      },
+      set: function (newValue) {
+        this.idState.searchText = newValue;
+      }
+    },
+    selectedLabels: {
+      get: function () {
+        return this.idState.selectedLabels;
+      },
+      set: function (newValue) {
+        this.idState.selectedLabels = newValue;
+      }
+    },
+    shownLabels: {
+      get: function () {
+        return this.idState.shownLabels;
+      },
+      set: function (newValue) {
+        this.idState.shownLabels = newValue;
+      }
+    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
@@ -162,13 +196,6 @@ export default {
       return this.$route.query.UXtest;
     },
   },
-  watch: {
-    appliedLabels(o, n) {
-      if (o.some((l) => n.indexOf(l) === -1)) {
-        this.selectedLabels = this.appliedLabels;
-      }
-    },
-  },
   mounted() {
     this.selectedLabels = this.appliedLabels;
   },
@@ -221,7 +248,8 @@ export default {
     align-self: center;
     margin: 3.5px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    font-family: $sff;
     outline: none;
     padding: 0.5em;
     border-radius: 5px;

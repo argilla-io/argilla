@@ -44,7 +44,7 @@ export default {
       &.active {
         ::v-deep svg {
           fill: $primary-color !important;
-          .breadcrumbs & {
+          .breadcrumbs &, .code & {
             fill: #f2067a !important;
           }
         }

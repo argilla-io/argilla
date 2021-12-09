@@ -143,7 +143,7 @@ export default {
     white-space: nowrap;
     user-select: none;
     cursor: default;
-    font-weight: 500;
+    font-weight: 600;
     box-shadow: $shadow-100;
     text-align: left;
     @include font-size(12px);
@@ -163,7 +163,7 @@ export default {
     white-space: nowrap;
     user-select: none;
     cursor: default;
-    font-weight: 500;
+    font-weight: 600;
     right: 50%;
     transform: translateX(50%);
     @include font-size(12px);

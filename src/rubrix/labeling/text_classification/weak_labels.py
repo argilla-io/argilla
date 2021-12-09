@@ -246,8 +246,8 @@ class WeakLabels:
         """Returns the annotation labels as an array of integers.
 
         Args:
-            exclude_missing_annotations: If True, excludes missing annotations,
-                that is all entries with the ``self.label2int[None]`` integer.
+            exclude_missing_annotations: If True, excludes all entries with the ``self.label2int[None]`` integer,
+                that is all records for which there is an annotation missing.
 
         Returns:
             The annotation array of integers.
@@ -453,25 +453,24 @@ class WeakLabels:
         Args:
             label2int: New label to integer mapping. Must cover all previous labels.
         """
-        # Check new label2int mapping
+        # save masks for swapping
+        label_masks = {}
+        annotation_masks = {}
+
         for label in self._label2int:
+            # Check new label2int mapping
             if label not in label2int:
                 raise MissingLabelError(
                     f"The label '{label}' is missing in the new mapping."
                 )
+            # compute masks
+            label_masks[label] = self._matrix == self._label2int[label]
+            annotation_masks[label] = self._annotation_array == self._label2int[label]
 
         # swap integers
         for label in self._label2int:
-            self._matrix = np.where(
-                self._matrix == self._label2int[label],
-                label2int[label],
-                self._matrix,
-            )
-            self._annotation_array = np.where(
-                self._annotation_array == self._label2int[label],
-                label2int[label],
-                self._annotation_array,
-            )
+            self._matrix[label_masks[label]] = label2int[label]
+            self._annotation_array[annotation_masks[label]] = label2int[label]
 
         # update mapping dicts
         self._label2int = label2int.copy()

@@ -31,34 +31,20 @@
       ></ReCheckbox>
       <slot :record="item" />
       <RecordExtraActions
+        :key="item.id"
         :allow-change-status="annotationEnabled"
         :record="item"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
-        @onShowMetadata="onShowMetadata"
+        @onShowMetadata="onShowMetadata(item)"
       />
       <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
     </div>
-    <LazyReModal
-      modal-class="modal-secondary"
-      modal-position="modal-center"
-      :modal-custom="true"
-      :prevent-body-scroll="true"
-      :modal-visible="showMetadata"
-      @close-modal="closeMetadata"
-    >
-      <Metadata
-        :applied-filters="dataset.query.metadata"
-        :metadata-items="item.metadata"
-        :title="item.recordTitle()"
-        @metafilterApply="onApplyMetadataFilter"
-        @cancel="closeMetadata"
-      />
-    </LazyReModal>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
+
 export default {
   props: {
     dataset: {
@@ -69,12 +55,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      selectedMetadataItem: this.metadataId,
-      showMetadata: false,
-    };
   },
   computed: {
     annotationEnabled() {
@@ -87,18 +67,9 @@ export default {
   methods: {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
-      search: "entities/datasets/search",
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-
-    async onApplyMetadataFilter(metadata) {
-      this.closeMetadata();
-      this.search({
-        dataset: this.dataset,
-        query: { metadata: metadata },
-      });
-    },
     async onCheckboxChanged(checkboxStatus, id) {
       const record = this.visibleRecords.find((r) => r.id === id);
       await this.updateRecords({
@@ -126,12 +97,8 @@ export default {
           console.warn("waT?", status);
       }
     },
-
-    onShowMetadata() {
-      this.showMetadata = true;
-    },
-    closeMetadata() {
-      this.showMetadata = false;
+    onShowMetadata(record) {
+      this.$emit('show-metadata', record)
     },
   },
 };
@@ -152,6 +119,7 @@ export default {
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid white;
+    min-height: 130px;
     &:hover {
       border: 1px solid palette(grey, smooth);
       ::v-deep .edit {

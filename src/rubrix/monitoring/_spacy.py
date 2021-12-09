@@ -8,7 +8,7 @@ from rubrix.monitoring.types import MissingType
 
 try:
     # Conditional modules
-    from spacy import Language
+    from spacy.language import Language
     from spacy.tokens import Doc
 except ModuleNotFoundError:
     Language = MissingType

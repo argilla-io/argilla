@@ -130,6 +130,8 @@ input:-webkit-autofill {
     line-height: normal;
     @include input-placeholder {
       color: $font-secondary;
+      font-family: $sff;
+      font-weight: 500;
     }
     &:focus {
       outline: none;

@@ -55,7 +55,7 @@
                 :contenteditable="annotationEnabled && editionMode"
                 placeholder="Type your text"
                 @input="input"
-                v-html="sentence.text"
+                v-html="initialNewSentence || sentence.text"
                 @click="edit()"
               ></p>
               <span v-if="editionMode"
@@ -157,8 +157,20 @@
 
 <script>
 import "assets/icons/pencil";
+import { IdState } from 'vue-virtual-scroller'
+
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
+    record: {
+      type: Object,
+      required: true
+    },
     predictions: {
       type: Array,
       required: true
@@ -167,30 +179,88 @@ export default {
       type: Array,
       required: true
     },
-    sentencesOrigin: {
-      type: String,
-      default: undefined
-    },
-    status: {
-      type: String,
-      required: true
-    },
     annotationEnabled: {
       type: Boolean,
       default: false
     }
   },
-  data: () => {
+  idState () {
     return {
+      sentencesOrigin: undefined,
       itemNumber: 0,
       newSentence: undefined,
+      initialNewSentence: undefined,
       editionMode: false,
       shiftPressed: false,
       shiftKey: undefined,
       refresh: 1
-    };
+    }
   },
   computed: {
+    sentencesOrigin: {
+      get: function () {
+        return this.idState.sentencesOrigin;
+      },
+      set: function (newValue) {
+        this.idState.sentencesOrigin = newValue;
+      }
+    },
+    itemNumber: {
+      get: function () {
+        return this.idState.itemNumber;
+      },
+      set: function (newValue) {
+        this.idState.itemNumber = newValue;
+      }
+    },
+    newSentence: {
+      get: function () {
+        return this.idState.newSentence;
+      },
+      set: function (newValue) {
+        this.idState.newSentence = newValue;
+      }
+    },
+    initialNewSentence: {
+      get: function () {
+        return this.idState.initialNewSentence;
+      },
+      set: function (newValue) {
+        this.idState.initialNewSentence = newValue;
+      }
+    },
+    editionMode: {
+      get: function () {
+        return this.idState.editionMode;
+      },
+      set: function (newValue) {
+        this.idState.editionMode = newValue;
+      }
+    },
+    shiftPressed: {
+      get: function () {
+        return this.idState.shiftPressed;
+      },
+      set: function (newValue) {
+        this.idState.shiftPressed = newValue;
+      }
+    },
+    shiftKey: {
+      get: function () {
+        return this.idState.shiftKey;
+      },
+      set: function (newValue) {
+        this.idState.shiftKey = newValue;
+      }
+    },
+    refresh: {
+      get: function () {
+        return this.idState.refresh;
+      },
+      set: function (newValue) {
+        this.idState.refresh = newValue;
+      }
+    },
     predictionsLength() {
       return this.predictions.length;
     },
@@ -210,13 +280,13 @@ export default {
       return this.predictions.length && this.annotations.length;
     },
     allowValidation() {
-      return this.sentencesOrigin === 'Prediction' || this.status === 'Discarded'
+      return this.sentencesOrigin === 'Prediction' || this.record.status === 'Discarded'
     }
   },
   mounted() {
-    this.getText();
-  },
-  updated() {
+    if (this.sentencesOrigin === undefined) {
+      this.initializeSentenceOrigin();
+    }
     this.getText();
   },
   created() {
@@ -227,10 +297,23 @@ export default {
     window.removeEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
   },
+  watch: {
+    annotationEnabled(oldValue, newValue) {
+      if (oldValue !== newValue) {
+        this.initializeSentenceOrigin();
+        this.back();
+        this.itemNumber = 0;
+      }
+    }
+  },
   methods: {
     getText() {
-      if (this.$refs.text && this.$refs.text[0]) {
-        this.newSentence = this.$refs.text[0].innerText;
+      if (this.newSentence === undefined) {
+        if (this.$refs.text && this.$refs.text[0]) {
+          this.newSentence = this.$refs.text[0].innerText;
+        }
+      } else {
+        this.initialNewSentence = this.newSentence;
       }
     },
     showitemNumber(index) {
@@ -260,16 +343,35 @@ export default {
     back() {
       this.editionMode = false;
       this.refresh++;
+      this.initialNewSentence = undefined,
       this.$emit('reset-initial-record')
     },
     changeVisibleSentences() {
       this.itemNumber = 0;
       this.editionMode = false;
-      this.$emit("change-visible-sentences");
+      this.sentencesOrigin !== "Annotation"
+        ? (this.sentencesOrigin = "Annotation")
+        : (this.sentencesOrigin = "Prediction");
+    },
+    initializeSentenceOrigin() {
+      if (this.annotationEnabled) {
+        if (this.annotations.length) {
+          this.sentencesOrigin = "Annotation";
+        } else if (this.predictions.length) {
+          this.sentencesOrigin = "Prediction";
+        }
+      } else {
+        if (this.predictions.length) {
+          this.sentencesOrigin = "Prediction";
+        } else if (this.annotations.length) {
+          this.sentencesOrigin = "Annotation";
+        }
+      }
     },
     annotate() {
       this.itemNumber = 0;
       this.editionMode = false;
+      this.sentencesOrigin = "Annotation";
       if (this.newSentence) {
         let newS = {
           score: 1,

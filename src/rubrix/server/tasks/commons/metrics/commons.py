@@ -1,4 +1,4 @@
-from rubrix.server.tasks.commons import EsRecordDataFieldNames
+from rubrix.server.tasks.commons import EsRecordDataFieldNames, TaskStatus
 from rubrix.server.tasks.commons.metrics.model.base import (
     HistogramAggregation,
     TermsAggregation,
@@ -13,7 +13,7 @@ class CommonTasksMetrics:
             name="Text length distribution",
             description="Computes the input text length distribution",
             field=EsRecordDataFieldNames.words,
-            script="doc['words'].size()",
+            script="params._source.words.length()",
             fixed_interval=1,
         ),
         TermsAggregation(
@@ -25,5 +25,12 @@ class CommonTasksMetrics:
             field=EsRecordDataFieldNames.predicted,
             missing="unknown",
             fixed_size=3,
+        ),
+        TermsAggregation(
+            id="status_distribution",
+            name="Record status distribution",
+            description="The dataset record status distribution",
+            field=EsRecordDataFieldNames.status,
+            fixed_size=len(TaskStatus),
         ),
     ]

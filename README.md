@@ -1,7 +1,8 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<p> Python framework to explore, label, and monitor data for NLP</p>
+<p> Build, refine and manage data for NLP.</p> 
+<p> Rubrix is an open-source Python framework to explore, label, and monitor data for NLP</p>
 <p align="left">
     <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
     ·
@@ -46,7 +47,7 @@ https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9
 
 Rubrix is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
 
-Key features:
+Why Rubrix?
 
 - **Open**: Rubrix is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -55,6 +56,32 @@ Key features:
 - **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
+
+## Features
+
+### Advanced NLP labeling
+
+- Programmatic labeling using Weak Supervision. Built-in label models (Snorkel, Flyingsquid)
+- Bulk-labeling and search-driven annotation
+- Iterate on training data with any pre-trained model or library
+- Efficiently review and refine annotations in the UI and with Python
+- Use Rubrix built-in metrics and methods for finding label and data errors (e.g., cleanlab)
+- Simple integration with active learning workflows
+
+### Monitoring
+
+- Close the gap between production data and data collection activities
+- Auto-monitoring for major NLP libraries and pipelines (spaCy, Hugging Face, FlairNLP)
+- ASGI middleware for HTTP endpoints
+- Rubrix Metrics to understand data and model issues, like entity consistency for NER models
+- Integrated with Kibana for custom dashboards
+
+### Team workspaces
+- Bring different users and roles into the NLP data and model lifecycles
+- Organize data collection, review and monitoring into different workspaces
+- Manage workspace access for different users
+
+
 
 ## Get started
 
@@ -236,11 +263,10 @@ Rubrix main components are:
 | 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
 | 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
 | 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
-| 📱 **[Web app reference](https://rubrix.rtfd.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
-| 🐍 **[Python client API](https://rubrix.rtfd.io/en/stable/reference/python_client_api.html)** | How to use the Python classes and methods |
+| 📱 **[Web app reference](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
+| 🐍 **[Python client API](https://rubrix.readthedocs.io/en/stable/reference/python/index.html)** | How to use the Python classes and methods |
 | 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
 | 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
-| 🤗 **[Hugging Face tutorial](https://rubrix.rtfd.io/en/stable/tutorials/01-huggingface.html)** | Using Rubrix with 🤗`transformers` and `datasets` |
 | 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
 | 🐠 **[Weak supervision tutorial](https://rubrix.rtfd.io/en/stable/tutorials/04-snorkel.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
 | 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |

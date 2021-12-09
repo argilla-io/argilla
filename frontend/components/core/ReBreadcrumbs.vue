@@ -76,7 +76,7 @@ export default {
     display: inline-block;
     padding-left: 0;
     font-weight: normal;
-    list-style: none;    
+    list-style: none;  
   }
   &__copy {
     .svg-icon {

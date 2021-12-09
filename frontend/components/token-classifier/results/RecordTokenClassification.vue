@@ -263,9 +263,7 @@ export default {
       min-height: 32px;
       line-height: 32px;
       display: block;
-      margin-bottom: 0;
-      margin-right: 0;
-      margin-left: auto;
+      margin: 1.5em auto 0 0;
       & + .re-button {
         margin-left: 1em;
       }

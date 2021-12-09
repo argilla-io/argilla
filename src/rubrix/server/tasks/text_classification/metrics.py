@@ -64,7 +64,7 @@ class F1Metric(PythonMetric):
 
         per_label = {}
         for label, p, r, f, _ in zip(
-            labels_mapping.values(),
+            labels_mapping.keys(),
             *precision_recall_fscore_support(
                 y_true=y_true,
                 y_pred=y_pred,
@@ -96,21 +96,21 @@ class DatasetLabels(TermsAggregation):
             "lang": "painless",
             "source": """
             def all_labels = [];
-            def predicted = doc.containsKey('prediction.labels.class_label.keyword') 
+            def predicted = doc.containsKey('prediction.labels.class_label.keyword')
                 ? doc['prediction.labels.class_label.keyword'] : null;
-            def annotated = doc.containsKey('annotation.labels.class_label.keyword') 
+            def annotated = doc.containsKey('annotation.labels.class_label.keyword')
                 ? doc['annotation.labels.class_label.keyword'] : null;
-            
+
             if (predicted != null && predicted.size() > 0) {
-              for (int i = 0; i < predicted.length; i++) {  
+              for (int i = 0; i < predicted.length; i++) {
                 all_labels.add(predicted[i])
-              }  
+              }
             }
-            
+
             if (annotated != null && annotated.size() > 0) {
-              for (int i = 0; i < annotated.length; i++) {  
+              for (int i = 0; i < annotated.length; i++) {
                 all_labels.add(annotated[i])
-              }  
+              }
             }
             return all_labels;
             """,

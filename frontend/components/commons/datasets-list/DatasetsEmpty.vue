@@ -1,56 +1,75 @@
 <template>
   <div class="datasets-empty">
-    <svgicon class="datasets-empty__icon" width="36" height="36" name="datasets-empty" />
+    <svgicon
+      class="datasets-empty__icon"
+      width="44"
+      height="46"
+      name="datasets-empty"
+    />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
-    <p class="datasets-empty__subtitle">The Rubrix web app allows you to log, explore and annotate your data.
-Start logging data with our Python client, or <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for more information.</p>
-    <re-code>import rubrix as rb
-
-rb.log(
-  rb.TextClassificationRecord(inputs={"text": "my first rubrix example"}),
-  name='example-dataset'
-)</re-code>
+    <p class="datasets-empty__subtitle">
+      The Rubrix web app allows you to log, explore and annotate your data.<br />
+      Start logging data with our Python client, or
+      <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
+      more information.
+    </p>
+    <re-code :code="generateCodeSnippet(workspace)"></re-code>
   </div>
 </template>
 
 <script>
 import "assets/icons/datasets-empty";
-export default {};
+export default {
+  props: {
+    workspace: {
+      required: true,
+      type: String,
+    },
+  },
+
+  methods: {
+    generateCodeSnippet(ws) {
+      return `import rubrix as rb
+
+rb.init("${window.location}", api_key="<YOUR_API_KEY>")
+rb.set_workspace("${ws}")
+
+rb.log(
+  rb.TextClassificationRecord(inputs="my first rubrix example"), 
+  name='example-dataset'
+)`;
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 .datasets-empty {
   text-align: center;
   margin: auto;
-  max-width: 460px;
-  margin-top: 15%;
+  margin-top: 12%;
   color: palette(grey, medium);
+  max-width: 610px;
+  line-height: 20px;
   &__icon {
     margin-bottom: 1em;
   }
   &__title {
-    margin-bottom: 1em;
-    margin-top: 0;
-    @include font-size(18px);
+    margin: 0 auto 1em auto;
+    @include font-size(20px);
     font-weight: 300;
+    max-width: 520px;
   }
   &__subtitle {
-    margin-bottom: 1em;
-    margin-top: 0;
-    @include font-size(13px);
-    font-weight: 300;
+    margin: 0 auto 1em auto;
+    @include font-size(14px);
+    max-width: 520px;
     a {
       color: $primary-color;
       text-decoration: none;
       &:hover {
-        color: darken($primary-color, 10%)
+        color: darken($primary-color, 10%);
       }
     }
   }
 }
-.highlight {
-  background-color: #333346;
-  color: white;
-  padding: 1em !important;
-}
 </style>
-

@@ -422,6 +422,7 @@ export default {
       padding-right: 0;
       color: $font-secondary;
       @include font-size(14px);
+      font-family: $sff;
       .svg-icon {
         margin-left: 0.5em;
       }

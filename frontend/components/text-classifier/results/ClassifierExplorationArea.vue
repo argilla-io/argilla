@@ -17,7 +17,7 @@
 
 <template>
   <div v-if="labels.length" class="exploration-area">
-    <label-search v-if="labels.length >= shownLabels" @input="onSearchLabel" />
+    <label-search v-if="labels.length >= shownLabels" :searchText="searchText" @input="onSearchLabel" />
     <div class="predictions">
       <span v-for="label in visibleLabels" :key="label.index">
         <LabelPill
@@ -46,18 +46,44 @@
 </template>
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { IdState } from 'vue-virtual-scroller'
+
 export default {
+  mixins: [
+    IdState({
+      // You can customize this
+      idProp: vm => vm.record.id,
+    }),
+  ],
   props: {
     record: {
       type: Object,
       required: true,
     },
   },
-  data: () => ({
-    searchText: undefined,
-    shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-  }),
+  idState () {
+    return {
+      searchText: undefined,
+      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+    }
+  },
   computed: {
+    searchText: {
+      get: function () {
+        return this.idState.searchText;
+      },
+      set: function (newValue) {
+        this.idState.searchText = newValue;
+      }
+    },
+    shownLabels: {
+      get: function () {
+        return this.idState.shownLabels;
+      },
+      set: function (newValue) {
+        this.idState.shownLabels = newValue;
+      }
+    },
     labels() {
       return this.record.prediction ? this.record.prediction.labels : [];
     },

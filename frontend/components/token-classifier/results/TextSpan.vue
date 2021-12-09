@@ -234,7 +234,7 @@ export default {
     z-index: 9;
     background: white;
     border: 1px solid $primary-color;
-    font-weight: 500;
+    font-weight: 600;
     &__container {
       @include font-size(14px);
       line-height: 1em;

@@ -41,7 +41,7 @@
 </template>
 <script>
 import "assets/icons/copy";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
@@ -60,7 +60,7 @@ export default {
     },
     breadcrumbs() {
       return [
-        { link: { path: "/" }, name: "Datasets" },
+        { link: { path: "/" }, name: this.workspace },
         { link: this.$route.fullPath, name: this.dataset.name },
       ];
     },
@@ -75,7 +75,13 @@ export default {
     },
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight
-    }
+    },
+    workspace() {
+      return this.auth.currentWorkspace;
+    },
+    ...mapState({
+      auth: 'auth'
+    }),
   },
   mounted() {
     this.setHeaderHeight();
@@ -143,13 +149,8 @@ export default {
   position: relative;
   margin: 0;
   z-index: 0;
-  .--fixed & {
+  .--fixed:not(.fixed-header) & {
     z-index: 2;
-  }
-  .fixed-header & {
-    ::v-deep .virtual-scroll {
-      padding-top: 3em;
-    }
   }
 }
 

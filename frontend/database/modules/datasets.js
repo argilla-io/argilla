@@ -1,7 +1,6 @@
 /*
  * coding=utf-8
  * Copyright 2021-present, the Recognai S.L. team.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +112,7 @@ async function _loadTaskDataset(dataset) {
   }
 
   if (pagination && pagination.page > 1) {
-    await _paginate({
+    return await _paginate({
       dataset: _dataset,
       size: pagination.size,
       page: pagination.page,
@@ -203,7 +202,7 @@ async function _updateViewSettings({ id, data }) {
   /**
    * Wraps view settings updates
    */
-  await DatasetViewSettings.update({
+  return await DatasetViewSettings.update({
     where: id,
     data: data,
   });
@@ -244,9 +243,9 @@ async function _paginate({ dataset, size, page }) {
       size,
       from: pagination.from,
     });
-    await _updateTaskDataset({ dataset, data: { results } });
+    return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
-    await _updateViewSettings({
+    const { annotationEnabled } = await _updateViewSettings({
       id: dataset.name,
       data: { loading: false },
     });
@@ -255,23 +254,36 @@ async function _paginate({ dataset, size, page }) {
       size,
       page,
     });
+
     _displayQueryParams({
       /**
        * Set different route query params
        */
       query: dataset.query,
       sort: dataset.sort,
-      enableAnnotation: dataset.annotationEnabled,
+      enableAnnotation: annotationEnabled,
       pagination,
     });
   }
+}
+
+async function _refreshDatasetAggregations({ dataset }) {
+  const { aggregations } = await _querySearch({
+    dataset,
+    query: dataset.query,
+    size: 0,
+  });
+
+  return await _updateTaskDataset({
+    dataset,
+    data: { results: { aggregations } },
+  });
 }
 
 async function _search({ dataset, query, sort, size }) {
   query = _normalizeSearchQuery({ query: query || {}, dataset });
   sort = sort || dataset.sort || [];
   size = size || new Pagination().size;
-
   try {
     await _updateViewSettings({ id: dataset.name, data: { loading: true } });
     await _querySearch({ dataset, query, sort, size });
@@ -297,7 +309,7 @@ async function _search({ dataset, query, sort, size }) {
   });
 
   const entity = dataset.getTaskDatasetClass();
-  return entity.find(dataset.name);
+  return entity.query().withAllRecursive().whereId(dataset.name).first();
 }
 
 async function _updateAnnotationProgress({ id, total, aggregations }) {
@@ -574,6 +586,16 @@ const actions = {
 
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
+  },
+
+  async refresh(_, { dataset }) {
+    const pagination = Pagination.find(dataset.name);
+    const paginatedDataset = await _paginate({
+      dataset,
+      size: pagination.size,
+      page: pagination.page,
+    });
+    await _refreshDatasetAggregations({ dataset: paginatedDataset });
   },
 };
 

@@ -6,7 +6,7 @@
 Advanced setup guides
 =====================
 
-Here we provide some advanced setup guides, in case you want to use docker, configure your own Elasticsearch instance, manage the users in your Rubrix server, or install the cutting-edge master version.
+Here we provide some advanced setup guides, in case you want to use docker, configure your own Elasticsearch instance or install the cutting-edge master version.
 
 .. _using-docker:
 
@@ -166,108 +166,7 @@ Accessing Rubrix
 In our case http://52.213.178.33
 
 
-.. _user-management:
 
-User management
----------------
-
-The Rubrix server allows you to manage various users, which helps you to keep track of the annotation agents.
-
-The default user
-^^^^^^^^^^^^^^^^
-
-By default, Rubrix is only configured for the following user:
-
-- username: ``rubrix``
-- password: ``1234``
-- api key: ``rubrix.apikey``
-
-
-How to override the default api key
-"""""""""""""""""""""""""""""""""""
-
-To override the default api key you can set the following environment variable before launching the server:
-
-.. code-block:: shell
-
-    export RUBRIX_LOCAL_AUTH_DEFAULT_APIKEY=new-apikey
-
-
-How to override the default user password
-"""""""""""""""""""""""""""""""""""""""""
-
-To override the password, you must set an environment variable that contains an already hashed password.
-You can use ``htpasswd`` to generate a hashed password:
-
-.. code-block:: shell
-
-   %> htpasswd -nbB "" my-new-password
-   :$2y$05$T5mHt/TfRHPPYwbeN2.q7e11QqhgvsHbhvQQ1c/pdap.xPZM2axje
-
-Then set the environment variable omitting the first ``:`` character (in our case ``$2y$05$T5...``):
-
-.. code-block:: shell
-
-    export RUBRIX_LOCAL_AUTH_DEFAULT_PASSWORD="<generated_user_password>"
-
-
-How to add new users
-^^^^^^^^^^^^^^^^^^^^
-
-To configure the Rubrix server for various users, you just need to create a yaml file like the following one:
-
-.. code-block:: yaml
-
-    #.users.yaml
-    # Users are provided as a list
-    - username: user1
-      hashed_password: <generated-hashed-password> # See the previous section above
-      api_key: "ThisIsTheUser1APIKEY"
-    - username: user2
-      hashed_password: <generated-hashed-password> # See the previous section above
-      api_key: "ThisIsTheUser2APIKEY"
-    - ...
-
-Then point the following environment variable to this yaml file before launching the server:
-
-.. code-block:: shell
-
-    export RUBRIX_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yaml
-
-If everything went well, the configured users can now log in and their annotations will be tracked with their usernames.
-
-
-Using docker-compose
-""""""""""""""""""""
-
-Make sure you create the yaml file above in the same folder as your `docker-compose.yaml`.
-
-Then open the provided ``docker-compose.yaml`` and configure the *rubrix* service in the following way:
-
-.. code-block:: yaml
-
-    # docker-compose.yaml
-    services:
-      rubrix:
-        image: recognai/rubrix:latest
-        ports:
-          - "6900:80"
-        environment:
-          ELASTICSEARCH: http://elasticsearch:9200
-          RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-
-        volumes:
-          # We mount the local file .users.yaml in remote container in path /config/.users.yaml
-          - ${PWD}/.users.yaml:/config/.users.yaml
-      ...
-
-You can reload the *rubrix* service to refresh the container:
-
-.. code-block:: shell
-
-    docker-compose up -d rubrix
-
-If everything went well, the configured users can now log in and their annotations will be tracked with their usernames.
 
 .. _install-from-master:
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import Vue from "vue";
-import VueAutoVirtualScrollList from "./vue-auto-virtual-scroll-list/index.js";
+import Vue from 'vue'
+import VueVirtualScroller from 'vue-virtual-scroller'
 
-Vue.component("VueAutoVirtualScrollList", VueAutoVirtualScrollList);
+Vue.use(VueVirtualScroller)

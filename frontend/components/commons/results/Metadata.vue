@@ -32,23 +32,20 @@
     </div>
     <div class="metadata__container">
       <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
-        <div :class="[
-            'metadata__blocks',
-            { '--disabled': isApplied(item) },
-          ]">
-            <ReCheckbox
-              :id="item[0]"
-              v-model="selectedMetadata"
-              class="re-checkbox--dark"
-              :value="item[0]"
-            >
-              <div class="metadata__key">
-                {{ item[0] }}
-                <div class="metadata__value">
-                  {{ item[1] }}
-                </div>
+        <div :class="['metadata__blocks', { '--disabled': isApplied(item) }]">
+          <ReCheckbox
+            :id="item[0]"
+            v-model="selectedMetadata"
+            class="re-checkbox--dark"
+            :value="item[0]"
+          >
+            <div class="metadata__key">
+              {{ item[0] }}
+              <div class="metadata__value">
+                {{ item[1] }}
               </div>
-            </ReCheckbox>
+            </div>
+          </ReCheckbox>
         </div>
       </div>
     </div>
@@ -59,10 +56,7 @@
       >
         Cancel
       </ReButton>
-      <ReButton
-        class="button-primary--small"
-        @click="applySelectedFilters()"
-      >
+      <ReButton class="button-primary--small" @click="applySelectedFilters()">
         Filter
       </ReButton>
     </div>
@@ -86,6 +80,7 @@ export default {
     },
     appliedFilters: {
       type: Object,
+      default: () => { },
     },
     title: {
       type: [Object, String],
@@ -94,13 +89,18 @@ export default {
   },
   data: () => ({
     selectedMetadata: [],
-
   }),
   computed: {
+    normalizedMetadataItems() {
+      return Object.keys(this.metadataItems).reduce(
+        (r, k) => ((r[k] = String(this.metadataItems[k])), r),
+        {}
+      );
+    },
     sortedMetadataItems() {
-      return Object.keys(this.metadataItems)
+      return Object.keys(this.normalizedMetadataItems)
         .sort()
-        .reduce((r, k) => ((r[k] = this.metadataItems[k]), r), {});
+        .reduce((r, k) => ((r[k] = this.normalizedMetadataItems[k]), r), {});
     },
     formatSortedMetadataItems() {
       return Object.entries(this.sortedMetadataItems);
@@ -109,27 +109,26 @@ export default {
   mounted() {
     if (this.appliedFilters) {
       Object.keys(this.appliedFilters).map((key) => {
-        if (this.appliedFilters[key].includes(this.metadataItems[key])) {
+        if (
+          this.appliedFilters[key].includes(this.normalizedMetadataItems[key])
+        ) {
           this.selectedMetadata.push(key);
-        };
+        }
       });
-    };
+    }
   },
   methods: {
     applySelectedFilters() {
       const filters = {};
       this.selectedMetadata.map((key) => {
-        filters[key] = this.metadataItems[key];
-      })
-      this.$emit(
-        "metafilterApply",
-        filters,
-      );
+        filters[key] = this.normalizedMetadataItems[key];
+      });
+      this.$emit("metafilterApply", filters);
     },
     isApplied(item) {
       if (this.appliedFilters) {
         return Object.keys(this.appliedFilters).includes(item[0]);
-      };
+      }
     },
   },
 };
