@@ -32,7 +32,7 @@
     </div>
     <div class="metadata__container">
       <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
-        <div :class="['metadata__blocks', { '--disabled': isApplied(item) }]">
+        <div class="metadata__blocks">
           <ReCheckbox
             :id="item[0]"
             v-model="selectedMetadata"
@@ -119,7 +119,10 @@ export default {
   },
   methods: {
     applySelectedFilters() {
-      const filters = {};
+      const filters = {}
+      Object.keys(this.appliedFilters).map(key => {
+        filters[key] = Array.isArray(this.appliedFilters[key]) ? this.appliedFilters[key].filter(v => v !== this.normalizedMetadataItems[key]) : [];
+      });
       this.selectedMetadata.map((key) => {
         filters[key] = this.normalizedMetadataItems[key];
       });
@@ -163,11 +166,6 @@ export default {
   &__blocks {
     display: flex;
     align-items: center;
-    &.--disabled {
-      opacity: 0.5;
-      pointer-events: none;
-      cursor: default;
-    }
     .re-checkbox--dark {
       width: 100%;
       display: flex;
