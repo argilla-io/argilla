@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from .label_errors import find_label_errors
 from .label_models import FlyingSquid, Snorkel
 from .rule import Rule
 from .weak_labels import WeakLabels
