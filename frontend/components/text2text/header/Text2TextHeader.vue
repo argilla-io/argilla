@@ -46,9 +46,9 @@ export default {
   },
   computed: {
     allowValidation() {
-      const selected = this.dataset.results.records.filter(r => r.selected);
+      const selected = this.dataset.results.records.filter((r) => r.selected);
       return this.validationFilter(selected).length > 0;
-    }
+    },
   },
   methods: {
     ...mapActions({
@@ -56,7 +56,9 @@ export default {
       validateAnnotations: "entities/datasets/validateAnnotations",
     }),
     validationFilter(records) {
-      return records.filter(r => r.visibleSentence && r.visibleSentence.length);
+      return records.filter(
+        (r) => r.sentenceForAnnotation && r.sentenceForAnnotation.length
+      );
     },
     async onDiscard(records) {
       await this.discardAnnotations({
@@ -70,15 +72,10 @@ export default {
         dataset: this.dataset,
         agent: getUsername(this.$auth),
         records: filteredRecords.map((record) => {
-          let visibleSentence = {};
-          visibleSentence.sentences = [{
-            text: record.visibleSentence,
-            score: 1,
-          }];
           return {
             ...record,
             annotation: {
-              ...visibleSentence,
+              sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
             },
           };
         }),

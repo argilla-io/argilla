@@ -20,14 +20,40 @@ import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 
 class Text2TextRecord extends BaseRecord {
   text;
-  visibleSentence;
+  lastEditedSentence;
 
-  constructor({ text, visibleSentence, ...superData }) {
+  constructor({ text, lastEditedSentence, ...superData }) {
     super(superData);
     this.text = text;
-    this.visibleSentence = visibleSentence;
+    this.lastEditedSentence = lastEditedSentence;
   }
-  recordTitle() {
+
+  get modified() {
+    if (
+      !(this.lastEditedSentence || this.annotation || this.annotation.sentences)
+    ) {
+      return false;
+    }
+
+    return this.lastEditedSentence !== this.annotation.sentences[0].text;
+  }
+
+  get sentenceForAnnotation() {
+    if (this.lastEditedSentence) {
+      return this.lastEditedSentence;
+    }
+
+    if (this.annotation && this.annotation.sentences) {
+      return this.annotation.sentences[0].text;
+    }
+
+    if (this.prediction && this.prediction.sentences) {
+      return this.prediction.sentences[0].text;
+    }
+    return undefined;
+  }
+
+  get recordTitle() {
     return this.text;
   }
 }
