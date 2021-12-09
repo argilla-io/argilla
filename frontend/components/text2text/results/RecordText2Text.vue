@@ -25,11 +25,11 @@
       <div>
         <text-2-text-list
           ref="list"
+          :dataset="dataset"
           :record="record"
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
           :annotation-enabled="annotationEnabled"
-          @update-record="updateRecordSentences"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
         />
@@ -38,7 +38,7 @@
   </div>
 </template>
 <script>
-import { IdState } from 'vue-virtual-scroller'
+import { IdState } from "vue-virtual-scroller";
 import { getUsername } from "@/models/User";
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
 import { mapActions } from "vuex";
@@ -46,7 +46,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => vm.record.id,
+      idProp: (vm) => vm.record.id,
     }),
   ],
   props: {
@@ -59,10 +59,10 @@ export default {
       required: true,
     },
   },
-  idState () {
+  idState() {
     return {
       initialRecord: {},
-    }
+    };
   },
   computed: {
     initialRecord: {
@@ -71,7 +71,7 @@ export default {
       },
       set: function (newValue) {
         this.idState.initialRecord = newValue;
-      }
+      },
     },
     annotationEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -98,24 +98,9 @@ export default {
     }),
 
     initializeInitialRecord() {
-      if (Object.entries(this.initialRecord).length === 0){
+      if (Object.entries(this.initialRecord).length === 0) {
         this.initialRecord = Object.assign({}, this.record);
       }
-    },
-    async updateRecordSentences({ sentences }) {
-      await this.updateRecords({
-        dataset: this.dataset,
-        records: [
-          {
-            ...this.record,
-            selected: true,
-            status: "Edited",
-            annotation: {
-              sentences,
-            },
-          },
-        ],
-      });
     },
     async onResetInitialRecord() {
       await this.updateRecords({

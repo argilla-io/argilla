@@ -26,6 +26,7 @@
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"
+        :allow-validation="allowValidation"
         @discard-records="onDiscard"
         @validate-records="onValidate"
       >
@@ -43,11 +44,22 @@ export default {
       required: true,
     },
   },
+  computed: {
+    allowValidation() {
+      const selected = this.dataset.results.records.filter((r) => r.selected);
+      return this.validationFilter(selected).length > 0;
+    },
+  },
   methods: {
     ...mapActions({
       discardAnnotations: "entities/datasets/discardAnnotations",
       validateAnnotations: "entities/datasets/validateAnnotations",
     }),
+    validationFilter(records) {
+      return records.filter(
+        (r) => r.sentenceForAnnotation && r.sentenceForAnnotation.length
+      );
+    },
     async onDiscard(records) {
       await this.discardAnnotations({
         dataset: this.dataset,
@@ -55,20 +67,15 @@ export default {
       });
     },
     async onValidate(records) {
-      const filteredRecords = records.filter(r => r.annotation);
+      const filteredRecords = this.validationFilter(records);
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
         records: filteredRecords.map((record) => {
-          let modelPrediction = {};
-          modelPrediction.sentences = [{
-            text: record.prediction.sentences[0].text,
-            score: 1,
-          }];
           return {
             ...record,
             annotation: {
-              ...(record.annotation || modelPrediction),
+              sentences: [{ text: record.sentenceForAnnotation, score: 1 }],
             },
           };
         }),
