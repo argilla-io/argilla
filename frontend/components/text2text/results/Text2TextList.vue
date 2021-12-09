@@ -315,15 +315,20 @@ export default {
       await (this.visibleSentence = this.selectedSentence);
     },
     async onTextChanged(newText) {
+      let status = "Edited";
+
+      if (this.selectedSentence === newText) {
+        status = "Default";
+      }
+
       await (this.visibleSentence = newText);
-      console.log(this.visibleSentence);
       await this.updateRecords({
         dataset: this.dataset,
         records: [
           {
             ...this.record,
             selected: true,
-            status: "Edited",
+            status,
             lastEditedSentence: newText,
           },
         ],
@@ -364,7 +369,6 @@ export default {
       }
     },
     async onAnnotate(sentence) {
-      console.log("onAnnotate", sentence);
       let newS = {
         score: 1,
         text: sentence,
