@@ -159,6 +159,7 @@
 <script>
 import "assets/icons/pencil";
 import { IdState } from "vue-virtual-scroller";
+import { mapActions } from "vuex";
 
 export default {
   mixins: [
@@ -168,6 +169,10 @@ export default {
     }),
   ],
   props: {
+    dataset: {
+      type: Object,
+      required: true,
+    },
     record: {
       type: Object,
       required: true,
@@ -214,9 +219,20 @@ export default {
       get: function () {
         return this.record.lastEditedSentence;
       },
-      set: function (newValue) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.record.lastEditedSentence = newValue;
+      set: async function (newValue) {
+        if (this.record.lastEditedSentence !== newValue) {
+          // eslint-disable-next-line vue/no-mutating-props
+          // this.record.lastEditedSentence = newValue;
+          await this.updateRecords({
+            dataset: this.dataset,
+            records: [
+              {
+                ...this.record,
+                lastEditedSentence: newValue,
+              },
+            ],
+          });
+        }
       },
     },
     editionMode: {
@@ -291,36 +307,46 @@ export default {
     }
   },
   methods: {
-    showitemNumber(index) {
+    ...mapActions({
+      updateRecords: "entities/datasets/updateDatasetRecords",
+    }),
+    async showitemNumber(index) {
       this.itemNumber = index;
-      this.visibleSentence = this.selectedSentence;
+      await (this.visibleSentence = this.selectedSentence);
     },
-    onTextChanged(newText) {
-      let newS = {
-        score: 1,
-        text: newText,
-      };
-      this.visibleSentence = newText;
-      this.$emit("update-record", { sentences: [newS] });
+    async onTextChanged(newText) {
+      await (this.visibleSentence = newText);
+      console.log(this.visibleSentence);
+      await this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            lastEditedSentence: newText,
+          },
+        ],
+      });
     },
     edit() {
       if (this.annotationEnabled) {
         this.editionMode = true;
       }
     },
-    back() {
+    async back() {
       this.editionMode = false;
       this.refresh++;
-      this.visibleSentence = this.selectedSentence;
+      await (this.visibleSentence = this.selectedSentence);
       this.$emit("reset-initial-record");
     },
-    changeVisibleSentences() {
+    async changeVisibleSentences() {
       this.sentencesOrigin !== "Annotation"
         ? (this.sentencesOrigin = "Annotation")
         : (this.sentencesOrigin = "Prediction");
       this.itemNumber = 0;
       this.editionMode = false;
-      this.visibleSentence = this.selectedSentence;
+      await (this.visibleSentence = this.selectedSentence);
     },
     initializeSentenceOrigin() {
       if (this.annotationEnabled) {
@@ -337,16 +363,17 @@ export default {
         }
       }
     },
-    onAnnotate(sentence) {
+    async onAnnotate(sentence) {
+      console.log("onAnnotate", sentence);
       let newS = {
         score: 1,
-        text: this.visibleSentence ? this.visibleSentence : sentence,
+        text: sentence,
       };
       this.$emit("annotate", { sentences: [newS] });
       this.itemNumber = 0;
       this.editionMode = false;
       this.sentencesOrigin = "Annotation";
-      this.visibleSentence = this.selectedSentence;
+      // await (this.visibleSentence = this.selectedSentence);
     },
   },
 };
