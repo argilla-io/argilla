@@ -75,7 +75,9 @@ export default {
       this.$emit("change-text", event.target.innerText);
     },
     annotate() {
-      this.$emit("annotate", this.defaultText);
+      if (this.defaultText && this.defaultText.trim()) {
+        this.$emit("annotate", this.defaultText);
+      }
     },
     keyUp(event) {
       if (this.shiftKey === event.key) {
