@@ -19,7 +19,8 @@ from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
     TokenClassificationAnnotation,
-    TokenClassificationQuery, TokenClassificationRecord,
+    TokenClassificationQuery,
+    TokenClassificationRecord,
 )
 
 
@@ -81,7 +82,7 @@ def test_too_long_metadata():
         {
             "text": text,
             "tokens": text.split(),
-            "metadata": {"too_long": "a"*1000},
+            "metadata": {"too_long": "a" * 1000},
         }
     )
 
@@ -102,12 +103,36 @@ def test_entity_label_too_long():
                     EntitySpan(
                         start=9,
                         end=len(text),
-                        label="a"*1000,
+                        label="a" * 1000,
                     ),
                 ],
             ),
         )
 
+
 def test_query_as_elasticsearch():
     query = TokenClassificationQuery(ids=[1, 2, 3])
     assert query.as_elasticsearch() == {"ids": {"values": query.ids}}
+
+
+def test_misaligned_entity_mentions():
+    assert TokenClassificationRecord(
+        text="according to analysts.\n     Dart Group Corp was not",
+        tokens=[
+            "according",
+            "to",
+            "analysts",
+            ".",
+            "\n     ",
+            "Dart",
+            "Group",
+            "Corp",
+            "was",
+            "not",
+        ],
+        annotation=TokenClassificationAnnotation(
+            agent="heuristics",
+            entities=[EntitySpan(start=22, end=43, label="COMPANY", score=1.0)],
+            score=None,
+        ),
+    )
