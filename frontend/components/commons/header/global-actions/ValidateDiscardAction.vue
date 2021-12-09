@@ -24,12 +24,15 @@
   >
     <ReCheckbox v-model="allSelected" class="list__item__checkbox"></ReCheckbox>
     <slot name="first" :selectedRecords="selectedRecords" />
-      <ReButton :disabled="!allowValidation" class="validate-discard-actions__button" @click="onValidate"
-        >Validate</ReButton
-      >
-      <ReButton class="validate-discard-actions__button" @click="onDiscard"
-        >Discard</ReButton
-      >
+    <ReButton
+      :disabled="!allowValidation"
+      class="validate-discard-actions__button"
+      @click="onValidate"
+      >Validate</ReButton
+    >
+    <ReButton class="validate-discard-actions__button" @click="onDiscard"
+      >Discard</ReButton
+    >
     <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
       Actions will apply to the
@@ -54,8 +57,9 @@ export default {
       default: "before",
     },
     allowValidation: {
-      type: Boolean,    
-    }
+      type: Boolean,
+      default: true,
+    },
   },
   data: () => ({
     allSelected: false,
