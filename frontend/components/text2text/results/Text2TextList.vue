@@ -262,7 +262,7 @@ export default {
       }
     },
     annotationEnabled(newValue, oldValue) {
-      if (newValue !== olsValue) {
+      if (newValue !== oldValue) {
         this.refresh++;
         this.initializeSentenceOrigin();
         this.back();
