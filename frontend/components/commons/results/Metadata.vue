@@ -120,9 +120,11 @@ export default {
   methods: {
     applySelectedFilters() {
       const filters = {}
-      Object.keys(this.appliedFilters).map(key => {
-        filters[key] = Array.isArray(this.appliedFilters[key]) ? this.appliedFilters[key].filter(v => v !== this.normalizedMetadataItems[key]) : [];
-      });
+      if (this.appliedFilters) {
+        Object.keys(this.appliedFilters).map(key => {
+          filters[key] = Array.isArray(this.appliedFilters[key]) ? this.appliedFilters[key].filter(v => v !== this.normalizedMetadataItems[key]) : [];
+        });
+      }
       this.selectedMetadata.map((key) => {
         filters[key] = this.normalizedMetadataItems[key];
       });
