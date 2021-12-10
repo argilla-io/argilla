@@ -30,6 +30,7 @@
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
           :annotation-enabled="annotationEnabled"
+          @update-initial-record="initializeInitialRecord"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
         />
@@ -98,9 +99,7 @@ export default {
     }),
 
     initializeInitialRecord() {
-      if (Object.entries(this.initialRecord).length === 0) {
-        this.initialRecord = Object.assign({}, this.record);
-      }
+      this.initialRecord = Object.assign({}, this.record);
     },
     async onResetInitialRecord() {
       await this.updateRecords({
