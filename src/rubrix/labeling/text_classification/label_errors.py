@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SortBy(Enum):
-    """A tie break policy"""
+    """A sort by strategy"""
 
     LIKELIHOOD = "likelihood"
     PREDICTION = "prediction"
@@ -42,11 +42,10 @@ def find_label_errors(
     sort_by: Union[str, SortBy] = "likelihood",
     **kwargs,
 ) -> List[TextClassificationRecord]:
-    """Find potential annotation/label errors in your records.
+    """Finds potential annotation/label errors in your records.
 
-    It will include all records in the given list for which a prediction AND annotation is available.
-    Make sure the predictions were made in a holdout manner, that is you should only include records that were not used
-    in the training of the predictor.
+    We will consider all records for which a prediction AND annotation is available. Make sure the predictions were made
+    in a holdout manner, that is you should only include records that were not used in the training of the predictor.
 
     Args:
         records: A list of text classification records
@@ -103,7 +102,7 @@ def find_label_errors(
 def _check_and_update_kwargs(
     record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict
 ):
-    """Helper function to check and update the kwargs passed on cleanlab's `get_noise_indices`.
+    """Helper function to check and update the kwargs passed on to cleanlab's `get_noise_indices`.
 
     Args:
         record: One of the records passed in the `find_label_error` function.
@@ -146,11 +145,11 @@ def _construct_s_and_psx(
         MissingPredictionError: If predictions are missing for certain labels.
     """
     predictions = []
-    labels = set()
+    labels = set()  # use a dict to preserve the order
     for rec in records:
         predictions.append({pred[0]: pred[1] for pred in rec.prediction})
         labels.update(predictions[-1].keys())
-    labels_mapping = {label: i for i, label in enumerate(labels)}
+    labels_mapping = {label: i for i, label in enumerate(sorted(labels))}
 
     s = (
         np.empty(len(records), dtype=object)
@@ -161,7 +160,7 @@ def _construct_s_and_psx(
 
     for i, rec, pred in zip(range(len(records)), records, predictions):
         try:
-            psx[i] = [pred[label] for label in labels]
+            psx[i] = [pred[label] for label in labels_mapping]
         except KeyError as error:
             raise MissingPredictionError(
                 f"It seems a prediction for {error} is missing in the following record: {rec}"
