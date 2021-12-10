@@ -119,15 +119,22 @@ export default {
   },
   methods: {
     applySelectedFilters() {
-      const filters = {}
-      if (this.appliedFilters) {
-        Object.keys(this.appliedFilters).map(key => {
-          filters[key] = Array.isArray(this.appliedFilters[key]) ? this.appliedFilters[key].filter(v => v !== this.normalizedMetadataItems[key]) : [];
-        });
-      }
+      const filters = Object.keys(this.appliedFilters || {}).reduce(
+        (r, k) => (
+          (r[k] = Array.isArray(this.appliedFilters[k])
+            ? this.appliedFilters[k].filter(
+              (v) => v !== this.normalizedMetadataItems[k]
+            )
+            : []),
+          r
+        ),
+        {}
+      );
+
       this.selectedMetadata.map((key) => {
         filters[key] = this.normalizedMetadataItems[key];
       });
+
       this.$emit("metafilterApply", filters);
     },
     isApplied(item) {
