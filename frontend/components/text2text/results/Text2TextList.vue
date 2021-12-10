@@ -287,9 +287,11 @@ export default {
   watch: {
     selected(newValue, oldValue) {
       if (newValue === false && oldValue === true) {
-        this.itemNumber = 0;
-        this.editionMode = false;
+        this.refresh++;
         this.sentencesOrigin = "Annotation";
+        this.editionMode = false;
+        this.itemNumber = 0;
+        this.$emit('update-initial-record');
       }
     },
     annotationEnabled(newValue, oldValue) {
@@ -300,6 +302,11 @@ export default {
         this.itemNumber = 0;
       }
     },
+  },
+  updated() {
+    if (this.sentencesOrigin === undefined) {
+      this.initializeSentenceOrigin();
+    }
   },
   mounted() {
     if (this.sentencesOrigin === undefined) {
