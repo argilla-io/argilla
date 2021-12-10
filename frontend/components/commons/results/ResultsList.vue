@@ -23,6 +23,7 @@
         <results-loading :size="dataset.viewSettings.pagination.size" />
       </div>
       <DynamicScroller
+        v-else
         page-mode
         class="scroller"
         :items="visibleRecords"
