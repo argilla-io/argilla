@@ -20,6 +20,5 @@ if __name__ == "__main__":
         "rubrix.server.server:app",
         port=6900,
         host="0.0.0.0",
-        reload=True,
         access_log=True,
     )
