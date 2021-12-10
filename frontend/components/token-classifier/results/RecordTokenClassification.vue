@@ -178,6 +178,9 @@ export default {
       this.onReset();
     },
     async onValidate(record) {
+      const emptyEntities = {
+        entities: [],
+      };
       await this.validate({
         dataset: this.dataset,
         agent: getUsername(this.$auth),
@@ -185,7 +188,7 @@ export default {
           {
             ...record,
             annotation: {
-              ...(record.annotation || record.prediction),
+              ...(record.annotation || record.prediction || emptyEntities),
             },
           },
         ],
