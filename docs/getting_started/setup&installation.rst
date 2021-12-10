@@ -14,11 +14,20 @@ In this guide, we will help you to get up and running with Rubrix. Basically, yo
 
 First, make sure you have Python 3.7 or above installed.
 
-Then you can install Rubrix with ``pip``\ :
+Then you can install Rubrix with ``pip`` or ``conda``\.
+
+**with pip**
 
 .. code-block:: bash
 
    pip install rubrix==0.7.0
+
+**with conda**
+
+.. code-block:: bash
+
+   conda install -c conda-forge rubrix
+
 
 2. Launch the web app
 ---------------------
