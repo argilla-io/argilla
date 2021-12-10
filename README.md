@@ -29,6 +29,15 @@
         <a href="https://hub.docker.com/r/recognai/rubrix">
         <img alt="CI" src="https://img.shields.io/docker/pulls/recognai/rubrix">
     </a>
+    <a href="https://anaconda.org/conda-forge/rubrix">
+        <img alt="CI" src="https://img.shields.io/conda/pn/conda-forge/rubrix?logo=anaconda&style=flat">
+    </a>
+    <a href="https://anaconda.org/conda-forge/rubrix">
+        <img alt="CI" src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
+    </a>
+    <a href="https://rubrix.readthedocs.io/en/stable/">
+        <img alt="CI" src="https://img.shields.io/static/v1?logo=readthedocs&style=flat&color=pink&label=docs&message=rubrix">
+    </a>
     <a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
     </a>
@@ -96,10 +105,18 @@ To get started you need to follow three steps:
    
 ### 1. Install the Python client
 
-You can install the Python client with `pip`:
+You can install the Python client with `pip` or `conda`.
+
+**with pip**
 
 ```bash
 pip install rubrix
+```
+
+**with conda**
+
+```sh
+conda install -c conda-forge rubrix
 ```
 
 ### 2. Launch the web app
