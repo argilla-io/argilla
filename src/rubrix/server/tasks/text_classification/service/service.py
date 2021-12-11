@@ -31,6 +31,7 @@ from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     LabelingRule,
+    LabelingRuleMetrics,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchAggregations,
@@ -252,3 +253,42 @@ class TextClassificationService:
         """
         if rule_query.strip():
             return self.__labeling__.delete_rule(dataset, rule_query)
+
+    def compute_rule_metrics(
+        self,
+        dataset: Dataset,
+        rule_query: str,
+        label: str,
+    ) -> LabelingRuleMetrics:
+        """
+        Compute metrics for a given rule. It's not necessary that query rule
+        is created in dataset. Basic computed rules are: coverage,
+        overlaps, conflicts[*], correct[*], incorrect[*], precision[*]
+
+        [*]: computed metrics only if label is provided or rule already created in dataset
+
+        Parameters
+        ----------
+        dataset:
+            The dataset
+        rule_query:
+            The provided rule query. If already created in dataset, the ``label``
+            param will be omitted
+        label:
+            Label used for rule metrics
+
+        Returns
+        -------
+
+        """
+        total, metrics = self.__labeling__.compute_rule_metrics(
+            dataset, rule_query=rule_query, label=label
+        )
+
+        return LabelingRuleMetrics(
+            coverage=metrics.covered_records / total,
+            correct=metrics.correct_records,
+            incorrect=metrics.incorrect_records,
+            precision=metrics.precision,
+            total_records=total,
+        )
