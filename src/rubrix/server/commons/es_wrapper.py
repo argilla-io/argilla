@@ -13,14 +13,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
-from rubrix.server.commons.errors import InvalidTextSearchError
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
+import deprecated
 import elasticsearch
 from elasticsearch import Elasticsearch, NotFoundError, RequestError
 from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
+
 from rubrix.logging import LoggingMixin
+from rubrix.server.commons.errors import InvalidTextSearchError
 
 try:
     import ujson as json
@@ -33,6 +34,28 @@ from .settings import settings
 
 class ElasticsearchWrapper(LoggingMixin):
     """A simple elasticsearch client wrapper for atomize some repetitive operations"""
+
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(cls) -> "ElasticsearchWrapper":
+        """
+        Creates an instance of ElasticsearchWrapper.
+
+        This function is used in fastapi for resolve component dependencies.
+
+        See <https://fastapi.tiangolo.com/tutorial/dependencies/>
+
+        Returns
+        -------
+
+        """
+
+        if cls._INSTANCE is None:
+            es_client = Elasticsearch(hosts=settings.elasticsearch)
+            cls._INSTANCE = cls(es_client)
+
+        return cls._INSTANCE
 
     def __init__(self, es_client: Elasticsearch):
         self.__client__ = es_client
@@ -479,6 +502,7 @@ class ElasticsearchWrapper(LoggingMixin):
 _instance = None  # The singleton instance
 
 
+@deprecated.deprecated(reason="Use `ElasticsearchWrapper.get_instance` instead")
 def create_es_wrapper() -> ElasticsearchWrapper:
     """
         Creates a instance of ElasticsearchWrapper.

@@ -82,6 +82,17 @@ class LabelingRule(CreateLabelingRule):
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
 
+class LabelingRuleMetrics(BaseModel):
+    """Metrics generated for a labeling rule"""
+
+    coverage: float
+    correct: float
+    incorrect: float
+    precision: float
+
+    total_records: int
+
+
 class TextClassificationDatasetDB(DatasetDB):
     """
     A dataset class specialized for text classification task
@@ -217,8 +228,9 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             ), "Annotation must include some label for validated records"
 
         if not multi_label and annotation:
-            assert len(annotation.labels) == 1, "Single label record must include only one annotation label"
-
+            assert (
+                len(annotation.labels) == 1
+            ), "Single label record must include only one annotation label"
 
     @classmethod
     def _check_score_integrity(
