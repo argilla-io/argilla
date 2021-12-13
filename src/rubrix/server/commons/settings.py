@@ -19,7 +19,7 @@ Common environment vars / settings
 
 from typing import List
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 
 class ApiSettings(BaseSettings):
@@ -52,6 +52,9 @@ class ApiSettings(BaseSettings):
 
     """
 
+    __DATASETS_INDEX_NAME__ = ".rubrix<NAMESPACE>.datasets-v0"
+    __DATASETS_RECORDS_INDEX_NAME__ = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
+
     only_bulk_api: bool = False
     elasticsearch: str = "http://localhost:9200"
     cors_origins: List[str] = ["*"]
@@ -61,6 +64,29 @@ class ApiSettings(BaseSettings):
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
     disable_es_index_template_creation: bool = False
+
+    namespace: str = Field(default=None, regex=r"^[a-z]+$")
+
+    @property
+    def dataset_index_name(self) -> str:
+        ns = self.namespace
+        if ns is None:
+            return self.__DATASETS_INDEX_NAME__.replace("<NAMESPACE>", "")
+        return self.__DATASETS_INDEX_NAME__.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def dataset_records_index_name(self) -> str:
+        ns = self.namespace
+        if ns is None:
+            return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", "")
+        return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", f".{ns}")
+
+    class Config:
+        fields = {
+            "namespace": {
+                "env": "RUBRIX_NAMESPACE",
+            }
+        }
 
 
 settings = ApiSettings()
