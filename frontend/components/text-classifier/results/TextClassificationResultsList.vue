@@ -21,6 +21,9 @@
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
+    <template slot="pre-records-area">
+      <rules :dataset="dataset" v-if="showRulesArea" />
+    </template>
     <template slot="record" slot-scope="results">
       <record-text-classification
         :dataset="dataset"
@@ -41,6 +44,11 @@ export default {
   data: () => ({
     selectedMetadataItem: undefined,
   }),
+  computed: {
+    showRulesArea() {
+      return !this.dataset.isMultiLabel && this.dataset.viewSettings.viewMode === 'define-rules';
+    },
+  },
   methods: {
     onShowMetadata(id) {
       this.selectedMetadataItem = id;

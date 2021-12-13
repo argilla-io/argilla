@@ -31,6 +31,9 @@
         :buffer="200"
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
       > 
+        <template #before>
+          <slot name="pre-records-area"/>
+        </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
             :watch-data="true"
@@ -194,7 +197,7 @@ export default {
   &__li {
     padding-bottom: 10px;
     position: relative;
-    min-height: 150px;
+    min-height: 140px;
   }
 }
 </style>
