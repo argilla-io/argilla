@@ -191,18 +191,23 @@ class TextClassificationService:
     def _check_multi_label_integrity(
         self, dataset: Dataset, records: List[TextClassificationRecord]
     ):
-        # Fetch a single record
-        results = self.search(
-            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
-        )
-        if results.records:
+        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
+        if is_multi_label_dataset is not None:
             is_multi_label = records[0].multi_label
-            assert is_multi_label == results.records[0].multi_label, (
+            assert is_multi_label == is_multi_label_dataset, (
                 "You cannot pass {labels_type} records for this dataset. "
                 "Stored records are {labels_type}".format(
                     labels_type="multi-label" if is_multi_label else "single-label"
                 )
             )
+
+    def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
+        # Fetch a single record
+        results = self.search(
+            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
+        )
+        if results.records:
+            return results.records[0].multi_label
 
     def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
         """
@@ -233,6 +238,9 @@ class TextClassificationService:
             The rule
 
         """
+        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
+        if is_multi_label_dataset is not None:
+            assert not is_multi_label_dataset, "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def delete_labeling_rule(self, dataset: Dataset, rule_query: str):

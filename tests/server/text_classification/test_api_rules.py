@@ -1,3 +1,5 @@
+import pytest
+
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
     LabelingRule,
@@ -8,13 +10,14 @@ from rubrix.server.tasks.text_classification import (
 from tests.server.test_helpers import client
 
 
-def log_some_records(dataset: str, annotation: str = None):
+def log_some_records(dataset: str, annotation: str = None, multi_label: bool = False):
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     record = {
         "id": 0,
         "inputs": {"text": "Esto es un ejemplo de texto"},
         "metadata": {"field.one": 1, "field.two": 2},
+        "multi_label": multi_label,
     }
 
     if annotation:
@@ -105,9 +108,25 @@ def test_duplicated_dataset_rules():
     assert response.status_code == 409
 
 
+def test_rules_with_multi_label_dataset():
+    dataset = "test_rules_with_multi_label_dataset"
+    log_some_records(dataset, multi_label=True)
+
+    with pytest.raises(
+        AssertionError,
+        match="Labeling rules are not supported for multi-label datasets",
+    ):
+        client.post(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+            json=CreateLabelingRule(
+                query="a query", description="Description", label="LALA"
+            ).dict(),
+        )
+
+
 def test_rule_metrics_with_missing_label():
     dataset = "test_rule_metrics_with_missing_label"
-    log_some_records(dataset, annotation=True)
+    log_some_records(dataset, annotation="OK")
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/a query/metrics"
@@ -161,4 +180,3 @@ def test_rule_metric():
     assert metrics.correct == 0
     assert metrics.incorrect == 0
     assert metrics.precision == 0
-
