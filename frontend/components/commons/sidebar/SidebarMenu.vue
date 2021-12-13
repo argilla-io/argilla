@@ -23,10 +23,10 @@
         <a class="sidebar__info__button"
           href="#"
           data-title="Explore"
-          @click="$emit('onEnableAnnotationView', false)"
+          @click="$emit('onChangeViewMode', 'explore')"
         >
           <svgicon
-            v-show="!annotationMode"
+            v-show="currentViewMode === 'explore'"
             class="sidebar__info__icon-help"
             name="check3"
           ></svgicon>
@@ -35,14 +35,26 @@
         <a class="sidebar__info__button"
           href="#"
           data-title="Annotate"
-          @click="$emit('onEnableAnnotationView', true)"
+          @click="$emit('onChangeViewMode', 'annotate')"
         >
           <svgicon
-            v-show="annotationMode"
+            v-show="currentViewMode === 'annotate'"
             class="sidebar__info__icon-help"
             name="check3"
           ></svgicon>
           <svgicon name="annotate-view"></svgicon>
+        </a>
+        <a class="sidebar__info__button"
+          href="#"
+          data-title="Define rules"
+          @click="$emit('onChangeViewMode', 'define-rules')"
+        >
+          <svgicon
+            v-show="currentViewMode === 'define-rules'"
+            class="sidebar__info__icon-help"
+            name="check3"
+          ></svgicon>
+          XX
         </a>
       </div>
       <div class="sidebar__info">
@@ -91,7 +103,7 @@ export default {
   },
   data: () => {
     return {
-      annotationMode: false,
+      currentViewMode: 'explore',
       width: window.innerWidth,
       visibleSidebarInfo: undefined,
       sidebarInfoOptions: [
@@ -109,16 +121,16 @@ export default {
     };
   },
   computed: {
-    annotationEnabled() {
-      return this.isDatasetView && this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
     isDatasetView() {
       return this.dataset !== undefined;
     }
   },
   watch: {
-    annotationEnabled(newValue) {
-      this.annotationMode = newValue;
+    viewMode(newValue) {
+      this.currentViewMode = newValue;
     }
   },
   updated() {
@@ -127,7 +139,7 @@ export default {
     };
   },
   mounted() {
-    this.annotationMode = this.annotationEnabled;
+    this.currentViewMode = this.viewMode;
   },
   methods: {
     showSidebarInfo(info) {

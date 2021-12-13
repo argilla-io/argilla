@@ -144,8 +144,8 @@ export default {
         shortCut: characters[index],
       }));
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
   created() {
@@ -158,12 +158,12 @@ export default {
   },
   methods: {
     startSelection() {
-      if (this.annotationEnabled) {
+      if (this.viewMode === 'annotate') {
         this.$emit("startSelection", this.spanId);
       }
     },
     endSelection() {
-      if (this.annotationEnabled) {
+      if (this.viewMode === 'annotate') {
         this.$emit("endSelection", this.spanId);
         this.showEntitiesSelector = true;
         // TODO (@leireaguirrework) : What's the purpose of this block?

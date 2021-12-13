@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="showAnnotationMode" class="container">
+  <div v-if="viewMode === 'annotate'" class="container">
     <div class="global-actions">
       <slot />
     </div>
@@ -32,8 +32,8 @@ export default {
   },
   data: () => ({}),
   computed: {
-    showAnnotationMode() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
 };

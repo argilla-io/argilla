@@ -34,7 +34,7 @@
         @reset="onReset"
       />
     </div>
-    <div v-if="annotationEnabled" class="content__actions-buttons">
+    <div v-if="viewMode === 'annotate'" class="content__actions-buttons">
       <re-button
         v-if="record.status !== 'Validated'"
         class="button-primary"
@@ -138,8 +138,8 @@ export default {
       }
       return textSpans;
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
   methods: {

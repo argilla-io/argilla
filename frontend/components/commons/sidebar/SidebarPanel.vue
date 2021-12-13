@@ -17,8 +17,8 @@
 
 <template>
   <aside
-    :style="{ marginTop: topPosition }"
-    :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']"
+    :style="{ top: topPosition }"
+    :class="['sidebar', viewMode === 'annotate' ? 'annotation' : 'explore']"
   >
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
@@ -36,11 +36,11 @@ export default {
     },
   },
   computed: {
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
     topPosition() {
-      return this.annotationEnabled
+      return this.viewMode === 'annotate'
         ? `${this.dataset.viewSettings.headerHeight - 60}px`
         : `${this.dataset.viewSettings.headerHeight + 10}px`;
     },

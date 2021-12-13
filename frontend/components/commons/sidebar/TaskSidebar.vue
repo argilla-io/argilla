@@ -4,7 +4,7 @@
       :dataset="dataset"
       @refresh="onRefresh"
       @showSidebarInfo="onShowSidebarInfo"
-      @onEnableAnnotationView="onEnableAnnotationView"
+      @onChangeViewMode="onChangeViewMode"
     />
     <!-- TODO: Use media queries -->
     <sidebar-panel
@@ -47,9 +47,6 @@ export default {
     currentTaskStats() {
       return this.currentTask + "Stats";
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
-    },
   },
   updated() {
     window.onresize = () => {
@@ -58,7 +55,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      enableAnnotation: "entities/datasets/enableAnnotation",
+      changeViewMode: "entities/datasets/changeViewMode",
       refresh: "entities/datasets/refresh",
     }),
     onRefresh() {
@@ -66,8 +63,8 @@ export default {
         dataset: this.dataset,
       });
     },
-    async onEnableAnnotationView(value) {
-      await this.enableAnnotation({
+    async onChangeViewMode(value) {
+      await this.changeViewMode({
         dataset: this.dataset,
         value: value,
       });
