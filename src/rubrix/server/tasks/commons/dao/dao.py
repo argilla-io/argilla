@@ -17,6 +17,7 @@ import dataclasses
 import datetime
 from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
+import deprecated
 from fastapi import Depends
 
 from rubrix.server.commons.es_helpers import (
@@ -94,6 +95,26 @@ def extends_index_analyzers(analyzers: Dict[str, Any]):
 
 class DatasetRecordsDAO:
     """Datasets records DAO"""
+
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        es: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+    ) -> "DatasetRecordsDAO":
+        """
+        Creates a dataset records dao instance
+
+        Parameters
+        ----------
+        es:
+            The elasticserach wrapper dependency
+
+        """
+        if not cls._INSTANCE:
+            cls._INSTANCE = cls(es)
+        return cls._INSTANCE
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
@@ -303,6 +324,7 @@ class DatasetRecordsDAO:
 _instance: Optional[DatasetRecordsDAO] = None
 
 
+@deprecated.deprecated(reason="Use `DatasetRecordsDAO.get_instance` instead")
 def dataset_records_dao(
     es: ElasticsearchWrapper = Depends(create_es_wrapper),
 ) -> DatasetRecordsDAO:

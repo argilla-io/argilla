@@ -70,18 +70,35 @@ class ForbiddenOperationError(HTTPException):
         )
 
 
-class WrongInputParamError(HTTPException):
+class BadRequestError(HTTPException):
+    """Generic bad request error"""
+
+    def __init__(self, detail: str):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+class WrongInputParamError(BadRequestError):
     """Error related with input params in general"""
 
-    def __init__(self, detail: str):
-        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+    pass
 
 
-class InvalidTextSearchError(HTTPException):
+class InvalidTextSearchError(BadRequestError):
     """Error related with input params in search"""
 
-    def __init__(self, detail: str):
-        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+    pass
+
+
+class WrongTaskError(BadRequestError):
+    """Error raised when provided task cannot be processed with requested entity"""
+
+    pass
+
+
+class MissingInputParamError(BadRequestError):
+    """Error when some required parameter is missing for operation"""
+
+    pass
 
 
 class EntityAlreadyExistsError(HTTPException):
@@ -100,13 +117,6 @@ class EntityAlreadyExistsError(HTTPException):
             status_code=status.HTTP_409_CONFLICT,
             detail=msg,
         )
-
-
-class WrongTaskError(HTTPException):
-    """Error raised when provided task cannot be processed with requested entity"""
-
-    def __init__(self, detail: str):
-        super().__init__(detail=detail, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 class EntityNotFoundError(HTTPException):

@@ -31,6 +31,7 @@ from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     LabelingRule,
+    LabelingRuleMetrics,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchAggregations,
@@ -190,18 +191,23 @@ class TextClassificationService:
     def _check_multi_label_integrity(
         self, dataset: Dataset, records: List[TextClassificationRecord]
     ):
-        # Fetch a single record
-        results = self.search(
-            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
-        )
-        if results.records:
+        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
+        if is_multi_label_dataset is not None:
             is_multi_label = records[0].multi_label
-            assert is_multi_label == results.records[0].multi_label, (
+            assert is_multi_label == is_multi_label_dataset, (
                 "You cannot pass {labels_type} records for this dataset. "
                 "Stored records are {labels_type}".format(
                     labels_type="multi-label" if is_multi_label else "single-label"
                 )
             )
+
+    def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
+        # Fetch a single record
+        results = self.search(
+            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
+        )
+        if results.records:
+            return results.records[0].multi_label
 
     def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
         """
@@ -232,6 +238,9 @@ class TextClassificationService:
             The rule
 
         """
+        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
+        if is_multi_label_dataset is not None:
+            assert not is_multi_label_dataset, "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
@@ -252,3 +261,42 @@ class TextClassificationService:
         """
         if rule_query.strip():
             return self.__labeling__.delete_rule(dataset, rule_query)
+
+    def compute_rule_metrics(
+        self,
+        dataset: Dataset,
+        rule_query: str,
+        label: str,
+    ) -> LabelingRuleMetrics:
+        """
+        Compute metrics for a given rule. It's not necessary that query rule
+        is created in dataset. Basic computed rules are: coverage,
+        overlaps, conflicts[*], correct[*], incorrect[*], precision[*]
+
+        [*]: computed metrics only if label is provided or rule already created in dataset
+
+        Parameters
+        ----------
+        dataset:
+            The dataset
+        rule_query:
+            The provided rule query. If already created in dataset, the ``label``
+            param will be omitted
+        label:
+            Label used for rule metrics
+
+        Returns
+        -------
+
+        """
+        total, metrics = self.__labeling__.compute_rule_metrics(
+            dataset, rule_query=rule_query, label=label
+        )
+
+        return LabelingRuleMetrics(
+            coverage=metrics.covered_records / total,
+            correct=metrics.correct_records,
+            incorrect=metrics.incorrect_records,
+            precision=metrics.precision,
+            total_records=total,
+        )

@@ -172,7 +172,10 @@ def parse_aggregations(
     result = {}
     for key, values in es_aggregations.items() or {}:
         if "buckets" in values:
-            result[key] = parse_buckets(values["buckets"])
+            buckets = values["buckets"]
+            if isinstance(buckets, dict):
+                buckets = [{"key": k, **v} for k, v in buckets.items()]
+            result[key] = parse_buckets(buckets)
         elif is_extended_stats_aggregation(values):
             result[key] = {"rubrix:stats": values}  # statistical aggregations
         else:
@@ -186,6 +189,34 @@ def decode_field_name(field: EsRecordDataFieldNames) -> str:
 
 class filters:
     """Group of functions related to elasticsearch filters"""
+
+    @staticmethod
+    def boolean_filter(
+        filter_query: Optional[Dict[str, Any]] = None,
+        must_query: Optional[Dict[str, Any]] = None,
+        must_not_query: Optional[Dict[str, Any]] = None,
+        should_filters: Optional[List[Dict[str, Any]]] = None,
+        minimum_should_match: Union[int, str] = 1,
+    ):
+        es_query = {}
+
+        if filter_query:
+            es_query["filter"] = filter_query
+
+        if must_query:
+            es_query["must"] = must_query
+
+        if must_not_query:
+            es_query["must_not"] = must_not_query
+
+        if should_filters:
+            es_query["should"] = should_filters
+            es_query["minimum_should_match"] = minimum_should_match or 1
+
+        if not es_query:
+            raise ValueError("Must provide minimal data for boolean query")
+
+        return {"bool": es_query}
 
     @staticmethod
     def exists_field(field_name: str) -> Dict[str, Any]:
@@ -276,28 +307,26 @@ class filters:
         """Filter records matching text query"""
         if text_query is None:
             return {"match_all": {}}
-        return {
-            "bool": {
-                "should": [
-                    {
-                        "query_string": {
-                            "default_field": EsRecordDataFieldNames.words,
-                            "default_operator": "AND",
-                            "query": text_query,
-                            "boost": "2.0",
-                        }
-                    },
-                    {
-                        "query_string": {
-                            "default_field": f"{EsRecordDataFieldNames.words}.extended",
-                            "default_operator": "AND",
-                            "query": text_query,
-                        }
-                    },
-                ],
-                "minimum_should_match": "50%",
-            }
-        }
+        return filters.boolean_filter(
+            should_filters=[
+                {
+                    "query_string": {
+                        "default_field": EsRecordDataFieldNames.words,
+                        "default_operator": "AND",
+                        "query": text_query,
+                        "boost": "2.0",
+                    }
+                },
+                {
+                    "query_string": {
+                        "default_field": f"{EsRecordDataFieldNames.words}.extended",
+                        "default_operator": "AND",
+                        "query": text_query,
+                    }
+                },
+            ],
+            minimum_should_match="50%",
+        )
 
     @staticmethod
     def score(
