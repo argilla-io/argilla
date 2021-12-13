@@ -54,7 +54,7 @@
             class="sidebar__info__icon-help"
             name="check3"
           ></svgicon>
-          XX
+          <svgicon name="define-rules-view"></svgicon>
         </a>
       </div>
       <div class="sidebar__info">
@@ -89,6 +89,7 @@
 import "assets/icons/refresh";
 import "assets/icons/explore-view";
 import "assets/icons/annotate-view";
+import "assets/icons/define-rules-view";
 import "assets/icons/progress";
 import "assets/icons/metrics";
 import "assets/icons/double-chev";
@@ -122,7 +123,9 @@ export default {
   },
   computed: {
     viewMode() {
-      return this.dataset.viewSettings.viewMode;
+      if (this.isDatasetView) {
+        return this.dataset.viewSettings.viewMode;
+      }
     },
     isDatasetView() {
       return this.dataset !== undefined;
