@@ -89,7 +89,6 @@
 
                   <ReDate
                     v-else-if="column.type === 'date'"
-                    class="table-info__meta"
                     :date="itemValue(item, column)"
                   />
                   <span v-else-if="column.type === 'object'">
@@ -527,10 +526,6 @@ export default {
         color: $primary-color;
       }
     }
-  }
-  &__meta {
-    font-weight: lighter;
-    color: $font-medium-color;
   }
   &__group {
     padding-bottom: 2em;
