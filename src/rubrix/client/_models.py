@@ -12,10 +12,6 @@ class Rule(BaseModel):
     label: str
     name: Optional[str] = None
 
-    @classmethod
-    def from_sdk(cls, value: LabelingRule) -> "Rule":
-        return cls(query=value.query, label=value.label, name=value.description)
-
 
 class RuleMetrics(BaseModel):
 
