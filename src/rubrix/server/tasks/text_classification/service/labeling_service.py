@@ -64,8 +64,9 @@ class LabelingRulesMetrics(ElasticsearchMetric):
 
         correct = aggregation_result["correct_records"]
         incorrect = aggregation_result["incorrect_records"]
+        annotated = correct + incorrect
 
-        aggregation_result["precision"] = correct / (correct + incorrect)
+        aggregation_result["precision"] = (correct / annotated) if annotated > 0 else 0
         return aggregation_result
 
 
