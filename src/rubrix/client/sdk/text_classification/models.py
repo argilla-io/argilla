@@ -19,12 +19,12 @@ from pydantic import BaseModel, Field
 
 from rubrix.client.models import (
     TextClassificationRecord as ClientTextClassificationRecord,
+    TokenAttributions as ClientTokenAttributions,
 )
-from rubrix.client.models import TokenAttributions as ClientTokenAttributions
 from rubrix.client.sdk.commons.models import (
-    MACHINE_NAME,
     BaseAnnotation,
     BaseRecord,
+    MACHINE_NAME,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
@@ -149,3 +149,34 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+
+class LabelingRule(BaseModel):
+    """
+    Adds read-only attributes to the labeling rule
+
+    Attributes:
+    -----------
+
+    query:
+        The ES query of the rule
+
+    label: str
+        The label associated with the rule
+
+    description:
+        A brief description of the rule
+
+    author:
+        Who created the rule
+
+    created_at:
+        When was the rule created
+
+    """
+
+    query: str
+    label: str
+    description: Optional[str] = None
+    author: str = None
+    created_at: datetime = None

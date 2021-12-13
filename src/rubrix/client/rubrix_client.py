@@ -24,6 +24,7 @@ import pandas
 from tqdm.auto import tqdm
 
 from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
+from rubrix.client._models import Rule, RuleMetrics
 from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
     BulkResponse,
@@ -38,22 +39,31 @@ from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dat
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics.api import compute_metric, get_dataset_metrics
 from rubrix.client.sdk.metrics.models import MetricInfo
-from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
-from rubrix.client.sdk.text2text.api import data as text2text_data
+from rubrix.client.sdk.text2text.api import (
+    bulk as text2text_bulk,
+    data as text2text_data,
+)
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
     Text2TextQuery,
 )
-from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
-from rubrix.client.sdk.text_classification.api import data as text_classification_data
+from rubrix.client.sdk.text_classification.api import (
+    bulk as text_classification_bulk,
+    data as text_classification_data,
+    dataset_rule_metrics,
+    fetch_dataset_labeling_rules,
+)
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
+    LabelingRule,
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.api import bulk as token_classification_bulk
-from rubrix.client.sdk.token_classification.api import data as token_classification_data
+from rubrix.client.sdk.token_classification.api import (
+    bulk as token_classification_bulk,
+    data as token_classification_data,
+)
 from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
@@ -373,6 +383,19 @@ class RubrixClient:
         _check_response_errors(response)
         return MetricResults(**metric_.dict(), results=response.parsed)
 
+    def fetch_dataset_labeling_rules(self, dataset: str) -> List[Rule]:
+        response = fetch_dataset_labeling_rules(self._client, name=dataset)
+        _check_response_errors(response)
+
+        return [Rule.parse_obj(data) for data in response.parsed]
+
+    def rule_metrics_for_dataset(self, dataset: str, rule: Rule) -> RuleMetrics:
+        response = dataset_rule_metrics(
+            self._client, name=dataset, rule=LabelingRule.parse_obj(rule)
+        )
+        _check_response_errors(response)
+
+        return RuleMetrics.parse_obj(response.parsed)
 
 def _check_response_errors(response: Response) -> None:
     """Checks response status codes and raise corresponding error if found"""
