@@ -1,5 +1,7 @@
-DATASETS_INDEX_NAME = f".rubrix.datasets-v0"
-DATASETS_RECORDS_INDEX_NAME = ".rubrix.dataset.{}.records-v0"
+from rubrix.server.commons.settings import settings
+
+DATASETS_INDEX_NAME = settings.dataset_index_name
+DATASETS_RECORDS_INDEX_NAME = settings.dataset_records_index_name
 
 
 DATASETS_INDEX_TEMPLATE = {
@@ -24,4 +26,3 @@ DATASETS_INDEX_TEMPLATE = {
         }
     },
 }
-
