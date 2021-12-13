@@ -57,9 +57,6 @@ export default {
     isExplainedRecord() {
       return this.dataset.results.records.some((record) => record.explanation);
     },
-    showAnnotationMode() {
-      return this.dataset.viewSettings.annotationEnabled;
-    },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },

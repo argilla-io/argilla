@@ -29,7 +29,7 @@
       :class="[
         `color_${entity.colorId}`,
         activeEntity === entity.text ? 'active' : '',
-        annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
+        viewMode === 'annotate' ? 'non-selectable--show-sort-code' : 'non-selectable',
       ]"
       @click="onActiveEntity(entity)"
     >
@@ -73,8 +73,8 @@ export default {
         ? entities
         : entities.slice(0, this.entitiesNumber);
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
   methods: {
@@ -82,7 +82,7 @@ export default {
       this.showEntitySelector = !this.showEntitySelector;
     },
     onActiveEntity(entity) {
-      if (this.annotationEnabled) {
+      if (this.viewMode === 'annotate') {
         if (this.activeEntity === entity.text) {
           this.activeEntity = undefined;
         } else {

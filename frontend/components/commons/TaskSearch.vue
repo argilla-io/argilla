@@ -20,8 +20,8 @@
     :class="[
       'app',
       currentTask,
-      annotationEnabled ? '--annotation' : '--exploration',
-      areMetricsVisible ? '--metrics' : null,
+      viewMode === 'annotate' ? '--annotation' : '--exploration',
+      areMetricsVisible ? '--metrics' : null
     ]"
   >
     <div class="app__content">
@@ -33,7 +33,7 @@
         <task-sidebar :dataset="dataset" />
         <component :is="currentTaskHeader" :dataset="dataset" />
       </section>
-      <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
+      <div :class="['grid', viewMode === 'annotate' ? 'grid--editable' : '']">
         <Results :dataset="dataset" />
       </div>
     </div>
@@ -70,8 +70,8 @@ export default {
     currentTaskHeader() {
       return this.currentTask + "Header";
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight;
