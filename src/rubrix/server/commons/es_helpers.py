@@ -307,28 +307,26 @@ class filters:
         """Filter records matching text query"""
         if text_query is None:
             return {"match_all": {}}
-        return {
-            "bool": {
-                "should": [
-                    {
-                        "query_string": {
-                            "default_field": EsRecordDataFieldNames.words,
-                            "default_operator": "AND",
-                            "query": text_query,
-                            "boost": "2.0",
-                        }
-                    },
-                    {
-                        "query_string": {
-                            "default_field": f"{EsRecordDataFieldNames.words}.extended",
-                            "default_operator": "AND",
-                            "query": text_query,
-                        }
-                    },
-                ],
-                "minimum_should_match": "50%",
-            }
-        }
+        return filters.boolean_filter(
+            should_filters=[
+                {
+                    "query_string": {
+                        "default_field": EsRecordDataFieldNames.words,
+                        "default_operator": "AND",
+                        "query": text_query,
+                        "boost": "2.0",
+                    }
+                },
+                {
+                    "query_string": {
+                        "default_field": f"{EsRecordDataFieldNames.words}.extended",
+                        "default_operator": "AND",
+                        "query": text_query,
+                    }
+                },
+            ],
+            minimum_should_match="50%",
+        )
 
     @staticmethod
     def score(
