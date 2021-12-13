@@ -130,9 +130,6 @@ export default {
         case "confirm-delete":
           this.deleteDataset(rowId);
           break;
-        case undefined:
-          this.$router.push(rowId);
-          break;
         default:
           console.warn(action);
       }

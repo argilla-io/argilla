@@ -67,10 +67,10 @@
               >
                 <span :class="column.class">
                   <span v-if="column.type === 'link'">
-                    <a href="#"
-                      @click.prevent="onActionClicked(item.kind, item.name)"
+                    <NuxtLink
+                      :to="item.name"
                       >{{ itemValue(item, column) }}
-                    </a>
+                    </NuxtLink>
                     <re-action-tooltip tooltip="Copied">
                       <ReButton
                         title="Copy to clipboard"
