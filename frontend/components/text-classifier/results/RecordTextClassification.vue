@@ -33,7 +33,7 @@
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <ClassifierExplorationArea v-else :record="record" />
+      <ClassifierExplorationArea v-else :dataset="dataset" :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <re-button
           v-if="allowValidate"
