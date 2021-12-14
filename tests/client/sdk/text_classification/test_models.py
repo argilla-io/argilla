@@ -21,6 +21,8 @@ from rubrix.client.models import TextClassificationRecord, TokenAttributions
 from rubrix.client.sdk.text_classification.models import (
     ClassPrediction,
     CreationTextClassificationRecord,
+    LabelingRule,
+    LabelingRuleMetrics,
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,
@@ -30,6 +32,8 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationBulkData as ServerTextClassificationBulkData,
+    LabelingRule as ServerLabelingRule,
+    LabelingRuleMetrics as ServerLabelingRuleMetrics,
 )
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationQuery as ServerTextClassificationQuery,
@@ -48,6 +52,24 @@ def test_bulk_data_schema(helpers):
 def test_query_schema(helpers):
     client_schema = TextClassificationQuery.schema()
     server_schema = ServerTextClassificationQuery.schema()
+
+    assert helpers.remove_description(client_schema) == helpers.remove_description(
+        server_schema
+    )
+
+
+def test_labeling_rule_schema(helpers):
+    client_schema = LabelingRule.schema()
+    server_schema = ServerLabelingRule.schema()
+
+    assert helpers.remove_description(client_schema) == helpers.remove_description(
+        server_schema
+    )
+
+
+def test_labeling_rule_metrics_schema(helpers):
+    client_schema = LabelingRuleMetrics.schema()
+    server_schema = ServerLabelingRuleMetrics.schema()
 
     assert helpers.remove_description(client_schema) == helpers.remove_description(
         server_schema

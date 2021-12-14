@@ -16,6 +16,7 @@ class Rule(BaseModel):
 class RuleMetrics(BaseModel):
 
     coverage: float
+    coverage_annotated: float
     precision: float
     correct: int
     incorrect: int

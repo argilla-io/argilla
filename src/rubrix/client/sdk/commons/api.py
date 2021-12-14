@@ -106,17 +106,20 @@ def build_list_response(
     )
 
 
-def build_raw_response(
-    response: httpx.Response,
-) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
+ResponseType = TypeVar("ResponseType")
 
+
+def build_typed_response(
+    response: httpx.Response,
+    response_type_class: Type[ResponseType],
+) -> Response[Union[ResponseType, ErrorMessage, HTTPValidationError]]:
     parsed_response = response.json()
-    if response.status_code == 404:
-        parsed_response = ErrorMessage(**parsed_response)
-    elif response.status_code == 500:
-        parsed_response = ErrorMessage(**parsed_response)
+    if response.status_code == 200:
+        parsed_response = response_type_class(**parsed_response)
     elif response.status_code == 422:
         parsed_response = HTTPValidationError(**parsed_response)
+    else:
+        parsed_response = ErrorMessage(**parsed_response)
 
     return Response(
         status_code=response.status_code,
@@ -124,3 +127,9 @@ def build_raw_response(
         headers=response.headers,
         parsed=parsed_response,
     )
+
+
+def build_raw_response(
+    response: httpx.Response,
+) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
+    return build_typed_response(response, response_type_class=dict)

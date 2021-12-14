@@ -391,7 +391,7 @@ class RubrixClient:
 
     def rule_metrics_for_dataset(self, dataset: str, rule: Rule) -> RuleMetrics:
         response = dataset_rule_metrics(
-            self._client, name=dataset, rule=LabelingRule.parse_obj(rule)
+            self._client, name=dataset, query=rule.query, label=rule.label
         )
         _check_response_errors(response)
 
