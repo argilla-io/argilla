@@ -12,10 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Optional
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 import rubrix as rb
-from rubrix import TextClassificationRecord
+from rubrix import TextClassificationRecord, _client_instance as client
 
 
 class Rule:
@@ -42,6 +44,16 @@ class Rule:
         self._label = label
         self._name = name
         self._matching_ids = None
+
+    @property
+    def query(self) -> str:
+        """The rule query"""
+        return self._query
+
+    @property
+    def label(self) -> str:
+        """The rule label"""
+        return self._label
 
     @property
     def name(self):
@@ -87,3 +99,42 @@ class Rule:
 
 class RuleNotAppliedError(Exception):
     pass
+
+
+class RuleMetrics(BaseModel):
+    """The rule metrics results dataclass"""
+
+    coverage: float
+    precision: float
+    correct: int
+    incorrect: int
+
+
+def rules_from_dataset(dataset: str) -> List[Rule]:
+    """
+    Fetch dataset rules defined in a given dataset
+
+    Parameters
+    ----------
+    dataset:
+        The dataset name
+
+    Returns
+    -------
+        A list of rules defined in provided dataset.
+    """
+    """"""
+    current_client = client()
+    rules = current_client.fetch_dataset_labeling_rules(dataset)
+    return [Rule(query=r.query, label=r.label, name=r.name) for r in rules]
+
+
+def rule_metrics(dataset: str, rule: Rule) -> RuleMetrics:
+    from rubrix.client._models import Rule as ClientRule
+
+    current_client = client()
+    metrics = current_client.rule_metrics_for_dataset(
+        dataset=dataset, rule=ClientRule(query=rule.query, label=rule.label)
+    )
+
+    return RuleMetrics.parse_obj(metrics)

@@ -12,12 +12,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response
+from rubrix.client.sdk.commons.api import (
+    build_bulk_response,
+    build_data_response,
+    build_list_response,
+    build_raw_response,
+)
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
     ErrorMessage,
@@ -25,6 +30,7 @@ from rubrix.client.sdk.commons.models import (
     Response,
 )
 from rubrix.client.sdk.text_classification.models import (
+    LabelingRule,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
@@ -73,3 +79,40 @@ def data(
         return build_data_response(
             response=response, data_type=TextClassificationRecord
         )
+
+
+def fetch_dataset_labeling_rules(
+    client: AuthenticatedClient,
+    name: str,
+) -> Response[Union[List[LabelingRule], HTTPValidationError, ErrorMessage]]:
+
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(
+        client.base_url, name=name
+    )
+
+    response = httpx.get(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    return build_list_response(response, LabelingRule)
+
+
+def dataset_rule_metrics(
+    client: AuthenticatedClient, name: str, rule: LabelingRule
+) -> Response[Union[Dict[str, Any], HTTPValidationError, ErrorMessage]]:
+
+    url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}/metrics?label={label}".format(
+        client.base_url, name=name, query=rule.query, label=rule.label
+    )
+
+    response = httpx.post(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    return build_raw_response(response)
