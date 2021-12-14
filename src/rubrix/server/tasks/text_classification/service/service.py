@@ -202,12 +202,14 @@ class TextClassificationService:
             )
 
     def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
-        # Fetch a single record
-        results = self.search(
-            dataset, query=TextClassificationQuery(), size=1, sort_by=[]
+        results = self.__dao__.search_records(
+            dataset,
+            search=RecordSearch(include_default_aggregations=False),
+            size=1,
         )
-        if results.records:
-            return results.records[0].multi_label
+        records = [TextClassificationRecord.parse_obj(r) for r in results.records]
+        if records:
+            return records[0].multi_label
 
     def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
         """
@@ -240,7 +242,9 @@ class TextClassificationService:
         """
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
-            assert not is_multi_label_dataset, "Labeling rules are not supported for multi-label datasets"
+            assert (
+                not is_multi_label_dataset
+            ), "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
