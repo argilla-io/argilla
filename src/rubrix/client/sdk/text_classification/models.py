@@ -178,5 +178,17 @@ class LabelingRule(BaseModel):
     query: str
     label: str
     description: Optional[str] = None
-    author: str = None
+    author: str
     created_at: datetime = None
+
+
+class LabelingRuleMetrics(BaseModel):
+    """Metrics generated for a labeling rule"""
+
+    coverage: float
+    coverage_annotated: float
+    correct: float
+    incorrect: float
+    precision: float
+
+    total_records: int
