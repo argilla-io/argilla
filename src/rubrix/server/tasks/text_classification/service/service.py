@@ -240,7 +240,9 @@ class TextClassificationService:
         """
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
-            assert not is_multi_label_dataset, "Labeling rules are not supported for multi-label datasets"
+            assert (
+                not is_multi_label_dataset
+            ), "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
@@ -289,12 +291,14 @@ class TextClassificationService:
         -------
 
         """
-        total, metrics = self.__labeling__.compute_rule_metrics(
+        total, annotated, metrics = self.__labeling__.compute_rule_metrics(
             dataset, rule_query=rule_query, label=label
         )
 
         return LabelingRuleMetrics(
             coverage=metrics.covered_records / total,
+            coverage_annotated=(metrics.correct_records + metrics.incorrect_records)
+            / annotated,
             correct=metrics.correct_records,
             incorrect=metrics.incorrect_records,
             precision=metrics.precision,
