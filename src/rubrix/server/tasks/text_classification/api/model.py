@@ -94,6 +94,13 @@ class LabelingRuleMetrics(BaseModel):
     total_records: int
 
 
+class DatasetLabelingRulesMetrics(BaseModel):
+    coverage: float
+    coverage_annotated: float
+
+    total_records: int
+
+
 class TextClassificationDatasetDB(DatasetDB):
     """
     A dataset class specialized for text classification task

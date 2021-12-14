@@ -2,6 +2,7 @@ import pytest
 
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
+    DatasetLabelingRulesMetrics,
     LabelingRule,
     LabelingRuleMetrics,
     TextClassificationBulkData,
@@ -128,7 +129,7 @@ def test_rule_metrics_with_missing_label():
     dataset = "test_rule_metrics_with_missing_label"
     log_some_records(dataset, annotation="OK")
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/a query/metrics"
     )
     assert response.status_code == 422
@@ -143,11 +144,33 @@ def test_rule_metrics_with_missing_label():
     }
 
 
+def test_dataset_rules_metrics():
+    dataset = "test_dataset_rules_metrics"
+    log_some_records(dataset, annotation="OK")
+
+    for query in ["ejemplo", "bad query"]:
+        client.post(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+            json=CreateLabelingRule(
+                query=query, label="TEST", description="Description"
+            ).dict(),
+        )
+
+    response = client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/metrics"
+    )
+    assert response.status_code == 200, response.json()
+
+    metrics = DatasetLabelingRulesMetrics.parse_obj(response.json())
+    assert metrics.coverage == 1
+    assert metrics.coverage_annotated == 1
+
+
 def test_rule_metric():
     dataset = "test_rule_metric"
     log_some_records(dataset, annotation="OK")
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics?label=TEST"
     )
     assert response.status_code == 200
@@ -160,7 +183,7 @@ def test_rule_metric():
     assert metrics.incorrect == 1
     assert metrics.precision == 0
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics?label=OK"
     )
     assert response.status_code == 200
@@ -170,7 +193,7 @@ def test_rule_metric():
     assert metrics.incorrect == 0
     assert metrics.precision == 1
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/badd/metrics?label=OK"
     )
     assert response.status_code == 200
