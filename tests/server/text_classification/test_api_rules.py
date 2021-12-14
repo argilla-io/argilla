@@ -128,7 +128,7 @@ def test_rule_metrics_with_missing_label():
     dataset = "test_rule_metrics_with_missing_label"
     log_some_records(dataset, annotation="OK")
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/a query/metrics"
     )
     assert response.status_code == 422
@@ -147,7 +147,7 @@ def test_rule_metric():
     dataset = "test_rule_metric"
     log_some_records(dataset, annotation="OK")
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics?label=TEST"
     )
     assert response.status_code == 200
@@ -160,7 +160,7 @@ def test_rule_metric():
     assert metrics.incorrect == 1
     assert metrics.precision == 0
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics?label=OK"
     )
     assert response.status_code == 200
@@ -170,7 +170,7 @@ def test_rule_metric():
     assert metrics.incorrect == 0
     assert metrics.precision == 1
 
-    response = client.post(
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/badd/metrics?label=OK"
     )
     assert response.status_code == 200
