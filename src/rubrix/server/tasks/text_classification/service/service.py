@@ -293,12 +293,14 @@ class TextClassificationService:
         -------
 
         """
-        total, metrics = self.__labeling__.compute_rule_metrics(
+        total, annotated, metrics = self.__labeling__.compute_rule_metrics(
             dataset, rule_query=rule_query, label=label
         )
 
         return LabelingRuleMetrics(
             coverage=metrics.covered_records / total,
+            coverage_annotated=(metrics.correct_records + metrics.incorrect_records)
+            / annotated,
             correct=metrics.correct_records,
             incorrect=metrics.incorrect_records,
             precision=metrics.precision,

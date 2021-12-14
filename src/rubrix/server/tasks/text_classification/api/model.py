@@ -86,6 +86,7 @@ class LabelingRuleMetrics(BaseModel):
     """Metrics generated for a labeling rule"""
 
     coverage: float
+    coverage_annotated: float
     correct: float
     incorrect: float
     precision: float

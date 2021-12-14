@@ -135,8 +135,19 @@ class LabelingService:
         dataset: BaseDatasetDB,
         rule_query: str,
         label: str,
-    ) -> Tuple[int, LabelingRuleMetrics]:
+    ) -> Tuple[int, int, LabelingRuleMetrics]:
         """Computes metrics for given rule query and optional label against a set of rules"""
+
+        results  = self.__records__.search_records(
+            dataset,
+            size=0,
+            search=RecordSearch(
+                query=filters.exists_field(EsRecordDataFieldNames.annotated_as),
+                include_default_aggregations=False,
+            ),
+        )
+
+        annotated_records = results.total
 
         results = self.__records__.search_records(
             dataset,
@@ -153,4 +164,6 @@ class LabelingService:
             results.aggregations
         )
 
-        return results.total, LabelingRuleMetrics.parse_obj(rule_metrics_summary)
+        metrics = LabelingRuleMetrics.parse_obj(rule_metrics_summary)
+
+        return results.total, annotated_records, metrics

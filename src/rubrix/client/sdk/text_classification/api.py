@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import httpx
 
@@ -21,7 +21,7 @@ from rubrix.client.sdk.commons.api import (
     build_bulk_response,
     build_data_response,
     build_list_response,
-    build_raw_response,
+    build_typed_response,
 )
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
@@ -31,6 +31,7 @@ from rubrix.client.sdk.commons.models import (
 )
 from rubrix.client.sdk.text_classification.models import (
     LabelingRule,
+    LabelingRuleMetrics,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
@@ -101,11 +102,14 @@ def fetch_dataset_labeling_rules(
 
 
 def dataset_rule_metrics(
-    client: AuthenticatedClient, name: str, rule: LabelingRule
-) -> Response[Union[Dict[str, Any], HTTPValidationError, ErrorMessage]]:
+    client: AuthenticatedClient,
+    name: str,
+    query: str,
+    label: str,
+) -> Response[Union[LabelingRuleMetrics, HTTPValidationError, ErrorMessage]]:
 
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}/metrics?label={label}".format(
-        client.base_url, name=name, query=rule.query, label=rule.label
+        client.base_url, name=name, query=query, label=label
     )
 
     response = httpx.post(
@@ -115,4 +119,4 @@ def dataset_rule_metrics(
         timeout=client.get_timeout(),
     )
 
-    return build_raw_response(response)
+    return build_typed_response(response, response_type_class=LabelingRuleMetrics)

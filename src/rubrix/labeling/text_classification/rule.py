@@ -105,6 +105,7 @@ class RuleMetrics(BaseModel):
     """The rule metrics results dataclass"""
 
     coverage: float
+    coverage_annotated: float
     precision: float
     correct: int
     incorrect: int

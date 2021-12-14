@@ -155,6 +155,7 @@ def test_rule_metric():
     metrics = LabelingRuleMetrics.parse_obj(response.json())
     assert metrics.total_records == 1
     assert metrics.coverage == 1
+    assert metrics.coverage_annotated == 1
     assert metrics.correct == 0
     assert metrics.incorrect == 1
     assert metrics.precision == 0
@@ -177,6 +178,7 @@ def test_rule_metric():
     metrics = LabelingRuleMetrics.parse_obj(response.json())
     assert metrics.total_records == 1
     assert metrics.coverage == 0
+    assert metrics.coverage_annotated == 0
     assert metrics.correct == 0
     assert metrics.incorrect == 0
     assert metrics.precision == 0
