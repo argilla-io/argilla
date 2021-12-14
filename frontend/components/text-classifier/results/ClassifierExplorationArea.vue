@@ -52,7 +52,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => vm.record.id,
+      idProp: vm => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -60,6 +60,9 @@ export default {
       type: Object,
       required: true,
     },
+    dataset: {
+      type: Object,   
+    }
   },
   idState () {
     return {

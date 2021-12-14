@@ -173,7 +173,6 @@ class LabelingService:
         """Computes metrics for given rule query and optional label against a set of rules"""
 
         annotated_records = self._count_annotated_records(dataset)
-
         results = self.__records__.search_records(
             dataset,
             size=0,
