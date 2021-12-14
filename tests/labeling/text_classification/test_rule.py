@@ -111,11 +111,33 @@ def test_dataset_rules(monkeypatch, log_dataset):
     [
         (
             Rule(query="neg*", label="LALA"),
-            RuleMetrics(correct=0, incorrect=1, coverage=0.5, precision=0),
+            RuleMetrics(
+                correct=0,
+                incorrect=1,
+                coverage=0.5,
+                coverage_annotated=0.5,
+                precision=0,
+            ),
         ),
         (
             Rule(query="neg*", label="negative"),
-            RuleMetrics(correct=1, incorrect=0, coverage=0.5, precision=1),
+            RuleMetrics(
+                correct=1,
+                incorrect=0,
+                coverage=0.5,
+                coverage_annotated=0.5,
+                precision=1,
+            ),
+        ),
+(
+            Rule(query="bad", label="negative"),
+            RuleMetrics(
+                correct=0,
+                incorrect=0,
+                coverage=0,
+                coverage_annotated=0,
+                precision=0,
+            ),
         ),
     ],
 )

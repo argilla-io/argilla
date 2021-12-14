@@ -298,6 +298,8 @@ def test_sort_by_id_as_default():
 
 def test_some_sort_by():
     dataset = "test_some_sort_by"
+
+    expected_records_length = 50
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
     response = client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -313,7 +315,7 @@ def test_some_sort_by():
                         },
                     }
                 )
-                for i in range(0, 100)
+                for i in range(0, expected_records_length)
             ],
         ).dict(by_alias=True),
     )
@@ -337,19 +339,8 @@ def test_some_sort_by():
     )
 
     results = TextClassificationSearchResults.parse_obj(response.json())
-    assert results.total == 100
-    assert list(map(lambda r: r.id, results.records)) == [
-        14,
-        19,
-        24,
-        29,
-        34,
-        39,
-        4,
-        44,
-        49,
-        54,
-    ]
+    assert results.total == expected_records_length
+    assert list(map(lambda r: r.id, results.records)) == [14, 19, 24, 29, 34, 39, 4, 44, 49, 9]
 
 
 def test_disable_aggregations_when_scroll():
