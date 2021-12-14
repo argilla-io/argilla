@@ -73,7 +73,7 @@ class ElasticsearchMetric(BaseMetric):
             Retrieved es aggregation result
 
         """
-        return aggregation_result
+        return aggregation_result.get(self.id, aggregation_result)
 
 
 class NestedPathElasticsearchMetric(ElasticsearchMetric):
