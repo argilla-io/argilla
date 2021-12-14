@@ -28,6 +28,7 @@ from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, Task
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
     CreateLabelingRule,
+    DatasetLabelingRulesMetrics,
     LabelingRule,
     LabelingRuleMetrics,
     TextClassificationBulkData,
@@ -296,7 +297,7 @@ async def create_rule(
     return rule
 
 
-@router.post(f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}/metrics")
+@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}/metrics")
 async def query_metrics(
     name: str,
     query: str,
@@ -318,6 +319,26 @@ async def query_metrics(
     return service.compute_rule_metrics(
         Dataset.parse_obj(dataset), rule_query=query, label=label
     )
+
+
+@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules/metrics")
+async def query_metrics(
+    name: str,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> DatasetLabelingRulesMetrics:
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    return service.compute_overall_rules_metrics(Dataset.parse_obj(dataset))
 
 
 @router.delete(

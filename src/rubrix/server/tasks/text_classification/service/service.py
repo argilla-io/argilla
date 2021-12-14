@@ -30,6 +30,7 @@ from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
+    DatasetLabelingRulesMetrics,
     LabelingRule,
     LabelingRuleMetrics,
     TextClassificationQuery,
@@ -302,5 +303,13 @@ class TextClassificationService:
             correct=metrics.correct_records,
             incorrect=metrics.incorrect_records,
             precision=metrics.precision,
+            total_records=total,
+        )
+
+    def compute_overall_rules_metrics(self, dataset: Dataset):
+        total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
+        return DatasetLabelingRulesMetrics(
+            coverage=metrics.covered_records / total,
+            coverage_annotated=metrics.annotated_covered_records / annotated,
             total_records=total,
         )
