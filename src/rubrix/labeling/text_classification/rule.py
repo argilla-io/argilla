@@ -17,7 +17,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 import rubrix as rb
-from rubrix import TextClassificationRecord, _client_instance as client
+from rubrix import TextClassificationRecord
+from rubrix import _client_instance as client
 
 
 class Rule:
@@ -111,26 +112,30 @@ class RuleMetrics(BaseModel):
     incorrect: int
 
 
-def rules_from_dataset(dataset: str) -> List[Rule]:
-    """
-    Fetch dataset rules defined in a given dataset
+def get_rules(dataset: str) -> List[Rule]:
+    """Get rules defined in a given dataset.
 
-    Parameters
-    ----------
-    dataset:
-        The dataset name
+    Args:
+        dataset: Name of the dataset.
 
-    Returns
-    -------
-        A list of rules defined in provided dataset.
+    Returns:
+        A list of rules defined in the given dataset.
     """
-    """"""
     current_client = client()
     rules = current_client.fetch_dataset_labeling_rules(dataset)
     return [Rule(query=r.query, label=r.label, name=r.name) for r in rules]
 
 
-def rule_metrics(dataset: str, rule: Rule) -> RuleMetrics:
+def get_rule_metrics(dataset: str, rule: Rule) -> RuleMetrics:
+    """Get metrics for a given dataset and rule.
+
+    Args:
+        dataset: Name of the dataset.
+        rule: The rule for which to compute the metrics.
+
+    Returns:
+        Metrics for the given rule.
+    """
     from rubrix.client._models import Rule as ClientRule
 
     current_client = client()
