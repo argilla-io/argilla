@@ -34,6 +34,7 @@
         :key="item.id"
         :allow-change-status="annotationEnabled"
         :record="item"
+        :dataset="dataset"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata(item)"
