@@ -112,7 +112,7 @@ def dataset_rule_metrics(
         client.base_url, name=name, query=query, label=label
     )
 
-    response = httpx.post(
+    response = httpx.get(
         url=url,
         headers=client.get_headers(),
         cookies=client.get_cookies(),
