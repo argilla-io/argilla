@@ -15,6 +15,7 @@
 
 import pytest
 from pydantic import ValidationError
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
@@ -115,7 +116,7 @@ def test_query_as_elasticsearch():
     assert query.as_elasticsearch() == {"ids": {"values": query.ids}}
 
 
-def test_misaligned_entity_mentions():
+def test_misaligned_entity_mentions_with_spaces_left():
     assert TokenClassificationRecord(
         text="according to analysts.\n     Dart Group Corp was not",
         tokens=[
@@ -133,6 +134,18 @@ def test_misaligned_entity_mentions():
         annotation=TokenClassificationAnnotation(
             agent="heuristics",
             entities=[EntitySpan(start=22, end=43, label="COMPANY", score=1.0)],
+            score=None,
+        ),
+    )
+
+
+def test_misaligned_entity_mentions_with_spaces_right():
+    assert TokenClassificationRecord(
+        text="\nvs 9.91 billion\n    Note\n REUTER\n",
+        tokens=["\n", "vs", "9.91", "billion", "\n    ", "Note", "\n ", "REUTER", "\n"],
+        annotation=TokenClassificationAnnotation(
+            agent="heuristics",
+            entities=[EntitySpan(start=4, end=21, label="MONEY", score=1.0)],
             score=None,
         ),
     )
