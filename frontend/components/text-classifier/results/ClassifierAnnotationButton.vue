@@ -194,6 +194,15 @@ $annotation-button-touch-size: 48px;
   &.disabled {
     opacity: 0.5;
   }
+  &.non-reactive {
+    pointer-events: none;
+    cursor: pointer;
+    .button {
+      background: $lighter-color;
+      color: palette(grey);
+      border: 1px solid palette(grey, light);
+    }
+  }
   &:not(.disabled) {
     cursor: pointer;
     .annotation-button {
