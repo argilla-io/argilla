@@ -28,9 +28,9 @@ from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, Task
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.text_classification.api.model import (
     CreateLabelingRule,
-    DatasetLabelingRulesMetrics,
+    DatasetLabelingRulesMetricsSummary,
     LabelingRule,
-    LabelingRuleMetrics,
+    LabelingRuleMetricsSummary,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
@@ -301,14 +301,14 @@ async def create_rule(
 async def query_metrics(
     name: str,
     query: str,
-    label: str = Query(..., description="Label related to query rule"),
+    label: Optional[str] = Query(None, description="Label related to query rule"),
     common_params: CommonTaskQueryParams = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-) -> LabelingRuleMetrics:
+) -> LabelingRuleMetricsSummary:
     dataset = datasets.find_by_name(
         name,
         task=TASK_TYPE,
@@ -330,7 +330,7 @@ async def query_metrics(
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-) -> DatasetLabelingRulesMetrics:
+) -> DatasetLabelingRulesMetricsSummary:
     dataset = datasets.find_by_name(
         name,
         task=TASK_TYPE,
