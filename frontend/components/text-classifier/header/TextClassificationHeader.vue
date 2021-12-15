@@ -18,11 +18,11 @@
 <template>
   <div class="header__filters">
     <header-title
-      v-if="dataset.results.records"
+      v-if="dataset.results.records && viewMode !== 'define-rules'"
       title="Text Classification"
       :dataset="dataset"
     />
-    <filters-area :dataset="dataset" />
+    <filters-area :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" />
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -68,6 +68,9 @@ export default {
           : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return labels;
+    },
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
   methods: {
