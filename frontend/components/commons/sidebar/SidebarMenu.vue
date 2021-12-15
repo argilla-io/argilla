@@ -45,6 +45,7 @@
           <svgicon name="annotate-view"></svgicon>
         </a>
         <a class="sidebar__info__button"
+          v-if="showDefineRules"
           href="#"
           data-title="Define rules"
           @click="$emit('onChangeViewMode', 'define-rules')"
@@ -129,6 +130,9 @@ export default {
     },
     isDatasetView() {
       return this.dataset !== undefined;
+    },
+    showDefineRules() {
+      return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
     }
   },
   watch: {
