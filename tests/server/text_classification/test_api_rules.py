@@ -2,9 +2,9 @@ import pytest
 
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
-    DatasetLabelingRulesMetrics,
+    DatasetLabelingRulesMetricsSummary,
     LabelingRule,
-    LabelingRuleMetrics,
+    LabelingRuleMetricsSummary,
     TextClassificationBulkData,
     TextClassificationRecord,
 )
@@ -132,16 +132,28 @@ def test_rule_metrics_with_missing_label():
     response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/a query/metrics"
     )
-    assert response.status_code == 422
+    assert response.status_code == 400
     assert response.json() == {
-        "detail": [
-            {
-                "loc": ["query", "label"],
-                "msg": "field required",
-                "type": "value_error.missing",
-            }
-        ]
+        "detail": "`label` param was not provided and rule is not stored for dataset. "
+        "You must either an already created rule or specify the label for metrics computation"
     }
+
+
+def test_rule_metrics_with_missing_label_for_stored_rule():
+    dataset = "test_rule_metrics_with_missing_label_for_stored_rule"
+    log_some_records(dataset, annotation="OK")
+    for query in ["ejemplo", "bad query"]:
+        client.post(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+            json=CreateLabelingRule(
+                query=query, label="TEST", description="Description"
+            ).dict(),
+        )
+
+    response = client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/bad query/metrics"
+    )
+    assert response.status_code == 200
 
 
 def test_dataset_rules_metrics():
@@ -161,7 +173,7 @@ def test_dataset_rules_metrics():
     )
     assert response.status_code == 200, response.json()
 
-    metrics = DatasetLabelingRulesMetrics.parse_obj(response.json())
+    metrics = DatasetLabelingRulesMetricsSummary.parse_obj(response.json())
     assert metrics.coverage == 1
     assert metrics.coverage_annotated == 1
 
@@ -175,7 +187,7 @@ def test_rule_metric():
     )
     assert response.status_code == 200
 
-    metrics = LabelingRuleMetrics.parse_obj(response.json())
+    metrics = LabelingRuleMetricsSummary.parse_obj(response.json())
     assert metrics.total_records == 1
     assert metrics.coverage == 1
     assert metrics.coverage_annotated == 1
@@ -188,7 +200,7 @@ def test_rule_metric():
     )
     assert response.status_code == 200
 
-    metrics = LabelingRuleMetrics.parse_obj(response.json())
+    metrics = LabelingRuleMetricsSummary.parse_obj(response.json())
     assert metrics.correct == 1
     assert metrics.incorrect == 0
     assert metrics.precision == 1
@@ -198,7 +210,7 @@ def test_rule_metric():
     )
     assert response.status_code == 200
 
-    metrics = LabelingRuleMetrics.parse_obj(response.json())
+    metrics = LabelingRuleMetricsSummary.parse_obj(response.json())
     assert metrics.total_records == 1
     assert metrics.coverage == 0
     assert metrics.coverage_annotated == 0
