@@ -33,7 +33,7 @@ from rubrix.client.sdk.text_classification.models import (
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationBulkData as ServerTextClassificationBulkData,
     LabelingRule as ServerLabelingRule,
-    LabelingRuleMetrics as ServerLabelingRuleMetrics,
+    LabelingRuleMetricsSummary as ServerLabelingRuleMetrics,
 )
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationQuery as ServerTextClassificationQuery,

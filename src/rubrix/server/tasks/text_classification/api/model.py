@@ -82,7 +82,7 @@ class LabelingRule(CreateLabelingRule):
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
 
-class LabelingRuleMetrics(BaseModel):
+class LabelingRuleMetricsSummary(BaseModel):
     """Metrics generated for a labeling rule"""
 
     coverage: float
@@ -94,7 +94,7 @@ class LabelingRuleMetrics(BaseModel):
     total_records: int
 
 
-class DatasetLabelingRulesMetrics(BaseModel):
+class DatasetLabelingRulesMetricsSummary(BaseModel):
     coverage: float
     coverage_annotated: float
 

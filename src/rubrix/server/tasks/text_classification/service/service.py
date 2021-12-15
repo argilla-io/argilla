@@ -17,6 +17,7 @@ from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
+from rubrix.server.commons.errors import MissingInputParamError
 from rubrix.server.commons.es_helpers import sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -30,9 +31,9 @@ from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
-    DatasetLabelingRulesMetrics,
+    DatasetLabelingRulesMetricsSummary,
     LabelingRule,
-    LabelingRuleMetrics,
+    LabelingRuleMetricsSummary,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchAggregations,
@@ -271,12 +272,13 @@ class TextClassificationService:
         self,
         dataset: Dataset,
         rule_query: str,
-        label: str,
-    ) -> LabelingRuleMetrics:
+        label: Optional[str],
+    ) -> LabelingRuleMetricsSummary:
         """
         Compute metrics for a given rule. It's not necessary that query rule
-        is created in dataset. Basic computed rules are: coverage,
-        overlaps, conflicts[*], correct[*], incorrect[*], precision[*]
+        is created in dataset. Basic computed rules are:
+
+        coverage, correct[*], incorrect[*], precision[*]
 
         [*]: computed metrics only if label is provided or rule already created in dataset
 
@@ -288,17 +290,34 @@ class TextClassificationService:
             The provided rule query. If already created in dataset, the ``label``
             param will be omitted
         label:
-            Label used for rule metrics
+            Label used for rule metrics. If not provided, defined in stored rule will be used
 
         Returns
         -------
 
+            Metrics summary for rule and label
+
         """
+
+        rule_query = rule_query.strip()
+
+        if label is None:
+            for rule in self.get_labeling_rules(dataset):
+                if rule.query == rule_query:
+                    label = rule.label
+                    break
+
+        if label is None:
+            raise MissingInputParamError(
+                "`label` param was not provided and rule is not stored for dataset. "
+                "You must either an already created rule or specify the label for metrics computation"
+            )
+
         total, annotated, metrics = self.__labeling__.compute_rule_metrics(
             dataset, rule_query=rule_query, label=label
         )
 
-        return LabelingRuleMetrics(
+        return LabelingRuleMetricsSummary(
             coverage=metrics.covered_records / total,
             coverage_annotated=(metrics.correct_records + metrics.incorrect_records)
             / annotated,
@@ -310,7 +329,7 @@ class TextClassificationService:
 
     def compute_overall_rules_metrics(self, dataset: Dataset):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
-        return DatasetLabelingRulesMetrics(
+        return DatasetLabelingRulesMetricsSummary(
             coverage=metrics.covered_records / total,
             coverage_annotated=metrics.annotated_covered_records / annotated,
             total_records=total,
