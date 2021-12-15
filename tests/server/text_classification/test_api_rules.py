@@ -44,6 +44,38 @@ def test_dataset_without_rules():
     assert len(response.json()) == 0
 
 
+def test_dataset_update_rule():
+    dataset = "test_dataset_with_rules"
+    query = "a query"
+    log_some_records(dataset)
+
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=CreateLabelingRule(query=query, label="LALA").dict(),
+    )
+    assert response.status_code == 200
+
+    client.patch(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{query}",
+        json={"label": "NEW Label"},
+    )
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    rules = list(map(LabelingRule.parse_obj, response.json()))
+    assert len(rules) == 1
+    assert rules[0].label == "NEW Label"
+    assert rules[0].description is None
+
+    client.patch(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{query}",
+        json={"label": "NEW Label", "description": "New description"},
+    )
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    rules = list(map(LabelingRule.parse_obj, response.json()))
+    assert len(rules) == 1
+    assert rules[0].description == "New description"
+
 def test_dataset_with_rules():
     dataset = "test_dataset_with_rules"
     log_some_records(dataset)
