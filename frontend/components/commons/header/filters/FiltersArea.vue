@@ -21,11 +21,12 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
-            class="filters__searchbar"
+            :class="[viewMode === 'define-rules' ? '--extended' : null, 'filters__searchbar']"
             :dataset="dataset"
             @submit="onTextQuerySearch"
           />
           <FiltersList
+            v-if="viewMode !== 'define-rules'"
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
@@ -33,6 +34,13 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
+          <re-button v-else-if="dataset.results.total" @click="showRulesList()" class="button-rules-summary button-clear">
+            <svgicon
+              name="config"
+              width="15"
+              height="14"
+            ></svgicon>
+            Rules Summary</re-button>
         </div>
       </div>
     </div>
@@ -40,7 +48,9 @@
 </template>
 
 <script>
+import "assets/icons/config";
 import { mapActions } from "vuex";
+import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     dataset: {
@@ -61,6 +71,11 @@ export default {
       { filter: "score", text: "Score", range: ["0", "1"] },
     ],
   }),
+  computed: {
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
+    },
+  },
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
@@ -81,6 +96,14 @@ export default {
       this.search({
         dataset: this.dataset,
         query: { metadata: { [filter]: values } },
+      });
+    },
+    showRulesList() {
+      DatasetViewSettings.update({
+        where: this.dataset.name,
+        data: {
+          visibleRulesList: true,
+        },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
@@ -143,12 +166,23 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
+    padding-right: 45px;
+    .--metrics & {
+      @include media(">desktop") {
+        width: 100%;
+        padding-right: calc(294px + 45px);
+        transition: padding 0.1s ease-in-out;
+      }
+    }
     .fixed-header & {
-      padding: 0.5em 0;
+      padding: 0.5em 45px 0.5em 0;
     }
   }
   &__searchbar {
     margin-right: 2em;
+    &.--extended {
+      width: 100%;
+    }
   }
   &--disabled {
     ::v-deep * {
@@ -162,6 +196,14 @@ export default {
       align-items: center;
       opacity: 0.4;
     }
+  }
+}
+.button-rules-summary {
+  min-width: 130px !important;
+  color: $font-secondary-dark;
+  margin-bottom: 0 !important;
+  .svg-icon {
+    margin-right: 0.5em;
   }
 }
 </style>

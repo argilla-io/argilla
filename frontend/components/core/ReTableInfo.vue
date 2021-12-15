@@ -75,7 +75,13 @@
                 class="table-info__item__col"
               >
                 <span :class="column.class">
-                  <span v-if="column.type === 'link'">
+                  <span v-if="column.type === 'action'">
+                    <a href="#"
+                      @click.prevent="onActionClicked(item.kind, item.name)"
+                      >{{ itemValue(item, column) }}
+                    </a>
+                  </span>
+                  <span v-else-if="column.type === 'link'">
                     <NuxtLink v-if="item.link" :to="item.link"
                       >{{ itemValue(item, column) }}
                     </NuxtLink>
@@ -94,6 +100,11 @@
                     v-else-if="column.type === 'date'"
                     :date="itemValue(item, column)"
                   />
+                  <span
+                    v-else-if="column.type === 'number'"
+                  >
+                  {{itemValue(item, column) | formatNumber}}
+                  </span>
                   <span v-else-if="column.type === 'object'">
                     <p
                       v-for="key in Object.keys(itemValue(item, column))"

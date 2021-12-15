@@ -16,66 +16,69 @@
   -->
 
 <template>
-  <div class="list">
-    <slot name="header" />
-    <div class="results-scroll" id="scroll">
-      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
-        <results-loading :size="dataset.viewSettings.pagination.size" />
+  <div class="content">  
+    <template v-if="!dataset.viewSettings.visibleRulesList">
+      <slot name="header" />
+      <div class="results-scroll" id="scroll">
+        <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
+          <results-loading :size="dataset.viewSettings.pagination.size" />
+        </div>
+        <DynamicScroller
+          page-mode
+          class="scroller"
+          :items="visibleRecords"
+          :min-item-size="150"
+          :buffer="200"
+          :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+          :emitUpdate="true"
+        > 
+          <template #before>
+            <slot name="pre-records-area"/>
+          </template>
+          <template v-slot="{ item, index, active }">
+            <DynamicScrollerItem
+              :watch-data="true"
+              class="content__li"
+              :item="item"
+              :active="active"
+              key-field="id"
+              :index="index"
+              :data-index="index"
+            >
+              <results-record @show-metadata="onShowMetadata" :key="`${dataset.name}-${item.id}`" :dataset="dataset" :item="item">
+                <slot name="record" :record="item" />
+              </results-record>
+            </DynamicScrollerItem>
+          </template>
+          <template #after>
+            <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+          </template>
+        </DynamicScroller>
+        <LazyReModal
+          modal-class="modal-secondary"
+          modal-position="modal-center"
+          :modal-custom="true"
+          :prevent-body-scroll="true"
+          :modal-visible="selectedRecord !== undefined"
+          @close-modal="onCloseMetadata"
+        >
+          <Metadata
+            v-if="selectedRecord"
+            :applied-filters="dataset.query.metadata"
+            :metadata-items="selectedRecord.metadata"
+            :title="selectedRecord.recordTitle()"
+            @metafilterApply="onApplyMetadataFilter"
+            @cancel="onCloseMetadata"
+          />
+        </LazyReModal>
       </div>
-      <DynamicScroller
-        v-else
-        page-mode
-        class="scroller"
-        :items="visibleRecords"
-        :min-item-size="150"
-        :buffer="200"
-        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-      > 
-        <template #before>
-          <slot name="pre-records-area"/>
-        </template>
-        <template v-slot="{ item, index, active }">
-          <DynamicScrollerItem
-            :watch-data="true"
-            class="list__li"
-            :item="item"
-            :active="active"
-            key-field="id"
-            :index="index"
-            :data-index="index"
-          >
-            <results-record @show-metadata="onShowMetadata" :key="item.id" :dataset="dataset" :item="item">
-              <slot name="record" :record="item" />
-            </results-record>
-          </DynamicScrollerItem>
-        </template>
-        <template #after>
-          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
-        </template>
-      </DynamicScroller>
-      <LazyReModal
-        modal-class="modal-secondary"
-        modal-position="modal-center"
-        :modal-custom="true"
-        :prevent-body-scroll="true"
-        :modal-visible="selectedRecord !== undefined"
-        @close-modal="onCloseMetadata"
-      >
-        <Metadata
-          v-if="selectedRecord"
-          :applied-filters="dataset.query.metadata"
-          :metadata-items="selectedRecord.metadata"
-          :title="selectedRecord.recordTitle()"
-          @metafilterApply="onApplyMetadataFilter"
-          @cancel="onCloseMetadata"
-        />
-      </LazyReModal>
-    </div>
-    <RePagination
-      :total-items="dataset.results.total"
-      :pagination-settings="dataset.viewSettings.pagination"
-      @changePage="onPagination"
-    />
+      <RePagination
+        :total-items="dataset.results.total"
+        :pagination-settings="dataset.viewSettings.pagination"
+        @changePage="onPagination"
+      />
+    </template>
+    <rules-list v-else :dataset="dataset"/>
   </div>
 </template>
 <script>
@@ -115,6 +118,13 @@ export default {
     },
   },
   mounted() {
+    const scroll = document.getElementById("scroll");
+    if (scroll) {
+      this.scrollComponent = scroll;
+      this.scrollComponent.addEventListener("scroll", this.onScroll);
+    }
+  },
+  updated() {
     const scroll = document.getElementById("scroll");
     if (scroll) {
       this.scrollComponent = scroll;
@@ -164,34 +174,34 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.list {
+.content {
   $this: &;
   padding: 0;
   width: 100%;
   position: relative;
   margin-bottom: 0;
   list-style: none;
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      width: 100%;
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
+    width: 100%;
+    padding-right: 100px;
+  }
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
     padding-bottom: 61px;
-    padding-right: calc(4em + 45px);
     transition: padding 0s ease-in-out 0.1s;
     .fixed-header & {
       padding-bottom: 200px;
-    }
-    .--metrics & {
-      @include media(">desktop") {
-        width: 100%;
-        padding-right: calc(294px + 100px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      width: 100%;
-      padding-right: 100px;
     }
   }
   &__li {
