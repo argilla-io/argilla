@@ -175,8 +175,8 @@ class LabelingRule(BaseModel):
 
     """
 
-    query: str
     label: str
+    query: str
     description: Optional[str] = None
     author: str
     created_at: datetime = None
