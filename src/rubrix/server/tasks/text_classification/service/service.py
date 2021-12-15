@@ -17,7 +17,7 @@ from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
-from rubrix.server.commons.errors import MissingInputParamError
+from rubrix.server.commons.errors import EntityNotFoundError, MissingInputParamError
 from rubrix.server.commons.es_helpers import sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -334,3 +334,20 @@ class TextClassificationService:
             coverage_annotated=metrics.annotated_covered_records / annotated,
             total_records=total,
         )
+
+    def update_labeling_rule(
+        self,
+        dataset: Dataset,
+        rule_query: str,
+        label: str,
+        description: Optional[str] = None,
+    ) -> LabelingRule:
+        found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
+
+        found_rule.label = label
+        if description is not None:
+            found_rule.description = description
+
+        self.__labeling__.replace_rule(dataset, found_rule)
+        return found_rule
+

@@ -228,3 +228,22 @@ class LabelingService:
             annotated_records,
             DatasetLabelingRulesSummary.parse_obj(rule_metrics_summary),
         )
+
+    def find_rule_by_query(
+        self, dataset: BaseDatasetDB, rule_query: str
+    ) -> LabelingRule:
+        rule_query = rule_query.strip()
+        for rule in self.list_rules(dataset):
+            if rule.query == rule_query:
+                return rule
+        raise EntityNotFoundError(rule_query, type=LabelingRule)
+
+    def replace_rule(self, dataset:BaseDatasetDB, rule:LabelingRule):
+        found_ds = self._find_text_classification_dataset(dataset)
+
+        for idx, r in enumerate(found_ds.rules):
+            if r.query == rule.query:
+                found_ds.rules[idx] = rule
+                break
+
+        self.__dao__.update_dataset(found_ds)
