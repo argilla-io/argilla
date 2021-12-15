@@ -27,7 +27,7 @@
           class="searchbar__button"
           name="cross"
           width="20"
-          height="14"
+          height="20"
           @click="removeFilter()"
         />
         <ReInput
@@ -99,22 +99,27 @@ export default {
     max-width: 280px;
     margin-right: auto;
     margin-left: 0;
+    .--extended & {
+      min-width: 100%;
+    }
   }
-  // &.re-input-focused {
-  //   border: 2px solid $secondary-color;
-  //   .svg-icon {
-  //     fill: $secondary-color;
-  //   }
-  // }
+  &__button {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    &:hover {
+      background: palette(grey, bg)
+    }
+  }
   .svg-icon {
-    fill: $primary-color;
+    fill: #4C4EA3;
     margin: auto 1em auto 1em;
   }
   &:hover {
     box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
   }
-  &__button {
-    cursor: pointer;
+  .--extended & {
+    min-width: 100%;
   }
 }
 </style>

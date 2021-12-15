@@ -46,7 +46,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .searchbar {
-  background: $lighter-color;
   width: 285px;
   min-height: 43px;
   border: none;
@@ -60,11 +59,8 @@ export default {
   border-radius: 5px;
   @include font-size(14px);
   .svg-icon {
-    fill: $primary-color;
+    fill: $font-secondary;
     margin: auto 1em auto 1em;
-  }
-  &:hover {
-    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
   }
   &__button {
     cursor: pointer;
