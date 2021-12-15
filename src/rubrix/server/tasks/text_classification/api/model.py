@@ -35,7 +35,14 @@ from rubrix.server.tasks.commons.api.model import (
 )
 
 
-class CreateLabelingRule(BaseModel):
+class UpdateLabelingRule(BaseModel):
+    label: str = Field(description="The label associated with the rule")
+    description: Optional[str] = Field(
+        None, description="A brief description of the rule"
+    )
+
+
+class CreateLabelingRule(UpdateLabelingRule):
     """
     Data model for labeling rules creation
 
@@ -53,9 +60,7 @@ class CreateLabelingRule(BaseModel):
 
     """
 
-    query: str
-    label: str
-    description: Optional[str] = None
+    query: str = Field(description="The es rule query")
 
     @validator("query")
     def strip_query(cls, query: str) -> str:
@@ -78,8 +83,10 @@ class LabelingRule(CreateLabelingRule):
 
     """
 
-    author: str
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    author: str = Field(description="User who created the rule")
+    created_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow, description="Rule creation timestamp"
+    )
 
 
 class LabelingRuleMetricsSummary(BaseModel):

@@ -36,6 +36,7 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationRecord,
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
+    UpdateLabelingRule,
 )
 from rubrix.server.tasks.text_classification.service.service import (
     TextClassificationService,
@@ -363,3 +364,34 @@ async def delete_rule(
     )
 
     service.delete_labeling_rule(Dataset.parse_obj(dataset), rule_query=query)
+
+
+@router.patch(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="update_rule"
+)
+async def update_rule(
+    name: str,
+    query: str,
+    update: UpdateLabelingRule,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> None:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    rule = service.update_labeling_rule(
+        Dataset.parse_obj(dataset),
+        rule_query=query,
+        label=update.label,
+        description=update.description,
+    )
+    return rule
