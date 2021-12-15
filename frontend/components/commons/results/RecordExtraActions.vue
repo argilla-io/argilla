@@ -22,7 +22,7 @@
       class="extra-actions__button"
       href="#"
       @click.prevent="open = !open"
-      ><svgicon name="kebab-menu-h" width="20" height="20" color="#4A4A4A"
+      ><svgicon name="kebab-menu-v" width="20" height="20" color="#4A4A4A"
     /></a>
     <div v-if="open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="showMetadata()">
@@ -46,7 +46,7 @@
 
 <script>
 import { BaseRecord } from "@/models/Common";
-import "assets/icons/kebab-menu-h";
+import "assets/icons/kebab-menu-v";
 import { IdState } from 'vue-virtual-scroller'
 
 export default {
@@ -143,9 +143,7 @@ export default {
   &__button {
     text-align: right;
     outline: none;
-    .svg-icon {
-      transform: rotate(90deg);
-    }
+    text-decoration: none;
   }
   &__content {
     position: absolute;
