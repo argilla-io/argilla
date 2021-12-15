@@ -496,7 +496,6 @@ const actions = {
       persistBackend: true,
     });
   },
-
   async setUserData(_, { dataset, data }) {
     const metadata = {
       [USER_DATA_METADATA_KEY]: data,
@@ -568,7 +567,7 @@ const actions = {
   async changeViewMode(_, { dataset, value }) {
     const settings = await _updateViewSettings({
       id: dataset.name,
-      data: { viewMode: value },
+      data: { viewMode: value, visibleRulesList: false },
     });
 
     _displayQueryParams({
@@ -597,6 +596,44 @@ const actions = {
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
   },
+
+  async getRules(_,{ dataset }) {
+    const { response } = await ObservationDataset.api().get(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules`,
+    );
+    return response.data;
+  },
+
+  async defineRule(_,{ dataset, label }) {
+    await ObservationDataset.api().post(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules`,
+      {
+        query: dataset.query.text,
+        label: label,
+        description: dataset.query.text
+      }
+    );
+  },
+
+  async deleteRule(_,{ dataset, query }) {
+    await ObservationDataset.api().delete(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
+    );
+  },
+
+  // async getRuleMetrics(_,{ dataset, query }) {
+  //   const { response } = await ObservationDataset.api().get(
+  //     `/datasets/${dataset.task}/${dataset.name}/labeling/rules/metrics?label=${query}`,
+  //   );
+  //   return response.data;
+  // },
+
+  async getRuleMetricsByLabel(_,{ dataset, query, label }) {
+    const { response } = await ObservationDataset.api().get(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics?label=${label}`,
+    );
+    return response.data;
+  }
 };
 
 export default {

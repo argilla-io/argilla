@@ -50,6 +50,7 @@ export default class DatasetViewSettings extends Model {
       loading: this.boolean(false),
       headerHeight: this.number(140),
       visibleMetrics: this.boolean(false),
+      visibleRulesList: this.boolean(false),
     };
   }
 }
