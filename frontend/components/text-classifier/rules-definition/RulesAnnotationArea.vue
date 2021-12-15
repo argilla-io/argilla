@@ -16,44 +16,54 @@
   -->
 
 <template>
-  <div v-if="labels.length">
-    <label-search
-      v-if="labels.length > maxVisibleLabels"
-      :searchText="searchText"
-      @input="onSearchLabel"
-    />
-    <ClassifierAnnotationButton
-      v-for="label in visibleLabels"
-      :id="label.class"
-      :key="`${label.class}`"
-      v-model="selectedLabels"
-      :allow-multiple="isMultiLabel"
-      :label="label"
-      class="label-button"
-      :data-title="label.class"
-      :value="label.class"
-      @change="updateLabels"
-    >
-    </ClassifierAnnotationButton>
+  <div>
+    <div v-if="labels.length">
+      <p>Select a label for your query </p>
+      <label-search
+        v-if="labels.length > maxVisibleLabels"
+        :searchText="searchText"
+        @input="onSearchLabel"
+      />
+      <ClassifierAnnotationButton
+        v-for="label in visibleLabels"
+        :id="label.class"
+        :key="`${label.class}`"
+        v-model="selectedLabels"
+        :allow-multiple="isMultiLabel"
+        :label="label"
+        :class="[!dataset.query.text ? 'non-reactive' : null, 'label-button']"
+        :data-title="label.class"
+        :value="label.class"
+        @change="updateLabel"
+      >
+      </ClassifierAnnotationButton>
 
-    <a
-      v-if="visibleLabels.length < filteredLabels.length"
-      href="#"
-      class="feedback-interactions__more"
-      @click.prevent="expandLabels()"
-      >+{{ filteredLabels.length - visibleLabels.length }}</a
-    >
-    <a
-      v-else-if="visibleLabels.length > maxVisibleLabels"
-      href="#"
-      class="feedback-interactions__more"
-      @click.prevent="collapseLabels()"
-      >Show less</a
-    >
+      <a
+        v-if="visibleLabels.length < filteredLabels.length"
+        href="#"
+        class="feedback-interactions__more"
+        @click.prevent="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</a
+      >
+      <a
+        v-else-if="visibleLabels.length > maxVisibleLabels"
+        href="#"
+        class="feedback-interactions__more"
+        @click.prevent="collapseLabels()"
+        >Show less</a
+      >
+    </div>
+    <div v-else class="empty-labels">
+      <p>There aren't any label yet.</p>
+      <p>To define rules you need al least two labels. Go to annotation mode to <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.</p>
+    </div>
+    <rule-metrics :metrics="metrics"/>
+    <re-button :disabled="!selectedLabels.length" @click="createRule()" class="feedback-interactions__button button-primary">
+    Save rule</re-button>  
   </div>
 </template>
 <script>
-import "assets/icons/ignore";
+import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
@@ -67,6 +77,7 @@ export default {
     return {
       searchText: "",
       selectedLabels: [],
+      metrics: {},
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS
     };
   },
@@ -108,8 +119,24 @@ export default {
     }
   },
   methods: {
-    updateLabels(labels) {
-      console.log("selected labels :", labels);
+    ...mapActions({
+      changeViewMode: "entities/datasets/changeViewMode",
+      defineRule: "entities/datasets/defineRule",
+      getRuleMetricsByLabel: "entities/datasets/getRuleMetricsByLabel"
+    }),
+    async createRule() {
+      await this.defineRule({
+        dataset: this.dataset,
+        label: this.selectedLabels[0]
+      });
+    },
+    async getMetricsByLabel(label) {
+      const response = await this.getRuleMetricsByLabel({
+        dataset: this.dataset,
+        query: this.query,
+        label: label
+      });
+      this.metrics = response;
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -119,6 +146,15 @@ export default {
     },
     onSearchLabel(event) {
       this.searchText = event;
+    },
+    async updateLabel(label) {
+      await this.getMetricsByLabel(label);
+    },
+    async changeToAnnotationViewMode() {
+      await this.changeViewMode({
+        dataset: this.dataset,
+        value: "annotate"
+      });
     }
   }
 };
@@ -149,8 +185,17 @@ export default {
       background: palette(grey, bg);
     }
   }
+  &__button {
+    margin-top: 2em;
+  }
 }
 .label-button {
   @extend %item;
+}
+.empty-labels {
+  a {
+    color: $primary-color;
+    text-decoration: none;
+  }
 }
 </style>

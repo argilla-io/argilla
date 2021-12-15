@@ -1,12 +1,10 @@
 <template>
-  <div class="rules__container">
-    <div class="rules__annotation">
-        NEW RULE: {{query}}
-        <rules-annotation-area :dataset="dataset"/>
+  <div>
+    <div class="rules__container">
+      <p class="rules__query">{{query}}</p>
+      <rules-annotation-area :dataset="dataset"/>
     </div>
-    <div class="rules__metrics">
-        METRICS
-    </div>
+    <p>Records ({{dataset.results.total}})</p>
   </div>
 </template>
 <script>
@@ -27,21 +25,16 @@ export default {
 <style lang="scss" scoped>
 .rules {
   &__container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  &__annotation {
-    padding: 1em;
+    padding: 20px;
     background: $lighter-color;
     width: 100%;
-    margin-right: 10px;
+    border-radius: 5px;
+    margin-bottom: 2em;
   }
-  &__metrics {
-    padding: 1em;
-    background: $lighter-color;
-    margin-right: 0;
-    min-width: 200px;
+  &__query {
+    color: $font-secondary-dark;
+    @include font-size(16px);
+    font-weight: 300;
   }
 }
 </style>
