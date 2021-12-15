@@ -31,7 +31,7 @@ from rubrix.client.sdk.commons.models import (
 )
 from rubrix.client.sdk.text_classification.models import (
     LabelingRule,
-    LabelingRuleMetrics,
+    LabelingRuleMetricsSummary,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
@@ -106,7 +106,7 @@ def dataset_rule_metrics(
     name: str,
     query: str,
     label: str,
-) -> Response[Union[LabelingRuleMetrics, HTTPValidationError, ErrorMessage]]:
+) -> Response[Union[LabelingRuleMetricsSummary, HTTPValidationError, ErrorMessage]]:
 
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}/metrics?label={label}".format(
         client.base_url, name=name, query=query, label=label
@@ -119,4 +119,4 @@ def dataset_rule_metrics(
         timeout=client.get_timeout(),
     )
 
-    return build_typed_response(response, response_type_class=LabelingRuleMetrics)
+    return build_typed_response(response, response_type_class=LabelingRuleMetricsSummary)

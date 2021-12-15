@@ -182,7 +182,7 @@ class LabelingRule(BaseModel):
     created_at: datetime = None
 
 
-class LabelingRuleMetrics(BaseModel):
+class LabelingRuleMetricsSummary(BaseModel):
     """Metrics generated for a labeling rule"""
 
     coverage: float
