@@ -23,7 +23,6 @@ import pytest
 
 import rubrix
 from rubrix import Text2TextRecord, TextClassificationRecord
-from rubrix.server.commons.errors import EntityAlreadyExistsError
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client, mocking_client
@@ -281,7 +280,9 @@ def test_dataset_copy(monkeypatch):
         df_copy = rubrix.load(dataset_copy)
         assert df.equals(df_copy)
 
-        with pytest.raises(RuntimeError, match="A dataset with name 'new_dataset' already exists"):
+        with pytest.raises(
+            RuntimeError, match="A dataset with name 'new_dataset' already exists"
+        ):
             rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
     finally:
         rubrix.init()  # reset workspace
