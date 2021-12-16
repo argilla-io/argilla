@@ -293,3 +293,10 @@ Rubrix main components are:
 
 ## Community
 As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
+
+## Contributors
+
+
+<a href="https://github.com/recognai/rubrix/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=recognai/rubrix" />
+</a>
