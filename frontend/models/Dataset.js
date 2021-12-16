@@ -52,9 +52,12 @@ class ObservationDataset extends Model {
       );
       return response.data;
     } catch (error) {
-      console.log(error);
       return { labels: [] };
     }
+  }
+
+  get id() {
+    return this.owner + this.name;
   }
 
   get visibleRecords() {
@@ -64,6 +67,7 @@ class ObservationDataset extends Model {
   static fields() {
     return {
       name: this.string(null),
+      owner: this.string(null),
       metadata: this.attr(null),
       tags: this.attr(null),
       task: this.string(null),
