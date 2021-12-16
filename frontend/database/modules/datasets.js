@@ -621,12 +621,12 @@ const actions = {
     );
   },
 
-  // async getRuleMetrics(_,{ dataset, query }) {
-  //   const { response } = await ObservationDataset.api().get(
-  //     `/datasets/${dataset.task}/${dataset.name}/labeling/rules/metrics?label=${query}`,
-  //   );
-  //   return response.data;
-  // },
+  async getRulesMetrics(_,{ dataset }) {
+    const { response } = await ObservationDataset.api().get(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/metrics`,
+    );
+    return response.data;
+  },
 
   async getRuleMetricsByLabel(_,{ dataset, query, label }) {
     const { response } = await ObservationDataset.api().get(

@@ -1,12 +1,18 @@
 <template>
   <div v-if="isVisible">
     <ReLoading v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error" class="rules__list__container">
-      <re-button @click="hideList()" class="rules__list__close primary-color">Back to query view</re-button>
-      <p class="rules__list__title">Summary</p>
+    <div v-else-if="!$fetchState.error" class="rules-summary__container">
+      <re-button @click="hideList()" class="rules-summary__close button-quaternary">
+        <svgicon
+          name="chev-left"
+          width="12"
+          height="12"
+        ></svgicon>Back to query view</re-button>
+      <p class="rules-summary__title">Summary</p>
+      <rules-summary-metrics :metricsByLabel="metricsByLabel" :dataset="dataset" />
       <ReSearchBar @input="onSearch" />
       <ReTableInfo
-        class="rules__list__table"
+        class="rules-summary__table"
         :data="formattedRules"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
@@ -39,7 +45,6 @@ export default {
       querySearch: undefined,
       showModal: undefined,
       rules: [],
-      test: undefined,
       metricsByLabel: {},
       tableColumns: [
         {
@@ -50,6 +55,7 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
+        { name: "C. Annotated", field: "coverage_annotated", class: "text", type: "number" },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
         { name: "Precision", field: "precision", class: "text", type: "number"  },
@@ -74,6 +80,7 @@ export default {
           kind: "select",
           label: r.label,
           coverage: this.metricsByLabel[r.query].coverage,
+          coverage_annotated: this.metricsByLabel[r.query].coverage_annotated,
           correct: this.metricsByLabel[r.query].correct,
           incorrect: this.metricsByLabel[r.query].incorrect,
           precision: this.metricsByLabel[r.query].precision,
@@ -86,7 +93,6 @@ export default {
       search: "entities/datasets/search",
       getRules: "entities/datasets/getRules",
       deleteRule: "entities/datasets/deleteRule",
-      getRuleMetrics: "entities/datasets/getRuleMetrics",
       getRuleMetricsByLabel: "entities/datasets/getRuleMetricsByLabel",
     }),
     async hideList() {
@@ -97,15 +103,6 @@ export default {
         }
       });
     },
-    // async getMetrics() {
-    //   for(let rule of this.rules) {
-    //     const response = await this.getRuleMetrics({
-    //       dataset: this.dataset,
-    //       query: rule.query,
-    //     })
-    //     this.test = response;
-    //   }
-    // },
     async getMetricsByLabel() {
       for(let rule of this.rules) {
         const response = await this.getRuleMetricsByLabel({
@@ -166,7 +163,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.rules__list {
+.rules-summary {
   &__container {
     margin-top: 3em;
     padding: 3em;
@@ -174,17 +171,21 @@ export default {
   &__title {
     color: $font-secondary-dark;
     @include font-size(22px);
+    font-weight: 600;
   }
   &__table {
     ::v-deep {
       .table-info__item__col:nth-of-type(2) {
-        min-width: 140px;
+        min-width: 100px;
       }
       .table-info__item__col:first-child {
-        min-width: 180px;
+        min-width: 120px;
       }
       .table-info__body {
         height: auto;
+      }
+      .table-info__item {
+        padding-right: 3em !important;
       }
     }
   }

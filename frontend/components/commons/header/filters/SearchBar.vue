@@ -107,7 +107,10 @@ export default {
     cursor: pointer;
     padding: 5px;
     border-radius: 3px;
+    background: $lighter-color;
+    transition: background 0.2s ease-in-out;
     &:hover {
+      transition: background 0.2s ease-in-out;
       background: palette(grey, bg)
     }
   }

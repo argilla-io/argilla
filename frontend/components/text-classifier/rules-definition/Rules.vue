@@ -35,6 +35,7 @@ export default {
     color: $font-secondary-dark;
     @include font-size(16px);
     font-weight: 300;
+    margin-top: 0;
   }
 }
 </style>
