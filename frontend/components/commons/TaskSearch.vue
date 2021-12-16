@@ -41,7 +41,7 @@
 </template>
 <script>
 import "assets/icons/copy";
-import { mapActions, mapState } from "vuex";
+import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { currentWorkspace, workspaceHome } from "@/models/Workspace";
 export default {
