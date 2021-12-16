@@ -246,8 +246,14 @@ async def stream_data(
     )
 
 
-@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules", operation_id="fetch_labeling_rules")
-async def fetch_labeling_rules(
+@router.get(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules",
+    operation_id="list_labeling_rules",
+    description="List all dataset labeling rules",
+    response_model=List[LabelingRule],
+    response_model_exclude_none=True,
+)
+async def list_labeling_rules(
     name: str,
     common_params: CommonTaskQueryParams = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -267,7 +273,13 @@ async def fetch_labeling_rules(
     return list(service.get_labeling_rules(Dataset.parse_obj(dataset)))
 
 
-@router.post(f"{NEW_BASE_ENDPOINT}/labeling/rules", operation_id="create_rule")
+@router.post(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules",
+    operation_id="create_rule",
+    description="Creates a new dataset labeling rule",
+    response_model=LabelingRule,
+    response_model_exclude_none=True,
+)
 async def create_rule(
     name: str,
     rule: CreateLabelingRule,
@@ -298,8 +310,14 @@ async def create_rule(
     return rule
 
 
-@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}/metrics")
-async def query_metrics(
+@router.get(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}/metrics",
+    operation_id="compute_rule_metrics",
+    description="Computes dataset labeling rule metrics",
+    response_model=LabelingRuleMetricsSummary,
+    response_model_exclude_none=True,
+)
+async def compute_rule_metrics(
     name: str,
     query: str,
     label: Optional[str] = Query(None, description="Label related to query rule"),
@@ -322,8 +340,14 @@ async def query_metrics(
     )
 
 
-@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules/metrics")
-async def query_metrics(
+@router.get(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/metrics",
+    operation_id="compute_dataset_rules_metrics",
+    description="Computes overall metrics for dataset labeling rules",
+    response_model=DatasetLabelingRulesMetricsSummary,
+    response_model_exclude_none=True,
+)
+async def compute_dataset_rules_metrics(
     name: str,
     common_params: CommonTaskQueryParams = Depends(),
     service: TextClassificationService = Depends(
@@ -343,9 +367,11 @@ async def query_metrics(
 
 
 @router.delete(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="delete_rule"
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    operation_id="delete_labeling_rule",
+    description="Deletes a labeling rule from dataset",
 )
-async def delete_rule(
+async def delete_labeling_rule(
     name: str,
     query: str,
     common_params: CommonTaskQueryParams = Depends(),
@@ -366,8 +392,44 @@ async def delete_rule(
     service.delete_labeling_rule(Dataset.parse_obj(dataset), rule_query=query)
 
 
+@router.get(
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    operation_id="get_rule",
+    description="Get the dataset labeling rule",
+    response_model=LabelingRule,
+    response_model_exclude_none=True,
+)
+async def get_rule(
+    name: str,
+    query: str,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> LabelingRule:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    rule = service.find_labeling_rule(
+        Dataset.parse_obj(dataset),
+        rule_query=query,
+    )
+    return rule
+
+
 @router.patch(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="update_rule"
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    operation_id="update_rule",
+    description="Update dataset labeling rule attributes",
+    response_model=LabelingRule,
+    response_model_exclude_none=True,
 )
 async def update_rule(
     name: str,
@@ -379,7 +441,7 @@ async def update_rule(
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-) -> None:
+) -> LabelingRule:
 
     dataset = datasets.find_by_name(
         name,

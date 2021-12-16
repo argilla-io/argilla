@@ -249,6 +249,49 @@ class TextClassificationService:
             ), "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
+    def update_labeling_rule(
+        self,
+        dataset: Dataset,
+        rule_query: str,
+        label: str,
+        description: Optional[str] = None,
+    ) -> LabelingRule:
+        """
+        Update a labeling rule. Updatable fields are label and/or description
+
+        Args:
+            dataset: The dataset
+            rule_query: The labeling rule
+            label: The new rule label
+            description: If provided, the new rule description
+
+        Returns:
+            Updated labeling rule
+
+        """
+        found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
+
+        found_rule.label = label
+        if description is not None:
+            found_rule.description = description
+
+        self.__labeling__.replace_rule(dataset, found_rule)
+        return found_rule
+
+    def find_labeling_rule(self, dataset: Dataset, rule_query: str):
+        """
+        Find a labeling rule given a rule query string
+
+        Args:
+            dataset: The dataset
+            rule_query:  The query string
+
+        Returns:
+            Found labeling rule.
+            If rule was not found EntityNotFoundError is raised
+        """
+        return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
+
     def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
         """
         Deletes a rule from a dataset.
@@ -334,20 +377,3 @@ class TextClassificationService:
             coverage_annotated=metrics.annotated_covered_records / annotated,
             total_records=total,
         )
-
-    def update_labeling_rule(
-        self,
-        dataset: Dataset,
-        rule_query: str,
-        label: str,
-        description: Optional[str] = None,
-    ) -> LabelingRule:
-        found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
-
-        found_rule.label = label
-        if description is not None:
-            found_rule.description = description
-
-        self.__labeling__.replace_rule(dataset, found_rule)
-        return found_rule
-
