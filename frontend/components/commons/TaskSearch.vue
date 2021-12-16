@@ -21,13 +21,13 @@
       'app',
       currentTask,
       annotationEnabled ? '--annotation' : '--exploration',
-      areMetricsVisible ? '--metrics' : null
+      areMetricsVisible ? '--metrics' : null,
     ]"
   >
     <div class="app__content">
       <section id="header" ref="header" class="header">
         <ReTopbarBrand v-if="currentTask">
-          <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copyButton="true" />
+          <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copy-button="true" />
           <user />
         </ReTopbarBrand>
         <task-sidebar :dataset="dataset" />
@@ -43,7 +43,7 @@
 import "assets/icons/copy";
 import { mapActions, mapState } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
-
+import { currentWorkspace, workspaceHome } from "@/models/Workspace";
 export default {
   props: {
     dataset: {
@@ -60,7 +60,7 @@ export default {
     },
     breadcrumbs() {
       return [
-        { link: { path: "/" }, name: this.workspace },
+        { link: { path: workspaceHome(this.workspace) }, name: this.workspace },
         { link: this.$route.fullPath, name: this.dataset.name },
       ];
     },
@@ -74,24 +74,21 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
     globalHeaderHeight() {
-      return this.dataset.viewSettings.headerHeight
+      return this.dataset.viewSettings.headerHeight;
     },
     workspace() {
-      return this.auth.currentWorkspace;
+      return currentWorkspace(this.$route);
     },
-    ...mapState({
-      auth: 'auth'
-    }),
-  },
-  mounted() {
-    this.setHeaderHeight();
   },
   watch: {
     globalHeaderHeight() {
       if (this.globalHeaderHeight !== this.headerHeight) {
         this.headerHeightUpdate();
       }
-    }
+    },
+  },
+  mounted() {
+    this.setHeaderHeight();
   },
   methods: {
     ...mapActions({
@@ -122,7 +119,7 @@ export default {
   &__content {
     width: 100%;
     .fixed-header & {
-      z-index: 3
+      z-index: 3;
     }
   }
 }

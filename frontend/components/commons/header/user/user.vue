@@ -4,7 +4,7 @@
       v-if="currentWorkspace"
       class="user__button"
       href="#"
-      @click.prevent="showSelector()"
+      @click.prevent="showSelector"
     >
       {{ firstChar(currentWorkspace) }}
     </a>
@@ -45,37 +45,27 @@
         </div>
         <p class="user__workspace__name">{{ workspace }}</p>
       </a>
-      <a class="user__logout" href="#" @click.prevent="logout()"> Log out </a>
+      <a class="user__logout" href="#" @click.prevent="logout"> Log out </a>
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  clearCurrentWorkspace,
-} from "@/models/User";
+import { setWorkspace, currentWorkspace } from "@/models/Workspace";
 export default {
   data: () => {
     return {
       visibleSelector: false,
-      currentWorkspace: undefined,
     };
   },
   computed: {
     user() {
       return this.$auth.user;
     },
-  },
-  watch: {
-    async currentWorkspace() {
-      await setCurrentWorkspace(this.$auth, this.currentWorkspace);
+    currentWorkspace() {
+      return currentWorkspace(this.$route);
     },
-  },
-  async mounted() {
-    this.currentWorkspace = await getCurrentWorkspace(this.$auth);
   },
   methods: {
     ...mapActions({
@@ -93,15 +83,10 @@ export default {
     async logout() {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
-      await clearCurrentWorkspace(this.$auth);
     },
     async selectWorkspace(workspace) {
       if (this.currentWorkspace !== workspace) {
-        this.currentWorkspace = workspace;
-        if (this.$router.currentRoute.name === "index") {
-          return await this.fetchDatasets();
-        }
-        return await this.$router.push("/");
+        return await setWorkspace(this.$router, workspace);
       }
       this.close();
     },
