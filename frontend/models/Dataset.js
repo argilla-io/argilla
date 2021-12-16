@@ -24,6 +24,8 @@ const USER_DATA_METADATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1";
 class ObservationDataset extends Model {
   static entity = "datasets";
 
+  // TODO: Combine name + owner for primary key.
+  //  This should fix https://github.com/recognai/rubrix/issues/736
   static primaryKey = "name";
 
   static #registeredDatasetClasses = {};
@@ -39,7 +41,7 @@ class ObservationDataset extends Model {
   getTaskDatasetClass() {
     return ObservationDataset.getClassDatasetForTask(this.task);
   }
-  async initialize() {}
+  async initialize() { }
 
   async fetchMetricSummary(metricId) {
     try {
