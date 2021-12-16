@@ -46,7 +46,6 @@
 </template>
 
 <script>
-import { getUsername } from "@/models/User";
 import { mapActions } from "vuex";
 
 export default {
@@ -170,7 +169,7 @@ export default {
             status: "Edited",
             annotation: {
               entities,
-              agent: getUsername(this.$auth),
+              agent: this.$auth.user.username,
             },
           },
         ],
@@ -183,7 +182,7 @@ export default {
       };
       await this.validate({
         dataset: this.dataset,
-        agent: getUsername(this.$auth),
+        agent: this.$auth.user.username,
         records: [
           {
             ...record,
