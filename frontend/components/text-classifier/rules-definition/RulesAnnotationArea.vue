@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="annotation-area">
     <div v-if="labels.length">
       <p>Select a label for your query </p>
       <label-search
@@ -57,7 +57,7 @@
       <p>There aren't any label yet.</p>
       <p>To define rules you need al least two labels. Go to annotation mode to <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.</p>
     </div>
-    <rule-metrics :metrics="metrics"/>
+    <rule-annotation-area-metrics :metrics="metrics"/>
     <re-button :disabled="!selectedLabels.length" @click="createRule()" class="feedback-interactions__button button-primary">
     Save rule</re-button>  
   </div>
@@ -131,12 +131,16 @@ export default {
       });
     },
     async getMetricsByLabel(label) {
-      const response = await this.getRuleMetricsByLabel({
-        dataset: this.dataset,
-        query: this.query,
-        label: label
-      });
-      this.metrics = response;
+      if (label.length) {
+        const response = await this.getRuleMetricsByLabel({
+          dataset: this.dataset,
+          query: this.dataset.query.text,
+          label: label
+        });
+        this.metrics = response;
+      } else {
+        this.metrics = {};
+      }
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -165,6 +169,12 @@ export default {
   min-width: 80px;
   max-width: 238px;
 }
+.annotation-area {
+  max-width: calc(100% - 200px);
+  @include media(">desktopLarge") {
+    max-width: 60%;
+  }
+}
 .feedback-interactions {
   .list__item--annotation-mode & {
     padding-right: 200px;
@@ -187,6 +197,7 @@ export default {
   }
   &__button {
     margin-top: 2em;
+    margin-bottom: 0;
   }
 }
 .label-button {

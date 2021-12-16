@@ -78,7 +78,7 @@
         @changePage="onPagination"
       />
     </template>
-    <rules-list v-else :dataset="dataset"/>
+    <rules-summary v-else :dataset="dataset"/>
   </div>
 </template>
 <script>
