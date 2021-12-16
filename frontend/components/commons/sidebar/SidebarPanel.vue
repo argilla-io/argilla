@@ -17,7 +17,7 @@
 
 <template>
   <aside
-    :style="{ top: topPosition }"
+    :style="{ marginTop: topPosition }"
     :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']"
   >
     <div class="sidebar__wrapper">
@@ -49,6 +49,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
+  top: 0;
   min-height: 300px;
   border-radius: 5px;
   width: 280px;
