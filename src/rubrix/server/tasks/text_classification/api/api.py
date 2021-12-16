@@ -366,6 +366,32 @@ async def delete_rule(
     service.delete_labeling_rule(Dataset.parse_obj(dataset), rule_query=query)
 
 
+@router.get(f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="get_rule")
+async def get_rule(
+    name: str,
+    query: str,
+    common_params: CommonTaskQueryParams = Depends(),
+    service: TextClassificationService = Depends(
+        TextClassificationService.get_instance
+    ),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    current_user: User = Security(auth.get_user, scopes=[]),
+) -> LabelingRule:
+
+    dataset = datasets.find_by_name(
+        name,
+        task=TASK_TYPE,
+        user=current_user,
+        workspace=common_params.workspace,
+    )
+
+    rule = service.find_labeling_rule(
+        Dataset.parse_obj(dataset),
+        rule_query=query,
+    )
+    return rule
+
+
 @router.patch(
     f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}", operation_id="update_rule"
 )
@@ -379,7 +405,7 @@ async def update_rule(
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-) -> None:
+) -> LabelingRule:
 
     dataset = datasets.find_by_name(
         name,

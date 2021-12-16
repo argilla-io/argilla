@@ -76,6 +76,7 @@ def test_dataset_update_rule():
     assert len(rules) == 1
     assert rules[0].description == "New description"
 
+
 def test_dataset_with_rules():
     dataset = "test_dataset_with_rules"
     log_some_records(dataset)
@@ -99,6 +100,32 @@ def test_dataset_with_rules():
     rules = list(map(LabelingRule.parse_obj, response.json()))
     assert len(rules) == 1
     assert rules[0] == created_rule
+
+
+def test_get_dataset_rule():
+    dataset = "test_get_dataset_rule"
+    log_some_records(dataset)
+
+    rule_query = "a query"
+    rule_label = "TEST"
+    rule_description = "Description"
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=CreateLabelingRule(
+            query=rule_query, label=rule_label, description=rule_description
+        ).dict(),
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule_query}"
+    )
+    assert response.status_code == 200
+    rule = LabelingRule.parse_obj(response.json())
+    assert rule.query == rule_query
+    assert rule.label == rule_label
+    assert rule.description == rule_description
+
 
 
 def test_delete_dataset_rules():
