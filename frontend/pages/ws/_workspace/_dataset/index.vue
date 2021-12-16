@@ -43,7 +43,10 @@ export default {
       return this.findByName(this.datasetName);
     },
     datasetName() {
-      return this.$route.params.id;
+      return this.$route.params.dataset;
+    },
+    workspace() {
+      return this.$route.params.workspace;
     },
   },
   methods: {
