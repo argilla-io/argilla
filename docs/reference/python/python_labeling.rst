@@ -23,3 +23,7 @@ Labeling tools for the text classification task.
 .. automodule:: rubrix.labeling.text_classification.label_models
    :members:
    :exclude-members: TieBreakPolicy, LabelModelError, MissingAnnotationError, TooFewRulesError, NotFittedError
+
+.. automodule:: rubrix.labeling.text_classification.label_errors
+   :members:
+   :exclude-members: SortBy, LabelErrorsException, NoRecordsError, MissingPredictionError
