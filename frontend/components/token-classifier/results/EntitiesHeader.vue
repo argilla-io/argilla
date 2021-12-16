@@ -37,7 +37,7 @@
     </span>
     <ReButton
       v-if="dataset.entities.length > entitiesNumber"
-      class="entities__container__button"
+      class="entities__container__button button-clear"
       @click="toggleEntitiesNumber"
       >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
     >
@@ -114,6 +114,13 @@ export default {
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
+      padding: 0.5em;
+      color: $secondary-color !important;
+      transition: background 0.2s ease-in-out;
+      &:hover {
+        background: palette(grey, smooth);
+        transition: background 0.2s ease-in-out;
+      }
     }
     &--multiple {
       .entity:not(.active) {
