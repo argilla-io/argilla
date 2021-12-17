@@ -17,68 +17,65 @@
 
 <template>
   <div class="content">  
-    <template v-if="!dataset.viewSettings.visibleRulesList">
-      <slot name="header" />
-      <div class="results-scroll" id="scroll">
-        <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
-          <results-loading :size="dataset.viewSettings.pagination.size" />
-        </div>
-        <DynamicScroller
-          page-mode
-          class="scroller"
-          :items="visibleRecords"
-          :min-item-size="150"
-          :buffer="200"
-          :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-          :emitUpdate="true"
-        > 
-          <template #before>
-            <slot name="pre-records-area"/>
-          </template>
-          <template v-slot="{ item, index, active }">
-            <DynamicScrollerItem
-              :watch-data="true"
-              class="content__li"
-              :item="item"
-              :active="active"
-              key-field="id"
-              :index="index"
-              :data-index="index"
-            >
-              <results-record @show-metadata="onShowMetadata" :key="`${dataset.name}-${item.id}`" :dataset="dataset" :item="item">
-                <slot name="record" :record="item" />
-              </results-record>
-            </DynamicScrollerItem>
-          </template>
-          <template #after>
-            <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
-          </template>
-        </DynamicScroller>
-        <LazyReModal
-          modal-class="modal-secondary"
-          modal-position="modal-center"
-          :modal-custom="true"
-          :prevent-body-scroll="true"
-          :modal-visible="selectedRecord !== undefined"
-          @close-modal="onCloseMetadata"
-        >
-          <Metadata
-            v-if="selectedRecord"
-            :applied-filters="dataset.query.metadata"
-            :metadata-items="selectedRecord.metadata"
-            :title="selectedRecord.recordTitle()"
-            @metafilterApply="onApplyMetadataFilter"
-            @cancel="onCloseMetadata"
-          />
-        </LazyReModal>
+    <slot name="header" />
+    <div class="results-scroll" id="scroll">
+      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
+        <results-loading :size="dataset.viewSettings.pagination.size" />
       </div>
-      <RePagination
-        :total-items="dataset.results.total"
-        :pagination-settings="dataset.viewSettings.pagination"
-        @changePage="onPagination"
-      />
-    </template>
-    <rules-summary v-else :dataset="dataset"/>
+      <DynamicScroller
+        page-mode
+        class="scroller"
+        :items="visibleRecords"
+        :min-item-size="150"
+        :buffer="200"
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+        :emitUpdate="true"
+      > 
+        <template #before>
+          <slot name="pre-records-area"/>
+        </template>
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            :watch-data="true"
+            class="content__li"
+            :item="item"
+            :active="active"
+            key-field="id"
+            :index="index"
+            :data-index="index"
+          >
+            <results-record @show-metadata="onShowMetadata" :key="`${dataset.name}-${item.id}`" :dataset="dataset" :item="item">
+              <slot name="record" :record="item" />
+            </results-record>
+          </DynamicScrollerItem>
+        </template>
+        <template #after>
+          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+        </template>
+      </DynamicScroller>
+      <LazyReModal
+        modal-class="modal-secondary"
+        modal-position="modal-center"
+        :modal-custom="true"
+        :prevent-body-scroll="true"
+        :modal-visible="selectedRecord !== undefined"
+        @close-modal="onCloseMetadata"
+      >
+        <Metadata
+          v-if="selectedRecord"
+          :applied-filters="dataset.query.metadata"
+          :metadata-items="selectedRecord.metadata"
+          :title="selectedRecord.recordTitle()"
+          @metafilterApply="onApplyMetadataFilter"
+          @cancel="onCloseMetadata"
+        />
+      </LazyReModal>
+    </div>
+    <RePagination
+      :total-items="dataset.results.total"
+      :pagination-settings="dataset.viewSettings.pagination"
+      @changePage="onPagination"
+    />
   </div>
 </template>
 <script>
