@@ -615,6 +615,27 @@ const actions = {
     );
   },
 
+  async updateRule(_,{ dataset, label }) {
+    await ObservationDataset.api().patch(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${dataset.query.text}`,
+      {
+        label: label,
+        description: dataset.query.text
+      }
+    );
+  },
+
+  async getRule(_,{ dataset, query}) {
+    try {
+      const { response } = await ObservationDataset.api().get(
+        `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
+      )
+      return response.data;
+    } catch {
+      return undefined;
+    }
+  },
+
   async deleteRule(_,{ dataset, query }) {
     await ObservationDataset.api().delete(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
