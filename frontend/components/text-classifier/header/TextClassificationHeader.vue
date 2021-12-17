@@ -18,12 +18,12 @@
 <template>
   <div class="header__filters">
     <header-title
-      v-if="dataset.results.records && viewMode !== 'define-rules'"
+      v-if="dataset.results.records && viewMode !== 'labelling-rules'"
       title="Text Classification"
       :dataset="dataset"
     />
-    <filters-area :expandedSearchbar="viewMode === 'define-rules'" :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" >
-      <re-button v-if="dataset.results.total && viewMode === 'define-rules'" @click="showRulesList()" class="button-rules-summary button-clear">
+    <filters-area :expandedSearchbar="viewMode === 'labelling-rules'" :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" >
+      <re-button v-if="dataset.results.total && viewMode === 'labelling-rules'" @click="showRulesList()" class="button-rules-summary button-clear">
         <svgicon
           name="config"
           width="15"

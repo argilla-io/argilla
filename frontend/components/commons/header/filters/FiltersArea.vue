@@ -27,7 +27,7 @@
             @submit="onTextQuerySearch"
           />
           <FiltersList
-            v-if="viewMode !== 'define-rules'"
+            v-if="viewMode !== 'labelling-rules'"
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"

@@ -48,7 +48,7 @@ export default {
   }),
   computed: {
     showRulesArea() {
-      return !this.dataset.isMultiLabel && this.dataset.viewSettings.viewMode === 'define-rules';
+      return !this.dataset.isMultiLabel && this.dataset.viewSettings.viewMode === 'labelling-rules';
     },
   },
   methods: {

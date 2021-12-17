@@ -48,14 +48,14 @@
           v-if="showDefineRules"
           href="#"
           data-title="Define rules"
-          @click="$emit('onChangeViewMode', 'define-rules')"
+          @click="$emit('onChangeViewMode', 'labelling-rules')"
         >
           <svgicon
-            v-show="currentViewMode === 'define-rules'"
+            v-show="currentViewMode === 'labelling-rules'"
             class="sidebar__info__icon-help"
             name="check3"
           ></svgicon>
-          <svgicon name="define-rules-view"></svgicon>
+          <svgicon name="labelling-rules-view"></svgicon>
         </a>
       </div>
       <div class="sidebar__info">
@@ -90,7 +90,7 @@
 import "assets/icons/refresh";
 import "assets/icons/explore-view";
 import "assets/icons/annotate-view";
-import "assets/icons/define-rules-view";
+import "assets/icons/labelling-rules-view";
 import "assets/icons/progress";
 import "assets/icons/metrics";
 import "assets/icons/double-chev";
