@@ -17,6 +17,7 @@
 
 <template>
   <results-list
+    v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
@@ -32,6 +33,7 @@
       />
     </template>
   </results-list>
+  <rules-summary class="content" v-else :dataset="dataset"/>
 </template>
 <script>
 export default {
@@ -59,3 +61,21 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.content {
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      width: 100%;
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
+    width: 100%;
+    padding-right: 100px;
+  }
+}
+</style>
+
