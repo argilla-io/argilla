@@ -27,13 +27,13 @@
       <span
         :class="[
           'highlight__tooltip',
-          viewMode === 'annotate' ? 'highlight__tooltip--icon' : '',
+          annotationEnabled ? 'highlight__tooltip--icon' : '',
         ]"
       >
         <span
           >{{ span.entity.label }}
           <svgicon
-            v-if="viewMode === 'annotate'"
+            v-if="annotationEnabled"
             width="12"
             height="12"
             name="cross"
@@ -76,14 +76,14 @@ export default {
     isText() {
       return this.text.replace(/\s/g, "").length;
     },
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
+    annotationEnabled() {
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
   },
   methods: {
     openTagSelector() {
       this.clicked = true;
-      if (this.viewMode === 'annotate') {
+      if (this.annotationEnabled) {
         setTimeout(() => {
           if (!this.doubleClicked) {
             this.$emit("openTagSelector");
@@ -94,7 +94,7 @@ export default {
     },
     removeEntity() {
       this.doubleClicked = true;
-      if (this.viewMode === 'annotate') {
+      if (this.annotationEnabled) {
         this.$emit("removeEntity");
         setTimeout(() => {
           this.doubleClicked = false;

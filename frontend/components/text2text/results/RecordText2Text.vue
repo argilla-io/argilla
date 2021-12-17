@@ -29,7 +29,7 @@
           :record="record"
           :predictions="predictionSentences"
           :annotations="initialAnnotations"
-          :annotation-enabled="viewMode === 'annotate'"
+          :annotation-enabled="annotationEnabled"
           @update-initial-record="initializeInitialRecord"
           @reset-initial-record="onResetInitialRecord"
           @annotate="onAnnotate"
@@ -74,8 +74,8 @@ export default {
         this.idState.initialRecord = newValue;
       },
     },
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
+    annotationEnabled() {
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
     annotationSentences() {
       return this.record.annotation ? this.record.annotation.sentences : [];

@@ -19,12 +19,12 @@
   <div>
     <div
       :class="[
-        viewMode === 'annotate' ? 'list__item--annotation-mode' : 'list__item',
+        annotationEnabled ? 'list__item--annotation-mode' : 'list__item',
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
       <ReCheckbox
-        v-if="viewMode === 'annotate'"
+        v-if="annotationEnabled "
         class="list__checkbox"
         :value="item.selected"
         @change="onCheckboxChanged($event, item.id)"
@@ -32,14 +32,14 @@
       <slot :record="item" />
       <RecordExtraActions
         :key="item.id"
-        :allow-change-status="viewMode === 'annotate'"
+        :allow-change-status="annotationEnabled "
         :record="item"
         :dataset="dataset"
         :task="dataset.task"
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata(item)"
       />
-      <status-tag v-if="viewMode === 'annotate' && item.status !== 'Default'" :title="item.status"></status-tag>
+      <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
     </div>
   </div>
 </template>
@@ -58,8 +58,8 @@ export default {
     },
   },
   computed: {
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
+    annotationEnabled() {
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
     visibleRecords() {
       return this.dataset.visibleRecords;

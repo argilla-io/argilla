@@ -27,14 +27,14 @@
         :query-text="dataset.query.text"
       />
       <ClassifierAnnotationArea
-        v-if="viewMode === 'annotate'"
+        v-if="annotationEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
       <ClassifierExplorationArea v-else :record="record" />
-      <div v-if="viewMode === 'annotate'" class="content__actions-buttons">
+      <div v-if="annotationEnabled" class="content__actions-buttons">
         <re-button
           v-if="allowValidate"
           class="button-primary"
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <div v-if="viewMode !== 'annotate'" class="record__labels">
+    <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
         <svgicon
           v-if="record.predicted"
@@ -84,8 +84,8 @@ export default {
   },
   data: () => ({}),
   computed: {
-    viewMode() {
-      return this.dataset.viewSettings.viewMode;
+    annotationEnabled() {
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
     allowValidate() {
       return (
