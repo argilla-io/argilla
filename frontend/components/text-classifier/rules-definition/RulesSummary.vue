@@ -88,6 +88,9 @@ export default {
       });
     }
   },
+  mounted() {
+    document.getElementsByTagName("body")[0].classList.remove("fixed-header");
+  },
   methods: {
     ...mapActions({
       search: "entities/text_classification/search",

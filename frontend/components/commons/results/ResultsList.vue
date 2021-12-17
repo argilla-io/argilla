@@ -121,13 +121,6 @@ export default {
       this.scrollComponent.addEventListener("scroll", this.onScroll);
     }
   },
-  updated() {
-    const scroll = document.getElementById("scroll");
-    if (scroll) {
-      this.scrollComponent = scroll;
-      this.scrollComponent.addEventListener("scroll", this.onScroll);
-    }
-  },
   beforeDestroy() {
     if (this.scrollComponent)
       this.scrollComponent.removeEventListener("scroll", this.onScroll);
