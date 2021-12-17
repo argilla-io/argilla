@@ -140,10 +140,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      changeViewMode: "entities/datasets/changeViewMode",
-      defineRule: "entities/datasets/defineRule",
-      updateRule: "entities/datasets/updateRule",
-      getRuleMetricsByLabel: "entities/datasets/getRuleMetricsByLabel"
+      changeViewMode: "entities/text_classification/changeViewMode",
+      defineRule: "entities/text_classification/defineRule",
+      updateRule: "entities/text_classification/updateRule",
+      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel"
     }),
     async createRule() {
       if (this.currentRule) {

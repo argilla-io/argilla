@@ -90,10 +90,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      search: "entities/datasets/search",
-      getRules: "entities/datasets/getRules",
-      deleteRule: "entities/datasets/deleteRule",
-      getRuleMetricsByLabel: "entities/datasets/getRuleMetricsByLabel",
+      search: "entities/text_classification/search",
+      getRules: "entities/text_classification/getRules",
+      deleteRule: "entities/text_classification/deleteRule",
+      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
     }),
     async hideList() {
       await DatasetViewSettings.update({

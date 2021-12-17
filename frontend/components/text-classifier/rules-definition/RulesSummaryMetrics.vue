@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRulesMetrics: "entities/datasets/getRulesMetrics",
+      getRulesMetrics: "entities/text_classification/getRulesMetrics",
     }),
     async getMetrics() {
       const response = await this.getRulesMetrics({

@@ -44,7 +44,7 @@ export default {
       this.$fetch()
     },
     ...mapActions({
-      getRule: "entities/datasets/getRule",
+      getRule: "entities/text_classification/getRule",
     }),
   }
 };
