@@ -9,8 +9,8 @@
           height="12"
         ></svgicon>Back to query view</re-button>
       <p class="rules-summary__title">Summary</p>
-      <rules-summary-metrics :metricsByLabel="metricsByLabel" :dataset="dataset" />
-      <ReSearchBar @input="onSearch" />
+      <rules-summary-metrics v-if="formattedRules.length" :metricsByLabel="metricsByLabel" :dataset="dataset" /> 
+      <ReSearchBar @input="onSearch" v-if="formattedRules.length" />
       <ReTableInfo
         class="rules-summary__table"
         :data="formattedRules"
