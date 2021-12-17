@@ -89,6 +89,13 @@ export default {
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     }
   },
+  watch: {
+    annotationLabels (n, o) {
+      if (n !== o) {
+        this.selectedLabels = this.appliedLabels;
+      }
+    }
+  },
   computed: {
     searchText: {
       get: function () {
