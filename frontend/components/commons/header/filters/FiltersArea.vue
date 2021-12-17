@@ -21,7 +21,8 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
-            :class="[viewMode === 'define-rules' ? '--extended' : null, 'filters__searchbar']"
+            :expandedSearchbar="expandedSearchbar"
+            class="filters__searchbar"
             :dataset="dataset"
             @submit="onTextQuerySearch"
           />
@@ -34,13 +35,7 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
-          <re-button v-else-if="dataset.results.total" @click="showRulesList()" class="button-rules-summary button-clear">
-            <svgicon
-              name="config"
-              width="15"
-              height="14"
-            ></svgicon>
-            Rules Summary</re-button>
+          <slot/>
         </div>
       </div>
     </div>
@@ -50,12 +45,15 @@
 <script>
 import "assets/icons/config";
 import { mapActions } from "vuex";
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    expandedSearchbar: {
+      type: Boolean,
+      default: false,
     },
   },
   data: () => ({
@@ -96,14 +94,6 @@ export default {
       this.search({
         dataset: this.dataset,
         query: { metadata: { [filter]: values } },
-      });
-    },
-    showRulesList() {
-      DatasetViewSettings.update({
-        where: this.dataset.name,
-        data: {
-          visibleRulesList: true,
-        },
       });
     },
     async onRemoveAllMetadataFilters(filters) {
@@ -197,14 +187,6 @@ export default {
       align-items: center;
       opacity: 0.4;
     }
-  }
-}
-.button-rules-summary {
-  min-width: 130px !important;
-  color: $font-secondary-dark;
-  margin-bottom: 0 !important;
-  .svg-icon {
-    margin-right: 0.5em;
   }
 }
 </style>
