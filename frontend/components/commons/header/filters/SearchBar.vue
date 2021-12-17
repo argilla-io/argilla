@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <form @submit.prevent="submit(query)">
+  <form @submit.prevent="submit(query)" :class="{'--extended': expandedSearchbar}">
     <div
       :class="['searchbar__container', { active: query }]"
     >
@@ -51,6 +51,9 @@ export default {
       type: Object,
       required: true,
     },
+    expandedSearchbar: {
+      type: Boolean,   
+    }
   },
   data: () => ({
     queryText: null,
