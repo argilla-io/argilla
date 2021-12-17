@@ -18,9 +18,16 @@
   <div />
 </template>
 <script>
+import { defaultWorkspace, setWorkspace } from "@/models/Workspace";
 export default {
-  mounted() {
-    this.$router.push("/ws");
+  data: () => ({}),
+  computed: {
+    workspace() {
+      return defaultWorkspace(this.$auth.user);
+    },
+  },
+  async mounted() {
+    await setWorkspace(this.$router, this.workspace);
   },
 };
 </script>

@@ -30,12 +30,15 @@
       </li>
     </ul>
     <re-action-tooltip tooltip="Copied">
-      <a v-if="copyButton" class="breadcrumbs__copy" href="#" @click.prevent="copyDatasetName(breadcrumbs[breadcrumbs.length - 1].name)">
-        <svgicon
-          name="copy"
-          width="12"
-          height="13"
-        />
+      <a
+        v-if="copyButton"
+        class="breadcrumbs__copy"
+        href="#"
+        @click.prevent="
+          copyToClipboard(breadcrumbs[breadcrumbs.length - 1].name)
+        "
+      >
+        <svgicon name="copy" width="12" height="13" />
       </a>
     </re-action-tooltip>
   </div>
@@ -46,14 +49,15 @@ export default {
   props: {
     breadcrumbs: {
       type: Array,
+      required: true,
     },
     copyButton: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   methods: {
-    copyDatasetName(name) {
+    copyToClipboard(name) {
       const myTemporaryInputElement = document.createElement("input");
       myTemporaryInputElement.type = "text";
       myTemporaryInputElement.className = "hidden-input";
@@ -61,8 +65,8 @@ export default {
       document.body.appendChild(myTemporaryInputElement);
       myTemporaryInputElement.select();
       document.execCommand("Copy");
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -76,7 +80,7 @@ export default {
     display: inline-block;
     padding-left: 0;
     font-weight: normal;
-    list-style: none;  
+    list-style: none;
   }
   &__copy {
     .svg-icon {

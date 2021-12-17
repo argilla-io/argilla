@@ -15,26 +15,19 @@
  * limitations under the License.
  */
 
-const CURRENT_WORKSPACE_FIELD = "currentWorkspace";
-
-
-function getUsername(auth) {
-  return auth.user.username;
+function defaultWorkspace(user) {
+  return user.username;
 }
 
-async function getCurrentWorkspace(auth) {
-  return await auth.$storage.syncUniversal(
-    CURRENT_WORKSPACE_FIELD,
-    auth.user.username
-  );
+function currentWorkspace(route) {
+  return route.params.workspace;
+}
+function workspaceHome(ws) {
+  return `/ws/${ws}`;
 }
 
-async function setCurrentWorkspace(auth, workspace) {
-  auth.$storage.setUniversal(CURRENT_WORKSPACE_FIELD, workspace);
+function setWorkspace(router, workspace) {
+  router.push(workspaceHome(workspace));
 }
 
-async function clearCurrentWorkspace(auth) {
-  await auth.$storage.removeUniversal(CURRENT_WORKSPACE_FIELD);
-}
-
-export { getUsername, getCurrentWorkspace, setCurrentWorkspace, clearCurrentWorkspace };
+export { defaultWorkspace, currentWorkspace, setWorkspace, workspaceHome };

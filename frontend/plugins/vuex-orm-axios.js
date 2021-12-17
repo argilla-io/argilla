@@ -18,7 +18,9 @@
 import { Model } from "@vuex-orm/core";
 import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { Notification } from "@/models/Notifications";
-import { getCurrentWorkspace } from "@/models/User";
+
+import { currentWorkspace, defaultWorkspace } from "@/models/Workspace";
+
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
 
@@ -29,17 +31,10 @@ export default ({ $axios, app }) => {
       return config;
     }
 
-    const currentWorkspace = await getCurrentWorkspace(app.$auth);
-
-    if (currentWorkspace && currentUser.username !== currentWorkspace) {
-      var wsQueryParam = "workspace=" + currentWorkspace;
-      if (config.url.includes("?")) {
-        wsQueryParam = "&" + wsQueryParam;
-      } else wsQueryParam = "?" + wsQueryParam;
-
-      config.url += wsQueryParam;
+    const ws = currentWorkspace(app.context.route);
+    if (ws && ws !== defaultWorkspace(currentUser)) {
+      config.headers["X-Rubrix-Workspace"] = ws;
     }
-
     return config;
   });
 
