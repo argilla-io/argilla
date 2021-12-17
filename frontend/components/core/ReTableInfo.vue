@@ -32,7 +32,16 @@
                 @click="sort(column)"
               >
                 {{ column.name }}
-                <svgicon color="#4C4EA3" width="7" height="7" :name="sortedBy === column.field && sortOrder === 'desc' ? 'chev-top' : 'chev-bottom'" />
+                <svgicon
+                  color="#4C4EA3"
+                  width="7"
+                  height="7"
+                  :name="
+                    sortedBy === column.field && sortOrder === 'desc'
+                      ? 'chev-top'
+                      : 'chev-bottom'
+                  "
+                />
               </button>
             </div>
           </div>
@@ -57,7 +66,7 @@
           </p>
         </span>
         <ul>
-          <li v-for="item in filteredResultsByGroup(group)" :key="item.name">
+          <li v-for="item in filteredResultsByGroup(group)" :key="item.id">
             <div class="table-info__item">
               <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
               <span
@@ -67,26 +76,20 @@
               >
                 <span :class="column.class">
                   <span v-if="column.type === 'link'">
-                    <NuxtLink
-                      :to="item.name"
+                    <NuxtLink v-if="item.link" :to="item.link"
                       >{{ itemValue(item, column) }}
                     </NuxtLink>
+                    <span v-else>{{ itemValue(item, column) }}</span>
                     <re-action-tooltip tooltip="Copied">
                       <ReButton
                         title="Copy to clipboard"
-                        @click.prevent="onActionClicked('copy-name', item.name)"
                         class="table-info__actions__button button-icon"
+                        @click.prevent="onActionClicked('copy-name', item)"
                       >
-                        <svgicon
-                          name="copy"
-                          width="12"
-                          height="13"
-                        />
+                        <svgicon name="copy" width="12" height="13" />
                       </ReButton>
                     </re-action-tooltip>
-                    
                   </span>
-
                   <ReDate
                     v-else-if="column.type === 'date'"
                     :date="itemValue(item, column)"
@@ -101,15 +104,27 @@
                     </p>
                   </span>
                   <span v-else-if="column.type === 'task'">
-                    {{ itemValue(item, column) }} <span class="table-info__tag" v-if="itemValue(item, column) === 'Text2Text'">Experimental</span>
-                  </span
-                  >
+                    {{ itemValue(item, column) }}
+                    <span
+                      v-if="itemValue(item, column) === 'Text2Text'"
+                      class="table-info__tag"
+                      >Experimental</span
+                    >
+                  </span>
                   <span v-else>{{ itemValue(item, column) }}</span>
                 </span>
               </span>
               <div v-if="visibleActions" class="table-info__actions">
-                <re-action-tooltip v-for="action in filterActions" :key="action.index" :tooltip="action.tooltip">
-                  <ReButton :title="action.title" @click="onActionClicked(action.name, item.name)" class="table-info__actions__button button-icon">
+                <re-action-tooltip
+                  v-for="action in filterActions"
+                  :key="action.index"
+                  :tooltip="action.tooltip"
+                >
+                  <ReButton
+                    :title="action.title"
+                    class="table-info__actions__button button-icon"
+                    @click="onActionClicked(action.name, item)"
+                  >
                     <svgicon
                       v-if="action.icon !== undefined"
                       :name="action.icon"
@@ -118,7 +133,6 @@
                     />
                   </ReButton>
                 </re-action-tooltip>
-
               </div>
               <ReModal
                 :modal-custom="true"
@@ -143,7 +157,7 @@
                     </ReButton>
                     <ReButton
                       class="button-secondary--small"
-                      @click="onActionClicked('confirm-delete', item.name)"
+                      @click="onActionClicked('confirm-delete', item)"
                     >
                       Yes, delete
                     </ReButton>
@@ -313,8 +327,8 @@ export default {
       }
       return item[column.field];
     },
-    onActionClicked(action, id) {
-      this.$emit("onActionClicked", action, id);
+    onActionClicked(action, item) {
+      this.$emit("onActionClicked", action, item);
     },
     sort(column) {
       this.$emit("sort-column", column.field, this.sortOrder);
@@ -476,7 +490,7 @@ export default {
     border-radius: 3px;
     color: $lighter-color;
     @include font-size(12px);
-    box-shadow: 0 1px 4px 1px rgba(222,222,222,0.50);
+    box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
     padding: 0.1em 0.5em;
     margin-left: 1em;
   }

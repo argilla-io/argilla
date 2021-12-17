@@ -40,14 +40,14 @@
 </template>
 <script>
 import { IdState } from "vue-virtual-scroller";
-import { getUsername } from "@/models/User";
+
 import { Text2TextRecord, Text2TextDataset } from "@/models/Text2Text";
 import { mapActions } from "vuex";
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -123,7 +123,8 @@ export default {
       this.initialRecord = newRecord;
       await this.validate({
         dataset: this.dataset,
-        agent: getUsername(this.$auth),
+        // TODO: Move user agent to action
+        agent: this.$auth.user.username,
         records: [newRecord],
       });
     },

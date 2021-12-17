@@ -36,7 +36,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
-import { getUsername } from "@/models/User";
+
 export default {
   props: {
     dataset: {
@@ -70,7 +70,7 @@ export default {
       const filteredRecords = this.validationFilter(records);
       await this.validateAnnotations({
         dataset: this.dataset,
-        agent: getUsername(this.$auth),
+        agent: this.$auth.user.username,
         records: filteredRecords.map((record) => {
           return {
             ...record,
