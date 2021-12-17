@@ -39,18 +39,16 @@ from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dat
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics.api import compute_metric, get_dataset_metrics
 from rubrix.client.sdk.metrics.models import MetricInfo
-from rubrix.client.sdk.text2text.api import (
-    bulk as text2text_bulk,
-    data as text2text_data,
-)
+from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
+from rubrix.client.sdk.text2text.api import data as text2text_data
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
     Text2TextQuery,
 )
+from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
+from rubrix.client.sdk.text_classification.api import data as text_classification_data
 from rubrix.client.sdk.text_classification.api import (
-    bulk as text_classification_bulk,
-    data as text_classification_data,
     dataset_rule_metrics,
     fetch_dataset_labeling_rules,
 )
@@ -60,10 +58,8 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.api import (
-    bulk as token_classification_bulk,
-    data as token_classification_data,
-)
+from rubrix.client.sdk.token_classification.api import bulk as token_classification_bulk
+from rubrix.client.sdk.token_classification.api import data as token_classification_data
 from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
@@ -244,7 +240,9 @@ class RubrixClient:
 
         # TODO: improve logging policy in library
         if verbose:
-            print(f"{processed} records logged to {self._client.base_url + '/' + name}")
+            print(
+                f"{processed} records logged to {self._client.base_url + '/ws/' + self.active_workspace + '/' + name}"
+            )
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
@@ -396,6 +394,7 @@ class RubrixClient:
         _check_response_errors(response)
 
         return RuleMetrics.parse_obj(response.parsed)
+
 
 def _check_response_errors(response: Response) -> None:
     """Checks response status codes and raise corresponding error if found"""
