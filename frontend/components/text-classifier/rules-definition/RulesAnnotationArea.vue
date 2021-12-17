@@ -58,7 +58,8 @@
       <p>To define rules you need al least two labels. Go to annotation mode to <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.</p>
     </div>
     <rule-annotation-area-metrics :metrics="metrics"/>
-    <re-button :disabled="!selectedLabels.length" @click="createRule()" class="feedback-interactions__button button-primary">
+    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">You have already a rule saved with that label.</p>
+    <re-button v-else :disabled="!selectedLabels.length" @click="createRule()" class="feedback-interactions__button button-primary">
     Save rule</re-button>  
   </div>
 </template>
@@ -71,6 +72,9 @@ export default {
     dataset: {
       type: Object,
       required: true
+    },
+    currentRule: {
+      type: Object,
     }
   },
   data: () => {
@@ -81,6 +85,22 @@ export default {
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS
     };
   },
+  watch: {
+    async currentRule(n) {
+      if (n) {
+        this.selectedLabels = [n.label];
+        await this.getMetricsByLabel(n.label);
+      } else {
+        this.selectedLabels = [];
+      }
+    }
+  },
+  async mounted() {
+    if (this.currentRule) {
+      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
+      await this.getMetricsByLabel(this.currentRule.label);
+    }
+  },
   computed: {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
@@ -89,25 +109,25 @@ export default {
       return this.dataset.isMultiLabel;
     },
     labels() {
-      return this.dataset._labels.map(l => ({ class: l }));
+      return this.dataset._labels.map(l => ({ class: l, selected: false}));
     },
-    // sortedLabels() {
-    //   return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
-    // },
+    sortedLabels() {
+      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
+    },
     filteredLabels() {
-      return this.labels.filter(label =>
+      return this.sortedLabels.filter(label =>
         label.class.toLowerCase().match(this.searchText)
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(l => l.selected).length;
+      const selectedLabels = this.filteredLabels.filter(l => this.selectedLabels.includes(l.class).length);
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
           ? this.shownLabels - selectedLabels
           : this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter(l => {
-        if (l.selected) {
+        if (this.selectedLabels.includes(l.class)) {
           return l;
         } else {
           if (nonSelected < availableNonSelected) {
@@ -116,19 +136,28 @@ export default {
           }
         }
       });
-    }
+    },
   },
   methods: {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
       defineRule: "entities/datasets/defineRule",
+      updateRule: "entities/datasets/updateRule",
       getRuleMetricsByLabel: "entities/datasets/getRuleMetricsByLabel"
     }),
     async createRule() {
-      await this.defineRule({
-        dataset: this.dataset,
-        label: this.selectedLabels[0]
-      });
+      if (this.currentRule) {
+        await this.updateRule({
+          dataset: this.dataset,
+          label: this.selectedLabels[0]
+        });
+      } else {
+        await this.defineRule({
+          dataset: this.dataset,
+          label: this.selectedLabels[0]
+        });
+      };
+      this.$emit('update-rule');
     },
     async getMetricsByLabel(label) {
       if (label.length) {

@@ -2,16 +2,22 @@
   <div>
     <div class="rules__container">
       <p class="rules__query">{{query}}</p>
-      <rules-annotation-area :dataset="dataset"/>
+      <rules-annotation-area :currentRule="currentRule" :dataset="dataset" @update-rule="updateRule"/>
     </div>
     <p>Records ({{dataset.results.total}})</p>
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
 export default {
   computed: {
     query() {
       return this.dataset.query.text;
+    }
+  },
+  data: () => {
+    return {
+      currentRule: undefined,
     }
   },
   props: {
@@ -19,6 +25,27 @@ export default {
       type: Object,
       default: () => ({}),
     },
+  },
+  async fetch() {
+    this.currentRule = await this.getRule({
+      dataset: this.dataset,
+      query: this.query
+    });
+  },
+  watch: {
+    query(n, o) {
+      if (o !== n) {
+        this.$fetch()
+      }
+    }
+  },
+  methods: {
+    updateRule() {
+      this.$fetch()
+    },
+    ...mapActions({
+      getRule: "entities/datasets/getRule",
+    }),
   }
 };
 </script>
