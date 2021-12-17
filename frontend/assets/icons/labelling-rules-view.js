@@ -18,7 +18,7 @@
 /* eslint-disable */
 var icon = require('vue-svgicon')
 icon.register({
-  'define-rules-view': {
+  'labelling-rules-view': {
     width: 26,
     height: 20,
     viewBox: '0 0 26 20',
