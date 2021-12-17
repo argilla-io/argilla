@@ -178,9 +178,6 @@ export default {
     .fixed-header & {
       padding-bottom: 200px;
     }
-    &::-webkit-scrollbar {
-      -webkit-appearance: none;
-    }
     .--metrics & {
       @include media(">desktop") {
         width: 100%;
