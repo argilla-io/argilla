@@ -40,6 +40,7 @@ class SortBy(Enum):
 def find_label_errors(
     records: List[TextClassificationRecord],
     sort_by: Union[str, SortBy] = "likelihood",
+    metadata_key: str = "label_error_candidate",
     **kwargs,
 ) -> List[TextClassificationRecord]:
     """Finds potential annotation/label errors in your records.
@@ -53,6 +54,7 @@ def find_label_errors(
             - "likelihood": sort the returned records by likelihood of containing a label error (most likely first)
             - "prediction": sort the returned records by the probability of the prediction (highest probability first)
             - "none": do not sort the returned records
+        metadata_key: The key added to the record's metadata that holds the order, if ``sort_by`` is not "none".
         **kwargs: Passed on to `cleanlab.pruning.get_noise_indices`
 
     Returns:
@@ -96,7 +98,14 @@ def find_label_errors(
 
     indices = get_noise_indices(s, psx, **kwargs)
 
-    return np.array(records)[indices].tolist()
+    records_with_label_errors = np.array(records)[indices].tolist()
+
+    # add metadata
+    if sort_by is not SortBy.NONE:
+        for i, rec in enumerate(records_with_label_errors):
+            rec.metadata[metadata_key] = i
+
+    return records_with_label_errors
 
 
 def _check_and_update_kwargs(
