@@ -190,6 +190,9 @@ export default {
     padding-left: 4em;
     padding-bottom: 61px;
     transition: padding 0s ease-in-out 0.1s;
+    &::-webkit-scrollbar {
+      display: none;
+    }
     .fixed-header & {
       padding-bottom: 200px;
     }
