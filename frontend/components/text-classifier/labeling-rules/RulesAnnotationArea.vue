@@ -92,6 +92,7 @@ export default {
         await this.getMetricsByLabel(n.label);
       } else {
         this.selectedLabels = [];
+        this.metrics = {};
       }
     }
   },

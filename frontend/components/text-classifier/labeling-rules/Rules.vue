@@ -33,9 +33,9 @@ export default {
     });
   },
   watch: {
-    query(n, o) {
+    async query(n, o) {
       if (o !== n) {
-        this.$fetch()
+        await this.$fetch()
       }
     }
   },
@@ -61,7 +61,7 @@ export default {
   &__query {
     color: $font-secondary-dark;
     @include font-size(16px);
-    font-weight: 300;
+    font-weight: 600;
     margin-top: 0;
   }
 }

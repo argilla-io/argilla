@@ -30,7 +30,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .rules__metrics {
-  margin-top: 3em;
+  margin-top: 1em;
   margin-bottom: 3em;
   max-width: 300px;
   display: flex;
