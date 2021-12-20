@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      search: "entities/text_classification/search",
+      search: "entities/datasets/search",
       getRules: "entities/text_classification/getRules",
       deleteRule: "entities/text_classification/deleteRule",
       getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
