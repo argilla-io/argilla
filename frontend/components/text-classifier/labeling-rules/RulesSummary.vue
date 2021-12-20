@@ -185,7 +185,7 @@ export default {
         min-width: 120px;
       }
       .table-info__body {
-        height: auto;
+        height: calc(100vh - 503px);
       }
       .table-info__item {
         padding-right: 3em !important;
