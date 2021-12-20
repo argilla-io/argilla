@@ -55,20 +55,19 @@ const actions = {
   },
 
   async getRule(_, { dataset, query }) {
-    try {
-      const { response } = await ObservationDataset.api().get(
-        `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
-        {
-          // Ignore errors related to rule not found
-          validateStatus: function (status) {
-            return status === 404 || (status >= 200 && status < 300);
-          },
-        }
-      );
-      return response.data;
-    } catch {
+    const { response } = await ObservationDataset.api().get(
+      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
+      {
+        // Ignore errors related to rule not found
+        validateStatus: function (status) {
+          return status === 404 || (status >= 200 && status < 300);
+        },
+      }
+    );
+    if (response.status === 404) {
       return undefined;
     }
+    return response.data;
   },
 
   async deleteRule(_, { dataset, query }) {
