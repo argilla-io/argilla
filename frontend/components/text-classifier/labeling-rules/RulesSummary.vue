@@ -152,12 +152,12 @@ export default {
       this.showModal = id.name;
     },
     async onDeleteRule(id) {
+      this.closeModal();
       await this.deleteRule({ 
         dataset: this.dataset,
         query: id.name,
       });
       await this.$fetch();
-      this.closeModal();
     },
     closeModal() {
       this.showModal = undefined;
