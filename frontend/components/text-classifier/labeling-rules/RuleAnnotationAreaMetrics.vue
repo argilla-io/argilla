@@ -15,6 +15,7 @@ export default {
     return {
       visibleMetrics: [
         { name: 'Coverage', id: 'coverage' },
+        { name: 'Annotated Coverage', id: 'coverage_annotated' },
         { name: 'Correct', id: 'correct' },
         { name: 'Incorrect', id: 'incorrect' },
         { name: 'Precision', id: 'precision' }
@@ -36,6 +37,7 @@ export default {
   display: flex;
   p {
     min-width: 25%;
+    white-space: nowrap;
     margin-right: 2em;
     span{
       display: block;
