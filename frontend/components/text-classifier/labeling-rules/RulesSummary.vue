@@ -149,12 +149,12 @@ export default {
       this.getMetricsByLabel();
     },
     onShowConfirmRuleDeletion(id) {
-      this.showModal = id;
+      this.showModal = id.name;
     },
     async onDeleteRule(id) {
       await this.deleteRule({ 
         dataset: this.dataset,
-        query: id,
+        query: id.name,
       });
       this.closeModal();
       this.$fetch();
