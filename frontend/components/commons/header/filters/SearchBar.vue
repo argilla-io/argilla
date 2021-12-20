@@ -16,12 +16,18 @@
   -->
 
 <template>
-  <form @submit.prevent="submit(query)" :class="{'--extended': expandedSearchbar}">
-    <div
-      :class="['searchbar__container', { active: query }]"
-    >
+  <form
+    :class="{ '--extended': expandSearchbar }"
+    @submit.prevent="submit(query)"
+  >
+    <div :class="['searchbar__container', { active: query }]">
       <ReInputContainer class="searchbar">
-        <svgicon v-if="!query && !dataset.query.text" name="search" width="20" height="40" />
+        <svgicon
+          v-if="!query && !dataset.query.text"
+          name="search"
+          width="20"
+          height="40"
+        />
         <svgicon
           v-else
           class="searchbar__button"
@@ -51,9 +57,9 @@ export default {
       type: Object,
       required: true,
     },
-    expandedSearchbar: {
-      type: Boolean,   
-    }
+    expandSearchbar: {
+      type: Boolean,
+    },
   },
   data: () => ({
     queryText: null,
@@ -76,9 +82,9 @@ export default {
       this.$emit("submit", query);
     },
     removeFilter() {
-      this.query = ''
+      this.query = "";
       this.$emit("submit", this.query);
-    }
+    },
   },
 };
 </script>
@@ -114,15 +120,15 @@ export default {
     transition: background 0.2s ease-in-out;
     &:hover {
       transition: background 0.2s ease-in-out;
-      background: palette(grey, bg)
+      background: palette(grey, bg);
     }
   }
   .svg-icon {
-    fill: #4C4EA3;
+    fill: #4c4ea3;
     margin: auto 1em auto 1em;
   }
   &:hover {
-    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
+    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4);
   }
   .--extended & {
     min-width: 100%;
