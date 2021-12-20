@@ -127,6 +127,7 @@ export default {
       if (this.isDatasetView) {
         return this.dataset.viewSettings.viewMode;
       }
+      return undefined;
     },
     isDatasetView() {
       return this.dataset !== undefined;
