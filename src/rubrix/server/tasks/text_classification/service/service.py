@@ -112,6 +112,7 @@ class TextClassificationService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
+        exclude_metrics: bool = True,
     ) -> TextClassificationSearchResults:
         """
         Run a search in a dataset
@@ -155,6 +156,7 @@ class TextClassificationService:
             ),
             size=size,
             record_from=record_from,
+            exclude_fields=["metrics"] if exclude_metrics else None,
         )
         return TextClassificationSearchResults(
             total=results.total,
@@ -208,6 +210,7 @@ class TextClassificationService:
             dataset,
             search=RecordSearch(include_default_aggregations=False),
             size=1,
+            exclude_fields=["metrics", "metadata"],
         )
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:
