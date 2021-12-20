@@ -156,7 +156,7 @@ export default {
         dataset: this.dataset,
         query: id.name,
       });
-      this.$fetch();
+      await this.$fetch();
       this.closeModal();
     },
     closeModal() {
