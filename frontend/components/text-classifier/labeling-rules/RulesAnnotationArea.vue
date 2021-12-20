@@ -18,10 +18,10 @@
 <template>
   <div class="annotation-area">
     <div v-if="labels.length">
-      <p>Select a label for your query </p>
+      <p>Select a label for your query</p>
       <label-search
         v-if="labels.length > maxVisibleLabels"
-        :searchText="searchText"
+        :search-text="searchText"
         @input="onSearchLabel"
       />
       <ClassifierAnnotationButton
@@ -55,12 +55,23 @@
     </div>
     <div v-else class="empty-labels">
       <p>There aren't any label yet.</p>
-      <p>To define rules you need al least two labels. Go to annotation mode to <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.</p>
+      <p>
+        To define rules you need al least two labels. Go to annotation mode to
+        <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.
+      </p>
     </div>
-    <rule-annotation-area-metrics :metrics="metrics"/>
-    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">You have already a rule saved with that label.</p>
-    <re-button v-else :disabled="!selectedLabels.length" @click="createRule()" class="feedback-interactions__button button-primary">
-    Save rule</re-button>  
+    <rule-annotation-area-metrics :metrics="metrics" />
+    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
+      You have already a rule saved with that label.
+    </p>
+    <re-button
+      v-else
+      :disabled="!selectedLabels.length"
+      class="feedback-interactions__button button-primary"
+      @click="createRule()"
+    >
+      Save rule</re-button
+    >
   </div>
 </template>
 <script>
@@ -71,36 +82,20 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true
+      required: true,
     },
     currentRule: {
       type: Object,
-    }
+      default: undefined,
+    },
   },
   data: () => {
     return {
       searchText: "",
       selectedLabels: [],
       metrics: {},
-      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS
+      shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     };
-  },
-  watch: {
-    async currentRule(n) {
-      if (n) {
-        this.selectedLabels = [n.label];
-        await this.getMetricsByLabel(n.label);
-      } else {
-        this.selectedLabels = [];
-        this.metrics = {};
-      }
-    }
-  },
-  async mounted() {
-    if (this.currentRule) {
-      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
-      await this.getMetricsByLabel(this.currentRule.label);
-    }
   },
   computed: {
     maxVisibleLabels() {
@@ -110,24 +105,26 @@ export default {
       return this.dataset.isMultiLabel;
     },
     labels() {
-      return this.dataset._labels.map(l => ({ class: l, selected: false}));
+      return this.dataset._labels.map((l) => ({ class: l, selected: false }));
     },
     sortedLabels() {
       return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
     },
     filteredLabels() {
-      return this.sortedLabels.filter(label =>
+      return this.sortedLabels.filter((label) =>
         label.class.toLowerCase().match(this.searchText)
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(l => this.selectedLabels.includes(l.class)).length;
+      const selectedLabels = this.filteredLabels.filter((l) =>
+        this.selectedLabels.includes(l.class)
+      ).length;
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
           ? this.shownLabels - selectedLabels
           : this.shownLabels;
       let nonSelected = 0;
-      return this.filteredLabels.filter(l => {
+      return this.filteredLabels.filter((l) => {
         if (this.selectedLabels.includes(l.class)) {
           return l;
         } else {
@@ -139,33 +136,50 @@ export default {
       });
     },
   },
+  watch: {
+    async currentRule(n) {
+      if (n) {
+        this.selectedLabels = [n.label];
+        await this.getMetricsByLabel(n.label);
+      } else {
+        this.selectedLabels = [];
+      }
+    },
+  },
+  async mounted() {
+    if (this.currentRule) {
+      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
+      await this.getMetricsByLabel(this.currentRule.label);
+    }
+  },
   methods: {
     ...mapActions({
       changeViewMode: "entities/text_classification/changeViewMode",
       defineRule: "entities/text_classification/defineRule",
       updateRule: "entities/text_classification/updateRule",
-      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel"
+      getRuleMetricsByLabel:
+        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async createRule() {
       if (this.currentRule) {
         await this.updateRule({
           dataset: this.dataset,
-          label: this.selectedLabels[0]
+          label: this.selectedLabels[0],
         });
       } else {
         await this.defineRule({
           dataset: this.dataset,
-          label: this.selectedLabels[0]
+          label: this.selectedLabels[0],
         });
-      };
-      this.$emit('update-rule');
+      }
+      this.$emit("update-rule");
     },
     async getMetricsByLabel(label) {
-      if (label.length) {
+      if (label !== undefined && label.length) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
           query: this.dataset.query.text,
-          label: label
+          label: label,
         });
         this.metrics = response;
       } else {
@@ -187,10 +201,10 @@ export default {
     async changeToAnnotationViewMode() {
       await this.changeViewMode({
         dataset: this.dataset,
-        value: "annotate"
+        value: "annotate",
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
