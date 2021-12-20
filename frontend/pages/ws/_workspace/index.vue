@@ -29,7 +29,7 @@
         <datasets-empty v-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
-            <ReSearchBar @input="onSearch" />
+            <ReSearchBar @input="onSearch" placeholder="Search datasets" />
           </div>
           <Error
             v-if="$fetchState.error"

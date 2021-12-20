@@ -34,7 +34,7 @@
           ref="input"
           v-model="query"
           class="searchbar__input"
-          placeholder="Search records"
+          placeholder="Introduce a query"
         />
       </ReInputContainer>
     </div>

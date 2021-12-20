@@ -10,7 +10,7 @@
         ></svgicon>Back to query view</re-button>
       <p class="rules-summary__title">Summary</p>
       <rules-summary-metrics v-if="formattedRules.length" :metricsByLabel="metricsByLabel" :dataset="dataset" /> 
-      <ReSearchBar @input="onSearch" v-if="formattedRules.length" />
+      <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
       <ReTableInfo
         class="rules-summary__table"
         :data="formattedRules"
@@ -55,7 +55,7 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
-        { name: "C. Annotated", field: "coverage_annotated", class: "text", type: "number" },
+        { name: "Cov. Annot.", field: "coverage_annotated", class: "text", type: "number" },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
         { name: "Precision", field: "precision", class: "text", type: "number"  },

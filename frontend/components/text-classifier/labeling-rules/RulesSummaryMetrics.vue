@@ -65,6 +65,7 @@ export default {
       display: inline-block;
       margin-right: 2.5em;
       span {
+        font-weight: 600;
         margin-left: 1em;
       }
     }

@@ -26,7 +26,7 @@
       height="14"
       @click="filter = undefined"
     />
-    <ReInput v-model="filter" placeholder="Search datasets" />
+    <ReInput v-model="filter" :placeholder="placeholder" />
   </ReInputContainer>
 </template>
 <script>
@@ -34,6 +34,12 @@ import "assets/icons/search";
 import "assets/icons/cross";
 
 export default {
+  props: {
+    placeholder: {
+      type: String,
+      required: true,
+    }
+  },
   data() {
     return { filter: this.value };
   },
