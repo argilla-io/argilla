@@ -19,7 +19,7 @@
 
 <script>
 import "assets/icons/datasets-empty";
-import { workspaceHome, currentWorkspace } from "@/models/Workspace";
+import { workspaceHome } from "@/models/Workspace";
 export default {
   props: {
     workspace: {
