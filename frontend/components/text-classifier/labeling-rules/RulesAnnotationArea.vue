@@ -120,7 +120,7 @@ export default {
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter(l => this.selectedLabels.includes(l.class).length);
+      const selectedLabels = this.filteredLabels.filter(l => this.selectedLabels.includes(l.class)).length;
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
           ? this.shownLabels - selectedLabels
