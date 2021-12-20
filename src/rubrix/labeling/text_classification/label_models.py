@@ -120,21 +120,30 @@ class Snorkel(LabelModel):
 
         super().__init__(weak_labels)
 
-        # Check if we need to change the weak labels to int mapping
+        # Check if we need to remap the weak labels to int mapping
         # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
         if self._weak_labels.label2int[None] != -1 or sorted(
             self._weak_labels.int2label
         ) != list(range(-1, len(self._weak_labels.label2int) - 1)):
+            self._need_remap = True
+
             labels = [None] + [
                 label for label in self._weak_labels.label2int if label is not None
             ]
-            label2int = {
-                label: integer
-                for label, integer in zip(
-                    labels, range(-1, len(self._weak_labels.label2int) - 1)
-                )
+
+            self._weaklabels2snorkel = {
+                self._weak_labels.label2int[label]: i
+                for i, label in enumerate(labels, -1)
             }
-            self._weak_labels.change_mapping(label2int)
+        else:
+            self._need_remap = False
+            self._weaklabels2snorkel = {
+                i: i for i in range(-1, len(self._weak_labels.label2int) - 1)
+            }
+
+        self._snorkel2weaklabels = {
+            val: key for key, val in self._weaklabels2snorkel.values()
+        }
 
         # instantiate Snorkel's label model
         self._model = SnorkelLabelModel(
@@ -160,8 +169,36 @@ class Snorkel(LabelModel):
         l_train = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
+        if self._need_remap:
+            l_train = self._copy_and_remap(l_train)
 
         self._model.fit(L_train=l_train, **kwargs)
+
+    def _copy_and_remap(self, matrix_or_array: np.ndarray):
+        """Helper function to copy and remap the weak label matrix or annotation array to be compatible with snorkel.
+
+        Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential.
+
+        Args:
+            matrix_or_array: The original weak label matrix or annotation array
+
+        Returns:
+            A copy of the weak label matrix, remapped to match snorkel's requirements.
+        """
+        matrix_or_array = matrix_or_array.copy()
+
+        # save masks for swapping
+        label_masks = {}
+
+        # compute masks
+        for idx in self._weaklabels2snorkel:
+            label_masks[idx] = matrix_or_array == idx
+
+        # swap integers
+        for idx in self._weaklabels2snorkel:
+            matrix_or_array[label_masks[idx]] = self._weaklabels2snorkel[idx]
+
+        return matrix_or_array
 
     def predict(
         self,
@@ -189,11 +226,15 @@ class Snorkel(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
+        l_pred = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
+        if self._need_remap:
+            l_pred = self._copy_and_remap(l_pred)
+
         # get predictions and probabilities
         predictions, probabilities = self._model.predict(
-            L=self._weak_labels.matrix(
-                has_annotation=None if include_annotated_records else False
-            ),
+            L=l_pred,
             return_probs=True,
             tie_break_policy=tie_break_policy.value,
         )
@@ -226,8 +267,13 @@ class Snorkel(LabelModel):
                             )
 
                 pred_for_rec = [
-                    (self._weak_labels.int2label[idx], prob[idx])
-                    for idx in np.argsort(prob)[::-1]
+                    (
+                        self._weak_labels.int2label[
+                            self._snorkel2weaklabels[snorkel_idx]
+                        ],
+                        prob[snorkel_idx],
+                    )
+                    for snorkel_idx in np.argsort(prob)[::-1]
                 ]
 
             records_with_prediction[-1].prediction = pred_for_rec
@@ -263,9 +309,13 @@ class Snorkel(LabelModel):
                 "You need annotated records to compute scores/metrics for your label model."
             )
 
+        l_pred = self._weak_labels.matrix(has_annotation=True)
+        if self._need_remap:
+            l_pred = self._copy_and_remap(l_pred)
+
         # get predictions and probabilities
         predictions, probabilities = self._model.predict(
-            L=self._weak_labels.matrix(has_annotation=True),
+            L=l_pred,
             return_probs=True,
             tie_break_policy=tie_break_policy.value,
         )
@@ -277,10 +327,13 @@ class Snorkel(LabelModel):
                 "Metrics are only calculated over non-abstained predictions!"
             )
 
+        annotations = self._weak_labels.annotation()[idx]
+        if self._need_remap:
+            annotations = self._copy_and_remap(annotations)
+
         # accuracy
         metrics = {
-            "accuracy": (predictions[idx] == self._weak_labels.annotation()[idx]).sum()
-            / len(predictions[idx])
+            "accuracy": (predictions[idx] == annotations).sum() / len(predictions[idx])
         }
 
         return metrics
