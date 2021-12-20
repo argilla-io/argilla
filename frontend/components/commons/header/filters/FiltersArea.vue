@@ -21,13 +21,13 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
-            :expandedSearchbar="expandedSearchbar"
+            :expand-searchbar="expandSearchbar"
             class="filters__searchbar"
             :dataset="dataset"
             @submit="onTextQuerySearch"
           />
           <FiltersList
-            v-if="viewMode !== 'labelling-rules'"
+            v-if="!expandSearchbar"
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
@@ -35,7 +35,7 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
-          <slot/>
+          <slot />
         </div>
       </div>
     </div>
@@ -51,7 +51,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    expandedSearchbar: {
+    expandSearchbar: {
       type: Boolean,
       default: false,
     },

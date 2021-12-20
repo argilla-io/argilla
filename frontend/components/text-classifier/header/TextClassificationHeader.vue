@@ -22,14 +22,19 @@
       title="Text Classification"
       :dataset="dataset"
     />
-    <filters-area :expandedSearchbar="viewMode === 'labelling-rules'" :dataset="dataset" v-if="!dataset.viewSettings.visibleRulesList" >
-      <re-button v-if="dataset.results.total && viewMode === 'labelling-rules'" @click="showRulesList()" class="button-rules-summary button-clear">
-        <svgicon
-          name="config"
-          width="15"
-          height="14"
-        ></svgicon>
-        Rules Summary</re-button>
+    <filters-area
+      v-if="!dataset.viewSettings.visibleRulesList"
+      :expand-searchbar="viewMode === 'labelling-rules'"
+      :dataset="dataset"
+    >
+      <re-button
+        v-if="dataset.results.total && viewMode === 'labelling-rules'"
+        class="button-rules-summary button-clear"
+        @click="showRulesList"
+      >
+        <svgicon name="config" width="15" height="14"></svgicon>
+        Rules Summary</re-button
+      >
     </filters-area>
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
@@ -163,4 +168,3 @@ export default {
   }
 }
 </style>
-
