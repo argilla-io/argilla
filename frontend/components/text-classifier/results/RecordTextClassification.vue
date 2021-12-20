@@ -33,7 +33,7 @@
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <ClassifierExplorationArea v-else :record="record" />
+      <ClassifierExplorationArea v-else :dataset="dataset" :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <re-button
           v-if="allowValidate"
@@ -62,6 +62,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import "assets/icons/predicted-ok";
 import "assets/icons/predicted-ko";
@@ -85,7 +86,7 @@ export default {
   data: () => ({}),
   computed: {
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === 'annotate';
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
     allowValidate() {
       return (
@@ -170,6 +171,7 @@ export default {
     padding: 4em 1.4em 1em 1em;
   }
 }
+
 .icon {
   &__predicted {
     display: block;
@@ -186,6 +188,7 @@ export default {
     }
   }
 }
+
 .content {
   &__actions-buttons {
     margin-right: 0;
