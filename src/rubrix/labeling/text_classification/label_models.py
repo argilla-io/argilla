@@ -142,7 +142,7 @@ class Snorkel(LabelModel):
             }
 
         self._snorkel2weaklabels = {
-            val: key for key, val in self._weaklabels2snorkel.values()
+            val: key for key, val in self._weaklabels2snorkel.items()
         }
 
         # instantiate Snorkel's label model
