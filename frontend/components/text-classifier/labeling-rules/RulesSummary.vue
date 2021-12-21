@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isVisible">
+  <div v-if="isVisible" class="rules-summary">
     <ReLoading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="rules-summary__container">
       <re-button @click="hideList()" class="rules-summary__close button-quaternary">
@@ -8,8 +8,9 @@
           width="12"
           height="12"
         ></svgicon>Back to query view</re-button>
-      <p class="rules-summary__title">Summary</p>
-      <rules-summary-metrics v-if="formattedRules.length" :metricsByLabel="metricsByLabel" :dataset="dataset" /> 
+      <p class="rules-summary__title">Overall Metrics</p>
+      <rules-summary-metrics :formattedRules="formattedRules" :metricsByLabel="metricsByLabel" :dataset="dataset" />
+      <p class="rules-summary__title">Summary</p> 
       <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
       <ReTableInfo
         class="rules-summary__table"
@@ -21,16 +22,20 @@
         :query-search="querySearch"
         :global-actions="false"
         search-on="name"
+        empty-icon="empty-rules"
+        empty-title="0 rules defined"
+        :empty-description="emptyRulesDescription"
         :show-modal="showModal"
         @sort-column="onSortColumns"
         @onActionClicked="onActionClicked"
         @close-modal="closeModal"
       />
-      <re-button class="button-primary" @click="updateSummary()">Update Summary</re-button>
+      <re-button v-if="formattedRules.length" class="button-primary" @click="updateSummary()">Update Summary</re-button>
     </div>
   </div>
 </template>
 <script>
+import "assets/icons/empty-rules";
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
@@ -87,7 +92,10 @@ export default {
           precision: this.metricsByLabel[r.query].precision,
         };
       });
-    }
+    },
+    emptyRulesDescription() {
+      return `You have not defined any rules for this dataset yet.<br /> Start to define rules`;
+    },
   },
   mounted() {
     document.getElementsByTagName("body")[0].classList.remove("fixed-header");
@@ -168,14 +176,23 @@ export default {
 </script>
 <style lang="scss" scoped>
 .rules-summary {
+  padding-left: 4em;
+  padding-top: 3em;
+  overflow: auto;
+  height: 100vh;
   &__container {
     margin-top: 3em;
-    padding: 3em;
+    padding: 20px;
+    background: rgba($lighter-color, .4);
+    border: 1px solid $lighter-color;
+    width: 100%;
+    border-radius: 5px;
   }
   &__title {
     color: $font-secondary-dark;
     @include font-size(22px);
     font-weight: 600;
+    margin-top: 0;
   }
   &__table {
     ::v-deep {
@@ -186,7 +203,8 @@ export default {
         min-width: 120px;
       }
       .table-info__body {
-        height: calc(100vh - 503px);
+        overflow: visible;
+        // height: calc(100vh - 580px);
       }
       .table-info__item {
         padding-right: 3em !important;
