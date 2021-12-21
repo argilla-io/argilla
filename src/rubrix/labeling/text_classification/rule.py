@@ -12,12 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional
-
-from pydantic import BaseModel
+from typing import Dict, List, Optional, Union
 
 import rubrix as rb
-from rubrix import TextClassificationRecord, _client_instance as client
+from rubrix import TextClassificationRecord
+from rubrix import _client_instance as client
+from rubrix.client.sdk.text_classification.models import LabelingRule
 
 
 class Rule:
@@ -39,10 +39,17 @@ class Rule:
         "not urgent"
     """
 
-    def __init__(self, query: str, label: str, name: Optional[str] = None):
+    def __init__(
+        self,
+        query: str,
+        label: str,
+        name: Optional[str] = None,
+        author: Optional[str] = None,
+    ):
         self._query = query
         self._label = label
         self._name = name
+        self._author = author
         self._matching_ids = None
 
     @property
@@ -62,6 +69,11 @@ class Rule:
             return self._name
         return self._query
 
+    @property
+    def author(self):
+        """Who authored the rule."""
+        return self._author
+
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
 
@@ -71,6 +83,37 @@ class Rule:
         records = rb.load(name=dataset, query=self._query, as_pandas=False)
 
         self._matching_ids = {record.id: None for record in records}
+
+    def metrics(self, dataset: str) -> Dict[str, Union[int, float]]:
+        """Compute the rule metrics for a given dataset:
+
+        - **coverage**: Fraction of the records labeled by the rule.
+        - **annotated_coverage**: Fraction of annotated records labeled by the rule.
+        - **correct**: Number of records the rule labeled correctly (if annotations are available).
+        - **incorrect**: Number of records the rule labeled incorrectly (if annotations are available).
+        - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
+
+        Args:
+            dataset: Name of the dataset for which to compute the rule metrics.
+
+        Returns:
+            The rule metrics.
+        """
+        current_client = client()
+        metrics = current_client.rule_metrics_for_dataset(
+            dataset=dataset,
+            rule=LabelingRule(
+                query=self.query, label=self.label, author=self.author or "None"
+            ),
+        )
+
+        return {
+            "coverage": metrics.coverage,
+            "annotated_coverage": metrics.coverage_annotated,
+            "correct": int(metrics.correct),
+            "incorrect": int(metrics.incorrect),
+            "precision": metrics.precision,
+        }
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:
         """Check if the given record is among the matching ids from the ``self.apply`` call.
@@ -97,45 +140,27 @@ class Rule:
             return self._label
 
 
-class RuleNotAppliedError(Exception):
-    pass
+def load_rules(dataset: str) -> List[Rule]:
+    """load the rules defined in a given dataset.
 
+    Args:
+        dataset: Name of the dataset.
 
-class RuleMetrics(BaseModel):
-    """The rule metrics results dataclass"""
-
-    coverage: float
-    coverage_annotated: float
-    precision: float
-    correct: int
-    incorrect: int
-
-
-def rules_from_dataset(dataset: str) -> List[Rule]:
+    Returns:
+        A list of rules defined in the given dataset.
     """
-    Fetch dataset rules defined in a given dataset
-
-    Parameters
-    ----------
-    dataset:
-        The dataset name
-
-    Returns
-    -------
-        A list of rules defined in provided dataset.
-    """
-    """"""
     current_client = client()
     rules = current_client.fetch_dataset_labeling_rules(dataset)
-    return [Rule(query=r.query, label=r.label, name=r.name) for r in rules]
+    return [
+        Rule(
+            query=rule.query,
+            label=rule.label,
+            name=rule.description,
+            author=rule.author,
+        )
+        for rule in rules
+    ]
 
 
-def rule_metrics(dataset: str, rule: Rule) -> RuleMetrics:
-    from rubrix.client._models import Rule as ClientRule
-
-    current_client = client()
-    metrics = current_client.rule_metrics_for_dataset(
-        dataset=dataset, rule=ClientRule(query=rule.query, label=rule.label)
-    )
-
-    return RuleMetrics.parse_obj(metrics)
+class RuleNotAppliedError(Exception):
+    pass
