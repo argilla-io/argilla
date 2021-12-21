@@ -77,7 +77,7 @@
                 <span :class="column.class">
                   <span v-if="column.type === 'action'">
                     <a href="#"
-                      @click.prevent="onActionClicked(item.kind, item.name)"
+                      @click.prevent="onActionClicked(item.kind, item)"
                       >{{ itemValue(item, column) }}
                     </a>
                   </span>
