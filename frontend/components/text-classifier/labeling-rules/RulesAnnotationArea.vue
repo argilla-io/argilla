@@ -18,7 +18,8 @@
 <template>
   <div class="annotation-area">
     <div v-if="labels.length">
-      <p>Select a label for your query</p>
+      <p v-if="!dataset.query.text">Start by entering a query in the search box</p>
+      <p v-else>Select a label for your query</p>
       <label-search
         v-if="labels.length > maxVisibleLabels"
         :search-text="searchText"
@@ -54,15 +55,18 @@
       >
     </div>
     <div v-else class="empty-labels">
-      <p>There aren't any label yet.</p>
+      <p>This doesn't have any labels yet.</p>
       <p>
-        To define rules you need al least two labels. Go to annotation mode to
-        <a href="#" @click="changeToAnnotationViewMode">create the labels</a>.
+        To create new rules you need al least two labels. It's highly recommended to also annotate some records with these labels. Go to the annotation mode to 
+        <a href="#" @click.prevent="changeToAnnotationViewMode">create the labels and annotate some records</a>.
       </p>
     </div>
     <rule-annotation-area-metrics :metrics="metrics" />
-    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
+    <!-- <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
       You have already a rule saved with that label.
+    </p> -->
+    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
+      Rule has been saved.
     </p>
     <re-button
       v-else
@@ -104,8 +108,11 @@ export default {
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },
+    query() {
+      return this.dataset.query.text;
+    },
     labels() {
-      return this.dataset._labels.map((l) => ({ class: l, selected: false }));
+      return this.dataset.labels.map((l) => ({ class: l, selected: false }));
     },
     sortedLabels() {
       return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
@@ -145,6 +152,12 @@ export default {
         this.selectedLabels = [];
         this.metrics = {};
       }
+    },
+    async query(n) {
+      if (n) {
+        this.selectedLabels = [];
+        this.metrics = {};
+      }
     }
   },
   async mounted() {
@@ -155,7 +168,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      changeViewMode: "entities/text_classification/changeViewMode",
+      changeViewMode: "entities/datasets/changeViewMode",
       defineRule: "entities/text_classification/defineRule",
       updateRule: "entities/text_classification/updateRule",
       getRuleMetricsByLabel:
@@ -250,6 +263,7 @@ export default {
 }
 .empty-labels {
   a {
+    outline: none;
     color: $primary-color;
     text-decoration: none;
   }
