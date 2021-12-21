@@ -43,7 +43,7 @@ def find_label_errors(
     metadata_key: str = "label_error_candidate",
     **kwargs,
 ) -> List[TextClassificationRecord]:
-    """Finds potential annotation/label errors in your records.
+    """Finds potential annotation/label errors in your records using [cleanlab](https://github.com/cleanlab/cleanlab).
 
     We will consider all records for which a prediction AND annotation is available. Make sure the predictions were made
     in a holdout manner, that is you should only include records that were not used in the training of the predictor.
