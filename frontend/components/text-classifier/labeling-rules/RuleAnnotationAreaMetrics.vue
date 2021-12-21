@@ -1,7 +1,7 @@
 <template>
   <div class="rules__metrics">
     <div v-for="metric in filteredMetrics" :key="metric.id">
-      <p>{{ metric.name }}
+      <p :data-title="metric.tooltip">{{ metric.name }}
         <span v-if="isNaN(metric.value)">-</span>
         <strong v-else>{{ metric.value | formatNumber }}</strong>
       </p>
@@ -14,12 +14,12 @@ export default {
   computed: {
       filteredMetrics() {
         return [ 
-          { name: 'Coverage', value: this.metrics.coverage },
-          { name: 'Annotated Coverage', value: this.metrics.coverage_annotated },
-          { name: 'Correct', value: this.metrics.correct },
-          { name: 'Incorrect', value: this.metrics.incorrect },
-          { name: 'Precision', value: this.metrics.precision },
-          { name: 'Records matching the query', value: Math.round(this.metrics.total_records * this.metrics.coverage) }
+          { name: 'Coverage', value: this.metrics.coverage, tooltip: 'Fraction of correct labels given by the rule' },
+          { name: 'Annotated Coverage', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
+          { name: 'Correct', value: this.metrics.correct, tooltip: 'Number of records the rule labeled correctly (if annotations are available)' },
+          { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labels incorrectly (if annotations are available)' },
+          { name: 'Precision', value: this.metrics.precision, tooltip: "Precision of the rule defined as 'correct' divided by the sum of 'correct' and 'incorrect'" },
+          { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' }
         ]
       }
   },
@@ -31,6 +31,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+$color: #333346;
 .rules__metrics {
   margin-top: 1em;
   margin-bottom: 3em;
@@ -43,6 +44,35 @@ export default {
     span, strong {
       display: block;
     }
+    strong {
+      @include font-size(18px);
+    }
+  }
+}
+p[data-title] {
+  position: relative;
+  @extend %hastooltip;
+  &:after {
+    padding: 0.5em 1em;
+    bottom: 100%;
+    right: 50%;
+    transform: translateX(50%);
+    background: $color;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    @include font-size(14px);
+    font-weight: 600;
+    margin-bottom: 0.5em;
+    min-width: 180px;
+    white-space: break-spaces;
+  }
+  &:before {
+    right: 50%;
+    top: -0.5em;
+    border-top: 7px solid  $color;
+    border-right: 7px solid transparent;
+    border-left: 7px solid transparent;
   }
 }
 </style>
