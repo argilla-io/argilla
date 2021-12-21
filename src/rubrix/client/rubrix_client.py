@@ -24,7 +24,6 @@ import pandas
 from tqdm.auto import tqdm
 
 from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
-from rubrix.client._models import Rule, RuleMetrics
 from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
     BulkResponse,
@@ -55,6 +54,7 @@ from rubrix.client.sdk.text_classification.api import (
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     LabelingRule,
+    LabelingRuleMetricsSummary,
     TextClassificationBulkData,
     TextClassificationQuery,
 )
@@ -381,19 +381,21 @@ class RubrixClient:
         _check_response_errors(response)
         return MetricResults(**metric_.dict(), results=response.parsed)
 
-    def fetch_dataset_labeling_rules(self, dataset: str) -> List[Rule]:
+    def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = fetch_dataset_labeling_rules(self._client, name=dataset)
         _check_response_errors(response)
 
-        return [Rule.parse_obj(data) for data in response.parsed]
+        return [LabelingRule.parse_obj(data) for data in response.parsed]
 
-    def rule_metrics_for_dataset(self, dataset: str, rule: Rule) -> RuleMetrics:
+    def rule_metrics_for_dataset(
+        self, dataset: str, rule: LabelingRule
+    ) -> LabelingRuleMetricsSummary:
         response = dataset_rule_metrics(
             self._client, name=dataset, query=rule.query, label=rule.label
         )
         _check_response_errors(response)
 
-        return RuleMetrics.parse_obj(response.parsed)
+        return LabelingRuleMetricsSummary.parse_obj(response.parsed)
 
 
 def _check_response_errors(response: Response) -> None:
