@@ -1,9 +1,27 @@
 <template>
   <div class="rules-summary__metrics">
-    <p>Precision average<span>{{getAverage('precision') | formatNumber}}</span></p>
-    <p>Total correct/incorrect<span class="correct">{{getTotal('correct')}}</span>/<span class="incorrect">{{getTotal('incorrect')}}</span>
-    <p>Total coverage<span>{{metricsTotal.coverage | formatNumber}}</span></p>
-    <p>Annotated coverage<span>{{metricsTotal.coverage_annotated | formatNumber}}</span></p>
+    <p>Precision average
+      <span v-if="metricsTotal">{{getAverage('precision') | formatNumber}}</span>
+      <span v-else>-</span>
+    </p>
+    <p>Total correct/incorrect
+      <span v-if="metricsTotal">
+        {{getTotal('correct')}}/{{getTotal('incorrect')}}
+      </span>
+      <span v-else>-</span>
+    </p>
+    <p>Total coverage
+      <span v-if="metricsTotal">
+        {{metricsTotal.coverage | formatNumber}}
+      </span>
+      <span v-else>-</span>
+    </p>
+    <p>Annotated coverage
+      <span v-if="metricsTotal">
+        {{metricsTotal.coverage_annotated | formatNumber}}
+      </span>
+      <span v-else>-</span>
+    </p>
   </div>
 </template>
 
@@ -16,15 +34,20 @@ export default {
     },
     dataset: {
       type: Object,      
-    }
+    },
+    formattedRules: {
+      type: Array,      
+    },
   },
   data: () => {
     return {
-      metricsTotal: {}
+      metricsTotal: undefined,
     }
   },
   async fetch() {
-    await this.getMetrics();
+    if (this.formattedRules.length) {
+      await this.getMetrics();
+    }
   },
   methods: {
     ...mapActions({
@@ -57,7 +80,6 @@ export default {
 .rules-summary {
   &__metrics {
     display: inline-block;
-    border-bottom: 1px solid $font-secondary-dark;
     margin-bottom: 2em;
     @include font-size(15px);
     color: $font-secondary-dark;
@@ -65,16 +87,11 @@ export default {
       display: inline-block;
       margin-right: 2.5em;
       span {
+        @include font-size(18px);
+        display: block;
+        color: palette(grey, dark);
         font-weight: 600;
-        margin-left: 1em;
       }
-    }
-    .correct {
-      color: palette(green);
-    }
-    .incorrect {
-      margin-left: 0;
-      color: palette(red);
     }
   }
 }
