@@ -55,7 +55,7 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
-        { name: "Cov. Annot.", field: "coverage_annotated", class: "text", type: "number" },
+        { name: "Annot. Cover.", field: "coverage_annotated", class: "text", type: "number" },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
         { name: "Precision", field: "precision", class: "text", type: "number"  },
