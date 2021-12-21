@@ -2,15 +2,24 @@
   <div v-if="isVisible">
     <ReLoading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="rules-summary__container">
-      <re-button @click="hideList()" class="rules-summary__close button-quaternary">
-        <svgicon
-          name="chev-left"
-          width="12"
-          height="12"
-        ></svgicon>Back to query view</re-button>
+      <re-button
+        class="rules-summary__close button-quaternary"
+        @click="hideList"
+      >
+        <svgicon name="chev-left" width="12" height="12"></svgicon>Back to query
+        view</re-button
+      >
       <p class="rules-summary__title">Summary</p>
-      <rules-summary-metrics v-if="formattedRules.length" :metricsByLabel="metricsByLabel" :dataset="dataset" /> 
-      <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
+      <rules-summary-metrics
+        v-if="formattedRules.length"
+        :metrics-by-label="metricsByLabel"
+        :dataset="dataset"
+      />
+      <ReSearchBar
+        v-if="formattedRules.length"
+        placeholder="Search rule by name"
+        @input="onSearch"
+      />
       <ReTableInfo
         class="rules-summary__table"
         :data="formattedRules"
@@ -26,7 +35,9 @@
         @onActionClicked="onActionClicked"
         @close-modal="closeModal"
       />
-      <re-button class="button-primary" @click="updateSummary()">Update Summary</re-button>
+      <re-button class="button-primary" @click="updateSummary()"
+        >Update Summary</re-button
+      >
     </div>
   </div>
 </template>
@@ -37,8 +48,8 @@ export default {
   props: {
     dataset: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   data: () => {
     return {
@@ -55,14 +66,24 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
-        { name: "Annot. Cover.", field: "coverage_annotated", class: "text", type: "number" },
+        {
+          name: "Annot. Cover.",
+          field: "coverage_annotated",
+          class: "text",
+          type: "number",
+        },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
-        { name: "Precision", field: "precision", class: "text", type: "number"  },
+        {
+          name: "Precision",
+          field: "precision",
+          class: "text",
+          type: "number",
+        },
       ],
       sortedOrder: "desc",
       sortedByField: "query",
-      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }]
+      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
     };
   },
   async fetch() {
@@ -74,7 +95,7 @@ export default {
       return this.dataset.viewSettings.visibleRulesList;
     },
     formattedRules() {
-      return this.rules.map(r => {
+      return this.rules.map((r) => {
         return {
           name: r.description,
           query: r.query,
@@ -87,7 +108,7 @@ export default {
           precision: this.metricsByLabel[r.query].precision,
         };
       });
-    }
+    },
   },
   mounted() {
     document.getElementsByTagName("body")[0].classList.remove("fixed-header");
@@ -97,23 +118,20 @@ export default {
       search: "entities/datasets/search",
       getRules: "entities/text_classification/getRules",
       deleteRule: "entities/text_classification/deleteRule",
-      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
+      getRuleMetricsByLabel:
+        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async hideList() {
-      await DatasetViewSettings.update({
-        where: this.dataset.name,
-        data: {
-          visibleRulesList: false
-        }
-      });
+      await this.dataset.viewSettings.disableRulesSummary();
     },
+
     async getMetricsByLabel() {
-      for(let rule of this.rules) {
+      for (let rule of this.rules) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
           query: rule.query,
           label: rule.label,
-        })
+        });
         this.metricsByLabel[rule.query] = response;
       }
     },
@@ -133,7 +151,7 @@ export default {
           this.onDeleteRule(rowId);
           break;
         case "select":
-          this.onSelectQuery(rowId)
+          this.onSelectQuery(rowId);
           break;
         default:
           console.warn(action);
@@ -146,15 +164,15 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
-    updateSummary() {
-      this.getMetricsByLabel();
+    async updateSummary() {
+      await this.getMetricsByLabel();
     },
     onShowConfirmRuleDeletion(id) {
       this.showModal = id.name;
     },
     async onDeleteRule(id) {
       this.closeModal();
-      await this.deleteRule({ 
+      await this.deleteRule({
         dataset: this.dataset,
         query: id.query,
       });
@@ -162,8 +180,8 @@ export default {
     },
     closeModal() {
       this.showModal = undefined;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -198,4 +216,3 @@ export default {
   }
 }
 </style>
-
