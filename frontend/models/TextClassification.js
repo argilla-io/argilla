@@ -1,25 +1,56 @@
+/*
+ * coding=utf-8
+ * Copyright 2021-present, the Recognai S.L. team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 
 class TextClassificationRecord extends BaseRecord {
   inputs;
 
-  constructor({ inputs, explanation, multi_label, ...superData }) {
+  constructor({
+    inputs,
+    explanation,
+    multi_label,
+    predicted_as,
+    ...superData
+  }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
+    this.predicted_as = predicted_as;
+  }
+
+  recordTitle() {
+    return this.inputs;
   }
 }
 
 class TextClassificationSearchQuery extends BaseSearchQuery {
-  confidence;
+  score;
 
   constructor(data) {
-    const { confidence, ...superData } = data;
+    const { score, confidence, ...superData } = data;
     super(superData);
-
-    this.confidence = confidence;
+    this.score = score;
+    // TODO: remove backward compatibility
+    if (confidence) {
+      this.score = confidence;
+    }
   }
 }
 
@@ -45,12 +76,30 @@ class TextClassificationDataset extends ObservationDataset {
         return new TextClassificationSearchQuery(data);
       }),
       sort: this.attr([]),
+      _labels: this.attr([]),
       results: this.attr(
         {},
         (data) => new TextClassificationSearchResults(data)
       ),
       globalResults: this.attr({}),
     };
+  }
+
+  async initialize() {
+    const { labels } = await this.fetchMetricSummary("dataset_labels");
+    const entity = this.getTaskDatasetClass();
+    await entity.insertOrUpdate({
+      where: this.name,
+      data: {
+        ...this,
+        _labels: labels,
+      },
+    });
+    return entity.find(this.name);
+  }
+
+  get isMultiLabel() {
+    return this.results.records.some((r) => r.multi_label);
   }
 
   get labels() {
@@ -61,6 +110,7 @@ class TextClassificationDataset extends ObservationDataset {
       ...new Set(
         (labels || [])
           .filter((l) => l && l.trim())
+          .concat(this._labels || [])
           .concat(Object.keys(aggregations.annotated_as))
           .concat(Object.keys(aggregations.predicted_as))
       ),
@@ -69,6 +119,11 @@ class TextClassificationDataset extends ObservationDataset {
     return uniqueLabels;
   }
 }
+
+ObservationDataset.registerTaskDataset(
+  "TextClassification",
+  TextClassificationDataset
+);
 
 export {
   TextClassificationDataset,

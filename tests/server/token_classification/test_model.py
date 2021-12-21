@@ -1,9 +1,26 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pytest
 from pydantic import ValidationError
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
     TokenClassificationAnnotation,
+    TokenClassificationQuery,
     TokenClassificationRecord,
 )
 
@@ -66,7 +83,7 @@ def test_too_long_metadata():
         {
             "text": text,
             "tokens": text.split(),
-            "metadata": {"too_long": "a"*1000},
+            "metadata": {"too_long": "a" * 1000},
         }
     )
 
@@ -87,8 +104,48 @@ def test_entity_label_too_long():
                     EntitySpan(
                         start=9,
                         end=len(text),
-                        label="a"*1000,
+                        label="a" * 1000,
                     ),
                 ],
             ),
         )
+
+
+def test_query_as_elasticsearch():
+    query = TokenClassificationQuery(ids=[1, 2, 3])
+    assert query.as_elasticsearch() == {"ids": {"values": query.ids}}
+
+
+def test_misaligned_entity_mentions_with_spaces_left():
+    assert TokenClassificationRecord(
+        text="according to analysts.\n     Dart Group Corp was not",
+        tokens=[
+            "according",
+            "to",
+            "analysts",
+            ".",
+            "\n     ",
+            "Dart",
+            "Group",
+            "Corp",
+            "was",
+            "not",
+        ],
+        annotation=TokenClassificationAnnotation(
+            agent="heuristics",
+            entities=[EntitySpan(start=22, end=43, label="COMPANY", score=1.0)],
+            score=None,
+        ),
+    )
+
+
+def test_misaligned_entity_mentions_with_spaces_right():
+    assert TokenClassificationRecord(
+        text="\nvs 9.91 billion\n    Note\n REUTER\n",
+        tokens=["\n", "vs", "9.91", "billion", "\n    ", "Note", "\n ", "REUTER", "\n"],
+        annotation=TokenClassificationAnnotation(
+            agent="heuristics",
+            entities=[EntitySpan(start=4, end=21, label="MONEY", score=1.0)],
+            score=None,
+        ),
+    )

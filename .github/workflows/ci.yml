@@ -26,7 +26,7 @@ jobs:
       - name: Setup ElasticSearch 🔎
         uses: getong/elasticsearch-action@v1.2
         with:
-          elasticsearch version: 7.3.2
+          elasticsearch version: 7.4.2
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -40,11 +40,12 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
-      - name: Install rubrix 🧊
-        run: pip install .[server]
       - name: Run tests 📈
-        run: 
-          pytest
+        run: |
+          pytest --cov=rubrix --cov-report=xml
+          pip install "spacy<3.0" && python -m spacy download en_core_web_sm
+          pytest tests/monitoring/test_spacy_monitoring.py
+
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         with:

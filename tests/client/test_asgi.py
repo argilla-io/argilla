@@ -1,10 +1,25 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import time
 from typing import Any, Dict
 
 import rubrix
 from fastapi import FastAPI
 from rubrix import TextClassificationRecord, TokenClassificationRecord
-from rubrix.client.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
+from rubrix.monitoring.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
@@ -26,8 +41,8 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
     def mock_predict(data: Dict[str, Any]):
         return JSONResponse(
             content=[
-                {"labels": ["A", "B"], "probabilities": [0.9, 0.1]},
-                {"labels": ["A", "B"], "probabilities": [0.9, 0.1]},
+                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
+                {"labels": ["A", "B"], "scores": [0.9, 0.1]},
             ]
         )
 

@@ -1,12 +1,34 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import itertools
 from typing import Iterable, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
-from rubrix.server.datasets.model import CreationDatasetRequest
-from rubrix.server.datasets.service import DatasetsService, create_dataset_service
+
+from rubrix.server.commons.api import CommonTaskQueryParams
+from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
-from rubrix.server.tasks.commons import BulkResponse, PaginationParams, TaskType
+from rubrix.server.security.model import User
+from rubrix.server.tasks.commons import (
+    BulkResponse,
+    PaginationParams,
+    TaskType,
+)
 from rubrix.server.tasks.commons.helpers import takeuntil
 from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationBulkData,
@@ -19,7 +41,6 @@ from rubrix.server.tasks.token_classification.service.service import (
     TokenClassificationService,
     token_classification_service,
 )
-from rubrix.server.users.model import User
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -36,8 +57,9 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
+    common_params: CommonTaskQueryParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -49,6 +71,8 @@ def bulk_records(
         The dataset name
     bulk:
         The bulk data
+    common_params:
+        Common query params
     service:
         the Service
     datasets:
@@ -61,14 +85,14 @@ def bulk_records(
         Bulk response data
     """
 
-    datasets.upsert(
+    dataset = datasets.upsert(
         CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        owner=current_user.current_group,
+        user=current_user,
+        workspace=common_params.workspace,
         task=TASK_TYPE,
     )
     result = service.add_records(
-        dataset=name,
-        owner=current_user.current_group,
+        dataset=dataset,
         records=bulk.records,
     )
     return BulkResponse(
@@ -87,9 +111,10 @@ def bulk_records(
 def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
+    common_params: CommonTaskQueryParams = Depends(),
     pagination: PaginationParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TokenClassificationSearchResults:
     """
@@ -101,6 +126,8 @@ def search_records(
         The dataset name
     search:
         THe search query request
+    common_params:
+        Common query params
     pagination:
         The pagination params
     service:
@@ -116,14 +143,16 @@ def search_records(
 
     """
 
-    datasets.find_by_name(name, owner=current_user.current_group)
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
 
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+    )
     result = service.search(
-        dataset=name,
-        owner=current_user.current_group,
-        search=query,
+        dataset=Dataset.parse_obj(dataset),
+        query=query,
+        sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
     )
@@ -171,9 +200,10 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TokenClassificationQuery] = None,
+    common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TokenClassificationService = Depends(token_classification_service),
-    datasets: DatasetsService = Depends(create_dataset_service),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
@@ -185,6 +215,8 @@ async def stream_data(
         The dataset name
     query:
         The stream data query
+    common_params:
+        Common query params
     limit:
         The load number of records limit. Optional
     service:
@@ -196,8 +228,10 @@ async def stream_data(
 
     """
     query = query or TokenClassificationQuery()
-    found = datasets.find_by_name(name, owner=current_user.current_group)
-    data_stream = service.read_dataset(found.name, owner=found.owner, query=query)
+    dataset = datasets.find_by_name(
+        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+    )
+    data_stream = service.read_dataset(dataset=Dataset.parse_obj(dataset), query=query)
 
     return scan_data_response(
         data_stream=data_stream,

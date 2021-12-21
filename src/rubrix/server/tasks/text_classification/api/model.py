@@ -1,18 +1,125 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
+
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_helpers import filters
 from rubrix.server.commons.helpers import flatten_dict
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
+    BaseSearchResults,
+    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
+    SortableField,
     TaskStatus,
     TaskType,
 )
-from rubrix._constants import MAX_KEYWORD_LENGTH
+
+
+class UpdateLabelingRule(BaseModel):
+    label: str = Field(description="The label associated with the rule")
+    description: Optional[str] = Field(
+        None, description="A brief description of the rule"
+    )
+
+
+class CreateLabelingRule(UpdateLabelingRule):
+    """
+    Data model for labeling rules creation
+
+    Attributes:
+    -----------
+
+    query:
+        The ES query of the rule
+
+    label: str
+        The label associated with the rule
+
+    description:
+        A brief description of the rule
+
+    """
+
+    query: str = Field(description="The es rule query")
+
+    @validator("query")
+    def strip_query(cls, query: str) -> str:
+        """Remove blank spaces for query"""
+        return query.strip()
+
+
+class LabelingRule(CreateLabelingRule):
+    """
+    Adds read-only attributes to the labeling rule
+
+    Attributes:
+    -----------
+
+    author:
+        Who created the rule
+
+    created_at:
+        When was the rule created
+
+    """
+
+    author: str = Field(description="User who created the rule")
+    created_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow, description="Rule creation timestamp"
+    )
+
+
+class LabelingRuleMetricsSummary(BaseModel):
+    """Metrics generated for a labeling rule"""
+
+    coverage: float
+    coverage_annotated: float
+    correct: float
+    incorrect: float
+    precision: float
+
+    total_records: int
+
+
+class DatasetLabelingRulesMetricsSummary(BaseModel):
+    coverage: float
+    coverage_annotated: float
+
+    total_records: int
+
+
+class TextClassificationDatasetDB(DatasetDB):
+    """
+    A dataset class specialized for text classification task
+
+    Attributes:
+    -----------
+
+        rules:
+            A list of dataset labeling rules
+    """
+
+    rules: List[LabelingRule] = Field(default_factory=list)
 
 
 class ClassPrediction(BaseModel):
@@ -31,7 +138,7 @@ class ClassPrediction(BaseModel):
     """
 
     class_label: Union[str, int] = Field(alias="class")
-    score: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @validator("class_label")
     def check_label_length(cls, class_label):
@@ -106,7 +213,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
 
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
-    explanation: Dict[str, List[TokenAttributions]] = None
+    explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
     _SCORE_DEVIATION_ERROR: ClassVar[float] = 0.001
 
@@ -114,10 +221,31 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
     def validate_record(cls, values):
         """fastapi validator method"""
         prediction = values.get("prediction", None)
+        annotation = values.get("annotation", None)
+        status = values.get("status")
         multi_label = values.get("multi_label", False)
 
         cls._check_score_integrity(prediction, multi_label)
+        cls._check_annotation_integrity(annotation, multi_label, status)
+
         return values
+
+    @classmethod
+    def _check_annotation_integrity(
+        cls,
+        annotation: TextClassificationAnnotation,
+        multi_label: bool,
+        status: TaskStatus,
+    ):
+        if status == TaskStatus.validated and not multi_label:
+            assert (
+                annotation and len(annotation.labels) > 0
+            ), "Annotation must include some label for validated records"
+
+        if not multi_label and annotation:
+            assert (
+                len(annotation.labels) == 1
+            ), "Single label record must include only one annotation label"
 
     @classmethod
     def _check_score_integrity(
@@ -185,9 +313,13 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             [label.score for label in self.prediction.labels]
             if self.multi_label
             else [
-                self._max_class_prediction(
-                    self.prediction, multi_label=self.multi_label
-                ).score
+                prediction_class.score
+                for prediction_class in [
+                    self._max_class_prediction(
+                        self.prediction, multi_label=self.multi_label
+                    )
+                ]
+                if prediction_class
             ]
         )
 
@@ -294,12 +426,23 @@ class TextClassificationBulkData(UpdateDatasetRequest):
     Attributes:
     -----------
 
-    records: List[TextClassificationRecord]
+    records: List[CreationTextClassificationRecord]
         The text classification record list
 
     """
 
     records: List[CreationTextClassificationRecord]
+
+    @validator("records")
+    def check_multi_label_integrity(cls, records: List[TextClassificationRecord]):
+        """Checks all records in batch have same multi-label configuration"""
+        if records:
+            multi_label = records[0].multi_label
+            for record in records[1:]:
+                assert (
+                    multi_label == record.multi_label
+                ), "All records must be single/multi labelled"
+        return records
 
 
 class TextClassificationQuery(BaseModel):
@@ -311,7 +454,7 @@ class TextClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
         Record ids list
 
-    query_text: Union[str, Dict[str, str]]
+    query_text: str
         Text query over inputs
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
@@ -333,21 +476,51 @@ class TextClassificationQuery(BaseModel):
 
     ids: Optional[List[Union[str, int]]]
 
-    query_text: Union[str, Dict[str, str]] = Field(
-        default_factory=dict, alias="query_inputs"
-    )
+    query_text: str = Field(default=None)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
-    score: Optional[ScoreRange] = Field(default=None, alias="confidence")
+    score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    class Config:
-        allow_population_by_field_name = True
+    def as_elasticsearch(self) -> Dict[str, Any]:
+        """Build an elasticsearch query part from search query"""
+
+        if self.ids:
+            return {"ids": {"values": self.ids}}
+
+        all_filters = filters.metadata(self.metadata)
+        query_filters = [
+            query_filter
+            for query_filter in [
+                filters.predicted_as(self.predicted_as),
+                filters.predicted_by(self.predicted_by),
+                filters.annotated_as(self.annotated_as),
+                filters.annotated_by(self.annotated_by),
+                filters.status(self.status),
+                filters.predicted(self.predicted),
+                filters.score(self.score),
+            ]
+            if query_filter
+        ]
+        query_text = filters.text_query(self.query_text)
+        all_filters.extend(query_filters)
+
+        return {
+            "bool": {
+                "must": query_text or {"match_all": {}},
+                "filter": {
+                    "bool": {
+                        "should": all_filters,
+                        "minimum_should_match": len(all_filters),
+                    }
+                },
+            }
+        }
 
 
 class TextClassificationSearchRequest(BaseModel):
@@ -359,65 +532,20 @@ class TextClassificationSearchRequest(BaseModel):
 
     query: TextClassificationQuery
         The search query configuration
+
+    sort:
+        The sort order list
     """
 
     query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
+    sort: List[SortableField] = Field(default_factory=list)
 
 
-class TextClassificationSearchAggregations(BaseModel):
-    """
-    API for result aggregations
-
-    Attributes:
-    -----------
-    predicted_as: Dict[str, int]
-        Occurrence info about more relevant predicted terms
-    annotated_as: Dict[str, int]
-        Occurrence info about more relevant annotated terms
-    annotated_by: Dict[str, int]
-        Occurrence info about more relevant annotation agent terms
-    predicted_by: Dict[str, int]
-        Occurrence info about more relevant prediction agent terms
-    status: Dict[str, int]
-        Occurrence info about task status
-    predicted: Dict[str, int]
-        Occurrence info about task prediction status
-    words: Dict[str, int]
-        The word cloud aggregations
-    metadata: Dict[str, Dict[str, int]]
-        The metadata fields aggregations
-    """
-
-    predicted_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_by: Dict[str, int] = Field(default_factory=dict)
-    predicted_by: Dict[str, int] = Field(default_factory=dict)
-    status: Dict[str, int] = Field(default_factory=dict)
-    predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
-    words: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
-
-    class Config:
-        allow_population_by_field_name = True
+class TextClassificationSearchAggregations(BaseSearchResultsAggregations):
+    pass
 
 
-class TextClassificationSearchResults(BaseModel):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total number of records
-    records: List[TextClassificationRecord]
-        The selected records to return
-    aggregations: TextClassificationAggregations
-        SearchRequest aggregations (if no pagination)
-
-    """
-
-    total: int = 0
-    records: List[TextClassificationRecord] = Field(default_factory=list)
-    aggregations: TextClassificationSearchAggregations = None
+class TextClassificationSearchResults(
+    BaseSearchResults[TextClassificationRecord, TextClassificationSearchAggregations]
+):
+    pass

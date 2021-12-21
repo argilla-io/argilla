@@ -1,22 +1,26 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <transition appear name="fade">
     <div v-if="resultsAvailable" class="table-info">
       <div class="table-info__header">
         <slot name="columns">
           <div class="table-info__item">
-            <div v-if="globalActions">
-              <!-- <ReCheckbox v-model="allRecordsSelected" class="table-info__header__checkbox" @change="selectAll($event)" /> -->
-              <ReButton
-                :disabled="!selectedItems.length"
-                class="
-                  button-tertiary--outline button-tertiary--small
-                  table-info__header__button
-                "
-                @click="$emit('confirm-delete-multiple')"
-              >
-                Delete
-              </ReButton>
-            </div>
             <div
               v-for="(column, key) in columns"
               :key="key"
@@ -28,6 +32,16 @@
                 @click="sort(column)"
               >
                 {{ column.name }}
+                <svgicon
+                  color="#4C4EA3"
+                  width="7"
+                  height="7"
+                  :name="
+                    sortedBy === column.field && sortOrder === 'desc'
+                      ? 'chev-top'
+                      : 'chev-bottom'
+                  "
+                />
               </button>
             </div>
           </div>
@@ -52,7 +66,7 @@
           </p>
         </span>
         <ul>
-          <li v-for="item in filteredResultsByGroup(group)" :key="item.name">
+          <li v-for="item in filteredResultsByGroup(group)" :key="item.id">
             <div class="table-info__item">
               <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
               <span
@@ -61,14 +75,23 @@
                 class="table-info__item__col"
               >
                 <span :class="column.class">
-                  <span
-                    v-if="column.type === 'link'"
-                    @click="onActionClicked(item.kind, item.name)"
-                    >{{ itemValue(item, column) }}</span
-                  >
+                  <span v-if="column.type === 'link'">
+                    <NuxtLink v-if="item.link" :to="item.link"
+                      >{{ itemValue(item, column) }}
+                    </NuxtLink>
+                    <span v-else>{{ itemValue(item, column) }}</span>
+                    <re-action-tooltip tooltip="Copied">
+                      <ReButton
+                        title="Copy to clipboard"
+                        class="table-info__actions__button button-icon"
+                        @click.prevent="onActionClicked('copy-name', item)"
+                      >
+                        <svgicon name="copy" width="12" height="13" />
+                      </ReButton>
+                    </re-action-tooltip>
+                  </span>
                   <ReDate
                     v-else-if="column.type === 'date'"
-                    class="table-info__meta"
                     :date="itemValue(item, column)"
                   />
                   <span v-else-if="column.type === 'object'">
@@ -80,34 +103,41 @@
                       {{ itemValue(item, column)[key] }}
                     </p>
                   </span>
+                  <span v-else-if="column.type === 'task'">
+                    {{ itemValue(item, column) }}
+                    <span
+                      v-if="itemValue(item, column) === 'Text2Text'"
+                      class="table-info__tag"
+                      >Experimental</span
+                    >
+                  </span>
                   <span v-else>{{ itemValue(item, column) }}</span>
                 </span>
               </span>
               <div v-if="visibleActions" class="table-info__actions">
-                <ReButton
+                <re-action-tooltip
                   v-for="action in filterActions"
                   :key="action.index"
-                  :data-title="action.tooltip"
-                  class="
-                    --hasTooltip-colored
-                    table-info__actions__button
-                    button-icon
-                  "
-                  :class="action.class"
-                  @click="onActionClicked(action.name, item.name)"
+                  :tooltip="action.tooltip"
                 >
-                  <svgicon
-                    v-if="action.icon !== undefined"
-                    :name="action.icon"
-                    width="26"
-                    height="20"
-                  />
-                </ReButton>
+                  <ReButton
+                    :title="action.title"
+                    class="table-info__actions__button button-icon"
+                    @click="onActionClicked(action.name, item)"
+                  >
+                    <svgicon
+                      v-if="action.icon !== undefined"
+                      :name="action.icon"
+                      width="12"
+                      height="13"
+                    />
+                  </ReButton>
+                </re-action-tooltip>
               </div>
               <ReModal
                 :modal-custom="true"
                 :prevent-body-scroll="true"
-                modal-class="modal-primary"
+                modal-class="modal-secondary"
                 :modal-visible="showModal === item.name"
                 modal-position="modal-center"
                 @close-modal="$emit('close-modal')"
@@ -127,7 +157,7 @@
                     </ReButton>
                     <ReButton
                       class="button-secondary--small"
-                      @click="onActionClicked('confirm-delete', item.name)"
+                      @click="onActionClicked('confirm-delete', item)"
                     >
                       Yes, delete
                     </ReButton>
@@ -169,7 +199,10 @@
 import "assets/icons/delete";
 import "assets/icons/refresh";
 import "assets/icons/copy";
+import "assets/icons/copy-url";
 import "assets/icons/datasource";
+import "assets/icons/chev-top";
+import "assets/icons/chev-bottom";
 export default {
   props: {
     data: {
@@ -294,15 +327,15 @@ export default {
       }
       return item[column.field];
     },
-    onActionClicked(action, id) {
-      this.$emit("onActionClicked", action, id);
+    onActionClicked(action, item) {
+      this.$emit("onActionClicked", action, item);
     },
     sort(column) {
       this.$emit("sort-column", column.field, this.sortOrder);
+      this.sortedBy = column.field;
       if (column.field === this.sortedBy) {
         this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
       }
-      this.sortedBy = column.field;
     },
     filteredResultsByGroup(group) {
       if (this.groupBy) {
@@ -402,19 +435,9 @@ export default {
       padding-right: 0;
       color: $font-secondary;
       @include font-size(14px);
-      &.active.desc {
-        &:after {
-          transform: rotate(180deg);
-          transform-origin: 50% 100%;
-        }
-      }
-      &:after {
-        content: "▾";
-        display: inline-block;
-        height: 10px;
-        width: 16px;
-        box-sizing: inherit;
-        text-align: center;
+      font-family: $sff;
+      .svg-icon {
+        margin-left: 0.5em;
       }
     }
   }
@@ -437,11 +460,20 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      &:nth-last-of-type(-n + 3) {
+      // text-overflow: ellipsis;
+      // overflow: hidden;
+      &:nth-last-of-type(-n + 2) {
         max-width: 120px;
       }
+      &:nth-last-of-type(3) {
+        max-width: 180px;
+      }
+      &:nth-of-type(2) {
+        min-width: 30%;
+      }
+      // .task span {
+      //   display: flex;
+      // }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
@@ -451,6 +483,16 @@ export default {
       margin-right: 1em;
       fill: $font-medium-color;
     }
+  }
+  &__tag {
+    background: palette(grey, dark);
+    display: inline-block;
+    border-radius: 3px;
+    color: $lighter-color;
+    @include font-size(12px);
+    box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
+    padding: 0.1em 0.5em;
+    margin-left: 1em;
   }
   // &__item:not(.disabled) {
   //   &:hover,
@@ -466,10 +508,10 @@ export default {
     right: 2em;
     &__button {
       position: relative;
-      margin-left: 1em;
+      margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
-        fill: $primary-color;
+        fill: palette(grey, dark);
         margin-right: 0;
       }
       & + #{$this} {
@@ -479,14 +521,25 @@ export default {
   }
   &__title {
     display: block;
-    color: $primary-color;
     @include font-size(15px);
     cursor: pointer;
     word-break: break-word;
-  }
-  &__meta {
-    font-weight: lighter;
-    color: $font-medium-color;
+    display: flex;
+    align-items: center;
+    .button-icon {
+      margin-left: 5px;
+      padding: 0;
+      margin-bottom: 2px;
+      .svg-icon {
+        fill: $font-medium-color;
+      }
+    }
+    a {
+      text-decoration: none;
+      &:hover {
+        color: $primary-color;
+      }
+    }
   }
   &__group {
     padding-bottom: 2em;
@@ -519,8 +572,7 @@ export default {
       border-radius: 10px;
       margin-right: 0.5em;
       margin-top: 0;
-      float: left;
-      clear: both;
+      word-break: break-all;
       &:last-child {
         margin-bottom: 0;
       }
@@ -548,18 +600,8 @@ export default {
   }
 }
 
-.modal-buttons {
-  text-align: right;
-}
-.modal__title {
-  color: $font-dark-color;
-  font-weight: 600;
-  margin-top: 0;
-  margin-right: 2em;
-}
-
-.--hasTooltip-colored {
-  @extend %hastooltip-colored;
+.--show-tooltip {
+  @extend %activetooltip;
   @extend %tooltip--left;
 }
 </style>

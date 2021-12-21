@@ -1,13 +1,30 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div v-if="annotationsProgress">
-    <p class="sidebar__title">AnnotationProgress</p>
+    <p class="sidebar__title">Progress</p>
     <div class="progress__info">
-      <p class="progress__info__text">Total annotations</p>
-      <span class="progress__info__percent">{{ progress }}%</span>
+      <p class="progress__info__text">Total</p>
+      <span class="progress__info__percent">{{ progress | percent }}</span>
     </div>
     <div class="progress__numbers">
-      <span>{{ totalAnnotated }}</span
-      >/{{ total }}
+      <span>{{ totalAnnotated | formatNumber }}</span
+      >/{{ total | formatNumber }}
     </div>
     <ReProgress
       re-mode="determinate"
@@ -21,14 +38,14 @@
           <span class="color-bullet validated"></span>
           <label>Validated</label>
           <span class="records-number">
-            {{ totalValidated }}
+            {{ totalValidated | formatNumber }}
           </span>
         </div>
         <div class="info">
           <span class="color-bullet discarded"></span>
           <label>Discarded</label>
           <span class="records-number">
-            {{ totalDiscarded }}
+            {{ totalDiscarded | formatNumber }}
           </span>
         </div>
         <slot></slot>
@@ -39,7 +56,6 @@
 
 <script>
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { ObservationDataset } from "@/models/Dataset";
 export default {
   // TODO clean and typify
   props: {
@@ -48,17 +64,12 @@ export default {
       required: true,
     },
   },
-  async fetch() {
-    await ObservationDataset.dispatch("refreshAnnotationProgress", {
-      dataset: this.dataset,
-    });
-  },
   computed: {
     annotationsSum() {
       return this.dataset.results.aggregations.status.Validated;
     },
     annotationsProgress() {
-      return AnnotationProgress.find(this.dataset.name + this.dataset.task);
+      return AnnotationProgress.find(this.dataset.name);
     },
     totalValidated() {
       return this.annotationsProgress.validated;
@@ -77,9 +88,8 @@ export default {
     },
     progress() {
       return (
-        (((this.totalValidated || 0) + (this.totalDiscarded || 0)) * 100) /
-        this.total
-      ).toFixed(2);
+        ((this.totalValidated || 0) + (this.totalDiscarded || 0)) / this.total
+      );
     },
     annotationIsEnabled() {
       return this.dataset.viewSettings.annotationEnabled;
@@ -93,6 +103,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 label {
@@ -127,7 +138,7 @@ label {
   }
 }
 .scroll {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 480px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
@@ -178,7 +189,13 @@ label {
     @include font-size(15px);
     align-items: center;
     color: $font-secondary-dark;
+    font-weight: 600;
+    margin-bottom: 1.5em;
+    &__text {
+      margin: 0;
+    }
     &__percent {
+      margin-top: 0;
       margin-right: 0;
       margin-left: auto;
     }
@@ -189,6 +206,7 @@ label {
     @include font-size(18px);
     span {
       @include font-size(40px);
+      font-weight: 700;
     }
   }
 }

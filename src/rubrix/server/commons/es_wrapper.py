@@ -1,11 +1,27 @@
-import os
-from rubrix.server.commons.errors import InvalidTextSearchError
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
+import deprecated
 import elasticsearch
 from elasticsearch import Elasticsearch, NotFoundError, RequestError
 from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
+
 from rubrix.logging import LoggingMixin
+from rubrix.server.commons.errors import InvalidTextSearchError
 
 try:
     import ujson as json
@@ -18,6 +34,28 @@ from .settings import settings
 
 class ElasticsearchWrapper(LoggingMixin):
     """A simple elasticsearch client wrapper for atomize some repetitive operations"""
+
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(cls) -> "ElasticsearchWrapper":
+        """
+        Creates an instance of ElasticsearchWrapper.
+
+        This function is used in fastapi for resolve component dependencies.
+
+        See <https://fastapi.tiangolo.com/tutorial/dependencies/>
+
+        Returns
+        -------
+
+        """
+
+        if cls._INSTANCE is None:
+            es_client = Elasticsearch(hosts=settings.elasticsearch)
+            cls._INSTANCE = cls(es_client)
+
+        return cls._INSTANCE
 
     def __init__(self, es_client: Elasticsearch):
         self.__client__ = es_client
@@ -212,7 +250,7 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        self.__client__.delete(index=index, id=doc_id)
+        self.__client__.delete(index=index, id=doc_id, refresh=True)
 
     def add_documents(
         self,
@@ -244,14 +282,18 @@ class ElasticsearchWrapper(LoggingMixin):
 
         def map_doc_2_action(doc: Dict[str, Any]) -> Dict[str, Any]:
             """Configures bulk action"""
-            return {
-                "_op_type": "update",
+            data = {
+                "_op_type": "index",
                 "_index": index,
-                "_id": doc_id(doc) if doc_id else doc["_id"],
                 "_routing": routing(doc) if routing else None,
-                "doc": doc,
-                "doc_as_upsert": True,
+                **doc,
             }
+
+            _id = doc_id(doc) if doc_id else None
+            if _id is not None:
+                data["_id"] = _id
+
+            return data
 
         success, failed = es_bulk(
             self.__client__,
@@ -262,12 +304,29 @@ class ElasticsearchWrapper(LoggingMixin):
         )
         return len(failed)
 
+    def get_mapping(self, index: str) -> Dict[str, Any]:
+        """
+        Return the configured index mapping
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.13/indices-get-mapping.html>`
+
+        """
+        try:
+            response = self.__client__.indices.get_mapping(
+                index=index,
+                ignore_unavailable=False,
+                include_type_name=True,
+            )
+            return list(response[index]["mappings"].values())[0]["properties"]
+        except NotFoundError:
+            return {}
+
     def get_field_mapping(self, index: str, field_name: str) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
         consist on a dictionary with full field name as key and its type as value
 
-        See <http://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html>
+        See <http://www.elastic.co/guide/en/elasticsearch/reference/7.13/indices-get-field-mapping.html>
 
         Parameters
         ----------
@@ -358,10 +417,92 @@ class ElasticsearchWrapper(LoggingMixin):
             wait_for_active_shards=settings.es_records_index_shards,
         )
 
+    def clone_index(self, index: str, clone_to: str, override: bool = True):
+        """
+        Clone an existing index. During index clone, source must be setup as read-only index. Then, changes can be
+        applied
+
+        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.x/indices-clone-index.html>`_
+
+        Parameters
+        ----------
+        index:
+            The source index name
+        clone_to:
+            The destination index name
+        override:
+            If True, destination index will be removed if exists
+        """
+        index_read_only = self.is_index_read_only(index)
+        try:
+            if not index_read_only:
+                self.index_read_only(index, read_only=True)
+            if override:
+                self.delete_index(clone_to)
+            self.__client__.indices.clone(
+                index=index,
+                target=clone_to,
+                wait_for_active_shards=settings.es_records_index_shards,
+            )
+        finally:
+            self.index_read_only(index, read_only=index_read_only)
+
+    def is_index_read_only(self, index: str) -> bool:
+        """
+        Fetch info about read-only configuration index
+
+        Parameters
+        ----------
+        index:
+            The index name
+
+        Returns
+        -------
+            True if queried index is read-only, False otherwise
+
+        """
+        response = self.__client__.indices.get_settings(
+            index=index,
+            name="index.blocks.write",
+            allow_no_indices=True,
+            flat_settings=True,
+        )
+        print(response)
+        return (
+            response[index]["settings"]["index.blocks.write"] == "true"
+            if response
+            else False
+        )
+
+    def index_read_only(self, index: str, read_only: bool):
+        """
+        Enable/disable index read only
+
+        Parameters
+        ----------
+        index:
+            The index name
+        read_only:
+            True for enable read-only, False otherwise
+
+        """
+        self.__client__.indices.put_settings(
+            index=index, body={"settings": {"index.blocks.write": read_only}}
+        )
+
+    def create_field_mapping(
+        self, index: str, field_name: str, type: str, **extra_args
+    ):
+        self.__client__.indices.put_mapping(
+            index=index,
+            body={"properties": {field_name: {"type": type, **extra_args}}},
+        )
+
 
 _instance = None  # The singleton instance
 
 
+@deprecated.deprecated(reason="Use `ElasticsearchWrapper.get_instance` instead")
 def create_es_wrapper() -> ElasticsearchWrapper:
     """
         Creates a instance of ElasticsearchWrapper.

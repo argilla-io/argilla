@@ -1,3 +1,18 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pytest
 from pydantic import ValidationError
 from rubrix.server.tasks.commons import TaskStatus
@@ -21,11 +36,37 @@ def test_flatten_metadata():
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
 
 
+def test_metadata_with_object_list():
+    data = {
+        "inputs": {"text": "bogh"},
+        "metadata": {
+            "mails": [
+                {"subject": "Mail One", "body": "This is a large text body"},
+                {"subject": "Mail Two", "body": "This is a large text body"},
+            ]
+        },
+    }
+    record = TextClassificationRecord.parse_obj(data)
+    assert list(record.metadata.keys()) == ["mails"]
+
+
+def test_single_label_with_multiple_annotation():
+
+    with pytest.raises(ValidationError, match="Single label record must include only one annotation label"):
+        TextClassificationRecord.parse_obj(
+            {
+                "inputs": {"text": "This is a text"},
+                "annotation": {"agent": "test", "labels": [{"class": "A"}, {"class": "B"}]},
+                "multi_label": False
+            }
+        )
+
+
 def test_too_long_metadata():
     record = TextClassificationRecord.parse_obj(
         {
             "inputs": {"text": "bogh"},
-            "metadata": {"too_long": "a"*1000},
+            "metadata": {"too_long": "a" * 1000},
         }
     )
 
@@ -39,21 +80,21 @@ def test_too_long_label():
                 "inputs": {"text": "bogh"},
                 "prediction": {
                     "agent": "test",
-                    "labels": [{"class": "a"*1000}],
+                    "labels": [{"class": "a" * 1000}],
                 },
             }
         )
 
 
-def test_confidence_integrity():
+def test_score_integrity():
     data = {
         "multi_label": False,
         "inputs": {"data": "My cool data"},
         "prediction": {
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.3},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.3},
+                {"class": "B", "score": 0.9},
             ],
         },
     }
@@ -69,14 +110,14 @@ def test_confidence_integrity():
 
     data["multi_label"] = False
     data["prediction"]["labels"] = [
-        {"class": "B", "confidence": 0.9},
+        {"class": "B", "score": 0.9},
     ]
     record = TextClassificationRecord.parse_obj(data)
     assert record is not None
 
     data["prediction"]["labels"] = [
-        {"class": "B", "confidence": 0.10000000012},
-        {"class": "B", "confidence": 0.90000000002},
+        {"class": "B", "score": 0.10000000012},
+        {"class": "B", "score": 0.90000000002},
     ]
     record = TextClassificationRecord.parse_obj(data)
     assert record is not None
@@ -90,8 +131,8 @@ def test_prediction_ok_cases():
         "prediction": {
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.3},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.3},
+                {"class": "B", "score": 0.9},
             ],
         },
     }
@@ -102,8 +143,8 @@ def test_prediction_ok_cases():
         **{
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 1},
-                {"class": "B", "confidence": 1},
+                {"class": "A", "score": 1},
+                {"class": "B", "score": 1},
             ],
         },
     )
@@ -113,8 +154,8 @@ def test_prediction_ok_cases():
         **{
             "agent": "test",
             "labels": [
-                {"class": "A", "confidence": 0.9},
-                {"class": "B", "confidence": 0.9},
+                {"class": "A", "score": 0.9},
+                {"class": "B", "score": 0.9},
             ],
         },
     )
@@ -124,12 +165,12 @@ def test_prediction_ok_cases():
     assert record.predicted is None
 
 
-def test_confidence_ranges():
+def test_score_ranges():
     with pytest.raises(ValidationError, match="less than or equal to 1.0"):
-        ClassPrediction(class_label="BB", confidence=100)
+        ClassPrediction(class_label="BB", score=100)
 
     with pytest.raises(ValidationError, match="greater than or equal to 0.0"):
-        ClassPrediction(class_label="BB", confidence=-100)
+        ClassPrediction(class_label="BB", score=-100)
 
 
 def test_predicted_as_with_no_labels():
@@ -169,3 +210,31 @@ def test_predicted_ok_for_multilabel_unordered():
     )
 
     assert record.predicted == PredictionStatus.OK
+
+
+@pytest.mark.parametrize(
+    "annotation",
+    [
+        TextClassificationAnnotation(
+            agent="test_ok",
+            labels=[],
+        ),
+        None,
+    ],
+)
+def test_validate_without_labels_for_single_label(annotation):
+    with pytest.raises(
+        ValidationError,
+        match="Annotation must include some label for validated records",
+    ):
+        TextClassificationRecord(
+            inputs={"text": "The text"},
+            status=TaskStatus.validated,
+            prediction=TextClassificationAnnotation(
+                agent="test",
+                labels=[
+                    ClassPrediction(class_label="C", score=0.3),
+                ],
+            ),
+            annotation=annotation,
+        )

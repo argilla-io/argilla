@@ -1,3 +1,20 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <a
     v-if="href"
@@ -96,6 +113,24 @@ export default {
     line-height: 30px;
     min-width: auto;
   }
+  &--outline {
+    @extend .button-primary;
+    background: transparent;
+    border: 1px solid $primary-color;
+    color: $primary-color;
+    text-transform: none;
+    display: flex;
+    &:hover,
+    &:focus {
+      background: transparent;
+      border-color: darken($primary-color, 10%);
+      color: darken($primary-color, 10%);
+    }
+    &[disabled] {
+      background-color: transparent;
+      opacity: 0.6;
+    }
+  }
 }
 
 .button-secondary {
@@ -163,14 +198,14 @@ export default {
   &--outline {
     @extend .button-tertiary;
     background: transparent;
-    border: 1px solid $line-smooth-color;
-    color: $font-medium-color;
+    border: 1px solid $primary-color;
+    color: $primary-color;
     text-transform: none;
     &:hover,
     &:focus {
       background: transparent;
-      border-color: darken($line-smooth-color, 10%);
-      color: darken($font-medium-color, 10%);
+      border-color: darken($primary-color, 10%);
+      color: darken($primary-color, 10%);
     }
     &[disabled] {
       background-color: transparent;
@@ -223,34 +258,8 @@ export default {
   }
 }
 
-.modal-buttons {
-  .re-button {
-    margin-bottom: 0;
-    &:last-child {
-      margin-left: 1em;
-    }
-  }
-}
-
-// .button-group {
-//     display: flex;
-//     .re-button {
-//         min-height: 50px;
-//         width: 100%;
-//         margin: 2px;
-//         &:active {
-//             color: $lighter-color;
-//         }
-//         &.inactive {
-//             opacity: 0.5;
-//             &:hover {
-//                 opacity: 1;
-//             }
-//         }
-//     }
-// }
-
 .re-button {
+  font-family: $sff;
   .spinner {
     position: absolute;
     left: 1em;

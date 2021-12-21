@@ -1,7 +1,7 @@
 .. _webapp_reference:
 
-Rubrix UI
-=========
+Web App UI
+==========
 This section contains a quick overview of Rubrix web-app's User Interface (UI).
 
 The web-app has two main pages: the **Home** page and the **Dataset** page.
@@ -65,6 +65,57 @@ To escape these character use the \\ before the character. For example to search
 
 ``\(1\+1\)\:2``
 
+Elasticsearch fields
+^^^^^^^^^^^^^^^^^^^^
+
+Below you can find a summary of available fields which can be used for the query DSL as well as for building Kibana Dashboards: common fields to all record types, and those specific to certain record types:
+
++-----------------+
+| Common fields   |
++=================+
+| annotated_as    |
++-----------------+
+| annotated_by    |
++-----------------+
+| event_timestamp |
++-----------------+
+| id              |
++-----------------+
+| last_updated    |
++-----------------+
+| metadata.*      |
++-----------------+
+| multi_label     |
++-----------------+
+| predicted       |
++-----------------+
+| predicted_as    |
++-----------------+
+| predicted_by    |
++-----------------+
+| status          |
++-----------------+
+| words           |
++-----------------+
+
+
++----------------------------+
+| Text classification fields |
++============================+
+| inputs.*                   |
++----------------------------+
+| score                      |
++----------------------------+
+
+
++------------------------------+
+| Tokens classification fields |
++==============================+
+| tokens                       |
++------------------------------+
+
+
+
 Predictions filters
 ^^^^^^^^^^^^^^^^^^^
 
@@ -75,7 +126,7 @@ This component allows filtering by aspects related to predictions, such as:
 - predicted ok or ko, for filtering records whose predictions are (or not) correct with respect to the annotations.
 
 Annotations filters
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 This component allows filtering by aspects related to annotations, such as:
 
@@ -143,3 +194,6 @@ This mode enables users to add and modify annotations, while following the same 
    :alt: Rubrix Token Classification (NER) Annotation mode
 
    Rubrix Token Classification (NER) Annotation mode
+
+Annotation by different users will be saved with different annotation agents.
+To setup various users in your Rubrix server, please refer to our `user management guide <../getting_started/user-management.ipynb>`_.

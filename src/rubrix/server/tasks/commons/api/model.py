@@ -1,6 +1,22 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 """
 Common model for task definitions
 """
+
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -10,6 +26,7 @@ from uuid import uuid4
 from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
 
@@ -25,6 +42,19 @@ class EsRecordDataFieldNames(str, Enum):
     predicted = "predicted"
     score = "score"
     words = "words"
+    event_timestamp = "event_timestamp"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class SortableField(BaseModel):
+    """Sortable field structure"""
+
+    id: str
+    order: SortOrder = SortOrder.asc
 
 
 class BulkResponse(BaseModel):
@@ -52,7 +82,9 @@ class PaginationParams:
     """Query pagination params"""
 
     limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(0, ge=0, alias="from", description="Record sequence from")
+    from_: int = Query(
+        0, ge=0, le=10000, alias="from", description="Record sequence from"
+    )
 
 
 class BaseAnnotation(BaseModel):
@@ -67,7 +99,7 @@ class BaseAnnotation(BaseModel):
         or some other human-supervised automatic process.
     """
 
-    agent: str
+    agent: str = Field(max_length=64)
 
 
 class TaskType(str, Enum):
@@ -81,7 +113,7 @@ class TaskType(str, Enum):
 
     text_classification = "TextClassification"
     token_classification = "TokenClassification"
-    text_to_text = "TextToText"
+    text2text = "Text2Text"
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 
@@ -97,7 +129,7 @@ class TaskStatus(str, Enum):
     """
 
     default = "Default"
-    edited = "Edited"
+    edited = "Edited"  # TODO: DEPRECATE
     discarded = "Discarded"
     validated = "Validated"
 
@@ -115,10 +147,10 @@ class PredictionStatus(str, Enum):
     KO = "ko"
 
 
-T = TypeVar("T", bound=BaseAnnotation)
+Annotation = TypeVar("Annotation", bound=BaseAnnotation)
 
 
-class BaseRecord(GenericModel, Generic[T]):
+class BaseRecord(GenericModel, Generic[Annotation]):
     """
     Minimal dataset record information
 
@@ -134,12 +166,13 @@ class BaseRecord(GenericModel, Generic[T]):
 
     """
 
-    id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
+    id: Optional[Union[int, str]] = Field(None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[T] = None
-    annotation: Optional[T] = None
+    prediction: Optional[Annotation] = None
+    annotation: Optional[Annotation] = None
+    metrics: Dict[str, Any] = Field(default_factory=dict)
 
     @validator("id", always=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -164,7 +197,7 @@ class BaseRecord(GenericModel, Generic[T]):
 
         """
         if metadata:
-            metadata = flatten_dict(metadata)
+            metadata = flatten_dict(metadata, drop_empty=True)
             metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
         return metadata
 
@@ -244,6 +277,66 @@ class BaseRecord(GenericModel, Generic[T]):
             EsRecordDataFieldNames.words: self.words,
             **self.extended_fields(),
         }
+
+
+class BaseSearchResultsAggregations(BaseModel):
+
+    """
+    API for result aggregations
+
+    Attributes:
+    -----------
+    predicted_as: Dict[str, int]
+        Occurrence info about more relevant predicted terms
+    annotated_as: Dict[str, int]
+        Occurrence info about more relevant annotated terms
+    annotated_by: Dict[str, int]
+        Occurrence info about more relevant annotation agent terms
+    predicted_by: Dict[str, int]
+        Occurrence info about more relevant prediction agent terms
+    status: Dict[str, int]
+        Occurrence info about task status
+    predicted: Dict[str, int]
+        Occurrence info about task prediction status
+    words: Dict[str, int]
+        The word cloud aggregations
+    metadata: Dict[str, Dict[str, Any]]
+        The metadata fields aggregations
+    """
+
+    predicted_as: Dict[str, int] = Field(default_factory=dict)
+    annotated_as: Dict[str, int] = Field(default_factory=dict)
+    annotated_by: Dict[str, int] = Field(default_factory=dict)
+    predicted_by: Dict[str, int] = Field(default_factory=dict)
+    status: Dict[str, int] = Field(default_factory=dict)
+    predicted: Dict[str, int] = Field(default_factory=dict)
+    score: Dict[str, int] = Field(default_factory=dict)
+    words: Dict[str, int] = Field(default_factory=dict)
+    metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
+
+Record = TypeVar("Record", bound=BaseRecord)
+Aggregations = TypeVar("Aggregations", bound=BaseSearchResultsAggregations)
+
+
+class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
+    """
+    API search results
+
+    Attributes:
+    -----------
+
+    total:
+        The total number of records
+    records:
+        The selected records to return
+    aggregations:
+        Requested aggregations
+    """
+
+    total: int = 0
+    records: List[Record] = Field(default_factory=list)
+    aggregations: Aggregations = None
 
 
 class ScoreRange(BaseModel):

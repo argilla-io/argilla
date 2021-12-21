@@ -1,38 +1,32 @@
-import json
-from typing import Any, Dict, List, Optional
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
+import json
+from typing import Any, Dict, List, Optional, Type, TypeVar
+
+import deprecated
 from fastapi import Depends
+
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.tasks.commons import TaskType
-
 from .model import DatasetDB
-
-DATASETS_INDEX_NAME = f".rubrix.datasets-v0"
-DATASETS_RECORDS_INDEX_NAME = ".rubrix.dataset.{}.records-v0"
-
-
-DATASETS_INDEX_TEMPLATE = {
-    "index_patterns": [DATASETS_INDEX_NAME],
-    "settings": {"number_of_shards": 1},
-    "mappings": {
-        "properties": {
-            "tags": {
-                "type": "nested",
-                "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "text"},
-                },
-            },
-            "metadata": {
-                "type": "nested",
-                "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "text"},
-                },
-            },
-        }
-    },
-}
+from ..commons.es_settings import (
+    DATASETS_INDEX_NAME,
+    DATASETS_INDEX_TEMPLATE,
+    DATASETS_RECORDS_INDEX_NAME,
+)
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -58,8 +52,34 @@ def dataset_records_index(dataset_id: str) -> str:
     return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
 
 
+BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
+
+
 class DatasetsDAO:
     """Datasets DAO"""
+
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls, es: ElasticsearchWrapper = Depends(create_es_wrapper)
+    ) -> "DatasetsDAO":
+        """
+        Gets or creates the dao instance
+
+        Parameters
+        ----------
+        es:
+            The elasticsearch wrapper dependency
+
+        Returns
+        -------
+            The dao instance
+
+        """
+        if cls._INSTANCE is None:
+            cls._INSTANCE = cls(es)
+        return cls._INSTANCE
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
@@ -95,7 +115,7 @@ class DatasetsDAO:
             index=DATASETS_INDEX_NAME,
             query=query,
         )
-        return [self._es_doc_to_observation_dataset(doc) for doc in docs]
+        return [self._es_doc_to_dataset(doc) for doc in docs]
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
         """
@@ -114,7 +134,7 @@ class DatasetsDAO:
         self._es.add_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset.id,
-            document=self._observation_dataset_to_es_doc(dataset),
+            document=self._dataset_to_es_doc(dataset),
         )
 
         self._es.create_index(
@@ -145,7 +165,7 @@ class DatasetsDAO:
         self._es.update_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset_id,
-            document=self._observation_dataset_to_es_doc(dataset),
+            document=self._dataset_to_es_doc(dataset),
         )
         return dataset
 
@@ -163,6 +183,30 @@ class DatasetsDAO:
             self._es.delete_index(dataset_records_index(dataset.id))
         finally:
             self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+
+    def find_by_id(
+        self, dataset_id: str, ds_class: Type[BaseDatasetDB] = DatasetDB
+    ) -> Optional[BaseDatasetDB]:
+        """
+        Finds a dataset db by its id
+
+        Parameters
+        ----------
+        dataset_id:
+            The dataset id
+        ds_class:
+            Class used for data deserialization. Class could be an specialization
+            of DatasetDB. Default ``DatasetDB``
+
+        Returns
+        -------
+            The dataset instance if found. ``None`` otherwise
+        """
+        document = self._es.get_document_by_id(
+            index=DATASETS_INDEX_NAME, doc_id=dataset_id
+        )
+        if document:
+            return self._es_doc_to_dataset(document, ds_class=ds_class)
 
     def find_by_name(self, name: str, owner: Optional[str]) -> Optional[DatasetDB]:
         """
@@ -183,7 +227,7 @@ class DatasetsDAO:
         document = self._es.get_document_by_id(
             index=DATASETS_INDEX_NAME, doc_id=dataset.id
         )
-        if not document:
+        if not document and owner is None:
             # We must search by name since we have no owner
             results = self._es.list_documents(
                 index=DATASETS_INDEX_NAME,
@@ -199,10 +243,12 @@ class DatasetsDAO:
                 )
 
             document = results[0]
-        return self._es_doc_to_observation_dataset(document) if document else None
+        return self._es_doc_to_dataset(document) if document else None
 
     @staticmethod
-    def _es_doc_to_observation_dataset(doc: Dict[str, Any]) -> DatasetDB:
+    def _es_doc_to_dataset(
+        doc: Dict[str, Any], ds_class: Type[BaseDatasetDB] = DatasetDB
+    ) -> BaseDatasetDB:
         """Transforms a stored elasticsearch document into a `DatasetDB`"""
 
         def __key_value_list_to_dict__(
@@ -214,7 +260,7 @@ class DatasetsDAO:
         tags = source.pop("tags", [])
         metadata = source.pop("metadata", [])
 
-        return DatasetDB.parse_obj(
+        return ds_class.parse_obj(
             {
                 **source,
                 "tags": __key_value_list_to_dict__(tags),
@@ -223,7 +269,7 @@ class DatasetsDAO:
         )
 
     @staticmethod
-    def _observation_dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
+    def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
         def __dict_to_key_value_list__(data: Dict[str, Any]) -> List[Dict[str, Any]]:
             return [
                 {"key": key, "value": json.dumps(value)} for key, value in data.items()
@@ -239,6 +285,16 @@ class DatasetsDAO:
             "metadata": __dict_to_key_value_list__(metadata),
         }
 
+    def copy(self, source: DatasetDB, target: DatasetDB):
+        self._es.add_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=target.id,
+            document=self._dataset_to_es_doc(target),
+        )
+        index_from = dataset_records_index(source.id)
+        index_to = dataset_records_index(target.id)
+        self._es.clone_index(index=index_from, clone_to=index_to)
+
     def close(self, dataset: DatasetDB):
         """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
         self._es.close_index(dataset_records_index(dataset.id))
@@ -251,6 +307,7 @@ class DatasetsDAO:
 _instance: Optional[DatasetsDAO] = None
 
 
+@deprecated.deprecated(reason="Use ``DatasetsDAO.get_instance`` class method instead")
 def create_datasets_dao(
     es: ElasticsearchWrapper = Depends(create_es_wrapper),
 ) -> DatasetsDAO:

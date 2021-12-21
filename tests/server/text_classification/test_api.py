@@ -1,19 +1,33 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from datetime import datetime
 
-from fastapi.testclient import TestClient
+import pytest
+
 from rubrix.server.datasets.model import Dataset
-from rubrix.server.server import app
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
-    TextClassificationSearchResults,
     TextClassificationSearchRequest,
+    TextClassificationSearchResults,
 )
-
-client = TestClient(app)
+from tests.server.test_helpers import client
 
 
 def test_create_records_for_text_classification_with_multi_label():
@@ -27,13 +41,17 @@ def test_create_records_for_text_classification_with_multi_label():
                 "id": 0,
                 "inputs": {"data": "my data"},
                 "multi_label": True,
-                "metadata": {"field_one": "value one", "field_two": "value 2"},
+                "metadata": {
+                    "field_one": "value one",
+                    "field_two": "value 2",
+                    "one_more": [{"a": 1, "b": 2}],
+                },
                 "prediction": {
                     "agent": "test",
                     "labels": [
-                        {"class": "Test", "confidence": 0.6},
-                        {"class": "Mocking", "confidence": 0.7},
-                        {"class": "NoClass", "confidence": 0.2},
+                        {"class": "Test", "score": 0.6},
+                        {"class": "Mocking", "score": 0.7},
+                        {"class": "NoClass", "score": 0.2},
                     ],
                 },
             },
@@ -45,9 +63,9 @@ def test_create_records_for_text_classification_with_multi_label():
                 "prediction": {
                     "agent": "test",
                     "labels": [
-                        {"class": "Test", "confidence": 0.6},
-                        {"class": "Mocking", "confidence": 0.7},
-                        {"class": "NoClass", "confidence": 0.2},
+                        {"class": "Test", "score": 0.6},
+                        {"class": "Mocking", "score": 0.7},
+                        {"class": "NoClass", "score": 0.2},
                     ],
                 },
             },
@@ -117,8 +135,8 @@ def test_create_records_for_text_classification():
                     "prediction": {
                         "agent": "test",
                         "labels": [
-                            {"class": "Test", "confidence": 0.3},
-                            {"class": "Mocking", "confidence": 0.7},
+                            {"class": "Test", "score": 0.3},
+                            {"class": "Mocking", "score": 0.7},
                         ],
                     },
                 }
@@ -166,9 +184,9 @@ def test_partial_record_update():
             "prediction": {
                 "agent": "test",
                 "labels": [
-                    {"class": "Positive", "confidence": 0.6},
-                    {"class": "Negative", "confidence": 0.3},
-                    {"class": "Other", "confidence": 0.1},
+                    {"class": "Positive", "score": 0.6},
+                    {"class": "Negative", "score": 0.3},
+                    {"class": "Other", "score": 0.1},
                 ],
             },
         }
@@ -226,9 +244,9 @@ def test_partial_record_update():
             "prediction": {
                 "agent": "test",
                 "labels": [
-                    {"class": "Positive", "confidence": 0.6},
-                    {"class": "Negative", "confidence": 0.3},
-                    {"class": "Other", "confidence": 0.1},
+                    {"class": "Positive", "score": 0.6},
+                    {"class": "Negative", "score": 0.3},
+                    {"class": "Other", "score": 0.1},
                 ],
             },
             "annotation": {
@@ -278,6 +296,53 @@ def test_sort_by_id_as_default():
     ]
 
 
+def test_some_sort_by():
+    dataset = "test_some_sort_by"
+
+    expected_records_length = 50
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": i,
+                        "inputs": {"data": "my data"},
+                        "prediction": {"agent": f"agent_{i%5}", "labels": []},
+                        "metadata": {
+                            "s": f"{i} value",
+                        },
+                    }
+                )
+                for i in range(0, expected_records_length)
+            ],
+        ).dict(by_alias=True),
+    )
+    with pytest.raises(AssertionError):
+        client.post(
+            f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+            json={
+                "sort": [
+                    {"id": "wrong_field"},
+                ]
+            },
+        )
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+        json={
+            "sort": [
+                {"id": "predicted_by", "order": "desc"},
+                {"id": "metadata.s", "order": "asc"},
+            ]
+        },
+    )
+
+    results = TextClassificationSearchResults.parse_obj(response.json())
+    assert results.total == expected_records_length
+    assert list(map(lambda r: r.id, results.records)) == [14, 19, 24, 29, 34, 39, 4, 44, 49, 9]
+
+
 def test_disable_aggregations_when_scroll():
     dataset = "test_disable_aggregations_when_scroll"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -295,8 +360,8 @@ def test_disable_aggregations_when_scroll():
                         "prediction": {
                             "agent": "test",
                             "labels": [
-                                {"class": "Test", "confidence": 0.3},
-                                {"class": "Mocking", "confidence": 0.7},
+                                {"class": "Test", "score": 0.3},
+                                {"class": "Mocking", "score": 0.7},
                             ],
                         },
                     }
@@ -336,8 +401,8 @@ def test_include_event_timestamp():
                         "prediction": {
                             "agent": "test",
                             "labels": [
-                                {"class": "Test", "confidence": 0.3},
-                                {"class": "Mocking", "confidence": 0.7},
+                                {"class": "Test", "score": 0.3},
+                                {"class": "Mocking", "score": 0.7},
                             ],
                         },
                     }
@@ -464,3 +529,5 @@ def test_wrong_text_query():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Failed to parse query [!]"
+
+

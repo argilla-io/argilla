@@ -1,21 +1,30 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div class="tabs">
     <div class="tabs__buttons">
       <button
         v-for="tab in tabs"
-        :key="tab.name"
-        :class="[
-          'tab',
-          { active: activeTab.name === tab.name || tabs.length === 1 },
-        ]"
+        :key="tab"
+        :class="['tab', { active: activeTab === tab || tabs.length === 1 }]"
         @click="changeTab(tab)"
       >
-        <span
-          >{{ tab.name
-          }}<span>
-            {{ numberOfItems(tab) ? `(${numberOfItems(tab)})` : "" }}</span
-          ></span
-        >
+        <span>{{ tab }} </span>
       </button>
     </div>
     <slot />
@@ -23,7 +32,7 @@
 </template>
 <script>
 export default {
-  props: ["tabs", "tabItems", "numberOfItems", "activeTab"],
+  props: ["tabs", "activeTab"],
   data: () => ({}),
   methods: {
     changeTab(tab) {
@@ -34,18 +43,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tabs {
-  position: relative;
-  text-align: left;
-  align-items: center;
-  @include font-size(15px);
-  display: flex;
   &__buttons {
     display: inline;
-    &:hover {
-      .active {
-        border-bottom: 3px solid transparent;
-      }
-    }
+    position: relative;
+    text-align: left;
+    align-items: center;
+    @include font-size(15px);
+    display: flex;
   }
   &__links {
     margin-right: 0;
@@ -86,6 +90,9 @@ export default {
   &:hover {
     border-bottom: 3px solid $primary-color !important;
     transition: border-color 0.4s ease;
+    & ~ .active {
+      border-bottom: 3px solid transparent;
+    }
   }
 }
 

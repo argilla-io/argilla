@@ -1,28 +1,29 @@
+/*
+ * coding=utf-8
+ * Copyright 2021-present, the Recognai S.L. team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 require("dotenv").config();
 const API_BASE_URL =
   process.env.API_BASE_URL || process.env.BASE_URL || "http://localhost:6900";
 
-const ENABLE_SECURITY = process.env.ENABLE_SECURITY || true;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
-
-let authRedirect = false;
-let authStrategy = ENABLE_SECURITY ? "localProvider" : "noAuth";
-if (authStrategy !== "noAuth") {
-  authRedirect = {
-    login: "/login",
-    logout: "/login",
-    home: false,
-  };
-}
 
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
-
-  publicRuntimeConfig: {
-    securityEnabled: ENABLE_SECURITY,
-    authStrategy,
-  },
 
   generate: {
     dir: DIST_FOLDER,
@@ -53,6 +54,7 @@ export default {
     { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
+    { src: "~/plugins/filters.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -75,6 +77,9 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
+    ['nuxt-highlightjs', {
+      style: 'dracula'
+    }]
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
@@ -110,29 +115,14 @@ export default {
 
   auth: {
     strategies: {
-      noAuth: {
-        scheme: "local",
-        token: {
-          property: "username",
-          required: false,
-        },
-        user: {
-          property: "username",
-          required: false,
-        },
-        endpoints: {
-          login: false,
-          logout: false,
-          user: { url: "/me", propertyName: false },
-        },
-      },
-      localProvider: {
+      authProvider: {
         scheme: "local",
         token: {
           property: "access_token",
         },
         user: {
-          property: "username",
+          property: false,
+          autoFetch: true
         },
         endpoints: {
           login: {
@@ -147,7 +137,7 @@ export default {
       },
     },
     resetOnError: true,
-    redirect: authRedirect,
+    redirect: { login: "/login", logout: "/login", home: false },
   },
 
   router: {

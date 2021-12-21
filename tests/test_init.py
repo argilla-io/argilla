@@ -1,4 +1,17 @@
-# -*- coding: utf-8 -*-
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
 """Rubrix Client Init Testing File"""
 
@@ -6,8 +19,10 @@ import os
 
 import httpx
 import pytest
+
 import rubrix
-from rubrix.client import AuthenticatedClient, Client, RubrixClient
+from rubrix.client import RubrixClient
+from rubrix.client.sdk.client import AuthenticatedClient
 
 
 @pytest.fixture
@@ -131,7 +146,7 @@ def test_init_incorrect(mock_response_500):
     rubrix._client = None  # assert empty client
     with pytest.raises(
         Exception,
-        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
     ):
         rubrix.init()
 
@@ -165,7 +180,7 @@ def test_init_token_incorrect(mock_response_500):
     rubrix._client = None  # assert empty client
     with pytest.raises(
         Exception,
-        match="Connection error: Indetermined error connecting to Rubrix Server. The API answered with a 500 code: b",
+        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
     ):
         rubrix.init(api_key="422")
 
@@ -181,7 +196,7 @@ def test_init_token_auth_fail(mock_response_token_401):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    with pytest.raises(Exception, match="Authentification error: invalid credentials."):
+    with pytest.raises(Exception, match="Authentication error: invalid credentials."):
         rubrix.init(api_url="fake_url", api_key="422")
 
 
@@ -202,7 +217,7 @@ def test_init_evironment_url(api_url_env_var, mock_response_200):
     rubrix.init()
 
     assert isinstance(rubrix._client, RubrixClient)
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://fakeurl.com"
 
 
@@ -247,7 +262,7 @@ def test_init_evironment_no_url_token(token_env_var, mock_response_200):
     rubrix.init(api_url="http://anotherfakeurl.com")
 
     assert isinstance(rubrix._client, RubrixClient)
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://anotherfakeurl.com"
 
 
@@ -288,7 +303,7 @@ def test_default_init(mock_response_200):
 
     rubrix.init()
 
-    assert isinstance(rubrix._client._client, Client)
+    assert isinstance(rubrix._client._client, AuthenticatedClient)
     assert rubrix._client._client.base_url == "http://localhost:6900"
 
     expected_token = "blablabla"

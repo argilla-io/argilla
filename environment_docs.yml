@@ -1,0 +1,20 @@
+name: rubrix
+
+channels:
+- conda-forge
+
+dependencies:
+- python~=3.8.0
+- pip>=20.3.0
+# pyparsing 3.0.5 seems to be buggy
+- pyparsing!=3.0.5
+# pandoc needs conda ...
+- pandoc==2.12
+# we need this to ensure syntax highlighting in the notebook code cells
+- ipython
+- pip:
+    - sphinx==4.1.2
+    - sphinx_rtd_theme==0.5.2
+    - nbsphinx==0.8.7
+    - sphinxext.opengraph==0.4.2
+    - -e .

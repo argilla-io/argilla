@@ -1,10 +1,27 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div class="container">
     <form class="form" @submit.prevent="userLogin">
       <Rubrix class="form__logo" />
       <p class="form__title">Track and iterate on data for AI</p>
       <div class="form__input" :class="{ active: login.username }">
-        <input v-model="login.username" type="text" placeholder="ID" />
+        <input v-model="login.username" type="text" placeholder="Username" />
       </div>
       <div class="form__input" :class="{ active: login.password }">
         <input
@@ -37,11 +54,6 @@ export default {
     if (this.$auth.loggedIn) {
       return;
     }
-    if (!this.$config.securityEnabled) {
-      await this.$auth.setUser("local");
-      await this.$auth.setUserToken("mock-token");
-      this.nextRedirect();
-    }
   },
   methods: {
     nextRedirect() {
@@ -53,7 +65,7 @@ export default {
     async userLogin() {
       try {
         await this.$store.dispatch("entities/deleteAll");
-        await this.$auth.loginWith(this.$config.authStrategy, {
+        await this.$auth.loginWith("authProvider", {
           data: `username=${this.login.username}&password=${this.login.password}`,
         });
         this.nextRedirect();

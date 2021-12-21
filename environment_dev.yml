@@ -6,20 +6,35 @@ channels:
 dependencies:
 - python~=3.8.0
 - pip>=20.3.0
+# pyparsing 3.0.5 seems to be buggy
+- pyparsing!=3.0.5
 # tests
 - pytest
 - pytest-cov
-# docs
-- sphinx==4.0.1
-- sphinx_rtd_theme==0.5.2
-- nbsphinx==0.8.5
+- pytest-asyncio
+# docs, pandoc needs conda ...
 - pandoc==2.12
 # we need this to ensure syntax highlighting in the notebook code cells for the docs
 - ipython
 # for building the frontend
 - nodejs~=14.15.0
 - pip:
-    # build python sdk
-    - openapi-python-client~=0.8.0
-    # install rubrix in editable mode
+    # docs
+    - sphinx==4.1.2
+    - sphinx_rtd_theme==0.5.2
+    - nbsphinx==0.8.7
+    - sphinxext.opengraph==0.4.2
+    # code formatting
+    - pre-commit==2.15.0
+    # extra test dependencies
+    - cleanlab
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
+    - flair==0.10
+    - flyingsquid
+    - pgmpy
+    - plotly>=4.1.0
+    - snorkel>=0.9.7
+    - spacy==3.1.0
+    - transformers[torch]
+    # install Rubrix in editable mode
     - -e .[server]

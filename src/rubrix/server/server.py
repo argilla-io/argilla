@@ -1,13 +1,31 @@
-"""
-This module configures the global fastapi application
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
 """
+This module configures the global fastapi application
+"""
+
 import os
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from brotli_asgi import BrotliMiddleware
+
 from pydantic import ValidationError
+
 from rubrix import __version__ as rubrix_version
 from rubrix.server.commons.errors import (
     common_exception_handler,
@@ -18,10 +36,8 @@ from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
-
 from .commons.settings import settings as api_settings
 from .routes import api_router
-from .security.settings import settings as security_settings
 
 
 def configure_middleware(app: FastAPI):
@@ -34,6 +50,8 @@ def configure_middleware(app: FastAPI):
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.add_middleware(BrotliMiddleware, minimum_size=512, quality=7)
 
 
 def configure_api_exceptions(api: FastAPI):
@@ -57,7 +75,6 @@ def configure_app_statics(app: FastAPI):
             directory=os.path.join(
                 parent_path,
                 "static",
-                "secured" if security_settings.enable_security else "unsecured",
             ),
             html=True,
             check_dir=False,
@@ -78,7 +95,7 @@ def configure_app_startup(app: FastAPI):
 
 def configure_app_security(app: FastAPI):
 
-    if security_settings.enable_security and hasattr(auth, "router"):
+    if hasattr(auth, "router"):
         app.include_router(auth.router)
 
 

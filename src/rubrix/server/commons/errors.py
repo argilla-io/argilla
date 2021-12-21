@@ -1,10 +1,24 @@
-from typing import Type
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from typing import Optional, Type
 
 from fastapi import HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel, ValidationError
-from pydantic.error_wrappers import ErrorWrapper
 
 
 class ErrorMessage(BaseModel):
@@ -49,17 +63,60 @@ class InactiveUserError(HTTPException):
 class ForbiddenOperationError(HTTPException):
     """Forbidden operation"""
 
-    def __init__(self):
+    def __init__(self, message: Optional[str] = None):
         super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Operation not allowed"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=message or "Operation not allowed",
         )
 
 
-class InvalidTextSearchError(HTTPException):
-    """Error related with input params in search"""
+class BadRequestError(HTTPException):
+    """Generic bad request error"""
 
     def __init__(self, detail: str):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+class WrongInputParamError(BadRequestError):
+    """Error related with input params in general"""
+
+    pass
+
+
+class InvalidTextSearchError(BadRequestError):
+    """Error related with input params in search"""
+
+    pass
+
+
+class WrongTaskError(BadRequestError):
+    """Error raised when provided task cannot be processed with requested entity"""
+
+    pass
+
+
+class MissingInputParamError(BadRequestError):
+    """Error when some required parameter is missing for operation"""
+
+    pass
+
+
+class EntityAlreadyExistsError(HTTPException):
+    """Error raised when entity was created"""
+
+    def __init__(self, name: str, type: Type, workspace: Optional[str] = None):
+        self.name = name
+        self.type = Type
+        self.workspace = workspace
+
+        msg = f"Already created entity {name} of type {type.__name__}"
+        if self.workspace:
+            msg += f" in {workspace} workspace."
+
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=msg,
+        )
 
 
 class EntityNotFoundError(HTTPException):

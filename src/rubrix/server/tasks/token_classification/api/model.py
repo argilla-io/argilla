@@ -1,17 +1,37 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
+
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
+    BaseSearchResults,
+    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
+    SortableField,
     TaskStatus,
     TaskType,
 )
-from rubrix._constants import MAX_KEYWORD_LENGTH
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -32,11 +52,14 @@ class EntitySpan(BaseModel):
         character end position, must be higher than the starting character.
     label: str
         the label related to tokens that conforms the entity span
+    score:
+        A higher score means, the model/annotator is more confident about its predicted/annotated entity.
     """
 
     start: int
     end: int
     label: str = Field(min_length=1, max_length=MAX_KEYWORD_LENGTH)
+    score: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @validator("end")
     def check_span_offset(cls, end: int, values):
@@ -51,8 +74,7 @@ class EntitySpan(BaseModel):
 
 
 class TokenClassificationAnnotation(BaseAnnotation):
-    """
-    Annotation class for rToken classification problem
+    """Annotation class for the Token classification task.
 
     Attributes:
     -----------
@@ -81,10 +103,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     """
 
-    tokens: List[str]
+    tokens: List[str] = Field(min_items=1)
     text: str = Field(alias="raw_text")
 
-    @root_validator
+    @validator("text")
+    def check_text_content(cls, text: str):
+        assert text and text.strip(), "No text or empty text provided"
+        return text
+
+    @root_validator(skip_on_failure=True)
     def data_validation(cls, values):
         prediction = values.get("prediction")
         annotation = values.get("annotation")
@@ -115,12 +142,12 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                     current_mention = mention
                     jdx = idx
                     while (
-                        current_mention.startswith(current_token)
+                        current_mention.strip().startswith(current_token)
                         and current_mention
                         and jdx <= len(tokens)
                     ):
+                        current_mention = current_mention.strip()
                         current_mention = current_mention[len(current_token) :]
-                        current_mention = current_mention.lstrip()
                         jdx += 1
                         if jdx < len(tokens):
                             current_token = tokens[jdx]
@@ -149,15 +176,14 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     @property
     def predicted_as(self) -> List[str]:
-        return [ent.label for ent in self._predicted_entities()]
+        return [ent.label for ent in self.predicted_entities()]
 
     @property
     def annotated_as(self) -> List[str]:
-        return [ent.label for ent in self._entities()]
+        return [ent.label for ent in self.annotated_entities()]
 
     @property
     def scores(self) -> List[float]:
-        """Values of prediction scores"""
         if not self.prediction:
             return []
         return [self.prediction.score]
@@ -168,47 +194,51 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
+            **super().extended_fields(),
+            # See ../service/service.py
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
-                for mention, entity in self._predicted_mentions()
+                {"mention": mention, "entity": entity.label, "score": entity.score}
+                for mention, entity in self.predicted_mentions()
             ],
             MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity}
-                for mention, entity in self._mentions()
+                {"mention": mention, "entity": entity.label}
+                for mention, entity in self.annotated_mentions()
             ],
         }
 
-    def _predicted_mentions(self) -> List[Tuple[str, str]]:
+    def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
-                self._predicted_entities()
+                self.predicted_entities()
             ).items()
         ]
 
-    def _mentions(self) -> List[Tuple[str, str]]:
+    def annotated_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
             for mention, entity in self.__mentions_from_entities__(
-                self._entities()
+                self.annotated_entities()
             ).items()
         ]
 
-    def _entities(self) -> Set[EntitySpan]:
+    def annotated_entities(self) -> Set[EntitySpan]:
         """Shortcut for real annotated entities, if provided"""
         if self.annotation is None:
             return set()
         return set(self.annotation.entities)
 
-    def _predicted_entities(self) -> Set[EntitySpan]:
+    def predicted_entities(self) -> Set[EntitySpan]:
         """Predicted entities"""
         if self.prediction is None:
             return set()
         return set(self.prediction.entities)
 
-    def __mentions_from_entities__(self, entities: Set[EntitySpan]) -> Dict[str, str]:
+    def __mentions_from_entities__(
+        self, entities: Set[EntitySpan]
+    ) -> Dict[str, EntitySpan]:
         return {
-            mention: entity.label
+            mention: entity
             for entity in entities
             for mention in [self.text[entity.start : entity.end]]
         }
@@ -258,7 +288,7 @@ class TokenClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
         Record ids list
 
-    query_text: Union[str, Dict[str, str]]
+    query_text: str
         Text query over inputs
     metadata: Optional[Dict[str, Union[str, List[str]]]]
         Text query over metadata fields. Default=None
@@ -280,7 +310,7 @@ class TokenClassificationQuery(BaseModel):
 
     ids: Optional[List[Union[str, int]]]
 
-    query_text: Union[str, Dict[str, str]] = Field(default_factory=dict)
+    query_text: str = Field(default=None)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
@@ -291,8 +321,44 @@ class TokenClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
+    def as_elasticsearch(self) -> Dict[str, Any]:
+        """Build an elasticsearch query part from search query"""
+
+        if self.ids:
+            return {"ids": {"values": self.ids}}
+
+        all_filters = filters.metadata(self.metadata)
+        query_filters = [
+            query_filter
+            for query_filter in [
+                filters.predicted_as(self.predicted_as),
+                filters.predicted_by(self.predicted_by),
+                filters.annotated_as(self.annotated_as),
+                filters.annotated_by(self.annotated_by),
+                filters.status(self.status),
+                filters.predicted(self.predicted),
+                filters.score(self.score),
+            ]
+            if query_filter
+        ]
+        query_text = filters.text_query(self.query_text)
+        all_filters.extend(query_filters)
+
+        return {
+            "bool": {
+                "must": query_text or {"match_all": {}},
+                "filter": {
+                    "bool": {
+                        "should": all_filters,
+                        "minimum_should_match": len(all_filters),
+                    }
+                },
+            }
+        }
+
 
 class TokenClassificationSearchRequest(BaseModel):
+
     """
     API SearchRequest request
 
@@ -301,68 +367,31 @@ class TokenClassificationSearchRequest(BaseModel):
 
     query: TokenClassificationQuery
         The search query configuration
+    sort:
+        The sort by order in search results
     """
 
     query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
+    sort: List[SortableField] = Field(default_factory=list)
 
 
-class TokenClassificationAggregations(BaseModel):
+class TokenClassificationAggregations(BaseSearchResultsAggregations):
     """
-    API for result aggregations
+    Extends base aggregation with mentions
 
     Attributes:
     -----------
-    predicted_as: Dict[str, int]
-        Occurrence info about more relevant predicted terms
-    annotated_as: Dict[str, int]
-        Occurrence info about more relevant annotated terms
-    annotated_by: Dict[str, int]
-        Occurrence info about more relevant annotation agent terms
-    predicted_by: Dict[str, int]
-        Occurrence info about more relevant prediction agent terms
-    status: Dict[str, int]
-        Occurrence info about task status
-    predicted: Dict[str, int]
-        Occurrence info about task prediction status
-    words: WordCloudAggregations
-        The word cloud aggregations
-    metadata: Dict[str, Dict[str, int]]
-        The metadata fields aggregations
     mentions: Dict[str,Dict[str,int]]
         The annotated entity spans
     predicted_mentions: Dict[str,Dict[str,int]]
         The prediction entity spans
     """
 
-    predicted_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_as: Dict[str, int] = Field(default_factory=dict)
-    annotated_by: Dict[str, int] = Field(default_factory=dict)
-    predicted_by: Dict[str, int] = Field(default_factory=dict)
-    status: Dict[str, int] = Field(default_factory=dict)
-    predicted: Dict[str, int] = Field(default_factory=dict)
-    score: Dict[str, int] = Field(default_factory=dict, alias="confidence")
-    words: Dict[str, int] = Field(default_factory=dict)
-    metadata: Dict[str, Dict[str, int]] = Field(default_factory=dict)
     predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
     mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
-class TokenClassificationSearchResults(BaseModel):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total number of records
-    records: List[TokenClassificationRecord]
-        The selected records to return
-    aggregations: TokenClassificationAggregations
-        SearchRequest aggregations (if no pagination)
-
-    """
-
-    total: int = 0
-    records: List[TokenClassificationRecord] = Field(default_factory=list)
-    aggregations: Optional[TokenClassificationAggregations] = None
+class TokenClassificationSearchResults(
+    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
+):
+    pass

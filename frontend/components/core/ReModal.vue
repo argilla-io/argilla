@@ -1,3 +1,20 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div v-if="modalVisible" v-click-outside="onClickOutside" class="modal-mask">
     <transition name="fade" appear>
@@ -12,14 +29,6 @@
           </p>
           <div v-if="!modalCustom" />
           <slot />
-          <ReButton
-            v-if="modalCloseButton"
-            class="modal-close"
-            @click="$emit('close-modal')"
-          >
-            <span class="modal-close__text">close</span>
-            <svgicon name="cross" width="10" height="auto" />
-          </ReButton>
         </div>
       </div>
     </transition>
@@ -97,7 +106,7 @@ export default {
   transition: opacity 0.3s ease;
   pointer-events: none;
   cursor: default;
-  background: rgba(0, 0, 0, 0.1);
+  // background: rgba(0, 0, 0, 0.1);
 }
 
 .modal-wrapper {
@@ -118,7 +127,7 @@ export default {
   margin: 0px auto;
   padding: 1.5em;
   background-color: $lighter-color;
-  border-radius: 4px;
+  border-radius: 3px;
   box-shadow: 0px 2px 4px 3px rgba(0, 0, 0, 0.27);
   transition: $swift-ease-in-out;
   position: relative;
@@ -127,7 +136,7 @@ export default {
 }
 .modal-primary {
   box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-  border-radius: 0;
+  border-radius: 3px;
   max-width: 520px;
   ::v-deep .modal__title {
     font-weight: normal;
@@ -136,36 +145,25 @@ export default {
   ::v-deep .modal__text {
     margin-bottom: 2em;
   }
-  .modal-close {
-    color: $primary-color;
-    font-weight: 600;
-    &__text {
-      margin-right: 10px;
-    }
-  }
 }
 .modal-secondary {
-  border: 1px solid $secondary-color;
-  border-radius: 0;
-  box-shadow: none;
-  max-width: 520px;
-  ::v-deep .modal__title {
-    color: $secondary-color;
-  }
+  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  max-width: 400px;
   ::v-deep .modal__text {
     margin-bottom: 2em;
-  }
-  .modal-close {
-    color: $secondary-color;
-    font-weight: 600;
-    &__text {
-      margin-right: 10px;
-    }
   }
 }
 
 ::v-deep .modal-buttons {
-  text-align: right;
+  display: flex;
+  .re-button {
+    width: 100%;
+    margin-bottom: 0;
+    &:last-child {
+      margin-left: 1em;
+    }
+  }
 }
 ::v-deep .modal__title {
   @include font-size(14px);
@@ -208,20 +206,16 @@ export default {
   opacity: 0;
 }
 
-.modal-buttons {
-  text-align: right;
-}
-
-.modal-close {
-  border: 0;
-  background: $lighter-color;
-  color: $font-medium-color;
-  position: absolute;
-  top: 0.5em;
-  right: 0.5em;
-  outline: none;
-  cursor: pointer;
-}
+// .modal-close {
+//   border: 0;
+//   background: $lighter-color;
+//   color: $font-medium-color;
+//   position: absolute;
+//   top: 0.5em;
+//   right: 0.5em;
+//   outline: none;
+//   cursor: pointer;
+// }
 
 .modal-enter .modal-container,
 .modal-leave-active .modal-container {

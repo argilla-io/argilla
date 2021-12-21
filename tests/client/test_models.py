@@ -1,8 +1,25 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+import json
+
+import numpy
 import pytest
 from pydantic import ValidationError
 from rubrix._constants import MAX_KEYWORD_LENGTH
 
-from rubrix.client.models import TextClassificationRecord
+from rubrix.client.models import Text2TextRecord, TextClassificationRecord
 from rubrix.client.models import TokenClassificationRecord
 
 
@@ -67,3 +84,11 @@ def test_metadata_values_length():
         text=text, tokens=text.split(), metadata=metadata
     )
     assert len(record.metadata["too_long"]) == MAX_KEYWORD_LENGTH
+
+
+def test_model_serialization_with_numpy_nan():
+    record = Text2TextRecord(
+        text="My name is Sarah and I love my dog.", metadata={"nan": numpy.nan}
+    )
+
+    json_record = json.loads(record.json())

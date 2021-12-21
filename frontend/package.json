@@ -12,7 +12,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate && cypress install --force && npm run test:e2e:run",
-    "generate-icons": "vsvg -s ./static/icons -t ./assets/icons",
+    "generate-icons": "vsvg -s ./static/icons -t ./assets/icons --tpl ./assets/icon-template.js.tmp",
     "lint": "eslint --ext .js,.vue --ignore-path .eslintignore  .",
     "lintfix": "eslint --fix --ext .js,.vue --ignore-path .eslintignore  .",
     "precommit": "yarn lintfix",
@@ -31,11 +31,13 @@
     "moment-timezone": "^0.5.33",
     "node-sass": "^5.0.0",
     "nuxt": "^2.14.6",
+    "nuxt-highlightjs": "^1.0.1",
     "sass-loader": "^10.1.0",
     "v-click-outside": "^3.1.2",
     "vue-moment": "^4.1.0",
     "vue-svgicon": "^3.2.9",
-    "vue-vega": "^1.0.0-alpha.13"
+    "vue-vega": "^1.0.0-alpha.13",
+    "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",

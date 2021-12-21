@@ -1,3 +1,20 @@
+<!--
+  - coding=utf-8
+  - Copyright 2021-present, the Recognai S.L. team.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -     http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
 <template>
   <div class="error">
     <div class="panel panel--warning">
@@ -8,7 +25,7 @@
       </p>
     </div>
     <NuxtLink class="re-button" :to="link">
-      <svgicon name="chev-left" width="15" height="15" color="#4A4A4A" />
+      <svgicon name="chev-left" width="8" height="8" color="#4A4A4A" />
       Back
     </NuxtLink>
   </div>
@@ -92,13 +109,13 @@ export default {
 
 .re-button {
   display: inline-block;
-  min-height: 40px;
-  line-height: 40px;
-  min-width: 150px;
+  min-height: 30px;
+  line-height: 30px;
+  min-width: auto;
   background: transparent;
   text-align: center;
   border: 1px solid $font-medium-color;
-  padding: 0 2em;
+  padding: 0 1em 0 1.5em;
   position: relative;
   font-weight: 600;
   color: $font-medium-color;
@@ -111,7 +128,7 @@ export default {
   }
   .svg-icon {
     position: absolute;
-    left: 12px;
+    left: 8px;
     top: 12px;
   }
 }
