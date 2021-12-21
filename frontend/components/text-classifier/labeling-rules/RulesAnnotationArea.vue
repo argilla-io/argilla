@@ -62,11 +62,8 @@
       </p>
     </div>
     <rule-annotation-area-metrics :metrics="metrics" />
-    <!-- <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
-      You have already a rule saved with that label.
-    </p> -->
     <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
-      Rule has been saved.
+      {{saved ? 'Rule has been saved' : 'You have already a rule saved with that label'}}.
     </p>
     <re-button
       v-else
@@ -95,6 +92,7 @@ export default {
   },
   data: () => {
     return {
+      saved: false,
       searchText: "",
       selectedLabels: [],
       metrics: {},
@@ -157,6 +155,7 @@ export default {
       if (n) {
         this.selectedLabels = [];
         this.metrics = {};
+        this.saved = false;
       }
     },
   },
@@ -186,6 +185,7 @@ export default {
           label: this.selectedLabels[0],
         });
       }
+      this.saved = true;
       this.$emit("update-rule");
     },
     async getMetricsByLabel(label) {
@@ -267,5 +267,8 @@ export default {
     color: $primary-color;
     text-decoration: none;
   }
+}
+.label-button:not(.active) ::v-deep .button {
+  background: $lighter-color !important;
 }
 </style>

@@ -172,7 +172,7 @@ export default {
     margin-right: 2em;
     &.--extended {
       width: 100%;
-      margin-right: 1em;
+      margin-right: 0;
     }
   }
   &--disabled {

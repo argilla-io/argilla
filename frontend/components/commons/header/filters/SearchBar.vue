@@ -95,7 +95,7 @@ export default {
   width: 285px;
   min-height: 43px;
   border: none;
-  padding: 0 1em;
+  padding: 0 0.5em;
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
