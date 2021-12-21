@@ -210,9 +210,9 @@ class DatasetRecordsDAO:
         size:
             Number of records to retrieve (for pagination)
         record_from:
-            Record from witch retrieve records (for pagination)
+            Record from which to retrieve the records (for pagination)
         exclude_fields:
-            a list of fields to exclude from result source. Wildcard are accepted
+            a list of fields to exclude from the result source. Wildcards are accepted
         Returns
         -------
             The search result
