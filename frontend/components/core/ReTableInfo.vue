@@ -47,7 +47,7 @@
           </div>
         </slot>
       </div>
-      <ResultsEmpty v-if="!data.length" :empty-title="emptyTitle" :empty-description="emptyDescription" empty-icon="empty-rules" />
+      <ResultsEmpty v-if="!data.length" :empty-title="emptyTitle" :empty-description="emptyDescription" :empty-icon="emptyIcon" />
       <template v-else-if="resultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
@@ -156,10 +156,8 @@
                   @close-modal="$emit('close-modal')"
                 >
                   <div>
-                    <p class="modal__title">Delete confirmation</p>
-                    <p>
-                      You are about to delete: <strong>{{ item.name }}</strong
-                      >. This process cannot be undone.
+                    <p class="modal__title">{{deleteModalContent.title}}</p>
+                    <p v-html="deleteModalContent.text">
                     </p>
                     <div class="modal-buttons">
                       <ReButton
@@ -202,7 +200,7 @@
           </ReModal> -->
         </div>
       </template>
-      <ResultsEmpty v-else empty-title="0 results found" />
+      <ResultsEmpty v-else :empty-title="emptyFilteredTitle" />
     </div>
   </transition>
 </template>
@@ -242,6 +240,10 @@ export default {
       type: String,
       default: undefined,
     },
+    emptyFilteredTitle: {
+      type: String,
+      default: undefined,
+    },
     emptyDescription: {
       type: String,
       default: undefined,
@@ -257,6 +259,9 @@ export default {
     showModal: {
       type: String,
       default: undefined,
+    },
+    deleteModalContent: {
+      type: Object,
     },
     globalActions: {
       type: Boolean,

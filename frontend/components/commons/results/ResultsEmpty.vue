@@ -18,7 +18,7 @@
 <template>
   <div class="empty">
     <span class="empty__content">
-      <svgicon v-if="emptyIcon" :name="emptyIcon" width="100" height="100" color="#686a6d" />
+      <svgicon v-if="emptyIcon" :name="emptyIcon" width="50" height="50" color="#686a6d" />
       <h1 class="empty__title">{{ emptyTitle }}</h1>
       <p v-if="emptyDescription" class="empty__description" v-html="emptyDescription" />
     </span>

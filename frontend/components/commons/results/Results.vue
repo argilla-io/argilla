@@ -16,13 +16,14 @@
   -->
 
 <template>
-  <results-empty v-if="dataset.results.total === 0" />
+  <results-empty empty-icon="empty-results" empty-description="There is no result. <br />Try another query." v-if="dataset.results.total === 0" />
   <div v-else class="results">
     <component :is="currentTaskResultsList" :dataset="dataset" />
   </div>
 </template>
 
 <script>
+import "assets/icons/empty-results";
 export default {
   props: {
     dataset: {
