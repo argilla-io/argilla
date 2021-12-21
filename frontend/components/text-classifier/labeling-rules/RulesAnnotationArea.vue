@@ -62,7 +62,7 @@
       </p>
     </div>
     <rule-annotation-area-metrics :metrics="metrics" />
-    <p v-if="currentRule && selectedLabels.includes(currentRule.label)">
+    <p v-if="currentRule && selectedLabels.includes(currentRule.label) && currentRule.description === description">
       {{saved ? 'Rule has been saved' : 'You have already a rule saved with that label'}}.
     </p>
     <re-button
@@ -87,6 +87,10 @@ export default {
     },
     currentRule: {
       type: Object,
+      default: undefined,
+    },
+    description: {
+      type: String,
       default: undefined,
     },
   },
@@ -178,11 +182,13 @@ export default {
         await this.updateRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
+          description: this.description,
         });
       } else {
         await this.defineRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
+          description: this.description,
         });
       }
       this.saved = true;

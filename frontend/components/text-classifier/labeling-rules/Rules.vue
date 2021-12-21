@@ -5,8 +5,8 @@
         class="rules__button button-secondary--outline"
         @click="showRulesList"
       >Manage rules</re-button>
-      <p class="rules__query">{{query}}</p>
-      <rules-annotation-area :currentRule="currentRule" :dataset="dataset" @update-rule="updateRule"/>
+      <input :class="[isFocused ? 'focused' : null, 'rules__query']" @focus="isFocused = true" @blur="isFocused = false" v-model="description">
+      <rules-annotation-area  :description="description" :currentRule="currentRule" :dataset="dataset" @update-rule="updateRule"/>
     </div>
     <p>Records ({{dataset.results.total | formatNumber}})</p>
   </div>
@@ -22,7 +22,9 @@ export default {
   },
   data: () => {
     return {
+      isFocused: undefined,
       currentRule: undefined,
+      description: undefined,
     }
   },
   props: {
@@ -34,8 +36,9 @@ export default {
   async fetch() {
     this.currentRule = await this.getRule({
       dataset: this.dataset,
-      query: this.query
+      query: this.query,
     });
+    this.description = this.currentRule ? this.currentRule.description : this.query;
   },
   watch: {
     async query(n, o) {
@@ -54,7 +57,7 @@ export default {
       });
     },
     updateRule() {
-      this.$fetch()
+      this.$fetch();
     },
     ...mapActions({
       getRule: "entities/text_classification/getRule",
@@ -80,6 +83,20 @@ export default {
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    outline: none;
+    @include input-placeholder {
+      color: $font-secondary;
+      font-weight: 600;
+    }
+    &.focused {
+      color: $font-secondary-dark;
+      @include input-placeholder {
+        color: $font-secondary-dark;
+      }
+    }
   }
   &__button {
     float: right;

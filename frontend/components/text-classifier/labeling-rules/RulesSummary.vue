@@ -77,6 +77,7 @@ export default {
       return this.rules.map(r => {
         return {
           name: r.description,
+          query: r.query,
           kind: "select",
           label: r.label,
           coverage: this.metricsByLabel[r.query].coverage,
@@ -117,8 +118,8 @@ export default {
       }
     },
     async onSelectQuery(id) {
-      if (id !== this.dataset.query.text) {
-        await this.search({ dataset: this.dataset, query: { text: id } });
+      if (id.query !== this.dataset.query.text) {
+        await this.search({ dataset: this.dataset, query: { text: id.query } });
       }
       await this.hideList();
     },
@@ -155,7 +156,7 @@ export default {
       this.closeModal();
       await this.deleteRule({ 
         dataset: this.dataset,
-        query: id.name,
+        query: id.query,
       });
       await this.$fetch();
     },
