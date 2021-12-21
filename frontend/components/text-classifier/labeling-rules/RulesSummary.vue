@@ -24,8 +24,10 @@
         search-on="name"
         empty-icon="empty-rules"
         empty-title="0 rules defined"
+        empty-filtered-title="0 rules found"
         :empty-description="emptyRulesDescription"
         :show-modal="showModal"
+        :delete-modal-content="getDeleteModalText"
         @sort-column="onSortColumns"
         @onActionClicked="onActionClicked"
         @close-modal="closeModal"
@@ -104,6 +106,12 @@ export default {
     },
     emptyRulesDescription() {
       return `You have not defined any rules for this dataset yet.<br /> Start to define rules`;
+    },
+    getDeleteModalText() {
+      return {
+        title: 'Permanently delete rule',
+        text: `You are about to delete the rule <strong>"${this.showModal}"</strong> from your dataset. This action cannot be undone.`
+      };
     },
   },
   mounted() {
@@ -206,6 +214,7 @@ export default {
     margin-top: 0;
   }
   &__table {
+    margin-bottom: 2em !important;
     ::v-deep {
       .table-info__item__col:nth-of-type(2) {
         min-width: 100px;
@@ -215,7 +224,7 @@ export default {
       }
       .table-info__body {
         overflow: visible;
-        // height: calc(100vh - 580px);
+        height: auto;
       }
       .table-info__item {
         padding-right: 3em !important;

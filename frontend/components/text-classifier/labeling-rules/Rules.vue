@@ -19,7 +19,7 @@
         @update-rule="updateRule"
       />
     </div>
-    <p>Records ({{ dataset.results.total | formatNumber }})</p>
+    <p class="rules__records">Records ({{ dataset.results.total | formatNumber }})</p>
   </div>
 </template>
 <script>
@@ -104,6 +104,9 @@ export default {
         color: $font-secondary-dark;
       }
     }
+  }
+  &__records {
+    color: $font-secondary;
   }
   &__button {
     float: right;

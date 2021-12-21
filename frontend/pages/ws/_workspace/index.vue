@@ -48,6 +48,7 @@
               :global-actions="false"
               search-on="name"
               :show-modal="showModal"
+              :delete-modal-content="getDeleteModalContent"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
               @close-modal="closeModal"
@@ -109,6 +110,12 @@ export default {
     workspace() {
       return currentWorkspace(this.$route);
     },
+    getDeleteModalContent() {
+      return {
+        title: 'Delete confirmation',
+        text: `You are about to delete: <strong>${this.showModal}</strong>. This action cannot be undone`
+      }
+    }
   },
   methods: {
     ...mapActions({
