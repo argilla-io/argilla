@@ -29,7 +29,6 @@
         :min-item-size="150"
         :buffer="200"
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-        :emitUpdate="true"
       > 
         <template #before>
           <slot name="pre-records-area"/>
