@@ -196,6 +196,7 @@ class DatasetRecordsDAO:
         search: Optional[RecordSearch] = None,
         size: int = 100,
         record_from: int = 0,
+        exclude_fields: List[str] = None,
     ) -> RecordSearchResults:
         """
         SearchRequest records under a dataset given a search parameters.
@@ -209,7 +210,9 @@ class DatasetRecordsDAO:
         size:
             Number of records to retrieve (for pagination)
         record_from:
-            Record from witch retrieve records (for pagination)
+            Record from which to retrieve the records (for pagination)
+        exclude_fields:
+            a list of fields to exclude from the result source. Wildcards are accepted
         Returns
         -------
             The search result
@@ -245,6 +248,7 @@ class DatasetRecordsDAO:
             aggregation_requests = None
 
         es_query = {
+            "_source": {"excludes": exclude_fields or []},
             "size": size,
             "from": record_from,
             "query": search.query or {"match_all": {}},
