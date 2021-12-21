@@ -1,17 +1,25 @@
 <template>
-  <div v-if="isVisible" class="rules-summary">
+  <div v-if="isVisible">
     <ReLoading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="rules-summary__container">
-      <re-button @click="hideList()" class="rules-summary__close button-quaternary">
-        <svgicon
-          name="chev-left"
-          width="12"
-          height="12"
-        ></svgicon>Back to query view</re-button>
-      <p class="rules-summary__title">Overall Metrics</p>
-      <rules-summary-metrics :formattedRules="formattedRules" :metricsByLabel="metricsByLabel" :dataset="dataset" />
-      <p class="rules-summary__title">Summary</p> 
-      <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
+      <re-button
+        class="rules-summary__close button-quaternary"
+        @click="hideList"
+      >
+        <svgicon name="chev-left" width="12" height="12"></svgicon>Back to query
+        view</re-button
+      >
+      <p class="rules-summary__title">Summary</p>
+      <rules-summary-metrics
+        v-if="formattedRules.length"
+        :metrics-by-label="metricsByLabel"
+        :dataset="dataset"
+      />
+      <ReSearchBar
+        v-if="formattedRules.length"
+        placeholder="Search rule by name"
+        @input="onSearch"
+      />
       <ReTableInfo
         class="rules-summary__table"
         :data="formattedRules"
@@ -22,28 +30,26 @@
         :query-search="querySearch"
         :global-actions="false"
         search-on="name"
-        empty-icon="empty-rules"
-        empty-title="0 rules defined"
-        :empty-description="emptyRulesDescription"
         :show-modal="showModal"
         @sort-column="onSortColumns"
         @onActionClicked="onActionClicked"
         @close-modal="closeModal"
       />
-      <re-button v-if="formattedRules.length" class="button-primary" @click="updateSummary()">Update Summary</re-button>
+      <re-button class="button-primary" @click="updateSummary()"
+        >Update Summary</re-button
+      >
     </div>
   </div>
 </template>
 <script>
-import "assets/icons/empty-rules";
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     dataset: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   data: () => {
     return {
@@ -60,14 +66,24 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
-        { name: "Annot. Cover.", field: "coverage_annotated", class: "text", type: "number" },
+        {
+          name: "Annot. Cover.",
+          field: "coverage_annotated",
+          class: "text",
+          type: "number",
+        },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
-        { name: "Precision", field: "precision", class: "text", type: "number"  },
+        {
+          name: "Precision",
+          field: "precision",
+          class: "text",
+          type: "number",
+        },
       ],
       sortedOrder: "desc",
       sortedByField: "query",
-      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }]
+      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
     };
   },
   async fetch() {
@@ -79,7 +95,7 @@ export default {
       return this.dataset.viewSettings.visibleRulesList;
     },
     formattedRules() {
-      return this.rules.map(r => {
+      return this.rules.map((r) => {
         return {
           name: r.description,
           query: r.query,
@@ -93,9 +109,6 @@ export default {
         };
       });
     },
-    emptyRulesDescription() {
-      return `You have not defined any rules for this dataset yet.<br /> Start to define rules`;
-    },
   },
   mounted() {
     document.getElementsByTagName("body")[0].classList.remove("fixed-header");
@@ -105,23 +118,20 @@ export default {
       search: "entities/datasets/search",
       getRules: "entities/text_classification/getRules",
       deleteRule: "entities/text_classification/deleteRule",
-      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
+      getRuleMetricsByLabel:
+        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async hideList() {
-      await DatasetViewSettings.update({
-        where: this.dataset.name,
-        data: {
-          visibleRulesList: false
-        }
-      });
+      await this.dataset.viewSettings.disableRulesSummary();
     },
+
     async getMetricsByLabel() {
-      for(let rule of this.rules) {
+      for (let rule of this.rules) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
           query: rule.query,
           label: rule.label,
-        })
+        });
         this.metricsByLabel[rule.query] = response;
       }
     },
@@ -141,7 +151,7 @@ export default {
           this.onDeleteRule(rowId);
           break;
         case "select":
-          this.onSelectQuery(rowId)
+          this.onSelectQuery(rowId);
           break;
         default:
           console.warn(action);
@@ -154,15 +164,15 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
-    updateSummary() {
-      this.getMetricsByLabel();
+    async updateSummary() {
+      await this.getMetricsByLabel();
     },
     onShowConfirmRuleDeletion(id) {
       this.showModal = id.name;
     },
     async onDeleteRule(id) {
       this.closeModal();
-      await this.deleteRule({ 
+      await this.deleteRule({
         dataset: this.dataset,
         query: id.query,
       });
@@ -170,29 +180,20 @@ export default {
     },
     closeModal() {
       this.showModal = undefined;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
 .rules-summary {
-  padding-left: 4em;
-  padding-top: 3em;
-  overflow: auto;
-  height: 100vh;
   &__container {
     margin-top: 3em;
-    padding: 20px;
-    background: rgba($lighter-color, .4);
-    border: 1px solid $lighter-color;
-    width: 100%;
-    border-radius: 5px;
+    padding: 3em;
   }
   &__title {
     color: $font-secondary-dark;
     @include font-size(22px);
     font-weight: 600;
-    margin-top: 0;
   }
   &__table {
     ::v-deep {
@@ -203,8 +204,7 @@ export default {
         min-width: 120px;
       }
       .table-info__body {
-        overflow: visible;
-        // height: calc(100vh - 580px);
+        height: calc(100vh - 503px);
       }
       .table-info__item {
         padding-right: 3em !important;
@@ -216,4 +216,3 @@ export default {
   }
 }
 </style>
-
