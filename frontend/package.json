@@ -1,6 +1,6 @@
 {
   "name": "rubrix",
-  "version": "0.1.2",
+  "version": "0.8.0",
   "private": true,
   "eslintIgnore": [
     "node_modules/**/*",
@@ -39,15 +39,17 @@
     "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/eslint-parser": "^7.15.0",
+    "@vue/test-utils": "^1.2.2",
     "axios-mock-adapter": "^1.19.0",
-    "babel-eslint": "^10.1.0",
     "cypress": "^6.2.1",
-    "eslint": "^7.17.0",
+    "eslint": "^8.5.0",
     "eslint-config-prettier": "^7.1.0",
-    "eslint-loader": "^4.0.2",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.4.1",
+    "eslint-plugin-vue": "^8.2.0",
     "prettier": "^2.2.1"
   }
 }
