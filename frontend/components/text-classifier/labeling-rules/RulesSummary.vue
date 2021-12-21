@@ -42,8 +42,8 @@ export default {
   props: {
     dataset: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   data: () => {
     return {
@@ -60,14 +60,24 @@ export default {
         },
         { name: "Label", field: "label", class: "text" },
         { name: "Coverage", field: "coverage", class: "text", type: "number" },
-        { name: "Annot. Cover.", field: "coverage_annotated", class: "text", type: "number" },
+        {
+          name: "Annot. Cover.",
+          field: "coverage_annotated",
+          class: "text",
+          type: "number",
+        },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
-        { name: "Precision", field: "precision", class: "text", type: "number"  },
+        {
+          name: "Precision",
+          field: "precision",
+          class: "text",
+          type: "number",
+        },
       ],
       sortedOrder: "desc",
       sortedByField: "query",
-      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }]
+      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
     };
   },
   async fetch() {
@@ -79,7 +89,7 @@ export default {
       return this.dataset.viewSettings.visibleRulesList;
     },
     formattedRules() {
-      return this.rules.map(r => {
+      return this.rules.map((r) => {
         return {
           name: r.description,
           query: r.query,
@@ -105,25 +115,27 @@ export default {
       search: "entities/datasets/search",
       getRules: "entities/text_classification/getRules",
       deleteRule: "entities/text_classification/deleteRule",
-      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
+      getRuleMetricsByLabel:
+        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async hideList() {
-      await DatasetViewSettings.update({
-        where: this.dataset.name,
-        data: {
-          visibleRulesList: false
-        }
-      });
+      await this.dataset.viewSettings.disableRulesSummary();
     },
+
     async getMetricsByLabel() {
-      for(let rule of this.rules) {
-        const response = await this.getRuleMetricsByLabel({
-          dataset: this.dataset,
-          query: rule.query,
-          label: rule.label,
+      const responses = await Promise.all(
+        this.rules.map((rule) => {
+          return this.getRuleMetricsByLabel({
+            dataset: this.dataset,
+            query: rule.query,
+            label: rule.label,
+          });
         })
-        this.metricsByLabel[rule.query] = response;
-      }
+      );
+
+      responses.forEach((response, idx) => {
+        this.metricsByLabel[this.rules[idx].query] = response;
+      });
     },
     async onSelectQuery(id) {
       if (id.query !== this.dataset.query.text) {
@@ -141,7 +153,7 @@ export default {
           this.onDeleteRule(rowId);
           break;
         case "select":
-          this.onSelectQuery(rowId)
+          this.onSelectQuery(rowId);
           break;
         default:
           console.warn(action);
@@ -154,15 +166,15 @@ export default {
     onSearch(event) {
       this.querySearch = event;
     },
-    updateSummary() {
-      this.getMetricsByLabel();
+    async updateSummary() {
+      await this.getMetricsByLabel();
     },
     onShowConfirmRuleDeletion(id) {
       this.showModal = id.name;
     },
     async onDeleteRule(id) {
       this.closeModal();
-      await this.deleteRule({ 
+      await this.deleteRule({
         dataset: this.dataset,
         query: id.query,
       });
@@ -170,8 +182,8 @@ export default {
     },
     closeModal() {
       this.showModal = undefined;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -216,4 +228,3 @@ export default {
   }
 }
 </style>
-
