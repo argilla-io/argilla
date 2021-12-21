@@ -64,8 +64,8 @@ export default {
     async showRulesList() {
       await this.dataset.viewSettings.enableRulesSummary();
     },
-    updateRule() {
-      this.$fetch();
+    async updateRule() {
+      await this.$fetch();
     },
     ...mapActions({
       getRule: "entities/text_classification/getRule",
