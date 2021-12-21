@@ -269,7 +269,7 @@ class WeakLabels:
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
         - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
         - **correct**: Number of records the rule labeled correctly (if annotations are available).
-        - **incorrect**: Number of records the rule labels incorrectly (if annotations are available).
+        - **incorrect**: Number of records the rule labeled incorrectly (if annotations are available).
         - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
 
 
