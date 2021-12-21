@@ -23,10 +23,8 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.labeling.text_classification.rule import (
     Rule,
-    RuleMetrics,
     RuleNotAppliedError,
-    rule_metrics,
-    rules_from_dataset,
+    load_rules,
 )
 from tests.server.test_helpers import client, mocking_client
 
@@ -92,7 +90,7 @@ def test_call(monkeypatch, log_dataset):
     assert rule(records[1]) is None
 
 
-def test_dataset_rules(monkeypatch, log_dataset):
+def test_load_rules(monkeypatch, log_dataset):
     mocking_client(monkeypatch, client)
 
     client.post(
@@ -100,7 +98,7 @@ def test_dataset_rules(monkeypatch, log_dataset):
         json={"query": "a query", "label": "LALA"},
     )
 
-    rules = rules_from_dataset(log_dataset)
+    rules = load_rules(log_dataset)
     assert len(rules) == 1
     assert rules[0].query == "a query"
     assert rules[0].label == "LALA"
@@ -111,37 +109,37 @@ def test_dataset_rules(monkeypatch, log_dataset):
     [
         (
             Rule(query="neg*", label="LALA"),
-            RuleMetrics(
+            dict(
+                coverage=0.5,
+                annotated_coverage=0.5,
                 correct=0,
                 incorrect=1,
-                coverage=0.5,
-                coverage_annotated=0.5,
-                precision=0,
+                precision=0.0,
             ),
         ),
         (
             Rule(query="neg*", label="negative"),
-            RuleMetrics(
+            dict(
+                coverage=0.5,
+                annotated_coverage=0.5,
                 correct=1,
                 incorrect=0,
-                coverage=0.5,
-                coverage_annotated=0.5,
-                precision=1,
+                precision=1.0,
             ),
         ),
-(
+        (
             Rule(query="bad", label="negative"),
-            RuleMetrics(
+            dict(
+                coverage=0.0,
+                annotated_coverage=0.0,
                 correct=0,
                 incorrect=0,
-                coverage=0,
-                coverage_annotated=0,
-                precision=0,
+                precision=0.0,
             ),
         ),
     ],
 )
-def test_dataset_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
+def test_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
     mocking_client(monkeypatch, client)
 
     client.post(
@@ -149,5 +147,5 @@ def test_dataset_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
         json={"query": rule.query, "label": rule.label},
     )
 
-    metrics = rule_metrics(log_dataset, rule=rule)
+    metrics = rule.metrics(log_dataset)
     assert metrics == expected_metrics

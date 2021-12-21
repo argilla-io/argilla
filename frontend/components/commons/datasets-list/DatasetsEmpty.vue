@@ -19,6 +19,7 @@
 
 <script>
 import "assets/icons/datasets-empty";
+import { workspaceHome } from "@/models/Workspace";
 export default {
   props: {
     workspace: {
@@ -29,9 +30,10 @@ export default {
 
   methods: {
     generateCodeSnippet(ws) {
+      const apiUrl = window.location.href.replace(workspaceHome(ws), "");
       return `import rubrix as rb
 
-rb.init("${window.location}", api_key="<YOUR_API_KEY>")
+rb.init("${apiUrl}", api_key="<YOUR_API_KEY>")
 rb.set_workspace("${ws}")
 
 rb.log(

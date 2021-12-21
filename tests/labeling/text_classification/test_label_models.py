@@ -113,22 +113,24 @@ class TestSnorkel:
         assert label_model._model.cardinality == 3
 
     @pytest.mark.parametrize(
-        "wrong_mapping",
+        "wrong_mapping,expected",
         [
-            {None: -10, "negative": 0, "positive": 1, "neutral": 2},
-            {None: -1, "negative": 1, "positive": 3, "neutral": 4},
+            (
+                {None: -10, "negative": 0, "positive": 1, "neutral": 2},
+                {-10: -1, 0: 0, 1: 1, 2: 2},
+            ),
+            (
+                {None: -1, "negative": 1, "positive": 3, "neutral": 4},
+                {-1: -1, 1: 0, 3: 1, 4: 2},
+            ),
         ],
     )
-    def test_init_wrong_mapping(self, weak_labels, wrong_mapping):
+    def test_init_wrong_mapping(self, weak_labels, wrong_mapping, expected):
         weak_labels.change_mapping(wrong_mapping)
         label_model = Snorkel(weak_labels)
 
-        assert label_model.weak_labels.label2int == {
-            None: -1,
-            "negative": 0,
-            "positive": 1,
-            "neutral": 2,
-        }
+        assert label_model._weaklabels2snorkel == expected
+        assert label_model._snorkel2weaklabels == {k: v for v, k in expected.items()}
 
     @pytest.mark.parametrize(
         "include_annotated_records",
@@ -263,7 +265,13 @@ class TestSnorkel:
         with pytest.raises(MissingAnnotationError, match="need annotated records"):
             label_model.score()
 
-    def test_integration(self, weak_labels_from_guide):
+    @pytest.mark.parametrize(
+        "change_mapping",
+        [False, True],
+    )
+    def test_integration(self, weak_labels_from_guide, change_mapping):
+        if change_mapping:
+            weak_labels_from_guide.change_mapping({None: -10, "HAM": 2, "SPAM": 5})
         label_model = Snorkel(weak_labels_from_guide)
         label_model.fit(seed=43)
 

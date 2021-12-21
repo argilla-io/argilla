@@ -155,6 +155,7 @@ def search_records(
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
+        exclude_metrics=not common_params.include_metrics,
     )
 
     return result
