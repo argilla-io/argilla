@@ -20,12 +20,14 @@ module.exports = {
   env: {
     node: true,
     browser: true,
+    jest: true,
   },
   extends: [
     "plugin:vue/recommended",
     "eslint:recommended",
     "prettier/vue",
     "plugin:prettier/recommended",
+    "plugin:cypress/recommended",
   ],
   rules: {
     "vue/component-name-in-template-casing": ["error", "PascalCase"],
