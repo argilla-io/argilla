@@ -39,10 +39,17 @@ class Rule:
         "not urgent"
     """
 
-    def __init__(self, query: str, label: str, name: Optional[str] = None):
+    def __init__(
+        self,
+        query: str,
+        label: str,
+        name: Optional[str] = None,
+        author: Optional[str] = None,
+    ):
         self._query = query
         self._label = label
         self._name = name
+        self._author = author
         self._matching_ids = None
 
     @property
@@ -61,6 +68,11 @@ class Rule:
         if self._name is not None:
             return self._name
         return self._query
+
+    @property
+    def author(self):
+        """Who authored the rule."""
+        return self._author
 
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
@@ -89,14 +101,17 @@ class Rule:
         """
         current_client = client()
         metrics = current_client.rule_metrics_for_dataset(
-            dataset=dataset, rule=LabelingRule(query=self.query, label=self.label)
+            dataset=dataset,
+            rule=LabelingRule(
+                query=self.query, label=self.label, author=self.author or "None"
+            ),
         )
 
         return {
             "coverage": metrics.coverage,
             "annotated_coverage": metrics.coverage_annotated,
-            "correct": metrics.correct,
-            "incorrect": metrics.incorrect,
+            "correct": int(metrics.correct),
+            "incorrect": int(metrics.incorrect),
             "precision": metrics.precision,
         }
 
@@ -137,7 +152,12 @@ def load_rules(dataset: str) -> List[Rule]:
     current_client = client()
     rules = current_client.fetch_dataset_labeling_rules(dataset)
     return [
-        Rule(query=rule.query, label=rule.label, name=rule.description)
+        Rule(
+            query=rule.query,
+            label=rule.label,
+            name=rule.description,
+            author=rule.author,
+        )
         for rule in rules
     ]
 
