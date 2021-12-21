@@ -23,7 +23,6 @@
   </div>
 </template>
 <script>
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { mapActions } from "vuex";
 export default {
   props: {
