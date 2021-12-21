@@ -26,16 +26,7 @@
       v-if="!dataset.viewSettings.visibleRulesList"
       :expand-searchbar="viewMode === 'labelling-rules'"
       :dataset="dataset"
-    >
-      <re-button
-        v-if="dataset.results.total && viewMode === 'labelling-rules'"
-        class="button-rules-summary button-clear"
-        @click="showRulesList"
-      >
-        <svgicon name="config" width="15" height="14"></svgicon>
-        Rules Summary</re-button
-      >
-    </filters-area>
+    />
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -92,14 +83,6 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-    showRulesList() {
-      DatasetViewSettings.update({
-        where: this.dataset.name,
-        data: {
-          visibleRulesList: true,
-        },
-      });
-    },
     async onSelectLabels(labels, selectedRecords) {
       const records = selectedRecords.map((record) => {
         let newLabels = labels.map((label) => ({
@@ -159,12 +142,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.button-rules-summary {
-  min-width: 130px !important;
-  color: $font-secondary-dark;
-  margin-bottom: 0 !important;
-  .svg-icon {
-    margin-right: 0.5em;
-  }
-}
 </style>
