@@ -126,14 +126,19 @@ export default {
     },
 
     async getMetricsByLabel() {
-      for (let rule of this.rules) {
-        const response = await this.getRuleMetricsByLabel({
-          dataset: this.dataset,
-          query: rule.query,
-          label: rule.label,
-        });
-        this.metricsByLabel[rule.query] = response;
-      }
+      const responses = await Promise.all(
+        this.rules.map((rule) => {
+          return this.getRuleMetricsByLabel({
+            dataset: this.dataset,
+            query: rule.query,
+            label: rule.label,
+          });
+        })
+      );
+
+      responses.forEach((response, idx) => {
+        this.metricsByLabel[this.rules[idx].query] = response;
+      });
     },
     async onSelectQuery(id) {
       if (id.query !== this.dataset.query.text) {
