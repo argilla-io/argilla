@@ -37,7 +37,6 @@
 <script>
 import "assets/icons/empty-rules";
 import { mapActions } from "vuex";
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 export default {
   props: {
     dataset: {
