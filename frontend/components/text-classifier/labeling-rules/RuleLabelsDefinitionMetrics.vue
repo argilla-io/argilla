@@ -16,10 +16,10 @@ export default {
         return [ 
           { name: 'Coverage', value: this.metrics.coverage, tooltip: 'Fraction of records labeled by the rule' },
           { name: 'Annotated Coverage', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
+          { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' },
           { name: 'Correct', value: this.metrics.correct, tooltip: 'Number of records the rule labeled correctly (if annotations are available)' },
           { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labeled incorrectly (if annotations are available)' },
-          { name: 'Precision', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" },
-          { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' }
+          { name: 'Precision', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" }
         ]
       }
   },
@@ -68,7 +68,7 @@ p[data-title] {
     white-space: break-spaces;
   }
   &:before {
-    right: 50%;
+    right: calc(50% - 7px);
     top: -0.5em;
     border-top: 7px solid  $color;
     border-right: 7px solid transparent;
