@@ -67,12 +67,10 @@
                   class="table-info__item__col"
                 >
                   <span :class="column.class">
-                    <span v-if="column.type === 'action'">
-                      <a href="#"
-                        @click.prevent="onActionClicked(item.kind, item)"
-                        >{{ itemValue(item, column) }}
-                      </a>
-                    </span>
+                    <a v-if="column.type === 'action'" href="#"
+                      @click.prevent="onActionClicked(item.kind, item)"
+                      >{{ itemValue(item, column) }}
+                    </a>
                     <span v-else-if="column.type === 'link'">
                       <NuxtLink v-if="item.link" :to="item.link"
                         >{{ itemValue(item, column) }}
@@ -539,7 +537,6 @@ export default {
   &__title {
     display: block;
     @include font-size(15px);
-    cursor: pointer;
     word-break: break-word;
     display: flex;
     align-items: center;
@@ -552,6 +549,7 @@ export default {
       }
     }
     a {
+      width: 100%;
       text-decoration: none;
       &:hover {
         color: $primary-color;
