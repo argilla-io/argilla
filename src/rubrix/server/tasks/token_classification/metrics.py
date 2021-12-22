@@ -404,7 +404,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
                 char_start=char_start,
                 char_end=char_end,
                 capitalness=cls.capitalness(token_value),
-                length=char_end - char_start,
+                length=1 + (char_end - char_start),
                 tag=tags[token_idx] if tags else None,
             )
             for (token_idx, (char_start, char_end)), token_value in zip(
