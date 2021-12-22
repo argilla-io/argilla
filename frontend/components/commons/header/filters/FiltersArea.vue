@@ -157,13 +157,6 @@ export default {
     padding: 1em 0;
     position: relative;
     padding-right: 45px;
-    .--metrics & {
-      @include media(">desktop") {
-        width: 100%;
-        padding-right: calc(294px + 45px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
     .fixed-header & {
       padding: 0.5em 45px 0.5em 0;
     }
