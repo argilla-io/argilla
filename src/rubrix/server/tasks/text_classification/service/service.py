@@ -381,8 +381,13 @@ class TextClassificationService:
 
     def compute_overall_rules_metrics(self, dataset: Dataset):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
+        coverage = metrics.covered_records / total if total else None
+        coverage_annotated = (
+            metrics.annotated_covered_records / annotated if annotated else None
+        )
         return DatasetLabelingRulesMetricsSummary(
-            coverage=metrics.covered_records / total,
-            coverage_annotated=metrics.annotated_covered_records / annotated,
+            coverage=coverage,
+            coverage_annotated=coverage_annotated,
             total_records=total,
+            annotated_records=annotated,
         )
