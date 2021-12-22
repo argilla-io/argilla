@@ -17,6 +17,10 @@
 
 <template>
   <div class="rule-labels-definition">
+    <input
+      v-model="description"
+      class="rule__description"
+    />
     <div v-if="labels.length">
       <p v-if="!dataset.query.text">Start by entering a query in the search box</p>
       <p v-else>Select a label for your query</p>
@@ -89,10 +93,6 @@ export default {
       type: Object,
       default: undefined,
     },
-    description: {
-      type: String,
-      default: undefined,
-    },
   },
   data: () => {
     return {
@@ -101,6 +101,7 @@ export default {
       selectedLabels: [],
       metrics: {},
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+      description: undefined,
     };
   },
   computed: {
@@ -147,6 +148,7 @@ export default {
   },
   watch: {
     async currentRule(n) {
+      this.setDescription()
       if (n) {
         this.selectedLabels = [n.label];
         await this.getMetricsByLabel(n.label);
@@ -156,6 +158,7 @@ export default {
       }
     },
     async query(n) {
+      this.setDescription()
       this.metrics = {};
       this.saved = false;
       if (!n) {
@@ -166,6 +169,7 @@ export default {
     }
   },
   async mounted() {
+    this.setDescription()
     if (this.currentRule) {
       this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
       await this.getMetricsByLabel(this.currentRule.label);
@@ -207,6 +211,11 @@ export default {
       } else {
         this.metrics = {};
       }
+    },
+    setDescription() {
+      this.description = this.currentRule
+        ? this.currentRule.description
+        : this.query;
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -279,4 +288,25 @@ export default {
 .label-button:not(.active) ::v-deep .button {
   background: $lighter-color !important;
 }
+.rule__description {
+    width: 100%;
+    color: $font-secondary;
+    @include font-size(18px);
+    font-weight: 600;
+    margin-top: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    outline: none;
+    @include input-placeholder {
+      color: $font-secondary;
+      font-weight: 600;
+    }
+    &:hover, .focused {
+      color: $font-secondary-dark;
+      @include input-placeholder {
+        color: $font-secondary-dark;
+      }
+    }
+  }
 </style>

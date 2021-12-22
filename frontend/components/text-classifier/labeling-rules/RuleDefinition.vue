@@ -6,14 +6,7 @@
         @click="showRulesList"
         >Manage rules</re-button
       >
-      <input
-        v-model="description"
-        :class="[isFocused ? 'focused' : null, 'rules__query']"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-      />
       <rule-labels-definition
-        :description="description"
         :current-rule="currentRule"
         :dataset="dataset"
         @update-rule="updateRule"
@@ -33,9 +26,7 @@ export default {
   },
   data: () => {
     return {
-      isFocused: undefined,
       currentRule: undefined,
-      description: undefined,
     };
   },
   async fetch() {
@@ -43,9 +34,6 @@ export default {
       dataset: this.dataset,
       query: this.query,
     });
-    this.description = this.currentRule
-      ? this.currentRule.description
-      : this.query;
   },
   computed: {
     query() {
@@ -83,26 +71,6 @@ export default {
     margin-bottom: 2em;
     &.active {
       box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
-    }
-  }
-  &__query {
-    color: $font-secondary;
-    @include font-size(18px);
-    font-weight: 600;
-    margin-top: 0;
-    border: none;
-    background: none;
-    padding: 0;
-    outline: none;
-    @include input-placeholder {
-      color: $font-secondary;
-      font-weight: 600;
-    }
-    &.focused {
-      color: $font-secondary-dark;
-      @include input-placeholder {
-        color: $font-secondary-dark;
-      }
     }
   }
   &__records {
