@@ -103,10 +103,11 @@ class LabelingRuleMetricsSummary(BaseModel):
 
 
 class DatasetLabelingRulesMetricsSummary(BaseModel):
-    coverage: float
-    coverage_annotated: float
+    coverage: Optional[float] = None
+    coverage_annotated: Optional[float] = None
 
     total_records: int
+    annotated_records: int
 
 
 class TextClassificationDatasetDB(DatasetDB):
