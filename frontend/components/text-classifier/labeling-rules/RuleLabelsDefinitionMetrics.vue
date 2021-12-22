@@ -14,11 +14,11 @@ export default {
   computed: {
       filteredMetrics() {
         return [ 
-          { name: 'Coverage', value: this.metrics.coverage, tooltip: 'Fraction of correct labels given by the rule' },
+          { name: 'Coverage', value: this.metrics.coverage, tooltip: 'Fraction of records labeled by the rule' },
           { name: 'Annotated Coverage', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
           { name: 'Correct', value: this.metrics.correct, tooltip: 'Number of records the rule labeled correctly (if annotations are available)' },
-          { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labels incorrectly (if annotations are available)' },
-          { name: 'Precision', value: this.metrics.precision, tooltip: "Precision of the rule defined as 'correct' divided by the sum of 'correct' and 'incorrect'" },
+          { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labeled incorrectly (if annotations are available)' },
+          { name: 'Precision', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" },
           { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' }
         ]
       }

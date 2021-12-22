@@ -12,7 +12,7 @@
         @focus="isFocused = true"
         @blur="isFocused = false"
       />
-      <rules-annotation-area
+      <rule-labels-definition
         :description="description"
         :current-rule="currentRule"
         :dataset="dataset"

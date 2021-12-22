@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="annotation-area">
+  <div class="rule-labels-definition">
     <div v-if="labels.length">
       <p v-if="!dataset.query.text">Start by entering a query in the search box</p>
       <p v-else>Select a label for your query</p>
@@ -61,7 +61,7 @@
         <a href="#" @click.prevent="changeToAnnotationViewMode">create the labels and annotate some records</a>.
       </p>
     </div>
-    <rule-annotation-area-metrics :metrics="metrics" />
+    <rule-labels-definition-metrics :metrics="metrics" />
     <p v-if="currentRule && selectedLabels.includes(currentRule.label) && currentRule.description === description">
       {{saved ? 'Rule has been saved' : 'You have already a rule saved with that label'}}.
     </p>
@@ -233,7 +233,7 @@ export default {
   min-width: 80px;
   max-width: 238px;
 }
-.annotation-area {
+.rule-labels-definition {
   max-width: calc(100% - 200px);
   @include media(">desktopLarge") {
     max-width: 60%;
