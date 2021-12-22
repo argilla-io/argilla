@@ -22,7 +22,7 @@
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
-    <template slot="pre-records-area">
+    <template slot="results-header">
       <rules :dataset="dataset" v-if="showRulesArea" />
     </template>
     <template slot="record" slot-scope="results">
