@@ -3,7 +3,8 @@
     <div v-for="metric in filteredMetrics" :key="metric.id">
       <p :data-title="metric.tooltip">{{ metric.name }}
         <span v-if="isNaN(metric.value)">-</span>
-        <strong v-else>{{ metric.value | formatNumber }}</strong>
+        <strong v-else-if="metric.type === 'percent'">{{metric.value | percent}}</strong>
+        <strong v-else>{{metric.value}}</strong>
       </p>
     </div>
   </div>
@@ -14,12 +15,12 @@ export default {
   computed: {
       filteredMetrics() {
         return [ 
-          { name: 'Coverage', value: this.metrics.coverage, tooltip: 'Fraction of records labeled by the rule' },
-          { name: 'Annotated Coverage', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
+          { name: 'Coverage', type: 'percent', value: this.metrics.coverage, tooltip: 'Fraction of records labeled by the rule' },
+          { name: 'Annotated Coverage', type: 'percent', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
           { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' },
           { name: 'Correct', value: this.metrics.correct, tooltip: 'Number of records the rule labeled correctly (if annotations are available)' },
           { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labeled incorrectly (if annotations are available)' },
-          { name: 'Precision', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" }
+          { name: 'Precision', type: 'percent', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" }
         ]
       }
   },

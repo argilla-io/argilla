@@ -1,27 +1,29 @@
 <template>
   <div class="rules-summary__metrics">
-    <p>Precision average
-      <span v-if="metricsTotal">{{getAverage('precision') | formatNumber}}</span>
-      <span v-else>-</span>
-    </p>
-    <p>Total correct/incorrect
-      <span v-if="metricsTotal">
-        {{getTotal('correct')}}/{{getTotal('incorrect')}}
-      </span>
-      <span v-else>-</span>
-    </p>
-    <p>Total coverage
-      <span v-if="metricsTotal">
-        {{metricsTotal.coverage | formatNumber}}
-      </span>
-      <span v-else>-</span>
-    </p>
-    <p>Annotated coverage
-      <span v-if="metricsTotal">
-        {{metricsTotal.coverage_annotated | formatNumber}}
-      </span>
-      <span v-else>-</span>
-    </p>
+    <template v-if="!$fetchState.error && !$fetchState.pending">
+      <p data-title="Average fraction of correct labels given by the rules">Precision average
+        <span v-if="metricsTotal">{{getAverage('precision') | percent}}</span>
+        <span v-else>-</span>
+      </p>
+      <p data-title="Total number of records the rules labeled correctly/incorrectly (if annotations are available)">Correct/incorrect
+        <span v-if="metricsTotal">
+          {{getTotal('correct')}}/{{getTotal('incorrect')}}
+        </span>
+        <span v-else>-</span>
+      </p>
+      <p data-title="Fraction of records labeled by any rule">Total coverage
+        <span v-if="metricsTotal">
+          {{metricsTotal.coverage | percent}}
+        </span>
+        <span v-else>-</span>
+      </p>
+      <p data-title="Fraction of annotated records labeled by any rule">Annotated coverage
+        <span v-if="metricsTotal">
+          {{metricsTotal.coverage_annotated | percent}}
+        </span>
+        <span v-else>-</span>
+      </p>
+    </template>
   </div>
 </template>
 
@@ -29,35 +31,50 @@
 import { mapActions } from "vuex";
 export default {
   props: {
-    metricsByLabel: {
-      type: Object,
+    rules: {
+      type: Array,
     },
     dataset: {
       type: Object,      
     },
-    formattedRules: {
-      type: Array,      
-    },
   },
   data: () => {
     return {
+      metricsByLabel: {},
       metricsTotal: undefined,
     }
   },
   async fetch() {
-    if (this.formattedRules.length) {
+    if (this.rules.length) {
       await this.getMetrics();
+      await this.getMetricsByLabel();
     }
   },
   methods: {
     ...mapActions({
       getRulesMetrics: "entities/text_classification/getRulesMetrics",
+      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
     }),
     async getMetrics() {
       const response = await this.getRulesMetrics({
         dataset: this.dataset,
       })
       this.metricsTotal = response;
+    },
+    async getMetricsByLabel() {
+      const responses = await Promise.all(
+        this.rules.map((rule) => {
+          return this.getRuleMetricsByLabel({
+            dataset: this.dataset,
+            query: rule.query,
+            label: rule.label,
+          });
+        })
+      );
+
+      responses.forEach((response, idx) => {
+        this.metricsByLabel[this.rules[idx].query] = response;
+      });
     },
     getTotal(type) {
       const reducer = (previousValue, currentValue) => previousValue + currentValue;
@@ -77,6 +94,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+$color: #333346;
 .rules-summary {
   &__metrics {
     display: inline-block;
@@ -93,6 +111,32 @@ export default {
         font-weight: 600;
       }
     }
+  }
+}
+p[data-title] {
+  position: relative;
+  @extend %hastooltip;
+  &:after {
+    padding: 0.5em 1em;
+    bottom: 100%;
+    right: 50%;
+    transform: translateX(50%);
+    background: $color;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    @include font-size(14px);
+    font-weight: 600;
+    margin-bottom: 0.5em;
+    min-width: 200px;
+    white-space: break-spaces;
+  }
+  &:before {
+    right: calc(50% - 7px);
+    top: -0.5em;
+    border-top: 7px solid  $color;
+    border-right: 7px solid transparent;
+    border-left: 7px solid transparent;
   }
 }
 </style>
