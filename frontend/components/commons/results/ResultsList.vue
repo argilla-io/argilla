@@ -31,7 +31,7 @@
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
       > 
         <template #before>
-          <slot name="pre-records-area"/>
+          <slot name="results-header"/>
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
