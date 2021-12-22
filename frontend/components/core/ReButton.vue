@@ -249,6 +249,25 @@ export default {
     line-height: 30px;
     min-width: auto;
   }
+  &--outline {
+    @extend .button-quaternary;
+    background: transparent;
+    border: 1px solid $lighter-color;
+    color: $lighter-color;
+    text-transform: none;
+    display: flex;
+    box-shadow: none;
+    &:hover,
+    &:focus {
+      background: transparent;
+      border-color: darken($lighter-color, 10%);
+      color: darken($lighter-color, 10%);
+    }
+    &[disabled] {
+      background-color: transparent;
+      opacity: 0.6;
+    }
+  }
 }
 
 .button-clear {
