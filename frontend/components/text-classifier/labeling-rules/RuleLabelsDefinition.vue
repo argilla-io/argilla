@@ -22,8 +22,6 @@
       class="rule__description"
     />
     <div v-if="labels.length">
-      <p v-if="!dataset.query.text">Start by entering a query in the search box</p>
-      <p v-else>Select a label for your query</p>
       <label-search
         v-if="labels.length > maxVisibleLabels"
         :search-text="searchText"
@@ -153,7 +151,7 @@ export default {
         this.selectedLabels = [n.label];
         await this.getMetricsByLabel(n.label);
       } else {
-        this.selectedLabels = [];
+        // this.selectedLabels = [];
         this.metrics = {};
       }
     },
@@ -245,7 +243,6 @@ export default {
   max-width: 238px;
 }
 .rule-labels-definition {
-  max-width: calc(100% - 200px);
   @include media(">desktopLarge") {
     max-width: 60%;
   }
@@ -286,7 +283,7 @@ export default {
   }
 }
 .label-button:not(.active) ::v-deep .button {
-  background: $lighter-color !important;
+  background: #E0E1FF !important;
 }
 .rule__description {
     width: 100%;
@@ -294,6 +291,7 @@ export default {
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;
+    margin-bottom: 1em;
     border: none;
     background: none;
     padding: 0;
