@@ -34,7 +34,6 @@ export default {
   layout: "app",
   async fetch() {
     await this.fetchByName(this.datasetName);
-    throw Error("lfjo2");
   },
   computed: {
     ...mapGetters({

@@ -95,7 +95,6 @@ export default {
   }),
   async fetch() {
     await this.fetchDatasets();
-    throw Error("THe error");
   },
   computed: {
     datasets() {
