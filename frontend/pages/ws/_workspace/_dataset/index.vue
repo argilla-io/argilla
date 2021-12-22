@@ -19,7 +19,7 @@
   <re-loading v-if="$fetchState.pending" />
   <error
     v-else-if="$fetchState.error"
-    link="/"
+    :link="errorLink"
     :where="datasetName"
     :error="$fetchState.error"
   ></error>
@@ -28,10 +28,13 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import { currentWorkspace, workspaceHome } from "@/models/Workspace";
+
 export default {
   layout: "app",
   async fetch() {
     await this.fetchByName(this.datasetName);
+    throw Error("lfjo2");
   },
   computed: {
     ...mapGetters({
@@ -46,7 +49,10 @@ export default {
       return this.$route.params.dataset;
     },
     workspace() {
-      return this.$route.params.workspace;
+      return currentWorkspace(this.$route);
+    },
+    errorLink() {
+      return workspaceHome(this.workspace);
     },
   },
   methods: {
