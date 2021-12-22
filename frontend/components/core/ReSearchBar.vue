@@ -37,7 +37,7 @@ export default {
   props: {
     placeholder: {
       type: String,
-      required: true,
+      default: 'Search'
     }
   },
   data() {
