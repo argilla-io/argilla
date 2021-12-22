@@ -156,10 +156,12 @@ export default {
       }
     },
     async query(n) {
-      if (n) {
+      this.metrics = {};
+      this.saved = false;
+      if (!n) {
         this.selectedLabels = [];
-        this.metrics = {};
-        this.saved = false;
+      } else {
+        await this.getMetricsByLabel(this.selectedLabels[0]);
       }
     }
   },
