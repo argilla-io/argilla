@@ -23,7 +23,7 @@
     @closeMetadata="resetMetadataItem"
   >
     <template slot="results-header">
-      <rules :dataset="dataset" v-if="showRulesArea" />
+      <rule-definition :dataset="dataset" v-if="showRulesArea" />
     </template>
     <template slot="record" slot-scope="results">
       <record-text-classification
