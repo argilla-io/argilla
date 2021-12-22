@@ -22,10 +22,8 @@
         :query-search="querySearch"
         :global-actions="false"
         search-on="name"
-        empty-icon="empty-rules"
-        empty-title="0 rules defined"
-        empty-filtered-title="0 rules found"
-        :empty-description="emptyRulesDescription"
+        :noDataInfo="noDataInfo"
+        :emptySeachInfo="emptySeachInfo"
         :show-modal="showModal"
         :delete-modal-content="getDeleteModalText"
         @sort-column="onSortColumns"
@@ -79,6 +77,14 @@ export default {
       sortedOrder: "desc",
       sortedByField: "query",
       actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
+      noDataInfo: {
+        title: '0 rules defined',
+        message: `You have not defined any rules for this dataset yet.`,
+        icon: 'empty-rules',
+      },
+      emptySeachInfo: {
+        title: '0 rules found',
+      },
     };
   },
   async fetch() {
@@ -103,9 +109,6 @@ export default {
           precision: this.metricsByLabel[r.query].precision,
         };
       });
-    },
-    emptyRulesDescription() {
-      return `You have not defined any rules for this dataset yet.<br /> Start to define rules`;
     },
     getDeleteModalText() {
       return {

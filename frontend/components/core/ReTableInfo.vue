@@ -47,7 +47,7 @@
           </div>
         </slot>
       </div>
-      <ResultsEmpty v-if="!data.length" :title="emptyTitle" :description="emptyDescription" :icon="emptyIcon" />
+      <ResultsEmpty v-if="!data.length" :title="noDataInfo.title" :message="noDataInfo.message" :icon="noDataInfo.icon" />
       <template v-else-if="resultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
@@ -190,7 +190,7 @@
           </ReModal> -->
         </div>
       </template>
-      <ResultsEmpty v-else :title="emptyFilteredTitle" />
+      <ResultsEmpty v-else :title="emptySeachInfo.title" />
     </div>
   </transition>
 </template>
@@ -226,21 +226,15 @@ export default {
       type: String,
       default: undefined,
     },
-    emptyTitle: {
-      type: String,
-      default: undefined,
+    noDataInfo: {
+      title: undefined,
+      message: undefined,
+      icon: undefined,
     },
-    emptyFilteredTitle: {
-      type: String,
-      default: undefined,
-    },
-    emptyDescription: {
-      type: String,
-      default: undefined,
-    },
-    emptyIcon: {
-      type: String,
-      default: undefined,
+    emptySeachInfo: {
+      title: undefined,
+      description: undefined,
+      icon: undefined,
     },
     hideButton: {
       type: Boolean,

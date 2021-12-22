@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <results-empty icon="empty-results" description="There is no result. <br />Try another query." v-if="dataset.results.total === 0" />
+  <results-empty :title="emptySeachInfo.title" :message="emptySeachInfo.message" :icon="emptySeachInfo.icon" v-if="dataset.results.total === 0" />
   <div v-else class="results">
     <component :is="currentTaskResultsList" :dataset="dataset" />
   </div>
@@ -30,6 +30,14 @@ export default {
       type: Object,
       default: () => ({}),
     },
+  },
+  data: () => {
+    return {
+      emptySeachInfo: {
+        // message: "There is no result. <br />Try another query.",
+        icon: "empty-results",
+      },
+    }
   },
   computed: {
     currentTaskResultsList() {

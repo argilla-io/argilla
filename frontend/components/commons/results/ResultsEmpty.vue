@@ -20,7 +20,7 @@
     <span class="empty__content">
       <svgicon v-if="icon" :name="icon" width="50" height="50" color="#686a6d" />
       <h1 class="empty__title">{{ title }}</h1>
-      <p v-if="description" class="empty__description" v-html="description" />
+      <p v-if="message" class="empty__message" v-html="message" />
     </span>
   </div>
 </template>
@@ -32,7 +32,7 @@ export default {
       type: String,
       default: "0 results found",
     },
-    description: {
+    message: {
       type: String,
       default: undefined,
     },
@@ -61,7 +61,7 @@ export default {
     font-weight: 400;
     color: palette(grey, medium)
   }
-  &__description {
+  &__message {
     max-width: 600px;
   }
 }
