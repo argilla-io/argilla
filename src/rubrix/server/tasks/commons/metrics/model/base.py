@@ -10,12 +10,11 @@ from typing import (
     Union,
 )
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic.generics import GenericModel
 
 from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons import BaseRecord
-
 
 GenericRecord = TypeVar("GenericRecord", bound=BaseRecord)
 
@@ -237,3 +236,33 @@ class TermsAggregation(ElasticsearchMetric):
                 self.field, script=self.script, size=size, missing=self.missing
             )
         }
+
+
+class NestedTermsAggregation(NestedPathElasticsearchMetric):
+    terms: TermsAggregation
+
+    @root_validator
+    def normalize_terms_field(cls, values):
+        terms = values["terms"]
+        nested_path = values["nested_path"]
+        terms.field = f"{nested_path}.{terms.field}"
+
+        return values
+
+    def inner_aggregation(self, size: int) -> Dict[str, Any]:
+        return self.terms.aggregation_request(size)
+
+
+class NestedHistogramAggregation(NestedPathElasticsearchMetric):
+    histogram: HistogramAggregation
+
+    @root_validator
+    def normalize_terms_field(cls, values):
+        histogram = values["histogram"]
+        nested_path = values["nested_path"]
+        histogram.field = f"{nested_path}.{histogram.field}"
+
+        return values
+
+    def inner_aggregation(self, interval: float) -> Dict[str, Any]:
+        return self.histogram.aggregation_request(interval)
