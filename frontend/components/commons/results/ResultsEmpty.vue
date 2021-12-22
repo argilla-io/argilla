@@ -50,8 +50,9 @@ export default {
   text-align: center;
   width: 100%;
   display: flex;
-  margin-top: 0;
-  height: 100vh;
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+  height: auto;
   #{$this}__content {
     align-items: center;
     margin: auto;

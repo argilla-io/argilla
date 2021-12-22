@@ -32,9 +32,11 @@
       > 
         <template #before>
           <slot name="results-header"/>
+          <results-empty :title="emptySeachInfo.title" :message="emptySeachInfo.message" :icon="emptySeachInfo.icon" v-if="dataset.results.total === 0" />
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
+            v-show="dataset.results.total > 0"
             :watch-data="true"
             class="content__li"
             :item="item"
@@ -78,6 +80,7 @@
   </div>
 </template>
 <script>
+import "assets/icons/empty-results";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -90,6 +93,10 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      emptySeachInfo: {
+        // message: "There is no result. <br />Try another query.",
+        icon: "empty-results",
+      },
     };
   },
   computed: {

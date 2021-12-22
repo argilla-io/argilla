@@ -16,28 +16,18 @@
   -->
 
 <template>
-  <results-empty :title="emptySeachInfo.title" :message="emptySeachInfo.message" :icon="emptySeachInfo.icon" v-if="dataset.results.total === 0" />
-  <div v-else class="results">
+  <div class="results">
     <component :is="currentTaskResultsList" :dataset="dataset" />
   </div>
 </template>
 
 <script>
-import "assets/icons/empty-results";
 export default {
   props: {
     dataset: {
       type: Object,
       default: () => ({}),
     },
-  },
-  data: () => {
-    return {
-      emptySeachInfo: {
-        // message: "There is no result. <br />Try another query.",
-        icon: "empty-results",
-      },
-    }
   },
   computed: {
     currentTaskResultsList() {
