@@ -47,23 +47,13 @@
           </div>
         </slot>
       </div>
-      <ResultsEmpty v-if="!data.length" :empty-title="emptyTitle" :empty-description="emptyDescription" :empty-icon="emptyIcon" />
+      <ResultsEmpty v-if="!data.length" :title="emptyTitle" :description="emptyDescription" :icon="emptyIcon" />
       <template v-else-if="resultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
             <p
               class="table-info__group__title"
-              :class="{
-                model: groupBy === 'model',
-                datasource: groupBy === 'dataSource',
-              }"
             >
-              <svgicon
-                v-if="groupBy === 'dataSource'"
-                name="datasource"
-                width="16"
-                height="auto"
-              />
               {{ group }}
             </p>
           </span>
@@ -200,7 +190,7 @@
           </ReModal> -->
         </div>
       </template>
-      <ResultsEmpty v-else :empty-title="emptyFilteredTitle" />
+      <ResultsEmpty v-else :title="emptyFilteredTitle" />
     </div>
   </transition>
 </template>

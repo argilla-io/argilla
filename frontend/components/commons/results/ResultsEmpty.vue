@@ -18,9 +18,9 @@
 <template>
   <div class="empty">
     <span class="empty__content">
-      <svgicon v-if="emptyIcon" :name="emptyIcon" width="50" height="50" color="#686a6d" />
-      <h1 class="empty__title">{{ emptyTitle }}</h1>
-      <p v-if="emptyDescription" class="empty__description" v-html="emptyDescription" />
+      <svgicon v-if="icon" :name="icon" width="50" height="50" color="#686a6d" />
+      <h1 class="empty__title">{{ title }}</h1>
+      <p v-if="description" class="empty__description" v-html="description" />
     </span>
   </div>
 </template>
@@ -28,15 +28,15 @@
 <script>
 export default {
   props: {
-    emptyTitle: {
+    title: {
       type: String,
       default: "0 results found",
     },
-    emptyDescription: {
+    description: {
       type: String,
       default: undefined,
     },
-    emptyIcon: {
+    icon: {
       type: String,
       default: undefined,
     },
