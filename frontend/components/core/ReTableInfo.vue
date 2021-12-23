@@ -188,7 +188,7 @@
           </ReModal> -->
         </div>
       </template>
-      <ResultsEmpty v-else :title="emptySeachInfo.title" />
+      <ResultsEmpty v-else :title="emptySearchInfo.title" />
     </div>
   </transition>
 </template>
@@ -229,7 +229,7 @@ export default {
       message: undefined,
       icon: undefined,
     },
-    emptySeachInfo: {
+    emptySearchInfo: {
       title: undefined,
       description: undefined,
       icon: undefined,

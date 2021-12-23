@@ -32,7 +32,7 @@
       > 
         <template #before>
           <slot name="results-header"/>
-          <results-empty :title="emptySeachInfo.title" :message="emptySeachInfo.message" :icon="emptySeachInfo.icon" v-if="dataset.results.total === 0" />
+          <results-empty :title="emptySearchInfo.title" :message="emptySearchInfo.message" :icon="emptySearchInfo.icon" v-if="dataset.results.total === 0" />
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
@@ -93,7 +93,7 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
-      emptySeachInfo: {
+      emptySearchInfo: {
         // message: "There is no result. <br />Try another query.",
         icon: "empty-results",
       },

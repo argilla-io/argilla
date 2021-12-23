@@ -23,7 +23,7 @@
         :global-actions="false"
         search-on="name"
         :noDataInfo="noDataInfo"
-        :emptySeachInfo="emptySeachInfo"
+        :emptySearchInfo="emptySearchInfo"
         :show-modal="showModal"
         :delete-modal-content="getDeleteModalText"
         @sort-column="onSortColumns"
@@ -82,7 +82,7 @@ export default {
         message: `You have not defined any rules for this dataset yet.`,
         icon: 'empty-rules',
       },
-      emptySeachInfo: {
+      emptySearchInfo: {
         title: '0 rules found',
       },
     };
