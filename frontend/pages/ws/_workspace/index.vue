@@ -47,7 +47,7 @@
               :query-search="querySearch"
               :global-actions="false"
               search-on="name"
-              :show-modal="showModal"
+              :visible-modal-id="visibleModalId"
               :delete-modal-content="getDeleteModalContent"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
@@ -93,7 +93,7 @@ export default {
     externalLinks: [],
     sortedOrder: "desc",
     sortedByField: "last_updated",
-    showModal: undefined,
+    visibleModalId: undefined,
   }),
   async fetch() {
     await this.fetchDatasets();
@@ -113,7 +113,7 @@ export default {
     getDeleteModalContent() {
       return {
         title: 'Delete confirmation',
-        text: `You are about to delete: <strong>${this.showModal}</strong>. This action cannot be undone`
+        text: `You are about to delete: <strong>${this.visibleModalId}</strong>. This action cannot be undone`
       }
     }
   },
@@ -171,7 +171,7 @@ export default {
       document.execCommand("Copy");
     },
     showConfirmDatasetDeletion(id) {
-      this.showModal = id;
+      this.visibleModalId = id;
     },
     deleteDataset(id) {
       this._deleteDataset({ name: id });
@@ -182,7 +182,7 @@ export default {
       this.sortedOrder = order;
     },
     closeModal() {
-      this.showModal = undefined;
+      this.visibleModalId = undefined;
     },
   },
 };

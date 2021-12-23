@@ -24,7 +24,7 @@
         search-on="name"
         :noDataInfo="noDataInfo"
         :emptySearchInfo="emptySearchInfo"
-        :show-modal="showModal"
+        :visible-modal-id="visibleModalId"
         :delete-modal-content="getDeleteModalText"
         @sort-column="onSortColumns"
         @onActionClicked="onActionClicked"
@@ -47,7 +47,7 @@ export default {
   data: () => {
     return {
       querySearch: undefined,
-      showModal: undefined,
+      visibleModalId: undefined,
       rules: [],
       metricsByLabel: {},
       tableColumns: [
@@ -113,7 +113,7 @@ export default {
     getDeleteModalText() {
       return {
         title: 'Permanently delete rule',
-        text: `You are about to delete the rule <strong>"${this.showModal}"</strong> from your dataset. This action cannot be undone.`
+        text: `You are about to delete the rule <strong>"${this.visibleModalId}"</strong> from your dataset. This action cannot be undone.`
       };
     },
   },
@@ -180,7 +180,7 @@ export default {
       await this.getMetricsByLabel();
     },
     onShowConfirmRuleDeletion(id) {
-      this.showModal = id.name;
+      this.visibleModalId = id.name;
     },
     async onDeleteRule(id) {
       this.closeModal();
@@ -191,7 +191,7 @@ export default {
       await this.$fetch();
     },
     closeModal() {
-      this.showModal = undefined;
+      this.visibleModalId = undefined;
     },
   },
 };

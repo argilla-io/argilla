@@ -139,7 +139,7 @@
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
-                  :modal-visible="showModal === item.name"
+                  :modal-visible="visibleModalId === item.name"
                   modal-position="modal-center"
                   @close-modal="$emit('close-modal')"
                 >
@@ -166,7 +166,7 @@
               </div>
             </li>
           </ul>
-          <!-- <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="showModal === 'all'" modal-position="modal-center" @close-modal="$emit('close-modal')">
+          <!-- <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="visibleModalId === 'all'" modal-position="modal-center" @close-modal="$emit('close-modal')">
             <div>
               <p class="modal__title">Delete confirmation</p>
               <span>
@@ -238,7 +238,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    showModal: {
+    visibleModalId: {
       type: String,
       default: undefined,
     },
