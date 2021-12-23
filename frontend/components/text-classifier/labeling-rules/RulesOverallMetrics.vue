@@ -1,25 +1,15 @@
 <template>
   <div class="rules-global__metrics">
     <template v-if="!$fetchState.error && !$fetchState.pending">
-      <p data-title="Average fraction of correct labels given by the rules">Precision average
-        <span v-if="!isNaN(getAverage('precision'))">{{getAverage('precision') | percent}}</span>
-        <span v-else>-</span>
-      </p>
-      <p data-title="Total number of records the rules labeled correctly/incorrectly (if annotations are available)">Correct/incorrect
-        <span v-if="!isNaN(getTotal('correct'))">
-          {{getTotal('correct')}}/{{getTotal('incorrect')}}
-        </span>
-        <span v-else>-</span>
-      </p>
-      <p data-title="Fraction of records labeled by any rule">Total coverage
-        <span v-if="!isNaN(metricsTotal.coverage)">
-          {{metricsTotal.coverage | percent}}
-        </span>
-        <span v-else>-</span>
-      </p>
-      <p data-title="Fraction of annotated records labeled by any rule">Annotated coverage
-        <span v-if="!isNaN(metricsTotal.coverage_annotated)">
-          {{metricsTotal.coverage_annotated | percent}}
+      <p :data-title="metric.tooltip" v-for="metric in metrics" :key="metric.name">
+        {{metric.name}}
+        <span v-if="!isNaN(metric.operation) && metric.value !== '0/0'">
+          <template v-if="metric.type === 'percent'">
+            {{metric.value | percent}}
+          </template>
+          <template v-else>
+            {{metric.value}}
+          </template>
         </span>
         <span v-else>-</span>
       </p>
@@ -42,6 +32,16 @@ export default {
     return {
       metricsByLabel: {},
       metricsTotal: undefined,
+    }
+  },
+  computed: {
+    metrics() {
+      return [
+        { name: 'Precision average', tooltip: 'Average fraction of correct labels given by the rules', value: this.getAverage('precision'), type: 'percent', operation: (this.getAverage('precision'))},
+        { name: 'Correct/incorrect', tooltip: 'Total number of records the rules labeled correctly/incorrectly (if annotations are available)', value: `${this.getTotal('correct')}/${this.getTotal('incorrect')}`, operation: this.getTotal('correct') },
+        { name: 'Total coverage', tooltip: 'Fraction of records labeled by any rule', value: this.metricsTotal ? this.metricsTotal.coverage : '-', type: 'percent', operation: this.metricsTotal ? this.metricsTotal.coverage : NaN },
+        { name: 'Annotated coverage', tooltip: 'Fraction of annotated records labeled by any rule', value: this.metricsTotal ? this.metricsTotal.coverage_annotated : '-', type: 'percent', operation: this.metricsTotal ? this.metricsTotal.coverage_annotated : NaN  },
+      ]
     }
   },
   async fetch() {
@@ -81,14 +81,14 @@ export default {
       const allValues = Object.keys(this.metricsByLabel).map(key => {
         return this.metricsByLabel[key][type];
       });
-      return allValues.reduce(reducer);
+      return allValues.reduce(reducer, 0);
     },
     getAverage(type) {
       const reducer = (previousValue, currentValue) => previousValue + currentValue;
       const allValues = Object.keys(this.metricsByLabel).map(key => {
         return this.metricsByLabel[key][type];
       });
-      return allValues.reduce(reducer) / allValues.length;
+      return allValues.reduce(reducer, 0) / allValues.length;
     }
   }
 }

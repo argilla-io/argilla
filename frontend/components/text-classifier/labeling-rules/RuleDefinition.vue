@@ -10,7 +10,7 @@
       </div>
       <div class="rule__global-metrics">
         <p class="global-metrics__title">Overall Metrics</p>
-        <rules-overall-metrics v-if="rules.length > 0" :key="refresh" :rules="rules" :dataset="dataset" />
+        <rules-overall-metrics :key="refresh" :rules="rules" :dataset="dataset" />
         <re-button
           class="rule__button button-quaternary--outline"
           @click="showRulesList"
@@ -53,9 +53,13 @@ export default {
     async query(n, o) {
       if (o !== n) {
         await this.$fetch();
-        this.refresh++;
       }
     },
+    async currentRule(n, o) {
+      if (o !== n) {
+        this.refresh++;
+      }      
+    }
   },
   methods: {
     async showRulesList() {
