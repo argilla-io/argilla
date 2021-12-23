@@ -20,6 +20,7 @@
     <template v-if="isDatasetView">
       <div class="sidebar__info">
         <p>Mode</p>
+        <!-- TODO: create SidebarButton -->
         <a class="sidebar__info__button"
           href="#"
           data-title="Explore"
