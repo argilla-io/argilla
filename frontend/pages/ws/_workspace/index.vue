@@ -26,17 +26,16 @@
           />
           <user />
         </ReTopbarBrand>
-        <datasets-empty v-if="!datasets.length" :workspace="workspace" />
+        <Error
+          v-if="$fetchState.error"
+          where="workspace datasets"
+          :error="$fetchState.error"
+        />
+        <datasets-empty v-else-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
             <ReSearchBar @input="onSearch" />
           </div>
-          <Error
-            v-if="$fetchState.error"
-            link="/"
-            where="datasets"
-            :error="$fetchState.error"
-          />
           <div>
             <ReTableInfo
               :data="datasets"
