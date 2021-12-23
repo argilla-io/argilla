@@ -80,7 +80,7 @@ jobs:
       - name: Install Rubrix
         run: pip install -U git+https://github.com/recognai/rubrix.git
       - name: Run tutorial
-        run: pytest --nbmake docs/tutorials/06-find_label_errors.ipynb
+        run: pytest --nbmake docs/tutorials/find_label_errors.ipynb
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yaml" down

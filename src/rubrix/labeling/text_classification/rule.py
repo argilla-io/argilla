@@ -110,9 +110,9 @@ class Rule:
         return {
             "coverage": metrics.coverage,
             "annotated_coverage": metrics.coverage_annotated,
-            "correct": int(metrics.correct),
-            "incorrect": int(metrics.incorrect),
-            "precision": metrics.precision,
+            "correct": int(metrics.correct) if metrics.correct is not None else None,
+            "incorrect": int(metrics.incorrect) if metrics.incorrect is not None else None,
+            "precision": metrics.precision if metrics.precision is not None else None,
         }
 
     def __call__(self, record: TextClassificationRecord) -> Optional[str]:

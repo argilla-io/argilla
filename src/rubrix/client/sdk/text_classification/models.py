@@ -185,10 +185,11 @@ class LabelingRule(BaseModel):
 class LabelingRuleMetricsSummary(BaseModel):
     """Metrics generated for a labeling rule"""
 
-    coverage: float
-    coverage_annotated: float
-    correct: float
-    incorrect: float
-    precision: float
+    coverage: Optional[float] = None
+    coverage_annotated: Optional[float] = None
+    correct: Optional[float] = None
+    incorrect: Optional[float] = None
+    precision: Optional[float] = None
 
     total_records: int
+    annotated_records: int

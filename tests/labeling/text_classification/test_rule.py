@@ -30,6 +30,29 @@ from tests.server.test_helpers import client, mocking_client
 
 
 @pytest.fixture(scope="module")
+def log_dataset_without_annotations() -> str:
+    dataset_name = "test_dataset_for_rule"
+    client.delete(f"/api/datasets/{dataset_name}")
+    records = [
+        CreationTextClassificationRecord.parse_obj(
+            {
+                "inputs": {"text": text},
+                "id": idx,
+            }
+        )
+        for text, idx in zip(["negative", "positive"], [1, 2])
+    ]
+    client.post(
+        f"/api/datasets/{dataset_name}/TextClassification:bulk",
+        json=TextClassificationBulkData(
+            records=records,
+        ).dict(by_alias=True),
+    )
+
+    return dataset_name
+
+
+@pytest.fixture(scope="module")
 def log_dataset() -> str:
     dataset_name = "test_dataset_for_rule"
     client.delete(f"/api/datasets/{dataset_name}")
@@ -148,4 +171,53 @@ def test_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
     )
 
     metrics = rule.metrics(log_dataset)
+    assert metrics == expected_metrics
+
+
+@pytest.mark.parametrize(
+    ["rule", "expected_metrics"],
+    [
+        (
+            Rule(query="neg*", label="LALA"),
+            dict(
+                coverage=0.5,
+                annotated_coverage=None,
+                correct=None,
+                incorrect=None,
+                precision=None,
+            ),
+        ),
+        (
+            Rule(query="neg*", label="negative"),
+            dict(
+                coverage=0.5,
+                annotated_coverage=None,
+                correct=None,
+                incorrect=None,
+                precision=None,
+            ),
+        ),
+        (
+            Rule(query="bad", label="negative"),
+            dict(
+                coverage=0.0,
+                annotated_coverage=None,
+                correct=None,
+                incorrect=None,
+                precision=None,
+            ),
+        ),
+    ],
+)
+def test_rule_metrics_without_annotated(
+    monkeypatch, log_dataset_without_annotations, rule, expected_metrics
+):
+    mocking_client(monkeypatch, client)
+
+    client.post(
+        f"/api/datasets/TextClassification/{log_dataset_without_annotations}/labeling/rules",
+        json={"query": rule.query, "label": rule.label},
+    )
+
+    metrics = rule.metrics(log_dataset_without_annotations)
     assert metrics == expected_metrics
