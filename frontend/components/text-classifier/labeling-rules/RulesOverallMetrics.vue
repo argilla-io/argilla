@@ -2,23 +2,23 @@
   <div class="rules-global__metrics">
     <template v-if="!$fetchState.error && !$fetchState.pending">
       <p data-title="Average fraction of correct labels given by the rules">Precision average
-        <span v-if="metricsTotal">{{getAverage('precision') | percent}}</span>
+        <span v-if="!isNaN(getAverage('precision'))">{{getAverage('precision') | percent}}</span>
         <span v-else>-</span>
       </p>
       <p data-title="Total number of records the rules labeled correctly/incorrectly (if annotations are available)">Correct/incorrect
-        <span v-if="metricsTotal">
+        <span v-if="!isNaN(getTotal('correct'))">
           {{getTotal('correct')}}/{{getTotal('incorrect')}}
         </span>
         <span v-else>-</span>
       </p>
       <p data-title="Fraction of records labeled by any rule">Total coverage
-        <span v-if="metricsTotal">
+        <span v-if="!isNaN(metricsTotal.coverage)">
           {{metricsTotal.coverage | percent}}
         </span>
         <span v-else>-</span>
       </p>
       <p data-title="Fraction of annotated records labeled by any rule">Annotated coverage
-        <span v-if="metricsTotal">
+        <span v-if="!isNaN(metricsTotal.coverage_annotated)">
           {{metricsTotal.coverage_annotated | percent}}
         </span>
         <span v-else>-</span>

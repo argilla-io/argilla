@@ -65,7 +65,7 @@
     </div>
     <rule-labels-definition-metrics :metrics="metrics" />
     <p v-if="currentRule && selectedLabels.includes(currentRule.label) && currentRule.description === description">
-      {{saved ? 'Rule has been saved' : 'You have already a rule saved with that label'}}.
+      {{saved ? 'Rule has been saved' : 'This query is already saved as a rule'}}.
     </p>
     <re-button
       v-else

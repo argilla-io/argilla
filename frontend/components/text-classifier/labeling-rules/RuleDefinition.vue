@@ -10,7 +10,7 @@
       </div>
       <div class="rule__global-metrics">
         <p class="global-metrics__title">Overall Metrics</p>
-        <rules-global-metrics v-if="rules.length > 0" :key="refresh" :rules="rules" :dataset="dataset" />
+        <rules-overall-metrics v-if="rules.length > 0" :key="refresh" :rules="rules" :dataset="dataset" />
         <re-button
           class="rule__button button-quaternary--outline"
           @click="showRulesList"

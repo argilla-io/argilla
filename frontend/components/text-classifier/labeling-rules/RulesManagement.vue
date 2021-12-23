@@ -9,7 +9,7 @@
           height="12"
         ></svgicon>Back to query view</re-button>
       <p class="rules-management__title">Overall Metrics</p>
-      <rules-global-metrics :rules="rules" :dataset="dataset" />
+      <rules-overall-metrics :rules="rules" :dataset="dataset" />
       <p class="rules-management__title">Rules</p> 
       <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
       <ReTableInfo
