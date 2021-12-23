@@ -17,7 +17,7 @@
 
 <template>
   <div class="content">  
-    <slot name="header" />
+    <slot name="header" />sssssdhuiehdiuehwudi
     <div class="results-scroll" id="scroll">
       <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
         <results-loading :size="dataset.viewSettings.pagination.size" />

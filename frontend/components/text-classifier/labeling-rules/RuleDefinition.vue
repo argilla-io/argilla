@@ -10,7 +10,7 @@
       </div>
       <div class="rule__global-metrics">
         <p class="global-metrics__title">Overall Metrics</p>
-        <rules-summary-metrics v-if="rules.length > 0" :key="refresh" :rules="rules" :dataset="dataset" />
+        <rules-global-metrics v-if="rules.length > 0" :key="refresh" :rules="rules" :dataset="dataset" />
         <re-button
           class="rule__button button-quaternary--outline"
           @click="showRulesList"
@@ -107,7 +107,7 @@ export default {
       }
     }
     &::v-deep {
-      .rules-summary__metrics p {
+      .rules-global__metrics p {
         width: 49%;
         margin-right: 0;
         color: $lighter-color;

@@ -1,19 +1,19 @@
 <template>
-  <div v-if="isVisible" class="rules-summary">
+  <div v-if="isVisible" class="rules-management">
     <ReLoading v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error" class="rules-summary__container">
-      <re-button @click="hideList()" class="rules-summary__close button-quaternary">
+    <div v-else-if="!$fetchState.error" class="rules-management__container">
+      <re-button @click="hideList()" class="rules-management__close button-quaternary">
         <svgicon
           name="chev-left"
           width="12"
           height="12"
         ></svgicon>Back to query view</re-button>
-      <p class="rules-summary__title">Overall Metrics</p>
-      <rules-summary-metrics :rules="rules" :dataset="dataset" />
-      <p class="rules-summary__title">Rules</p> 
+      <p class="rules-management__title">Overall Metrics</p>
+      <rules-global-metrics :rules="rules" :dataset="dataset" />
+      <p class="rules-management__title">Rules</p> 
       <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
       <ReTableInfo
-        class="rules-summary__table"
+        class="rules-management__table"
         :data="formattedRules"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
@@ -197,7 +197,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.rules-summary {
+.rules-management {
   padding-left: 4em;
   padding-top: 3em;
   overflow: auto;

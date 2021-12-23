@@ -1,5 +1,5 @@
 <template>
-  <div class="rules-summary__metrics">
+  <div class="rules-global__metrics">
     <template v-if="!$fetchState.error && !$fetchState.pending">
       <p data-title="Average fraction of correct labels given by the rules">Precision average
         <span v-if="metricsTotal">{{getAverage('precision') | percent}}</span>
@@ -95,7 +95,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 $color: #333346;
-.rules-summary {
+.rules-global {
   &__metrics {
     display: inline-block;
     margin-bottom: 2em;

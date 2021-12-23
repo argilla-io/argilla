@@ -33,7 +33,7 @@
       />
     </template>
   </results-list>
-  <rules-summary class="content" v-else :dataset="dataset"/>
+  <rules-management class="content" v-else :dataset="dataset"/>
 </template>
 <script>
 export default {
