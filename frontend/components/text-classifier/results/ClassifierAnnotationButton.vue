@@ -198,7 +198,7 @@ $annotation-button-touch-size: 48px;
     pointer-events: none;
     cursor: pointer;
     .button {
-      background: $lighter-color;
+      background: $lighter-color !important;
       color: palette(grey);
       border: 1px solid palette(grey, light);
     }

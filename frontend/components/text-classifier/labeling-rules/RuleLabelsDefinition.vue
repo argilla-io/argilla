@@ -18,6 +18,7 @@
 <template>
   <div class="rule-labels-definition">
     <input
+      v-if="query"
       v-model="description"
       class="rule__description"
     />
@@ -243,6 +244,9 @@ export default {
   max-width: 238px;
 }
 .rule-labels-definition {
+  height: 100%;
+  display: flex;
+  flex-flow: column;
   @include media(">desktopLarge") {
     max-width: 60%;
   }
@@ -268,8 +272,9 @@ export default {
     }
   }
   &__button {
-    margin-top: 2em;
+    margin-top: auto;
     margin-bottom: 0;
+    align-self: flex-start;
   }
 }
 .label-button {

@@ -95,12 +95,15 @@ export default {
   &__global-metrics {
     width: 290px;
     min-width: 290px;
+    max-height: 410px;
     background: $primary-color;
     margin-left: 1em;
     color: $lighter-color;
     border-radius: 5px;
     margin-bottom: 2em;
     padding: 20px;
+    display: flex;
+    flex-flow: column;
     .global-metrics {
       &__title {
         padding-bottom: 0;
@@ -135,7 +138,9 @@ export default {
   }
   &__button {
     float: left;
-    margin-bottom: 0 !important;
+    align-self: flex-start;
+    margin-bottom: 0;
+    margin-top: auto;
   }
 }
 </style>
