@@ -20,44 +20,7 @@
     <template v-if="isDatasetView">
       <div class="sidebar__info">
         <p>Mode</p>
-        <!-- TODO: create SidebarButton -->
-        <a class="sidebar__info__button"
-          href="#"
-          data-title="Explore"
-          @click="$emit('onChangeViewMode', 'explore')"
-        >
-          <svgicon
-            v-show="currentViewMode === 'explore'"
-            class="sidebar__info__icon-help"
-            name="check3"
-          ></svgicon>
-          <svgicon name="explore-view"></svgicon>
-        </a>
-        <a class="sidebar__info__button"
-          href="#"
-          data-title="Annotate"
-          @click="$emit('onChangeViewMode', 'annotate')"
-        >
-          <svgicon
-            v-show="currentViewMode === 'annotate'"
-            class="sidebar__info__icon-help"
-            name="check3"
-          ></svgicon>
-          <svgicon name="annotate-view"></svgicon>
-        </a>
-        <a class="sidebar__info__button"
-          v-if="showDefineRules"
-          href="#"
-          data-title="Define rules"
-          @click="$emit('onChangeViewMode', 'labelling-rules')"
-        >
-          <svgicon
-            v-show="currentViewMode === 'labelling-rules'"
-            class="sidebar__info__icon-help"
-            name="check3"
-          ></svgicon>
-          <svgicon name="labelling-rules-view"></svgicon>
-        </a>
+        <sidebar-button v-if="button.condition !== false" :active-view="currentViewMode" :icon="button.icon" :tooltip="button.tooltip" :id="button.id" v-for="button in sidebarInfoOptions.filter(b => b.type === 'view-mode')" :key="button.id" @change-view-mode="onChangeViewMode" />
       </div>
       <div class="sidebar__info">
         <p>Metrics</p>
@@ -109,21 +72,44 @@ export default {
       currentViewMode: 'explore',
       width: window.innerWidth,
       visibleSidebarInfo: undefined,
-      sidebarInfoOptions: [
-        {
+    };
+  },
+  computed: {
+    sidebarInfoOptions() {
+      return [
+        { 
+          type: 'view-mode',
+          id: "explore",
+          tooltip: "Explore",
+          icon: "explore-view"
+        },
+        { 
+          type: 'view-mode',
+          id: "annotate",
+          tooltip: "Annotate",
+          icon: "annotate-view"
+        },
+        { 
+          type: 'view-mode',
+          id: "labelling-rules",
+          tooltip: "Define rules",
+          icon: "labelling-rules-view",
+          condition: this.showLabellingRules,
+        },
+        { 
+          type: 'metrics',
           id: "progress",
           tooltip: "Progress",
           icon: "progress"
         },
         {
+          type: 'metrics',
           id: "stats",
           tooltip: "Stats",
           icon: "metrics"
         }
       ]
-    };
-  },
-  computed: {
+    },
     viewMode() {
       if (this.isDatasetView) {
         return this.dataset.viewSettings.viewMode;
@@ -133,7 +119,7 @@ export default {
     isDatasetView() {
       return this.dataset !== undefined;
     },
-    showDefineRules() {
+    showLabellingRules() {
       return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
     }
   },
@@ -158,6 +144,9 @@ export default {
       } else {
         this.visibleSidebarInfo = undefined;
       }
+    },
+    onChangeViewMode(id) {
+      this.$emit('onChangeViewMode', id);
     },
   }
 };
@@ -191,29 +180,10 @@ $color: #333346;
     display: block;
     outline: none;
   }
-  .svg-icon {
-    display: block;
-    text-align: center;
-    margin: auto;
-    width: 24px;
-    height: 24px;
-    margin-bottom: 1.5em;
-    fill: $color;
-  }
   &__info {
     position: relative;
     z-index: 1;
     margin-bottom: 5em;
-    &__icon-help {
-      left: 5px;
-      width: 11px !important;
-      margin-right: 0;
-      stroke-width: 2;
-      position: absolute;
-      left: 0.8em;
-    }
-    &__button {
-    }
   }
 }
 a[data-title]:not(.active) {
