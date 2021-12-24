@@ -20,7 +20,7 @@
     <span v-for="group in sidebarButtons" :key="group.name">
       <div v-if="group.condition !== false" class="sidebar__info">
         <p>{{ group.name }}</p>
-        <sidebar-button v-if="button.condition !== false" :active-view="group.isActive" :icon="button.icon" :tooltip="button.tooltip" :type="group.name" :id="button.id" v-for="button in group.elements" :key="button.id" @button-action="group.action" />
+        <sidebar-button :condition="button.condition" :active-view="group.isActive" :icon="button.icon" :tooltip="button.tooltip" :type="group.name" :id="button.id" v-for="button in group.elements" :key="button.id" @button-action="group.action" />
       </div>
     </span>
     <slot />
@@ -113,6 +113,8 @@ export default {
     showLabellingRules() {
       if (this.isDatasetView) {
         return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
+      } else {
+        return false;
       }
     }
   },

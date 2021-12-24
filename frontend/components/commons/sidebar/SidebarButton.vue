@@ -1,5 +1,6 @@
 <template>
   <a class="sidebar-button"
+    v-if="condition !== false"
     href="#"
     :data-title="tooltip"
     @click="$emit('button-action', id)"
@@ -36,6 +37,9 @@ export default {
     },
     icon: {
       type: String,
+    },
+    condition: {
+      type: Boolean,
     },
     type: {
       type: String,
