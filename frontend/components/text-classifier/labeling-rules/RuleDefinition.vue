@@ -139,7 +139,7 @@ export default {
   &__button {
     float: left;
     align-self: flex-start;
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
     margin-top: auto;
   }
 }

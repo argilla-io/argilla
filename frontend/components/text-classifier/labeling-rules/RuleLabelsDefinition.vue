@@ -273,7 +273,7 @@ export default {
   }
   &__button {
     margin-top: auto;
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
     align-self: flex-start;
   }
 }
