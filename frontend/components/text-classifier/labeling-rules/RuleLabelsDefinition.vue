@@ -151,16 +151,13 @@ export default {
       if (n) {
         this.selectedLabels = [n.label];
         await this.getMetricsByLabel(n.label);
-      } else {
-        // this.selectedLabels = [];
-        this.metrics = {};
       }
     },
     async query(n) {
       this.setDescription()
-      this.metrics = {};
       this.saved = false;
       if (!n) {
+        this.metrics = {};
         this.selectedLabels = [];
       } else {
         await this.getMetricsByLabel(this.selectedLabels[0]);
@@ -197,6 +194,7 @@ export default {
         });
       }
       this.saved = true;
+      this.collapseLabels();
       this.$emit("update-rule");
     },
     async getMetricsByLabel(label) {
