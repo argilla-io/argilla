@@ -3,8 +3,8 @@
     <sidebar-menu
       :dataset="dataset"
       @refresh="onRefresh"
-      @showSidebarInfo="onShowSidebarInfo"
-      @onChangeViewMode="onChangeViewMode"
+      @showMetric="onShowSidebarInfo"
+      @changeViewMode="onChangeViewMode"
     />
     <!-- TODO: Use media queries -->
     <sidebar-panel

@@ -2,18 +2,27 @@
   <a class="sidebar-button"
     href="#"
     :data-title="tooltip"
-    @click="$emit('change-view-mode', id)"
+    @click="$emit('button-action', id)"
   >
     <svgicon
+      v-if="type !== 'Refresh'"
       v-show="activeView === id"
       class="sidebar-button__icon-help"
-      name="check3"
+      :name="type === 'Mode' ? 'check3' : 'double-chev'"
     ></svgicon>
     <svgicon :name="icon"></svgicon>
   </a>
 </template>
 
 <script>
+import "assets/icons/refresh";
+import "assets/icons/explore-view";
+import "assets/icons/annotate-view";
+import "assets/icons/labelling-rules-view";
+import "assets/icons/progress";
+import "assets/icons/metrics";
+import "assets/icons/double-chev";
+import "assets/icons/check3";
 export default {
   props: {
     activeView: {
@@ -27,6 +36,12 @@ export default {
     },
     icon: {
       type: String,
+    },
+    type: {
+      type: String,
+      validator: (value) => {
+        return ['Mode', 'Metrics', 'Refresh'].includes(value);
+      }
     }
   }
 }

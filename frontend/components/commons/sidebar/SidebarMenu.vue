@@ -17,48 +17,17 @@
 
 <template>
   <div class="sidebar">
-    <template v-if="isDatasetView">
-      <div class="sidebar__info">
-        <p>Mode</p>
-        <sidebar-button v-if="button.condition !== false" :active-view="currentViewMode" :icon="button.icon" :tooltip="button.tooltip" :id="button.id" v-for="button in sidebarInfoOptions.filter(b => b.type === 'view-mode')" :key="button.id" @change-view-mode="onChangeViewMode" />
+    <span v-for="group in sidebarButtons" :key="group.name">
+      <div v-if="group.condition !== false" class="sidebar__info">
+        <p>{{ group.name }}</p>
+        <sidebar-button v-if="button.condition !== false" :active-view="group.isActive" :icon="button.icon" :tooltip="button.tooltip" :type="group.name" :id="button.id" v-for="button in group.elements" :key="button.id" @button-action="group.action" />
       </div>
-      <div class="sidebar__info">
-        <p>Metrics</p>
-        <a
-          v-for="sidebarInfo in sidebarInfoOptions"
-          :key="sidebarInfo.id"
-          :class="['sidebar__info__button', visibleSidebarInfo === sidebarInfo.id ? 'active' : null]"
-          href="#"
-          :data-title="sidebarInfo.tooltip"
-          @click.prevent="showSidebarInfo(sidebarInfo.id)"
-        >
-          <svgicon v-if="visibleSidebarInfo === sidebarInfo.id"
-            class="sidebar__info__icon-help"
-            name="double-chev"
-          ></svgicon>
-          <svgicon :name="sidebarInfo.icon"></svgicon>
-        </a>
-      </div>
-    </template>
-    <div class="sidebar__info">
-      <p>Refresh</p>
-      <a href="#" @click.prevent="$emit('refresh')">
-        <svgicon name="refresh"></svgicon>
-      </a>
-    </div>
+    </span>
     <slot />
   </div>
 </template>
 
 <script>
-import "assets/icons/refresh";
-import "assets/icons/explore-view";
-import "assets/icons/annotate-view";
-import "assets/icons/labelling-rules-view";
-import "assets/icons/progress";
-import "assets/icons/metrics";
-import "assets/icons/double-chev";
-import "assets/icons/check3";
 export default {
   props: {
     dataset: {
@@ -75,38 +44,60 @@ export default {
     };
   },
   computed: {
-    sidebarInfoOptions() {
+    sidebarButtons() {
       return [
         { 
-          type: 'view-mode',
-          id: "explore",
-          tooltip: "Explore",
-          icon: "explore-view"
-        },
-        { 
-          type: 'view-mode',
-          id: "annotate",
-          tooltip: "Annotate",
-          icon: "annotate-view"
-        },
-        { 
-          type: 'view-mode',
-          id: "labelling-rules",
-          tooltip: "Define rules",
-          icon: "labelling-rules-view",
-          condition: this.showLabellingRules,
-        },
-        { 
-          type: 'metrics',
-          id: "progress",
-          tooltip: "Progress",
-          icon: "progress"
+          name: 'Mode',
+          condition: this.isDatasetView,
+          action: this.onChangeViewMode,
+          isActive: this.currentViewMode,
+          elements: [
+            { 
+              id: "explore",
+              tooltip: "Explore",
+              icon: "explore-view"
+            },
+            { 
+              id: "annotate",
+              tooltip: "Annotate",
+              icon: "annotate-view"
+            },
+            { 
+              id: "labelling-rules",
+              tooltip: "Define rules",
+              icon: "labelling-rules-view",
+              condition: this.showLabellingRules,
+            },
+          ]
         },
         {
-          type: 'metrics',
-          id: "stats",
-          tooltip: "Stats",
-          icon: "metrics"
+          name: 'Metrics',
+          condition: this.isDatasetView,
+          action: this.onShowMetric,
+          isActive: this.visibleSidebarInfo,
+          elements: [
+            { 
+              id: "progress",
+              tooltip: "Progress",
+              icon: "progress"
+            },
+            {
+              id: "stats",
+              tooltip: "Stats",
+              icon: "metrics"
+            },
+          ]
+        },
+        {
+          name: 'Refresh',
+          action: this.onRefresh,
+          elements: [
+            {
+              id: "refresh",
+              tooltip: "Refresh",
+              icon: "refresh"
+            }
+          ]
         }
       ]
     },
@@ -120,7 +111,9 @@ export default {
       return this.dataset !== undefined;
     },
     showLabellingRules() {
-      return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
+      if (this.isDatasetView) {
+        return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
+      }
     }
   },
   watch: {
@@ -137,8 +130,8 @@ export default {
     this.currentViewMode = this.viewMode;
   },
   methods: {
-    showSidebarInfo(info) {
-      this.$emit("showSidebarInfo", info);
+    onShowMetric(info) {
+      this.$emit("showMetric", info);
       if (this.visibleSidebarInfo !== info) {
         this.visibleSidebarInfo = info;
       } else {
@@ -146,7 +139,10 @@ export default {
       }
     },
     onChangeViewMode(id) {
-      this.$emit('onChangeViewMode', id);
+      this.$emit('changeViewMode', id);
+    },
+    onRefresh() {
+      this.$emit('refresh');
     },
   }
 };
