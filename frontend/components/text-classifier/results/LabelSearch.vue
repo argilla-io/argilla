@@ -38,18 +38,18 @@ export default {
     searchText: {
       type: String,
       default: undefined,
-    }
+    },
   },
   computed: {
     filter: {
       get() {
-        return this.searchText
+        return this.searchText;
       },
       set(val) {
-        this.$emit('input', val)
-      }
-    }
-  }
+        this.$emit("input", val);
+      },
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>

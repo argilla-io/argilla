@@ -39,7 +39,10 @@
         @onChangeRecordStatus="onChangeRecordStatus"
         @onShowMetadata="onShowMetadata(item)"
       />
-      <status-tag v-if="annotationEnabled && item.status !== 'Default'" :title="item.status"></status-tag>
+      <status-tag
+        v-if="annotationEnabled && item.status !== 'Default'"
+        :title="item.status"
+      ></status-tag>
     </div>
   </div>
 </template>
@@ -99,7 +102,7 @@ export default {
       }
     },
     onShowMetadata(record) {
-      this.$emit('show-metadata', record)
+      this.$emit("show-metadata", record);
     },
   },
 };

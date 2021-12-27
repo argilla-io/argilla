@@ -19,7 +19,10 @@
   <div class="list">
     <slot name="header" />
     <div class="results-scroll" id="scroll">
-      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
+      <div
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+        v-if="showLoader"
+      >
         <results-loading :size="dataset.viewSettings.pagination.size" />
       </div>
       <DynamicScroller
@@ -30,7 +33,7 @@
         :min-item-size="150"
         :buffer="200"
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-      > 
+      >
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
             :watch-data="true"
@@ -41,13 +44,21 @@
             :index="index"
             :data-index="index"
           >
-            <results-record @show-metadata="onShowMetadata" :key="item.id" :dataset="dataset" :item="item">
+            <results-record
+              @show-metadata="onShowMetadata"
+              :key="item.id"
+              :dataset="dataset"
+              :item="item"
+            >
               <slot name="record" :record="item" />
             </results-record>
           </DynamicScrollerItem>
         </template>
         <template #after>
-          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+          <pagination-end-alert
+            :limit="paginationLimit"
+            v-if="isLastPagePaginable"
+          />
         </template>
       </DynamicScroller>
       <LazyReModal
@@ -81,8 +92,8 @@ export default {
   props: {
     dataset: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -154,10 +165,10 @@ export default {
       await this.paginate({
         dataset: this.dataset,
         page: page,
-        size: size
+        size: size,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -202,7 +213,7 @@ export default {
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {
-    z-index: $maxItemsperPage - $i
+    z-index: $maxItemsperPage - $i;
   }
 }
 </style>

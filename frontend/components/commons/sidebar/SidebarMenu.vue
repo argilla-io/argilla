@@ -20,7 +20,8 @@
     <template v-if="isDatasetView">
       <div class="sidebar__info">
         <p>Mode</p>
-        <a class="sidebar__info__button"
+        <a
+          class="sidebar__info__button"
           href="#"
           data-title="Explore"
           @click="$emit('onEnableAnnotationView', false)"
@@ -32,7 +33,8 @@
           ></svgicon>
           <svgicon name="explore-view"></svgicon>
         </a>
-        <a class="sidebar__info__button"
+        <a
+          class="sidebar__info__button"
           href="#"
           data-title="Annotate"
           @click="$emit('onEnableAnnotationView', true)"
@@ -50,12 +52,16 @@
         <a
           v-for="sidebarInfo in sidebarInfoOptions"
           :key="sidebarInfo.id"
-          :class="['sidebar__info__button', visibleSidebarInfo === sidebarInfo.id ? 'active' : null]"
+          :class="[
+            'sidebar__info__button',
+            visibleSidebarInfo === sidebarInfo.id ? 'active' : null,
+          ]"
           href="#"
           :data-title="sidebarInfo.tooltip"
           @click.prevent="showSidebarInfo(sidebarInfo.id)"
         >
-          <svgicon v-if="visibleSidebarInfo === sidebarInfo.id"
+          <svgicon
+            v-if="visibleSidebarInfo === sidebarInfo.id"
             class="sidebar__info__icon-help"
             name="double-chev"
           ></svgicon>
@@ -86,7 +92,7 @@ export default {
     dataset: {
       type: Object,
       requried: false,
-      default: undefined
+      default: undefined,
     },
   },
   data: () => {
@@ -98,14 +104,14 @@ export default {
         {
           id: "progress",
           tooltip: "Progress",
-          icon: "progress"
+          icon: "progress",
         },
         {
           id: "stats",
           tooltip: "Stats",
-          icon: "metrics"
-        }
-      ]
+          icon: "metrics",
+        },
+      ],
     };
   },
   computed: {
@@ -114,12 +120,12 @@ export default {
     },
     isDatasetView() {
       return this.dataset !== undefined;
-    }
+    },
   },
   watch: {
     annotationEnabled(newValue) {
       this.annotationMode = newValue;
-    }
+    },
   },
   updated() {
     window.onresize = () => {
@@ -138,7 +144,7 @@ export default {
         this.visibleSidebarInfo = undefined;
       }
     },
-  }
+  },
 };
 </script>
 

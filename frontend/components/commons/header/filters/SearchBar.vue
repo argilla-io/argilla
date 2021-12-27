@@ -17,11 +17,14 @@
 
 <template>
   <form @submit.prevent="submit(query)">
-    <div
-      :class="['searchbar__container', { active: query }]"
-    >
+    <div :class="['searchbar__container', { active: query }]">
       <ReInputContainer class="searchbar">
-        <svgicon v-if="!query && !dataset.query.text" name="search" width="20" height="40" />
+        <svgicon
+          v-if="!query && !dataset.query.text"
+          name="search"
+          width="20"
+          height="40"
+        />
         <svgicon
           v-else
           class="searchbar__button"
@@ -73,9 +76,9 @@ export default {
       this.$emit("submit", query);
     },
     removeFilter() {
-      this.query = ''
+      this.query = "";
       this.$emit("submit", this.query);
-    }
+    },
   },
 };
 </script>
@@ -111,7 +114,7 @@ export default {
     margin: auto 1em auto 1em;
   }
   &:hover {
-    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
+    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4);
   }
   &__button {
     cursor: pointer;

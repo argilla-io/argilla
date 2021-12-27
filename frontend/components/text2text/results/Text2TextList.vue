@@ -165,7 +165,7 @@ export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -290,7 +290,7 @@ export default {
         this.sentencesOrigin = "Annotation";
         this.editionMode = false;
         this.itemNumber = 0;
-        this.$emit('update-initial-record');
+        this.$emit("update-initial-record");
       }
     },
     annotationEnabled(newValue, oldValue) {

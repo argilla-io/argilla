@@ -51,6 +51,7 @@ export default {
     { src: "~/plugins/vue-vega.js" },
     { src: "~/plugins/click-outside.js" },
     { src: "~/plugins/mock.js" },
+    { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
     { src: "~/plugins/filters.js" },
@@ -76,9 +77,12 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
-    ['nuxt-highlightjs', {
-      style: 'dracula'
-    }]
+    [
+      "nuxt-highlightjs",
+      {
+        style: "dracula",
+      },
+    ],
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
@@ -121,7 +125,7 @@ export default {
         },
         user: {
           property: false,
-          autoFetch: true
+          autoFetch: true,
         },
         endpoints: {
           login: {

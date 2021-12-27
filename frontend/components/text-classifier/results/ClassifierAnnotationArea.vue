@@ -63,13 +63,13 @@
 <script>
 import "assets/icons/ignore";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
-import { IdState } from 'vue-virtual-scroller'
+import { IdState } from "vue-virtual-scroller";
 
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -82,19 +82,19 @@ export default {
       required: true,
     },
   },
-  idState () {
+  idState() {
     return {
       searchText: undefined,
       selectedLabels: [],
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-    }
+    };
   },
   watch: {
-    annotationLabels (n, o) {
+    annotationLabels(n, o) {
       if (n !== o) {
         this.selectedLabels = this.appliedLabels;
       }
-    }
+    },
   },
   computed: {
     searchText: {
@@ -103,7 +103,7 @@ export default {
       },
       set: function (newValue) {
         this.idState.searchText = newValue;
-      }
+      },
     },
     selectedLabels: {
       get: function () {
@@ -111,7 +111,7 @@ export default {
       },
       set: function (newValue) {
         this.idState.selectedLabels = newValue;
-      }
+      },
     },
     shownLabels: {
       get: function () {
@@ -119,7 +119,7 @@ export default {
       },
       set: function (newValue) {
         this.idState.shownLabels = newValue;
-      }
+      },
     },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
@@ -167,8 +167,9 @@ export default {
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter((l) => l.selected)
-        .length;
+      const selectedLabels = this.filteredLabels.filter(
+        (l) => l.selected
+      ).length;
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
           ? this.shownLabels - selectedLabels

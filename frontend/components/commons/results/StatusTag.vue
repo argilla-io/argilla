@@ -1,13 +1,21 @@
 <template>
-    <span :class="['status-tag', title]">
-      <svgicon
-        :name="title === 'Validated' ? 'check' : null || title === 'Edited' ? 'clock' : null || title === 'Discarded' ? 'forbidden' : null"
-        width="12"
-        height="12"
-        color="#ffffff"
-      ></svgicon>
-      {{title === 'Edited' ? 'Pending' : title}}
-    </span>
+  <span :class="['status-tag', title]">
+    <svgicon
+      :name="
+        title === 'Validated'
+          ? 'check'
+          : null || title === 'Edited'
+          ? 'clock'
+          : null || title === 'Discarded'
+          ? 'forbidden'
+          : null
+      "
+      width="12"
+      height="12"
+      color="#ffffff"
+    ></svgicon>
+    {{ title === "Edited" ? "Pending" : title }}
+  </span>
 </template>
 
 <script>
@@ -17,9 +25,9 @@ import "assets/icons/forbidden";
 export default {
   props: {
     title: {
-      type: String
-    }
-  }
+      type: String,
+    },
+  },
 };
 </script>
 
@@ -38,14 +46,13 @@ export default {
   font-weight: 600;
   z-index: 0;
   &.Edited {
-    background: #BB720A;
+    background: #bb720a;
   }
   &.Discarded {
-    background: #70767F;
+    background: #70767f;
   }
   .svg-icon {
     margin-right: 0.5em;
   }
 }
 </style>
-

@@ -137,7 +137,9 @@ export default {
       return Math.ceil(this.paginableTotalItems / this.paginationSettings.size);
     },
     paginableTotalItems() {
-      return this.totalItems >= this.maxRecordsLimit ? this.maxRecordsLimit : this.totalItems;
+      return this.totalItems >= this.maxRecordsLimit
+        ? this.maxRecordsLimit
+        : this.totalItems;
     },
     paginationSize() {
       return this.paginationSettings.size;
@@ -146,7 +148,9 @@ export default {
       return this.paginationSettings.maxRecordsLimit;
     },
     availableItemsPerPage() {
-      return this.paginationSettings.pageSizeOptions.filter(p => p !== this.paginationSize);
+      return this.paginationSettings.pageSizeOptions.filter(
+        (p) => p !== this.paginationSize
+      );
     },
     currentPage() {
       return this.paginationSettings.page;
@@ -196,12 +200,12 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
-      const elem = document.querySelector('body');
+      const elem = document.querySelector("body");
       if (elem === document.activeElement) {
         if (event.keyCode === 39) {
-          this.nextPage()
+          this.nextPage();
         } else if (event.keyCode === 37) {
-          this.prevPage()
+          this.prevPage();
         }
       }
     },
@@ -329,7 +333,7 @@ $pagination-size: 30px;
       bottom: 3em;
       left: 0;
       right: 0;
-      box-shadow: 0 5px 11px 0 rgba(0,0,0,0.50);
+      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
       border-radius: 3px;
       margin: 2px;
       a {
