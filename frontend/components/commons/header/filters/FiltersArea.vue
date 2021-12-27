@@ -21,11 +21,13 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
+            :expand-searchbar="expandSearchbar"
             class="filters__searchbar"
             :dataset="dataset"
             @submit="onTextQuerySearch"
           />
           <FiltersList
+            v-if="!expandSearchbar"
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
@@ -33,6 +35,7 @@
             @removeAllMetadataFilters="onRemoveAllMetadataFilters"
             @removeFiltersByGroup="onRemoveFiltersByGroup"
           ></FiltersList>
+          <slot />
         </div>
       </div>
     </div>
@@ -40,12 +43,17 @@
 </template>
 
 <script>
+import "assets/icons/config";
 import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
       type: Object,
       default: () => ({}),
+    },
+    expandSearchbar: {
+      type: Boolean,
+      default: false,
     },
   },
   data: () => ({
@@ -61,6 +69,11 @@ export default {
       { filter: "score", text: "Score", range: ["0", "1"] },
     ],
   }),
+  computed: {
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
+    },
+  },
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
@@ -143,12 +156,17 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
+    padding-right: 45px;
     .fixed-header & {
-      padding: 0.5em 0;
+      padding: 0.5em 45px 0.5em 0;
     }
   }
   &__searchbar {
     margin-right: 2em;
+    &.--extended {
+      width: 100%;
+      margin-right: 0;
+    }
   }
   &--disabled {
     ::v-deep * {

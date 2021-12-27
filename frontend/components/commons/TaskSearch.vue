@@ -21,7 +21,7 @@
       'app',
       currentTask,
       annotationEnabled ? '--annotation' : '--exploration',
-      areMetricsVisible ? '--metrics' : null,
+      areMetricsVisible ? '--metrics' : null
     ]"
   >
     <div class="app__content">
@@ -71,7 +71,7 @@ export default {
       return this.currentTask + "Header";
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight;

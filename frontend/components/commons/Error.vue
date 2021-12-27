@@ -24,7 +24,7 @@
         following error: <strong>{{ error.message }}</strong>
       </p>
     </div>
-    <NuxtLink class="re-button" :to="link">
+    <NuxtLink v-if="link" class="re-button" :to="link">
       <svgicon name="chev-left" width="8" height="8" color="#4A4A4A" />
       Back
     </NuxtLink>

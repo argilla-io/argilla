@@ -26,17 +26,16 @@
           />
           <user />
         </ReTopbarBrand>
-        <datasets-empty v-if="!datasets.length" :workspace="workspace" />
+        <Error
+          v-if="$fetchState.error"
+          where="workspace datasets"
+          :error="$fetchState.error"
+        />
+        <datasets-empty v-else-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
-            <ReSearchBar @input="onSearch" />
+            <ReSearchBar @input="onSearch" placeholder="Search datasets" />
           </div>
-          <Error
-            v-if="$fetchState.error"
-            link="/"
-            where="datasets"
-            :error="$fetchState.error"
-          />
           <div>
             <ReTableInfo
               :data="datasets"
@@ -47,7 +46,8 @@
               :query-search="querySearch"
               :global-actions="false"
               search-on="name"
-              :show-modal="showModal"
+              :visible-modal-id="visibleModalId"
+              :delete-modal-content="getDeleteModalContent"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
               @close-modal="closeModal"
@@ -92,7 +92,7 @@ export default {
     externalLinks: [],
     sortedOrder: "desc",
     sortedByField: "last_updated",
-    showModal: undefined,
+    visibleModalId: undefined,
   }),
   async fetch() {
     await this.fetchDatasets();
@@ -109,6 +109,12 @@ export default {
     workspace() {
       return currentWorkspace(this.$route);
     },
+    getDeleteModalContent() {
+      return {
+        title: 'Delete confirmation',
+        text: `You are about to delete: <strong>${this.visibleModalId}</strong>. This action cannot be undone`
+      }
+    }
   },
   methods: {
     ...mapActions({
@@ -164,7 +170,7 @@ export default {
       document.execCommand("Copy");
     },
     showConfirmDatasetDeletion(id) {
-      this.showModal = id;
+      this.visibleModalId = id;
     },
     deleteDataset(id) {
       this._deleteDataset({ name: id });
@@ -175,7 +181,7 @@ export default {
       this.sortedOrder = order;
     },
     closeModal() {
-      this.showModal = undefined;
+      this.visibleModalId = undefined;
     },
   },
 };
