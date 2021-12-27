@@ -17,7 +17,9 @@
 
 <template>
   <div class="container">
-    <h2 class="title">{{ title }} records ({{ dataset.results.total | formatNumber }})</h2>
+    <h2 class="title">
+      {{ title }} records ({{ dataset.results.total | formatNumber }})
+    </h2>
   </div>
 </template>
 

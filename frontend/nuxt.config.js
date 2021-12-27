@@ -77,9 +77,12 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
-    ['nuxt-highlightjs', {
-      style: 'dracula'
-    }]
+    [
+      "nuxt-highlightjs",
+      {
+        style: "dracula",
+      },
+    ],
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
@@ -122,7 +125,7 @@ export default {
         },
         user: {
           property: false,
-          autoFetch: true
+          autoFetch: true,
         },
         endpoints: {
           login: {

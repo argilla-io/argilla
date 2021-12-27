@@ -41,7 +41,7 @@ class ObservationDataset extends Model {
   getTaskDatasetClass() {
     return ObservationDataset.getClassDatasetForTask(this.task);
   }
-  async initialize() { }
+  async initialize() {}
 
   async fetchMetricSummary(metricId) {
     try {
