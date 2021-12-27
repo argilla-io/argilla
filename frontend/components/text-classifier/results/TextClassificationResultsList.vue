@@ -17,10 +17,14 @@
 
 <template>
   <results-list
+    v-if="!dataset.viewSettings.visibleRulesList"
     :dataset="dataset"
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
+    <template slot="results-header">
+      <rule-definition :dataset="dataset" v-if="showRulesArea" />
+    </template>
     <template slot="record" slot-scope="results">
       <record-text-classification
         :dataset="dataset"
@@ -29,6 +33,7 @@
       />
     </template>
   </results-list>
+  <rules-management class="content" v-else :dataset="dataset"/>
 </template>
 <script>
 export default {
@@ -41,6 +46,11 @@ export default {
   data: () => ({
     selectedMetadataItem: undefined,
   }),
+  computed: {
+    showRulesArea() {
+      return this.dataset.viewSettings.viewMode === 'labelling-rules';
+    },
+  },
   methods: {
     onShowMetadata(id) {
       this.selectedMetadataItem = id;
@@ -51,3 +61,21 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.content {
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      width: 100%;
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
+    width: 100%;
+    padding-right: 100px;
+  }
+}
+</style>
+

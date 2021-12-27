@@ -16,8 +16,7 @@
   -->
 
 <template>
-  <results-empty v-if="dataset.results.total === 0" />
-  <div v-else class="results">
+  <div class="results">
     <component :is="currentTaskResultsList" :dataset="dataset" />
   </div>
 </template>

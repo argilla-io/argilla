@@ -16,25 +16,31 @@
   -->
 
 <template>
-  <form @submit.prevent="submit(query)">
-    <div
-      :class="['searchbar__container', { active: query }]"
-    >
+  <form
+    :class="{ '--extended': expandSearchbar }"
+    @submit.prevent="submit(query)"
+  >
+    <div :class="['searchbar__container', { active: query }]">
       <ReInputContainer class="searchbar">
-        <svgicon v-if="!query && !dataset.query.text" name="search" width="20" height="40" />
+        <svgicon
+          v-if="!query && !dataset.query.text"
+          name="search"
+          width="20"
+          height="40"
+        />
         <svgicon
           v-else
           class="searchbar__button"
           name="cross"
           width="20"
-          height="14"
+          height="20"
           @click="removeFilter()"
         />
         <ReInput
           ref="input"
           v-model="query"
           class="searchbar__input"
-          placeholder="Search records"
+          placeholder="Introduce a query"
         />
       </ReInputContainer>
     </div>
@@ -50,6 +56,9 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+    expandSearchbar: {
+      type: Boolean,
     },
   },
   data: () => ({
@@ -73,9 +82,9 @@ export default {
       this.$emit("submit", query);
     },
     removeFilter() {
-      this.query = ''
+      this.query = "";
       this.$emit("submit", this.query);
-    }
+    },
   },
 };
 </script>
@@ -86,7 +95,7 @@ export default {
   width: 285px;
   min-height: 43px;
   border: none;
-  padding: 0 1em;
+  padding: 0 0.5em;
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
@@ -99,22 +108,30 @@ export default {
     max-width: 280px;
     margin-right: auto;
     margin-left: 0;
-  }
-  // &.re-input-focused {
-  //   border: 2px solid $secondary-color;
-  //   .svg-icon {
-  //     fill: $secondary-color;
-  //   }
-  // }
-  .svg-icon {
-    fill: $primary-color;
-    margin: auto 1em auto 1em;
-  }
-  &:hover {
-    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4)
+    .--extended & {
+      min-width: 100%;
+    }
   }
   &__button {
     cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    background: $lighter-color;
+    transition: background 0.2s ease-in-out;
+    &:hover {
+      transition: background 0.2s ease-in-out;
+      background: palette(grey, bg);
+    }
+  }
+  .svg-icon {
+    fill: #4c4ea3;
+    margin: auto 1em auto 1em;
+  }
+  &:hover {
+    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4);
+  }
+  .--extended & {
+    min-width: 100%;
   }
 }
 </style>

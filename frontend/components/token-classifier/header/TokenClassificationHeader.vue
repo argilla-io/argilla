@@ -44,12 +44,6 @@ export default {
       type: Object,
     },
   },
-  computed: {
-    showAnnotationMode() {
-      return this.dataset.viewSettings.annotationEnabled;
-    },
-  },
-
   methods: {
     ...mapActions({
       discard: "entities/datasets/discardAnnotations",

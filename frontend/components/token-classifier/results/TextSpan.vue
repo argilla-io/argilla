@@ -145,7 +145,7 @@ export default {
       }));
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
   },
   created() {

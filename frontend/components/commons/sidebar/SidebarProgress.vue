@@ -91,9 +91,6 @@ export default {
         ((this.totalValidated || 0) + (this.totalDiscarded || 0)) / this.total
       );
     },
-    annotationIsEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
-    },
   },
 };
 </script>

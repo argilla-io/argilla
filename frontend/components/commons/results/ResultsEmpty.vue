@@ -18,7 +18,9 @@
 <template>
   <div class="empty">
     <span class="empty__content">
+      <svgicon v-if="icon" :name="icon" width="50" height="50" color="#686a6d" />
       <h1 class="empty__title">{{ title }}</h1>
+      <p v-if="message" class="empty__message" v-html="message" />
     </span>
   </div>
 </template>
@@ -30,6 +32,14 @@ export default {
       type: String,
       default: "0 results found",
     },
+    message: {
+      type: String,
+      default: undefined,
+    },
+    icon: {
+      type: String,
+      default: undefined,
+    },
   },
 };
 </script>
@@ -40,8 +50,9 @@ export default {
   text-align: center;
   width: 100%;
   display: flex;
-  margin-top: 0;
-  height: 100vh;
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+  height: auto;
   #{$this}__content {
     align-items: center;
     margin: auto;
@@ -49,6 +60,10 @@ export default {
   &__title {
     @include font-size(30px);
     font-weight: 400;
+    color: palette(grey, medium)
+  }
+  &__message {
+    max-width: 600px;
   }
 }
 </style>
