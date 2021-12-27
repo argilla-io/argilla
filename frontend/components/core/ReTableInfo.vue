@@ -47,13 +47,16 @@
           </div>
         </slot>
       </div>
-      <ResultsEmpty v-if="!data.length" :title="noDataInfo.title" :message="noDataInfo.message" :icon="noDataInfo.icon" />
+      <ResultsEmpty
+        v-if="!data.length"
+        :title="noDataInfo.title"
+        :message="noDataInfo.message"
+        :icon="noDataInfo.icon"
+      />
       <template v-else-if="resultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
-            <p
-              class="table-info__group__title"
-            >
+            <p class="table-info__group__title">
               {{ group }}
             </p>
           </span>
@@ -67,7 +70,9 @@
                   class="table-info__item__col"
                 >
                   <span :class="column.class">
-                    <a v-if="column.type === 'action'" href="#"
+                    <a
+                      v-if="column.type === 'action'"
+                      href="#"
                       @click.prevent="onActionClicked(item.kind, item)"
                       >{{ itemValue(item, column) }}
                     </a>
@@ -90,10 +95,8 @@
                       v-else-if="column.type === 'date'"
                       :date="itemValue(item, column)"
                     />
-                    <span
-                      v-else-if="column.type === 'number'"
-                    >
-                    {{itemValue(item, column) | formatNumber}}
+                    <span v-else-if="column.type === 'number'">
+                      {{ itemValue(item, column) | formatNumber }}
                     </span>
                     <span v-else-if="column.type === 'object'">
                       <p
@@ -145,9 +148,8 @@
                   @close-modal="$emit('close-modal')"
                 >
                   <div>
-                    <p class="modal__title">{{deleteModalContent.title}}</p>
-                    <p v-html="deleteModalContent.text">
-                    </p>
+                    <p class="modal__title">{{ deleteModalContent.title }}</p>
+                    <p v-html="deleteModalContent.text"></p>
                     <div class="modal-buttons">
                       <ReButton
                         class="button-tertiary--small button-tertiary--outline"

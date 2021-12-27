@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === 'annotate';
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
     topPosition() {
       return this.annotationEnabled

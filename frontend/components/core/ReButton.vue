@@ -226,7 +226,7 @@ export default {
   background: $lighter-color;
   color: palette(grey, dark);
   border: 1px solid palette(grey, smooth);
-  box-shadow: inset 0 -2px 6px 0 rgba(223,223,223,0.50);
+  box-shadow: inset 0 -2px 6px 0 rgba(223, 223, 223, 0.5);
   .svg-icon {
     margin-right: 1em;
     vertical-align: middle;
