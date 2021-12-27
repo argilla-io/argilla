@@ -164,7 +164,7 @@ export default {
       return pages;
     },
   },
-  created() {
+  mounted() {
     window.addEventListener("keydown", this.keyDown);
   },
   destroyed() {

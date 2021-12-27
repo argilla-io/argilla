@@ -148,7 +148,7 @@ export default {
       return this.dataset.viewSettings.annotationEnabled;
     },
   },
-  created() {
+  mounted() {
     window.addEventListener("keydown", this.keyDown);
     window.addEventListener("keyup", this.keyUp);
   },

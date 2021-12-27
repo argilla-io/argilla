@@ -221,7 +221,6 @@ export default {
       },
       set: async function (newValue) {
         if (this.record.lastEditedSentence !== newValue) {
-          // eslint-disable-next-line vue/no-mutating-props
           // this.record.lastEditedSentence = newValue;
           await this.updateRecords({
             dataset: this.dataset,
