@@ -16,8 +16,7 @@
   -->
 
 <template>
-  <SidebarProgress :dataset="dataset">
-  </SidebarProgress>
+  <SidebarProgress :dataset="dataset"> </SidebarProgress>
 </template>
 
 <script>
@@ -30,5 +29,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -33,11 +33,7 @@
         :value="value"
         :checked="checked"
       />
-      <svgicon
-        color="#fffff"
-        width="12"
-        name="check2"
-      />
+      <svgicon color="#fffff" width="12" name="check2" />
     </div>
   </div>
 </template>

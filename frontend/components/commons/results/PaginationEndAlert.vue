@@ -1,8 +1,11 @@
 <template>
-    <div class="results-pagination-end">
-        <svgicon width="40" height="40" name="pagination-end" />
-        <p>You have reached the current record limit ({{limit | formatNumber}}). To view more records please refine your query</p>
-    </div>
+  <div class="results-pagination-end">
+    <svgicon width="40" height="40" name="pagination-end" />
+    <p>
+      You have reached the current record limit ({{ limit | formatNumber }}). To
+      view more records please refine your query
+    </p>
+  </div>
 </template>
 <script>
 import "assets/icons/pagination-end";
@@ -10,9 +13,9 @@ export default {
   props: {
     limit: {
       type: Number,
-      required: true
-    }
-  }
+      required: true,
+    },
+  },
 };
 </script>
 
@@ -36,4 +39,3 @@ export default {
   }
 }
 </style>
-

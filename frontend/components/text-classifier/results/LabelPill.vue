@@ -93,7 +93,7 @@ export default {
     margin-left: 1em;
   }
   &.active {
-    background: #F4F5F6
+    background: #f4f5f6;
   }
 }
 </style>

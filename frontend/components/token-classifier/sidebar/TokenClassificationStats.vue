@@ -121,7 +121,7 @@ export default {
     },
     query() {
       return this.dataset.query;
-    }
+    },
   },
   watch: {
     query() {
