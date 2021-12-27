@@ -24,7 +24,7 @@
       ]"
     >
       <ReCheckbox
-        v-if="annotationEnabled"
+        v-if="annotationEnabled "
         class="list__checkbox"
         :value="item.selected"
         @change="onCheckboxChanged($event, item.id)"
@@ -32,7 +32,7 @@
       <slot :record="item" />
       <RecordExtraActions
         :key="item.id"
-        :allow-change-status="annotationEnabled"
+        :allow-change-status="annotationEnabled "
         :record="item"
         :dataset="dataset"
         :task="dataset.task"
@@ -62,7 +62,7 @@ export default {
   },
   computed: {
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
     visibleRecords() {
       return this.dataset.visibleRecords;

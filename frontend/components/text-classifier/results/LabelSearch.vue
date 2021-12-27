@@ -54,7 +54,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .searchbar {
-  background: $lighter-color;
   width: 285px;
   min-height: 43px;
   border: none;

@@ -46,11 +46,30 @@ export default class DatasetViewSettings extends Model {
     return {
       id: this.string(null),
       pagination: this.hasOne(Pagination, "id"),
-      annotationEnabled: this.boolean(false),
+      viewMode: this.string("explore"),
       loading: this.boolean(false),
       headerHeight: this.number(140),
       visibleMetrics: this.boolean(false),
+      visibleRulesList: this.boolean(false),
     };
+  }
+
+  async enableRulesSummary() {
+    return await DatasetViewSettings.update({
+      where: this.$id,
+      data: {
+        visibleRulesList: true,
+      },
+    });
+  }
+
+  async disableRulesSummary() {
+    return await DatasetViewSettings.update({
+      where: this.$id,
+      data: {
+        visibleRulesList: false,
+      },
+    });
   }
 }
 

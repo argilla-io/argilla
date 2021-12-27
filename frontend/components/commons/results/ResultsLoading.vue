@@ -46,7 +46,7 @@ export default {
   animation: load 0.8s ease-in-out infinite;
 }
 .record {
-  min-height: 150px;
+  min-height: 140px;
   display: block;
   width: 100%;
   background: white;

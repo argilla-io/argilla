@@ -14,8 +14,9 @@
 #  limitations under the License.
 
 import math
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
+from pydantic import BaseModel
 from stopwordsiso import stopwords
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
@@ -100,6 +101,25 @@ DATASETS_RECORDS_INDEX_TEMPLATE = {
         ],
     },
 }
+
+
+def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
+    def resolve_type(info):
+        the_type = info.get("type")
+        if the_type == "number":
+            return "float"
+        if the_type == "integer":
+            return "integer"
+        return "keyword"
+
+    return {
+        "type": "nested",
+        "include_in_root": True,
+        "properties": {
+            key: {"type": resolve_type(info)}
+            for key, info in model_class.schema()["properties"].items()
+        },
+    }
 
 
 def sort_by2elasticsearch(

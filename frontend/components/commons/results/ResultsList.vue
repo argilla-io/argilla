@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="list">
+  <div class="content">  
     <slot name="header" />
     <div class="results-scroll" id="scroll">
       <div
@@ -26,7 +26,6 @@
         <results-loading :size="dataset.viewSettings.pagination.size" />
       </div>
       <DynamicScroller
-        v-else
         page-mode
         class="scroller"
         :items="visibleRecords"
@@ -34,22 +33,22 @@
         :buffer="200"
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
       >
+        <template #before>
+          <slot name="results-header"/>
+          <results-empty :title="emptySearchInfo.title" :message="emptySearchInfo.message" :icon="emptySearchInfo.icon" v-if="dataset.results.total === 0" />
+        </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
+            v-show="dataset.results.total > 0"
             :watch-data="true"
-            class="list__li"
+            class="content__li"
             :item="item"
             :active="active"
             key-field="id"
             :index="index"
             :data-index="index"
           >
-            <results-record
-              @show-metadata="onShowMetadata"
-              :key="item.id"
-              :dataset="dataset"
-              :item="item"
-            >
+            <results-record @show-metadata="onShowMetadata" :key="`${dataset.name}-${item.id}`" :dataset="dataset" :item="item">
               <slot name="record" :record="item" />
             </results-record>
           </DynamicScrollerItem>
@@ -87,6 +86,7 @@
   </div>
 </template>
 <script>
+import "assets/icons/empty-results";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -99,6 +99,10 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      emptySearchInfo: {
+        // message: "There is no result. <br />Try another query.",
+        icon: "empty-results",
+      },
     };
   },
   computed: {
@@ -172,40 +176,43 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.list {
+.content {
   $this: &;
   padding: 0;
   width: 100%;
   position: relative;
   margin-bottom: 0;
   list-style: none;
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      width: 100%;
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
+    width: 100%;
+    padding-right: 100px;
+  }
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
     padding-bottom: 61px;
-    padding-right: calc(4em + 45px);
     transition: padding 0s ease-in-out 0.1s;
+    &::-webkit-scrollbar {
+      display: none;
+    }
     .fixed-header & {
       padding-bottom: 200px;
-    }
-    .--metrics & {
-      @include media(">desktop") {
-        width: 100%;
-        padding-right: calc(294px + 100px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      width: 100%;
-      padding-right: 100px;
     }
   }
   &__li {
     padding-bottom: 10px;
     position: relative;
-    min-height: 150px;
+    min-height: 140px;
   }
 }
 </style>

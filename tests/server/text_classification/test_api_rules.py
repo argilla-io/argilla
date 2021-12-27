@@ -127,7 +127,6 @@ def test_get_dataset_rule():
     assert rule.description == rule_description
 
 
-
 def test_delete_dataset_rules():
     dataset = "test_delete_dataset_rules"
     log_some_records(dataset)
@@ -235,6 +234,32 @@ def test_dataset_rules_metrics():
     metrics = DatasetLabelingRulesMetricsSummary.parse_obj(response.json())
     assert metrics.coverage == 1
     assert metrics.coverage_annotated == 1
+    assert metrics.total_records == 1
+    assert metrics.annotated_records == 1
+
+
+def test_dataset_rules_metrics_without_annotation():
+    dataset = "test_dataset_rules_metrics_without_annotation"
+    log_some_records(dataset)
+
+    for query in ["ejemplo", "bad query"]:
+        client.post(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+            json=CreateLabelingRule(
+                query=query, label="TEST", description="Description"
+            ).dict(),
+        )
+
+    response = client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/metrics"
+    )
+    assert response.status_code == 200, response.json()
+
+    metrics = DatasetLabelingRulesMetricsSummary.parse_obj(response.json())
+    assert metrics.coverage == 1
+    assert metrics.total_records == 1
+    assert metrics.annotated_records == 0
+    assert metrics.coverage_annotated is None
 
 
 def test_rule_metric():

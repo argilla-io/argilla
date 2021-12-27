@@ -124,7 +124,7 @@ async function _loadTaskDataset(dataset) {
 
 async function _configureDatasetViewSettings(
   datasetName,
-  enableAnnotationMode
+  viewMode
 ) {
   /**
    * Initialize dataset view settings
@@ -134,25 +134,25 @@ async function _configureDatasetViewSettings(
     data: {
       pagination: { id: datasetName },
       id: datasetName,
-      annotationEnabled: enableAnnotationMode === "true" ? true : false,
+      viewMode: viewMode ? viewMode : 'explore',
     },
   });
 }
 
 function _configuredRouteParams() {
   /**
-   * Read the route query params: query, sort, allowAnnotation and pagination
+   * Read the route query params: query, sort, viewMode and pagination
    */
-  const { query, sort, allowAnnotation, pagination } = $nuxt.$route.query;
+  const { query, sort, viewMode, pagination } = $nuxt.$route.query;
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
-    allowAnnotation: allowAnnotation || false,
+    viewMode: viewMode || 'explore',
     pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
   };
 }
 
-function _displayQueryParams({ query, sort, enableAnnotation, pagination }) {
+function _displayQueryParams({ query, sort, viewMode, pagination }) {
   /**
    * Set different route query params
    */
@@ -164,7 +164,7 @@ function _displayQueryParams({ query, sort, enableAnnotation, pagination }) {
       ...$nuxt.$route.query,
       query: Base64.encodeURI(JSON.stringify(query)),
       sort: Base64.encodeURI(JSON.stringify(sort)),
-      allowAnnotation: enableAnnotation,
+      viewMode: viewMode,
       pagination: Base64.encodeURI(JSON.stringify(pagination)),
     },
   });
@@ -245,7 +245,7 @@ async function _paginate({ dataset, size, page }) {
     });
     return await _updateTaskDataset({ dataset, data: { results } });
   } finally {
-    const { annotationEnabled } = await _updateViewSettings({
+    const { viewMode } = await _updateViewSettings({
       id: dataset.name,
       data: { loading: false },
     });
@@ -261,7 +261,7 @@ async function _paginate({ dataset, size, page }) {
        */
       query: dataset.query,
       sort: dataset.sort,
-      enableAnnotation: annotationEnabled,
+      viewMode: viewMode,
       pagination,
     });
   }
@@ -304,7 +304,7 @@ async function _search({ dataset, query, sort, size }) {
      */
     query,
     sort,
-    enableAnnotation: viewSettings.annotationEnabled,
+    viewMode: viewSettings.viewMode,
     pagination: { size, page },
   });
 
@@ -496,7 +496,6 @@ const actions = {
       persistBackend: true,
     });
   },
-
   async setUserData(_, { dataset, data }) {
     const metadata = {
       [USER_DATA_METADATA_KEY]: data,
@@ -544,8 +543,8 @@ const actions = {
      * Fetch a observation dataset by name
      */
     const ds = await _getOrFetchDataset(name);
-    const { allowAnnotation } = _configuredRouteParams();
-    await _configureDatasetViewSettings(ds.name, allowAnnotation);
+    const { viewMode } = _configuredRouteParams();
+    await _configureDatasetViewSettings(ds.name, viewMode);
     const dataset = await _loadTaskDataset(ds);
     await dataset.initialize();
     await _updateAnnotationProgress({
@@ -565,10 +564,10 @@ const actions = {
     return await _search({ dataset, query, sort, size });
   },
 
-  async enableAnnotation(_, { dataset, value }) {
+  async changeViewMode(_, { dataset, value }) {
     const settings = await _updateViewSettings({
       id: dataset.name,
-      data: { annotationEnabled: value },
+      data: { viewMode: value, visibleRulesList: false },
     });
 
     _displayQueryParams({
@@ -577,7 +576,7 @@ const actions = {
        */
       query: dataset.query,
       sort: dataset.sort,
-      enableAnnotation: value,
+      viewMode: value,
       pagination: Pagination.find(dataset.name),
     });
 

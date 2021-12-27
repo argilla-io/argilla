@@ -24,6 +24,7 @@ from rubrix.server.tasks.token_classification import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
+from rubrix.server.tasks.token_classification.metrics import TokenClassificationMetrics
 from tests.server.test_helpers import client
 
 
@@ -113,14 +114,21 @@ def test_dataset_for_token_classification():
         == 200
     )
     metrics = client.get(f"/api/datasets/TokenClassification/{dataset}/metrics").json()
-    assert len(metrics) > 0
+    assert len(metrics) == len(TokenClassificationMetrics.metrics)
 
     for metric in metrics:
+        metric_id = metric["id"]
+
         response = client.post(
-            f"/api/datasets/TokenClassification/{dataset}/metrics/{metric['id']}:summary",
+            f"/api/datasets/TokenClassification/{dataset}/metrics/{metric_id}:summary",
             json={},
         )
+
         assert response.status_code == 200
+        summary = response.json()
+
+        if not ("predicted" in metric_id or "annotated" in metric_id):
+            assert len(summary) > 0, (metric_id, summary)
 
 
 def test_dataset_metrics():

@@ -2,15 +2,5 @@
 **
 
 # Distribution packages
-!dist/**
-!scripts/**
-!src/**
-!frontend/**
-!docs/**
-!.gitignore
-!pyproject.toml
-!setup.cfg
-!.git/**
-
-**/node_modules/**
+!dist/*.whl
 

@@ -17,76 +17,26 @@
 
 <template>
   <div class="sidebar">
-    <template v-if="isDatasetView">
+    <span v-for="group in sidebarButtonGroups" :key="group.name">
       <div class="sidebar__info">
-        <p>Mode</p>
-        <a
-          class="sidebar__info__button"
-          href="#"
-          data-title="Explore"
-          @click="$emit('onEnableAnnotationView', false)"
-        >
-          <svgicon
-            v-show="!annotationMode"
-            class="sidebar__info__icon-help"
-            name="check3"
-          ></svgicon>
-          <svgicon name="explore-view"></svgicon>
-        </a>
-        <a
-          class="sidebar__info__button"
-          href="#"
-          data-title="Annotate"
-          @click="$emit('onEnableAnnotationView', true)"
-        >
-          <svgicon
-            v-show="annotationMode"
-            class="sidebar__info__icon-help"
-            name="check3"
-          ></svgicon>
-          <svgicon name="annotate-view"></svgicon>
-        </a>
+        <p>{{ group.name }}</p>
+        <sidebar-button
+          v-for="button in group.elements"
+          :id="button.id"
+          :key="button.id"
+          :active-view="group.isActive"
+          :icon="button.icon"
+          :tooltip="button.tooltip"
+          :type="group.name"
+          @button-action="group.action"
+        />
       </div>
-      <div class="sidebar__info">
-        <p>Metrics</p>
-        <a
-          v-for="sidebarInfo in sidebarInfoOptions"
-          :key="sidebarInfo.id"
-          :class="[
-            'sidebar__info__button',
-            visibleSidebarInfo === sidebarInfo.id ? 'active' : null,
-          ]"
-          href="#"
-          :data-title="sidebarInfo.tooltip"
-          @click.prevent="showSidebarInfo(sidebarInfo.id)"
-        >
-          <svgicon
-            v-if="visibleSidebarInfo === sidebarInfo.id"
-            class="sidebar__info__icon-help"
-            name="double-chev"
-          ></svgicon>
-          <svgicon :name="sidebarInfo.icon"></svgicon>
-        </a>
-      </div>
-    </template>
-    <div class="sidebar__info">
-      <p>Refresh</p>
-      <a href="#" @click.prevent="$emit('refresh')">
-        <svgicon name="refresh"></svgicon>
-      </a>
-    </div>
+    </span>
     <slot />
   </div>
 </template>
 
 <script>
-import "assets/icons/refresh";
-import "assets/icons/explore-view";
-import "assets/icons/annotate-view";
-import "assets/icons/progress";
-import "assets/icons/metrics";
-import "assets/icons/double-chev";
-import "assets/icons/check3";
 export default {
   props: {
     dataset: {
@@ -97,34 +47,97 @@ export default {
   },
   data: () => {
     return {
-      annotationMode: false,
+      currentViewMode: "explore",
       width: window.innerWidth,
       visibleSidebarInfo: undefined,
-      sidebarInfoOptions: [
-        {
-          id: "progress",
-          tooltip: "Progress",
-          icon: "progress",
-        },
-        {
-          id: "stats",
-          tooltip: "Stats",
-          icon: "metrics",
-        },
-      ],
     };
   },
   computed: {
-    annotationEnabled() {
-      return this.isDatasetView && this.dataset.viewSettings.annotationEnabled;
+    sidebarButtonGroups() {
+      // TODO: sidebar must be customized for task view
+      var groups = [];
+      if (this.isDatasetView) {
+        const modeGroup = {
+          name: "Mode",
+          action: this.onChangeViewMode,
+          isActive: this.currentViewMode,
+          elements: [
+            {
+              id: "explore",
+              tooltip: "Explore",
+              icon: "explore-view",
+            },
+            {
+              id: "annotate",
+              tooltip: "Annotate",
+              icon: "annotate-view",
+            },
+          ],
+        };
+
+        if (this.showLabellingRules) {
+          modeGroup.elements.push({
+            id: "labelling-rules",
+            tooltip: "Define rules",
+            icon: "labelling-rules-view",
+          });
+        }
+        groups.push(modeGroup);
+
+        const metrics = {
+          name: "Metrics",
+          condition: this.isDatasetView,
+          action: this.onShowMetric,
+          isActive: this.visibleSidebarInfo,
+          elements: [
+            {
+              id: "progress",
+              tooltip: "Progress",
+              icon: "progress",
+            },
+            {
+              id: "stats",
+              tooltip: "Stats",
+              icon: "metrics",
+            },
+          ],
+        };
+        groups.push(metrics);
+      }
+      const refresh = {
+        name: "Refresh",
+        action: this.onRefresh,
+        elements: [
+          {
+            id: "refresh",
+            tooltip: "Refresh",
+            icon: "refresh",
+          },
+        ],
+      };
+      groups.push(refresh);
+      return groups;
+    },
+    viewMode() {
+      if (this.isDatasetView) {
+        return this.dataset.viewSettings.viewMode;
+      }
+      return undefined;
     },
     isDatasetView() {
       return this.dataset !== undefined;
     },
+    showLabellingRules() {
+      return (
+        this.isDatasetView &&
+        !this.dataset.isMultiLabel &&
+        this.dataset.task === "TextClassification"
+      );
+    },
   },
   watch: {
-    annotationEnabled(newValue) {
-      this.annotationMode = newValue;
+    viewMode(newValue) {
+      this.currentViewMode = newValue;
     },
   },
   updated() {
@@ -133,16 +146,22 @@ export default {
     };
   },
   mounted() {
-    this.annotationMode = this.annotationEnabled;
+    this.currentViewMode = this.viewMode;
   },
   methods: {
-    showSidebarInfo(info) {
-      this.$emit("showSidebarInfo", info);
+    onShowMetric(info) {
+      this.$emit("showMetric", info);
       if (this.visibleSidebarInfo !== info) {
         this.visibleSidebarInfo = info;
       } else {
         this.visibleSidebarInfo = undefined;
       }
+    },
+    onChangeViewMode(id) {
+      this.$emit("changeViewMode", id);
+    },
+    onRefresh() {
+      this.$emit("refresh");
     },
   },
 };
@@ -176,29 +195,10 @@ $color: #333346;
     display: block;
     outline: none;
   }
-  .svg-icon {
-    display: block;
-    text-align: center;
-    margin: auto;
-    width: 24px;
-    height: 24px;
-    margin-bottom: 1.5em;
-    fill: $color;
-  }
   &__info {
     position: relative;
     z-index: 1;
     margin-bottom: 5em;
-    &__icon-help {
-      left: 5px;
-      width: 11px !important;
-      margin-right: 0;
-      stroke-width: 2;
-      position: absolute;
-      left: 0.8em;
-    }
-    &__button {
-    }
   }
 }
 a[data-title]:not(.active) {

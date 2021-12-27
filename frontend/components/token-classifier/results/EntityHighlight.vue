@@ -77,7 +77,7 @@ export default {
       return this.text.replace(/\s/g, "").length;
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+      return this.dataset.viewSettings.viewMode === 'annotate';
     },
   },
   methods: {
