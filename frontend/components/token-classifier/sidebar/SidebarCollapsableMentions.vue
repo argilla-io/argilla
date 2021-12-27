@@ -54,7 +54,7 @@ export default {
   },
   computed: {
     sortedObject() {
-      return Object.entries(this.object[this.k]).sort(([,a],[,b]) => b-a);
+      return Object.entries(this.object[this.k]).sort(([, a], [, b]) => b - a);
     },
   },
 };

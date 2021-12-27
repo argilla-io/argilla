@@ -89,7 +89,8 @@ export default {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
     allowValidate() {
-      const isBinary = this.dataset.labels.length === 2 && !this.dataset.isMultiLabel;
+      const isBinary =
+        this.dataset.labels.length === 2 && !this.dataset.isMultiLabel;
       return (
         this.record.status !== "Validated" &&
         !isBinary &&

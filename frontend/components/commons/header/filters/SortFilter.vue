@@ -59,7 +59,11 @@
       class="sort__direction"
       @click="selectSortDirection()"
     >
-      <svgicon width="17" height="24" :name="defaultSortedByDir === 'asc' ? 'arrow-top' : 'arrow-bottom'" />
+      <svgicon
+        width="17"
+        height="24"
+        :name="defaultSortedByDir === 'asc' ? 'arrow-top' : 'arrow-bottom'"
+      />
     </p>
   </div>
 </template>

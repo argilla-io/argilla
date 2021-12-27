@@ -56,15 +56,13 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener("keydown", this.keyDown);
+    window.addEventListener("keyup", this.keyUp);
     if (this.defaultText) {
       this.editableText = this.defaultText;
     } else {
       this.editableText = this.text;
     }
-  },
-  created() {
-    window.addEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);

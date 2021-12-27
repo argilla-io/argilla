@@ -7,9 +7,9 @@ export default {
   props: {
     name: {
       type: String,
-      required: true
+      required: true,
     },
-  }
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -25,6 +25,6 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: top;
-  background: palette(grey, bg)
+  background: palette(grey, bg);
 }
 </style>

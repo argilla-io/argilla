@@ -29,7 +29,10 @@
     <p class="filter__label">{{ filter.name }}:</p>
     <div
       class="filter__item filter__item--score"
-      :class="{ 'filter__item--open': scoreExpanded, 'highlighted' : filter.selected }"
+      :class="{
+        'filter__item--open': scoreExpanded,
+        highlighted: filter.selected,
+      }"
       @click="expandScore"
     >
       <div class="score-content">
@@ -151,8 +154,12 @@ export default {
     },
   },
   beforeMount() {
-    let from = this.filter.selected ? this.filter.selected.from * 100 : this.rangeOptions.min;
-    let to = this.filter.selected ? this.filter.selected.to * 100 : this.rangeOptions.max;
+    let from = this.filter.selected
+      ? this.filter.selected.from * 100
+      : this.rangeOptions.min;
+    let to = this.filter.selected
+      ? this.filter.selected.to * 100
+      : this.rangeOptions.max;
     this.scoreRanges = [from, to];
   },
   methods: {
