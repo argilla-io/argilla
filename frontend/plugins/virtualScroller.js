@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import Vue from 'vue'
-import VueVirtualScroller from 'vue-virtual-scroller'
+import Vue from "vue";
+import VueVirtualScroller from "vue-virtual-scroller";
 
-Vue.use(VueVirtualScroller)
+Vue.use(VueVirtualScroller);

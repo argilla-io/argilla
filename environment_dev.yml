@@ -17,7 +17,7 @@ dependencies:
 # we need this to ensure syntax highlighting in the notebook code cells for the docs
 - ipython
 # for building the frontend
-- nodejs~=14.15.0
+- nodejs~=14.17.0
 - pip:
     # docs
     - sphinx==4.1.2

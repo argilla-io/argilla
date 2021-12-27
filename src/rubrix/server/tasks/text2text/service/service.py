@@ -93,6 +93,7 @@ class Text2TextService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
+        exclude_metrics: bool = True,
     ) -> Text2TextSearchResults:
         """
         Run a search in a dataset
@@ -141,6 +142,7 @@ class Text2TextService:
             ),
             size=size,
             record_from=record_from,
+            exclude_fields=["metrics"] if exclude_metrics else None,
         )
         return Text2TextSearchResults(
             total=results.total,

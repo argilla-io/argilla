@@ -112,6 +112,7 @@ class TextClassificationService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
+        exclude_metrics: bool = True,
     ) -> TextClassificationSearchResults:
         """
         Run a search in a dataset
@@ -155,6 +156,7 @@ class TextClassificationService:
             ),
             size=size,
             record_from=record_from,
+            exclude_fields=["metrics"] if exclude_metrics else None,
         )
         return TextClassificationSearchResults(
             total=results.total,
@@ -208,6 +210,7 @@ class TextClassificationService:
             dataset,
             search=RecordSearch(include_default_aggregations=False),
             size=1,
+            exclude_fields=["metrics", "metadata"],
         )
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:
@@ -360,20 +363,31 @@ class TextClassificationService:
             dataset, rule_query=rule_query, label=label
         )
 
+        coverage = metrics.covered_records / total if total > 0 else None
+        coverage_annotated = (
+            (metrics.correct_records + metrics.incorrect_records) / annotated
+            if annotated > 0
+            else None
+        )
         return LabelingRuleMetricsSummary(
-            coverage=metrics.covered_records / total,
-            coverage_annotated=(metrics.correct_records + metrics.incorrect_records)
-            / annotated,
-            correct=metrics.correct_records,
-            incorrect=metrics.incorrect_records,
-            precision=metrics.precision,
             total_records=total,
+            annotated_records=annotated,
+            coverage=coverage,
+            coverage_annotated=coverage_annotated,
+            correct=metrics.correct_records if annotated > 0 else None,
+            incorrect=metrics.incorrect_records if annotated > 0 else None,
+            precision=metrics.precision if annotated > 0 else None,
         )
 
     def compute_overall_rules_metrics(self, dataset: Dataset):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
+        coverage = metrics.covered_records / total if total else None
+        coverage_annotated = (
+            metrics.annotated_covered_records / annotated if annotated else None
+        )
         return DatasetLabelingRulesMetricsSummary(
-            coverage=metrics.covered_records / total,
-            coverage_annotated=metrics.annotated_covered_records / annotated,
+            coverage=coverage,
+            coverage_annotated=coverage_annotated,
             total_records=total,
+            annotated_records=annotated,
         )

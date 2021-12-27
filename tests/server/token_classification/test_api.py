@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Callable
 
 import pytest
 
@@ -121,34 +122,36 @@ def test_some_sort():
         )
 
 
-def test_create_records_for_token_classification():
+@pytest.mark.parametrize(
+    ("include_metrics", "metrics_validator"),
+    [
+        (True, lambda r: len(r.metrics) > 0),
+        (False, lambda r: len(r.metrics) == 0),
+        (None, lambda r: len(r.metrics) == 0),
+    ],
+)
+def test_create_records_for_token_classification(
+    include_metrics: bool, metrics_validator: Callable
+):
     dataset = "test_create_records_for_token_classification"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"
+    expected_records = 2
+    record = {
+        "tokens": "This is a text".split(" "),
+        "raw_text": "This is a text",
+        "metadata": {"field_one": "value one", "field_two": "value 2"},
+        "prediction": {
+            "agent": "test",
+            "entities": [{"start": 0, "end": 4, "label": entity_label}],
+        },
+        "annotation": {
+            "agent": "test",
+            "entities": [{"start": 0, "end": 4, "label": entity_label}],
+        },
+    }
+    records = [TokenClassificationRecord.parse_obj(record)] * expected_records
 
-    records = [
-        TokenClassificationRecord.parse_obj(data)
-        for data in [
-            {
-                "tokens": "This is a text".split(" "),
-                "raw_text": "This is a text",
-                "metadata": {"field_one": "value one", "field_two": "value 2"},
-                "prediction": {
-                    "agent": "test",
-                    "entities": [{"start": 0, "end": 4, "label": entity_label}],
-                },
-            },
-            {
-                "tokens": "This is a text".split(" "),
-                "raw_text": "This is a text",
-                "metadata": {"field_one": "value one", "field_two": "value 2"},
-                "annotation": {
-                    "agent": "test",
-                    "entities": [{"start": 0, "end": 4, "label": entity_label}],
-                },
-            },
-        ]
-    ]
     response = client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
@@ -162,13 +165,19 @@ def test_create_records_for_token_classification():
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.dataset == dataset
     assert bulk_response.failed == 0
-    assert bulk_response.processed == 2
+    assert bulk_response.processed == expected_records
 
-    response = client.post(f"/api/datasets/{dataset}/TokenClassification:search")
+    search_url = f"/api/datasets/{dataset}/TokenClassification:search"
+    if include_metrics is not None:
+        search_url += f"?include_metrics={include_metrics}"
+
+    response = client.post(search_url)
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
     assert "This" in results.aggregations.predicted_mentions[entity_label]
     assert "This" in results.aggregations.mentions[entity_label]
+    for record in results.records:
+        assert metrics_validator(record)
 
 
 def test_multiple_mentions_in_same_record():

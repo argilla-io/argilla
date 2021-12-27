@@ -80,7 +80,7 @@ export default {
     },
     appliedFilters: {
       type: Object,
-      default: () => { },
+      default: () => {},
     },
     title: {
       type: [Object, String],
@@ -123,8 +123,8 @@ export default {
         (r, k) => (
           (r[k] = Array.isArray(this.appliedFilters[k])
             ? this.appliedFilters[k].filter(
-              (v) => v !== this.normalizedMetadataItems[k]
-            )
+                (v) => v !== this.normalizedMetadataItems[k]
+              )
             : []),
           r
         ),
