@@ -17,10 +17,19 @@
 
 <template>
   <div class="sidebar">
-    <span v-for="group in sidebarButtons" :key="group.name">
-      <div v-if="group.condition !== false" class="sidebar__info">
+    <span v-for="group in sidebarButtonGroups" :key="group.name">
+      <div class="sidebar__info">
         <p>{{ group.name }}</p>
-        <sidebar-button :condition="button.condition" :active-view="group.isActive" :icon="button.icon" :tooltip="button.tooltip" :type="group.name" :id="button.id" v-for="button in group.elements" :key="button.id" @button-action="group.action" />
+        <sidebar-button
+          v-for="button in group.elements"
+          :id="button.id"
+          :key="button.id"
+          :active-view="group.isActive"
+          :icon="button.icon"
+          :tooltip="button.tooltip"
+          :type="group.name"
+          @button-action="group.action"
+        />
       </div>
     </span>
     <slot />
@@ -33,73 +42,81 @@ export default {
     dataset: {
       type: Object,
       requried: false,
-      default: undefined
+      default: undefined,
     },
   },
   data: () => {
     return {
-      currentViewMode: 'explore',
+      currentViewMode: "explore",
       width: window.innerWidth,
       visibleSidebarInfo: undefined,
     };
   },
   computed: {
-    sidebarButtons() {
-      return [
-        { 
-          name: 'Mode',
-          condition: this.isDatasetView,
+    sidebarButtonGroups() {
+      // TODO: sidebar must be customized for task view
+      var groups = [];
+      if (this.isDatasetView) {
+        const modeGroup = {
+          name: "Mode",
           action: this.onChangeViewMode,
           isActive: this.currentViewMode,
           elements: [
-            { 
+            {
               id: "explore",
               tooltip: "Explore",
-              icon: "explore-view"
+              icon: "explore-view",
             },
-            { 
+            {
               id: "annotate",
               tooltip: "Annotate",
-              icon: "annotate-view"
+              icon: "annotate-view",
             },
-            { 
-              id: "labelling-rules",
-              tooltip: "Define rules",
-              icon: "labelling-rules-view",
-              condition: this.showLabellingRules,
-            },
-          ]
-        },
-        {
-          name: 'Metrics',
+          ],
+        };
+
+        if (this.showLabellingRules) {
+          modeGroup.elements.push({
+            id: "labelling-rules",
+            tooltip: "Define rules",
+            icon: "labelling-rules-view",
+          });
+        }
+        groups.push(modeGroup);
+
+        const metrics = {
+          name: "Metrics",
           condition: this.isDatasetView,
           action: this.onShowMetric,
           isActive: this.visibleSidebarInfo,
           elements: [
-            { 
+            {
               id: "progress",
               tooltip: "Progress",
-              icon: "progress"
+              icon: "progress",
             },
             {
               id: "stats",
               tooltip: "Stats",
-              icon: "metrics"
+              icon: "metrics",
             },
-          ]
-        },
-        {
-          name: 'Refresh',
-          action: this.onRefresh,
-          elements: [
-            {
-              id: "refresh",
-              tooltip: "Refresh",
-              icon: "refresh"
-            }
-          ]
-        }
-      ]
+          ],
+        };
+        groups.push(metrics);
+      }
+      const refresh = {
+        name: "Refresh",
+        action: this.onRefresh,
+        elements: [
+          {
+            id: "refresh",
+            tooltip: "Refresh",
+            icon: "refresh",
+          },
+        ],
+      };
+      groups.push(refresh);
+      return groups;
     },
     viewMode() {
       if (this.isDatasetView) {
@@ -111,17 +128,17 @@ export default {
       return this.dataset !== undefined;
     },
     showLabellingRules() {
-      if (this.isDatasetView) {
-        return !this.dataset.isMultiLabel && this.dataset.task === 'TextClassification';
-      } else {
-        return false;
-      }
-    }
+      return (
+        this.isDatasetView &&
+        !this.dataset.isMultiLabel &&
+        this.dataset.task === "TextClassification"
+      );
+    },
   },
   watch: {
     viewMode(newValue) {
       this.currentViewMode = newValue;
-    }
+    },
   },
   updated() {
     window.onresize = () => {
@@ -141,12 +158,12 @@ export default {
       }
     },
     onChangeViewMode(id) {
-      this.$emit('changeViewMode', id);
+      this.$emit("changeViewMode", id);
     },
     onRefresh() {
-      this.$emit('refresh');
+      this.$emit("refresh");
     },
-  }
+  },
 };
 </script>
 

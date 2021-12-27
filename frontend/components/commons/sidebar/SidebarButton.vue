@@ -1,6 +1,6 @@
 <template>
-  <a class="sidebar-button"
-    v-if="condition !== false"
+  <a
+    class="sidebar-button"
     href="#"
     :data-title="tooltip"
     @click="$emit('button-action', id)"
@@ -28,27 +28,29 @@ export default {
   props: {
     activeView: {
       type: String,
+      default: undefined,
     },
     tooltip: {
       type: String,
+      required: true,
     },
     id: {
       type: String,
+      required: true,
     },
     icon: {
       type: String,
-    },
-    condition: {
-      type: Boolean,
+      required: true,
     },
     type: {
       type: String,
+      required: true,
       validator: (value) => {
-        return ['Mode', 'Metrics', 'Refresh'].includes(value);
-      }
-    }
-  }
-}
+        return ["Mode", "Metrics", "Refresh"].includes(value);
+      },
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -73,4 +75,3 @@ $color: #333346;
   fill: $color;
 }
 </style>
-
