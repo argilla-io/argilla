@@ -1,14 +1,18 @@
 <template>
   <div class="rules-global__metrics">
     <template v-if="!$fetchState.error && !$fetchState.pending">
-      <p :data-title="metric.tooltip" v-for="metric in metrics" :key="metric.name">
-        {{metric.name}}
+      <p
+        v-for="metric in metrics"
+        :key="metric.name"
+        :data-title="metric.tooltip"
+      >
+        {{ metric.name }}
         <span v-if="!isNaN(metric.operation) && metric.value !== '0/0'">
           <template v-if="metric.type === 'percent'">
-            {{metric.value | percent}}
+            {{ metric.value | percent }}
           </template>
           <template v-else>
-            {{metric.value}}
+            {{ metric.value }}
           </template>
         </span>
         <span v-else>-</span>
@@ -23,42 +27,70 @@ export default {
   props: {
     rules: {
       type: Array,
+      default: () => [],
     },
     dataset: {
-      type: Object,      
+      type: Object,
+      required: true,
     },
   },
   data: () => {
     return {
       metricsByLabel: {},
       metricsTotal: undefined,
+    };
+  },
+  async fetch() {
+    if (this.rules.length) {
+      await Promise.all([this.getMetrics(), this.getMetricsByLabel()]);
     }
   },
   computed: {
     metrics() {
       return [
-        { name: 'Precision average', tooltip: 'Average fraction of correct labels given by the rules', value: this.getAverage('precision'), type: 'percent', operation: (this.getAverage('precision'))},
-        { name: 'Correct/incorrect', tooltip: 'Total number of records the rules labeled correctly/incorrectly (if annotations are available)', value: `${this.getTotal('correct')}/${this.getTotal('incorrect')}`, operation: this.getTotal('correct') },
-        { name: 'Total coverage', tooltip: 'Fraction of records labeled by any rule', value: this.metricsTotal ? this.metricsTotal.coverage : '-', type: 'percent', operation: this.metricsTotal ? this.metricsTotal.coverage : NaN },
-        { name: 'Annotated coverage', tooltip: 'Fraction of annotated records labeled by any rule', value: this.metricsTotal ? this.metricsTotal.coverage_annotated : '-', type: 'percent', operation: this.metricsTotal ? this.metricsTotal.coverage_annotated : NaN  },
-      ]
-    }
-  },
-  async fetch() {
-    if (this.rules.length) {
-      await this.getMetrics();
-      await this.getMetricsByLabel();
-    }
+        {
+          name: "Precision average",
+          tooltip: "Average fraction of correct labels given by the rules",
+          value: this.getAverage("precision"),
+          type: "percent",
+          operation: this.getAverage("precision"),
+        },
+        {
+          name: "Correct/incorrect",
+          tooltip:
+            "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
+          value: `${this.getTotal("correct")}/${this.getTotal("incorrect")}`,
+          operation: this.getTotal("correct"),
+        },
+        {
+          name: "Total coverage",
+          tooltip: "Fraction of records labeled by any rule",
+          value: this.metricsTotal ? this.metricsTotal.coverage : "-",
+          type: "percent",
+          operation: this.metricsTotal ? this.metricsTotal.coverage : NaN,
+        },
+        {
+          name: "Annotated coverage",
+          tooltip: "Fraction of annotated records labeled by any rule",
+          value: this.metricsTotal ? this.metricsTotal.coverage_annotated : "-",
+          type: "percent",
+          operation: this.metricsTotal
+            ? this.metricsTotal.coverage_annotated
+            : NaN,
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions({
       getRulesMetrics: "entities/text_classification/getRulesMetrics",
-      getRuleMetricsByLabel: "entities/text_classification/getRuleMetricsByLabel",
+      getRuleMetricsByLabel:
+        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async getMetrics() {
       const response = await this.getRulesMetrics({
         dataset: this.dataset,
-      })
+      });
       this.metricsTotal = response;
     },
     async getMetricsByLabel() {
@@ -77,21 +109,23 @@ export default {
       });
     },
     getTotal(type) {
-      const reducer = (previousValue, currentValue) => previousValue + currentValue;
-      const allValues = Object.keys(this.metricsByLabel).map(key => {
+      const reducer = (previousValue, currentValue) =>
+        previousValue + currentValue;
+      const allValues = Object.keys(this.metricsByLabel).map((key) => {
         return this.metricsByLabel[key][type];
       });
       return allValues.reduce(reducer, 0);
     },
     getAverage(type) {
-      const reducer = (previousValue, currentValue) => previousValue + currentValue;
-      const allValues = Object.keys(this.metricsByLabel).map(key => {
+      const reducer = (previousValue, currentValue) =>
+        previousValue + currentValue;
+      const allValues = Object.keys(this.metricsByLabel).map((key) => {
         return this.metricsByLabel[key][type];
       });
       return allValues.reduce(reducer, 0) / allValues.length;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 $color: #333346;
@@ -134,11 +168,9 @@ p[data-title] {
   &:before {
     right: calc(50% - 7px);
     top: -0.5em;
-    border-top: 7px solid  $color;
+    border-top: 7px solid $color;
     border-right: 7px solid transparent;
     border-left: 7px solid transparent;
   }
 }
 </style>
-
-

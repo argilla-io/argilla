@@ -2,16 +2,21 @@
   <div v-if="isVisible" class="rules-management">
     <ReLoading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="rules-management__container">
-      <re-button @click="hideList()" class="rules-management__close button-quaternary">
-        <svgicon
-          name="chev-left"
-          width="12"
-          height="12"
-        ></svgicon>Back to query view</re-button>
+      <re-button
+        class="rules-management__close button-quaternary"
+        @click="hideList()"
+      >
+        <svgicon name="chev-left" width="12" height="12"></svgicon>Back to query
+        view</re-button
+      >
       <p class="rules-management__title">Overall Metrics</p>
       <rules-overall-metrics :rules="rules" :dataset="dataset" />
-      <p class="rules-management__title">Rules</p> 
-      <ReSearchBar @input="onSearch" v-if="formattedRules.length" placeholder="Search rule by name" />
+      <p class="rules-management__title">Rules</p>
+      <ReSearchBar
+        v-if="formattedRules.length"
+        placeholder="Search rule by name"
+        @input="onSearch"
+      />
       <ReTableInfo
         class="rules-management__table"
         :data="formattedRules"
@@ -22,15 +27,20 @@
         :query-search="querySearch"
         :global-actions="false"
         search-on="name"
-        :noDataInfo="noDataInfo"
-        :emptySearchInfo="emptySearchInfo"
+        :no-data-info="noDataInfo"
+        :empty-search-info="emptySearchInfo"
         :visible-modal-id="visibleModalId"
         :delete-modal-content="getDeleteModalText"
         @sort-column="onSortColumns"
         @onActionClicked="onActionClicked"
         @close-modal="closeModal"
       />
-      <re-button v-if="formattedRules.length" class="button-primary" @click="updateSummary()">Update Summary</re-button>
+      <re-button
+        v-if="formattedRules.length"
+        class="button-primary"
+        @click="updateSummary()"
+        >Update Summary</re-button
+      >
     </div>
   </div>
 </template>
@@ -78,12 +88,12 @@ export default {
       sortedByField: "query",
       actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
       noDataInfo: {
-        title: '0 rules defined',
+        title: "0 rules defined",
         message: `You have not defined any rules for this dataset yet.`,
-        icon: 'empty-rules',
+        icon: "empty-rules",
       },
       emptySearchInfo: {
-        title: '0 rules found',
+        title: "0 rules found",
       },
     };
   },
@@ -112,8 +122,8 @@ export default {
     },
     getDeleteModalText() {
       return {
-        title: 'Permanently delete rule',
-        text: `You are about to delete the rule <strong>"${this.visibleModalId}"</strong> from your dataset. This action cannot be undone.`
+        title: "Permanently delete rule",
+        text: `You are about to delete the rule <strong>"${this.visibleModalId}"</strong> from your dataset. This action cannot be undone.`,
       };
     },
   },
@@ -154,7 +164,6 @@ export default {
       await this.hideList();
     },
     onActionClicked(action, rowId) {
-      console.log(action, rowId);
       switch (action) {
         case "delete":
           this.onShowConfirmRuleDeletion(rowId);
@@ -205,7 +214,7 @@ export default {
   &__container {
     margin-top: 3em;
     padding: 20px;
-    background: rgba($lighter-color, .4);
+    background: rgba($lighter-color, 0.4);
     border: 1px solid $lighter-color;
     width: 100%;
     border-radius: 5px;
