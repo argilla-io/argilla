@@ -1,7 +1,7 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<p> Build, refine and manage data for NLP.</p> 
+<p> Build, refine and manage data for NLP.</p>
 <p> Rubrix is an open-source Python framework to explore, label, and monitor data for NLP</p>
 <p align="left">
     <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
@@ -45,16 +45,16 @@
         <img alt="CI" src="https://img.shields.io/twitter/follow/rubrixml.svg?style=social&label=Follow">
     </a>
     <!--img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix?sort=semver"-->
-    
+
 </p>
 
-https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4
+<video width="100%" controls><source src="../_static/tutorials/portada.mp4" type="video/mp4"></video>
 <p align="center">Example: Named Entity Recognition data exploration and annotation with spaCy and the IMDB dataset</p>
 
 
 ## What is Rubrix?
 
-Rubrix is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
+Rubrix is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects.
 
 Why Rubrix?
 
@@ -62,7 +62,7 @@ Why Rubrix?
 
 - **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions, and collect more data to improve your model over time. Rubrix is designed to close this gap, enabling you to **iterate as much as you need**.
 
-- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**.
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
@@ -102,7 +102,7 @@ To get started you need to follow three steps:
 
 🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
 
-   
+
 ### 1. Install the Python client
 
 You can install the Python client with `pip` or `conda`.
@@ -192,9 +192,9 @@ To better understand what's possible take a look at Rubrix's [Cookbook](https://
 
 ## Example
 
-Let's see Rubrix in action with a quick example: *Bootstraping data annotation with a zero-shot classifier* 
+Let's see Rubrix in action with a quick example: *Bootstraping data annotation with a zero-shot classifier*
 
-**Why**: 
+**Why**:
 
 - The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
 - The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
