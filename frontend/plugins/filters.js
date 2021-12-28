@@ -17,6 +17,6 @@ Vue.filter("percent", function (value) {
     style: "percent",
     minimumFractionDigits: 2,
     maximumFractionDigits: 3,
-  })
-  return formatter.format(value)
+  });
+  return formatter.format(value);
 });
