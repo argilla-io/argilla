@@ -74,7 +74,7 @@ export default {
         : entities.slice(0, this.entitiesNumber);
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === 'annotate';
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
   },
   methods: {

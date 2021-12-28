@@ -1,10 +1,13 @@
 <template>
   <div class="rules__metrics">
     <div v-for="metric in filteredMetrics" :key="metric.id">
-      <p :data-title="metric.tooltip">{{ metric.name }}
+      <p :data-title="metric.tooltip">
+        {{ metric.name }}
         <span v-if="isNaN(metric.value)">-</span>
-        <strong v-else-if="metric.type === 'percent'">{{metric.value | percent}}</strong>
-        <strong v-else>{{metric.value}}</strong>
+        <strong v-else-if="metric.type === 'percent'">{{
+          metric.value | percent
+        }}</strong>
+        <strong v-else>{{ metric.value }}</strong>
       </p>
     </div>
   </div>
@@ -13,23 +16,52 @@
 <script>
 export default {
   computed: {
-      filteredMetrics() {
-        return [ 
-          { name: 'Coverage', type: 'percent', value: this.metrics.coverage, tooltip: 'Fraction of records labeled by the rule' },
-          { name: 'Annotated Coverage', type: 'percent', value: this.metrics.coverage_annotated, tooltip: 'Fraction of annotated records labeled by the rule' },
-          { name: 'Records', value: Math.round(this.metrics.total_records * this.metrics.coverage), tooltip: 'Records matching the query' },
-          { name: 'Correct', value: this.metrics.correct, tooltip: 'Number of records the rule labeled correctly (if annotations are available)' },
-          { name: 'Incorrect', value: this.metrics.incorrect, tooltip: 'Number of records the rule labeled incorrectly (if annotations are available)' },
-          { name: 'Precision', type: 'percent', value: this.metrics.precision, tooltip: "Fraction of correct labels given by the rule" }
-        ]
-      }
+    filteredMetrics() {
+      return [
+        {
+          name: "Coverage",
+          type: "percent",
+          value: this.metrics.coverage,
+          tooltip: "Fraction of records labeled by the rule",
+        },
+        {
+          name: "Annotated Coverage",
+          type: "percent",
+          value: this.metrics.coverage_annotated,
+          tooltip: "Fraction of annotated records labeled by the rule",
+        },
+        {
+          name: "Records",
+          value: Math.round(this.metrics.total_records * this.metrics.coverage),
+          tooltip: "Records matching the query",
+        },
+        {
+          name: "Correct",
+          value: this.metrics.correct,
+          tooltip:
+            "Number of records the rule labeled correctly (if annotations are available)",
+        },
+        {
+          name: "Incorrect",
+          value: this.metrics.incorrect,
+          tooltip:
+            "Number of records the rule labeled incorrectly (if annotations are available)",
+        },
+        {
+          name: "Precision",
+          type: "percent",
+          value: this.metrics.precision,
+          tooltip: "Fraction of correct labels given by the rule",
+        },
+      ];
+    },
   },
   props: {
     metrics: {
       type: Object,
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 $color: #333346;
@@ -42,7 +74,8 @@ $color: #333346;
     min-width: 25%;
     white-space: nowrap;
     margin-right: 2em;
-    span, strong {
+    span,
+    strong {
       display: block;
     }
     strong {
@@ -71,12 +104,9 @@ p[data-title] {
   &:before {
     right: calc(50% - 7px);
     top: -0.5em;
-    border-top: 7px solid  $color;
+    border-top: 7px solid $color;
     border-right: 7px solid transparent;
     border-left: 7px solid transparent;
   }
 }
 </style>
-
-
-   

@@ -20,12 +20,14 @@ module.exports = {
   env: {
     node: true,
     browser: true,
+    jest: true,
   },
   extends: [
     "plugin:nuxt/recommended",
     "eslint:recommended",
     "prettier/vue",
     "plugin:prettier/recommended",
+    "plugin:cypress/recommended",
   ],
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",

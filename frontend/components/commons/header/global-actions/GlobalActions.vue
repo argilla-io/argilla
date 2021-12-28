@@ -33,7 +33,7 @@ export default {
   data: () => ({}),
   computed: {
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === 'annotate';
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
   },
 };

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="content">  
+  <div class="content">
     <slot name="header" />
     <div class="results-scroll" id="scroll">
       <div
@@ -34,8 +34,13 @@
         :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
       >
         <template #before>
-          <slot name="results-header"/>
-          <results-empty :title="emptySearchInfo.title" :message="emptySearchInfo.message" :icon="emptySearchInfo.icon" v-if="dataset.results.total === 0" />
+          <slot name="results-header" />
+          <results-empty
+            :title="emptySearchInfo.title"
+            :message="emptySearchInfo.message"
+            :icon="emptySearchInfo.icon"
+            v-if="dataset.results.total === 0"
+          />
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
@@ -48,7 +53,12 @@
             :index="index"
             :data-index="index"
           >
-            <results-record @show-metadata="onShowMetadata" :key="`${dataset.name}-${item.id}`" :dataset="dataset" :item="item">
+            <results-record
+              @show-metadata="onShowMetadata"
+              :key="`${dataset.name}-${item.id}`"
+              :dataset="dataset"
+              :item="item"
+            >
               <slot name="record" :record="item" />
             </results-record>
           </DynamicScrollerItem>

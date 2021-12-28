@@ -122,10 +122,7 @@ async function _loadTaskDataset(dataset) {
   return _dataset;
 }
 
-async function _configureDatasetViewSettings(
-  datasetName,
-  viewMode
-) {
+async function _configureDatasetViewSettings(datasetName, viewMode) {
   /**
    * Initialize dataset view settings
    */
@@ -134,7 +131,7 @@ async function _configureDatasetViewSettings(
     data: {
       pagination: { id: datasetName },
       id: datasetName,
-      viewMode: viewMode ? viewMode : 'explore',
+      viewMode: viewMode ? viewMode : "explore",
     },
   });
 }
@@ -147,7 +144,7 @@ function _configuredRouteParams() {
   return {
     query: JSON.parse(query ? Base64.decode(query) : "{}"),
     sort: JSON.parse(sort ? Base64.decode(sort) : "[]"),
-    viewMode: viewMode || 'explore',
+    viewMode: viewMode || "explore",
     pagination: pagination ? JSON.parse(Base64.decode(pagination)) : {},
   };
 }
