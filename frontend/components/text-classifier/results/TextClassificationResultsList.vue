@@ -33,7 +33,7 @@
       />
     </template>
   </results-list>
-  <rules-management class="content" v-else :dataset="dataset"/>
+  <rules-management class="content" v-else :dataset="dataset" />
 </template>
 <script>
 export default {
@@ -48,7 +48,7 @@ export default {
   }),
   computed: {
     showRulesArea() {
-      return this.dataset.viewSettings.viewMode === 'labelling-rules';
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
   },
   methods: {
@@ -78,4 +78,3 @@ export default {
   }
 }
 </style>
-

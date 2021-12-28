@@ -18,7 +18,13 @@
 <template>
   <div class="empty">
     <span class="empty__content">
-      <svgicon v-if="icon" :name="icon" width="50" height="50" color="#686a6d" />
+      <svgicon
+        v-if="icon"
+        :name="icon"
+        width="50"
+        height="50"
+        color="#686a6d"
+      />
       <h1 class="empty__title">{{ title }}</h1>
       <p v-if="message" class="empty__message" v-html="message" />
     </span>
@@ -60,7 +66,7 @@ export default {
   &__title {
     @include font-size(30px);
     font-weight: 400;
-    color: palette(grey, medium)
+    color: palette(grey, medium);
   }
   &__message {
     max-width: 600px;

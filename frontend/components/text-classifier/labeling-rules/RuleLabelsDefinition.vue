@@ -17,11 +17,7 @@
 
 <template>
   <div class="rule-labels-definition">
-    <input
-      v-if="query"
-      v-model="description"
-      class="rule__description"
-    />
+    <input v-if="query" v-model="description" class="rule__description" />
     <div v-if="labels.length">
       <label-search
         v-if="labels.length > maxVisibleLabels"
@@ -60,13 +56,25 @@
     <div v-else class="empty-labels">
       <p>This doesn't have any labels yet.</p>
       <p>
-        To create new rules you need al least two labels. It's highly recommended to also annotate some records with these labels. Go to the annotation mode to 
-        <a href="#" @click.prevent="changeToAnnotationViewMode">create the labels and annotate some records</a>.
+        To create new rules you need al least two labels. It's highly
+        recommended to also annotate some records with these labels. Go to the
+        annotation mode to
+        <a href="#" @click.prevent="changeToAnnotationViewMode"
+          >create the labels and annotate some records</a
+        >.
       </p>
     </div>
     <rule-labels-definition-metrics :metrics="metrics" />
-    <p v-if="currentRule && selectedLabels.includes(currentRule.label) && currentRule.description === description">
-      {{saved ? 'Rule has been saved' : 'This query is already saved as a rule'}}.
+    <p
+      v-if="
+        currentRule &&
+        selectedLabels.includes(currentRule.label) &&
+        currentRule.description === description
+      "
+    >
+      {{
+        saved ? "Rule has been saved" : "This query is already saved as a rule"
+      }}.
     </p>
     <re-button
       v-else
@@ -147,14 +155,14 @@ export default {
   },
   watch: {
     async currentRule(n) {
-      this.setDescription()
+      this.setDescription();
       if (n) {
         this.selectedLabels = [n.label];
         await this.getMetricsByLabel(n.label);
       }
     },
     async query(n) {
-      this.setDescription()
+      this.setDescription();
       this.saved = false;
       if (!n) {
         this.metrics = {};
@@ -162,10 +170,10 @@ export default {
       } else {
         await this.getMetricsByLabel(this.selectedLabels[0]);
       }
-    }
+    },
   },
   async mounted() {
-    this.setDescription()
+    this.setDescription();
     if (this.currentRule) {
       this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
       await this.getMetricsByLabel(this.currentRule.label);
@@ -286,28 +294,29 @@ export default {
   }
 }
 .label-button:not(.active) ::v-deep .button {
-  background: #E0E1FF !important;
+  background: #e0e1ff !important;
 }
 .rule__description {
-    width: 100%;
+  width: 100%;
+  color: $font-secondary;
+  @include font-size(18px);
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1em;
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  @include input-placeholder {
     color: $font-secondary;
-    @include font-size(18px);
     font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 1em;
-    border: none;
-    background: none;
-    padding: 0;
-    outline: none;
+  }
+  &:hover,
+  .focused {
+    color: $font-secondary-dark;
     @include input-placeholder {
-      color: $font-secondary;
-      font-weight: 600;
-    }
-    &:hover, .focused {
       color: $font-secondary-dark;
-      @include input-placeholder {
-        color: $font-secondary-dark;
-      }
     }
   }
+}
 </style>

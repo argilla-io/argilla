@@ -111,10 +111,10 @@ export default {
     },
     getDeleteModalContent() {
       return {
-        title: 'Delete confirmation',
-        text: `You are about to delete: <strong>${this.visibleModalId}</strong>. This action cannot be undone`
-      }
-    }
+        title: "Delete confirmation",
+        text: `You are about to delete: <strong>${this.visibleModalId}</strong>. This action cannot be undone`,
+      };
+    },
   },
   methods: {
     ...mapActions({

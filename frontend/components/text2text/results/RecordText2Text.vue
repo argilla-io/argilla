@@ -75,7 +75,7 @@ export default {
       },
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === 'annotate';
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
     annotationSentences() {
       return this.record.annotation ? this.record.annotation.sentences : [];

@@ -10,7 +10,11 @@
       </div>
       <div class="rule__global-metrics">
         <p class="global-metrics__title">Overall Metrics</p>
-        <rules-overall-metrics :key="refresh" :rules="rules" :dataset="dataset" />
+        <rules-overall-metrics
+          :key="refresh"
+          :rules="rules"
+          :dataset="dataset"
+        />
         <re-button
           class="rule__button button-quaternary--outline"
           @click="showRulesList"
@@ -18,7 +22,9 @@
         >
       </div>
     </div>
-    <p class="rule__records" v-if="dataset.results.total > 0">Records ({{ dataset.results.total | formatNumber }})</p>
+    <p class="rule__records" v-if="dataset.results.total > 0">
+      Records ({{ dataset.results.total | formatNumber }})
+    </p>
   </div>
 </template>
 <script>
@@ -58,8 +64,8 @@ export default {
     async currentRule(n, o) {
       if (o !== n) {
         this.refresh++;
-      }      
-    }
+      }
+    },
   },
   methods: {
     async showRulesList() {
@@ -121,8 +127,9 @@ export default {
         padding-bottom: 2em;
         @include font-size(14px);
         &[data-title] {
-          &:after, &:before {
-            display:none;
+          &:after,
+          &:before {
+            display: none;
           }
         }
         span {
