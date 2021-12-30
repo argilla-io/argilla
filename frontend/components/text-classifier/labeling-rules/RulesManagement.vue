@@ -1,46 +1,59 @@
 <template>
   <div v-if="isVisible" class="rules-management">
     <ReLoading v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error" class="rules-management__container">
-      <re-button
-        class="rules-management__close button-quaternary"
-        @click="hideList()"
+    <div v-else-if="!$fetchState.error">
+      <rules-metrics
+        title="Overall Metrics"
+        :dataset="dataset"
+        metrics-type="overall"
       >
-        <svgicon name="chev-left" width="12" height="12"></svgicon>Back to query
-        view</re-button
-      >
-      <p class="rules-management__title">Overall Metrics</p>
-      <rules-overall-metrics :rules="rules" :dataset="dataset" />
-      <p class="rules-management__title">Rules</p>
-      <ReSearchBar
-        v-if="formattedRules.length"
-        placeholder="Search rule by name"
-        @input="onSearch"
-      />
-      <ReTableInfo
-        class="rules-management__table"
-        :data="formattedRules"
-        :sorted-order="sortedOrder"
-        :sorted-by-field="sortedByField"
-        :columns="tableColumns"
-        :actions="actions"
-        :query-search="querySearch"
-        :global-actions="false"
-        search-on="name"
-        :no-data-info="noDataInfo"
-        :empty-search-info="emptySearchInfo"
-        :visible-modal-id="visibleModalId"
-        :delete-modal-content="getDeleteModalText"
-        @sort-column="onSortColumns"
-        @onActionClicked="onActionClicked"
-        @close-modal="closeModal"
-      />
-      <re-button
-        v-if="formattedRules.length"
-        class="button-primary"
-        @click="updateSummary()"
-        >Update Summary</re-button
-      >
+        <template #button-top>
+          <re-button
+            class="rules-management__close button-quaternary--outline"
+            @click="hideList()"
+          >
+            <svgicon
+              name="chev-left"
+              color="white"
+              width="12"
+              height="12"
+            ></svgicon
+            >Back to query view</re-button
+          >
+        </template>
+      </rules-metrics>
+      <div class="rules-management__container">
+        <p class="rules-management__title">Rules</p>
+        <ReSearchBar
+          v-if="formattedRules.length"
+          placeholder="Search rule by name"
+          @input="onSearch"
+        />
+        <ReTableInfo
+          class="rules-management__table"
+          :data="formattedRules"
+          :sorted-order="sortedOrder"
+          :sorted-by-field="sortedByField"
+          :columns="tableColumns"
+          :actions="actions"
+          :query-search="querySearch"
+          :global-actions="false"
+          search-on="name"
+          :no-data-info="noDataInfo"
+          :empty-search-info="emptySearchInfo"
+          :visible-modal-id="visibleModalId"
+          :delete-modal-content="getDeleteModalText"
+          @sort-column="onSortColumns"
+          @onActionClicked="onActionClicked"
+          @close-modal="closeModal"
+        />
+        <re-button
+          v-if="formattedRules.length"
+          class="button-primary"
+          @click="updateSummary()"
+          >Update Summary</re-button
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -208,11 +221,10 @@ export default {
 <style lang="scss" scoped>
 .rules-management {
   padding-left: 4em;
-  padding-top: 3em;
+  padding-top: 7em;
   overflow: auto;
   height: 100vh;
   &__container {
-    margin-top: 3em;
     padding: 20px;
     background: rgba($lighter-color, 0.4);
     border: 1px solid $lighter-color;
@@ -244,7 +256,27 @@ export default {
     }
   }
   &__close {
-    float: right;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+}
+.rule-metrics {
+  &__container {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 20px;
+    min-height: 180px;
+    &::v-deep {
+      .rule-metrics {
+        display: flex;
+        &__item {
+          width: 100%;
+          margin-top: 1em;
+          margin-bottom: 2em;
+        }
+      }
+    }
   }
 }
 </style>

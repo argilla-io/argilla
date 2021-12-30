@@ -17,10 +17,16 @@
 
 <template>
   <div class="rule-labels-definition">
-    <input v-if="query" v-model="description" class="rule__description" />
-    <div v-if="labels.length">
+    <div class="rule-labels-definition__info">
+      <input v-if="query" v-model="description" class="rule__description" />
+      <p class="rule__text" v-else>New query</p>
+      <p class="rule__records">
+        <slot name="records-metric" />
+      </p>
+    </div>
+    <div class="rule__labels" v-if="labels.length">
       <label-search
-        v-if="labels.length > maxVisibleLabels"
+        v-if="query && labels.length > maxVisibleLabels"
         :search-text="searchText"
         @input="onSearchLabel"
       />
@@ -31,7 +37,7 @@
         v-model="selectedLabels"
         :allow-multiple="isMultiLabel"
         :label="label"
-        :class="[!dataset.query.text ? 'non-reactive' : null, 'label-button']"
+        :class="[!query ? 'non-reactive' : null, 'label-button']"
         :data-title="label.class"
         :value="label.class"
         @change="updateLabel"
@@ -39,14 +45,14 @@
       </ClassifierAnnotationButton>
 
       <a
-        v-if="visibleLabels.length < filteredLabels.length"
+        v-if="query && visibleLabels.length < filteredLabels.length"
         href="#"
         class="feedback-interactions__more"
         @click.prevent="expandLabels()"
         >+{{ filteredLabels.length - visibleLabels.length }}</a
       >
       <a
-        v-else-if="visibleLabels.length > maxVisibleLabels"
+        v-else-if="query && visibleLabels.length > maxVisibleLabels"
         href="#"
         class="feedback-interactions__more"
         @click.prevent="collapseLabels()"
@@ -64,7 +70,9 @@
         >.
       </p>
     </div>
-    <rule-labels-definition-metrics :metrics="metrics" />
+    <div v-if="!query" class="empty-query">
+      <p><strong>Introduce a query</strong> to define a rule.</p>
+    </div>
     <p
       v-if="
         currentRule &&
@@ -77,7 +85,7 @@
       }}.
     </p>
     <re-button
-      v-else
+      v-else-if="query"
       :disabled="!selectedLabels.length"
       class="feedback-interactions__button button-primary"
       @click="createRule()"
@@ -106,7 +114,6 @@ export default {
       saved: false,
       searchText: "",
       selectedLabels: [],
-      metrics: {},
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       description: undefined,
     };
@@ -154,38 +161,31 @@ export default {
     },
   },
   watch: {
-    async currentRule(n) {
+    currentRule(n) {
       this.setDescription();
       if (n) {
         this.selectedLabels = [n.label];
-        await this.getMetricsByLabel(n.label);
       }
     },
-    async query(n) {
+    query(n) {
       this.setDescription();
       this.saved = false;
       if (!n) {
-        this.metrics = {};
         this.selectedLabels = [];
-      } else {
-        await this.getMetricsByLabel(this.selectedLabels[0]);
+        this.$emit("update-label", undefined);
       }
     },
   },
-  async mounted() {
+  mounted() {
     this.setDescription();
     if (this.currentRule) {
       this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
-      await this.getMetricsByLabel(this.currentRule.label);
     }
   },
   methods: {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
       defineRule: "entities/text_classification/defineRule",
-      updateRule: "entities/text_classification/updateRule",
-      getRuleMetricsByLabel:
-        "entities/text_classification/getRuleMetricsByLabel",
     }),
     async createRule() {
       if (this.currentRule) {
@@ -205,18 +205,6 @@ export default {
       this.collapseLabels();
       this.$emit("update-rule");
     },
-    async getMetricsByLabel(label) {
-      if (label !== undefined && label.length) {
-        const response = await this.getRuleMetricsByLabel({
-          dataset: this.dataset,
-          query: this.dataset.query.text,
-          label: label,
-        });
-        this.metrics = response;
-      } else {
-        this.metrics = {};
-      }
-    },
     setDescription() {
       this.description = this.currentRule
         ? this.currentRule.description
@@ -231,8 +219,8 @@ export default {
     onSearchLabel(event) {
       this.searchText = event;
     },
-    async updateLabel(label) {
-      await this.getMetricsByLabel(label);
+    updateLabel(label) {
+      this.$emit("update-label", label);
     },
     async changeToAnnotationViewMode() {
       await this.changeViewMode({
@@ -253,8 +241,8 @@ export default {
   height: 100%;
   display: flex;
   flex-flow: column;
-  @include media(">desktopLarge") {
-    max-width: 60%;
+  &__info {
+    display: flex;
   }
 }
 .feedback-interactions {
@@ -278,7 +266,6 @@ export default {
     }
   }
   &__button {
-    margin-top: auto;
     margin-bottom: 0 !important;
     align-self: flex-start;
   }
@@ -293,30 +280,67 @@ export default {
     text-decoration: none;
   }
 }
+.empty-query {
+  @include font-size(18px);
+  color: palette(grey, medium);
+  text-align: center;
+  margin-bottom: 2em;
+  margin-top: 2em;
+}
+.label-button {
+  margin: 5px;
+}
+.label-button ::v-deep .button {
+  justify-content: center;
+}
 .label-button:not(.active) ::v-deep .button {
   background: #e0e1ff !important;
 }
-.rule__description {
-  width: 100%;
-  color: $font-secondary;
-  @include font-size(18px);
-  font-weight: 600;
-  margin-top: 0;
-  margin-bottom: 1em;
-  border: none;
-  background: none;
-  padding: 0;
-  outline: none;
-  @include input-placeholder {
+.rule {
+  &__description {
+    width: 100%;
+    height: 20px;
     color: $font-secondary;
     font-weight: 600;
-  }
-  &:hover,
-  .focused {
-    color: $font-secondary-dark;
+    margin-top: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    outline: none;
     @include input-placeholder {
+      color: $font-secondary;
+      font-weight: 600;
+    }
+    &:hover,
+    .focused {
       color: $font-secondary-dark;
     }
   }
+  &__text {
+    color: palette(grey, medium);
+    @include font-size(18px);
+    font-weight: 600;
+    margin-top: 0;
+  }
+  &__records {
+    color: palette(grey, medium);
+    margin-left: auto;
+    margin-top: 0;
+    min-width: 200px;
+    text-align: right;
+    @include font-size(14px);
+    strong {
+      font-weight: 600;
+    }
+  }
+  &__labels {
+    margin-bottom: 1em;
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+}
+.searchbar {
+  margin-top: 0 !important;
+  margin-left: 5px !important;
 }
 </style>
