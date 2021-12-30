@@ -1,8 +1,7 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<p> Build, refine and manage data for NLP.</p> 
-<p> Rubrix is an open-source Python framework to explore, label, and monitor data for NLP</p>
+<h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3> 
 <p align="left">
     <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
     ·
@@ -189,6 +188,23 @@ Congratulations! You are ready to start working with Rubrix. You can continue re
 
 To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
 
+## Quick links
+
+| Doc | Description |
+|---|---|
+| 🚶 **[First steps](https://rubrix.rtfd.io/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
+| 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
+| 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
+| 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
+| 📱 **[Web app reference](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
+| 🐍 **[Python client API](https://rubrix.readthedocs.io/en/stable/reference/python/index.html)** | How to use the Python classes and methods |
+| 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
+| 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
+| 🤗 **[Hugging Face tutorial](https://rubrix.readthedocs.io/en/master/tutorials/01-labeling-finetuning.html)** | Using `Hugging Face` transformers with Rubrix for text classification|
+| 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
+| 🐠 **[Weak supervision tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supervision-with-rubrix.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
+| 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
+
 
 ## Example
 
@@ -271,23 +287,6 @@ Rubrix main components are:
 - **Rubrix web app**: Easy-to-use web application for data exploration and annotation.
 
 ![](docs/images/rubrix_intro.svg)
-
-## Quick links
-
-| Doc | Description |
-|---|---|
-| 🚶 **[First steps](https://rubrix.rtfd.io/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
-| 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
-| 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
-| 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
-| 📱 **[Web app reference](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
-| 🐍 **[Python client API](https://rubrix.readthedocs.io/en/stable/reference/python/index.html)** | How to use the Python classes and methods |
-| 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
-| 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
-| 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
-| 🐠 **[Weak supervision tutorial](https://rubrix.rtfd.io/en/stable/tutorials/04-snorkel.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
-| 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
-| 🧪 **[Knowledge graph tutorial](https://rubrix.rtfd.io/en/stable/tutorials/03-kglab_pytorch_geometric.html)** | How to use Rubrix with `kglab` & `pytorch_geometric` |
 
 
 
