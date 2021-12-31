@@ -300,6 +300,7 @@ export default {
 }
 .rule {
   &__description {
+    @include font-size(18px);
     width: 100%;
     height: 20px;
     color: $font-secondary;

@@ -265,7 +265,7 @@ $color: #333346;
     color: $lighter-color;
     border-radius: 5px;
     margin-bottom: 2em;
-    padding: 20px;
+    padding: 30px;
   }
   &__title {
     padding-bottom: 0;
@@ -286,7 +286,7 @@ $color: #333346;
         }
         &__overall {
           span {
-            font-weight: 600;
+            font-weight: 800;
           }
         }
       }
@@ -295,7 +295,7 @@ $color: #333346;
       span {
         display: block;
         @include font-size(20px);
-        font-weight: 600;
+        font-weight: 800;
         margin-top: 0.2em;
       }
     }

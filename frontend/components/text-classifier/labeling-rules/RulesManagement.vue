@@ -257,8 +257,8 @@ export default {
   }
   &__close {
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: 30px;
+    top: 30px;
   }
 }
 .rule-metrics {
