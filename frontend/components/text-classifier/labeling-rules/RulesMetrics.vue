@@ -275,6 +275,7 @@ $color: #333346;
     margin-top: 0;
   }
   &__item {
+    min-height: 82px;
     &.all {
       .metric {
         &__rule {
@@ -306,10 +307,6 @@ $color: #333346;
     @include font-size(14px);
     font-weight: 600;
     margin-bottom: 0;
-  }
-  &__placeholder {
-    @include font-size(20px);
-    margin-top: 0.4em;
   }
 }
 p[data-title] {

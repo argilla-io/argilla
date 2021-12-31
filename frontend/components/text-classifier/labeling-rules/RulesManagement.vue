@@ -273,11 +273,6 @@ export default {
         &__item {
           width: 100%;
           margin-top: 1em;
-          margin-bottom: 2em;
-        }
-        .metric__placeholder {
-          margin-top: 0;
-          margin-bottom: 0;
         }
       }
     }

@@ -137,7 +137,6 @@ export default {
   }
   &__metrics {
     min-width: 350px;
-    min-height: 320px;
     @include media(">desktopLarge") {
       min-width: 33%;
     }
@@ -149,9 +148,6 @@ export default {
       .rule-metrics__item {
         width: 49%;
         display: inline-block;
-      }
-      .metric__placeholder {
-        margin-bottom: 0.95em;  
       }
     }
   }
