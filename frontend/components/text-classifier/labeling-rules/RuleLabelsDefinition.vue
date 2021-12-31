@@ -186,6 +186,7 @@ export default {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
       defineRule: "entities/text_classification/defineRule",
+      updateRule: "entities/text_classification/updateRule",
     }),
     async createRule() {
       if (this.currentRule) {
@@ -266,6 +267,7 @@ export default {
     }
   }
   &__button {
+    margin-top: auto;
     margin-bottom: 0 !important;
     align-self: flex-start;
   }
