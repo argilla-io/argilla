@@ -19,12 +19,6 @@
   <div class="content">
     <slot name="header" />
     <div class="results-scroll" id="scroll">
-      <div
-        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-        v-if="showLoader"
-      >
-        <results-loading :size="dataset.viewSettings.pagination.size" />
-      </div>
       <DynamicScroller
         page-mode
         class="scroller"
@@ -41,10 +35,11 @@
             :icon="emptySearchInfo.icon"
             v-if="dataset.results.total === 0"
           />
+          <results-loading v-if="showLoader" :size="dataset.viewSettings.pagination.size" />
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
-            v-show="dataset.results.total > 0"
+            v-show="!showLoader && dataset.results.total > 0"
             :watch-data="true"
             class="content__li"
             :item="item"
@@ -210,19 +205,21 @@ export default {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
-    padding-bottom: 61px;
     transition: padding 0s ease-in-out 0.1s;
     &::-webkit-scrollbar {
       display: none;
-    }
-    .fixed-header & {
-      padding-bottom: 200px;
     }
   }
   &__li {
     padding-bottom: 10px;
     position: relative;
     min-height: 140px;
+  }
+}
+.scroller {
+  padding-bottom: 61px;
+  .fixed-header & {
+    padding-bottom: 200px;
   }
 }
 </style>
