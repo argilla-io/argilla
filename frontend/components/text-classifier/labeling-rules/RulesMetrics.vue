@@ -2,55 +2,57 @@
   <div class="rule-metrics__container">
     <p class="rule-metrics__title">{{ title }}</p>
     <slot name="button-top" />
-    <template>
-      <div class="rule-metrics">
-        <div
-          :class="[metricsType, 'rule-metrics__item']"
-          v-for="metric in metrics"
-          :key="metric.name"
-        >
-          <p
-            class="metric__title"
-            :data-title="
-              metricsType === 'overall'
-                ? metric.overall.tooltip
-                : metric.rule.tooltip
-            "
-          >
-            {{ metric.name }}
-          </p>
-          <template v-if="metricsType !== 'overall'">
-            <p class="metric__rule">
-              <transition name="fade" mode="out-in" appear>
-                <strong
-                  :key="metric.rule.value"
-                  v-if="metric.rule.type === 'percent'"
-                  >{{ metric.rule.value | percent }}</strong
-                >
-                <strong :key="metric.rule.value" v-else>{{
-                  metric.rule.value
-                }}</strong>
-              </transition>
-            </p>
-          </template>
-          <template v-if="metricsType !== 'rule'">
-            <span class="metric__overall">
-              <template v-if="metricsType === 'all'">{{
-                metric.overall.description
-              }}</template>
-              <transition name="fade" mode="out-in" appear>
-                <span v-if="metric.overall.type === 'percent'">
-                  {{ metric.overall.value | percent }}
-                </span>
-                <span v-else>
-                  {{ metric.overall.value }}
-                </span>
-              </transition>
-            </span>
-          </template>
+    <div class="rule-metrics">
+      <template v-if="$fetchState.pending">
+        <div class="rule-metrics__item" v-for="(field, index) in fields" :key="index">
+          <p class="metric__title">{{field}}</p>
+          <p class="metric__placeholder">-</p>
         </div>
+      </template>
+      <template v-else-if="!$fetchState.error">
+      <div
+        :class="[metricsType, 'rule-metrics__item']"
+        v-for="metric in metrics"
+        :key="metric.name"
+      >
+        <p
+          class="metric__title"
+          :data-title="
+            metricsType === 'overall'
+              ? metric.overall.tooltip
+              : metric.rule.tooltip
+          "
+        >
+          {{ metric.name }}
+        </p>
+        <p class="metric__rule" v-if="metricsType !== 'overall'">
+          <transition name="fade" mode="out-in" appear>
+            <strong
+              :key="metric.rule.value"
+              v-if="metric.rule.type === 'percent'"
+              >{{ metric.rule.value | percent }}</strong
+            >
+            <strong :key="metric.rule.value" v-else>{{
+              metric.rule.value
+            }}</strong>
+          </transition>
+        </p>
+        <span class="metric__overall"  v-if="metricsType !== 'rule'">
+          <template v-if="metricsType === 'all'">{{
+            metric.overall.description
+          }}</template>
+          <transition name="fade" mode="out-in" appear>
+            <span v-if="metric.overall.type === 'percent'">
+              {{ metric.overall.value | percent }}
+            </span>
+            <span v-else>
+              {{ metric.overall.value }}
+            </span>
+          </transition>
+        </span>
       </div>
-    </template>
+      </template>
+    </div>
     <slot name="button-bottom" />
   </div>
 </template>
@@ -94,6 +96,9 @@ export default {
     }
   },
   computed: {
+    fields() {
+      return this.metrics.map(m => m.name);
+    },
     metrics() {
       return [
         {
@@ -301,6 +306,10 @@ $color: #333346;
     @include font-size(14px);
     font-weight: 600;
     margin-bottom: 0;
+  }
+  &__placeholder {
+    @include font-size(20px);
+    margin-top: 0.4em;
   }
 }
 p[data-title] {

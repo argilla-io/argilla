@@ -150,6 +150,9 @@ export default {
         width: 49%;
         display: inline-block;
       }
+      .metric__placeholder {
+        margin-bottom: 0.95em;  
+      }
     }
   }
 }
