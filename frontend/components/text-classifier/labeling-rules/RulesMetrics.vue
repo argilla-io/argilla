@@ -2,7 +2,7 @@
   <div class="rule-metrics__container">
     <p class="rule-metrics__title">{{ title }}</p>
     <slot name="button-top" />
-    <template v-if="!$fetchState.error && !$fetchState.pending">
+    <template>
       <div class="rule-metrics">
         <div
           :class="[metricsType, 'rule-metrics__item']"

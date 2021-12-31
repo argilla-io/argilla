@@ -137,6 +137,7 @@ export default {
   }
   &__metrics {
     min-width: 350px;
+    min-height: 320px;
     @include media(">desktopLarge") {
       min-width: 33%;
     }
