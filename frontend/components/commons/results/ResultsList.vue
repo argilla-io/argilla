@@ -35,7 +35,10 @@
             :icon="emptySearchInfo.icon"
             v-if="dataset.results.total === 0"
           />
-          <results-loading v-if="showLoader" :size="dataset.viewSettings.pagination.size" />
+          <results-loading
+            v-if="showLoader"
+            :size="dataset.viewSettings.pagination.size"
+          />
         </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
