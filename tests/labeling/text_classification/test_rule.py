@@ -21,7 +21,7 @@ from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.labeling.text_classification.rule import (
+from rubrix.labeling.text_classification import (
     Rule,
     RuleNotAppliedError,
     load_rules,
