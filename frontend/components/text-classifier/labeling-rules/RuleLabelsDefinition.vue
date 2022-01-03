@@ -82,7 +82,7 @@
       "
     >
       {{
-        saved ? "Rule has been saved" : "This query is already saved as a rule"
+        saved ? "The rule has been saved" : "This query with this label are already saved as rule"
       }}.
     </p>
     <re-button
