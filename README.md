@@ -48,7 +48,7 @@
 
 </p>
 
-<video width="100%" controls><source src="../_static/tutorials/portada.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="../_static/portada.mp4" type="video/mp4"></video>
 <p align="center">Example: Named Entity Recognition data exploration and annotation with spaCy and the IMDB dataset</p>
 
 
