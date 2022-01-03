@@ -329,9 +329,10 @@ export default {
     color: palette(grey, medium);
     margin-left: auto;
     margin-top: 0;
-    min-width: 200px;
+    white-space: nowrap;
     text-align: right;
     @include font-size(14px);
+    margin-left: 0.5em;
     strong {
       font-weight: 600;
     }

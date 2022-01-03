@@ -9,12 +9,7 @@
           @update-label="updateLabel"
         >
           <template v-if="recordsMetric" #records-metric>
-            Records
-            <strong
-              >{{ recordsMetric.value | formatNumber }}/{{
-                dataset.globalResults.total | formatNumber
-              }}</strong
-            >
+            Records <strong>{{ recordsMetric.value | formatNumber }}</strong>
           </template>
         </rule-labels-definition>
       </div>

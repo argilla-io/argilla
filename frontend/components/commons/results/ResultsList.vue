@@ -25,7 +25,7 @@
         :items="visibleRecords"
         :min-item-size="150"
         :buffer="200"
-        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight}px` }"
       >
         <template #before>
           <slot name="results-header" />
