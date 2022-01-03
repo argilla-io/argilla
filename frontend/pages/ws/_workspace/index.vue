@@ -48,6 +48,7 @@
               search-on="name"
               :visible-modal-id="visibleModalId"
               :delete-modal-content="getDeleteModalContent"
+              :empty-search-info="emptySearchInfo"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
               @close-modal="closeModal"
@@ -89,6 +90,9 @@ export default {
         tooltip: "Copied",
       },
     ],
+    emptySearchInfo: {
+      title: "0 datasets found",
+    },
     externalLinks: [],
     sortedOrder: "desc",
     sortedByField: "last_updated",
