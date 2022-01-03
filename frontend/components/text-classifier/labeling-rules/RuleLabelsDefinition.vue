@@ -74,6 +74,7 @@
       <p><strong>Introduce a query</strong> to define a rule.</p>
     </div>
     <p
+      class="rule__info"
       v-if="
         currentRule &&
         selectedLabels.includes(currentRule.label) &&
@@ -324,6 +325,10 @@ export default {
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;
+  }
+  &__info {
+    margin-bottom: 0;
+    margin-top: auto;
   }
   &__records {
     color: palette(grey, medium);
