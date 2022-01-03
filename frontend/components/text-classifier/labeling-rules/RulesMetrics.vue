@@ -4,53 +4,57 @@
     <slot name="button-top" />
     <div class="rule-metrics">
       <template v-if="$fetchState.pending">
-        <div class="rule-metrics__item" v-for="(field, index) in fields" :key="index">
-          <p class="metric__title">{{field}}</p>
+        <div
+          class="rule-metrics__item"
+          v-for="(field, index) in placeholderFields"
+          :key="index"
+        >
+          <p class="metric__title">{{ field }}</p>
           <p class="metric__placeholder">-</p>
         </div>
       </template>
       <template v-else-if="!$fetchState.error">
-      <div
-        :class="[metricsType, 'rule-metrics__item']"
-        v-for="metric in metrics"
-        :key="metric.name"
-      >
-        <p
-          class="metric__title"
-          :data-title="
-            metricsType === 'overall'
-              ? metric.overall.tooltip
-              : metric.rule.tooltip
-          "
+        <div
+          :class="[metricsType, 'rule-metrics__item']"
+          v-for="metric in metrics"
+          :key="metric.name"
         >
-          {{ metric.name }}
-        </p>
-        <p class="metric__rule" v-if="metricsType !== 'overall'">
-          <transition name="fade" mode="out-in" appear>
-            <strong
-              :key="metric.rule.value"
-              v-if="metric.rule.type === 'percent'"
-              >{{ metric.rule.value | percent }}</strong
-            >
-            <strong :key="metric.rule.value" v-else>{{
-              metric.rule.value
-            }}</strong>
-          </transition>
-        </p>
-        <span class="metric__overall"  v-if="metricsType !== 'rule'">
-          <template v-if="metricsType === 'all'">{{
-            metric.overall.description
-          }}</template>
-          <transition name="fade" mode="out-in" appear>
-            <span v-if="metric.overall.type === 'percent'">
-              {{ metric.overall.value | percent }}
-            </span>
-            <span v-else>
-              {{ metric.overall.value }}
-            </span>
-          </transition>
-        </span>
-      </div>
+          <p
+            class="metric__title"
+            :data-title="
+              metricsType === 'overall'
+                ? metric.overall.tooltip
+                : metric.rule.tooltip
+            "
+          >
+            {{ metric.name }}
+          </p>
+          <p class="metric__rule" v-if="metricsType !== 'overall'">
+            <transition name="fade" mode="out-in" appear>
+              <strong
+                :key="metric.rule.value"
+                v-if="metric.rule.type === 'percent'"
+                >{{ metric.rule.value | percent }}</strong
+              >
+              <strong :key="metric.rule.value" v-else>{{
+                metric.rule.value
+              }}</strong>
+            </transition>
+          </p>
+          <span class="metric__overall" v-if="metricsType !== 'rule'">
+            <template v-if="metricsType === 'all'">{{
+              metric.overall.description
+            }}</template>
+            <transition name="fade" mode="out-in" appear>
+              <span v-if="metric.overall.type === 'percent'">
+                {{ metric.overall.value | percent }}
+              </span>
+              <span v-else>
+                {{ metric.overall.value }}
+              </span>
+            </transition>
+          </span>
+        </div>
       </template>
     </div>
     <slot name="button-bottom" />
@@ -82,7 +86,7 @@ export default {
   },
   data: () => {
     return {
-      rules: undefined,
+      rules: [],
       metricsByLabel: {},
       metricsByRules: {},
       metricsTotal: undefined,
@@ -96,8 +100,13 @@ export default {
     }
   },
   computed: {
-    fields() {
-      return this.metrics.map(m => m.name);
+    placeholderFields() {
+      return [
+        "Precision",
+        "Correct/incorrect",
+        "Coverage",
+        "Annotated coverage",
+      ];
     },
     metrics() {
       return [
@@ -108,7 +117,6 @@ export default {
             tooltip: "Average fraction of correct labels given by the rules",
             value: this.getAverage("precision") || 0,
             type: "percent",
-            operation: this.getAverage("precision"),
           },
           rule: {
             type: "percent",
@@ -122,10 +130,10 @@ export default {
             description: "Total:",
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
-            value: this.getTotal("correct")
-              ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-              : "_/_",
-            operation: this.getTotal("correct"),
+            value:
+              this.getTotal("correct") !== undefined
+                ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
+                : "_/_",
           },
           rule: {
             value:
@@ -143,7 +151,6 @@ export default {
             tooltip: "Fraction of records labeled by any rule",
             value: this.metricsTotal ? this.metricsTotal.coverage : 0,
             type: "percent",
-            operation: this.metricsTotal ? this.metricsTotal.coverage : NaN,
           },
           rule: {
             type: "percent",
@@ -158,9 +165,6 @@ export default {
             tooltip: "Fraction of annotated records labeled by any rule",
             value: this.metricsTotal ? this.metricsTotal.coverage_annotated : 0,
             type: "percent",
-            operation: this.metricsTotal
-              ? this.metricsTotal.coverage_annotated
-              : NaN,
           },
           rule: {
             type: "percent",
@@ -233,21 +237,19 @@ export default {
         this.metricsByLabel = {};
       }
     },
-    getTotal(type) {
-      const reducer = (previousValue, currentValue) =>
-        previousValue + currentValue;
-      const allValues = Object.keys(this.metricsByRules).map((key) => {
+    getValuesByMetricType(type) {
+      return Object.keys(this.metricsByRules).map((key) => {
         return this.metricsByRules[key][type];
       });
-      return allValues.reduce(reducer, 0);
+    },
+    getTotal(type) {
+      return this.getValuesByMetricType(type).reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+        0
+      );
     },
     getAverage(type) {
-      const reducer = (previousValue, currentValue) =>
-        previousValue + currentValue;
-      const allValues = Object.keys(this.metricsByRules).map((key) => {
-        return this.metricsByRules[key][type];
-      });
-      return allValues.reduce(reducer, 0) / allValues.length;
+      return this.getTotal(type) / this.getValuesByMetricType(type).length;
     },
   },
 };
