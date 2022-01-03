@@ -4,6 +4,7 @@
     <div v-else-if="!$fetchState.error">
       <rules-metrics
         title="Overall Metrics"
+        :rules="rules"
         :dataset="dataset"
         metrics-type="overall"
       >
@@ -199,7 +200,7 @@ export default {
       this.querySearch = event;
     },
     async updateSummary() {
-      await this.getMetricsByLabel();
+      await this.$fetch();
     },
     onShowConfirmRuleDeletion(id) {
       this.visibleModalId = id.name;
@@ -264,7 +265,7 @@ export default {
 .rule-metrics {
   &__container {
     width: 100%;
-    margin-left: 0;
+    margin-left: 0 !important;
     margin-bottom: 20px;
     min-height: 180px;
     &::v-deep {

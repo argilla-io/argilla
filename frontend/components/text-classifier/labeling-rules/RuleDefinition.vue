@@ -20,6 +20,7 @@
           metrics-type="all"
           :activeLabel="activeLabel"
           :key="refresh"
+          :rules="rules"
           :dataset="dataset"
         >
           <template #button-bottom>
@@ -48,6 +49,7 @@ export default {
   },
   data: () => {
     return {
+      rules: [],
       selectedLabels: undefined,
       currentRule: undefined,
       recordsMetric: undefined,
@@ -55,6 +57,7 @@ export default {
     };
   },
   async fetch() {
+    await this.getAllRules();
     this.currentRule = await this.getRule({
       dataset: this.dataset,
       query: this.query,
@@ -79,13 +82,11 @@ export default {
         await this.$fetch();
       }
     },
-    async currentRule(n, o) {
-      if (o !== n) {
-        this.refresh++;
-      }
-    },
   },
   methods: {
+    async getAllRules() {
+      this.rules = await this.getRules({ dataset: this.dataset });
+    },
     async showRulesList() {
       await this.dataset.viewSettings.enableRulesSummary();
     },
@@ -99,6 +100,7 @@ export default {
       this.recordsMetric = met;
     },
     ...mapActions({
+      getRules: "entities/text_classification/getRules",
       getRule: "entities/text_classification/getRule",
     }),
   },

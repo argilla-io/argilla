@@ -73,6 +73,9 @@ export default {
       type: Object,
       required: true,
     },
+    rules: {
+      type: Array,
+    },
     metricsType: {
       type: String,
       default: "all",
@@ -86,18 +89,14 @@ export default {
   },
   data: () => {
     return {
-      rules: [],
       metricsByLabel: {},
       metricsByRules: {},
       metricsTotal: undefined,
     };
   },
   async fetch() {
-    await this.getAllRules();
     await this.getMetricsByLabel();
-    if (this.rules.length) {
-      await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
-    }
+    await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
   },
   computed: {
     placeholderFields() {
@@ -191,20 +190,21 @@ export default {
         await this.getMetricsByLabel();
       }
     },
+    async rules(n, o) {
+      if (n !== o) {
+        await this.$fetch();
+      }
+    },
     recordsMetric(n) {
       this.$emit("records-metric", n);
     },
   },
   methods: {
     ...mapActions({
-      getRules: "entities/text_classification/getRules",
       getRulesMetrics: "entities/text_classification/getRulesMetrics",
       getRuleMetricsByLabel:
         "entities/text_classification/getRuleMetricsByLabel",
     }),
-    async getAllRules() {
-      this.rules = await this.getRules({ dataset: this.dataset });
-    },
     async getMetrics() {
       this.metricsTotal = await this.getRulesMetrics({
         dataset: this.dataset,
