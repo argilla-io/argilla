@@ -2,7 +2,9 @@
   <div>
     <div class="rule__area">
       <div :class="[query ? 'active' : null, 'rule__container']">
+        <rule-empty-query :dataset="dataset" v-if="!query"/>
         <rule-labels-definition
+          v-else
           :current-rule="currentRule"
           :dataset="dataset"
           @update-rule="updateRule"
@@ -68,7 +70,7 @@ export default {
       return this.dataset.query.text;
     },
     activeLabel() {
-      return this.selectedLabels
+      return this.selectedLabels.length
         ? this.selectedLabels[0]
         : this.currentRule
         ? this.currentRule.label

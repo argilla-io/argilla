@@ -18,15 +18,14 @@
 <template>
   <div class="rule-labels-definition">
     <div class="rule-labels-definition__info">
-      <input v-if="query" v-model="description" class="rule__description" />
-      <p class="rule__text" v-else>New query</p>
+      <input v-model="description" class="rule__description" />
       <p class="rule__records">
         <slot name="records-metric" />
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
       <label-search
-        v-if="query && labels.length > maxVisibleLabels"
+        v-if="labels.length > maxVisibleLabels"
         :search-text="searchText"
         @input="onSearchLabel"
       />
@@ -37,7 +36,7 @@
         v-model="selectedLabels"
         :allow-multiple="isMultiLabel"
         :label="label"
-        :class="[!query ? 'non-reactive' : null, 'label-button']"
+        class="label-button"
         :data-title="label.class"
         :value="label.class"
         @change="updateLabels"
@@ -45,14 +44,14 @@
       </ClassifierAnnotationButton>
 
       <a
-        v-if="query && visibleLabels.length < filteredLabels.length"
+        v-if="visibleLabels.length < filteredLabels.length"
         href="#"
         class="feedback-interactions__more"
         @click.prevent="expandLabels()"
         >+{{ filteredLabels.length - visibleLabels.length }}</a
       >
       <a
-        v-else-if="query && visibleLabels.length > maxVisibleLabels"
+        v-else-if="visibleLabels.length > maxVisibleLabels"
         href="#"
         class="feedback-interactions__more"
         @click.prevent="collapseLabels()"
@@ -70,9 +69,6 @@
         >.
       </p>
     </div>
-    <div v-if="!query" class="empty-query">
-      <p><strong>Introduce a query</strong> to define a rule.</p>
-    </div>
     <p
       class="rule__info"
       v-if="
@@ -86,7 +82,7 @@
       }}.
     </p>
     <re-button
-      v-else-if="query"
+      v-else
       :disabled="!selectedLabels.length"
       class="feedback-interactions__button button-primary"
       @click="createRule()"
@@ -282,13 +278,6 @@ export default {
     color: $primary-color;
     text-decoration: none;
   }
-}
-.empty-query {
-  @include font-size(18px);
-  color: palette(grey, medium);
-  text-align: center;
-  margin-bottom: 2em;
-  margin-top: 2em;
 }
 .label-button {
   margin: 5px;
