@@ -118,7 +118,10 @@ export default {
       };
 
       if (workspace === this.workspace) {
-        content.text = content.text.replace(` from workspace <strong>${workspace}</strong>`, "");
+        content.text = content.text.replace(
+          ` from workspace <strong>${workspace}</strong>`,
+          ""
+        );
       }
       return content;
     },
@@ -181,7 +184,7 @@ export default {
     deleteDataset(dataset) {
       this._deleteDataset({
         workspace: dataset.owner,
-        name: dataset.name
+        name: dataset.name,
       });
       this.closeModal();
     },
