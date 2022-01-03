@@ -196,10 +196,10 @@ $annotation-button-touch-size: 48px;
   &.non-reactive {
     pointer-events: none;
     cursor: pointer;
-    display: none;
-    &:nth-of-type(-n + 5) {
-      display: inline-block;
-    }
+    // display: none;
+    // &:nth-of-type(-n + 5) {
+    //   display: inline-block;
+    // }
     .button {
       background: $lighter-color !important;
       color: $lighter-color;
