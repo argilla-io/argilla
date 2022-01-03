@@ -6,7 +6,7 @@
           :current-rule="currentRule"
           :dataset="dataset"
           @update-rule="updateRule"
-          @update-label="updateLabel"
+          @update-labels="updateLabels"
         >
           <template v-if="recordsMetric" #records-metric>
             Records <strong>{{ recordsMetric.value | formatNumber }}</strong>
@@ -50,7 +50,7 @@ export default {
   data: () => {
     return {
       rules: [],
-      selectedLabels: undefined,
+      selectedLabels: [],
       currentRule: undefined,
       recordsMetric: undefined,
       refresh: 0,
@@ -93,8 +93,8 @@ export default {
     async updateRule() {
       await this.$fetch();
     },
-    updateLabel(label) {
-      this.selectedLabels = label;
+    updateLabels(labels) {
+      this.selectedLabels = labels;
     },
     onUpdateRecordsMetric(met) {
       this.recordsMetric = met;

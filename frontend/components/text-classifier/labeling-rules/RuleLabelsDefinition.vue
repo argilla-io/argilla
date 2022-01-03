@@ -40,7 +40,7 @@
         :class="[!query ? 'non-reactive' : null, 'label-button']"
         :data-title="label.class"
         :value="label.class"
-        @change="updateLabel"
+        @change="updateLabels"
       >
       </ClassifierAnnotationButton>
 
@@ -221,8 +221,8 @@ export default {
     onSearchLabel(event) {
       this.searchText = event;
     },
-    updateLabel(label) {
-      this.$emit("update-label", label);
+    updateLabels(labels) {
+      this.$emit("update-labels", labels);
     },
     async changeToAnnotationViewMode() {
       await this.changeViewMode({
@@ -321,6 +321,7 @@ export default {
     }
   }
   &__text {
+    width: 100%;
     color: palette(grey, medium);
     @include font-size(18px);
     font-weight: 600;
