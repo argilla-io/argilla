@@ -96,7 +96,9 @@ export default {
   },
   async fetch() {
     await this.getMetricsByLabel();
-    await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
+    if (this.rules.length) {
+      await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
+    }
   },
   computed: {
     placeholderFields() {
