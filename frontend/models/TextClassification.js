@@ -89,13 +89,13 @@ class TextClassificationDataset extends ObservationDataset {
     const { labels } = await this.fetchMetricSummary("dataset_labels");
     const entity = this.getTaskDatasetClass();
     await entity.insertOrUpdate({
-      where: this.name,
+      where: this.id,
       data: {
         ...this,
         _labels: labels,
       },
     });
-    return entity.find(this.name);
+    return entity.find(this.id);
   }
 
   get isMultiLabel() {

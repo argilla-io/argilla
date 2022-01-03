@@ -17,6 +17,7 @@
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
+import { currentWorkspace, defaultWorkspace } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 
 const isObject = (obj) => obj && typeof obj === "object";
@@ -55,16 +56,17 @@ function mergeObjectsDeep(...objects) {
   }, {});
 }
 
-async function _getOrFetchDataset(name) {
+async function _getOrFetchDataset({ workspace, name }) {
   /**
    * Find locally a dataset by its name and fetch from backend if not found
    */
-  let ds = ObservationDataset.find(name);
+
+  let ds = ObservationDataset.find([workspace, name]);
   if (ds !== null) {
     return ds;
   }
   await ObservationDataset.api().get(`/datasets/${name}`);
-  return await _getOrFetchDataset(name);
+  return await _getOrFetchDataset({ workspace, name });
 }
 
 async function _fetchAnnotationProgress(dataset) {
@@ -306,7 +308,7 @@ async function _search({ dataset, query, sort, size }) {
   });
 
   const entity = dataset.getTaskDatasetClass();
-  return entity.query().withAllRecursive().whereId(dataset.name).first();
+  return entity.query().withAllRecursive().whereId(dataset.id).first();
 }
 
 async function _updateAnnotationProgress({ id, total, aggregations }) {
@@ -344,7 +346,7 @@ async function _updateDatasetRecords({
   let aggregations = {};
   const entity = dataset.getTaskDatasetClass();
   const updatedDataset = await entity.update({
-    where: dataset.name,
+    where: dataset.id,
     data: {
       ...dataset,
       results: {
@@ -370,7 +372,7 @@ async function _updateDatasetRecords({
       _fetchAnnotationProgress(dataset);
     } catch (error) {
       await entity.update({
-        where: dataset.name,
+        where: dataset.id,
         data: dataset,
       });
     }
@@ -397,14 +399,14 @@ async function _updateTaskDataset({ dataset, data }) {
   }
 
   await entity.insertOrUpdate({
-    where: dataset.name,
+    where: dataset.id,
     data: {
       ...dataset,
       ...data,
       results: mergeObjectsDeep(datasetResults, dataResults),
     },
   });
-  return entity.find(dataset.name);
+  return entity.find(dataset.id);
 }
 
 async function _updatePagination({ id, size, page }) {
@@ -418,7 +420,8 @@ async function _updatePagination({ id, size, page }) {
 
 const getters = {
   findByName: () => (name) => {
-    const ds = ObservationDataset.find(name);
+    const workspace = currentWorkspace($nuxt.$route);
+    const ds = ObservationDataset.find([workspace, name]);
     if (ds === null) {
       throw Error("Not found dataset named " + name);
     }
@@ -427,7 +430,7 @@ const getters = {
       .getTaskDatasetClass()
       .query()
       .withAllRecursive()
-      .whereId(name)
+      .whereId(ds.id)
       .first();
   },
 };
@@ -502,7 +505,7 @@ const actions = {
     });
 
     return await dataset.$update({
-      where: dataset.name,
+      where: dataset.id,
       data: {
         ...dataset,
         metadata: {
@@ -513,13 +516,14 @@ const actions = {
     });
   },
 
-  async deleteDataset(_, { name }) {
-    const deleteResults = await ObservationDataset.api().delete(
-      `/datasets/${name}`,
-      {
-        delete: name,
-      }
-    );
+  async deleteDataset(_, { workspace, name }) {
+    var url = `/datasets/${name}`;
+    if (workspace !== defaultWorkspace($nuxt.$auth.user)) {
+      url += `?workspace=${workspace}`;
+    }
+    const deleteResults = await ObservationDataset.api().delete(url, {
+      delete: [workspace, name],
+    });
     return deleteResults;
   },
 
@@ -531,15 +535,25 @@ const actions = {
     /**
      * Fetch all observation datasets from backend
      */
+
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
+      dataTransformer: ({ data }) => {
+        const owner = defaultWorkspace($nuxt.$auth.user);
+        return data.map((datasource) => {
+          datasource.owner = datasource.owner || owner;
+          return datasource;
+        });
+      },
     });
   },
   async fetchByName(_, name) {
     /**
      * Fetch a observation dataset by name
      */
-    const ds = await _getOrFetchDataset(name);
+    const workspace = currentWorkspace($nuxt.$route);
+
+    const ds = await _getOrFetchDataset({ workspace, name });
     const { viewMode } = _configuredRouteParams();
     await _configureDatasetViewSettings(ds.name, viewMode);
     const dataset = await _loadTaskDataset(ds);

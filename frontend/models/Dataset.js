@@ -26,7 +26,7 @@ class ObservationDataset extends Model {
 
   // TODO: Combine name + owner for primary key.
   //  This should fix https://github.com/recognai/rubrix/issues/736
-  static primaryKey = "name";
+  static primaryKey = ["owner", "name"];
 
   static #registeredDatasetClasses = {};
 
@@ -41,7 +41,7 @@ class ObservationDataset extends Model {
   getTaskDatasetClass() {
     return ObservationDataset.getClassDatasetForTask(this.task);
   }
-  async initialize() {}
+  async initialize() { }
 
   async fetchMetricSummary(metricId) {
     try {
@@ -59,7 +59,7 @@ class ObservationDataset extends Model {
   }
 
   get id() {
-    return this.owner + this.name;
+    return [this.owner, this.name];
   }
 
   get visibleRecords() {
@@ -75,7 +75,8 @@ class ObservationDataset extends Model {
       task: this.string(null),
       created_at: this.string(null),
       last_updated: this.string(null),
-      viewSettings: this.hasOne(DatasetViewSettings, "id"),
+      // This will be normalized in a future PR using also owner for relational ids
+      viewSettings: this.hasOne(DatasetViewSettings, "id", "name"),
     };
   }
 }
