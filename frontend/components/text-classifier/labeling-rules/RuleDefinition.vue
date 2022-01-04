@@ -73,9 +73,7 @@ export default {
       return this.dataset.query.text;
     },
     activeLabel() {
-      return this.selectedLabels.length
-        ? this.selectedLabels[0]
-        : undefined;
+      return this.selectedLabels.length ? this.selectedLabels[0] : undefined;
     },
   },
   watch: {
