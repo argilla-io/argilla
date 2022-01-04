@@ -46,10 +46,10 @@
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
-              <span v-if="metric.overall.type === 'percent'">
+              <span :key="metric.overall.value" v-if="metric.overall.type === 'percent'">
                 {{ metric.overall.value | percent }}
               </span>
-              <span v-else>
+              <span :key="metric.overall.value" v-else>
                 {{ metric.overall.value }}
               </span>
             </transition>
