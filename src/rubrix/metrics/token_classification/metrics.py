@@ -42,6 +42,106 @@ def tokens_length(
     )
 
 
+def token_frequency(
+    name: str, query: Optional[str] = None, tokens: int = 1000
+) -> MetricSummary:
+    """Computes the token frequency distribution for a numbe of tokens.
+
+    Args:
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+        tokens: The top-k number of tokens to retrieve
+
+    Returns:
+        The summary for token frequency distribution
+
+    Examples:
+        >>> from rubrix.metrics.token_classification import token_frequency
+        >>> summary = token_frequency(name="example-dataset", token=50)
+        >>> summary.visualize() # will plot a histogram with results
+        >>> summary.data # the top-50 tokens frequency
+    """
+    current_client = client()
+
+    metric = current_client.compute_metric(
+        name, metric="token_frequency", query=query, size=tokens
+    )
+
+    return MetricSummary.new_summary(
+        data=metric.results,
+        visualization=lambda: helpers.bar(
+            metric.results,
+            title=metric.description,
+        ),
+    )
+
+
+def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
+    """Computes the token size distribution in terms of number of characters
+
+    Args:
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+
+    Returns:
+        The summary for token length distribution
+
+    Examples:
+        >>> from rubrix.metrics.token_classification import token_length
+        >>> summary = token_length(name="example-dataset")
+        >>> summary.visualize() # will plot a histogram with results
+        >>> summary.data # The token length distribution
+    """
+    current_client = client()
+
+    metric = current_client.compute_metric(
+        name, metric="token_length", query=query
+    )
+
+    return MetricSummary.new_summary(
+        data=metric.results,
+        visualization=lambda: helpers.histogram(
+            metric.results,
+            title=metric.description,
+            x_legend="# chars",
+        ),
+    )
+
+
+def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
+    """Computes the token capitalness distribution
+
+    Args:
+        name: The dataset name.
+        query: An ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+
+    Returns:
+        The summary for token length distribution
+
+    Examples:
+        >>> from rubrix.metrics.token_classification import token_capitalness
+        >>> summary = token_capitalness(name="example-dataset")
+        >>> summary.visualize() # will plot a histogram with results
+        >>> summary.data # The token capitalness distribution
+    """
+    current_client = client()
+
+    metric = current_client.compute_metric(
+        name, metric="token_capitalness", query=query
+    )
+
+    return MetricSummary.new_summary(
+        data=metric.results,
+        visualization=lambda: helpers.bar(
+            metric.results,
+            title=metric.description,
+        ),
+    )
+
+
 class ComputeFor(Enum):
     ANNOTATIONS = "annotations"
     PREDICTIONS = "predictions"
@@ -143,7 +243,7 @@ def entity_labels(
 
     Examples:
         >>> from rubrix.metrics.token_classification import entity_labels
-        >>> summary = entity_labels(name="example-dataset", labels=10)
+        >>> summary = entity_labels(name="example-dataset", labels=20)
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """

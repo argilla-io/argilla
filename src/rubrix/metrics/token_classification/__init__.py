@@ -1,12 +1,15 @@
 from .metrics import (
+    Annotations,
+    ComputeFor,
+    Predictions,
     entity_capitalness,
     entity_consistency,
     entity_density,
     entity_labels,
     f1,
     mention_length,
+    token_capitalness,
+    token_frequency,
+    token_length,
     tokens_length,
-    ComputeFor,
-    Annotations,
-    Predictions,
 )

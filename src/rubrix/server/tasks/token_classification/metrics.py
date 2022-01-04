@@ -518,6 +518,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
             id="token_length",
             name="Token length distribution",
             nested_path=_TOKENS_NAMESPACE,
+            description="Computes token length distribution in number of characters",
             histogram=HistogramAggregation(
                 id="length",
                 field="length",
@@ -528,6 +529,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
         NestedTermsAggregation(
             id="token_capitalness",
             name="Token capitalness distribution",
+            description="Computes capitalization information of tokens",
             nested_path=_TOKENS_NAMESPACE,
             terms=TermsAggregation(
                 id="capitalness",
@@ -554,7 +556,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
         EntityCapitalness(
             id="predicted_entity_capitalness",
             name="Mention entity capitalness for predictions",
-            description="Compute capitalization information of predicted entity mentions",
+            description="Computes capitalization information of predicted entity mentions",
             nested_path=_PREDICTED_MENTIONS_NAMESPACE,
             capitalness_field="capitalness",
         ),
