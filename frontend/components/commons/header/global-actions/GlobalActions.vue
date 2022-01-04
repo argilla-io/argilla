@@ -67,6 +67,7 @@ export default {
   background: $lighter-color;
   border-radius: 1px;
   position: relative;
+  margin-bottom: 10px;
   &--exploration {
     position: relative;
   }
