@@ -108,15 +108,15 @@ export default {
           overall: {
             description: "Avg:",
             tooltip: "Average fraction of correct labels given by the rules",
-            value: this.$options.filters.percent(
-              this.getAverage("precision") || 0
-            ),
+            value: isNaN(this.getAverage("precision"))
+              ? "-"
+              : this.$options.filters.percent(this.getAverage("precision")),
             refresh: this.refresh,
           },
           rule: {
-            value: this.$options.filters.percent(
-              this.metricsByLabel.precision || 0
-            ),
+            value: isNaN(this.metricsByLabel.precision)
+              ? "-"
+              : this.$options.filters.percent(this.metricsByLabel.precision),
             tooltip: "Fraction of correct labels given by the rule",
           },
         },
@@ -127,7 +127,7 @@ export default {
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
             value:
-              this.getTotal("correct") !== undefined
+              Object.keys(this.metricsByRules).length
                 ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
                 : "_/_",
             refresh: this.refresh,
