@@ -12,6 +12,9 @@ from rubrix.metrics.token_classification import (
     f1,
     mention_length,
     tokens_length,
+    token_length,
+    token_frequency,
+    token_capitalness,
 )
 from tests.server.test_helpers import client
 
@@ -81,6 +84,39 @@ def test_tokens_length(monkeypatch):
     results = tokens_length(dataset)
     assert results
     assert results.data == {"4.0": 4}
+    results.visualize()
+
+
+def test_token_length(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_token_length"
+    log_some_data(dataset)
+
+    results = token_length(dataset)
+    assert results
+    assert results.data == {"2.0": 4, "3.0": 0, "4.0": 0, "5.0": 4, "6.0": 4, "7.0": 4}
+    results.visualize()
+
+
+def test_token_frequency(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_token_frequency"
+    log_some_data(dataset)
+
+    results = token_frequency(dataset)
+    assert results
+    assert results.data == {"My": 4, "example": 4, "first": 4, "rubrix": 4}
+    results.visualize()
+
+
+def test_token_capitalness(monkeypatch):
+    mocking_client(monkeypatch)
+    dataset = "test_token_capitalness"
+    log_some_data(dataset)
+
+    results = token_capitalness(dataset)
+    assert results
+    assert results.data == {"LOWER": 12, "FIRST": 4}
     results.visualize()
 
 
