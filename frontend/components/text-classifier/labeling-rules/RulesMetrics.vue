@@ -53,6 +53,7 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   props: {
     title: {
@@ -108,15 +109,11 @@ export default {
           overall: {
             description: "Avg:",
             tooltip: "Average fraction of correct labels given by the rules",
-            value: isNaN(this.getAverage("precision"))
-              ? "-"
-              : this.$options.filters.percent(this.getAverage("precision")),
+            value: this.formatNumber(this.getAverage("precision")),
             refresh: this.refresh,
           },
           rule: {
-            value: isNaN(this.metricsByLabel.precision)
-              ? "-"
-              : this.$options.filters.percent(this.metricsByLabel.precision),
+            value: this.formatNumber(this.metricsByLabel.precision),
             tooltip: "Fraction of correct labels given by the rule",
           },
         },
@@ -126,10 +123,9 @@ export default {
             description: "Total:",
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
-            value:
-              Object.keys(this.metricsByRules).length
-                ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-                : "_/_",
+            value: Object.keys(this.metricsByRules).length
+              ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
+              : "_/_",
             refresh: this.refresh,
           },
           rule: {
@@ -146,14 +142,10 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Fraction of records labeled by any rule",
-            value: isNaN(this.metricsTotal.coverage)
-              ? "-"
-              : this.$options.filters.percent(this.metricsTotal.coverage),
+            value: this.formatNumber(this.metricsTotal.coverage),
           },
           rule: {
-            value: isNaN(this.metricsByLabel.coverage)
-              ? "-"
-              : this.$options.filters.percent(this.metricsByLabel.coverage),
+            value: this.formatNumber(this.metricsByLabel.coverage),
             tooltip: "Fraction of records labeled by the rule",
           },
         },
@@ -162,18 +154,10 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Fraction of annotated records labeled by any rule",
-            value: isNaN(this.metricsTotal.coverage_annotated)
-              ? "-"
-              : this.$options.filters.percent(
-                  this.metricsTotal.coverage_annotated
-                ),
+            value: this.formatNumber(this.metricsTotal.coverage_annotated),
           },
           rule: {
-            value: isNaN(this.metricsByLabel.coverage_annotated)
-              ? "-"
-              : this.$options.filters.percent(
-                  this.metricsByLabel.coverage_annotated
-                ),
+            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
             tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
@@ -217,6 +201,11 @@ export default {
       getRuleMetricsByLabel:
         "entities/text_classification/getRuleMetricsByLabel",
     }),
+
+    formatNumber(value) {
+      return isNaN(value) ? "-" : this.$options.filters.percent(value);
+    },
+
     async getMetrics() {
       this.metricsTotal = await this.getRulesMetrics({
         dataset: this.dataset,
