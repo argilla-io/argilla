@@ -78,7 +78,9 @@
       "
     >
       {{
-        saved ? "The rule has been saved" : "This query with this label are already saved as rule"
+        saved
+          ? "The rule has been saved"
+          : "This query with this label are already saved as rule"
       }}.
     </p>
     <re-button
@@ -162,6 +164,7 @@ export default {
       this.setDescription();
       if (n) {
         this.selectedLabels = [n.label];
+        this.$emit("update-labels", [n.label]);
       }
     },
     query(n) {
@@ -169,7 +172,7 @@ export default {
       this.saved = false;
       if (!n) {
         this.selectedLabels = [];
-        this.$emit("update-label", undefined);
+        this.$emit("update-labels", undefined);
       }
     },
   },

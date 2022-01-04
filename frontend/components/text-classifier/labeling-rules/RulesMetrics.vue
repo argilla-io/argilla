@@ -31,14 +31,7 @@
           </p>
           <p class="metric__rule" v-if="metricsType !== 'overall'">
             <transition name="fade" mode="out-in" appear>
-              <strong
-                :key="metric.rule.value"
-                v-if="metric.rule.type === 'percent'"
-                >{{ metric.rule.value | percent }}</strong
-              >
-              <strong :key="metric.rule.value" v-else>{{
-                metric.rule.value
-              }}</strong>
+              <strong :key="metric.rule.value">{{ metric.rule.value }}</strong>
             </transition>
           </p>
           <span class="metric__overall" v-if="metricsType !== 'rule'">
@@ -46,10 +39,7 @@
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
-              <span :key="metric.overall.value" v-if="metric.overall.type === 'percent'">
-                {{ metric.overall.value | percent }}
-              </span>
-              <span :key="metric.overall.value" v-else>
+              <span :key="metric.overall.value">
                 {{ metric.overall.value }}
               </span>
             </transition>
@@ -63,6 +53,7 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   props: {
     title: {
@@ -91,14 +82,15 @@ export default {
     return {
       metricsByLabel: {},
       metricsByRules: {},
-      metricsTotal: undefined,
+      metricsTotal: {},
       refresh: 0,
     };
   },
   async fetch() {
     await this.getMetricsByLabel();
     if (this.rules.length) {
-      await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
+      await this.getMetrics();
+      await this.getMetricsByRules();
     }
   },
   computed: {
@@ -117,13 +109,11 @@ export default {
           overall: {
             description: "Avg:",
             tooltip: "Average fraction of correct labels given by the rules",
-            value: this.getAverage("precision") || 0,
+            value: this.formatNumber(this.getAverage("precision")),
             refresh: this.refresh,
-            type: "percent",
           },
           rule: {
-            type: "percent",
-            value: this.metricsByLabel.precision || 0,
+            value: this.formatNumber(this.metricsByLabel.precision),
             tooltip: "Fraction of correct labels given by the rule",
           },
         },
@@ -133,10 +123,9 @@ export default {
             description: "Total:",
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
-            value:
-              this.getTotal("correct") !== undefined
-                ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-                : "_/_",
+            value: Object.keys(this.metricsByRules).length
+              ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
+              : "_/_",
             refresh: this.refresh,
           },
           rule: {
@@ -153,12 +142,10 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Fraction of records labeled by any rule",
-            value: this.metricsTotal ? this.metricsTotal.coverage : 0,
-            type: "percent",
+            value: this.formatNumber(this.metricsTotal.coverage),
           },
           rule: {
-            type: "percent",
-            value: this.metricsByLabel.coverage || 0,
+            value: this.formatNumber(this.metricsByLabel.coverage),
             tooltip: "Fraction of records labeled by the rule",
           },
         },
@@ -167,12 +154,10 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Fraction of annotated records labeled by any rule",
-            value: this.metricsTotal ? this.metricsTotal.coverage_annotated : 0,
-            type: "percent",
+            value: this.formatNumber(this.metricsTotal.coverage_annotated),
           },
           rule: {
-            type: "percent",
-            value: this.metricsByLabel.coverage_annotated || 0,
+            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
             tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
@@ -181,10 +166,13 @@ export default {
     recordsMetric() {
       return {
         name: "Records",
-        value:
-          Math.round(
-            this.metricsByLabel.total_records * this.metricsByLabel.coverage
-          ) || 0,
+        value: isNaN(this.metricsByLabel.total_records)
+          ? "-"
+          : this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsByLabel.total_records * this.metricsByLabel.coverage
+              )
+            ),
         tooltip: "Records matching the query",
       };
     },
@@ -197,7 +185,9 @@ export default {
     },
     async rules(n, o) {
       if (n !== o) {
-        await this.getMetricsByRules();
+        if (this.rules.length) {
+          await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
+        }
         this.refresh++;
       }
     },
@@ -211,6 +201,11 @@ export default {
       getRuleMetricsByLabel:
         "entities/text_classification/getRuleMetricsByLabel",
     }),
+
+    formatNumber(value) {
+      return isNaN(value) ? "-" : this.$options.filters.percent(value);
+    },
+
     async getMetrics() {
       this.metricsTotal = await this.getRulesMetrics({
         dataset: this.dataset,
