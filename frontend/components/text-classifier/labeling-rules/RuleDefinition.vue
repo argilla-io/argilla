@@ -75,8 +75,6 @@ export default {
     activeLabel() {
       return this.selectedLabels.length
         ? this.selectedLabels[0]
-        : this.currentRule
-        ? this.currentRule.label
         : undefined;
     },
   },

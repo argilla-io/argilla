@@ -164,6 +164,7 @@ export default {
       this.setDescription();
       if (n) {
         this.selectedLabels = [n.label];
+        this.$emit("update-labels", [n.label]);
       }
     },
     query(n) {
@@ -171,7 +172,7 @@ export default {
       this.saved = false;
       if (!n) {
         this.selectedLabels = [];
-        this.$emit("update-label", undefined);
+        this.$emit("update-labels", undefined);
       }
     },
   },
