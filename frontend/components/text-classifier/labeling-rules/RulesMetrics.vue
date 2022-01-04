@@ -92,6 +92,7 @@ export default {
       metricsByLabel: {},
       metricsByRules: {},
       metricsTotal: undefined,
+      refresh: 0,
     };
   },
   async fetch() {
@@ -117,6 +118,7 @@ export default {
             description: "Avg:",
             tooltip: "Average fraction of correct labels given by the rules",
             value: this.getAverage("precision") || 0,
+            refresh: this.refresh,
             type: "percent",
           },
           rule: {
@@ -135,6 +137,7 @@ export default {
               this.getTotal("correct") !== undefined
                 ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
                 : "_/_",
+            refresh: this.refresh,
           },
           rule: {
             value:
@@ -194,7 +197,8 @@ export default {
     },
     async rules(n, o) {
       if (n !== o) {
-        await this.$fetch();
+        await this.getMetricsByRules();
+        this.refresh++;
       }
     },
     recordsMetric(n) {
