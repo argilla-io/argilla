@@ -221,6 +221,55 @@ export default {
   }
 }
 
+.button-quaternary {
+  @extend %button;
+  background: $lighter-color;
+  color: palette(grey, dark);
+  border: 1px solid palette(grey, smooth);
+  box-shadow: inset 0 -2px 6px 0 rgba(223, 223, 223, 0.5);
+  .svg-icon {
+    margin: auto 1em auto auto;
+    vertical-align: middle;
+    fill: palette(grey, dark);
+  }
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    background-color: $lighter-color;
+    border: 1px solid darken(palette(grey, smooth), 10%);
+  }
+  &[disabled] {
+    background-color: $lighter-color;
+  }
+  &--small {
+    @extend .button-quaternary;
+    text-transform: none;
+    min-height: 30px;
+    line-height: 30px;
+    min-width: auto;
+  }
+  &--outline {
+    @extend .button-quaternary;
+    background: transparent;
+    border: 1px solid $lighter-color;
+    color: $lighter-color;
+    text-transform: none;
+    display: flex;
+    box-shadow: none;
+    &:hover,
+    &:focus {
+      background: transparent;
+      border-color: darken($lighter-color, 10%);
+      color: darken($lighter-color, 10%);
+    }
+    &[disabled] {
+      background-color: transparent;
+      opacity: 0.6;
+    }
+  }
+}
+
 .button-clear {
   @extend %button;
   @extend %clear;

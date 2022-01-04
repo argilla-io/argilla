@@ -71,7 +71,7 @@ export default {
       return this.currentTask + "Header";
     },
     annotationEnabled() {
-      return this.dataset.viewSettings.annotationEnabled;
+      return this.dataset.viewSettings.viewMode === "annotate";
     },
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight;

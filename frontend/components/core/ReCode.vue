@@ -5,11 +5,7 @@
     </pre>
     <re-action-tooltip class="code__button" tooltip="Copied">
       <a class="breadcrumbs__copy" href="#" @click.prevent="copy(code)">
-        <svgicon
-          name="copy"
-          width="12"
-          height="13"
-        />
+        <svgicon name="copy" width="12" height="13" />
       </a>
     </re-action-tooltip>
   </div>
@@ -22,7 +18,7 @@ export default {
     code: {
       type: String,
       required: true,
-    }
+    },
   },
   methods: {
     copy(code) {
@@ -33,7 +29,7 @@ export default {
       myTemporaryInputElement.select();
       document.execCommand("Copy");
     },
-  }
+  },
 };
 </script>
 
@@ -47,7 +43,7 @@ export default {
     svg {
       fill: $lighter-color;
     }
-  } 
+  }
 }
 .hljs {
   font-family: monospace, serif;
@@ -84,4 +80,3 @@ export default {
   }
 }
 </style>
-

@@ -1,0 +1,6 @@
+{
+    "baseUrl": "http://localhost:3000",
+    "viewportWidth": 1500,
+    "viewportHeight": 568,
+    "trashAssetsBeforeRuns": true
+  }

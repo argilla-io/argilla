@@ -47,13 +47,13 @@
 <script>
 import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu-v";
-import { IdState } from 'vue-virtual-scroller'
+import { IdState } from "vue-virtual-scroller";
 
 export default {
   mixins: [
     IdState({
       // You can customize this
-      idProp: vm => `${vm.dataset.name}-${vm.record.id}`,
+      idProp: (vm) => `${vm.dataset.name}-${vm.record.id}`,
     }),
   ],
   props: {
@@ -66,7 +66,7 @@ export default {
       required: true,
     },
     dataset: {
-      type: Object
+      type: Object,
     },
     task: {
       type: String,
@@ -76,7 +76,7 @@ export default {
   idState() {
     return {
       open: false,
-    }
+    };
   },
   data: () => ({
     statusActions: [
@@ -95,7 +95,7 @@ export default {
       },
       set: function (newValue) {
         this.idState.open = newValue;
-      }
+      },
     },
     hasMetadata() {
       const metadata = this.record.metadata;
@@ -120,7 +120,7 @@ export default {
       this.close();
     },
     showMetadata() {
-      this.$emit('onShowMetadata');
+      this.$emit("onShowMetadata");
       this.close();
     },
     close() {

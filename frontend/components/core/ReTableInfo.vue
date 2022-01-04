@@ -17,7 +17,7 @@
 
 <template>
   <transition appear name="fade">
-    <div v-if="resultsAvailable" class="table-info">
+    <div class="table-info">
       <div class="table-info__header">
         <slot name="columns">
           <div class="table-info__item">
@@ -47,150 +47,151 @@
           </div>
         </slot>
       </div>
-      <div v-for="group in groups" :key="group" class="table-info__body">
-        <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
-          <p
-            class="table-info__group__title"
-            :class="{
-              model: groupBy === 'model',
-              datasource: groupBy === 'dataSource',
-            }"
-          >
-            <svgicon
-              v-if="groupBy === 'dataSource'"
-              name="datasource"
-              width="16"
-              height="auto"
-            />
-            {{ group }}
-          </p>
-        </span>
-        <ul>
-          <li v-for="item in filteredResultsByGroup(group)" :key="item.id">
-            <div class="table-info__item">
-              <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
-              <span
-                v-for="(column, idx) in columns"
-                :key="idx"
-                class="table-info__item__col"
-              >
-                <span :class="column.class">
-                  <span v-if="column.type === 'link'">
-                    <NuxtLink v-if="item.link" :to="item.link"
-                      >{{ itemValue(item, column) }}
-                    </NuxtLink>
-                    <span v-else>{{ itemValue(item, column) }}</span>
-                    <re-action-tooltip tooltip="Copied">
-                      <ReButton
-                        title="Copy to clipboard"
-                        class="table-info__actions__button button-icon"
-                        @click.prevent="onActionClicked('copy-name', item)"
-                      >
-                        <svgicon name="copy" width="12" height="13" />
-                      </ReButton>
-                    </re-action-tooltip>
-                  </span>
-                  <ReDate
-                    v-else-if="column.type === 'date'"
-                    :date="itemValue(item, column)"
-                  />
-                  <span v-else-if="column.type === 'object'">
-                    <p
-                      v-for="key in Object.keys(itemValue(item, column))"
-                      :key="key"
-                    >
-                      <strong>{{ key }}:</strong>
-                      {{ itemValue(item, column)[key] }}
-                    </p>
-                  </span>
-                  <span v-else-if="column.type === 'task'">
-                    {{ itemValue(item, column) }}
-                    <span
-                      v-if="itemValue(item, column) === 'Text2Text'"
-                      class="table-info__tag"
-                      >Experimental</span
-                    >
-                  </span>
-                  <span v-else>{{ itemValue(item, column) }}</span>
-                </span>
-              </span>
-              <div v-if="visibleActions" class="table-info__actions">
-                <re-action-tooltip
-                  v-for="action in filterActions"
-                  :key="action.index"
-                  :tooltip="action.tooltip"
+      <ResultsEmpty
+        v-if="!data.length"
+        :title="noDataInfo.title"
+        :message="noDataInfo.message"
+        :icon="noDataInfo.icon"
+      />
+      <template v-else-if="resultsAvailable">
+        <div v-for="group in groups" :key="group" class="table-info__body">
+          <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
+            <p class="table-info__group__title">
+              {{ group }}
+            </p>
+          </span>
+          <ul>
+            <li v-for="item in filteredResultsByGroup(group)" :key="item.id">
+              <div class="table-info__item">
+                <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
+                <span
+                  v-for="(column, idx) in columns"
+                  :key="idx"
+                  class="table-info__item__col"
                 >
-                  <ReButton
-                    :title="action.title"
-                    class="table-info__actions__button button-icon"
-                    @click="onActionClicked(action.name, item)"
-                  >
-                    <svgicon
-                      v-if="action.icon !== undefined"
-                      :name="action.icon"
-                      width="12"
-                      height="13"
+                  <span :class="column.class">
+                    <a
+                      v-if="column.type === 'action'"
+                      href="#"
+                      @click.prevent="onActionClicked(item.kind, item)"
+                      >{{ itemValue(item, column) }}
+                    </a>
+                    <span v-else-if="column.type === 'link'">
+                      <NuxtLink v-if="item.link" :to="item.link"
+                        >{{ itemValue(item, column) }}
+                      </NuxtLink>
+                      <span v-else>{{ itemValue(item, column) }}</span>
+                      <re-action-tooltip tooltip="Copied">
+                        <ReButton
+                          title="Copy to clipboard"
+                          class="table-info__actions__button button-icon"
+                          @click.prevent="onActionClicked('copy-name', item)"
+                        >
+                          <svgicon name="copy" width="12" height="13" />
+                        </ReButton>
+                      </re-action-tooltip>
+                    </span>
+                    <ReDate
+                      v-else-if="column.type === 'date'"
+                      :date="itemValue(item, column)"
                     />
-                  </ReButton>
-                </re-action-tooltip>
-              </div>
-              <ReModal
-                :modal-custom="true"
-                :prevent-body-scroll="true"
-                modal-class="modal-secondary"
-                :modal-visible="showModal === item.name"
-                modal-position="modal-center"
-                @close-modal="$emit('close-modal')"
-              >
-                <div>
-                  <p class="modal__title">Delete confirmation</p>
-                  <p>
-                    You are about to delete: <strong>{{ item.name }}</strong
-                    >. This process cannot be undone.
-                  </p>
-                  <div class="modal-buttons">
+                    <span v-else-if="column.type === 'number'">
+                      {{ itemValue(item, column) | formatNumber }}
+                    </span>
+                    <span v-else-if="column.type === 'object'">
+                      <p
+                        v-for="key in Object.keys(itemValue(item, column))"
+                        :key="key"
+                      >
+                        <strong>{{ key }}:</strong>
+                        {{ itemValue(item, column)[key] }}
+                      </p>
+                    </span>
+                    <!-- TODO: remove references to task -->
+                    <span v-else-if="column.type === 'task'">
+                      {{ itemValue(item, column) }}
+                      <span
+                        v-if="itemValue(item, column) === 'Text2Text'"
+                        class="table-info__tag"
+                        >Experimental</span
+                      >
+                    </span>
+                    <span v-else>{{ itemValue(item, column) }}</span>
+                  </span>
+                </span>
+                <div v-if="visibleActions" class="table-info__actions">
+                  <re-action-tooltip
+                    v-for="action in filterActions"
+                    :key="action.index"
+                    :tooltip="action.tooltip"
+                  >
                     <ReButton
-                      class="button-tertiary--small button-tertiary--outline"
-                      @click="$emit('close-modal')"
+                      :title="action.title"
+                      class="table-info__actions__button button-icon"
+                      @click="onActionClicked(action.name, item)"
                     >
-                      Cancel
+                      <svgicon
+                        v-if="action.icon !== undefined"
+                        :name="action.icon"
+                        width="12"
+                        height="13"
+                      />
                     </ReButton>
-                    <ReButton
-                      class="button-secondary--small"
-                      @click="onActionClicked('confirm-delete', item)"
-                    >
-                      Yes, delete
-                    </ReButton>
-                  </div>
+                  </re-action-tooltip>
                 </div>
-              </ReModal>
+                <ReModal
+                  :modal-custom="true"
+                  :prevent-body-scroll="true"
+                  modal-class="modal-secondary"
+                  :modal-visible="visibleModalId === item.name"
+                  modal-position="modal-center"
+                  @close-modal="$emit('close-modal')"
+                >
+                  <div>
+                    <p class="modal__title">{{ deleteModalContent.title }}</p>
+                    <p v-html="deleteModalContent.text"></p>
+                    <div class="modal-buttons">
+                      <ReButton
+                        class="button-tertiary--small button-tertiary--outline"
+                        @click="$emit('close-modal')"
+                      >
+                        Cancel
+                      </ReButton>
+                      <ReButton
+                        class="button-secondary--small"
+                        @click="onActionClicked('confirm-delete', item)"
+                      >
+                        Yes, delete
+                      </ReButton>
+                    </div>
+                  </div>
+                </ReModal>
+              </div>
+            </li>
+          </ul>
+          <!-- <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="visibleModalId === 'all'" modal-position="modal-center" @close-modal="$emit('close-modal')">
+            <div>
+              <p class="modal__title">Delete confirmation</p>
+              <span>
+                You are about to delete: <br />
+                <span v-for="item in selectedItems" :key="item.id">
+                  <strong>{{ item.actionName }}</strong><br /></span>
+              </span>
+              <p>This process cannot be undone</p>
+              <br />
+              <div class="modal-buttons">
+                <ReButton class="button-tertiary--small button-tertiary--outline" @click="$emit('close-modal')">
+                  Cancel
+                </ReButton>
+                <ReButton class="button-primary--small" @click="$emit('delete-multiple')">
+                  Yes, delete
+                </ReButton>
+              </div>
             </div>
-          </li>
-        </ul>
-        <!-- <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="showModal === 'all'" modal-position="modal-center" @close-modal="$emit('close-modal')">
-           <div>
-             <p class="modal__title">Delete confirmation</p>
-             <span>
-               You are about to delete: <br />
-               <span v-for="item in selectedItems" :key="item.id">
-                 <strong>{{ item.actionName }}</strong><br /></span>
-             </span>
-             <p>This process cannot be undone</p>
-             <br />
-             <div class="modal-buttons">
-               <ReButton class="button-tertiary--small button-tertiary--outline" @click="$emit('close-modal')">
-                 Cancel
-               </ReButton>
-               <ReButton class="button-primary--small" @click="$emit('delete-multiple')">
-                 Yes, delete
-               </ReButton>
-             </div>
-           </div>
-        </ReModal> -->
-      </div>
-    </div>
-    <div v-else>
-      <ResultsEmpty empty-title="0 results found" />
+          </ReModal> -->
+        </div>
+      </template>
+      <ResultsEmpty v-else :title="emptySearchInfo.title" />
     </div>
   </transition>
 </template>
@@ -226,13 +227,26 @@ export default {
       type: String,
       default: undefined,
     },
+    noDataInfo: {
+      title: undefined,
+      message: undefined,
+      icon: undefined,
+    },
+    emptySearchInfo: {
+      title: undefined,
+      description: undefined,
+      icon: undefined,
+    },
     hideButton: {
       type: Boolean,
       default: false,
     },
-    showModal: {
+    visibleModalId: {
       type: String,
       default: undefined,
+    },
+    deleteModalContent: {
+      type: Object,
     },
     globalActions: {
       type: Boolean,
@@ -494,6 +508,10 @@ export default {
     padding: 0.1em 0.5em;
     margin-left: 1em;
   }
+  .empty {
+    margin-top: 5em;
+    height: auto;
+  }
   // &__item:not(.disabled) {
   //   &:hover,
   //   &:focus {
@@ -522,7 +540,6 @@ export default {
   &__title {
     display: block;
     @include font-size(15px);
-    cursor: pointer;
     word-break: break-word;
     display: flex;
     align-items: center;
@@ -535,6 +552,7 @@ export default {
       }
     }
     a {
+      width: 100%;
       text-decoration: none;
       &:hover {
         color: $primary-color;
@@ -599,7 +617,6 @@ export default {
     }
   }
 }
-
 .--show-tooltip {
   @extend %activetooltip;
   @extend %tooltip--left;

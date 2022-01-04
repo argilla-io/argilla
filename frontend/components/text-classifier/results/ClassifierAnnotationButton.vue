@@ -24,10 +24,7 @@
       <span class="annotation-button-data__text" :title="label.class"
         >{{ label.class }}
       </span>
-      <div
-        v-if="label.score > 0"
-        class="annotation-button-data__info"
-      >
+      <div v-if="label.score > 0" class="annotation-button-data__info">
         <span>{{ label.score | percent }}</span>
       </div>
     </label>
@@ -114,7 +111,7 @@ $annotation-button-touch-size: 48px;
     .button {
       outline: none;
       cursor: pointer;
-      background: #F0F0FE;
+      background: #f0f0fe;
       border-radius: 8px;
       height: 40px;
       line-height: 40px;
@@ -131,7 +128,7 @@ $annotation-button-touch-size: 48px;
     }
     &.predicted-label {
       .button {
-        background: #D6D6FF;
+        background: #d6d6ff;
       }
     }
     &.active {
@@ -145,7 +142,8 @@ $annotation-button-touch-size: 48px;
       &:hover {
         .button {
           transition: all 0.2s ease-in-out;
-          box-shadow: 0 0 1px 0 rgba(212,212,212,0.50), inset 0 -2px 6px 0 #3B3C81;
+          box-shadow: 0 0 1px 0 rgba(212, 212, 212, 0.5),
+            inset 0 -2px 6px 0 #3b3c81;
         }
       }
       &:after {
@@ -187,12 +185,26 @@ $annotation-button-touch-size: 48px;
     }
     &:not(.active):hover {
       .button {
-        box-shadow: 0 0 1px 0 rgba(212,212,212,0.50), inset 0 -2px 6px 1px #BBBCE0;
+        box-shadow: 0 0 1px 0 rgba(212, 212, 212, 0.5),
+          inset 0 -2px 6px 1px #bbbce0;
       }
     }
   }
   &.disabled {
     opacity: 0.5;
+  }
+  &.non-reactive {
+    pointer-events: none;
+    cursor: pointer;
+    // display: none;
+    // &:nth-of-type(-n + 5) {
+    //   display: inline-block;
+    // }
+    .button {
+      background: $lighter-color !important;
+      color: $lighter-color;
+      border: 1px solid palette(grey, light);
+    }
   }
   &:not(.disabled) {
     cursor: pointer;

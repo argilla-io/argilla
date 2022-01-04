@@ -16,38 +16,56 @@
   -->
 
 <template>
-  <div class="list">
+  <div class="content">
     <slot name="header" />
     <div class="results-scroll" id="scroll">
-      <div :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }" v-if="showLoader">
-        <results-loading :size="dataset.viewSettings.pagination.size" />
-      </div>
       <DynamicScroller
-        v-else
         page-mode
         class="scroller"
         :items="visibleRecords"
         :min-item-size="150"
         :buffer="200"
-        :style="{ paddingTop: `${dataset.viewSettings.headerHeight + 10}px` }"
-      > 
+        :style="{ paddingTop: `${dataset.viewSettings.headerHeight}px` }"
+      >
+        <template #before>
+          <slot name="results-header" />
+          <results-empty
+            :title="emptySearchInfo.title"
+            :message="emptySearchInfo.message"
+            :icon="emptySearchInfo.icon"
+            v-if="dataset.results.total === 0"
+          />
+          <results-loading
+            v-if="showLoader"
+            :size="dataset.viewSettings.pagination.size"
+          />
+        </template>
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
+            v-show="!showLoader && dataset.results.total > 0"
             :watch-data="true"
-            class="list__li"
+            class="content__li"
             :item="item"
             :active="active"
             key-field="id"
             :index="index"
             :data-index="index"
           >
-            <results-record @show-metadata="onShowMetadata" :key="item.id" :dataset="dataset" :item="item">
+            <results-record
+              @show-metadata="onShowMetadata"
+              :key="`${dataset.name}-${item.id}`"
+              :dataset="dataset"
+              :item="item"
+            >
               <slot name="record" :record="item" />
             </results-record>
           </DynamicScrollerItem>
         </template>
         <template #after>
-          <pagination-end-alert :limit="paginationLimit" v-if="isLastPagePaginable" />
+          <pagination-end-alert
+            :limit="paginationLimit"
+            v-if="isLastPagePaginable"
+          />
         </template>
       </DynamicScroller>
       <LazyReModal
@@ -76,18 +94,23 @@
   </div>
 </template>
 <script>
+import "assets/icons/empty-results";
 import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
+      emptySearchInfo: {
+        // message: "There is no result. <br />Try another query.",
+        icon: "empty-results",
+      },
     };
   },
   computed: {
@@ -154,47 +177,52 @@ export default {
       await this.paginate({
         dataset: this.dataset,
         page: page,
-        size: size
+        size: size,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
-.list {
+.content {
   $this: &;
   padding: 0;
   width: 100%;
   position: relative;
   margin-bottom: 0;
   list-style: none;
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      width: 100%;
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
+  @include media(">desktop") {
+    transition: padding 0.1s ease-in-out;
+    width: 100%;
+    padding-right: 100px;
+  }
   .results-scroll {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
-    padding-bottom: 61px;
-    padding-right: calc(4em + 45px);
     transition: padding 0s ease-in-out 0.1s;
-    .fixed-header & {
-      padding-bottom: 200px;
-    }
-    .--metrics & {
-      @include media(">desktop") {
-        width: 100%;
-        padding-right: calc(294px + 100px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      width: 100%;
-      padding-right: 100px;
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
   &__li {
     padding-bottom: 10px;
     position: relative;
-    min-height: 150px;
+    min-height: 140px;
+  }
+}
+.scroller {
+  padding-bottom: 61px;
+  .fixed-header & {
+    padding-bottom: 200px;
   }
 }
 </style>
@@ -202,7 +230,7 @@ export default {
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {
-    z-index: $maxItemsperPage - $i
+    z-index: $maxItemsperPage - $i;
   }
 }
 </style>

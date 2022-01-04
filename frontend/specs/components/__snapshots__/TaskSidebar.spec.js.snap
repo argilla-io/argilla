@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskSidebar Show sidebar panel 1`] = `
+<div>
+  <div class="sidebar"><span><div class="sidebar__info"><p>Mode</p> <sidebar-button id="explore" icon="explore-view" tooltip="Explore" type="Mode"></sidebar-button><sidebar-button id="annotate" icon="annotate-view" tooltip="Annotate" type="Mode"></sidebar-button><sidebar-button id="labelling-rules" icon="labelling-rules-view" tooltip="Define rules" type="Mode"></sidebar-button></div></span><span><div class="sidebar__info"><p>Metrics</p> <sidebar-button id="progress" icon="progress" tooltip="Progress" type="Metrics"></sidebar-button><sidebar-button id="stats" icon="metrics" tooltip="Stats" type="Metrics"></sidebar-button></div></span><span><div class="sidebar__info"><p>Refresh</p> <sidebar-button id="refresh" icon="refresh" tooltip="Refresh" type="Refresh"></sidebar-button></div></span> </div>
+  <aside class="sidebar explore TextClassification">
+    <div class="sidebar__wrapper">
+      <div class="sidebar__content">
+        <div>
+          <textclassificationprogress dataset="[object Object]"></textclassificationprogress>
+        </div>
+        <div style="display: none;">
+          <textclassificationstats dataset="[object Object]"></textclassificationstats>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+`;
+
+exports[`TaskSidebar renders properly 1`] = `
+<div>
+  <div class="sidebar"><span><div class="sidebar__info"><p>Mode</p> <sidebar-button id="explore" active-view="explore" icon="explore-view" tooltip="Explore" type="Mode"></sidebar-button><sidebar-button id="annotate" active-view="explore" icon="annotate-view" tooltip="Annotate" type="Mode"></sidebar-button><sidebar-button id="labelling-rules" active-view="explore" icon="labelling-rules-view" tooltip="Define rules" type="Mode"></sidebar-button></div></span><span><div class="sidebar__info"><p>Metrics</p> <sidebar-button id="progress" icon="progress" tooltip="Progress" type="Metrics"></sidebar-button><sidebar-button id="stats" icon="metrics" tooltip="Stats" type="Metrics"></sidebar-button></div></span><span><div class="sidebar__info"><p>Refresh</p> <sidebar-button id="refresh" icon="refresh" tooltip="Refresh" type="Refresh"></sidebar-button></div></span> </div>
+  <!---->
+</div>
+`;

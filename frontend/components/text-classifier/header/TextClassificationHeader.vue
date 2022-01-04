@@ -18,11 +18,15 @@
 <template>
   <div class="header__filters">
     <header-title
-      v-if="dataset.results.records"
+      v-if="dataset.results.records && viewMode !== 'labelling-rules'"
       title="Text Classification"
       :dataset="dataset"
     />
-    <filters-area :dataset="dataset" />
+    <filters-area
+      v-if="!dataset.viewSettings.visibleRulesList"
+      :expand-searchbar="viewMode === 'labelling-rules'"
+      :dataset="dataset"
+    />
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -45,7 +49,6 @@
 </template>
 <script>
 import { mapActions } from "vuex";
-
 export default {
   props: {
     dataset: {
@@ -56,9 +59,6 @@ export default {
   computed: {
     isExplainedRecord() {
       return this.dataset.results.records.some((record) => record.explanation);
-    },
-    showAnnotationMode() {
-      return this.dataset.viewSettings.annotationEnabled;
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
@@ -71,6 +71,9 @@ export default {
           : [];
       labels = Array.from(new Set([...labels, ...this.dataset.labels]));
       return labels;
+    },
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
     },
   },
   methods: {
@@ -137,3 +140,4 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped></style>
