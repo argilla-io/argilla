@@ -2,7 +2,7 @@
   <div>
     <div class="rule__area">
       <div :class="[query ? 'active' : null, 'rule__container']">
-        <rule-empty-query :dataset="dataset" v-if="!query"/>
+        <rule-empty-query :dataset="dataset" v-if="!query" />
         <rule-labels-definition
           v-else
           :current-rule="currentRule"
@@ -11,7 +11,10 @@
           @update-labels="updateLabels"
         >
           <template v-if="recordsMetric" #records-metric>
-            Records <strong>{{ recordsMetric.value | formatNumber }}</strong>
+            Records
+            <strong>
+              {{ recordsMetric.value }}
+            </strong>
           </template>
         </rule-labels-definition>
       </div>
