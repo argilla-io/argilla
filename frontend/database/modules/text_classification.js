@@ -16,6 +16,7 @@
  */
 
 import { ObservationDataset } from "@/models/Dataset";
+import { TextClassificationDataset } from "@/models/TextClassification";
 
 const getters = {};
 
@@ -27,14 +28,14 @@ const actions = {
     });
   },
   async getRules(_, { dataset }) {
-    const { response } = await ObservationDataset.api().get(
+    const { response } = await TextClassificationDataset.api().get(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules`
     );
     return response.data;
   },
 
   async defineRule(_, { dataset, label, description }) {
-    await ObservationDataset.api().post(
+    await TextClassificationDataset.api().post(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules`,
       {
         query: dataset.query.text,
@@ -45,7 +46,7 @@ const actions = {
   },
 
   async updateRule(_, { dataset, label, description }) {
-    await ObservationDataset.api().patch(
+    await TextClassificationDataset.api().patch(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${dataset.query.text}`,
       {
         label: label,
@@ -55,7 +56,7 @@ const actions = {
   },
 
   async getRule(_, { dataset, query }) {
-    const { response } = await ObservationDataset.api().get(
+    const { response } = await TextClassificationDataset.api().get(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`,
       {
         // Ignore errors related to rule not found
@@ -71,20 +72,20 @@ const actions = {
   },
 
   async deleteRule(_, { dataset, query }) {
-    await ObservationDataset.api().delete(
+    await TextClassificationDataset.api().delete(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}`
     );
   },
 
   async getRulesMetrics(_, { dataset }) {
-    const { response } = await ObservationDataset.api().get(
+    const { response } = await TextClassificationDataset.api().get(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/metrics`
     );
     return response.data;
   },
 
   async getRuleMetricsByLabel(_, { dataset, query, label }) {
-    const { response } = await ObservationDataset.api().get(
+    const { response } = await TextClassificationDataset.api().get(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics?label=${label}`
     );
     return response.data;

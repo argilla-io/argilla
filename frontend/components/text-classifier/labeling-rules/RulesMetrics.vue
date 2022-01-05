@@ -3,39 +3,22 @@
     <p class="rule-metrics__title">{{ title }}</p>
     <slot name="button-top" />
     <div class="rule-metrics">
-      <template v-if="$fetchState.pending">
-        <div
-          class="rule-metrics__item"
-          v-for="(field, index) in placeholderFields"
-          :key="index"
-        >
-          <p class="metric__title">{{ field }}</p>
-          <p class="metric__placeholder">-</p>
-        </div>
-      </template>
-      <template v-else-if="!$fetchState.error">
+      <template>
         <div
           :class="[metricsType, 'rule-metrics__item']"
           v-for="metric in metrics"
           :key="metric.name"
         >
-          <p
-            class="metric__title"
-            :data-title="
-              metricsType === 'overall'
-                ? metric.overall.tooltip
-                : metric.rule.tooltip
-            "
-          >
+          <p class="metric__title" :data-title="metricsTitle(metric)">
             {{ metric.name }}
           </p>
-          <p class="metric__rule" v-if="metricsType !== 'overall'">
+          <p class="metric__rule" v-if="!onlyOveralMetrics">
             <transition name="fade" mode="out-in" appear>
               <strong :key="metric.rule.value">{{ metric.rule.value }}</strong>
             </transition>
           </p>
-          <span class="metric__overall" v-if="metricsType !== 'rule'">
-            <template v-if="metricsType === 'all'">{{
+          <span class="metric__overall">
+            <template v-if="!onlyOveralMetrics">{{
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
@@ -52,48 +35,54 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { TextClassificationDataset } from "@/models/TextClassification";
 
 export default {
   props: {
-    title: {
-      type: String,
-      default: "Metrics",
-    },
     dataset: {
-      type: Object,
+      type: TextClassificationDataset,
       required: true,
     },
-    rules: {
-      type: Array,
+
+    title: {
+      type: String,
+      required: true,
     },
+
     metricsType: {
       type: String,
       default: "all",
       validator: (value) => {
-        return ["all", "overall", "rule"].includes(value);
+        return ["all", "overall"].includes(value);
       },
-    },
-    activeLabel: {
-      type: String,
     },
   },
   data: () => {
     return {
-      metricsByLabel: {},
       metricsByRules: {},
-      metricsTotal: {},
       refresh: 0,
     };
   },
-  async fetch() {
-    await this.getMetricsByLabel();
-    if (this.rules.length) {
-      await this.getMetrics();
-      await this.getMetricsByRules();
-    }
-  },
   computed: {
+    rules() {
+      return this.dataset.labelingRules;
+    },
+    metricsTotal() {
+      return this.dataset.labelingRulesOveralMetrics || {};
+    },
+
+    currentRule() {
+      return this.dataset.getCurrentLabelingRule();
+    },
+
+    ruleMetrics() {
+      return this.dataset.getCurrentLabelingRuleMetrics() || {};
+    },
+
+    onlyOveralMetrics() {
+      return this.metricsType === "overall";
+    },
+
     placeholderFields() {
       return [
         "Precision",
@@ -109,11 +98,11 @@ export default {
           overall: {
             description: "Avg:",
             tooltip: "Average fraction of correct labels given by the rules",
-            value: this.formatNumber(this.getAverage("precision")),
+            value: this.formatNumber(this.metricsTotal.precisionAverage),
             refresh: this.refresh,
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.precision),
+            value: this.formatNumber(this.ruleMetrics.precision),
             tooltip: "Fraction of correct labels given by the rule",
           },
         },
@@ -123,16 +112,15 @@ export default {
             description: "Total:",
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
-            value: Object.keys(this.metricsByRules).length
-              ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-              : "_/_",
+            value: isNaN(this.metricsTotal.totalCorrects)
+              ? "_/_"
+              : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
             refresh: this.refresh,
           },
           rule: {
-            value:
-              this.metricsByLabel.correct !== undefined
-                ? `${this.metricsByLabel.correct}/${this.metricsByLabel.incorrect}`
-                : "_/_",
+            value: isNaN(this.ruleMetrics.correct)
+              ? "_/_"
+              : `${this.ruleMetrics.correct} / ${this.ruleMetrics.incorrect}`,
             tooltip:
               "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
           },
@@ -145,7 +133,7 @@ export default {
             value: this.formatNumber(this.metricsTotal.coverage),
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage),
+            value: this.formatNumber(this.ruleMetrics.coverage),
             tooltip: "Fraction of records labeled by the rule",
           },
         },
@@ -157,87 +145,24 @@ export default {
             value: this.formatNumber(this.metricsTotal.coverage_annotated),
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
+            value: this.formatNumber(this.ruleMetrics.coverage_annotated),
             tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
       ];
     },
-    recordsMetric() {
-      return {
-        name: "Records",
-        value: isNaN(this.metricsByLabel.total_records)
-          ? "-"
-          : this.$options.filters.formatNumber(
-              Math.round(
-                this.metricsByLabel.total_records * this.metricsByLabel.coverage
-              )
-            ),
-        tooltip: "Records matching the query",
-      };
-    },
-  },
-  watch: {
-    async activeLabel(n, o) {
-      if (n !== o) {
-        await this.getMetricsByLabel();
-      }
-    },
-    async rules(n, o) {
-      if (n !== o) {
-        if (this.rules.length) {
-          await Promise.all([this.getMetrics(), this.getMetricsByRules()]);
-        }
-        this.refresh++;
-      }
-    },
-    recordsMetric(n) {
-      this.$emit("records-metric", n);
-    },
   },
   methods: {
-    ...mapActions({
-      getRulesMetrics: "entities/text_classification/getRulesMetrics",
-      getRuleMetricsByLabel:
-        "entities/text_classification/getRuleMetricsByLabel",
-    }),
+    metricsTitle(metric) {
+      return this.onlyOveralMetrics
+        ? metric.overall.tooltip
+        : metric.rule.tooltip;
+    },
 
     formatNumber(value) {
       return isNaN(value) ? "-" : this.$options.filters.percent(value);
     },
 
-    async getMetrics() {
-      this.metricsTotal = await this.getRulesMetrics({
-        dataset: this.dataset,
-      });
-    },
-    async getMetricsByRules() {
-      const responses = await Promise.all(
-        this.rules.map((rule) => {
-          return this.getRuleMetricsByLabel({
-            dataset: this.dataset,
-            query: rule.query,
-            label: rule.label,
-          });
-        })
-      );
-
-      responses.forEach((response, idx) => {
-        this.metricsByRules[this.rules[idx].query] = response;
-      });
-    },
-    async getMetricsByLabel() {
-      if (this.activeLabel !== undefined) {
-        const response = await this.getRuleMetricsByLabel({
-          dataset: this.dataset,
-          query: this.dataset.query.text,
-          label: this.activeLabel,
-        });
-        this.metricsByLabel = response;
-      } else {
-        this.metricsByLabel = {};
-      }
-    },
     getValuesByMetricType(type) {
       return Object.keys(this.metricsByRules).map((key) => {
         return this.metricsByRules[key][type];

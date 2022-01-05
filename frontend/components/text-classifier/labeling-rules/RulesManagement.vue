@@ -11,7 +11,7 @@
         <template #button-top>
           <re-button
             class="rules-management__close button-quaternary--outline"
-            @click="hideList()"
+            @click="hideList"
           >
             <svgicon
               name="chev-left"
@@ -51,7 +51,8 @@
         <re-button
           v-if="formattedRules.length"
           class="button-primary"
-          @click="updateSummary()"
+          @click="updateSummary"
+          :disabled="isLoading"
           >Update Summary</re-button
         >
       </div>
@@ -61,19 +62,19 @@
 <script>
 import "assets/icons/empty-rules";
 import { mapActions } from "vuex";
+import { TextClassificationDataset } from "@/models/TextClassification";
 export default {
   props: {
     dataset: {
-      type: Object,
-      default: () => ({}),
+      type: TextClassificationDataset,
+      required: true,
     },
   },
   data: () => {
     return {
       querySearch: undefined,
       visibleModalId: undefined,
-      rules: [],
-      metricsByLabel: {},
+      isLoading: undefined,
       tableColumns: [
         {
           name: "Name",
@@ -112,10 +113,17 @@ export default {
     };
   },
   async fetch() {
-    this.rules = await this.getRules({ dataset: this.dataset });
-    await this.getMetricsByLabel();
+    if (this.dataset.perRuleQueryMetrics === null) {
+      this.dataset.refreshRulesMetrics();
+    }
   },
   computed: {
+    rules() {
+      return this.dataset.labelingRules;
+    },
+    perRuleMetrics() {
+      return this.dataset.perRuleQueryMetrics || {};
+    },
     isVisible() {
       return this.dataset.viewSettings.visibleRulesList;
     },
@@ -126,11 +134,7 @@ export default {
           query: r.query,
           kind: "select",
           label: r.label,
-          coverage: this.metricsByLabel[r.query].coverage,
-          coverage_annotated: this.metricsByLabel[r.query].coverage_annotated,
-          correct: this.metricsByLabel[r.query].correct,
-          incorrect: this.metricsByLabel[r.query].incorrect,
-          precision: this.metricsByLabel[r.query].precision,
+          ...this.metricsForRule(r),
         };
       });
     },
@@ -147,33 +151,23 @@ export default {
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
-      getRules: "entities/text_classification/getRules",
-      deleteRule: "entities/text_classification/deleteRule",
-      getRuleMetricsByLabel:
-        "entities/text_classification/getRuleMetricsByLabel",
     }),
+
+    metricsForRule(rule) {
+      return this.perRuleMetrics[rule.query];
+    },
+
     async hideList() {
       await this.dataset.viewSettings.disableRulesSummary();
     },
 
-    async getMetricsByLabel() {
-      const responses = await Promise.all(
-        this.rules.map((rule) => {
-          return this.getRuleMetricsByLabel({
-            dataset: this.dataset,
-            query: rule.query,
-            label: rule.label,
-          });
-        })
-      );
-
-      responses.forEach((response, idx) => {
-        this.metricsByLabel[this.rules[idx].query] = response;
-      });
-    },
-    async onSelectQuery(id) {
-      if (id.query !== this.dataset.query.text) {
-        await this.search({ dataset: this.dataset, query: { text: id.query } });
+    async onSelectQuery(rule) {
+      await this.dataset.setCurrentLabelingRule(rule);
+      if (rule.query !== this.dataset.query.text) {
+        await this.search({
+          dataset: this.dataset,
+          query: { text: rule.query },
+        });
       }
       await this.hideList();
     },
@@ -200,18 +194,18 @@ export default {
       this.querySearch = event;
     },
     async updateSummary() {
-      await this.$fetch();
+      this.isLoading = true;
+      try {
+        await this.dataset.refreshRulesMetrics();
+      } finally {
+        this.isLoading = false;
+      }
     },
     onShowConfirmRuleDeletion(id) {
       this.visibleModalId = id.name;
     },
-    async onDeleteRule(id) {
-      this.closeModal();
-      await this.deleteRule({
-        dataset: this.dataset,
-        query: id.query,
-      });
-      await this.$fetch();
+    async onDeleteRule(rule) {
+      await this.dataset.deleteLabelingRule(rule);
     },
     closeModal() {
       this.visibleModalId = undefined;

@@ -346,7 +346,6 @@ async function _updateDatasetRecords({
   const updatedDataset = await entity.update({
     where: dataset.name,
     data: {
-      ...dataset,
       results: {
         ...dataset.results,
         aggregations: {
