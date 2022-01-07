@@ -82,12 +82,11 @@ export default {
           type: "action",
         },
         { name: "Label", field: "label", class: "text" },
-        { name: "Coverage", field: "coverage", class: "text", type: "number" },
+        { name: "Coverage", field: "coverage", class: "text" },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
-          type: "number",
         },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
@@ -95,7 +94,6 @@ export default {
           name: "Precision",
           field: "precision",
           class: "text",
-          type: "number",
         },
       ],
       sortedOrder: "desc",
@@ -126,11 +124,17 @@ export default {
           query: r.query,
           kind: "select",
           label: r.label,
-          coverage: this.metricsByLabel[r.query].coverage,
-          coverage_annotated: this.metricsByLabel[r.query].coverage_annotated,
+          coverage: this.$options.filters.percent(
+            this.metricsByLabel[r.query].coverage
+          ),
+          coverage_annotated: this.$options.filters.percent(
+            this.metricsByLabel[r.query].coverage_annotated
+          ),
           correct: this.metricsByLabel[r.query].correct,
           incorrect: this.metricsByLabel[r.query].incorrect,
-          precision: this.metricsByLabel[r.query].precision,
+          precision: this.$options.filters.percent(
+            this.metricsByLabel[r.query].precision
+          ),
         };
       });
     },
