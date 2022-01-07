@@ -122,6 +122,7 @@ export default {
     formattedRules() {
       return this.rules.map((r) => {
         return {
+          id: r.query,
           name: r.description,
           query: r.query,
           kind: "select",
@@ -177,16 +178,16 @@ export default {
       }
       await this.hideList();
     },
-    onActionClicked(action, rowId) {
+    onActionClicked(action, rule) {
       switch (action) {
         case "delete":
-          this.onShowConfirmRuleDeletion(rowId);
+          this.onShowConfirmRuleDeletion(rule);
           break;
         case "confirm-delete":
-          this.onDeleteRule(rowId);
+          this.onDeleteRule(rule);
           break;
         case "select":
-          this.onSelectQuery(rowId);
+          this.onSelectQuery(rule);
           break;
         default:
           console.warn(action);
