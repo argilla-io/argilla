@@ -236,7 +236,6 @@ class TextClassificationDataset extends ObservationDataset {
         rules,
       },
     });
-    return entity.find(this.id);
   }
 
   get isMultiLabel() {
