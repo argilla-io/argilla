@@ -135,7 +135,7 @@ export default {
     },
     filteredLabels() {
       return this.sortedLabels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText)
+        label.class.toLowerCase().match(this.searchText.toLowerCase())
       );
     },
     visibleLabels() {
