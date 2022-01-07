@@ -61,7 +61,10 @@
             </p>
           </span>
           <ul>
-            <li v-for="item in filteredResultsByGroup(group)" :key="item.id">
+            <li
+              v-for="item in filteredResultsByGroup(group)"
+              :key="String(item.id)"
+            >
               <div class="table-info__item">
                 <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
                 <span
@@ -143,7 +146,7 @@
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
-                  :modal-visible="visibleModalId === item.name"
+                  :modal-visible="visibleModalId === item.id"
                   modal-position="modal-center"
                   @close-modal="$emit('close-modal')"
                 >
@@ -242,7 +245,7 @@ export default {
       default: false,
     },
     visibleModalId: {
-      type: String,
+      type: String | Array,
       default: undefined,
     },
     deleteModalContent: {
