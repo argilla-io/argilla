@@ -70,7 +70,7 @@ export default {
   },
   idState() {
     return {
-      searchText: undefined,
+      searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
     };
   },
@@ -99,7 +99,7 @@ export default {
     },
     filteredLabels() {
       return this.labels.filter((label) =>
-        label.class.toLowerCase().match(this.searchText)
+        label.class.toLowerCase().match(this.searchText.toLowerCase())
       );
     },
     visibleLabels() {
