@@ -83,12 +83,11 @@ export default {
           type: "action",
         },
         { name: "Label", field: "label", class: "text" },
-        { name: "Coverage", field: "coverage", class: "text", type: "number" },
+        { name: "Coverage", field: "coverage", class: "text" },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
-          type: "number",
         },
         { name: "Correct", field: "correct", class: "text" },
         { name: "Incorrect", field: "incorrect", class: "text" },
@@ -96,7 +95,6 @@ export default {
           name: "Precision",
           field: "precision",
           class: "text",
-          type: "number",
         },
       ],
       sortedOrder: "desc",
@@ -130,6 +128,7 @@ export default {
     formattedRules() {
       return this.rules.map((r) => {
         return {
+          id: r.query,
           name: r.description,
           query: r.query,
           kind: "select",
@@ -154,7 +153,14 @@ export default {
     }),
 
     metricsForRule(rule) {
-      return this.perRuleMetrics[rule.query];
+      const metrics = this.perRuleMetrics[rule.query];
+      return {
+        coverage: this.$options.filters.percent(metrics.coverage),
+        coverage_annotated: this.$options.filters.percent(metrics.coverage_annotated),
+        correct: metrics.correct,
+        incorrect: metrics.incorrect,
+        precision: this.$options.filters.percent(metrics.precision),
+      }
     },
 
     async hideList() {
@@ -171,16 +177,16 @@ export default {
       }
       await this.hideList();
     },
-    onActionClicked(action, rowId) {
+    onActionClicked(action, rule) {
       switch (action) {
         case "delete":
-          this.onShowConfirmRuleDeletion(rowId);
+          this.onShowConfirmRuleDeletion(rule);
           break;
         case "confirm-delete":
-          this.onDeleteRule(rowId);
+          this.onDeleteRule(rule);
           break;
         case "select":
-          this.onSelectQuery(rowId);
+          this.onSelectQuery(rule);
           break;
         default:
           console.warn(action);
