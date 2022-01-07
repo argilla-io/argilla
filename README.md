@@ -2,17 +2,6 @@
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
 <h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3> 
-<p align="left">
-    <a href="https://github.com/recognai/rubrix/#get-started">Get started</a>
-    ·
-    <a href="https://github.com/recognai/rubrix/#example">Usage example</a>
-    ·
-    <a href="https://github.com/recognai/rubrix/#quick-links">Quick links</a>
-    ·
-    <a href="https://docs.rubrix.ml">Docs</a>
-    ·
-    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111615.png" alt="Slack" width="1.5%"> Join the Rubrix community on Slack</a>
-</p>
 
 <p align="left">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -46,6 +35,20 @@
     <!--img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix?sort=semver"-->
     
 </p>
+
+
+---
+
+<p align="justify" style="font-size: 18px">
+    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a></span>
+    〰️
+    <a href="https://docs.rubrix.ml">📚 Docs</a>
+    〰️
+    <a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a>
+    〰️
+    <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a>
+</p>
+
 
 https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4
 <p align="center">Example: Named Entity Recognition data exploration and annotation with spaCy and the IMDB dataset</p>
