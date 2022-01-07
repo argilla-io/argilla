@@ -24,7 +24,7 @@
       name="cross"
       width="20"
       height="14"
-      @click="filter = undefined"
+      @click="filter = ''"
     />
     <ReInput v-model="filter" placeholder="Search labels" />
   </ReInputContainer>
@@ -37,7 +37,7 @@ export default {
   props: {
     searchText: {
       type: String,
-      default: undefined,
+      default: "",
     },
   },
   computed: {
