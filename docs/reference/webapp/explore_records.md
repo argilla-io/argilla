@@ -17,6 +17,8 @@ As it is known, Rubrix deals with three different types of tasks:
 
 - **Text Classification Tasks**: In this mode, it works in a very similar way to token classification tasks. The **explore mode** is specially interesting with binary models— when it comes to positive or negative annotations, their corresponding icon is displayed next to the record.
 
+<video width="100%" controls><source src="images/explore_mode.mp4" type="video/mp4"></video>
+
 ## Filters and search
 
 Filters can be useful in order to sort and find records easily.

@@ -13,3 +13,5 @@ It can be done by using full-text queries (a normal search), or by Elasticsearch
 In both **Annotation** and **Exploration** modes, the search bar is placed in the upper left-hand corner. To search something, users must type one or several words (or a query) and click the **Intro** button.
 
 Note that this feature also works as a kind of filter. If users search something, it is possible to explore and/or annotate the results obtained. [Filters](filter_records.md) can be applied.
+
+<video width="100%" controls><source src="images/search_records.mp4" type="video/mp4"></video>

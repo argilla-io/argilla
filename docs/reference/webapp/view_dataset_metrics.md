@@ -14,6 +14,8 @@ This submenu is useful when users need to know how many records are annotated, v
 
 When clicking on this menu, not only the progress is shown, but also the number of labels and records.
 
+![Progress menu](images/progress.png)
+
 ### Stats
 
 This submenu allows users to know more about the keywords and the error distribution of the dataset.
@@ -24,6 +26,8 @@ It is composed of a dropdown with two dropdowns:
 - The **Error Distribution** dropdown displays a pie chart with the number of records, correct and incorrect predictions.
 
 Please, note that this section might vary, depending on the task carried out.
+
+<video width="100%" controls><source src="images/stats.mp4" type="video/mp4"></video>
 
 ### Refresh button
 

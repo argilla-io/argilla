@@ -14,6 +14,8 @@ Filtering records can be useful in big datasets, when users need to see and anno
 
 For example, if users are annotating a dataset in a **token classification task** and they need to see how many records are annotated with one or more labels, they can use the **Annotation filter** and choose the desired combination.
 
+<video width="100%" controls><source src="images/filter_records.mp4" type="video/mp4"></video>
+
 ### Filtering records in the Explore Mode
 
 In this case, the use is basically the same, but just for analysis purposes.
