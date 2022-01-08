@@ -41,6 +41,7 @@ Search bar
 This section is available `here <searchbar.rst>`_\.
 
 **ACTIVE QUERY PARAMETERS**
+
 This component show the current active search parameters. It allows removing each individual param as well as all params at once.
 
 .. figure:: ../images/reference/ui/active_query_params.png
