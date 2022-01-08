@@ -106,14 +106,29 @@ Sort filter
 ~~~~~~~~~~
 
 With this component, users are able to sort the information on the dataset by the following parameters:
-    - Predicted as,
-    - Predicted ok,
-    - Score,
-    - Predicted by,
-    - Annotated as,
-    - Annotated by,
-    - Status,
-    - Metadata.category/loss/topic/- (this one is not available in every dataset).
+
++-----------------+
+| Parameters      |
++=================+
+| Predicted as    |
++-----------------+
+| Predicted ok    |
++-----------------+
+| Score           |
++-----------------+
+| Predicted by    |
++-----------------+
+| Annotated as    |
++-----------------+
+| Annotated by    |
++-----------------+
+| Status          |
++-----------------+
+| Metadata.-*     |
++-----------------+
+
+The **Metadata** filter can be **Metadata.category/loss/topic/-**. Please, note that this one is not available for all the tasks.
+
 
 Please, note that these parameters could change depending on the kind of dataset used and the tasks to be performed.
 
@@ -125,7 +140,7 @@ Rubrix has three modes available:
 
 - **Explore mode**: learn more `here <explore_records.rst>`_\.
 - **Annotate mode**: learn more `here <annotate_records.rst>`_\.
-- **Define rules mode**: learn more `here <define_labelingrules.rst`_\.
+- **Define rules mode**: learn more `here <define_labelingrules.rst>`_\.
 
 Metrics
 ~~~~~~~~~~
