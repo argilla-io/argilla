@@ -12,11 +12,22 @@ When choosing this mode, the display of the dataset is slightly different. The *
 
 Users can annotate one by one, or several records in a row, but the annotation will change depending on the task:
 
-- On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
+Text2Text Tasks
+~~~~~~~~~~
 
-- On **token classification tasks**, the record will show different labels on its words (tokens). Users can pick words or sequences of words in order to annotate them with labels, and then, records can be validated or discarded.
+On **text2text tasks**, records can be edited, validated or discarded.
 
-- On **text2text tasks**, records can be edited, validated or discarded.
+
+Token Classification Tasks
+~~~~~~~~~~
+
+On **token classification tasks**, the record will show different labels on its words (tokens). Users can pick words or sequences of words in order to annotate them with labels, and then, records can be validated or discarded.
+
+
+Text Classification Tasks
+~~~~~~~~~~
+
+On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
 
 Bulk Annotation
@@ -29,15 +40,17 @@ After choosing the records to be annotated, a label must be selected on the "Ann
 
 It is also posible to create new labels for any classification task (tokenization, text classification...).
 
-Filters
+Filters and search
 ---------
 Using filters can be very helpful when it comes to annotate specific records or to carry out subtasks (this often happens when datasets are big).
 
 More information about these features can be found  `here <dataset_main.rst>`_\, and their use is described  `here <filter_records.rst>`_\.
 
+With respect to searching records, more information can be found `here <search_records.rst>`_\.
+
 Sidebar and metrics
 ---------
-In both modes (**Explore** and **Annotation**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\ (features) or  `here <metrics.rst>`_\ (an "user guide"). 
+In both modes (**Explore** and **Annotation**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide"). 
 
 .. figure:: ../images/reference/ui/annotation_textcat.png
    :alt: Rubrix Text Classification Annotation mode

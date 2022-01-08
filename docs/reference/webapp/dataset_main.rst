@@ -1,36 +1,20 @@
 Dataset
 ==========
-The main sections of the search bar are following:
-
-- **Record cards**
-    - Text classification
-        - Single label
-        - Multi label
-    - Token classification
-    - Text2Text
--  **Search bar**
-    - Active query parameters
-- **Filters**
-    - Predictions
-    - Annotations
-    - Status
-    - Metadata 
-    - Sort 
-- **Sidebar**
-    - Modes/Views
-        - Explore
-        - Annotate
-        - Define rules
-    - Metrics
-        - Progress
-        - Stats
-        - Refresh
 
 The **Dataset page** is the workspace for exploring and annotating records in a Rubrix dataset. Every task has its own specialized components, while keeping a similar layout and structure.
 
 The search components and the two modes of operation (`Explore <explore_records.rst>`_\ and `Annotation <annotate_records.rst>`_\) are described below.
 
 Rubrix dataset page is driven by **search features**. The **search records bar** gives users quick filters for easily exploring and selecting data subsets.
+
+The main sections of the search bar are following:
+
+.. toctree::
+
+Record cards
+Search bar
+Filters
+Sidebar
 
 Record cards
 ---------
