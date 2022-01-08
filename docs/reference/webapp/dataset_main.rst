@@ -8,6 +8,7 @@ Rubrix dataset page is driven by **search features**. The **search records bar**
 The main sections of the search bar are following:
 
 .. toctree::
+ :maxdepth: 2
 Record cards
 Search bar
 Filters
