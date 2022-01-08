@@ -5,7 +5,7 @@ This component enables:
 
 1. **Full-text queries** over all record ``inputs``.
 
-2. **Queries using Elasticsearch's query DSL with the** `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\, **which enables powerful queries for advanced users, using the Rubrix data model. Some examples are:**
+2. Queries using **Elasticsearch's query DSL** with the  `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\, **which enables powerful queries for advanced users, using the Rubrix data model. Some examples are:
     -``inputs.text:(women AND feminists)`` : records containing the words "women" AND "feminist" in the inputs.text field.
 
     -``inputs.text:(NOT women)`` : records NOT containing women in the inputs.text field.
@@ -18,7 +18,7 @@ This component enables:
 
     -``predicted_as:(NOT Sports)`` : records which are not predicted with the label ``Sports``, this is useful when you have many target labels and want to exclude only some of them.
 
-.. figure:: ../docs/reference/webapp/webappui_images/active_query_params.png
+.. image:: ../docs/reference/webapp/webappui_images/active_query_params.png
    :alt: Search input with Elasticsearch DSL query string
 
    Rubrix search input with Elasticsearch DSL query string

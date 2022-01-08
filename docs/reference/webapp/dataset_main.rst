@@ -8,10 +8,8 @@ Rubrix dataset page is driven by **search features**. The **search records bar**
 The main sections of the search bar are following:
 
 .. toctree::
-Record cards
-Search bar
-Filters
-Sidebar
+   :glob:
+   :titlesonly:
 
 Record cards
 ---------
@@ -19,17 +17,17 @@ There are three different types of record cards in Rubrix:
 
 Text classification
 ~~~~~~~~~~
-This type of record deals with predicting in which categories a text fits. This records usually deals with  multilabel text classification, sentiment analysis, semantic similarity, stance detection, and much more.
+This type of record deals with predicting in which categories a text fits. These records are usually related to multilabel text classification, sentiment analysis, semantic similarity, stance detection, and much more.
 
-In this case, these records can be **single** or **multilabel**— this means, that there are records with different number of labels, where one or more can be selected.
+In this case, these records can be **single** or **multilabel**— in other words, there are records with different number of labels, where one or more can be selected.
 
 Token classification
 ~~~~~~~~~~
-This type of record is intended to divide the input text into words, or syllables, and assign certain values to them. It is specially useful for NER tasks, POS tagging or any task more focused on Lingustics.
+This type of record is intended to divide the input text into words or syllables, and assign certain values to them. It is specially useful for NER tasks, POS tagging or any task more focused on Lingustics.
 
 Text2Text
 ~~~~~~~~~~
-The expression Text2Text encompasses text generation tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
+The concept Text2Text encompasses text generation tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
 
 These three types of cards are composed by the same components described below, although their modes differ. These are the links for reading about the `Annotation Mode <annotate_records.rst>`_\ and about the `Exploration Mode <explore_records.rst>`_\.
 
@@ -42,7 +40,7 @@ More information about this feature can be found by clicking `here <search_recor
 Active query parameters
 ~~~~~~~~~~
 
-This component show the current active search parameters. It allows removing each individual param as well as all params at once.
+This component show the current active search parameters. It allows removing each individual parameter as well as all params at once.
 
 .. figure:: ../docs/reference/webapp/webappui_images/active_query_params.png
    :alt: Active query params module
@@ -59,7 +57,7 @@ This component allows filtering by aspects related to predictions, such as:
 - **predicted as**: for filtering records by predicted labels,
 - **predicted by**: for filtering by prediction_agent (e.g., different versions of a model),
 - **predicted ok or ko**: for filtering records whose predictions are (or not) correct with respect to the annotations,
-- **score**: for inspecting the score of a negative or positive label. Although this feature is displayed in all datasets, is only effective for results involving percentage or numbers (watch this, this or this tutorial to know more.)
+- **score**: for inspecting the score of a negative or positive label. Although this feature is displayed in all datasets, it is only effective for results involving percentage or numbers (specially in **text classification** tasks).
 
 With the exception of the score filter, which works in a different way, several filters can be chosen in the different sections.
 
@@ -75,7 +73,7 @@ The different filters are the following:
 - **annotated as**: for filtering records by annotated labels. Several labels can be selected, and if an user creates a new one, it will be shown on the drop down.
 - **annotated by**: for filtering by annotation_agent (e.g., different human users or dataset versions). This agent can be established when programming ``Records``.
 
-.. figure:: ../docs/reference/webapp/webappui_images/annotation_filters.png
+.. image:: ../docs/reference/webapp/webappui_images/annotation_filters.png
    :alt: Rubrix annotation filters
 
    Rubrix annotation filters
@@ -87,9 +85,9 @@ This component allows filtering by record status:
 
 - **Default**: records without any annotation or edition.
 - **Validated**: records with validated annotations.
-- **Edited**: records with annotations but not yet validated.
+- **Edited**: records with annotations but still not validated.
 
-.. figure:: ../docs/reference/webapp/webappui_images/status_filters.png
+.. image:: ../docs/reference/webapp/webappui_images/status_filters.png
    :alt: Rubrix status filters
 
    Rubrix status filters
@@ -104,9 +102,7 @@ This component allows filtering by metadata fields.
 
    Rubrix metadata filters
 
-The list of **metadata categories** is dynamic and it's created by aggregating metadata fields, included in any of the logged records.
-
-Several filters can be chosen in order to see different metadata, and it will display a result of records with the same metadata category.
+The list of **metadata categories** is dynamic and it's created by aggregating metadata fields, included in any of the logged records. Several filters can be chosen in order to see different metadata, and it will display a result of records with the same metadata category.
 
 Sort filter
 ~~~~~~~~~~
@@ -133,9 +129,9 @@ With this component, users are able to sort the information on the dataset by th
 | Metadata.-*     |
 +-----------------+
 
-The **Metadata** filter can be **Metadata.category/loss/topic/-**. Please, note that this one is not available for all the tasks.
+The **Metadata** filter can be **Metadata.category/loss/topic/-**.
 
-Please, note that these parameters could change depending on the kind of dataset used and the tasks to be performed.
+Please, note that these parameters could change depending on the kind of dataset used and the tasks to be performed. For example, the **Metadata**m filter is not available for all tasks.
 
 More about these features can be found `here <filter_records.rst>`_\.
 
@@ -149,9 +145,6 @@ Rubrix has three modes available:
 - **Annotate mode**: learn more `here <annotate_records.rst>`_\.
 - **Define rules mode**: learn more `here <define_labelingrules.rst>`_\.
 
-This would be the preliminar view for each mode:
-
-
 
 Metrics
 ~~~~~~~~~~
@@ -163,4 +156,4 @@ It is composed by two submenus and the **Refresh** button:
 - **Stats**: this submenu allows users to know more about the keywords and the error distribution of the dataset.
 - **Refresh**: with this button, it is possible to update the dataset page, in order to see changes applied.
 
-Click `here <metrics.rst>`_\ to know more about these features.
+Click `here <metrics.rst>`_\  to know more about these features.

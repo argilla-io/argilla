@@ -6,21 +6,23 @@ Rubrix metrics are very convenient in terms of assesing the status of the datase
 
 How to use Metrics
 ---------
-Metrics are composed of two submenus: **Progress** and **Stats**. They work similarly in **Annotation** and **Explore** and **Define rules** mode.
+Metrics are composed of two submenus: **Progress** and **Stats**. They work similarly in **Annotation**, **Explore** and **Define rules** mode.
 
 Progress
 ~~~~~~~~~~
-This submenu is useful when users need to know how many records are annotated, validated and/or discarded. 
+This submenu is useful when users need to know how many records are annotated, validated and/or discarded.
 
-When clicking on this menu, not only the progress is shown, but users can also check the number of labels, and how many records belong to each one.
+When clicking on this menu, not only the progress is shown, but also the number of labels and records.
 
 Stats
 ~~~~~~~~~~
-This submenu allows users to know more about the keywords and the error distribution of the dataset. 
+This submenu allows users to know more about the keywords and the error distribution of the dataset.
 
 It is composed of a dropdown with the two options (**Keywords** and **Error Distribution**).
 
-The **Keywords** dropdown displays a list of annotated words and the number of occurrences, while the **Error Distribution** dropdown displays a pie chart with the number of records, and the number of correct and incorrect predictions. 
+The **Keywords** dropdown displays a list of annotated words and the number of occurrences, while the **Error Distribution** dropdown displays a pie chart with the number of records, and the number of correct and incorrect predictions.
+
+Please, note that this section might vary, depending on the task carried out.
 
 Refresh button
 ~~~~~~~~~~

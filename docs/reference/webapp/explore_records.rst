@@ -4,12 +4,6 @@ The **Exploration mode** turns out convenient when it comes to explore and analy
 
 As Rubrix allows different tasks to be carried out (more information `here <workspace.rst>`_\), different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above.
 
-When it comes to explore records, the interface can be divided in three parts:
-
-- **Tasks and Records**,
-- **Filter and search**
-- and **Sidebar and metrics**
-
 More detailed information about these features can be found `here <dataset_main.rst>`_\. This section will explain the actions related to exploring records.
 
 Tasks and Records
@@ -19,7 +13,7 @@ As it is known, Rubrix deals with three different types of tasks: **Text2Text**,
 Text2Text Tasks
 ~~~~~~~~~~
 
-In these tasks, where the model receives and outputs a sequence of tokens, the main objective is to display arranged records. Thus, it is possible to use the Metrics menu (on the sidebar) and to analyze the score, the prediction agent and the status, or users can also sort the results by these parameters.
+In these tasks, the main objective is to display arranged records. Thus, it is possible to use the Metrics menu (on the sidebar) and to analyze the score, the prediction agent and the status, or users can also sort the results by these parameters.
 
 In order to gain further knowledge of the aforementioned aspects, read the section devoted to `datasets <dataset_main.rst>`_\.
 

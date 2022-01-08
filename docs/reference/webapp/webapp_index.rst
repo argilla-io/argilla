@@ -7,7 +7,7 @@ This section contains a quick, but throrough overview of Rubrix web-app's User I
 
 Pages
 ---------
-The web-app has two main sections: 
+The web-app has two main sections:
 
 - `Workspace <workspace.rst>`_\
 
@@ -30,7 +30,3 @@ These are the different features available at Rubrix:
 - `View dataset metrics <metrics.rst>`_\
 
 - `Switch workspaces <switch_workspaces.rst>`_\
-
-User stories
----------
-- **Exclude extreme records**
