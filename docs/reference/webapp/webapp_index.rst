@@ -19,17 +19,17 @@ These are the different features available at Rubrix:
 
 - `Annotate Records <annotate_records.rst>`_\
 
-- `Explore Records <explore_records.rst>`\
+- `Explore Records <explore_records.rst>`_\
 
-- `Define labeling rules <define_labelingrules.rst>`\
+- `Define labeling rules <define_labelingrules.rst>`_\
 
-- `Search records <search_records.rst>`\
+- `Search records <search_records.rst>`_\
 
-- `Filter records <filter_records.rst>`\
+- `Filter records <filter_records.rst>`_\
 
-- `View dataset metrics <metrics.rst>`\
+- `View dataset metrics <metrics.rst>`_\
 
-- `Switch workspaces <switch_workspaces.rst>`\
+- `Switch workspaces <switch_workspaces.rst>`_\
 
 User stories
 ---------
