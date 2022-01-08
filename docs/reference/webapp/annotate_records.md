@@ -14,11 +14,11 @@ When choosing this mode, the display of the selected dataset is slightly differe
 
 Users can annotate one record by one, or several records in a row, but the annotation will change depending on the task:
 
-- **Text2Text Tasks**: On **text2text tasks**, records can be edited, validated or discarded.
+- **Text2Text Tasks**: Records can be edited, validated or discarded in these tasks.
 - **Token Classification Tasks**: The record will show different labels on its words. Users can select words or sequences of words (tokens) in order to annotate them with labels, and then, records can be validated or discarded.
 - **Text Classification Tasks**: A record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
-!<video width="100%" controls><source src="images/random_examples.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="images/random_examples.mp4" type="video/mp4"></video>
 
 ### Bulk Annotation
 
