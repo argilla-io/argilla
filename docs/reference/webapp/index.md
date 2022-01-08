@@ -20,13 +20,13 @@ dataset
 
 ## Features
 
-- [**Explore records**](explore_records.rst): Explore your data and predictions, as well as your annotations
-- [**Annotate records**](annotate_records.rst): Annotate your records for different [tasks](../../guides/task_examples.ipynb)
-- [**Define rules**](define_rules.rst): Define rules to weakly supervise your data
-- [**Search records**](search_records.rst): Search your records with the powerful elasticsearch query syntax
-- [**Filter records**](filter_records.rst): Quickly filter your records by predictions, annotations or their metadata
-- [**View dataset metrics**](view_dataset_metrics.rst): View insightful metrics of your dataset
-- [**Switch workspaces**](switch_workspaces.rst): Switch your workspace and access shared datasets
+- [**Explore records**](explore_records.md): Explore your data and predictions, as well as your annotations
+- [**Annotate records**](annotate_records.md): Annotate your records for different [tasks](../../guides/task_examples.ipynb)
+- [**Define rules**](define_rules.md): Define rules to weakly supervise your data
+- [**Search records**](search_records.md): Search your records with the powerful elasticsearch query syntax
+- [**Filter records**](filter_records.md): Quickly filter your records by predictions, annotations or their metadata
+- [**View dataset metrics**](view_dataset_metrics.md): View insightful metrics of your dataset
+- [**Switch workspaces**](switch_workspaces.md): Switch your workspace and access shared datasets
 
 ```{toctree}
 :maxdepth: 1
