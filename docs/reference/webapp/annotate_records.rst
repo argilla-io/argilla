@@ -39,7 +39,7 @@ Text Classification Tasks
 
 On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
-.. figure:: ../_static/images/webappui_images/random_examples.mp4
+.. figure:: /webappui_images/random_examples.mp4
 
 Bulk Annotation
 ---------
@@ -63,13 +63,13 @@ Sidebar and metrics
 ---------
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide").
 
-.. image:: _static/images/webappui_images/annotation_textcat.png
+.. image:: /webappui_images/annotation_textcat.png
    :alt: Rubrix Text Classification Annotation mode
 
    Rubrix Text Classification Annotation mode
 
 
-.. image:: _static/images/webappui_images/annotation_ner.png
+.. image:: /webappui_images/annotation_ner.png
    :alt: Rubrix Token Classification (NER) Annotation mode
 
    Rubrix Token Classification (NER) Annotation mode

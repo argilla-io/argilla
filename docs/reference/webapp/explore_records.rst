@@ -48,14 +48,14 @@ Sidebar and metrics
 ---------
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide").
 
-.. figure:: ../images/reference/ui/explore_textcat.png
+.. image:: /webappui_images/explore_textcat.png
    :alt: Rubrix Text Classification Explore mode
 
    Rubrix Text Classification Explore mode
 
 An example is displayed here:
 
-.. figure:: ../images/reference/ui/explore_ner.png
+.. image:: /webappui_images/explore_ner.png
    :alt: Rubrix Token Classification (NER) Explore mode
 
    Rubrix Token Classification (NER) Explore mode
