@@ -2,7 +2,7 @@ Explore Records
 ^^^^^^^^^^^^^^^^^^^
 The **Exploration mode** turns out convenient when it comes to explore and analyze records in a dataset. 
 
-As Rubrix allows different tasks to be carried out `(more information here <workspace.rst>)`_\, different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above. 
+As Rubrix allows different tasks to be carried out (more information `here <workspace.rst>)`_\, different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above. 
 
 When it comes to explore records, the interface can be divided in three parts:
 
@@ -25,6 +25,10 @@ In order to gain further knowledge of the aforementioned aspects, read the secti
    When it comes to explore records for tokenization tasks, Rubrix displays labels in a very transparent way— each label in a dataset has a different color, and their caption is displayed next to the search bar. In addition to this, all filters can be used to analyze the records, as well as the Metrics menu.
 
 - **Text Classification Tasks**: the **Exploration Mode** works in a very similar way to token classification tasks. The filters and menus are the same, but in this case this mode is very interesting with binary models— when it comes to positive or negative annotations, their corresponding icon is displayed next to the record.
+
+Metrics
+---------
+In both modes (**Explore** and **Annotation**), the **Metrics** menu is available. Learn more about it `here <dataset_main.rst>`_\
 
 .. figure:: ../images/reference/ui/explore_textcat.png
    :alt: Rubrix Text Classification Explore mode
