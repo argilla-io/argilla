@@ -2,22 +2,25 @@
 
 Web App UI
 ==========
-!This section contains a quick, but throrough overview of Rubrix web-app's User Interface (UI).
+This section contains a quick, but throrough overview of Rubrix web-app's User Interface (UI).
 
 
 Pages
 ---------
 The web-app has two main sections: 
-- `**Workspace** <workspace.rst>`_\,
-- `**Dataset** <dataset.rst>`_\
+- `**Workspace** <workspace.rst>`_\
+- `**Dataset** <dataset_main.rst>`_\
 
 Features
 ---------
 - **Annotate Records**
 - **Explore Records**
-- **View Metrics**
-- **Filter Records**
-- **Define Labeling Rules**
-- **Search Mode**
-- **Sidebar**
-- **Switch Workspaces**
+- **Define labeling rules**
+- **Search records*+
+- **Filter records**
+- **View dataset metrics**
+- **Switch workspaces**
+
+User stories
+---------
+- **Exclude extreme records**
