@@ -2,7 +2,8 @@
 
 Web App UI
 ==========
-This section contains a quick, but throrough overview of Rubrix web-app's User Interface (UI).
+!This section contains a quick, but throrough overview of Rubrix web-app's User Interface (UI).
+
 
 Pages
 ---------
