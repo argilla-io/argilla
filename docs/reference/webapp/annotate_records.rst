@@ -2,14 +2,14 @@ Annotate Records
 ^^^^^^^^^^^^^^^^^^^
 In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `Explore mode <explore_records.rst>`_\  (e.g., using filters and advanced search).
 
-The **Define rules mode** works slightly different, even though its features can be seen in its `section <define_labelingrules.rst>`_\.
+The `Define rules mode <define_labelingrules.rst>`_\ works slightly different, even though its features can be seen in its `section <define_labelingrules.rst>`_\.
 
 Novel features, such as **bulk annotation** for a given set of search parameters are also available.
 
 When it comes to annotate records, the interface can be divided in three parts:
 
 - **How to annotate**,
-- **Filter and search **
+- **Filter and search**
 - and **Sidebar and metrics**
 
 More detailed information about these features can be found `here <dataset_main.rst>`_\. This section will explain the actions related to annotation.
@@ -39,7 +39,7 @@ Text Classification Tasks
 
 On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
-.. figure:: ../reference/webapp/webappui_images/random_examples.mp4
+.. figure:: ../_static/images/webappui_images/random_examples.mp4
 
 Bulk Annotation
 ---------
@@ -63,18 +63,18 @@ Sidebar and metrics
 ---------
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide").
 
-.. figure:: ../images/reference/ui/annotation_textcat.png
+.. figure:: ../_static/images/webappui_images/annotation_textcat.png
    :alt: Rubrix Text Classification Annotation mode
 
    Rubrix Text Classification Annotation mode
 
 
-.. figure:: ../images/reference/ui/annotation_ner.png
+.. figure:: ../_static/images/webappui_images/annotation_ner.png
    :alt: Rubrix Token Classification (NER) Annotation mode
 
    Rubrix Token Classification (NER) Annotation mode
 
 Annotation by different users will be saved with different annotation agents.
-To setup various users in your Rubrix server, please refer to our `user management guide </getting_started/user-management.ipynb>`_.
+To setup various users in your Rubrix server, please refer to our `user management guide <https://docs.rubrix.ml/en/stable/getting_started/user-management.html>`_.
 
-Click `here <docs/getting_started/setup&installation.rst>`_\  to start with the installation or the first tutorial (a list with different tutorials is available).
+Click `here <https://docs.rubrix.ml/en/stable/getting_started/setup%26installation.html>`_\  to start with the installation or the first tutorial (a list with different tutorials is available).
