@@ -1,6 +1,6 @@
 Sort filter
 ^^^^^^^^^^^^^^^^
-With this component, users are able to sort the **information** on the dataset by the following parameters:
+With this component, users are able to sort the information on the dataset by the following parameters:
     - Predicted as,
     - Predicted ok,
     - Score,

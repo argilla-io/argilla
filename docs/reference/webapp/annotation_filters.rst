@@ -1,4 +1,4 @@
-Annotations filters
+Annotation filters
 ^^^^^^^^^^^^^^^^^^^
 
 This component allows filtering by aspects related to annotations. This can be very useful when it comes to handle a lot of data.

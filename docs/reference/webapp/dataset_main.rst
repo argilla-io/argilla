@@ -8,20 +8,23 @@ The Rubrix dataset page is driven by **search features**. The **search records b
 
 The main sections of the search bar are following:
 
-- *Record cards*
+- **Record cards**
+
     - Text classification
         - Single label
         - Multi label
     - Token classification
     - Text2Text
 -  `Search bar <searchbar.rst>`_\
-- *Filters*
+- **Filters**
+
     - `Predictions <prediction_filters.rst>`_\
     - `Annotations <annotation_filters.rst>`_\
     - `Status <status_filters.rst>`_\
     - `Metadata <metadata_filters.rst>`_\
     - `Sort <sort_filters.rst>`_\
 - *Sidebar*
+
     - Modes/Views
         - Explore
         - Annotate

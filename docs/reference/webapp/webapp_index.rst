@@ -15,14 +15,21 @@ The web-app has two main sections:
 
 Features
 ---------
+These are the different features available at Rubrix:
+
 - `Annotate Records <annotate_records.rst>`_\
 
-- **Explore Records**
-- **Define labeling rules**
-- **Search records**
-- **Filter records**
-- **View dataset metrics**
-- **Switch workspaces**
+- `Explore Records <explore_records.rst>`\
+
+- `Define labeling rules <define_labelingrules.rst>`\
+
+- `Search records <search_records.rst>`\
+
+- `Filter records <filter_records.rst>`\
+
+- `View dataset metrics <metrics.rst>`\
+
+- `Switch workspaces <switch_workspaces.rst>`\
 
 User stories
 ---------

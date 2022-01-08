@@ -1,4 +1,4 @@
-Predictions filters
+Prediction filters
 ^^^^^^^^^^^^^^^^^^^
 
 This component allows filtering by aspects related to predictions, such as:
@@ -10,4 +10,4 @@ This component allows filtering by aspects related to predictions, such as:
 
 With the exception of the score filter, which works in a different way, several filters can be chosen in the different sections.
 
-Look at how score can work here:
+Here is an example of how the score can work for a text classification task:
