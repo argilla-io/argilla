@@ -3,7 +3,7 @@
 ![Screenshot of the Workspace page](images/workspace_1.png)
 
 The _Workspace_ page is mainly a **searchable and sortable list** of **datasets**.
-It is the **entry point** to the Rubrix web app composed of the following components:
+It is the **entry point** to the Rubrix web app and is composed of the following 3 components.
 
 ## Search bar
 

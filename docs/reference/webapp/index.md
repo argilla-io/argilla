@@ -7,7 +7,7 @@ Most of the features are accessed via the [Dataset page](dataset.rst).
 ## Pages
 
 - [**Workspace**](workspace.md): Search, access and share your datasets in a unified place
-- [**Dataset**](dataset.rst): Dive into your dataset to explore and annotate your records
+- [**Dataset**](dataset.md): Dive into your dataset to explore and annotate your records
 
 ```{toctree}
 :maxdepth: 1
