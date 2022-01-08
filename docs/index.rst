@@ -193,7 +193,8 @@ You can join the conversation on our Github page and our Github forum.
    :hidden:
 
    reference/python/index
-   reference/rubrix_webapp_reference
+   reference/webapp/webapp_index
+   reference/webapp/sample
 
 
 .. toctree::
