@@ -12,7 +12,7 @@ Rubrix's Workspace is a **searchable and sortable list** of **datasets**, which 
 - **Updated at**
 - **Refresh button** (in the sidebar)
 
-.. figure:: ../images/reference/webapp/webappui_images/workspace_1.png
+.. figure:: ../reference/webapp/webappui_images/workspace_1.png
    :alt: Rubrix Workspace view
 
    Rubrix Workspace view
