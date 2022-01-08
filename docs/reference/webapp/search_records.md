@@ -4,8 +4,7 @@ With this component, users are able to search specific information on the datase
 
 More information is available [here](searchbar.md).
 
-(images/search_components.png)
-    Search components
+![Search components](images/search_components.png)
 
 ## How to search
 

@@ -17,8 +17,7 @@ This component enables:
 
     -``predicted_as:(NOT Sports)`` : records which are not predicted with the label ``Sports``, this is useful when you have many target labels and want to exclude only some of them.
 
-(images/active_query_params.png)
-   Search input with Elasticsearch DSL query string
+![Search input with Elasticsearch DSL query string](images/active_query_params.png)
 
 **NOTE**: Elasticsearch's query DSL supports **escaping special characters** that are part of the query syntax. The current list special characters are:
 

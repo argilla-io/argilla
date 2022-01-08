@@ -29,10 +29,8 @@ More information about searching records can be found [here](search_records.md).
 
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it [here](dataset.md) (features) or [here](view_dataset_metrics.md) (an "user guide").
 
-(images/explore_textcat.png)
-   Rubrix Text Classification Explore mode
+![Rubrix Text Classification Explore mode](images/explore_textcat.png)
 
 An example is displayed here:
 
-(images/explore_ner.png)
-   Rubrix Token Classification (NER) Explore mode
+![Rubrix Token Classification (NER) Explore mode](images/explore_ner.png)
