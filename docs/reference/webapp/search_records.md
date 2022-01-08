@@ -14,4 +14,4 @@ In both **Annotation** and **Exploration** modes, the search bar is placed in th
 
 Note that this feature also works as a kind of filter. If users search something, it is possible to explore and/or annotate the results obtained. [Filters](filter_records.md) can be applied.
 
-<video width="100%" controls><source src="images/search_records.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="_static/reference/webapp/search_records.mp4" type="video/mp4"></video>

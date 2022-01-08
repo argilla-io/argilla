@@ -27,7 +27,7 @@ It is composed of a dropdown with two dropdowns:
 
 Please, note that this section might vary, depending on the task carried out.
 
-<video width="100%" controls><source src="images/stats.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="_static/reference/webapp/stats.mp4" type="video/mp4"></video>
 
 ### Refresh button
 
