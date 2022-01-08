@@ -1,8 +1,7 @@
 # Web App UI
 
 Here we provide a comprehensible overview of the Rubrix web app's User Interface (UI).
-The web app consists of two main pages.
-Most of the features are accessed via the [Dataset page](dataset.md).
+To launch the web app, please have a look at our [setup and installation guide](../../getting_started/setup&installation.rst#launch-the-web-app).
 
 ## Pages
 

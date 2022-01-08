@@ -126,7 +126,7 @@ This section of the sidebar lets you switch between the different Rubrix modes t
 
 - **Explore**: this mode is for [exploring your dataset](explore_records.md) and gain valuable insights
 - **Annotate**: this mode lets you conveniently [annotate your data](annotate_records.md)
-- **Define rules**: this mode helps you to [define heuristic rules](define_rules.md) to automatically label your data
+- **Define rules**: this mode helps you to [define rules](define_rules.md) to automatically label your data
 
 ```{note}
 Not all modes are available for all [tasks](../../guides/task_examples.ipynb).
