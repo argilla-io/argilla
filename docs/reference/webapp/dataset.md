@@ -1,6 +1,6 @@
 # Dataset
 
-_TODO: Screenshot_
+![Dataset view](../../_static/reference/webapp/dataset_view.png)
 
 The _Dataset_ page is the main page of the Rubrix web app.
 From here you can access most of Rubrix's features, like **exploring and annotating** the records of your dataset.
@@ -13,7 +13,7 @@ The page is composed of 4 major components:
 
 ## Search bar
 
-_TODO: Screenshot_
+![Search bar](../../_static/reference/webapp/search_bar.png)
 
 Rubrix's _search bar_ is a powerful tool that allows you to thoroughly explore your dataset, and quickly navigate through the records.
 You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
@@ -21,7 +21,7 @@ You can find more information about how to use the search bar in our detailed [s
 
 ## Filters
 
-_TODO: Screenshot_
+![Dataset filters](../../_static/reference/webapp/filters_all.png)
 
 The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
 You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
@@ -32,7 +32,7 @@ Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 
 ### Predictions filter
 
-_TODO: Screenshot_
+![Predictions filter](../../_static/reference/webapp/predictions_filter.png)
 
 This filter allows you to filter records with respect of their predictions:
 
@@ -72,13 +72,11 @@ Nested metadata will be flattened and the keys will be joint by a dot.
 
 ### Sort records
 
-_TODO: Screenshot_
+![Sort filter](../../_static/reference/webapp/sort_filter.png)
 
 With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 ## Record cards
-
-_TODO: Screenshot_
 
 The record cards are at the heart of the _Dataset_ page and contain your data.
 There are three different flavors of record cards depending on the [task](../../guides/task_examples.ipynb) of your dataset.
@@ -89,7 +87,7 @@ Check out our [exploration](explore_records.md) and [annotation](annotate_record
 
 ### Text classification
 
-_TODO: Screenshot_
+![Text classification view](../../_static/reference/webapp/text_classification.png)
 
 In this task the predictions are given as tags below the input text.
 They contain the label as well as a percentage score.
@@ -100,14 +98,14 @@ A text classification dataset can support either single-label or multi-label cla
 
 ### Token classification
 
-_TODO: Screenshot_
+![Token classification view](../../_static/reference/webapp/token_classification.png)
 
 In this task predictions and annotation are given as highlights in the input text.
 Work in progress ...
 
 ### Text2Text
 
-_TODO: Screenshot_
+![Text2Text view](../../_static/reference/webapp/text2text.png)
 
 In this task predictions and the annotation are given in a text field below the input text.
 You can switch between prediction and annotation via the "_View annotation_"/"_View predictions_" buttons.
@@ -116,7 +114,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
-_TODO: Screenshot_
+![Sidebar](../../_static/reference/webapp/sidebar.png)
 
 The sidebar is divided into three sections.
 
