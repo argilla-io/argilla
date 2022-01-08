@@ -9,6 +9,7 @@ Pages
 ---------
 The web-app has two main sections: 
 - `**Workspace** <workspace.rst>`_\
+
 - `**Dataset** <dataset_main.rst>`_\
 
 Features
@@ -16,7 +17,7 @@ Features
 - **Annotate Records**
 - **Explore Records**
 - **Define labeling rules**
-- **Search records*+
+- **Search records**
 - **Filter records**
 - **View dataset metrics**
 - **Switch workspaces**
