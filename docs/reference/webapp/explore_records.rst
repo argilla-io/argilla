@@ -1,5 +1,8 @@
-Explore Records
-^^^^^^^^^^^^^^^^^^^
+.. _webapp_explore_records:
+
+Explore records
+===============
+
 The **Exploration mode** turns out convenient when it comes to explore and analyze records in a dataset.
 
 As Rubrix allows different tasks to be carried out (more information `here <workspace.rst>`_\), different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above.

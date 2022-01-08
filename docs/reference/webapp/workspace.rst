@@ -1,3 +1,5 @@
+.. _webapp_workspace:
+
 Workspace
 ==========
 This is the **entry point** to Rubrix. From this page, it is possible to open one or multiple datasets.

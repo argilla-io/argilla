@@ -1,14 +1,17 @@
-Define Labeling Rules
-^^^^^^^^^^^^^^^^^^^
-The **Define Rules** mode is a feature available for **Text Classification Tasks**.
+.. _webapp_define_rules:
+
+Define rules
+============
+
+The **Define rules** mode is a feature available for **Text Classification Tasks**.
 
 This mode creates **labeling rules** for easily accessing some specific contents. By creating rules, users can see not only the corresponding results, but also features like coverage, precision, correct/incorrect records, and so on.
 
 More detailed information about these features can be found `here <dataset_main.rst>`_\.
 
 How it works
----------
-After opening a dataset, the **Define Rules** mode can be chosen on the sidebar.
+------------
+After opening a dataset, the **Define Rules** mode must be chosen on the sidebar.
 
 If it is chosen, a **query searchbar** is displayed on the superior part of the dataset. Below, users will see the **Rules Menu** with the following features:
 

@@ -1,9 +1,13 @@
+.. _webapp_dataset:
+
 Dataset
-==========
+=======
 
-The **Dataset page** is the workspace for exploring and annotating records in a Rubrix dataset. Every task has its own specialized components, while keeping a similar layout and structure.
+The **Dataset page** is the workspace for exploring and annotating records in a Rubrix dataset.
+Every task has its own specialized components, while keeping a similar layout and structure.
 
-Rubrix dataset page is driven by **search features**. The **search records bar** gives users quick filters for easily exploring and selecting data subsets.
+Rubrix dataset page is driven by **search features**.
+The **search records bar** gives users quick filters for easily exploring and selecting data subsets.
 
 The main sections of the search bar are following:
 
@@ -32,13 +36,13 @@ The concept Text2Text encompasses text generation tasks where the model receives
 These three types of cards are composed by the same components described below, although their modes differ. These are the links for reading about the `Annotation Mode <annotate_records.rst>`_\ and about the `Exploration Mode <explore_records.rst>`_\.
 
 Search bar
----------
-This section is available `here <searchbar.rst>`_\.
+----------
+This section is available `here <searchbar.rst>`__\.
 
-More information about this feature can be found by clicking `here <search_records.rst>`_\.
+More information about this feature can be found by clicking `here <search_records.rst>`__\.
 
 Active query parameters
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 This component show the current active search parameters. It allows removing each individual parameter as well as all params at once.
 
@@ -48,9 +52,10 @@ This component show the current active search parameters. It allows removing eac
    Active query params module
 
 Filters
----------
+-------
+
 Prediction filters
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 This component allows filtering by aspects related to predictions, such as:
 
@@ -133,7 +138,7 @@ The **Metadata** filter can be **Metadata.category/loss/topic/-**.
 
 Please, note that these parameters could change depending on the kind of dataset used and the tasks to be performed. For example, the **Metadata**m filter is not available for all tasks.
 
-More about these features can be found `here <filter_records.rst>`_\.
+More about these features can be found `here <filter_records.rst>`__\.
 
 Sidebar
 ---------
@@ -141,9 +146,9 @@ Modes
 ~~~~~~~~~~
 Rubrix has three modes available:
 
-- **Explore mode**: learn more `here <explore_records.rst>`_\.
-- **Annotate mode**: learn more `here <annotate_records.rst>`_\.
-- **Define rules mode**: learn more `here <define_labelingrules.rst>`_\.
+- **Explore mode**: learn more `here <explore_records.rst>`__\.
+- **Annotate mode**: learn more `here <annotate_records.rst>`__\.
+- **Define rules mode**: learn more `here <define_labelingrules.rst>`__\.
 
 
 Metrics
@@ -156,4 +161,4 @@ It is composed by two submenus and the **Refresh** button:
 - **Stats**: this submenu allows users to know more about the keywords and the error distribution of the dataset.
 - **Refresh**: with this button, it is possible to update the dataset page, in order to see changes applied.
 
-Click `here <metrics.rst>`_\  to know more about these features.
+Click `here <metrics.rst>`__ to know more about these features.

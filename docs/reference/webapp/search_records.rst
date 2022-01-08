@@ -10,7 +10,8 @@ More information is available  `here <searchbar.rst>`_\.
    Search components
 
 How to search on Rubrix records
----------
+-------------------------------
+
 As stated above, searching records can be done by full-text queries (a normal search), or by Elasticsearch queries with its `query string syntax <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax>`_\.
 
 In both **Annotation** and **Exploration** modes, the search bar is placed in the upper left-hand corner. To search something, users must type one or several words (or a query) and click the **Intro** button. After that, corresponding records will be displayed.

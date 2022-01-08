@@ -1,5 +1,8 @@
-Annotate Records
-^^^^^^^^^^^^^^^^^^^
+.. _webapp_annotate_records:
+
+Annotate records
+================
+
 In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `Explore mode <explore_records.rst>`_\  (e.g., using filters and advanced search).
 
 The `Define rules mode <define_labelingrules.rst>`_\ works slightly different, even though its features can be seen in its `section <define_labelingrules.rst>`_\.

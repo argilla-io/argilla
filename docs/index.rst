@@ -193,7 +193,7 @@ You can join the conversation on our Github page and our Github forum.
    :hidden:
 
    reference/python/index
-   reference/webapp/webapp_index
+   reference/webapp/index
 
 .. toctree::
    :maxdepth: 2

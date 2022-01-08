@@ -1,5 +1,8 @@
-View Dataset Metrics
-^^^^^^^^^^^^^^^^^^^
+.. _webapp_view_dataset_metrics:
+
+View dataset metrics
+====================
+
 The **Dataset Metrics** are part of the **Sidebar** placed on the right side of **Rubrix datasets**. To know more about this component, click `here <dataset_main.rst>`_\.
 
 Rubrix metrics are very convenient in terms of assesing the status of the dataset, and to extract more valuable information.
