@@ -15,7 +15,7 @@ The web-app has two main sections:
 
 Features
 ---------
-- **Annotate Records**
+- `**Annotate Records** <annotate_records.rst>_\
 - **Explore Records**
 - **Define labeling rules**
 - **Search records**
