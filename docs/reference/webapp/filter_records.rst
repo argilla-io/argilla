@@ -2,7 +2,7 @@ Filter Records
 ^^^^^^^^^^^^^^^^^^^
 With this component, users are able to sort the information on the dataset by different parameters (see `here <dataset_main.rst>`_\).
 
-Since Rubrix can carry out different types of tasks, filters are different for each of them. Besides, filtering records can be used in both **Annotation** and **Exploration** modes.
+Since Rubrix can carry out different types of `tasks <dataset_main>`_\, filters are different for each of them. Besides, filtering records can be used in both **Annotation** and **Exploration** modes.
 
 How filters work
 ---------
@@ -14,7 +14,7 @@ Filtering records in the Annotation Mode
 ~~~~~~~~~~
 Filtering records can be useful in big datasets, when users need to see and annotate a very specific part of the dataset or want to check how many records without validation are left.
 
-For example, if an user is annotating a dataset in a **token classification task** and needs to see how many records are annotated with a specific label (or more than one), they can use the **Annotation filter** and choose the desired combinations on the dropdown. 
+For example, if an user is annotating a dataset in a **token classification task** and needs to see how many records are annotated with a specific label (or more than one), they can use the **Annotation filter** and choose the desired combinations on the dropdown.
 
 Filtering records in the Explore Mode
 ~~~~~~~~~~

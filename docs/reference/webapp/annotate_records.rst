@@ -6,6 +6,14 @@ The **Define rules mode** works slightly different, even though its features can
 
 Novel features, such as **bulk annotation** for a given set of search parameters are also available.
 
+When it comes to annotate records, the interface can be divided in three parts:
+
+- **How to annotate**,
+- **Filter and search **
+- and **Sidebar and metrics**
+
+More detailed information about these features can be found `here <dataset_main.rst>`_\. This section will explain the actions related to annotation.
+
 How to annotate
 ---------
 This section is intended to explain how the **Annotation Mode** works.
@@ -67,6 +75,6 @@ In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics**
    Rubrix Token Classification (NER) Annotation mode
 
 Annotation by different users will be saved with different annotation agents.
-To setup various users in your Rubrix server, please refer to our `user management guide <../getting_started/user-management.ipynb>`_.
+To setup various users in your Rubrix server, please refer to our `user management guide </getting_started/user-management.ipynb>`_.
 
-Click `here <..docs/getting_started/setup&installation.rst>`_\  to start with the installation or the first tutorial (a list with different tutorials is available).
+Click `here <docs/getting_started/setup&installation.rst>`_\  to start with the installation or the first tutorial (a list with different tutorials is available).

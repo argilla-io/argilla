@@ -4,6 +4,15 @@ The **Define Rules** mode is a feature available for **Text Classification Tasks
 
 This mode creates **labeling rules** for easily accessing some specific contents. By creating rules, users can see not only the corresponding results, but also features like coverage, precision, correct/incorrect records, and so on.
 
+The interface can be divided in three parts for this mode:
+
+- **How it works**,
+- **Rules**,
+- **Filter and search**
+- and **Sidebar and metrics**
+
+More detailed information about these features can be found `here <dataset_main.rst>`_\. This section will explain the actions related to exploring records.
+
 How it works
 ---------
 After opening a dataset, the **Define Rules** mode must be chosen on the sidebar.

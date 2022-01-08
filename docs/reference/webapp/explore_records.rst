@@ -1,14 +1,14 @@
 Explore Records
 ^^^^^^^^^^^^^^^^^^^
-The **Exploration mode** turns out convenient when it comes to explore and analyze records in a dataset. 
+The **Exploration mode** turns out convenient when it comes to explore and analyze records in a dataset.
 
-As Rubrix allows different tasks to be carried out (more information `here <workspace.rst>`_\), different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above. 
+As Rubrix allows different tasks to be carried out (more information `here <workspace.rst>`_\), different visualizations are tailored for the task. For example, it is possible to see and analyze the keywords, metrics, the labels and to choose the parameters described above.
 
 When it comes to explore records, the interface can be divided in three parts:
 
-- **Search records**,
-- **Records**, 
-- and **Sidebar**
+- **Tasks and Records**,
+- **Filter and search**
+- and **Sidebar and metrics**
 
 More detailed information about these features can be found `here <dataset_main.rst>`_\. This section will explain the actions related to exploring records.
 
@@ -26,14 +26,14 @@ In order to gain further knowledge of the aforementioned aspects, read the secti
 Token Classification Tasks
 ~~~~~~~~~~
 
-As tokenization gives a lot of importance to words (tokens), the way they are labeled is key in these tasks. 
+As tokenization gives a lot of importance to words (tokens), the way they are labeled is key in these tasks.
 
 When it comes to explore records for tokenization tasks, Rubrix displays labels in a very transparent way— each label in a dataset has a different color, and their caption is displayed next to the search bar. In addition to this, all filters can be used to analyze the records, as well as the Metrics menu.
 
 Text Classification Tasks
 ~~~~~~~~~~
 
-The **Exploration Mode** works in a very similar way to token classification tasks. 
+The **Exploration Mode** works in a very similar way to token classification tasks.
 The filters and menus are the same, but in this case this mode is very interesting with binary models— when it comes to positive or negative annotations, their corresponding icon is displayed next to the record.
 
 Filters and search
@@ -46,7 +46,7 @@ With respect to searching records, more information can be found `here <search_r
 
 Sidebar and metrics
 ---------
-In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide"). 
+In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide").
 
 .. figure:: ../images/reference/ui/explore_textcat.png
    :alt: Rubrix Text Classification Explore mode

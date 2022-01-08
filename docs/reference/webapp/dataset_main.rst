@@ -38,6 +38,8 @@ Search bar
 ---------
 This section is available `here <searchbar.rst>`_\.
 
+More information about this feature can be found by clicking `here <search_records.rst>`_\.
+
 Active query parameters
 ~~~~~~~~~~
 
@@ -72,7 +74,7 @@ This component allows filtering by aspects related to annotations. This can be v
 The different filters are the following:
 
 - **annotated as**: for filtering records by annotated labels. Several labels can be selected, and if an user creates a new one, it will be shown on the drop down.
-- **annotated by**: for filtering by annotation_agent (e.g., different human users or dataset versions). This agent can be established when programming ``Records``. 
+- **annotated by**: for filtering by annotation_agent (e.g., different human users or dataset versions). This agent can be established when programming ``Records``.
 
 .. figure:: ../images/reference/ui/annotation_filters.png
    :alt: Rubrix annotation filters
@@ -96,7 +98,7 @@ This component allows filtering by record status:
 Metadata filter
 ~~~~~~~~~~
 
-This component allows filtering by metadata fields. 
+This component allows filtering by metadata fields.
 
 The list of **metadata categories** is dynamic and it's created by aggregating metadata fields, included in any of the logged records.
 
@@ -129,8 +131,9 @@ With this component, users are able to sort the information on the dataset by th
 
 The **Metadata** filter can be **Metadata.category/loss/topic/-**. Please, note that this one is not available for all the tasks.
 
-
 Please, note that these parameters could change depending on the kind of dataset used and the tasks to be performed.
+
+More about these features can be found `here <filter_records.rst>`_\.
 
 Sidebar
 ---------
@@ -152,7 +155,8 @@ This component allow users to check the statistics, progress, error distribution
 
 It is composed by two submenus and the **Refresh** button:
 
-- **Progress**: this submenu allows tracking how many records are annotated, validated and/or discarded. 
-- **Stats**: this submenu allows users to know more about the keywords and the error distribution of the dataset. 
+- **Progress**: this submenu allows tracking how many records are annotated, validated and/or discarded.
+- **Stats**: this submenu allows users to know more about the keywords and the error distribution of the dataset.
 - **Refresh**: with this button, it is possible to update the dataset page, in order to see changes applied.
 
+Click `here <metrics.rst>`_\ to know more about these features.
