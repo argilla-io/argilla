@@ -6,15 +6,16 @@ This section contains a quick, but throrough overview of Rubrix web-app's User I
 
 Pages
 ---------
-- `**Workspace** <sample.rst>`_\ 
-- **Dataset**
+The web-app has two main sections: 
+- `**Workspace** <workspace.rst>`_\ 
+- `**Dataset** <dataset.rst>`_\
 
 Features
 ---------
 - **Annotate Records**
 - **Explore Records**
 - **View Metrics**
-- **Rules**
+- **Filter Records**
 - **Define Labeling Rules**
 - **Search Mode**
 - **Sidebar**

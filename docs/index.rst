@@ -194,8 +194,6 @@ You can join the conversation on our Github page and our Github forum.
 
    reference/python/index
    reference/webapp/webapp_index
-   reference/webapp/sample
-
 
 .. toctree::
    :maxdepth: 2
