@@ -1,6 +1,6 @@
 Annotate Records
 ^^^^^^^^^^^^^^^^^^^
-In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `explore mode <explore_records.rst>`_\ (e.g., using filters and advanced search).
+In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `explore mode <explore_records.rst>`_\  (e.g., using filters and advanced search).
 
 Novel features, such as **bulk annotation** for a given set of search parameters are also available. 
 
@@ -36,4 +36,4 @@ In both modes (**Explore** and **Annotation**), the **Metrics** menu is availabl
 Annotation by different users will be saved with different annotation agents.
 To setup various users in your Rubrix server, please refer to our `user management guide <../getting_started/user-management.ipynb>`_.
 
-Click `here <..docs/getting_started/setup&installation.rst>`_\ to start with the installation or the first tutorial (a list with different tutorials is available).
+Click `here <..docs/getting_started/setup&installation.rst>`_\  to start with the installation or the first tutorial (a list with different tutorials is available).

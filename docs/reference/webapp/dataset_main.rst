@@ -28,9 +28,9 @@ The main sections of the search bar are following:
 
 The **Dataset page** is the workspace for exploring and annotating records in a Rubrix dataset. Every task has its own specialized components, while keeping a similar layout and structure.
 
-The search components and the two modes of operation (Explore and Annotation) are described below.
+The search components and the two modes of operation (`Explore <explore_records.rst>`_\ and `Annotation <annotate_records.rst>`_\) are described below.
 
-The Rubrix dataset page is driven by **search features**. The **search records bar** gives users quick filters for easily exploring and selecting data subsets.
+Rubrix dataset page is driven by **search features**. The **search records bar** gives users quick filters for easily exploring and selecting data subsets.
 
 Record cards
 ---------
@@ -40,7 +40,8 @@ Search bar
 ---------
 This section is available `here <searchbar.rst>`_\.
 
-**ACTIVE QUERY PARAMETERS**
+Active query parameters
+~~~~~~~~~~
 
 This component show the current active search parameters. It allows removing each individual param as well as all params at once.
 
@@ -51,7 +52,8 @@ This component show the current active search parameters. It allows removing eac
 
 Filters
 ---------
-**PREDICTION FILTERS**
+Prediction filters
+~~~~~~~~~~
 
 This component allows filtering by aspects related to predictions, such as:
 
@@ -64,7 +66,8 @@ With the exception of the score filter, which works in a different way, several 
 
 Here is an example of how the score can work for a text classification task:
 
-**ANNOTATION FILTERS**
+Annotation filters
+~~~~~~~~~~
 
 This component allows filtering by aspects related to annotations. This can be very useful when it comes to handle a lot of data.
 
@@ -78,7 +81,8 @@ The different filters are the following:
 
    Rubrix annotation filters
 
-**STATUS FILTER**
+Status filter
+~~~~~~~~~~
 
 This component allows filtering by record status:
 
@@ -91,14 +95,18 @@ This component allows filtering by record status:
 
    Rubrix status filters
 
-**METADATA FILTERS**
+Metadata filter
+~~~~~~~~~~
+
 This component allows filtering by metadata fields. 
 
-The list of **metadata categories** is dynamic and it's created with the aggregation of metadata fields included in any of the logged records.
+The list of **metadata categories** is dynamic and it's created by aggregating metadata fields, included in any of the logged records.
 
 Several filters can be chosen in order to see different metadata, and it will display a result of records with the same metadata category.
 
-**SORT FILTERS**
+Sort filter
+~~~~~~~~~~
+
 With this component, users are able to sort the information on the dataset by the following parameters:
     - Predicted as,
     - Predicted ok,
