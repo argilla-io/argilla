@@ -6,7 +6,6 @@ As Rubrix allows different tasks to be carried out, different visualizations are
 
 More detailed information about the features related to the **Explore mode** can be found [here](dataset.md).
 
-
 ## Tasks and Records
 
 As it is known, Rubrix deals with three different types of tasks:
@@ -17,7 +16,7 @@ As it is known, Rubrix deals with three different types of tasks:
 
 - **Text Classification Tasks**: In this mode, it works in a very similar way to token classification tasks. The **explore mode** is specially interesting with binary models— when it comes to positive or negative annotations, their corresponding icon is displayed next to the record.
 
-<video width="100%" controls><source src="_static/reference/webapp/explore_mode.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="../../_static/reference/webapp/explore_mode.mp4" type="video/mp4"></video>
 
 ## Filters and search
 
@@ -31,8 +30,8 @@ More information about searching records can be found [here](search_records.md).
 
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it [here](dataset.md) (features) or [here](view_dataset_metrics.md) (an "user guide").
 
-![Rubrix Text Classification Explore mode](images/explore_textcat.png)
+![Rubrix Text Classification Explore mode](../../_static/reference/webapp/explore_textcat.png)
 
 An example is displayed here:
 
-![Rubrix Token Classification (NER) Explore mode](images/explore_ner.png)
+![Rubrix Token Classification (NER) Explore mode](../../_static/reference/webapp/explore_ner.png)

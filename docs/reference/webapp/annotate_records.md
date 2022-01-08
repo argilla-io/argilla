@@ -18,7 +18,7 @@ Users can annotate one record by one, or several records in a row, but the annot
 - **Token Classification Tasks**: The record will show different labels on its words. Users can select words or sequences of words (tokens) in order to annotate them with labels, and then, records can be validated or discarded.
 - **Text Classification Tasks**: A record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
-<video width="100%" controls><source src="_static/reference/webapp/annotation_mode.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="../../_static/reference/webapp/annotation_mode.mp4" type="video/mp4"></video>
 
 ### Bulk Annotation
 
@@ -32,7 +32,7 @@ It is also posible to create new labels by clicking on **Create new label**.
 
 Using filters can be very helpful when it comes to annotate specific records or to carry out subtasks.
 
-More information about these features can be found  [here](dataset.md), and their use is described  [here](filter_records.md).
+More information about these features can be found [here](dataset.md), and their use is described [here](filter_records.md).
 
 Click [here](search_records.md) to find out more about searching records.
 
@@ -40,11 +40,11 @@ Click [here](search_records.md) to find out more about searching records.
 
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it [here](dataset.md) (features) or [here](view_dataset_metrics.md) (an "user guide").
 
-![Rubrix Text Classification Annotation mode](images/annotation_textcat.png)
+![Rubrix Text Classification Annotation mode](../../_static/reference/webapp/annotation_textcat.png)
 
-![Rubrix Token Classification (NER) Annotation mode](images/annotation_ner.png)
+![Rubrix Token Classification (NER) Annotation mode](../../_static/reference/webapp/annotation_ner.png)
 
 Annotation by different users will be saved with different **annotation agents**.
-To setup various users in your Rubrix server, please refer to our [user management guide](https://docs.rubrix.ml/en/stable/getting_started/user-management.html).
+To setup various users in your Rubrix server, please refer to our [user management guide](../../getting_started/user-management.ipynb).
 
-Click [here](https://docs.rubrix.ml/en/stable/getting_started/setup%26installation.html) to start with the installation.
+Click [here](../../getting_started/setup&installation.rst) to start with the installation.

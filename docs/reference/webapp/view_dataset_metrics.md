@@ -14,7 +14,7 @@ This submenu is useful when users need to know how many records are annotated, v
 
 When clicking on this menu, not only the progress is shown, but also the number of labels and records.
 
-![Progress menu](images/progress.png)
+![Progress menu](../../_static/reference/webapp/progress.png)
 
 ### Stats
 
@@ -27,7 +27,7 @@ It is composed of a dropdown with two dropdowns:
 
 Please, note that this section might vary, depending on the task carried out.
 
-<video width="100%" controls><source src="_static/reference/webapp/stats.mp4" type="video/mp4"></video>
+<video width="100%" controls><source src="../../_static/reference/webapp/stats.mp4" type="video/mp4"></video>
 
 ### Refresh button
 

@@ -24,7 +24,7 @@ You can find more information about how to use the search bar in our detailed [s
 _TODO: Screenshot_
 
 The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
-You can find more information about how to use the filters in our detailed [filter guide](filter_records.rst).
+You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
 
 ```{note}
 Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
@@ -43,7 +43,7 @@ This filter allows you to filter records with respect of their predictions:
 
 ### Annotations filter
 
-![Annotation filters](images/annotation_filters.png)
+![Annotation filters](../../_static/reference/webapp/annotation_filters.png)
 
 This filter allows you to filter records with respect to their annotations:
 
@@ -52,7 +52,7 @@ This filter allows you to filter records with respect to their annotations:
 
 ### Status filter
 
-![Status filters](images/status_filters.png)
+![Status filters](../../_static/reference/webapp/status_filters.png)
 
 This filter allows you to filter records with respect to their status:
 
@@ -62,7 +62,7 @@ This filter allows you to filter records with respect to their status:
 
 ### Metadata filter
 
-![Metadata filters](images/metadata_filters.png)
+![Metadata filters](../../_static/reference/webapp/metadata_filters.png)
 
 This filter allows you to filter records with respect to their metadata.
 
@@ -124,9 +124,9 @@ The sidebar is divided into three sections.
 
 This section of the sidebar lets you switch between the different Rubrix modes that are covered extensively in their respective guides:
 
-- **Explore**: this mode is for [exploring your dataset](explore_records.rst) and gain valuable insights
-- **Annotate**: this mode lets you conveniently [annotate your data](annotate_records.rst)
-- **Define rules**: this mode helps you to [define heuristic rules](define_rules.rst) to automatically label your data
+- **Explore**: this mode is for [exploring your dataset](explore_records.md) and gain valuable insights
+- **Annotate**: this mode lets you conveniently [annotate your data](annotate_records.md)
+- **Define rules**: this mode helps you to [define heuristic rules](define_rules.md) to automatically label your data
 
 ```{note}
 Not all modes are available for all [tasks](../../guides/task_examples.ipynb).
@@ -140,7 +140,7 @@ They are grouped into two submenus:
 - **Progress**: see metrics of your annotation process, like its progress and the label distribution
 - **Stats**: check the keywords of your dataset and the error distribution of the predictions
 
-You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.rst).
+You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
 
 ### Refresh
 

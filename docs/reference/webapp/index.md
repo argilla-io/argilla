@@ -2,7 +2,7 @@
 
 Here we provide a comprehensible overview of the Rubrix web app's User Interface (UI).
 The web app consists of two main pages.
-Most of the features are accessed via the [Dataset page](dataset.rst).
+Most of the features are accessed via the [Dataset page](dataset.md).
 
 ## Pages
 
@@ -41,7 +41,3 @@ filter_records
 view_dataset_metrics
 switch_workspaces
 ```
-
-## User stories
-
-- Exclude/correct outliers (coming soon ...)
