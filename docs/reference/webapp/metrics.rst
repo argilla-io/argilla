@@ -6,7 +6,7 @@ Rubrix metrics are very convenient in terms of assesing the status of the datase
 
 How to use Metrics
 ---------
-Metrics are composed of two submenus: **Progress** and **Stats**. They work similarly in both **Annotation** and **Explore** mode.
+Metrics are composed of two submenus: **Progress** and **Stats**. They work similarly in **Annotation** and **Explore** and **Define rules** mode.
 
 Progress
 ~~~~~~~~~~

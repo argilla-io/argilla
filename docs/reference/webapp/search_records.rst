@@ -13,3 +13,4 @@ In both **Annotation** and **Exploration** modes, the searchbar is placed in the
 
 Note that this feature also works as a kind of filter, as if users search something, it is possible to explore and/or annotate the results obtained. Besides, more `filters <filter_records.rst>`_\  can be applied.
 
+**NOTE**: There is no search bar in the **Define label rules**, as it works with queries.

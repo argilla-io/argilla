@@ -21,3 +21,5 @@ Filtering records in the Explore Mode
 In this case, the use is basically the same, but just for analyzing purposes.
 
 Anyway, another example would be the following: if in a **text classification task** that uses **scores** (i.e. this `tutorial <https://docs.rubrix.ml/en/stable/tutorials/08-error_analysis_using_loss.html>`_\), users want to sort records to see the highest or lowest model loss, the **Sort filter** can be used choosing the **Score** field on the dropdown, in descending or ascending order.
+
+**NOTE**: There are no filters in the **Define label rules**, as it works with queries.

@@ -46,7 +46,7 @@ With respect to searching records, more information can be found `here <search_r
 
 Sidebar and metrics
 ---------
-In both modes (**Explore** and **Annotation**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide"). 
+In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide"). 
 
 .. figure:: ../images/reference/ui/explore_textcat.png
    :alt: Rubrix Text Classification Explore mode
