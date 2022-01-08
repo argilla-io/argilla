@@ -8,19 +8,36 @@ How to annotate
 ---------
 This section is intended to explain how the **Annotation Mode** works.
 
-When choosing this mode, the display of the dataset is slightly different. 
+When choosing this mode, the display of the dataset is slightly different. The **"Bulk Annotation"** bar appears (see below), and records appear editable. 
 
+Users can annotate one by one, or several records in a row, but the annotation will change depending on the task:
+
+- On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
+
+- On **token classification tasks**, the record will show different labels on its words (tokens). Users can pick words or sequences of words in order to annotate them with labels, and then, records can be validated or discarded.
+
+- On **text2text tasks**, records can be edited, validated or discarded.
 
 
 Bulk Annotation
 ---------
-With this feature, users can validate or discard from 5 to 20 records at the same time, depending on how many records per page are being displayed.
+With this feature, from 5 to 20 records can be validated or discarded at the same time, depending on how many records per page are being displayed.
 
-It is also posible to create new labels for any classification task (tokenization, text classification...), and results can be validated or discarded.
+In order to use it, users must operate with the bar placed below the search bar and the filters. One or more records can be selected by clicking on specific checkbox or choosing the "Select all" checkbox.
 
-Metrics
+After choosing the records to be annotated, a label must be selected on the "Annotate as" dropdown, and after that, these records must be validated or discarded.
+
+It is also posible to create new labels for any classification task (tokenization, text classification...).
+
+Filters
 ---------
-In both modes (**Explore** and **Annotation**), the **Metrics** menu is available. Learn more about it `here <dataset_main.rst>`_\. 
+Using filters can be very helpful when it comes to annotate specific records or to carry out subtasks (this often happens when datasets are big).
+
+More information about these features can be found  `here <dataset_main.rst>`_\, and their use is described  `here <filter_records.rst>`_\.
+
+Sidebar and metrics
+---------
+In both modes (**Explore** and **Annotation**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\ (features) or  `here <metrics.rst>`_\ (an "user guide"). 
 
 .. figure:: ../images/reference/ui/annotation_textcat.png
    :alt: Rubrix Text Classification Annotation mode
