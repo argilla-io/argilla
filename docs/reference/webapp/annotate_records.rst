@@ -1,16 +1,16 @@
 Annotate Records
 ^^^^^^^^^^^^^^^^^^^
-In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `Explore mode <explore_records.rst>`_\  (e.g., using filters and advanced search). 
+In terms of annotating records, the **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the `Explore mode <explore_records.rst>`_\  (e.g., using filters and advanced search).
 
 The **Define rules mode** works slightly different, even though its features can be seen in its `section <define_labelingrules.rst>`_\.
 
-Novel features, such as **bulk annotation** for a given set of search parameters are also available. 
+Novel features, such as **bulk annotation** for a given set of search parameters are also available.
 
 How to annotate
 ---------
 This section is intended to explain how the **Annotation Mode** works.
 
-When choosing this mode, the display of the dataset is slightly different. The **"Bulk Annotation"** bar appears (see below), and records appear editable. 
+When choosing this mode, the display of the dataset is slightly different. The **"Bulk Annotation"** bar appears (see below), and records appear editable.
 
 Users can annotate one by one, or several records in a row, but the annotation will change depending on the task:
 
@@ -31,6 +31,7 @@ Text Classification Tasks
 
 On **text classification tasks**, a record will be displayed with different labels below. Users have to choose one or more labels (or validate the selected one) and validate the record. Records can be discarded too.
 
+.. figure:: ../reference/webapp/webappui_images/random_examples.mp4
 
 Bulk Annotation
 ---------
@@ -52,7 +53,7 @@ With respect to searching records, more information can be found `here <search_r
 
 Sidebar and metrics
 ---------
-In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide"). 
+In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar. Learn more about it  `here <dataset_main.rst>`_\  (features) or  `here <metrics.rst>`_\  (an "user guide").
 
 .. figure:: ../images/reference/ui/annotation_textcat.png
    :alt: Rubrix Text Classification Annotation mode
