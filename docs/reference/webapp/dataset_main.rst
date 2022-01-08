@@ -142,6 +142,10 @@ Rubrix has three modes available:
 - **Annotate mode**: learn more `here <annotate_records.rst>`_\.
 - **Define rules mode**: learn more `here <define_labelingrules.rst>`_\.
 
+This would be the preliminar view for each mode:
+
+
+
 Metrics
 ~~~~~~~~~~
 This component allow users to check the statistics, progress, error distribution and keywords of a dataset.
