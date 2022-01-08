@@ -4,6 +4,10 @@ With this component, users are able to search specific information on the datase
 
 More information is available  `here <searchbar.rst>`_\.
 
+.. figure:: ../docs/reference/webapp/webappui_images/search_components.png
+   :alt: Search components
+
+   Search components
 
 How to search on Rubrix records
 ---------

@@ -1,6 +1,6 @@
 Workspace
 ==========
-This is the **entry point** to Rubrix. From this page, it is possible to open one or multiple datasets in order to work with them. 
+This is the **entry point** to Rubrix. From this page, it is possible to open one or multiple datasets in order to work with them.
 
 Rubrix's Workspace is a **searchable and sortable list** of **datasets**, which contains the following attributes:
 
@@ -15,7 +15,7 @@ A column displaying the names of the loaded datasets. This column can be sorted 
 
 Tags
 ---------
-A column which displays the ``tags`` passed to the ``rubrix.log`` method. 
+A column which displays the ``tags`` passed to the ``rubrix.log`` method.
 
 These are useful to organize your datasets by project, model, status and any other dataset attribute you can think of.
 
@@ -37,7 +37,7 @@ The sidebar consists of two parts:
    - **Refresh button**: allows updating the UI in order to display recent changes.
    - **List of workspaces**: allows the user to see the different workspaces they can work with.
 
-.. figure:: ../reference/webapp/webappui_images/workspace_1.png
-   :alt: Rubrix Workspace view
+.. figure:: ../docs/reference/webapp/webappui_images/workspace_1.png
+   :alt: Rubrix Workspace
 
-   Rubrix Workspace view
+   Rubrix Workspace

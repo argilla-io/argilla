@@ -8,7 +8,6 @@ Rubrix dataset page is driven by **search features**. The **search records bar**
 The main sections of the search bar are following:
 
 .. toctree::
- :maxdepth: 2
 Record cards
 Search bar
 Filters
@@ -45,7 +44,7 @@ Active query parameters
 
 This component show the current active search parameters. It allows removing each individual param as well as all params at once.
 
-.. figure:: ../images/reference/ui/active_query_params.png
+.. figure:: ../docs/reference/webapp/webappui_images/active_query_params.png
    :alt: Active query params module
 
    Active query params module
@@ -76,7 +75,7 @@ The different filters are the following:
 - **annotated as**: for filtering records by annotated labels. Several labels can be selected, and if an user creates a new one, it will be shown on the drop down.
 - **annotated by**: for filtering by annotation_agent (e.g., different human users or dataset versions). This agent can be established when programming ``Records``.
 
-.. figure:: ../images/reference/ui/annotation_filters.png
+.. figure:: ../docs/reference/webapp/webappui_images/annotation_filters.png
    :alt: Rubrix annotation filters
 
    Rubrix annotation filters
@@ -90,7 +89,7 @@ This component allows filtering by record status:
 - **Validated**: records with validated annotations.
 - **Edited**: records with annotations but not yet validated.
 
-.. figure:: ../images/reference/ui/status_filters.png
+.. figure:: ../docs/reference/webapp/webappui_images/status_filters.png
    :alt: Rubrix status filters
 
    Rubrix status filters
@@ -99,6 +98,11 @@ Metadata filter
 ~~~~~~~~~~
 
 This component allows filtering by metadata fields.
+
+.. figure:: ../docs/reference/webapp/webappui_images/metadata_filters.png
+   :alt: Rubrix metadata filters
+
+   Rubrix metadata filters
 
 The list of **metadata categories** is dynamic and it's created by aggregating metadata fields, included in any of the logged records.
 
