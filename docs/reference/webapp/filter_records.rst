@@ -6,7 +6,7 @@ Since Rubrix can carry out different types of tasks, filters are different for e
 
 How filters work
 ---------
-*(To see a description of their components, click `here <dataset_main.rst>`_\).*
+(To see a description of their components, click `here <dataset_main.rst>`_\).
 
 In both modes, filters work in a very similar way.
 
@@ -20,4 +20,4 @@ Filtering records in the Explore Mode
 ~~~~~~~~~~
 In this case, the use is basically the same, but just for analyzing purposes.
 
-Anyway, another example would be the following: if in a **text classification task** that uses **scores** (i.e. this `tutorial <docs/tutorials/08-error_analysis_using_loss.ipynb`_\), users want to sort records to see the highest or lowest model loss, the **Sort filter** can be used choosing the **Score** field on the dropdown, in descending or ascending order.
+Anyway, another example would be the following: if in a **text classification task** that uses **scores** (i.e. this `tutorial <https://docs.rubrix.ml/en/stable/tutorials/08-error_analysis_using_loss.html>`_\), users want to sort records to see the highest or lowest model loss, the **Sort filter** can be used choosing the **Score** field on the dropdown, in descending or ascending order.
