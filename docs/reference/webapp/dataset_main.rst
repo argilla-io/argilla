@@ -18,7 +18,23 @@ Sidebar
 
 Record cards
 ---------
-TBD
+There are three different types of record cards in Rubrix:
+
+Text classification
+~~~~~~~~~~
+This type of record deals with predicting in which categories a text fits. This records usually deals with  multilabel text classification, sentiment analysis, semantic similarity, stance detection, and much more.
+
+In this case, these records can be **single** or **multilabel**— this means, that there are records with different number of labels, where one or more can be selected.
+
+Token classification
+~~~~~~~~~~
+This type of record is intended to divide the input text into words, or syllables, and assign certain values to them. It is specially useful for NER tasks, POS tagging or any task more focused on Lingustics.
+
+Text2Text
+~~~~~~~~~~
+The expression Text2Text encompasses text generation tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
+
+These three types of cards are composed by the same components described below, although their modes differ. These are the links for reading about the `Annotation Mode <annotate_records.rst>`_\ and about the `Exploration Mode <explore_records.rst>`_\.
 
 Search bar
 ---------
@@ -105,4 +121,21 @@ Please, note that these parameters could change depending on the kind of dataset
 
 Sidebar
 ---------
-TBD
+Modes
+~~~~~~~~~~
+Rubrix has three modes available:
+
+- **Explore mode**: learn more `here <explore_records.rst>`_\.
+- **Annotate mode**: learn more `here <annotate_records.rst>`_\.
+- **Define rules mode**: learn more `here <define_labelingrules.rst`_\.
+
+Metrics
+~~~~~~~~~~
+This component allow users to check the statistics, progress, error distribution and keywords of a dataset.
+
+It is composed by two submenus and the **Refresh** button:
+
+- **Progress**: this submenu allows tracking how many records are annotated, validated and/or discarded. 
+- **Stats**: this submenu allows users to know more about the keywords and the error distribution of the dataset. 
+- **Refresh**: with this button, it is possible to update the dataset page, in order to see changes applied.
+
