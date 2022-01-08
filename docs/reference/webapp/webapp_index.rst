@@ -8,6 +8,7 @@ This section contains a quick, but throrough overview of Rubrix web-app's User I
 Pages
 ---------
 The web-app has two main sections: 
+
 - `**Workspace** <workspace.rst>`_\
 
 - `**Dataset** <dataset_main.rst>`_\

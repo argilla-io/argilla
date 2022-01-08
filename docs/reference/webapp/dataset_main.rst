@@ -14,13 +14,13 @@ The main sections of the search bar are following:
         - Multi label
     - Token classification
     - Text2Text
--  `*Search bar* <searchbar.rst>`_\
+-  `Search bar <searchbar.rst>`_\
 - *Filters*
-    - `Predictions <prediction_filters.rst>`\
-    - `Annotations <annotation_filters.rst>`\
-    - `Status <status_filters.rst>`\
-    - `Metadata <metadata_filters.rst>`\
-    - `Sort <sort_filters.rst>`\
+    - `Predictions <prediction_filters.rst>`_\
+    - `Annotations <annotation_filters.rst>`_\
+    - `Status <status_filters.rst>`_\
+    - `Metadata <metadata_filters.rst>`_\
+    - `Sort <sort_filters.rst>`_\
 - *Sidebar*
     - Modes/Views
         - Explore

@@ -1,6 +1,5 @@
 Status filter
 ^^^^^^^^^^^^^
-
 This component allows filtering by record status:
 
 - **Default**: records without any annotation or edition.
