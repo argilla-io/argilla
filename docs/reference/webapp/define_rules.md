@@ -11,15 +11,15 @@ You can access the _Define rules_ mode via the sidebar of the [Dataset page](dat
 The _Define rules_ mode is only available for single-label text classification datasets.
 ```
 
-To define a rule in the Rubrix web app you simply have to:
-
-- write a query,
-- choose a label,
-- and save them.
-
 ## Query plus label
 
-A rule is basically a query plus a label.
+_TODO: Screenshot of the search bar and label component_
+
+A rule in Rubrix is basically a [query](search_records.md) together with a label.
+After entering a query and selecting a label, you will see the corresponding [rule metrics](#rule-metrics) on the right and the matches of your query in the record list below.
+
+the resulton the you will see the results in the record list below. and after selecting a label
+After entering a query, the list of records gets updated and shows the matches
 
 ## Rule Metrics
 
