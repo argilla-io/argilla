@@ -11,8 +11,9 @@ from rubrix.server.tasks.text_classification import (
 from tests.server.test_helpers import client
 
 
-def log_some_records(dataset: str, annotation: str = None, multi_label: bool = False):
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+def log_some_records(dataset: str, annotation: str = None, multi_label: bool = False, delete:bool=True):
+    if delete:
+        assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     record = {
         "id": 0,
@@ -212,6 +213,27 @@ def test_rule_metrics_with_missing_label_for_stored_rule():
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/bad query/metrics"
     )
     assert response.status_code == 200
+
+
+def test_create_rules_and_then_log():
+    dataset = "test_create_rules_and_then_log"
+    log_some_records(dataset, annotation="OK")
+    for query in ["ejemplo", "bad query"]:
+        client.post(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+            json=CreateLabelingRule(
+                query=query, label="TEST", description="Description"
+            ).dict(),
+        )
+
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    rules = list(map(LabelingRule.parse_obj, response.json()))
+    assert len(rules) == 2
+
+    log_some_records(dataset, annotation="OK", delete=False)
+    response = client.get(f"/api/datasets/TextClassification/{dataset}/labeling/rules")
+    rules = list(map(LabelingRule.parse_obj, response.json()))
+    assert len(rules) == 2
 
 
 def test_dataset_rules_metrics():

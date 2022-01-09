@@ -166,6 +166,7 @@ class DatasetsDAO:
             index=DATASETS_INDEX_NAME,
             doc_id=dataset_id,
             document=self._dataset_to_es_doc(dataset),
+            partial_update=True,
         )
         return dataset
 
