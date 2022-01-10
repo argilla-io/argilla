@@ -336,10 +336,9 @@ class TextClassificationService:
             The provided rule query. If already created in dataset, the ``label``
             param will be omitted
         label:
-            Label used for rule metrics. If not provided and no rule was stored with provided query,
-            no precision will be computed. Otherwise, the store rule label will be used for metrics
-            computation
-
+            Label used for the rule metrics. If not provided and no rule was stored with the 
+            provided query, no precision will be computed. 
+            Otherwise, the label from the stored rule will be used to compute the metrics.
 
         Returns
         -------
