@@ -76,7 +76,7 @@ export default {
       metricsByLabel: {},
       tableColumns: [
         {
-          name: "Name",
+          name: "Query",
           field: "name",
           class: "table-info__title",
           type: "action",
