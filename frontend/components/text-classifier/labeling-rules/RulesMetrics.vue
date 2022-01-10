@@ -183,10 +183,10 @@ export default {
         value: isNaN(this.metricsByLabel.total_records)
           ? "-"
           : this.$options.filters.formatNumber(
-            Math.round(
-              this.metricsByLabel.total_records * this.metricsByLabel.coverage
-            )
-          ),
+              Math.round(
+                this.metricsByLabel.total_records * this.metricsByLabel.coverage
+              )
+            ),
         tooltip: "Records matching the query",
       };
     },
@@ -241,7 +241,6 @@ export default {
       });
     },
     async getMetricsByLabel() {
-
       if (this.query !== undefined) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
