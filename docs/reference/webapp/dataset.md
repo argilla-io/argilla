@@ -143,4 +143,4 @@ You can find more information about each metric in our dedicated [metrics guide]
 ### Refresh
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
-For example, if you are annotating and use the _Status filter_ to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+For example, if you are annotating and use the [Status filter](#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
