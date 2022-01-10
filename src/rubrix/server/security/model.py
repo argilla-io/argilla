@@ -85,7 +85,7 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if not workspace:
+        if not workspace or workspace == self.default_workspace:
             return self.default_workspace
         if self.workspaces is None:
             return workspace
