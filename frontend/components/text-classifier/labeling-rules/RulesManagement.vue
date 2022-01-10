@@ -82,22 +82,30 @@ export default {
           type: "action",
         },
         { name: "Label", field: "label", class: "text" },
-        { name: "Coverage", field: "coverage", class: "text" },
+        { name: "Coverage", field: "coverage", class: "text", tooltip: "Percentage of records labeled by the rule" },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
+          tooltip: "Percentage of annotated records labeled by the rule"
         },
-        { name: "Correct", field: "correct", class: "text" },
-        { name: "Incorrect", field: "incorrect", class: "text" },
+        { name: "Correct", field: "correct", class: "text", tooltip: "Number of records the rule labeled correctly (if annotations are available)" },
+        { name: "Incorrect", field: "incorrect", class: "text", tooltip: "Number of records the rule labeled incorrectly (if annotations are available)" },
         {
           name: "Precision",
           field: "precision",
           class: "text",
+          tooltip: "Percentage of correct labels given by the rule"
+        },
+        {
+          name: "Created at",
+          field: "created_at",
+          class: "date",
+          type: "date",
         },
       ],
       sortedOrder: "desc",
-      sortedByField: "query",
+      sortedByField: "created_at",
       actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
       noDataInfo: {
         title: "0 rules defined",
@@ -136,6 +144,7 @@ export default {
           precision: this.$options.filters.percent(
             this.metricsByLabel[r.query].precision
           ),
+          created_at: r.created_at,
         };
       });
     },
