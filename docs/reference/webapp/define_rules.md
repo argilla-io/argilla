@@ -21,8 +21,6 @@ After entering a query in the search bar and selecting a label, you will see som
 If you are happy with the metrics and/or the matching record list, you can save the rule by clicking on "Save rule".
 In this way it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
 
-Before saving the rule, you can change its name, which by default is simply the query string.
-
 ```{note}
 If you want to add labels to the available list of labels, you can switch to the [Annotation mode](annotate_records.md) and create labels there.
 ```
@@ -34,10 +32,10 @@ _TODO: Screenshot of the rule metrics_
 After entering a query and selecting a label, Rubrix provides you with some key metrics about the rule.
 Some metrics are only available if your dataset has also annotated records.
 
-- \*\*Coverage: Percentage of records labeled by the rule
-- Annotated coverage: Percentage of annotated records labeled by the rule
-- Correct/incorrect: Number of records the rule labelled correctly/incorrectly (if annotations are available)
-- Precision: Percentage of correct labels given by the rule (if annotations are available)
+- **Coverage**: Number of records (percentage) of records labeled by the rule
+- **Annotated coverage**: Number of records (percentage) of annotated records labeled by the rule
+- **Correct/incorrect**: Number of records the rule labelled correctly/incorrectly (if annotations are available)
+- **Precision**: Percentage of correct labels given by the rule (if annotations are available)
 
 ## Manage rules
 

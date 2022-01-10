@@ -1,5 +1,34 @@
 # Annotate records
 
+The Rubrix web app has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
+Rubrix's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
+
+You can access the _Annotate mode_ via the sidebar of the [Dataset page](dataset.md).
+
+## Search and filter
+
+_TODO: Screenshot of the search bar and filters_
+
+The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
+The _filters_, on the other hand, provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including the metadata of your records.
+
+For example, if you want to hide the records that are already annotated, you can set the [Status filter]() to _Default_.
+If, on the other hand, you want to revise your annotations and only see annotated records, you can set this filter to _Validated_.
+
+You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
+
+```{note}
+Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
+```
+
+## Validate predictions
+
+## Bulk annotations
+
+## Annotation progress
+
+## Annotating single records
+
 The **Annotation mode** enables users to add and modify annotations. This mode follows the same interaction patterns as in the [**Explore mode**](explore_records.md).
 
 Novel features, such as **bulk annotation** for a given set of search parameters are also available.
