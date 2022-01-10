@@ -61,9 +61,6 @@ export default {
       refresh: 0,
     };
   },
-  async mounted() {
-    await this.resetFilters();
-  },
   async fetch() {
     await this.getAllRules();
     this.currentRule = await this.getRule({
@@ -88,9 +85,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      search: "entities/datasets/search",
-    }),
     async getAllRules() {
       this.rules = await this.getRules({ dataset: this.dataset });
     },
@@ -99,27 +93,6 @@ export default {
     },
     async updateRule() {
       await this.$fetch();
-    },
-    async resetFilters() {
-      let query = {};
-      query = Object.keys(this.dataset.query)
-        .filter((k) => k !== "text")
-        .map((k) => {
-          this.dataset.query[k] = undefined;
-        });
-      await this.search({
-        dataset: this.dataset,
-        query: query,
-        sort: [
-          {
-            id: "status",
-            key: "status",
-            group: "Status",
-            name: "Status",
-            order: "desc",
-          },
-        ],
-      });
     },
     updateLabels(labels) {
       this.selectedLabels = labels;
