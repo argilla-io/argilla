@@ -74,7 +74,7 @@
       v-if="
         currentRule &&
         selectedLabels.includes(currentRule.label) &&
-        currentRule.description === query
+        currentRule.description === currentRule.query
       "
     >
       {{
@@ -189,13 +189,11 @@ export default {
         await this.updateRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
-          description: this.query,
         });
       } else {
         await this.defineRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
-          description: this.query,
         });
       }
       this.saved = true;
