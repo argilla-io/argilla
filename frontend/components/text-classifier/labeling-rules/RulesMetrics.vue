@@ -92,6 +92,9 @@ export default {
     }
   },
   computed: {
+    query() {
+      return this.dataset.query.text;
+    },
     placeholderFields() {
       return [
         "Precision",
@@ -180,10 +183,10 @@ export default {
         value: isNaN(this.metricsByLabel.total_records)
           ? "-"
           : this.$options.filters.formatNumber(
-              Math.round(
-                this.metricsByLabel.total_records * this.metricsByLabel.coverage
-              )
-            ),
+            Math.round(
+              this.metricsByLabel.total_records * this.metricsByLabel.coverage
+            )
+          ),
         tooltip: "Records matching the query",
       };
     },
@@ -238,10 +241,11 @@ export default {
       });
     },
     async getMetricsByLabel() {
-      if (this.activeLabel !== undefined) {
+
+      if (this.query !== undefined) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
-          query: this.dataset.query.text,
+          query: this.query,
           label: this.activeLabel,
         });
         this.metricsByLabel = response;

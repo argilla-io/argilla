@@ -84,9 +84,11 @@ const actions = {
   },
 
   async getRuleMetricsByLabel(_, { dataset, query, label }) {
-    const { response } = await ObservationDataset.api().get(
-      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics?label=${label}`
-    );
+    var url = `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics`;
+    if (label !== undefined) {
+      url += `?label=${label}`;
+    }
+    const { response } = await ObservationDataset.api().get(url);
     return response.data;
   },
 };
