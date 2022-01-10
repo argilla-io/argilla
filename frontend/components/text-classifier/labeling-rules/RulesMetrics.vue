@@ -105,16 +105,40 @@ export default {
     metrics() {
       return [
         {
+          name: "Coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Percentage of records labeled by any rule",
+            value: this.formatNumber(this.metricsTotal.coverage),
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage),
+            tooltip: "Percentage of records labeled by the rule",
+          },
+        },
+        {
+          name: "Annotated coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Percentage of annotated records labeled by any rule",
+            value: this.formatNumber(this.metricsTotal.coverage_annotated),
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
+            tooltip: "Percentage of annotated records labeled by the rule",
+          },
+        },
+        {
           name: "Precision",
           overall: {
             description: "Avg:",
-            tooltip: "Average fraction of correct labels given by the rules",
+            tooltip: "Average percentage of correct labels given by the rules",
             value: this.formatNumber(this.getAverage("precision")),
             refresh: this.refresh,
           },
           rule: {
             value: this.formatNumber(this.metricsByLabel.precision),
-            tooltip: "Fraction of correct labels given by the rule",
+            tooltip: "Percentage of correct labels given by the rule",
           },
         },
         {
@@ -125,40 +149,16 @@ export default {
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
             value: Object.keys(this.metricsByRules).length
               ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-              : "_/_",
+              : "-/-",
             refresh: this.refresh,
           },
           rule: {
             value:
               this.metricsByLabel.correct !== undefined
                 ? `${this.metricsByLabel.correct}/${this.metricsByLabel.incorrect}`
-                : "_/_",
+                : "-/-",
             tooltip:
               "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
-          },
-        },
-        {
-          name: "Coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage),
-            tooltip: "Fraction of records labeled by the rule",
-          },
-        },
-        {
-          name: "Annotated coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of annotated records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage_annotated),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
-            tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
       ];
@@ -250,7 +250,12 @@ export default {
       );
     },
     getAverage(type) {
-      return this.getTotal(type) / this.getValuesByMetricType(type).length;
+      const filteredValues = Object.keys(this.metricsByRules)
+        .filter((key) => this.metricsByRules[key].coverage_annotated > 0)
+        .map((k) => {
+          return this.metricsByRules[k][type];
+        });
+      return this.getTotal(type) / filteredValues.length;
     },
   },
 };
