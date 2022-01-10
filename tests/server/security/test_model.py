@@ -78,8 +78,9 @@ def test_workspace_for_superuser():
         (["a"], ["user"]),
     ],
 )
-def test_check_team_with_default(workspaces, expected):
+def test_check_workspaces_with_default(workspaces, expected):
     user = User(username="user", workspaces=workspaces)
     assert user.check_workspaces([]) == expected
     assert user.check_workspaces(None) == expected
     assert user.check_workspaces([None]) == expected
+    assert user.check_workspace(user.username) == user.username
