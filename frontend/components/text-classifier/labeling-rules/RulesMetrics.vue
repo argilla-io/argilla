@@ -251,7 +251,7 @@ export default {
     },
     getAverage(type) {
       const filteredValues = Object.keys(this.metricsByRules)
-        .filter((key) => this.metricsByRules[key].coverage_annotated !== 0)
+        .filter((key) => this.metricsByRules[key].coverage_annotated > 0)
         .map((k) => {
           return this.metricsByRules[k][type];
         });
