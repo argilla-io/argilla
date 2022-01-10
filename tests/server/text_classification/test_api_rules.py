@@ -11,7 +11,9 @@ from rubrix.server.tasks.text_classification import (
 from tests.server.test_helpers import client
 
 
-def log_some_records(dataset: str, annotation: str = None, multi_label: bool = False, delete:bool=True):
+def log_some_records(
+    dataset: str, annotation: str = None, multi_label: bool = False, delete: bool = True
+):
     if delete:
         assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
@@ -191,10 +193,14 @@ def test_rule_metrics_with_missing_label():
     response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/a query/metrics"
     )
-    assert response.status_code == 400
+    assert response.status_code == 200, response.json()
     assert response.json() == {
-        "detail": "`label` param was not provided and rule is not stored for dataset. "
-        "You must either an already created rule or specify the label for metrics computation"
+        "coverage": 0.0,
+        "coverage_annotated": 0.0,
+        "correct": 0.0,
+        "incorrect": 0.0,
+        "total_records": 1,
+        "annotated_records": 1,
     }
 
 
@@ -322,4 +328,4 @@ def test_rule_metric():
     assert metrics.coverage_annotated == 0
     assert metrics.correct == 0
     assert metrics.incorrect == 0
-    assert metrics.precision == 0
+    assert metrics.precision is None

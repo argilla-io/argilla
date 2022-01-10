@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import Depends
 from pydantic import BaseModel, Field
@@ -55,47 +55,55 @@ class LabelingRulesMetric(ElasticsearchMetric):
     def aggregation_request(
         self,
         rule_query: str,
-        label: str,
+        label: Optional[str],
     ) -> Dict[str, Any]:
 
         rule_query_filter = filters.text_query(rule_query)
-        annotated_records_filter = filters.exists_field(
-            EsRecordDataFieldNames.annotated_as
-        )
-        rule_label_annotated_filter = filters.annotated_as([label])
-        return {
-            self.id: {
-                "filters": {
-                    "filters": {
-                        "covered_records": rule_query_filter,
-                        "correct_records": filters.boolean_filter(
-                            filter_query=annotated_records_filter,
-                            should_filters=[
-                                rule_query_filter,
-                                rule_label_annotated_filter,
-                            ],
-                            minimum_should_match=2,
-                        ),
-                        "incorrect_records": filters.boolean_filter(
-                            filter_query=annotated_records_filter,
-                            must_query=rule_query_filter,
-                            must_not_query=rule_label_annotated_filter,
-                        ),
-                    }
-                }
-            }
+        aggr_filters = {
+            "covered_records": rule_query_filter,
         }
+
+        if label is not None:
+            annotated_records_filter = filters.exists_field(
+                EsRecordDataFieldNames.annotated_as
+            )
+            rule_label_annotated_filter = filters.annotated_as([label])
+            aggr_filters.update(
+                {
+                    "correct_records": filters.boolean_filter(
+                        filter_query=annotated_records_filter,
+                        should_filters=[
+                            rule_query_filter,
+                            rule_label_annotated_filter,
+                        ],
+                        minimum_should_match=2,
+                    ),
+                    "incorrect_records": filters.boolean_filter(
+                        filter_query=annotated_records_filter,
+                        must_query=rule_query_filter,
+                        must_not_query=rule_label_annotated_filter,
+                    ),
+                }
+            )
+
+        return {self.id: {"filters": {"filters": aggr_filters}}}
 
     def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         if self.id in aggregation_result:
             aggregation_result = aggregation_result[self.id]
 
-        correct = aggregation_result["correct_records"]
-        incorrect = aggregation_result["incorrect_records"]
+        correct = aggregation_result.get("correct_records", 0)
+        incorrect = aggregation_result.get("incorrect_records", 0)
         annotated = correct + incorrect
 
-        aggregation_result["precision"] = (correct / annotated) if annotated > 0 else 0
-        return aggregation_result
+        results = {
+            **aggregation_result,
+            "correct_records": correct,
+            "incorrect_records": incorrect,
+        }
+        if annotated > 0:
+            results["precision"] = correct / annotated
+        return results
 
 
 class DatasetLabelingRulesSummary(BaseModel):
@@ -107,7 +115,7 @@ class LabelingRuleSummary(BaseModel):
     covered_records: int
     correct_records: int
     incorrect_records: int
-    precision: float
+    precision: Optional[float]
 
 
 class LabelingService:
@@ -168,7 +176,7 @@ class LabelingService:
         self,
         dataset: BaseDatasetDB,
         rule_query: str,
-        label: str,
+        label: Optional[str] = None,
     ) -> Tuple[int, int, LabelingRuleSummary]:
         """Computes metrics for given rule query and optional label against a set of rules"""
 
@@ -238,7 +246,7 @@ class LabelingService:
                 return rule
         raise EntityNotFoundError(rule_query, type=LabelingRule)
 
-    def replace_rule(self, dataset:BaseDatasetDB, rule:LabelingRule):
+    def replace_rule(self, dataset: BaseDatasetDB, rule: LabelingRule):
         found_ds = self._find_text_classification_dataset(dataset)
 
         for idx, r in enumerate(found_ds.rules):
