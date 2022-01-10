@@ -24,7 +24,7 @@
         </template>
       </rules-metrics>
       <div class="rules-management__container">
-        <p class="rules-management__title">Rules</p>
+        <p class="rules-management__title">Rules <span v-if="formattedRules.length">({{formattedRules.length}})</span></p>
         <ReSearchBar
           v-if="formattedRules.length"
           placeholder="Search rule by name"
@@ -76,7 +76,7 @@ export default {
       metricsByLabel: {},
       tableColumns: [
         {
-          name: "Name",
+          name: "Query",
           field: "name",
           class: "table-info__title",
           type: "action",
@@ -106,7 +106,7 @@ export default {
       ],
       sortedOrder: "desc",
       sortedByField: "created_at",
-      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
+      actions: [{ name: "delete", icon: "delete", title: "Delete rule" }],
       noDataInfo: {
         title: "0 rules defined",
         message: `You have not defined any rules for this dataset yet.`,
@@ -251,6 +251,10 @@ export default {
     @include font-size(22px);
     font-weight: 600;
     margin-top: 0;
+    span {
+      @include font-size(16px);
+      font-weight: normal;
+    }
   }
   &__table {
     margin-bottom: 2em !important;

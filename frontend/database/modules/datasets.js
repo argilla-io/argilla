@@ -598,6 +598,23 @@ const actions = {
     await _paginate({ dataset, size, page });
   },
 
+  async resetSearch(_, { dataset, query, sort, size }) {
+    return await _search({ 
+      dataset, 
+      query: {}, 
+      sort: [
+        {
+          id: "status",
+          key: "status",
+          group: "Status",
+          name: "Status",
+          order: "desc",
+        },
+      ],
+      size
+    });
+  },
+
   async refresh(_, { dataset }) {
     const pagination = Pagination.find(dataset.name);
     const paginatedDataset = await _paginate({
