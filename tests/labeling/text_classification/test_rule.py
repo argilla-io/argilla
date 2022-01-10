@@ -157,7 +157,7 @@ def test_load_rules(monkeypatch, log_dataset):
                 annotated_coverage=0.0,
                 correct=0,
                 incorrect=0,
-                precision=0.0,
+                precision=None,
             ),
         ),
     ],
