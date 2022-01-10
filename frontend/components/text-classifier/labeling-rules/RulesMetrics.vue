@@ -39,9 +39,7 @@
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
-              <span :key="metric.overall.value">
-                {{ metric.overall.value }}
-              </span>
+              <span v-html="metric.overall.value" :key="metric.overall.value" />
             </transition>
           </span>
         </div>
@@ -109,7 +107,13 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Percentage of records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage),
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage * this.dataset.globalResults.total
+              )
+            )} records)</span>`,
           },
           rule: {
             value: this.formatNumber(this.metricsByLabel.coverage),
@@ -121,7 +125,14 @@ export default {
           overall: {
             description: "Total:",
             tooltip: "Percentage of annotated records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage_annotated),
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage_annotated
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage_annotated *
+                  this.dataset.globalResults.total
+              )
+            )} records)</span>`,
           },
           rule: {
             value: this.formatNumber(this.metricsByLabel.coverage_annotated),
@@ -341,6 +352,16 @@ p[data-title] {
     border-top: 7px solid $color;
     border-right: 7px solid transparent;
     border-left: 7px solid transparent;
+  }
+}
+</style>
+
+<style lang="scss">
+.records-number {
+  @include font-size(16px);
+  font-weight: normal;
+  .all & {
+    display: none;
   }
 }
 </style>
