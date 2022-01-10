@@ -18,7 +18,7 @@
 <template>
   <div class="rule-labels-definition">
     <div class="rule-labels-definition__info">
-      <input v-model="description" class="rule__description" />
+      <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
         <slot name="records-metric" />
       </p>
@@ -74,13 +74,13 @@
       v-if="
         currentRule &&
         selectedLabels.includes(currentRule.label) &&
-        currentRule.description === description
+        currentRule.description === currentRule.query
       "
     >
       {{
         saved
           ? "The rule has been saved"
-          : "This query with this label are already saved as rule"
+          : "This query with this label is already saved as rule"
       }}.
     </p>
     <re-button
@@ -114,7 +114,6 @@ export default {
       searchText: "",
       selectedLabels: [],
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
-      description: undefined,
     };
   },
   computed: {
@@ -161,14 +160,12 @@ export default {
   },
   watch: {
     currentRule(n) {
-      this.setDescription();
       if (n) {
         this.selectedLabels = [n.label];
         this.$emit("update-labels", [n.label]);
       }
     },
     query(n) {
-      this.setDescription();
       this.saved = false;
       if (!n) {
         this.selectedLabels = [];
@@ -177,7 +174,6 @@ export default {
     },
   },
   mounted() {
-    this.setDescription();
     if (this.currentRule) {
       this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
     }
@@ -193,23 +189,16 @@ export default {
         await this.updateRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
-          description: this.description,
         });
       } else {
         await this.defineRule({
           dataset: this.dataset,
           label: this.selectedLabels[0],
-          description: this.description,
         });
       }
       this.saved = true;
       this.collapseLabels();
       this.$emit("update-rule");
-    },
-    setDescription() {
-      this.description = this.currentRule
-        ? this.currentRule.description
-        : this.query;
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -299,18 +288,7 @@ export default {
     color: $font-secondary;
     font-weight: 600;
     margin-top: 0;
-    border: none;
-    background: none;
     padding: 0;
-    outline: none;
-    @include input-placeholder {
-      color: $font-secondary;
-      font-weight: 600;
-    }
-    &:hover,
-    .focused {
-      color: $font-secondary-dark;
-    }
   }
   &__text {
     width: 100%;

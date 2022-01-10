@@ -33,23 +33,23 @@ const actions = {
     return response.data;
   },
 
-  async defineRule(_, { dataset, label, description }) {
+  async defineRule(_, { dataset, label }) {
     await ObservationDataset.api().post(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules`,
       {
         query: dataset.query.text,
         label: label,
-        description: description,
+        description: dataset.query.text,
       }
     );
   },
 
-  async updateRule(_, { dataset, label, description }) {
+  async updateRule(_, { dataset, label }) {
     await ObservationDataset.api().patch(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${dataset.query.text}`,
       {
         label: label,
-        description: description,
+        description: dataset.query.text,
       }
     );
   },
