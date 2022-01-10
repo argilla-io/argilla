@@ -90,7 +90,7 @@ export default {
       }
     },
     async currentViewMode(n) {
-      if (n ===  'labelling-rules') {
+      if (n === "labelling-rules") {
         await this.resetSearch({ dataset: this.dataset });
       }
     },
