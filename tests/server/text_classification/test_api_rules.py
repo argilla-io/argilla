@@ -318,6 +318,17 @@ def test_rule_metric():
     assert metrics.precision == 1
 
     response = client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics"
+    )
+    assert response.status_code == 200
+
+    metrics = LabelingRuleMetricsSummary.parse_obj(response.json())
+    assert metrics.correct == 0
+    assert metrics.incorrect == 0
+    assert metrics.precision is None
+    assert metrics.coverage_annotated == 1
+
+    response = client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/badd/metrics?label=OK"
     )
     assert response.status_code == 200

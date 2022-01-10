@@ -58,15 +58,19 @@ class LabelingRulesMetric(ElasticsearchMetric):
         label: Optional[str],
     ) -> Dict[str, Any]:
 
+        annotated_records_filter = filters.exists_field(
+            EsRecordDataFieldNames.annotated_as
+        )
         rule_query_filter = filters.text_query(rule_query)
         aggr_filters = {
             "covered_records": rule_query_filter,
+            "annotated_covered_records": filters.boolean_filter(
+                filter_query=annotated_records_filter,
+                should_filters=[rule_query_filter],
+            ),
         }
 
         if label is not None:
-            annotated_records_filter = filters.exists_field(
-                EsRecordDataFieldNames.annotated_as
-            )
             rule_label_annotated_filter = filters.annotated_as([label])
             aggr_filters.update(
                 {
@@ -113,6 +117,7 @@ class DatasetLabelingRulesSummary(BaseModel):
 
 class LabelingRuleSummary(BaseModel):
     covered_records: int
+    annotated_covered_records: int
     correct_records: int
     incorrect_records: int
     precision: Optional[float]
