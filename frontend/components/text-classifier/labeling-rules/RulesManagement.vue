@@ -24,7 +24,12 @@
         </template>
       </rules-metrics>
       <div class="rules-management__container">
-        <p class="rules-management__title">Rules <span v-if="formattedRules.length">({{formattedRules.length}})</span></p>
+        <p class="rules-management__title">
+          Rules
+          <span v-if="formattedRules.length"
+            >({{ formattedRules.length }})</span
+          >
+        </p>
         <ReSearchBar
           v-if="formattedRules.length"
           placeholder="Search rule by name"
@@ -82,20 +87,37 @@ export default {
           type: "action",
         },
         { name: "Label", field: "label", class: "text" },
-        { name: "Coverage", field: "coverage", class: "text", tooltip: "Percentage of records labeled by the rule" },
+        {
+          name: "Coverage",
+          field: "coverage",
+          class: "text",
+          tooltip: "Percentage of records labeled by the rule",
+        },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
-          tooltip: "Percentage of annotated records labeled by the rule"
+          tooltip: "Percentage of annotated records labeled by the rule",
         },
-        { name: "Correct", field: "correct", class: "text", tooltip: "Number of records the rule labeled correctly (if annotations are available)" },
-        { name: "Incorrect", field: "incorrect", class: "text", tooltip: "Number of records the rule labeled incorrectly (if annotations are available)" },
+        {
+          name: "Correct",
+          field: "correct",
+          class: "text",
+          tooltip:
+            "Number of records the rule labeled correctly (if annotations are available)",
+        },
+        {
+          name: "Incorrect",
+          field: "incorrect",
+          class: "text",
+          tooltip:
+            "Number of records the rule labeled incorrectly (if annotations are available)",
+        },
         {
           name: "Precision",
           field: "precision",
           class: "text",
-          tooltip: "Percentage of correct labels given by the rule"
+          tooltip: "Percentage of correct labels given by the rule",
         },
         {
           name: "Created at",
