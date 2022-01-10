@@ -598,10 +598,10 @@ const actions = {
     await _paginate({ dataset, size, page });
   },
 
-  async resetSearch(_, { dataset, query, sort, size }) {
-    return await _search({ 
-      dataset, 
-      query: {}, 
+  async resetSearch(_, { dataset, size }) {
+    return await _search({
+      dataset,
+      query: {},
       sort: [
         {
           id: "status",
@@ -611,7 +611,7 @@ const actions = {
           order: "desc",
         },
       ],
-      size
+      size,
     });
   },
 
