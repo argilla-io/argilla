@@ -39,9 +39,7 @@
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
-              <span :key="metric.overall.value">
-                {{ metric.overall.value }}
-              </span>
+              <span v-html="metric.overall.value" :key="metric.overall.value" />
             </transition>
           </span>
         </div>
@@ -105,6 +103,43 @@ export default {
     metrics() {
       return [
         {
+          name: "Coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Fraction of records labeled by any rule",
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage * this.dataset.results.total
+              )
+            )} records)</span>`,
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage),
+            tooltip: "Fraction of records labeled by the rule",
+          },
+        },
+        {
+          name: "Annotated coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Fraction of annotated records labeled by any rule",
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage_annotated
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage_annotated *
+                  this.dataset.results.total
+              )
+            )} records)</span>`,
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
+            tooltip: "Fraction of annotated records labeled by the rule",
+          },
+        },
+        {
           name: "Precision",
           overall: {
             description: "Avg:",
@@ -135,30 +170,6 @@ export default {
                 : "_/_",
             tooltip:
               "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
-          },
-        },
-        {
-          name: "Coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage),
-            tooltip: "Fraction of records labeled by the rule",
-          },
-        },
-        {
-          name: "Annotated coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of annotated records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage_annotated),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
-            tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
       ];
@@ -336,6 +347,16 @@ p[data-title] {
     border-top: 7px solid $color;
     border-right: 7px solid transparent;
     border-left: 7px solid transparent;
+  }
+}
+</style>
+
+<style lang="scss">
+.records-number {
+  @include font-size(16px);
+  font-weight: normal;
+  .all & {
+    display: none;
   }
 }
 </style>
