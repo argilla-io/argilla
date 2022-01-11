@@ -268,7 +268,7 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary()
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
@@ -285,7 +285,7 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(normalize_by_coverage=True)
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
@@ -302,13 +302,14 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
                 {"negative", "positive"},
             ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
+            "annotated_coverage": [2.0 / 3, 3.0 / 3, 0, 3.0 / 3],
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
             "correct": [1, 2, 0, 3],
