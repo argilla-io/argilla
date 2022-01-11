@@ -314,7 +314,7 @@ def test_summary(monkeypatch, rules):
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
             "correct": [1, 2, 0, 3],
             "incorrect": [1, 0, 0, 1],
-            "precision": [1.0 / 2, 2 / 2, 0, 3.0 / 4],
+            "precision": [1.0 / 2, 2 / 2, np.nan, 3.0 / 4],
         },
         index=["first_rule", "rule_1", "rubrix_rule", "total"],
     )

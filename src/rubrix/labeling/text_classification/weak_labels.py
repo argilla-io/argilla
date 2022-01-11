@@ -348,7 +348,7 @@ class WeakLabels:
             )
 
             # precision
-            precision = np.nan_to_num(correct / (correct + incorrect))
+            precision = correct / (correct + incorrect)
 
             return pd.DataFrame(
                 {
