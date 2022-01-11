@@ -264,8 +264,9 @@ class WeakLabels:
     ) -> pd.DataFrame:
         """Returns following summary statistics for each rule:
 
-        - **polarity**: Set of unique labels returned by the rule, excluding "None" (abstain).
+        - **label**: Set of unique labels returned by the rule, excluding "None" (abstain).
         - **coverage**: Fraction of the records labeled by the rule.
+        - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
         - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
         - **correct**: Number of records the rule labeled correctly (if annotations are available).
@@ -283,7 +284,7 @@ class WeakLabels:
         """
         has_weak_label = self._matrix != self._label2int[None]
 
-        # polarity
+        # polarity (label)
         polarity = [
             set(
                 self._int2label[integer]
@@ -322,21 +323,36 @@ class WeakLabels:
         # index for the summary
         index = list(self._rules_name2index.keys()) + ["total"]
 
-        # only add correct, incorrect and precision if we have annotations
+        # only add annotated_coverage, correct, incorrect and precision if we have annotations
         if (
             any(self._annotation_array != self._label2int[None])
             or annotation is not None
         ):
+            # annotated coverage
+            nr_of_annotations = (
+                (annotation if annotation is not None else self._annotation_array)
+                != self._label2int[None]
+            ).sum()
+            annotated_coverage = has_weak_label.sum(axis=0) / nr_of_annotations
+            annotated_coverage = np.append(
+                annotated_coverage,
+                (has_weak_label.sum(axis=1) > 0).sum() / nr_of_annotations,
+            )
+
+            # correct/incorrect
             correct, incorrect = self._compute_correct_incorrect(
                 has_weak_label,
                 annotation if annotation is not None else self._annotation_array,
             )
+
+            # precision
             precision = np.nan_to_num(correct / (correct + incorrect))
 
             return pd.DataFrame(
                 {
-                    "polarity": polarity,
+                    "label": polarity,
                     "coverage": coverage,
+                    "annotated_coverage": annotated_coverage,
                     "overlaps": overlaps,
                     "conflicts": conflicts,
                     "correct": correct,
@@ -348,7 +364,7 @@ class WeakLabels:
 
         return pd.DataFrame(
             {
-                "polarity": polarity,
+                "label": polarity,
                 "coverage": coverage,
                 "overlaps": overlaps,
                 "conflicts": conflicts,
