@@ -52,4 +52,4 @@ It is also posible to create new labels by clicking on **Create new label**.
 In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics** menu is available on the sidebar.
 Learn more about it [here](dataset.md) (features) or [here](view_dataset_metrics.md) (an "user guide").
 
-![Rubrix Text Classification Annotation mode](../../_static/reference/webapp/annotation_textcat.png)
+![Metrics Annotate](../../_static/reference/webapp/metrics_annotate.png)
