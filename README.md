@@ -50,8 +50,10 @@
 </p>
 
 
-https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4
-<p align="center">Example: Named Entity Recognition data exploration and annotation with spaCy and the IMDB dataset</p>
+
+
+https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
+<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
 
 
 ## What is Rubrix?
