@@ -309,7 +309,7 @@ def test_summary(monkeypatch, rules):
                 {"negative", "positive"},
             ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
-            "annotated_coverage": [2.0 / 3, 3.0 / 3, 0, 3.0 / 3],
+            "annotated_coverage": [2.0 / 3, 2.0 / 3, 0, 2.0 / 3],
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
             "correct": [1, 2, 0, 3],
