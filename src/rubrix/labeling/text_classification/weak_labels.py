@@ -329,14 +329,16 @@ class WeakLabels:
             or annotation is not None
         ):
             # annotated coverage
-            nr_of_annotations = (
-                (annotation if annotation is not None else self._annotation_array)
-                != self._label2int[None]
-            ).sum()
-            annotated_coverage = has_weak_label.sum(axis=0) / nr_of_annotations
+            has_annotation = (
+                annotation if annotation is not None else self._annotation_array
+            ) != self._label2int[None]
+            annotated_coverage = (
+                has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
+            )
             annotated_coverage = np.append(
                 annotated_coverage,
-                (has_weak_label.sum(axis=1) > 0).sum() / nr_of_annotations,
+                (has_weak_label[has_annotation].sum(axis=1) > 0).sum()
+                / has_annotation.sum(),
             )
 
             # correct/incorrect
