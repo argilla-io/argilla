@@ -9,10 +9,6 @@ from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
 class CommonTaskQueryParams:
     """Common task query params"""
 
-    include_metrics: bool = Query(
-        False, description="If enabled, return related record metrics"
-    )
-
     __workspace_param__: str = Query(
         None,
         alias="workspace",
