@@ -65,7 +65,12 @@ async function _getOrFetchDataset({ workspace, name }) {
   if (ds !== null) {
     return ds;
   }
-  await ObservationDataset.api().get(`/datasets/${name}`);
+  await ObservationDataset.api().get(`/datasets/${name}`, {
+    dataTransformer: ({ data }) => {
+      data.owner = data.owner || workspace;
+      return data;
+    },
+  });
   return await _getOrFetchDataset({ workspace, name });
 }
 
