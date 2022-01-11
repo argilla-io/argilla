@@ -97,10 +97,10 @@ export default {
     },
     placeholderFields() {
       return [
-        "Precision",
-        "Correct/incorrect",
         "Coverage",
         "Annotated coverage",
+        "Precision",
+        "Correct/incorrect",
       ];
     },
     metrics() {
@@ -254,7 +254,7 @@ export default {
     },
     getValuesByMetricType(type) {
       return Object.keys(this.metricsByRules).map((key) => {
-        return this.metricsByRules[key][type];
+        return this.metricsByRules[key][type] || 0;
       });
     },
     getTotal(type) {
