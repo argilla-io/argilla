@@ -85,7 +85,7 @@ jobs:
         with:
           images: recognai/rubrix
       - name: Login to DockerHub
-        # if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -95,8 +95,7 @@ jobs:
         with:
           context: .
           file: release.Dockerfile
-          # push: ${{ github.event_name != 'pull_request' }}
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
