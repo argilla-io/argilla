@@ -1,7 +1,7 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3> 
+<h3> Open-source framework to label, refine and monitor data for NLP</h3> 
 
 <p align="left">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -37,23 +37,22 @@
 </p>
 
 
----
-
-<p align="justify" style="font-size: 18px">
-    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a></span>
-    〰️
-    <a href="https://docs.rubrix.ml">📚 Docs</a>
-    〰️
-    <a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a>
-    〰️
-    <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a>
-</p>
-
-
-
 
 https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
 <p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
+
+---
+
+<p align="justify" style="font-size: 18px">
+    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 &nbsp; Join the community on Slack</a></span>
+     &nbsp; &nbsp;  〰️ &nbsp; &nbsp; 
+    <a href="https://docs.rubrix.ml"> 📚 &nbsp;  Docs</a>
+    &nbsp; &nbsp;  〰️ &nbsp; &nbsp; 
+    <a href="https://github.com/recognai/rubrix/#get-started"> 🚀   &nbsp; Get started</a>
+    &nbsp; &nbsp;  〰️ &nbsp; &nbsp; 
+    <a href="https://github.com/recognai/rubrix/#quick-links"> 🔗 &nbsp;  Quick links</a>
+</p>
+
 
 
 ## What is Rubrix?
