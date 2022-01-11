@@ -1,6 +1,6 @@
 # Dataset
 
-![Dataset view](../../_static/reference/webapp/dataset_view.png)
+![Dataset view](../../_static/reference/webapp/dataset_view1.png)
 
 The _Dataset_ page is the main page of the Rubrix web app.
 From here you can access most of Rubrix's features, like **exploring and annotating** the records of your dataset.
