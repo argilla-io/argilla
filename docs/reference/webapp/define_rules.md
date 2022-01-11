@@ -1,7 +1,5 @@
 # Define rules
 
-![Define Rules view](../../_static/reference/webapp/definerules_view.png)
-
 The Rubrix web app has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
 As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/weak-supervision-with-rubrix.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
@@ -13,7 +11,7 @@ The _Define rules_ mode is only available for single-label text classification d
 
 ## Query plus label
 
-![Label searchbar](../../_static/reference/webapp/label_searchbar.png)
+![Label searchbar](../../_static/reference/webapp/definerules_view.png)
 
 A rule in Rubrix basically applies a chosen label to a list of records that match a given [query](search_records.md), so all you need is a query plus a label.
 After entering a query in the search bar and selecting a label, you will see some [metrics](#rule-metrics) for the rule on the right and the matches of your query in the record list below.
@@ -41,13 +39,5 @@ Some metrics are only available if your dataset has also annotated records.
 
 Here you will see a list of your saved rules as well as their overall metrics.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
-
-![Label Rules 1](../../_static/reference/webapp/label1.png)
-
-![Label Rules 2](../../_static/reference/webapp/label2.png)
-
-![Label Rules 3](../../_static/reference/webapp/label3.png)
-
-![Label Rules 4](../../_static/reference/webapp/label4.png)
 
 ![Label Rules 5](../../_static/reference/webapp/label5.png)
