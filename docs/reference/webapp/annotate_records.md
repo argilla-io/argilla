@@ -1,6 +1,6 @@
 # Annotate records
 
-_TODO: Screenshot of token classification annotations_
+![Rubrix Token Classification (NER) Annotation mode](../../_static/reference/webapp/annotation_ner.png)
 
 The Rubrix web app has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
 Rubrix's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
@@ -9,7 +9,7 @@ You can access the _Annotate mode_ via the sidebar of the [Dataset page](dataset
 
 ## Search and filter
 
-_TODO: Screenshot of the search bar and filters_
+![Search and filter for annotation view](../../_static/reference/webapp/filters_all.png)
 
 The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
 In addition, the _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including the metadata of your records.
@@ -53,5 +53,3 @@ In all modes (**Explore**, **Annotation** and **Define rules**), the **Metrics**
 Learn more about it [here](dataset.md) (features) or [here](view_dataset_metrics.md) (an "user guide").
 
 ![Rubrix Text Classification Annotation mode](../../_static/reference/webapp/annotation_textcat.png)
-
-![Rubrix Token Classification (NER) Annotation mode](../../_static/reference/webapp/annotation_ner.png)

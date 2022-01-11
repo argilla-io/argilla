@@ -1,6 +1,6 @@
 # Explore records
 
-_TODO: Screenshot_
+![Explore view](../../_static/reference/webapp/explore_view.png)
 
 If you want to explore your dataset or analyze the predictions of a model, the Rubrix web app offers a dedicated Explore mode.
 The powerful search functionality and intuitive filters allow you to quickly navigate through your records and dive deep into your dataset.
@@ -10,7 +10,7 @@ You can access the _Explore mode_ via the sidebar of the [Dataset page](dataset.
 
 ## Search and filter
 
-_TODO: Screenshot of the search bar and filters_
+![Search bar and filters](../../_static/reference/webapp/search_bar.png)
 
 The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
 In addition, the _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including predictions and annotations.
@@ -53,6 +53,6 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Metrics
 
-_TODO: Screenshot_
+![Metrics for Explore Mode](../../_static/reference/webapp/metrics_exploremode.png)
 
 From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
