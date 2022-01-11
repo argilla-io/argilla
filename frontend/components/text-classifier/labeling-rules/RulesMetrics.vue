@@ -97,10 +97,10 @@ export default {
     },
     placeholderFields() {
       return [
-        "Precision",
-        "Correct/incorrect",
         "Coverage",
         "Annotated coverage",
+        "Precision",
+        "Correct/incorrect",
       ];
     },
     metrics() {
