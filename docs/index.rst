@@ -9,7 +9,7 @@ Welcome to Rubrix
 
 .. raw:: html
 
-   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132382444-56218f91-7492-4a2f-9c05-aa3082f4f212.mp4" type="video/mp4"></video>
+   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4" type="video/mp4"></video>
 
 
 What's Rubrix?
