@@ -105,7 +105,7 @@ jobs:
   deploy_release:
     name: Deploy Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name == 'release' }}
     needs:
       - build
     defaults:
@@ -129,7 +129,6 @@ jobs:
         run: pip install --index-url https://test.pypi.org/simple --no-deps rubrix==${GITHUB_REF#refs/*/v}
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
-        if: github.event_name == 'release'
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
