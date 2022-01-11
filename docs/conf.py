@@ -43,6 +43,7 @@ version = release
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "myst_parser",
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -80,7 +81,7 @@ nbsphinx_prolog = """
 """
 
 # TODO: Change this to "both" once Sphinx 4.1 is out
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
