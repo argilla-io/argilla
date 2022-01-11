@@ -33,23 +33,23 @@ const actions = {
     return response.data;
   },
 
-  async defineRule(_, { dataset, label, description }) {
+  async defineRule(_, { dataset, label }) {
     await ObservationDataset.api().post(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules`,
       {
         query: dataset.query.text,
         label: label,
-        description: description,
+        description: dataset.query.text,
       }
     );
   },
 
-  async updateRule(_, { dataset, label, description }) {
+  async updateRule(_, { dataset, label }) {
     await ObservationDataset.api().patch(
       `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${dataset.query.text}`,
       {
         label: label,
-        description: description,
+        description: dataset.query.text,
       }
     );
   },
@@ -84,9 +84,11 @@ const actions = {
   },
 
   async getRuleMetricsByLabel(_, { dataset, query, label }) {
-    const { response } = await ObservationDataset.api().get(
-      `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics?label=${label}`
-    );
+    var url = `/datasets/${dataset.task}/${dataset.name}/labeling/rules/${query}/metrics`;
+    if (label !== undefined) {
+      url += `?label=${label}`;
+    }
+    const { response } = await ObservationDataset.api().get(url);
     return response.data;
   },
 };

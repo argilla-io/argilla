@@ -76,6 +76,9 @@ export default {
     globalHeaderHeight() {
       return this.dataset.viewSettings.headerHeight;
     },
+    currentViewMode() {
+      return this.dataset.viewSettings.viewMode;
+    },
     workspace() {
       return currentWorkspace(this.$route);
     },
@@ -86,12 +89,18 @@ export default {
         this.headerHeightUpdate();
       }
     },
+    async currentViewMode(n) {
+      if (n === "labelling-rules") {
+        await this.resetSearch({ dataset: this.dataset });
+      }
+    },
   },
   mounted() {
     this.setHeaderHeight();
   },
   methods: {
     ...mapActions({
+      resetSearch: "entities/datasets/resetSearch",
       fetchDataset: "entities/datasets/fetchByName",
     }),
     async setHeaderHeight() {

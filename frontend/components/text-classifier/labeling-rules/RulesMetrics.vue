@@ -39,9 +39,7 @@
               metric.overall.description
             }}</template>
             <transition name="fade" mode="out-in" appear>
-              <span :key="metric.overall.value">
-                {{ metric.overall.value }}
-              </span>
+              <span v-html="metric.overall.value" :key="metric.overall.value" />
             </transition>
           </span>
         </div>
@@ -94,6 +92,9 @@ export default {
     }
   },
   computed: {
+    query() {
+      return this.dataset.query.text;
+    },
     placeholderFields() {
       return [
         "Precision",
@@ -105,16 +106,53 @@ export default {
     metrics() {
       return [
         {
+          name: "Coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Percentage of records labeled by any rule",
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage * this.dataset.globalResults.total
+              )
+            )} records)</span>`,
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage),
+            tooltip: "Percentage of records labeled by the rule",
+          },
+        },
+        {
+          name: "Annotated coverage",
+          overall: {
+            description: "Total:",
+            tooltip: "Percentage of annotated records labeled by any rule",
+            value: `${this.formatNumber(
+              this.metricsTotal.coverage_annotated
+            )} <span class="records-number">(${this.$options.filters.formatNumber(
+              Math.round(
+                this.metricsTotal.coverage_annotated *
+                  this.dataset.globalResults.total
+              )
+            )} records)</span>`,
+          },
+          rule: {
+            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
+            tooltip: "Percentage of annotated records labeled by the rule",
+          },
+        },
+        {
           name: "Precision",
           overall: {
             description: "Avg:",
-            tooltip: "Average fraction of correct labels given by the rules",
+            tooltip: "Average percentage of correct labels given by the rules",
             value: this.formatNumber(this.getAverage("precision")),
             refresh: this.refresh,
           },
           rule: {
             value: this.formatNumber(this.metricsByLabel.precision),
-            tooltip: "Fraction of correct labels given by the rule",
+            tooltip: "Percentage of correct labels given by the rule",
           },
         },
         {
@@ -125,40 +163,16 @@ export default {
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
             value: Object.keys(this.metricsByRules).length
               ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-              : "_/_",
+              : "-/-",
             refresh: this.refresh,
           },
           rule: {
             value:
               this.metricsByLabel.correct !== undefined
                 ? `${this.metricsByLabel.correct}/${this.metricsByLabel.incorrect}`
-                : "_/_",
+                : "-/-",
             tooltip:
               "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
-          },
-        },
-        {
-          name: "Coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage),
-            tooltip: "Fraction of records labeled by the rule",
-          },
-        },
-        {
-          name: "Annotated coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Fraction of annotated records labeled by any rule",
-            value: this.formatNumber(this.metricsTotal.coverage_annotated),
-          },
-          rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
-            tooltip: "Fraction of annotated records labeled by the rule",
           },
         },
       ];
@@ -227,10 +241,10 @@ export default {
       });
     },
     async getMetricsByLabel() {
-      if (this.activeLabel !== undefined) {
+      if (this.query !== undefined) {
         const response = await this.getRuleMetricsByLabel({
           dataset: this.dataset,
-          query: this.dataset.query.text,
+          query: this.query,
           label: this.activeLabel,
         });
         this.metricsByLabel = response;
@@ -250,7 +264,12 @@ export default {
       );
     },
     getAverage(type) {
-      return this.getTotal(type) / this.getValuesByMetricType(type).length;
+      const filteredValues = Object.keys(this.metricsByRules)
+        .filter((key) => this.metricsByRules[key].coverage_annotated > 0)
+        .map((k) => {
+          return this.metricsByRules[k][type];
+        });
+      return this.getTotal(type) / filteredValues.length;
     },
   },
 };
@@ -336,6 +355,16 @@ p[data-title] {
     border-top: 7px solid $color;
     border-right: 7px solid transparent;
     border-left: 7px solid transparent;
+  }
+}
+</style>
+
+<style lang="scss">
+.records-number {
+  @include font-size(16px);
+  font-weight: normal;
+  .all & {
+    display: none;
   }
 }
 </style>

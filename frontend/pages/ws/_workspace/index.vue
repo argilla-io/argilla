@@ -46,8 +46,8 @@
               :query-search="querySearch"
               :global-actions="false"
               search-on="name"
-              :visible-modal-id="visibleModalId"
-              :delete-modal-content="getDeleteModalContent"
+              :visible-modal-id="datasetCompositeId"
+              :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
@@ -96,7 +96,7 @@ export default {
     externalLinks: [],
     sortedOrder: "desc",
     sortedByField: "last_updated",
-    visibleModalId: undefined,
+    datasetCompositeId: undefined,
   }),
   async fetch() {
     await this.fetchDatasets();
@@ -106,6 +106,7 @@ export default {
       return ObservationDataset.all().map((dataset) => {
         return {
           ...dataset,
+          id: dataset.id,
           link: this.datasetWorkspace(dataset),
         };
       });
@@ -113,11 +114,20 @@ export default {
     workspace() {
       return currentWorkspace(this.$route);
     },
-    getDeleteModalContent() {
-      return {
+    deleteConfirmationContent() {
+      const [workspace, name] = this.datasetCompositeId || [];
+      const content = {
         title: "Delete confirmation",
-        text: `You are about to delete: <strong>${this.visibleModalId}</strong>. This action cannot be undone`,
+        text: `You are about to delete: <strong>${name}</strong> from workspace <strong>${workspace}</strong>. This action cannot be undone`,
       };
+
+      if (workspace === this.workspace) {
+        content.text = content.text.replace(
+          ` from workspace <strong>${workspace}</strong>`,
+          ""
+        );
+      }
+      return content;
     },
   },
   methods: {
@@ -131,14 +141,13 @@ export default {
       if (workspace === null || workspace === "null") {
         workspace = this.workspace;
       }
-
       return `/ws/${workspace}/${dataset.name}`;
     },
 
     onActionClicked(action, dataset) {
       switch (action) {
         case "delete":
-          this.showConfirmDatasetDeletion(dataset.name);
+          this.showConfirmDatasetDeletion(dataset);
           break;
         case "copy":
           this.copyUrl(dataset);
@@ -147,7 +156,7 @@ export default {
           this.copyName(dataset.name);
           break;
         case "confirm-delete":
-          this.deleteDataset(dataset.name);
+          this.deleteDataset(dataset);
           break;
 
         default:
@@ -173,11 +182,14 @@ export default {
       myTemporaryInputElement.select();
       document.execCommand("Copy");
     },
-    showConfirmDatasetDeletion(id) {
-      this.visibleModalId = id;
+    showConfirmDatasetDeletion(dataset) {
+      this.datasetCompositeId = dataset.id;
     },
-    deleteDataset(id) {
-      this._deleteDataset({ name: id });
+    deleteDataset(dataset) {
+      this._deleteDataset({
+        workspace: dataset.owner,
+        name: dataset.name,
+      });
       this.closeModal();
     },
     onSortColumns(by, order) {
@@ -185,7 +197,7 @@ export default {
       this.sortedOrder = order;
     },
     closeModal() {
-      this.visibleModalId = undefined;
+      this.datasetCompositeId = undefined;
     },
   },
 };

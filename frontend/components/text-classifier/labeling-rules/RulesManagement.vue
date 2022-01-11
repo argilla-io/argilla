@@ -24,7 +24,12 @@
         </template>
       </rules-metrics>
       <div class="rules-management__container">
-        <p class="rules-management__title">Rules</p>
+        <p class="rules-management__title">
+          Rules
+          <span v-if="formattedRules.length"
+            >({{ formattedRules.length }})</span
+          >
+        </p>
         <ReSearchBar
           v-if="formattedRules.length"
           placeholder="Search rule by name"
@@ -76,31 +81,54 @@ export default {
       metricsByLabel: {},
       tableColumns: [
         {
-          name: "Name",
+          name: "Query",
           field: "name",
           class: "table-info__title",
           type: "action",
         },
         { name: "Label", field: "label", class: "text" },
-        { name: "Coverage", field: "coverage", class: "text", type: "number" },
+        {
+          name: "Coverage",
+          field: "coverage",
+          class: "text",
+          tooltip: "Percentage of records labeled by the rule",
+        },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
-          type: "number",
+          tooltip: "Percentage of annotated records labeled by the rule",
         },
-        { name: "Correct", field: "correct", class: "text" },
-        { name: "Incorrect", field: "incorrect", class: "text" },
+        {
+          name: "Correct",
+          field: "correct",
+          class: "text",
+          tooltip:
+            "Number of records the rule labeled correctly (if annotations are available)",
+        },
+        {
+          name: "Incorrect",
+          field: "incorrect",
+          class: "text",
+          tooltip:
+            "Number of records the rule labeled incorrectly (if annotations are available)",
+        },
         {
           name: "Precision",
           field: "precision",
           class: "text",
-          type: "number",
+          tooltip: "Percentage of correct labels given by the rule",
+        },
+        {
+          name: "Created at",
+          field: "created_at",
+          class: "date",
+          type: "date",
         },
       ],
       sortedOrder: "desc",
-      sortedByField: "query",
-      actions: [{ name: "delete", icon: "delete", title: "Delete dataset" }],
+      sortedByField: "created_at",
+      actions: [{ name: "delete", icon: "delete", title: "Delete rule" }],
       noDataInfo: {
         title: "0 rules defined",
         message: `You have not defined any rules for this dataset yet.`,
@@ -122,15 +150,23 @@ export default {
     formattedRules() {
       return this.rules.map((r) => {
         return {
+          id: r.query,
           name: r.description,
           query: r.query,
           kind: "select",
           label: r.label,
-          coverage: this.metricsByLabel[r.query].coverage,
-          coverage_annotated: this.metricsByLabel[r.query].coverage_annotated,
+          coverage: this.$options.filters.percent(
+            this.metricsByLabel[r.query].coverage
+          ),
+          coverage_annotated: this.$options.filters.percent(
+            this.metricsByLabel[r.query].coverage_annotated
+          ),
           correct: this.metricsByLabel[r.query].correct,
           incorrect: this.metricsByLabel[r.query].incorrect,
-          precision: this.metricsByLabel[r.query].precision,
+          precision: this.$options.filters.percent(
+            this.metricsByLabel[r.query].precision
+          ),
+          created_at: r.created_at,
         };
       });
     },
@@ -177,16 +213,16 @@ export default {
       }
       await this.hideList();
     },
-    onActionClicked(action, rowId) {
+    onActionClicked(action, rule) {
       switch (action) {
         case "delete":
-          this.onShowConfirmRuleDeletion(rowId);
+          this.onShowConfirmRuleDeletion(rule);
           break;
         case "confirm-delete":
-          this.onDeleteRule(rowId);
+          this.onDeleteRule(rule);
           break;
         case "select":
-          this.onSelectQuery(rowId);
+          this.onSelectQuery(rule);
           break;
         default:
           console.warn(action);
@@ -237,6 +273,10 @@ export default {
     @include font-size(22px);
     font-weight: 600;
     margin-top: 0;
+    span {
+      @include font-size(16px);
+      font-weight: normal;
+    }
   }
   &__table {
     margin-bottom: 2em !important;
