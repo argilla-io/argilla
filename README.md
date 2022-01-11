@@ -1,7 +1,7 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3> 
+<h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3>
 
 <p align="left">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -33,9 +33,8 @@
         <img alt="CI" src="https://img.shields.io/twitter/follow/rubrixml.svg?style=social&label=Follow">
     </a>
     <!--img alt="CI" src="https://img.shields.io/docker/v/recognai/rubrix?sort=semver"-->
-    
-</p>
 
+</p>
 
 ---
 
@@ -49,16 +48,13 @@
     <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a>
 </p>
 
-
-
-
 https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
-<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
 
+<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
 
 ## What is Rubrix?
 
-Rubrix is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects. 
+Rubrix is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects.
 
 Why Rubrix?
 
@@ -66,7 +62,7 @@ Why Rubrix?
 
 - **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions, and collect more data to improve your model over time. Rubrix is designed to close this gap, enabling you to **iterate as much as you need**.
 
-- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. *Domain experts* should feel comfortable interpreting and annotating data. *Data scientists* should feel free to experiment and iterate. *Engineers* should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**. 
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**.
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
@@ -90,11 +86,10 @@ Why Rubrix?
 - Integrated with Kibana for custom dashboards
 
 ### Team workspaces
+
 - Bring different users and roles into the NLP data and model lifecycles
 - Organize data collection, review and monitoring into different workspaces
 - Manage workspace access for different users
-
-
 
 ## Get started
 
@@ -106,7 +101,6 @@ To get started you need to follow three steps:
 
 🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
 
-   
 ### 1. Install the Python client
 
 You can install the Python client with `pip` or `conda`.
@@ -169,8 +163,8 @@ pip install rubrix[server]
 python -m rubrix.server
 ```
 
-By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
-But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
+By default, the Rubrix server will look for your Elasticsearch endpoint at `http://localhost:9200`.
+But you can customize this by setting the `ELASTICSEARCH` environment variable.
 
 ### 3. Start logging data
 
@@ -186,7 +180,7 @@ rb.log(
 ```
 
 If you go to your Rubrix web app at http://localhost:6900/, you should see your first dataset.
-**The default username and password are ``rubrix`` and ``1234``**.
+**The default username and password are `rubrix` and `1234`**.
 You can also check the REST API docs at http://localhost:6900/api/docs.
 
 Congratulations! You are ready to start working with Rubrix. You can continue reading a working example below.
@@ -195,27 +189,26 @@ To better understand what's possible take a look at Rubrix's [Cookbook](https://
 
 ## Quick links
 
-| Doc | Description |
-|---|---|
-| 🚶 **[First steps](https://rubrix.rtfd.io/en/stable/index.html#first-steps-with-rubrix)**    | New to Rubrix and want to get started? |
-| 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**   | Want to know more about Rubrix concepts? |
-| 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**  | How to configure and install Rubrix |
-| 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**  | What can you use Rubrix for? |
-| 📱 **[Web app reference](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html)** | How to use the web-app for data exploration and annotation |
-| 🐍 **[Python client API](https://rubrix.readthedocs.io/en/stable/reference/python/index.html)** | How to use the Python classes and methods |
-| 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**   | How to use Rubrix with your favourite libraries (`flair`, `stanza`...)  |
-| 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**   | Ask questions, share feedback, ideas and suggestions  |
-| 🤗 **[Hugging Face tutorial](https://rubrix.readthedocs.io/en/master/tutorials/01-labeling-finetuning.html)** | Using `Hugging Face` transformers with Rubrix for text classification|
-| 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)** | Using `spaCy` with Rubrix for NER projects |
-| 🐠 **[Weak supervision tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supervision-with-rubrix.html)** | How to leverage weak supervision with `snorkel` & Rubrix |
-| 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)** | How to use active learning with `modAL` & Rubrix |
-
+| Doc                                                                                                                     | Description                                                            |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 🚶 **[First steps](https://rubrix.rtfd.io/en/stable/index.html#first-steps-with-rubrix)**                               | New to Rubrix and want to get started?                                 |
+| 👩‍🏫 **[Concepts](https://rubrix.rtfd.io/en/stable/getting_started/concepts.html)**                                       | Want to know more about Rubrix concepts?                               |
+| 🛠️ **[Setup and install](https://rubrix.rtfd.io/en/stable/getting_started/setup%26installation.html)**                  | How to configure and install Rubrix                                    |
+| 🗒️ **[Tasks](https://rubrix.rtfd.io/en/stable/getting_started/supported_tasks.html)**                                   | What can you use Rubrix for?                                           |
+| 📱 **[Web app reference](https://rubrix.readthedocs.io/en/stable/reference/webapp/index.html)**                         | How to use the web-app for data exploration and annotation             |
+| 🐍 **[Python client API](https://rubrix.readthedocs.io/en/stable/reference/python/index.html)**                         | How to use the Python classes and methods                              |
+| 👩‍🍳 **[Rubrix cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)**                                         | How to use Rubrix with your favourite libraries (`flair`, `stanza`...) |
+| 👋 **[Community forum](https://github.com/recognai/rubrix/discussions)**                                                | Ask questions, share feedback, ideas and suggestions                   |
+| 🤗 **[Hugging Face tutorial](https://rubrix.readthedocs.io/en/master/tutorials/01-labeling-finetuning.html)**           | Using `Hugging Face` transformers with Rubrix for text classification  |
+| 💫 **[spaCy tutorial](https://rubrix.rtfd.io/en/stable/tutorials/02-spacy.html)**                                       | Using `spaCy` with Rubrix for NER projects                             |
+| 🐠 **[Weak supervision tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supervision-with-rubrix.html)** | How to leverage weak supervision with `snorkel` & Rubrix               |
+| 🤔 **[Active learning tutorial](https://rubrix.rtfd.io/en/stable/tutorials/05-active_learning.html)**                   | How to use active learning with `modAL` & Rubrix                       |
 
 ## Example
 
-Let's see Rubrix in action with a quick example: *Bootstraping data annotation with a zero-shot classifier* 
+Let's see Rubrix in action with a quick example: _Bootstraping data annotation with a zero-shot classifier_
 
-**Why**: 
+**Why**:
 
 - The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
 - The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
@@ -264,8 +257,8 @@ Now let's access our Rubrix dataset and start annotating data. Let's filter the 
 
 https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4
 
-
 ### 3. Load and create a training set
+
 After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
 ```python
@@ -293,13 +286,11 @@ Rubrix main components are:
 
 ![](docs/images/rubrix_intro.svg)
 
-
-
 ## Community
+
 As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
 
 ## Contributors
-
 
 <a href="https://github.com/recognai/rubrix/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=recognai/rubrix" />

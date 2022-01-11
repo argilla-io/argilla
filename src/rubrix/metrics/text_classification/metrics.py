@@ -12,7 +12,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html)
 
     Returns:
         The f1 metric summary
@@ -39,7 +39,7 @@ def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input)
+            An ElasticSearch query with the [query string syntax](https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html)
 
     Returns:
         The f1 metric summary
