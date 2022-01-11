@@ -37,7 +37,8 @@
     "vue-moment": "^4.1.0",
     "vue-svgicon": "^3.2.9",
     "vue-vega": "^1.0.0-alpha.13",
-    "vue-virtual-scroller": "^1.0.10"
+    "vue-virtual-scroller": "^1.0.10",
+    "vuex-multi-tab-state": "^1.0.17"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
