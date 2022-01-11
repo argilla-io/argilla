@@ -163,9 +163,9 @@ export default {
           ),
           correct: this.metricsByLabel[r.query].correct,
           incorrect: this.metricsByLabel[r.query].incorrect,
-          precision: this.$options.filters.percent(
-            this.metricsByLabel[r.query].precision || 0
-          ),
+          precision: this.metricsByLabel[r.query].precision ? this.$options.filters.percent(
+            this.metricsByLabel[r.query].precision
+          ) : '-',
           created_at: r.created_at,
         };
       });
