@@ -254,7 +254,7 @@ export default {
     },
     getValuesByMetricType(type) {
       return Object.keys(this.metricsByRules).map((key) => {
-        return this.metricsByRules[key][type];
+        return this.metricsByRules[key][type] || 0;
       });
     },
     getTotal(type) {
