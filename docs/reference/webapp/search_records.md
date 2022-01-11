@@ -54,5 +54,3 @@ Shown below is a summary of available fields that can be used for the query DSL,
 | words.extended  |                            |                             |
 
 With this component, users are able to search specific information on the dataset, either by **full-text queries** or by queries using **Elasticsearch**.
-
-![Search components](../../_static/reference/webapp/search_components.png)

@@ -2,7 +2,7 @@
 
 _TODO: Screenshot_
 
-The Rubrix web app has a dedicated mode to find good heuristic rules, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
+The Rubrix web app has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
 As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/weak-supervision-with-rubrix.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Define rules_ mode via the sidebar of the [Dataset page](dataset.md).

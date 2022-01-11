@@ -32,7 +32,7 @@ Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 
 ### Predictions filter
 
-![Predictions filter](../../_static/reference/webapp/predictions_filter.png)
+![Predictions filter](../../_static/reference/webapp/prediction_filter.png)
 
 This filter allows you to filter records with respect of their predictions:
 
@@ -62,7 +62,7 @@ This filter allows you to filter records with respect to their status:
 
 ### Metadata filter
 
-![Metadata filters](../../_static/reference/webapp/metadata_filters.png)
+![Metadata filters](../../_static/reference/webapp/metadata_filter.png)
 
 This filter allows you to filter records with respect to their metadata.
 
@@ -114,7 +114,7 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
-![Sidebar](../../_static/reference/webapp/sidebar.png)
+![Sidebar](../../_static/reference/webapp/sidebar_view.png)
 
 The sidebar is divided into three sections.
 
