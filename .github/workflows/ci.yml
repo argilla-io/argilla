@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'releases/**'
     tags:
       - 'v*'
   pull_request:
@@ -113,7 +114,6 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-
       - name: Download python package
         uses: actions/download-artifact@v2
         with:

@@ -18,7 +18,7 @@
 <template>
   <div class="rule-labels-definition">
     <div class="rule-labels-definition__info">
-      <input v-model="descriptionVModel" class="rule__description" />
+      <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
         Records:
         <strong>{{
@@ -101,7 +101,6 @@ export default {
       searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       selectedLabelsVModel: [],
-      descriptionVModel: undefined,
     };
   },
   computed: {
@@ -173,7 +172,6 @@ export default {
       this.$emit("update-rule", {
         query: this.query,
         label: newValue,
-        description: this.descriptionVModel,
       });
     },
     currentRule() {
@@ -188,6 +186,24 @@ export default {
     this.selectedLabelsVModel = this.currentRule
       ? [this.currentRule.label]
       : [];
+    currentRule(n) {
+      if (n) {
+        this.selectedLabels = [n.label];
+        this.$emit("update-labels", [n.label]);
+      }
+    },
+    query(n) {
+      this.saved = false;
+      if (!n) {
+        this.selectedLabels = [];
+        this.$emit("update-labels", undefined);
+      }
+    },
+  },
+  mounted() {
+    if (this.currentRule) {
+      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
+    }
   },
   methods: {
     ...mapActions({
@@ -199,13 +215,7 @@ export default {
       this.$emit("save-rule", {
         query: this.currentRule.query,
         label: this.currentRule.label,
-        description: this.descriptionVModel,
       });
-    },
-    setDescription() {
-      this.descriptionVModel = this.currentRule
-        ? this.currentRule.description
-        : this.query;
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -292,18 +302,7 @@ export default {
     color: $font-secondary;
     font-weight: 600;
     margin-top: 0;
-    border: none;
-    background: none;
     padding: 0;
-    outline: none;
-    @include input-placeholder {
-      color: $font-secondary;
-      font-weight: 600;
-    }
-    &:hover,
-    .focused {
-      color: $font-secondary-dark;
-    }
   }
   &__text {
     width: 100%;

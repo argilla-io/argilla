@@ -336,7 +336,9 @@ class TextClassificationService:
             The provided rule query. If already created in dataset, the ``label``
             param will be omitted
         label:
-            Label used for rule metrics. If not provided, defined in stored rule will be used
+            Label used for the rule metrics. If not provided and no rule was stored with the
+            provided query, no precision will be computed.
+            Otherwise, the label from the stored rule will be used to compute the metrics.
 
         Returns
         -------
@@ -353,21 +355,13 @@ class TextClassificationService:
                     label = rule.label
                     break
 
-        if label is None:
-            raise MissingInputParamError(
-                "`label` param was not provided and rule is not stored for dataset. "
-                "You must either an already created rule or specify the label for metrics computation"
-            )
-
         total, annotated, metrics = self.__labeling__.compute_rule_metrics(
             dataset, rule_query=rule_query, label=label
         )
 
         coverage = metrics.covered_records / total if total > 0 else None
         coverage_annotated = (
-            (metrics.correct_records + metrics.incorrect_records) / annotated
-            if annotated > 0
-            else None
+            metrics.annotated_covered_records / annotated if annotated > 0 else None
         )
         return LabelingRuleMetricsSummary(
             total_records=total,

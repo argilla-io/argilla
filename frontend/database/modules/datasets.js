@@ -65,7 +65,12 @@ async function _getOrFetchDataset({ workspace, name }) {
   if (ds !== null) {
     return ds;
   }
-  await ObservationDataset.api().get(`/datasets/${name}`);
+  await ObservationDataset.api().get(`/datasets/${name}`, {
+    dataTransformer: ({ data }) => {
+      data.owner = data.owner || workspace;
+      return data;
+    },
+  });
   return await _getOrFetchDataset({ workspace, name });
 }
 
@@ -595,6 +600,23 @@ const actions = {
 
   async paginate(_, { dataset, size, page }) {
     await _paginate({ dataset, size, page });
+  },
+
+  async resetSearch(_, { dataset, size }) {
+    return await _search({
+      dataset,
+      query: {},
+      sort: [
+        {
+          id: "status",
+          key: "status",
+          group: "Status",
+          name: "Status",
+          order: "desc",
+        },
+      ],
+      size,
+    });
   },
 
   async refresh(_, { dataset }) {

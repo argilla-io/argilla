@@ -46,6 +46,11 @@ export default ({ $axios, app }) => {
 
     switch (code) {
       case 400:
+        Notification.dispatch("notify", {
+          message: "Error: " + error.response.data.detail,
+          type: "error",
+        });
+        break;
       case 422:
         (error.response.data.detail || [undefined]).forEach(({ msg }) => {
           Notification.dispatch("notify", {

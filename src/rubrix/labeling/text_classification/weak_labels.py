@@ -32,7 +32,7 @@ class WeakLabels:
         dataset: Name of the dataset to which the rules will be applied.
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
             to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Remember that the return type ``None`` means
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
@@ -264,8 +264,9 @@ class WeakLabels:
     ) -> pd.DataFrame:
         """Returns following summary statistics for each rule:
 
-        - **polarity**: Set of unique labels returned by the rule, excluding "None" (abstain).
+        - **label**: Set of unique labels returned by the rule, excluding "None" (abstain).
         - **coverage**: Fraction of the records labeled by the rule.
+        - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
         - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
         - **correct**: Number of records the rule labeled correctly (if annotations are available).
@@ -283,7 +284,7 @@ class WeakLabels:
         """
         has_weak_label = self._matrix != self._label2int[None]
 
-        # polarity
+        # polarity (label)
         polarity = [
             set(
                 self._int2label[integer]
@@ -322,21 +323,38 @@ class WeakLabels:
         # index for the summary
         index = list(self._rules_name2index.keys()) + ["total"]
 
-        # only add correct, incorrect and precision if we have annotations
+        # only add annotated_coverage, correct, incorrect and precision if we have annotations
         if (
             any(self._annotation_array != self._label2int[None])
             or annotation is not None
         ):
+            # annotated coverage
+            has_annotation = (
+                annotation if annotation is not None else self._annotation_array
+            ) != self._label2int[None]
+            annotated_coverage = (
+                has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
+            )
+            annotated_coverage = np.append(
+                annotated_coverage,
+                (has_weak_label[has_annotation].sum(axis=1) > 0).sum()
+                / has_annotation.sum(),
+            )
+
+            # correct/incorrect
             correct, incorrect = self._compute_correct_incorrect(
                 has_weak_label,
                 annotation if annotation is not None else self._annotation_array,
             )
-            precision = np.nan_to_num(correct / (correct + incorrect))
+
+            # precision
+            precision = correct / (correct + incorrect)
 
             return pd.DataFrame(
                 {
-                    "polarity": polarity,
+                    "label": polarity,
                     "coverage": coverage,
+                    "annotated_coverage": annotated_coverage,
                     "overlaps": overlaps,
                     "conflicts": conflicts,
                     "correct": correct,
@@ -348,7 +366,7 @@ class WeakLabels:
 
         return pd.DataFrame(
             {
-                "polarity": polarity,
+                "label": polarity,
                 "coverage": coverage,
                 "overlaps": overlaps,
                 "conflicts": conflicts,

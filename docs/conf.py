@@ -43,6 +43,7 @@ version = release
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "myst_parser",
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -80,7 +81,7 @@ nbsphinx_prolog = """
 """
 
 # TODO: Change this to "both" once Sphinx 4.1 is out
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -101,11 +102,7 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [
-    "_static",
-    "tutorials/find_label_errors",
-    "tutorials/05-active_learning",
-]
+html_static_path = ["_static"]
 
 
 # Theme options
