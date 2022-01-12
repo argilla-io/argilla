@@ -139,7 +139,7 @@ Define a docker-compose.yaml
 
    services:
      rubrix:
-       image: recognai/rubrix:v0.7.0
+       image: recognai/rubrix:v0.8.0
        ports:
          - "80:80"
        environment:
