@@ -24,8 +24,7 @@ This component enables:
 
 **NOTE**: Elasticsearch's query DSL supports **escaping special characters** that are part of the query syntax. The current list special characters are:
 
-| ----------- |
-| `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \` |
+`+ - && || ! ( ) { } [ ] ^ " ~ * ? : \`
 
 To escape these character use the \\ before the character. For example to search for (1+1):2 use the query `\(1\+1\)\:2`.
 
