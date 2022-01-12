@@ -1,7 +1,7 @@
 .. _python_client:
 
 Client
-=============
+======
 
 Here we describe the Python client of Rubrix that we divide into two basic modules:
 
