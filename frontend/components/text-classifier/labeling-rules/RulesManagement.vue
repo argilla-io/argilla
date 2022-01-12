@@ -83,7 +83,7 @@ export default {
       tableColumns: [
         {
           name: "Query",
-          field: "name",
+          field: "query",
           class: "table-info__title",
           type: "action",
         },
@@ -163,6 +163,7 @@ export default {
           query: r.query,
           kind: "select",
           label: r.label,
+          ...this.metricsForRule(r),
           created_at: r.created_at,
         };
       });
@@ -240,7 +241,7 @@ export default {
       }
     },
     onShowConfirmRuleDeletion(id) {
-      this.visibleModalId = id.name;
+      this.visibleModalId = id.query;
     },
     async onDeleteRule(rule) {
       await this.dataset.deleteLabelingRule(rule);

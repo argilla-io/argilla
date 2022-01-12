@@ -135,7 +135,7 @@ export default {
           overall: {
             description: "Avg:",
             tooltip: "Average percentage of correct labels given by the rules",
-            value: this.formatNumber(this.getAverage("precision")),
+            value: this.formatNumber(this.metricsTotal.precisionAverage),
             refresh: this.refresh,
           },
           rule: {
@@ -149,9 +149,9 @@ export default {
             description: "Total:",
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
-            value: Object.keys(this.metricsByRules).length
-              ? `${this.getTotal("correct")}/${this.getTotal("incorrect")}`
-              : "-/-",
+            value: isNaN(this.metricsTotal.totalCorrects)
+              ? "-/-" :
+              `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
             refresh: this.refresh,
           },
           rule: {
