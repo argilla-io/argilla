@@ -14,7 +14,7 @@ def tokens_length(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         interval: The bins or bucket for result histogram
 
     Returns:
@@ -50,7 +50,7 @@ def token_frequency(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         tokens: The top-k number of tokens to retrieve
 
     Returns:
@@ -83,7 +83,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
 
     Returns:
         The summary for token length distribution
@@ -96,9 +96,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
     """
     current_client = client()
 
-    metric = current_client.compute_metric(
-        name, metric="token_length", query=query
-    )
+    metric = current_client.compute_metric(name, metric="token_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -116,7 +114,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
 
     Returns:
         The summary for token length distribution
@@ -183,7 +181,7 @@ def mention_length(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         level: The mention length level. Accepted values are "token" and "char"
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Defaults to ``Predictions``.
@@ -233,7 +231,7 @@ def entity_labels(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
         labels: The number of top entities to retrieve. Lower numbers will be better performants
@@ -277,7 +275,7 @@ def entity_density(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``.
         interval: The interval for histogram. The entity density is defined in the range 0-1.
@@ -325,7 +323,7 @@ def entity_capitalness(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``.
     Returns:
@@ -368,7 +366,7 @@ def entity_consistency(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
         mentions: The number of top mentions to retrieve.
@@ -417,7 +415,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
 
     Returns:
         The F1 metric summary containing precision, recall and the F1 score (averaged and per label).

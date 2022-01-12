@@ -70,7 +70,7 @@ def init(
             it will default to `http://localhost:6900`.
         api_key: Authentification key for the REST API. If `None` (default) and the env variable ``RUBRIX_API_KEY``
             is not set, it will default to `rubrix.apikey`.
-        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the 
+        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``RUBRIX_WORKSPACE`` is not set, it will default to the private user workspace.
         timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
 
@@ -172,7 +172,9 @@ def copy(dataset: str, name_of_copy: str, workspace: str = None):
         >>> rb.copy("my_dataset", name_of_copy="new_dataset")
         >>> dataframe = rb.load("new_dataset")
     """
-    _client_instance().copy(source=dataset, target=name_of_copy, target_workspace=workspace)
+    _client_instance().copy(
+        source=dataset, target=name_of_copy, target_workspace=workspace
+    )
 
 
 def load(
@@ -187,7 +189,7 @@ def load(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
         as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
