@@ -107,7 +107,7 @@ export default {
             )} records)</span>`,
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage),
+            value: this.formatNumber(this.ruleMetrics.coverage),
             tooltip: "Percentage of records labeled by the rule",
           },
         },
@@ -126,7 +126,7 @@ export default {
             )} records)</span>`,
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.coverage_annotated),
+            value: this.formatNumber(this.ruleMetrics.coverage_annotated),
             tooltip: "Percentage of annotated records labeled by the rule",
           },
         },
@@ -139,7 +139,7 @@ export default {
             refresh: this.refresh,
           },
           rule: {
-            value: this.formatNumber(this.metricsByLabel.precision),
+            value: this.formatNumber(this.ruleMetrics.precision),
             tooltip: "Percentage of correct labels given by the rule",
           },
         },
@@ -156,8 +156,8 @@ export default {
           },
           rule: {
             value:
-              this.metricsByLabel.correct !== undefined
-                ? `${this.metricsByLabel.correct}/${this.metricsByLabel.incorrect}`
+              this.ruleMetrics.correct !== undefined
+                ? `${this.ruleMetrics.correct}/${this.ruleMetrics.incorrect}`
                 : "-/-",
             tooltip:
               "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
@@ -184,7 +184,7 @@ export default {
     async getMetricsByRules() {
       const responses = await Promise.all(
         this.rules.map((rule) => {
-          return this.getRuleMetricsByLabel({
+          return this.getRuleruleMetrics({
             dataset: this.dataset,
             query: rule.query,
             label: rule.label,
@@ -196,16 +196,16 @@ export default {
         this.metricsByRules[this.rules[idx].query] = response;
       });
     },
-    async getMetricsByLabel() {
+    async getruleMetrics() {
       if (this.query !== undefined) {
-        const response = await this.getRuleMetricsByLabel({
+        const response = await this.getRuleruleMetrics({
           dataset: this.dataset,
           query: this.query,
           label: this.activeLabel,
         });
-        this.metricsByLabel = response;
+        this.ruleMetrics = response;
       } else {
-        this.metricsByLabel = {};
+        this.ruleMetrics = {};
       }
     },
     getValuesByMetricType(type) {

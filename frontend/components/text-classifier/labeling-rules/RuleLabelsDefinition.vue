@@ -174,31 +174,12 @@ export default {
         label: newValue,
       });
     },
-    currentRule() {
-      this.setDescription();
-    },
-    query() {
-      this.setDescription();
-    },
   },
   mounted() {
     this.setDescription();
     this.selectedLabelsVModel = this.currentRule
       ? [this.currentRule.label]
       : [];
-    currentRule(n) {
-      if (n) {
-        this.selectedLabels = [n.label];
-        this.$emit("update-labels", [n.label]);
-      }
-    },
-    query(n) {
-      this.saved = false;
-      if (!n) {
-        this.selectedLabels = [];
-        this.$emit("update-labels", undefined);
-      }
-    },
   },
   mounted() {
     if (this.currentRule) {
