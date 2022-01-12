@@ -110,7 +110,7 @@ class TextClassificationDataset extends ObservationDataset {
         },
       ],
     });
-    return entity.find(this.name);
+    return entity.find(this.id);
   }
 
   async _deleteRule({ query }) {
