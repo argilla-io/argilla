@@ -32,7 +32,7 @@ class WeakLabels:
         dataset: Name of the dataset to which the rules will be applied.
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
             to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Remember that the return type ``None`` means
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
