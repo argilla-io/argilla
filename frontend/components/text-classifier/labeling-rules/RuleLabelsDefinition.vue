@@ -75,6 +75,7 @@
     </div>
     <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
     <re-button
+      v-else
       :disabled="!selectedLabelsVModel.length"
       class="feedback-interactions__button button-primary"
       @click="saveRule"
