@@ -236,6 +236,7 @@ class TextClassificationDataset extends ObservationDataset {
         rules,
       },
     });
+    
   }
 
   get isMultiLabel() {
@@ -283,7 +284,7 @@ class TextClassificationDataset extends ObservationDataset {
     return this.activeRuleMetrics === null ? undefined : this.activeRuleMetrics;
   }
 
-  async setCurrentLabelingRule({ query, label, description }) {
+  async setCurrentLabelingRule({ query, label }) {
     if (
       this.currentLabelingRule &&
       query === this.currentLabelingRule.query &&
@@ -302,7 +303,7 @@ class TextClassificationDataset extends ObservationDataset {
         activeRule: rule || {
           query,
           label,
-          description: description || query,
+          description: query,
         },
         activeRuleMetrics:
           ruleMetrics || (await this._fetchRuleMetrics({ query, label })),

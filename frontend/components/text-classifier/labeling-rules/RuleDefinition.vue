@@ -89,7 +89,7 @@ export default {
     },
   },
   methods: {
-    async updateCurrentRule({ query, label, description }) {
+    async updateCurrentRule({ query, label }) {
       if (!query) {
         return await this.dataset.clearCurrentLabelingRule();
       }
@@ -101,7 +101,6 @@ export default {
         await this.dataset.setCurrentLabelingRule({
           query,
           label,
-          description: description || query,
         });
       } else {
         await this.dataset.clearCurrentLabelingRule();
