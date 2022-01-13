@@ -113,6 +113,22 @@ class TextClassificationDataset extends ObservationDataset {
     return entity.find(this.id);
   }
 
+  async _getRule({ query }) {
+    const { response } = await TextClassificationDataset.api().get(
+      `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
+      {
+        // Ignore errors related to rule not found
+        validateStatus: function (status) {
+          return status === 404 || (status >= 200 && status < 300);
+        },
+      }
+    );
+    if (response.status === 404) {
+      return undefined;
+    }
+    return response.data;
+  }
+
   async _deleteRule({ query }) {
     const { response } = await TextClassificationDataset.api().delete(
       `/datasets/${this.task}/${this.name}/labeling/rules/${query}`
@@ -317,7 +333,8 @@ class TextClassificationDataset extends ObservationDataset {
       ...this.perRuleQueryMetrics,
       [activeRule.query]: this.activeRuleMetrics,
     };
-    rules.push(activeRule);
+    let rule = await this._getRule({query: activeRule.query});
+    rules.push(rule);
 
     const overalMetrics = await this._fetchOveralMetrics(
       Object.values(perRuleQueryMetrics)
