@@ -16,7 +16,6 @@
  */
 
 import { ObservationDataset } from "@/models/Dataset";
-import { TextClassificationDataset } from "@/models/TextClassification";
 
 const getters = {};
 
