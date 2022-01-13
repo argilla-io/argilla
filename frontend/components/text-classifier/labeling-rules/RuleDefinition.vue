@@ -49,6 +49,9 @@ export default {
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
+    if (!this.currentRule) {
+      await this.dataset.setCurrentLabelingRule({query: this.query, label: undefined});
+    }
   },
   watch: {
     async query(newValue) {
