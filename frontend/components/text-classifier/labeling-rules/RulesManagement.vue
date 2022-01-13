@@ -44,7 +44,7 @@
           :actions="actions"
           :query-search="querySearch"
           :global-actions="false"
-          search-on="name"
+          search-on="query"
           :no-data-info="noDataInfo"
           :empty-search-info="emptySearchInfo"
           :visible-modal-id="visibleModalId"
