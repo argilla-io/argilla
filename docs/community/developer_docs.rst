@@ -41,6 +41,14 @@ You can install them by simply running:
 
     pre-commit install
 
+Install the `commit-msg` hook if you want to check your commit messages in your
+contributions:
+
+.. code-block:: bash
+
+    pre-commit install --hook-type commit-msg
+
+
 The last step is to build the static UI files in case you want to work on the UI:
 
 .. code-block:: bash
