@@ -147,7 +147,7 @@ class TextClassificationDataset extends ObservationDataset {
             { correct, incorrect, precision }
           ) => {
             return {
-              precisionAverage: precisionAverage + precision,
+              precisionAverage: precisionAverage + (precision || 0),
               totalCorrects: totalCorrects + correct,
               totalIncorrects: totalIncorrects + incorrect,
             };
