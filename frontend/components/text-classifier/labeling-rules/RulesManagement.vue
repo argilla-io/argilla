@@ -236,7 +236,6 @@ export default {
     async updateSummary() {
       this.isLoading = true;
       try {
-        await this.dataset.refreshRules();
         await this.dataset.refreshRulesMetrics();
       } finally {
         this.isLoading = false;
