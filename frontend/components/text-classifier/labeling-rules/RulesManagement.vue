@@ -192,7 +192,9 @@ export default {
         ),
         correct: metrics.correct,
         incorrect: metrics.incorrect,
-        precision: !isNaN(metrics.precision) ? this.$options.filters.percent(metrics.precision) : "-",
+        precision: !isNaN(metrics.precision)
+          ? this.$options.filters.percent(metrics.precision)
+          : "-",
       };
     },
 

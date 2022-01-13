@@ -150,8 +150,8 @@ export default {
             tooltip:
               "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
             value: isNaN(this.metricsTotal.totalCorrects)
-              ? "-/-" :
-              `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
+              ? "-/-"
+              : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
             refresh: this.refresh,
           },
           rule: {

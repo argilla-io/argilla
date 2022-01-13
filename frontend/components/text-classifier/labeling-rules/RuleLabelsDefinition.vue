@@ -122,7 +122,7 @@ export default {
       // TODO: We can improve this
       if (
         this.currentRule &&
-        this.selectedLabelsVModel.length && 
+        this.selectedLabelsVModel.length &&
         this.dataset.findRuleByQuery(
           this.currentRule.query,
           this.currentRule.label
@@ -178,7 +178,9 @@ export default {
   },
   mounted() {
     if (this.currentRule) {
-      this.selectedLabelsVModel = this.currentRule ? [this.currentRule.label] : [];
+      this.selectedLabelsVModel = this.currentRule
+        ? [this.currentRule.label]
+        : [];
     }
   },
   methods: {

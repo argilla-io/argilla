@@ -236,7 +236,6 @@ class TextClassificationDataset extends ObservationDataset {
         rules,
       },
     });
-    
   }
 
   get isMultiLabel() {
