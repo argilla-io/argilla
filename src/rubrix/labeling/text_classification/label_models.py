@@ -296,7 +296,7 @@ class Snorkel(LabelModel):
                 as is the case when all of the labeling functions abstained.
 
         Returns:
-            The scores/metrics as a dictionary.
+            The scores/metrics as a dictionary. NOTE: metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
@@ -322,10 +322,6 @@ class Snorkel(LabelModel):
 
         # metrics are only calculated for non-abstained data points
         idx = predictions != -1
-        if not idx.all():
-            _LOGGER.warning(
-                "Metrics are only calculated over non-abstained predictions!"
-            )
 
         annotations = self._weak_labels.annotation()[idx]
         if self._need_remap:
@@ -589,7 +585,7 @@ class FlyingSquid(LabelModel):
             verbose: If True, print out messages of the progress to stderr.
 
         Returns:
-            The scores/metrics as a dictionary.
+            The scores/metrics as a dictionary. NOTE: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             NotFittedError: If the label model was still not fitted.
@@ -621,9 +617,6 @@ class FlyingSquid(LabelModel):
             accuracy = (predictions == annotations).sum() / len(predictions)
         # resolve ties
         elif tie_break_policy is TieBreakPolicy.ABSTAIN:
-            _LOGGER.warning(
-                "Metrics are only calculated over non-abstained predictions!"
-            )
             accuracy = (predictions[~is_tie] == annotations[~is_tie]).sum() / (
                 ~is_tie
             ).sum()
