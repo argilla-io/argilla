@@ -98,7 +98,6 @@ export default {
   },
   data: () => {
     return {
-      saved: false,
       searchText: "",
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
       selectedLabelsVModel: [],
@@ -123,6 +122,7 @@ export default {
       // TODO: We can improve this
       if (
         this.currentRule &&
+        this.selectedLabelsVModel.length && 
         this.dataset.findRuleByQuery(
           this.currentRule.query,
           this.currentRule.label
@@ -177,14 +177,8 @@ export default {
     },
   },
   mounted() {
-    this.setDescription();
-    this.selectedLabelsVModel = this.currentRule
-      ? [this.currentRule.label]
-      : [];
-  },
-  mounted() {
     if (this.currentRule) {
-      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
+      this.selectedLabelsVModel = this.currentRule ? [this.currentRule.label] : [];
     }
   },
   methods: {
@@ -192,7 +186,6 @@ export default {
       changeViewMode: "entities/datasets/changeViewMode",
     }),
     saveRule() {
-      this.saved = true;
       this.collapseLabels();
       this.$emit("save-rule", {
         query: this.currentRule.query,
