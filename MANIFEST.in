@@ -1,0 +1,3 @@
+prune docs/tutorials
+prune docs/_static/tutorials
+prune docs/_static/reference
