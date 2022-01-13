@@ -125,7 +125,7 @@ export default {
         this.selectedLabelsVModel.length &&
         this.dataset.findRuleByQuery(
           this.currentRule.query,
-          this.currentRule.label
+          this.selectedLabel
         )
       ) {
         return "This query with this label are already saved as rule";
@@ -175,13 +175,11 @@ export default {
         label: newValue,
       });
     },
-  },
-  mounted() {
-    if (this.currentRule) {
+    currentRule(newValue) {
       this.selectedLabelsVModel = this.currentRule
         ? [this.currentRule.label]
         : [];
-    }
+    },
   },
   methods: {
     ...mapActions({
@@ -191,7 +189,7 @@ export default {
       this.collapseLabels();
       this.$emit("save-rule", {
         query: this.currentRule.query,
-        label: this.currentRule.label,
+        label: this.selectedLabel,
       });
     },
     expandLabels() {

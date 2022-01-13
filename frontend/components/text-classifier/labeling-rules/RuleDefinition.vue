@@ -49,8 +49,11 @@ export default {
     if (!this.hasMetrics) {
       await this.dataset.refreshRulesMetrics();
     }
-    if (!this.currentRule) {
-      await this.dataset.setCurrentLabelingRule({query: this.query, label: undefined});
+    if (!this.currentRule && this.query) {
+      const rule = this.dataset.findRuleByQuery(this.query, undefined);
+      if (rule) {
+        await this.dataset.setCurrentLabelingRule(rule);
+      }
     }
   },
   watch: {
@@ -89,8 +92,7 @@ export default {
       if (!query) {
         return await this.dataset.clearCurrentLabelingRule();
       }
-
-      const rule = this.dataset.findRuleByQuery(query, label);
+      const rule = this.dataset.findRuleByQuery(query, undefined);
       if (rule) {
         await this.dataset.setCurrentLabelingRule(rule);
       } else if (label) {
