@@ -58,7 +58,6 @@ export default {
   data: () => {
     return {
       metricsByRules: {},
-      refresh: 0,
     };
   },
   computed: {
@@ -136,7 +135,6 @@ export default {
             description: "Avg:",
             tooltip: "Average percentage of correct labels given by the rules",
             value: this.formatNumber(this.metricsTotal.precisionAverage),
-            refresh: this.refresh,
           },
           rule: {
             value: this.formatNumber(this.ruleMetrics.precision),
@@ -152,7 +150,6 @@ export default {
             value: isNaN(this.metricsTotal.totalCorrects)
               ? "-/-"
               : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
-            refresh: this.refresh,
           },
           rule: {
             value:
