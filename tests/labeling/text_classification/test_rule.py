@@ -21,10 +21,7 @@ from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.labeling.text_classification import (
-    Rule,
-    load_rules,
-)
+from rubrix.labeling.text_classification import Rule, load_rules
 from rubrix.labeling.text_classification.rule import RuleNotAppliedError
 from tests.server.test_helpers import client, mocking_client
 
@@ -125,6 +122,25 @@ def test_load_rules(monkeypatch, log_dataset):
     assert len(rules) == 1
     assert rules[0].query == "a query"
     assert rules[0].label == "LALA"
+
+
+def test_copy_dataset_with_rules(monkeypatch, log_dataset):
+    import rubrix as rb
+
+    mocking_client(monkeypatch, client)
+
+    client.post(
+        f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
+        json={"query": "a query", "label": "LALA"},
+    )
+
+    copied_dataset = f"{log_dataset}_copy"
+    rb.delete(copied_dataset)
+    rb.copy(log_dataset, name_of_copy=copied_dataset)
+
+    assert [{"q": r.query, "l": r.label} for r in load_rules(copied_dataset)] == [
+        {"q": r.query, "l": r.label} for r in load_rules(log_dataset)
+    ]
 
 
 @pytest.mark.parametrize(
