@@ -4,7 +4,6 @@
     <div v-else-if="!$fetchState.error">
       <rules-metrics
         title="Overall Metrics"
-        :rules="rules"
         :dataset="dataset"
         metrics-type="overall"
       >

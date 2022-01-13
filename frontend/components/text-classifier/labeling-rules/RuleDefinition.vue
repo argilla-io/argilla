@@ -15,8 +15,6 @@
         <rules-metrics
           title="Rule Metrics"
           metrics-type="all"
-          :key="refresh"
-          :rules="rules"
           :dataset="dataset"
         >
           <template #button-bottom>
@@ -43,11 +41,6 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
-  },
-  data: () => {
-    return {
-      refresh: 0,
-    };
   },
   async fetch() {
     if (this.rules === undefined) {
