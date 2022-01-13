@@ -166,7 +166,7 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async _persistRule({ query, label, description }) {
-    const response = await TextClassificationDataset.api().post(
+    const { response } = await TextClassificationDataset.api().post(
       `/datasets/${this.task}/${this.name}/labeling/rules`,
       { query, label, description },
       {
@@ -176,8 +176,7 @@ class TextClassificationDataset extends ObservationDataset {
         },
       }
     );
-
-    if (response.status == 409) {
+    if (response.status === 409) {
       await TextClassificationDataset.api().patch(
         `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
         { label, description }
