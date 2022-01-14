@@ -140,8 +140,8 @@ export default {
     };
   },
   async fetch() {
-    if (this.dataset.perRuleQueryMetrics === null) {
-      this.dataset.refreshRulesMetrics();
+    if (!this.rules) {
+      await this.dataset.refreshRules();
     }
   },
   computed: {
@@ -149,7 +149,7 @@ export default {
       return this.dataset.labelingRules;
     },
     perRuleMetrics() {
-      return this.dataset.perRuleQueryMetrics || {};
+      return this.dataset.labelingRulesMetrics;
     },
     isVisible() {
       return this.dataset.viewSettings.visibleRulesList;
