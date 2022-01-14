@@ -30,6 +30,7 @@ from rubrix.labeling.text_classification.weak_labels import (
     MissingLabelError,
     MultiLabelError,
     NoRecordsFoundError,
+    NoRulesFoundError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -406,3 +407,17 @@ def test_change_mapping(monkeypatch, rules):
     weak_labels.change_mapping(old_mapping)
 
     assert (weak_labels.matrix() == old_wlm).all()
+
+
+def test_dataset_type_error():
+    with pytest.raises(TypeError, match="must be a string, but you provided"):
+        WeakLabels([1, 2, 3])
+
+
+def test_norulesfounderror(monkeypatch):
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules", lambda x: []
+    )
+
+    with pytest.raises(NoRulesFoundError, match="No rules were found"):
+        WeakLabels("mock")

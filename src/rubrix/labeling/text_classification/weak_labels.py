@@ -83,7 +83,7 @@ class WeakLabels:
     ):
         if not isinstance(dataset, str):
             raise TypeError(
-                f"The name of the dataset has to be a string, but you provided: {dataset}"
+                f"The name of the dataset must be a string, but you provided: {dataset}"
             )
         self._dataset = dataset
 
