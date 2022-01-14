@@ -43,7 +43,7 @@ export default {
     },
   },
   async fetch() {
-    if (this.rules === undefined) {
+    if (!this.rules) {
       await this.dataset.refreshRules();
     }
     if (!this.hasMetrics) {
