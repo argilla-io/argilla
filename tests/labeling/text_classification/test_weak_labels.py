@@ -106,7 +106,7 @@ def test_multi_label_error(monkeypatch):
     )
 
     with pytest.raises(MultiLabelError):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
 
 
 def test_no_records_found_error(monkeypatch):
@@ -120,21 +120,21 @@ def test_no_records_found_error(monkeypatch):
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock'."
     ):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock'.",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock")
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock' with ids \[-1\]."
     ):
-        WeakLabels(rules=[], dataset="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
 
 @pytest.mark.parametrize(
