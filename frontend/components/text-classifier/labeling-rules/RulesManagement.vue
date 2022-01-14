@@ -155,17 +155,21 @@ export default {
       return this.dataset.viewSettings.visibleRulesList;
     },
     formattedRules() {
-      return this.rules.map((r) => {
-        return {
-          id: r.query,
-          name: r.description,
-          query: r.query,
-          kind: "select",
-          label: r.label,
-          ...this.metricsForRule(r),
-          created_at: r.created_at,
-        };
-      });
+      if (this.rules) {
+        return this.rules.map((r) => {
+          return {
+            id: r.query,
+            name: r.description,
+            query: r.query,
+            kind: "select",
+            label: r.label,
+            ...this.metricsForRule(r),
+            created_at: r.created_at,
+          };
+        });
+      } else {
+        return []
+      }
     },
     getDeleteModalText() {
       return {
