@@ -102,7 +102,7 @@ export default {
             )} <span class="records-number">(${this.$options.filters.formatNumber(
               Math.round(
                 this.metricsTotal.coverage * this.dataset.globalResults.total
-              )
+              ) || 0
             )} records)</span>`,
           },
           rule: {
@@ -121,7 +121,7 @@ export default {
               Math.round(
                 this.metricsTotal.coverage_annotated *
                   this.dataset.globalResults.total
-              )
+              ) || 0
             )} records)</span>`,
           },
           rule: {
