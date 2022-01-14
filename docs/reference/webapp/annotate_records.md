@@ -1,6 +1,6 @@
 # Annotate records
 
-![Rubrix Token Classification (NER) Annotation mode](../../_static/reference/webapp/annotation_ner.png)
+![Annotate mode for the Token Classification task](../../_static/reference/webapp/annotation_ner.png)
 
 The Rubrix web app has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
 Rubrix's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
@@ -21,9 +21,46 @@ You can find more information about how to use the search bar and the filters in
 Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 ```
 
-## How to annotate
+## Annotate
 
-The **Annotation mode** enables users to add and modify annotations.
+To annotate the records, the Rubrix web app provides a simple and intuitive interface that tries to follow the same interaction pattern as in the [Explore mode](explore_records.md).
+As the _Explore mode_, the record cards in the _Annotate mode_ are also customized depending on the [task](../../guides/task_examples.ipynb) of the dataset.
+
+### Text Classification
+
+_TODO: Screenshot of a multi label card with the Validated tag in the upper right_
+
+When switching in the _Annotate mode_ for a text classification dataset, the labels in the record cards become clickable and you can annotate the records by simply clicking on them.
+You can also validate the predictions shown in a slightly darker tone by pressing the _Validate_ button:
+
+- for a **single label** classification task, this will be the prediction with the highest percentage
+- for a **multi label** classification task, this will be the predictions with a percentage above 50%
+
+Once a record is annotated, it will be marked as _Validated_ in the upper right corner of the record card.
+
+### Token Classification
+
+_TODO: Screenshot_
+
+For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
+Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#rubrix.client.models.TokenClassificationRecord).
+You can also remove annotations by hovering over the highlights and pressing the _X_ button.
+
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
+You can also validate the predictions (or the absent of them) by pressing the _Validate_ button.
+Once the record is saved or validated, its status will change to _Validated_.
+
+### Text2Text
+
+## Bulk annotate
+
+## Create labels
+
+## Progress metric
+
+## Old
+
+The **Annotate mode** enables users to add and modify annotations.
 This mode follows the same interaction patterns as in the [**Explore mode**](explore_records.md).
 
 When choosing this mode, the display of the selected dataset is slightly different. The **"Bulk Annotation"** bar appears (see below), and records appear editable.
@@ -46,6 +83,8 @@ With this feature, from 5 to 20 records can be validated or discarded at the sam
 After choosing the records to be annotated, a label must be selected on the **Annotate as** dropdown. After that, these records must be validated or discarded.
 
 It is also posible to create new labels by clicking on **Create new label**.
+
+## Create labels
 
 ## Sidebar and metrics
 
