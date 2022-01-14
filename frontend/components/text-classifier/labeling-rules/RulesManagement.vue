@@ -168,7 +168,7 @@ export default {
           };
         });
       } else {
-        return []
+        return [];
       }
     },
     getDeleteModalText() {

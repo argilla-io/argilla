@@ -86,7 +86,7 @@ export default {
           document.body.classList.remove("--fixed");
         }
       }
-    }
+    },
   },
   beforeDestroy() {
     if (this.preventBodyScroll) {

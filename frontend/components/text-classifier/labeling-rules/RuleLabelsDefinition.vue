@@ -123,10 +123,7 @@ export default {
       if (
         this.currentRule &&
         this.selectedLabelsVModel.length &&
-        this.dataset.findRuleByQuery(
-          this.currentRule.query,
-          this.selectedLabel
-        )
+        this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)
       ) {
         return "This query with this label are already saved as rule";
       }
