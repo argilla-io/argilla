@@ -97,9 +97,8 @@ class Snorkel(LabelModel):
             Passed on to the `torch.Tensor.to()` calls.
 
     Examples:
-        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
-        >>> rule = Rule(query="good OR best", label="Positive")
-        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> from rubrix.labeling.text_classification import WeakLabels
+        >>> weak_labels = WeakLabels(dataset="my_dataset")
         >>> label_model = Snorkel(weak_labels)
         >>> label_model.fit()
         >>> records = label_model.predict()
@@ -344,9 +343,8 @@ class FlyingSquid(LabelModel):
             `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`_.
 
     Examples:
-        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
-        >>> rule = Rule(query="good OR best", label="Positive")
-        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> from rubrix.labeling.text_classification import WeakLabels
+        >>> weak_labels = WeakLabels(dataset="my_dataset")
         >>> label_model = FlyingSquid(weak_labels)
         >>> label_model.fit()
         >>> records = label_model.predict()
