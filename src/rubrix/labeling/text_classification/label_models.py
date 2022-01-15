@@ -15,7 +15,7 @@
 import hashlib
 import logging
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -86,6 +86,77 @@ class LabelModel:
         """
         raise NotImplementedError
 
+    def _compute_metrics(
+        self,
+        annotation: np.ndarray,
+        prediction: np.ndarray,
+        int2int: Optional[Dict[int, int]],
+    ) -> Dict[str, float]:
+        """Helper method to compute the metrics.
+
+        Args:
+            annotation: Array containing the annotations.
+            prediction: Array containing te predictions.
+            int2int: Optional int2int mapping, in case the label model requires its own mapping.
+
+        Returns:
+            A dictionary containing the metrics
+        """
+        # sklearn is a dependency of snorkel, so it should be installed
+        from sklearn.metrics import precision_recall_fscore_support
+
+        # accuracy
+        metrics = {"accuracy": (prediction == annotation).sum() / len(prediction)}
+
+        # precision, recall, f1, support micro average
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation,
+            y_pred=prediction,
+            average="micro",
+        )
+        metrics.update(
+            {
+                "precision_micro": precision,
+                "recall_micro": recall,
+                "f1_micro": f1,
+                "support_micro": support,
+            }
+        )
+
+        # precision, recall, f1, support macro average
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation,
+            y_pred=prediction,
+            average="macro",
+        )
+        metrics.update(
+            {
+                "precision_macro": precision,
+                "recall_macro": recall,
+                "f1_macro": f1,
+                "support_macro": support,
+            }
+        )
+
+        # precision, recall, f1, support per label
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation, y_pred=prediction
+        )
+        for i, per_label in enumerate(zip(precision, recall, f1, support)):
+            label = self._weak_labels.int2label[
+                int2int[i] if int2int is not None else i
+            ]
+            metrics.update(
+                {
+                    f"precision_{label}": per_label[0],
+                    f"recall_{label}": per_label[1],
+                    f"f1_{label}": per_label[2],
+                    f"support_{label}": per_label[3],
+                }
+            )
+
+        return metrics
+
 
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`_.
@@ -130,18 +201,18 @@ class Snorkel(LabelModel):
                 label for label in self._weak_labels.label2int if label is not None
             ]
 
-            self._weaklabels2snorkel = {
+            self._weaklabelsInt2snorkelInt = {
                 self._weak_labels.label2int[label]: i
                 for i, label in enumerate(labels, -1)
             }
         else:
             self._need_remap = False
-            self._weaklabels2snorkel = {
+            self._weaklabelsInt2snorkelInt = {
                 i: i for i in range(-1, len(self._weak_labels.label2int) - 1)
             }
 
-        self._snorkel2weaklabels = {
-            val: key for key, val in self._weaklabels2snorkel.items()
+        self._snorkelInt2weaklabelsInt = {
+            val: key for key, val in self._weaklabelsInt2snorkelInt.items()
         }
 
         # instantiate Snorkel's label model
@@ -190,12 +261,12 @@ class Snorkel(LabelModel):
         label_masks = {}
 
         # compute masks
-        for idx in self._weaklabels2snorkel:
+        for idx in self._weaklabelsInt2snorkelInt:
             label_masks[idx] = matrix_or_array == idx
 
         # swap integers
-        for idx in self._weaklabels2snorkel:
-            matrix_or_array[label_masks[idx]] = self._weaklabels2snorkel[idx]
+        for idx in self._weaklabelsInt2snorkelInt:
+            matrix_or_array[label_masks[idx]] = self._weaklabelsInt2snorkelInt[idx]
 
         return matrix_or_array
 
@@ -268,7 +339,7 @@ class Snorkel(LabelModel):
                 pred_for_rec = [
                     (
                         self._weak_labels.int2label[
-                            self._snorkel2weaklabels[snorkel_idx]
+                            self._snorkelInt2weaklabelsInt[snorkel_idx]
                         ],
                         prob[snorkel_idx],
                     )
@@ -322,14 +393,15 @@ class Snorkel(LabelModel):
         # metrics are only calculated for non-abstained data points
         idx = predictions != -1
 
-        annotations = self._weak_labels.annotation()[idx]
+        annotation = self._weak_labels.annotation()[idx]
         if self._need_remap:
-            annotations = self._copy_and_remap(annotations)
+            annotation = self._copy_and_remap(annotation)
 
-        # accuracy
-        metrics = {
-            "accuracy": (predictions[idx] == annotations).sum() / len(predictions[idx])
-        }
+        metrics = self._compute_metrics(
+            annotation=annotation,
+            prediction=predictions[idx],
+            int2int=self._snorkelInt2weaklabelsInt,
+        )
 
         return metrics
 
