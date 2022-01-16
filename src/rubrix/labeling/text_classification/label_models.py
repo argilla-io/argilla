@@ -94,6 +94,13 @@ class LabelModel:
     ) -> Dict[str, float]:
         """Helper method to compute the metrics.
 
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
+
         Args:
             annotation: Array containing the annotations.
             prediction: Array containing te predictions.
@@ -118,9 +125,9 @@ class LabelModel:
         )
         metrics.update(
             {
-                "precision_micro": precision,
-                "recall_micro": recall,
-                "f1_micro": f1,
+                "micro_precision": precision,
+                "micro_recall": recall,
+                "micro_f1": f1,
             }
         )
 
@@ -132,9 +139,9 @@ class LabelModel:
         )
         metrics.update(
             {
-                "precision_macro": precision,
-                "recall_macro": recall,
-                "f1_macro": f1,
+                "macro_precision": precision,
+                "macro_recall": recall,
+                "macro_f1": f1,
             }
         )
 
@@ -160,7 +167,7 @@ class LabelModel:
 
 
 class Snorkel(LabelModel):
-    """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`_.
+    """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
@@ -229,7 +236,7 @@ class Snorkel(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
-                `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`_.
+                `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
         """
         if "L_train" in kwargs:
@@ -354,7 +361,16 @@ class Snorkel(LabelModel):
     def score(
         self, tie_break_policy: Union[TieBreakPolicy, str] = "abstain"
     ) -> Dict[str, float]:
-        """Returns some scores of the label model with respect to the annotated records.
+        """Returns some scores/metrics of the label model with respect to the annotated records.
+
+        The metrics are:
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
             tie_break_policy: Policy to break ties. You can choose among three policies:
@@ -408,12 +424,12 @@ class Snorkel(LabelModel):
 
 
 class FlyingSquid(LabelModel):
-    """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`_.
+    """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
         **kwargs: Passed on to the init of the FlyingSquid's
-            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`_.
+            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`__.
 
     Examples:
         >>> from rubrix.labeling.text_classification import WeakLabels
@@ -461,7 +477,7 @@ class FlyingSquid(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Passed on to the FlyingSquid's
-                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`_
+                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
         """
         wl_matrix = self._weak_labels.matrix(
@@ -643,7 +659,16 @@ class FlyingSquid(LabelModel):
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
     ) -> Dict[str, float]:
-        """Returns some scores of the label model with respect to the annotated records.
+        """Returns some scores/metrics of the label model with respect to the annotated records.
+
+        The metrics are:
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
             tie_break_policy: Policy to break ties. You can choose among two policies:
