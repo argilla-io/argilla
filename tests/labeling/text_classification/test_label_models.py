@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -96,6 +97,40 @@ class TestLabelModel:
         with pytest.raises(NotImplementedError):
             label_model.predict()
 
+    @pytest.mark.parametrize("int2int", [None, {2: 0, 3: 1}])
+    def test_compute_metrics(self, int2int):
+        weak_labels = SimpleNamespace()
+        weak_labels.int2label = {0: "pos", 1: "neg"}
+
+        lm = LabelModel(weak_labels=weak_labels)
+        metrics = lm._compute_metrics(
+            annotation=np.array([0, 0, 1, 1, 1])
+            if int2int is None
+            else np.array([2, 2, 3, 3, 3]),
+            prediction=np.array([0, 1, 0, 1, 0])
+            if int2int is None
+            else np.array([2, 3, 2, 3, 2]),
+            int2int=int2int,
+        )
+
+        assert metrics == {
+            "accuracy": 0.4,
+            "precision_micro": 0.4,
+            "recall_micro": 0.4,
+            "f1_micro": pytest.approx(0.4),
+            "precision_macro": pytest.approx(5 / 6 / 2.0),
+            "recall_macro": pytest.approx(5 / 6 / 2.0),
+            "f1_macro": 0.4,
+            "precision_pos": 1 / 3.0,
+            "recall_pos": 0.5,
+            "f1_pos": 0.4,
+            "support_pos": 2,
+            "precision_neg": 0.5,
+            "recall_neg": 1 / 3.0,
+            "f1_neg": 0.4,
+            "support_neg": 3,
+        }
+
 
 class TestSnorkel:
     def test_not_installed(self, monkeypatch):
@@ -129,8 +164,10 @@ class TestSnorkel:
         weak_labels.change_mapping(wrong_mapping)
         label_model = Snorkel(weak_labels)
 
-        assert label_model._weaklabels2snorkel == expected
-        assert label_model._snorkel2weaklabels == {k: v for v, k in expected.items()}
+        assert label_model._weaklabelsInt2snorkelInt == expected
+        assert label_model._snorkelInt2weaklabelsInt == {
+            k: v for v, k in expected.items()
+        }
 
     @pytest.mark.parametrize(
         "include_annotated_records",
@@ -254,9 +291,9 @@ class TestSnorkel:
         )
 
         label_model = Snorkel(weak_labels)
-        assert label_model.score(tie_break_policy=policy)["accuracy"] == pytest.approx(
-            expected
-        )
+        metrics = label_model.score(tie_break_policy=policy)
+
+        assert metrics["accuracy"] == pytest.approx(expected)
 
     def test_score_without_annotations(self, weak_labels):
         weak_labels._annotation_array = np.array([], dtype=np.short)
