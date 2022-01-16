@@ -6,6 +6,7 @@
         <rule-labels-definition
           v-else
           :dataset="dataset"
+          :isSaved="saved"
           @save-rule="saveRule"
           @update-rule="updateCurrentRule"
         >
@@ -41,6 +42,11 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
+  },
+  data: () => {
+    return {
+      saved: undefined
+    };
   },
   async fetch() {
     if (!this.rules) {
@@ -103,12 +109,14 @@ export default {
       } else {
         await this.dataset.clearCurrentLabelingRule();
       }
+      this.saved = false;
     },
     async showRulesList() {
       await this.dataset.viewSettings.enableRulesSummary();
     },
     async saveRule(rule) {
       await this.dataset.storeLabelingRule(rule);
+      this.saved = true;
     },
   },
 };

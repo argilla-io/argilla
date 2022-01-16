@@ -95,6 +95,10 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
+    isSaved: {
+      type: Boolean,
+      default: false
+    }
   },
   data: () => {
     return {
@@ -120,6 +124,9 @@ export default {
 
     ruleInfo() {
       // TODO: We can improve this
+      if (this.isSaved) {
+        return "The rule was saved";
+      }
       if (
         this.currentRule &&
         this.selectedLabelsVModel.length &&
