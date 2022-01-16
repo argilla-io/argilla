@@ -90,7 +90,7 @@ class LabelModel:
         self,
         annotation: np.ndarray,
         prediction: np.ndarray,
-        int2int: Optional[Dict[int, int]],
+        int2int: Optional[Dict[int, int]] = None,
     ) -> Dict[str, float]:
         """Helper method to compute the metrics.
 
@@ -104,6 +104,8 @@ class LabelModel:
         """
         # sklearn is a dependency of snorkel, so it should be installed
         from sklearn.metrics import precision_recall_fscore_support
+
+        int2int = int2int or {i: i for i in self._weak_labels.int2label.keys()}
 
         # accuracy
         metrics = {"accuracy": (prediction == annotation).sum() / len(prediction)}
@@ -119,7 +121,6 @@ class LabelModel:
                 "precision_micro": precision,
                 "recall_micro": recall,
                 "f1_micro": f1,
-                "support_micro": support,
             }
         )
 
@@ -134,7 +135,6 @@ class LabelModel:
                 "precision_macro": precision,
                 "recall_macro": recall,
                 "f1_macro": f1,
-                "support_macro": support,
             }
         )
 
@@ -142,10 +142,11 @@ class LabelModel:
         precision, recall, f1, support = precision_recall_fscore_support(
             y_true=annotation, y_pred=prediction
         )
+        metricIdx2labelIdx = {
+            i: label_idx for i, label_idx in enumerate(sorted(int2int.keys()))
+        }
         for i, per_label in enumerate(zip(precision, recall, f1, support)):
-            label = self._weak_labels.int2label[
-                int2int[i] if int2int is not None else i
-            ]
+            label = self._weak_labels.int2label[int2int[metricIdx2labelIdx[i]]]
             metrics.update(
                 {
                     f"precision_{label}": per_label[0],
@@ -673,9 +674,9 @@ class FlyingSquid(LabelModel):
         )
         is_tie = is_max.sum(axis=1) > 1
 
-        predictions = np.argmax(is_max, axis=1)
+        prediction = np.argmax(is_max, axis=1)
         # we need to transform the indexes!
-        annotations = np.array(
+        annotation = np.array(
             [
                 self._labels.index(self._weak_labels.int2label[i])
                 for i in self._weak_labels.annotation()
@@ -684,26 +685,31 @@ class FlyingSquid(LabelModel):
         )
 
         if not is_tie.any():
-            accuracy = (predictions == annotations).sum() / len(predictions)
+            pass
         # resolve ties
         elif tie_break_policy is TieBreakPolicy.ABSTAIN:
-            accuracy = (predictions[~is_tie] == annotations[~is_tie]).sum() / (
-                ~is_tie
-            ).sum()
+            prediction, annotation = prediction[~is_tie], annotation[~is_tie]
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                predictions[i] = equal_prob_idx[random_idx]
-            accuracy = (predictions == annotations).sum() / len(predictions)
+                prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        return {"accuracy": accuracy}
+        fsInt2wlInt = {
+            i: self._weak_labels.label2int[label]
+            for i, label in enumerate(self._labels)
+        }
+        metrics = self._compute_metrics(
+            prediction=prediction, annotation=annotation, int2int=fsInt2wlInt
+        )
+
+        return metrics
 
 
 class LabelModelError(Exception):
