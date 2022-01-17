@@ -21,15 +21,16 @@ from tqdm.auto import tqdm
 
 from rubrix import load
 from rubrix.client.models import TextClassificationRecord
-from rubrix.labeling.text_classification.rule import Rule
+from rubrix.labeling.text_classification.rule import Rule, load_rules
 
 
 class WeakLabels:
     """Computes the weak labels of a dataset by applying a given list of rules.
 
     Args:
-        rules: A list of rules (labeling functions). They must return a string, or ``None`` in case of abstention.
         dataset: Name of the dataset to which the rules will be applied.
+        rules: A list of rules (labeling functions). They must return a string, or ``None`` in case of abstention.
+            If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
             `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
@@ -38,6 +39,7 @@ class WeakLabels:
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
 
     Raises:
+        NoRulesFoundError: When you do not provide rules, and the dataset has no rules either.
         DuplicatedRuleNameError: When you provided multiple rules with the same name.
         NoRecordsFoundError: When the filtered dataset is empty.
         MultiLabelError: When trying to get weak labels for a multi-label text classification task.
@@ -45,7 +47,13 @@ class WeakLabels:
             weak label or annotation label is not present in its keys.
 
     Examples:
-        Get the weak label matrix and a summary of the applied rules:
+        Get the weak label matrix from a dataset with rules:
+
+        >>> weak_labels = WeakLabels(dataset="my_dataset")
+        >>> weak_labels.matrix()
+        >>> weak_labels.summary()
+
+        Get the weak label matrix from rules defined in Python:
 
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
         ...     return "Positive" if "awesome" in record.inputs["text"] else None
@@ -54,24 +62,37 @@ class WeakLabels:
         >>> weak_labels.matrix()
         >>> weak_labels.summary()
 
-        Use snorkel's LabelModel:
+        Use the WeakLabels object with snorkel's LabelModel:
 
         >>> from snorkel.labeling.model import LabelModel
         >>> label_model = LabelModel()
         >>> label_model.fit(L_train=weak_labels.matrix(has_annotation=False))
         >>> label_model.score(L=weak_labels.matrix(has_annotation=True), Y=weak_labels.annotation())
         >>> label_model.predict(L=weak_labels.matrix(has_annotation=False))
+
+        For a builtin integration with Snorkel, see `rubrix.labeling.text_classification.Snorkel`.
     """
 
     def __init__(
         self,
-        rules: List[Callable],
         dataset: str,
+        rules: Optional[List[Callable]] = None,
         ids: Optional[List[Union[int, str]]] = None,
         query: Optional[str] = None,
         label2int: Optional[Dict[Optional[str], int]] = None,
     ):
-        self._rules = rules
+        if not isinstance(dataset, str):
+            raise TypeError(
+                f"The name of the dataset must be a string, but you provided: {dataset}"
+            )
+        self._dataset = dataset
+
+        self._rules = rules or load_rules(dataset)
+        if self._rules == []:
+            raise NoRulesFoundError(
+                f"No rules were found in the given dataset '{dataset}'"
+            )
+
         self._rules_index2name = {
             # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
             index: (
@@ -96,8 +117,6 @@ class WeakLabels:
         self._rules_name2index = {
             val: key for key, val in self._rules_index2name.items()
         }
-
-        self._dataset = dataset
 
         # load records and check compatibility
         self._records: List[TextClassificationRecord] = load(
@@ -496,6 +515,10 @@ class WeakLabels:
 
 
 class WeakLabelsError(Exception):
+    pass
+
+
+class NoRulesFoundError(WeakLabelsError):
     pass
 
 
