@@ -15,7 +15,7 @@
 import hashlib
 import logging
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -86,9 +86,88 @@ class LabelModel:
         """
         raise NotImplementedError
 
+    def _compute_metrics(
+        self,
+        annotation: np.ndarray,
+        prediction: np.ndarray,
+        int2int: Optional[Dict[int, int]] = None,
+    ) -> Dict[str, float]:
+        """Helper method to compute the metrics.
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
+
+        Args:
+            annotation: Array containing the annotations.
+            prediction: Array containing te predictions.
+            int2int: Optional int2int mapping, in case the label model requires its own mapping.
+
+        Returns:
+            A dictionary containing the metrics
+        """
+        # sklearn is a dependency of snorkel, so it should be installed
+        from sklearn.metrics import precision_recall_fscore_support
+
+        int2int = int2int or {i: i for i in self._weak_labels.int2label.keys()}
+
+        # accuracy
+        metrics = {"accuracy": (prediction == annotation).sum() / len(prediction)}
+
+        # precision, recall, f1, support micro average
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation,
+            y_pred=prediction,
+            average="micro",
+        )
+        metrics.update(
+            {
+                "micro_precision": precision,
+                "micro_recall": recall,
+                "micro_f1": f1,
+            }
+        )
+
+        # precision, recall, f1, support macro average
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation,
+            y_pred=prediction,
+            average="macro",
+        )
+        metrics.update(
+            {
+                "macro_precision": precision,
+                "macro_recall": recall,
+                "macro_f1": f1,
+            }
+        )
+
+        # precision, recall, f1, support per label
+        precision, recall, f1, support = precision_recall_fscore_support(
+            y_true=annotation, y_pred=prediction
+        )
+        metricIdx2labelIdx = {
+            i: label_idx for i, label_idx in enumerate(sorted(int2int.keys()))
+        }
+        for i, per_label in enumerate(zip(precision, recall, f1, support)):
+            label = self._weak_labels.int2label[int2int[metricIdx2labelIdx[i]]]
+            metrics.update(
+                {
+                    f"precision_{label}": per_label[0],
+                    f"recall_{label}": per_label[1],
+                    f"f1_{label}": per_label[2],
+                    f"support_{label}": per_label[3],
+                }
+            )
+
+        return metrics
+
 
 class Snorkel(LabelModel):
-    """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`_.
+    """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
@@ -97,9 +176,8 @@ class Snorkel(LabelModel):
             Passed on to the `torch.Tensor.to()` calls.
 
     Examples:
-        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
-        >>> rule = Rule(query="good OR best", label="Positive")
-        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> from rubrix.labeling.text_classification import WeakLabels
+        >>> weak_labels = WeakLabels(dataset="my_dataset")
         >>> label_model = Snorkel(weak_labels)
         >>> label_model.fit()
         >>> records = label_model.predict()
@@ -131,18 +209,18 @@ class Snorkel(LabelModel):
                 label for label in self._weak_labels.label2int if label is not None
             ]
 
-            self._weaklabels2snorkel = {
+            self._weaklabelsInt2snorkelInt = {
                 self._weak_labels.label2int[label]: i
                 for i, label in enumerate(labels, -1)
             }
         else:
             self._need_remap = False
-            self._weaklabels2snorkel = {
+            self._weaklabelsInt2snorkelInt = {
                 i: i for i in range(-1, len(self._weak_labels.label2int) - 1)
             }
 
-        self._snorkel2weaklabels = {
-            val: key for key, val in self._weaklabels2snorkel.items()
+        self._snorkelInt2weaklabelsInt = {
+            val: key for key, val in self._weaklabelsInt2snorkelInt.items()
         }
 
         # instantiate Snorkel's label model
@@ -158,7 +236,7 @@ class Snorkel(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
-                `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`_.
+                `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
         """
         if "L_train" in kwargs:
@@ -191,12 +269,12 @@ class Snorkel(LabelModel):
         label_masks = {}
 
         # compute masks
-        for idx in self._weaklabels2snorkel:
+        for idx in self._weaklabelsInt2snorkelInt:
             label_masks[idx] = matrix_or_array == idx
 
         # swap integers
-        for idx in self._weaklabels2snorkel:
-            matrix_or_array[label_masks[idx]] = self._weaklabels2snorkel[idx]
+        for idx in self._weaklabelsInt2snorkelInt:
+            matrix_or_array[label_masks[idx]] = self._weaklabelsInt2snorkelInt[idx]
 
         return matrix_or_array
 
@@ -269,7 +347,7 @@ class Snorkel(LabelModel):
                 pred_for_rec = [
                     (
                         self._weak_labels.int2label[
-                            self._snorkel2weaklabels[snorkel_idx]
+                            self._snorkelInt2weaklabelsInt[snorkel_idx]
                         ],
                         prob[snorkel_idx],
                     )
@@ -283,7 +361,16 @@ class Snorkel(LabelModel):
     def score(
         self, tie_break_policy: Union[TieBreakPolicy, str] = "abstain"
     ) -> Dict[str, float]:
-        """Returns some scores of the label model with respect to the annotated records.
+        """Returns some scores/metrics of the label model with respect to the annotated records.
+
+        The metrics are:
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
             tie_break_policy: Policy to break ties. You can choose among three policies:
@@ -327,30 +414,30 @@ class Snorkel(LabelModel):
                 "Metrics are only calculated over non-abstained predictions!"
             )
 
-        annotations = self._weak_labels.annotation()[idx]
+        annotation = self._weak_labels.annotation()[idx]
         if self._need_remap:
-            annotations = self._copy_and_remap(annotations)
+            annotation = self._copy_and_remap(annotation)
 
-        # accuracy
-        metrics = {
-            "accuracy": (predictions[idx] == annotations).sum() / len(predictions[idx])
-        }
+        metrics = self._compute_metrics(
+            annotation=annotation,
+            prediction=predictions[idx],
+            int2int=self._snorkelInt2weaklabelsInt,
+        )
 
         return metrics
 
 
 class FlyingSquid(LabelModel):
-    """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`_.
+    """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
         **kwargs: Passed on to the init of the FlyingSquid's
-            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`_.
+            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`__.
 
     Examples:
-        >>> from rubrix.labeling.text_classification import Rule, WeakLabels
-        >>> rule = Rule(query="good OR best", label="Positive")
-        >>> weak_labels = WeakLabels(rules=[rule], dataset="my_dataset")
+        >>> from rubrix.labeling.text_classification import WeakLabels
+        >>> weak_labels = WeakLabels(dataset="my_dataset")
         >>> label_model = FlyingSquid(weak_labels)
         >>> label_model.fit()
         >>> records = label_model.predict()
@@ -394,7 +481,7 @@ class FlyingSquid(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records in the training.
             **kwargs: Passed on to the FlyingSquid's
-                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`_
+                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
         """
         wl_matrix = self._weak_labels.matrix(
@@ -576,7 +663,16 @@ class FlyingSquid(LabelModel):
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
     ) -> Dict[str, float]:
-        """Returns some scores of the label model with respect to the annotated records.
+        """Returns some scores/metrics of the label model with respect to the annotated records.
+
+        The metrics are:
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
             tie_break_policy: Policy to break ties. You can choose among two policies:
@@ -607,9 +703,9 @@ class FlyingSquid(LabelModel):
         )
         is_tie = is_max.sum(axis=1) > 1
 
-        predictions = np.argmax(is_max, axis=1)
+        prediction = np.argmax(is_max, axis=1)
         # we need to transform the indexes!
-        annotations = np.array(
+        annotation = np.array(
             [
                 self._labels.index(self._weak_labels.int2label[i])
                 for i in self._weak_labels.annotation()
@@ -618,29 +714,31 @@ class FlyingSquid(LabelModel):
         )
 
         if not is_tie.any():
-            accuracy = (predictions == annotations).sum() / len(predictions)
+            pass
         # resolve ties
         elif tie_break_policy is TieBreakPolicy.ABSTAIN:
-            _LOGGER.warning(
-                "Metrics are only calculated over non-abstained predictions!"
-            )
-            accuracy = (predictions[~is_tie] == annotations[~is_tie]).sum() / (
-                ~is_tie
-            ).sum()
+            prediction, annotation = prediction[~is_tie], annotation[~is_tie]
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                predictions[i] = equal_prob_idx[random_idx]
-            accuracy = (predictions == annotations).sum() / len(predictions)
+                prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        return {"accuracy": accuracy}
+        fsInt2wlInt = {
+            i: self._weak_labels.label2int[label]
+            for i, label in enumerate(self._labels)
+        }
+        metrics = self._compute_metrics(
+            prediction=prediction, annotation=annotation, int2int=fsInt2wlInt
+        )
+
+        return metrics
 
 
 class LabelModelError(Exception):
