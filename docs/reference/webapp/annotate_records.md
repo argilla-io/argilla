@@ -28,7 +28,7 @@ As the _Explore mode_, the record cards in the _Annotate mode_ are also customiz
 
 ### Text Classification
 
-_TODO: Screenshot of a multi label card with the Validated tag in the upper right_
+![Multilabel card, validated](../../_static/reference/webapp/textclassification_multilabel.png)
 
 When switching in the _Annotate mode_ for a text classification dataset, the labels in the record cards become clickable and you can annotate the records by simply clicking on them.
 You can also validate the predictions shown in a slightly darker tone by pressing the _Validate_ button:
@@ -52,7 +52,7 @@ Once the record is saved or validated, its status will change to _Validated_.
 
 ### Text2Text
 
-_TODO: Screenshot_
+![Text2Text View](../../_static/reference/webapp/text2text_annotation.png)
 
 For text2text datasets, you have a text box available, in which you can draft or edit an annotation.
 You can also validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
@@ -60,7 +60,7 @@ After editing or drafting your annotation, don't forget to save your changes.
 
 ## Bulk annotate
 
-_TODO: Screenshot of the bulk annotation bar for a text classification task_
+![Bulk annotation bar](../../_static/reference/webapp/bulk_annotate.png)
 
 For all [tasks](../../guides/task_examples.ipynb), you can **bulk validate** the predictions of the records.
 You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page.
@@ -70,14 +70,14 @@ For the text classification task, you can additionally **bulk annotate** the sel
 
 ## Create labels
 
-_TODO: Screenshot of the bulk validation bar when the Create new label button was pressed_
+![Create new label](../../_static/reference/webapp/create_newlabel.png)
 
 For the text and token classification tasks, you can create new labels within the _Annotate mode_.
 On the right side of the bulk validation bar, you will find a _"+ Create new label"_ button that lets you add new labels to your dataset.
 
 ## Progress metric
 
-_TODO: Screenshot of the Progress metric_
+![Progress bar](../../_static/reference/webapp/progress_bar.png)
 
 From the sidebar you can access the _Progress metrics_.
 There you will find the progress of your annotation session, the distribution of validated and discarded records, and the label distribution of your annotations.
