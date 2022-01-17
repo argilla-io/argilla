@@ -188,6 +188,9 @@ export default {
 
     metricsForRule(rule) {
       const metrics = this.perRuleMetrics[rule.query];
+      if (!metrics) {
+        return {}
+      }
       return {
         coverage: this.$options.filters.percent(metrics.coverage),
         coverage_annotated: this.$options.filters.percent(
