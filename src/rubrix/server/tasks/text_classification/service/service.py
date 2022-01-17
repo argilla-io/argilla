@@ -135,10 +135,11 @@ class TextClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
+        rules = self.__labeling__.list_rules(dataset)
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=query.as_elasticsearch(),
+                query=query.as_elasticsearch(rules),
                 sort=sort_by2elasticsearch(
                     sort_by,
                     valid_fields=[
@@ -187,8 +188,9 @@ class TextClassificationService:
             the provided query filters. Optional
 
         """
+        rules = self.__labeling__.list_rules(dataset)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query.as_elasticsearch())
+            dataset, search=RecordSearch(query=query.as_elasticsearch(rules))
         ):
             yield TextClassificationRecord.parse_obj(db_record)
 

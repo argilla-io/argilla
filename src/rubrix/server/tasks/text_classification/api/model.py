@@ -489,7 +489,12 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    def as_elasticsearch(self) -> Dict[str, Any]:
+    only_uncovered: bool = Field(
+        default=False,
+        description="If enabled, filter records that are not affected by defined rules",
+    )
+
+    def as_elasticsearch(self, rules: List[LabelingRule]) -> Dict[str, Any]:
         """Build an elasticsearch query part from search query"""
 
         if self.ids:
@@ -506,6 +511,15 @@ class TextClassificationQuery(BaseModel):
                 filters.status(self.status),
                 filters.predicted(self.predicted),
                 filters.score(self.score),
+                filters.boolean_filter(
+                    must_not_query=filters.boolean_filter(
+                        should_filters=[
+                            filters.text_query(rule.query) for rule in rules
+                        ]
+                    )
+                )
+                if self.only_uncovered and rules
+                else None,
             ]
             if query_filter
         ]
