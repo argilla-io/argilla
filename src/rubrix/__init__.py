@@ -21,14 +21,21 @@ This module contains the interface to access Rubrix's REST API.
 import logging
 import os
 import re
-from typing import Iterable
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
 import pkg_resources
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
-from rubrix.client.models import *
+from rubrix.client.models import (
+    BulkResponse,
+    Record,
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
 from rubrix.monitoring.model_monitor import monitor
 
 try:
