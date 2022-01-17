@@ -20,7 +20,12 @@
     <div class="rule-labels-definition__info">
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
-        <slot name="records-metric" />
+        Records:
+        <strong>{{
+          isNaN(currentRuleMetrics.records)
+            ? "-"
+            : $options.filters.formatNumber(currentRuleMetrics.records)
+        }}</strong>
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -33,13 +38,12 @@
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
-        v-model="selectedLabels"
-        :allow-multiple="isMultiLabel"
+        v-model="selectedLabelsVModel"
+        :allow-multiple="false"
         :label="label"
         class="label-button"
         :data-title="label.class"
         :value="label.class"
-        @change="updateLabels"
       >
       </ClassifierAnnotationButton>
 
@@ -47,14 +51,14 @@
         v-if="visibleLabels.length < filteredLabels.length"
         href="#"
         class="feedback-interactions__more"
-        @click.prevent="expandLabels()"
+        @click.prevent="expandLabels"
         >+{{ filteredLabels.length - visibleLabels.length }}</a
       >
       <a
         v-else-if="visibleLabels.length > maxVisibleLabels"
         href="#"
         class="feedback-interactions__more"
-        @click.prevent="collapseLabels()"
+        @click.prevent="collapseLabels"
         >Show less</a
       >
     </div>
@@ -69,25 +73,12 @@
         >.
       </p>
     </div>
-    <p
-      class="rule__info"
-      v-if="
-        currentRule &&
-        selectedLabels.includes(currentRule.label) &&
-        currentRule.description === currentRule.query
-      "
-    >
-      {{
-        saved
-          ? "The rule has been saved"
-          : "This query with this label is already saved as rule"
-      }}.
-    </p>
+    <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
     <re-button
       v-else
-      :disabled="!selectedLabels.length"
+      :disabled="!selectedLabelsVModel.length"
       class="feedback-interactions__button button-primary"
-      @click="createRule()"
+      @click="saveRule"
     >
       Save rule</re-button
     >
@@ -96,32 +87,57 @@
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import { TextClassificationDataset } from "@/models/TextClassification";
 
 export default {
   props: {
     dataset: {
-      type: Object,
+      type: TextClassificationDataset,
       required: true,
     },
-    currentRule: {
-      type: Object,
-      default: undefined,
+    isSaved: {
+      type: Boolean,
+      default: false,
     },
   },
   data: () => {
     return {
-      saved: false,
       searchText: "",
-      selectedLabels: [],
       shownLabels: DatasetViewSettings.MAX_VISIBLE_LABELS,
+      selectedLabelsVModel: [],
     };
   },
   computed: {
+    currentRule() {
+      return this.dataset.getCurrentLabelingRule();
+    },
+
+    currentRuleMetrics() {
+      return this.dataset.getCurrentLabelingRuleMetrics() || {};
+    },
+
+    selectedLabel() {
+      if (this.selectedLabelsVModel !== undefined) {
+        return this.selectedLabelsVModel[0];
+      }
+    },
+
+    ruleInfo() {
+      // TODO: We can improve this
+      if (this.isSaved) {
+        return "The rule was saved";
+      }
+      if (
+        this.currentRule &&
+        this.selectedLabelsVModel.length &&
+        this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)
+      ) {
+        return "This query with this label are already saved as rule";
+      }
+    },
+
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
-    },
-    isMultiLabel() {
-      return this.dataset.isMultiLabel;
     },
     query() {
       return this.dataset.query.text;
@@ -129,25 +145,22 @@ export default {
     labels() {
       return this.dataset.labels.map((l) => ({ class: l, selected: false }));
     },
-    sortedLabels() {
-      return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
-    },
     filteredLabels() {
-      return this.sortedLabels.filter((label) =>
+      return this.labels.filter((label) =>
         label.class.toLowerCase().match(this.searchText.toLowerCase())
       );
     },
     visibleLabels() {
-      const selectedLabels = this.filteredLabels.filter((l) =>
-        this.selectedLabels.includes(l.class)
+      const selectedLabelsVModel = this.filteredLabels.filter((l) =>
+        this.selectedLabelsVModel.includes(l.class)
       ).length;
       const availableNonSelected =
         this.shownLabels < this.filteredLabels.length
-          ? this.shownLabels - selectedLabels
+          ? this.shownLabels - selectedLabelsVModel
           : this.shownLabels;
       let nonSelected = 0;
       return this.filteredLabels.filter((l) => {
-        if (this.selectedLabels.includes(l.class)) {
+        if (this.selectedLabelsVModel.includes(l.class)) {
           return l;
         } else {
           if (nonSelected < availableNonSelected) {
@@ -159,46 +172,29 @@ export default {
     },
   },
   watch: {
-    currentRule(n) {
-      if (n) {
-        this.selectedLabels = [n.label];
-        this.$emit("update-labels", [n.label]);
+    selectedLabel(newValue) {
+      // Here send description too --> update Rule
+      this.$emit("update-rule", {
+        query: this.query,
+        label: newValue,
+      });
+    },
+    currentRule(newValue) {
+      if (newValue && newValue.label) {
+        this.selectedLabelsVModel = [newValue.label];
       }
     },
-    query(n) {
-      this.saved = false;
-      if (!n) {
-        this.selectedLabels = [];
-        this.$emit("update-labels", undefined);
-      }
-    },
-  },
-  mounted() {
-    if (this.currentRule) {
-      this.selectedLabels = this.currentRule ? [this.currentRule.label] : [];
-    }
   },
   methods: {
     ...mapActions({
       changeViewMode: "entities/datasets/changeViewMode",
-      defineRule: "entities/text_classification/defineRule",
-      updateRule: "entities/text_classification/updateRule",
     }),
-    async createRule() {
-      if (this.currentRule) {
-        await this.updateRule({
-          dataset: this.dataset,
-          label: this.selectedLabels[0],
-        });
-      } else {
-        await this.defineRule({
-          dataset: this.dataset,
-          label: this.selectedLabels[0],
-        });
-      }
-      this.saved = true;
+    saveRule() {
       this.collapseLabels();
-      this.$emit("update-rule");
+      this.$emit("save-rule", {
+        query: this.currentRule.query,
+        label: this.selectedLabel,
+      });
     },
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
@@ -208,9 +204,6 @@ export default {
     },
     onSearchLabel(event) {
       this.searchText = event;
-    },
-    updateLabels(labels) {
-      this.$emit("update-labels", labels);
     },
     async changeToAnnotationViewMode() {
       await this.changeViewMode({

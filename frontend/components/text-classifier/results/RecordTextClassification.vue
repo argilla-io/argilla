@@ -66,12 +66,11 @@
 <script>
 import "assets/icons/predicted-ok";
 import "assets/icons/predicted-ko";
-
+import { mapActions } from "vuex";
 import {
   TextClassificationRecord,
   TextClassificationDataset,
 } from "@/models/TextClassification";
-import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {

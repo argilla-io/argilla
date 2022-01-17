@@ -4,14 +4,13 @@
     <div v-else-if="!$fetchState.error">
       <rules-metrics
         title="Overall Metrics"
-        :rules="rules"
         :dataset="dataset"
         metrics-type="overall"
       >
         <template #button-top>
           <re-button
             class="rules-management__close button-quaternary--outline"
-            @click="hideList()"
+            @click="hideList"
           >
             <svgicon
               name="chev-left"
@@ -44,7 +43,7 @@
           :actions="actions"
           :query-search="querySearch"
           :global-actions="false"
-          search-on="name"
+          search-on="query"
           :no-data-info="noDataInfo"
           :empty-search-info="emptySearchInfo"
           :visible-modal-id="visibleModalId"
@@ -56,7 +55,8 @@
         <re-button
           v-if="formattedRules.length"
           class="button-primary"
-          @click="updateSummary()"
+          @click="updateSummary"
+          :disabled="isLoading"
           >Update Summary</re-button
         >
       </div>
@@ -66,23 +66,23 @@
 <script>
 import "assets/icons/empty-rules";
 import { mapActions } from "vuex";
+import { TextClassificationDataset } from "@/models/TextClassification";
 export default {
   props: {
     dataset: {
-      type: Object,
-      default: () => ({}),
+      type: TextClassificationDataset,
+      required: true,
     },
   },
   data: () => {
     return {
       querySearch: undefined,
       visibleModalId: undefined,
-      rules: [],
-      metricsByLabel: {},
+      isLoading: undefined,
       tableColumns: [
         {
           name: "Query",
-          field: "name",
+          field: "query",
           class: "table-info__title",
           type: "action",
         },
@@ -143,37 +143,36 @@ export default {
     };
   },
   async fetch() {
-    this.rules = await this.getRules({ dataset: this.dataset });
-    await this.getMetricsByLabel();
+    if (!this.rules) {
+      await this.dataset.refreshRules();
+    }
   },
   computed: {
+    rules() {
+      return this.dataset.labelingRules;
+    },
+    perRuleMetrics() {
+      return this.dataset.labelingRulesMetrics;
+    },
     isVisible() {
       return this.dataset.viewSettings.visibleRulesList;
     },
     formattedRules() {
-      return this.rules.map((r) => {
-        return {
-          id: r.query,
-          name: r.description,
-          query: r.query,
-          kind: "select",
-          label: r.label,
-          coverage: this.$options.filters.percent(
-            this.metricsByLabel[r.query].coverage
-          ),
-          coverage_annotated: this.$options.filters.percent(
-            this.metricsByLabel[r.query].coverage_annotated
-          ),
-          correct: this.metricsByLabel[r.query].correct,
-          incorrect: this.metricsByLabel[r.query].incorrect,
-          precision: !isNaN(this.metricsByLabel[r.query].precision)
-            ? this.$options.filters.percent(
-                this.metricsByLabel[r.query].precision
-              )
-            : "-",
-          created_at: r.created_at,
-        };
-      });
+      if (this.rules) {
+        return this.rules.map((r) => {
+          return {
+            id: r.query,
+            name: r.description,
+            query: r.query,
+            kind: "select",
+            label: r.label,
+            ...this.metricsForRule(r),
+            created_at: r.created_at,
+          };
+        });
+      } else {
+        return [];
+      }
     },
     getDeleteModalText() {
       return {
@@ -188,10 +187,6 @@ export default {
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
-      getRules: "entities/text_classification/getRules",
-      deleteRule: "entities/text_classification/deleteRule",
-      getRuleMetricsByLabel:
-        "entities/text_classification/getRuleMetricsByLabel",
     }),
 
     metricsForRule(rule) {
@@ -212,24 +207,13 @@ export default {
       await this.dataset.viewSettings.disableRulesSummary();
     },
 
-    async getMetricsByLabel() {
-      const responses = await Promise.all(
-        this.rules.map((rule) => {
-          return this.getRuleMetricsByLabel({
-            dataset: this.dataset,
-            query: rule.query,
-            label: rule.label,
-          });
-        })
-      );
-
-      responses.forEach((response, idx) => {
-        this.metricsByLabel[this.rules[idx].query] = response;
-      });
-    },
-    async onSelectQuery(id) {
-      if (id.query !== this.dataset.query.text) {
-        await this.search({ dataset: this.dataset, query: { text: id.query } });
+    async onSelectQuery(rule) {
+      await this.dataset.setCurrentLabelingRule(rule);
+      if (rule.query !== this.dataset.query.text) {
+        await this.search({
+          dataset: this.dataset,
+          query: { text: rule.query },
+        });
       }
       await this.hideList();
     },
@@ -256,18 +240,19 @@ export default {
       this.querySearch = event;
     },
     async updateSummary() {
-      await this.$fetch();
+      this.isLoading = true;
+      try {
+        await this.dataset.refreshRules();
+        await this.dataset.refreshRulesMetrics();
+      } finally {
+        this.isLoading = false;
+      }
     },
     onShowConfirmRuleDeletion(id) {
-      this.visibleModalId = id.name;
+      this.visibleModalId = id.query;
     },
-    async onDeleteRule(id) {
-      this.closeModal();
-      await this.deleteRule({
-        dataset: this.dataset,
-        query: id.query,
-      });
-      await this.$fetch();
+    async onDeleteRule(rule) {
+      await this.dataset.deleteLabelingRule(rule);
     },
     closeModal() {
       this.visibleModalId = undefined;
