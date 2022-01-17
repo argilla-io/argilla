@@ -220,42 +220,44 @@ class DatasetRecordsDAO:
         """
         search = search or RecordSearch()
         records_index = dataset_records_index(dataset.id)
-
+        compute_aggregations = record_from == 0
         aggregation_requests = (
-            {**(search.aggregations or {})} if record_from == 0 else None
+            {**(search.aggregations or {})} if compute_aggregations else {}
         )
-
-        if aggregation_requests is not None and search.include_default_aggregations:
-            aggregation_requests.update(
-                {
-                    **aggregations.predicted_as(),
-                    **aggregations.predicted_by(),
-                    **aggregations.annotated_as(),
-                    **aggregations.annotated_by(),
-                    **aggregations.status(),
-                    **aggregations.predicted(),
-                    **aggregations.words_cloud(),
-                    **aggregations.score(),
-                    **aggregations.custom_fields(
-                        self._es.get_field_mapping(
-                            index=records_index, field_name="metadata.*"
-                        )
-                    ),
-                }
-            )
-
-        if record_from > 0:
-            aggregation_requests = None
 
         es_query = {
             "_source": {"excludes": exclude_fields or []},
-            "size": size,
             "from": record_from,
             "query": search.query or {"match_all": {}},
             "sort": search.sort or [{"_id": {"order": "asc"}}],
-            "aggs": aggregation_requests or {},
+            "aggs": aggregation_requests,
         }
         results = self._es.search(index=records_index, query=es_query, size=size)
+
+        if compute_aggregations and search.include_default_aggregations:
+            current_aggrs = results.get("aggregations", {})
+            for aggr in [
+                aggregations.predicted_as(),
+                aggregations.predicted_by(),
+                aggregations.annotated_as(),
+                aggregations.annotated_by(),
+                aggregations.status(),
+                aggregations.predicted(),
+                aggregations.words_cloud(),
+                aggregations.score(),
+                aggregations.custom_fields(
+                    self._es.get_field_mapping(
+                        index=records_index, field_name="metadata.*"
+                    )
+                ),
+            ]:
+                if aggr:
+                    aggr_results = self._es.search(
+                        index=records_index,
+                        query={"query": es_query["query"], "aggs": aggr},
+                    )
+                    current_aggrs.update(aggr_results["aggregations"])
+            results["aggregations"] = current_aggrs
 
         hits = results["hits"]
         total = hits["total"]
