@@ -45,7 +45,7 @@ export default {
   },
   data: () => {
     return {
-      saved: undefined
+      saved: undefined,
     };
   },
   async fetch() {
@@ -57,7 +57,9 @@ export default {
     }
     if (!this.currentRule && this.query) {
       const rule = this.dataset.findRuleByQuery(this.query, undefined);
-      await this.dataset.setCurrentLabelingRule(rule ? rule : { query: this.query });
+      await this.dataset.setCurrentLabelingRule(
+        rule ? rule : { query: this.query }
+      );
     }
   },
   watch: {
@@ -96,13 +98,15 @@ export default {
       if (!query) {
         return await this.dataset.clearCurrentLabelingRule();
       }
-      const rule = this.dataset.findRuleByQuery(query, undefined);
-      if (rule) {
-        await this.dataset.setCurrentLabelingRule(rule);
-      } else {
+      if (label) {
         await this.dataset.setCurrentLabelingRule({
           query,
           label,
+        });
+      } else {
+        await this.dataset.setCurrentLabelingRule({
+          query,
+          label: undefined,
         });
       }
       this.saved = false;

@@ -97,8 +97,8 @@ export default {
     },
     isSaved: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data: () => {
     return {
@@ -178,6 +178,11 @@ export default {
         query: this.query,
         label: newValue,
       });
+    },
+    currentRule(newValue, oldValue) {
+      if (newValue && newValue.label && !oldValue) {
+        this.selectedLabelsVModel = [newValue.label];
+      }
     },
   },
   mounted() {
