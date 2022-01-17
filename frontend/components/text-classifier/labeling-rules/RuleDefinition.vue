@@ -5,32 +5,23 @@
         <rule-empty-query :dataset="dataset" v-if="!query" />
         <rule-labels-definition
           v-else
-          :current-rule="currentRule"
           :dataset="dataset"
-          @update-rule="updateRule"
-          @update-labels="updateLabels"
+          :isSaved="saved"
+          @save-rule="saveRule"
+          @update-rule="updateCurrentRule"
         >
-          <template v-if="recordsMetric" #records-metric>
-            Records
-            <strong>
-              {{ recordsMetric.value }}
-            </strong>
-          </template>
         </rule-labels-definition>
       </div>
       <div class="rule__metrics">
         <rules-metrics
-          @records-metric="onUpdateRecordsMetric"
           title="Rule Metrics"
           metrics-type="all"
-          :activeLabel="activeLabel"
-          :key="refresh"
-          :rules="rules"
           :dataset="dataset"
         >
           <template #button-bottom>
             <re-button
               class="rule__button button-quaternary--outline"
+              :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</re-button
             >
@@ -44,66 +35,89 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { TextClassificationDataset } from "@/models/TextClassification";
 export default {
   props: {
     dataset: {
-      type: Object,
-      default: () => ({}),
+      type: TextClassificationDataset,
+      required: true,
     },
   },
   data: () => {
     return {
-      rules: [],
-      selectedLabels: [],
-      currentRule: undefined,
-      recordsMetric: undefined,
-      refresh: 0,
+      saved: undefined,
     };
   },
   async fetch() {
-    await this.getAllRules();
-    this.currentRule = await this.getRule({
-      dataset: this.dataset,
-      query: this.query,
-    });
+    if (!this.rules) {
+      await this.dataset.refreshRules();
+    }
+    if (!this.hasMetrics) {
+      await this.dataset.refreshRulesMetrics();
+    }
+    if (!this.currentRule && this.query) {
+      const rule = this.dataset.findRuleByQuery(this.query, undefined);
+      await this.dataset.setCurrentLabelingRule(
+        rule ? rule : { query: this.query }
+      );
+    }
+  },
+  watch: {
+    async query(newValue) {
+      await this.updateCurrentRule({
+        query: newValue,
+        label: (this.currentRule || {}).label,
+      });
+    },
   },
   computed: {
     query() {
       return this.dataset.query.text;
     },
-    activeLabel() {
-      return this.selectedLabels.length ? this.selectedLabels[0] : undefined;
+    isLoading() {
+      return this.$fetchState.pending;
     },
-  },
-  watch: {
-    async query(n, o) {
-      if (o !== n) {
-        this.refresh++;
-        await this.$fetch();
-      }
+    currentRule() {
+      return this.dataset.getCurrentLabelingRule();
+    },
+    hasMetrics() {
+      return this.overalMetrics && this.rulesMetrics;
+    },
+    rules() {
+      return this.dataset.labelingRules;
+    },
+    overalMetrics() {
+      return this.dataset.labelingRulesOveralMetrics;
+    },
+    rulesMetrics() {
+      return this.dataset.labelingRulesMetrics;
     },
   },
   methods: {
-    async getAllRules() {
-      this.rules = await this.getRules({ dataset: this.dataset });
+    async updateCurrentRule({ query, label }) {
+      if (!query) {
+        return await this.dataset.clearCurrentLabelingRule();
+      }
+      if (label) {
+        await this.dataset.setCurrentLabelingRule({
+          query,
+          label,
+        });
+      } else {
+        await this.dataset.setCurrentLabelingRule({
+          query,
+          label: undefined,
+        });
+      }
+      this.saved = false;
     },
     async showRulesList() {
       await this.dataset.viewSettings.enableRulesSummary();
     },
-    async updateRule() {
-      await this.$fetch();
+    async saveRule(rule) {
+      await this.dataset.storeLabelingRule(rule);
+      this.saved = true;
     },
-    updateLabels(labels) {
-      this.selectedLabels = labels;
-    },
-    onUpdateRecordsMetric(met) {
-      this.recordsMetric = met;
-    },
-    ...mapActions({
-      getRules: "entities/text_classification/getRules",
-      getRule: "entities/text_classification/getRule",
-    }),
   },
 };
 </script>
