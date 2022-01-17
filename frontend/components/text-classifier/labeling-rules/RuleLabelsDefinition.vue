@@ -179,16 +179,11 @@ export default {
         label: newValue,
       });
     },
-    currentRule(newValue, oldValue) {
-      if (newValue && newValue.label && !oldValue) {
+    currentRule(newValue) {
+      if (newValue && newValue.label) {
         this.selectedLabelsVModel = [newValue.label];
       }
     },
-  },
-  mounted() {
-    this.selectedLabelsVModel = this.currentRule
-      ? [this.currentRule.label]
-      : [];
   },
   methods: {
     ...mapActions({
