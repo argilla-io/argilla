@@ -201,13 +201,16 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async _fetchRuleMetrics({ query, label }) {
-    const { response } = await TextClassificationDataset.api().get(
-      `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics?label=${label}`
-    );
+    var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
+    if (label !== undefined) {
+      url += `?label=${label}`;
+    }
+    const { response } = await TextClassificationDataset.api().get(url);
 
     const metrics = response.data;
     // Computed extra metrics
     metrics.records = Math.round(metrics.total_records * metrics.coverage);
+
     return metrics;
   }
 
@@ -243,7 +246,6 @@ class TextClassificationDataset extends ObservationDataset {
 
   async refreshRules() {
     const rules = await this._fetchAllRules();
-
     await TextClassificationDataset.insertOrUpdate({
       data: {
         owner: this.owner,
@@ -299,16 +301,8 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async setCurrentLabelingRule({ query, label }) {
-    if (
-      this.currentLabelingRule &&
-      query === this.currentLabelingRule.query &&
-      label === this.currentLabelingRule.label
-    ) {
-      return;
-    }
-
     let rule = this.findRuleByQuery(query, label);
-    let ruleMetrics = this.getMetricsByRule(rule);
+    let ruleMetrics = this.getMetricsByRule(rule) || this.getMetricsByRule({query, label});
 
     await TextClassificationDataset.insertOrUpdate({
       data: {

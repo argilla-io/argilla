@@ -57,9 +57,7 @@ export default {
     }
     if (!this.currentRule && this.query) {
       const rule = this.dataset.findRuleByQuery(this.query, undefined);
-      if (rule) {
-        await this.dataset.setCurrentLabelingRule(rule);
-      }
+      await this.dataset.setCurrentLabelingRule(rule ? rule : { query: this.query });
     }
   },
   watch: {
@@ -101,13 +99,11 @@ export default {
       const rule = this.dataset.findRuleByQuery(query, undefined);
       if (rule) {
         await this.dataset.setCurrentLabelingRule(rule);
-      } else if (label) {
+      } else {
         await this.dataset.setCurrentLabelingRule({
           query,
           label,
         });
-      } else {
-        await this.dataset.clearCurrentLabelingRule();
       }
       this.saved = false;
     },
