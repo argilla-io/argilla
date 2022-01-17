@@ -19,3 +19,4 @@ Models
 
 .. automodule:: rubrix.client.models
    :members:
+   :exclude-members: BaseRecord, BulkResponse
