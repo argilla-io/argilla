@@ -219,14 +219,19 @@ export default {
     min-height: 140px;
   }
 }
-.scroller {
-  padding-bottom: 61px;
-  .fixed-header & {
-    padding-bottom: 200px;
-  }
-}
 </style>
 <style lang="scss">
+.vue-recycle-scroller__item-wrapper {
+  box-sizing: content-box;
+   padding-bottom: 61px;
+   .fixed-header & {
+    padding-bottom: 260px;
+   }
+ }
+.vue-recycle-scroller__item-view {
+  box-sizing: border-box;
+}
+
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {
