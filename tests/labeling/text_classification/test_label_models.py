@@ -115,12 +115,12 @@ class TestLabelModel:
 
         assert metrics == {
             "accuracy": 0.4,
-            "precision_micro": 0.4,
-            "recall_micro": 0.4,
-            "f1_micro": pytest.approx(0.4),
-            "precision_macro": pytest.approx(5 / 6 / 2.0),
-            "recall_macro": pytest.approx(5 / 6 / 2.0),
-            "f1_macro": 0.4,
+            "micro_precision": 0.4,
+            "micro_recall": 0.4,
+            "micro_f1": pytest.approx(0.4),
+            "macro_precision": pytest.approx(5 / 6 / 2.0),
+            "macro_recall": pytest.approx(5 / 6 / 2.0),
+            "macro_f1": 0.4,
             "precision_pos": 1 / 3.0,
             "recall_pos": 0.5,
             "f1_pos": 0.4,
