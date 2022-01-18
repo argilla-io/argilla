@@ -37,23 +37,6 @@ def test_flatten_metadata():
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
 
 
-@pytest.mark.parametrize("metadata_length", [1, 50, 51, 100])
-def test_metadata_limits(metadata_length):
-    data = {
-        "inputs": {"text": "bogh"},
-        "metadata": {k: k for k in range(0, metadata_length)},
-    }
-    if metadata_length <= settings.metadata_fields_limit:
-        TextClassificationRecord.parse_obj(data)
-    else:
-        with pytest.raises(
-            ValidationError,
-            match=f"Number of keys in metadata \({metadata_length}\) "
-            f"exceeds the configured limit \({settings.metadata_fields_limit}\)",
-        ):
-            TextClassificationRecord.parse_obj(data)
-
-
 def test_metadata_with_object_list():
     data = {
         "inputs": {"text": "bogh"},

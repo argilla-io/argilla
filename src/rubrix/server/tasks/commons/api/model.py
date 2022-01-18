@@ -203,16 +203,6 @@ class BaseRecord(GenericModel, Generic[Annotation]):
             metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
         return metadata
 
-    @validator(
-        "metadata",
-    )
-    def check_metadata_limit(cls, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        if len(metadata) > settings.metadata_fields_limit:
-            raise MetadataLimitExceededError.new_error(
-                len(metadata), limit=settings.metadata_fields_limit
-            )
-        return metadata
-
     @validator("status", always=True)
     def fill_default_value(cls, status: TaskStatus):
         """Fastapi validator for set default task status"""
