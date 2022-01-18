@@ -12,11 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import pytest
 from pydantic import ValidationError
-from rubrix.server.tasks.commons import TaskStatus
+
 from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.settings import settings
+from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
@@ -36,6 +37,23 @@ def test_flatten_metadata():
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
 
 
+@pytest.mark.parametrize("metadata_length", [1, 50, 51, 100])
+def test_metadata_limits(metadata_length):
+    data = {
+        "inputs": {"text": "bogh"},
+        "metadata": {k: k for k in range(0, metadata_length)},
+    }
+    if metadata_length <= settings.metadata_fields_limit:
+        TextClassificationRecord.parse_obj(data)
+    else:
+        with pytest.raises(
+            ValidationError,
+            match=f"Number of keys in metadata \({metadata_length}\) "
+            f"exceeds the configured limit \({settings.metadata_fields_limit}\)",
+        ):
+            TextClassificationRecord.parse_obj(data)
+
+
 def test_metadata_with_object_list():
     data = {
         "inputs": {"text": "bogh"},
@@ -52,12 +70,18 @@ def test_metadata_with_object_list():
 
 def test_single_label_with_multiple_annotation():
 
-    with pytest.raises(ValidationError, match="Single label record must include only one annotation label"):
+    with pytest.raises(
+        ValidationError,
+        match="Single label record must include only one annotation label",
+    ):
         TextClassificationRecord.parse_obj(
             {
                 "inputs": {"text": "This is a text"},
-                "annotation": {"agent": "test", "labels": [{"class": "A"}, {"class": "B"}]},
-                "multi_label": False
+                "annotation": {
+                    "agent": "test",
+                    "labels": [{"class": "A"}, {"class": "B"}],
+                },
+                "multi_label": False,
             }
         )
 
