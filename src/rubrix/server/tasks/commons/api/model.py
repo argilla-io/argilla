@@ -29,6 +29,8 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import flatten_dict, limit_value_length
+from rubrix.server.commons.settings import settings
+from rubrix.server.tasks.commons.api.errors import MetadataLimitExceededError
 
 
 class EsRecordDataFieldNames(str, Enum):
@@ -199,6 +201,16 @@ class BaseRecord(GenericModel, Generic[Annotation]):
         if metadata:
             metadata = flatten_dict(metadata, drop_empty=True)
             metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
+        return metadata
+
+    @validator(
+        "metadata",
+    )
+    def check_metadata_limit(cls, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        if len(metadata) > settings.metadata_fields_limit:
+            raise MetadataLimitExceededError.new_error(
+                len(metadata), limit=settings.metadata_fields_limit
+            )
         return metadata
 
     @validator("status", always=True)
