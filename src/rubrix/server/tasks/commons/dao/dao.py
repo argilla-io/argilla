@@ -33,7 +33,7 @@ from rubrix.server.datasets.dao import (
     dataset_records_index,
 )
 from rubrix.server.datasets.model import BaseDatasetDB
-from rubrix.server.tasks.commons import BaseRecord
+from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
@@ -313,10 +313,25 @@ class DatasetRecordsDAO:
         return {**doc["_source"], "id": doc["_id"]}
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
+        def check_metadata_length(metadata_length: int = 0):
+            if metadata_length > settings.metadata_fields_limit:
+                raise MetadataLimitExceededError.new_error(
+                    metadata_length, limit=settings.metadata_fields_limit
+                )
+
         def detect_nested_type(v: Any) -> bool:
             """Returns True if value match as nested value"""
             return isinstance(v, list) and isinstance(v[0], dict)
 
+        check_metadata_length(len(metadata_values))
+        check_metadata_length(
+            len(
+                {
+                    *self._es.get_field_mapping(index, "metadata.*"),
+                    *[k for k in metadata_values.keys()],
+                }
+            )
+        )
         for field, value in metadata_values.items():
             if detect_nested_type(value):
                 self._es.create_field_mapping(
