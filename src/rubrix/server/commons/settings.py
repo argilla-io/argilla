@@ -67,6 +67,10 @@ class ApiSettings(BaseSettings):
 
     namespace: str = Field(default=None, regex=r"^[a-z]+$")
 
+    metadata_fields_limit: int = Field(
+        default=50, gt=0, le=100, description="Max number of fields in metadata"
+    )
+
     @property
     def dataset_index_name(self) -> str:
         ns = self.namespace
@@ -82,10 +86,12 @@ class ApiSettings(BaseSettings):
         return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", f".{ns}")
 
     class Config:
+        # TODO: include a common prefix for all rubrix env vars.
         fields = {
+            "metadata_fields_limit": {"env": "RUBRIX_METADATA_FIELDS_LIMIT"},
             "namespace": {
                 "env": "RUBRIX_NAMESPACE",
-            }
+            },
         }
 
 
