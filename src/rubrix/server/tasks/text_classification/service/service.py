@@ -139,7 +139,7 @@ class TextClassificationService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=query.as_elasticsearch(rules),
+                query=query.as_elasticsearch(),
                 sort=sort_by2elasticsearch(
                     sort_by,
                     valid_fields=[
@@ -190,7 +190,7 @@ class TextClassificationService:
         """
         rules = self.__labeling__.list_rules(dataset)
         for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query.as_elasticsearch(rules))
+            dataset, search=RecordSearch(query=query.as_elasticsearch())
         ):
             yield TextClassificationRecord.parse_obj(db_record)
 

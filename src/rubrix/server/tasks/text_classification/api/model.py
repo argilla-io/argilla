@@ -473,6 +473,8 @@ class TextClassificationQuery(BaseModel):
         List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
+    uncovered_by_rules:
+        List of rule queries filtering records uncovered by these rules.
 
     """
 
@@ -489,12 +491,12 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    only_uncovered: bool = Field(
-        default=False,
-        description="If enabled, filter records that are not affected by defined rules",
+    uncovered_by_rules: List[str] = Field(
+        default_factory=list,
+        description="List of rule queries that WILL NOT cover the result records",
     )
 
-    def as_elasticsearch(self, rules: List[LabelingRule]) -> Dict[str, Any]:
+    def as_elasticsearch(self) -> Dict[str, Any]:
         """Build an elasticsearch query part from search query"""
 
         if self.ids:
@@ -514,11 +516,12 @@ class TextClassificationQuery(BaseModel):
                 filters.boolean_filter(
                     must_not_query=filters.boolean_filter(
                         should_filters=[
-                            filters.text_query(rule.query) for rule in rules
+                            filters.text_query(query)
+                            for query in self.uncovered_by_rules
                         ]
                     )
                 )
-                if self.only_uncovered and rules
+                if self.uncovered_by_rules
                 else None,
             ]
             if query_filter
