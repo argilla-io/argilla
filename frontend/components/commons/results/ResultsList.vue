@@ -223,7 +223,7 @@ export default {
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
-   padding-bottom: 61px;
+   padding-bottom: 260px;
    .fixed-header & {
     padding-bottom: 260px;
    }
