@@ -513,33 +513,27 @@ class TextClassificationQuery(BaseModel):
                 filters.status(self.status),
                 filters.predicted(self.predicted),
                 filters.score(self.score),
-                filters.boolean_filter(
-                    must_not_query=filters.boolean_filter(
-                        should_filters=[
-                            filters.text_query(query)
-                            for query in self.uncovered_by_rules
-                        ]
-                    )
-                )
-                if self.uncovered_by_rules
-                else None,
             ]
             if query_filter
         ]
         query_text = filters.text_query(self.query_text)
         all_filters.extend(query_filters)
 
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
+        return filters.boolean_filter(
+            must_query=query_text or {"match_all": {}},
+            must_not_query=filters.boolean_filter(
+                should_filters=[
+                    filters.text_query(query) for query in self.uncovered_by_rules
+                ]
+            )
+            if self.uncovered_by_rules
+            else None,
+            filter_query=filters.boolean_filter(
+                should_filters=all_filters, minimum_should_match=len(all_filters)
+            )
+            if all_filters
+            else None,
+        )
 
 
 class TextClassificationSearchRequest(BaseModel):
