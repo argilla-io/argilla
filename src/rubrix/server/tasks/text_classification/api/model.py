@@ -474,7 +474,7 @@ class TextClassificationQuery(BaseModel):
     predicted: Optional[PredictionStatus]
         The task prediction status
     uncovered_by_rules:
-        List of rule queries filtering records uncovered by these rules.
+        Only return records that are NOT covered by these rules.
 
     """
 
@@ -493,7 +493,7 @@ class TextClassificationQuery(BaseModel):
 
     uncovered_by_rules: List[str] = Field(
         default_factory=list,
-        description="List of rule queries that WILL NOT cover the result records",
+        description="List of rule queries that WILL NOT cover the resulting records",
     )
 
     def as_elasticsearch(self) -> Dict[str, Any]:

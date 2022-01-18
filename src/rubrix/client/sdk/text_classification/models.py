@@ -152,7 +152,7 @@ class TextClassificationQuery(BaseModel):
 
     uncovered_by_rules: List[str] = Field(
         default_factory=list,
-        description="List of rule queries that WILL NOT cover the result records",
+        description="List of rule queries that WILL NOT cover the resulting records",
     )
 
 
