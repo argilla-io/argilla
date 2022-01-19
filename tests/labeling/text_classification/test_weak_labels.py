@@ -238,7 +238,7 @@ def test_rules_matrix_records_annotation(monkeypatch):
     ).all()
     assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([[-1, 0]], dtype=np.short)
     ).all()
 
@@ -398,7 +398,7 @@ def test_change_mapping(monkeypatch, rules):
         )
     ).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([2, 10, -10, 1, 2], dtype=np.short)
     ).all()
     assert weak_labels.label2int == new_mapping
