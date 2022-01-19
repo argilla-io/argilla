@@ -2,6 +2,8 @@ import pytest
 
 import rubrix
 from rubrix import TextClassificationRecord, TokenClassificationRecord
+from rubrix.server.commons.settings import settings
+from rubrix.server.tasks.commons import MetadataLimitExceededError
 from tests.server.test_helpers import client, mocking_client
 
 
@@ -72,3 +74,23 @@ def test_log_records_with_empty_metadata_list(monkeypatch):
 
     for meta in df.metadata.values.tolist():
         assert meta == {}
+
+
+def test_logging_with_metadata_limits_exceeded(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_delete_and_create_for_different_task"
+
+    rubrix.delete(dataset)
+    expected_record = TextClassificationRecord(
+        inputs="The input text",
+        metadata={k: k for k in range(0, settings.metadata_fields_limit + 1)},
+    )
+    with pytest.raises(MetadataLimitExceededError):
+        rubrix.log(expected_record, name=dataset)
+
+    expected_record.metadata = {k: k for k in range(0, settings.metadata_fields_limit)}
+    rubrix.log(expected_record, name=dataset)
+
+    expected_record.metadata["new_key"] = "value"
+    with pytest.raises(MetadataLimitExceededError):
+        rubrix.log(expected_record, name=dataset)

@@ -67,7 +67,6 @@
           </ul>
         </span>
       </div>
-      <div v-if="showEntitiesSelector" class="overlay" />
     </span>
     <span class="span__whitespace" v-html="whiteSpace"></span>
   </span>
@@ -287,19 +286,6 @@ export default {
   &__whitespace {
     @include font-size(16px);
   }
-}
-
-.overlay {
-  background: white;
-  opacity: 0.5;
-  height: 100vh;
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
 }
 
 // highlight word with overlay

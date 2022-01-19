@@ -20,7 +20,7 @@
     <ul>
       <li>
         <NuxtLink
-          v-for="breadcrumb in breadcrumbs"
+          v-for="breadcrumb in filteredBreadcrumbs"
           :key="breadcrumb.name"
           class="breadcrumbs__item"
           :to="breadcrumb.link"
@@ -54,6 +54,11 @@ export default {
     copyButton: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    filteredBreadcrumbs() {
+      return this.breadcrumbs.filter((breadcrumb) => breadcrumb.name);
     },
   },
   methods: {

@@ -12,13 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
+
+from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification import TextClassificationQuery
+
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
