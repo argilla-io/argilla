@@ -16,8 +16,11 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
+
 from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import TaskStatus
+from rubrix.server.tasks.text_classification import TextClassificationQuery
+
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
@@ -245,3 +248,64 @@ def test_validate_without_labels_for_single_label(annotation):
             ),
             annotation=annotation,
         )
+
+
+def test_query_with_uncovered_by_rules():
+
+    query = TextClassificationQuery(uncovered_by_rules=["query", "other*"])
+    assert query.as_elasticsearch() == {
+        "bool": {
+            "must": {"match_all": {}},
+            "must_not": {
+                "bool": {
+                    "should": [
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "query_string": {
+                                            "default_field": "words",
+                                            "default_operator": "AND",
+                                            "query": "query",
+                                            "boost": "2.0",
+                                        }
+                                    },
+                                    {
+                                        "query_string": {
+                                            "default_field": "words.extended",
+                                            "default_operator": "AND",
+                                            "query": "query",
+                                        }
+                                    },
+                                ],
+                                "minimum_should_match": "50%",
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "query_string": {
+                                            "default_field": "words",
+                                            "default_operator": "AND",
+                                            "query": "other*",
+                                            "boost": "2.0",
+                                        }
+                                    },
+                                    {
+                                        "query_string": {
+                                            "default_field": "words.extended",
+                                            "default_operator": "AND",
+                                            "query": "other*",
+                                        }
+                                    },
+                                ],
+                                "minimum_should_match": "50%",
+                            }
+                        },
+                    ],
+                    "minimum_should_match": 1,
+                }
+            },
+        }
+    }
