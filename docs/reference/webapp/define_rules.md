@@ -1,8 +1,14 @@
 # Define rules
 
+<<<<<<< HEAD
+_TODO: Screenshot_
+
+The Rubrix web app has a dedicated mode to find good heuristic rules, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
+=======
 ![Define Rules view](../../_static/reference/webapp/definerules_view.png)
 
 The Rubrix web app has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/weak-supervision-with-rubrix.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Define rules_ mode via the sidebar of the [Dataset page](dataset.md).
@@ -13,7 +19,11 @@ The _Define rules_ mode is only available for single-label text classification d
 
 ## Query plus label
 
+<<<<<<< HEAD
+_TODO: Screenshot of the search bar and label component_
+=======
 ![Label searchbar](../../_static/reference/webapp/label1.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 A rule in Rubrix basically applies a chosen label to a list of records that match a given [query](search_records.md), so all you need is a query plus a label.
 After entering a query in the search bar and selecting a label, you will see some [metrics](#rule-metrics) for the rule on the right and the matches of your query in the record list below.
@@ -27,7 +37,11 @@ If you want to add labels to the available list of labels, you can switch to the
 
 ## Rule Metrics
 
+<<<<<<< HEAD
+_TODO: Screenshot of the rule metrics_
+=======
 ![Labeling metrics](../../_static/reference/webapp/label_rulemetrics.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 After entering a query and selecting a label, Rubrix provides you with some key metrics about the rule.
 Some metrics are only available if your dataset has also annotated records.
@@ -39,7 +53,14 @@ Some metrics are only available if your dataset has also annotated records.
 
 ## Manage rules
 
+<<<<<<< HEAD
+_TODO: Screenshot_
+
+Here you will see a list of your saved rules as well as their overall metrics.
+You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
+=======
 Here you will see a list of your saved rules as well as their overall metrics.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
 
 ![Label Rules 5](../../_static/reference/webapp/label5.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
