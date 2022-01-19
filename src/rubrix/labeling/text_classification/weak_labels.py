@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import warnings
 from collections import Counter
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -261,17 +262,30 @@ class WeakLabels:
 
         return self._records
 
-    def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
+    def annotation(
+        self,
+        include_missing: bool = False,
+        exclude_missing_annotations: Optional[bool] = None,
+    ) -> np.ndarray:
         """Returns the annotation labels as an array of integers.
 
         Args:
-            exclude_missing_annotations: If True, excludes all entries with the ``self.label2int[None]`` integer,
-                that is all records for which there is an annotation missing.
+            include_missing: If True, returns an array of the length of the record list.
+                For this we will pad the array with the ``self.label2int[None]`` integer for records without an annotation.
+            exclude_missing_annotations: DEPRECATED
 
         Returns:
             The annotation array of integers.
         """
-        if not exclude_missing_annotations:
+        if exclude_missing_annotations is not None:
+            warnings.warn(
+                "The 'exclude_missing_annotations' argument is deprecated and will be removed in the next minor release."
+                "Please use the 'include_missing' argument.",
+                category=DeprecationWarning,
+            )
+            include_missing = not exclude_missing_annotations
+
+        if include_missing:
             return self._annotation_array
 
         return self._annotation_array[self._annotation_array != self._label2int[None]]
