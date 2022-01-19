@@ -21,12 +21,13 @@ from fastapi import Depends
 
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.tasks.commons import TaskType
-from .model import DatasetDB
+
 from ..commons.es_settings import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
     DATASETS_RECORDS_INDEX_NAME,
 )
+from .model import DatasetDB
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -166,6 +167,7 @@ class DatasetsDAO:
             index=DATASETS_INDEX_NAME,
             doc_id=dataset_id,
             document=self._dataset_to_es_doc(dataset),
+            partial_update=True,
         )
         return dataset
 
@@ -286,10 +288,16 @@ class DatasetsDAO:
         }
 
     def copy(self, source: DatasetDB, target: DatasetDB):
+        source_doc = self._es.get_document_by_id(
+            index=DATASETS_INDEX_NAME, doc_id=source.id
+        )
         self._es.add_document(
             index=DATASETS_INDEX_NAME,
             doc_id=target.id,
-            document=self._dataset_to_es_doc(target),
+            document={
+                **source_doc["_source"],  # we copy extended fields from source document
+                **self._dataset_to_es_doc(target),
+            },
         )
         index_from = dataset_records_index(source.id)
         index_to = dataset_records_index(target.id)

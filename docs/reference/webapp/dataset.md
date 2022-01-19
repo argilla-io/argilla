@@ -1,6 +1,10 @@
 # Dataset
 
+<<<<<<< HEAD
 ![Dataset view](../../_static/reference/webapp/dataset_view.png)
+=======
+![Dataset view](../../_static/reference/webapp/dataset_view1.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 The _Dataset_ page is the main page of the Rubrix web app.
 From here you can access most of Rubrix's features, like **exploring and annotating** the records of your dataset.
@@ -32,7 +36,11 @@ Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
 
 ### Predictions filter
 
+<<<<<<< HEAD
 ![Predictions filter](../../_static/reference/webapp/predictions_filter.png)
+=======
+![Predictions filter](../../_static/reference/webapp/prediction_filter.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 This filter allows you to filter records with respect of their predictions:
 
@@ -62,7 +70,11 @@ This filter allows you to filter records with respect to their status:
 
 ### Metadata filter
 
+<<<<<<< HEAD
 ![Metadata filters](../../_static/reference/webapp/metadata_filters.png)
+=======
+![Metadata filters](../../_static/reference/webapp/metadata_filter.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 This filter allows you to filter records with respect to their metadata.
 
@@ -114,7 +126,11 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
+<<<<<<< HEAD
 ![Sidebar](../../_static/reference/webapp/sidebar.png)
+=======
+![Sidebar](../../_static/reference/webapp/sidebar_view.png)
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 The sidebar is divided into three sections.
 

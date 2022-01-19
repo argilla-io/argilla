@@ -24,7 +24,7 @@ class Rule:
     """A rule (labeling function) in form of an ElasticSearch query.
 
     Args:
-        query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_.
+        query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_.
         label: The label associated to the query.
         name: An optional name for the rule to be used as identifier in the
             `rubrix.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
@@ -111,7 +111,9 @@ class Rule:
             "coverage": metrics.coverage,
             "annotated_coverage": metrics.coverage_annotated,
             "correct": int(metrics.correct) if metrics.correct is not None else None,
-            "incorrect": int(metrics.incorrect) if metrics.incorrect is not None else None,
+            "incorrect": int(metrics.incorrect)
+            if metrics.incorrect is not None
+            else None,
             "precision": metrics.precision if metrics.precision is not None else None,
         }
 

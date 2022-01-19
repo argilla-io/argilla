@@ -30,6 +30,7 @@ from rubrix.labeling.text_classification.weak_labels import (
     MissingLabelError,
     MultiLabelError,
     NoRecordsFoundError,
+    NoRulesFoundError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -105,7 +106,7 @@ def test_multi_label_error(monkeypatch):
     )
 
     with pytest.raises(MultiLabelError):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
 
 
 def test_no_records_found_error(monkeypatch):
@@ -119,21 +120,21 @@ def test_no_records_found_error(monkeypatch):
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock'."
     ):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock'.",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock")
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock' with ids \[-1\]."
     ):
-        WeakLabels(rules=[], dataset="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
 
 @pytest.mark.parametrize(
@@ -268,7 +269,7 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary()
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
@@ -285,7 +286,7 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(normalize_by_coverage=True)
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
@@ -302,18 +303,19 @@ def test_summary(monkeypatch, rules):
     summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
     expected = pd.DataFrame(
         {
-            "polarity": [
+            "label": [
                 {"negative", "positive"},
                 {"negative", "positive"},
                 set(),
                 {"negative", "positive"},
             ],
             "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
+            "annotated_coverage": [2.0 / 3, 2.0 / 3, 0, 2.0 / 3],
             "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
             "correct": [1, 2, 0, 3],
             "incorrect": [1, 0, 0, 1],
-            "precision": [1.0 / 2, 2 / 2, 0, 3.0 / 4],
+            "precision": [1.0 / 2, 2 / 2, np.nan, 3.0 / 4],
         },
         index=["first_rule", "rule_1", "rubrix_rule", "total"],
     )
@@ -405,3 +407,17 @@ def test_change_mapping(monkeypatch, rules):
     weak_labels.change_mapping(old_mapping)
 
     assert (weak_labels.matrix() == old_wlm).all()
+
+
+def test_dataset_type_error():
+    with pytest.raises(TypeError, match="must be a string, but you provided"):
+        WeakLabels([1, 2, 3])
+
+
+def test_norulesfounderror(monkeypatch):
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules", lambda x: []
+    )
+
+    with pytest.raises(NoRulesFoundError, match="No rules were found"):
+        WeakLabels("mock")

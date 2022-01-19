@@ -112,6 +112,9 @@ def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
     common_params: CommonTaskQueryParams = Depends(),
+    include_metrics: bool = Query(
+        False, description="If enabled, return related record metrics"
+    ),
     pagination: PaginationParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -128,6 +131,8 @@ def search_records(
         THe search query request
     common_params:
         Common query params
+    include_metrics:
+        include metrics flag
     pagination:
         The pagination params
     service:
@@ -155,7 +160,7 @@ def search_records(
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
-        exclude_metrics=not common_params.include_metrics,
+        exclude_metrics=not include_metrics,
     )
 
     return result

@@ -77,13 +77,20 @@ export default {
     },
   },
   data: () => ({}),
-  updated() {
-    if (this.preventBodyScroll) {
-      if (this.modalVisible) {
-        document.body.classList.add("--fixed");
-      } else {
-        document.body.classList.remove("--fixed");
+  watch: {
+    modalVisible() {
+      if (this.preventBodyScroll) {
+        if (this.modalVisible) {
+          document.body.classList.add("--fixed");
+        } else {
+          document.body.classList.remove("--fixed");
+        }
       }
+    },
+  },
+  beforeDestroy() {
+    if (this.preventBodyScroll) {
+      document.body.classList.remove("--fixed");
     }
   },
   methods: {

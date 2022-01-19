@@ -260,7 +260,7 @@ class RubrixClient:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the
-                `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/rubrix_webapp_reference.html#search-input>`_
+                `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
             as_pandas: If True, return a pandas DataFrame. If False, return a list of records.

@@ -24,8 +24,12 @@ This component enables:
 
 **NOTE**: Elasticsearch's query DSL supports **escaping special characters** that are part of the query syntax. The current list special characters are:
 
+<<<<<<< HEAD
 | ----------- |
 | `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \` |
+=======
+`+ - && || ! ( ) { } [ ] ^ " ~ * ? : \`
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 
 To escape these character use the \\ before the character. For example to search for (1+1):2 use the query `\(1\+1\)\:2`.
 
@@ -54,5 +58,8 @@ Shown below is a summary of available fields that can be used for the query DSL,
 | words.extended  |                            |                             |
 
 With this component, users are able to search specific information on the dataset, either by **full-text queries** or by queries using **Elasticsearch**.
+<<<<<<< HEAD
 
 ![Search components](../../_static/reference/webapp/search_components.png)
+=======
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a

@@ -20,12 +20,10 @@
     <ReLoading v-if="$fetchState.pending" />
     <div v-else class="wrapper">
       <div class="main">
-        <ReTopbarBrand>
-          <ReBreadcrumbs
-            :breadcrumbs="[{ link: `/ws/${workspace}`, name: workspace }]"
-          />
-          <user />
-        </ReTopbarBrand>
+        <app-header
+          :breadcrumbs="[{ link: `/ws/${workspace}`, name: workspace }]"
+          :sticky="false"
+        />
         <Error
           v-if="$fetchState.error"
           where="workspace datasets"
