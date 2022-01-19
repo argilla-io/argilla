@@ -352,3 +352,19 @@ def test_rule_metric():
     assert metrics.correct == 0
     assert metrics.incorrect == 0
     assert metrics.precision is None
+
+
+def test_search_records_with_uncovered_rules():
+    dataset = "test_search_records_with_uncovered_rules"
+    log_some_records(dataset, annotation="OK")
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+    )
+    assert len(response.json()["records"]) == 1
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json={"query": {"uncovered_by_rules": ["texto"]}},
+    )
+    assert len(response.json()["records"]) == 0
