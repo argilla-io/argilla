@@ -279,9 +279,9 @@ class WeakLabels:
         """
         if exclude_missing_annotations is not None:
             warnings.warn(
-                "The 'exclude_missing_annotations' argument is deprecated and will be removed in the next minor release."
+                "'exclude_missing_annotations' is deprecated and will be removed in the next major release. "
                 "Please use the 'include_missing' argument.",
-                category=DeprecationWarning,
+                category=FutureWarning,
             )
             include_missing = not exclude_missing_annotations
 
