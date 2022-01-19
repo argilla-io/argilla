@@ -57,9 +57,9 @@ All you need to take into account is:
 
 * Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
 
-Rubrix uses the ``ELASTICSEARCH`` environment variable to set the ES connection. 
+Rubrix uses the ``ELASTICSEARCH`` environment variable to set the ES connection.
 
-You can provide the credentials using the following scheme: 
+You can provide the credentials using the following scheme:
 
 .. code-block:: bash
 
@@ -139,7 +139,7 @@ Define a docker-compose.yaml
 
    services:
      rubrix:
-       image: recognai/rubrix:v0.8.0
+       image: recognai/rubrix:v0.8.1
        ports:
          - "80:80"
        environment:

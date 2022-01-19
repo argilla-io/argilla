@@ -20,7 +20,7 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 
 .. code-block:: bash
 
-   pip install rubrix==0.8.0
+   pip install rubrix==0.8.1
 
 **with conda**
 
@@ -78,7 +78,7 @@ This method may be preferred if you
 
 .. code-block:: bash
 
-   pip install rubrix[server]==0.8.0
+   pip install rubrix[server]==0.8.1
 
 3. Launch a local instance of the Rubrix web app
 
