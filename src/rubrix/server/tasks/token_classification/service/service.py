@@ -17,27 +17,22 @@ from typing import Iterable, List
 
 from fastapi import Depends
 
-from rubrix import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_helpers import (
-    aggregations,
-    sort_by2elasticsearch,
-)
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
 )
-from rubrix.server.tasks.commons.dao import (
-    extends_index_properties,
-)
+from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.token_classification.api.model import (
-    CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
     PREDICTED_MENTIONS_ES_FIELD_NAME,
+    CreationTokenClassificationRecord,
     TokenClassificationAggregations,
     TokenClassificationQuery,
     TokenClassificationRecord,
@@ -177,7 +172,7 @@ class TokenClassificationService:
             ),
             size=size,
             record_from=record_from,
-            exclude_fields=["metrics"] if exclude_metrics else None
+            exclude_fields=["metrics"] if exclude_metrics else None,
         )
         return TokenClassificationSearchResults(
             total=results.total,
@@ -239,8 +234,5 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(
-            dao=dao,
-            metrics=metrics
-        )
+        _instance = TokenClassificationService(dao=dao, metrics=metrics)
     return _instance
