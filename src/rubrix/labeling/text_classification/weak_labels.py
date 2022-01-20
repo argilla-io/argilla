@@ -105,11 +105,11 @@ class WeakLabels:
                 )
                 or f"rule_{index}"
             )
-            for index, rule in enumerate(rules)
+            for index, rule in enumerate(self._rules)
         }
         # raise error if there are duplicates
         counts = Counter(self._rules_index2name.values())
-        if len(counts.keys()) < len(rules):
+        if len(counts.keys()) < len(self._rules):
             raise DuplicatedRuleNameError(
                 f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
                 " Please make sure to provide unique rule names."
