@@ -241,6 +241,10 @@ def test_rules_matrix_records_annotation(monkeypatch):
         weak_labels.annotation(include_missing=True)
         == np.array([[-1, 0]], dtype=np.short)
     ).all()
+    with pytest.warns(
+        FutureWarning, match="'exclude_missing_annotations' is deprecated"
+    ):
+        weak_labels.annotation(exclude_missing_annotations=True)
 
 
 def test_summary(monkeypatch, rules):
