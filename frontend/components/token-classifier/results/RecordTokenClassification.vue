@@ -17,7 +17,7 @@
 
 <template>
   <div class="record">
-    <div class="content__toogle" v-if="!annotationEnabled">
+    <div class="content__toggle" v-if="!annotationEnabled">
       <ReCheckbox
         v-for="option in entitiesOptions"
         :key="option"
