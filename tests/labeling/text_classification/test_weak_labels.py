@@ -415,13 +415,16 @@ def test_dataset_type_error():
 
 
 def test_rules_from_dataset(monkeypatch, log_dataset):
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "stream", client.stream)
+
     mock_rules = [Rule(query="mock", label="mock")]
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load_rules",
         lambda x: mock_rules,
     )
 
-    wl = WeakLabels("test_dataset_for_applier")
+    wl = WeakLabels(log_dataset)
     assert wl.rules is mock_rules
 
 
