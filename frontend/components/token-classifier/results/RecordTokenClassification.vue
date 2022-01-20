@@ -20,32 +20,24 @@
     <div class="content__toggle" v-if="!annotationEnabled">
       <ReCheckbox
         v-for="option in entitiesOptions"
-        :key="option"
-        :id="option"
+        :key="option.key"
+        :id="option.key"
         v-model="entitiesOrigin"
         class="re-checkbox--dark"
-        :value="option"
+        :value="option.key"
       >
-        {{ option }}
+        {{ option.name }}
       </ReCheckbox>
     </div>
     <div class="content">
-    <text-spans
-      v-if="record.annotation" 
-      :dataset="dataset" 
-      :record="record"
-      :entities="record.annotation.entities"
-      :agent="record.annotation.agent"
-      @updateRecordEntities="updateRecordEntities"     
-        />
-    <text-spans
-      v-if="record.prediction && !annotationEnabled" 
-      :dataset="dataset" 
-      :record="record"
-      :entities="record.prediction.entities"
-      :agent="record.prediction.agent"
-      @updateRecordEntities="updateRecordEntities"     
-        />
+      <text-spans
+        v-for="origin in entitiesOrigin" :key="origin"
+        :dataset="dataset" 
+        :record="record"
+        :entities="record[origin].entities"
+        :agent="record[origin].agent"
+        @updateRecordEntities="updateRecordEntities"     
+          />
     </div>
     <div v-if="annotationEnabled" class="content__actions-buttons">
       <re-button
@@ -76,8 +68,8 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
-      entitiesOptions: [ 'Annotation', 'Prediction'],
-      visibleEntities: ['Annotation'],
+      entitiesOptions: [ {key: 'annotation', name: 'Annotation'}, {key: 'prediction', name: 'Prediction'}],
+      visibleEntities: ['annotation'],
     };
   },
   computed: {
@@ -89,7 +81,9 @@ export default {
         return this.visibleEntities;     
       },
       set (val) {
-        this.visibleEntities = val            
+        if (!this.annotationEnabled) {
+          this.visibleEntities = val  
+        }          
       }
     }
   },
@@ -143,7 +137,6 @@ export default {
   padding: 44px 20px 20px 20px;
   display: block;
   margin-bottom: 0; // white-space: pre-line;
-  white-space: pre-wrap;
   @include font-size(16px);
   line-height: 1.6em;
   .list__item--annotation-mode & {
@@ -152,8 +145,9 @@ export default {
 }
 .content {
   position: relative;
+  white-space: pre-wrap;
   & > div:nth-child(2) {
-    // position: absolute;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -182,14 +176,17 @@ export default {
       }
     }
   }
-}
-.re-checkbox--dark {
-  line-height: 20px;
-  align-items: center;
-  ::v-deep {
-    .checkbox-label {
-      height: auto;
-      margin-right: 1em;
+  &__toggle {
+    .re-checkbox--dark {
+      line-height: 20px;
+      align-items: center;
+      margin-right: 2em;
+      ::v-deep {
+        .checkbox-label {
+          height: auto;
+          margin-right: 1em;
+        }
+      }
     }
   }
 }
