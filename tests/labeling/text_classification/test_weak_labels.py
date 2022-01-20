@@ -414,6 +414,17 @@ def test_dataset_type_error():
         WeakLabels([1, 2, 3])
 
 
+def test_rules_from_dataset(monkeypatch, log_dataset):
+    mock_rules = [Rule(query="mock", label="mock")]
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules",
+        lambda x: mock_rules,
+    )
+
+    wl = WeakLabels("test_dataset_for_applier")
+    assert wl.rules is mock_rules
+
+
 def test_norulesfounderror(monkeypatch):
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load_rules", lambda x: []
