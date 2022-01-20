@@ -110,7 +110,7 @@ export default {
   line-height: 1em;
   position: relative;
   cursor: default;
-  display: inline;
+  display: inline-flex;
   border-radius: 2px;
   padding: 0;
   &--block {

@@ -17,22 +17,35 @@
 
 <template>
   <div class="record">
-    <div v-if="textSpans.length" ref="list" class="content__input">
-      <TextSpan
-        v-for="(token, i) in textSpans"
-        :key="i"
-        :record="record"
-        :span-id="i"
-        :spans="textSpans"
-        :dataset="dataset"
-        :class="isSelected(i) ? 'selected' : ''"
-        @startSelection="onStartSelection"
-        @endSelection="onEndSelection"
-        @selectEntity="onSelectEntity"
-        @changeEntityLabel="onChangeEntityLabel"
-        @removeEntity="onRemoveEntity"
-        @reset="onReset"
-      />
+    <div class="content__toogle" v-if="!annotationEnabled">
+      <ReCheckbox
+        v-for="option in entitiesOptions"
+        :key="option"
+        :id="option"
+        v-model="entitiesOrigin"
+        class="re-checkbox--dark"
+        :value="option"
+      >
+        {{ option }}
+      </ReCheckbox>
+    </div>
+    <div class="content">
+    <text-spans
+      v-if="record.annotation" 
+      :dataset="dataset" 
+      :record="record"
+      :entities="record.annotation.entities"
+      :agent="record.annotation.agent"
+      @updateRecordEntities="updateRecordEntities"     
+        />
+    <text-spans
+      v-if="record.prediction && !annotationEnabled" 
+      :dataset="dataset" 
+      :record="record"
+      :entities="record.prediction.entities"
+      :agent="record.prediction.agent"
+      @updateRecordEntities="updateRecordEntities"     
+        />
     </div>
     <div v-if="annotationEnabled" class="content__actions-buttons">
       <re-button
@@ -63,84 +76,22 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      entitiesOptions: [ 'Annotation', 'Prediction'],
+      visibleEntities: ['Annotation'],
     };
   },
   computed: {
-    entities() {
-      let entities = [];
-      if (this.record.annotation) {
-        entities = this.record.annotation.entities;
-      } else if (this.record.prediction) {
-        entities = this.record.prediction.entities;
-      }
-      return entities;
-    },
-    agent() {
-      if (this.record.annotation) {
-        return this.record.annotation.agent;
-      }
-      if (this.record.prediction) {
-        return this.record.prediction.agent;
-      }
-      return undefined;
-    },
-    textSpans() {
-      // TODO Simplify !!!
-      const normalizedEntities = (entities, tokens) => {
-        const tokenForChar = (character, tokens) => {
-          const tokenIdx = tokens.findIndex(
-            (token) => token.start <= character && character < token.end
-          );
-          return tokenIdx >= 0 ? tokenIdx : undefined;
-        };
-        return entities.map((entity) => {
-          const start_token = tokenForChar(entity.start, tokens);
-          const end_token = tokenForChar(entity.end - 1, tokens);
-          return entity.start_token && entity.end_token
-            ? entity
-            : { ...entity, start_token, end_token: end_token + 1 };
-        });
-      };
-
-      let idx = 0;
-      let textSpans = [];
-      const entities = normalizedEntities(
-        this.entities,
-        this.record.visualTokens
-      );
-      while (idx < this.record.visualTokens.length) {
-        const entity = entities.find(
-          (entity) => entity.start_token <= idx && idx < entity.end_token
-        );
-        if (entity) {
-          textSpans.push({
-            entity,
-            tokens: this.record.visualTokens.slice(
-              entity.start_token,
-              entity.end_token
-            ),
-            start: entity.start,
-            end: entity.end,
-            agent: this.agent,
-          });
-          idx = entity.end_token;
-        } else {
-          const token = this.record.visualTokens[idx];
-          textSpans.push({
-            entity: undefined,
-            tokens: [token],
-            start: token.start,
-            end: token.end,
-            agent: this.agent,
-          });
-          idx++;
-        }
-      }
-      return textSpans;
-    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    entitiesOrigin: {
+      get () {
+        return this.visibleEntities;     
+      },
+      set (val) {
+        this.visibleEntities = val            
+      }
+    }
   },
   methods: {
     ...mapActions({
@@ -149,16 +100,6 @@ export default {
       validate: "entities/datasets/validateAnnotations",
     }),
 
-    onReset() {
-      this.selectionStart = undefined;
-      this.selectionEnd = undefined;
-    },
-    onStartSelection(spanId) {
-      this.selectionStart = spanId;
-    },
-    onEndSelection(spanId) {
-      this.selectionEnd = spanId;
-    },
     updateRecordEntities(entities) {
       this.updateRecords({
         dataset: this.dataset,
@@ -174,7 +115,7 @@ export default {
           },
         ],
       });
-      this.onReset();
+      // this.onReset();
     },
     async onValidate(record) {
       const emptyEntities = {
@@ -193,49 +134,6 @@ export default {
         ],
       });
     },
-    onSelectEntity(entity) {
-      const from = Math.min(this.selectionStart, this.selectionEnd);
-      const to = Math.max(this.selectionStart, this.selectionEnd);
-      const startToken = this.textSpans[from].tokens[0];
-      const endToken = this.textSpans[to].tokens.reverse()[0];
-
-      let entities = [...this.entities];
-      entities.push({
-        start: startToken.start,
-        end: endToken.end,
-        label: entity,
-      });
-      this.updateRecordEntities(entities);
-    },
-    onChangeEntityLabel(entity, newLabel) {
-      let entities = this.entities.map((ent) => {
-        return ent.start === entity.start &&
-          ent.end === entity.end &&
-          ent.label === entity.label
-          ? { ...ent, label: newLabel }
-          : ent;
-      });
-      this.updateRecordEntities(entities);
-    },
-    onRemoveEntity(entity) {
-      const found = this.entities.findIndex(
-        (ent) =>
-          ent.start === entity.start &&
-          ent.end === entity.end &&
-          ent.label === entity.label
-      );
-      let entities = [...this.entities];
-      entities.splice(found, 1);
-      this.updateRecordEntities(entities);
-    },
-    isSelected(i) {
-      const init = Math.min(this.selectionStart, this.selectionEnd);
-      const end = Math.max(this.selectionStart, this.selectionEnd);
-      if (i >= init && i <= end) {
-        return true;
-      }
-      return false;
-    },
   },
 };
 </script>
@@ -253,6 +151,19 @@ export default {
   }
 }
 .content {
+  position: relative;
+  & > div:nth-child(2) {
+    // position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    ::v-deep {
+      .span__text {
+        opacity: 0;
+      }
+    }
+  }
   &__input {
     padding-right: 200px;
   }
@@ -269,6 +180,16 @@ export default {
       & + .re-button {
         margin-left: 1em;
       }
+    }
+  }
+}
+.re-checkbox--dark {
+  line-height: 20px;
+  align-items: center;
+  ::v-deep {
+    .checkbox-label {
+      height: auto;
+      margin-right: 1em;
     }
   }
 }
