@@ -270,8 +270,8 @@ class WeakLabels:
         """Returns the annotation labels as an array of integers.
 
         Args:
-            include_missing: If True, returns an array of the length of the record list.
-                For this we will pad the array with the ``self.label2int[None]`` integer for records without an annotation.
+            include_missing: If True, returns an array of the length of the record list (``self.records()``).
+                For this we will fill the array with the ``self.label2int[None]`` integer for records without an annotation.
             exclude_missing_annotations: DEPRECATED
 
         Returns:
