@@ -84,12 +84,29 @@ This method may be preferred if you
 
 .. code-block::
 
-   python -m rubrix.server
+   python -m rubrix
 
 By default, the Rubrix server will look for your Elasticsearch endpoint at ``http://localhost:9200``.
 But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
 
 **If you are already running an Elasticsearch instance for other applications and want to share it with Rubrix**, please refer to our :ref:`advanced setup guide <configure-elasticsearch-role-users>`.
+
+Uvicorn
+"""""""
+
+Since, rubrix server is built using fastapi, you can launch rubrix server using **uvicorn** ASGI server:
+
+.. code-block::
+
+   uvicorn rubrix:app
+
+*(for older rubrix version you should launch as)*
+
+.. code-block::
+
+   uvicorn rubrix.server.server:app
+
+See more details `here <https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn>`_
 
 3. Start logging data
 ---------------------
