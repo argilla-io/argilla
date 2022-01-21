@@ -17,6 +17,7 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
+import { indexOf, length } from 'stringz';
 
 class TokenClassificationRecord extends BaseRecord {
   tokens;
@@ -28,8 +29,8 @@ class TokenClassificationRecord extends BaseRecord {
     super({ ...superData });
     const { visualTokens } = tokens.reduce(
       ({ visualTokens, startPosition }, token) => {
-        const start = raw_text.indexOf(token, startPosition);
-        const end = start + token.length;
+        const start = indexOf(raw_text, token, startPosition);
+        const end = start + length(token);
         return {
           visualTokens: [...visualTokens, { start, end, text: token }],
           startPosition: end,
