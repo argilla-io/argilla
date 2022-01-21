@@ -17,7 +17,7 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
-import { indexOf, length } from 'stringz';
+import { indexOf, length } from "stringz";
 
 class TokenClassificationRecord extends BaseRecord {
   tokens;

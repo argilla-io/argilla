@@ -76,7 +76,7 @@
 import ClickOutside from "v-click-outside";
 import "assets/icons/check";
 import "assets/icons/cross";
-import { substring } from 'stringz';
+import { substring } from "stringz";
 
 export default {
   directives: {
@@ -114,10 +114,15 @@ export default {
       return this.spans[this.spanId];
     },
     text() {
-      return substring(this.record.raw_text, this.spans[this.spanId].start, this.spans[this.spanId].end)
+      return substring(
+        this.record.raw_text,
+        this.spans[this.spanId].start,
+        this.spans[this.spanId].end
+      );
     },
     whiteSpace() {
-      return substring(this.record.raw_text,
+      return substring(
+        this.record.raw_text,
         this.spans[this.spanId].end,
         this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
       );
