@@ -38,13 +38,29 @@ from rubrix.client.models import (
 )
 from rubrix.monitoring.model_monitor import monitor
 
+_LOGGER = logging.getLogger(__name__)
+
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
 except pkg_resources.DistributionNotFound:
     # package is not installed
     pass
 
-_LOGGER = logging.getLogger(__name__)
+try:
+    from rubrix.server.server import app
+except ModuleNotFoundError as ex:
+    module_name = ex.name
+
+    def fallback_app(*args, **kwargs):
+        raise RuntimeError(
+            "\n"
+            f"Cannot start rubrix server. Some dependencies was not found:[{module_name}].\n"
+            "Please, install missing modules or reinstall rubrix with server extra deps:\n"
+            "pip install rubrix[server]"
+        )
+
+    app = fallback_app
+
 
 _client: Optional[
     RubrixClient
