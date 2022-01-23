@@ -58,7 +58,8 @@ class mappings:
                     "fielddata": True,
                 },
             },
-            "meta": {"experimental": "true"},
+            # TODO(@frascuchon): verify min es version that support meta fields
+            # "meta": {"experimental": "true"},
         }
 
     @staticmethod
@@ -122,7 +123,8 @@ def dynamic_metadata_text():
 def tasks_common_mappings():
     """Commons index mappings"""
     return {
-        "_meta": {"version.min": "0.9"},
+        # TODO(@frascuchon): verify min es version that support meta fields
+        # "_meta": {"version.min": "0.9"},
         # "dynamic": "strict",
         "properties": {
             "id": mappings.keyword_field(),
