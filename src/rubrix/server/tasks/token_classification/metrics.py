@@ -20,7 +20,7 @@ from rubrix.server.tasks.commons.metrics.model.base import (
     PythonMetric,
     TermsAggregation,
 )
-from rubrix.server.tasks.token_classification import (
+from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
     TokenClassificationRecord,
 )
