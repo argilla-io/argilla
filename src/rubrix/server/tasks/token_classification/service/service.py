@@ -24,6 +24,7 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
 from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
@@ -37,6 +38,9 @@ from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchResults,
+)
+from rubrix.server.tasks.token_classification.dao.es_config import (
+    token_classification_mappings,
 )
 
 extends_index_properties(
@@ -88,6 +92,10 @@ class TokenClassificationService:
         self.__dao__ = dao
         self.__metrics__ = metrics
 
+        self.__dao__.register_task_mappings(
+            TaskType.token_classification, token_classification_mappings()
+        )
+
     def add_records(
         self,
         dataset: Dataset,
@@ -95,7 +103,9 @@ class TokenClassificationService:
     ):
         self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
-            dataset=dataset, records=records, record_class=TokenClassificationRecord
+            dataset=dataset,
+            records=records,
+            record_class=TokenClassificationRecord,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -148,6 +158,8 @@ class TokenClassificationService:
                     ],
                 ),
                 aggregations={
+                    **aggregations.predicted_as(),
+                    **aggregations.annotated_as(),
                     PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
                         inner_aggregation={
