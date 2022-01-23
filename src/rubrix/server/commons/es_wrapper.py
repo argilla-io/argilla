@@ -197,6 +197,7 @@ class ElasticsearchWrapper(LoggingMixin):
             self.__client__.indices.put_template(name=name, body=template)
 
     def delete_index_template(self, index_template: str):
+        """Deletes an index template"""
         self.__client__.indices.delete_template(name=index_template, ignore=[400, 404])
 
     def delete_index(self, index: str):
@@ -505,8 +506,9 @@ class ElasticsearchWrapper(LoggingMixin):
         self,
         index: str,
         field_name: str,
-        mapping,
+        mapping: Dict[str, Any],
     ):
+        """Creates or updates an index field mapping configuration"""
         self.__client__.indices.put_mapping(
             index=index,
             body={"properties": {field_name: mapping}},

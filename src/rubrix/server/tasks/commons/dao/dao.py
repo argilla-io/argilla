@@ -119,6 +119,8 @@ class DatasetRecordsDAO:
 
     _INSTANCE = None
 
+    # Keep info about elasticsearch mappings per task
+    # This info must be provided by each task using dao.register_task_mappings method
     _MAPPINGS_BY_TASKS = {}
 
     @classmethod
@@ -141,11 +143,13 @@ class DatasetRecordsDAO:
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
-
         self.init()
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
+
+        # TODO(@frascuchon): detect settings.disable_es_index_template_creation env var
+        #  and show alternative to customize dataset index configuration
         self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(
@@ -342,11 +346,32 @@ class DatasetRecordsDAO:
                 )
 
     def register_task_mappings(self, task_type: TaskType, mappings: Dict[str, Any]):
+        """
+        Register an index mappings configuration for provided task.
+
+        Args:
+            task_type:
+                The task Type
+            mappings:
+                The elasticsearch index mappings section configuration
+        """
         self._MAPPINGS_BY_TASKS[task_type] = mappings.copy()
 
     def create_dataset_index(
         self, dataset: BaseDatasetDB, force_recreate: bool = False
     ) -> str:
+        """
+        Creates a dataset records elasticsearch index based on dataset task type
+
+        Args:
+            dataset:
+                The dataset
+            force_recreate:
+                If True, the index will be deleted and recreated
+
+        Returns:
+            The generated index name.
+        """
         _mappings = tasks_common_mappings()
         task_mappings = self._MAPPINGS_BY_TASKS[dataset.task]
         for k in task_mappings:

@@ -2,6 +2,7 @@ from rubrix.server.tasks.commons.dao.es_config import mappings
 
 
 def text2text_mappings():
+    """Text2Text index mappings"""
     return {
         "_source": mappings.source(
             excludes=[

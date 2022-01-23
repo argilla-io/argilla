@@ -2,6 +2,7 @@ from rubrix.server.tasks.commons.dao.es_config import mappings
 
 
 def text_classification_mappings():
+    """Text classification index mappings"""
     return {
         "_source": mappings.source(
             excludes=[
