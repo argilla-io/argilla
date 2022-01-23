@@ -20,20 +20,18 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
-from rubrix.server.commons.es_helpers import (
-    DATASETS_RECORDS_INDEX_TEMPLATE,
-    aggregations,
-    parse_aggregations,
-)
+from rubrix.server.commons.es_helpers import aggregations, parse_aggregations
+from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.commons.settings import settings
-from rubrix.server.datasets.dao import (
-    DATASETS_RECORDS_INDEX_NAME,
-    dataset_records_index,
-)
 from rubrix.server.datasets.model import BaseDatasetDB
-from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError
+from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError, TaskType
+from rubrix.server.tasks.commons.dao.es_config import (
+    mappings,
+    tasks_common_mappings,
+    tasks_common_settings,
+)
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
@@ -93,10 +91,35 @@ def extends_index_analyzers(analyzers: Dict[str, Any]):
     _extensions.analyzers.append(analyzers)
 
 
+def dataset_records_index(dataset_id: str) -> str:
+    """
+    Returns dataset records index for a given dataset id
+
+    The dataset info is stored in two elasticsearch indices. The main
+    index where all datasets definition are stored and
+    an specific dataset index for data records.
+
+    This function calculates the corresponding dataset records index
+    for a given dataset id.
+
+    Parameters
+    ----------
+    dataset_id
+
+    Returns
+    -------
+        The dataset records index name
+
+    """
+    return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
+
+
 class DatasetRecordsDAO:
     """Datasets records DAO"""
 
     _INSTANCE = None
+
+    _MAPPINGS_BY_TASKS = {}
 
     @classmethod
     def get_instance(
@@ -118,30 +141,12 @@ class DatasetRecordsDAO:
 
     def __init__(self, es: ElasticsearchWrapper):
         self._es = es
+
         self.init()
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
-
-        template = DATASETS_RECORDS_INDEX_TEMPLATE.copy()
-
-        if _extensions.analyzers:
-            for analyzer in _extensions.analyzers:
-                template["settings"]["analysis"]["analyzer"].update(analyzer)
-
-        if _extensions.dynamic_templates:
-            for dynamic_template in _extensions.dynamic_templates:
-                template["mappings"]["dynamic_templates"].append(dynamic_template)
-
-        if _extensions.properties:
-            for property in _extensions.properties:
-                template["mappings"]["properties"].update(property)
-
-        self._es.create_index_template(
-            name=DATASETS_RECORDS_INDEX_NAME,
-            template=template,
-            force_recreate=not settings.disable_es_index_template_creation,
-        )
+        self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(
         self,
@@ -180,9 +185,7 @@ class DatasetRecordsDAO:
                 db_record.last_updated = now
             documents.append(db_record.dict(exclude_none=False))
 
-        index_name = dataset_records_index(dataset.id)
-
-        self._es.create_index(index=index_name)
+        index_name = self.create_dataset_index(dataset)
         self._configure_metadata_fields(index_name, metadata_values)
         return self._es.add_documents(
             index=index_name,
@@ -237,9 +240,7 @@ class DatasetRecordsDAO:
         if compute_aggregations and search.include_default_aggregations:
             current_aggrs = results.get("aggregations", {})
             for aggr in [
-                aggregations.predicted_as(),
                 aggregations.predicted_by(),
-                aggregations.annotated_as(),
                 aggregations.annotated_by(),
                 aggregations.status(),
                 aggregations.predicted(),
@@ -337,9 +338,31 @@ class DatasetRecordsDAO:
                 self._es.create_field_mapping(
                     index,
                     field_name=f"metadata.{field}",
-                    type="nested",
-                    include_in_root=True,
+                    mapping=mappings.nested_field(),
                 )
+
+    def register_task_mappings(self, task_type: TaskType, mappings: Dict[str, Any]):
+        self._MAPPINGS_BY_TASKS[task_type] = mappings.copy()
+
+    def create_dataset_index(
+        self, dataset: BaseDatasetDB, force_recreate: bool = False
+    ) -> str:
+        _mappings = tasks_common_mappings()
+        task_mappings = self._MAPPINGS_BY_TASKS[dataset.task]
+        for k in task_mappings:
+            if isinstance(task_mappings[k], list):
+                _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
+            else:
+                _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
+
+        index_name = dataset_records_index(dataset.id)
+        self._es.create_index(
+            index=index_name,
+            settings=tasks_common_settings(),
+            mappings={**tasks_common_mappings(), **_mappings},
+            force_recreate=force_recreate,
+        )
+        return index_name
 
 
 _instance: Optional[DatasetRecordsDAO] = None
