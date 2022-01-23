@@ -42,7 +42,6 @@ class mappings:
                     "analyzer": EXTENDED_ANALYZER_REF,
                 }
             },
-            "meta": {"deprecated": "true"},
         }
 
     @staticmethod
