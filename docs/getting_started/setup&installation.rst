@@ -94,7 +94,7 @@ But you can customize this by setting the ``ELASTICSEARCH`` environment variable
 Uvicorn
 """""""
 
-Since, rubrix server is built using fastapi, you can launch rubrix server using **uvicorn** ASGI server:
+Since the Rubrix server is built on fastapi, you can launch it using **uvicorn**:
 
 .. code-block::
 
