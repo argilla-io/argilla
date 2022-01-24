@@ -332,8 +332,12 @@ $hue: 360;
     1
   );
   .color_#{$i - 1} {
-    ::v-deep span {
+    ::v-deep span.annotation {
       background: $rcolor;
+    }
+    ::v-deep span.prediction {
+      padding-bottom: 7px;
+      border-bottom: 4px solid $rcolor;
     }
     &.active,
     &.tag:hover {

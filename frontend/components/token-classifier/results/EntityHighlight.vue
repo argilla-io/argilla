@@ -18,6 +18,7 @@
 <template>
   <span :class="['highlight', isText ? '' : 'highlight--block']">
     <span
+      :class="span.entity.origin"
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
@@ -110,9 +111,10 @@ export default {
   line-height: 1em;
   position: relative;
   cursor: default;
-  display: inline-flex;
+  // display: inline-flex;
   border-radius: 2px;
   padding: 0;
+  margin-right: -3px;
   &--block {
     display: block;
     .highlight__content:after {

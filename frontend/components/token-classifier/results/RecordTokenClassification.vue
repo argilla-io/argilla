@@ -17,25 +17,22 @@
 
 <template>
   <div class="record">
-    <div class="content__toggle" v-if="!annotationEnabled">
-      <ReCheckbox
-        v-for="option in entitiesOptions"
-        :key="option.key"
-        :id="option.key"
-        v-model="entitiesOrigin"
-        class="re-checkbox--dark"
-        :value="option.key"
-      >
-        {{ option.name }}
-      </ReCheckbox>
-    </div>
     <div class="content">
       <text-spans
+        v-if="annotationEnabled"
+        :dataset="dataset" 
+        :record="record"
+        :entities="annotationEntities"
+        :agent="agent"  
+          />
+      <text-spans 
+        v-else
         v-for="origin in entitiesOrigin" :key="origin"
         :dataset="dataset" 
         :record="record"
-        :entities="record[origin].entities"
-        :agent="record[origin].agent"
+        :class="origin"
+        :entities="getEntitiesByOrigin(origin)"
+        :agent="record[origin].agent || []"
         @updateRecordEntities="updateRecordEntities"     
           />
     </div>
@@ -68,24 +65,31 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
-      entitiesOptions: [ {key: 'annotation', name: 'Annotation'}, {key: 'prediction', name: 'Prediction'}],
-      visibleEntities: ['annotation'],
+      entitiesOrigin: ['prediction', 'annotation'],
     };
   },
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
-    entitiesOrigin: {
-      get () {
-        return this.visibleEntities;     
-      },
-      set (val) {
-        if (!this.annotationEnabled) {
-          this.visibleEntities = val  
-        }          
+    annotationEntities() {
+      let entities = [];
+      if (this.record.annotation) {
+        entities = this.record.annotation.entities.map(obj=> ({ ...obj, origin: 'annotation' }));
+      } else if (this.record.prediction) {
+        entities = this.record.prediction.entities.map(obj=> ({ ...obj, origin: 'prediction' }));;
       }
-    }
+      return entities;
+    },
+    agent() {
+      if (this.record.annotation) {
+        return this.record.annotation.agent;
+      }
+      if (this.record.prediction) {
+        return this.record.prediction.agent;
+      }
+      return undefined;
+    },
   },
   methods: {
     ...mapActions({
@@ -93,7 +97,9 @@ export default {
       discard: "entities/datasets/discardAnnotations",
       validate: "entities/datasets/validateAnnotations",
     }),
-
+    getEntitiesByOrigin(origin) {
+      return this.record[origin] ? this.record[origin].entities.map(obj=> ({ ...obj, origin: origin })) : []
+    },
     updateRecordEntities(entities) {
       this.updateRecords({
         dataset: this.dataset,
@@ -176,18 +182,26 @@ export default {
       }
     }
   }
-  &__toggle {
-    .re-checkbox--dark {
-      line-height: 20px;
-      align-items: center;
-      margin-right: 2em;
-      ::v-deep {
-        .checkbox-label {
-          height: auto;
-          margin-right: 1em;
-        }
-      }
+}
+.prediction {
+  pointer-events: none;
+  ::v-deep {
+    .highlight__content {
+      padding-top: 4px;
+      padding-bottom: 2px;
+      pointer-events: all;
+    }
+  }
+}
+.annotation {
+  pointer-events: none;
+  ::v-deep {
+    .highlight__content {
+      padding-top: 2px;
+      padding-bottom: 4px;
+      pointer-events: all;
     }
   }
 }
 </style>
+

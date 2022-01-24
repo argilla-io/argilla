@@ -51,11 +51,9 @@ export default {
     },
     agent: {
       type: String,
-      required: true,
     },
     entities: {
       type: Array,
-      required: true,
     },
   },
   data: function () {
