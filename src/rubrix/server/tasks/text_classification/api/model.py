@@ -473,6 +473,8 @@ class TextClassificationQuery(BaseModel):
         List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
+    uncovered_by_rules:
+        Only return records that are NOT covered by these rules.
 
     """
 
@@ -488,6 +490,11 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    uncovered_by_rules: List[str] = Field(
+        default_factory=list,
+        description="List of rule queries that WILL NOT cover the resulting records",
+    )
 
     def as_elasticsearch(self) -> Dict[str, Any]:
         """Build an elasticsearch query part from search query"""
@@ -512,17 +519,21 @@ class TextClassificationQuery(BaseModel):
         query_text = filters.text_query(self.query_text)
         all_filters.extend(query_filters)
 
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
+        return filters.boolean_filter(
+            must_query=query_text or {"match_all": {}},
+            must_not_query=filters.boolean_filter(
+                should_filters=[
+                    filters.text_query(query) for query in self.uncovered_by_rules
+                ]
+            )
+            if self.uncovered_by_rules
+            else None,
+            filter_query=filters.boolean_filter(
+                should_filters=all_filters, minimum_should_match=len(all_filters)
+            )
+            if all_filters
+            else None,
+        )
 
 
 class TextClassificationSearchRequest(BaseModel):

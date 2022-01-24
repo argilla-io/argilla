@@ -33,6 +33,7 @@
     "nuxt": "^2.14.6",
     "nuxt-highlightjs": "^1.0.1",
     "sass-loader": "^10.1.0",
+    "stringz": "^2.1.0",
     "v-click-outside": "^3.1.2",
     "vue-moment": "^4.1.0",
     "vue-svgicon": "^3.2.9",

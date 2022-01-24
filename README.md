@@ -1,9 +1,13 @@
 <p align="left">
     <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
 </p>
-<h3> Rubrix is an open-source Python framework to label, refine and monitor data for NLP</h3>
+<h3> Open-source framework to label, refine and monitor data for NLP</h3>
 
-<p align="left">
+https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
+
+<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
+
+<p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
         <img alt="CI" src="https://github.com/recognai/rubrix/workflows/CI/badge.svg?branch=master&event=push">
     </a>
@@ -17,18 +21,18 @@
         <a href="https://hub.docker.com/r/recognai/rubrix">
         <img alt="CI" src="https://img.shields.io/docker/pulls/recognai/rubrix">
     </a>
-    <a href="https://anaconda.org/conda-forge/rubrix">
+    <!--a href="https://anaconda.org/conda-forge/rubrix">
         <img alt="CI" src="https://img.shields.io/conda/pn/conda-forge/rubrix?logo=anaconda&style=flat">
-    </a>
+    </a-->
     <a href="https://anaconda.org/conda-forge/rubrix">
         <img alt="CI" src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
     </a>
     <a href="https://rubrix.readthedocs.io/en/stable/">
         <img alt="CI" src="https://img.shields.io/static/v1?logo=readthedocs&style=flat&color=pink&label=docs&message=rubrix">
     </a>
-    <a href="https://github.com/ambv/black">
+    <!--a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
-    </a>
+    </a-->
     <a href="https://twitter.com/rubrixml">
         <img alt="CI" src="https://img.shields.io/twitter/follow/rubrixml.svg?style=social&label=Follow">
     </a>
@@ -36,21 +40,12 @@
 
 </p>
 
----
-
-<p align="justify" style="font-size: 18px">
-    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a></span>
-    〰️
-    <a href="https://docs.rubrix.ml">📚 Docs</a>
-    〰️
-    <a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a>
-    〰️
-    <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a>
+<p align="center">
+    <h3><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a></h3>
+    <h3><a href="https://docs.rubrix.ml">📚 Docs</a></h3>
+    <h3><a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a></h3>
+    <h3><a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a></h3>
 </p>
-
-https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
-
-<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
 
 ## What is Rubrix?
 

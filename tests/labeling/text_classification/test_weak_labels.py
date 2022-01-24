@@ -30,6 +30,7 @@ from rubrix.labeling.text_classification.weak_labels import (
     MissingLabelError,
     MultiLabelError,
     NoRecordsFoundError,
+    NoRulesFoundError,
     WeakLabels,
 )
 from tests.server.test_helpers import client
@@ -105,7 +106,7 @@ def test_multi_label_error(monkeypatch):
     )
 
     with pytest.raises(MultiLabelError):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
 
 
 def test_no_records_found_error(monkeypatch):
@@ -119,21 +120,21 @@ def test_no_records_found_error(monkeypatch):
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock'."
     ):
-        WeakLabels(rules=[], dataset="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock")
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock'.",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock")
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock")
     with pytest.raises(
         NoRecordsFoundError, match="No records found in dataset 'mock' with ids \[-1\]."
     ):
-        WeakLabels(rules=[], dataset="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
     with pytest.raises(
         NoRecordsFoundError,
         match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
     ):
-        WeakLabels(rules=[], dataset="mock", query="mock", ids=[-1])
+        WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
 
 @pytest.mark.parametrize(
@@ -237,9 +238,13 @@ def test_rules_matrix_records_annotation(monkeypatch):
     ).all()
     assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([[-1, 0]], dtype=np.short)
     ).all()
+    with pytest.warns(
+        FutureWarning, match="'exclude_missing_annotations' is deprecated"
+    ):
+        weak_labels.annotation(exclude_missing_annotations=True)
 
 
 def test_summary(monkeypatch, rules):
@@ -397,7 +402,7 @@ def test_change_mapping(monkeypatch, rules):
         )
     ).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([2, 10, -10, 1, 2], dtype=np.short)
     ).all()
     assert weak_labels.label2int == new_mapping
@@ -406,3 +411,31 @@ def test_change_mapping(monkeypatch, rules):
     weak_labels.change_mapping(old_mapping)
 
     assert (weak_labels.matrix() == old_wlm).all()
+
+
+def test_dataset_type_error():
+    with pytest.raises(TypeError, match="must be a string, but you provided"):
+        WeakLabels([1, 2, 3])
+
+
+def test_rules_from_dataset(monkeypatch, log_dataset):
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "stream", client.stream)
+
+    mock_rules = [Rule(query="mock", label="mock")]
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules",
+        lambda x: mock_rules,
+    )
+
+    wl = WeakLabels(log_dataset)
+    assert wl.rules is mock_rules
+
+
+def test_norulesfounderror(monkeypatch):
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules", lambda x: []
+    )
+
+    with pytest.raises(NoRulesFoundError, match="No rules were found"):
+        WeakLabels("mock")

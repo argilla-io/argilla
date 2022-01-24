@@ -17,13 +17,25 @@
 
 <template>
   <re-loading v-if="$fetchState.pending" />
-  <error
-    v-else-if="$fetchState.error"
-    :link="errorLink"
-    :where="datasetName"
-    :error="$fetchState.error"
-  ></error>
-  <task-search v-else :dataset="dataset" />
+  <div
+    :class="[
+      'app',
+      annotationEnabled ? '--annotation' : '',
+      areMetricsVisible ? '--metrics' : '',
+    ]"
+    v-else
+  >
+    <app-header :dataset="dataset" :breadcrumbs="breadcrumbs">
+      <task-sidebar v-if="dataset" :dataset="dataset" />
+    </app-header>
+    <error
+      v-if="$fetchState.error"
+      :link="errorLink"
+      :where="datasetName"
+      :error="$fetchState.error"
+    ></error>
+    <task-search v-else :dataset="dataset" />
+  </div>
 </template>
 
 <script>
@@ -39,10 +51,22 @@ export default {
     ...mapGetters({
       findByName: "entities/datasets/findByName",
     }),
-
+    breadcrumbs() {
+      return [
+        { link: { path: workspaceHome(this.workspace) }, name: this.workspace },
+        {
+          link: this.$route.fullPath,
+          name: this.dataset ? this.dataset.name : undefined,
+        },
+      ];
+    },
     dataset() {
       // This computed data makes that store updates could be shown here
-      return this.findByName(this.datasetName);
+      try {
+        return this.findByName(this.datasetName);
+      } catch {
+        return null;
+      }
     },
     datasetName() {
       return this.$route.params.dataset;
@@ -53,6 +77,12 @@ export default {
     errorLink() {
       return workspaceHome(this.workspace);
     },
+    areMetricsVisible() {
+      return this.dataset && this.dataset.viewSettings.visibleMetrics;
+    },
+    annotationEnabled() {
+      return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
+    },
   },
   methods: {
     ...mapActions({
@@ -61,3 +91,5 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped></style>

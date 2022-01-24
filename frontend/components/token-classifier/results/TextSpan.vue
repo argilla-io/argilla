@@ -67,7 +67,6 @@
           </ul>
         </span>
       </div>
-      <div v-if="showEntitiesSelector" class="overlay" />
     </span>
     <span class="span__whitespace" v-html="whiteSpace"></span>
   </span>
@@ -77,6 +76,7 @@
 import ClickOutside from "v-click-outside";
 import "assets/icons/check";
 import "assets/icons/cross";
+import { substring } from "stringz";
 
 export default {
   directives: {
@@ -114,13 +114,15 @@ export default {
       return this.spans[this.spanId];
     },
     text() {
-      return this.record.raw_text.slice(
+      return substring(
+        this.record.raw_text,
         this.spans[this.spanId].start,
         this.spans[this.spanId].end
       );
     },
     whiteSpace() {
-      return this.record.raw_text.slice(
+      return substring(
+        this.record.raw_text,
         this.spans[this.spanId].end,
         this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
       );
@@ -287,19 +289,6 @@ export default {
   &__whitespace {
     @include font-size(16px);
   }
-}
-
-.overlay {
-  background: white;
-  opacity: 0.5;
-  height: 100vh;
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
 }
 
 // highlight word with overlay
