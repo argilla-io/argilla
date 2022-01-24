@@ -73,13 +73,13 @@ Below you can see a screenshot for setting up a new *rubrix* Role and its permis
 Change elasticsearch index analyzers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As default, for index text fields, rubrix use the `standard` analyzer and the `whitespace` for accurate
-text searches. If those analyzers does not feat your data, you can change by using the environment variables
+By default, for indexing text fields, Rubrix uses the `standard` analyzer for general search and the `whitespace` analyzer for more exact queries (required by certain rules in the weak supervision module).
+ If those analyzers don't fit your use case, you can change them using the following environment variables:
 `RUBRIX_DEFAULT_ES_SEARCH_ANALYZER` and `RUBRIX_EXACT_ES_SEARCH_ANALYZER`.
 
 Note that provided analyzers names should be defined as built-in ones. If you want to use a
-customized analyzer, you should create it inside an index_template matching the rubrix index names (`.rubrix*.records-v0),
-and then provide the analyzer name using the convenient environment variable.
+customized analyzer, you should create it inside an index_template matching Rubrix index names (`.rubrix*.records-v0),
+and then provide the analyzer name using the specific environment variable.
 
 
 Deploy to aws instance using docker-machine
