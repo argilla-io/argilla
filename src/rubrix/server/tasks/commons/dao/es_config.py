@@ -32,14 +32,24 @@ class mappings:
     @staticmethod
     def words_text_field():
         """Mappings config for old `word` field. Deprecated"""
+
+        default_analyzer = settings.default_es_search_analyzer
+        exact_analyzer = settings.exact_es_search_analyzer
+
+        if default_analyzer == "standard":
+            default_analyzer = MULTILINGUAL_STOP_ANALYZER_REF
+
+        if exact_analyzer == "whitespace":
+            exact_analyzer = EXTENDED_ANALYZER_REF
+
         return {
             "type": "text",
             "fielddata": True,
-            "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
+            "analyzer": default_analyzer,
             "fields": {
                 "extended": {
                     "type": "text",
-                    "analyzer": EXTENDED_ANALYZER_REF,
+                    "analyzer": exact_analyzer,
                 }
             },
         }
@@ -47,11 +57,14 @@ class mappings:
     @staticmethod
     def text_field():
         """Mappings config for textual field"""
+        default_analyzer = settings.default_es_search_analyzer
+        exact_analyzer = settings.exact_es_search_analyzer
+
         return {
             "type": "text",
-            "analyzer": "standard",
+            "analyzer": default_analyzer,
             "fields": {
-                "exact": {"type": "text", "analyzer": "whitespace"},
+                "exact": {"type": "text", "analyzer": exact_analyzer},
                 "wordcloud": {
                     "type": "text",
                     "analyzer": MULTILINGUAL_STOP_ANALYZER_REF,
