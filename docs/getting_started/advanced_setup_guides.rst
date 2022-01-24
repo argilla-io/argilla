@@ -57,9 +57,9 @@ All you need to take into account is:
 
 * Rubrix creates an index template for these indices, so you may provide related template privileges to this ES role.
 
-Rubrix uses the ``ELASTICSEARCH`` environment variable to set the ES connection. 
+Rubrix uses the ``ELASTICSEARCH`` environment variable to set the ES connection.
 
-You can provide the credentials using the following scheme: 
+You can provide the credentials using the following scheme:
 
 .. code-block:: bash
 
@@ -68,6 +68,18 @@ You can provide the credentials using the following scheme:
 Below you can see a screenshot for setting up a new *rubrix* Role and its permissions:
 
 :raw-html-m2r:`<img src="https://user-images.githubusercontent.com/2518789/142883104-f4f20cf0-34a0-47ff-8ee3-ab9f4644271c.png"/>`
+
+
+Change elasticsearch index analyzers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As default, for index text fields, rubrix use the `standard` analyzer and the `whitespace` for accurate
+text searches. If those analyzers does not feat your data, you can change by using the environment variables
+`RUBRIX_DEFAULT_ES_SEARCH_ANALYZER` and `RUBRIX_EXACT_ES_SEARCH_ANALYZER`.
+
+Note that provided analyzers names should be defined as built-in ones. If you want to use a
+customized analyzer, you should create it inside an index_template matching the rubrix index names (`.rubrix*.records-v0),
+and then provide the analyzer name using the convenient environment variable.
 
 
 Deploy to aws instance using docker-machine
