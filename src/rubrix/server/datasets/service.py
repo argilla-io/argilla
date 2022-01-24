@@ -24,7 +24,9 @@ from rubrix.server.commons.errors import (
     ForbiddenOperationError,
     WrongTaskError,
 )
-from .dao import DatasetsDAO, create_datasets_dao
+
+from ..security.model import User
+from .dao import DatasetsDAO
 from .model import (
     CopyDatasetRequest,
     CreationDatasetRequest,
@@ -33,7 +35,6 @@ from .model import (
     TaskType,
     UpdateDatasetRequest,
 )
-from ..security.model import User
 
 
 class DatasetsService:
@@ -43,7 +44,7 @@ class DatasetsService:
 
     @classmethod
     def get_instance(
-        cls, dao: DatasetsDAO = Depends(create_datasets_dao)
+        cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
     ) -> "DatasetsService":
 
         """
@@ -292,8 +293,12 @@ class DatasetsService:
         dataset_workspace = user.check_workspace(dataset_workspace)
 
         try:
-            self.find_by_name(data.name, task=None, user=user, workspace=dataset_workspace)
-            raise EntityAlreadyExistsError(name=data.name, type=Dataset, workspace=dataset_workspace)
+            self.find_by_name(
+                data.name, task=None, user=user, workspace=dataset_workspace
+            )
+            raise EntityAlreadyExistsError(
+                name=data.name, type=Dataset, workspace=dataset_workspace
+            )
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 
