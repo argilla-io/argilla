@@ -99,7 +99,7 @@ def configure_app_startup(app: FastAPI):
         except elasticsearch.exceptions.ConnectionError as error:
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.elasticsearch} is not available or not responding."
-                "\nPlease make sure your Elasticsearch instance is launched and correctly running and you have the necessary access permissions and"
+                "\nPlease make sure your Elasticsearch instance is launched and correctly running and you have the necessary access permissions. "
                 "Once you have verified this, restart the Rubrix server."
                 f"\nError detail: [{error}]"
             )
