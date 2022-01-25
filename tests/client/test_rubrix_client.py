@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import datetime
+from curses import meta
 from time import sleep
 from typing import Iterable
 
@@ -22,7 +23,8 @@ import pandas
 import pytest
 
 import rubrix
-from rubrix import Text2TextRecord, TextClassificationRecord
+from rubrix import Text2TextRecord, TextClassificationRecord, TokenAttributions
+from rubrix.client.rubrix_client import _textclassification_to_dataset
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client, mocking_client
@@ -490,3 +492,31 @@ def test_load_sort(monkeypatch):
     assert list(df.id) == [1, 2, 11]
     df = rubrix.load(name=dataset, ids=["1str", "2str", "11str"])
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+def test_textclassification_to_dataset(monkeypatch):
+    records = [
+        TextClassificationRecord(
+            inputs={"text": "mock", "context": "mock"},
+            prediction=[("a", 0.5), ("b", 0.5)],
+            prediction_agent="mock_pagent",
+            annotation="a",
+            annotation_agent="mock_aagent",
+            multi_label=False,
+            id=1,
+            event_timestamp=datetime.datetime.now(),
+            metadata={"test": "test"},
+            explanation={
+                "text": [
+                    TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})
+                ]
+            },
+            status="Validated",
+            metrics={},
+        ),
+        TextClassificationRecord(inputs="test", metadata={"test": 1}),
+    ]
+
+    ds = _textclassification_to_dataset(records)
+    print(ds.features)
+    assert False
