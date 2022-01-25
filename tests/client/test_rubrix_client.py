@@ -14,17 +14,18 @@
 #  limitations under the License.
 
 import datetime
-from curses import meta
 from time import sleep
 from typing import Iterable
 
 import httpx
 import pandas
 import pytest
+from datasets import ClassLabel, Sequence, Value
 
 import rubrix
-from rubrix import Text2TextRecord, TextClassificationRecord, TokenAttributions
-from rubrix.client.rubrix_client import _textclassification_to_dataset
+from rubrix import Text2TextRecord, TextClassificationRecord
+from rubrix.client.models import TokenAttributions
+from rubrix.client.rubrix_client import _DatasetsFormatter
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client, mocking_client
@@ -494,29 +495,134 @@ def test_load_sort(monkeypatch):
     assert list(df.id) == ["11str", "1str", "2str"]
 
 
-def test_textclassification_to_dataset(monkeypatch):
-    records = [
-        TextClassificationRecord(
-            inputs={"text": "mock", "context": "mock"},
-            prediction=[("a", 0.5), ("b", 0.5)],
-            prediction_agent="mock_pagent",
-            annotation="a",
-            annotation_agent="mock_aagent",
-            multi_label=False,
-            id=1,
-            event_timestamp=datetime.datetime.now(),
-            metadata={"test": "test"},
-            explanation={
+@pytest.mark.parametrize(
+    "log_records, records",
+    [
+        (
+            "log_singlelabel_textclassification_records",
+            "singlelabel_textclassification_records",
+        ),
+        (
+            "log_multilabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ),
+    ],
+)
+def test_basic_load(monkeypatch, log_records, records, request):
+    log_records = request.getfixturevalue(log_records)
+    records = request.getfixturevalue(records)
+
+    mocking_client(monkeypatch, client)
+
+    loaded_records = rubrix.load(log_records, as_pandas=False)
+
+    assert loaded_records == records
+
+
+class TestDatasetFormatter:
+    formatter = _DatasetsFormatter()
+
+    @pytest.mark.parametrize(
+        "records,annotation_feature",
+        [
+            (
+                "singlelabel_textclassification_records",
+                ClassLabel(num_classes=2, names=["a", "b"]),
+            ),
+            (
+                "multilabel_textclassification_records",
+                Sequence(feature=ClassLabel(num_classes=2, names=["a", "b"])),
+            ),
+        ],
+    )
+    def test_textclassification_to_dataset(self, records, annotation_feature, request):
+        records = request.getfixturevalue(records)
+
+        ds = self.formatter._textclassification_to_dataset(records)
+
+        assert ds.features == {
+            "prediction": [
+                {
+                    "label": ClassLabel(num_classes=2, names=["a", "b"]),
+                    "score": Value("float64"),
+                }
+            ],
+            "annotation": annotation_feature,
+            "prediction_agent": Value("string"),
+            "annotation_agent": Value("string"),
+            "id": Value("string"),
+            "metadata": {
+                "mock2_metadata": Value("string"),
+                "mock_metadata": Value("string"),
+            },
+            "status": Value("string"),
+            "event_timestamp": Value("timestamp[us]"),
+            "metrics": {},
+            "inputs": {
+                "context": Value("string"),
+                "text": Value("string"),
+            },
+            "multi_label": Value("bool"),
+            "explanation": {
                 "text": [
-                    TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})
+                    {
+                        "attributions": {
+                            "a": Value("float64"),
+                            "b": Value("float64"),
+                        },
+                        "token": Value("string"),
+                    }
                 ]
             },
-            status="Validated",
-            metrics={},
-        ),
-        TextClassificationRecord(inputs="test", metadata={"test": 1}),
-    ]
+        }
 
-    ds = _textclassification_to_dataset(records)
-    print(ds.features)
-    assert False
+        assert len(ds) == len(records)
+        for rec in records:
+            for field in rec.__fields__:
+                if field in ["prediction", "annotation", "explanation", "metadata"]:
+                    continue
+                assert ds[0][field] == getattr(records[0], field)
+
+    def test_textclass_to_ds_pred_annot_expl(self):
+        rec = TextClassificationRecord(
+            inputs={"text": "test a input"},
+            prediction=[("a", 0.5), ("b", 0.5)],
+            annotation="c",
+            explanation={
+                "text": [
+                    TokenAttributions(token="test", attributions={"a": 0.1, "b": 0.1})
+                ]
+            },
+        )
+        ds = self.formatter._textclassification_to_dataset([rec])
+
+        assert ds[0]["prediction"] == [
+            {"label": 0, "score": 0.5},
+            {"label": 1, "score": 0.5},
+        ]
+        assert ds[0]["annotation"] == 2
+        assert ds[0]["explanation"] == {
+            "text": [{"token": "test", "attributions": {"a": 0.1, "b": 0.1}}]
+        }
+
+        rec = TextClassificationRecord(
+            inputs={"text": "test a input"},
+            prediction=[("d", 0.6), ("g", 0.7)],
+            annotation=["a", "z"],
+            multi_label=True,
+        )
+        ds = self.formatter._textclassification_to_dataset([rec])
+
+        assert ds[0]["prediction"] == [
+            {"label": 1, "score": 0.6},
+            {"label": 2, "score": 0.7},
+        ]
+        assert ds[0]["annotation"] == [0, 3]
+
+    def test_warning_when_removing_metadata(self):
+        recs = [
+            TextClassificationRecord(inputs="test", metadata={"a": 2}),
+            TextClassificationRecord(inputs="test2", metadata={"a": "string"}),
+        ]
+
+        self.formatter._textclassification_to_dataset(recs)

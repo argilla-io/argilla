@@ -30,6 +30,7 @@ from rubrix.client.models import (
     Record,
     Text2TextRecord,
     TextClassificationRecord,
+    TokenAttributions,
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
@@ -443,82 +444,214 @@ def _check_response_errors(response: Response) -> None:
         )
 
 
-def _records_to_dataset(records: List[Record]) -> "datasets.Dataset":
-    """Helper method to turn records into a `datasets.Dataset`"""
-    try:
-        import datasets
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            "'datasets' must be installed to use the `datasets` format! "
-            "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
-        )
+class _DatasetsFormatter:
+    def __init__(self):
+        try:
+            import datasets
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'datasets' must be installed to use the `datasets` format! "
+                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+            )
 
-    if isinstance(records[0], TextClassificationRecord):
-        return _textclassification_to_dataset(records)
-    if isinstance(records[0], TokenClassificationRecord):
-        raise NotImplementedError
-    if isinstance(records[0], Text2TextRecord):
-        raise NotImplementedError
+    def to_dataset(self, records: List[Record]) -> "datasets.Dataset":
+        """Transforms a list of records into a `datasets.Dataset`
 
+        Args:
+            records: List of Rubrix records.
 
-def _textclassification_to_dataset(records: List[Record]) -> "datasets.Dataset":
-    """Transform a list of `TextClassificationRecord`s into a `datasets.Dataset`"""
-    from datasets import ClassLabel, Dataset, Sequence, Value
+        Returns:
+            A datasets Dataset object.
+        """
+        if isinstance(records[0], TextClassificationRecord):
+            return self._textclassification_to_dataset(records)
+        if isinstance(records[0], TokenClassificationRecord):
+            raise NotImplementedError
+        if isinstance(records[0], Text2TextRecord):
+            raise NotImplementedError
+        else:
+            raise TypeError("Unknown record type provided.")
 
-    # get labels: first prediction, then annotation
-    labels = set(
-        [
-            pred[0]
-            for rec in records
-            if rec.prediction is not None
-            for pred in rec.prediction
-        ]
-    ).union(
-        set(
+    def to_rubrix(
+        self,
+        dataset: "datasets.Dataset",
+        task: Union[str, TaskType] = "TextClassification",
+    ) -> List[Record]:
+        if isinstance(task, str):
+            task = TaskType(task)
+
+        if task == TaskType.text_classification:
+            return self._dataset_to_textclassification(dataset)
+        elif task == TaskType.token_classification:
+            raise NotImplementedError
+        elif task == TaskType.text2text:
+            raise NotImplementedError
+        else:
+            raise ValueError("Provided task not supported!")
+
+    def _textclassification_to_dataset(
+        self, records: List[Record]
+    ) -> "datasets.Dataset":
+        """Transforms a list of `TextClassificationRecord`s into a `datasets.Dataset`
+
+        Args:
+            records: List of Rubrix text classification records.
+
+        Returns:
+            A datasets Dataset, without the metadata if they were incompatible with the Dataset format.
+        """
+        from datasets import ClassLabel, Sequence, Value
+
+        # get labels: first prediction, then annotation
+        labels = set(
             [
-                annot
+                pred[0]
                 for rec in records
-                if rec.annotation is not None
-                for annot in rec.annotation
+                if rec.prediction is not None
+                for pred in rec.prediction
             ]
-            if records[0].multi_label
-            else [rec.annotation for rec in records if rec.annotation is not None]
-        )
-    )
-
-    class_label = ClassLabel(names=sorted(list(labels)))
-    ds_dict = {key: [getattr(rec, key) for rec in records] for key in dict(records[0])}
-
-    feature = [{"label": class_label, "score": Value("float64")}]
-    dataset = dataset.cast_column("prediction", feature=feature)
-
-    feature = (
-        Sequence(feature=class_label) if dataset["multi_label"][0] else class_label
-    )
-    dataset = dataset.cast_column("annotation", feature=feature)
-
-    return dataset
-
-
-def _baserecord_to_dataset(records: List[Record]) -> "datasets.Dataset":
-    ds_dict = {
-        "prediction_agent": [rec.prediction_agent for rec in records],
-        "annotation_agent": [rec.annotation_agent for rec in records],
-        "ids": [str(rec.id) for rec in records],
-        "metadata": [rec.metadata for rec in records],
-        "status": [rec.status for rec in records],
-        "event_timestamp": [rec.event_timestamp for rec in records],
-        "metrics": [rec.metrics for rec in records],
-    }
-
-    try:
-        dataset = Dataset.from_dict(ds_dict)
-    # try without metadata
-    except Exception:
-        del ds_dict["metadata"]
-        dataset = Dataset.from_dict(ds_dict)
-        _LOGGER.warning(
-            "The 'metadata' of the records was removed, since it was incompatible with the 'datasets' format."
+        ).union(
+            set(
+                [
+                    annot
+                    for rec in records
+                    if rec.annotation is not None
+                    for annot in rec.annotation
+                ]
+                if records[0].multi_label
+                else [rec.annotation for rec in records if rec.annotation is not None]
+            )
         )
 
-    return dataset
+        class_label = ClassLabel(names=sorted(list(labels)))
+
+        # create a dict first, where we make the necessary transformations
+        ds_dict = {}
+        for key in records[0].__fields__:
+            if key == "prediction":
+                ds_dict[key] = [
+                    [
+                        {"label": class_label.str2int(pred[0]), "score": pred[1]}
+                        for pred in rec.prediction
+                    ]
+                    if rec.prediction is not None
+                    else None
+                    for rec in records
+                ]
+            elif key == "annotation":
+                ds_dict[key] = (
+                    [
+                        [class_label.str2int(anot) for anot in rec.annotation]
+                        if rec.annotation is not None
+                        else None
+                        for rec in records
+                    ]
+                    if records[0].multi_label
+                    else [
+                        class_label.str2int(rec.annotation)
+                        if rec.annotation is not None
+                        else None
+                        for rec in records
+                    ]
+                )
+            elif key == "explanation":
+                ds_dict[key] = [
+                    {
+                        key: list(map(dict, tokattrs))
+                        for key, tokattrs in rec.explanation.items()
+                    }
+                    if rec.explanation is not None
+                    else None
+                    for rec in records
+                ]
+            else:
+                ds_dict[key] = [getattr(rec, key) for rec in records]
+
+        dataset = self._create_dataset_from_dict(ds_dict)
+
+        # update features
+        dataset = dataset.cast_column(
+            "prediction", feature=[{"label": class_label, "score": Value("float64")}]
+        )
+        dataset = dataset.cast_column(
+            "annotation",
+            feature=Sequence(feature=class_label)
+            if dataset["multi_label"][0]
+            else class_label,
+        )
+
+        return dataset
+
+    def _create_dataset_from_dict(self, dataset_dict: Dict) -> "datasets.Dataset":
+        """Creates a datasets Dataset from a dict, removing the 'metadata' key from the dict if necessary.
+
+        Args:
+            dataset_dict: A dict containing the dataset data.
+
+        Returns:
+            A datasets Dataset object, without the metadata, if it is incompatible with the Dataset format.
+        """
+        from datasets import Dataset
+
+        try:
+            dataset = Dataset.from_dict(dataset_dict)
+        # try without metadata
+        except Exception:
+            del dataset_dict["metadata"]
+            dataset = Dataset.from_dict(dataset_dict)
+            _LOGGER.warning(
+                "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
+            )
+
+        return dataset
+
+    def _dataset_to_textclassification(
+        self,
+        dataset: "datasets.Dataset",
+    ) -> List[TextClassificationRecord]:
+        """Transforms a ``datasets.Dataset`` into a list of `TextClassificationRecord`s.
+
+        Args:
+            dataset: A datasets Dataset
+
+        Returns:
+            A list of ``TextClassificationRecord``s.
+        """
+        records = []
+        for row in dataset:
+            row["prediction"] = [
+                (
+                    dataset.features["prediction"][0]["label"].int2str(pred["label"]),
+                    pred["score"],
+                )
+                if pred is not None
+                else None
+                for pred in row["prediction"]
+            ]
+            if row["multi_label"]:
+                row["annotation"] = (
+                    [
+                        dataset.features["annotation"].feature.int2str(anot)
+                        for anot in row["annotation"]
+                    ]
+                    if row["annotation"] is not None
+                    else None
+                )
+            else:
+                row["annotation"] = (
+                    dataset.features["annotation"].int2str(row["annotation"])
+                    if row["annotation"] is not None
+                    else None
+                )
+            row["explanation"] = (
+                {
+                    key: [TokenAttributions(**tokattr_kwargs) for tokattr_kwargs in val]
+                    for key, val in row["explanation"].items()
+                }
+                if row["explanation"] is not None
+                else None
+            )
+
+            records.append(TextClassificationRecord(**row))
+
+        return records
