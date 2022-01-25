@@ -38,7 +38,6 @@
 </template>
 
 <script>
-
 export default {
   props: {
     dataset: {
@@ -141,8 +140,8 @@ export default {
         end: endToken.end,
         label: entity,
       });
-      this.$emit('updateRecordEntities', entities);
-      this.onReset()
+      this.$emit("updateRecordEntities", entities);
+      this.onReset();
     },
     onChangeEntityLabel(entity, newLabel) {
       let entities = this.entities.map((ent) => {
@@ -152,8 +151,8 @@ export default {
           ? { ...ent, label: newLabel }
           : ent;
       });
-      this.$emit('updateRecordEntities', entities);
-      this.onReset()
+      this.$emit("updateRecordEntities", entities);
+      this.onReset();
     },
     onRemoveEntity(entity) {
       const found = this.entities.findIndex(
@@ -164,8 +163,8 @@ export default {
       );
       let entities = [...this.entities];
       entities.splice(found, 1);
-      this.$emit('updateRecordEntities', entities);
-      this.onReset()
+      this.$emit("updateRecordEntities", entities);
+      this.onReset();
     },
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);

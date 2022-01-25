@@ -16,23 +16,23 @@
   -->
 
 <template>
-    <div>
-      <text-spans
-        :dataset="dataset" 
-        :record="record"
-        :entities="annotationEntities"
-        :agent="agent"
-        @updateRecordEntities="updateRecordEntities"
-          />
-        <div class="content__actions-buttons">
-          <re-button
-            v-if="record.status !== 'Validated'"
-            class="button-primary"
-            @click="onValidate(record)"
-            >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
-          >
-        </div>
+  <div>
+    <text-spans
+      :dataset="dataset"
+      :record="record"
+      :entities="annotationEntities"
+      :agent="agent"
+      @updateRecordEntities="updateRecordEntities"
+    />
+    <div class="content__actions-buttons">
+      <re-button
+        v-if="record.status !== 'Validated'"
+        class="button-primary"
+        @click="onValidate(record)"
+        >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
+      >
     </div>
+  </div>
 </template>
 
 <script>
@@ -53,9 +53,15 @@ export default {
     annotationEntities() {
       let entities = [];
       if (this.record.annotation) {
-        entities = this.record.annotation.entities.map(obj=> ({ ...obj, origin: 'annotation' }));
+        entities = this.record.annotation.entities.map((obj) => ({
+          ...obj,
+          origin: "annotation",
+        }));
       } else if (this.record.prediction) {
-        entities = this.record.prediction.entities.map(obj=> ({ ...obj, origin: 'prediction' }));;
+        entities = this.record.prediction.entities.map((obj) => ({
+          ...obj,
+          origin: "prediction",
+        }));
       }
       return entities;
     },
@@ -148,4 +154,3 @@ export default {
   }
 }
 </style>
-

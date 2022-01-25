@@ -16,7 +16,9 @@
   -->
 
 <template>
-  <span :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']">
+  <span
+    :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']"
+  >
     <span
       class="highlight__content"
       @click="openTagSelector"
@@ -30,7 +32,11 @@
           annotationEnabled ? 'highlight__tooltip--icon' : '',
         ]"
       >
-        <span class="highlight__tooltip__origin" v-if="span.entity.origin === 'annotation'">Annot.</span>
+        <span
+          class="highlight__tooltip__origin"
+          v-if="span.entity.origin === 'annotation'"
+          >Annot.</span
+        >
         <span
           >{{ span.entity.label }}
           <svgicon
@@ -175,10 +181,10 @@ export default {
       @include font-size(8px);
     }
     .annotation & {
-      bottom: 100%;     
+      bottom: 100%;
     }
     .prediction & {
-      top: calc(100% + 15px);      
+      top: calc(100% + 15px);
     }
     &--icon {
       padding-right: 20px;
