@@ -23,6 +23,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
 import pandas
+from packaging.version import parse as parse_version
 from tqdm.auto import tqdm
 
 from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
@@ -490,6 +491,11 @@ class _DatasetsFormatter:
             raise ModuleNotFoundError(
                 "'datasets' must be installed to use the `datasets` format! "
                 "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+            )
+        if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
+            raise ImportError(
+                "Version >1.17.0 of 'datasets' must be installed to use the `datasets` format! "
+                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
             )
 
     def to_dataset(self, records: List[Record]) -> "datasets.Dataset":
