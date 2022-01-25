@@ -74,6 +74,9 @@ class _RootValidators(BaseModel):
 
         return values
 
+    class Config:
+        extra = "forbid"
+
 
 class BulkResponse(BaseModel):
     """Summary response when logging records to the Rubrix server.
@@ -229,7 +232,7 @@ class TokenClassificationRecord(_RootValidators):
     metrics: Optional[Dict[str, Any]] = None
 
 
-class Text2TextRecord(BaseRecord):
+class Text2TextRecord(_RootValidators):
     """Record for a text to text task
 
     Args:
