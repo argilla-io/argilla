@@ -75,15 +75,6 @@ export default {
       }
       return entities;
     },
-    agent() {
-      if (this.record.annotation) {
-        return this.record.annotation.agent;
-      }
-      if (this.record.prediction) {
-        return this.record.prediction.agent;
-      }
-      return undefined;
-    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -121,7 +112,6 @@ export default {
             ),
             start: entity.start,
             end: entity.end,
-            agent: this.agent,
           });
           idx = entity.end_token;
         } else {
@@ -131,7 +121,6 @@ export default {
             tokens: [token],
             start: token.start,
             end: token.end,
-            agent: this.agent,
           });
           idx++;
         }
