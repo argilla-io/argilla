@@ -30,6 +30,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import httpx
 
+from rubrix.client.sdk.commons.errors_handler import handle_response_error
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
     ErrorMessage,
@@ -39,25 +40,18 @@ from rubrix.client.sdk.commons.models import (
 
 
 def build_bulk_response(
-    response: httpx.Response,
-) -> Response[Union[BulkResponse, ErrorMessage, HTTPValidationError]]:
+    response: httpx.Response, dataset: str
+) -> Response[BulkResponse]:
 
-    parsed_response = None
-    if response.status_code == 200:
-        parsed_response = BulkResponse(**response.json())
-    elif response.status_code == 404:
-        parsed_response = ErrorMessage(**response.json())
-    elif response.status_code == 500:
-        parsed_response = ErrorMessage(**response.json())
-    elif response.status_code == 422:
-        parsed_response = HTTPValidationError(**response.json())
+    if 200 <= response.status_code < 400:
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=BulkResponse(**response.json()),
+        )
 
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=parsed_response,
-    )
+    return handle_response_error(response, dataset=dataset)
 
 
 T = TypeVar("T")
@@ -65,24 +59,19 @@ T = TypeVar("T")
 
 def build_data_response(
     response: httpx.Response, data_type: Type[T]
-) -> Response[Union[List[T], HTTPValidationError, ErrorMessage]]:
+) -> Response[List[T]]:
     if 200 <= response.status_code < 400:
         parsed_response = [data_type(**json.loads(r)) for r in response.iter_lines()]
-    else:
-        content = next(response.iter_lines())
-        data = json.loads(content)
-        parsed_response = (
-            HTTPValidationError(**data)
-            if response.status_code == 422
-            else ErrorMessage(**data)
+        return Response(
+            status_code=response.status_code,
+            content=b"",
+            headers=response.headers,
+            parsed=parsed_response,
         )
 
-    return Response(
-        status_code=response.status_code,
-        content=b"",
-        headers=response.headers,
-        parsed=parsed_response,
-    )
+    content = next(response.iter_lines())
+    data = json.loads(content)
+    return handle_response_error(response, **data, parse_response=False)
 
 
 def build_list_response(
@@ -93,17 +82,14 @@ def build_list_response(
 
     if 200 <= response.status_code < 400:
         parsed_response = [item_class(**r) for r in parsed_response]
-    elif response.status_code == 422:
-        parsed_response = HTTPValidationError.parse_obj(parsed_response)
-    else:
-        parsed_response = ErrorMessage.parse_obj(parsed_response)
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
 
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=parsed_response,
-    )
+    return handle_response_error(response, item_class=item_class)
 
 
 ResponseType = TypeVar("ResponseType")
@@ -114,19 +100,16 @@ def build_typed_response(
     response_type_class: Type[ResponseType],
 ) -> Response[Union[ResponseType, ErrorMessage, HTTPValidationError]]:
     parsed_response = response.json()
-    if response.status_code == 200:
+    if 200 <= response.status_code < 400:
         parsed_response = response_type_class(**parsed_response)
-    elif response.status_code == 422:
-        parsed_response = HTTPValidationError(**parsed_response)
-    else:
-        parsed_response = ErrorMessage(**parsed_response)
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
 
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=parsed_response,
-    )
+    return handle_response_error(response, expected_response=response_type_class)
 
 
 def build_raw_response(

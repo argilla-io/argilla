@@ -18,6 +18,7 @@ from typing import Union
 import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors_handler import handle_response_error
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
@@ -36,7 +37,7 @@ def get_dataset(
         timeout=client.get_timeout(),
     )
 
-    return _build_response(response=response)
+    return _build_response(response=response, name=name)
 
 
 def copy_dataset(
@@ -54,7 +55,7 @@ def copy_dataset(
         json=json_body.dict(by_alias=True),
     )
 
-    return _build_response(response=response)
+    return _build_response(response=response, name=name)
 
 
 def delete_dataset(
@@ -70,34 +71,27 @@ def delete_dataset(
         timeout=client.get_timeout(),
     )
     # If everything was ok, we must clear local cache data
-    if response.status_code == 200:
+    if 200 <= response.status_code < 400:
         get_dataset.cache_clear()
-
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=response.json(),
-    )
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=response.json(),
+        )
+    return handle_response_error(response, dataset=name)
 
 
 def _build_response(
-    response: httpx.Response,
+    response: httpx.Response, name: str
 ) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
 
-    parsed_response = None
     if response.status_code == 200:
         parsed_response = Dataset(**response.json())
-    elif response.status_code == 404:
-        parsed_response = ErrorMessage(**response.json())
-    elif response.status_code == 500:
-        parsed_response = ErrorMessage(**response.json())
-    elif response.status_code == 422:
-        parsed_response = HTTPValidationError(**response.json())
-
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=parsed_response,
-    )
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response, dataset=name)
