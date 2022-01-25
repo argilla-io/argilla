@@ -336,8 +336,8 @@ $hue: 360;
       background: $rcolor;
     }
     ::v-deep span.prediction {
-      padding-bottom: 7px;
-      border-bottom: 4px solid $rcolor;
+      padding-bottom: 2px;
+      border-bottom: 5px solid $rcolor;
     }
     &.active,
     &.tag:hover {

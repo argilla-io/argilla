@@ -18,37 +18,13 @@
 <template>
   <div class="record">
     <div class="content">
-      <text-spans
-        v-if="annotationEnabled"
-        :dataset="dataset" 
-        :record="record"
-        :entities="annotationEntities"
-        :agent="agent"  
-          />
-      <text-spans 
-        v-else
-        v-for="origin in entitiesOrigin" :key="origin"
-        :dataset="dataset" 
-        :record="record"
-        :class="origin"
-        :entities="getEntitiesByOrigin(origin)"
-        :agent="record[origin].agent || []"
-        @updateRecordEntities="updateRecordEntities"     
-          />
-    </div>
-    <div v-if="annotationEnabled" class="content__actions-buttons">
-      <re-button
-        v-if="record.status !== 'Validated'"
-        class="button-primary"
-        @click="onValidate(record)"
-        >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
-      >
+      <record-token-classification-annotation :dataset="dataset" :record="record" v-if="annotationEnabled" />
+      <record-token-classification-exploration :dataset="dataset" :record="record" v-else />
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
 
 export default {
   props: {
@@ -61,78 +37,9 @@ export default {
       required: true,
     },
   },
-  data: function () {
-    return {
-      selectionStart: undefined,
-      selectionEnd: undefined,
-      entitiesOrigin: ['prediction', 'annotation'],
-    };
-  },
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
-    },
-    annotationEntities() {
-      let entities = [];
-      if (this.record.annotation) {
-        entities = this.record.annotation.entities.map(obj=> ({ ...obj, origin: 'annotation' }));
-      } else if (this.record.prediction) {
-        entities = this.record.prediction.entities.map(obj=> ({ ...obj, origin: 'prediction' }));;
-      }
-      return entities;
-    },
-    agent() {
-      if (this.record.annotation) {
-        return this.record.annotation.agent;
-      }
-      if (this.record.prediction) {
-        return this.record.prediction.agent;
-      }
-      return undefined;
-    },
-  },
-  methods: {
-    ...mapActions({
-      updateRecords: "entities/datasets/updateDatasetRecords",
-      discard: "entities/datasets/discardAnnotations",
-      validate: "entities/datasets/validateAnnotations",
-    }),
-    getEntitiesByOrigin(origin) {
-      return this.record[origin] ? this.record[origin].entities.map(obj=> ({ ...obj, origin: origin })) : []
-    },
-    updateRecordEntities(entities) {
-      this.updateRecords({
-        dataset: this.dataset,
-        records: [
-          {
-            ...this.record,
-            selected: true,
-            status: "Edited",
-            annotation: {
-              entities,
-              agent: this.$auth.user.username,
-            },
-          },
-        ],
-      });
-      // this.onReset();
-    },
-    async onValidate(record) {
-      const emptyEntities = {
-        entities: [],
-      };
-      await this.validate({
-        dataset: this.dataset,
-        agent: this.$auth.user.username,
-        records: [
-          {
-            ...record,
-            annotation: {
-              ...(record.annotation || record.prediction || emptyEntities),
-            },
-          },
-        ],
-      });
     },
   },
 };
@@ -152,18 +59,6 @@ export default {
 .content {
   position: relative;
   white-space: pre-wrap;
-  & > div:nth-child(2) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    ::v-deep {
-      .span__text {
-        opacity: 0;
-      }
-    }
-  }
   &__input {
     padding-right: 200px;
   }
@@ -180,26 +75,6 @@ export default {
       & + .re-button {
         margin-left: 1em;
       }
-    }
-  }
-}
-.prediction {
-  pointer-events: none;
-  ::v-deep {
-    .highlight__content {
-      padding-top: 4px;
-      padding-bottom: 2px;
-      pointer-events: all;
-    }
-  }
-}
-.annotation {
-  pointer-events: none;
-  ::v-deep {
-    .highlight__content {
-      padding-top: 2px;
-      padding-bottom: 4px;
-      pointer-events: all;
     }
   }
 }
