@@ -527,11 +527,11 @@ class TestDatasetFormatter:
         [
             (
                 "singlelabel_textclassification_records",
-                ClassLabel(num_classes=2, names=["a", "b"]),
+                Value("string"),
             ),
             (
                 "multilabel_textclassification_records",
-                Sequence(feature=ClassLabel(num_classes=2, names=["a", "b"])),
+                Sequence(feature=Value("string")),
             ),
         ],
     )
@@ -543,7 +543,7 @@ class TestDatasetFormatter:
         assert ds.features == {
             "prediction": [
                 {
-                    "label": ClassLabel(num_classes=2, names=["a", "b"]),
+                    "label": Value("string"),
                     "score": Value("float64"),
                 }
             ],
@@ -577,47 +577,29 @@ class TestDatasetFormatter:
         }
 
         assert len(ds) == len(records)
-        for rec in records:
-            for field in rec.__fields__:
-                if field in ["prediction", "annotation", "explanation", "metadata"]:
-                    continue
-                assert ds[0][field] == getattr(records[0], field)
 
-    def test_textclass_to_ds_pred_annot_expl(self):
-        rec = TextClassificationRecord(
-            inputs={"text": "test a input"},
-            prediction=[("a", 0.5), ("b", 0.5)],
-            annotation="c",
-            explanation={
-                "text": [
-                    TokenAttributions(token="test", attributions={"a": 0.1, "b": 0.1})
-                ]
-            },
-        )
-        ds = self.formatter._textclassification_to_dataset([rec])
+        records_from_ds = self.formatter._dataset_to_textclassification(ds)
 
-        assert ds[0]["prediction"] == [
-            {"label": 0, "score": 0.5},
-            {"label": 1, "score": 0.5},
-        ]
-        assert ds[0]["annotation"] == 2
-        assert ds[0]["explanation"] == {
-            "text": [{"token": "test", "attributions": {"a": 0.1, "b": 0.1}}]
-        }
-
-        rec = TextClassificationRecord(
-            inputs={"text": "test a input"},
-            prediction=[("d", 0.6), ("g", 0.7)],
-            annotation=["a", "z"],
-            multi_label=True,
-        )
-        ds = self.formatter._textclassification_to_dataset([rec])
-
-        assert ds[0]["prediction"] == [
-            {"label": 1, "score": 0.6},
-            {"label": 2, "score": 0.7},
-        ]
-        assert ds[0]["annotation"] == [0, 3]
+        for rec, rec_expected in zip(records_from_ds, records):
+            for field in rec_expected.__fields__:
+                # datasets sorts the keys in the dict ...
+                if field == "inputs":
+                    assert all(
+                        [
+                            rec.inputs[key] == val
+                            for key, val in rec_expected.inputs.items()
+                        ]
+                    )
+                # datasets adds None to missing metadata fields
+                elif "metadata":
+                    assert all(
+                        [
+                            rec.metadata[key] == val
+                            for key, val in rec_expected.metadata.items()
+                        ]
+                    )
+                else:
+                    assert getattr(rec, field) == getattr(rec_expected, field)
 
     def test_warning_when_removing_metadata(self):
         recs = [

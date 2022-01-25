@@ -500,60 +500,16 @@ class _DatasetsFormatter:
         Returns:
             A datasets Dataset, without the metadata if they were incompatible with the Dataset format.
         """
-        from datasets import ClassLabel, Sequence, Value
-
-        # get labels: first prediction, then annotation
-        labels = set(
-            [
-                pred[0]
-                for rec in records
-                if rec.prediction is not None
-                for pred in rec.prediction
-            ]
-        ).union(
-            set(
-                [
-                    annot
-                    for rec in records
-                    if rec.annotation is not None
-                    for annot in rec.annotation
-                ]
-                if records[0].multi_label
-                else [rec.annotation for rec in records if rec.annotation is not None]
-            )
-        )
-
-        class_label = ClassLabel(names=sorted(list(labels)))
-
         # create a dict first, where we make the necessary transformations
         ds_dict = {}
         for key in records[0].__fields__:
             if key == "prediction":
                 ds_dict[key] = [
-                    [
-                        {"label": class_label.str2int(pred[0]), "score": pred[1]}
-                        for pred in rec.prediction
-                    ]
+                    [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
                     if rec.prediction is not None
                     else None
                     for rec in records
                 ]
-            elif key == "annotation":
-                ds_dict[key] = (
-                    [
-                        [class_label.str2int(anot) for anot in rec.annotation]
-                        if rec.annotation is not None
-                        else None
-                        for rec in records
-                    ]
-                    if records[0].multi_label
-                    else [
-                        class_label.str2int(rec.annotation)
-                        if rec.annotation is not None
-                        else None
-                        for rec in records
-                    ]
-                )
             elif key == "explanation":
                 ds_dict[key] = [
                     {
@@ -567,20 +523,7 @@ class _DatasetsFormatter:
             else:
                 ds_dict[key] = [getattr(rec, key) for rec in records]
 
-        dataset = self._create_dataset_from_dict(ds_dict)
-
-        # update features
-        dataset = dataset.cast_column(
-            "prediction", feature=[{"label": class_label, "score": Value("float64")}]
-        )
-        dataset = dataset.cast_column(
-            "annotation",
-            feature=Sequence(feature=class_label)
-            if dataset["multi_label"][0]
-            else class_label,
-        )
-
-        return dataset
+        return self._create_dataset_from_dict(ds_dict)
 
     def _create_dataset_from_dict(self, dataset_dict: Dict) -> "datasets.Dataset":
         """Creates a datasets Dataset from a dict, removing the 'metadata' key from the dict if necessary.
@@ -621,28 +564,13 @@ class _DatasetsFormatter:
         for row in dataset:
             row["prediction"] = [
                 (
-                    dataset.features["prediction"][0]["label"].int2str(pred["label"]),
+                    pred["label"],
                     pred["score"],
                 )
                 if pred is not None
                 else None
                 for pred in row["prediction"]
             ]
-            if row["multi_label"]:
-                row["annotation"] = (
-                    [
-                        dataset.features["annotation"].feature.int2str(anot)
-                        for anot in row["annotation"]
-                    ]
-                    if row["annotation"] is not None
-                    else None
-                )
-            else:
-                row["annotation"] = (
-                    dataset.features["annotation"].int2str(row["annotation"])
-                    if row["annotation"] is not None
-                    else None
-                )
             row["explanation"] = (
                 {
                     key: [TokenAttributions(**tokattr_kwargs) for tokattr_kwargs in val]
