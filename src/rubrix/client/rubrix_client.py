@@ -17,6 +17,7 @@
 
 import logging
 import socket
+from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import httpx
@@ -70,6 +71,20 @@ from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class DatasetFormat(Enum):
+    """A dataset format"""
+
+    RUBRIX = "rubrix"
+    PANDAS = "pandas"
+    DATASETS = "datasets"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
 
 
 class RubrixClient:
@@ -254,8 +269,9 @@ class RubrixClient:
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        as_pandas: bool = True,
-    ) -> Union[pandas.DataFrame, List[Record]]:
+        as_pandas: Optional[bool] = None,
+        format: Union[str, DatasetFormat] = "pandas",
+    ) -> Union[pandas.DataFrame, List[Record], "datasets.Dataset"]:
         """Loads a dataset as a pandas DataFrame or a list of records.
 
         Args:
@@ -264,11 +280,19 @@ class RubrixClient:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
-            as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
+            format: The format of the returned dataset, one of "pandas", "rubrix" or "datasets".
+            as_pandas: DEPRECATED, use ``format`` instead.
 
         Returns:
-            The dataset as a pandas Dataframe or a list of records.
+            The dataset in a format defined by the `format` argument.
         """
+        if isinstance(format, str):
+            format = DatasetFormat(format)
+
+        # we check here to fail fast in case datasets is not installed!
+        if format == DatasetFormat.DATASETS:
+            formatter = _DatasetsFormatter()
+
         response = get_dataset(client=self._client, name=name)
         _check_response_errors(response)
         task = response.parsed.task
@@ -276,23 +300,20 @@ class RubrixClient:
         task_config = {
             TaskType.text_classification: (
                 text_classification_data,
-                None,
                 TextClassificationQuery,
             ),
             TaskType.token_classification: (
                 token_classification_data,
-                None,
                 TokenClassificationQuery,
             ),
             TaskType.text2text: (
                 text2text_data,
-                None,
                 Text2TextQuery,
             ),
         }
 
         try:
-            get_dataset_data, map_fn, request_class = task_config[task]
+            get_dataset_data, request_class = task_config[task]
         except KeyError:
             raise ValueError(
                 f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
@@ -314,9 +335,14 @@ class RubrixClient:
         except TypeError:
             records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
 
-        if as_pandas:
+        if format is DatasetFormat.RUBRIX:
+            return records_sorted_by_id
+
+        if format is DatasetFormat.PANDAS:
             return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
-        return records_sorted_by_id
+
+        if format is DatasetFormat.DATASETS:
+            return formatter.to_dataset(records_sorted_by_id)
 
     def copy(self, source: str, target: str, target_workspace: Optional[str] = None):
         """Makes a copy of the `source` dataset and saves it as `target`"""
