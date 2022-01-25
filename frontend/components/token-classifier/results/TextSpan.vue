@@ -332,12 +332,18 @@ $hue: 360;
     1
   );
   .color_#{$i - 1} {
-    ::v-deep span.annotation {
+    &.annotation ::v-deep .highlight__content {
       background: $rcolor;
     }
-    ::v-deep span.prediction {
+    &.prediction ::v-deep .highlight__content {
       padding-bottom: 2px;
       border-bottom: 5px solid $rcolor;
+    }
+    &.annotation ::v-deep .highlight__tooltip:after {
+      border-color: $rcolor transparent transparent transparent;
+    }
+    &.prediction ::v-deep .highlight__tooltip:after {
+      border-color: transparent transparent $rcolor transparent;
     }
     &.active,
     &.tag:hover {
@@ -361,9 +367,6 @@ $hue: 360;
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
-  }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip:after {
-    border-color: $rcolor transparent transparent transparent;
   }
 }
 </style>
