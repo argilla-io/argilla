@@ -17,6 +17,7 @@
 
 import logging
 import socket
+import warnings
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -286,6 +287,17 @@ class RubrixClient:
         Returns:
             The dataset in a format defined by the `format` argument.
         """
+        if as_pandas is not None:
+            warnings.warn(
+                "'as_pandas' is deprecated and will be removed in the next major release. "
+                "Please use the 'format' argument.",
+                category=FutureWarning,
+            )
+            if as_pandas is True:
+                format = DatasetFormat("pandas")
+            elif as_pandas is False:
+                format = DatasetFormat("rubrix")
+
         if isinstance(format, str):
             format = DatasetFormat(format)
 
