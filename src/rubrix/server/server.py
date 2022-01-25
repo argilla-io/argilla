@@ -20,10 +20,11 @@ This module configures the global fastapi application
 import os
 from pathlib import Path
 
+import elasticsearch
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import ValidationError
+from pydantic import ConfigError, ValidationError
 
 from rubrix import __version__ as rubrix_version
 from rubrix.server.commons.errors import (
@@ -36,6 +37,7 @@ from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
+from .commons.settings import settings
 from .commons.settings import settings as api_settings
 from .routes import api_router
 
@@ -86,12 +88,21 @@ def configure_app_statics(app: FastAPI):
 def configure_app_startup(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
-        es_wrapper = create_es_wrapper()
-        dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
-        datasets: DatasetsDAO = DatasetsDAO.get_instance(es_wrapper, dataset_records)
-
-        datasets.init()
-        dataset_records.init()
+        try:
+            es_wrapper = create_es_wrapper()
+            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
+            datasets: DatasetsDAO = DatasetsDAO.get_instance(
+                es_wrapper, dataset_records
+            )
+            datasets.init()
+            dataset_records.init()
+        except elasticsearch.exceptions.ConnectionError as error:
+            raise ConfigError(
+                f"We checked the elastic search endpoint at {settings.elasticsearch} and is not responding/available..."
+                "\nPlease make sure your Elasticsearch is running or you have access to elasticsearch and "
+                "restart rubrix."
+                f"\nError detail: [{error}]"
+            )
 
 
 def configure_app_security(app: FastAPI):
