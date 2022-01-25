@@ -441,3 +441,89 @@ def _check_response_errors(response: Response) -> None:
             "Connection error: API is not responding. "
             "The API answered with a {} code: {}".format(http_status, response_data)
         )
+
+    def _records_to_dataset(self, records: List[Record]) -> "datasets.Dataset":
+        """Helper method to turn records into a `datasets.Dataset`"""
+        try:
+            import datasets
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'datasets' must be installed to use the `datasets` format! "
+                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+            )
+
+        if isinstance(records[0], TextClassificationRecord):
+            return self._textclassification_to_dataset(records)
+        if isinstance(records[0], TokenClassificationRecord):
+            raise NotImplementedError
+        if isinstance(records[0], Text2TextRecord):
+            raise NotImplementedError
+
+    def _textclassification_to_dataset(records: List[Record]) -> "datasets.Dataset":
+        """Transform a list of `TextClassificationRecord`s into a `datasets.Dataset`"""
+        from datasets import ClassLabel, Dataset, Sequence, Value
+
+        dataset = Dataset.from_dict(
+            {
+                "inputs": [rec.inputs for rec in records],
+                "prediction": [
+                    [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
+                    if rec.prediction is not None
+                    else None
+                    for rec in records
+                ],
+                "prediction_agent": [rec.prediction_agent for rec in records],
+                "annotation": [rec.annotation for rec in records],
+                "annotation_agent": [rec.annotation_agent for rec in records],
+                "multi_label": [rec.multi_label for rec in records],
+                "ids": [rec.id for rec in records],
+                "metadata": [rec.metadata for rec in records],
+                "status": [rec.status for rec in records],
+                "event_timestamp": [rec.event_timestamp for rec in records],
+                "metrics": [rec.metrics for rec in records],
+                "explanation": [
+                    {
+                        key: list(map(dict, tokattr) for tokattr in tokattrs)
+                        for key, tokattrs in rec.explanation.items()
+                    }
+                    if rec.explanation is not None
+                    else None
+                    for rec in records
+                ],
+            }
+        )
+
+        # first the prediction labels, then the annotation labels, then remove None
+        labels = set(
+            [
+                pred["label"]
+                for preds in dataset["prediction"]
+                for pred in preds
+                if preds is not None
+            ]
+        ).union(
+            set(
+                [
+                    annot
+                    for annots in dataset["annotation"]
+                    for annot in annots
+                    if annots is not None
+                ]
+                if dataset["multi_label"][0]
+                else dataset["annotation"]
+            )
+        ) - set(
+            [None]
+        )
+
+        class_label = ClassLabel(names=sorted(list(labels)))
+
+        feature = [{"label": class_label, "score": Value("float64")}]
+        dataset.cast_column("prediction", feature=feature)
+
+        feature = (
+            Sequence(feature=class_label) if dataset["multi_label"][0] else class_label
+        )
+        dataset.cast_column("annotation", feature=feature)
+
+        return dataset
