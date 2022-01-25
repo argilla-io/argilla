@@ -26,13 +26,11 @@ class TextClassificationRecord extends BaseRecord {
     explanation,
     multi_label,
     predicted_as,
-    event_timestamp,
     ...superData
   }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
-    this.event_timestamp = event_timestamp,
     this.multi_label = multi_label;
     this.predicted_as = predicted_as;
   }
