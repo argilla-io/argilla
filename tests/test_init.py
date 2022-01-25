@@ -23,6 +23,7 @@ import pytest
 import rubrix
 from rubrix.client import RubrixClient
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors import UnauthorizedApiError
 
 
 @pytest.fixture
@@ -196,7 +197,7 @@ def test_init_token_auth_fail(mock_response_token_401):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    with pytest.raises(Exception, match="Authentication error: invalid credentials."):
+    with pytest.raises(UnauthorizedApiError):
         rubrix.init(api_url="fake_url", api_key="422")
 
 
