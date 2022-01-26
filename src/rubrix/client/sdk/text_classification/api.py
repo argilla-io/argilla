@@ -55,7 +55,7 @@ def bulk(
         json=json_body.dict(by_alias=True),
     )
 
-    return build_bulk_response(response)
+    return build_bulk_response(response, dataset=name)
 
 
 def data(
@@ -119,4 +119,6 @@ def dataset_rule_metrics(
         timeout=client.get_timeout(),
     )
 
-    return build_typed_response(response, response_type_class=LabelingRuleMetricsSummary)
+    return build_typed_response(
+        response, response_type_class=LabelingRuleMetricsSummary
+    )

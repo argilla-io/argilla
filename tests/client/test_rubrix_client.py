@@ -23,6 +23,15 @@ import pytest
 
 import rubrix
 from rubrix import Text2TextRecord, TextClassificationRecord
+from rubrix.client.rubrix_client import InputValueError
+from rubrix.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    ForbiddenApiError,
+    GenericApiError,
+    NotFoundApiError,
+    UnauthorizedApiError,
+    ValidationApiError,
+)
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 from tests.server.test_helpers import client, mocking_client
@@ -81,16 +90,15 @@ def test_log_records_with_too_long_text(monkeypatch):
 
 def test_not_found_response(monkeypatch):
     mocking_client(monkeypatch, client)
-    not_found_match = "Not found error. The API answered with a 404 code"
 
-    with pytest.raises(Exception, match=not_found_match):
+    with pytest.raises(NotFoundApiError):
         rubrix.load(name="not-found")
 
 
 def test_log_without_name(monkeypatch):
     mocking_client(monkeypatch, client)
     with pytest.raises(
-        Exception, match="Empty project name has been passed as argument."
+        InputValueError, match="Empty project name has been passed as argument."
     ):
         rubrix.log(
             TextClassificationRecord(
@@ -104,26 +112,22 @@ def test_log_passing_empty_records_list(monkeypatch):
     mocking_client(monkeypatch, client)
 
     with pytest.raises(
-        Exception, match="Empty record list has been passed as argument."
+        InputValueError, match="Empty record list has been passed as argument."
     ):
         rubrix.log(records=[], name="ds")
 
 
 @pytest.mark.parametrize(
-    "status,match",
+    "status,error_type",
     [
-        (
-            401,
-            "Unauthorized error: invalid credentials. The API answered with a 401 code",
-        ),
-        (403, "Forbidden error: you have not been authorised to access this dataset. "),
-        (404, "Not found error. The API answered with a"),
-        (422, "Unprocessable entity error: Something is wrong in your records. "),
-        (429, "Request error: API cannot answer. "),
-        (500, "Connection error: API is not responding. "),
+        (401, UnauthorizedApiError),
+        (403, ForbiddenApiError),
+        (404, NotFoundApiError),
+        (422, ValidationApiError),
+        (500, GenericApiError),
     ],
 )
-def test_delete_with_errors(monkeypatch, status, match):
+def test_delete_with_errors(monkeypatch, status, error_type):
     mocking_client(monkeypatch, client)
 
     def send_mock_response_with_http_status(status: int):
@@ -132,7 +136,7 @@ def test_delete_with_errors(monkeypatch, status, match):
 
         return inner
 
-    with pytest.raises(Exception, match=match):
+    with pytest.raises(error_type):
         monkeypatch.setattr(
             httpx, "delete", send_mock_response_with_http_status(status)
         )
@@ -210,10 +214,7 @@ def test_create_ds_with_wrong_name(monkeypatch):
     dataset_name = "Test Create_ds_with_wrong_name"
     client.delete(f"/api/datasets/{dataset_name}")
 
-    with pytest.raises(
-        Exception,
-        match="msg='string does not match regex",
-    ):
+    with pytest.raises(ValidationApiError):
         rubrix.log(
             TextClassificationRecord(
                 inputs={"text": "The text data"},
@@ -239,9 +240,7 @@ def test_delete_dataset(monkeypatch):
     rubrix.load(name=dataset_name)
     rubrix.delete(name=dataset_name)
     sleep(1)
-    with pytest.raises(
-        Exception, match="Not found error. The API answered with a 404 code"
-    ):
+    with pytest.raises(NotFoundApiError):
         rubrix.load(name=dataset_name)
 
 
@@ -270,7 +269,7 @@ def test_dataset_copy(monkeypatch):
 
     assert df.equals(df_copy)
 
-    with pytest.raises(Exception):
+    with pytest.raises(AlreadyExistsApiError):
         rubrix.copy(dataset, name_of_copy=dataset_copy)
 
     rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
@@ -280,9 +279,7 @@ def test_dataset_copy(monkeypatch):
         df_copy = rubrix.load(dataset_copy)
         assert df.equals(df_copy)
 
-        with pytest.raises(
-            RuntimeError, match="A dataset with name 'new_dataset' already exists"
-        ):
+        with pytest.raises(AlreadyExistsApiError):
             rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
     finally:
         rubrix.init()  # reset workspace

@@ -2,6 +2,7 @@ import pytest
 
 import rubrix
 from rubrix import TextClassificationRecord, TokenClassificationRecord
+from rubrix.client.sdk.commons.errors import ValidationApiError
 from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import MetadataLimitExceededError
 from tests.server.test_helpers import client, mocking_client
@@ -26,10 +27,7 @@ def test_log_records_with_multi_and_single_label_task(monkeypatch):
         ),
     ]
 
-    with pytest.raises(
-        Exception,
-        match="msg='All records must be single/multi labelled'",
-    ):
+    with pytest.raises(ValidationApiError):
         rubrix.log(
             records,
             name=dataset,
