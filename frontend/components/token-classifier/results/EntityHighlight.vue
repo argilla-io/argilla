@@ -120,7 +120,7 @@ export default {
   // display: inline-flex;
   border-radius: 2px;
   padding: 0;
-  margin-right: -3px;
+  margin-right: -3.2px;
   &--block {
     display: block;
     .highlight__content:after {
