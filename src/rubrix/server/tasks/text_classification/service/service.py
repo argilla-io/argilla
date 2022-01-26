@@ -15,15 +15,17 @@
 
 from typing import Iterable, List, Optional
 
+from elasticsearch import NotFoundError
 from fastapi import Depends
 
 from rubrix.server.commons.errors import EntityNotFoundError, MissingInputParamError
-from rubrix.server.commons.es_helpers import sort_by2elasticsearch
+from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
@@ -38,6 +40,9 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationRecord,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
+)
+from rubrix.server.tasks.text_classification.dao.es_config import (
+    text_classification_mappings,
 )
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
@@ -93,6 +98,10 @@ class TextClassificationService:
         self.__metrics__ = metrics
         self.__labeling__ = labeling
 
+        self.__dao__.register_task_mappings(
+            TaskType.text_classification, text_classification_mappings()
+        )
+
     def add_records(
         self,
         dataset: Dataset,
@@ -101,7 +110,9 @@ class TextClassificationService:
         self._check_multi_label_integrity(dataset, records)
         self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
-            dataset=dataset, records=records, record_class=TextClassificationRecord
+            dataset=dataset,
+            records=records,
+            record_class=TextClassificationRecord,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -153,6 +164,10 @@ class TextClassificationService:
                         EsRecordDataFieldNames.event_timestamp,
                     ],
                 ),
+                aggregations={
+                    **aggregations.predicted_as(),
+                    **aggregations.annotated_as(),
+                },
             ),
             size=size,
             record_from=record_from,
@@ -206,12 +221,15 @@ class TextClassificationService:
             )
 
     def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
-        results = self.__dao__.search_records(
-            dataset,
-            search=RecordSearch(include_default_aggregations=False),
-            size=1,
-            exclude_fields=["metrics", "metadata"],
-        )
+        try:
+            results = self.__dao__.search_records(
+                dataset,
+                search=RecordSearch(include_default_aggregations=False),
+                size=1,
+                exclude_fields=["metrics", "metadata"],
+            )
+        except NotFoundError:
+            return None
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:
             return records[0].multi_label

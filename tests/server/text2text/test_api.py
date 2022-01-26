@@ -47,7 +47,7 @@ def test_search_records():
     assert bulk_response.processed == 2
 
     response = client.post(f"/api/datasets/{dataset}/Text2Text:search", json={})
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.records[0].predicted is None

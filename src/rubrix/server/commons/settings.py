@@ -55,17 +55,26 @@ class ApiSettings(BaseSettings):
     __DATASETS_INDEX_NAME__ = ".rubrix<NAMESPACE>.datasets-v0"
     __DATASETS_RECORDS_INDEX_NAME__ = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
 
-    only_bulk_api: bool = False
     elasticsearch: str = "http://localhost:9200"
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
 
+    namespace: str = Field(default=None, regex=r"^[a-z]+$")
+
+    # Analyzer configuration
+    default_es_search_analyzer: str = "standard"
+    exact_es_search_analyzer: str = "whitespace"
+    # This line will be enabled once words field won't be used anymore
+    # wordcloud_es_search_analyzer: str = "multilingual_stop_analyzer"
+
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
     disable_es_index_template_creation: bool = False
 
-    namespace: str = Field(default=None, regex=r"^[a-z]+$")
+    metadata_fields_limit: int = Field(
+        default=50, gt=0, le=100, description="Max number of fields in metadata"
+    )
 
     @property
     def dataset_index_name(self) -> str:
@@ -82,10 +91,16 @@ class ApiSettings(BaseSettings):
         return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", f".{ns}")
 
     class Config:
+        # TODO: include a common prefix for all rubrix env vars.
         fields = {
+            "metadata_fields_limit": {"env": "RUBRIX_METADATA_FIELDS_LIMIT"},
             "namespace": {
                 "env": "RUBRIX_NAMESPACE",
-            }
+            },
+            "default_es_search_analyzer": {
+                "env": "RUBRIX_DEFAULT_ES_SEARCH_ANALYZER",
+            },
+            "exact_es_search_analyzer": {"env": "RUBRIX_EXACT_ES_SEARCH_ANALYZER"},
         }
 
 

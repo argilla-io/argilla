@@ -17,10 +17,14 @@ import json
 import numpy
 import pytest
 from pydantic import ValidationError
-from rubrix._constants import MAX_KEYWORD_LENGTH
 
-from rubrix.client.models import Text2TextRecord, TextClassificationRecord
-from rubrix.client.models import TokenClassificationRecord
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.client.models import (
+    BaseRecord,
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+)
 
 
 @pytest.mark.parametrize(
@@ -92,3 +96,14 @@ def test_model_serialization_with_numpy_nan():
     )
 
     json_record = json.loads(record.json())
+
+
+def test_warning_when_only_agent():
+    with pytest.warns(
+        UserWarning, match="`prediction_agent` will not be logged to the server."
+    ):
+        BaseRecord(prediction_agent="mock")
+    with pytest.warns(
+        UserWarning, match="`annotation_agent` will not be logged to the server."
+    ):
+        BaseRecord(annotation_agent="mock")

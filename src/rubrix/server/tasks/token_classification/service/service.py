@@ -17,31 +17,30 @@ from typing import Iterable, List
 
 from fastapi import Depends
 
-from rubrix import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_helpers import (
-    aggregations,
-    sort_by2elasticsearch,
-)
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
-from rubrix.server.tasks.commons.dao import (
-    extends_index_properties,
-)
+from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.token_classification.api.model import (
-    CreationTokenClassificationRecord,
     MENTIONS_ES_FIELD_NAME,
     PREDICTED_MENTIONS_ES_FIELD_NAME,
+    CreationTokenClassificationRecord,
     TokenClassificationAggregations,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchResults,
+)
+from rubrix.server.tasks.token_classification.dao.es_config import (
+    token_classification_mappings,
 )
 
 extends_index_properties(
@@ -93,6 +92,10 @@ class TokenClassificationService:
         self.__dao__ = dao
         self.__metrics__ = metrics
 
+        self.__dao__.register_task_mappings(
+            TaskType.token_classification, token_classification_mappings()
+        )
+
     def add_records(
         self,
         dataset: Dataset,
@@ -100,7 +103,9 @@ class TokenClassificationService:
     ):
         self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
-            dataset=dataset, records=records, record_class=TokenClassificationRecord
+            dataset=dataset,
+            records=records,
+            record_class=TokenClassificationRecord,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -153,6 +158,8 @@ class TokenClassificationService:
                     ],
                 ),
                 aggregations={
+                    **aggregations.predicted_as(),
+                    **aggregations.annotated_as(),
                     PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
                         inner_aggregation={
@@ -177,7 +184,7 @@ class TokenClassificationService:
             ),
             size=size,
             record_from=record_from,
-            exclude_fields=["metrics"] if exclude_metrics else None
+            exclude_fields=["metrics"] if exclude_metrics else None,
         )
         return TokenClassificationSearchResults(
             total=results.total,
@@ -239,8 +246,5 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(
-            dao=dao,
-            metrics=metrics
-        )
+        _instance = TokenClassificationService(dao=dao, metrics=metrics)
     return _instance

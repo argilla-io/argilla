@@ -13,7 +13,7 @@ class CommonTasksMetrics:
             name="Text length distribution",
             description="Computes the input text length distribution",
             field=EsRecordDataFieldNames.words,
-            script="params._source.words.length()",
+            script="params._source.words.length()",  # TODO(@frascuchon): This won't work once words is excluded from _source
             fixed_interval=1,
         ),
         TermsAggregation(

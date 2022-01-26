@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import warnings
 from collections import Counter
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -105,11 +106,11 @@ class WeakLabels:
                 )
                 or f"rule_{index}"
             )
-            for index, rule in enumerate(rules)
+            for index, rule in enumerate(self._rules)
         }
         # raise error if there are duplicates
         counts = Counter(self._rules_index2name.values())
-        if len(counts.keys()) < len(rules):
+        if len(counts.keys()) < len(self._rules):
             raise DuplicatedRuleNameError(
                 f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
                 " Please make sure to provide unique rule names."
@@ -261,17 +262,30 @@ class WeakLabels:
 
         return self._records
 
-    def annotation(self, exclude_missing_annotations: bool = True) -> np.ndarray:
+    def annotation(
+        self,
+        include_missing: bool = False,
+        exclude_missing_annotations: Optional[bool] = None,
+    ) -> np.ndarray:
         """Returns the annotation labels as an array of integers.
 
         Args:
-            exclude_missing_annotations: If True, excludes all entries with the ``self.label2int[None]`` integer,
-                that is all records for which there is an annotation missing.
+            include_missing: If True, returns an array of the length of the record list (``self.records()``).
+                For this we will fill the array with the ``self.label2int[None]`` integer for records without an annotation.
+            exclude_missing_annotations: DEPRECATED
 
         Returns:
             The annotation array of integers.
         """
-        if not exclude_missing_annotations:
+        if exclude_missing_annotations is not None:
+            warnings.warn(
+                "'exclude_missing_annotations' is deprecated and will be removed in the next major release. "
+                "Please use the 'include_missing' argument.",
+                category=FutureWarning,
+            )
+            include_missing = not exclude_missing_annotations
+
+        if include_missing:
             return self._annotation_array
 
         return self._annotation_array[self._annotation_array != self._label2int[None]]
