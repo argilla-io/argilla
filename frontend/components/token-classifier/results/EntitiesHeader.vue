@@ -37,7 +37,7 @@
     </span>
     <ReButton
       v-if="dataset.entities.length > entitiesNumber"
-      class="entities__container__button button-clear"
+      class="entities__container__button"
       @click="toggleEntitiesNumber"
       >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
     >
@@ -117,8 +117,12 @@ export default {
       padding: 0.5em;
       color: $secondary-color !important;
       transition: background 0.2s ease-in-out;
+      padding: 5px;
+      border-radius: 5px;
+      border: 0;
+      background: none;
       &:hover {
-        background: palette(grey, smooth);
+        background: palette(grey, smooth) !important;
         transition: background 0.2s ease-in-out;
       }
     }
@@ -138,6 +142,7 @@ export default {
   max-height: 28px;
   border: 2px solid transparent;
   transition: all 0.2s ease-in-out;
+  font-weight: 600;
   // &:not(.active):hover {
   //   filter: brightness(90%);
   // }
@@ -161,12 +166,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(
-    ($colors * $i) + ($hue * $i / $colors),
-    100% - $i / 2,
-    82% - ($colors % $i),
-    1
-  );
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.active,

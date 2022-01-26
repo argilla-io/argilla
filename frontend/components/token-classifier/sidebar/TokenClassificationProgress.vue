@@ -64,6 +64,7 @@ export default {
   position: relative;
   display: flex;
   margin-bottom: 0.7em;
+  font-weight: 600;
   label {
     margin: 0; // for tagger
     &[class^="color_"] {
@@ -74,12 +75,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(
-    ($colors * $i) + ($hue * $i / $colors),
-    100% - $i / 2,
-    82% - ($colors % $i),
-    1
-  );
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
   }
