@@ -46,6 +46,9 @@ class EsRecordDataFieldNames(str, Enum):
     words = "words"
     event_timestamp = "event_timestamp"
 
+    def __str__(self):
+        return self.value
+
 
 class SortOrder(str, Enum):
     asc = "asc"

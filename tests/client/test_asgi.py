@@ -16,13 +16,14 @@
 import time
 from typing import Any, Dict
 
-import rubrix
 from fastapi import FastAPI
-from rubrix import TextClassificationRecord, TokenClassificationRecord
-from rubrix.monitoring.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
+
+import rubrix
+from rubrix import TextClassificationRecord, TokenClassificationRecord
+from rubrix.monitoring.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
 
 
 def test_rubrix_middleware_for_text_classification(monkeypatch):

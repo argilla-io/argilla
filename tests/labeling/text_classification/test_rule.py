@@ -23,6 +23,7 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.labeling.text_classification import Rule, load_rules
 from rubrix.labeling.text_classification.rule import RuleNotAppliedError
+from rubrix.server.commons.errors import EntityNotFoundError
 from tests.server.test_helpers import client, mocking_client
 
 
@@ -128,10 +129,12 @@ def test_copy_dataset_with_rules(monkeypatch, log_dataset):
     import rubrix as rb
 
     mocking_client(monkeypatch, client)
+    rule = Rule(query="a query", label="LALA")
+    delete_rule_silently(log_dataset, rule)
 
     client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
-        json={"query": "a query", "label": "LALA"},
+        json=vars(rule),
     )
 
     copied_dataset = f"{log_dataset}_copy"
@@ -181,6 +184,8 @@ def test_copy_dataset_with_rules(monkeypatch, log_dataset):
 def test_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
     mocking_client(monkeypatch, client)
 
+    delete_rule_silently(log_dataset, rule)
+
     client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
         json={"query": rule.query, "label": rule.label},
@@ -229,6 +234,7 @@ def test_rule_metrics_without_annotated(
     monkeypatch, log_dataset_without_annotations, rule, expected_metrics
 ):
     mocking_client(monkeypatch, client)
+    delete_rule_silently(log_dataset_without_annotations, rule)
 
     client.post(
         f"/api/datasets/TextClassification/{log_dataset_without_annotations}/labeling/rules",
@@ -237,3 +243,12 @@ def test_rule_metrics_without_annotated(
 
     metrics = rule.metrics(log_dataset_without_annotations)
     assert metrics == expected_metrics
+
+
+def delete_rule_silently(dataset: str, rule: Rule):
+    try:
+        client.delete(
+            f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}"
+        )
+    except EntityNotFoundError:
+        pass

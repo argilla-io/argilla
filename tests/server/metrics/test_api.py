@@ -14,6 +14,7 @@
 #  limitations under the License.
 import pytest
 
+from rubrix.server.commons.errors import EntityNotFoundError, WrongTaskError
 from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.text2text import Text2TextBulkData, Text2TextRecord
 from rubrix.server.tasks.text_classification import (
@@ -56,10 +57,29 @@ def test_wrong_dataset_metrics():
 
     response = client.get(f"/api/datasets/TokenClassification/{dataset}/metrics")
     assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::WrongTaskError",
+            "params": {
+                "message": "Provided task TokenClassification cannot be applied to dataset"
+            },
+        }
+    }
+
     response = client.post(
-        f"/api/datasets/TokenClassification/{dataset}/metrics/a-metric:summary", json={}
+        f"/api/datasets/TokenClassification/{dataset}/metrics/a-metric:summary",
+        json={},
     )
+
     assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::WrongTaskError",
+            "params": {
+                "message": "Provided task TokenClassification cannot be applied to dataset"
+            },
+        }
+    }
 
 
 def test_dataset_for_text2text():
@@ -172,6 +192,12 @@ def test_dataset_metrics():
     )
 
     assert response.status_code == 404
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::EntityNotFoundError",
+            "params": {"name": "missing_metric", "type": "BaseMetric"},
+        }
+    }
 
     for metric in metrics:
         response = client.post(
