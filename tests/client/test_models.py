@@ -13,14 +13,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
+from typing import Any, Optional
 
 import numpy
 import pytest
 from pydantic import ValidationError
-from rubrix._constants import MAX_KEYWORD_LENGTH
 
-from rubrix.client.models import Text2TextRecord, TextClassificationRecord
-from rubrix.client.models import TokenClassificationRecord
+from rubrix._constants import MAX_KEYWORD_LENGTH
+from rubrix.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenClassificationRecord,
+    _RootValidators,
+)
 
 
 @pytest.mark.parametrize(
@@ -92,3 +97,35 @@ def test_model_serialization_with_numpy_nan():
     )
 
     json_record = json.loads(record.json())
+
+
+def test_warning_when_only_agent():
+    class MockRecord(_RootValidators):
+        prediction: Optional[Any] = None
+        prediction_agent: Optional[str] = None
+        annotation: Optional[Any] = None
+        annotation_agent: Optional[str] = None
+        metadata: Optional[Any] = None
+        status: Optional[str] = None
+
+    with pytest.warns(
+        UserWarning, match="`prediction_agent` will not be logged to the server."
+    ):
+        MockRecord(prediction_agent="mock")
+    with pytest.warns(
+        UserWarning, match="`annotation_agent` will not be logged to the server."
+    ):
+        MockRecord(annotation_agent="mock")
+
+
+def test_forbid_extra():
+    class MockRecord(_RootValidators):
+        prediction: Optional[Any] = None
+        prediction_agent: Optional[str] = None
+        annotation: Optional[Any] = None
+        annotation_agent: Optional[str] = None
+        metadata: Optional[Any] = None
+        status: Optional[str] = None
+
+    with pytest.raises(ValidationError):
+        MockRecord(extra="mock")
