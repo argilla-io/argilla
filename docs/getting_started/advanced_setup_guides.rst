@@ -29,10 +29,10 @@ For MacOS and Windows, Elasticsearch also provides `homebrew formulae <https://w
 We recommend ES version 7.10 to work with Rubrix.
 
 .. warning::
-   Keep in mind, if you `docker rm` your ES container, you will loose all your datasets in Rubrix!
+   Keep in mind, if you ```docker rm``` your ES container, you will loose all your datasets in Rubrix!
 
 
-.. _server_configurations:
+.. _server-configurations:
 
 Server configurations
 ---------------------
@@ -115,7 +115,7 @@ This is a convenient way because it automatically includes an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`__ instance, Rubrix's main persistent layer.
 
 .. warning::
-   Keep in mind, if you execute `docker-compose down`, you will loose all your datasets in Rubrix!
+   Keep in mind, if you execute ``docker-compose down``, you will loose all your datasets in Rubrix!
 
 
 .. _configure-elasticsearch-role-users:
@@ -156,7 +156,7 @@ Note that provided analyzers names should be defined as built-in ones. If you wa
 customized analyzer, you should create it inside an index_template matching Rubrix index names (`.rubrix*.records-v0),
 and then provide the analyzer name using the specific environment variable.
 
-.. _deploy-to-aws-instance-using-docker-machine
+.. _deploy-to-aws-instance-using-docker-machine:
 
 Deploy to aws instance using docker-machine
 -------------------------------------------
