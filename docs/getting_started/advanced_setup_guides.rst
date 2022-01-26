@@ -29,7 +29,7 @@ For MacOS and Windows, Elasticsearch also provides `homebrew formulae <https://w
 We recommend ES version 7.10 to work with Rubrix.
 
 .. warning::
-   Keep in mind, if you ```docker rm``` your ES container, you will loose all your datasets in Rubrix!
+   Keep in mind, if you ``docker rm`` your ES container, you will loose all your datasets in Rubrix!
 
 
 .. _server-configurations:
