@@ -16,7 +16,9 @@
   -->
 
 <template>
-  <span :class="['highlight', isText ? '' : 'highlight--block']">
+  <span
+    :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']"
+  >
     <span
       class="highlight__content"
       @click="openTagSelector"
@@ -31,11 +33,16 @@
         ]"
       >
         <span
+          class="highlight__tooltip__origin"
+          v-if="span.entity.origin === 'annotation'"
+          >Annot.</span
+        >
+        <span
           >{{ span.entity.label }}
           <svgicon
             v-if="annotationEnabled"
-            width="12"
-            height="12"
+            width="8"
+            height="8"
             name="cross"
             @click="removeEntity"
           ></svgicon>
@@ -107,9 +114,10 @@ export default {
   line-height: 1em;
   position: relative;
   cursor: default;
-  display: inline;
+  // display: inline-flex;
   border-radius: 2px;
   padding: 0;
+  margin-right: -3.2px;
   &--block {
     display: block;
     .highlight__content:after {
@@ -123,17 +131,16 @@ export default {
   &__label {
     @include font-size(0px);
   }
-  .highlight__content {
+  &__content {
     display: inline;
   }
-  .highlight__tooltip {
+  &__tooltip {
     display: block;
     position: absolute;
     border-radius: 2px;
     padding: 4px 9px 5px 9px;
     opacity: 0;
     z-index: -1;
-    bottom: 100%;
     margin-bottom: 0.5em;
     transition: opacity 0.5s ease, z-index 0.2s ease;
     white-space: nowrap;
@@ -143,23 +150,43 @@ export default {
     right: 50%;
     transform: translateX(50%);
     @include font-size(12px);
+    & > span {
+      display: block;
+    }
+    &__origin {
+      @include font-size(8px);
+    }
+    .annotation & {
+      bottom: 100%;
+    }
+    .prediction & {
+      top: calc(100% + 15px);
+    }
     &--icon {
       padding-right: 20px;
       .svg-icon {
-        display: inline-block;
-        margin-left: 1em;
+        position: absolute;
+        top: 8px;
+        right: 8px;
         cursor: pointer;
       }
     }
   }
-  .highlight__tooltip:after {
+  &__tooltip:after {
     margin: auto;
-    transform: translateY(10px);
-    @include triangle(bottom, 6px, 6px, auto);
     position: absolute;
-    bottom: 5px;
     right: 0;
     left: 0;
+    .annotation & {
+      @include triangle(bottom, 6px, 6px, auto);
+      bottom: 5px;
+      transform: translateY(10px);
+    }
+    .prediction & {
+      @include triangle(top, 6px, 6px, auto);
+      top: -15px;
+      transform: translateY(10px);
+    }
   }
   &:hover .highlight__tooltip {
     opacity: 1;

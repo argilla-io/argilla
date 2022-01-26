@@ -297,7 +297,7 @@ export default {
 }
 .selected {
   // border: 1px dashed $tertiary-color;
-  .span__text {
+  ::v-deep .span__text {
     line-height: 1.5em;
     background: $tertiary-lighten-color;
   }
@@ -335,8 +335,18 @@ $hue: 360;
     1
   );
   .color_#{$i - 1} {
-    ::v-deep span {
+    &.annotation ::v-deep .highlight__content {
       background: $rcolor;
+    }
+    &.prediction ::v-deep .highlight__content {
+      padding-bottom: 2px;
+      border-bottom: 5px solid $rcolor;
+    }
+    &.annotation ::v-deep .highlight__tooltip:after {
+      border-color: $rcolor transparent transparent transparent;
+    }
+    &.prediction ::v-deep .highlight__tooltip:after {
+      border-color: transparent transparent $rcolor transparent;
     }
     &.active,
     &.tag:hover {
@@ -360,9 +370,6 @@ $hue: 360;
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
-  }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip:after {
-    border-color: $rcolor transparent transparent transparent;
   }
 }
 </style>
