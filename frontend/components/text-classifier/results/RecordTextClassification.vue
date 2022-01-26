@@ -47,7 +47,7 @@
     <div v-if="!annotationEnabled" class="record__labels">
       <template v-if="record.annotation">
         <svgicon
-          v-if="record.predicted"
+          v-if="record.predicted && !labellingRulesView"
           :class="['icon__predicted', record.predicted]"
           width="20"
           height="20"
@@ -87,6 +87,9 @@ export default {
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
+    },
+    labellingRulesView() {
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
     allowValidate() {
       const isBinary =
