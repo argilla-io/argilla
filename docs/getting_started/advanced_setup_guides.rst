@@ -12,7 +12,7 @@ Here we provide some advanced setup guides:
    :local:
    :depth: 1
 
-.. _setting-up-ES-via-docker
+.. _setting-up-ES-via-docker:
 
 Setting up ES via docker
 ------------------------
@@ -32,7 +32,7 @@ We recommend ES version 7.10 to work with Rubrix.
    Keep in mind, if you `docker rm` your ES container, you will loose all your datasets in Rubrix!
 
 
-.. _server_configurations
+.. _server_configurations:
 
 Server configurations
 ---------------------

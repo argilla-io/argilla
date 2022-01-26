@@ -40,22 +40,19 @@ Make sure you have ``Docker`` installed and run (check the :ref:`setup and insta
 
 .. code-block:: bash
 
-   mkdir rubrix && cd rubrix
+   pip install rubrix[server] transformers[torch] datasets
+
+.. code-block:: bash
+
+   docker run -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
 
 And then run:
 
 .. code-block:: bash
 
-   wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
-
-Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`` libraries for this example):
-
-.. code-block:: bash
-
-   pip install rubrix transformers datasets torch
+   python -m rubrix
 
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
-
 
 **Why**:
 

@@ -3,7 +3,8 @@
 Setup and installation
 ======================
 
-In this guide, we will help you to get up and running with Rubrix. Basically, you need to:
+In this guide, we will help you to get up and running with Rubrix.
+Basically, you need to:
 
 1. Install Rubrix
 2. Launch the web app
@@ -30,7 +31,8 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 
 .. note::
    Conda only installs the Python client of Rubrix.
-   This means, you have to launch the web app via docker or docker-compose.
+   This means, you have to launch the web app via :ref:`docker <launching-the-web-app-via-docker>` or :ref:`docker-compose <launching-the-web-app-via-docker-compose>`.
+
 
 2. Launch the web app
 ---------------------
