@@ -297,7 +297,7 @@ export default {
 }
 .selected {
   // border: 1px dashed $tertiary-color;
-  .span__text {
+  ::v-deep .span__text {
     line-height: 1.5em;
     background: $tertiary-lighten-color;
   }

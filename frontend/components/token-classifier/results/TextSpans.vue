@@ -27,6 +27,7 @@
         :dataset="dataset"
         :class="isSelected(i) ? 'selected' : ''"
         @startSelection="onStartSelection"
+        @reset="onReset"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
         @changeEntityLabel="onChangeEntityLabel"
