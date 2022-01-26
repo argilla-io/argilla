@@ -18,6 +18,7 @@ Common environment vars / settings
 """
 
 from typing import List
+from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field
 
@@ -89,6 +90,13 @@ class ApiSettings(BaseSettings):
         if ns is None:
             return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", "")
         return self.__DATASETS_RECORDS_INDEX_NAME__.replace("<NAMESPACE>", f".{ns}")
+
+    def obfuscated_elasticsearch(self) -> str:
+        """Returns configured elasticsearch url obfuscating the provided password, if any"""
+        parsed = urlparse(self.elasticsearch)
+        if parsed.password:
+            return self.elasticsearch.replace(parsed.password, "XXXX")
+        return self.elasticsearch
 
     class Config:
         # TODO: include a common prefix for all rubrix env vars.

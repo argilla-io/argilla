@@ -94,11 +94,12 @@ def configure_app_startup(app: FastAPI):
             dataset_records.init()
         except elasticsearch.exceptions.ConnectionError as error:
             raise ConfigError(
-                f"Your Elasticsearch endpoint at {settings.elasticsearch} is not available or not responding."
-                "\nPlease make sure your Elasticsearch instance is launched and correctly running and "
+                f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
+                "is not available or not responding.\n"
+                "Please make sure your Elasticsearch instance is launched and correctly running and "
                 "you have the necessary access permissions. "
-                "Once you have verified this, restart the Rubrix server."
-                f"\nError detail: [{error}]"
+                "Once you have verified this, restart the Rubrix server.\n"
+                f"Error detail: [{error}]"
             )
 
 
