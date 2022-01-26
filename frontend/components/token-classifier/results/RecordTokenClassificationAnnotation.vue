@@ -21,7 +21,6 @@
       :dataset="dataset"
       :record="record"
       :entities="annotationEntities"
-      :agent="agent"
       @updateRecordEntities="updateRecordEntities"
     />
     <div class="content__actions-buttons">
@@ -64,15 +63,6 @@ export default {
         }));
       }
       return entities;
-    },
-    agent() {
-      if (this.record.annotation) {
-        return this.record.annotation.agent;
-      }
-      if (this.record.prediction) {
-        return this.record.prediction.agent;
-      }
-      return undefined;
     },
   },
   methods: {

@@ -48,9 +48,6 @@ export default {
       type: Object,
       required: true,
     },
-    agent: {
-      type: String,
-    },
     entities: {
       type: Array,
     },
@@ -99,7 +96,6 @@ export default {
             ),
             start: entity.start,
             end: entity.end,
-            agent: this.agent,
           });
           idx = entity.end_token;
         } else {
@@ -109,7 +105,6 @@ export default {
             tokens: [token],
             start: token.start,
             end: token.end,
-            agent: this.agent,
           });
           idx++;
         }

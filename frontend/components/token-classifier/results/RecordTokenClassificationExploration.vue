@@ -24,7 +24,6 @@
       :record="record"
       :class="origin"
       :entities="getEntitiesByOrigin(origin)"
-      :agent="(record[origin] && record[origin].agent) || undefined"
     />
   </div>
 </template>
