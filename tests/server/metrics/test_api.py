@@ -27,7 +27,6 @@ from rubrix.server.tasks.token_classification import (
 from rubrix.server.tasks.token_classification.metrics import TokenClassificationMetrics
 from tests.server.test_helpers import client
 
-
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 
 
@@ -178,4 +177,4 @@ def test_dataset_metrics():
             f"/api/datasets/TextClassification/{dataset}/metrics/{metric['id']}:summary",
             json={},
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"{metric}: {response.json()}"

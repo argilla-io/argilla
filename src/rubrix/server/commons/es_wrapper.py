@@ -18,7 +18,8 @@ from typing import Any, Callable, Dict, Iterable, List, Optional
 import deprecated
 import elasticsearch
 from elasticsearch import Elasticsearch, NotFoundError, RequestError
-from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
+from elasticsearch.helpers import bulk as es_bulk
+from elasticsearch.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.errors import InvalidTextSearchError
@@ -27,7 +28,6 @@ try:
     import ujson as json
 except ModuleNotFoundError:
     import json
-
 
 from .settings import settings
 
@@ -146,7 +146,11 @@ class ElasticsearchWrapper(LoggingMixin):
             raise InvalidTextSearchError(detail)
 
     def create_index(
-        self, index: str, force_recreate: bool = False, mappings: Dict[str, Any] = None
+        self,
+        index: str,
+        force_recreate: bool = False,
+        settings: Dict[str, Any] = None,
+        mappings: Dict[str, Any] = None,
     ):
         """
         Applies a index creation with provided mapping configuration.
@@ -159,6 +163,8 @@ class ElasticsearchWrapper(LoggingMixin):
             The index name
         force_recreate:
             If True, the index will be recreated (if exists). Default=False
+        settings:
+            The index settings configuration
         mappings:
             The mapping configuration. Optional.
 
@@ -167,7 +173,8 @@ class ElasticsearchWrapper(LoggingMixin):
             self.delete_index(index)
         if not self.index_exists(index):
             self.__client__.indices.create(
-                index=index, body={"mappings": mappings or {}}
+                index=index,
+                body={"settings": settings or {}, "mappings": mappings or {}},
             )
 
     def create_index_template(
@@ -188,6 +195,10 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         if force_recreate or not self.__client__.indices.exists_template(name):
             self.__client__.indices.put_template(name=name, body=template)
+
+    def delete_index_template(self, index_template: str):
+        """Deletes an index template"""
+        self.__client__.indices.delete_template(name=index_template, ignore=[400, 404])
 
     def delete_index(self, index: str):
         """Deletes an elasticsearch index"""
@@ -492,11 +503,15 @@ class ElasticsearchWrapper(LoggingMixin):
         )
 
     def create_field_mapping(
-        self, index: str, field_name: str, type: str, **extra_args
+        self,
+        index: str,
+        field_name: str,
+        mapping: Dict[str, Any],
     ):
+        """Creates or updates an index field mapping configuration"""
         self.__client__.indices.put_mapping(
             index=index,
-            body={"properties": {field_name: {"type": type, **extra_args}}},
+            body={"properties": {field_name: mapping}},
         )
 
 

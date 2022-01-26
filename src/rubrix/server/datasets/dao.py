@@ -16,42 +16,14 @@
 import json
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
-import deprecated
 from fastapi import Depends
 
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
+from rubrix.server.commons.es_wrapper import ElasticsearchWrapper
 from rubrix.server.tasks.commons import TaskType
 
-from ..commons.es_settings import (
-    DATASETS_INDEX_NAME,
-    DATASETS_INDEX_TEMPLATE,
-    DATASETS_RECORDS_INDEX_NAME,
-)
+from ..commons.es_settings import DATASETS_INDEX_NAME, DATASETS_INDEX_TEMPLATE
+from ..tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_index
 from .model import DatasetDB
-
-
-def dataset_records_index(dataset_id: str) -> str:
-    """
-    Returns dataset records index for a given dataset id
-
-    The dataset info is stored in two elasticsearch indices. The main
-    index where all datasets definition are stored and
-    an specific dataset index for data records.
-
-    This function calculates the corresponding dataset records index
-    for a given dataset id.
-
-    Parameters
-    ----------
-    dataset_id
-
-    Returns
-    -------
-        The dataset records index name
-
-    """
-    return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
-
 
 BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
 
@@ -63,7 +35,9 @@ class DatasetsDAO:
 
     @classmethod
     def get_instance(
-        cls, es: ElasticsearchWrapper = Depends(create_es_wrapper)
+        cls,
+        es: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+        records_dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "DatasetsDAO":
         """
         Gets or creates the dao instance
@@ -73,17 +47,21 @@ class DatasetsDAO:
         es:
             The elasticsearch wrapper dependency
 
+        records_dao:
+            The dataset records dao
+
         Returns
         -------
             The dao instance
 
         """
         if cls._INSTANCE is None:
-            cls._INSTANCE = cls(es)
+            cls._INSTANCE = cls(es, records_dao)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchWrapper):
+    def __init__(self, es: ElasticsearchWrapper, records_dao: DatasetRecordsDAO):
         self._es = es
+        self.__records_dao__ = records_dao
         self.init()
 
     def init(self):
@@ -137,11 +115,7 @@ class DatasetsDAO:
             doc_id=dataset.id,
             document=self._dataset_to_es_doc(dataset),
         )
-
-        self._es.create_index(
-            index=dataset_records_index(dataset.id),
-            force_recreate=True,
-        )
+        self.__records_dao__.create_dataset_index(dataset, force_recreate=True)
         return dataset
 
     def update_dataset(
@@ -310,28 +284,3 @@ class DatasetsDAO:
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open_index(dataset_records_index(dataset.id))
-
-
-_instance: Optional[DatasetsDAO] = None
-
-
-@deprecated.deprecated(reason="Use ``DatasetsDAO.get_instance`` class method instead")
-def create_datasets_dao(
-    es: ElasticsearchWrapper = Depends(create_es_wrapper),
-) -> DatasetsDAO:
-    """
-    Creates the dao
-    Parameters
-    ----------
-    es:
-        The elasticsearch wrapper dependency>
-
-    Returns
-    -------
-        The dao instance
-
-    """
-    global _instance
-    if _instance is None:
-        _instance = DatasetsDAO(es)
-    return _instance

@@ -20,10 +20,9 @@ This module configures the global fastapi application
 import os
 from pathlib import Path
 
+from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from brotli_asgi import BrotliMiddleware
-
 from pydantic import ValidationError
 
 from rubrix import __version__ as rubrix_version
@@ -33,9 +32,10 @@ from rubrix.server.commons.errors import (
 )
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
-from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
+from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
+from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
+
 from .commons.settings import settings as api_settings
 from .routes import api_router
 
@@ -87,8 +87,9 @@ def configure_app_startup(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
         es_wrapper = create_es_wrapper()
-        datasets: DatasetsDAO = create_datasets_dao(es=es_wrapper)
-        dataset_records: DatasetRecordsDAO = dataset_records_dao(es=es_wrapper)
+        dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
+        datasets: DatasetsDAO = DatasetsDAO.get_instance(es_wrapper, dataset_records)
+
         datasets.init()
         dataset_records.init()
 

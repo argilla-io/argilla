@@ -20,7 +20,7 @@
     <ul>
       <li>
         <NuxtLink
-          v-for="breadcrumb in breadcrumbs"
+          v-for="breadcrumb in filteredBreadcrumbs"
           :key="breadcrumb.name"
           class="breadcrumbs__item"
           :to="breadcrumb.link"
@@ -35,7 +35,7 @@
         class="breadcrumbs__copy"
         href="#"
         @click.prevent="
-          copyToClipboard(breadcrumbs[breadcrumbs.length - 1].name)
+          copyToClipboard(filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name)
         "
       >
         <svgicon name="copy" width="12" height="13" />
@@ -54,6 +54,11 @@ export default {
     copyButton: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    filteredBreadcrumbs() {
+      return this.breadcrumbs.filter((breadcrumb) => breadcrumb.name);
     },
   },
   methods: {

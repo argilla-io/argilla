@@ -48,9 +48,6 @@
           ></svgicon>
         </span>
       </span>
-      <span v-if="span.agent" class="highlight__metadata">
-        <strong>agent:</strong> {{ span.agent }}
-      </span>
     </span>
   </span>
 </template>
@@ -137,27 +134,6 @@ export default {
   &__content {
     display: inline;
   }
-  &__metadata {
-    background: white;
-    display: block;
-    position: absolute;
-    border-radius: 2px;
-    padding: 4px 9px 5px 9px;
-    opacity: 0;
-    z-index: -1;
-    top: 100%;
-    margin-top: 0.5em;
-    transition: opacity 0.5s ease, z-index 0.2s ease;
-    white-space: nowrap;
-    user-select: none;
-    cursor: default;
-    font-weight: 600;
-    box-shadow: $shadow-100;
-    text-align: left;
-    @include font-size(12px);
-    right: 50%;
-    transform: translateX(50%);
-  }
   &__tooltip {
     display: block;
     position: absolute;
@@ -211,11 +187,6 @@ export default {
       top: -15px;
       transform: translateY(10px);
     }
-  }
-  &:hover .highlight__metadata {
-    opacity: 1;
-    transition-delay: 0s;
-    z-index: 4;
   }
   &:hover .highlight__tooltip {
     opacity: 1;

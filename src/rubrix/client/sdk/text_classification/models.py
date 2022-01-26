@@ -19,12 +19,12 @@ from pydantic import BaseModel, Field
 
 from rubrix.client.models import (
     TextClassificationRecord as ClientTextClassificationRecord,
-    TokenAttributions as ClientTokenAttributions,
 )
+from rubrix.client.models import TokenAttributions as ClientTokenAttributions
 from rubrix.client.sdk.commons.models import (
+    MACHINE_NAME,
     BaseAnnotation,
     BaseRecord,
-    MACHINE_NAME,
     PredictionStatus,
     ScoreRange,
     TaskStatus,
@@ -149,6 +149,11 @@ class TextClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    uncovered_by_rules: List[str] = Field(
+        default_factory=list,
+        description="List of rule queries that WILL NOT cover the resulting records",
+    )
 
 
 class LabelingRule(BaseModel):

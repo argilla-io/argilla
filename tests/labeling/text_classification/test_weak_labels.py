@@ -238,9 +238,13 @@ def test_rules_matrix_records_annotation(monkeypatch):
     ).all()
     assert (weak_labels.annotation() == np.array([[0]], dtype=np.short)).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([[-1, 0]], dtype=np.short)
     ).all()
+    with pytest.warns(
+        FutureWarning, match="'exclude_missing_annotations' is deprecated"
+    ):
+        weak_labels.annotation(exclude_missing_annotations=True)
 
 
 def test_summary(monkeypatch, rules):
@@ -398,7 +402,7 @@ def test_change_mapping(monkeypatch, rules):
         )
     ).all()
     assert (
-        weak_labels.annotation(exclude_missing_annotations=False)
+        weak_labels.annotation(include_missing=True)
         == np.array([2, 10, -10, 1, 2], dtype=np.short)
     ).all()
     assert weak_labels.label2int == new_mapping
@@ -412,6 +416,20 @@ def test_change_mapping(monkeypatch, rules):
 def test_dataset_type_error():
     with pytest.raises(TypeError, match="must be a string, but you provided"):
         WeakLabels([1, 2, 3])
+
+
+def test_rules_from_dataset(monkeypatch, log_dataset):
+    monkeypatch.setattr(httpx, "get", client.get)
+    monkeypatch.setattr(httpx, "stream", client.stream)
+
+    mock_rules = [Rule(query="mock", label="mock")]
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load_rules",
+        lambda x: mock_rules,
+    )
+
+    wl = WeakLabels(log_dataset)
+    assert wl.rules is mock_rules
 
 
 def test_norulesfounderror(monkeypatch):
