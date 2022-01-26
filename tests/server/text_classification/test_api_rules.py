@@ -1,5 +1,6 @@
 import pytest
 
+from rubrix.server.commons.errors import EntityAlreadyExistsError
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
@@ -168,22 +169,33 @@ def test_duplicated_dataset_rules():
         json=rule.dict(),
     )
     assert response.status_code == 409
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::EntityAlreadyExistsError",
+            "params": {"name": "a query", "type": "LabelingRule"},
+        }
+    }
 
 
 def test_rules_with_multi_label_dataset():
     dataset = "test_rules_with_multi_label_dataset"
     log_some_records(dataset, multi_label=True)
 
-    with pytest.raises(
-        AssertionError,
-        match="Labeling rules are not supported for multi-label datasets",
-    ):
-        client.post(
-            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-            json=CreateLabelingRule(
-                query="a query", description="Description", label="LALA"
-            ).dict(),
-        )
+    response = client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules",
+        json=CreateLabelingRule(
+            query="a query", description="Description", label="LALA"
+        ).dict(),
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::BadRequestError",
+            "params": {
+                "message": "Labeling rules are not supported for multi-label datasets"
+            },
+        }
+    }
 
 
 def test_rule_metrics_with_missing_label():
