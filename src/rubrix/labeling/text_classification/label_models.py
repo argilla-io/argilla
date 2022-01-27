@@ -73,6 +73,7 @@ class LabelModel:
         self,
         include_annotated_records: bool = False,
         include_abstentions: bool = False,
+        prediction_agent: str = "LabelModel",
         **kwargs,
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
@@ -80,6 +81,7 @@ class LabelModel:
         Args:
             include_annotated_records: Whether or not to include annotated records.
             include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -282,6 +284,7 @@ class Snorkel(LabelModel):
         self,
         include_annotated_records: bool = False,
         include_abstentions: bool = False,
+        prediction_agent: str = "Snorkel",
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
     ) -> List[TextClassificationRecord]:
         """Returns a list of records that contain the predictions of the label model
@@ -289,6 +292,7 @@ class Snorkel(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records.
             include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
             tie_break_policy: Policy to break ties. You can choose among three policies:
 
                 - `abstain`: Do not provide any prediction
@@ -355,6 +359,7 @@ class Snorkel(LabelModel):
                 ]
 
             records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
 
         return records_with_prediction
 
@@ -531,6 +536,7 @@ class FlyingSquid(LabelModel):
         self,
         include_annotated_records: bool = False,
         include_abstentions: bool = False,
+        prediction_agent: str = "FlyingSquid",
         verbose: bool = True,
         tie_break_policy: str = "abstain",
     ) -> List[TextClassificationRecord]:
@@ -539,6 +545,7 @@ class FlyingSquid(LabelModel):
         Args:
             include_annotated_records: Whether or not to include annotated records.
             include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
             verbose: If True, print out messages of the progress to stderr.
             tie_break_policy: Policy to break ties. You can choose among two policies:
 
@@ -612,6 +619,7 @@ class FlyingSquid(LabelModel):
 
             records_with_prediction.append(rec.copy(deep=True))
             records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
 
         return records_with_prediction
 
