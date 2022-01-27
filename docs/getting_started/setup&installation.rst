@@ -42,7 +42,7 @@ Rubrix uses `Elasticsearch (ES) <https://www.elastic.co/elasticsearch/>`__ as it
 
 You can start the Rubrix web app via Python.
 
-.. code-block::
+.. code-block:: bash
 
    python -m rubrix
 

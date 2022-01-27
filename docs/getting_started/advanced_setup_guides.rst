@@ -20,7 +20,7 @@ Setting up Elasticsearch via docker
 Setting up Elasticsearch (ES) via docker is straight forward.
 Simply run following command:
 
-.. code-block::
+.. code-block:: bash
 
    docker run -d \
    --name elasticsearch-for-rubrix \
@@ -32,13 +32,13 @@ Simply run following command:
 This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
 To see the logs of the container, you can run:
 
-.. code-block::
+.. code-block:: bash
 
    docker logs elasticsearch-for-rubrix
 
 Or you can stop/start the container via:
 
-.. code-block::
+.. code-block:: bash
 
    docker stop elasticsearch-for-rubrix
    docker start elasticsearch-for-rubrix
