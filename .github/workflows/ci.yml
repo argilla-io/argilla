@@ -24,7 +24,18 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
+
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            python_code:
+              - 'src/**'
+            frontend:
+              - 'frontend/**'
+
       - name: Setup ElasticSearch 🔎
+        if: steps.filter.outputs.python_code == 'true'
         uses: getong/elasticsearch-action@v1.2
         with:
           elasticsearch version: 7.4.2
@@ -42,6 +53,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
       - name: Run tests 📈
+        if: steps.filter.outputs.python_code == 'true'
         run: |
           pytest --cov=rubrix --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
@@ -49,6 +61,7 @@ jobs:
 
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
+        if: steps.filter.outputs.python_code == 'true'
         with:
           files: ./coverage.xml
           flags: pytest
