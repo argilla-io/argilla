@@ -21,7 +21,7 @@
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
         Records:
-        <strong>{{coveredRecords}}</strong>
+        <strong>{{ coveredRecords }}</strong>
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -132,7 +132,9 @@ export default {
       }
     },
     coveredRecords() {
-      return isNaN(this.currentRuleMetrics.records) ? "-" : this.$options.filters.formatNumber(this.currentRuleMetrics.records)
+      return isNaN(this.currentRuleMetrics.records)
+        ? "-"
+        : this.$options.filters.formatNumber(this.currentRuleMetrics.records);
     },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;

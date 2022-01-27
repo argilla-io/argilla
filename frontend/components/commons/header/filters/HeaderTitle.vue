@@ -18,7 +18,10 @@
 <template>
   <div class="container">
     <h2 class="title">
-      Records <template v-if="filtersApplied.length">with filters applied</template> ({{ dataset.results.total | formatNumber }})
+      Records
+      <template v-if="filtersApplied.length">with filters applied</template> ({{
+        dataset.results.total | formatNumber
+      }})
     </h2>
   </div>
 </template>
@@ -37,9 +40,11 @@ export default {
   },
   computed: {
     filtersApplied() {
-      return Object.values(this.dataset.query).filter(v => v && Object.values(v).length);
-    }
-  }
+      return Object.values(this.dataset.query).filter(
+        (v) => v && Object.values(v).length
+      );
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
