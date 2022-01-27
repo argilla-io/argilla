@@ -216,7 +216,7 @@ $hue: 360;
   $rcolor: hsla(
     ($colors * $i) + ($hue * $i / $colors),
     100% - $i / 2,
-    82% - ($colors % $i),
+    87% - ($colors % $i),
     1
   );
   .color_#{$i - 1} {

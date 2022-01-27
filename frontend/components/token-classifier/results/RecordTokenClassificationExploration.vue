@@ -71,6 +71,7 @@ export default {
     }
   }
 }
+
 .prediction {
   pointer-events: none;
   ::v-deep {

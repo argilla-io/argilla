@@ -35,7 +35,7 @@
         <span
           class="highlight__tooltip__origin"
           v-if="span.entity.origin === 'annotation'"
-          >Annot.</span
+          >annot.</span
         >
         <span
           >{{ span.entity.label }}
@@ -110,7 +110,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .highlight {
-  @include font-size(16px);
+  @include font-size(18px);
   line-height: 1em;
   position: relative;
   cursor: default;
@@ -133,12 +133,13 @@ export default {
   }
   &__content {
     display: inline;
+    padding-bottom: 1px;
   }
   &__tooltip {
     display: block;
     position: absolute;
     border-radius: 2px;
-    padding: 4px 9px 5px 9px;
+    padding: 5px 10px 6px 10px;
     opacity: 0;
     z-index: -1;
     margin-bottom: 0.5em;
@@ -149,12 +150,14 @@ export default {
     font-weight: 600;
     right: 50%;
     transform: translateX(50%);
-    @include font-size(12px);
+    min-width: 50px;
+    @include font-size(16px);
     & > span {
       display: block;
     }
     &__origin {
-      @include font-size(8px);
+      @include font-size(12px);
+      font-weight: normal;
     }
     .annotation & {
       bottom: 100%;
@@ -166,8 +169,8 @@ export default {
       padding-right: 20px;
       .svg-icon {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 10px;
+        right: 10px;
         cursor: pointer;
       }
     }
