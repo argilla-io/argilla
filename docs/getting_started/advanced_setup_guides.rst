@@ -6,14 +6,82 @@
 Advanced setup guides
 =====================
 
-Here we provide some advanced setup guides, in case you want to use docker, configure your own Elasticsearch instance or install the cutting-edge master version.
+Here we provide some advanced setup guides:
 
-.. _using-docker:
+.. contents::
+   :local:
+   :depth: 1
 
-Using docker
-------------
+.. _setting-up-elasticsearch-via-docker:
 
-You can use vanilla docker to run our image of the server.
+Setting up Elasticsearch via docker
+-----------------------------------
+
+Setting up Elasticsearch (ES) via docker is straight forward.
+Simply run following command:
+
+.. code-block:: bash
+
+   docker run -d \
+   --name elasticsearch-for-rubrix \
+   -p 9200:9200 -p 9300:9300 \
+   -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+   -e "discovery.type=single-node" \
+   docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+
+This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
+To see the logs of the container, you can run:
+
+.. code-block:: bash
+
+   docker logs elasticsearch-for-rubrix
+
+Or you can stop/start the container via:
+
+.. code-block:: bash
+
+   docker stop elasticsearch-for-rubrix
+   docker start elasticsearch-for-rubrix
+
+.. warning::
+   Keep in mind, if you remove your container with ``docker rm elasticsearch-for-rubrix``, you will loose all your datasets in Rubrix!
+
+For more details about the ES installation with docker, see their `official documentation <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/docker.html>`__.
+For MacOS and Windows, Elasticsearch also provides `homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/brew.html>`__ and a `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/windows.html>`__, respectively.
+We recommend ES version 7.10 to work with Rubrix.
+
+
+.. _server-configurations:
+
+Server configurations
+---------------------
+
+By default, the :ref:`Rubrix server <...>` will look for your ES endpoint at ``http://localhost:9200``.
+But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
+
+Since the Rubrix server is built on fastapi, you can launch it using **uvicorn** directly:
+
+.. code-block:: bash
+
+   uvicorn rubrix:app
+
+*(for Rubrix versions below 0.9 you can launch the server via)*
+
+.. code-block:: bash
+
+   uvicorn rubrix.server.server:app
+
+For more details about fastapi and uvicorn, see `here <https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn>`_
+
+Fastapi also provides beautiful REST API docs that you can check at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
+
+
+.. _launching-the-web-app-via-docker:
+
+Launching the web app via docker
+--------------------------------
+
+You can use vanilla docker to run our image of the web app.
 First, pull the image from the `Docker Hub <https://hub.docker.com/>`_:
 
 .. code-block:: shell
@@ -43,9 +111,35 @@ To stop the Rubrix server, just stop the container:
 
 If you want to deploy your own Elasticsearch cluster via docker, we refer you to the excellent guide on the `Elasticsearch homepage <https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html>`_
 
+.. _launching-the-web-app-via-docker-compose:
+
+Launching the web app via docker-compose
+----------------------------------------
+
+For this method you first need to install `Docker Compose <https://docs.docker.com/compose/install/>`__.
+
+Then, create a folder:
+
+.. code-block:: bash
+
+   mkdir rubrix && cd rubrix
+
+and launch the docker-contained web app with the following command:
+
+.. code-block:: bash
+
+   wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up -d
+
+This is a convenient way because it automatically includes an
+`Elasticsearch <https://www.elastic.co/elasticsearch/>`__ instance, Rubrix's main persistent layer.
+
+.. warning::
+   Keep in mind, if you execute ``docker-compose down``, you will loose all your datasets in Rubrix!
+
+
 .. _configure-elasticsearch-role-users:
 
-Configure elasticsearch role/users
+Configure Elasticsearch role/users
 ----------------------------------
 
 If you have an Elasticsearch instance and want to share resources with other applications, you can easily configure it for Rubrix.
@@ -81,6 +175,7 @@ Note that provided analyzers names should be defined as built-in ones. If you wa
 customized analyzer, you should create it inside an index_template matching Rubrix index names (`.rubrix*.records-v0),
 and then provide the analyzer name using the specific environment variable.
 
+.. _deploy-to-aws-instance-using-docker-machine:
 
 Deploy to aws instance using docker-machine
 -------------------------------------------
@@ -176,8 +271,6 @@ Accessing Rubrix
 ^^^^^^^^^^^^^^^^
 
 In our case http://52.213.178.33
-
-
 
 
 .. _install-from-master:
