@@ -30,7 +30,7 @@
       </div>
     </div>
     <p class="rule__records" v-if="dataset.results.total > 0">
-      Records with filter applied ({{ dataset.results.total | formatNumber }})
+      Records <template v-if="filtersApplied.length">with filters applied</template> ({{ dataset.results.total | formatNumber }})
     </p>
   </div>
 </template>
@@ -92,6 +92,9 @@ export default {
     rulesMetrics() {
       return this.dataset.labelingRulesMetrics;
     },
+    filtersApplied() {
+      return Object.values(this.dataset.query).filter(v => v && Object.values(v).length);
+    }
   },
   methods: {
     async updateCurrentRule({ query, label }) {

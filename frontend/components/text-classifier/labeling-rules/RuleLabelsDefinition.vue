@@ -70,16 +70,14 @@
       </p>
     </div>
     <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
-    <template v-else>
-      <p class="rule__info" v-if="ruleSaveInfo" v-html="ruleSaveInfo" />
-      <re-button
-        :disabled="!selectedLabelsVModel.length"
-        class="feedback-interactions__button button-primary"
-        @click="saveRule"
-      >
-        Save rule</re-button
-      >
-    </template>
+    <re-button
+      v-else
+      :disabled="!selectedLabelsVModel.length"
+      class="feedback-interactions__button button-primary"
+      @click="saveRule"
+    >
+      Save rule</re-button
+    >
   </div>
 </template>
 <script>
@@ -131,11 +129,6 @@ export default {
         this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)
       ) {
         return "This query with this label are already saved as rule";
-      }
-    },
-    ruleSaveInfo() {
-      if (this.currentRule && this.selectedLabelsVModel.length && !this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)) {
-        return `Rule will apply to the <strong>${this.coveredRecords} records</strong> conteining "${this.query}" regardless of the filters applied`
       }
     },
     coveredRecords() {
