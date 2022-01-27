@@ -282,12 +282,12 @@ export default {
   line-height: 1em;
   @include font-size(0);
   &__text {
-    @include font-size(16px);
+    @include font-size(18px);
     display: inline;
     position: relative;
   }
   &__whitespace {
-    @include font-size(16px);
+    @include font-size(18px);
   }
 }
 
@@ -296,10 +296,12 @@ export default {
   z-index: 3;
 }
 .selected {
-  // border: 1px dashed $tertiary-color;
   ::v-deep .span__text {
     line-height: 1.5em;
     background: $tertiary-lighten-color;
+  }
+  span::selection {
+    background: none !important;
   }
 }
 .span span {
@@ -331,7 +333,7 @@ $hue: 360;
   $rcolor: hsla(
     ($colors * $i) + ($hue * $i / $colors),
     100% - $i / 2,
-    82% - ($colors % $i),
+    87% - ($colors % $i),
     1
   );
   .color_#{$i - 1} {
@@ -339,7 +341,7 @@ $hue: 360;
       background: $rcolor;
     }
     &.prediction ::v-deep .highlight__content {
-      padding-bottom: 2px;
+      padding-bottom: 3px;
       border-bottom: 5px solid $rcolor;
     }
     &.annotation ::v-deep .highlight__tooltip:after {

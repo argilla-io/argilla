@@ -180,8 +180,8 @@ export default {
   display: block;
   margin-bottom: 0; // white-space: pre-line;
   white-space: pre-wrap;
-  @include font-size(16px);
-  line-height: 1.6em;
+  @include font-size(18px);
+  line-height: 34px;
   .list__item--annotation-mode & {
     padding-left: 65px;
   }

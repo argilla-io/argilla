@@ -85,7 +85,6 @@ export default {
           },
         ],
       });
-      // this.onReset();
     },
     async onValidate(record) {
       const emptyEntities = {
