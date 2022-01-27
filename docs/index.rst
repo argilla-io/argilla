@@ -44,7 +44,13 @@ Make sure you have ``Docker`` installed and run (check the :ref:`setup and insta
 
 .. code-block:: bash
 
-   docker run -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+   docker run -d \
+   --name elasticsearch-for-rubrix \
+   -p 9200:9200 -p 9300:9300 \
+   -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+   -e "discovery.type=single-node" \
+   docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+
 
 And then run:
 
