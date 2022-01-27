@@ -109,7 +109,7 @@ and launch the docker-contained web app with the following command:
 
 .. code-block:: bash
 
-   wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up
+   wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up -d
 
 This is a convenient way because it automatically includes an
 `Elasticsearch <https://www.elastic.co/elasticsearch/>`__ instance, Rubrix's main persistent layer.
