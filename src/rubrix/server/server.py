@@ -23,6 +23,7 @@ from pathlib import Path
 import elasticsearch
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ConfigError
 
@@ -56,6 +57,9 @@ def configure_middleware(app: FastAPI):
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(RequestValidationError)(
+        APIErrorHandler.common_exception_handler
+    )
 
 
 def configure_api_router(app: FastAPI):

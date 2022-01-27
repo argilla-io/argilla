@@ -1,9 +1,9 @@
 import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict
 
 from fastapi import HTTPException, Request, status
 from fastapi.exception_handlers import http_exception_handler
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from rubrix.server.commons.errors.adapter import exception_to_rubrix_error
 from rubrix.server.commons.errors.base_errors import RubrixServerError
