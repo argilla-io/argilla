@@ -14,8 +14,10 @@ class RubrixServerError(Exception):
             "content": {
                 "application/json": {
                     "example": {
-                        "code": cls.get_error_code(),
-                        "params": {"extra": "error parameters"},
+                        "detail": {
+                            "code": cls.get_error_code(),
+                            "params": {"extra": "error parameters"},
+                        }
                     }
                 }
             },
@@ -56,7 +58,9 @@ class GenericRubrixServerError(RubrixServerError):
     def api_documentation(cls):
         return {
             "content": {
-                "application/json": {"example": {"code": "builtins.TypeError"}}
+                "application/json": {
+                    "example": {"detail": {"code": "builtins.TypeError"}}
+                }
             },
         }
 
