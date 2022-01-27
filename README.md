@@ -94,7 +94,7 @@ Getting started with Rubrix is as easy as:
 pip install rubrix[server]
 ```
 
-If you don't have [Elasticsearch (ES)]() running, make sure you have `Docker` installed and run:
+If you don't have [Elasticsearch (ES)](https://www.elastic.co/elasticsearch) running, make sure you have `Docker` installed and run:
 
 > :information_source: **Check [our documentation](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations regarding Elasticsearch.**
 
