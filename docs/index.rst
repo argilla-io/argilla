@@ -35,12 +35,14 @@ Quickstart
 
 Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
 
-
-Make sure you have ``Docker`` installed and run (check the :ref:`setup and installation section <setup-and-installation>` for a more detailed installation process):
-
 .. code-block:: bash
 
    pip install rubrix[server] transformers[torch] datasets
+
+If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ running, make sure you have `Docker` installed and run:
+
+.. note::
+   Check the :ref:`setup and installation section <setup-and-installation>` for further options and configurations regarding Elasticsearch.
 
 .. code-block:: bash
 
@@ -52,11 +54,14 @@ Make sure you have ``Docker`` installed and run (check the :ref:`setup and insta
    docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 
-And then run:
+Then simply run:
 
 .. code-block:: bash
 
    python -m rubrix
+
+Afterward, you should be able to access the web app at `http://localhost:6900/ <http://localhost:6900/>`__.
+**The default username and password are** ``rubrix`` **and** ``1234``.
 
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
 

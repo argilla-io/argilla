@@ -96,6 +96,8 @@ pip install rubrix[server]
 
 If you don't have [Elasticsearch (ES)]() running, make sure you have `Docker` installed and run:
 
+> :information_source: **Check [our documentation](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations regarding Elasticsearch.**
+
 ```bash
 docker run -d \
  --name elasticsearch-for-rubrix \
@@ -105,8 +107,6 @@ docker run -d \
  docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 ```
-
-> :information_source: **Check [our documentation](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations regarding Elasticsearch.**
 
 Then simply run:
 

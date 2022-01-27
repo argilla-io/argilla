@@ -61,13 +61,13 @@ But you can customize this by setting the ``ELASTICSEARCH`` environment variable
 
 Since the Rubrix server is built on fastapi, you can launch it using **uvicorn** directly:
 
-.. code-block::
+.. code-block:: bash
 
    uvicorn rubrix:app
 
 *(for Rubrix versions below 0.9 you can launch the server via)*
 
-.. code-block::
+.. code-block:: bash
 
    uvicorn rubrix.server.server:app
 

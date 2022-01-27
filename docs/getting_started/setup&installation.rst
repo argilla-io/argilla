@@ -30,7 +30,7 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
    conda install -c conda-forge rubrix
 
 .. note::
-   Conda only installs the Python client of Rubrix.
+   Conda for now only installs the Python client of Rubrix.
    This means, you have to launch the web app via :ref:`docker <launching-the-web-app-via-docker>` or :ref:`docker-compose <launching-the-web-app-via-docker-compose>`.
 
 
