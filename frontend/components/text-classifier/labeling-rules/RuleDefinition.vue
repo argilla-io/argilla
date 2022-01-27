@@ -30,7 +30,7 @@
       </div>
     </div>
     <p class="rule__records" v-if="dataset.results.total > 0">
-      Records ({{ dataset.results.total | formatNumber }})
+      Records with filter applied ({{ dataset.results.total | formatNumber }})
     </p>
   </div>
 </template>

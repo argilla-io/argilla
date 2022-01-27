@@ -21,11 +21,7 @@
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
         Records:
-        <strong>{{
-          isNaN(currentRuleMetrics.records)
-            ? "-"
-            : $options.filters.formatNumber(currentRuleMetrics.records)
-        }}</strong>
+        <strong>{{coveredRecords}}</strong>
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -74,14 +70,16 @@
       </p>
     </div>
     <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
-    <re-button
-      v-else
-      :disabled="!selectedLabelsVModel.length"
-      class="feedback-interactions__button button-primary"
-      @click="saveRule"
-    >
-      Save rule</re-button
-    >
+    <template v-else>
+      <p class="rule__info" v-if="ruleSaveInfo" v-html="ruleSaveInfo" />
+      <re-button
+        :disabled="!selectedLabelsVModel.length"
+        class="feedback-interactions__button button-primary"
+        @click="saveRule"
+      >
+        Save rule</re-button
+      >
+    </template>
   </div>
 </template>
 <script>
@@ -135,7 +133,14 @@ export default {
         return "This query with this label are already saved as rule";
       }
     },
-
+    ruleSaveInfo() {
+      if (this.currentRule && this.selectedLabelsVModel.length && !this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)) {
+        return `Rule will apply to the <strong>${this.coveredRecords} records</strong> conteining "${this.query}" regardless of the filters applied`
+      }
+    },
+    coveredRecords() {
+      return isNaN(this.currentRuleMetrics.records) ? "-" : this.$options.filters.formatNumber(this.currentRuleMetrics.records)
+    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
