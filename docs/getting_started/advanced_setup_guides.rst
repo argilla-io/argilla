@@ -12,24 +12,43 @@ Here we provide some advanced setup guides:
    :local:
    :depth: 1
 
-.. _setting-up-ES-via-docker:
+.. _setting-up-elasticsearch-via-docker:
 
-Setting up ES via docker
-------------------------
+Setting up Elasticsearch via docker
+-----------------------------------
 
-Setting up Elasticsearch via docker is straight forward.
+Setting up Elasticsearch (ES) via docker is straight forward.
 Simply run following command:
 
 .. code-block::
 
-   docker run -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+   docker run -d \
+   --name elasticsearch-for-rubrix \
+   -p 9200:9200 -p 9300:9300 \
+   -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+   -e "discovery.type=single-node" \
+   docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+
+This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
+To see the logs of the container, you can run:
+
+.. code-block::
+
+   docker logs elasticsearch-for-rubrix
+
+Or you can stop/start the container via:
+
+.. code-block::
+
+   docker stop elasticsearch-for-rubrix
+   docker start elasticsearch-for-rubrix
+
+.. warning::
+   Keep in mind, if you remove your container with ``docker rm elasticsearch-for-rubrix``, you will loose all your datasets in Rubrix!
 
 For more details about the ES installation with docker, see their `official documentation <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/docker.html>`__.
 For MacOS and Windows, Elasticsearch also provides `homebrew formulae <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/brew.html>`__ and a `msi package <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/windows.html>`__, respectively.
 We recommend ES version 7.10 to work with Rubrix.
-
-.. warning::
-   Keep in mind, if you ``docker rm`` your ES container, you will loose all your datasets in Rubrix!
 
 
 .. _server-configurations:

@@ -38,7 +38,7 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 ---------------------
 
 Rubrix uses `Elasticsearch (ES) <https://www.elastic.co/elasticsearch/>`__ as its main persistent layer.
-**If you do not have an ES instance running on your machine**, we recommend setting one up :ref:`via docker <setting-up-es-via-docker>`.
+**If you do not have an ES instance running on your machine**, we recommend setting one up :ref:`via docker <setting-up-elasticsearch-via-docker>`.
 
 You can start the Rubrix web app via Python.
 
