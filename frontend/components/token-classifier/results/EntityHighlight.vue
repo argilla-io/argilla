@@ -58,22 +58,22 @@ export default {
   props: {
     span: {
       type: Object,
-      required: true
+      required: true,
     },
     text: {
       type: String,
-      required: true
+      required: true,
     },
     dataset: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data: () => {
     return {
       singleClickDelay: 300,
       doubleClicked: false,
-      clicked: false
+      clicked: false,
     };
   },
   computed: {
@@ -82,7 +82,7 @@ export default {
     },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
-    }
+    },
   },
   methods: {
     openTagSelector() {
@@ -104,8 +104,8 @@ export default {
           this.doubleClicked = false;
         }, this.singleClickDelay);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
