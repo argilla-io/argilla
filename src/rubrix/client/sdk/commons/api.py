@@ -40,7 +40,7 @@ from rubrix.client.sdk.commons.models import (
 
 
 def build_bulk_response(
-    response: httpx.Response, dataset: str
+    response: httpx.Response, name: str, body: Any
 ) -> Response[BulkResponse]:
 
     if 200 <= response.status_code < 400:
@@ -51,7 +51,7 @@ def build_bulk_response(
             parsed=BulkResponse(**response.json()),
         )
 
-    return handle_response_error(response, dataset=dataset)
+    return handle_response_error(response, name=name, body=body)
 
 
 T = TypeVar("T")

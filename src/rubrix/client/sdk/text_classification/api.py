@@ -42,7 +42,7 @@ def bulk(
     client: AuthenticatedClient,
     name: str,
     json_body: TextClassificationBulkData,
-) -> Response[Union[BulkResponse, ErrorMessage, HTTPValidationError]]:
+) -> Response[BulkResponse]:
     url = "{}/api/datasets/{name}/TextClassification:bulk".format(
         client.base_url, name=name
     )
@@ -55,7 +55,7 @@ def bulk(
         json=json_body.dict(by_alias=True),
     )
 
-    return build_bulk_response(response, dataset=name)
+    return build_bulk_response(response, name=name, body=json_body)
 
 
 def data(
