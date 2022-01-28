@@ -32,11 +32,9 @@
           annotationEnabled ? 'highlight__tooltip--icon' : '',
         ]"
       >
-        <span
-          class="highlight__tooltip__origin"
-          v-if="span.entity.origin === 'annotation'"
-          >annot.</span
-        >
+        <span class="highlight__tooltip__origin" v-if="span.entity.origin">{{
+          span.entity.origin === "annotation" ? "annot." : "pred."
+        }}</span>
         <span
           >{{ span.entity.label }}
           <svgicon
@@ -118,6 +116,9 @@ export default {
   border-radius: 2px;
   padding: 0;
   margin-right: -3.2px;
+  ::selection {
+    background: none;
+  }
   &--block {
     display: block;
     .highlight__content:after {
@@ -150,7 +151,7 @@ export default {
     font-weight: 600;
     right: 50%;
     transform: translateX(50%);
-    min-width: 50px;
+    min-width: 80px;
     @include font-size(16px);
     & > span {
       display: block;

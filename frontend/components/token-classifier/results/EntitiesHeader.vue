@@ -142,6 +142,7 @@ export default {
   max-height: 28px;
   border: 2px solid transparent;
   transition: all 0.2s ease-in-out;
+  font-weight: 600;
   // &:not(.active):hover {
   //   filter: brightness(90%);
   // }
@@ -165,12 +166,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(
-    ($colors * $i) + ($hue * $i / $colors),
-    100% - $i / 2,
-    87% - ($colors % $i),
-    1
-  );
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.active,
