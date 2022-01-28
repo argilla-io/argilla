@@ -130,8 +130,8 @@ def sort_by2elasticsearch(
     for sortable_field in sort:
         if valid_fields:
             assert sortable_field.id.split(".")[0] in valid_fields, (
-                f"Wrong sort id {sortable_field.id}. Valid values are"
-                f"[{valid_fields}]"
+                f"Wrong sort id {sortable_field.id}. Valid values are: "
+                f"{[str(v) for v in valid_fields]}"
             )
         result.append({sortable_field.id: {"order": sortable_field.order}})
     return result

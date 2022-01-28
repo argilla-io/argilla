@@ -212,7 +212,6 @@ def test_log_with_annotation(monkeypatch):
 def test_create_ds_with_wrong_name(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset_name = "Test Create_ds_with_wrong_name"
-    client.delete(f"/api/datasets/{dataset_name}")
 
     with pytest.raises(ValidationApiError):
         rubrix.log(

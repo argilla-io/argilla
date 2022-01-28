@@ -1,14 +1,7 @@
-from typing import Any
-
-from pydantic import PydanticValueError
+from rubrix.server.commons.errors import BadRequestError
 
 
-class MetadataLimitExceededError(PydanticValueError):
-    code = "metadata.limit_exceeded"
-    msg_template = (
-        "Number of keys in metadata ({meta_len}) exceeds the configured limit ({limit})"
-    )
-
-    @classmethod
-    def new_error(cls, found_len: int, limit: int) -> "MetadataLimitExceededError":
-        return cls(meta_len=found_len, limit=limit)
+class MetadataLimitExceededError(BadRequestError):
+    def __init__(self, length: int, limit: int):
+        self.len = length
+        self.limit = limit

@@ -23,20 +23,18 @@ from pathlib import Path
 import elasticsearch
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import ConfigError, ValidationError
+from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.commons.errors import (
-    common_exception_handler,
-    validation_exception_handler,
-)
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
+from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
 from .routes import api_router
@@ -58,8 +56,10 @@ def configure_middleware(app: FastAPI):
 
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
-    api.exception_handler(500)(common_exception_handler)
-    api.exception_handler(ValidationError)(validation_exception_handler)
+    api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(RequestValidationError)(
+        APIErrorHandler.common_exception_handler
+    )
 
 
 def configure_api_router(app: FastAPI):
@@ -98,10 +98,12 @@ def configure_app_startup(app: FastAPI):
             dataset_records.init()
         except elasticsearch.exceptions.ConnectionError as error:
             raise ConfigError(
-                f"Your Elasticsearch endpoint at {settings.elasticsearch} is not available or not responding."
-                "\nPlease make sure your Elasticsearch instance is launched and correctly running and you have the necessary access permissions. "
-                "Once you have verified this, restart the Rubrix server."
-                f"\nError detail: [{error}]"
+                f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
+                "is not available or not responding.\n"
+                "Please make sure your Elasticsearch instance is launched and correctly running and "
+                "you have the necessary access permissions. "
+                "Once you have verified this, restart the Rubrix server.\n"
+                f"Error detail: [{error}]"
             )
 
 
