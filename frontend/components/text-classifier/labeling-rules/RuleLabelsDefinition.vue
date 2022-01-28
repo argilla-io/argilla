@@ -21,11 +21,7 @@
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
         Records:
-        <strong>{{
-          isNaN(currentRuleMetrics.records)
-            ? "-"
-            : $options.filters.formatNumber(currentRuleMetrics.records)
-        }}</strong>
+        <strong>{{ coveredRecords }}</strong>
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -135,7 +131,11 @@ export default {
         return "This query with this label are already saved as rule";
       }
     },
-
+    coveredRecords() {
+      return isNaN(this.currentRuleMetrics.records)
+        ? "-"
+        : this.$options.filters.formatNumber(this.currentRuleMetrics.records);
+    },
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },

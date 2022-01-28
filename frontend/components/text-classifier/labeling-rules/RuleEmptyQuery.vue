@@ -43,7 +43,7 @@
         >.
       </p>
     </div>
-    <div class="empty-query">
+    <div v-if="labels.length" class="empty-query">
       <p><strong>Introduce a query</strong> to define a rule.</p>
     </div>
   </div>
