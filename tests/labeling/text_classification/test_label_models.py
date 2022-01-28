@@ -259,6 +259,7 @@ class TestSnorkel:
             tie_break_policy=policy,
             include_annotated_records=include_annotated_records,
             include_abstentions=include_abstentions,
+            prediction_agent="mock_agent",
         )
         assert len(records) == expected[0]
         assert [
@@ -267,6 +268,7 @@ class TestSnorkel:
         assert [
             rec.prediction[0][1] if rec.prediction else None for rec in records
         ] == expected[2]
+        assert records[0].prediction_agent == "mock_agent"
 
     @pytest.mark.parametrize("policy,expected", [("abstain", 0.5), ("random", 2.0 / 3)])
     def test_score(self, monkeypatch, weak_labels, policy, expected):
@@ -455,12 +457,14 @@ class TestFlyingSquid:
             include_annotated_records=include_annotated_records,
             include_abstentions=include_abstentions,
             verbose=verbose,
+            prediction_agent="mock_agent",
         )
 
         assert MockPredict.calls_count == 3
         assert len(records) == expected["nr_of_records"]
         if records:
             assert records[0].prediction == expected["prediction"]
+            assert records[0].prediction_agent == "mock_agent"
 
     def test_predict_binary(self, monkeypatch, weak_labels):
         class MockPredict:
