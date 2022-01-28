@@ -41,6 +41,7 @@ def find_label_errors(
     records: List[TextClassificationRecord],
     sort_by: Union[str, SortBy] = "likelihood",
     metadata_key: str = "label_error_candidate",
+    n_jobs: int = 1,
     **kwargs,
 ) -> List[TextClassificationRecord]:
     """Finds potential annotation/label errors in your records using [cleanlab](https://github.com/cleanlab/cleanlab).
@@ -55,6 +56,8 @@ def find_label_errors(
             - "prediction": sort the returned records by the probability of the prediction (highest probability first)
             - "none": do not sort the returned records
         metadata_key: The key added to the record's metadata that holds the order, if ``sort_by`` is not "none".
+        n_jobs : Number of processing threads used by multiprocessing. Default 1, what it's mean no parallel processing
+            is applied. Set to None to use the number of processing threads on your CPU
         **kwargs: Passed on to `cleanlab.pruning.get_noise_indices`
 
     Returns:
@@ -96,7 +99,7 @@ def find_label_errors(
     # construct "noisy" label vector and probability matrix of the predictions
     s, psx = _construct_s_and_psx(records)
 
-    indices = get_noise_indices(s, psx, **kwargs)
+    indices = get_noise_indices(s, psx, n_jobs=n_jobs, **kwargs)
 
     records_with_label_errors = np.array(records)[indices].tolist()
 
