@@ -121,7 +121,6 @@ export default {
   methods: {
     reset(e) {
       if (e.target === this.$refs.list) {
-        console.log("yesss");
         this.onReset();
       }
     },
