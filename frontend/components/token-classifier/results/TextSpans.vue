@@ -17,7 +17,13 @@
 
 <template>
   <div>
-    <div v-if="textSpans.length" ref="list" class="content__input">
+    <div
+      v-if="textSpans.length"
+      ref="list"
+      class="content__input"
+      @mouseup="reset($event)"
+      v-click-outside="onReset"
+    >
       <TextSpan
         v-for="(token, i) in textSpans"
         :key="i"
@@ -27,7 +33,6 @@
         :dataset="dataset"
         :class="isSelected(i) ? 'selected' : ''"
         @startSelection="onStartSelection"
-        @reset="onReset"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
         @changeEntityLabel="onChangeEntityLabel"
@@ -114,6 +119,12 @@ export default {
     },
   },
   methods: {
+    reset(e) {
+      if (e.target === this.$refs.list) {
+        console.log("yesss");
+        this.onReset();
+      }
+    },
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
@@ -175,17 +186,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.record {
-  padding: 44px 20px 20px 20px;
-  display: block;
-  margin-bottom: 0; // white-space: pre-line;
-  white-space: pre-wrap;
-  @include font-size(18px);
-  line-height: 34px;
-  .list__item--annotation-mode & {
-    padding-left: 65px;
-  }
-}
 .content {
   &__input {
     padding-right: 200px;
