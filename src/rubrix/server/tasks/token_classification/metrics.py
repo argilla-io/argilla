@@ -329,15 +329,15 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
 
     @staticmethod
     def spans2iob(
-        spans: List[EntitySpan], chars2tokens: Dict[int, int], n_tokens: int
+        spans: List[EntitySpan], record: TokenClassificationRecord
     ) -> List[str]:
         if not spans:
             return []
 
-        tags = ["O"] * n_tokens
+        tags = ["O"] * len(record.tokens)
         for entity in spans:
-            token_start = chars2tokens[entity.start]
-            token_end = chars2tokens[entity.end - 1]
+            token_start = record.char_id2token_id(entity.start)
+            token_end = record.char_id2token_id(entity.end - 1)
             for idx in range(token_start, token_end + 1):
                 tags[idx] = f"I-{entity.label}"
             if token_start != token_end:
@@ -346,57 +346,58 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
 
     @staticmethod
     def build_mentions_metrics(
-        mentions: List[Tuple[str, EntitySpan]],
-        tokens: List[str],
-        chars2tokens: Dict[int, int],
-    ) -> List[MentionMetrics]:
+        record: TokenClassificationRecord,
+    ) -> Dict[str, Any]:
         """Given a list of mentions with its entity spans, Compute all required metrics"""
 
-        def mention_tokens_length(
-            entity: EntitySpan, chars2token_map: Dict[int, int]
-        ) -> int:
-            """Compute mention tokens length"""
-            return len(
-                set(
-                    [
-                        token_idx
-                        for i in range(entity.start, entity.end)
-                        for token_idx in [chars2token_map.get(i)]
-                        if token_idx is not None
-                    ]
+        def mentions_metrics(mentions: List[Tuple[str, EntitySpan]]):
+            def mention_tokens_length(entity: EntitySpan) -> int:
+                """Compute mention tokens length"""
+                return len(
+                    set(
+                        [
+                            token_idx
+                            for i in range(entity.start, entity.end)
+                            for token_idx in [record.char_id2token_id(i)]
+                            if token_idx is not None
+                        ]
+                    )
                 )
-            )
 
-        return [
-            MentionMetrics(
-                value=mention,
-                label=entity.label,
-                score=entity.score,
-                capitalness=TokenClassificationMetrics.capitalness(mention),
-                density=TokenClassificationMetrics.density(
-                    _tokens_length, sentence_length=len(tokens)
-                ),
-                tokens_length=_tokens_length,
-                chars_length=len(mention),
-            )
-            for mention, entity in mentions
-            for _tokens_length in [
-                mention_tokens_length(entity, chars2tokens),
+            return [
+                MentionMetrics(
+                    value=mention,
+                    label=entity.label,
+                    score=entity.score,
+                    capitalness=TokenClassificationMetrics.capitalness(mention),
+                    density=TokenClassificationMetrics.density(
+                        _tokens_length, sentence_length=len(record.tokens)
+                    ),
+                    tokens_length=_tokens_length,
+                    chars_length=len(mention),
+                )
+                for mention, entity in mentions
+                for _tokens_length in [
+                    mention_tokens_length(entity),
+                ]
             ]
-        ]
+
+        return {
+            "predicted": {"mentions": mentions_metrics(record.predicted_mentions())},
+            "annotated": {"mentions": mentions_metrics(record.annotated_mentions())},
+        }
 
     @classmethod
     def build_tokens_metrics(
-        cls, record: TokenClassificationRecord, chars2tokens: Dict[int, int]
+        cls, record: TokenClassificationRecord
     ) -> List[TokenMetrics]:
-        tokens2chars = cls.build_tokens2chars_map(chars2tokens)
-
         spans = (
             record.prediction.entities
             if record.prediction
             else (record.annotation.entities if record.annotation else None)
         )
-        tags = cls.spans2iob(spans, chars2tokens, n_tokens=len(record.tokens))
+        tags = cls.spans2iob(spans, record)
+
         return [
             TokenMetrics(
                 idx=token_idx,
@@ -407,58 +408,9 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
                 length=1 + (char_end - char_start),
                 tag=tags[token_idx] if tags else None,
             )
-            for (token_idx, (char_start, char_end)), token_value in zip(
-                tokens2chars.items(), record.tokens
-            )
+            for token_idx, token_value in enumerate(record.tokens)
+            for char_start, char_end in [record.token_span(token_idx)]
         ]
-
-    @staticmethod
-    def build_tokens2chars_map(
-        chars2tokens: Dict[int, int]
-    ) -> Dict[int, Tuple[int, int]]:
-        tokens2chars_map = defaultdict(list)
-        for c, t in chars2tokens.items():
-            tokens2chars_map[t].append(c)
-
-        return {
-            token_idx: (min(chars), max(chars))
-            for token_idx, chars in tokens2chars_map.items()
-        }
-
-    @staticmethod
-    def build_chars2tokens_map(record: TokenClassificationRecord) -> Dict[int, int]:
-        """
-        Build the mapping between text characters and where belongs to.
-
-        For example, ``chars2tokens_map.get(i)`` value is the
-        token id where char i is contained (if any).
-
-        Out-of-token characters won't be included in this map,
-        so access should be using ``chars2tokens_map.get(i)``
-        instead of ``chars2tokens_map[i]``.
-
-        """
-
-        chars_map = {}
-        current_token = 0
-        current_token_char_start = 0
-        for idx, char in enumerate(record.text):
-            relative_idx = idx - current_token_char_start
-            if (
-                relative_idx < len(record.tokens[current_token])
-                and char == record.tokens[current_token][relative_idx]
-            ):
-                chars_map[idx] = current_token
-            elif (
-                current_token + 1 < len(record.tokens)
-                and relative_idx >= len(record.tokens[current_token])
-                and char == record.tokens[current_token + 1][0]
-            ):
-                current_token += 1
-                current_token_char_start += relative_idx
-                chars_map[idx] = current_token
-
-        return chars_map
 
     @classmethod
     def configure_es_index(cls):
@@ -476,25 +428,11 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
         """Compute metrics at record level"""
-        chars2tokens = cls.build_chars2tokens_map(record)
 
         return {
-            "tokens": cls.build_tokens_metrics(record, chars2tokens),
+            "tokens": cls.build_tokens_metrics(record),
             "tokens_length": len(record.tokens),
-            "predicted": {
-                "mentions": cls.build_mentions_metrics(
-                    mentions=record.predicted_mentions(),
-                    tokens=record.tokens,
-                    chars2tokens=chars2tokens,
-                )
-            },
-            "annotated": {
-                "mentions": cls.build_mentions_metrics(
-                    mentions=record.annotated_mentions(),
-                    tokens=record.tokens,
-                    chars2tokens=chars2tokens,
-                )
-            },
+            **cls.build_mentions_metrics(record),
         }
 
     _TOKENS_METRICS = [
