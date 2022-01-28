@@ -27,10 +27,12 @@ jobs:
 
       - name: Check affected files
         uses: dorny/paths-filter@v2
+        id: filter
         with:
           filters: |
             python_code:
               - 'src/**'
+              - 'tests/**'
             frontend:
               - 'frontend/**'
 
