@@ -116,7 +116,7 @@ def test_sort_by(monkeypatch, sort_by, expected):
 def test_kwargs(monkeypatch, records):
     is_multi_label = records[0].multi_label
 
-    def mock_get_noise_indices(s, psx, **kwargs):
+    def mock_get_noise_indices(s, psx, n_jobs, **kwargs):
         assert kwargs == {
             "multi_label": is_multi_label,
             "sorted_index_method": "normalized_margin",
