@@ -14,7 +14,7 @@
 #  limitations under the License.
 import logging
 from enum import Enum
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -57,7 +57,7 @@ def find_label_errors(
             - "none": do not sort the returned records
         metadata_key: The key added to the record's metadata that holds the order, if ``sort_by`` is not "none".
         n_jobs : Number of processing threads used by multiprocessing. If None, uses the number of threads
-            on your CPU. Defaults to 1, which removes parallel processing. 
+            on your CPU. Defaults to 1, which removes parallel processing.
         **kwargs: Passed on to `cleanlab.pruning.get_noise_indices`
 
     Returns:
