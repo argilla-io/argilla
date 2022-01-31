@@ -91,12 +91,14 @@ export default {
           name: "Coverage",
           field: "coverage",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of records labeled by the rule",
         },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of annotated records labeled by the rule",
         },
         {
@@ -117,6 +119,7 @@ export default {
           name: "Precision",
           field: "precision",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of correct labels given by the rule",
         },
         {
@@ -190,6 +193,21 @@ export default {
       getRuleMetricsByLabel:
         "entities/text_classification/getRuleMetricsByLabel",
     }),
+
+    metricsForRule(rule) {
+      const metrics = this.perRuleMetrics[rule.query];
+      if (!metrics) {
+        return {};
+      }
+      return {
+        coverage: metrics.coverage,
+        coverage_annotated: metrics.coverage_annotated,
+        correct: metrics.correct,
+        incorrect: metrics.incorrect,
+        precision: !isNaN(metrics.precision) ? metrics.precision : "-",
+      };
+    },
+
     async hideList() {
       await this.dataset.viewSettings.disableRulesSummary();
     },
