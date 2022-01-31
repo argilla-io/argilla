@@ -16,36 +16,22 @@
   -->
 
 <template>
-  <span class="record__scroll__container">
-    <span
-      ref="list"
-      :class="[
-        'record__scroll--large',
-        !allowScroll ? 'record__scroll--prevent' : '',
-      ]"
-    >
-      <re-button
-        v-if="scrollHeight >= 800"
-        :title="allowScroll ? 'prevent scroll' : 'allow scroll'"
-        class="record__scroll__button button-icon"
-        @click="allowScroll = !allowScroll"
-      >
-        <svgicon
-          :name="allowScroll ? 'unlock' : 'lock'"
-          width="15"
-          height="14"
-        ></svgicon>
-      </re-button>
-
-      <span class="record__content" v-html="$highlightSearch(queryText, text)">
-      </span>
+  <div
+    ref="list"
+    :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
+  >
+    <span class="record__content" v-html="$highlightSearch(queryText, text)">
     </span>
-  </span>
+    <a
+      href="#"
+      v-if="scrollHeight >= visibleRecordHeight"
+      class="record__button"
+      @click.prevent="showFullRecord = !showFullRecord"
+      >{{ !showFullRecord ? "Show full record" : "Show less" }}
+    </a>
+  </div>
 </template>
 <script>
-import "assets/icons/lock";
-import "assets/icons/unlock";
-
 export default {
   props: {
     text: {
@@ -58,9 +44,14 @@ export default {
     },
   },
   data: () => ({
-    allowScroll: false,
+    showFullRecord: false,
     scrollHeight: undefined,
   }),
+  computed: {
+    visibleRecordHeight() {
+      return this.$mq === "lg" ? 700 : 400;
+    },
+  },
   updated() {
     this.calculateScrollHeight();
   },
@@ -87,60 +78,39 @@ export default {
 </style>
 <style lang="scss" scoped>
 .record {
-  &__scroll {
-    display: block;
-    max-height: 300px;
-    overflow: auto;
-    border: 1px solid $line-smooth-color;
-    @include font-size(14px);
-    margin-bottom: 0.5em;
-    &--large {
-      display: block;
-      overflow: auto;
-      max-height: 800px;
-      margin-bottom: 0.5em;
-      ::v-deep .record__scroll__button {
-        right: 0;
-        top: 0;
-        .svg-icon {
-          margin-left: auto !important;
-        }
-      }
-    }
-    &__container {
-      position: relative;
-      display: block;
-    }
-    &__button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: block;
-      background: $lighter-color;
-      border: 1px solid $primary-color;
-      border-radius: 3px;
-      height: 25px;
-      width: 25px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      .svg-icon {
-        margin: auto;
-        fill: $primary-color;
-      }
-    }
-    &--prevent {
+  &__collapsed {
+    .record__content {
+      max-height: 400px;
       overflow: hidden;
+      @include media(">xxl") {
+        max-height: 700px;
+      }
     }
-  }
-  &__scroll--large {
-    position: relative;
-    width: calc(100% - 200px);
   }
   &__content {
     word-break: break-word;
     display: block;
     color: palette(grey, medium);
+    width: calc(100% - 200px);
+  }
+  &__button {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 0.5em;
+    transition: all 0.2s ease;
+    @include font-size(14px);
+    font-weight: 400;
+    background: none;
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+    font-weight: 600;
+    text-decoration: none;
+    line-height: 1;
+    outline: none;
+    &:hover {
+      transition: all 0.2s ease;
+      background: palette(grey, bg);
+    }
   }
 }
 </style>

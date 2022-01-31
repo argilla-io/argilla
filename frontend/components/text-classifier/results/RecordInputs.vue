@@ -16,7 +16,10 @@
   -->
 
 <template>
-  <div>
+  <div
+    ref="list"
+    :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
+  >
     <span v-for="(text, index) in data" :key="index" class="record">
       <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
         <span class="record__key">{{ index }}:</span>
@@ -29,6 +32,13 @@
         <LazyRecordString v-else :query-text="queryText" :text="text" />
       </span>
     </span>
+    <a
+      href="#"
+      v-if="scrollHeight >= visibleRecordHeight"
+      class="record__button"
+      @click.prevent="showFullRecord = !showFullRecord"
+      >{{ !showFullRecord ? "Show full record" : "Show less" }}
+    </a>
   </div>
 </template>
 
@@ -51,9 +61,30 @@ export default {
       default: () => undefined,
     },
   },
+  data: () => ({
+    showFullRecord: false,
+    scrollHeight: undefined,
+  }),
+  computed: {
+    visibleRecordHeight() {
+      return this.$mq === "lg" ? 700 : 400;
+    },
+  },
+  updated() {
+    this.calculateScrollHeight();
+  },
+  mounted() {
+    this.calculateScrollHeight();
+  },
   methods: {
     isHtml(record) {
       return record.includes("<meta"); // TODO: improve
+    },
+    calculateScrollHeight() {
+      if (this.$refs.list) {
+        const padding = 2;
+        this.scrollHeight = this.$refs.list.clientHeight + padding;
+      }
     },
   },
 };
@@ -66,6 +97,15 @@ export default {
   .list__item--annotation-mode & {
     padding-right: 200px;
   }
+  &__collapsed {
+    .record {
+      max-height: 400px;
+      overflow: hidden;
+      @include media(">xxl") {
+        max-height: 700px;
+      }
+    }
+  }
   &__key {
     font-weight: 600;
     margin-right: 0.5em;
@@ -77,6 +117,25 @@ export default {
     display: block;
     @include font-size(16px);
     line-height: 1.6em;
+  }
+  &__button {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 0.5em;
+    transition: all 0.2s ease;
+    @include font-size(14px);
+    font-weight: 400;
+    background: none;
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+    font-weight: 600;
+    text-decoration: none;
+    line-height: 1;
+    outline: none;
+    &:hover {
+      transition: all 0.2s ease;
+      background: palette(grey, bg);
+    }
   }
   &--email {
     display: block;
