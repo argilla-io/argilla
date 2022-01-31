@@ -104,10 +104,19 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     """
 
     tokens: List[str] = Field(min_items=1)
-    text: str = Field(alias="raw_text")
+    text: str = Field()
+    _raw_text: Optional[str] = Field(alias="raw_text")
 
     __chars2tokens__: Dict[int, int] = None
     __tokens2chars__: Dict[int, Tuple[int, int]] = None
+
+    @root_validator(pre=True)
+    def accept_old_fashion_text_field(cls, values):
+        text, raw_text = values.get("text"), values.get("raw_text")
+        text = text or raw_text
+        values["text"] = cls.check_text_content(text)
+
+        return values
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -235,23 +244,8 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return []
         return [self.prediction.score]
 
-    @property
-    def words(self) -> str:
+    def all_text(self) -> str:
         return self.text
-
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            **super().extended_fields(),
-            # See ../service/service.py
-            PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self.predicted_mentions()
-            ],
-            MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label}
-                for mention, entity in self.annotated_mentions()
-            ],
-        }
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
@@ -310,6 +304,32 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
 
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def extended_fields(self) -> Dict[str, Any]:
+        return {
+            **super().extended_fields(),
+            "raw_text": self.text,  # Maintain results compatibility
+        }
+
+
+class TokenClassificationRecordDB(TokenClassificationRecord):
+    def extended_fields(self) -> Dict[str, Any]:
+        parent_fields = super().extended_fields()
+        parent_fields.pop("raw_text")
+
+        return {
+            **parent_fields,
+            # See ../service/service.py
+            PREDICTED_MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label, "score": entity.score}
+                for mention, entity in self.predicted_mentions()
+            ],
+            MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label}
+                for mention, entity in self.annotated_mentions()
+            ],
+            "words": self.all_text(),
+        }
 
 
 class TokenClassificationBulkData(UpdateDatasetRequest):
