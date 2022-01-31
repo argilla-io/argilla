@@ -132,7 +132,10 @@ def test_delete_with_errors(monkeypatch, status, error_type):
 
     def send_mock_response_with_http_status(status: int):
         def inner(*args, **kwargs):
-            return httpx.Response(status_code=status, json={"message": "Mock"})
+            return httpx.Response(
+                status_code=status,
+                json={"detail": {"code": "error:code", "params": {"message": "Mock"}}},
+            )
 
         return inner
 

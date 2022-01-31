@@ -27,7 +27,7 @@ from rubrix.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 def get_dataset(
     client: AuthenticatedClient,
     name: str,
-) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
+) -> Response[Dataset]:
     url = "{}/api/datasets/{name}".format(client.base_url, name=name)
 
     response = httpx.get(
@@ -44,7 +44,7 @@ def copy_dataset(
     client: AuthenticatedClient,
     name: str,
     json_body: CopyDatasetRequest,
-) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
+) -> Response[Dataset]:
     url = "{}/api/datasets/{name}:copy".format(client.base_url, name=name)
 
     response = httpx.put(

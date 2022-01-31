@@ -66,6 +66,9 @@ def test_get_dataset(sdk_client, monkeypatch):
     ],
 )
 def test_build_response(status_code, expected):
-    httpx_response = httpx.Response(status_code=status_code, content="boo")
+    httpx_response = httpx.Response(
+        status_code=status_code,
+        json={"detail": {"code": "error.code", "params": {"foo": "bar"}}},
+    )
     with pytest.raises(expected):
         _build_response(httpx_response, name="mock-ds")

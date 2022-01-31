@@ -51,7 +51,7 @@ def test_build_bulk_response(status_code, expected):
     httpx_response = HttpxResponse(
         status_code=status_code, content=server_response.json()
     )
-    response = build_bulk_response(httpx_response, dataset="mock-dataset")
+    response = build_bulk_response(httpx_response, name="mock-dataset", body={})
 
     assert isinstance(response, Response)
     assert isinstance(response.parsed, expected)
