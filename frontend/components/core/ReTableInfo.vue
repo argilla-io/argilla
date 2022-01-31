@@ -102,6 +102,14 @@
                     <span v-else-if="column.type === 'number'">
                       {{ itemValue(item, column) | formatNumber }}
                     </span>
+                    <span
+                      v-else-if="
+                        !isNaN(itemValue(item, column)) &&
+                        column.type === 'percentage'
+                      "
+                    >
+                      {{ itemValue(item, column) | percent }}
+                    </span>
                     <span v-else-if="column.type === 'object'">
                       <p
                         v-for="key in Object.keys(itemValue(item, column))"
