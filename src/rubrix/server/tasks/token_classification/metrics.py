@@ -329,19 +329,19 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
 
     @staticmethod
     def spans2iob(
-        spans: List[EntitySpan], chars2tokens: Dict[int, int], n_tokens: int
+        spans: List[EntitySpan], record: TokenClassificationRecord
     ) -> List[str]:
         if not spans:
             return []
 
-        tags = ["O"] * n_tokens
+        tags = ["O"] * len(record.tokens)
         for entity in spans:
-            token_start = chars2tokens[entity.start]
-            token_end = chars2tokens[entity.end - 1]
-            for idx in range(token_start, token_end + 1):
+            token_start = record.char_id2token_id(entity.start)
+            token_end = record.char_id2token_id(entity.end - 1)
+            tags[token_start] = f"B-{entity.label}"
+            for idx in range(token_start + 1, token_end + 1):
                 tags[idx] = f"I-{entity.label}"
-            if token_start != token_end:
-                tags[token_start] = f"B-{entity.label}"
+
         return tags
 
     @staticmethod
