@@ -4,7 +4,6 @@ import rubrix
 from rubrix import TextClassificationRecord, TokenClassificationRecord
 from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
 from rubrix.server.commons.settings import settings
-from rubrix.server.tasks.commons import MetadataLimitExceededError
 from tests.server.test_helpers import client, mocking_client
 
 
