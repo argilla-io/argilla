@@ -90,7 +90,7 @@ export default {
   &__content {
     word-break: break-word;
     white-space: pre-line;
-    
+
     display: block;
     color: palette(grey, medium);
     width: calc(100% - 200px);
