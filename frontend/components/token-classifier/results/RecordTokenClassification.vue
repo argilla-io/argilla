@@ -17,8 +17,10 @@
 
 <template>
   <div class="record">
-    <div ref="list"
-    :class="showFullRecord ? 'record__expanded' : 'record__collapsed'">
+    <div
+      ref="list"
+      :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
+    >
       <div class="content">
         <record-token-classification-annotation
           :dataset="dataset"
@@ -31,13 +33,13 @@
           v-else
         />
       </div>
-    <a
-      href="#"
-      v-if="scrollHeight >= visibleRecordHeight"
-      class="record__button"
-      @click.prevent="showFullRecord = !showFullRecord"
-      >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </a>
+      <a
+        href="#"
+        v-if="scrollHeight >= visibleRecordHeight"
+        class="record__button"
+        @click.prevent="showFullRecord = !showFullRecord"
+        >{{ !showFullRecord ? "Show full record" : "Show less" }}
+      </a>
     </div>
   </div>
 </template>
@@ -79,7 +81,7 @@ export default {
         this.scrollHeight = this.$refs.list.clientHeight + padding;
       }
     },
-  }
+  },
 };
 </script>
 
