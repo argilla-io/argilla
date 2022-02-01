@@ -26,7 +26,6 @@ class TextClassificationRecord extends BaseRecord {
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
-    // this.predicted_as = predicted_as;
   }
 
   recordTitle() {
