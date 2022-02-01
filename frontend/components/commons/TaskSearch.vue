@@ -91,9 +91,5 @@ export default {
 .grid {
   position: relative;
   margin: 0;
-  z-index: 0;
-  .--fixed:not(.fixed-header) & {
-    z-index: 2;
-  }
 }
 </style>
