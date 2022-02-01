@@ -385,6 +385,8 @@ class Snorkel(LabelModel):
         Returns:
             The scores/metrics as a dictionary.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
@@ -686,6 +688,8 @@ class FlyingSquid(LabelModel):
 
         Returns:
             The scores/metrics as a dictionary.
+
+        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             NotFittedError: If the label model was still not fitted.
