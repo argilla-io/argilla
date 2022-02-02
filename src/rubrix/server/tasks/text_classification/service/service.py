@@ -17,8 +17,7 @@ from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
-from rubrix.server.commons.errors import EntityNotFoundError, MissingInputParamError
-from rubrix.server.commons.es_helpers import sort_by2elasticsearch
+from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
@@ -153,6 +152,11 @@ class TextClassificationService:
                         EsRecordDataFieldNames.event_timestamp,
                     ],
                 ),
+                aggregations={
+                    **aggregations.predicted_as(),
+                    **aggregations.annotated_as(),
+                    **aggregations.predicted(),
+                },
             ),
             size=size,
             record_from=record_from,

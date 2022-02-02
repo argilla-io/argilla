@@ -148,6 +148,9 @@ class TokenClassificationService:
                     ],
                 ),
                 aggregations={
+                    **aggregations.predicted_as(),
+                    **aggregations.annotated_as(),
+                    **aggregations.predicted(),
                     PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
                         nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
                         inner_aggregation={
