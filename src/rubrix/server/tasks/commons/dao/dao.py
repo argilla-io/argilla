@@ -237,12 +237,9 @@ class DatasetRecordsDAO:
         if compute_aggregations and search.include_default_aggregations:
             current_aggrs = results.get("aggregations", {})
             for aggr in [
-                aggregations.predicted_as(),
                 aggregations.predicted_by(),
-                aggregations.annotated_as(),
                 aggregations.annotated_by(),
                 aggregations.status(),
-                aggregations.predicted(),
                 aggregations.words_cloud(),
                 aggregations.score(),
                 aggregations.custom_fields(

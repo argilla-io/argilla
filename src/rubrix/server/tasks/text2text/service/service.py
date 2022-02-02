@@ -17,10 +17,7 @@ from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
-from rubrix.server.commons.es_helpers import (
-    aggregations,
-    sort_by2elasticsearch,
-)
+from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
