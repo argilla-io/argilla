@@ -175,7 +175,7 @@ class TextClassificationDataset extends ObservationDataset {
           }
         ),
       };
-      overalMetrics.precisionAverage /= rulesMetrics.length;
+      overalMetrics.precisionAverage = overalMetrics.totalCorrects / (overalMetrics.totalCorrects + overalMetrics.totalIncorrects) * 100;
     }
 
     return overalMetrics;
