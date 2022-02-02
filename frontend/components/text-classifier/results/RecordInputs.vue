@@ -19,19 +19,21 @@
   <div
     ref="list"
     :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
-  >
-    <span v-for="(text, index) in data" :key="index" class="record">
-      <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
-        <span class="record__key">{{ index }}:</span>
-        <LazyRecordExplain
-          v-if="explanation"
-          :predicted="predicted"
-          :query-text="queryText"
-          :explain="explanation[index]"
-        />
-        <LazyRecordString v-else :query-text="queryText" :text="text" />
+  > 
+    <div class="record__content">
+      <span v-for="(text, index) in data" :key="index" class="record">
+        <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
+          <span class="record__key">{{ index }}:</span>
+          <LazyRecordExplain
+            v-if="explanation"
+            :predicted="predicted"
+            :query-text="queryText"
+            :explain="explanation[index]"
+          />
+          <LazyRecordString v-else :query-text="queryText" :text="text" />
+        </span>
       </span>
-    </span>
+    </div>
     <a
       href="#"
       v-if="scrollHeight >= visibleRecordHeight"
@@ -98,7 +100,7 @@ export default {
     padding-right: 200px;
   }
   &__collapsed {
-    .record {
+    .record__content {
       max-height: 400px;
       overflow: hidden;
       @include media(">xxl") {
