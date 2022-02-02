@@ -24,7 +24,6 @@
     />
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
-      :expand-searchbar="viewMode === 'labelling-rules'"
       :dataset="dataset"
     />
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />

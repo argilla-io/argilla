@@ -2,6 +2,7 @@ import pytest
 
 import rubrix
 from rubrix import TextClassificationRecord, TokenClassificationRecord
+from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
 from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import MetadataLimitExceededError
 from tests.server.test_helpers import client, mocking_client
@@ -26,10 +27,7 @@ def test_log_records_with_multi_and_single_label_task(monkeypatch):
         ),
     ]
 
-    with pytest.raises(
-        Exception,
-        match="msg='All records must be single/multi labelled'",
-    ):
+    with pytest.raises(ValidationApiError):
         rubrix.log(
             records,
             name=dataset,
@@ -78,19 +76,36 @@ def test_log_records_with_empty_metadata_list(monkeypatch):
 
 def test_logging_with_metadata_limits_exceeded(monkeypatch):
     mocking_client(monkeypatch, client)
-    dataset = "test_delete_and_create_for_different_task"
+    dataset = "test_logging_with_metadata_limits_exceeded"
 
     rubrix.delete(dataset)
     expected_record = TextClassificationRecord(
         inputs="The input text",
         metadata={k: k for k in range(0, settings.metadata_fields_limit + 1)},
     )
-    with pytest.raises(MetadataLimitExceededError):
+    with pytest.raises(BadRequestApiError):
         rubrix.log(expected_record, name=dataset)
 
     expected_record.metadata = {k: k for k in range(0, settings.metadata_fields_limit)}
     rubrix.log(expected_record, name=dataset)
 
     expected_record.metadata["new_key"] = "value"
-    with pytest.raises(MetadataLimitExceededError):
+    with pytest.raises(BadRequestApiError):
         rubrix.log(expected_record, name=dataset)
+
+
+def test_log_with_other_task(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_log_with_other_task"
+
+    rubrix.delete(dataset)
+    record = TextClassificationRecord(
+        inputs="The input text",
+    )
+    rubrix.log(record, name=dataset)
+
+    with pytest.raises(BadRequestApiError):
+        rubrix.log(
+            TokenClassificationRecord(text="The text", tokens=["The", "text"]),
+            name=dataset,
+        )

@@ -17,6 +17,7 @@ from datetime import datetime
 
 import pytest
 
+from rubrix.server.commons.errors import InvalidTextSearchError
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
@@ -301,7 +302,7 @@ def test_some_sort_by():
 
     expected_records_length = 50
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
-    response = client.post(
+    client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=[
@@ -319,15 +320,29 @@ def test_some_sort_by():
             ],
         ).dict(by_alias=True),
     )
-    with pytest.raises(AssertionError):
-        client.post(
-            f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
-            json={
-                "sort": [
-                    {"id": "wrong_field"},
-                ]
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+        json={
+            "sort": [
+                {"id": "wrong_field"},
+            ]
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::BadRequestError",
+            "params": {
+                "message": "Wrong sort id wrong_field. Valid values "
+                "are: ['metadata', 'score', 'predicted', "
+                "'predicted_as', 'predicted_by', "
+                "'annotated_as', 'annotated_by', 'status', "
+                "'event_timestamp']"
             },
-        )
+        }
+    }
+
     response = client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={
@@ -340,7 +355,18 @@ def test_some_sort_by():
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == expected_records_length
-    assert list(map(lambda r: r.id, results.records)) == [14, 19, 24, 29, 34, 39, 4, 44, 49, 9]
+    assert list(map(lambda r: r.id, results.records)) == [
+        14,
+        19,
+        24,
+        29,
+        34,
+        39,
+        4,
+        44,
+        49,
+        9,
+    ]
 
 
 def test_disable_aggregations_when_scroll():
@@ -505,7 +531,7 @@ def test_wrong_text_query():
     dataset = "test_wrong_text_query"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             records=[
@@ -526,8 +552,10 @@ def test_wrong_text_query():
             query=TextClassificationQuery(query_text="!")
         ).dict(),
     )
-
     assert response.status_code == 400
-    assert response.json()["detail"] == "Failed to parse query [!]"
-
-
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::InvalidTextSearchError",
+            "params": {"message": "Failed to parse query [!]"},
+        }
+    }

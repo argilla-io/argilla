@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -106,59 +106,106 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     tokens: List[str] = Field(min_items=1)
     text: str = Field(alias="raw_text")
 
+    __chars2tokens__: Dict[int, int] = None
+    __tokens2chars__: Dict[int, Tuple[int, int]] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__()
+
+        self.check_annotation(self.prediction)
+        self.check_annotation(self.annotation)
+
+    def char_id2token_id(self, char_idx: int) -> Optional[int]:
+        return self.__chars2tokens__.get(char_idx)
+
+    def token_span(self, token_idx: int) -> Tuple[int, int]:
+        if token_idx not in self.__tokens2chars__:
+            raise IndexError(f"Token id {token_idx} out of bounds")
+        return self.__tokens2chars__[token_idx]
+
     @validator("text")
     def check_text_content(cls, text: str):
         assert text and text.strip(), "No text or empty text provided"
         return text
 
-    @root_validator(skip_on_failure=True)
-    def data_validation(cls, values):
-        prediction = values.get("prediction")
-        annotation = values.get("annotation")
-        text = values["text"]
-        tokens = values["tokens"]
+    def __build_indices_map__(
+        self,
+    ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
+        """
+        Build the indices mapping between text characters and tokens where belongs to,
+        and vice versa.
 
-        cls.check_annotation(prediction, text, tokens)
-        cls.check_annotation(annotation, text, tokens)
+        chars2tokens index contains is the token idx where i char is contained (if any).
 
-        return values
+        Out-of-token characters won't be included in this map,
+        so access should be using ``chars2tokens_map.get(i)``
+        instead of ``chars2tokens_map[i]``.
 
-    @staticmethod
+        """
+
+        def chars2tokens_index():
+            chars_map = {}
+            current_token = 0
+            current_token_char_start = 0
+            for idx, char in enumerate(self.text):
+                relative_idx = idx - current_token_char_start
+                if (
+                    relative_idx < len(self.tokens[current_token])
+                    and char == self.tokens[current_token][relative_idx]
+                ):
+                    chars_map[idx] = current_token
+                elif (
+                    current_token + 1 < len(self.tokens)
+                    and relative_idx >= len(self.tokens[current_token])
+                    and char == self.tokens[current_token + 1][0]
+                ):
+                    current_token += 1
+                    current_token_char_start += relative_idx
+                    chars_map[idx] = current_token
+
+            return chars_map
+
+        def tokens2chars_index(
+            chars2tokens: Dict[int, int]
+        ) -> Dict[int, Tuple[int, int]]:
+            tokens2chars_map = defaultdict(list)
+            for c, t in chars2tokens.items():
+                tokens2chars_map[t].append(c)
+
+            return {
+                token_idx: (min(chars), max(chars))
+                for token_idx, chars in tokens2chars_map.items()
+            }
+
+        chars2tokens_idx = chars2tokens_index()
+        return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
+
     def check_annotation(
+        self,
         annotation: Optional[TokenClassificationAnnotation],
-        text: str,
-        tokens: List[str],
     ):
         """Validates entities in terms of offset spans"""
         if annotation:
-            tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
-                mention = text[entity.start : entity.end]
+                mention = self.text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
 
-                idx = 0
-                while mention and idx < len(tokens):
-                    current_token = tokens[idx]
-                    current_mention = mention
-                    jdx = idx
-                    while (
-                        current_mention.strip().startswith(current_token)
-                        and current_mention
-                        and jdx <= len(tokens)
-                    ):
-                        current_mention = current_mention.strip()
-                        current_mention = current_mention[len(current_token) :]
-                        jdx += 1
-                        if jdx < len(tokens):
-                            current_token = tokens[jdx]
+                token_start = self.char_id2token_id(entity.start)
+                token_end = self.char_id2token_id(entity.end - 1)
 
-                    if not current_mention:
-                        mention = current_mention
-                    idx += 1
+                assert not (
+                    token_start is None or token_end is None
+                ), f"Provided entity span {self.text[entity.start: entity.end]} is not aligned with provided tokens."
+                "Some entity chars could be reference characters out of tokens"
+
+                span_start, _ = self.token_span(token_start)
+                _, span_end = self.token_span(token_end)
 
                 assert (
-                    not mention
-                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned entity mention"
+                    self.text[span_start : span_end + 1] == mention
+                ), f"Defined offset [{self.text[entity.start: entity.end]}] is a misaligned entity mention"
 
     def task(cls) -> TaskType:
         """The record task type"""
@@ -245,6 +292,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     class Config:
         allow_population_by_field_name = True
+        underscore_attrs_are_private = True
 
 
 class TokenClassificationRecord(CreationTokenClassificationRecord):

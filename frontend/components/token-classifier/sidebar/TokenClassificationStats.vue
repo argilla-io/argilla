@@ -59,6 +59,7 @@
             :class="[
               `color_${entities.filter((e) => e.text === key)[0].colorId}`,
               'entity',
+              activeTab,
             ]"
             >{{ key }}</span
           >
@@ -202,6 +203,7 @@ export default {
     margin-bottom: 0.5em;
     padding: 0.5em;
     display: inline-flex;
+    font-weight: 600;
   }
   .scroll {
     max-height: calc(100vh - 500px);
@@ -213,14 +215,14 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(
-    ($colors * $i) + ($hue * $i / $colors),
-    100% - $i / 2,
-    82% - ($colors % $i),
-    1
-  );
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
+    &.predicted_mentions {
+      padding: 0.4em 0;
+      background: none;
+      border-bottom: 5px solid $rcolor;
+    }
   }
 }
 </style>

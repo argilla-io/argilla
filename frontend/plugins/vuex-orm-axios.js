@@ -44,15 +44,22 @@ export default ({ $axios, app }) => {
       app.$auth.logout();
     }
 
+    const messageDetail = error.response.data.detail || {
+      code: undefined,
+      params: {},
+    };
+
     switch (code) {
       case 400:
         Notification.dispatch("notify", {
-          message: "Error: " + error.response.data.detail,
+          message: Object.entries(messageDetail.params)
+            .map(([k, v]) => `Error ${k}: ${v}`)
+            .join("\n"),
           type: "error",
         });
         break;
       case 422:
-        (error.response.data.detail || [undefined]).forEach(({ msg }) => {
+        (messageDetail.params.errors || [undefined]).forEach(({ msg }) => {
           Notification.dispatch("notify", {
             message: "Error: " + (msg || "Unknown"),
             type: "error",

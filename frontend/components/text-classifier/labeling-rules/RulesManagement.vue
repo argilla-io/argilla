@@ -91,12 +91,14 @@ export default {
           name: "Coverage",
           field: "coverage",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of records labeled by the rule",
         },
         {
           name: "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of annotated records labeled by the rule",
         },
         {
@@ -117,6 +119,7 @@ export default {
           name: "Precision",
           field: "precision",
           class: "text",
+          type: "percentage",
           tooltip: "Percentage of correct labels given by the rule",
         },
         {
@@ -189,18 +192,14 @@ export default {
     metricsForRule(rule) {
       const metrics = this.perRuleMetrics[rule.query];
       if (!metrics) {
-        return {}
+        return {};
       }
       return {
-        coverage: this.$options.filters.percent(metrics.coverage),
-        coverage_annotated: this.$options.filters.percent(
-          metrics.coverage_annotated
-        ),
+        coverage: metrics.coverage,
+        coverage_annotated: metrics.coverage_annotated,
         correct: metrics.correct,
         incorrect: metrics.incorrect,
-        precision: !isNaN(metrics.precision)
-          ? this.$options.filters.percent(metrics.precision)
-          : "-",
+        precision: !isNaN(metrics.precision) ? metrics.precision : "-",
       };
     },
 

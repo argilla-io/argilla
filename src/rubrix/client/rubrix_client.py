@@ -33,6 +33,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
@@ -67,6 +68,10 @@ from rubrix.client.sdk.token_classification.models import (
 )
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
+
+
+class InputValueError(RubrixClientError):
+    pass
 
 
 class RubrixClient:
@@ -168,7 +173,7 @@ class RubrixClient:
         """
 
         if not name:
-            raise Exception("Empty project name has been passed as argument.")
+            raise InputValueError("Empty project name has been passed as argument.")
 
         if isinstance(records, Record.__args__):
             records = [records]
@@ -180,7 +185,7 @@ class RubrixClient:
         try:
             record_type = type(records[0])
         except IndexError:
-            raise Exception("Empty record list has been passed as argument.")
+            raise InputValueError("Empty record list has been passed as argument.")
 
         # Check chunk_size <= length of training dataset not needed, as the Python slice system will adjust
         # a bigger-than-possible length to the whole list, having all input in the same chunk.
@@ -210,7 +215,7 @@ class RubrixClient:
 
         # Record type is not recognised
         else:
-            raise Exception(
+            raise InputValueError(
                 f"Unknown record type passed as argument for [{','.join(map(str, records[0:5]))}...] "
                 f"Available values are {Record.__args__}"
             )

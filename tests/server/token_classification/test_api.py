@@ -16,6 +16,7 @@ from typing import Callable
 
 import pytest
 
+from rubrix.server.commons.errors import WrongTaskError
 from rubrix.server.tasks.commons import BulkResponse, SortableField
 from rubrix.server.tasks.token_classification import (
     TokenClassificationQuery,
@@ -55,7 +56,17 @@ def test_load_as_different_task():
         f"/api/datasets/{dataset}/TextClassification:search",
         json={},
     )
+
     assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::WrongTaskError",
+            "params": {
+                "message": "Provided task TextClassification cannot be "
+                "applied to dataset"
+            },
+        }
+    }
 
 
 def test_search_special_characters():
@@ -113,13 +124,26 @@ def test_some_sort():
         ).dict(by_alias=True),
     )
 
-    with pytest.raises(AssertionError):
-        client.post(
-            f"/api/datasets/{dataset}/TokenClassification:search",
-            json=TokenClassificationSearchRequest(
-                sort=[SortableField(id="babba")],
-            ).dict(),
-        )
+    response = client.post(
+        f"/api/datasets/{dataset}/TokenClassification:search",
+        json=TokenClassificationSearchRequest(
+            sort=[SortableField(id="babba")],
+        ).dict(),
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::BadRequestError",
+            "params": {
+                "message": "Wrong sort id babba. Valid values are: "
+                "['metadata', 'score', 'predicted', "
+                "'predicted_as', 'predicted_by', "
+                "'annotated_as', 'annotated_by', 'status', "
+                "'event_timestamp']"
+            },
+        }
+    }
 
 
 @pytest.mark.parametrize(

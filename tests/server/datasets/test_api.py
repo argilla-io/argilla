@@ -12,12 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import elasticsearch
-import pytest
 
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.text_classification import TextClassificationBulkData
-
 from tests.server.test_helpers import client
 
 
@@ -26,28 +23,64 @@ def test_delete_dataset():
     create_mock_dataset(dataset)
 
     delete_dataset(dataset)
-    assert client.get(f"/api/datasets/{dataset}").status_code == 404
+
+    response = client.get(f"/api/datasets/{dataset}")
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::EntityNotFoundError",
+            "params": {"name": "test_delete_dataset", "type": "Dataset"},
+        }
+    }
 
 
 def test_dataset_naming_validation():
     request = TextClassificationBulkData(records=[])
     dataset = "Wrong dataset name"
 
-    assert (
-        client.post(
-            f"/api/datasets/{dataset}/TextClassification:bulk",
-            json=request.dict(by_alias=True),
-        ).status_code
-        == 422
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        json=request.dict(by_alias=True),
     )
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::ValidationError",
+            "params": {
+                "errors": [
+                    {
+                        "ctx": {"pattern": "^(?!-|_)[a-z0-9-_]+$"},
+                        "loc": ["name"],
+                        "msg": "string does not match regex " '"^(?!-|_)[a-z0-9-_]+$"',
+                        "type": "value_error.str.regex",
+                    }
+                ],
+                "model": "CreationDatasetRequest",
+            },
+        }
+    }
 
-    assert (
-        client.post(
-            f"/api/datasets/{dataset}/TokenClassification:bulk",
-            json=request.dict(by_alias=True),
-        ).status_code
-        == 422
+    response = client.post(
+        f"/api/datasets/{dataset}/TokenClassification:bulk",
+        json=request.dict(by_alias=True),
     )
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": {
+            "code": "rubrix.api.errors::ValidationError",
+            "params": {
+                "errors": [
+                    {
+                        "ctx": {"pattern": "^(?!-|_)[a-z0-9-_]+$"},
+                        "loc": ["name"],
+                        "msg": "string does not match regex " '"^(?!-|_)[a-z0-9-_]+$"',
+                        "type": "value_error.str.regex",
+                    }
+                ],
+                "model": "CreationDatasetRequest",
+            },
+        }
+    }
 
 
 def test_list_datasets():
@@ -87,10 +120,11 @@ def test_open_and_close_dataset():
 
     assert client.put(f"/api/datasets/{dataset}:close").status_code == 200
 
-    with pytest.raises(
-        elasticsearch.exceptions.RequestError, match="index_closed_exception"
-    ):
-        client.post(f"/api/datasets/{dataset}/TextClassification:search")
+    response = client.post(f"/api/datasets/{dataset}/TextClassification:search")
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {"code": "elasticsearch.exceptions.RequestError", "params": {}}
+    }
 
     assert client.put(f"/api/datasets/{dataset}:open").status_code == 200
     assert (

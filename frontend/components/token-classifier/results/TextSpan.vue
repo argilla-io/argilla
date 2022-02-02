@@ -34,8 +34,8 @@
       v-html="$highlightSearch(dataset.query.text, text)"
     /><span class="entities__selector__container">
       <div
-        v-if="showEntitiesSelector"
         v-click-outside="onClickOutside"
+        v-if="showEntitiesSelector"
         class="entities__selector"
       >
         <span v-show="!addnewSlotVisible">
@@ -161,6 +161,7 @@ export default {
   methods: {
     startSelection() {
       if (this.annotationEnabled) {
+        this.$emit("endSelection", undefined);
         this.$emit("startSelection", this.spanId);
       }
     },
@@ -168,13 +169,6 @@ export default {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
         this.showEntitiesSelector = true;
-        // TODO (@leireaguirrework) : What's the purpose of this block?
-        if (this.activeTag) {
-          this.selectEntity(this.activeTag);
-          // remove selection highlight after apply tag
-          const selectionHighlight = window.getSelection();
-          selectionHighlight.removeAllRanges();
-        }
       }
     },
     openTagSelector() {
@@ -189,7 +183,6 @@ export default {
     onClickOutside() {
       this.showEntitiesSelector = false;
       this.searchEntity = "";
-      this.$emit("reset");
     },
     selectEntity(entityLabel) {
       this.span.entity
@@ -282,12 +275,12 @@ export default {
   line-height: 1em;
   @include font-size(0);
   &__text {
-    @include font-size(16px);
+    @include font-size(18px);
     display: inline;
     position: relative;
   }
   &__whitespace {
-    @include font-size(16px);
+    @include font-size(18px);
   }
 }
 
@@ -296,15 +289,17 @@ export default {
   z-index: 3;
 }
 .selected {
-  // border: 1px dashed $tertiary-color;
-  .span__text {
+  ::v-deep .span__text {
     line-height: 1.5em;
-    background: $tertiary-lighten-color;
+    background: palette(grey, smooth);
+  }
+  span::selection {
+    background: none !important;
   }
 }
 .span span {
   &::selection {
-    background: $tertiary-lighten-color;
+    background: palette(grey, smooth);
   }
 }
 .entity {
@@ -328,15 +323,20 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(
-    ($colors * $i) + ($hue * $i / $colors),
-    100% - $i / 2,
-    82% - ($colors % $i),
-    1
-  );
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
   .color_#{$i - 1} {
-    ::v-deep span {
+    &.annotation ::v-deep .highlight__content {
       background: $rcolor;
+    }
+    &.prediction ::v-deep .highlight__content {
+      padding-bottom: 3px;
+      border-bottom: 5px solid $rcolor;
+    }
+    &.annotation ::v-deep .highlight__tooltip:after {
+      border-color: $rcolor transparent transparent transparent;
+    }
+    &.prediction ::v-deep .highlight__tooltip:after {
+      border-color: transparent transparent $rcolor transparent;
     }
     &.active,
     &.tag:hover {
@@ -360,9 +360,6 @@ $hue: 360;
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
-  }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip:after {
-    border-color: $rcolor transparent transparent transparent;
   }
 }
 </style>

@@ -252,7 +252,7 @@ def test_log_record_that_makes_me_cry(monkeypatch):
                 "length": 6,
                 "capitalness": "LOWER",
                 "score": None,
-                "tag": "I-ENG",
+                "tag": "B-ENG",
                 "custom": None,
             },
             {

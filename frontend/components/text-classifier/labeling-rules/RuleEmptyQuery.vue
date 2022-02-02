@@ -43,12 +43,13 @@
         >.
       </p>
     </div>
-    <div class="empty-query">
+    <div v-if="labels.length" class="empty-query">
       <p><strong>Introduce a query</strong> to define a rule.</p>
     </div>
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
@@ -96,11 +97,20 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      changeViewMode: "entities/datasets/changeViewMode",
+    }),
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
       this.shownLabels = this.maxVisibleLabels;
+    },
+    async changeToAnnotationViewMode() {
+      await this.changeViewMode({
+        dataset: this.dataset,
+        value: "annotate",
+      });
     },
   },
 };

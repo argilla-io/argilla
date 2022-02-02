@@ -17,7 +17,6 @@
 
 <template>
   <form
-    :class="{ '--extended': expandSearchbar }"
     @submit.prevent="submit(query)"
   >
     <div :class="['searchbar__container', { active: query }]">
@@ -103,14 +102,12 @@ export default {
   margin-left: auto;
   pointer-events: all;
   border-radius: 5px;
+  min-width: 100%;
   &__container {
     position: relative;
-    max-width: 280px;
     margin-right: auto;
     margin-left: 0;
-    .--extended & {
-      min-width: 100%;
-    }
+    min-width: 100%;
   }
   &__button {
     cursor: pointer;
@@ -129,9 +126,6 @@ export default {
   }
   &:hover {
     box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4);
-  }
-  .--extended & {
-    min-width: 100%;
   }
 }
 </style>

@@ -16,7 +16,9 @@
   -->
 
 <template>
-  <span :class="['highlight', isText ? '' : 'highlight--block']">
+  <span
+    :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']"
+  >
     <span
       class="highlight__content"
       @click="openTagSelector"
@@ -30,19 +32,19 @@
           annotationEnabled ? 'highlight__tooltip--icon' : '',
         ]"
       >
+        <span class="highlight__tooltip__origin" v-if="span.entity.origin">{{
+          span.entity.origin === "annotation" ? "annot." : "pred."
+        }}</span>
         <span
           >{{ span.entity.label }}
           <svgicon
             v-if="annotationEnabled"
-            width="12"
-            height="12"
+            width="8"
+            height="8"
             name="cross"
             @click="removeEntity"
           ></svgicon>
         </span>
-      </span>
-      <span v-if="span.agent" class="highlight__metadata">
-        <strong>agent:</strong> {{ span.agent }}
       </span>
     </span>
   </span>
@@ -106,13 +108,17 @@ export default {
 </script>
 <style lang="scss" scoped>
 .highlight {
-  @include font-size(16px);
+  @include font-size(18px);
   line-height: 1em;
   position: relative;
   cursor: default;
-  display: inline;
+  // display: inline-flex;
   border-radius: 2px;
   padding: 0;
+  margin-right: -3.2px;
+  ::selection {
+    background: none;
+  }
   &--block {
     display: block;
     .highlight__content:after {
@@ -126,38 +132,17 @@ export default {
   &__label {
     @include font-size(0px);
   }
-  .highlight__content {
+  &__content {
     display: inline;
+    padding-bottom: 1px;
   }
-  .highlight__metadata {
-    background: white;
+  &__tooltip {
     display: block;
     position: absolute;
     border-radius: 2px;
-    padding: 4px 9px 5px 9px;
+    padding: 5px 10px 6px 10px;
     opacity: 0;
     z-index: -1;
-    top: 100%;
-    margin-top: 0.5em;
-    transition: opacity 0.5s ease, z-index 0.2s ease;
-    white-space: nowrap;
-    user-select: none;
-    cursor: default;
-    font-weight: 600;
-    box-shadow: $shadow-100;
-    text-align: left;
-    @include font-size(12px);
-    right: 50%;
-    transform: translateX(50%);
-  }
-  .highlight__tooltip {
-    display: block;
-    position: absolute;
-    border-radius: 2px;
-    padding: 4px 9px 5px 9px;
-    opacity: 0;
-    z-index: -1;
-    bottom: 100%;
     margin-bottom: 0.5em;
     transition: opacity 0.5s ease, z-index 0.2s ease;
     white-space: nowrap;
@@ -166,29 +151,46 @@ export default {
     font-weight: 600;
     right: 50%;
     transform: translateX(50%);
-    @include font-size(12px);
+    min-width: 80px;
+    @include font-size(16px);
+    & > span {
+      display: block;
+    }
+    &__origin {
+      @include font-size(12px);
+      font-weight: normal;
+    }
+    .annotation & {
+      bottom: 100%;
+    }
+    .prediction & {
+      top: calc(100% + 15px);
+    }
     &--icon {
       padding-right: 20px;
       .svg-icon {
-        display: inline-block;
-        margin-left: 1em;
+        position: absolute;
+        top: 10px;
+        right: 10px;
         cursor: pointer;
       }
     }
   }
-  .highlight__tooltip:after {
+  &__tooltip:after {
     margin: auto;
-    transform: translateY(10px);
-    @include triangle(bottom, 6px, 6px, auto);
     position: absolute;
-    bottom: 5px;
     right: 0;
     left: 0;
-  }
-  &:hover .highlight__metadata {
-    opacity: 1;
-    transition-delay: 0s;
-    z-index: 4;
+    .annotation & {
+      @include triangle(bottom, 6px, 6px, auto);
+      bottom: 5px;
+      transform: translateY(10px);
+    }
+    .prediction & {
+      @include triangle(top, 6px, 6px, auto);
+      top: -15px;
+      transform: translateY(10px);
+    }
   }
   &:hover .highlight__tooltip {
     opacity: 1;

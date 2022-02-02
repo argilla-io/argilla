@@ -64,10 +64,10 @@ class SecuredClient:
         raise NotImplementedError
 
 
-client = SecuredClient(TestClient(app))
+client = SecuredClient(TestClient(app, raise_server_exceptions=False))
 
 
-def mocking_client(monkeypatch, client):
+def mocking_client(monkeypatch, client: SecuredClient):
     monkeypatch.setattr(httpx, "post", client.post)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)

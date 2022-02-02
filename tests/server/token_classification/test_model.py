@@ -149,3 +149,30 @@ def test_misaligned_entity_mentions_with_spaces_right():
             score=None,
         ),
     )
+
+
+def test_custom_tokens_splitting():
+    TokenClassificationRecord(
+        text="ThisisMr.Bean, a character  playedby actor RowanAtkinson",
+        tokens=[
+            "This",
+            "is",
+            "Mr.",
+            "Bean",
+            "a",
+            "character",
+            "played",
+            "by",
+            "actor",
+            "Rowan",
+            "Atkinson",
+        ],
+        annotation=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=9, end=13, label="PERSON"),
+                EntitySpan(start=43, end=48, label="NAME"),
+                EntitySpan(start=48, end=56, label="SURNAME"),
+            ],
+        ),
+    )
