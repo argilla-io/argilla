@@ -93,82 +93,38 @@ Why Rubrix?
 
 ## Get started
 
-To get started you need to follow three steps:
-
-1. Install the Python client
-2. Launch the web app
-3. Start logging data
-
-🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
-
-### 1. Install the Python client
-
-You can install the Python client with `pip` or `conda`.
-
-**with pip**
-
-```bash
-pip install rubrix
-```
-
-**with conda**
-
-```sh
-conda install -c conda-forge rubrix
-```
-
-### 2. Launch the web app
-
-There are two ways to launch the web app:
-
-- a) Using [docker-compose](https://docs.docker.com/compose/) (**recommended**).
-- b) Executing the server code manually
-
-#### a) Using docker-compose (recommended)
-
-Create a folder:
-
-```bash
-mkdir rubrix && cd rubrix
-```
-
-and launch the docker-contained web app with the following command:
-
-```bash
-wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
-```
-
-This is the recommended way because it automatically includes an
-[Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistence layer.
-
-#### b) Executing the server code manually
-
-When executing the server code manually you need to provide an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance yourself.
-
-1. First you need to install
-   [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html)
-   (we recommend version 7.10) and launch an Elasticsearch instance.
-   For MacOS and Windows there are
-   [Homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.13/brew.html) and a
-   [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html), respectively.
-2. Install the Python client together with its server dependencies:
+Getting started with Rubrix is as easy as:
 
 ```bash
 pip install rubrix[server]
 ```
 
-3. Launch a local instance of the web app
+If you don't have [Elasticsearch (ES)](https://www.elastic.co/elasticsearch) running, make sure you have `Docker` installed and run:
+
+> :information_source: **Check [our documentation](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations regarding Elasticsearch.**
 
 ```bash
-python -m rubrix.server
+docker run -d \
+ --name elasticsearch-for-rubrix \
+ -p 9200:9200 -p 9300:9300 \
+ -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+ -e "discovery.type=single-node" \
+ docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+
 ```
 
-By default, the Rubrix server will look for your Elasticsearch endpoint at `http://localhost:9200`.
-But you can customize this by setting the `ELASTICSEARCH` environment variable.
+Then simply run:
 
-### 3. Start logging data
+```bash
+python -m rubrix
+```
 
-The following code will log one record into a data set called `example-dataset`:
+Afterward, you should be able to access the web app at http://localhost:6900/.
+**The default username and password are** `rubrix` **and** `1234`.
+
+> 🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
+
+The following code will log one record into a dataset called `example-dataset`:
 
 ```python
 import rubrix as rb
@@ -180,10 +136,8 @@ rb.log(
 ```
 
 If you go to your Rubrix web app at http://localhost:6900/, you should see your first dataset.
-**The default username and password are `rubrix` and `1234`**.
-You can also check the REST API docs at http://localhost:6900/api/docs.
 
-Congratulations! You are ready to start working with Rubrix. You can continue reading a working example below.
+**Congratulations! You are ready to start working with Rubrix.** You can continue reading for a working example below.
 
 To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
 
