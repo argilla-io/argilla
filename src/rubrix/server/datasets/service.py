@@ -191,6 +191,7 @@ class DatasetsService:
         data: UpdateDatasetRequest,
         user: User,
         workspace: Optional[str],
+        task: Optional[str] = None,
     ) -> Dataset:
         """
         Updates an existing dataset. Fields in update data are
@@ -206,13 +207,15 @@ class DatasetsService:
             The current user
         workspace:
             The workspace where dataset belongs to
+        task:
+            If provided, is used to match the existing dataset
 
         Returns
         -------
             The updated dataset
         """
 
-        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
+        found = self.find_by_name(name, task=task, user=user, workspace=workspace)
 
         data.tags = {**found.tags, **data.tags}
         data.metadata = {**found.metadata, **data.metadata}
@@ -257,6 +260,7 @@ class DatasetsService:
                 data=UpdateDatasetRequest(tags=dataset.tags, metadata=dataset.metadata),
                 user=user,
                 workspace=workspace,
+                task=task,
             )
         except EntityNotFoundError:
             return self.create(
