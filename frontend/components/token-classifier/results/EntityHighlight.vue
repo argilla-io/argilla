@@ -159,7 +159,7 @@ export default {
     min-width: 80px;
     @include font-size(16px);
     .prediction & {
-      margin-top: 1em;
+      margin-top: 0.5em;
     }
     & > span {
       display: block;
@@ -174,7 +174,7 @@ export default {
         bottom: 100%;
       }
       .prediction & {
-        top: 100%;
+        top: calc(100% + 8px);
       }
     }
     &__origin {
@@ -189,7 +189,7 @@ export default {
         right: 10px;
         cursor: pointer;
         .prediction & {
-          top: 26px;
+          top: 16px;
         }
       }
     }
@@ -205,7 +205,7 @@ export default {
     }
     .prediction & {
       @include triangle(top, 6px, 6px, auto);
-      top: 10px;
+      top: 2px;
     }
   }
   &:hover .highlight__tooltip__container {
