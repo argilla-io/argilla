@@ -39,30 +39,25 @@
         class="entities__selector"
       >
         <span v-show="!addnewSlotVisible">
-          <input
-            v-model="searchEntity"
-            class="entities__selector__search"
-            type="text"
-            placeholder="Select entity..."
-            @focus="isFocused = true"
-          />
           <ul class="entities__selector__options">
+            <li
+              class="entities__selector__option active"
+              :class="`color_${lastSelectedEntity.colorId}`"
+              v-if="lastSelectedEntity.text"
+              @click="selectEntity(lastSelectedEntity)"
+            >
+              <span>{{ lastSelectedEntity.text }}</span>
+              <span class="entity__sort-code">[ENTER]</span>
+            </li>
             <li
               v-for="(entity, index) in formattedEntities"
               :key="index"
               class="entities__selector__option"
               :class="`color_${entity.colorId}`"
-              @click="selectEntity(entity.text)"
+              @click="selectEntity(entity)"
             >
-              <span v-if="controlPressed" class="entity__sort-code"
-                >[{{ entity.shortCut }}]</span
-              >
               <span>{{ entity.text }}</span>
-              <svgicon
-                v-if="span.entity && entity.text === span.entity.label"
-                color="#bababa"
-                name="check"
-              />
+              <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
             </li>
           </ul>
         </span>
@@ -74,7 +69,6 @@
 
 <script>
 import ClickOutside from "v-click-outside";
-import "assets/icons/check";
 import "assets/icons/cross";
 import { substring } from "stringz";
 
@@ -83,6 +77,9 @@ export default {
     clickOutside: ClickOutside.directive,
   },
   props: {
+    lastSelectedEntity: {
+      type: Object,
+    },
     record: {
       type: Object,
       required: true,
@@ -101,11 +98,9 @@ export default {
     },
   },
   data: () => ({
-    searchEntity: "",
     newSlot: "",
     showEntitiesSelector: false,
     addnewSlotVisible: false,
-    isFocused: false,
     controlPressed: false,
     controlKey: undefined,
   }),
@@ -134,9 +129,7 @@ export default {
     },
     filteredEntities() {
       return this.dataset.entities
-        .filter((entity) =>
-          entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
-        )
+        .filter((entity) => entity.text)
         .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
@@ -168,7 +161,11 @@ export default {
     endSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
-        this.showEntitiesSelector = true;
+        if (this.formattedEntities.length == 1) {
+          this.selectEntity(this.formattedEntities[0]);
+        } else {
+          this.showEntitiesSelector = true;
+        }
       }
     },
     openTagSelector() {
@@ -182,14 +179,13 @@ export default {
     },
     onClickOutside() {
       this.showEntitiesSelector = false;
-      this.searchEntity = "";
     },
     selectEntity(entityLabel) {
+      this.$emit("setLastSelectedEntity", entityLabel);
       this.span.entity
-        ? this.$emit("changeEntityLabel", this.span.entity, entityLabel)
-        : this.$emit("selectEntity", entityLabel);
+        ? this.$emit("changeEntityLabel", this.span.entity, entityLabel.text)
+        : this.$emit("selectEntity", entityLabel.text);
       this.showEntitiesSelector = false;
-      this.searchEntity = "";
     },
     keyUp(event) {
       if (this.controlKey === event.key) {
@@ -203,9 +199,13 @@ export default {
       }
       const cmd = String.fromCharCode(event.keyCode).toUpperCase();
       if (this.controlPressed && this.showEntitiesSelector && cmd) {
-        const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
-        if (entity) {
-          this.selectEntity(entity.text);
+        if (event.keyCode === 13 && this.lastSelectedEntity.text) {
+          this.selectEntity(this.lastSelectedEntity);
+        } else {
+          const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
+          if (entity) {
+            this.selectEntity(entity);
+          }
         }
       }
     },
@@ -214,9 +214,8 @@ export default {
 </script>
 <style lang="scss">
 .highlight-text {
-  display: inline-block;
-  background: #ffbf00 !important;
-  line-height: 16px;
+  display: inline;
+  font-weight: 600;
 }
 </style>
 <style lang="scss" scoped>
@@ -227,44 +226,30 @@ export default {
     top: 2em;
     min-width: 160px;
     z-index: 9;
-    background: white;
-    border: 1px solid $primary-color;
+    background: $bg;
     font-weight: 600;
+    padding: 0.5em;
+    border-radius: 1px;
     &__container {
       @include font-size(14px);
       line-height: 1em;
       display: inline-block;
       white-space: pre-line;
     }
-    &__search {
-      width: 100%;
-      padding: 0.5em;
-      border: 0;
-      outline: none;
-      background: $lighter-color;
-      border-bottom: 1px solid $line-light-color;
-    }
     &__options {
-      max-height: 146px;
+      max-height: 160px;
       overflow-y: scroll;
       padding-left: 0;
+      margin: 0;
     }
     &__option {
       display: flex;
       transition: all 0.2s ease;
-      padding: 5px;
-      padding-right: 2em;
+      padding: 0.5em;
       position: relative;
       cursor: pointer;
-      span {
-        padding: 3px;
-      }
-      .svg-icon {
-        position: absolute;
-        right: 0.5em;
-        top: 1em;
-        margin: auto 0 auto auto;
-        @include font-size(12px);
+      &.active {
+        border: 2px solid palette(grey, medium);
       }
     }
   }
@@ -272,15 +257,21 @@ export default {
 .span {
   position: relative;
   display: inline;
-  line-height: 1em;
+  line-height: 18px;
   @include font-size(0);
+  &::selection {
+    background: none !important;
+  }
   &__text {
-    @include font-size(18px);
     display: inline;
     position: relative;
+    @include font-size(18px);
   }
   &__whitespace {
     @include font-size(18px);
+    &::selection {
+      background: none !important;
+    }
   }
 }
 
@@ -289,17 +280,33 @@ export default {
   z-index: 3;
 }
 .selected {
-  ::v-deep .span__text {
-    line-height: 1.5em;
+  cursor: pointer;
+  position: relative;
+  background: palette(grey, smooth);
+  .span__text {
+    background: palette(grey, smooth);
+  }
+  .span__whitespace {
     background: palette(grey, smooth);
   }
   span::selection {
     background: none !important;
   }
+  ::v-deep .highlight-text {
+    &::selection {
+      background: none !important;
+    }
+  }
 }
 .span span {
+  display: inline;
   &::selection {
     background: palette(grey, smooth);
+  }
+  ::v-deep .highlight-text {
+    &::selection {
+      background: palette(grey, smooth);
+    }
   }
 }
 .entity {
@@ -310,9 +317,9 @@ export default {
   }
   &__sort-code {
     @include font-size(12px);
-    color: $font-medium-color;
     font-weight: lighter;
-    margin-left: 0.5em;
+    margin-left: auto;
+    margin-right: 0;
     .non-selectable & {
       display: none;
     }
@@ -346,16 +353,16 @@ $hue: 360;
   .tag.color_#{$i - 1} span {
     background: $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} span {
+  .entities__selector__option.color_#{$i - 1} {
     background: $rcolor;
+    border: 2px solid $rcolor;
   }
   .entities__selector__option.color_#{$i - 1} {
-    background: white;
     &:hover {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
+      border: 2px solid palette(grey, medium);
     }
     &:active {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
+      border: 2px solid palette(grey, medium);
     }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {

@@ -16,9 +16,7 @@
   -->
 
 <template>
-  <form
-    @submit.prevent="submit(query)"
-  >
+  <form @submit.prevent="submit(query)">
     <div :class="['searchbar__container', { active: query }]">
       <ReInputContainer class="searchbar">
         <svgicon

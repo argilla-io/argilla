@@ -32,9 +32,11 @@
         :spans="textSpans"
         :dataset="dataset"
         :class="isSelected(i) ? 'selected' : ''"
+        :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
+        @setLastSelectedEntity="onSetLastSelectedEntity"
         @changeEntityLabel="onChangeEntityLabel"
         @removeEntity="onRemoveEntity"
         @updateRecordEntities="$emit('updateRecordEntities')"
@@ -62,6 +64,7 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      lastSelectedEntity: {},
     };
   },
   computed: {
@@ -179,6 +182,9 @@ export default {
         return true;
       }
       return false;
+    },
+    onSetLastSelectedEntity(entity) {
+      this.lastSelectedEntity = entity;
     },
   },
 };

@@ -17,27 +17,17 @@
 
 <template>
   <div class="record">
-    <div ref="list"
-    :class="showFullRecord ? 'record__expanded' : 'record__collapsed'">
-      <div class="content">
-        <record-token-classification-annotation
-          :dataset="dataset"
-          :record="record"
-          v-if="annotationEnabled"
-        />
-        <record-token-classification-exploration
-          :dataset="dataset"
-          :record="record"
-          v-else
-        />
-      </div>
-    <a
-      href="#"
-      v-if="scrollHeight >= visibleRecordHeight"
-      class="record__button"
-      @click.prevent="showFullRecord = !showFullRecord"
-      >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </a>
+    <div class="content">
+      <record-token-classification-annotation
+        :dataset="dataset"
+        :record="record"
+        v-if="annotationEnabled"
+      />
+      <record-token-classification-exploration
+        :dataset="dataset"
+        :record="record"
+        v-else
+      />
     </div>
   </div>
 </template>
@@ -54,32 +44,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    showFullRecord: false,
-    scrollHeight: undefined,
-  }),
-  updated() {
-    this.calculateScrollHeight();
-  },
-  mounted() {
-    this.calculateScrollHeight();
-  },
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
-    visibleRecordHeight() {
-      return this.$mq === "lg" ? 700 : 400;
-    },
   },
-  methods: {
-    calculateScrollHeight() {
-      if (this.$refs.list) {
-        const padding = 2;
-        this.scrollHeight = this.$refs.list.clientHeight + padding;
-      }
-    },
-  }
 };
 </script>
 
@@ -90,34 +59,6 @@ export default {
   margin-bottom: 0;
   @include font-size(18px);
   line-height: 34px;
-  &__collapsed {
-    .content {
-      max-height: 400px;
-      overflow: hidden;
-      @include media(">xxl") {
-        max-height: 700px;
-      }
-    }
-  }
-  &__button {
-    display: inline-block;
-    border-radius: 5px;
-    padding: 0.5em;
-    transition: all 0.2s ease;
-    @include font-size(14px);
-    font-weight: 400;
-    background: none;
-    margin-top: 1.5em;
-    margin-bottom: 1em;
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1;
-    outline: none;
-    &:hover {
-      transition: all 0.2s ease;
-      background: palette(grey, bg);
-    }
-  }
 }
 .content {
   position: relative;
