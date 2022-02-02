@@ -147,6 +147,7 @@ export default {
       entities.push({
         start: startToken.start,
         end: endToken.end,
+        origin: "annotation",
         label: entity,
       });
       this.$emit("updateRecordEntities", entities);
@@ -157,7 +158,7 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel }
+          ? { ...ent, label: newLabel, origin: 'annotation' }
           : ent;
       });
       this.$emit("updateRecordEntities", entities);
