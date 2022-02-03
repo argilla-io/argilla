@@ -38,23 +38,6 @@ from rubrix.server.tasks.text2text.api.model import (
     Text2TextSearchResults,
 )
 
-extends_index_properties(
-    {
-        ExtendedEsRecordDataFieldNames.text_predicted: {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": "multilingual_stop_analyzer",
-            "fields": {"extended": {"type": "text", "analyzer": "extended_analyzer"}},
-        },
-        ExtendedEsRecordDataFieldNames.text_annotated: {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": "multilingual_stop_analyzer",
-            "fields": {"extended": {"type": "text", "analyzer": "extended_analyzer"}},
-        },
-    }
-)
-
 
 class Text2TextService:
     """

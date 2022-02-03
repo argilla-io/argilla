@@ -219,29 +219,25 @@ class BaseRecord(GenericModel, Generic[Annotation]):
     @property
     def predicted(self) -> Optional[PredictionStatus]:
         """The task record prediction status (if any)"""
-        raise NotImplementedError
+        return None
 
     @property
-    def predicted_as(self) -> List[str]:
+    def predicted_as(self) -> Optional[List[str]]:
         """Predictions strings representation"""
-        raise NotImplementedError
+        return None
 
     @property
-    def annotated_as(self) -> List[str]:
+    def annotated_as(self) -> Optional[List[str]]:
         """Annotations strings representation"""
-        raise NotImplementedError
+        return None
 
     @property
-    def scores(self) -> List[float]:
+    def scores(self) -> Optional[List[float]]:
         """Prediction scores"""
-        raise NotImplementedError
+        return None
 
-    @property
-    def words(self) -> str:
-        """
-        Textual information related to record.
-        This info will be used analytical data purposes (word tags, word distributions,...)
-        """
+    def all_text(self) -> str:
+        """All textual information related to record"""
         raise NotImplementedError
 
     @property
@@ -265,25 +261,21 @@ class BaseRecord(GenericModel, Generic[Annotation]):
         this method.
         """
         return {
-            # This allow query by text:.... or text.exact:....
-            # Once words is remove we can normalize at record level
-            "text": self.words
-        }
-
-    def dict(self, *args, **kwargs) -> "DictStrAny":
-        """
-        Extends base component dict extending object properties
-        and user defined extnded fields
-        """
-        return {
-            **super().dict(*args, **kwargs),
             EsRecordDataFieldNames.predicted: self.predicted,
             EsRecordDataFieldNames.annotated_as: self.annotated_as,
             EsRecordDataFieldNames.predicted_as: self.predicted_as,
             EsRecordDataFieldNames.annotated_by: self.annotated_by,
             EsRecordDataFieldNames.predicted_by: self.predicted_by,
             EsRecordDataFieldNames.score: self.scores,
-            EsRecordDataFieldNames.words: self.words,
+        }
+
+    def dict(self, *args, **kwargs) -> "DictStrAny":
+        """
+        Extends base component dict extending object properties
+        and user defined extended fields
+        """
+        return {
+            **super().dict(*args, **kwargs),
             **self.extended_fields(),
         }
 

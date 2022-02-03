@@ -35,6 +35,7 @@ from rubrix.server.tasks.text_classification.api.model import (
     LabelingRuleMetricsSummary,
     TextClassificationQuery,
     TextClassificationRecord,
+    TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
@@ -100,7 +101,9 @@ class TextClassificationService:
         self._check_multi_label_integrity(dataset, records)
         self.__metrics__.build_records_metrics(dataset, records)
         failed = self.__dao__.add_records(
-            dataset=dataset, records=records, record_class=TextClassificationRecord
+            dataset=dataset,
+            records=records,
+            record_class=TextClassificationRecordDB,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
