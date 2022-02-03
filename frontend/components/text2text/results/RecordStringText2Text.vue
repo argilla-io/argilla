@@ -49,7 +49,7 @@ export default {
   }),
   computed: {
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 700 : 400;
+      return this.$mq === "lg" ? 550 : 400;
     },
   },
   updated() {
@@ -83,14 +83,14 @@ export default {
       max-height: 400px;
       overflow: hidden;
       @include media(">xxl") {
-        max-height: 700px;
+        max-height: 550px;
       }
     }
   }
   &__content {
     word-break: break-word;
     white-space: pre-line;
-    
+
     display: block;
     color: palette(grey, medium);
     width: calc(100% - 200px);

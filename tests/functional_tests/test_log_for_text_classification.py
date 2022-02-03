@@ -91,3 +91,20 @@ def test_logging_with_metadata_limits_exceeded(monkeypatch):
     expected_record.metadata["new_key"] = "value"
     with pytest.raises(BadRequestApiError):
         rubrix.log(expected_record, name=dataset)
+
+
+def test_log_with_other_task(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_log_with_other_task"
+
+    rubrix.delete(dataset)
+    record = TextClassificationRecord(
+        inputs="The input text",
+    )
+    rubrix.log(record, name=dataset)
+
+    with pytest.raises(BadRequestApiError):
+        rubrix.log(
+            TokenClassificationRecord(text="The text", tokens=["The", "text"]),
+            name=dataset,
+        )

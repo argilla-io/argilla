@@ -49,6 +49,7 @@
   </div>
 </template>
 <script>
+import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 
 export default {
@@ -96,11 +97,20 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      changeViewMode: "entities/datasets/changeViewMode",
+    }),
     expandLabels() {
       this.shownLabels = this.filteredLabels.length;
     },
     collapseLabels() {
       this.shownLabels = this.maxVisibleLabels;
+    },
+    async changeToAnnotationViewMode() {
+      await this.changeViewMode({
+        dataset: this.dataset,
+        value: "annotate",
+      });
     },
   },
 };

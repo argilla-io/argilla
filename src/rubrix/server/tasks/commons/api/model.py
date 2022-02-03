@@ -261,6 +261,9 @@ class BaseRecord(GenericModel, Generic[Annotation]):
         this method.
         """
         return {
+            # This allow query by text:.... or text.exact:....
+            # Once words is remove we can normalize at record level
+            "text": self.words,
             EsRecordDataFieldNames.predicted: self.predicted,
             EsRecordDataFieldNames.annotated_as: self.annotated_as,
             EsRecordDataFieldNames.predicted_as: self.predicted_as,
