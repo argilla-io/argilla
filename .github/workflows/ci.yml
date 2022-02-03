@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elasticsearch: [ 7.4.2, 7.10.2, 7.14.2, 7.16.3 ]
+        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16 ]
     defaults:
       run:
         shell: bash -l {0}
@@ -40,9 +40,9 @@ jobs:
 
       - name: Setup ElasticSearch 🔎
         if: steps.filter.outputs.python_code == 'true'
-        uses: getong/elasticsearch-action@v1.2
+        uses: ankane/setup-elasticsearch@v1
         with:
-          elasticsearch version: ${{ matrix.elasticsearch }}
+          elasticsearch-version: ${{ matrix.elasticsearch }}
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
