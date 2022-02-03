@@ -559,3 +559,41 @@ def test_wrong_text_query():
             "params": {"message": "Failed to parse query [!]"},
         }
     }
+
+
+def test_search_using_text():
+    dataset = "test_search_using_text"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"data": "Esto es un ejemplo de Texto"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+            ],
+        ).json(by_alias=True),
+    )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json=TextClassificationSearchRequest(
+            query=TextClassificationQuery(query_text="text: texto")
+        ).dict(),
+    )
+    assert response.status_code == 200
+    assert response.json()["total"] == 1
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json=TextClassificationSearchRequest(
+            query=TextClassificationQuery(query_text="text.exact: texto")
+        ).dict(),
+    )
+    assert response.status_code == 200
+    assert response.json()["total"] == 0
