@@ -106,6 +106,7 @@ docker run -d \
  -e "discovery.type=single-node" \
  docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
+pip install "elasticsearch<7.14.0"
 ```
 
 Then simply run:
