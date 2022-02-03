@@ -45,6 +45,7 @@ class EsRecordDataFieldNames(str, Enum):
     score = "score"
     words = "words"
     event_timestamp = "event_timestamp"
+    last_updated = "last_updated"
 
     def __str__(self):
         return self.value
