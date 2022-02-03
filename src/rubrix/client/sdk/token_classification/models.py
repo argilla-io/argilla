@@ -46,7 +46,8 @@ class TokenClassificationAnnotation(BaseAnnotation):
 
 class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
     tokens: List[str] = Field(min_items=1)
-    text: str = Field(alias="raw_text")
+
+    text: str
 
     @validator("text")
     def check_text_content(cls, text: str):
@@ -81,7 +82,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
         return cls(
             tokens=record.tokens,
-            raw_text=record.text,
+            text=record.text,
             prediction=prediction,
             annotation=annotation,
             status=record.status,

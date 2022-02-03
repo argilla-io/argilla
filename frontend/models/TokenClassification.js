@@ -21,15 +21,17 @@ import { indexOf, length } from "stringz";
 
 class TokenClassificationRecord extends BaseRecord {
   tokens;
-  raw_text;
+  text;
 
   visualTokens;
 
-  constructor({ tokens, raw_text, ...superData }) {
+  constructor({ tokens, text, ...superData }) {
     super({ ...superData });
+    this.text = text;
+
     const { visualTokens } = tokens.reduce(
       ({ visualTokens, startPosition }, token) => {
-        const start = indexOf(raw_text, token, startPosition);
+        const start = indexOf(this.text, token, startPosition);
         const end = start + length(token);
         return {
           visualTokens: [...visualTokens, { start, end, text: token }],
@@ -42,12 +44,12 @@ class TokenClassificationRecord extends BaseRecord {
       }
     );
     this.tokens = tokens;
-    this.raw_text = raw_text;
+
     this.visualTokens = visualTokens;
   }
 
   recordTitle() {
-    return this.raw_text;
+    return this.text;
   }
 }
 
