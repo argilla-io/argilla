@@ -223,12 +223,12 @@ export default {
   &__selector {
     position: absolute;
     left: -35%;
-    top: 2em;
-    min-width: 160px;
+    top: 1em;
+    min-width: 170px;
     z-index: 9;
     background: $bg;
     font-weight: 600;
-    padding: 0.5em;
+    padding: 0.6em;
     border-radius: 1px;
     &__container {
       @include font-size(14px);
@@ -237,7 +237,7 @@ export default {
       white-space: pre-line;
     }
     &__options {
-      max-height: 160px;
+      max-height: 170px;
       overflow-y: scroll;
       padding-left: 0;
       margin: 0;
@@ -248,8 +248,10 @@ export default {
       padding: 0.5em;
       position: relative;
       cursor: pointer;
+      margin-top: 2px;
+      margin-bottom: 2px;
       &.active {
-        border: 2px solid palette(grey, medium);
+        border-color: palette(grey, medium) !important;
       }
     }
   }
@@ -308,6 +310,9 @@ export default {
       background: palette(grey, smooth);
     }
   }
+}
+.list__item--annotation-mode span span {
+  cursor: text
 }
 .entity {
   &.non-selectable,
