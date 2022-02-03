@@ -52,17 +52,15 @@ export default {
       });
     },
     async onValidate(records) {
-      const emptyEntities = {
-        entities: [],
-      };
       await this.validate({
         dataset: this.dataset,
         agent: this.$auth.user.username,
         records: records.map((record) => {
           return {
             ...record,
+            annotatedEntities: undefined,
             annotation: {
-              ...(record.annotation || record.prediction || emptyEntities),
+              entities: record.annotatedEntities,
             },
           };
         }),
