@@ -13,17 +13,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import elasticsearch
 import pytest
 
+from rubrix.server.commons.errors import ClosedDatasetError
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.tasks.commons import TaskType
 from rubrix.server.tasks.commons.dao.dao import dataset_records_dao
+from rubrix.server.tasks.text_classification.dao.es_config import (
+    text_classification_mappings,
+)
 
 es_wrapper = create_es_wrapper()
 records = dataset_records_dao(es_wrapper)
+records.register_task_mappings(
+    TaskType.text_classification, text_classification_mappings()
+)
 dao = DatasetsDAO.get_instance(es_wrapper, records)
 
 
@@ -45,9 +51,7 @@ def test_close_dataset():
     )
 
     dao.close(created)
-    with pytest.raises(
-        elasticsearch.exceptions.RequestError, match="index_closed_exception"
-    ):
+    with pytest.raises(ClosedDatasetError, match=dataset):
         records.search_records(dataset=created)
 
     dao.open(created)

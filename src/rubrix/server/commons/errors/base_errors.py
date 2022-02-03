@@ -151,6 +151,16 @@ class EntityNotFoundError(RubrixServerError):
         self.type = type.__name__
 
 
+class ClosedDatasetError(BadRequestError):
+    def __init__(self, name: str):
+        self.name = name
+
+
+class MissingDatasetRecordsError(BadRequestError):
+    def __init__(self, message: str):
+        self.message = message
+
+
 __ALL__ = [
     BadRequestError,
     EntityNotFoundError,
@@ -158,4 +168,6 @@ __ALL__ = [
     EntityAlreadyExistsError,
     ValidationError,
     GenericRubrixServerError,
+    ClosedDatasetError,
+    MissingDatasetRecordsError,
 ]
