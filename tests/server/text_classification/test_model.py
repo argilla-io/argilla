@@ -16,11 +16,9 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-
 from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import TaskStatus
 from rubrix.server.tasks.text_classification import TextClassificationQuery
-
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
     PredictionStatus,
@@ -52,6 +50,35 @@ def test_metadata_with_object_list():
     }
     record = TextClassificationRecord.parse_obj(data)
     assert list(record.metadata.keys()) == ["mails"]
+
+
+def test_model_dict():
+    record = TextClassificationRecord.parse_obj(
+        {
+            "id": 1,
+            "inputs": {"text": "This is a text"},
+            "annotation": {
+                "agent": "test",
+                "labels": [{"class": "A"}, {"class": "B"}],
+            },
+            "multi_label": True,
+        }
+    )
+
+    assert record.dict(exclude_none=True) == {
+        "annotation": {
+            "agent": "test",
+            "labels": [
+                {"class_label": "A", "score": 1.0},
+                {"class_label": "B", "score": 1.0},
+            ],
+        },
+        "id": 1,
+        "inputs": {"text": "This is a text"},
+        "metrics": {},
+        "multi_label": True,
+        "status": "Default",
+    }
 
 
 def test_single_label_with_multiple_annotation():
