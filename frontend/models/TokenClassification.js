@@ -25,13 +25,11 @@ class TokenClassificationRecord extends BaseRecord {
 
   visualTokens;
 
-  constructor({ tokens, raw_text, annotatedEntities, ...superData }) {
+  constructor({ tokens, text, annotatedEntities, ...superData }) {
     super({ ...superData });
-    this.text = text;
-
     const { visualTokens } = tokens.reduce(
       ({ visualTokens, startPosition }, token) => {
-        const start = indexOf(this.text, token, startPosition);
+        const start = indexOf(text, token, startPosition);
         const end = start + length(token);
         return {
           visualTokens: [...visualTokens, { start, end, text: token }],
@@ -44,7 +42,7 @@ class TokenClassificationRecord extends BaseRecord {
       }
     );
     this.tokens = tokens;
-
+    this.text = text;
     this.visualTokens = visualTokens;
 
     if (!annotatedEntities) {
