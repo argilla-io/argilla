@@ -426,6 +426,8 @@ class TextClassificationRecordDB(TextClassificationRecord):
         return {
             **super().extended_fields(),
             "words": words,
+            # This allow query by text:.... or text.exact:....
+            # Once words is remove we can normalize at record level
             "text": words,
         }
 
