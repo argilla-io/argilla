@@ -121,9 +121,12 @@ def test_open_and_close_dataset():
     assert client.put(f"/api/datasets/{dataset}:close").status_code == 200
 
     response = client.post(f"/api/datasets/{dataset}/TextClassification:search")
-    assert response.status_code == 500
+    assert response.status_code == 400
     assert response.json() == {
-        "detail": {"code": "elasticsearch.exceptions.RequestError", "params": {}}
+        "detail": {
+            "code": "rubrix.api.errors::ClosedDatasetError",
+            "params": {"name": dataset},
+        }
     }
 
     assert client.put(f"/api/datasets/{dataset}:open").status_code == 200

@@ -115,14 +115,14 @@ export default {
     },
     text() {
       return substring(
-        this.record.raw_text,
+        this.record.text,
         this.spans[this.spanId].start,
         this.spans[this.spanId].end
       );
     },
     whiteSpace() {
       return substring(
-        this.record.raw_text,
+        this.record.text,
         this.spans[this.spanId].end,
         this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
       );

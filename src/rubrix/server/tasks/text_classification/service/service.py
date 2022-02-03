@@ -15,10 +15,9 @@
 
 from typing import Iterable, List, Optional
 
-from elasticsearch import NotFoundError
 from fastapi import Depends
 
-from rubrix.server.commons.errors import EntityNotFoundError, MissingInputParamError
+from rubrix.server.commons.errors import MissingDatasetRecordsError
 from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -38,6 +37,7 @@ from rubrix.server.tasks.text_classification.api.model import (
     LabelingRuleMetricsSummary,
     TextClassificationQuery,
     TextClassificationRecord,
+    TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
@@ -112,7 +112,7 @@ class TextClassificationService:
         failed = self.__dao__.add_records(
             dataset=dataset,
             records=records,
-            record_class=TextClassificationRecord,
+            record_class=TextClassificationRecordDB,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -228,7 +228,7 @@ class TextClassificationService:
                 size=1,
                 exclude_fields=["metrics", "metadata"],
             )
-        except NotFoundError:
+        except MissingDatasetRecordsError:  # No records index yet
             return None
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:

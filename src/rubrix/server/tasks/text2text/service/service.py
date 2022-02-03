@@ -40,23 +40,6 @@ from rubrix.server.tasks.text2text.api.model import (
 )
 from rubrix.server.tasks.text2text.dao.es_config import text2text_mappings
 
-extends_index_properties(
-    {
-        ExtendedEsRecordDataFieldNames.text_predicted: {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": "multilingual_stop_analyzer",
-            "fields": {"extended": {"type": "text", "analyzer": "extended_analyzer"}},
-        },
-        ExtendedEsRecordDataFieldNames.text_annotated: {
-            "type": "text",
-            "fielddata": True,
-            "analyzer": "multilingual_stop_analyzer",
-            "fields": {"extended": {"type": "text", "analyzer": "extended_analyzer"}},
-        },
-    }
-)
-
 
 class Text2TextService:
     """
