@@ -17,19 +17,21 @@ Here we provide some advanced setup guides:
 Setting up Elasticsearch via docker
 -----------------------------------
 
-Setting up Elasticsearch (ES) via docker is straight forward.
-Simply run following command:
+Setting up Elasticsearch (ES) via docker is straightforward.
+Simply run the following command:
 
 .. code-block:: bash
 
    docker run -d \
-   --name elasticsearch-for-rubrix \
-   -p 9200:9200 -p 9300:9300 \
-   -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-   -e "discovery.type=single-node" \
-   docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+     --name elasticsearch-for-rubrix \
+     -p 9200:9200 -p 9300:9300 \
+     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+     -e "discovery.type=single-node" \
+     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+   pip install "elasticsearch<7.14.0"
 
-This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
+This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background, and it will also install the appropriate client.
+
 To see the logs of the container, you can run:
 
 .. code-block:: bash
