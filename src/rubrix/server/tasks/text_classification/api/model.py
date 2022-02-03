@@ -285,16 +285,6 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         return None
 
     @property
-    def words(self) -> str:
-        sentences = []
-        for v in self.inputs.values():
-            if isinstance(v, list):
-                sentences.extend(v)
-            else:
-                sentences.append(v)
-        return "\n".join(sentences)
-
-    @property
     def predicted_as(self) -> List[str]:
         return self._labels_from_annotation(
             self.prediction, multi_label=self.multi_label
@@ -324,6 +314,15 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
                 if prediction_class
             ]
         )
+
+    def all_text(self) -> str:
+        sentences = []
+        for v in self.inputs.values():
+            if isinstance(v, list):
+                sentences.extend(v)
+            else:
+                sentences.append(v)
+        return "\n".join(sentences)
 
     @validator("inputs")
     def validate_inputs(cls, text: Dict[str, Any]):
@@ -419,6 +418,18 @@ class TextClassificationRecord(CreationTextClassificationRecord):
 
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+
+class TextClassificationRecordDB(TextClassificationRecord):
+    def extended_fields(self) -> Dict[str, Any]:
+        words = self.all_text()
+        return {
+            **super().extended_fields(),
+            "words": words,
+            # This allow query by text:.... or text.exact:....
+            # Once words is remove we can normalize at record level
+            "text": words,
+        }
 
 
 class TextClassificationBulkData(UpdateDatasetRequest):
