@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16 ]
+        elasticsearch: [ 6.8, 7.0, 7.2, 7.4, 7.10.2, 7.14, 7.16, 7.17 ]
     defaults:
       run:
         shell: bash -l {0}
@@ -43,13 +43,17 @@ jobs:
         uses: ankane/setup-elasticsearch@v1
         with:
           elasticsearch-version: ${{ matrix.elasticsearch }}
+
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
+        if: steps.filter.outputs.python_code == 'true'
         with:
           environment-file: environment_dev.yml
           activate-environment: rubrix
+
       - name: Cache pip 👜
         uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
         env:
           # Increase this value to reset cache if setup.cfg has not changed
           CACHE_NUMBER: 0
@@ -153,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
     needs:
-      - build
+      - deploy_docker
     defaults:
       run:
         shell: bash -l {0}
