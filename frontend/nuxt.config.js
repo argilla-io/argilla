@@ -83,6 +83,16 @@ export default {
         style: "dracula",
       },
     ],
+    [
+      "nuxt-mq",
+      {
+        breakpoints: {
+          sm: 450,
+          md: 1901,
+          lg: Infinity,
+        },
+      },
+    ],
   ],
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
