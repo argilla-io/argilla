@@ -306,11 +306,9 @@ class TokenClassificationRecordDB(CreationTokenClassificationRecord):
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
-        parent_fields = super().extended_fields()
-        parent_fields.pop("raw_text")
 
         return {
-            **parent_fields,
+            **super().extended_fields(),
             # See ../service/service.py
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
                 {"mention": mention, "entity": entity.label, "score": entity.score}
