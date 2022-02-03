@@ -101,7 +101,7 @@ def test_to_client():
     )
 
     sdk_record = SdkTokenClassificationRecord(
-        raw_text="this is a test text",
+        text="this is a test text",
         tokens=["this", "is", "a", "test", "text"],
         annotation=annotation,
         prediction=prediction,
