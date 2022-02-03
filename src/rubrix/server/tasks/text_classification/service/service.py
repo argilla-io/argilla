@@ -15,10 +15,9 @@
 
 from typing import Iterable, List, Optional
 
-from elasticsearch import NotFoundError
 from fastapi import Depends
 
-from rubrix.server.commons.errors import EntityNotFoundError, MissingInputParamError
+from rubrix.server.commons.errors import MissingDatasetRecordsError
 from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -228,7 +227,7 @@ class TextClassificationService:
                 size=1,
                 exclude_fields=["metrics", "metadata"],
             )
-        except NotFoundError:
+        except MissingDatasetRecordsError:  # No records index yet
             return None
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:
