@@ -17,19 +17,17 @@
 
 <template>
   <div class="record">
-
-      <div class="content">
-        <record-token-classification-annotation
-          :dataset="dataset"
-          :record="record"
-          v-if="annotationEnabled"
-        />
-        <record-token-classification-exploration
-          :dataset="dataset"
-          :record="record"
-          v-else
-        />
-      </div>
+    <div class="content">
+      <record-token-classification-annotation
+        :dataset="dataset"
+        :record="record"
+        v-if="annotationEnabled"
+      />
+      <record-token-classification-exploration
+        :dataset="dataset"
+        :record="record"
+        v-else
+      />
     </div>
   </div>
 </template>
