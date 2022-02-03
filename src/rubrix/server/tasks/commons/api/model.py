@@ -264,7 +264,11 @@ class BaseRecord(GenericModel, Generic[Annotation]):
         properties than commons (predicted, annotated_as,....) could implement
         this method.
         """
-        return {}
+        return {
+            # This allow query by text:.... or text.exact:....
+            # Once words is remove we can normalize at record level
+            "text": self.words
+        }
 
     def dict(self, *args, **kwargs) -> "DictStrAny":
         """
