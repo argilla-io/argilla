@@ -198,6 +198,43 @@ def test_create_records_for_token_classification(
     response = client.post(search_url)
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
+
+    assert results.aggregations.dict() == {
+        "annotated_as": {"TEST": 1},
+        "annotated_by": {"test": 1},
+        "mentions": {"TEST": {"This": 1}},
+        "metadata": {"field_one": {"value one": 1}, "field_two": {"value 2": 1}},
+        "predicted": {"ok": 1},
+        "predicted_as": {"TEST": 1},
+        "predicted_by": {"test": 1},
+        "predicted_mentions": {"TEST": {"This": 1}},
+        "score": {
+            "0.0-0.05": 0,
+            "0.05-0.1": 0,
+            "0.1-0.15": 0,
+            "0.15-0.2": 0,
+            "0.2-0.25": 0,
+            "0.25-0.3": 0,
+            "0.3-0.35": 0,
+            "0.35-0.4": 0,
+            "0.4-0.45": 0,
+            "0.45-0.5": 0,
+            "0.5-0.55": 0,
+            "0.55-0.6": 0,
+            "0.6-0.65": 0,
+            "0.65-0.7": 0,
+            "0.7-0.75": 0,
+            "0.75-0.8": 0,
+            "0.8-0.85": 0,
+            "0.85-0.9": 0,
+            "0.9-0.95": 0,
+            "0.95-1.0": 0,
+            "1.0-*": 0,
+        },
+        "status": {"Default": 1},
+        "words": {},
+    }
+
     assert "This" in results.aggregations.predicted_mentions[entity_label]
     assert "This" in results.aggregations.mentions[entity_label]
     for record in results.records:

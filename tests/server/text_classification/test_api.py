@@ -168,10 +168,39 @@ def test_create_records_for_text_classification():
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
-    assert results.aggregations.predicted_as == {"Mocking": 1}
-    assert results.aggregations.status == {"Default": 1}
-    assert results.aggregations.score
-    assert results.aggregations.predicted == {}
+    assert results.aggregations.dict() == {
+        "annotated_as": {},
+        "annotated_by": {},
+        "metadata": {},
+        "predicted": {},
+        "predicted_as": {"Mocking": 1},
+        "predicted_by": {"test": 1},
+        "score": {
+            "0.0-0.05": 0,
+            "0.05-0.1": 0,
+            "0.1-0.15": 0,
+            "0.15-0.2": 0,
+            "0.2-0.25": 0,
+            "0.25-0.3": 0,
+            "0.3-0.35": 0,
+            "0.35-0.4": 0,
+            "0.4-0.45": 0,
+            "0.45-0.5": 0,
+            "0.5-0.55": 0,
+            "0.55-0.6": 0,
+            "0.6-0.65": 0,
+            "0.65-0.7": 1,
+            "0.7-0.75": 0,
+            "0.75-0.8": 0,
+            "0.8-0.85": 0,
+            "0.85-0.9": 0,
+            "0.9-0.95": 0,
+            "0.95-1.0": 0,
+            "1.0-*": 0,
+        },
+        "status": {"Default": 1},
+        "words": {"data": 1},
+    }
 
 
 def test_partial_record_update():
