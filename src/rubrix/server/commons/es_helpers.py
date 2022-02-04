@@ -588,6 +588,7 @@ class aggregations:
             "score": {
                 "range": {
                     "field": EsRecordDataFieldNames.score,
+                    "keyed": True,
                     "ranges": [
                         {"from": _from / ten_decimals, "to": _to / ten_decimals}
                         for _from, _to in zip(
