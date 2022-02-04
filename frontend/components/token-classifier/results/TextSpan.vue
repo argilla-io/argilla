@@ -41,23 +41,25 @@
         <span v-show="!addnewSlotVisible">
           <ul class="entities__selector__options">
             <li
-              class="entities__selector__option active"
-              :class="`color_${lastSelectedEntity.colorId}`"
+              class="entities__selector__option"
+              :class="[`color_${lastSelectedEntity.colorId}`, activeEntity === -1 ? 'active' : null]"
               v-if="lastSelectedEntity.text"
               @click="selectEntity(lastSelectedEntity)"
             >
               <span>{{ lastSelectedEntity.text }}</span>
-              <span class="entity__sort-code">[ENTER]</span>
+              <span class="entity__sort-code">{{activeEntity === -1 ?'[ENTER]' : '[SPACE]'}}</span>
             </li>
             <li
               v-for="(entity, index) in formattedEntities"
+              tabindex="0"
+              :focused="activeEntity === index"
               :key="index"
               class="entities__selector__option"
-              :class="`color_${entity.colorId}`"
+              :class="[`color_${entity.colorId}`, activeEntity === index ? 'active' : null]"
               @click="selectEntity(entity)"
             >
               <span>{{ entity.text }}</span>
-              <span class="entity__sort-code">[{{ entity.shortCut }}]</span>
+              <span class="entity__sort-code">[{{ activeEntity === index ? 'ENTER' : entity.shortCut }}]</span>
             </li>
           </ul>
         </span>
@@ -103,6 +105,7 @@ export default {
     addnewSlotVisible: false,
     controlPressed: false,
     controlKey: undefined,
+    activeEntity: -1,
   }),
   computed: {
     span() {
@@ -186,11 +189,15 @@ export default {
         ? this.$emit("changeEntityLabel", this.span.entity, entityLabel.text)
         : this.$emit("selectEntity", entityLabel.text);
       this.showEntitiesSelector = false;
+      this.resetActiveEntity();
     },
     keyUp(event) {
       if (this.controlKey === event.key) {
         this.controlPressed = false;
       }
+    },
+    resetActiveEntity() {
+      this.activeEntity = -1;
     },
     keyDown(event) {
       if (event.ctrlKey) {
@@ -198,9 +205,28 @@ export default {
         this.controlPressed = true;
       }
       const cmd = String.fromCharCode(event.keyCode).toUpperCase();
-      if (this.controlPressed && this.showEntitiesSelector && cmd) {
-        if (event.keyCode === 13 && this.lastSelectedEntity.text) {
+      event.preventDefault()
+      if (this.showEntitiesSelector && cmd) {
+        // enter
+        if (event.keyCode === 13) {
+          if (this.lastSelectedEntity.text && this.activeEntity === -1 ) {
+            this.selectEntity(this.lastSelectedEntity);
+          } else {
+            this.selectEntity(this.formattedEntities[this.activeEntity]);
+          }
+        //space 
+        } else if (event.keyCode === 32 && this.lastSelectedEntity) {
           this.selectEntity(this.lastSelectedEntity);
+        //down
+        } else if (event.keyCode === 40 && this.activeEntity + 1 < this.formattedEntities.length) {
+          this.activeEntity ++;
+          // if (this.activeEntity >= 0) {
+          //   // this.$refs.activeEntity_[this.activeEntity];
+          //   console.log(this.$refs.activeEntity_[this.activeEntity])
+          // }
+        //up
+        } else if (event.keyCode === 38 && this.activeEntity >= 0) {
+          this.activeEntity --;
         } else {
           const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
           if (entity) {
