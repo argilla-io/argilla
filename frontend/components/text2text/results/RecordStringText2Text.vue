@@ -49,7 +49,7 @@ export default {
   }),
   computed: {
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 550 : 350;
+      return this.$mq === "lg" ? 550 : 300;
     },
   },
   updated() {
@@ -80,7 +80,7 @@ export default {
 .record {
   &__collapsed {
     .record__content {
-      max-height: 350px;
+      max-height: 300px;
       overflow: hidden;
       @include media(">xxl") {
         max-height: 550px;
