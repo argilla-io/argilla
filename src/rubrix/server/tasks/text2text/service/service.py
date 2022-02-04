@@ -123,7 +123,6 @@ class Text2TextService:
                         ExtendedEsRecordDataFieldNames.text_predicted
                     )
                 },
-                include_default_aggregations=False,
             ),
             size=size,
             record_from=record_from,
