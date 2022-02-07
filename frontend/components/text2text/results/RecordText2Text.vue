@@ -148,7 +148,7 @@ export default {
   }
   &--left {
     width: 100%;
-    padding: 52px 20px 20px 65px;
+    padding: 15px 20px 20px 20px;
   }
 }
 </style>

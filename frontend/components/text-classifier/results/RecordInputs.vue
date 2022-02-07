@@ -19,7 +19,7 @@
   <div
     ref="list"
     :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
-  > 
+  >
     <div class="record__content">
       <span v-for="(text, index) in data" :key="index" class="record">
         <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
@@ -69,7 +69,7 @@ export default {
   }),
   computed: {
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 550 : 400;
+      return this.$mq === "lg" ? 438 : 144;
     },
   },
   updated() {
@@ -101,10 +101,10 @@ export default {
   }
   &__collapsed {
     .record__content {
-      max-height: 400px;
+      max-height: 144px;
       overflow: hidden;
       @include media(">xxl") {
-        max-height: 550px;
+        max-height: 438px;
       }
     }
   }
