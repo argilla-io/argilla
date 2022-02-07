@@ -21,6 +21,7 @@ import datetime
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import pandas as pd
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
@@ -71,6 +72,14 @@ class _RootValidators(BaseModel):
         values["status"] = values.get("status") or (
             "Default" if values.get("annotation") is None else "Validated"
         )
+
+        return values
+
+    @root_validator
+    def _nat_to_none(cls, values):
+        """Converts pandas `NaT`s to `None`s"""
+        if values["event_timestamp"] is pd.NaT:
+            values["event_timestamp"] = None
 
         return values
 
