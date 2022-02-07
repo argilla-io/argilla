@@ -51,3 +51,16 @@ def test_search_records():
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.records[0].predicted is None
+
+    assert results.aggregations.dict(exclude={"score"}) == {
+        "annotated_as": {},
+        "annotated_by": {},
+        "annotated_text": {},
+        "metadata": {"field_one": {"value one": 1}},
+        "predicted": {},
+        "predicted_as": {},
+        "predicted_by": {"test": 1},
+        "predicted_text": {},
+        "status": {"Default": 2},
+        "words": {"data": 2, "ånother": 1},
+    }

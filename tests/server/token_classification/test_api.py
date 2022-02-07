@@ -199,6 +199,20 @@ def test_create_records_for_token_classification(
     response = client.post(search_url)
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
+
+    assert results.aggregations.dict(exclude={"score"}) == {
+        "annotated_as": {"TEST": 1},
+        "annotated_by": {"test": 1},
+        "mentions": {"TEST": {"This": 1}},
+        "metadata": {"field_one": {"value one": 1}, "field_two": {"value 2": 1}},
+        "predicted": {"ok": 1},
+        "predicted_as": {"TEST": 1},
+        "predicted_by": {"test": 1},
+        "predicted_mentions": {"TEST": {"This": 1}},
+        "status": {"Default": 1},
+        "words": {},
+    }
+
     assert "This" in results.aggregations.predicted_mentions[entity_label]
     assert "This" in results.aggregations.mentions[entity_label]
     for record in results.records:
