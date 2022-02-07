@@ -21,49 +21,52 @@ import datetime
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import pandas as pd
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import limit_value_length
 
 
-class _RootValidators(BaseModel):
-    """Base class for our record models that takes care of root validations"""
+class _Validators(BaseModel):
+    """Base class for our record models that takes care of general validations"""
 
-    @root_validator
-    def _check_value_length(cls, values):
+    @validator("metadata", check_fields=False)
+    def _check_value_length(cls, v):
         """Checks metadata values length and apply value truncation for large values"""
-        new_metadata = limit_value_length(
-            values["metadata"], max_length=MAX_KEYWORD_LENGTH
-        )
-        if new_metadata != values["metadata"]:
+        new_metadata = limit_value_length(v, max_length=MAX_KEYWORD_LENGTH)
+        if new_metadata != v:
             warnings.warn(
                 "Some metadata values exceed the max length. "
                 f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
             )
-            values["metadata"] = new_metadata
 
-        return values
+        return new_metadata
 
-    @root_validator
-    def _check_agents(cls, values):
-        """Triggers a warning when ONLY agents are provided"""
-        if (
-            values.get("annotation_agent") is not None
-            and values.get("annotation") is None
-        ):
-            warnings.warn(
-                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
-            )
-        if (
-            values.get("prediction_agent") is not None
-            and values.get("prediction") is None
-        ):
+    @validator("prediction_agent", check_fields=False)
+    def _check_prediction_agent(cls, v, values):
+        """Triggers a warning when ONLY prediction agent is provided"""
+        if v and values["prediction"] is None:
             warnings.warn(
                 "You provided an `prediction_agent`, but no `prediction`. The `prediction_agent` will not be logged to the server."
             )
+        return v
 
-        return values
+    @validator("annotation_agent", check_fields=False)
+    def _check_annotation_agent(cls, v, values):
+        """Triggers a warning when ONLY annotation agent is provided"""
+        if v and values["annotation"] is None:
+            warnings.warn(
+                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
+            )
+        return v
+
+    @validator("event_timestamp", check_fields=False)
+    def _nat_to_none(cls, v):
+        """Converts pandas `NaT`s to `None`s"""
+        if v is pd.NaT:
+            return None
+        return v
 
     @root_validator
     def _check_and_update_status(cls, values):
@@ -106,7 +109,7 @@ class TokenAttributions(BaseModel):
     attributions: Dict[str, float] = Field(default_factory=dict)
 
 
-class TextClassificationRecord(_RootValidators):
+class TextClassificationRecord(_Validators):
     """Record for text classification
 
     Args:
@@ -172,7 +175,7 @@ class TextClassificationRecord(_RootValidators):
         return dict(text=inputs)
 
 
-class TokenClassificationRecord(_RootValidators):
+class TokenClassificationRecord(_Validators):
     """Record for a token classification task
 
     Args:
@@ -232,7 +235,7 @@ class TokenClassificationRecord(_RootValidators):
     metrics: Optional[Dict[str, Any]] = None
 
 
-class Text2TextRecord(_RootValidators):
+class Text2TextRecord(_Validators):
     """Record for a text to text task
 
     Args:
