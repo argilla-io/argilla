@@ -24,6 +24,7 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
 from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
@@ -39,6 +40,9 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
+)
+from rubrix.server.tasks.text_classification.dao.es_config import (
+    text_classification_mappings,
 )
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
@@ -93,6 +97,10 @@ class TextClassificationService:
         self.__dao__ = dao
         self.__metrics__ = metrics
         self.__labeling__ = labeling
+
+        self.__dao__.register_task_mappings(
+            TaskType.text_classification, text_classification_mappings()
+        )
 
     def add_records(
         self,

@@ -28,7 +28,6 @@ try:
 except ModuleNotFoundError:
     import json
 
-
 from .settings import settings
 
 

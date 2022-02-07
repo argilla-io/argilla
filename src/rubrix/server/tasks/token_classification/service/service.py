@@ -24,6 +24,7 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
 from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
@@ -38,6 +39,9 @@ from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationRecord,
     TokenClassificationRecordDB,
     TokenClassificationSearchResults,
+)
+from rubrix.server.tasks.token_classification.dao.es_config import (
+    token_classification_mappings,
 )
 
 extends_index_properties(
@@ -88,6 +92,10 @@ class TokenClassificationService:
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
+
+        self.__dao__.register_task_mappings(
+            TaskType.token_classification, token_classification_mappings()
+        )
 
     def add_records(
         self,
