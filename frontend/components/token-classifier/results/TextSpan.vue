@@ -220,13 +220,14 @@ export default {
         //down
         } else if (event.keyCode === 40 && this.activeEntity + 1 < this.formattedEntities.length) {
           this.activeEntity ++;
-          // if (this.activeEntity >= 0) {
-          //   // this.$refs.activeEntity_[this.activeEntity];
-          //   console.log(this.$refs.activeEntity_[this.activeEntity])
-          // }
+          var element = document.getElementsByClassName("active")
+
+          element[0].parentNode.scrollTop = element[0].offsetTop - element[0].offsetHeight - 2;
         //up
         } else if (event.keyCode === 38 && this.activeEntity >= 0) {
           this.activeEntity --;
+          var element = document.getElementsByClassName("active")
+          element[0].parentNode.scrollTop = element[0].offsetTop - element[0].offsetHeight - 2;
         } else {
           const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
           if (entity) {
@@ -267,6 +268,8 @@ export default {
       overflow-y: scroll;
       padding-left: 0;
       margin: 0;
+      overscroll-behavior: contain;
+      position: relative;
     }
     &__option {
       display: flex;
