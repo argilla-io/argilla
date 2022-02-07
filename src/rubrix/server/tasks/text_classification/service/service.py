@@ -17,6 +17,7 @@ from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
+from rubrix.server.commons.errors import MissingDatasetRecordsError
 from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -213,12 +214,15 @@ class TextClassificationService:
             )
 
     def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
-        results = self.__dao__.search_records(
-            dataset,
-            search=RecordSearch(include_default_aggregations=False),
-            size=1,
-            exclude_fields=["metrics", "metadata"],
-        )
+        try:
+            results = self.__dao__.search_records(
+                dataset,
+                search=RecordSearch(include_default_aggregations=False),
+                size=1,
+                exclude_fields=["metrics", "metadata"],
+            )
+        except MissingDatasetRecordsError:  # No records index yet
+            return None
         records = [TextClassificationRecord.parse_obj(r) for r in results.records]
         if records:
             return records[0].multi_label
