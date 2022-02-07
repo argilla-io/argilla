@@ -29,7 +29,7 @@ from pydantic import ConfigError
 from rubrix import __version__ as rubrix_version
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
-from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
+from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 

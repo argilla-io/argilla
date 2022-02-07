@@ -23,6 +23,7 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
+    TaskType,
 )
 from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
@@ -37,6 +38,7 @@ from rubrix.server.tasks.text2text.api.model import (
     Text2TextSearchAggregations,
     Text2TextSearchResults,
 )
+from rubrix.server.tasks.text2text.dao.es_config import text2text_mappings
 
 
 class Text2TextService:
@@ -52,6 +54,8 @@ class Text2TextService:
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
+
+        self.__dao__.register_task_mappings(TaskType.text2text, text2text_mappings())
 
     def add_records(
         self,
@@ -118,6 +122,7 @@ class Text2TextService:
                         ExtendedEsRecordDataFieldNames.text_predicted
                     )
                 },
+                include_default_aggregations=False,
             ),
             size=size,
             record_from=record_from,
