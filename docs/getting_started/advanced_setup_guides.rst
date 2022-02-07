@@ -29,7 +29,7 @@ Simply run the following command:
      -e "discovery.type=single-node" \
      docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
-This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background, and it will also install the appropriate client.
+This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
 
 To see the logs of the container, you can run:
 
