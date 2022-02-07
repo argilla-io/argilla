@@ -22,21 +22,16 @@ import rubrix as rb
 from rubrix.client.dataset import MixedRecordTypesError, WrongRecordTypeError
 
 
-@pytest.fixture
-def records() -> List[rb.TextClassificationRecord]:
-    return [rb.TextClassificationRecord(inputs=f"{i}") for i in range(3)]
-
-
-def test_init(records):
+def test_init(singlelabel_textclassification_records):
     dataset = rb.Dataset()
 
     assert dataset._records == []
     assert dataset._record_type is None
 
-    dataset = rb.Dataset(records)
+    dataset = rb.Dataset(singlelabel_textclassification_records)
 
-    assert dataset._records is records
-    assert dataset._record_type is type(records[0])
+    assert dataset._records is singlelabel_textclassification_records
+    assert dataset._record_type is type(singlelabel_textclassification_records[0])
 
     with pytest.raises(
         MixedRecordTypesError,
@@ -50,23 +45,27 @@ def test_init(records):
         )
 
 
-def test_iter_len_getitem(records):
-    dataset = rb.Dataset(records)
+def test_iter_len_getitem(singlelabel_textclassification_records):
+    dataset = rb.Dataset(singlelabel_textclassification_records)
 
-    for record, expected in zip(dataset, records):
+    for record, expected in zip(dataset, singlelabel_textclassification_records):
         assert record == expected
 
-    assert len(dataset) == 3
-    assert dataset[1] is records[1]
+    assert len(dataset) == 4
+    assert dataset[1] is singlelabel_textclassification_records[1]
 
 
-def test_setitem(records):
-    dataset = rb.Dataset(records)
+def test_setitem_delitem(singlelabel_textclassification_records):
+    dataset = rb.Dataset(singlelabel_textclassification_records)
 
     record = rb.TextClassificationRecord(inputs="mock")
     dataset[0] = record
 
     assert dataset._records[0] is record
+
+    assert len(dataset) == 4
+    del dataset[1]
+    assert len(dataset) == 3
 
     with pytest.raises(
         WrongRecordTypeError,
@@ -75,7 +74,7 @@ def test_setitem(records):
         dataset[0] = rb.Text2TextRecord(text="mock")
 
 
-def test_append(records):
+def test_append(singlelabel_textclassification_records):
     dataset = rb.Dataset()
     record = rb.TextClassificationRecord(inputs="mock")
 
