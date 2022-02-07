@@ -28,6 +28,7 @@ import pkg_resources
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
+from rubrix.client.dataset import Dataset
 from rubrix.client.models import (
     BulkResponse,
     Record,
