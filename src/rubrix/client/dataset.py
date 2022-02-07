@@ -137,15 +137,13 @@ class Dataset:
 
     @classmethod
     def from_datasets(
-        cls,
-        dataset: "datasets.Dataset",
-        task: Union[str, TaskType] = "TextClassification",
+        cls, dataset: "datasets.Dataset", task: Union[str, TaskType]
     ) -> "Dataset":
         """Imports records from a `datasets.Dataset`.
 
         Args:
             dataset: A datasets Dataset from which to import the records.
-            task: The task defines the record type.
+            task: The task defines the record type. One of: ["TextClassification", "TokenClassification", "Text2Text"]
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -156,9 +154,9 @@ class Dataset:
         if task is TaskType.text_classification:
             return cls._datasets_to_textclassification(dataset)
         if task is TaskType.token_classification:
-            raise NotImplementedError(f"{task} is still not implemented.")
+            return cls._datasets_to_tokenclassification(dataset)
         if task is TaskType.text2text:
-            raise NotImplementedError(f"{task} is still not implemented.")
+            return cls._datasets_to_text2text(dataset)
         raise ValueError(f"Provided task {task} is not supported!")
 
     def _textclassification_to_datasets(self) -> "datasets.Dataset":
@@ -195,14 +193,7 @@ class Dataset:
         cls,
         dataset: "datasets.Dataset",
     ) -> "Dataset":
-        """Helper method to import text classification records from a `datasets.Dataset`.
-
-        Args:
-            dataset: A datasets Dataset
-
-        Returns:
-            A Dataset.
-        """
+        """Helper method to import text classification records from a `datasets.Dataset`"""
         records = []
         for row in dataset:
             row["inputs"] = {
@@ -232,10 +223,56 @@ class Dataset:
 
         return cls(records)
 
-    def _tokenclassification_to_datasets(self):
-        raise NotImplementedError
+    def _tokenclassification_to_datasets(self) -> "datasets.Dataset":
+        """Helper method to put token classification records in a `datasets.Dataset`"""
+        # create a dict first, where we make the necessary transformations
+        def entities_to_dict(annotation_or_prediction: str):
+            return [
+                [
+                    {"label": ent[0], "start": ent[1], "end": ent[2]}
+                    for ent in getattr(rec, annotation_or_prediction)
+                ]
+                if getattr(rec, annotation_or_prediction) is not None
+                else None
+                for rec in self._records
+            ]
+
+        ds_dict = {}
+        for key in self._records[0].__fields__:
+            if key == "prediction":
+                ds_dict[key] = entities_to_dict(key)
+            elif key == "annotation":
+                ds_dict[key] = entities_to_dict(key)
+            elif key == "id":
+                ds_dict[key] = [str(rec.id) for rec in self._records]
+            else:
+                ds_dict[key] = [getattr(rec, key) for rec in self._records]
+
+        return self._dict_to_datasets(ds_dict)
+
+    @classmethod
+    def _datasets_to_tokenclassification(cls, dataset: "datasets.Dataset") -> "Dataset":
+        """Helper method to import token classification records from a `datasets.Dataset`."""
+
+        def entities_to_tuple(entities):
+            return [(ent["label"], ent["start"], ent["end"]) for ent in entities]
+
+        records = []
+        for row in dataset:
+            if row["prediction"] is not None:
+                row["prediction"] = entities_to_tuple(row["prediction"])
+            if row["annotation"] is not None:
+                row["annotation"] = entities_to_tuple(row["annotation"])
+            records.append(TokenClassificationRecord(**row))
+
+        return cls(records)
 
     def _text2text_to_datasets(self):
+        """Helper method to put text2text records in a `datasets.Dataset`"""
+        raise NotImplementedError
+
+    def _datasets_to_text2text(cls, dataset: "datasets.Dataset") -> "Dataset":
+        """Helper method to import text2text records from a `datasets.Dataset`."""
         raise NotImplementedError
 
     def _dict_to_datasets(self, records_dict: Dict) -> "datasets.Dataset":
@@ -271,38 +308,30 @@ class Dataset:
 
     @classmethod
     def from_pandas(
-        cls, dataframe: pd.DataFrame, task: Union[str, TaskType] = "TextClassification"
+        cls, dataframe: pd.DataFrame, task: Union[str, TaskType]
     ) -> "Dataset":
+        """Imports records from a `pandas.DataFrame`.
+
+        Args:
+            dataframe: A pandas DataFrame from which to import the records.
+            task: The task defines the record type. One of: ["TextClassification", "TokenClassification", "Text2Text"]
+
+        Returns:
+            The imported records in a Rubrix Dataset.
+        """
         if isinstance(task, str):
             task = TaskType(task)
 
         if task is TaskType.text_classification:
-            return cls._pandas_to_textclassification(dataframe)
-        if task is TaskType.token_classification:
-            raise NotImplementedError(f"{task} is still not implemented.")
-        if task is TaskType.text2text:
-            raise NotImplementedError(f"{task} is still not implemented.")
+            model = TextClassificationRecord
+        elif task is TaskType.token_classification:
+            model = TokenClassificationRecord
+        elif task is TaskType.text2text:
+            model = Text2TextRecord
+        else:
+            raise ValueError(f"Provided task {task} is not supported!")
 
-        raise ValueError(f"Provided task {task} is not supported!")
-
-    @classmethod
-    def _pandas_to_textclassification(cls, dataframe: pd.DataFrame) -> "Dataset":
-        """Helper method to convert a pandas DataFrame to a text classification Dataset.
-
-        Args:
-            dataframe: A pandas DataFrame containing the records.
-
-        Returns:
-            A Rubrix dataset.
-        """
-        dataset = cls(
-            [
-                TextClassificationRecord(
-                    **{key: getattr(row, key) for key in row._fields if key != "Index"}
-                )
-                for row in dataframe.itertuples()
-            ]
-        )
+        dataset = cls([model(**row) for row in dataframe.to_dict("records")])
 
         # TODO: remove this once PR #1105 is merged
         for rec in dataset:
