@@ -12,10 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
 import json
 from typing import Any, Optional
 
 import numpy
+import pandas as pd
 import pytest
 from pydantic import ValidationError
 
@@ -129,3 +131,13 @@ def test_forbid_extra():
 
     with pytest.raises(ValidationError):
         MockRecord(extra="mock")
+
+
+def test_nat_to_none():
+    class MockRecord(_RootValidators):
+        event_timestamp: Optional[datetime.datetime] = None
+        metadata: Optional[Any] = None
+        status: Optional[str] = None
+
+    record = MockRecord(event_timestamp=pd.NaT)
+    assert record.event_timestamp is None
