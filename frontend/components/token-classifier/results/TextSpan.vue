@@ -42,12 +42,17 @@
           <ul class="entities__selector__options">
             <li
               class="entities__selector__option"
-              :class="[`color_${lastSelectedEntity.colorId}`, activeEntity === -1 ? 'active' : null]"
+              :class="[
+                `color_${lastSelectedEntity.colorId}`,
+                activeEntity === -1 ? 'active' : null,
+              ]"
               v-if="lastSelectedEntity.text"
               @click="selectEntity(lastSelectedEntity)"
             >
               <span>{{ lastSelectedEntity.text }}</span>
-              <span class="entity__sort-code">{{activeEntity === -1 ?'[ENTER]' : '[SPACE]'}}</span>
+              <span class="entity__sort-code">{{
+                activeEntity === -1 ? "[ENTER]" : "[SPACE]"
+              }}</span>
             </li>
             <li
               v-for="(entity, index) in formattedEntities"
@@ -55,11 +60,18 @@
               :focused="activeEntity === index"
               :key="index"
               class="entities__selector__option"
-              :class="[`color_${entity.colorId}`, activeEntity === index ? 'active' : null]"
+              :class="[
+                `color_${entity.colorId}`,
+                activeEntity === index ? 'active' : null,
+              ]"
               @click="selectEntity(entity)"
             >
               <span>{{ entity.text }}</span>
-              <span class="entity__sort-code">[{{ activeEntity === index ? 'ENTER' : entity.shortCut }}]</span>
+              <span class="entity__sort-code"
+                >[{{
+                  activeEntity === index ? "ENTER" : entity.shortCut
+                }}]</span
+              >
             </li>
           </ul>
         </span>
@@ -206,30 +218,34 @@ export default {
       }
       const cmd = String.fromCharCode(event.keyCode).toUpperCase();
       if (this.showEntitiesSelector && cmd) {
-        event.preventDefault()
+        const element = document.getElementsByClassName("active");
+        event.preventDefault();
         // enter
         if (event.keyCode === 13) {
-          if (this.lastSelectedEntity.text && this.activeEntity === -1 ) {
+          if (this.lastSelectedEntity.text && this.activeEntity === -1) {
             this.selectEntity(this.lastSelectedEntity);
           } else {
             this.selectEntity(this.formattedEntities[this.activeEntity]);
           }
-        //space 
+          //space
         } else if (event.keyCode === 32 && this.lastSelectedEntity) {
           this.selectEntity(this.lastSelectedEntity);
-        //down
-        } else if (event.keyCode === 40 && this.activeEntity + 1 < this.formattedEntities.length) {
-          this.activeEntity ++;
-          var element = document.getElementsByClassName("active")
+          //down
+        } else if (
+          event.keyCode === 40 &&
+          this.activeEntity + 1 < this.formattedEntities.length
+        ) {
+          this.activeEntity++;
           if (element[0] && element[0].offsetTop >= 120) {
-            element[0].parentNode.scrollTop = element[0].offsetTop - element[0].offsetHeight - 2;
+            element[0].parentNode.scrollTop =
+              element[0].offsetTop - 2;
           }
-        //up
+          //up
         } else if (event.keyCode === 38 && this.activeEntity >= 0) {
-          this.activeEntity --;
-          var element = document.getElementsByClassName("active")
+          this.activeEntity--;
           if (element[0]) {
-            element[0].parentNode.scrollTop = element[0].offsetTop - element[0].offsetHeight - 2;
+            element[0].parentNode.scrollTop =
+              element[0].offsetTop - element[0].offsetHeight - 2;
           }
         } else {
           const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
@@ -329,7 +345,7 @@ export default {
 .last-selected {
   .span__whitespace {
     background: none;
-  }  
+  }
 }
 .span span {
   display: inline;
@@ -343,7 +359,7 @@ export default {
   }
 }
 .list__item--annotation-mode span span {
-  cursor: text
+  cursor: text;
 }
 .entity {
   &.non-selectable,

@@ -31,7 +31,10 @@
         :span-id="i"
         :spans="textSpans"
         :dataset="dataset"
-        :class="[isSelected(i) ? 'selected' : '', isLastSelected(i) ? 'last-selected' : '' ]"
+        :class="[
+          isSelected(i) ? 'selected' : '',
+          isLastSelected(i) ? 'last-selected' : '',
+        ]"
         :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
