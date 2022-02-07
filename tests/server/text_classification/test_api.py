@@ -258,6 +258,33 @@ def test_partial_record_update():
     )
 
 
+def test_sort_by_last_updated():
+    dataset = "test_sort_by_last_updated"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    for i in range(0, 10):
+        client.post(
+            f"/api/datasets/{dataset}/TextClassification:bulk",
+            json=TextClassificationBulkData(
+                records=[
+                    TextClassificationRecord(
+                        **{
+                            "id": i,
+                            "inputs": {"data": "my data"},
+                            "metadata": {"s": "value"},
+                        }
+                    )
+                ],
+            ).dict(by_alias=True),
+        )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+        json={"sort": [{"id": "last_updated", "order": "asc"}]},
+    )
+
+    assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
+
+
 def test_sort_by_id_as_default():
     dataset = "test_sort_by_id_as_default"
     assert client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -335,9 +362,10 @@ def test_some_sort_by():
             "code": "rubrix.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
-                "are: ['metadata', 'score', 'predicted', "
-                "'predicted_as', 'predicted_by', "
-                "'annotated_as', 'annotated_by', 'status', "
+                "are: ['metadata', 'last_updated', 'score', "
+                "'predicted', 'predicted_as', "
+                "'predicted_by', 'annotated_as', "
+                "'annotated_by', 'status', "
                 "'event_timestamp']"
             },
         }
