@@ -20,12 +20,18 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
+from rubrix.server.commons.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.commons.es_helpers import (
     DATASETS_RECORDS_INDEX_TEMPLATE,
     aggregations,
     parse_aggregations,
 )
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
+from rubrix.server.commons.es_wrapper import (
+    ClosedIndexError,
+    ElasticsearchWrapper,
+    IndexNotFoundError,
+    create_es_wrapper,
+)
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.dao import (
@@ -232,7 +238,15 @@ class DatasetRecordsDAO:
             "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": aggregation_requests,
         }
-        results = self._es.search(index=records_index, query=es_query, size=size)
+
+        try:
+            results = self._es.search(index=records_index, query=es_query, size=size)
+        except ClosedIndexError:
+            raise ClosedDatasetError(dataset.name)
+        except IndexNotFoundError:
+            raise MissingDatasetRecordsError(
+                f"No records index found for dataset {dataset.name}"
+            )
 
         if compute_aggregations and search.include_default_aggregations:
             current_aggrs = results.get("aggregations", {})
