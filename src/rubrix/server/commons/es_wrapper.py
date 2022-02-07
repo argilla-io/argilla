@@ -16,9 +16,9 @@
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import deprecated
-import elasticsearch
-from elasticsearch import Elasticsearch, NotFoundError, RequestError
-from elasticsearch.helpers import bulk as es_bulk, scan as es_scan
+from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
+from opensearchpy.helpers import bulk as es_bulk
+from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.errors import InvalidTextSearchError
@@ -30,6 +30,19 @@ except ModuleNotFoundError:
 
 
 from .settings import settings
+
+
+class ClosedIndexError(Exception):
+    pass
+
+
+class IndexNotFoundError(Exception):
+    pass
+
+
+class GenericSearchError(Exception):
+    def __init__(self, origin_error: Exception):
+        self.origin_error = origin_error
 
 
 class ElasticsearchWrapper(LoggingMixin):
@@ -52,12 +65,12 @@ class ElasticsearchWrapper(LoggingMixin):
         """
 
         if cls._INSTANCE is None:
-            es_client = Elasticsearch(hosts=settings.elasticsearch)
+            es_client = OpenSearch(hosts=settings.elasticsearch)
             cls._INSTANCE = cls(es_client)
 
         return cls._INSTANCE
 
-    def __init__(self, es_client: Elasticsearch):
+    def __init__(self, es_client: OpenSearch):
         self.__client__ = es_client
 
     @property
@@ -136,17 +149,25 @@ class ElasticsearchWrapper(LoggingMixin):
             )
         except RequestError as rex:
 
-            if rex.error != "search_phase_execution_exception":
-                raise rex
+            if rex.error == "search_phase_execution_exception":
+                detail = rex.info["error"]
+                detail = detail.get("root_cause")
+                detail = detail[0].get("reason") if detail else rex.info["error"]
 
-            detail = rex.info["error"]
-            detail = detail.get("root_cause")
-            detail = detail[0].get("reason") if detail else rex.info["error"]
+                raise InvalidTextSearchError(detail)
 
-            raise InvalidTextSearchError(detail)
+            if rex.error == "index_closed_exception":
+                raise ClosedIndexError(index)
+            raise GenericSearchError(rex)
+        except OpenSearchException as ex:
+            raise GenericSearchError(ex)
 
     def create_index(
-        self, index: str, force_recreate: bool = False, mappings: Dict[str, Any] = None
+        self,
+        index: str,
+        force_recreate: bool = False,
+        settings: Dict[str, Any] = None,
+        mappings: Dict[str, Any] = None,
     ):
         """
         Applies a index creation with provided mapping configuration.
@@ -159,6 +180,8 @@ class ElasticsearchWrapper(LoggingMixin):
             The index name
         force_recreate:
             If True, the index will be recreated (if exists). Default=False
+        settings:
+            The index settings configuration
         mappings:
             The mapping configuration. Optional.
 
@@ -167,7 +190,8 @@ class ElasticsearchWrapper(LoggingMixin):
             self.delete_index(index)
         if not self.index_exists(index):
             self.__client__.indices.create(
-                index=index, body={"mappings": mappings or {}}
+                index=index,
+                body={"settings": settings or {}, "mappings": mappings or {}},
             )
 
     def create_index_template(
@@ -188,6 +212,10 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         if force_recreate or not self.__client__.indices.exists_template(name):
             self.__client__.indices.put_template(name=name, body=template)
+
+    def delete_index_template(self, index_template: str):
+        """Deletes an index template"""
+        self.__client__.indices.delete_template(name=index_template, ignore=[400, 404])
 
     def delete_index(self, index: str):
         """Deletes an elasticsearch index"""
@@ -230,7 +258,7 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         try:
             return self.__client__.get(index=index, id=doc_id)
-        except elasticsearch.exceptions.NotFoundError:
+        except NotFoundError:
             return None
 
     def delete_document(self, index: str, doc_id: str):
@@ -492,12 +520,23 @@ class ElasticsearchWrapper(LoggingMixin):
         )
 
     def create_field_mapping(
-        self, index: str, field_name: str, type: str, **extra_args
+        self,
+        index: str,
+        field_name: str,
+        mapping: Dict[str, Any],
     ):
+        """Creates or updates an index field mapping configuration"""
         self.__client__.indices.put_mapping(
             index=index,
-            body={"properties": {field_name: {"type": type, **extra_args}}},
+            body={"properties": {field_name: mapping}},
         )
+
+    def get_cluster_info(self) -> Dict[str, Any]:
+        """Returns basic about es cluster"""
+        try:
+            return self.__client__.info()
+        except OpenSearchException as ex:
+            return {"error": ex}
 
 
 _instance = None  # The singleton instance
@@ -519,7 +558,6 @@ def create_es_wrapper() -> ElasticsearchWrapper:
 
     global _instance
     if _instance is None:
-        es_client = Elasticsearch(hosts=settings.elasticsearch)
-        _instance = ElasticsearchWrapper(es_client)
+        _instance = ElasticsearchWrapper.get_instance()
 
     return _instance

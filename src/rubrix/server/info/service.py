@@ -17,12 +17,12 @@ import os
 from typing import Any, Dict, Optional
 
 import psutil
-from elasticsearch import Elasticsearch, ElasticsearchException
 from fastapi import Depends
 from hurry.filesize import size
-from rubrix import __version__ as rubrix_version
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 
+from rubrix import __version__ as rubrix_version
+
+from ..commons.es_wrapper import ElasticsearchWrapper
 from .model import ApiStatus
 
 
@@ -31,7 +31,7 @@ class ApiInfoService:
     The api info service
     """
 
-    def __init__(self, es: Elasticsearch):
+    def __init__(self, es: ElasticsearchWrapper):
         self.__es__ = es
 
     def api_status(self) -> ApiStatus:
@@ -44,10 +44,7 @@ class ApiInfoService:
 
     def _elasticsearch_info(self) -> Dict[str, Any]:
         """Returns the elasticsearch cluster info"""
-        try:
-            return self.__es__.info()
-        except ElasticsearchException as ex:
-            return {"error": ex}
+        return self.__es__.get_cluster_info()
 
     @staticmethod
     def _api_memory_info() -> Dict[str, Any]:
@@ -60,7 +57,7 @@ _instance: Optional[ApiInfoService] = None
 
 
 def create_info_service(
-    es_wrapper: ElasticsearchWrapper = Depends(create_es_wrapper),
+    es_wrapper: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
 ) -> ApiInfoService:
     """
     Creates an api info service
@@ -68,5 +65,5 @@ def create_info_service(
 
     global _instance
     if not _instance:
-        _instance = ApiInfoService(es_wrapper.client)
+        _instance = ApiInfoService(es_wrapper)
     return _instance
