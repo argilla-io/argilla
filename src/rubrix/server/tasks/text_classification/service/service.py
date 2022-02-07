@@ -146,6 +146,7 @@ class TextClassificationService:
                     sort_by,
                     valid_fields=[
                         "metadata",
+                        EsRecordDataFieldNames.last_updated,
                         EsRecordDataFieldNames.score,
                         EsRecordDataFieldNames.predicted,
                         EsRecordDataFieldNames.predicted_as,
