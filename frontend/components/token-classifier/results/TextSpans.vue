@@ -31,7 +31,7 @@
         :span-id="i"
         :spans="textSpans"
         :dataset="dataset"
-        :class="isSelected(i) ? 'selected' : ''"
+        :class="[isSelected(i) ? 'selected' : '', isLastSelected(i) ? 'last-selected' : '' ]"
         :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
@@ -183,13 +183,19 @@ export default {
       }
       return false;
     },
+    isLastSelected(i) {
+      const end = Math.max(this.selectionStart, this.selectionEnd);
+      if (i === end) {
+        return true;
+      }
+      return false;
+    },
     onSetLastSelectedEntity(entity) {
       this.lastSelectedEntity = entity;
     },
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .content {
   &__input {

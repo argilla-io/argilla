@@ -242,12 +242,6 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.highlight-text {
-  display: inline;
-  font-weight: 600;
-}
-</style>
 <style lang="scss" scoped>
 .entities {
   &__selector {
@@ -332,6 +326,11 @@ export default {
     }
   }
 }
+.last-selected {
+  .span__whitespace {
+    background: none;
+  }  
+}
 .span span {
   display: inline;
   &::selection {
@@ -405,5 +404,11 @@ $hue: 360;
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
   }
+}
+</style>
+<style lang="scss">
+.highlight-text {
+  display: inline;
+  font-weight: 600;
 }
 </style>
