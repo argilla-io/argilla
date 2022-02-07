@@ -205,8 +205,8 @@ export default {
         this.controlPressed = true;
       }
       const cmd = String.fromCharCode(event.keyCode).toUpperCase();
-      event.preventDefault()
       if (this.showEntitiesSelector && cmd) {
+        event.preventDefault()
         // enter
         if (event.keyCode === 13) {
           if (this.lastSelectedEntity.text && this.activeEntity === -1 ) {
@@ -221,7 +221,7 @@ export default {
         } else if (event.keyCode === 40 && this.activeEntity + 1 < this.formattedEntities.length) {
           this.activeEntity ++;
           var element = document.getElementsByClassName("active")
-          if (element[0]) {
+          if (element[0] && element[0].offsetTop >= 120) {
             element[0].parentNode.scrollTop = element[0].offsetTop - element[0].offsetHeight - 2;
           }
         //up
