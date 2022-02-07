@@ -289,7 +289,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         underscore_attrs_are_private = True
 
 
-class TokenClassificationRecord(CreationTokenClassificationRecord):
+class TokenClassificationRecordDB(CreationTokenClassificationRecord):
     """
     The main token classification task record
 
@@ -306,19 +306,9 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
+
         return {
             **super().extended_fields(),
-            "raw_text": self.text,  # Maintain results compatibility
-        }
-
-
-class TokenClassificationRecordDB(TokenClassificationRecord):
-    def extended_fields(self) -> Dict[str, Any]:
-        parent_fields = super().extended_fields()
-        parent_fields.pop("raw_text")
-
-        return {
-            **parent_fields,
             # See ../service/service.py
             PREDICTED_MENTIONS_ES_FIELD_NAME: [
                 {"mention": mention, "entity": entity.label, "score": entity.score}
@@ -329,6 +319,13 @@ class TokenClassificationRecordDB(TokenClassificationRecord):
                 for mention, entity in self.annotated_mentions()
             ],
             "words": self.all_text(),
+        }
+
+
+class TokenClassificationRecord(TokenClassificationRecordDB):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {
+            "raw_text": self.text,  # Maintain results compatibility
         }
 
 
