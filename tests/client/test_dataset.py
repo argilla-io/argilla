@@ -15,6 +15,7 @@
 from typing import List
 
 import datasets
+import pandas as pd
 import pytest
 
 import rubrix as rb
@@ -98,15 +99,15 @@ def test_to_from_datasets_textclassification(records, request):
     records = request.getfixturevalue(records)
     expected_dataset = rb.Dataset(records)
 
-    ds_dataset = expected_dataset.to_datasets()
+    dataset_ds = expected_dataset.to_datasets()
 
-    assert isinstance(ds_dataset, datasets.Dataset)
-    assert ds_dataset.column_names == list(expected_dataset[0].__fields__.keys())
-    assert ds_dataset.features["prediction"] == [
+    assert isinstance(dataset_ds, datasets.Dataset)
+    assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+    assert dataset_ds.features["prediction"] == [
         {"label": datasets.Value("string"), "score": datasets.Value("float64")}
     ]
 
-    dataset = rb.Dataset.from_datasets(ds_dataset)
+    dataset = rb.Dataset.from_datasets(dataset_ds)
 
     assert isinstance(dataset, rb.Dataset)
     for rec, expected in zip(dataset, expected_dataset):
@@ -115,3 +116,23 @@ def test_to_from_datasets_textclassification(records, request):
             if col in ["metadata", "metrics"]:
                 continue
             assert getattr(rec, col) == getattr(expected, col)
+
+
+@pytest.mark.parametrize(
+    "records",
+    ["singlelabel_textclassification_records", "multilabel_textclassification_records"],
+)
+def test_to_from_pandas_textclassification(records, request):
+    records = request.getfixturevalue(records)
+    expected_dataset = rb.Dataset(records)
+
+    dataset_df = expected_dataset.to_pandas()
+
+    assert isinstance(dataset_df, pd.DataFrame)
+    assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
+
+    dataset = rb.Dataset.from_pandas(dataset_df)
+
+    assert isinstance(dataset, rb.Dataset)
+    for rec, expected in zip(dataset, expected_dataset):
+        assert rec == expected

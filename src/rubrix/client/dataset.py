@@ -269,6 +269,7 @@ class Dataset:
         """
         return pd.DataFrame(map(dict, self._records))
 
+    @classmethod
     def from_pandas(
         cls, dataframe: pd.DataFrame, task: Union[str, TaskType] = "TextClassification"
     ) -> "Dataset":
@@ -276,15 +277,39 @@ class Dataset:
             task = TaskType(task)
 
         if task is TaskType.text_classification:
-            return cls(
-                [TextClassificationRecord(**row) for row in dataframe.itertuples()]
-            )
+            return cls._pandas_to_textclassification(dataframe)
         if task is TaskType.token_classification:
             raise NotImplementedError(f"{task} is still not implemented.")
         if task is TaskType.text2text:
             raise NotImplementedError(f"{task} is still not implemented.")
 
         raise ValueError(f"Provided task {task} is not supported!")
+
+    @classmethod
+    def _pandas_to_textclassification(cls, dataframe: pd.DataFrame) -> "Dataset":
+        """Helper method to convert a pandas DataFrame to a text classification Dataset.
+
+        Args:
+            dataframe: A pandas DataFrame containing the records.
+
+        Returns:
+            A Rubrix dataset.
+        """
+        dataset = cls(
+            [
+                TextClassificationRecord(
+                    **{key: getattr(row, key) for key in row._fields if key != "Index"}
+                )
+                for row in dataframe.itertuples()
+            ]
+        )
+
+        # TODO: remove this once PR #1105 is merged
+        for rec in dataset:
+            if rec.event_timestamp is pd.NaT:
+                rec.event_timestamp = None
+
+        return dataset
 
 
 class DatasetError(Exception):
