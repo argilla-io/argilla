@@ -52,7 +52,6 @@ If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ 
      -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
      -e "discovery.type=single-node" \
      docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
-   pip install "elasticsearch<7.14.0"
 
 
 Then simply run:
