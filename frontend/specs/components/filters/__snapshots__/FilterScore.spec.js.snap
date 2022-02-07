@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterScore Expand filter 1`] = `
+<div class="filter__row">
+  <!---->
+  <p class="filter__label">Score:</p>
+  <div class="filter__item filter__item--score filter__item--open">
+    <div class="score-content">
+      <vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite>
+    </div>
+  </div>
+  <div class="filter__item filter__item--score expanded">
+    <div class="score-content">
+      <p class="range__panel">0% to 100%</p>
+      <vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite>
+      <div class="range__container">
+        <rerange height="4" dotsize="20" min="0" max="100" interval="1" show="true"></rerange>
+      </div>
+    </div>
+    <div class="filter__buttons">
+      <rebutton class="button-tertiary--small button-tertiary--outline">Cancel</rebutton>
+      <rebutton class="button-primary--small">Apply</rebutton>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FilterScore renders properly 1`] = `
+<div class="filter__row">
+  <!---->
+  <p class="filter__label">Score:</p>
+  <div class="filter__item filter__item--score">
+    <div class="score-content">
+      <vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite>
+    </div>
+  </div>
+  <!---->
+</div>
+`;
