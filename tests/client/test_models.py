@@ -109,6 +109,7 @@ def test_warning_when_only_agent():
         annotation_agent: Optional[str] = None
         metadata: Optional[Any] = None
         status: Optional[str] = None
+        event_timestamp: Optional[datetime.datetime] = None
 
     with pytest.warns(
         UserWarning, match="`prediction_agent` will not be logged to the server."
@@ -128,6 +129,7 @@ def test_forbid_extra():
         annotation_agent: Optional[str] = None
         metadata: Optional[Any] = None
         status: Optional[str] = None
+        event_timestamp: Optional[datetime.datetime] = None
 
     with pytest.raises(ValidationError):
         MockRecord(extra="mock")
