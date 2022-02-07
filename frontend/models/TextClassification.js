@@ -34,7 +34,7 @@ class TextClassificationRecord extends BaseRecord {
 
   get predicted_as() {
     if (this.prediction === undefined) {
-      return undefined;
+      return [];
     }
     let labels = this.prediction.labels;
     if (this.multi_label) {
@@ -179,7 +179,9 @@ class TextClassificationDataset extends ObservationDataset {
           }
         ),
       };
-      overalMetrics.precisionAverage = overalMetrics.totalCorrects / (overalMetrics.totalCorrects + overalMetrics.totalIncorrects);
+      overalMetrics.precisionAverage =
+        overalMetrics.totalCorrects /
+        (overalMetrics.totalCorrects + overalMetrics.totalIncorrects);
     }
 
     return overalMetrics;

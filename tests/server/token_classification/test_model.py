@@ -77,6 +77,33 @@ def test_entities_with_spaces():
     )
 
 
+def test_model_dict():
+    record = TokenClassificationRecord(
+        id="1",
+        text="This is  a  great  space",
+        tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
+        prediction=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=9, end=24, label="test"),
+            ],
+        ),
+    )
+
+    assert record.dict(exclude_none=True) == {
+        "id": 1,
+        "metrics": {},
+        "prediction": {
+            "agent": "test",
+            "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
+        },
+        "raw_text": "This is  a  great  space",
+        "status": "Default",
+        "text": "This is  a  great  space",
+        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
+    }
+
+
 def test_too_long_metadata():
     text = "On one ones o no"
     record = TokenClassificationRecord.parse_obj(

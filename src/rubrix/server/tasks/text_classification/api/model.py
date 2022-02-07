@@ -403,7 +403,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         allow_population_by_field_name = True
 
 
-class TextClassificationRecord(CreationTextClassificationRecord):
+class TextClassificationRecordDB(CreationTextClassificationRecord):
     """
     The main text classification task record
 
@@ -419,8 +419,6 @@ class TextClassificationRecord(CreationTextClassificationRecord):
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
-
-class TextClassificationRecordDB(TextClassificationRecord):
     def extended_fields(self) -> Dict[str, Any]:
         words = self.all_text()
         return {
@@ -430,6 +428,11 @@ class TextClassificationRecordDB(TextClassificationRecord):
             # Once words is remove we can normalize at record level
             "text": words,
         }
+
+
+class TextClassificationRecord(TextClassificationRecordDB):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {}
 
 
 class TextClassificationBulkData(UpdateDatasetRequest):
