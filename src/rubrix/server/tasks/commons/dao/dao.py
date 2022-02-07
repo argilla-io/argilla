@@ -348,8 +348,7 @@ class DatasetRecordsDAO:
                 self._es.create_field_mapping(
                     index,
                     field_name=f"metadata.{field}",
-                    type="nested",
-                    include_in_root=True,
+                    mapping={"type": "nested", "include_in_root": True},
                 )
 
 
