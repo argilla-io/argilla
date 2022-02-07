@@ -34,13 +34,13 @@ class Dataset:
     """Dataset is a container class for Rubrix records.
 
     Args:
-        records: A list of Rubrix records
+        records: A list of Rubrix records.
 
     Raises:
         MixedRecordTypesError: When the provided list contains more than one type of record.
 
     Examples:
-        Pass in a list of records:
+        Passing in a list of records:
         >>> import rubrix as rb
         >>> records = [
         ...     rb.TextClassificationRecord(inputs="example"),
@@ -48,18 +48,18 @@ class Dataset:
         ... ]
         >>> dataset = rb.Dataset(records)
 
-        Append records to an empty dataset:
+        Appending records to the dataset:
         >>> import rubrix as rb
         >>> dataset = Dataset()
         >>> for text in ["example", "another example"]:
         ...     datasets.append(rb.TextClassificationRecord(inputs=text))
 
-        Index into the dataset:
+        Indexing into the dataset:
         >>> dataset[0]
         ... rb.TextClassificationRecord(inputs={"text": "example"})
         >>> dataset[0] = rb.TextClassificationRecord(inputs="replaced example")
 
-        Loop over the dataset:
+        Looping over the dataset:
         >>> assert len(dataset) == 2
         >>> for record in dataset:
         ...     print(record)
@@ -92,20 +92,24 @@ class Dataset:
             )
         self._records[key] = value
 
+    def __delitem__(self, key):
+        del self._records[key]
+
     def __len__(self) -> int:
         return len(self._records)
 
     def append(self, record: Record):
-        """Appends a record to the dataset
+        """Appends a record to the dataset.
 
         Args:
-            record: The record to be added to the dataset
+            record: The record to be added to the dataset.
         """
-        if self._record_type and type(record) is not self._record_type:
+        if self._record_type is None:
+            self._record_type = type(record)
+        elif type(record) is not self._record_type:
             raise WrongRecordTypeError(
                 f"You are only allowed to append a record of type {self._record_type} to this dataset, but you provided {type(record)}"
             )
-        self._record_type = type(record)
 
         self._records.append(record)
 
@@ -331,14 +335,7 @@ class Dataset:
         else:
             raise ValueError(f"Provided task {task} is not supported!")
 
-        dataset = cls([model(**row) for row in dataframe.to_dict("records")])
-
-        # TODO: remove this once PR #1105 is merged
-        for rec in dataset:
-            if rec.event_timestamp is pd.NaT:
-                rec.event_timestamp = None
-
-        return dataset
+        return cls([model(**row) for row in dataframe.to_dict("records")])
 
 
 class DatasetError(Exception):
