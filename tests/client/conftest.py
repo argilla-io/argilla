@@ -9,6 +9,10 @@ from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
+from rubrix.client.sdk.token_classification.models import (
+    CreationTokenClassificationRecord,
+    TokenClassificationBulkData,
+)
 from tests.server.test_helpers import client
 
 
@@ -138,6 +142,23 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             status="Default",
             metrics={},
         ),
+        rb.TextClassificationRecord(
+            inputs={"text": "mock3", "context": "mock3"},
+            annotation=["a"],
+            annotation_agent="mock_aagent",
+            multi_label=True,
+            id="three",
+            event_timestamp=datetime.datetime(2000, 3, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
+        rb.TextClassificationRecord(
+            inputs="mock",
+            multi_label=True,
+            id=4,
+            status="Validated",
+            metrics={"mock_metric": ["B", "I", "O"]},
+        ),
     ]
 
 
@@ -160,6 +181,77 @@ def log_multilabel_textclassification_records(
             records=[
                 CreationTextClassificationRecord.from_client(rec)
                 for rec in multilabel_textclassification_records
+            ],
+        ).dict(by_alias=True),
+    )
+
+    return dataset_name
+
+
+@pytest.fixture(scope="session")
+def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
+    return [
+        rb.TokenClassificationRecord(
+            text="This is an example",
+            tokens=["This", "is", "an", "example"],
+            prediction=[("a", 5, 7), ("b", 11, 18)],
+            prediction_agent="mock_pagent",
+            annotation=[("a", 5, 7)],
+            annotation_agent="mock_aagent",
+            id="one",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            status="Validated",
+            metrics={},
+        ),
+        rb.TokenClassificationRecord(
+            text="This is a second example",
+            tokens=["This", "is", "a", "second", "example"],
+            prediction=[("a", 5, 7), ("b", 8, 9)],
+            prediction_agent="mock_pagent",
+            id="two",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
+        rb.TokenClassificationRecord(
+            text="This is a third example",
+            tokens=["This", "is", "a", "third", "example"],
+            annotation=[("a", 0, 4), ("b", 16, 23)],
+            annotation_agent="mock_pagent",
+            id="three",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
+        rb.TokenClassificationRecord(
+            text="This is a third example",
+            tokens=["This", "is", "a", "third", "example"],
+            id=4,
+            status="Discarded",
+            metrics={"mock_metric": ["B", "I", "O"]},
+        ),
+    ]
+
+
+@pytest.fixture(scope="session")
+def log_tokenclassification_records(
+    request,
+    tokenclassification_records,
+) -> str:
+    dataset_name = "tokenclassification_records"
+    client.delete(f"/api/datasets/{dataset_name}")
+
+    client.post(
+        f"/api/datasets/{dataset_name}/{TaskType.token_classification}:bulk",
+        json=TokenClassificationBulkData(
+            tags={
+                "env": "test",
+                "task": TaskType.token_classification,
+            },
+            records=[
+                CreationTokenClassificationRecord.from_client(rec)
+                for rec in tokenclassification_records
             ],
         ).dict(by_alias=True),
     )
