@@ -21,11 +21,8 @@ import deprecated
 from fastapi import Depends
 
 from rubrix.server.commons.errors import ClosedDatasetError, MissingDatasetRecordsError
-from rubrix.server.commons.es_helpers import (
-    DATASETS_RECORDS_INDEX_TEMPLATE,
-    aggregations,
-    parse_aggregations,
-)
+from rubrix.server.commons.es_helpers import aggregations, parse_aggregations
+from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
 from rubrix.server.commons.es_wrapper import (
     ClosedIndexError,
     ElasticsearchWrapper,

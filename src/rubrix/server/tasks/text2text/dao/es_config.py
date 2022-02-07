@@ -16,8 +16,12 @@ def text2text_mappings():
             ]
         ),
         "properties": {
-            "annotated_as": mappings.text_field(),
-            "predicted_as": mappings.text_field(),
+            # TODO: we will include this breaking changes 2 releases after
+            #  PR https://github.com/recognai/rubrix/pull/1018
+            # "annotated_as": mappings.text_field(),
+            # "predicted_as": mappings.text_field(),
+            "annotated_as": mappings.keyword_field(),
+            "predicted_as": mappings.keyword_field(),
             "text_predicted": mappings.words_text_field(),
             "score": {"type": "float"},
         },
