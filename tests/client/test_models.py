@@ -12,10 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
 import json
 from typing import Any, Optional
 
 import numpy
+import pandas as pd
 import pytest
 from pydantic import ValidationError
 
@@ -24,7 +26,7 @@ from rubrix.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
-    _RootValidators,
+    _Validators,
 )
 
 
@@ -39,9 +41,14 @@ from rubrix.client.models import (
 )
 def test_text_classification_record(annotation, status, expected_status):
     """Just testing its dynamic defaults"""
-    record = TextClassificationRecord(
-        inputs={"text": "test"}, annotation=annotation, status=status
-    )
+    if status:
+        record = TextClassificationRecord(
+            inputs={"text": "test"}, annotation=annotation, status=status
+        )
+    else:
+        record = TextClassificationRecord(
+            inputs={"text": "test"}, annotation=annotation
+        )
     assert record.status == expected_status
 
 
@@ -100,13 +107,11 @@ def test_model_serialization_with_numpy_nan():
 
 
 def test_warning_when_only_agent():
-    class MockRecord(_RootValidators):
+    class MockRecord(_Validators):
         prediction: Optional[Any] = None
         prediction_agent: Optional[str] = None
         annotation: Optional[Any] = None
         annotation_agent: Optional[str] = None
-        metadata: Optional[Any] = None
-        status: Optional[str] = None
 
     with pytest.warns(
         UserWarning, match="`prediction_agent` will not be logged to the server."
@@ -119,13 +124,16 @@ def test_warning_when_only_agent():
 
 
 def test_forbid_extra():
-    class MockRecord(_RootValidators):
-        prediction: Optional[Any] = None
-        prediction_agent: Optional[str] = None
-        annotation: Optional[Any] = None
-        annotation_agent: Optional[str] = None
-        metadata: Optional[Any] = None
-        status: Optional[str] = None
+    class MockRecord(_Validators):
+        mock: str
 
     with pytest.raises(ValidationError):
-        MockRecord(extra="mock")
+        MockRecord(mock="mock", extra_argument="mock")
+
+
+def test_nat_to_none():
+    class MockRecord(_Validators):
+        event_timestamp: Optional[datetime.datetime] = None
+
+    record = MockRecord(event_timestamp=pd.NaT)
+    assert record.event_timestamp is None
