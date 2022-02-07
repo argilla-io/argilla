@@ -34,7 +34,7 @@ class TextClassificationRecord extends BaseRecord {
 
   get predicted_as() {
     if (this.prediction === undefined) {
-      return undefined;
+      return [];
     }
     return this.prediction.labels.map((p) => p.class);
   }
@@ -175,7 +175,9 @@ class TextClassificationDataset extends ObservationDataset {
           }
         ),
       };
-      overalMetrics.precisionAverage = overalMetrics.totalCorrects / (overalMetrics.totalCorrects + overalMetrics.totalIncorrects);
+      overalMetrics.precisionAverage =
+        overalMetrics.totalCorrects /
+        (overalMetrics.totalCorrects + overalMetrics.totalIncorrects);
     }
 
     return overalMetrics;
