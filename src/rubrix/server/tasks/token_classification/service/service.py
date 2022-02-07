@@ -17,6 +17,7 @@ from typing import Iterable, List
 
 from fastapi import Depends
 
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
@@ -24,6 +25,7 @@ from rubrix.server.tasks.commons import (
     EsRecordDataFieldNames,
     SortableField,
 )
+from rubrix.server.tasks.commons.dao import extends_index_properties
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
@@ -36,6 +38,40 @@ from rubrix.server.tasks.token_classification.api.model import (
     TokenClassificationRecord,
     TokenClassificationRecordDB,
     TokenClassificationSearchResults,
+)
+
+extends_index_properties(
+    {
+        "tokens": {"type": "text"},
+        PREDICTED_MENTIONS_ES_FIELD_NAME: {
+            "type": "nested",
+            "properties": {
+                "score": {"type": "float"},
+                "mention": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+                "entity": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+            },
+        },
+        MENTIONS_ES_FIELD_NAME: {
+            "type": "nested",
+            "properties": {
+                "score": {"type": "float"},
+                "mention": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+                "entity": {
+                    "type": "keyword",
+                    "ignore_above": MAX_KEYWORD_LENGTH,
+                },
+            },
+        },
+    }
 )
 
 
