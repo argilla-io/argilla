@@ -54,7 +54,7 @@ export default {
       if (this.record.annotation) {
         entities = this.record.annotation.entities.map((obj) => ({
           ...obj,
-          origin: obj.origin? obj.origin : "annotation",
+          origin: "annotation",
         }));
       } else if (this.record.prediction) {
         entities = this.record.prediction.entities.map((obj) => ({
