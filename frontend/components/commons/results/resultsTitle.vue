@@ -13,17 +13,17 @@ export default {
     dataset: {
       dataset: {
         type: Object,
-        required: true
-      }
-    }
+        required: true,
+      },
+    },
   },
   computed: {
     filtersApplied() {
       return Object.values(this.dataset.query).filter(
-        v => v && Object.values(v).length
+        (v) => v && Object.values(v).length
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -32,5 +32,3 @@ export default {
   color: $font-secondary;
 }
 </style>
-
-
