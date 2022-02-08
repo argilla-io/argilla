@@ -237,9 +237,6 @@ export default {
   min-width: 80px;
   max-width: 238px;
 }
-.annotation-area {
-  margin-top: 2em;
-}
 .feedback-interactions {
   margin: 0 auto 0 auto;
   padding-right: 0;
