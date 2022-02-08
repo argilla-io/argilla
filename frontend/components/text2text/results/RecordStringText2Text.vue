@@ -71,8 +71,7 @@ export default {
 <style lang="scss">
 .highlight-text {
   display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
+  font-weight: 600;
   line-height: 16px;
 }
 </style>

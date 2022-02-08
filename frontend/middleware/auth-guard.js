@@ -17,7 +17,7 @@
 
 export default ({ $auth, route, redirect }) => {
   switch (route.name) {
-    case "login" :
+    case "login":
       break;
     default:
       if (!$auth.loggedIn) {

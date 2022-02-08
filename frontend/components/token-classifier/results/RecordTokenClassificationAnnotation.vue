@@ -80,7 +80,7 @@ export default {
     bottom: 0;
     ::v-deep {
       .span__text {
-        opacity: 0;
+        opacity: 1;
       }
     }
   }
