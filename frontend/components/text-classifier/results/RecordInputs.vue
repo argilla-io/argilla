@@ -129,7 +129,6 @@ export default {
     font-weight: 400;
     background: none;
     margin-top: 1em;
-    margin-bottom: -1em;
     font-weight: 600;
     text-decoration: none;
     line-height: 1;
