@@ -30,7 +30,6 @@ export default {
 <style lang="scss" scoped>
 .records-title {
   color: $font-secondary;
-  margin-left: 20px;
 }
 </style>
 
