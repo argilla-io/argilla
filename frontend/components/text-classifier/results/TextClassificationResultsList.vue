@@ -24,6 +24,7 @@
   >
     <template slot="results-header">
       <rule-definition :dataset="dataset" v-if="showRulesArea" />
+      <results-title :dataset="dataset" />
     </template>
     <template slot="record" slot-scope="results">
       <record-text-classification
