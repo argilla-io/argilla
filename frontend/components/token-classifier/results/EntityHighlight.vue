@@ -17,33 +17,43 @@
 
 <template>
   <span
-    :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']"
+    :class="[
+      'highlight',
+      span.origin,
+      isText ? '' : 'highlight--block',
+      annotationEnabled ? 'editable' : null,
+    ]"
   >
     <span
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="$highlightSearch(dataset.query.text, text)"
-    />
-    <span class="highlight__label">
+    >
       <span
-        :class="[
-          'highlight__tooltip',
-          annotationEnabled ? 'highlight__tooltip--icon' : '',
-        ]"
-      >
-        <span class="highlight__tooltip__origin" v-if="span.entity.origin">{{
-          span.entity.origin === "annotation" ? "annot." : "pred."
-        }}</span>
+        class="highlight__content__text"
+        v-html="$highlightSearch(dataset.query.text, text)"
+      />
+    </span>
+    <span class="highlight__label">
+      <span @click="removeEntity" class="highlight__tooltip__container">
         <span
-          >{{ span.entity.label }}
-          <svgicon
-            v-if="annotationEnabled"
-            width="8"
-            height="8"
-            name="cross"
-            @click="removeEntity"
-          ></svgicon>
+          :class="[
+            'highlight__tooltip',
+            annotationEnabled ? 'highlight__tooltip--icon' : '',
+          ]"
+        >
+          <span class="highlight__tooltip__origin" v-if="span.origin">{{
+            span.origin === "prediction" ? "pred." : "annot."
+          }}</span>
+          <span
+            >{{ span.entity.label }}
+            <svgicon
+              v-if="annotationEnabled && span.origin === 'annotation'"
+              width="8"
+              height="8"
+              name="cross"
+            ></svgicon>
+          </span>
         </span>
       </span>
     </span>
@@ -115,7 +125,10 @@ export default {
   // display: inline-flex;
   border-radius: 2px;
   padding: 0;
-  margin-right: -3.2px;
+  margin-right: -3.62px;
+  &.editable {
+    cursor: pointer;
+  }
   ::selection {
     background: none;
   }
@@ -137,34 +150,40 @@ export default {
     padding-bottom: 1px;
   }
   &__tooltip {
+    pointer-events: all;
+    cursor: pointer;
     display: block;
-    position: absolute;
     border-radius: 2px;
     padding: 5px 10px 6px 10px;
-    opacity: 0;
-    z-index: -1;
     margin-bottom: 0.5em;
     transition: opacity 0.5s ease, z-index 0.2s ease;
     white-space: nowrap;
     user-select: none;
-    cursor: default;
     font-weight: 600;
-    right: 50%;
-    transform: translateX(50%);
     min-width: 80px;
     @include font-size(16px);
+    .prediction & {
+      margin-top: 0.5em;
+    }
     & > span {
       display: block;
+    }
+    &__container {
+      position: absolute;
+      right: 50%;
+      transform: translateX(50%);
+      opacity: 0;
+      z-index: -1;
+      .annotation & {
+        bottom: 100%;
+      }
+      .prediction & {
+        top: calc(100% + 8px);
+      }
     }
     &__origin {
       @include font-size(12px);
       font-weight: normal;
-    }
-    .annotation & {
-      bottom: 100%;
-    }
-    .prediction & {
-      top: calc(100% + 15px);
     }
     &--icon {
       padding-right: 20px;
@@ -173,6 +192,9 @@ export default {
         top: 10px;
         right: 10px;
         cursor: pointer;
+        .prediction & {
+          top: 16px;
+        }
       }
     }
   }
@@ -183,16 +205,14 @@ export default {
     left: 0;
     .annotation & {
       @include triangle(bottom, 6px, 6px, auto);
-      bottom: 5px;
-      transform: translateY(10px);
+      bottom: 2px;
     }
     .prediction & {
       @include triangle(top, 6px, 6px, auto);
-      top: -15px;
-      transform: translateY(10px);
+      top: 3px;
     }
   }
-  &:hover .highlight__tooltip {
+  &:hover .highlight__tooltip__container {
     opacity: 1;
     transition-delay: 0s;
     z-index: 4;

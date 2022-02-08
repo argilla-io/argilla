@@ -34,12 +34,19 @@
       @click="onActiveEntity(entity)"
     >
       {{ entity.text }}
+      <span v-if="entity.shortcut" class="shortcut"
+        >[{{ entity.shortcut }}]</span
+      >
     </span>
     <ReButton
       v-if="dataset.entities.length > entitiesNumber"
       class="entities__container__button"
       @click="toggleEntitiesNumber"
-      >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
+      >{{
+        showEntitySelector
+          ? "Show less"
+          : `+ ${dataset.entities.length - entitiesNumber}`
+      }}</ReButton
     >
   </div>
 </template>
@@ -63,9 +70,11 @@ export default {
   }),
   computed: {
     visibleEntities() {
+      const characters = "1234567890".split("");
       let entities = [...this.dataset.entities]
         .sort((a, b) => a.text.localeCompare(b.text))
-        .map((ent) => ({
+        .map((ent, index) => ({
+          shortcut: characters[index],
           ...ent,
         }));
 
@@ -137,7 +146,8 @@ export default {
   padding: 0.3em;
   margin: 1em 1em 0 0;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   max-height: 28px;
   border: 2px solid transparent;
@@ -151,11 +161,10 @@ export default {
     cursor: default;
     pointer-events: none;
   }
-  &__sort-code {
-    @include font-size(12px);
-    color: $font-medium-color;
+  .shortcut {
+    @include font-size(14px);
     font-weight: lighter;
-    margin-left: 0.5em;
+    margin-left: 1em;
     .non-selectable & {
       display: none;
     }
@@ -166,7 +175,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.active,
@@ -179,15 +188,6 @@ $hue: 360;
   }
   .entities__selector__option.color_#{$i - 1} span {
     background: $rcolor;
-  }
-  .entities__selector__option.color_#{$i - 1} {
-    background: white;
-    &:hover {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
-    }
-    &:active {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
-    }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;

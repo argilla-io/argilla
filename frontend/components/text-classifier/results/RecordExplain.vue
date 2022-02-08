@@ -87,13 +87,6 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  background: #ffbf00;
-  line-height: 16px;
-}
-</style>
 <style lang="scss" scoped>
 %grad {
   .atom__tooltip {
