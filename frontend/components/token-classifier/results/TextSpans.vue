@@ -61,6 +61,10 @@ export default {
       type: Object,
       required: true,
     },
+    origin: {
+      type: String,
+      required: true,
+    },
   },
   data: function () {
     return {
@@ -71,7 +75,7 @@ export default {
   },
   computed: {
     entities() {
-      return this.record.annotatedEntities;
+      return this.origin === 'annotation' ? this.record.annotatedEntities : this.record.prediction && this.record.prediction.entities;
     },
     textSpans() {
       // TODO Simplify !!!
@@ -110,6 +114,7 @@ export default {
             ),
             start: entity.start,
             end: entity.end,
+            origin: this.origin,
           });
           idx = entity.end_token;
         } else {
@@ -119,6 +124,7 @@ export default {
             tokens: [token],
             start: token.start,
             end: token.end,
+            origin: this.origin,
           });
           idx++;
         }
@@ -171,7 +177,6 @@ export default {
         start: startToken.start,
         end: endToken.end,
         label: entity,
-        origin: "annotation",
       });
       this.updateAnnotatedEntities(entities);
       this.onReset();
@@ -181,7 +186,7 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel, origin: "annotation" }
+          ? { ...ent, label: newLabel, }
           : ent;
       });
       this.updateAnnotatedEntities(entities);
@@ -198,14 +203,6 @@ export default {
       entities.splice(found, 1);
       this.updateAnnotatedEntities(entities);
       this.onReset();
-    },
-    groupByOrigin(entities) {
-      let annotation = entities.filter((e) => e.origin == "annotation");
-      let prediction = entities.filter((e) => e.origin == "prediction");
-      return {
-        annotation,
-        prediction,
-      };
     },
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);

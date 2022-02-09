@@ -17,7 +17,16 @@
 
 <template>
   <div>
-    <text-spans :dataset="dataset" :record="record" />
+    <div class="origins">
+      <text-spans 
+        v-for="origin in entitiesOrigin" 
+        :key="origin"
+        :dataset="dataset" 
+        :origin="origin" 
+        :record="record" 
+        :class="origin" 
+      />
+    </div>
     <div class="content__actions-buttons">
       <re-button
         v-if="record.status !== 'Validated'"
@@ -33,6 +42,11 @@
 import { mapActions } from "vuex";
 
 export default {
+  data: function () {
+    return {
+      entitiesOrigin: ["prediction", "annotation"],
+    };
+  },
   props: {
     dataset: {
       type: Object,
@@ -47,7 +61,6 @@ export default {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
     }),
-
     async onValidate(record) {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
@@ -59,6 +72,7 @@ export default {
             annotatedEntities: undefined,
             annotation: {
               entities: record.annotatedEntities,
+              origin: "annotation"
             },
           },
         ],
@@ -102,5 +116,35 @@ export default {
       }
     }
   }
+}
+.origins > div:nth-child(1) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  ::v-deep {
+    .span__text {
+      opacity: 0;
+    }
+  }
+}
+// .prediction {
+//   pointer-events: none;
+//   ::v-deep {
+//     .highlight__content {
+//       pointer-events: all;
+//     }
+//   }
+// }
+// .annotation {
+//   pointer-events: none;
+//   * > {
+//     pointer-events: all; 
+//   }
+// }
+
+.prediction ::v-deep  .highlight-text {
+  opacity: 0;
 }
 </style>

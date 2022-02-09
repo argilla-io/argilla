@@ -56,7 +56,6 @@
               v-for="(entity, index) in formattedEntities"
               tabindex="0"
               :focused="activeEntity === index"
-              @mouseover="updateActiveEntity(index)"
               :key="index"
               class="entities__selector__option"
               :class="[
@@ -253,9 +252,6 @@ export default {
         }
       }
     },
-    updateActiveEntity(index) {
-      this.activeEntity = index;
-    }
   },
 };
 </script>
