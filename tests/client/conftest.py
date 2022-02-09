@@ -5,6 +5,10 @@ import pytest
 
 import rubrix as rb
 from rubrix.client.sdk.datasets.models import TaskType
+from rubrix.client.sdk.text2text.models import (
+    CreationText2TextRecord,
+    Text2TextBulkData,
+)
 from rubrix.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
@@ -252,6 +256,82 @@ def log_tokenclassification_records(
             records=[
                 CreationTokenClassificationRecord.from_client(rec)
                 for rec in tokenclassification_records
+            ],
+        ).dict(by_alias=True),
+    )
+
+    return dataset_name
+
+
+@pytest.fixture(scope="session")
+def text2text_records(request) -> List[rb.Text2TextRecord]:
+    return [
+        rb.Text2TextRecord(
+            text="This is an example",
+            prediction=["Das ist ein Beispiel", "Esto es un ejemplo"],
+            prediction_agent="mock_pagent",
+            annotation="C'est une baguette",
+            annotation_agent="mock_aagent",
+            id="one",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            status="Validated",
+            metrics={},
+        ),
+        rb.Text2TextRecord(
+            text="This is a one and a half example",
+            prediction=[("Das ist ein Beispiell", 0.9), ("Esto es un ejemploo", 0.1)],
+            prediction_agent="mock_pagent",
+            id="1/2",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
+        # TODO: provide bug fix for this record
+        # rb.Text2TextRecord(
+        #     text="This is a second example",
+        #     prediction=[("Das ist ein Beispielll", 0.9), "Esto es un ejemplooo"],
+        #     prediction_agent="mock_pagent",
+        #     id="two",
+        #     event_timestamp=datetime.datetime(2000, 1, 1),
+        #     metadata={"mock_metadata": "mock"},
+        #     metrics={},
+        # ),
+        rb.Text2TextRecord(
+            text="This is a third example",
+            annotation="C'est une très bonne baguette",
+            annotation_agent="mock_pagent",
+            id="three",
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
+        rb.Text2TextRecord(
+            text="This is a forth example",
+            id=4,
+            status="Discarded",
+            metrics={"mock_metric": ["B", "I", "O"]},
+        ),
+    ]
+
+
+@pytest.fixture(scope="session")
+def log_text2text_records(
+    request,
+    text2text_records,
+) -> str:
+    dataset_name = "text2text_records"
+    client.delete(f"/api/datasets/{dataset_name}")
+
+    client.post(
+        f"/api/datasets/{dataset_name}/{TaskType.text2text}:bulk",
+        json=Text2TextBulkData(
+            tags={
+                "env": "test",
+                "task": TaskType.text2text,
+            },
+            records=[
+                CreationText2TextRecord.from_client(rec) for rec in text2text_records
             ],
         ).dict(by_alias=True),
     )

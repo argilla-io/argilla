@@ -59,16 +59,16 @@ class Dataset:
             WrongRecordTypeError: When the record type in the provided
                 list does not correspond to the dataset type.
         """
-        record_types = {type(rec).__name__: None for rec in self._records}
+        record_types = {type(rec): None for rec in self._records}
         if len(record_types) > 1:
             raise WrongRecordTypeError(
-                f"A {self.__name__} must only contain {self._record_type.__name__}s, "
-                f"but you provided various types: {list(record_types.keys())}"
+                f"A {type(self).__name__} must only contain {self._record_type.__name__}s, "
+                f"but you provided various types: {[rt.__name__ for rt in record_types.keys()]}"
             )
         elif next(iter(record_types)) is not self._record_type:
             raise WrongRecordTypeError(
-                f"A {self.__name__} must only contain {self._record_type.__name__}s, "
-                f"but you provided {list(record_types.keys())[0]}s."
+                f"A {type(self).__name__} must only contain {self._record_type.__name__}s, "
+                f"but you provided {list(record_types.keys())[0].__name__}s."
             )
 
     def __iter__(self):
@@ -251,7 +251,7 @@ class DatasetForTextClassification(Dataset):
     def _to_datasets_dict(self) -> Dict:
         # create a dict first, where we make the necessary transformations
         ds_dict = {}
-        for key in self._records[0].__fields__:
+        for key in self._record_type.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
                     [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
@@ -370,7 +370,7 @@ class DatasetForTokenClassification(Dataset):
             ]
 
         ds_dict = {}
-        for key in self._records[0].__fields__:
+        for key in self._record_type.__fields__:
             if key == "prediction":
                 ds_dict[key] = entities_to_dict(key)
             elif key == "annotation":
@@ -453,13 +453,13 @@ class DatasetForText2Text(Dataset):
             return {"text": pred[0], "score": pred[1]}
 
         ds_dict = {}
-        for key in self._records[0].__fields__:
+        for key in self._record_type.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
-                    [pred_to_dict(pred) for pred in prediction]
-                    if prediction is not None
+                    [pred_to_dict(pred) for pred in rec.prediction]
+                    if rec.prediction is not None
                     else None
-                    for prediction in ds_dict[key]
+                    for rec in self._records
                 ]
             elif key == "id":
                 ds_dict[key] = [str(rec.id) for rec in self._records]

@@ -12,41 +12,88 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List
+import sys
 
 import datasets
 import pandas as pd
 import pytest
 
 import rubrix as rb
-from rubrix.client.dataset import MixedRecordTypesError, WrongRecordTypeError
+from rubrix.client.dataset import Dataset, WrongRecordTypeError
 
 
 def test_init(singlelabel_textclassification_records):
-    dataset = rb.Dataset()
 
-    assert dataset._records == []
-    assert dataset._record_type is None
+    ds = Dataset(
+        record_type=rb.TextClassificationRecord,
+        records=singlelabel_textclassification_records,
+    )
+    assert ds._record_type == rb.TextClassificationRecord
+    assert ds._records == singlelabel_textclassification_records
 
-    dataset = rb.Dataset(singlelabel_textclassification_records)
-
-    assert dataset._records is singlelabel_textclassification_records
-    assert dataset._record_type is type(singlelabel_textclassification_records[0])
+    ds = Dataset(record_type="mock")
+    assert ds._record_type == "mock"
+    assert ds._records == []
 
     with pytest.raises(
-        MixedRecordTypesError,
-        match="but you provided more than one: .*TextClassificationRecord.*Text2TextRecord.*",
+        WrongRecordTypeError, match="but you provided TextClassificationRecord"
     ):
-        rb.Dataset(
-            [
-                rb.TextClassificationRecord(inputs="mock"),
-                rb.Text2TextRecord(text="mock"),
-            ]
+        Dataset(
+            record_type=rb.TokenClassificationRecord,
+            records=[rb.TextClassificationRecord(inputs="test")],
         )
+
+    with pytest.raises(
+        WrongRecordTypeError,
+        match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
+    ):
+        Dataset(
+            record_type=rb.Text2TextRecord,
+            records=[
+                rb.TextClassificationRecord(inputs="test"),
+                rb.Text2TextRecord(text="test"),
+            ],
+        )
+
+    with pytest.raises(NotImplementedError):
+        ds.to_datasets()
+
+    with pytest.raises(NotImplementedError):
+        ds.from_datasets("mock")
+
+    with pytest.raises(NotImplementedError):
+        ds.from_pandas("mock")
+
+
+def test_dict_to_datasets(caplog):
+    dict_with_incompatible_metadata = {
+        "metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]
+    }
+    ds = Dataset("mock")
+    datasets_ds = ds._dict_to_datasets(dict_with_incompatible_metadata)
+    assert datasets_ds.features == {}
+    assert len(datasets_ds) == 0
+    assert len(caplog.record_tuples) == 1
+    assert caplog.record_tuples[0][1] == 30
+    assert "The 'metadata' of the records were removed" in caplog.record_tuples[0][2]
+
+
+def test_datasets_not_installed(monkeypatch):
+    monkeypatch.setitem(sys.modules, "datasets", None)
+    with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
+        Dataset("mock").to_datasets()
+
+
+def test_datasets_wrong_version(monkeypatch):
+    monkeypatch.setattr("datasets.__version__", "1.16.0")
+    with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
+        Dataset("mock").to_datasets()
 
 
 def test_iter_len_getitem(singlelabel_textclassification_records):
-    dataset = rb.Dataset(singlelabel_textclassification_records)
+    dataset = Dataset(
+        rb.TextClassificationRecord, singlelabel_textclassification_records
+    )
 
     for record, expected in zip(dataset, singlelabel_textclassification_records):
         assert record == expected
@@ -56,7 +103,10 @@ def test_iter_len_getitem(singlelabel_textclassification_records):
 
 
 def test_setitem_delitem(singlelabel_textclassification_records):
-    dataset = rb.Dataset(singlelabel_textclassification_records)
+    dataset = Dataset(
+        rb.TextClassificationRecord,
+        [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
+    )
 
     record = rb.TextClassificationRecord(inputs="mock")
     dataset[0] = record
@@ -75,7 +125,7 @@ def test_setitem_delitem(singlelabel_textclassification_records):
 
 
 def test_append(singlelabel_textclassification_records):
-    dataset = rb.Dataset()
+    dataset = Dataset(rb.TextClassificationRecord)
     record = rb.TextClassificationRecord(inputs="mock")
 
     dataset.append(record)
@@ -90,96 +140,166 @@ def test_append(singlelabel_textclassification_records):
         dataset.append(rb.Text2TextRecord(text="mock"))
 
 
-@pytest.mark.parametrize(
-    "records",
-    ["singlelabel_textclassification_records", "multilabel_textclassification_records"],
-)
-def test_to_from_datasets_textclassification(records, request):
-    records = request.getfixturevalue(records)
-    expected_dataset = rb.Dataset(records)
+class TestDatasetForTextClassification:
+    def test_init_append(self, singlelabel_textclassification_records):
+        ds = rb.DatasetForTextClassification(singlelabel_textclassification_records)
+        assert ds._record_type == rb.TextClassificationRecord
+        assert ds._records == singlelabel_textclassification_records
 
-    dataset_ds = expected_dataset.to_datasets()
+        ds.append(singlelabel_textclassification_records[0])
+        assert len(ds) == 5
 
-    assert isinstance(dataset_ds, datasets.Dataset)
-    assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
-    assert dataset_ds.features["prediction"] == [
-        {"label": datasets.Value("string"), "score": datasets.Value("float64")}
-    ]
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_to_from_datasets(self, records, request):
+        records = request.getfixturevalue(records)
+        expected_dataset = rb.DatasetForTextClassification(records)
 
-    dataset = rb.Dataset.from_datasets(dataset_ds, task="TextClassification")
+        dataset_ds = expected_dataset.to_datasets()
 
-    assert isinstance(dataset, rb.Dataset)
-    for rec, expected in zip(dataset, expected_dataset):
-        for col in expected.__fields__.keys():
-            # TODO: have to think about how we deal with `None`s
-            if col in ["metadata", "metrics"]:
-                continue
-            assert getattr(rec, col) == getattr(expected, col)
+        assert isinstance(dataset_ds, datasets.Dataset)
+        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.features["prediction"] == [
+            {"label": datasets.Value("string"), "score": datasets.Value("float64")}
+        ]
 
+        dataset = rb.DatasetForTextClassification.from_datasets(dataset_ds)
 
-def test_to_from_datasets_tokenclassification(tokenclassification_records):
-    expected_dataset = rb.Dataset(tokenclassification_records)
+        assert isinstance(dataset, rb.DatasetForTextClassification)
+        for rec, expected in zip(dataset, expected_dataset):
+            for col in expected.__fields__.keys():
+                # TODO: have to think about how we deal with `None`s
+                if col in ["metadata", "metrics"]:
+                    continue
+                assert getattr(rec, col) == getattr(expected, col)
 
-    dataset_ds = expected_dataset.to_datasets()
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_to_from_pandas(self, records, request):
+        records = request.getfixturevalue(records)
+        expected_dataset = rb.DatasetForTextClassification(records)
 
-    assert isinstance(dataset_ds, datasets.Dataset)
-    assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
-    assert dataset_ds.features["prediction"] == [
-        {
-            "label": datasets.Value("string"),
-            "start": datasets.Value("int64"),
-            "end": datasets.Value("int64"),
-        }
-    ]
-    assert dataset_ds.features["annotation"] == [
-        {
-            "label": datasets.Value("string"),
-            "start": datasets.Value("int64"),
-            "end": datasets.Value("int64"),
-        }
-    ]
+        dataset_df = expected_dataset.to_pandas()
 
-    dataset = rb.Dataset.from_datasets(dataset_ds, task="TokenClassification")
+        assert isinstance(dataset_df, pd.DataFrame)
+        assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
 
-    assert isinstance(dataset, rb.Dataset)
-    for rec, expected in zip(dataset, expected_dataset):
-        for col in expected.__fields__.keys():
-            # TODO: have to think about how we deal with `None`s
-            if col in ["metadata", "metrics"]:
-                continue
-            assert getattr(rec, col) == getattr(expected, col)
+        dataset = rb.DatasetForTextClassification.from_pandas(dataset_df)
 
-
-@pytest.mark.parametrize(
-    "records",
-    ["singlelabel_textclassification_records", "multilabel_textclassification_records"],
-)
-def test_to_from_pandas_textclassification(records, request):
-    records = request.getfixturevalue(records)
-    expected_dataset = rb.Dataset(records)
-
-    dataset_df = expected_dataset.to_pandas()
-
-    assert isinstance(dataset_df, pd.DataFrame)
-    assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
-
-    dataset = rb.Dataset.from_pandas(dataset_df, task="TextClassification")
-
-    assert isinstance(dataset, rb.Dataset)
-    for rec, expected in zip(dataset, expected_dataset):
-        assert rec == expected
+        assert isinstance(dataset, rb.DatasetForTextClassification)
+        for rec, expected in zip(dataset, expected_dataset):
+            assert rec == expected
 
 
-def test_to_from_pandas_tokenclassification(tokenclassification_records):
-    expected_dataset = rb.Dataset(tokenclassification_records)
+class TestDatasetForTokenClassification:
+    def test_init_append(self, tokenclassification_records):
+        ds = rb.DatasetForTokenClassification(tokenclassification_records)
+        assert ds._record_type == rb.TokenClassificationRecord
+        assert ds._records == tokenclassification_records
 
-    dataset_df = expected_dataset.to_pandas()
+        ds.append(tokenclassification_records[0])
+        assert len(ds) == 5
 
-    assert isinstance(dataset_df, pd.DataFrame)
-    assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
+    def test_to_from_datasets(self, tokenclassification_records):
+        expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
 
-    dataset = rb.Dataset.from_pandas(dataset_df, task="TokenClassification")
+        dataset_ds = expected_dataset.to_datasets()
 
-    assert isinstance(dataset, rb.Dataset)
-    for rec, expected in zip(dataset, expected_dataset):
-        assert rec == expected
+        assert isinstance(dataset_ds, datasets.Dataset)
+        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.features["prediction"] == [
+            {
+                "label": datasets.Value("string"),
+                "start": datasets.Value("int64"),
+                "end": datasets.Value("int64"),
+            }
+        ]
+        assert dataset_ds.features["annotation"] == [
+            {
+                "label": datasets.Value("string"),
+                "start": datasets.Value("int64"),
+                "end": datasets.Value("int64"),
+            }
+        ]
+
+        dataset = rb.DatasetForTokenClassification.from_datasets(dataset_ds)
+
+        assert isinstance(dataset, rb.DatasetForTokenClassification)
+        for rec, expected in zip(dataset, expected_dataset):
+            for col in expected.__fields__.keys():
+                # TODO: have to think about how we deal with `None`s
+                if col in ["metadata", "metrics"]:
+                    continue
+                assert getattr(rec, col) == getattr(expected, col)
+
+    def test_to_from_pandas(self, tokenclassification_records):
+        expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
+
+        dataset_df = expected_dataset.to_pandas()
+
+        assert isinstance(dataset_df, pd.DataFrame)
+        assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
+
+        dataset = rb.DatasetForTokenClassification.from_pandas(dataset_df)
+
+        assert isinstance(dataset, rb.DatasetForTokenClassification)
+        for rec, expected in zip(dataset, expected_dataset):
+            assert rec == expected
+
+
+class TestDatasetForText2Text:
+    def test_init_append(self, text2text_records):
+        ds = rb.DatasetForText2Text(text2text_records)
+        assert ds._record_type == rb.Text2TextRecord
+        assert ds._records == text2text_records
+
+        ds.append(text2text_records[0])
+        assert len(ds) == 5
+
+    def test_to_from_datasets(self, text2text_records):
+        expected_dataset = rb.DatasetForText2Text(text2text_records)
+
+        dataset_ds = expected_dataset.to_datasets()
+
+        assert isinstance(dataset_ds, datasets.Dataset)
+        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.features["prediction"] == [
+            {
+                "text": datasets.Value("string"),
+                "score": datasets.Value("float64"),
+            }
+        ]
+
+        dataset = rb.DatasetForText2Text.from_datasets(dataset_ds)
+
+        assert isinstance(dataset, rb.DatasetForText2Text)
+        for rec, expected in zip(dataset, expected_dataset):
+            for col in expected.__fields__.keys():
+                # TODO: have to think about how we deal with `None`s
+                if col in ["metadata", "metrics"]:
+                    continue
+                assert getattr(rec, col) == getattr(expected, col)
+
+    def test_to_from_pandas(self, text2text_records):
+        expected_dataset = rb.DatasetForText2Text(text2text_records)
+
+        dataset_df = expected_dataset.to_pandas()
+
+        assert isinstance(dataset_df, pd.DataFrame)
+        assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
+
+        dataset = rb.DatasetForText2Text.from_pandas(dataset_df)
+
+        assert isinstance(dataset, rb.DatasetForText2Text)
+        for rec, expected in zip(dataset, expected_dataset):
+            assert rec == expected
