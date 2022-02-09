@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SortList renders properly 1`] = `
+<div>
+  <sortfilter sort-options="[object Object]" class="sort"></sortfilter>
+  <!---->
+  <div class="sort__buttons">
+    <re-button class="button-tertiary--small button-tertiary--outline">Cancel</re-button>
+    <re-button class="button-primary--small">Sort</re-button>
+  </div>
+</div>
+`;
