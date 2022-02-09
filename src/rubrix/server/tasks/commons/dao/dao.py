@@ -203,6 +203,11 @@ class DatasetRecordsDAO:
             doc_id=lambda _record: _record.get("id"),
         )
 
+    def get_metadata_schema(self, dataset: BaseDatasetDB) -> Dict[str, str]:
+        """Get metadata fields schema for provided dataset"""
+        records_index = dataset_records_index(dataset.id)
+        return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
+
     def search_records(
         self,
         dataset: BaseDatasetDB,
@@ -263,11 +268,7 @@ class DatasetRecordsDAO:
                 aggregations.status(),
                 aggregations.words_cloud(),
                 aggregations.score(),
-                aggregations.custom_fields(
-                    self._es.get_field_mapping(
-                        index=records_index, field_name="metadata.*"
-                    )
-                ),
+                aggregations.custom_fields(self.get_metadata_schema(dataset)),
             ]:
                 if aggr:
                     aggr_results = self._es.search(
@@ -288,12 +289,13 @@ class DatasetRecordsDAO:
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
-            parsed_aggregations = unflatten_dict(
-                parsed_aggregations, stop_keys=["metadata"]
-            )
 
-            result.words = parsed_aggregations.pop("words", {})
-            result.metadata = parsed_aggregations.pop("metadata", {})
+            if search.include_default_aggregations:
+                parsed_aggregations = unflatten_dict(
+                    parsed_aggregations, stop_keys=["metadata"]
+                )
+                result.words = parsed_aggregations.pop("words", {})
+                result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
 
         return result

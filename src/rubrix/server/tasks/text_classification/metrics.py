@@ -126,6 +126,16 @@ class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
+        TermsAggregation(
+            id="predicted_as",
+            name="Predicted labels distribution",
+            field="predicted_as",
+        ),
+        TermsAggregation(
+            id="annotated_as",
+            name="Annotated labels distribution",
+            field="annotated_as",
+        ),
         F1Metric(
             id="F1",
             name="F1 Metrics for single-label",

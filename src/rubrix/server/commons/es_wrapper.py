@@ -348,7 +348,9 @@ class ElasticsearchWrapper(LoggingMixin):
         except NotFoundError:
             return {}
 
-    def get_field_mapping(self, index: str, field_name: str) -> Dict[str, str]:
+    def get_field_mapping(
+        self, index: str, field_name: Optional[str] = None
+    ) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
         consist on a dictionary with full field name as key and its type as value
@@ -368,7 +370,7 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         try:
             response = self.__client__.indices.get_field_mapping(
-                fields=field_name,
+                fields=field_name or "*",
                 index=index,
                 ignore_unavailable=False,
             )
