@@ -496,7 +496,7 @@ class aggregations:
                 return {
                     "terms": {
                         "field": field_name,
-                        "size": size,
+                        "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
                         "order": {"_count": "desc"},
                     }
                 }

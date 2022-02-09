@@ -109,14 +109,16 @@ def test_dataset_for_text2text():
 
 
 def test_dataset_for_token_classification():
-    text = "This is a text"
+    text = "This is a contaminated text"
+    metadata = {"metadata": {"field": 1}}
+    prediction = {"prediction": {"entities": [], "agent": "test", "score": 0.3}}
     records = [
         TokenClassificationRecord.parse_obj(data)
         for data in [
-            {"text": text, "tokens": text.split(" ")},
-            {"text": text, "tokens": text.split(" ")},
-            {"text": text, "tokens": text.split(" ")},
-            {"text": text, "tokens": text.split(" ")},
+            {"text": text, "tokens": text.split(" "), **metadata, **prediction},
+            {"text": text, "tokens": text.split(" "), **metadata, **prediction},
+            {"text": text, "tokens": text.split(" "), **metadata, **prediction},
+            {"text": text, "tokens": text.split(" "), **metadata, **prediction},
         ]
     ]
 
@@ -143,7 +145,7 @@ def test_dataset_for_token_classification():
             json={},
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
         summary = response.json()
 
         if not ("predicted" in metric_id or "annotated" in metric_id):
@@ -183,7 +185,7 @@ def test_dataset_metrics():
 
     metrics = client.get(f"/api/datasets/TextClassification/{dataset}/metrics").json()
 
-    assert len(metrics) == COMMON_METRICS_LENGTH + 3
+    assert len(metrics) == COMMON_METRICS_LENGTH + 5
 
     response = client.post(
         f"/api/datasets/TextClassification/{dataset}/metrics/missing_metric:summary",

@@ -111,6 +111,16 @@ class EntityCapitalness(NestedPathElasticsearchMetric):
         }
 
 
+class MentionsByEntityDistribution(NestedPathElasticsearchMetric):
+    def inner_aggregation(self):
+        return {
+            self.id: aggregations.bidimentional_terms_aggregations(
+                field_name_x=f"{self.nested_path}.label",
+                field_name_y=f"{self.nested_path}.value",
+            )
+        }
+
+
 class EntityConsistency(NestedPathElasticsearchMetric):
     """Computes the entity consistency distribution"""
 
@@ -512,6 +522,12 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
             nested_path=_PREDICTED_MENTIONS_NAMESPACE,
             length_field="chars_length",
         ),
+        MentionsByEntityDistribution(
+            id="predicted_mentions_distribution",
+            name="Predicted mentions distribution by entity",
+            description="Computes predicted mentions distribution against its labels",
+            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
+        ),
         EntityConsistency(
             id="predicted_entity_consistency",
             name="Entity label consistency for predictions",
@@ -558,6 +574,12 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
             nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
             length_field="chars_length",
         ),
+        MentionsByEntityDistribution(
+            id="annotated_mentions_distribution",
+            name="Annotated mentions distribution by entity",
+            description="Computes annotated mentions distribution against its labels",
+            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
+        ),
         EntityConsistency(
             id="annotated_entity_consistency",
             name="Entity label consistency for annotations",
@@ -569,6 +591,16 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
     ]
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
+        TermsAggregation(
+            id="predicted_as",
+            name="Predicted labels distribution",
+            field="predicted_as",
+        ),
+        TermsAggregation(
+            id="annotated_as",
+            name="Annotated labels distribution",
+            field="annotated_as",
+        ),
         *_TOKENS_METRICS,
         *_PREDICTED_METRICS,
         *_ANNOTATED_METRICS,

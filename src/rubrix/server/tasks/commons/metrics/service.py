@@ -164,7 +164,9 @@ class MetricsService:
             The metric summary result
 
         """
-        metric_params = self._filter_metric_params(metric, metric_params)
+        metric_params = self._filter_metric_params(
+            metric, {**metric_params, "dataset": dataset, "dao": self.__dao__}
+        )
         metric_aggregation = metric.aggregation_request(**metric_params)
         results = self.__dao__.search_records(
             dataset,
