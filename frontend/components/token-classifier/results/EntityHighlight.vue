@@ -19,7 +19,7 @@
   <span
     :class="[
       'highlight',
-      span.entity.origin,
+      span.origin,
       isText ? '' : 'highlight--block',
       annotationEnabled ? 'editable' : null,
     ]"
@@ -38,8 +38,8 @@
             annotationEnabled ? 'highlight__tooltip--icon' : '',
           ]"
         >
-          <span class="highlight__tooltip__origin" v-if="span.entity.origin">{{
-            span.entity.origin === "annotation" ? "annot." : "pred."
+          <span class="highlight__tooltip__origin" v-if="span.origin">{{
+            span.origin === "annotation" ? "annot." : "pred."
           }}</span>
           <span
             >{{ span.entity.label }}
@@ -205,7 +205,7 @@ export default {
     }
     .prediction & {
       @include triangle(top, 6px, 6px, auto);
-      top: 2px;
+      top: 11px;
     }
   }
   &:hover .highlight__tooltip__container {
