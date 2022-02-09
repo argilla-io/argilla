@@ -88,4 +88,11 @@ export default {
     }
   }
 }
+::v-deep .highlight__tooltip__container {
+  pointer-events: all;
+  cursor: default;
+}
+::v-deep .highlight__tooltip {
+  cursor: default;
+}
 </style>

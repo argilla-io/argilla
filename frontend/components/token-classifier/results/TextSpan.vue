@@ -50,14 +50,13 @@
               @click="selectEntity(lastSelectedEntity)"
             >
               <span>{{ lastSelectedEntity.text }}</span>
-              <span class="entity__sort-code">{{
-                activeEntity === -1 ? "[ENTER]" : "[SPACE]"
-              }}</span>
+              <span class="entity__sort-code">[space]</span>
             </li>
             <li
               v-for="(entity, index) in formattedEntities"
               tabindex="0"
               :focused="activeEntity === index"
+              @mouseover="updateActiveEntity(index)"
               :key="index"
               class="entities__selector__option"
               :class="[
@@ -69,7 +68,7 @@
               <span>{{ entity.text }}</span>
               <span class="entity__sort-code"
                 >[{{
-                  activeEntity === index ? "ENTER" : entity.shortCut
+                  activeEntity === index ? "enter" : entity.shortCut
                 }}]</span
               >
             </li>
@@ -145,6 +144,7 @@ export default {
     filteredEntities() {
       return this.dataset.entities
         .filter((entity) => entity.text)
+        .filter((entity) => entity.text !== this.lastSelectedEntity.text)
         .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
@@ -222,9 +222,7 @@ export default {
         event.preventDefault();
         // enter
         if (event.keyCode === 13) {
-          if (this.lastSelectedEntity.text && this.activeEntity === -1) {
-            this.selectEntity(this.lastSelectedEntity);
-          } else {
+          if (this.activeEntity !== -1) {
             this.selectEntity(this.formattedEntities[this.activeEntity]);
           }
           //space
@@ -255,6 +253,9 @@ export default {
         }
       }
     },
+    updateActiveEntity(index) {
+      this.activeEntity = index;
+    }
   },
 };
 </script>
@@ -264,11 +265,11 @@ export default {
     position: absolute;
     left: -35%;
     top: 1em;
-    min-width: 170px;
+    min-width: 220px;
     z-index: 9;
     background: $bg;
     font-weight: 600;
-    padding: 0.6em;
+    padding: 0.8em;
     border-radius: 1px;
     &__container {
       @include font-size(14px);
@@ -292,6 +293,9 @@ export default {
       cursor: pointer;
       margin-top: 2px;
       margin-bottom: 2px;
+      span {
+        cursor: pointer !important;
+      }
       &.active {
         border-color: palette(grey, medium) !important;
       }
@@ -327,6 +331,9 @@ export default {
   cursor: pointer;
   position: relative;
   background: palette(grey, smooth);
+  .prediction ::v-deep .highlight__content {
+    background: palette(grey, smooth);
+  }
   .span__text {
     background: palette(grey, smooth);
   }
@@ -368,8 +375,6 @@ export default {
     pointer-events: none;
   }
   &__sort-code {
-    @include font-size(12px);
-    font-weight: lighter;
     margin-left: auto;
     margin-right: 0;
     .non-selectable & {
@@ -410,9 +415,6 @@ $hue: 360;
     border: 2px solid $rcolor;
   }
   .entities__selector__option.color_#{$i - 1} {
-    &:hover {
-      border: 2px solid palette(grey, medium);
-    }
     &:active {
       border: 2px solid palette(grey, medium);
     }
