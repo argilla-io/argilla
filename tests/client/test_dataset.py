@@ -19,26 +19,26 @@ import pandas as pd
 import pytest
 
 import rubrix as rb
-from rubrix.client.dataset import Dataset, WrongRecordTypeError
+from rubrix.client.datasets import DatasetBase, WrongRecordTypeError
 
 
 def test_init(singlelabel_textclassification_records):
 
-    ds = Dataset(
+    ds = DatasetBase(
         record_type=rb.TextClassificationRecord,
         records=singlelabel_textclassification_records,
     )
     assert ds._record_type == rb.TextClassificationRecord
     assert ds._records == singlelabel_textclassification_records
 
-    ds = Dataset(record_type="mock")
+    ds = DatasetBase(record_type="mock")
     assert ds._record_type == "mock"
     assert ds._records == []
 
     with pytest.raises(
         WrongRecordTypeError, match="but you provided TextClassificationRecord"
     ):
-        Dataset(
+        DatasetBase(
             record_type=rb.TokenClassificationRecord,
             records=[rb.TextClassificationRecord(inputs="test")],
         )
@@ -47,7 +47,7 @@ def test_init(singlelabel_textclassification_records):
         WrongRecordTypeError,
         match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
     ):
-        Dataset(
+        DatasetBase(
             record_type=rb.Text2TextRecord,
             records=[
                 rb.TextClassificationRecord(inputs="test"),
@@ -69,7 +69,7 @@ def test_dict_to_datasets(caplog):
     dict_with_incompatible_metadata = {
         "metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]
     }
-    ds = Dataset("mock")
+    ds = DatasetBase("mock")
     datasets_ds = ds._dict_to_datasets(dict_with_incompatible_metadata)
     assert datasets_ds.features == {}
     assert len(datasets_ds) == 0
@@ -81,17 +81,17 @@ def test_dict_to_datasets(caplog):
 def test_datasets_not_installed(monkeypatch):
     monkeypatch.setitem(sys.modules, "datasets", None)
     with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
-        Dataset("mock").to_datasets()
+        DatasetBase("mock").to_datasets()
 
 
 def test_datasets_wrong_version(monkeypatch):
     monkeypatch.setattr("datasets.__version__", "1.16.0")
     with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
-        Dataset("mock").to_datasets()
+        DatasetBase("mock").to_datasets()
 
 
 def test_iter_len_getitem(singlelabel_textclassification_records):
-    dataset = Dataset(
+    dataset = DatasetBase(
         rb.TextClassificationRecord, singlelabel_textclassification_records
     )
 
@@ -103,7 +103,7 @@ def test_iter_len_getitem(singlelabel_textclassification_records):
 
 
 def test_setitem_delitem(singlelabel_textclassification_records):
-    dataset = Dataset(
+    dataset = DatasetBase(
         rb.TextClassificationRecord,
         [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
     )
@@ -125,7 +125,7 @@ def test_setitem_delitem(singlelabel_textclassification_records):
 
 
 def test_append(singlelabel_textclassification_records):
-    dataset = Dataset(rb.TextClassificationRecord)
+    dataset = DatasetBase(rb.TextClassificationRecord)
     record = rb.TextClassificationRecord(inputs="mock")
 
     dataset.append(record)

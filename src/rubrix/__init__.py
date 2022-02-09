@@ -152,7 +152,7 @@ def set_workspace(ws: str) -> None:
 
 
 def log(
-    records: Union[Record, Iterable[Record]],
+    records: Union[Record, Iterable[Record], Dataset],
     name: str,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,

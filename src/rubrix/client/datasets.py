@@ -30,7 +30,7 @@ from rubrix.client.sdk.datasets.models import TaskType
 _LOGGER = logging.getLogger(__name__)
 
 
-class Dataset:
+class DatasetBase:
     """The Dataset classes are containers for Rubrix records.
 
     This is the base class to facilitate the implementation for each record type.
@@ -210,7 +210,7 @@ def _prepend_docstring(record_type: Type[Record]):
 
 
 @_prepend_docstring(TextClassificationRecord)
-class DatasetForTextClassification(Dataset):
+class DatasetForTextClassification(DatasetBase):
     """
     Examples:
         Import/export records:
@@ -317,7 +317,7 @@ class DatasetForTextClassification(Dataset):
 
 
 @_prepend_docstring(TokenClassificationRecord)
-class DatasetForTokenClassification(Dataset):
+class DatasetForTokenClassification(DatasetBase):
     """
     Examples:
         Import/export records:
@@ -407,7 +407,7 @@ class DatasetForTokenClassification(Dataset):
 
 
 @_prepend_docstring(Text2TextRecord)
-class DatasetForText2Text(Dataset):
+class DatasetForText2Text(DatasetBase):
     """
     Examples:
         Import/export records:
@@ -486,6 +486,11 @@ class DatasetForText2Text(Dataset):
     @classmethod
     def from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
+
+
+Dataset = Union[
+    DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text
+]
 
 
 def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Dataset:
