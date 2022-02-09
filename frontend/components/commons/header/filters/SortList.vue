@@ -78,7 +78,11 @@ export default {
       this.numberOfSortFields += 1;
     },
     onRemoveSortField(index) {
-      this.selectedFields.splice(index - 1, 1);
+      if (this.selectedFields.length === 1) {
+        this.$emit("sortBy", []);
+      } else {
+        this.selectedFields.splice(index - 1, 1);
+      }
       if (this.numberOfSortFields > 1) {
         this.numberOfSortFields -= 1;
       }
