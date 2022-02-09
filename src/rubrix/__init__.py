@@ -28,7 +28,13 @@ import pkg_resources
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
-from rubrix.client.dataset import Dataset
+from rubrix.client.dataset import (
+    DatasetForText2Text,
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+    read_datasets,
+    read_pandas,
+)
 from rubrix.client.models import (
     BulkResponse,
     Record,
