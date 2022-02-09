@@ -15,9 +15,6 @@
 
 from datetime import datetime
 
-import pytest
-
-from rubrix.server.commons.errors import InvalidTextSearchError
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
@@ -208,7 +205,7 @@ def test_partial_record_update():
         json=bulk.dict(by_alias=True),
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.failed == 0
     assert bulk_response.processed == 1
