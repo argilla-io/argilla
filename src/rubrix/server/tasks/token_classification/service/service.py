@@ -17,7 +17,6 @@ from typing import Iterable, List
 
 from fastapi import Depends
 
-from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
@@ -28,9 +27,9 @@ from rubrix.server.tasks.commons import (
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
+from rubrix.server.tasks.search.model import SortConfig
+from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.token_classification.api.model import (
-    MENTIONS_ES_FIELD_NAME,
-    PREDICTED_MENTIONS_ES_FIELD_NAME,
     CreationTokenClassificationRecord,
     TokenClassificationAggregations,
     TokenClassificationQuery,
@@ -53,9 +52,11 @@ class TokenClassificationService:
         self,
         dao: DatasetRecordsDAO,
         metrics: MetricsService,
+        search: SearchRecordsService,
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
+        self.__search__ = search
 
         self.__dao__.register_task_mappings(
             TaskType.token_classification, token_classification_mappings()
@@ -104,63 +105,61 @@ class TokenClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-        results = self.__dao__.search_records(
+
+        results = self.__search__.search(
             dataset,
-            search=RecordSearch(
-                query=query.as_elasticsearch(),
-                sort=sort_by2elasticsearch(
-                    sort_by,
-                    valid_fields=[
-                        "metadata",
-                        EsRecordDataFieldNames.last_updated,
-                        EsRecordDataFieldNames.score,
-                        EsRecordDataFieldNames.predicted,
-                        EsRecordDataFieldNames.predicted_as,
-                        EsRecordDataFieldNames.predicted_by,
-                        EsRecordDataFieldNames.annotated_as,
-                        EsRecordDataFieldNames.annotated_by,
-                        EsRecordDataFieldNames.status,
-                        EsRecordDataFieldNames.event_timestamp,
-                    ],
-                ),
-                aggregations={
-                    **aggregations.predicted_as(),
-                    **aggregations.annotated_as(),
-                    PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
-                        nested_path=PREDICTED_MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation={
-                            PREDICTED_MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
-                                field_name_x=PREDICTED_MENTIONS_ES_FIELD_NAME
-                                + ".entity",
-                                field_name_y=PREDICTED_MENTIONS_ES_FIELD_NAME
-                                + ".mention",
-                            )
-                        },
-                    ),
-                    MENTIONS_ES_FIELD_NAME: aggregations.nested_aggregation(
-                        nested_path=MENTIONS_ES_FIELD_NAME,
-                        inner_aggregation={
-                            MENTIONS_ES_FIELD_NAME: aggregations.bidimentional_terms_aggregations(
-                                field_name_x=MENTIONS_ES_FIELD_NAME + ".entity",
-                                field_name_y=MENTIONS_ES_FIELD_NAME + ".mention",
-                            )
-                        },
-                    ),
-                },
-            ),
+            query=query,
+            record_type=TokenClassificationRecord,
             size=size,
             record_from=record_from,
-            exclude_fields=["metrics"] if exclude_metrics else None,
+            exclude_metrics=exclude_metrics,
+            metrics={
+                "words_cloud",
+                "predicted_by",
+                "predicted_as",
+                "annotated_by",
+                "annotated_as",
+                "error_distribution",
+                "predicted_mentions_distribution",
+                "annotated_mentions_distribution",
+                "status_distribution",
+                "metadata",
+                "score",
+            },
+            sort_config=SortConfig(
+                sort_by=sort_by,
+                valid_fields=[
+                    "metadata",
+                    EsRecordDataFieldNames.last_updated,
+                    EsRecordDataFieldNames.score,
+                    EsRecordDataFieldNames.predicted,
+                    EsRecordDataFieldNames.predicted_as,
+                    EsRecordDataFieldNames.predicted_by,
+                    EsRecordDataFieldNames.annotated_as,
+                    EsRecordDataFieldNames.annotated_by,
+                    EsRecordDataFieldNames.status,
+                    EsRecordDataFieldNames.event_timestamp,
+                ],
+            ),
         )
+
+        if results.metrics:
+            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["status"] = results.metrics["status_distribution"]
+            results.metrics["predicted"] = results.metrics["error_distribution"]
+            results.metrics["predicted"].pop("unknown", None)
+            results.metrics["mentions"] = results.metrics[
+                "annotated_mentions_distribution"
+            ]
+            results.metrics["predicted_mentions"] = results.metrics[
+                "predicted_mentions_distribution"
+            ]
+
         return TokenClassificationSearchResults(
             total=results.total,
-            records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TokenClassificationAggregations(
-                **results.aggregations,
-                words=results.words,
-                metadata=results.metadata or {},
-            )
-            if results.aggregations
+            records=results.records,
+            aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
+            if results.metrics
             else None,
         )
 
@@ -195,6 +194,7 @@ _instance = None
 def token_classification_service(
     dao: DatasetRecordsDAO = Depends(dataset_records_dao),
     metrics: MetricsService = Depends(MetricsService.get_instance),
+    search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
 ) -> TokenClassificationService:
     """
     Creates a dataset record service instance
@@ -212,5 +212,5 @@ def token_classification_service(
     """
     global _instance
     if not _instance:
-        _instance = TokenClassificationService(dao=dao, metrics=metrics)
+        _instance = TokenClassificationService(dao=dao, metrics=metrics, search=search)
     return _instance
