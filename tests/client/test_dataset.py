@@ -378,3 +378,41 @@ class TestDatasetForText2Text:
         assert isinstance(dataset, rb.DatasetForText2Text)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+
+@pytest.mark.parametrize(
+    "task,dataset_class",
+    [
+        ("TextClassification", "DatasetForTextClassification"),
+        ("TokenClassification", "DatasetForTokenClassification"),
+        ("Text2Text", "DatasetForText2Text"),
+    ],
+)
+def test_read_pandas(monkeypatch, task, dataset_class):
+    def mock_from_pandas(mock):
+        return mock
+
+    monkeypatch.setattr(
+        f"rubrix.client.datasets.{dataset_class}.from_pandas", mock_from_pandas
+    )
+
+    assert rb.read_pandas("mock", task) == "mock"
+
+
+@pytest.mark.parametrize(
+    "task,dataset_class",
+    [
+        ("TextClassification", "DatasetForTextClassification"),
+        ("TokenClassification", "DatasetForTokenClassification"),
+        ("Text2Text", "DatasetForText2Text"),
+    ],
+)
+def test_read_datasets(monkeypatch, task, dataset_class):
+    def mock_from_datasets(mock):
+        return mock
+
+    monkeypatch.setattr(
+        f"rubrix.client.datasets.{dataset_class}.from_datasets", mock_from_datasets
+    )
+
+    assert rb.read_datasets("mock", task) == "mock"
