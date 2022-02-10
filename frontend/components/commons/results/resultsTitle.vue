@@ -1,8 +1,8 @@
 <template>
   <p class="records-title" v-if="dataset.results.total > 0">
     Records
-    <template v-if="showWhenFiltered && areFiltersApplied.length"
-      >with filters applied</template
+    <span v-if="showWhenFiltered && areFiltersApplied.length"
+      >with filters applied</span
     >
     ({{ dataset.results.total | formatNumber }})
   </p>
