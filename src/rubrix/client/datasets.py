@@ -269,28 +269,24 @@ def _prepend_docstring(record_type: Type[Record]):
 class DatasetForTextClassification(DatasetBase):
     """
     Examples:
-        Import/export records:
-        >>> dataset = {record_type.__name__}.from_pandas(my_dataframe)
-        >>> dataset.to_datasets()  # returns a datasets.Dataset
-
-        Looping over the dataset:
-        >>> assert len(dataset) == 2
+        >>> import rubrix as rb
+        >>> # Import/export records:
+        >>> dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
+        >>> dataset.to_datasets()
+        >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
-
-        Passing in a list of records:
-        >>> import rubrix as rb
+        >>> # Passing in a list of records:
         >>> records = [
         ...     rb.TextClassificationRecord(inputs="example"),
         ...     rb.TextClassificationRecord(inputs="another example"),
         ... ]
         >>> dataset = rb.DatasetForTextClassification(records)
-
-        Appending records to the dataset:
+        >>> assert len(dataset) == 2
+        >>> # Appending records to the dataset:
         >>> for text in ["example", "another example"]:
         ...     dataset.append(rb.TextClassificationRecord(inputs=text))
-
-        Indexing into the dataset:
+        >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TextClassificationRecord(inputs={"text": "example"})
         >>> dataset[0] = rb.TextClassificationRecord(inputs="replaced example")
@@ -312,6 +308,26 @@ class DatasetForTextClassification(DatasetBase):
         cls,
         dataset: "datasets.Dataset",
     ) -> "DatasetForTextClassification":
+        """Imports records from a `datasets.Dataset`.
+
+        Columns that are not supported are ignored.
+
+        Args:
+            dataset: A datasets Dataset from which to import the records.
+
+        Returns:
+            The imported records in a Rubrix Dataset.
+
+        Examples:
+            >>> import datasets
+            >>> ds = datasets.Dataset.from_dict({
+            ...     "inputs": ["example"],
+            ...     "prediction": [
+            ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
+            ...     ]
+            ... })
+            >>> DatasetForTextClassification.from_datasets(ds)
+        """
         return super().from_datasets(dataset)
 
     @classmethod
@@ -400,28 +416,25 @@ class DatasetForTextClassification(DatasetBase):
 class DatasetForTokenClassification(DatasetBase):
     """
     Examples:
-        Import/export records:
-        >>> dataset = DatasetForTokenClassification.from_pandas(my_dataframe)
-        >>> dataset.to_datasets()  # returns a datasets.Dataset
-
-        Looping over the dataset:
+        >>> import rubrix as rb
+        >>> # Import/export records:
+        >>> dataset = rb.DatasetForTokenClassification.from_pandas(my_dataframe)
+        >>> dataset.to_datasets()
+        >>> # Looping over the dataset:
         >>> assert len(dataset) == 2
         >>> for record in dataset:
         ...     print(record)
-
-        Passing in a list of records:
+        >>> # Passing in a list of records:
         >>> import rubrix as rb
         >>> records = [
         ...     rb.TokenClassificationRecord(text="example", tokens=["example"]),
         ...     rb.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
         ... ]
         >>> dataset = rb.DatasetForTokenClassification(records)
-
-        Appending records to the dataset:
+        >>> # Appending records to the dataset:
         >>> for text in ["example", "another example"]:
         ...     dataset.append(rb.TokenClassificationRecord(text=text, tokens=text.split()))
-
-        Indexing into the dataset:
+        >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TokenClassificationRecord(text="example", tokens=["example"])
         >>> dataset[0] = rb.TokenClassificationRecord(text="replace example", tokens=["replace", "example"])
@@ -441,6 +454,27 @@ class DatasetForTokenClassification(DatasetBase):
     def from_datasets(
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTokenClassification":
+        """Imports records from a `datasets.Dataset`.
+
+        Columns that are not supported are ignored.
+
+        Args:
+            dataset: A datasets Dataset from which to import the records.
+
+        Returns:
+            The imported records in a Rubrix Dataset.
+
+        Examples:
+            >>> import datasets
+            >>> ds = datasets.Dataset.from_dict({
+            ...     "text": ["my example"],
+            ...     "tokens": [["my", "example"]],
+            ...     "prediction": [
+            ...         [{"label": "LABEL1", "start": 3, "end": 10}]
+            ...     ]
+            ... })
+            >>> DatasetForTokenClassification.from_datasets(ds)
+        """
         # we implement this to have more specific type hints
         return super().from_datasets(dataset)
 
@@ -507,28 +541,24 @@ class DatasetForTokenClassification(DatasetBase):
 class DatasetForText2Text(DatasetBase):
     """
     Examples:
-        Import/export records:
-        >>> dataset = DatasetForText2Text.from_pandas(my_dataframe)
-        >>> dataset.to_datasets()  # returns a datasets.Dataset
-
-        Looping over the dataset:
-        >>> assert len(dataset) == 2
-        >>> for record in dataset:
-        ...     print(record)
-
-        Passing in a list of records:
         >>> import rubrix as rb
+        >>> # Import/export records:
+        >>> dataset = rb.DatasetForText2Text.from_pandas(my_dataframe)
+        >>> dataset.to_datasets()
+        >>> # Passing in a list of records:
         >>> records = [
         ...     rb.Text2TextRecord(text="example"),
         ...     rb.Text2TextRecord(text="another example"),
         ... ]
         >>> dataset = rb.DatasetForText2Text(records)
-
-        Appending records to the dataset:
+        >>> assert len(dataset) == 2
+        >>> # Looping over the dataset:
+        >>> for record in dataset:
+        ...     print(record)
+        >>> # Appending records to the dataset:
         >>> for text in ["example", "another example"]:
         ...     dataset.append(rb.Text2TextRecord(text=text))
-
-        Indexing into the dataset:
+        >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.Text2TextRecord(text="example"})
         >>> dataset[0] = rb.Text2TextRecord(text="replaced example")
@@ -546,6 +576,29 @@ class DatasetForText2Text(DatasetBase):
 
     @classmethod
     def from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
+        """Imports records from a `datasets.Dataset`.
+
+        Columns that are not supported are ignored.
+
+        Args:
+            dataset: A datasets Dataset from which to import the records.
+
+        Returns:
+            The imported records in a Rubrix Dataset.
+
+        Examples:
+            >>> import datasets
+            >>> ds = datasets.Dataset.from_dict({
+            ...     "text": ["my example"],
+            ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
+            ... })
+            >>> # or
+            >>> ds = datasets.Dataset.from_dict({
+            ...     "text": ["my example"],
+            ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
+            ... })
+            >>> DatasetForText2Text.from_datasets(ds)
+        """
         # we implement this to have more specific type hints
         return super().from_datasets(dataset)
 
@@ -582,14 +635,18 @@ class DatasetForText2Text(DatasetBase):
 
     @classmethod
     def _from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
+        def extract_prediction(prediction: Union[str, Dict]):
+            if isinstance(prediction, str):
+                return prediction
+            if prediction["score"] is None:
+                return prediction["text"]
+            return prediction["text"], prediction["score"]
+
         records = []
         for row in dataset:
             if row.get("prediction"):
                 row["prediction"] = [
-                    pred["text"]
-                    if pred["score"] is None
-                    else (pred["text"], pred["score"])
-                    for pred in row["prediction"]
+                    extract_prediction(pred) for pred in row["prediction"]
                 ]
             records.append(Text2TextRecord(**row))
 
@@ -614,6 +671,39 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Da
 
     Returns:
         A Rubrix dataset for the given task.
+
+    Examples:
+        >>> # Read text classification records from a datasets Dataset
+        >>> import datasets
+        >>> ds = datasets.Dataset.from_dict({
+        ...     "inputs": ["example"],
+        ...     "prediction": [
+        ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
+        ...     ]
+        ... })
+        >>> read_datasets(ds, task="TextClassification")
+        >>>
+        >>> # Read token classification records from a datasets Dataset
+        >>> ds = datasets.Dataset.from_dict({
+        ...     "text": ["my example"],
+        ...     "tokens": [["my", "example"]],
+        ...     "prediction": [
+        ...         [{"label": "LABEL1", "start": 3, "end": 10}]
+        ...     ]
+        ... })
+        >>> read_datasets(ds, task="TokenClassification")
+        >>>
+        >>> # Read text2text records from a datasets Dataset
+        >>> ds = datasets.Dataset.from_dict({
+        ...     "text": ["my example"],
+        ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
+        ... })
+        >>> # or
+        >>> ds = datasets.Dataset.from_dict({
+        ...     "text": ["my example"],
+        ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
+        ... })
+        >>> read_datasets(ds, task="Text2Text")
     """
     if isinstance(task, str):
         task = TaskType(task)
@@ -638,6 +728,39 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
 
     Returns:
         A Rubrix dataset for the given task.
+
+    Examples:
+        >>> # Read text classification records from a pandas DataFrame
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({
+        ...     "inputs": ["example"],
+        ...     "prediction": [
+        ...         [("LABEL1", 0.9), ("LABEL2", 0.1)]
+        ...     ]
+        ... })
+        >>> read_pandas(df, task="TextClassification")
+        >>>
+        >>> # Read token classification records from a datasets Dataset
+        >>> df = pd.DataFrame({
+        ...     "text": ["my example"],
+        ...     "tokens": [["my", "example"]],
+        ...     "prediction": [
+        ...         [("LABEL1", 3, 10)]
+        ...     ]
+        ... })
+        >>> read_pandas(df, task="TokenClassification")
+        >>>
+        >>> # Read text2text records from a datasets Dataset
+        >>> df = pd.DataFrame({
+        ...     "text": ["my example"],
+        ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
+        ... })
+        >>> # or
+        >>> ds = pd.DataFrame({
+        ...     "text": ["my example"],
+        ...     "prediction": [[("mi ejemplo", 0.9)]]
+        ... })
+        >>> read_pandas(df, task="Text2Text")
     """
     if isinstance(task, str):
         task = TaskType(task)
