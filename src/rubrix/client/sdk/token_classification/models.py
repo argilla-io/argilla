@@ -129,6 +129,7 @@ class TokenClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
+    advanced_query_dsl: bool = False
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)

@@ -405,6 +405,11 @@ class DatasetRecordsDAO:
         )
         return index_name
 
+    def get_dataset_schema(self, dataset: BaseDatasetDB) -> Dict[str, Any]:
+        """Return inner elasticsearch index configuration"""
+        index_name = dataset_records_index(dataset.id)
+        return self._es.__client__.indices.get_mapping(index=index_name)
+
 
 _instance: Optional[DatasetRecordsDAO] = None
 

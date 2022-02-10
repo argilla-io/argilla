@@ -16,22 +16,25 @@ class EsQueryBuilder:
         self.__dao__ = dao
 
     def __call__(self, dataset: Dataset, query: SearchQuery) -> Dict[str, Any]:
+
+        if not query.advanced_query_dsl or not query.query_text:
+            return query.as_elasticsearch()
+
         text_search = query.query_text
-        query.query_text = ""
+        query.query_text = None
 
-        if query.advanced_query_dsl:
-            schema = self.__dao__.get_dataset_schema(dataset)
-            schema = SchemaAnalyzer(schema)
-            es_query_builder = ElasticsearchQueryBuilder(
-                **schema.query_builder_options()
-            )
+        schema = self.__dao__.get_dataset_schema(dataset)
+        schema = SchemaAnalyzer(schema)
+        es_query_builder = ElasticsearchQueryBuilder(
+            **{
+                **schema.query_builder_options(),
+                "default_field": "words",
+            }  # TODO: This will change
+        )
 
-            query_tree = parser.parse(query.query_text)
-            query_text = es_query_builder(query_tree)
-        else:
-            query_text = es_helpers.filters.text_query(text_search)
+        query_tree = parser.parse(text_search)
+        query_text = es_query_builder(query_tree)
 
         return es_helpers.filters.boolean_filter(
-            should_filters=[query_text, query.as_elasticsearch()],
-            minimum_should_match=2,
+            filter_query=query.as_elasticsearch(), must_query=query_text
         )
