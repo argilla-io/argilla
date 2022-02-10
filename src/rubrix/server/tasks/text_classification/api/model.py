@@ -33,6 +33,7 @@ from rubrix.server.tasks.commons.api.model import (
     TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 
 class UpdateLabelingRule(BaseModel):
@@ -461,48 +462,30 @@ class TextClassificationBulkData(UpdateDatasetRequest):
         return records
 
 
-class TextClassificationQuery(BaseModel):
+class TextClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
+
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
+
     predicted: Optional[PredictionStatus]
         The task prediction status
+
     uncovered_by_rules:
         Only return records that are NOT covered by these rules.
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(
