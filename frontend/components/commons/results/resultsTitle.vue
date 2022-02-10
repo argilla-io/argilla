@@ -1,9 +1,10 @@
 <template>
   <p class="records-title" v-if="dataset.results.total > 0">
     Records
-    <template v-if="filtersApplied.length">with filters applied</template> ({{
-      dataset.results.total | formatNumber
-    }})
+    <template v-if="showWhenFiltered && areFiltersApplied.length"
+      >with filters applied</template
+    >
+    ({{ dataset.results.total | formatNumber }})
   </p>
 </template>
 
@@ -11,17 +12,26 @@
 export default {
   props: {
     dataset: {
-      dataset: {
-        type: Object,
-        required: true,
+      type: Object,
+      required: true,
+    },
+    showWhenFiltered: {
+      type: Boolean,
+      required: false,
+    },
+    excludedFilter: {
+      type: Array,
+      default: () => {
+        return ["text"];
       },
     },
   },
   computed: {
-    filtersApplied() {
-      return Object.values(this.dataset.query).filter(
-        (v) => v && Object.values(v).length
-      );
+    areFiltersApplied() {
+      const appliedFilters = Object.keys(this.dataset.query)
+        .filter((f) => !this.excludedFilter.includes(f))
+        .map((key) => this.dataset.query[key]);
+      return appliedFilters.filter((v) => v && Object.values(v).length);
     },
   },
 };

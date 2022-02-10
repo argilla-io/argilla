@@ -30,7 +30,6 @@
         >
           <template #before>
             <slot name="results-header" />
-            <results-title :dataset="dataset" />
             <results-empty
               :title="emptySearchInfo.title"
               :message="emptySearchInfo.message"
