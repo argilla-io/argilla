@@ -15,9 +15,12 @@
 import hashlib
 import logging
 from enum import Enum
+from os import stat
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+from functools import partial
+import random
 
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels
@@ -532,6 +535,8 @@ class FlyingSquid(LabelModel):
         wl_matrix_i[abstain_mask] = 0
         wl_matrix_i[other_mask] = 1
 
+        # epoxy
+
         return wl_matrix_i
 
     def predict(
@@ -747,6 +752,86 @@ class FlyingSquid(LabelModel):
         )
 
         return metrics
+
+class Epoxy(FlyingSquid):
+    
+    def __init__(
+        self, 
+        weak_labels: WeakLabels, 
+        thresholds: List[int] = None, 
+        embeddings: np.ndarray = None, 
+        **kwargs):
+        
+        super().__init__(weak_labels, **kwargs)
+        
+        try:
+            import epoxy
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'epoxy' must be installed to use the `Epoxy` label model! "
+                "You can install 'epoxy' with the command: `pip install epoxy`"
+            )
+        
+        try:
+            import faiss
+        except ModuleNotFoundError:    
+            raise ModuleNotFoundError(
+                "'faiss' must be installed to use the `Epoxy` label model! "
+                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
+            )
+
+        self.thresholds = thresholds
+        self.embeddings = embeddings
+
+    @classmethod
+    def _fit_and_score(cls, weak_labels, embeddings, score="accuracy", thresholds=None):
+        epoxy_instance = cls(weak_labels, thresholds=thresholds, embeddings=embeddings)
+        epoxy_instance.fit()
+        result = epoxy_instance.score(tie_break_policy="random")[score]
+        return result
+
+    @staticmethod
+    def _generate_first_search_space(weak_labels, num=20):
+        thresholds_len = weak_labels.matrix().shape[1]
+        linspace = np.linspace(0, 1, num=num)
+        for x in linspace:
+            yield [x] * thresholds_len
+
+    @staticmethod
+    def _generate_second_search_space(thresholds, num=20, subset=None):
+        linspace = np.linspace(0, 1, num=num)
+        for index in range(len(thresholds)):
+            if not subset or ( subset and index in subset ):
+                for item in linspace:
+                    trial = thresholds.copy()
+                    trial[index] = item
+                    yield trial
+
+    @classmethod
+    def grid_search_threshold(
+        cls, 
+        weak_labels, 
+        embeddings, 
+        score="accuracy", 
+        first_space_num=20, 
+        second_space_num=20, 
+        subset=None):
+
+        for threshold in cls._generate_first_search_space(weak_labels, num=first_space_num):
+            cls._fit_and_score()
+
+    def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
+        L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
+
+        if not self.thresholds:
+            thresholds = [0.85] * L_matrix.shape[1]
+        else:
+            thresholds = self.thresholds
+
+        epoxy_model = Epoxy(L_matrix, self.embeddings)
+        epoxy_model.preprocess(L_matrix, self.embeddings)
+        L_extended = epoxy_model.extend(thresholds)
+        return L_extended
 
 
 class LabelModelError(Exception):
