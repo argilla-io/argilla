@@ -128,7 +128,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             }
             if self.explanation
             else None,
-            metrics=self.metrics,
+            metrics=self.metrics or None,
         )
 
 

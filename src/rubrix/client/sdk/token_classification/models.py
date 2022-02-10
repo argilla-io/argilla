@@ -117,7 +117,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             event_timestamp=self.event_timestamp,
             status=self.status,
             metadata=self.metadata or {},
-            metrics=self.metrics,
+            metrics=self.metrics or {},
         )
 
 
