@@ -223,6 +223,7 @@ export default {
   }
 }
 </style>
+
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
