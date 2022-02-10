@@ -22,7 +22,6 @@ import logging
 import os
 import re
 from typing import Any, Dict, Iterable, List, Optional, Union
-from unicodedata import category
 
 import pandas
 import pkg_resources
