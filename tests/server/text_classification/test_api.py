@@ -15,9 +15,6 @@
 
 from datetime import datetime
 
-import pytest
-
-from rubrix.server.commons.errors import InvalidTextSearchError
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
 from rubrix.server.tasks.text_classification.api import (
@@ -168,10 +165,16 @@ def test_create_records_for_text_classification():
     assert response.status_code == 200
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
-    assert results.aggregations.predicted_as == {"Mocking": 1}
-    assert results.aggregations.status == {"Default": 1}
-    assert results.aggregations.score
-    assert results.aggregations.predicted == {}
+    assert results.aggregations.dict(exclude={"score"}) == {
+        "annotated_as": {},
+        "annotated_by": {},
+        "metadata": {},
+        "predicted": {},
+        "predicted_as": {"Mocking": 1},
+        "predicted_by": {"test": 1},
+        "status": {"Default": 1},
+        "words": {"data": 1},
+    }
 
 
 def test_partial_record_update():
@@ -202,7 +205,7 @@ def test_partial_record_update():
         json=bulk.dict(by_alias=True),
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.failed == 0
     assert bulk_response.processed == 1
@@ -256,6 +259,33 @@ def test_partial_record_update():
             },
         }
     )
+
+
+def test_sort_by_last_updated():
+    dataset = "test_sort_by_last_updated"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    for i in range(0, 10):
+        client.post(
+            f"/api/datasets/{dataset}/TextClassification:bulk",
+            json=TextClassificationBulkData(
+                records=[
+                    TextClassificationRecord(
+                        **{
+                            "id": i,
+                            "inputs": {"data": "my data"},
+                            "metadata": {"s": "value"},
+                        }
+                    )
+                ],
+            ).dict(by_alias=True),
+        )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
+        json={"sort": [{"id": "last_updated", "order": "asc"}]},
+    )
+
+    assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
 
 
 def test_sort_by_id_as_default():
@@ -335,9 +365,10 @@ def test_some_sort_by():
             "code": "rubrix.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
-                "are: ['metadata', 'score', 'predicted', "
-                "'predicted_as', 'predicted_by', "
-                "'annotated_as', 'annotated_by', 'status', "
+                "are: ['metadata', 'last_updated', 'score', "
+                "'predicted', 'predicted_as', "
+                "'predicted_by', 'annotated_as', "
+                "'annotated_by', 'status', "
                 "'event_timestamp']"
             },
         }
@@ -559,3 +590,41 @@ def test_wrong_text_query():
             "params": {"message": "Failed to parse query [!]"},
         }
     }
+
+
+def test_search_using_text():
+    dataset = "test_search_using_text"
+    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    client.post(
+        f"/api/datasets/{dataset}/TextClassification:bulk",
+        data=TextClassificationBulkData(
+            records=[
+                TextClassificationRecord(
+                    **{
+                        "id": 0,
+                        "inputs": {"data": "Esto es un ejemplo de Texto"},
+                        "metadata": {"field.one": 1, "field.two": 2},
+                    }
+                ),
+            ],
+        ).json(by_alias=True),
+    )
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json=TextClassificationSearchRequest(
+            query=TextClassificationQuery(query_text="text: texto")
+        ).dict(),
+    )
+    assert response.status_code == 200
+    assert response.json()["total"] == 1
+
+    response = client.post(
+        f"/api/datasets/{dataset}/TextClassification:search",
+        json=TextClassificationSearchRequest(
+            query=TextClassificationQuery(query_text="text.exact: texto")
+        ).dict(),
+    )
+    assert response.status_code == 200
+    assert response.json()["total"] == 0

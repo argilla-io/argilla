@@ -105,7 +105,6 @@ docker run -d \
  -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
  -e "discovery.type=single-node" \
  docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
-
 ```
 
 Then simply run:

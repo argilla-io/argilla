@@ -17,12 +17,7 @@
 
 <template>
   <div>
-    <text-spans
-      :dataset="dataset"
-      :record="record"
-      :entities="annotationEntities"
-      @updateRecordEntities="updateRecordEntities"
-    />
+    <text-spans :dataset="dataset" :record="record" />
     <div class="content__actions-buttons">
       <re-button
         v-if="record.status !== 'Validated'"
@@ -48,56 +43,22 @@ export default {
       required: true,
     },
   },
-  computed: {
-    annotationEntities() {
-      let entities = [];
-      if (this.record.annotation) {
-        entities = this.record.annotation.entities.map((obj) => ({
-          ...obj,
-          origin: "annotation",
-        }));
-      } else if (this.record.prediction) {
-        entities = this.record.prediction.entities.map((obj) => ({
-          ...obj,
-          origin: "prediction",
-        }));
-      }
-      return entities;
-    },
-  },
   methods: {
     ...mapActions({
-      updateRecords: "entities/datasets/updateDatasetRecords",
       validate: "entities/datasets/validateAnnotations",
     }),
-    updateRecordEntities(entities) {
-      this.updateRecords({
-        dataset: this.dataset,
-        records: [
-          {
-            ...this.record,
-            selected: true,
-            status: "Edited",
-            annotation: {
-              entities,
-              agent: this.$auth.user.username,
-            },
-          },
-        ],
-      });
-    },
+
     async onValidate(record) {
-      const emptyEntities = {
-        entities: [],
-      };
       await this.validate({
+        // TODO: Move this as part of token classification dataset logic
         dataset: this.dataset,
         agent: this.$auth.user.username,
         records: [
           {
             ...record,
+            annotatedEntities: undefined,
             annotation: {
-              ...(record.annotation || record.prediction || emptyEntities),
+              entities: record.annotatedEntities,
             },
           },
         ],
@@ -119,7 +80,7 @@ export default {
     bottom: 0;
     ::v-deep {
       .span__text {
-        opacity: 0;
+        opacity: 1;
       }
     }
   }

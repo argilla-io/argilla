@@ -31,10 +31,15 @@
         :span-id="i"
         :spans="textSpans"
         :dataset="dataset"
-        :class="isSelected(i) ? 'selected' : ''"
+        :class="[
+          isSelected(i) ? 'selected' : '',
+          isLastSelected(i) ? 'last-selected' : '',
+        ]"
+        :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
+        @setLastSelectedEntity="onSetLastSelectedEntity"
         @changeEntityLabel="onChangeEntityLabel"
         @removeEntity="onRemoveEntity"
         @updateRecordEntities="$emit('updateRecordEntities')"
@@ -44,6 +49,8 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   props: {
     dataset: {
@@ -54,17 +61,18 @@ export default {
       type: Object,
       required: true,
     },
-    entities: {
-      type: Array,
-    },
   },
   data: function () {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      lastSelectedEntity: {},
     };
   },
   computed: {
+    entities() {
+      return this.record.annotatedEntities;
+    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -119,6 +127,24 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updateRecords: "entities/datasets/updateDatasetRecords",
+    }),
+
+    updateAnnotatedEntities(entities) {
+      this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotatedEntities: entities,
+          },
+        ],
+      });
+    },
+
     reset(e) {
       if (e.target === this.$refs.list) {
         this.onReset();
@@ -145,8 +171,9 @@ export default {
         start: startToken.start,
         end: endToken.end,
         label: entity,
+        origin: "annotation",
       });
-      this.$emit("updateRecordEntities", entities);
+      this.updateAnnotatedEntities(entities);
       this.onReset();
     },
     onChangeEntityLabel(entity, newLabel) {
@@ -154,10 +181,10 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel }
+          ? { ...ent, label: newLabel, origin: "annotation" }
           : ent;
       });
-      this.$emit("updateRecordEntities", entities);
+      this.updateAnnotatedEntities(entities);
       this.onReset();
     },
     onRemoveEntity(entity) {
@@ -169,8 +196,16 @@ export default {
       );
       let entities = [...this.entities];
       entities.splice(found, 1);
-      this.$emit("updateRecordEntities", entities);
+      this.updateAnnotatedEntities(entities);
       this.onReset();
+    },
+    groupByOrigin(entities) {
+      let annotation = entities.filter((e) => e.origin == "annotation");
+      let prediction = entities.filter((e) => e.origin == "prediction");
+      return {
+        annotation,
+        prediction,
+      };
     },
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);
@@ -180,10 +215,19 @@ export default {
       }
       return false;
     },
+    isLastSelected(i) {
+      const end = Math.max(this.selectionStart, this.selectionEnd);
+      if (i === end) {
+        return true;
+      }
+      return false;
+    },
+    onSetLastSelectedEntity(entity) {
+      this.lastSelectedEntity = entity;
+    },
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .content {
   &__input {

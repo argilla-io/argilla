@@ -33,6 +33,7 @@ from rubrix.server.tasks.commons.api.model import (
     TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 
 class UpdateLabelingRule(BaseModel):
@@ -285,16 +286,6 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         return None
 
     @property
-    def words(self) -> str:
-        sentences = []
-        for v in self.inputs.values():
-            if isinstance(v, list):
-                sentences.extend(v)
-            else:
-                sentences.append(v)
-        return "\n".join(sentences)
-
-    @property
     def predicted_as(self) -> List[str]:
         return self._labels_from_annotation(
             self.prediction, multi_label=self.multi_label
@@ -324,6 +315,15 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
                 if prediction_class
             ]
         )
+
+    def all_text(self) -> str:
+        sentences = []
+        for v in self.inputs.values():
+            if isinstance(v, list):
+                sentences.extend(v)
+            else:
+                sentences.append(v)
+        return "\n".join(sentences)
 
     @validator("inputs")
     def validate_inputs(cls, text: Dict[str, Any]):
@@ -404,7 +404,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
         allow_population_by_field_name = True
 
 
-class TextClassificationRecord(CreationTextClassificationRecord):
+class TextClassificationRecordDB(CreationTextClassificationRecord):
     """
     The main text classification task record
 
@@ -419,6 +419,21 @@ class TextClassificationRecord(CreationTextClassificationRecord):
 
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def extended_fields(self) -> Dict[str, Any]:
+        words = self.all_text()
+        return {
+            **super().extended_fields(),
+            "words": words,
+            # This allow query by text:.... or text.exact:....
+            # Once words is remove we can normalize at record level
+            "text": words,
+        }
+
+
+class TextClassificationRecord(TextClassificationRecordDB):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {}
 
 
 class TextClassificationBulkData(UpdateDatasetRequest):
@@ -447,48 +462,30 @@ class TextClassificationBulkData(UpdateDatasetRequest):
         return records
 
 
-class TextClassificationQuery(BaseModel):
+class TextClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
+
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
+
     predicted: Optional[PredictionStatus]
         The task prediction status
+
     uncovered_by_rules:
         Only return records that are NOT covered by these rules.
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(

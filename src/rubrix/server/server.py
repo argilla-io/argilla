@@ -20,7 +20,6 @@ This module configures the global fastapi application
 import os
 from pathlib import Path
 
-import elasticsearch
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -88,6 +87,8 @@ def configure_app_statics(app: FastAPI):
 def configure_app_startup(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
+        import opensearchpy
+
         try:
             es_wrapper = create_es_wrapper()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
@@ -96,7 +97,7 @@ def configure_app_startup(app: FastAPI):
             )
             datasets.init()
             dataset_records.init()
-        except elasticsearch.exceptions.ConnectionError as error:
+        except opensearchpy.exceptions.ConnectionError as error:
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
                 "is not available or not responding.\n"

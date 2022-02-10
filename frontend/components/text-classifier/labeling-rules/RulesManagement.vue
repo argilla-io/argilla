@@ -52,13 +52,6 @@
           @onActionClicked="onActionClicked"
           @close-modal="closeModal"
         />
-        <re-button
-          v-if="formattedRules.length"
-          class="button-primary"
-          @click="updateSummary"
-          :disabled="isLoading"
-          >Update Summary</re-button
-        >
       </div>
     </div>
   </div>
@@ -238,15 +231,6 @@ export default {
     },
     onSearch(event) {
       this.querySearch = event;
-    },
-    async updateSummary() {
-      this.isLoading = true;
-      try {
-        await this.dataset.refreshRules();
-        await this.dataset.refreshRulesMetrics();
-      } finally {
-        this.isLoading = false;
-      }
     },
     onShowConfirmRuleDeletion(id) {
       this.visibleModalId = id.query;

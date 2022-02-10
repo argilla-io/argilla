@@ -20,9 +20,15 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
+from rubrix.server.commons.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.commons.es_helpers import aggregations, parse_aggregations
 from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
+from rubrix.server.commons.es_wrapper import (
+    ClosedIndexError,
+    ElasticsearchWrapper,
+    IndexNotFoundError,
+    create_es_wrapper,
+)
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.model import BaseDatasetDB
@@ -197,6 +203,11 @@ class DatasetRecordsDAO:
             doc_id=lambda _record: _record.get("id"),
         )
 
+    def get_metadata_schema(self, dataset: BaseDatasetDB) -> Dict[str, str]:
+        """Get metadata fields schema for provided dataset"""
+        records_index = dataset_records_index(dataset.id)
+        return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
+
     def search_records(
         self,
         dataset: BaseDatasetDB,
@@ -239,7 +250,15 @@ class DatasetRecordsDAO:
             "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": aggregation_requests,
         }
-        results = self._es.search(index=records_index, query=es_query, size=size)
+
+        try:
+            results = self._es.search(index=records_index, query=es_query, size=size)
+        except ClosedIndexError:
+            raise ClosedDatasetError(dataset.name)
+        except IndexNotFoundError:
+            raise MissingDatasetRecordsError(
+                f"No records index found for dataset {dataset.name}"
+            )
 
         if compute_aggregations and search.include_default_aggregations:
             current_aggrs = results.get("aggregations", {})
@@ -250,11 +269,7 @@ class DatasetRecordsDAO:
                 aggregations.predicted(),
                 aggregations.words_cloud(),
                 aggregations.score(),
-                aggregations.custom_fields(
-                    self._es.get_field_mapping(
-                        index=records_index, field_name="metadata.*"
-                    )
-                ),
+                aggregations.custom_fields(self.get_metadata_schema(dataset)),
             ]:
                 if aggr:
                     aggr_results = self._es.search(
@@ -275,12 +290,13 @@ class DatasetRecordsDAO:
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
-            parsed_aggregations = unflatten_dict(
-                parsed_aggregations, stop_keys=["metadata"]
-            )
 
-            result.words = parsed_aggregations.pop("words", {})
-            result.metadata = parsed_aggregations.pop("metadata", {})
+            if search.include_default_aggregations:
+                parsed_aggregations = unflatten_dict(
+                    parsed_aggregations, stop_keys=["metadata"]
+                )
+                result.words = parsed_aggregations.pop("words", {})
+                result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
 
         return result

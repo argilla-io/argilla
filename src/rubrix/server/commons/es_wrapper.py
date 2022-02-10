@@ -16,10 +16,9 @@
 from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import deprecated
-import elasticsearch
-from elasticsearch import Elasticsearch, NotFoundError, RequestError
-from elasticsearch.helpers import bulk as es_bulk
-from elasticsearch.helpers import scan as es_scan
+from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
+from opensearchpy.helpers import bulk as es_bulk
+from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.errors import InvalidTextSearchError
@@ -30,6 +29,19 @@ except ModuleNotFoundError:
     import json
 
 from .settings import settings
+
+
+class ClosedIndexError(Exception):
+    pass
+
+
+class IndexNotFoundError(Exception):
+    pass
+
+
+class GenericSearchError(Exception):
+    def __init__(self, origin_error: Exception):
+        self.origin_error = origin_error
 
 
 class ElasticsearchWrapper(LoggingMixin):
@@ -52,12 +64,12 @@ class ElasticsearchWrapper(LoggingMixin):
         """
 
         if cls._INSTANCE is None:
-            es_client = Elasticsearch(hosts=settings.elasticsearch)
+            es_client = OpenSearch(hosts=settings.elasticsearch)
             cls._INSTANCE = cls(es_client)
 
         return cls._INSTANCE
 
-    def __init__(self, es_client: Elasticsearch):
+    def __init__(self, es_client: OpenSearch):
         self.__client__ = es_client
 
     @property
@@ -136,14 +148,18 @@ class ElasticsearchWrapper(LoggingMixin):
             )
         except RequestError as rex:
 
-            if rex.error != "search_phase_execution_exception":
-                raise rex
+            if rex.error == "search_phase_execution_exception":
+                detail = rex.info["error"]
+                detail = detail.get("root_cause")
+                detail = detail[0].get("reason") if detail else rex.info["error"]
 
-            detail = rex.info["error"]
-            detail = detail.get("root_cause")
-            detail = detail[0].get("reason") if detail else rex.info["error"]
+                raise InvalidTextSearchError(detail)
 
-            raise InvalidTextSearchError(detail)
+            if rex.error == "index_closed_exception":
+                raise ClosedIndexError(index)
+            raise GenericSearchError(rex)
+        except OpenSearchException as ex:
+            raise GenericSearchError(ex)
 
     def create_index(
         self,
@@ -241,7 +257,7 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         try:
             return self.__client__.get(index=index, id=doc_id)
-        except elasticsearch.exceptions.NotFoundError:
+        except NotFoundError:
             return None
 
     def delete_document(self, index: str, doc_id: str):
@@ -332,7 +348,9 @@ class ElasticsearchWrapper(LoggingMixin):
         except NotFoundError:
             return {}
 
-    def get_field_mapping(self, index: str, field_name: str) -> Dict[str, str]:
+    def get_field_mapping(
+        self, index: str, field_name: Optional[str] = None
+    ) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
         consist on a dictionary with full field name as key and its type as value
@@ -352,7 +370,7 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         try:
             response = self.__client__.indices.get_field_mapping(
-                fields=field_name,
+                fields=field_name or "*",
                 index=index,
                 ignore_unavailable=False,
             )
@@ -514,6 +532,13 @@ class ElasticsearchWrapper(LoggingMixin):
             body={"properties": {field_name: mapping}},
         )
 
+    def get_cluster_info(self) -> Dict[str, Any]:
+        """Returns basic about es cluster"""
+        try:
+            return self.__client__.info()
+        except OpenSearchException as ex:
+            return {"error": ex}
+
 
 _instance = None  # The singleton instance
 
@@ -534,7 +559,6 @@ def create_es_wrapper() -> ElasticsearchWrapper:
 
     global _instance
     if _instance is None:
-        es_client = Elasticsearch(hosts=settings.elasticsearch)
-        _instance = ElasticsearchWrapper(es_client)
+        _instance = ElasticsearchWrapper.get_instance()
 
     return _instance

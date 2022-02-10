@@ -112,7 +112,7 @@ export default {
   &__checkbox.re-checkbox {
     position: absolute;
     left: 1.4em;
-    top: 0;
+    top: 0.2em;
     width: auto;
   }
   &__item {

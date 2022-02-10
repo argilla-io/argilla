@@ -14,7 +14,7 @@
 #  limitations under the License.
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -29,9 +29,9 @@ from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -104,10 +104,19 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     """
 
     tokens: List[str] = Field(min_items=1)
-    text: str = Field(alias="raw_text")
+    text: str = Field()
+    _raw_text: Optional[str] = Field(alias="raw_text")
 
     __chars2tokens__: Dict[int, int] = None
     __tokens2chars__: Dict[int, Tuple[int, int]] = None
+
+    @root_validator(pre=True)
+    def accept_old_fashion_text_field(cls, values):
+        text, raw_text = values.get("text"), values.get("raw_text")
+        text = text or raw_text
+        values["text"] = cls.check_text_content(text)
+
+        return values
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -235,23 +244,8 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return []
         return [self.prediction.score]
 
-    @property
-    def words(self) -> str:
+    def all_text(self) -> str:
         return self.text
-
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            **super().extended_fields(),
-            # See ../service/service.py
-            PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self.predicted_mentions()
-            ],
-            MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label}
-                for mention, entity in self.annotated_mentions()
-            ],
-        }
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
@@ -295,7 +289,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         underscore_attrs_are_private = True
 
 
-class TokenClassificationRecord(CreationTokenClassificationRecord):
+class TokenClassificationRecordDB(CreationTokenClassificationRecord):
     """
     The main token classification task record
 
@@ -310,6 +304,29 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
 
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def extended_fields(self) -> Dict[str, Any]:
+
+        return {
+            **super().extended_fields(),
+            # See ../service/service.py
+            PREDICTED_MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label, "score": entity.score}
+                for mention, entity in self.predicted_mentions()
+            ],
+            MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label}
+                for mention, entity in self.annotated_mentions()
+            ],
+            "words": self.all_text(),
+        }
+
+
+class TokenClassificationRecord(TokenClassificationRecordDB):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {
+            "raw_text": self.text,  # Maintain results compatibility
+        }
 
 
 class TokenClassificationBulkData(UpdateDatasetRequest):
@@ -327,46 +344,25 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseModel):
+class TokenClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     def as_elasticsearch(self) -> Dict[str, Any]:

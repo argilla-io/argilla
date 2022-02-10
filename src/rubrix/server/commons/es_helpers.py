@@ -496,7 +496,7 @@ class aggregations:
                 return {
                     "terms": {
                         "field": field_name,
-                        "size": size,
+                        "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
                         "order": {"_count": "desc"},
                     }
                 }
@@ -588,6 +588,7 @@ class aggregations:
             "score": {
                 "range": {
                     "field": EsRecordDataFieldNames.score,
+                    "keyed": True,
                     "ranges": [
                         {"from": _from / ten_decimals, "to": _to / ten_decimals}
                         for _from, _to in zip(
