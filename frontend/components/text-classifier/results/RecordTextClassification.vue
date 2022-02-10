@@ -133,10 +133,15 @@ export default {
     },
     async onValidate(record) {
       let modelPrediction = {};
-      modelPrediction.labels = record.predicted_as.map((pred) => ({
+      let labels = record.predicted_as.map((pred) => ({
         class: pred,
         score: 1,
       }));
+      if (this.dataset.isMultiLabel) {
+        modelPrediction.labels = labels;
+      } else {
+        modelPrediction.labels = [labels.shift()];
+      }
       // TODO: do not validate records without labels
       await this.validateAnnotations({
         dataset: this.dataset,
