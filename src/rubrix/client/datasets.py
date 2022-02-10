@@ -36,7 +36,6 @@ class DatasetBase:
     This is the base class to facilitate the implementation for each record type.
 
     Args:
-        record_type: Type of the records.
         records: A list of Rubrix records.
 
     Raises:
@@ -44,10 +43,14 @@ class DatasetBase:
             list does not correspond to the dataset type.
     """
 
-    def __init__(
-        self, record_type: Type[Record], records: Optional[List[Record]] = None
-    ):
-        self._record_type = record_type
+    _RECORD_TYPE = None
+
+    def __init__(self, records: Optional[List[Record]] = None):
+        if self._RECORD_TYPE is None:
+            raise NotImplementedError(
+                "A Dataset implementation has to define a `_RECORD_TYPE`!"
+            )
+
         self._records = records or []
         if self._records:
             self._validate_record_type()
@@ -62,12 +65,12 @@ class DatasetBase:
         record_types = {type(rec): None for rec in self._records}
         if len(record_types) > 1:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._record_type.__name__}s, "
+                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
                 f"but you provided various types: {[rt.__name__ for rt in record_types.keys()]}"
             )
-        elif next(iter(record_types)) is not self._record_type:
+        elif next(iter(record_types)) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._record_type.__name__}s, "
+                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
                 f"but you provided {list(record_types.keys())[0].__name__}s."
             )
 
@@ -78,9 +81,9 @@ class DatasetBase:
         return self._records[key]
 
     def __setitem__(self, key, value):
-        if type(value) is not self._record_type:
+        if type(value) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"You are only allowed to set a record of type {self._record_type} in this dataset, but you provided {type(value)}"
+                f"You are only allowed to set a record of type {self._RECORD_TYPE} in this dataset, but you provided {type(value)}"
             )
         self._records[key] = value
 
@@ -99,9 +102,9 @@ class DatasetBase:
         Raises:
             WrongRecordTypeError: When the type of the record does not correspond to the dataset type.
         """
-        if type(record) is not self._record_type:
+        if type(record) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"You are only allowed to append a record of type {self._record_type} to this dataset, but you provided {type(record)}"
+                f"You are only allowed to append a record of type {self._RECORD_TYPE} to this dataset, but you provided {type(record)}"
             )
         self._records.append(record)
 
@@ -159,11 +162,39 @@ class DatasetBase:
     def from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
         """Imports records from a `datasets.Dataset`.
 
+        Columns that are not supported are ignored.
+
         Args:
             dataset: A datasets Dataset from which to import the records.
 
         Returns:
             The imported records in a Rubrix Dataset.
+        """
+
+        not_supported_columns = [
+            col
+            for col in dataset.column_names
+            if col not in cls._RECORD_TYPE.__fields__
+        ]
+        if not_supported_columns:
+            _LOGGER.warning(
+                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model and are ignored: {not_supported_columns}"
+            )
+            dataset = dataset.remove_columns(not_supported_columns)
+
+        return cls._from_datasets(dataset)
+
+    @classmethod
+    def _from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
+        """Helper method to create a Rubrix Dataset from a datasets Dataset.
+
+        Must be implemented by the child class.
+
+        Args:
+            dataset: A datasets Dataset
+
+        Returns:
+            A Rubrix Dataset
         """
         raise NotImplementedError
 
@@ -179,11 +210,36 @@ class DatasetBase:
     def from_pandas(cls, dataframe: pd.DataFrame) -> "Dataset":
         """Imports records from a `pandas.DataFrame`.
 
+        Columns that are not supported are ignored.
+
         Args:
             dataframe: A pandas DataFrame from which to import the records.
 
         Returns:
             The imported records in a Rubrix Dataset.
+        """
+        not_supported_columns = [
+            col for col in dataframe.columns if col not in cls._RECORD_TYPE.__fields__
+        ]
+        if not_supported_columns:
+            _LOGGER.warning(
+                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model and are ignored: {not_supported_columns}"
+            )
+            dataframe = dataframe.drop(columns=not_supported_columns)
+
+        return cls._from_pandas(dataframe)
+
+    @classmethod
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "Dataset":
+        """Helper method to create a Rubrix Dataset from a pandas DataFrame.
+
+        Must be implemented by the child class.
+
+        Args:
+            dataframe: A pandas DataFrame
+
+        Returns:
+            A Rubrix Dataset
         """
         raise NotImplementedError
 
@@ -240,18 +296,36 @@ class DatasetForTextClassification(DatasetBase):
         >>> dataset[0] = rb.TextClassificationRecord(inputs="replaced example")
     """
 
+    _RECORD_TYPE = TextClassificationRecord
+
     def __init__(self, records: Optional[List[TextClassificationRecord]] = None):
         # we implement this to have more specific type hints
-        super().__init__(record_type=TextClassificationRecord, records=records)
+        super().__init__(records=records)
 
     def append(self, record: TextClassificationRecord):
         # we implement this to have more specific type hints
         super().append(record)
 
+    @classmethod
+    def from_datasets(
+        # we implement this to have more specific type hints
+        cls,
+        dataset: "datasets.Dataset",
+    ) -> "DatasetForTextClassification":
+        return super().from_datasets(dataset)
+
+    @classmethod
+    def from_pandas(
+        # we implement this to have more specific type hints
+        cls,
+        dataframe: pd.DataFrame,
+    ) -> "DatasetForTextClassification":
+        return super().from_pandas(dataframe)
+
     def _to_datasets_dict(self) -> Dict:
         # create a dict first, where we make the necessary transformations
         ds_dict = {}
-        for key in self._record_type.__fields__:
+        for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
                     [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
@@ -277,40 +351,46 @@ class DatasetForTextClassification(DatasetBase):
         return ds_dict
 
     @classmethod
-    def from_datasets(
+    def _from_datasets(
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTextClassification":
         records = []
         for row in dataset:
-            row["inputs"] = {
-                key: val for key, val in row["inputs"].items() if val is not None
-            }
-            row["prediction"] = (
-                [
-                    (
-                        pred["label"],
-                        pred["score"],
-                    )
-                    for pred in row["prediction"]
-                ]
-                if row["prediction"] is not None
-                else None
-            )
-            row["explanation"] = (
-                {
-                    key: [TokenAttributions(**tokattr_kwargs) for tokattr_kwargs in val]
-                    for key, val in row["explanation"].items()
+            if row.get("inputs") and isinstance(row["inputs"], dict):
+                row["inputs"] = {
+                    key: val for key, val in row["inputs"].items() if val is not None
                 }
-                if row["explanation"] is not None
-                else None
-            )
+            if row.get("prediction"):
+                row["prediction"] = (
+                    [
+                        (
+                            pred["label"],
+                            pred["score"],
+                        )
+                        for pred in row["prediction"]
+                    ]
+                    if row["prediction"] is not None
+                    else None
+                )
+            if row.get("explanation"):
+                row["explanation"] = (
+                    {
+                        key: [
+                            TokenAttributions(**tokattr_kwargs)
+                            for tokattr_kwargs in val
+                        ]
+                        for key, val in row["explanation"].items()
+                    }
+                    if row["explanation"] is not None
+                    else None
+                )
 
             records.append(TextClassificationRecord(**row))
 
         return cls(records)
 
     @classmethod
-    def from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
         return cls(
             [TextClassificationRecord(**row) for row in dataframe.to_dict("records")]
         )
@@ -347,13 +427,30 @@ class DatasetForTokenClassification(DatasetBase):
         >>> dataset[0] = rb.TokenClassificationRecord(text="replace example", tokens=["replace", "example"])
     """
 
+    _RECORD_TYPE = TokenClassificationRecord
+
     def __init__(self, records: Optional[List[TokenClassificationRecord]] = None):
         # we implement this to have more specific type hints
-        super().__init__(record_type=TokenClassificationRecord, records=records)
+        super().__init__(records=records)
 
     def append(self, record: TokenClassificationRecord):
         # we implement this to have more specific type hints
         super().append(record)
+
+    @classmethod
+    def from_datasets(
+        cls, dataset: "datasets.Dataset"
+    ) -> "DatasetForTokenClassification":
+        # we implement this to have more specific type hints
+        return super().from_datasets(dataset)
+
+    @classmethod
+    def from_pandas(
+        # we implement this to have more specific type hints
+        cls,
+        dataframe: pd.DataFrame,
+    ) -> "DatasetForTokenClassification":
+        return super().from_pandas(dataframe)
 
     def _to_datasets_dict(self) -> Dict:
         """Helper method to put token classification records in a `datasets.Dataset`"""
@@ -370,7 +467,7 @@ class DatasetForTokenClassification(DatasetBase):
             ]
 
         ds_dict = {}
-        for key in self._record_type.__fields__:
+        for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
                 ds_dict[key] = entities_to_dict(key)
             elif key == "annotation":
@@ -383,7 +480,7 @@ class DatasetForTokenClassification(DatasetBase):
         return ds_dict
 
     @classmethod
-    def from_datasets(
+    def _from_datasets(
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTokenClassification":
         def entities_to_tuple(entities):
@@ -391,16 +488,16 @@ class DatasetForTokenClassification(DatasetBase):
 
         records = []
         for row in dataset:
-            if row["prediction"] is not None:
+            if row.get("prediction"):
                 row["prediction"] = entities_to_tuple(row["prediction"])
-            if row["annotation"] is not None:
+            if row.get("annotation"):
                 row["annotation"] = entities_to_tuple(row["annotation"])
             records.append(TokenClassificationRecord(**row))
 
         return cls(records)
 
     @classmethod
-    def from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
         return cls(
             [TokenClassificationRecord(**row) for row in dataframe.to_dict("records")]
         )
@@ -437,13 +534,28 @@ class DatasetForText2Text(DatasetBase):
         >>> dataset[0] = rb.Text2TextRecord(text="replaced example")
     """
 
+    _RECORD_TYPE = Text2TextRecord
+
     def __init__(self, records: Optional[List[Text2TextRecord]] = None):
         # we implement this to have more specific type hints
-        super().__init__(record_type=Text2TextRecord, records=records)
+        super().__init__(records=records)
 
     def append(self, record: Text2TextRecord):
         # we implement this to have more specific type hints
         super().append(record)
+
+    @classmethod
+    def from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
+        # we implement this to have more specific type hints
+        return super().from_datasets(dataset)
+
+    @classmethod
+    def from_pandas(
+        # we implement this to have more specific type hints
+        cls,
+        dataframe: pd.DataFrame,
+    ) -> "DatasetForText2Text":
+        return super().from_pandas(dataframe)
 
     def _to_datasets_dict(self) -> Dict:
         # create a dict first, where we make the necessary transformations
@@ -453,7 +565,7 @@ class DatasetForText2Text(DatasetBase):
             return {"text": pred[0], "score": pred[1]}
 
         ds_dict = {}
-        for key in self._record_type.__fields__:
+        for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
                     [pred_to_dict(pred) for pred in rec.prediction]
@@ -469,10 +581,10 @@ class DatasetForText2Text(DatasetBase):
         return ds_dict
 
     @classmethod
-    def from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
+    def _from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
         records = []
         for row in dataset:
-            if row["prediction"] is not None:
+            if row.get("prediction"):
                 row["prediction"] = [
                     pred["text"]
                     if pred["score"] is None
@@ -484,7 +596,7 @@ class DatasetForText2Text(DatasetBase):
         return cls(records)
 
     @classmethod
-    def from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
 
 
