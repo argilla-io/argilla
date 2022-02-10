@@ -232,12 +232,7 @@ class TestDatasetForTextClassification:
         dataset = rb.DatasetForTextClassification.from_datasets(dataset_ds)
 
         assert isinstance(dataset, rb.DatasetForTextClassification)
-        for rec, expected in zip(dataset, expected_dataset):
-            for col in expected.__fields__.keys():
-                # TODO: have to think about how we deal with `None`s
-                if col in ["metadata", "metrics"]:
-                    continue
-                assert getattr(rec, col) == getattr(expected, col)
+        _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict({"inputs": ["mock"]})
         rec = rb.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
@@ -300,12 +295,7 @@ class TestDatasetForTokenClassification:
         dataset = rb.DatasetForTokenClassification.from_datasets(dataset_ds)
 
         assert isinstance(dataset, rb.DatasetForTokenClassification)
-        for rec, expected in zip(dataset, expected_dataset):
-            for col in expected.__fields__.keys():
-                # TODO: have to think about how we deal with `None`s
-                if col in ["metadata", "metrics"]:
-                    continue
-                assert getattr(rec, col) == getattr(expected, col)
+        _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict(
             {"text": ["mock"], "tokens": [["mock"]]}
@@ -354,16 +344,19 @@ class TestDatasetForText2Text:
         dataset = rb.DatasetForText2Text.from_datasets(dataset_ds)
 
         assert isinstance(dataset, rb.DatasetForText2Text)
-        for rec, expected in zip(dataset, expected_dataset):
-            for col in expected.__fields__.keys():
-                # TODO: have to think about how we deal with `None`s
-                if col in ["metadata", "metrics"]:
-                    continue
-                assert getattr(rec, col) == getattr(expected, col)
+        _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict({"text": ["mock"]})
         rec = rb.DatasetForText2Text.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock"
+
+        # alternative format for the predictions
+        ds = datasets.Dataset.from_dict(
+            {"text": ["example"], "prediction": [["ejemplo"]]}
+        )
+        rec = rb.DatasetForText2Text.from_datasets(ds)[0]
+        assert rec.prediction[0][0] == "ejemplo"
+        assert rec.prediction[0][1] == pytest.approx(1.0)
 
     def test_to_from_pandas(self, text2text_records):
         expected_dataset = rb.DatasetForText2Text(text2text_records)
@@ -378,6 +371,15 @@ class TestDatasetForText2Text:
         assert isinstance(dataset, rb.DatasetForText2Text)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+
+def _compare_datasets(dataset, expected_dataset):
+    for rec, expected in zip(dataset, expected_dataset):
+        for col in expected.__fields__.keys():
+            # TODO: have to think about how we deal with `None`s
+            if col in ["metadata", "metrics"]:
+                continue
+            assert getattr(rec, col) == getattr(expected, col)
 
 
 @pytest.mark.parametrize(
