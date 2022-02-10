@@ -1,38 +1,40 @@
 import { mount } from "@vue/test-utils";
-import TaskSidebar from "@/components/commons/sidebar/TaskSidebar";
+import ResultsTitle from "@/components/commons/results/ResultsTitle";
 
-function mountSidebar() {
-  return mount(TaskSidebar, {
+function mountResultsTitle() {
+  return mount(ResultsTitle, {
     propsData: {
       dataset: {
         task: "TextClassification",
-        viewSettings: {
-          annotationEnabled: false,
+        results: {
+          total: 400,
+        },
+        query: {
+          annotated_as: undefined,
+          annotated_by: undefined,
+          from: undefined,
+          limit: undefined,
+          metadata: {},
+          predicted: undefined,
+          predicted_as: ["Alta"],
+          predicted_by: undefined,
+          score: undefined,
+          status: undefined,
+          text: "de",
         },
       },
+      showWhenFiltered: true,
+      excludedFilter: ["text"],
     },
   });
 }
 
-describe("TaskSidebar", () => {
+describe("ResultsTitle", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
-  test("Required property", () => {
-    mount(TaskSidebar);
-    expect(spy).toBeCalledWith(
-      expect.stringContaining('[Vue warn]: Missing required prop: "dataset"')
-    );
-  });
-
   test("renders properly", () => {
-    const wrapper = mountSidebar();
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test("Show sidebar panel", async () => {
-    const wrapper = mountSidebar();
-    await wrapper.setData({ sidebarVisible: true });
+    const wrapper = mountResultsTitle();
     expect(wrapper).toMatchSnapshot();
   });
 });
