@@ -21,6 +21,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 
 from rubrix import load
+from rubrix.client.datasets import DatasetForTextClassification
 from rubrix.client.models import TextClassificationRecord
 from rubrix.labeling.text_classification.rule import Rule, load_rules
 
@@ -120,7 +121,7 @@ class WeakLabels:
         }
 
         # load records and check compatibility
-        self._records: List[TextClassificationRecord] = load(
+        self._records: DatasetForTextClassification = load(
             dataset, query=query, ids=ids, as_pandas=False
         )
         if not self._records:
