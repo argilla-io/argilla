@@ -17,11 +17,6 @@
 
 <template>
   <div class="header__filters">
-    <header-title
-      v-if="dataset.results.records"
-      title="Token Classification"
-      :dataset="dataset"
-    />
     <filters-area :dataset="dataset" />
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
