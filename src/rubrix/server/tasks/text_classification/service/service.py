@@ -18,7 +18,6 @@ from typing import Iterable, List, Optional
 from fastapi import Depends
 
 from rubrix.server.commons.errors import MissingDatasetRecordsError
-from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
@@ -30,6 +29,8 @@ from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
+from rubrix.server.tasks.search.model import SortConfig
+from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     DatasetLabelingRulesMetricsSummary,
@@ -67,6 +68,7 @@ class TextClassificationService:
         dao: DatasetRecordsDAO = Depends(dataset_records_dao),
         labeling: LabelingService = Depends(LabelingService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
+        search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ) -> "TextClassificationService":
         """
         Creates a service instance for text classification operations
@@ -79,24 +81,28 @@ class TextClassificationService:
             The labeling service dependency
         metrics:
             The metrics service dependency
+        search:
+            The search records service
 
         Returns
         -------
             A dataset records service instance
         """
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao, metrics, labeling=labeling)
+            cls._INSTANCE = cls(dao, metrics, labeling=labeling, search=search)
         return cls._INSTANCE
 
     def __init__(
         self,
         dao: DatasetRecordsDAO,
         metrics: MetricsService,
+        search: SearchRecordsService,
         labeling: LabelingService,
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
         self.__labeling__ = labeling
+        self.__search__ = search
 
         self.__dao__.register_task_mappings(
             TaskType.text_classification, text_classification_mappings()
@@ -146,43 +152,53 @@ class TextClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-        results = self.__dao__.search_records(
+
+        results = self.__search__.search(
             dataset,
-            search=RecordSearch(
-                query=query.as_elasticsearch(),
-                sort=sort_by2elasticsearch(
-                    sort_by,
-                    valid_fields=[
-                        "metadata",
-                        EsRecordDataFieldNames.last_updated,
-                        EsRecordDataFieldNames.score,
-                        EsRecordDataFieldNames.predicted,
-                        EsRecordDataFieldNames.predicted_as,
-                        EsRecordDataFieldNames.predicted_by,
-                        EsRecordDataFieldNames.annotated_as,
-                        EsRecordDataFieldNames.annotated_by,
-                        EsRecordDataFieldNames.status,
-                        EsRecordDataFieldNames.event_timestamp,
-                    ],
-                ),
-                aggregations={
-                    **aggregations.predicted_as(),
-                    **aggregations.annotated_as(),
-                },
-            ),
-            size=size,
+            query=query,
+            record_type=TextClassificationRecord,
             record_from=record_from,
-            exclude_fields=["metrics"] if exclude_metrics else None,
+            size=size,
+            exclude_metrics=exclude_metrics,
+            metrics={
+                "words_cloud",
+                "predicted_by",
+                "predicted_as",
+                "annotated_by",
+                "annotated_as",
+                "error_distribution",
+                "status_distribution",
+                "metadata",
+                "score",
+            },
+            sort_config=SortConfig(
+                sort_by=sort_by,
+                valid_fields=[
+                    "metadata",
+                    EsRecordDataFieldNames.last_updated,
+                    EsRecordDataFieldNames.score,
+                    EsRecordDataFieldNames.predicted,
+                    EsRecordDataFieldNames.predicted_as,
+                    EsRecordDataFieldNames.predicted_by,
+                    EsRecordDataFieldNames.annotated_as,
+                    EsRecordDataFieldNames.annotated_by,
+                    EsRecordDataFieldNames.status,
+                    EsRecordDataFieldNames.event_timestamp,
+                ],
+            ),
         )
+
+        if results.metrics:
+            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["status"] = results.metrics["status_distribution"]
+            results.metrics["predicted"] = results.metrics["error_distribution"]
+            results.metrics["predicted"].pop("unknown", None)
+
         return TextClassificationSearchResults(
             total=results.total,
-            records=[TextClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TextClassificationSearchAggregations(
-                **results.aggregations,
-                words=results.words,
-                metadata=results.metadata or {},
-            )
-            if results.aggregations
+            records=results.records,
+            aggregations=TextClassificationSearchAggregations.parse_obj(results.metrics)
+            if results.metrics
             else None,
         )
 

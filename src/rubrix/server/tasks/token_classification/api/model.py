@@ -14,7 +14,7 @@
 #  limitations under the License.
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -29,9 +29,9 @@ from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -344,46 +344,25 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseModel):
+class TokenClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     def as_elasticsearch(self) -> Dict[str, Any]:
