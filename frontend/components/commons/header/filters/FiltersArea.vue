@@ -157,6 +157,7 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
+    max-width: calc(100% - 300px);
     .fixed-header & {
       padding: 0.5em 45px 0.5em 0;
     }
@@ -164,7 +165,6 @@ export default {
   &__searchbar {
     margin-right: 2em;
     width: 100%;
-    max-width: 610px;
     &.--extended {
       width: 100%;
       margin-right: 0;
