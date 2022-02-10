@@ -20,3 +20,9 @@ Models
 .. automodule:: rubrix.client.models
    :members:
    :exclude-members: BaseRecord, BulkResponse
+
+Datasets
+--------
+
+.. automodule:: rubrix.client.datasets
+   :members: DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text, read_datasets, read_pandas
