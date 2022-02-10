@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ResultsTitle renders properly 1`] = `
+<p class="records-title">
+  Records
+  <span>with filters applied</span>
+  (400)
+</p>
+`;

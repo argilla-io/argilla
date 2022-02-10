@@ -17,11 +17,6 @@
 
 <template>
   <div class="header__filters">
-    <header-title
-      v-if="dataset.results.records && viewMode !== 'labelling-rules'"
-      title="Text Classification"
-      :dataset="dataset"
-    />
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
