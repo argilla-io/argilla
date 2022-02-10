@@ -36,7 +36,11 @@ class TextClassificationRecord extends BaseRecord {
     if (this.prediction === undefined) {
       return [];
     }
-    return this.prediction.labels.map((p) => p.class);
+    let labels = this.prediction.labels;
+    if (this.multi_label) {
+      return labels.filter((l) => l.score > 0.5).map((l) => l.class);
+    }
+    return [this.prediction.labels[0].class];
   }
 }
 
