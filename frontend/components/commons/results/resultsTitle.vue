@@ -38,6 +38,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 .records-title {
   color: $font-secondary;
 }
