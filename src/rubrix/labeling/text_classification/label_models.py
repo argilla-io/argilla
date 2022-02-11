@@ -19,8 +19,6 @@ from os import stat
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-from functools import partial
-import random
 
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels
@@ -771,6 +769,8 @@ class Epoxy(FlyingSquid):
                 "'epoxy' must be installed to use the `Epoxy` label model! "
                 "You can install 'epoxy' with the command: `pip install epoxy`"
             )
+        else:
+            from epoxy import Epoxy as EpoxyModel
         
         try:
             import faiss
@@ -828,7 +828,7 @@ class Epoxy(FlyingSquid):
         else:
             thresholds = self.thresholds
 
-        epoxy_model = Epoxy(L_matrix, self.embeddings)
+        epoxy_model = EpoxyModel(L_matrix, self.embeddings)
         epoxy_model.preprocess(L_matrix, self.embeddings)
         L_extended = epoxy_model.extend(thresholds)
         return L_extended
