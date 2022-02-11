@@ -158,6 +158,8 @@ class ElasticsearchWrapper(LoggingMixin):
             if rex.error == "index_closed_exception":
                 raise ClosedIndexError(index)
             raise GenericSearchError(rex)
+        except NotFoundError as nex:
+            raise IndexNotFoundError(nex)
         except OpenSearchException as ex:
             raise GenericSearchError(ex)
 

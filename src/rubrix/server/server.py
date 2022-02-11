@@ -92,7 +92,9 @@ def configure_app_startup(app: FastAPI):
         try:
             es_wrapper = create_es_wrapper()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
-            datasets: DatasetsDAO = DatasetsDAO.get_instance(es_wrapper)
+            datasets: DatasetsDAO = DatasetsDAO.get_instance(
+                es_wrapper, records_dao=dataset_records
+            )
             datasets.init()
             dataset_records.init()
         except opensearchpy.exceptions.ConnectionError as error:
