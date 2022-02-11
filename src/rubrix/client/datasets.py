@@ -93,21 +93,6 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
-    def append(self, record: Record):
-        """Appends a record to the dataset.
-
-        Args:
-            record: The record to be added to the dataset.
-
-        Raises:
-            WrongRecordTypeError: When the type of the record does not correspond to the dataset type.
-        """
-        if type(record) is not self._RECORD_TYPE:
-            raise WrongRecordTypeError(
-                f"You are only allowed to append a record of type {self._RECORD_TYPE} to this dataset, but you provided {type(record)}"
-            )
-        self._records.append(record)
-
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
 
@@ -248,7 +233,7 @@ def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
 
     It allows you to export/import records into/from different formats,
-    append further records, loop over the records, and access them by index.
+    loop over the records, and access them by index.
 
     Args:
         records: A list of `{record_type.__name__}`s.
@@ -283,9 +268,6 @@ class DatasetForTextClassification(DatasetBase):
         ... ]
         >>> dataset = rb.DatasetForTextClassification(records)
         >>> assert len(dataset) == 2
-        >>> # Appending records to the dataset:
-        >>> for text in ["example", "another example"]:
-        ...     dataset.append(rb.TextClassificationRecord(inputs=text))
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TextClassificationRecord(inputs={"text": "example"})
@@ -297,10 +279,6 @@ class DatasetForTextClassification(DatasetBase):
     def __init__(self, records: Optional[List[TextClassificationRecord]] = None):
         # we implement this to have more specific type hints
         super().__init__(records=records)
-
-    def append(self, record: TextClassificationRecord):
-        # we implement this to have more specific type hints
-        super().append(record)
 
     @classmethod
     def from_datasets(
@@ -431,9 +409,6 @@ class DatasetForTokenClassification(DatasetBase):
         ...     rb.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
         ... ]
         >>> dataset = rb.DatasetForTokenClassification(records)
-        >>> # Appending records to the dataset:
-        >>> for text in ["example", "another example"]:
-        ...     dataset.append(rb.TokenClassificationRecord(text=text, tokens=text.split()))
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TokenClassificationRecord(text="example", tokens=["example"])
@@ -445,10 +420,6 @@ class DatasetForTokenClassification(DatasetBase):
     def __init__(self, records: Optional[List[TokenClassificationRecord]] = None):
         # we implement this to have more specific type hints
         super().__init__(records=records)
-
-    def append(self, record: TokenClassificationRecord):
-        # we implement this to have more specific type hints
-        super().append(record)
 
     @classmethod
     def from_datasets(
@@ -555,9 +526,6 @@ class DatasetForText2Text(DatasetBase):
         >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
-        >>> # Appending records to the dataset:
-        >>> for text in ["example", "another example"]:
-        ...     dataset.append(rb.Text2TextRecord(text=text))
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.Text2TextRecord(text="example"})
@@ -569,10 +537,6 @@ class DatasetForText2Text(DatasetBase):
     def __init__(self, records: Optional[List[Text2TextRecord]] = None):
         # we implement this to have more specific type hints
         super().__init__(records=records)
-
-    def append(self, record: Text2TextRecord):
-        # we implement this to have more specific type hints
-        super().append(record)
 
     @classmethod
     def from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":

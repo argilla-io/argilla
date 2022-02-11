@@ -183,32 +183,11 @@ def test_setitem_delitem(monkeypatch, singlelabel_textclassification_records):
         dataset[0] = rb.Text2TextRecord(text="mock")
 
 
-def test_append(monkeypatch, singlelabel_textclassification_records):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-    dataset = DatasetBase()
-    record = rb.TextClassificationRecord(inputs="mock")
-
-    dataset.append(record)
-
-    assert dataset._records[-1] is record
-
-    with pytest.raises(
-        WrongRecordTypeError,
-        match="You are only allowed to append a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
-    ):
-        dataset.append(rb.Text2TextRecord(text="mock"))
-
-
 class TestDatasetForTextClassification:
-    def test_init_append(self, singlelabel_textclassification_records):
+    def test_init(self, singlelabel_textclassification_records):
         ds = rb.DatasetForTextClassification(singlelabel_textclassification_records)
         assert ds._RECORD_TYPE == rb.TextClassificationRecord
         assert ds._records == singlelabel_textclassification_records
-
-        ds.append(singlelabel_textclassification_records[0])
-        assert len(ds) == 5
 
     @pytest.mark.parametrize(
         "records",
@@ -262,13 +241,10 @@ class TestDatasetForTextClassification:
 
 
 class TestDatasetForTokenClassification:
-    def test_init_append(self, tokenclassification_records):
+    def test_init(self, tokenclassification_records):
         ds = rb.DatasetForTokenClassification(tokenclassification_records)
         assert ds._RECORD_TYPE == rb.TokenClassificationRecord
         assert ds._records == tokenclassification_records
-
-        ds.append(tokenclassification_records[0])
-        assert len(ds) == 5
 
     def test_to_from_datasets(self, tokenclassification_records):
         expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
@@ -319,13 +295,10 @@ class TestDatasetForTokenClassification:
 
 
 class TestDatasetForText2Text:
-    def test_init_append(self, text2text_records):
+    def test_init(self, text2text_records):
         ds = rb.DatasetForText2Text(text2text_records)
         assert ds._RECORD_TYPE == rb.Text2TextRecord
         assert ds._records == text2text_records
-
-        ds.append(text2text_records[0])
-        assert len(ds) == 5
 
     def test_to_from_datasets(self, text2text_records):
         expected_dataset = rb.DatasetForText2Text(text2text_records)
