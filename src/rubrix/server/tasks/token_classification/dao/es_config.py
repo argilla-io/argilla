@@ -12,6 +12,7 @@ def mentions_mappings():
         "properties": {
             "mention": mappings.keyword_field(),
             "entity": mappings.keyword_field(),
+            "score": mappings.decimal_field(),
         },
     }
 
