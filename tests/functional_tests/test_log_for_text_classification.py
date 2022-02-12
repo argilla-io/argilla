@@ -108,3 +108,17 @@ def test_log_with_other_task(monkeypatch):
             TokenClassificationRecord(text="The text", tokens=["The", "text"]),
             name=dataset,
         )
+
+
+def test_dynamics_metadata(monkeypatch):
+    mocking_client(monkeypatch, client)
+    dataset = "test_dynamics_metadata"
+    rubrix.log(
+        TextClassificationRecord(inputs="This is a text", metadata={"a": "value"}),
+        name=dataset,
+    )
+
+    rubrix.log(
+        TextClassificationRecord(inputs="Another text", metadata={"b": "value"}),
+        name=dataset,
+    )
