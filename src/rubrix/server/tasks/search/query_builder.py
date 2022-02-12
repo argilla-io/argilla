@@ -32,14 +32,14 @@ class EsQueryBuilder:
             return query.as_elasticsearch()
 
         text_search = query.query_text
-        new_query = query.copy(exclude={"query_text"})
+        new_query = query.copy(update={"query_text": None})
 
         schema = self.__dao__.get_dataset_schema(dataset)
         schema = SchemaAnalyzer(schema)
         es_query_builder = ElasticsearchQueryBuilder(
             **{
                 **schema.query_builder_options(),
-                "default_field": "words",
+                "default_field": "text",
             }  # TODO: This will change
         )
 
