@@ -213,6 +213,10 @@ async function _updateViewSettings({ id, data }) {
 }
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
+  const { advancedQueryDsl } = $nuxt.$route.query;
+  if (advancedQueryDsl === null || advancedQueryDsl === "true") {
+    query.advanced_query_dsl = true;
+  }
   const { response } = await ObservationDataset.api().post(
     `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
     {
