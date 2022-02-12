@@ -90,6 +90,10 @@ class mappings:
         """Nested field mapping basic configuration"""
         return {"type": "nested", "include_in_root": True}
 
+    @staticmethod
+    def decimal_field():
+        return {"type": "float"}
+
 
 def multilingual_stop_analyzer(supported_langs: List[str] = None) -> Dict[str, Any]:
     """Multilingual stop analyzer"""
@@ -137,8 +141,8 @@ def tasks_common_mappings():
     """Commons index mappings"""
     return {
         # TODO(@frascuchon): verify min es version that support meta fields
-        # "_meta": {"version.min": "0.9"},
-        # "dynamic": "strict",
+        # "_meta": {"version.min": "0.10"},
+        "dynamic": "strict",
         "properties": {
             "id": mappings.keyword_field(),
             "words": mappings.words_text_field(),
