@@ -153,7 +153,10 @@ def check_zero_shot_results(
 
     if isinstance(text, list):
         text = text[0]
+    try:
         predictions = predictions[0]
+    except KeyError:
+        pass
 
     df = rubrix.load(dataset)
     assert len(df) == 1
