@@ -60,6 +60,13 @@ def singlelabel_textclassification_records(
             status="Default",
         ),
         rb.TextClassificationRecord(
+            inputs={"text": "mock2", "context": "mock2"},
+            prediction=[("a", 0.5), ("b", 0.2)],
+            prediction_agent="mock2_pagent",
+            id=3,
+            status="Discarded",
+        ),
+        rb.TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation="a",
             annotation_agent="mock_aagent",
@@ -142,6 +149,14 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             status="Default",
         ),
         rb.TextClassificationRecord(
+            inputs={"text": "mock2", "context": "mock2"},
+            prediction=[("a", 0.5), ("b", 0.2)],
+            prediction_agent="mock2_pagent",
+            multi_label=True,
+            id=3,
+            status="Discarded",
+        ),
+        rb.TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation=["a"],
             annotation_agent="mock_aagent",
@@ -212,6 +227,14 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
             metadata={"mock_metadata": "mock"},
         ),
         rb.TokenClassificationRecord(
+            text="This is a secondd example",
+            tokens=["This", "is", "a", "secondd", "example"],
+            prediction=[("a", 5, 7), ("b", 8, 9, 0.5)],
+            prediction_agent="mock_pagent",
+            id=3,
+            status="Default",
+        ),
+        rb.TokenClassificationRecord(
             text="This is a third example",
             tokens=["This", "is", "a", "third", "example"],
             annotation=[("a", 0, 4), ("b", 16, 23)],
@@ -278,16 +301,15 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        # TODO: provide bug fix for this record
-        # rb.Text2TextRecord(
-        #     text="This is a second example",
-        #     prediction=[("Das ist ein Beispielll", 0.9), "Esto es un ejemplooo"],
-        #     prediction_agent="mock_pagent",
-        #     id="two",
-        #     event_timestamp=datetime.datetime(2000, 1, 1),
-        #     metadata={"mock_metadata": "mock"},
-        #     metrics={},
-        # ),
+        rb.Text2TextRecord(
+            text="This is a second example",
+            prediction=["Esto es un ejemplooo", ("Das ist ein Beispielll", 0.9)],
+            prediction_agent="mock_pagent",
+            id=3,
+            event_timestamp=datetime.datetime(2000, 1, 1),
+            metadata={"mock_metadata": "mock"},
+            metrics={},
+        ),
         rb.Text2TextRecord(
             text="This is a third example",
             annotation="C'est une très bonne baguette",
