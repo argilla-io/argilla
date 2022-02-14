@@ -180,6 +180,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/weak-supervision
    guides/monitoring
    guides/metrics
+   guides/datasets_in_the_client
 
 .. toctree::
    :maxdepth: 3

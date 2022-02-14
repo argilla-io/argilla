@@ -22,7 +22,11 @@ import pandas
 import pytest
 
 import rubrix
-from rubrix import Text2TextRecord, TextClassificationRecord
+from rubrix import (
+    DatasetForTextClassification,
+    Text2TextRecord,
+    TextClassificationRecord,
+)
 from rubrix.client.rubrix_client import InputValueError
 from rubrix.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -146,15 +150,42 @@ def test_delete_with_errors(monkeypatch, status, error_type):
         rubrix.delete("dataset")
 
 
-def test_single_record(monkeypatch):
+# TODO: Add tokenclassification and text2text records after their client models are updated, see issue #1140
+@pytest.mark.parametrize(
+    "records, dataset_class",
+    [
+        ("singlelabel_textclassification_records", DatasetForTextClassification),
+        ("multilabel_textclassification_records", DatasetForTextClassification),
+    ],
+)
+def test_general_log_load(monkeypatch, request, records, dataset_class):
     mocking_client(monkeypatch, client)
-    dataset_name = "test_log_single_records"
-    client.delete(f"/api/datasets/{dataset_name}")
-    item = TextClassificationRecord(
-        inputs={"text": "This is a single record. Only this. No more."}
-    )
+    dataset_names = [
+        f"test_general_log_load_{dataset_class.__name__.lower()}_" + input_type
+        for input_type in ["single", "list", "dataset"]
+    ]
+    for name in dataset_names:
+        client.delete(f"/api/datasets/{name}")
 
-    rubrix.log(item, name=dataset_name)
+    records = request.getfixturevalue(records)
+
+    rubrix.log(records[0], name=dataset_names[0])
+    dataset = rubrix.load(dataset_names[0], as_pandas=False)
+    assert dataset[0] == records[0]
+
+    rubrix.log(records, name=dataset_names[1])
+    dataset = rubrix.load(dataset_names[1], as_pandas=False)
+    assert len(dataset) == len(records)
+    for record, expected in zip(dataset, records):
+        expected.metrics = record.metrics
+        assert record == expected
+
+    rubrix.log(dataset_class(records), name=dataset_names[2])
+    dataset = rubrix.load(dataset_names[2], as_pandas=False)
+    assert len(dataset) == len(records)
+    for record, expected in zip(dataset, records):
+        record.metrics = expected.metrics
+        assert record == expected
 
 
 def test_passing_wrong_iterable_data(monkeypatch):
@@ -175,41 +206,6 @@ def test_log_with_generator(monkeypatch):
             yield TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     rubrix.log(generator(), name=dataset_name)
-
-
-def test_log_with_annotation(monkeypatch):
-    mocking_client(monkeypatch, client)
-    dataset_name = "test_log_with_annotation"
-    rubrix.delete(dataset_name)
-    rubrix.log(
-        TextClassificationRecord(
-            id=0,
-            inputs={"text": "The text data"},
-            annotation="T",
-            annotation_agent="test",
-        ),
-        name=dataset_name,
-    )
-
-    df = rubrix.load(dataset_name)
-    records = df.to_dict(orient="records")
-    assert len(records) == 1
-    assert records[0]["status"] == "Validated"
-
-    rubrix.log(
-        TextClassificationRecord(
-            id=0,
-            inputs={"text": "The text data"},
-            annotation="T",
-            annotation_agent="test",
-            status="Discarded",
-        ),
-        name=dataset_name,
-    )
-    df = rubrix.load(dataset_name)
-    records = df.to_dict(orient="records")
-    assert len(records) == 1
-    assert records[0]["status"] == "Discarded"
 
 
 def test_create_ds_with_wrong_name(monkeypatch):
@@ -389,6 +385,7 @@ def test_load_as_pandas(monkeypatch, as_pandas):
         assert list(records.id) == [0, 1, 2, 3]
     else:
         records = rubrix.load(name=dataset, as_pandas=False)
+        assert isinstance(records, DatasetForTextClassification)
         assert isinstance(records[0], TextClassificationRecord)
         assert [record.id for record in records] == [0, 1, 2, 3]
 
