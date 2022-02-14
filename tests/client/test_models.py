@@ -79,6 +79,25 @@ def test_token_classification_record(annotation, status, expected_status):
     assert record.status == expected_status
 
 
+@pytest.mark.parametrize(
+    "prediction,expected",
+    [
+        (None, None),
+        ([("mock", 0, 4)], [("mock", 0, 4, 1.0)]),
+        ([("mock", 0, 4, 0.5)], [("mock", 0, 4, 0.5)]),
+        (
+            [("mock", 0, 4), ("mock", 0, 4, 0.5)],
+            [("mock", 0, 4, 1.0), ("mock", 0, 4, 0.5)],
+        ),
+    ],
+)
+def test_token_classification_prediction_validator(prediction, expected):
+    record = TokenClassificationRecord(
+        text="this", tokens=["this"], prediction=prediction
+    )
+    assert record.prediction == expected
+
+
 def test_text_classification_record_none_inputs():
     """Test validation error for None in inputs"""
     with pytest.raises(ValidationError):
@@ -137,3 +156,17 @@ def test_nat_to_none():
 
     record = MockRecord(event_timestamp=pd.NaT)
     assert record.event_timestamp is None
+
+
+@pytest.mark.parametrize(
+    "prediction,expected",
+    [
+        (None, None),
+        (["mock"], [("mock", 1.0)]),
+        ([("mock", 0.5)], [("mock", 0.5)]),
+        (["mock", ("mock", 0.5)], [("mock", 1.0), ("mock", 0.5)]),
+    ],
+)
+def test_text2text_prediction_validator(prediction, expected):
+    record = Text2TextRecord(text="mock", prediction=prediction)
+    assert record.prediction == expected
