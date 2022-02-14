@@ -28,8 +28,9 @@
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="$highlightSearch(dataset.query.text, text)"
-    />
+    >
+      <span class="highlight__content__text" v-html="$highlightSearch(dataset.query.text, text)"/>
+    </span>
     <span class="highlight__label">
       <span @click="removeEntity" class="highlight__tooltip__container">
         <span
@@ -39,12 +40,12 @@
           ]"
         >
           <span class="highlight__tooltip__origin" v-if="span.origin">{{
-            span.origin === "annotation" ? "annot." : "pred."
+            span.origin === "prediction" ? "pred." : "annot."
           }}</span>
           <span
             >{{ span.entity.label }}
             <svgicon
-              v-if="annotationEnabled"
+              v-if="annotationEnabled && span.origin === 'annotation'"
               width="8"
               height="8"
               name="cross"
@@ -205,7 +206,7 @@ export default {
     }
     .prediction & {
       @include triangle(top, 6px, 6px, auto);
-      top: 11px;
+      top: 3px;
     }
   }
   &:hover .highlight__tooltip__container {
