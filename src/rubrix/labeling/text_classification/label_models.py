@@ -784,10 +784,10 @@ class Epoxy(FlyingSquid):
         self.embeddings = embeddings
 
     @classmethod
-    def _fit_and_score(cls, weak_labels, embeddings, score="accuracy", thresholds=None):
+    def _fit_and_score(cls, weak_labels, embeddings, score="accuracy", thresholds=None, tie_break_policy="random"):
         epoxy_instance = cls(weak_labels, thresholds=thresholds, embeddings=embeddings)
         epoxy_instance.fit()
-        result = epoxy_instance.score(tie_break_policy="random")[score]
+        result = epoxy_instance.score(tie_break_policy=tie_break_policy)[score]
         return result
 
     @staticmethod
@@ -801,30 +801,76 @@ class Epoxy(FlyingSquid):
     def _generate_second_search_space(thresholds, num=20, subset=None):
         linspace = np.linspace(0, 1, num=num)
         for index in range(len(thresholds)):
-            if not subset or ( subset and index in subset ):
+            if subset and index in subset:
                 for item in linspace:
                     trial = thresholds.copy()
                     trial[index] = item
-                    yield trial
+                    yield index, trial
 
     @classmethod
     def grid_search_threshold(
         cls, 
-        weak_labels, 
-        embeddings, 
-        score="accuracy", 
+        weak_labels,
+        embeddings=None,
+        score="accuracy",
+        tie_break_policy="random",
         first_space_num=20, 
         second_space_num=20, 
-        subset=None):
+        second_space_subset=None):
+
+        output = None
+        max_metric = 0
 
         for threshold in cls._generate_first_search_space(weak_labels, num=first_space_num):
-            cls._fit_and_score()
+
+            result = cls._fit_and_score(
+                cls, 
+                weak_labels,
+                score=score,
+                embeddings=embeddings, 
+                thresholds=threshold,
+                tie_break_policy=tie_break_policy)
+
+            if result >= max_metric:
+                output = threshold
+                max_metric = result
+
+        if not second_space_subset:
+            second_space_subset = [i for i in range(len(output))]
+
+        current_index = None
+        while second_space_subset:
+
+            for index, threshold in cls._generate_second_search_space(
+                thresholds=output,
+                num=second_space_num,
+                subset=second_space_subset):
+
+                if not current_index:
+                    current_index = index
+                elif current_index != index:
+                    second_space_subset.remove(index)
+                    break
+
+                result = cls._fit_and_score(
+                    cls, 
+                    weak_labels,
+                    score=score,
+                    embeddings=embeddings, 
+                    thresholds=threshold,
+                    tie_break_policy=tie_break_policy)
+
+                if result >= max_metric:
+                    output = threshold
+                    max_metric = result
+            
+        return output
 
     def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
         L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
 
         if not self.thresholds:
-            thresholds = [0.85] * L_matrix.shape[1]
+            thresholds = [1.0] * L_matrix.shape[1]
         else:
             thresholds = self.thresholds
 
