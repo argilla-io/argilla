@@ -83,7 +83,9 @@ class LoguruLoggerHandler(logging.Handler):
         if not self.is_available:
             logging.getLogger(__name__).warning(
                 "Cannot find required package for logging.\n"
-                "Please, install `loguru` if you want to enable server api logging"
+                "Please, install `loguru` by typing:\n"
+                "pip install loguru\n"
+                "if you want to enable enhanced server api logging"
             )
             self.emit = lambda record: None
 
@@ -99,5 +101,5 @@ class LoguruLoggerHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        log = logger.bind(request_id="app")
+        log = logger.bind(request_id="rubrix")
         log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
