@@ -187,7 +187,7 @@ class TokenClassificationRecord(_Validators):
         prediction:
             A list of tuples containing the predictions for the record. The first entry of the tuple is the name of
             predicted entity, the second and third entry correspond to the start and stop character index of the entity.
-            EXPERIMENTAL: The fourth entry is optional and corresponds to the score of the entity.
+            The fourth entry is optional and corresponds to the score of the entity (a float number between 0 and 1).
         prediction_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation:
@@ -233,6 +233,21 @@ class TokenClassificationRecord(_Validators):
     event_timestamp: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
+
+    @validator("prediction")
+    def add_default_score(
+        cls,
+        prediction: Optional[
+            List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+        ],
+    ):
+        """Adds the default score to the predictions if it is missing"""
+        if prediction is None:
+            return prediction
+        return [
+            (pred[0], pred[1], pred[2], 1.0) if len(pred) == 3 else pred
+            for pred in prediction
+        ]
 
 
 class Text2TextRecord(_Validators):
