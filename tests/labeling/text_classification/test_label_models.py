@@ -97,40 +97,6 @@ class TestLabelModel:
         with pytest.raises(NotImplementedError):
             label_model.predict()
 
-    @pytest.mark.parametrize("int2int", [None, {2: 0, 3: 1}])
-    def test_compute_metrics(self, int2int):
-        weak_labels = SimpleNamespace()
-        weak_labels.int2label = {0: "pos", 1: "neg"}
-
-        lm = LabelModel(weak_labels=weak_labels)
-        metrics = lm._compute_metrics(
-            annotation=np.array([0, 0, 1, 1, 1])
-            if int2int is None
-            else np.array([2, 2, 3, 3, 3]),
-            prediction=np.array([0, 1, 0, 1, 0])
-            if int2int is None
-            else np.array([2, 3, 2, 3, 2]),
-            int2int=int2int,
-        )
-
-        assert metrics == {
-            "accuracy": 0.4,
-            "micro_precision": 0.4,
-            "micro_recall": 0.4,
-            "micro_f1": pytest.approx(0.4),
-            "macro_precision": pytest.approx(5 / 6 / 2.0),
-            "macro_recall": pytest.approx(5 / 6 / 2.0),
-            "macro_f1": 0.4,
-            "precision_pos": 1 / 3.0,
-            "recall_pos": 0.5,
-            "f1_pos": 0.4,
-            "support_pos": 2,
-            "precision_neg": 0.5,
-            "recall_neg": 1 / 3.0,
-            "f1_neg": 0.4,
-            "support_neg": 3,
-        }
-
 
 class TestSnorkel:
     def test_not_installed(self, monkeypatch):
@@ -293,9 +259,10 @@ class TestSnorkel:
         )
 
         label_model = Snorkel(weak_labels)
-        metrics = label_model.score(tie_break_policy=policy)
+        metrics = label_model.score(tie_break_policy=policy, output_dict=True)
 
         assert metrics["accuracy"] == pytest.approx(expected)
+        assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
 
     def test_score_without_annotations(self, weak_labels):
         weak_labels._annotation_array = np.array([], dtype=np.short)
@@ -314,7 +281,7 @@ class TestSnorkel:
         label_model = Snorkel(weak_labels_from_guide)
         label_model.fit(seed=43)
 
-        metrics = label_model.score()
+        metrics = label_model.score(output_dict=True)
         assert metrics["accuracy"] == pytest.approx(0.8947368421052632)
 
         records = label_model.predict()
@@ -517,10 +484,11 @@ class TestFlyingSquid:
         monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
 
         label_model = FlyingSquid(weak_labels)
-        metrics = label_model.score()
+        metrics = label_model.score(output_dict=True)
 
         assert "accuracy" in metrics
         assert metrics["accuracy"] == pytest.approx(1.0)
+        assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
 
     @pytest.mark.parametrize(
         "tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)]
@@ -536,9 +504,13 @@ class TestFlyingSquid:
         monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
 
         label_model = FlyingSquid(weak_labels)
-        metrics = label_model.score(tie_break_policy=tbp, verbose=vrb)
+        metrics = label_model.score(tie_break_policy=tbp, verbose=vrb, output_dict=True)
 
         assert metrics["accuracy"] == pytest.approx(expected)
+        if tbp == "abstain":
+            assert list(metrics.keys())[:1] == ["negative"]
+        elif tbp == "random":
+            assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
 
     def test_score_not_implemented_tbp(self, weak_labels):
         label_model = FlyingSquid(weak_labels)
@@ -551,7 +523,7 @@ class TestFlyingSquid:
         label_model = FlyingSquid(weak_labels_from_guide)
         label_model.fit()
 
-        metrics = label_model.score()
+        metrics = label_model.score(output_dict=True)
         assert metrics["accuracy"] == pytest.approx(0.9282296650717703)
 
         records = label_model.predict()
