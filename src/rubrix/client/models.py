@@ -292,9 +292,7 @@ class Text2TextRecord(_Validators):
         """Preprocess the predictions and wraps them in a tuple if needed"""
         if prediction is None:
             return prediction
-        if all([isinstance(pred, tuple) for pred in prediction]):
-            return prediction
-        return [(text, 1.0) for text in prediction]
+        return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
 Record = Union[TextClassificationRecord, TokenClassificationRecord, Text2TextRecord]
