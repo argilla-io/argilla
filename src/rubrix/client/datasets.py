@@ -441,7 +441,7 @@ class DatasetForTokenClassification(DatasetBase):
             ...     "text": ["my example"],
             ...     "tokens": [["my", "example"]],
             ...     "prediction": [
-            ...         [{"label": "LABEL1", "start": 3, "end": 10}]
+            ...         [{"label": "LABEL1", "start": 3, "end": 10, "score": 0.5}]
             ...     ]
             ... })
             >>> DatasetForTokenClassification.from_datasets(ds)
@@ -460,23 +460,30 @@ class DatasetForTokenClassification(DatasetBase):
     def _to_datasets_dict(self) -> Dict:
         """Helper method to put token classification records in a `datasets.Dataset`"""
         # create a dict first, where we make the necessary transformations
-        def entities_to_dict(annotation_or_prediction: str):
+        def entities_to_dict(
+            entities: Optional[
+                List[Union[Tuple[str, int, int, float], Tuple[str, int, int]]]
+            ]
+        ) -> Optional[List[Dict[str, Union[str, int, float]]]]:
+            if entities is None:
+                return None
             return [
-                [
-                    {"label": ent[0], "start": ent[1], "end": ent[2]}
-                    for ent in getattr(rec, annotation_or_prediction)
-                ]
-                if getattr(rec, annotation_or_prediction) is not None
-                else None
-                for rec in self._records
+                {"label": ent[0], "start": ent[1], "end": ent[2]}
+                if len(ent) == 3
+                else {"label": ent[0], "start": ent[1], "end": ent[2], "score": ent[3]}
+                for ent in entities
             ]
 
         ds_dict = {}
         for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
-                ds_dict[key] = entities_to_dict(key)
+                ds_dict[key] = [
+                    entities_to_dict(rec.prediction) for rec in self._records
+                ]
             elif key == "annotation":
-                ds_dict[key] = entities_to_dict(key)
+                ds_dict[key] = [
+                    entities_to_dict(rec.annotation) for rec in self._records
+                ]
             elif key == "id":
                 ds_dict[key] = [str(rec.id) for rec in self._records]
             else:
@@ -489,7 +496,12 @@ class DatasetForTokenClassification(DatasetBase):
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTokenClassification":
         def entities_to_tuple(entities):
-            return [(ent["label"], ent["start"], ent["end"]) for ent in entities]
+            return [
+                (ent["label"], ent["start"], ent["end"])
+                if len(ent) == 3
+                else (ent["label"], ent["start"], ent["end"], ent["score"] or 1.0)
+                for ent in entities
+            ]
 
         records = []
         for row in dataset:
