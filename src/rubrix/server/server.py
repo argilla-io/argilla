@@ -33,7 +33,7 @@ from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
-from ..logging import InterceptHandler
+from ..logging import LoguruLoggerHandler
 from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
@@ -117,7 +117,7 @@ def configure_app_security(app: FastAPI):
 
 def configure_app_logging(app: FastAPI):
     """Configure app logging using"""
-    intercept_handler = InterceptHandler()
+    intercept_handler = LoguruLoggerHandler()
 
     if not intercept_handler.is_available:
         return

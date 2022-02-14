@@ -60,7 +60,7 @@ class LoggingMixin:
         return self.__logger__
 
 
-class InterceptHandler(logging.Handler):
+class LoguruLoggerHandler(logging.Handler):
     """This logging handler enables an easy way to use loguru fo all built-in logger traces"""
 
     __LOGLEVEL_MAPPING__ = {
