@@ -31,15 +31,14 @@
         :span-id="i"
         :spans="textSpans"
         :dataset="dataset"
+        :suggestedLabel="suggestedLabel"
         :class="[
           isSelected(i) ? 'selected' : '',
           isLastSelected(i) ? 'last-selected' : '',
         ]"
-        :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
-        @setLastSelectedEntity="onSetLastSelectedEntity"
         @changeEntityLabel="onChangeEntityLabel"
         @removeEntity="onRemoveEntity"
         @updateRecordEntities="$emit('updateRecordEntities')"
@@ -70,7 +69,7 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
-      lastSelectedEntity: {},
+      suggestedLabel: undefined,
     };
   },
   computed: {
@@ -159,8 +158,10 @@ export default {
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
+      this.suggestedLabel = undefined;
     },
     onStartSelection(spanId) {
+      this.suggestedLabel = undefined;
       this.selectionStart = spanId;
     },
     onEndSelection(spanId) {
@@ -171,7 +172,6 @@ export default {
       const to = Math.max(this.selectionStart, this.selectionEnd);
       const startToken = this.textSpans[from].tokens[0];
       const endToken = this.textSpans[to].tokens.reverse()[0];
-
       let entities = [...this.entities];
       entities.push({
         start: startToken.start,
@@ -207,6 +207,7 @@ export default {
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);
       const end = Math.max(this.selectionStart, this.selectionEnd);
+      this.suggestEntity();
       if (i >= init && i <= end) {
         return true;
       }
@@ -219,9 +220,16 @@ export default {
       }
       return false;
     },
-    onSetLastSelectedEntity(entity) {
-      this.lastSelectedEntity = entity;
-    },
+    suggestEntity() {
+      const from = Math.min(this.selectionStart, this.selectionEnd);
+      const to = Math.max(this.selectionStart, this.selectionEnd);
+      const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
+      const endToken = this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
+      const matchedPrediction = this.record.prediction.entities.find(ent => ent.start === (startToken && startToken.start) && ent.end === (endToken && endToken.end));
+      if (matchedPrediction) {
+        this.suggestedLabel = matchedPrediction.label;
+      }
+    }
   },
 };
 </script>
