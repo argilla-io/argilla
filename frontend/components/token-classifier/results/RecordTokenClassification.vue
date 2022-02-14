@@ -54,11 +54,14 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 52px 20px 20px 65px;
+  padding: 52px 20px 20px 25px;
   display: block;
   margin-bottom: 0;
   @include font-size(18px);
   line-height: 34px;
+  .list__item--annotation-mode & {
+    padding-left: 65px;
+  }
 }
 .content {
   position: relative;
