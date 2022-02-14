@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
+from rubrix.client.datasets import DatasetForTextClassification
 from rubrix.client.models import TextClassificationRecord
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class SortBy(Enum):
 
 
 def find_label_errors(
-    records: List[TextClassificationRecord],
+    records: Union[List[TextClassificationRecord], DatasetForTextClassification],
     sort_by: Union[str, SortBy] = "likelihood",
     metadata_key: str = "label_error_candidate",
     n_jobs: Optional[int] = 1,

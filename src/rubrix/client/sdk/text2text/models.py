@@ -93,7 +93,7 @@ class Text2TextRecord(CreationText2TextRecord):
             metadata=self.metadata or {},
             id=self.id,
             event_timestamp=self.event_timestamp,
-            metrics=self.metrics,
+            metrics=self.metrics or None,
         )
 
 

@@ -28,6 +28,14 @@ import pkg_resources
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
+from rubrix.client.datasets import (
+    Dataset,
+    DatasetForText2Text,
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+    read_datasets,
+    read_pandas,
+)
 from rubrix.client.models import (
     BulkResponse,
     Record,
@@ -143,7 +151,7 @@ def set_workspace(ws: str) -> None:
 
 
 def log(
-    records: Union[Record, Iterable[Record]],
+    records: Union[Record, Iterable[Record], Dataset],
     name: str,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
@@ -206,8 +214,8 @@ def load(
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
     as_pandas: bool = True,
-) -> Union[pandas.DataFrame, List[Record]]:
-    """Loads a dataset as a pandas DataFrame or a list of records.
+) -> Union[pandas.DataFrame, Dataset]:
+    """Loads a dataset as a pandas DataFrame or a Dataset.
 
     Args:
         name: The dataset name.
@@ -215,10 +223,10 @@ def load(
             `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
-        as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
+        as_pandas: If True, return a pandas DataFrame. If False, return a Dataset.
 
     Returns:
-        The dataset as a pandas Dataframe or a list of records.
+        The dataset as a pandas Dataframe or a Dataset.
 
     Examples:
         >>> import rubrix as rb
