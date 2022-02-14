@@ -441,7 +441,7 @@ class DatasetForTokenClassification(DatasetBase):
             ...     "text": ["my example"],
             ...     "tokens": [["my", "example"]],
             ...     "prediction": [
-            ...         [{"label": "LABEL1", "start": 3, "end": 10, "score": 0.5}]
+            ...         [{"label": "LABEL1", "start": 3, "end": 10, "score": 1.0}]
             ...     ]
             ... })
             >>> DatasetForTokenClassification.from_datasets(ds)
