@@ -259,10 +259,12 @@ class TestSnorkel:
         )
 
         label_model = Snorkel(weak_labels)
-        metrics = label_model.score(tie_break_policy=policy, output_dict=True)
+        metrics = label_model.score(tie_break_policy=policy)
 
         assert metrics["accuracy"] == pytest.approx(expected)
         assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
+
+        assert isinstance(label_model.score(output_str=True), str)
 
     def test_score_without_annotations(self, weak_labels):
         weak_labels._annotation_array = np.array([], dtype=np.short)
@@ -281,7 +283,7 @@ class TestSnorkel:
         label_model = Snorkel(weak_labels_from_guide)
         label_model.fit(seed=43)
 
-        metrics = label_model.score(output_dict=True)
+        metrics = label_model.score()
         assert metrics["accuracy"] == pytest.approx(0.8947368421052632)
 
         records = label_model.predict()
@@ -484,11 +486,13 @@ class TestFlyingSquid:
         monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
 
         label_model = FlyingSquid(weak_labels)
-        metrics = label_model.score(output_dict=True)
+        metrics = label_model.score()
 
         assert "accuracy" in metrics
         assert metrics["accuracy"] == pytest.approx(1.0)
         assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
+
+        assert isinstance(label_model.score(output_str=True), str)
 
     @pytest.mark.parametrize(
         "tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)]
@@ -504,7 +508,7 @@ class TestFlyingSquid:
         monkeypatch.setattr(FlyingSquid, "_predict", mock_predict)
 
         label_model = FlyingSquid(weak_labels)
-        metrics = label_model.score(tie_break_policy=tbp, verbose=vrb, output_dict=True)
+        metrics = label_model.score(tie_break_policy=tbp, verbose=vrb)
 
         assert metrics["accuracy"] == pytest.approx(expected)
         if tbp == "abstain":
@@ -523,7 +527,7 @@ class TestFlyingSquid:
         label_model = FlyingSquid(weak_labels_from_guide)
         label_model.fit()
 
-        metrics = label_model.score(output_dict=True)
+        metrics = label_model.score()
         assert metrics["accuracy"] == pytest.approx(0.9282296650717703)
 
         records = label_model.predict()

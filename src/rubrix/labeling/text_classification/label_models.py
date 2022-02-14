@@ -287,8 +287,8 @@ class Snorkel(LabelModel):
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-        output_dict: bool = False,
-    ) -> Dict[str, float]:
+        output_str: bool = False,
+    ) -> Union[Dict[str, float], str]:
         """Returns some scores/metrics of the label model with respect to the annotated records.
 
         The metrics are:
@@ -309,10 +309,10 @@ class Snorkel(LabelModel):
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
-            output_dict: If True, return output as dict.
+            output_str: If True, return output as nicely formatted string.
 
         Returns:
-            The scores/metrics as a nicely formatted str or dictionary.
+            The scores/metrics in a dictionary or as a nicely formatted str.
 
         .. note:: Metrics are only calculated over non-abstained predictions!
 
@@ -362,7 +362,7 @@ class Snorkel(LabelModel):
             annotation,
             predictions[idx],
             target_names=target_names[: annotation.max() + 1],
-            output_dict=output_dict,
+            output_dict=not output_str,
         )
 
 
@@ -604,8 +604,8 @@ class FlyingSquid(LabelModel):
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
-        output_dict: bool = False,
-    ) -> Union[str, Dict[str, float]]:
+        output_str: bool = False,
+    ) -> Union[Dict[str, float], str]:
         """Returns some scores/metrics of the label model with respect to the annotated records.
 
         The metrics are:
@@ -626,10 +626,10 @@ class FlyingSquid(LabelModel):
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
             verbose: If True, print out messages of the progress to stderr.
-            output_dict: If True, return output as dict.
+            output_str: If True, return output as nicely formatted string.
 
         Returns:
-            The scores/metrics as a nicely formatted str or dictionary.
+            The scores/metrics in a dictionary or as a nicely formatted str.
 
         .. note:: Metrics are only calculated over non-abstained predictions!
 
@@ -688,7 +688,7 @@ class FlyingSquid(LabelModel):
             annotation,
             prediction,
             target_names=self._labels[: annotation.max() + 1],
-            output_dict=output_dict,
+            output_dict=not output_str,
         )
 
 
