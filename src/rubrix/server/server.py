@@ -101,11 +101,10 @@ def configure_app_startup(app: FastAPI):
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
                 "is not available or not responding.\n"
-                "Please make sure your Elasticsearch instance is launched and correctly running and "
+                "Please make sure your Elasticsearch instance is launched and correctly running and\n"
                 "you have the necessary access permissions. "
                 "Once you have verified this, restart the Rubrix server.\n"
-                f"Error detail: [{error}]"
-            )
+            ) from error
 
 
 def configure_app_security(app: FastAPI):
