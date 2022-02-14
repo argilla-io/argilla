@@ -127,6 +127,12 @@ export default {
     .span__text {
       opacity: 0;
     }
+    .highlight__content__text {
+      opacity: 0;
+    }
+  };
+  ::v-deep  .highlight-text {
+    opacity: 0;
   }
 }
 // .prediction {
@@ -144,7 +150,4 @@ export default {
 //   }
 // }
 
-.prediction ::v-deep  .highlight-text {
-  opacity: 0;
-}
 </style>
