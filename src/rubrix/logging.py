@@ -53,3 +53,32 @@ class LoggingMixin:
     def logger(self) -> logging.Logger:
         """Return the logger configured for the class"""
         return self.__logger__
+
+
+class InterceptHandler(logging.Handler):
+    """This logging handler enables an easy way to use loguru fo all built-in logger traces"""
+
+    __LOGLEVEL_MAPPING__ = {
+        50: "CRITICAL",
+        40: "ERROR",
+        30: "WARNING",
+        20: "INFO",
+        10: "DEBUG",
+        0: "NOTSET",
+    }
+
+    def emit(self, record):
+        from loguru import logger
+
+        try:
+            level = logger.level(record.levelname).name
+        except AttributeError:
+            level = self.__LOGLEVEL_MAPPING__[record.levelno]
+
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        log = logger.bind(request_id="app")
+        log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
