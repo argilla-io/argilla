@@ -54,13 +54,6 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  font-weight: 600;
-  line-height: 16px;
-}
-</style>
 <style lang="scss" scoped>
 .record {
   &__content {
