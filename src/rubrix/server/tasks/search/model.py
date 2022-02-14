@@ -34,7 +34,7 @@ class BaseSearchQuery(BaseModel):
     """
 
     query_text: Optional[str] = None
-    # advanced_query_text: bool = False
+    advanced_query_dsl: bool = False
 
     ids: Optional[List[Union[str, int]]]
 
@@ -46,6 +46,7 @@ class BaseSearchQuery(BaseModel):
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     def as_elasticsearch(self) -> Dict[str, Any]:
+        # TODO: Hide transformations in DAO component
         raise NotImplementedError()
 
 

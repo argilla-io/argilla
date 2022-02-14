@@ -14,6 +14,7 @@ from rubrix.server.tasks.commons.metrics.model.base import (
     PythonMetric,
 )
 from rubrix.server.tasks.commons.task_factory import TaskFactory
+from rubrix.server.tasks.search.query_builder import EsQueryBuilder
 
 GenericQuery = TypeVar("GenericQuery")
 
@@ -27,6 +28,7 @@ class MetricsService:
     def get_instance(
         cls,
         dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+        query_builder: EsQueryBuilder = Depends(EsQueryBuilder.get_instance),
     ) -> "MetricsService":
         """
         Creates the service instance.
@@ -42,10 +44,10 @@ class MetricsService:
 
         """
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao)
+            cls._INSTANCE = cls(dao, query_builder=query_builder)
         return cls._INSTANCE
 
-    def __init__(self, dao: DatasetRecordsDAO):
+    def __init__(self, dao: DatasetRecordsDAO, query_builder: EsQueryBuilder):
         """
         Creates a service instance
 
@@ -55,6 +57,7 @@ class MetricsService:
             The dataset records dao
         """
         self.__dao__ = dao
+        self.__query_builder__ = query_builder
 
     @staticmethod
     def find_metric_by_id(metric: str, task: TaskType) -> Optional[BaseMetric]:
@@ -132,7 +135,11 @@ class MetricsService:
         elif isinstance(_metric, PythonMetric):
             records = self.__dao__.scan_dataset(
                 dataset,
-                search=RecordSearch(query=query.as_elasticsearch() if query else None),
+                search=RecordSearch(
+                    query=self.__query_builder__(dataset, query=query)
+                    if query
+                    else None
+                ),
             )
             record_class = TaskFactory.get_task_record(dataset.task)
             return _metric.apply(map(record_class.parse_obj, records))
@@ -172,7 +179,7 @@ class MetricsService:
             dataset,
             size=0,  # No records at all
             search=RecordSearch(
-                query=query.as_elasticsearch() if query else None,
+                query=self.__query_builder__(dataset, query=query) if query else None,
                 aggregations=metric_aggregation,
                 include_default_aggregations=False,
             ),
