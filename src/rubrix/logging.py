@@ -21,6 +21,11 @@ import logging
 from logging import Logger
 from typing import Type
 
+try:
+    from loguru import logger
+except ModuleNotFoundError:
+    logger = None
+
 
 def full_qualified_class_name(_class: Type) -> str:
     """Calculates the full qualified name (module + class) of a class"""
@@ -67,8 +72,22 @@ class InterceptHandler(logging.Handler):
         0: "NOTSET",
     }
 
-    def emit(self, record):
-        from loguru import logger
+    @property
+    def is_available(self) -> bool:
+        """Return True if handler can tackle log records. False otherwise"""
+        return logger is not None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not self.is_available:
+            logging.getLogger(__name__).warning(
+                "Cannot find required package for logging.\n"
+                "Please, install `loguru` if you want to enable server api logging"
+            )
+            self.emit = lambda record: None
+
+    def emit(self, record: logging.LogRecord):
 
         try:
             level = logger.level(record.levelname).name

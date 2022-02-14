@@ -85,7 +85,7 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_app_startup(app: FastAPI):
+def configure_app_storage(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
         import opensearchpy
@@ -118,6 +118,9 @@ def configure_app_security(app: FastAPI):
 def configure_app_logging(app: FastAPI):
     """Configure app logging using"""
     intercept_handler = InterceptHandler()
+
+    if not intercept_handler.is_available:
+        return
 
     def _inner_logging_config():
         logging.basicConfig(handlers=[intercept_handler], level=logging.WARNING)
@@ -157,6 +160,6 @@ for app_configure in [
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_app_startup,
+    configure_app_storage,
 ]:
     app_configure(app)
