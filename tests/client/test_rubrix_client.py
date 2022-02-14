@@ -23,7 +23,9 @@ import pytest
 
 import rubrix
 from rubrix import (
+    DatasetForText2Text,
     DatasetForTextClassification,
+    DatasetForTokenClassification,
     Text2TextRecord,
     TextClassificationRecord,
 )
@@ -150,12 +152,13 @@ def test_delete_with_errors(monkeypatch, status, error_type):
         rubrix.delete("dataset")
 
 
-# TODO: Add tokenclassification and text2text records after their client models are updated, see issue #1140
 @pytest.mark.parametrize(
     "records, dataset_class",
     [
         ("singlelabel_textclassification_records", DatasetForTextClassification),
         ("multilabel_textclassification_records", DatasetForTextClassification),
+        ("tokenclassification_records", DatasetForTokenClassification),
+        ("text2text_records", DatasetForText2Text),
     ],
 )
 def test_general_log_load(monkeypatch, request, records, dataset_class):
@@ -169,10 +172,13 @@ def test_general_log_load(monkeypatch, request, records, dataset_class):
 
     records = request.getfixturevalue(records)
 
+    # log single records
     rubrix.log(records[0], name=dataset_names[0])
     dataset = rubrix.load(dataset_names[0], as_pandas=False)
+    records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
 
+    # log list of records
     rubrix.log(records, name=dataset_names[1])
     dataset = rubrix.load(dataset_names[1], as_pandas=False)
     assert len(dataset) == len(records)
@@ -180,6 +186,7 @@ def test_general_log_load(monkeypatch, request, records, dataset_class):
         expected.metrics = record.metrics
         assert record == expected
 
+    # log dataset
     rubrix.log(dataset_class(records), name=dataset_names[2])
     dataset = rubrix.load(dataset_names[2], as_pandas=False)
     assert len(dataset) == len(records)
