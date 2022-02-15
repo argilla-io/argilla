@@ -95,12 +95,6 @@ export default {
       default: () => ({}),
     },
   },
-  async fetch() {
-    if (!this.dataset.rules && this.dataset.task === "TextClassification") {
-      console.log("fetch");
-      await this.dataset.refreshRules();
-    }
-  },
   data: () => {
     return {
       initialVisibleGroup: undefined,
