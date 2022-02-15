@@ -182,10 +182,9 @@ class TokenClassificationService:
             the provided query filters. Optional
 
         """
-        for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query.as_elasticsearch())
-        ):
-            yield TokenClassificationRecord.parse_obj(db_record)
+        yield from self.__search__.scan_records(
+            dataset, query=query, record_type=TokenClassificationRecord
+        )
 
 
 _instance = None

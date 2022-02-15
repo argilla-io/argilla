@@ -9,7 +9,12 @@ from rubrix.server.tasks.commons import BaseRecord, EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
-from rubrix.server.tasks.search.model import BaseSearchQuery, SearchResults, SortConfig
+from rubrix.server.tasks.search.model import (
+    BaseSearchQuery,
+    Record,
+    SearchResults,
+    SortConfig,
+)
 from rubrix.server.tasks.search.query_builder import EsQueryBuilder
 
 
@@ -100,3 +105,15 @@ class SearchRecordsService:
             records=[record_type.parse_obj(r) for r in results.records],
             metrics=metrics_results if metrics_results else {},
         )
+
+    def scan_records(
+        self,
+        dataset: Dataset,
+        query: BaseSearchQuery,
+        record_type: Type[BaseRecord],
+    ) -> Iterable[Record]:
+        """Scan records for a queried"""
+        for doc in self.__dao__.scan_dataset(
+            dataset, search=RecordSearch(query=self.__query_builder__(dataset, query))
+        ):
+            yield record_type.parse_obj(doc)

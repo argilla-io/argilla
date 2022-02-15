@@ -25,7 +25,6 @@ from rubrix.server.tasks.commons import (
     SortableField,
     TaskType,
 )
-from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
@@ -47,10 +46,6 @@ from rubrix.server.tasks.text_classification.dao.es_config import (
 )
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
-)
-
-extends_index_dynamic_templates(
-    {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
 )
 
 
@@ -219,13 +214,12 @@ class TextClassificationService:
             the provided query filters. Optional
 
         """
-        for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query.as_elasticsearch())
-        ):
-            yield TextClassificationRecord.parse_obj(db_record)
+        yield from self.__search__.scan_records(
+            dataset, query=query, record_type=TextClassificationRecord
+        )
 
     def _check_multi_label_integrity(
-        self, dataset: Dataset, records: List[TextClassificationRecord]
+        self, dataset: Dataset, records: List[CreationTextClassificationRecord]
     ):
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
