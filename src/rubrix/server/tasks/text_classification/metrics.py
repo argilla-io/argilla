@@ -28,7 +28,7 @@ class F1Metric(PythonMetric):
 
     def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
-        # TODO: This must be precalculated with using a global dataset metric
+        # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {
             label for record in filtered_records for label in record.annotated_as
         }
