@@ -52,6 +52,9 @@ import { mapActions } from "vuex";
 
 export default {
   props: {
+    entities: {
+      type: Array,
+    },
     dataset: {
       type: Object,
       required: true,
@@ -73,11 +76,6 @@ export default {
     };
   },
   computed: {
-    entities() {
-      return this.origin === "annotation"
-        ? this.record.annotatedEntities
-        : this.record.prediction && this.record.prediction.entities;
-    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {

@@ -25,6 +25,7 @@
         :origin="origin"
         :record="record"
         :class="origin"
+        :entities="getEntitiesByOrigin(origin)"
       />
     </div>
     <div class="content__actions-buttons">
@@ -61,6 +62,11 @@ export default {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
     }),
+    getEntitiesByOrigin(origin) {
+      return origin === "annotation"
+        ? this.record.annotatedEntities
+        : this.record.prediction && this.record.prediction.entities;
+    },
     async onValidate(record) {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
