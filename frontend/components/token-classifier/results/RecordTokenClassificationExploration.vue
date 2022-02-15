@@ -73,9 +73,6 @@ export default {
   }
 }
 
-.prediction ::v-deep  .highlight-text {
-  opacity: 0;
-}
 .prediction {
   pointer-events: none;
   ::v-deep {
