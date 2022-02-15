@@ -783,7 +783,7 @@ class Epoxy(FlyingSquid):
         self.embeddings = embeddings
 
     @classmethod
-    def _fit_and_score(cls, weak_labels, embeddings, score="accuracy", thresholds=None, tie_break_policy="random"):
+    def _fit_and_score(cls, weak_labels, embeddings=None, score="accuracy", thresholds=None, tie_break_policy="random"):
         epoxy_instance = cls(weak_labels, thresholds=thresholds, embeddings=embeddings)
         epoxy_instance.fit()
         result = epoxy_instance.score(tie_break_policy=tie_break_policy)[score]
@@ -823,7 +823,6 @@ class Epoxy(FlyingSquid):
         for threshold in cls._generate_first_search_space(weak_labels, num=first_space_num):
 
             result = cls._fit_and_score(
-                cls, 
                 weak_labels,
                 score=score,
                 embeddings=embeddings, 
@@ -833,6 +832,20 @@ class Epoxy(FlyingSquid):
             if result >= max_metric:
                 output = threshold
                 max_metric = result
+
+            _LOGGER.debug(
+                    """
+                    Searching on the first search space.
+                    Current values:
+                    - current threshold: {0}
+                    - best threshold: {1}
+                    """.format(str(threshold), str(output))
+            )
+
+
+        _LOGGER.debug(
+            "Exited from the first search space. Best threshold: {0}".format(str(output))
+        )
 
         if not second_space_subset:
             second_space_subset = [i for i in range(len(output))]
@@ -845,14 +858,24 @@ class Epoxy(FlyingSquid):
                 num=second_space_num,
                 subset=second_space_subset):
 
+                _LOGGER.debug(
+                    """
+                    Searching on the second search space.
+                    Current values:
+                    - threshold: {0}
+                    - index: {1}
+                    - second_space_subset: {2} 
+                    """.format(str(threshold), str(index), str(second_space_subset))
+                )
+
                 if not current_index:
                     current_index = index
                 elif current_index != index:
-                    second_space_subset.remove(index)
+                    second_space_subset.remove(current_index)
+                    current_index = None
                     break
 
                 result = cls._fit_and_score(
-                    cls, 
                     weak_labels,
                     score=score,
                     embeddings=embeddings, 
@@ -863,9 +886,13 @@ class Epoxy(FlyingSquid):
                     output = threshold
                     max_metric = result
             
+        _LOGGER.debug("End of the grid search. Best thresholds: {0}".format(output))
         return output
 
     def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
+
+        from epoxy import Epoxy as EpoxyModel
+
         L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
 
         if not self.thresholds:

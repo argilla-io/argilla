@@ -53,7 +53,7 @@ def weak_labels(monkeypatch):
 
 
 @pytest.fixture
-def word_embeddings():
+def embeddings():
     np.random.seed(0)
     word_embeddings = np.random.random((4,1024))
     return word_embeddings
@@ -568,12 +568,8 @@ class TestFlyingSquid:
         ]
 
 class TestEpoxy:
-    def test_not_installed(self, monkeypatch):
-        monkeypatch.setitem(sys.modules, "epoxy", None)
-        with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):
-            Epoxy(None)
 
     def test_grid_search(self, weak_labels, embeddings):
-        label_model = Epoxy(weak_labels, embeddings)
-        threshold = label_model.grid_search_threshold(weak_labels, embeddings)
+        label_model = Epoxy(weak_labels, thresholds=None, embeddings=embeddings)
+        threshold = label_model.grid_search_threshold(weak_labels, embeddings=embeddings)
         assert True # to-do
