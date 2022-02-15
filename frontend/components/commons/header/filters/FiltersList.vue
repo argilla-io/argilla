@@ -60,6 +60,10 @@
               @apply="onApply"
             />
           </span>
+          <FilterUncoveredByRules
+            v-if="showUncoveredByRulesFilter"
+            :dataset="dataset"
+          />
           <a
             v-if="
               initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
@@ -90,6 +94,12 @@ export default {
       type: Object,
       default: () => ({}),
     },
+  },
+  async fetch() {
+    if (!this.dataset.rules && this.dataset.task === "TextClassification") {
+      console.log("fetch");
+      await this.dataset.refreshRules();
+    }
   },
   data: () => {
     return {
@@ -166,6 +176,13 @@ export default {
     },
     isMultiLabel() {
       return this.dataset.isMultiLabel;
+    },
+    showUncoveredByRulesFilter() {
+      return (
+        this.initialVisibleGroup === "Annotations" &&
+        this.dataset.rules &&
+        this.dataset.rules.length
+      );
     },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
@@ -337,7 +354,6 @@ $number-size: 18px;
 }
 
 .filter {
-  display: block;
   margin-bottom: 1em;
 }
 </style>
