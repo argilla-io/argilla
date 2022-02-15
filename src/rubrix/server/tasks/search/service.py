@@ -9,22 +9,34 @@ from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import BaseSearchQuery, SearchResults, SortConfig
+from rubrix.server.tasks.search.query_builder import EsQueryBuilder
 
 
 class SearchRecordsService:
     """Generic service for search records operations"""
 
-    def __init__(self, dao: DatasetRecordsDAO, metrics: MetricsService):
-        self.__dao__ = dao
-        self.__metrics__ = metrics
+    _INSTANCE: "SearchRecordsService" = None
 
     @classmethod
     def get_instance(
         cls,
         dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
+        query_builder: EsQueryBuilder = Depends(EsQueryBuilder.get_instance),
     ):
-        return cls(dao=dao, metrics=metrics)
+        if not cls._INSTANCE:
+            cls._INSTANCE = cls(dao=dao, metrics=metrics, query_builder=query_builder)
+        return cls._INSTANCE
+
+    def __init__(
+        self,
+        dao: DatasetRecordsDAO,
+        metrics: MetricsService,
+        query_builder: EsQueryBuilder,
+    ):
+        self.__dao__ = dao
+        self.__metrics__ = metrics
+        self.__query_builder__ = query_builder
 
     def search(
         self,
@@ -45,8 +57,7 @@ class SearchRecordsService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                # TODO: This must be hidden inside dao implementation
-                query=query.as_elasticsearch(),
+                query=self.__query_builder__(dataset, query),
                 sort=sort_by2elasticsearch(
                     sort_config.sort_by,
                     valid_fields=[

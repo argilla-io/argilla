@@ -75,7 +75,7 @@ def test_to_dataframe(monkeypatch, singlelabel_textclassification_records):
     df = DatasetBase(singlelabel_textclassification_records).to_pandas()
 
     assert isinstance(df, pd.DataFrame)
-    assert len(df) == 4
+    assert len(df) == 5
     assert list(df.columns) == list(TextClassificationRecord.__fields__)
 
 
@@ -155,7 +155,7 @@ def test_iter_len_getitem(monkeypatch, singlelabel_textclassification_records):
     for record, expected in zip(dataset, singlelabel_textclassification_records):
         assert record == expected
 
-    assert len(dataset) == 4
+    assert len(dataset) == 5
     assert dataset[1] is singlelabel_textclassification_records[1]
 
 
@@ -172,9 +172,9 @@ def test_setitem_delitem(monkeypatch, singlelabel_textclassification_records):
 
     assert dataset._records[0] is record
 
-    assert len(dataset) == 4
+    assert len(dataset) == 5
     del dataset[1]
-    assert len(dataset) == 3
+    assert len(dataset) == 4
 
     with pytest.raises(
         WrongRecordTypeError,
@@ -258,6 +258,7 @@ class TestDatasetForTokenClassification:
                 "label": datasets.Value("string"),
                 "start": datasets.Value("int64"),
                 "end": datasets.Value("int64"),
+                "score": datasets.Value("float64"),
             }
         ]
         assert dataset_ds.features["annotation"] == [
