@@ -34,6 +34,7 @@
       @click="onActiveEntity(entity)"
     >
       {{ entity.text }}
+      <span v-if="entity.shortcut" class="shortcut">[{{entity.shortcut}}]</span>
     </span>
     <ReButton
       v-if="dataset.entities.length > entitiesNumber"
@@ -63,9 +64,11 @@ export default {
   }),
   computed: {
     visibleEntities() {
+      const characters = "1234567890".split("");
       let entities = [...this.dataset.entities]
         .sort((a, b) => a.text.localeCompare(b.text))
-        .map((ent) => ({
+        .map((ent, index) => ({
+          shortcut: characters[index],
           ...ent,
         }));
 
@@ -137,7 +140,8 @@ export default {
   padding: 0.3em;
   margin: 1em 1em 0 0;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   max-height: 28px;
   border: 2px solid transparent;
@@ -151,11 +155,10 @@ export default {
     cursor: default;
     pointer-events: none;
   }
-  &__sort-code {
-    @include font-size(12px);
-    color: $font-medium-color;
+  .shortcut {
+    @include font-size(14px);
     font-weight: lighter;
-    margin-left: 0.5em;
+    margin-left: 1em;
     .non-selectable & {
       display: none;
     }
