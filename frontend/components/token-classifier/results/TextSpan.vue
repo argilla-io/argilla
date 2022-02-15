@@ -172,8 +172,10 @@ export default {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
     suggestedEntity() {
-      return this.formattedEntities.find(ent => ent.text === this.suggestedLabel)
-    }
+      return this.formattedEntities.find(
+        (ent) => ent.text === this.suggestedLabel
+      );
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
@@ -185,7 +187,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateLastSelectedEntity: "entities/token_classification/updateLastSelectedEntity",
+      updateLastSelectedEntity:
+        "entities/token_classification/updateLastSelectedEntity",
     }),
     startSelection() {
       if (this.annotationEnabled) {
@@ -204,9 +207,11 @@ export default {
       }
     },
     openTagSelector() {
-      this.showEntitiesSelector = !this.showEntitiesSelector;
-      this.startSelection();
-      this.endSelection();
+      if (this.span.origin !== "prediction") {
+        this.showEntitiesSelector = !this.showEntitiesSelector;
+        this.startSelection();
+        this.endSelection();
+      }
     },
     removeEntity() {
       this.$emit("removeEntity", this.span.entity);
@@ -217,7 +222,7 @@ export default {
     },
     async selectEntity(entityLabel) {
       await this.updateLastSelectedEntity({
-        dataset: this.dataset, 
+        dataset: this.dataset,
         lastSelectedEntity: entityLabel,
       });
       this.span.entity
@@ -262,8 +267,7 @@ export default {
         ) {
           this.activeEntity++;
           if (element[0] && element[0].offsetTop >= 90) {
-            element[0].parentNode.scrollTop =
-              element[0].offsetTop - 2;
+            element[0].parentNode.scrollTop = element[0].offsetTop - 2;
           }
           //up
         } else if (event.keyCode === 38 && this.activeEntity >= 0) {
@@ -439,7 +443,9 @@ $hue: 360;
     border: 2px solid $rcolor;
   }
   .entities__selector__option.color_#{$i - 1} {
-    &:active, &.active, &:hover {
+    &:active,
+    &.active,
+    &:hover {
       border: 2px solid darken($rcolor, 50%);
     }
   }

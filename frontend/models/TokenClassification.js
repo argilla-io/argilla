@@ -87,7 +87,7 @@ class TokenClassificationSearchResults extends BaseSearchResults {
         (record) => new TokenClassificationRecord(record)
       ),
     });
-  };
+  }
 }
 
 class TokenClassificationDataset extends ObservationDataset {

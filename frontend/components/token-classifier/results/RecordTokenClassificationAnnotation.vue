@@ -18,13 +18,13 @@
 <template>
   <div>
     <div class="origins">
-      <text-spans 
-        v-for="origin in entitiesOrigin" 
+      <text-spans
+        v-for="origin in entitiesOrigin"
         :key="origin"
-        :dataset="dataset" 
-        :origin="origin" 
-        :record="record" 
-        :class="origin" 
+        :dataset="dataset"
+        :origin="origin"
+        :record="record"
+        :class="origin"
       />
     </div>
     <div class="content__actions-buttons">
@@ -72,7 +72,7 @@ export default {
             annotatedEntities: undefined,
             annotation: {
               entities: record.annotatedEntities,
-              origin: "annotation"
+              origin: "annotation",
             },
           },
         ],
@@ -130,8 +130,8 @@ export default {
     .highlight__content__text {
       opacity: 0;
     }
-  };
-  ::v-deep  .highlight-text {
+  }
+  ::v-deep .highlight-text {
     opacity: 0;
   }
 }
@@ -146,8 +146,7 @@ export default {
 // .annotation {
 //   pointer-events: none;
 //   * > {
-//     pointer-events: all; 
+//     pointer-events: all;
 //   }
 // }
-
 </style>
