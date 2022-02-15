@@ -114,6 +114,9 @@ class TextClassificationDataset extends ObservationDataset {
         },
       ],
     });
+    if (!this.labelingRules) {
+      await this.refreshRules();
+    }
     return entity.find(this.id);
   }
 
