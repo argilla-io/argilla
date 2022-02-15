@@ -60,7 +60,7 @@
               @apply="onApply"
             />
             <FilterUncoveredByRules
-              v-else-if="filter.type === 'checkbox'"
+              v-else-if="filter.type === 'checkbox' && showUncoveredByRulesFilter"
               class="filter"
               :filter="filter"
               :dataset="dataset"
@@ -235,7 +235,7 @@ export default {
         type: "checkbox",
         group: "Annotations",
         options: [true, false],
-        selected: false,
+        selected: this.dataset.query.uncovered_by_rules && this.dataset.query.uncovered_by_rules.length > 0
       }
       return [...filters, ...sortedMetadataFilters, uncoveredByRules];
     },
