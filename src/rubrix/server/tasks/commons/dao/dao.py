@@ -51,52 +51,6 @@ class _IndexTemplateExtensions:
     dynamic_templates: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
 
 
-_extensions = _IndexTemplateExtensions()
-
-
-def extends_index_properties(extended_properties: Dict[str, Any]):
-    """
-    Add explict properties configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-
-    Parameters
-    ----------
-    extended_properties:
-        The properties dictionary configuration. Several properties could be configured here
-
-    """
-    _extensions.properties.append(extended_properties)
-
-
-def extends_index_dynamic_templates(*templates: Dict[str, Any]):
-    """
-    Add dynamic mapping template configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/7.x/dynamic-templates.html#dynamic-templates
-
-    Parameters
-    ----------
-    templates:
-        One or several mapping templates
-    """
-    _extensions.dynamic_templates.extend(templates)
-
-
-def extends_index_analyzers(analyzers: Dict[str, Any]):
-    """
-    Add index analysis configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer.html
-
-    Parameters
-    ----------
-    analyzers:
-        The analyzers configuration. Several analyzers could be configured here
-    """
-    _extensions.analyzers.append(analyzers)
-
-
 def dataset_records_index(dataset_id: str) -> str:
     """
     Returns dataset records index for a given dataset id

@@ -17,11 +17,7 @@ import math
 from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
-from stopwordsiso import stopwords
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
-from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
@@ -29,78 +25,6 @@ from rubrix.server.tasks.commons import (
     TaskStatus,
 )
 from rubrix.server.tasks.commons.api import EsRecordDataFieldNames
-
-SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
-DATASETS_RECORDS_INDEX_TEMPLATE = {
-    "settings": {
-        "number_of_shards": settings.es_records_index_shards,
-        "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                "multilingual_stop_analyzer": {
-                    "type": "stop",
-                    "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
-                },
-                "extended_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "whitespace",
-                    "filter": ["lowercase", "asciifolding"],
-                },
-            }
-        },
-    },
-    "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
-    "mappings": {
-        "properties": {
-            EsRecordDataFieldNames.event_timestamp: {"type": "date"},
-            # TODO(in new index version): Data based on text field with multiple fields:
-            #   - keywords: for words aggregations
-            #   - extended: including stop words and special characters in search
-            EsRecordDataFieldNames.words: {
-                "type": "text",
-                "fielddata": True,
-                "analyzer": "multilingual_stop_analyzer",
-                "fields": {
-                    "extended": {"type": "text", "analyzer": "extended_analyzer"}
-                },
-            },
-            EsRecordDataFieldNames.predicted_as: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.predicted_by: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.annotated_as: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.annotated_by: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.status: {
-                "type": "keyword",
-            },
-            EsRecordDataFieldNames.predicted: {
-                "type": "keyword",
-            },
-        },
-        "dynamic_templates": [
-            {
-                "metadata_strings": {
-                    "path_match": "metadata.*",
-                    "match_mapping_type": "string",
-                    "mapping": {
-                        "type": "keyword",
-                        "ignore_above": MAX_KEYWORD_LENGTH,
-                    },
-                }
-            },
-        ],
-    },
-}
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:

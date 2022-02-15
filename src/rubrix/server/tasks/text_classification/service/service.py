@@ -25,7 +25,6 @@ from rubrix.server.tasks.commons import (
     SortableField,
     TaskType,
 )
-from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
@@ -47,10 +46,6 @@ from rubrix.server.tasks.text_classification.dao.es_config import (
 )
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
-)
-
-extends_index_dynamic_templates(
-    {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
 )
 
 
