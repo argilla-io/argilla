@@ -24,7 +24,7 @@ if __name__ == "__main__":
     )
 
     uvicorn.run(
-        "rubrix.server.server:app",
+        "rubrix:app",
         port=6900,
         host="0.0.0.0",
         access_log=True,
