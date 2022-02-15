@@ -22,6 +22,7 @@
       :key="origin"
       :dataset="dataset"
       :record="record"
+      :origin="origin"
       :class="origin"
       :entities="getEntitiesByOrigin(origin)"
     />
@@ -87,5 +88,12 @@ export default {
       pointer-events: all;
     }
   }
+}
+::v-deep .highlight__tooltip__container {
+  pointer-events: all;
+  cursor: default;
+}
+::v-deep .highlight__tooltip {
+  cursor: default;
 }
 </style>

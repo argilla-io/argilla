@@ -105,6 +105,7 @@ class TokenClassificationDataset extends ObservationDataset {
         (data) => new TokenClassificationSearchResults(data)
       ),
       globalResults: this.attr({}),
+      lastSelectedEntity: this.attr({}),
     };
   }
 

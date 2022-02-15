@@ -41,18 +41,28 @@
         <span v-show="!addnewSlotVisible">
           <ul class="entities__selector__options">
             <li
-              class="entities__selector__option"
+              class="entities__selector__option suggestion"
+              :class="[
+                `color_${suggestedEntity.colorId}`,
+                activeEntity === -1 ? 'active' : null,
+              ]"
+              v-if="suggestedEntity"
+              @click="selectEntity(suggestedEntity)"
+            >
+              <span>{{ suggestedEntity.text }}</span>
+              <span class="entity__sort-code">[space]</span>
+            </li>
+            <li
+              class="entities__selector__option suggestion"
               :class="[
                 `color_${lastSelectedEntity.colorId}`,
                 activeEntity === -1 ? 'active' : null,
               ]"
-              v-if="lastSelectedEntity.text"
+              v-else-if="lastSelectedEntity.text"
               @click="selectEntity(lastSelectedEntity)"
             >
               <span>{{ lastSelectedEntity.text }}</span>
-              <span class="entity__sort-code">{{
-                activeEntity === -1 ? "[ENTER]" : "[SPACE]"
-              }}</span>
+              <span class="entity__sort-code">[space]</span>
             </li>
             <li
               v-for="(entity, index) in formattedEntities"
@@ -69,7 +79,7 @@
               <span>{{ entity.text }}</span>
               <span class="entity__sort-code"
                 >[{{
-                  activeEntity === index ? "ENTER" : entity.shortCut
+                  activeEntity === index ? "enter" : entity.shortCut
                 }}]</span
               >
             </li>
@@ -85,15 +95,13 @@
 import ClickOutside from "v-click-outside";
 import "assets/icons/cross";
 import { substring } from "stringz";
+import { mapActions } from "vuex";
 
 export default {
   directives: {
     clickOutside: ClickOutside.directive,
   },
   props: {
-    lastSelectedEntity: {
-      type: Object,
-    },
     record: {
       type: Object,
       required: true,
@@ -110,6 +118,9 @@ export default {
       type: Object,
       required: true,
     },
+    suggestedLabel: {
+      type: String,
+    },
   },
   data: () => ({
     newSlot: "",
@@ -122,6 +133,9 @@ export default {
   computed: {
     span() {
       return this.spans[this.spanId];
+    },
+    lastSelectedEntity() {
+      return this.dataset.lastSelectedEntity;
     },
     text() {
       return substring(
@@ -157,6 +171,11 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    suggestedEntity() {
+      return this.formattedEntities.find(
+        (ent) => ent.text === this.suggestedLabel
+      );
+    },
   },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
@@ -167,6 +186,10 @@ export default {
     window.addEventListener("keyup", this.keyUp);
   },
   methods: {
+    ...mapActions({
+      updateLastSelectedEntity:
+        "entities/token_classification/updateLastSelectedEntity",
+    }),
     startSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", undefined);
@@ -184,9 +207,11 @@ export default {
       }
     },
     openTagSelector() {
-      this.showEntitiesSelector = !this.showEntitiesSelector;
-      this.startSelection();
-      this.endSelection();
+      if (this.span.origin !== "prediction") {
+        this.showEntitiesSelector = !this.showEntitiesSelector;
+        this.startSelection();
+        this.endSelection();
+      }
     },
     removeEntity() {
       this.$emit("removeEntity", this.span.entity);
@@ -195,8 +220,11 @@ export default {
     onClickOutside() {
       this.showEntitiesSelector = false;
     },
-    selectEntity(entityLabel) {
-      this.$emit("setLastSelectedEntity", entityLabel);
+    async selectEntity(entityLabel) {
+      await this.updateLastSelectedEntity({
+        dataset: this.dataset,
+        lastSelectedEntity: entityLabel,
+      });
       this.span.entity
         ? this.$emit("changeEntityLabel", this.span.entity, entityLabel.text)
         : this.$emit("selectEntity", entityLabel.text);
@@ -222,30 +250,31 @@ export default {
         event.preventDefault();
         // enter
         if (event.keyCode === 13) {
-          if (this.lastSelectedEntity.text && this.activeEntity === -1) {
-            this.selectEntity(this.lastSelectedEntity);
-          } else {
+          if (this.activeEntity !== -1) {
             this.selectEntity(this.formattedEntities[this.activeEntity]);
           }
           //space
-        } else if (event.keyCode === 32 && this.lastSelectedEntity) {
-          this.selectEntity(this.lastSelectedEntity);
+        } else if (event.keyCode === 32) {
+          if (this.suggestedEntity) {
+            this.selectEntity(this.suggestedEntity);
+          } else if (this.lastSelectedEntity) {
+            this.selectEntity(this.lastSelectedEntity);
+          }
           //down
         } else if (
           event.keyCode === 40 &&
           this.activeEntity + 1 < this.formattedEntities.length
         ) {
           this.activeEntity++;
-          if (element[0] && element[0].offsetTop >= 120) {
-            element[0].parentNode.scrollTop =
-              element[0].offsetTop - 2;
+          if (element[0] && element[0].offsetTop >= 90) {
+            element[0].parentNode.scrollTop = element[0].offsetTop - 2;
           }
           //up
         } else if (event.keyCode === 38 && this.activeEntity >= 0) {
           this.activeEntity--;
           if (element[0]) {
             element[0].parentNode.scrollTop =
-              element[0].offsetTop - element[0].offsetHeight - 2;
+              element[0].offsetTop - element[0].offsetHeight - 8;
           }
         } else {
           const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
@@ -264,11 +293,11 @@ export default {
     position: absolute;
     left: -35%;
     top: 1em;
-    min-width: 170px;
+    min-width: 220px;
     z-index: 9;
     background: $bg;
     font-weight: 600;
-    padding: 0.6em;
+    padding: 0.8em;
     border-radius: 1px;
     &__container {
       @include font-size(14px);
@@ -277,7 +306,7 @@ export default {
       white-space: pre-line;
     }
     &__options {
-      max-height: 170px;
+      max-height: 142px;
       overflow-y: scroll;
       padding-left: 0;
       margin: 0;
@@ -292,8 +321,11 @@ export default {
       cursor: pointer;
       margin-top: 2px;
       margin-bottom: 2px;
-      &.active {
-        border-color: palette(grey, medium) !important;
+      &.suggestion {
+        margin-bottom: 0.5em;
+      }
+      span {
+        cursor: pointer !important;
       }
     }
   }
@@ -327,6 +359,9 @@ export default {
   cursor: pointer;
   position: relative;
   background: palette(grey, smooth);
+  .prediction ::v-deep .highlight__content {
+    background: palette(grey, smooth);
+  }
   .span__text {
     background: palette(grey, smooth);
   }
@@ -368,8 +403,6 @@ export default {
     pointer-events: none;
   }
   &__sort-code {
-    @include font-size(12px);
-    font-weight: lighter;
     margin-left: auto;
     margin-right: 0;
     .non-selectable & {
@@ -410,21 +443,14 @@ $hue: 360;
     border: 2px solid $rcolor;
   }
   .entities__selector__option.color_#{$i - 1} {
+    &:active,
+    &.active,
     &:hover {
-      border: 2px solid palette(grey, medium);
-    }
-    &:active {
-      border: 2px solid palette(grey, medium);
+      border: 2px solid darken($rcolor, 50%);
     }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
   }
-}
-</style>
-<style lang="scss">
-.highlight-text {
-  display: inline;
-  font-weight: 600;
 }
 </style>

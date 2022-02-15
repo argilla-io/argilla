@@ -31,15 +31,14 @@
         :span-id="i"
         :spans="textSpans"
         :dataset="dataset"
+        :suggestedLabel="suggestedLabel"
         :class="[
           isSelected(i) ? 'selected' : '',
           isLastSelected(i) ? 'last-selected' : '',
         ]"
-        :lastSelectedEntity="lastSelectedEntity"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
         @selectEntity="onSelectEntity"
-        @setLastSelectedEntity="onSetLastSelectedEntity"
         @changeEntityLabel="onChangeEntityLabel"
         @removeEntity="onRemoveEntity"
         @updateRecordEntities="$emit('updateRecordEntities')"
@@ -53,6 +52,9 @@ import { mapActions } from "vuex";
 
 export default {
   props: {
+    entities: {
+      type: Array,
+    },
     dataset: {
       type: Object,
       required: true,
@@ -61,18 +63,19 @@ export default {
       type: Object,
       required: true,
     },
+    origin: {
+      type: String,
+      required: true,
+    },
   },
   data: function () {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
-      lastSelectedEntity: {},
+      suggestedLabel: undefined,
     };
   },
   computed: {
-    entities() {
-      return this.record.annotatedEntities;
-    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -110,6 +113,7 @@ export default {
             ),
             start: entity.start,
             end: entity.end,
+            origin: this.origin,
           });
           idx = entity.end_token;
         } else {
@@ -119,6 +123,7 @@ export default {
             tokens: [token],
             start: token.start,
             end: token.end,
+            origin: this.origin,
           });
           idx++;
         }
@@ -153,8 +158,10 @@ export default {
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
+      this.suggestedLabel = undefined;
     },
     onStartSelection(spanId) {
+      this.suggestedLabel = undefined;
       this.selectionStart = spanId;
     },
     onEndSelection(spanId) {
@@ -165,13 +172,11 @@ export default {
       const to = Math.max(this.selectionStart, this.selectionEnd);
       const startToken = this.textSpans[from].tokens[0];
       const endToken = this.textSpans[to].tokens.reverse()[0];
-
       let entities = [...this.entities];
       entities.push({
         start: startToken.start,
         end: endToken.end,
         label: entity,
-        origin: "annotation",
       });
       this.updateAnnotatedEntities(entities);
       this.onReset();
@@ -181,7 +186,7 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel, origin: "annotation" }
+          ? { ...ent, label: newLabel }
           : ent;
       });
       this.updateAnnotatedEntities(entities);
@@ -199,17 +204,10 @@ export default {
       this.updateAnnotatedEntities(entities);
       this.onReset();
     },
-    groupByOrigin(entities) {
-      let annotation = entities.filter((e) => e.origin == "annotation");
-      let prediction = entities.filter((e) => e.origin == "prediction");
-      return {
-        annotation,
-        prediction,
-      };
-    },
     isSelected(i) {
       const init = Math.min(this.selectionStart, this.selectionEnd);
       const end = Math.max(this.selectionStart, this.selectionEnd);
+      this.suggestEntity();
       if (i >= init && i <= end) {
         return true;
       }
@@ -222,8 +220,20 @@ export default {
       }
       return false;
     },
-    onSetLastSelectedEntity(entity) {
-      this.lastSelectedEntity = entity;
+    suggestEntity() {
+      const from = Math.min(this.selectionStart, this.selectionEnd);
+      const to = Math.max(this.selectionStart, this.selectionEnd);
+      const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
+      const endToken =
+        this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
+      const matchedPrediction = this.record.prediction.entities.find(
+        (ent) =>
+          ent.start === (startToken && startToken.start) &&
+          ent.end === (endToken && endToken.end)
+      );
+      if (matchedPrediction) {
+        this.suggestedLabel = matchedPrediction.label;
+      }
     },
   },
 };
