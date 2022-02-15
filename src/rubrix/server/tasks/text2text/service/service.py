@@ -161,10 +161,9 @@ class Text2TextService:
             the provided query filters. Optional
 
         """
-        for db_record in self.__dao__.scan_dataset(  # TODO: use search service instead
-            dataset, search=RecordSearch(query=query.as_elasticsearch())
-        ):
-            yield Text2TextRecord.parse_obj(db_record)
+        yield from self.__search__.scan_records(
+            dataset, query=query, record_type=Text2TextRecord
+        )
 
 
 _instance = None
