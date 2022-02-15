@@ -29,7 +29,10 @@
       @click="openTagSelector"
       @dblclick="removeEntity"
     >
-      <span class="highlight__content__text" v-html="$highlightSearch(dataset.query.text, text)"/>
+      <span
+        class="highlight__content__text"
+        v-html="$highlightSearch(dataset.query.text, text)"
+      />
     </span>
     <span class="highlight__label">
       <span @click="removeEntity" class="highlight__tooltip__container">

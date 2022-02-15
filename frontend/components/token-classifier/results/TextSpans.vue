@@ -74,7 +74,9 @@ export default {
   },
   computed: {
     entities() {
-      return this.origin === 'annotation' ? this.record.annotatedEntities : this.record.prediction && this.record.prediction.entities;
+      return this.origin === "annotation"
+        ? this.record.annotatedEntities
+        : this.record.prediction && this.record.prediction.entities;
     },
     textSpans() {
       // TODO Simplify !!!
@@ -186,7 +188,7 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel, }
+          ? { ...ent, label: newLabel }
           : ent;
       });
       this.updateAnnotatedEntities(entities);
@@ -224,12 +226,17 @@ export default {
       const from = Math.min(this.selectionStart, this.selectionEnd);
       const to = Math.max(this.selectionStart, this.selectionEnd);
       const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
-      const endToken = this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
-      const matchedPrediction = this.record.prediction.entities.find(ent => ent.start === (startToken && startToken.start) && ent.end === (endToken && endToken.end));
+      const endToken =
+        this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
+      const matchedPrediction = this.record.prediction.entities.find(
+        (ent) =>
+          ent.start === (startToken && startToken.start) &&
+          ent.end === (endToken && endToken.end)
+      );
       if (matchedPrediction) {
         this.suggestedLabel = matchedPrediction.label;
       }
-    }
+    },
   },
 };
 </script>
