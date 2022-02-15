@@ -779,7 +779,6 @@ class Epoxy(FlyingSquid):
                 "'faiss' must be installed to use the `Epoxy` label model! "
                 "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
             )
-
         self.thresholds = thresholds
         self.embeddings = embeddings
 
