@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import FlyingSquid, Snorkel, WeakLabels
+from rubrix.labeling.text_classification import FlyingSquid, Epoxy, Snorkel, WeakLabels
 from rubrix.labeling.text_classification.label_models import (
     LabelModel,
     MissingAnnotationError,
@@ -51,6 +51,12 @@ def weak_labels(monkeypatch):
 
     return WeakLabels(rules=[lambda: None] * 3, dataset="mock")
 
+
+@pytest.fixture
+def word_embeddings():
+    np.random.seed(0)
+    word_embeddings = np.random.random((4,1024))
+    return word_embeddings
 
 @pytest.fixture
 def weak_labels_from_guide(monkeypatch, resources):
@@ -560,3 +566,14 @@ class TestFlyingSquid:
             ("SPAM", 0.8236983486087645),
             ("HAM", 0.17630165139123552),
         ]
+
+class TestEpoxy:
+    def test_not_installed(self, monkeypatch):
+        monkeypatch.setitem(sys.modules, "epoxy", None)
+        with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):
+            Epoxy(None)
+
+    def test_grid_search(self, weak_labels, embeddings):
+        label_model = Epoxy(weak_labels, embeddings)
+        threshold = label_model.grid_search_threshold(weak_labels, embeddings)
+        assert True # to-do
