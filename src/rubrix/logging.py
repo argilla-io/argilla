@@ -103,3 +103,28 @@ class LoguruLoggerHandler(logging.Handler):
 
         log = logger.bind(request_id="rubrix")
         log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+def configure_logging():
+    """Normalizes logging configuration for rubrix and its dependencies"""
+    intercept_handler = LoguruLoggerHandler()
+    if not intercept_handler.is_available:
+        return
+
+    logging.basicConfig(handlers=[intercept_handler], level=logging.WARNING)
+    for name in logging.root.manager.loggerDict:
+        logger_ = logging.getLogger(name)
+        logger_.handlers = []
+
+    for name in [
+        "uvicorn",
+        "uvicorn.lifespan",
+        "uvicorn.error",
+        "uvicorn.access",
+        "fastapi",
+        "rubrix",
+        "rubrix.server",
+    ]:
+        logger_ = logging.getLogger(name)
+        logger_.propagate = False
+        logger_.handlers = [intercept_handler]

@@ -17,10 +17,9 @@
 This module contains the interface to access Rubrix's REST API.
 """
 
-
-import logging
 import os
 import re
+from logging import getLogger
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
@@ -44,9 +43,12 @@ from rubrix.client.models import (
     TokenAttributions,
     TokenClassificationRecord,
 )
+from rubrix.logging import configure_logging
 from rubrix.monitoring.model_monitor import monitor
 
-_LOGGER = logging.getLogger(__name__)
+configure_logging()
+
+_LOGGER = getLogger(__name__)
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
