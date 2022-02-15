@@ -59,11 +59,13 @@
               :filter="filter"
               @apply="onApply"
             />
+            <FilterUncoveredByRules
+              v-else-if="filter.type === 'checkbox'"
+              class="filter"
+              :filter="filter"
+              :dataset="dataset"
+            />
           </span>
-          <FilterUncoveredByRules
-            v-if="showUncoveredByRulesFilter"
-            :dataset="dataset"
-          />
           <a
             v-if="
               initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
@@ -94,12 +96,6 @@ export default {
       type: Object,
       default: () => ({}),
     },
-  },
-  async fetch() {
-    if (!this.dataset.rules && this.dataset.task === "TextClassification") {
-      console.log("fetch");
-      await this.dataset.refreshRules();
-    }
   },
   data: () => {
     return {
@@ -154,6 +150,13 @@ export default {
           placeholder: "Select options",
         },
         {
+          key: "status",
+          name: "Status",
+          type: "select",
+          group: "Status",
+          placeholder: "Select options",
+        },
+        {
           key: "sort",
           name: "Sort",
           type: "sort",
@@ -179,7 +182,6 @@ export default {
     },
     showUncoveredByRulesFilter() {
       return (
-        this.initialVisibleGroup === "Annotations" &&
         this.dataset.rules &&
         this.dataset.rules.length
       );
@@ -227,7 +229,15 @@ export default {
             a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
-      return [...filters, ...sortedMetadataFilters];
+      const uncoveredByRules = {
+        id: "uncovered_by_rules",
+        id: "key",
+        type: "checkbox",
+        group: "Annotations",
+        options: [true, false],
+        selected: false,
+      }
+      return [...filters, ...sortedMetadataFilters, uncoveredByRules];
     },
   },
   methods: {

@@ -1,9 +1,8 @@
 <template>
   <ReCheckbox
-    :id="showUncoveredByRules"
-    v-model="showUncoveredByRules"
+    @change="changeUncoveredByRules"
     class="re-checkbox--dark"
-    :value="showUncoveredByRules"
+    :value="filter.selected"
   >
     Not covered by rules
   </ReCheckbox>
@@ -18,32 +17,22 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
-  },
-  data: () => {
-    return {
-      showUncoveredByRules: false,
-    };
-  },
-  watch: {
-    async showUncoveredByRules() {
-      if (this.showUncoveredByRules) {
-        const rulesId = this.dataset.rules.map((r) => r.query);
-        await this.search({
-          dataset: this.dataset,
-          query: { uncovered_by_rules: rulesId },
-        });
-      } else {
-        await this.search({
-          dataset: this.dataset,
-          query: { uncovered_by_rules: [] },
-        });
-      }
-    },
+    filter: {
+      type: Object,
+      required: true,
+    }
   },
   methods: {
     ...mapActions({
       search: "entities/datasets/search",
     }),
+    async changeUncoveredByRules() {
+      const rulesId = this.dataset.rules.map((r) => r.query);
+      await this.search({
+        dataset: this.dataset,
+        query: { uncovered_by_rules: !this.filter.selected ? rulesId : [] },
+      });
+    }
   },
 };
 </script>
