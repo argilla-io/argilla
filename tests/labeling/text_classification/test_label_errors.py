@@ -24,7 +24,6 @@ from rubrix.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
-from tests.server.test_helpers import client, mocking_client
 
 
 @pytest.fixture(
@@ -193,9 +192,7 @@ def test_missing_predictions():
 
 
 @pytest.fixture
-def dataset(monkeypatch, records):
-    mocking_client(monkeypatch, client)
-
+def dataset(mocked_client, records):
     dataset = "dataset_for_label_errors"
 
     rb.log(records, name=dataset)

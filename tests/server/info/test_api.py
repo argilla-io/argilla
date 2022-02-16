@@ -16,12 +16,10 @@
 from rubrix import __version__ as rubrix_version
 from rubrix.server.info.model import ApiInfo, ApiStatus
 
-from tests.server.test_helpers import client
 
+def test_api_info(mocked_client):
 
-def test_api_info():
-
-    response = client.get("/api/_info")
+    response = mocked_client.get("/api/_info")
     assert response.status_code == 200
 
     info = ApiInfo.parse_obj(response.json())
@@ -29,9 +27,9 @@ def test_api_info():
     assert info.rubrix_version == rubrix_version
 
 
-def test_api_status():
+def test_api_status(mocked_client):
 
-    response = client.get("/api/_status")
+    response = mocked_client.get("/api/_status")
 
     assert response.status_code == 200
 

@@ -4,13 +4,11 @@ import pytest
 
 import rubrix
 from rubrix import TextClassificationRecord
-from rubrix.monitoring._transformers import huggingface_monitor
 from tests.monitoring.helpers import mock_monitor
-from tests.server.test_helpers import client, mocking_client
 
 
 def test_classifier_monitoring_with_all_scores(
-    client_mock, classifier_monitor_all_scores, classifier_dataset
+    mocked_client, classifier_monitor_all_scores, classifier_dataset
 ):
     rubrix.delete(classifier_dataset)
 
@@ -24,7 +22,7 @@ def test_classifier_monitoring_with_all_scores(
     assert len(record.prediction) > 1
 
 
-def test_classifier_monitoring(client_mock, classifier_monitor, classifier_dataset):
+def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dataset):
     rubrix.delete(classifier_dataset)
 
     expected_text = "This is a text, yeah"
@@ -116,12 +114,6 @@ def zero_shot_inputs():
     ]
 
 
-@pytest.fixture
-def client_mock(monkeypatch):
-    mocking_client(monkeypatch, client)
-    return client
-
-
 @pytest.fixture()
 def dataset():
     return "zero_shot_dataset"
@@ -175,7 +167,7 @@ def check_zero_shot_results(
     zero_shot_inputs(),
 )
 def test_monitor_zero_short_passing_labels_as_args(
-    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
 ):
     rubrix.delete(dataset)
     predictions = mocked_monitor(text, labels, hypothesis_template=hypothesis)
@@ -195,7 +187,7 @@ def test_monitor_zero_short_passing_labels_as_args(
     zero_shot_inputs(),
 )
 def test_monitor_zero_short_passing_labels_keyword_arg(
-    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
 ):
 
     rubrix.delete(dataset)
@@ -218,7 +210,7 @@ def test_monitor_zero_short_passing_labels_keyword_arg(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_with_multilabel(
-    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
 ):
     rubrix.delete(dataset)
     rubrix.delete(dataset + "_multi")
@@ -245,7 +237,7 @@ def test_monitor_zero_shot_with_multilabel(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_with_text_array(
-    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
 ):
 
     rubrix.delete(dataset)
@@ -268,7 +260,7 @@ def test_monitor_zero_shot_with_text_array(
     zero_shot_inputs(),
 )
 def test_monitor_zero_shot_passing_metadata(
-    text, labels, hypothesis, client_mock, mocked_monitor, dataset
+    text, labels, hypothesis, mocked_client, mocked_monitor, dataset
 ):
     rubrix.delete(dataset)
     expected_metadata = {"type": "test"}

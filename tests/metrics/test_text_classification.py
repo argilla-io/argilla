@@ -1,18 +1,4 @@
-import httpx
-
-from tests.server.test_helpers import client
-
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
-
-
-def test_metrics_for_text_classification(monkeypatch):
-    mocking_client(monkeypatch)
+def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_text_classification"
 
     import rubrix as rb
@@ -74,8 +60,7 @@ def test_metrics_for_text_classification(monkeypatch):
     results.visualize()
 
 
-def test_f1_without_results(monkeypatch):
-    mocking_client(monkeypatch)
+def test_f1_without_results(mocked_client):
     dataset = "test_f1_without_results"
     import rubrix as rb
 

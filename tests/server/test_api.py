@@ -22,10 +22,8 @@ from rubrix.server.tasks.text_classification.api import (
     TextClassificationRecord,
 )
 
-from tests.server.test_helpers import client
 
-
-def create_some_data_for_text_classification(name: str, n: int):
+def create_some_data_for_text_classification(client, name: str, n: int):
     records = [
         TextClassificationRecord(**data)
         for idx in range(0, n or 10, 2)
@@ -80,4 +78,3 @@ def uri_2_path(uri: str):
 
     p = urlparse(uri)
     return os.path.abspath(os.path.join(p.netloc, p.path))
-

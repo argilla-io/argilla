@@ -17,7 +17,6 @@ from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
-from tests.server.test_helpers import client
 
 
 @pytest.fixture(scope="session")
@@ -83,15 +82,14 @@ def singlelabel_textclassification_records(
     ]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def log_singlelabel_textclassification_records(
-    request,
+    mocked_client,
     singlelabel_textclassification_records,
 ) -> str:
     dataset_name = "singlelabel_textclassification_records"
-    client.delete(f"/api/datasets/{dataset_name}")
-
-    client.post(
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/{TaskType.text_classification}:bulk",
         json=TextClassificationBulkData(
             tags={
@@ -176,15 +174,15 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
     ]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def log_multilabel_textclassification_records(
-    request,
+    mocked_client,
     multilabel_textclassification_records,
 ) -> str:
     dataset_name = "multilabel_textclassification_records"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/{TaskType.text_classification}:bulk",
         json=TextClassificationBulkData(
             tags={
@@ -254,15 +252,15 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
     ]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def log_tokenclassification_records(
-    request,
+    mocked_client,
     tokenclassification_records,
 ) -> str:
     dataset_name = "tokenclassification_records"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/{TaskType.token_classification}:bulk",
         json=TokenClassificationBulkData(
             tags={
@@ -328,15 +326,15 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
     ]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def log_text2text_records(
-    request,
+    mocked_client,
     text2text_records,
 ) -> str:
     dataset_name = "text2text_records"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/{TaskType.text2text}:bulk",
         json=Text2TextBulkData(
             tags={
