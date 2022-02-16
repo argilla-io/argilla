@@ -319,6 +319,8 @@ class Snorkel(LabelModel):
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
+        from sklearn.metrics import classification_report
+
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
