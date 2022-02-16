@@ -1,6 +1,5 @@
 import pytest
 
-from rubrix.server.commons.errors import EntityAlreadyExistsError
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
@@ -75,11 +74,12 @@ def test_dataset_update_rule(mocked_client):
     rules = list(map(LabelingRule.parse_obj, response.json()))
     assert len(rules) == 1
     assert rules[0].label == "NEW Label"
+    assert rules[0].labels == ["NEW Label"]
     assert rules[0].description is None
 
     mocked_client.patch(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/{query}",
-        json={"label": "NEW Label", "description": "New description"},
+        json={"labels": ["A", "B"], "description": "New description"},
     )
 
     response = mocked_client.get(
@@ -88,25 +88,34 @@ def test_dataset_update_rule(mocked_client):
     rules = list(map(LabelingRule.parse_obj, response.json()))
     assert len(rules) == 1
     assert rules[0].description == "New description"
+    assert rules[0].label is None
+    assert rules[0].labels == ["A", "B"]
 
 
-def test_dataset_with_rules(mocked_client):
+@pytest.mark.parametrize(
+    "rule",
+    [
+        CreateLabelingRule(query="a query", description="Description", label="LALA"),
+        CreateLabelingRule(
+            query="another query", description="Description", labels=["A", "B", "C"]
+        ),
+    ],
+)
+def test_dataset_with_rules(mocked_client, rule):
     dataset = "test_dataset_with_rules"
     log_some_records(mocked_client, dataset)
 
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-        json=CreateLabelingRule(
-            query="a query", description="Description", label="LALA"
-        ).dict(),
+        json=rule.dict(),
     )
     assert response.status_code == 200
 
     created_rule = LabelingRule.parse_obj(response.json())
-    assert created_rule.query == "a query"
-    assert created_rule.label == "LALA"
-    assert created_rule.description == "Description"
-    assert created_rule.author == "rubrix"
+    assert created_rule.query == rule.query
+    assert created_rule.label == rule.label
+    assert created_rule.labels == rule.labels
+    assert created_rule.description == rule.description
 
     response = mocked_client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules"
@@ -117,29 +126,34 @@ def test_dataset_with_rules(mocked_client):
     assert rules[0] == created_rule
 
 
-def test_get_dataset_rule(mocked_client):
+@pytest.mark.parametrize(
+    "rule",
+    [
+        CreateLabelingRule(query="a query", description="Description", label="LALA"),
+        CreateLabelingRule(
+            query="another query", description="Description", labels=["A", "B", "C"]
+        ),
+    ],
+)
+def test_get_dataset_rule(mocked_client, rule):
     dataset = "test_get_dataset_rule"
     log_some_records(mocked_client, dataset)
 
-    rule_query = "a query"
-    rule_label = "TEST"
-    rule_description = "Description"
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-        json=CreateLabelingRule(
-            query=rule_query, label=rule_label, description=rule_description
-        ).dict(),
+        json=rule.dict(),
     )
     assert response.status_code == 200
 
     response = mocked_client.get(
-        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule_query}"
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}"
     )
     assert response.status_code == 200
-    rule = LabelingRule.parse_obj(response.json())
-    assert rule.query == rule_query
-    assert rule.label == rule_label
-    assert rule.description == rule_description
+    found_rule = LabelingRule.parse_obj(response.json())
+    assert found_rule.query == rule.query
+    assert found_rule.label == rule.label
+    assert found_rule.labels == rule.labels
+    assert found_rule.description == rule.description
 
 
 def test_delete_dataset_rules(mocked_client):
@@ -170,7 +184,7 @@ def test_duplicated_dataset_rules(mocked_client):
     dataset = "test_duplicated_dataset_rules"
     log_some_records(mocked_client, dataset)
 
-    rule = CreateLabelingRule(query="a query", label="TEST")
+    rule = CreateLabelingRule(query="a query", labels=["TEST"])
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
         json=rule.dict(),
@@ -194,21 +208,18 @@ def test_rules_with_multi_label_dataset(mocked_client):
     dataset = "test_rules_with_multi_label_dataset"
     log_some_records(mocked_client, dataset, multi_label=True)
 
+    rule = CreateLabelingRule(query="a query", description="Description", label="LALA")
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-        json=CreateLabelingRule(
-            query="a query", description="Description", label="LALA"
-        ).dict(),
+        json=rule.dict(),
     )
-    assert response.status_code == 400
-    assert response.json() == {
-        "detail": {
-            "code": "rubrix.api.errors::BadRequestError",
-            "params": {
-                "message": "Labeling rules are not supported for multi-label datasets"
-            },
-        }
-    }
+    assert response.status_code == 200
+    found_rule = LabelingRule.parse_obj(response.json())
+
+    assert found_rule.query == rule.query
+    assert found_rule.label == rule.label
+    assert found_rule.labels == rule.labels
+    assert found_rule.description == rule.description
 
 
 def test_rule_metrics_with_missing_label(mocked_client):
@@ -229,21 +240,84 @@ def test_rule_metrics_with_missing_label(mocked_client):
     }
 
 
-def test_rule_metrics_with_missing_label_for_stored_rule(mocked_client):
+@pytest.mark.parametrize(
+    ("rule", "expected_metrics"),
+    [
+        (
+            CreateLabelingRule(query="ejemplo", label="TEST"),
+            {
+                "annotated_records": 1,
+                "correct": 0.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 1.0,
+                "precision": 0.0,
+                "total_records": 1,
+            },
+        ),
+        (
+            CreateLabelingRule(query="ejemplo", label="OK"),
+            {
+                "annotated_records": 1,
+                "correct": 1.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 0.0,
+                "precision": 1.0,
+                "total_records": 1,
+            },
+        ),
+        (
+            CreateLabelingRule(query="bad query", label="TEST"),
+            {
+                "annotated_records": 1,
+                "correct": 0.0,
+                "coverage": 0.0,
+                "coverage_annotated": 0.0,
+                "incorrect": 0.0,
+                "total_records": 1,
+            },
+        ),
+        (
+            CreateLabelingRule(query="ejemplo", labels=["TEST", "A", "B"]),
+            {
+                "annotated_records": 1,
+                "correct": 0.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 3.0,
+                "precision": 0.0,
+                "total_records": 1,
+            },
+        ),
+        (
+            CreateLabelingRule(query="ejemplo", labels=["A", "OK"]),
+            {
+                "annotated_records": 1,
+                "correct": 1.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 1.0,
+                "precision": 0.5,
+                "total_records": 1,
+            },
+        ),
+    ],
+)
+def test_rule_metrics_with_missing_label_for_stored_rule(
+    mocked_client, rule, expected_metrics
+):
     dataset = "test_rule_metrics_with_missing_label_for_stored_rule"
     log_some_records(mocked_client, dataset, annotation="OK")
-    for query in ["ejemplo", "bad query"]:
-        mocked_client.post(
-            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-            json=CreateLabelingRule(
-                query=query, label="TEST", description="Description"
-            ).dict(),
-        )
+    mocked_client.post(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules", json=rule.dict()
+    )
 
     response = mocked_client.get(
-        f"/api/datasets/TextClassification/{dataset}/labeling/rules/bad query/metrics"
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}/metrics"
     )
     assert response.status_code == 200
+    assert response.json() == expected_metrics
 
 
 def test_create_rules_and_then_log(mocked_client):
@@ -271,52 +345,53 @@ def test_create_rules_and_then_log(mocked_client):
     assert len(rules) == 2
 
 
-def test_dataset_rules_metrics(mocked_client):
+@pytest.mark.parametrize(
+    ("rules", "expected_metrics", "annotation"),
+    [
+        (
+            [
+                CreateLabelingRule(query="ejemplo", label="TEST"),
+                CreateLabelingRule(query="bad request", label="TEST"),
+                CreateLabelingRule(query="other", labels=["A", "B"]),
+            ],
+            {
+                "annotated_records": 1,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "total_records": 1,
+            },
+            "OK",
+        ),
+        (
+            [
+                CreateLabelingRule(query="ejemplo", label="TEST"),
+                CreateLabelingRule(query="bad request", label="TEST"),
+                CreateLabelingRule(query="other", labels=["A", "B"]),
+            ],
+            {
+                "annotated_records": 0,
+                "coverage": 1.0,
+                "total_records": 1,
+            },
+            None,
+        ),
+    ],
+)
+def test_dataset_rules_metrics(mocked_client, rules, expected_metrics, annotation):
     dataset = "test_dataset_rules_metrics"
-    log_some_records(mocked_client, dataset, annotation="OK")
+    log_some_records(mocked_client, dataset, annotation=annotation)
 
-    for query in ["ejemplo", "bad query"]:
+    for rule in rules:
         mocked_client.post(
             f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-            json=CreateLabelingRule(
-                query=query, label="TEST", description="Description"
-            ).dict(),
+            json=rule.dict(),
         )
 
     response = mocked_client.get(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/metrics"
     )
     assert response.status_code == 200, response.json()
-
-    metrics = DatasetLabelingRulesMetricsSummary.parse_obj(response.json())
-    assert metrics.coverage == 1
-    assert metrics.coverage_annotated == 1
-    assert metrics.total_records == 1
-    assert metrics.annotated_records == 1
-
-
-def test_dataset_rules_metrics_without_annotation(mocked_client):
-    dataset = "test_dataset_rules_metrics_without_annotation"
-    log_some_records(mocked_client, dataset)
-
-    for query in ["ejemplo", "bad query"]:
-        mocked_client.post(
-            f"/api/datasets/TextClassification/{dataset}/labeling/rules",
-            json=CreateLabelingRule(
-                query=query, label="TEST", description="Description"
-            ).dict(),
-        )
-
-    response = mocked_client.get(
-        f"/api/datasets/TextClassification/{dataset}/labeling/rules/metrics"
-    )
-    assert response.status_code == 200, response.json()
-
-    metrics = DatasetLabelingRulesMetricsSummary.parse_obj(response.json())
-    assert metrics.coverage == 1
-    assert metrics.total_records == 1
-    assert metrics.annotated_records == 0
-    assert metrics.coverage_annotated is None
+    assert response.json() == expected_metrics
 
 
 def test_rule_metric(mocked_client):
@@ -369,6 +444,25 @@ def test_rule_metric(mocked_client):
     assert metrics.correct == 0
     assert metrics.incorrect == 0
     assert metrics.precision is None
+
+
+def test_rule_metric_with_multiple_labels(mocked_client):
+    dataset = "test_rule_metric"
+    log_some_records(mocked_client, dataset, annotation="OK")
+
+    response = mocked_client.get(
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules/ejemplo/metrics?label=A&label=OK"
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "annotated_records": 1,
+        "correct": 1.0,
+        "coverage": 1.0,
+        "coverage_annotated": 1.0,
+        "incorrect": 1.0,
+        "precision": 0.5,
+        "total_records": 1,
+    }
 
 
 def test_search_records_with_uncovered_rules(mocked_client):
