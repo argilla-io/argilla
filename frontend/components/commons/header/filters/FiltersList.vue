@@ -175,7 +175,12 @@ export default {
       return this.dataset.isMultiLabel;
     },
     showUncoveredByRulesFilter() {
-      return this.dataset.rules && this.dataset.rules.length;
+      return (
+        this.dataset.rules &&
+        this.dataset.rules.length &&
+        !this.dataset.isMultiLabel &&
+        this.dataset.task === "TextClassification"
+      );
     },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
