@@ -240,20 +240,14 @@ class TextClassificationService:
 
         rule:
             The rule
-
         """
-        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
-        if is_multi_label_dataset is not None:
-            assert (
-                not is_multi_label_dataset
-            ), "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def update_labeling_rule(
         self,
         dataset: Dataset,
         rule_query: str,
-        label: str,
+        labels: List[str],
         description: Optional[str] = None,
     ) -> LabelingRule:
         """
@@ -271,10 +265,10 @@ class TextClassificationService:
         """
         found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
 
-        found_rule.label = label
+        found_rule.labels = labels
+        found_rule.label = labels[0] if len(labels) == 1 else None
         if description is not None:
             found_rule.description = description
-
         self.__labeling__.replace_rule(dataset, found_rule)
         return found_rule
 
@@ -315,7 +309,7 @@ class TextClassificationService:
         self,
         dataset: Dataset,
         rule_query: str,
-        label: Optional[str],
+        labels: Optional[List[str]] = None,
     ) -> LabelingRuleMetricsSummary:
         """
         Compute metrics for a given rule. It's not necessary that query rule
@@ -332,28 +326,28 @@ class TextClassificationService:
         rule_query:
             The provided rule query. If already created in dataset, the ``label``
             param will be omitted
-        label:
+        labels:
             Label used for the rule metrics. If not provided and no rule was stored with the
             provided query, no precision will be computed.
-            Otherwise, the label from the stored rule will be used to compute the metrics.
+            Otherwise, the labels from the stored rule will be used to compute the metrics.
 
         Returns
         -------
 
-            Metrics summary for rule and label
+            Metrics summary for rule and labels
 
         """
 
         rule_query = rule_query.strip()
 
-        if label is None:
+        if labels is None:
             for rule in self.get_labeling_rules(dataset):
                 if rule.query == rule_query:
-                    label = rule.label
+                    labels = rule.labels
                     break
 
         total, annotated, metrics = self.__labeling__.compute_rule_metrics(
-            dataset, rule_query=rule_query, label=label
+            dataset, rule_query=rule_query, labels=labels
         )
 
         coverage = metrics.covered_records / total if total > 0 else None

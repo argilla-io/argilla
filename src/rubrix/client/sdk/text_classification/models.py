@@ -181,7 +181,8 @@ class LabelingRule(BaseModel):
 
     """
 
-    label: str
+    label: str = None
+    labels: List[str] = Field(default_factory=list)
     query: str
     description: Optional[str] = None
     author: str

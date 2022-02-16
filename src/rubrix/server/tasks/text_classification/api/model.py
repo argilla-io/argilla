@@ -37,10 +37,29 @@ from rubrix.server.tasks.search.model import BaseSearchQuery
 
 
 class UpdateLabelingRule(BaseModel):
-    label: str = Field(description="The label associated with the rule")
+    label: Optional[str] = Field(
+        default=None, description="@Deprecated::The label associated with the rule."
+    )
+    labels: List[str] = Field(
+        default_factory=list,
+        description="For multi label problems, a list of labels. "
+        "It will replace the `label` field",
+    )
     description: Optional[str] = Field(
         None, description="A brief description of the rule"
     )
+
+    @root_validator
+    def initialize_labels(cls, values):
+        label = values.get("label", None)
+        labels = values.get("labels", [])
+
+        if label:
+            labels.append(label)
+            values["labels"] = list(set(labels))
+
+        assert len(labels) >= 1, f"No labels was provided in rule {values}"
+        return values
 
 
 class CreateLabelingRule(UpdateLabelingRule):

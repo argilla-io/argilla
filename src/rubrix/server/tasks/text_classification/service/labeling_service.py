@@ -3,21 +3,17 @@ from typing import Any, Dict, List, Optional, Tuple
 from fastapi import Depends
 from pydantic import BaseModel, Field
 
-from rubrix.server.commons.errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-)
+from rubrix.server.commons.errors import EntityAlreadyExistsError, EntityNotFoundError
 from rubrix.server.commons.es_helpers import filters
+from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.datasets.model import BaseDatasetDB
-from ..api.model import (
-    LabelingRule,
-    TextClassificationDatasetDB,
-)
+
 from ...commons import EsRecordDataFieldNames
 from ...commons.dao.dao import DatasetRecordsDAO
 from ...commons.dao.model import RecordSearch
 from ...commons.metrics.model.base import ElasticsearchMetric
+from ..api.model import LabelingRule, TextClassificationDatasetDB
 
 
 class DatasetLabelingRulesMetric(ElasticsearchMetric):
@@ -55,7 +51,7 @@ class LabelingRulesMetric(ElasticsearchMetric):
     def aggregation_request(
         self,
         rule_query: str,
-        label: Optional[str],
+        labels: Optional[List[str]],
     ) -> Dict[str, Any]:
 
         annotated_records_filter = filters.exists_field(
@@ -70,43 +66,72 @@ class LabelingRulesMetric(ElasticsearchMetric):
             ),
         }
 
-        if label is not None:
-            rule_label_annotated_filter = filters.annotated_as([label])
-            aggr_filters.update(
-                {
-                    "correct_records": filters.boolean_filter(
-                        filter_query=annotated_records_filter,
-                        should_filters=[
-                            rule_query_filter,
-                            rule_label_annotated_filter,
-                        ],
-                        minimum_should_match=2,
-                    ),
-                    "incorrect_records": filters.boolean_filter(
-                        filter_query=annotated_records_filter,
-                        must_query=rule_query_filter,
-                        must_not_query=rule_label_annotated_filter,
-                    ),
-                }
-            )
+        if labels is not None:
+            for label in labels:
+                label = self._encode_label_name(label)
+                rule_label_annotated_filter = filters.annotated_as([label])
+                aggr_filters.update(
+                    {
+                        f"{label}.correct_records": filters.boolean_filter(
+                            filter_query=annotated_records_filter,
+                            should_filters=[
+                                rule_query_filter,
+                                rule_label_annotated_filter,
+                            ],
+                            minimum_should_match=2,
+                        ),
+                        f"{label}.incorrect_records": filters.boolean_filter(
+                            filter_query=annotated_records_filter,
+                            must_query=rule_query_filter,
+                            must_not_query=rule_label_annotated_filter,
+                        ),
+                    }
+                )
 
         return {self.id: {"filters": {"filters": aggr_filters}}}
+
+    @staticmethod
+    def _encode_label_name(label: str) -> str:
+        return label.replace(".", "@@@")
+
+    @staticmethod
+    def _decode_label_name(label: str) -> str:
+        return label.replace("@@@", ".")
 
     def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         if self.id in aggregation_result:
             aggregation_result = aggregation_result[self.id]
 
-        correct = aggregation_result.get("correct_records", 0)
-        incorrect = aggregation_result.get("incorrect_records", 0)
-        annotated = correct + incorrect
-
+        aggregation_result = unflatten_dict(aggregation_result)
         results = {
-            **aggregation_result,
-            "correct_records": correct,
-            "incorrect_records": incorrect,
+            "covered_records": aggregation_result.pop("covered_records"),
+            "annotated_covered_records": aggregation_result.pop(
+                "annotated_covered_records"
+            ),
         }
-        if annotated > 0:
-            results["precision"] = correct / annotated
+
+        all_correct = []
+        all_incorrect = []
+        all_precision = []
+        for label, metrics in aggregation_result.items():
+            correct = metrics.get("correct_records", 0)
+            incorrect = metrics.get("incorrect_records", 0)
+            annotated = correct + incorrect
+            metrics["annotated"] = annotated
+            if annotated > 0:
+                precision = correct / annotated
+                metrics["precision"] = precision
+                all_precision.append(precision)
+
+            all_correct.append(correct)
+            all_incorrect.append(incorrect)
+            results[self._decode_label_name(label)] = metrics
+
+        results["correct_records"] = sum(all_correct)
+        results["incorrect_records"] = sum(all_incorrect)
+        if len(all_precision) > 0:
+            results["precision"] = sum(all_precision) / len(all_precision)
+
         return results
 
 
@@ -118,9 +143,9 @@ class DatasetLabelingRulesSummary(BaseModel):
 class LabelingRuleSummary(BaseModel):
     covered_records: int
     annotated_covered_records: int
-    correct_records: int
-    incorrect_records: int
-    precision: Optional[float]
+    correct_records: int = Field(default=0)
+    incorrect_records: int = Field(default=0)
+    precision: Optional[float] = None
 
 
 class LabelingService:
@@ -181,7 +206,7 @@ class LabelingService:
         self,
         dataset: BaseDatasetDB,
         rule_query: str,
-        label: Optional[str] = None,
+        labels: Optional[List[str]] = None,
     ) -> Tuple[int, int, LabelingRuleSummary]:
         """Computes metrics for given rule query and optional label against a set of rules"""
 
@@ -192,7 +217,7 @@ class LabelingService:
             search=RecordSearch(
                 include_default_aggregations=False,
                 aggregations=self.__rule_metrics__.aggregation_request(
-                    rule_query=rule_query, label=label
+                    rule_query=rule_query, labels=labels
                 ),
             ),
         )
