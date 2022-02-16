@@ -568,8 +568,23 @@ class TestFlyingSquid:
         ]
 
 class TestEpoxy:
+    
+    def test_not_installed(self, monkeypatch):
+        monkeypatch.setitem(sys.modules, "epoxy", None)
+        with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):
+            Epoxy(None)
+
+    def test_init(self, weak_labels, embeddings):
+        label_model = Epoxy(weak_labels, embeddings)
+        assert label_model._labels == ["negative", "positive", "neutral"]
+
+        with pytest.raises(ValueError, match="must not contain 'm'"):
+            Epoxy(weak_labels=weak_labels, embeddings=embeddings, m="mock")
+
+        weak_labels._rules = weak_labels.rules[:2]
+        with pytest.raises(TooFewRulesError, match="at least three"):
+            Epoxy(weak_labels=weak_labels, embeddings=embeddings)
 
     def test_grid_search(self, weak_labels, embeddings):
-        label_model = Epoxy(weak_labels, thresholds=None, embeddings=embeddings)
-        threshold = label_model.grid_search_threshold(weak_labels, embeddings=embeddings)
-        assert True # to-do
+        threshold = Epoxy.grid_search_threshold(weak_labels, embeddings=embeddings)
+        assert threshold == [1.0, 1.0, 1.0]

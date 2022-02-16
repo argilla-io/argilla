@@ -13,12 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import hashlib
+import importlib
 import logging
 from enum import Enum
 from os import stat
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+import sys
 
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels
@@ -760,27 +762,36 @@ class Epoxy(FlyingSquid):
         embeddings: np.ndarray = None, 
         **kwargs):
         
-        super().__init__(weak_labels, **kwargs)
-        
-        try:
-            import epoxy
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'epoxy' must be installed to use the `Epoxy` label model! "
-                "You can install 'epoxy' with the command: `pip install epoxy`"
-            )
-        else:
-            from epoxy import Epoxy as EpoxyModel
-        
-        try:
-            import faiss
-        except ModuleNotFoundError:    
-            raise ModuleNotFoundError(
-                "'faiss' must be installed to use the `Epoxy` label model! "
-                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
-            )
+        libraries = {
+            "epoxy": """
+                'epoxy' must be installed to use the `Epoxy` label model!
+                You can install 'epoxy' with the command: `pip install epoxy`
+                """,
+            "faiss": """ 
+                'faiss' must be installed to use the `Epoxy` label model!
+                You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`           
+            """,
+            ("flyingsquid", "pgmpy"): """ 
+                'flyingsquid' must be installed to use the `Epoxy` label model! "
+                "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`
+            """
+        }
+
+        for key, value in libraries.items():
+            if isinstance(key, str):
+                iterable = (key,)
+            elif isinstance(key, tuple):
+                iterable = key
+            for item in iterable:
+                try:
+                    importlib.import_module(item)
+                except:
+                    raise ModuleNotFoundError(value)
+
         self.thresholds = thresholds
         self.embeddings = embeddings
+
+        super().__init__(weak_labels, **kwargs)
 
     @classmethod
     def _fit_and_score(cls, weak_labels, embeddings=None, score="accuracy", thresholds=None, tie_break_policy="random"):
@@ -797,14 +808,13 @@ class Epoxy(FlyingSquid):
             yield [x] * thresholds_len
 
     @staticmethod
-    def _generate_second_search_space(thresholds, num=20, subset=None):
+    def _generate_second_search_space(thresholds, num=20, index=0):
+        arr = thresholds.copy()
         linspace = np.linspace(0, 1, num=num)
-        for index in range(len(thresholds)):
-            if subset and index in subset:
-                for item in linspace:
-                    trial = thresholds.copy()
-                    trial[index] = item
-                    yield index, trial
+        for item in linspace:
+            trial = arr.copy()
+            trial[index] = item
+            yield trial
 
     @classmethod
     def grid_search_threshold(
@@ -850,13 +860,15 @@ class Epoxy(FlyingSquid):
         if not second_space_subset:
             second_space_subset = [i for i in range(len(output))]
 
-        current_index = None
         while second_space_subset:
 
-            for index, threshold in cls._generate_second_search_space(
+            current_index = second_space_subset.pop(0)
+
+            for threshold in cls._generate_second_search_space(
                 thresholds=output,
                 num=second_space_num,
-                subset=second_space_subset):
+                index=current_index
+            ):
 
                 _LOGGER.debug(
                     """
@@ -865,15 +877,8 @@ class Epoxy(FlyingSquid):
                     - threshold: {0}
                     - index: {1}
                     - second_space_subset: {2} 
-                    """.format(str(threshold), str(index), str(second_space_subset))
+                    """.format(str(threshold), str(current_index), str(second_space_subset))
                 )
-
-                if not current_index:
-                    current_index = index
-                elif current_index != index:
-                    second_space_subset.remove(current_index)
-                    current_index = None
-                    break
 
                 result = cls._fit_and_score(
                     weak_labels,
@@ -890,8 +895,9 @@ class Epoxy(FlyingSquid):
         return output
 
     def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
-
-        from epoxy import Epoxy as EpoxyModel
+        
+        if not 'epoxy.epoxy.Epoxy' in sys.modules:
+            from epoxy import Epoxy as EpoxyModel
 
         L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
 
