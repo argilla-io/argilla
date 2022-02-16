@@ -68,11 +68,11 @@ class LabelingRulesMetric(ElasticsearchMetric):
 
         if labels is not None:
             for label in labels:
-                label = self._encode_label_name(label)
                 rule_label_annotated_filter = filters.annotated_as([label])
+                encoded_label = self._encode_label_name(label)
                 aggr_filters.update(
                     {
-                        f"{label}.correct_records": filters.boolean_filter(
+                        f"{encoded_label}.correct_records": filters.boolean_filter(
                             filter_query=annotated_records_filter,
                             should_filters=[
                                 rule_query_filter,
@@ -80,7 +80,7 @@ class LabelingRulesMetric(ElasticsearchMetric):
                             ],
                             minimum_should_match=2,
                         ),
-                        f"{label}.incorrect_records": filters.boolean_filter(
+                        f"{encoded_label}.incorrect_records": filters.boolean_filter(
                             filter_query=annotated_records_filter,
                             must_query=rule_query_filter,
                             must_not_query=rule_label_annotated_filter,

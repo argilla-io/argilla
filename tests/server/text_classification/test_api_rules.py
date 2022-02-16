@@ -256,7 +256,19 @@ def test_rule_metrics_with_missing_label(mocked_client):
             },
         ),
         (
-            CreateLabelingRule(query="ejemplo", label="OK"),
+            CreateLabelingRule(query="ejemplo", label="test.bad"),
+            {
+                "annotated_records": 1,
+                "correct": 0.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 1.0,
+                "precision": 0.0,
+                "total_records": 1,
+            },
+        ),
+        (
+            CreateLabelingRule(query="ejemplo", label="o.k."),
             {
                 "annotated_records": 1,
                 "correct": 1.0,
@@ -291,7 +303,7 @@ def test_rule_metrics_with_missing_label(mocked_client):
             },
         ),
         (
-            CreateLabelingRule(query="ejemplo", labels=["A", "OK"]),
+            CreateLabelingRule(query="ejemplo", labels=["A", "o.k."]),
             {
                 "annotated_records": 1,
                 "correct": 1.0,
@@ -308,7 +320,7 @@ def test_rule_metrics_with_missing_label_for_stored_rule(
     mocked_client, rule, expected_metrics
 ):
     dataset = "test_rule_metrics_with_missing_label_for_stored_rule"
-    log_some_records(mocked_client, dataset, annotation="OK")
+    log_some_records(mocked_client, dataset, annotation="o.k.")
     mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules", json=rule.dict()
     )
@@ -374,6 +386,20 @@ def test_create_rules_and_then_log(mocked_client):
                 "total_records": 1,
             },
             None,
+        ),
+        (
+            [
+                CreateLabelingRule(query="ejemplo", label="TEST"),
+                CreateLabelingRule(query="bad request", label="bad.label"),
+                CreateLabelingRule(query="other", labels=["A", "B", "good.label"]),
+            ],
+            {
+                "annotated_records": 1,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "total_records": 1,
+            },
+            "good.label",
         ),
     ],
 )
