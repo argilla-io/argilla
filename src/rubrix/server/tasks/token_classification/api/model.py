@@ -388,18 +388,11 @@ class TokenClassificationQuery(BaseSearchQuery):
         query_text = filters.text_query(self.query_text)
         all_filters.extend(query_filters)
 
-        # TODO: use es_helpers
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
+        return filters.boolean_filter(
+            must_query=query_text,
+            should_filters=all_filters,
+            minimum_should_match=len(all_filters),
+        )
 
 
 class TokenClassificationSearchRequest(BaseModel):
