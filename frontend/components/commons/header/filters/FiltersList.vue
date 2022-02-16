@@ -60,10 +60,11 @@
               @apply="onApply"
             />
             <FilterUncoveredByRules
-              v-else-if="filter.type === 'checkbox' && showUncoveredByRulesFilter"
+              v-else-if="showUncoveredByRulesFilter"
               class="filter"
               :filter="filter"
               :dataset="dataset"
+              @apply="onApply"
             />
           </span>
           <a
@@ -150,13 +151,6 @@ export default {
           placeholder: "Select options",
         },
         {
-          key: "status",
-          name: "Status",
-          type: "select",
-          group: "Status",
-          placeholder: "Select options",
-        },
-        {
           key: "sort",
           name: "Sort",
           type: "sort",
@@ -181,10 +175,7 @@ export default {
       return this.dataset.isMultiLabel;
     },
     showUncoveredByRulesFilter() {
-      return (
-        this.dataset.rules &&
-        this.dataset.rules.length
-      );
+      return this.dataset.rules && this.dataset.rules.length;
     },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
@@ -231,12 +222,13 @@ export default {
         [];
       const uncoveredByRules = {
         id: "uncovered_by_rules",
-        id: "key",
-        type: "checkbox",
+        key: "uncovered_by_rules",
         group: "Annotations",
         options: [true, false],
-        selected: this.dataset.query.uncovered_by_rules && this.dataset.query.uncovered_by_rules.length > 0
-      }
+        selected:
+          this.dataset.query.uncovered_by_rules &&
+          this.dataset.query.uncovered_by_rules.length > 0,
+      };
       return [...filters, ...sortedMetadataFilters, uncoveredByRules];
     },
   },

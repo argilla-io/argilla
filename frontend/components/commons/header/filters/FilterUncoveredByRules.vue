@@ -10,7 +10,6 @@
 
 <script>
 import { TextClassificationDataset } from "@/models/TextClassification";
-import { mapActions } from "vuex";
 export default {
   props: {
     dataset: {
@@ -20,19 +19,13 @@ export default {
     filter: {
       type: Object,
       required: true,
-    }
+    },
   },
   methods: {
-    ...mapActions({
-      search: "entities/datasets/search",
-    }),
     async changeUncoveredByRules() {
       const rulesId = this.dataset.rules.map((r) => r.query);
-      await this.search({
-        dataset: this.dataset,
-        query: { uncovered_by_rules: !this.filter.selected ? rulesId : [] },
-      });
-    }
+      this.$emit("apply", this.filter, !this.filter.selected ? rulesId : []);
+    },
   },
 };
 </script>
