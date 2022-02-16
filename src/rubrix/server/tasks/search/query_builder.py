@@ -1,4 +1,4 @@
-from typing import Any, Dict, TypeVar
+from typing import Any, Dict, Optional, TypeVar
 
 from fastapi import Depends
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
@@ -26,7 +26,12 @@ class EsQueryBuilder:
     def __init__(self, dao: DatasetRecordsDAO):
         self.__dao__ = dao
 
-    def __call__(self, dataset: BaseDatasetDB, query: SearchQuery) -> Dict[str, Any]:
+    def __call__(
+        self, dataset: BaseDatasetDB, query: Optional[SearchQuery] = None
+    ) -> Dict[str, Any]:
+
+        if not query:
+            return es_helpers.filters.match_all()
 
         if not query.advanced_query_dsl or not query.query_text:
             return query.as_elasticsearch()

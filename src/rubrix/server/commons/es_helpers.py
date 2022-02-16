@@ -287,6 +287,10 @@ class filters:
 
         return {"range": {EsRecordDataFieldNames.score: score_filter}}
 
+    @classmethod
+    def match_all(cls):
+        return {"match_all": {}}
+
 
 class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
