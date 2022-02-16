@@ -475,6 +475,13 @@ class TestFlyingSquid:
         with pytest.raises(NotFittedError, match="not fitted yet"):
             label_model.score()
 
+    def test_score_sklearn_not_installed(self, monkeypatch, weak_labels):
+        monkeypatch.setitem(sys.modules, "sklearn", None)
+
+        label_model = FlyingSquid(weak_labels)
+        with pytest.raises(ModuleNotFoundError, match="pip install scikit-learn"):
+            label_model.score()
+
     def test_score(self, monkeypatch, weak_labels):
         def mock_predict(self, weak_label_matrix, verbose):
             assert verbose is False

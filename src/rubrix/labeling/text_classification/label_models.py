@@ -319,14 +319,6 @@ class Snorkel(LabelModel):
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
-        try:
-            from sklearn.metrics import classification_report
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'sklearn' must be installed to compute the metrics! "
-                "You can install 'sklearn' with the command: `pip install scikit-learn`"
-            )
-
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
@@ -638,12 +630,13 @@ class FlyingSquid(LabelModel):
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
         try:
-            from sklearn.metrics import classification_report
+            import sklearn
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "'sklearn' must be installed to compute the metrics! "
                 "You can install 'sklearn' with the command: `pip install scikit-learn`"
             )
+        from sklearn.metrics import classification_report
 
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
