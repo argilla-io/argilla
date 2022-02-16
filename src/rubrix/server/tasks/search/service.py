@@ -49,9 +49,9 @@ class SearchRecordsService:
     def search(
         self,
         dataset: Dataset,
-        query: BaseSearchQuery,
-        sort_config: SortConfig,
         record_type: Type[BaseRecord],
+        query: Optional[BaseSearchQuery] = None,
+        sort_config: Optional[SortConfig] = None,
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
@@ -61,6 +61,7 @@ class SearchRecordsService:
         if record_from > 0:
             metrics = None
 
+        sort_config = sort_config or SortConfig()
         exclude_fields = ["metrics.*"] if exclude_metrics else None
         results = self.__dao__.search_records(
             dataset,

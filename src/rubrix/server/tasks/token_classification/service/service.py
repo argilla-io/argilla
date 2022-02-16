@@ -29,6 +29,7 @@ from rubrix.server.tasks.commons.dao.model import RecordSearch
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import SortConfig
 from rubrix.server.tasks.search.service import SearchRecordsService
+from rubrix.server.tasks.storage.service import RecordsStorageService
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     TokenClassificationAggregations,
@@ -48,30 +49,35 @@ class TokenClassificationService:
 
     """
 
+    _INSTANCE: "TokenClassificationService" = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
+        search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
+    ):
+        if not cls._INSTANCE:
+            cls._INSTANCE = cls(storage, search)
+        return cls._INSTANCE
+
     def __init__(
         self,
-        dao: DatasetRecordsDAO,
-        metrics: MetricsService,
+        storage: RecordsStorageService,
         search: SearchRecordsService,
     ):
-        self.__dao__ = dao
-        self.__metrics__ = metrics
+        self.__storage__ = storage
         self.__search__ = search
-
-        self.__dao__.register_task_mappings(
-            TaskType.token_classification, token_classification_mappings()
-        )
 
     def add_records(
         self,
         dataset: Dataset,
         records: List[CreationTokenClassificationRecord],
     ):
-        self.__metrics__.build_records_metrics(dataset, records)
-        failed = self.__dao__.add_records(
+        failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_class=TokenClassificationRecordDB,
+            record_type=TokenClassificationRecordDB,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -187,29 +193,4 @@ class TokenClassificationService:
         )
 
 
-_instance = None
-
-
-def token_classification_service(
-    dao: DatasetRecordsDAO = Depends(dataset_records_dao),
-    metrics: MetricsService = Depends(MetricsService.get_instance),
-    search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
-) -> TokenClassificationService:
-    """
-    Creates a dataset record service instance
-
-    Parameters
-    ----------
-    datasets:
-        The datasets service dependency
-    dao:
-        The dataset records dao dependency
-
-    Returns
-    -------
-        A dataset records service instance
-    """
-    global _instance
-    if not _instance:
-        _instance = TokenClassificationService(dao=dao, metrics=metrics, search=search)
-    return _instance
+token_classification_service = TokenClassificationService.get_instance

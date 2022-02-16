@@ -23,13 +23,10 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
-    TaskType,
 )
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
-from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import SortConfig
 from rubrix.server.tasks.search.service import SearchRecordsService
+from rubrix.server.tasks.storage.service import RecordsStorageService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     DatasetLabelingRulesMetricsSummary,
@@ -40,9 +37,6 @@ from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
-)
-from rubrix.server.tasks.text_classification.dao.es_config import (
-    text_classification_mappings,
 )
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
@@ -60,60 +54,36 @@ class TextClassificationService:
     @classmethod
     def get_instance(
         cls,
-        dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+        storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         labeling: LabelingService = Depends(LabelingService.get_instance),
-        metrics: MetricsService = Depends(MetricsService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ) -> "TextClassificationService":
-        """
-        Creates a service instance for text classification operations
-
-        Parameters
-        ----------
-        dao:
-            The dataset records dao dependency
-        labeling:
-            The labeling service dependency
-        metrics:
-            The metrics service dependency
-        search:
-            The search records service
-
-        Returns
-        -------
-            A dataset records service instance
-        """
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao, metrics, labeling=labeling, search=search)
+            cls._INSTANCE = cls(storage, labeling=labeling, search=search)
         return cls._INSTANCE
 
     def __init__(
         self,
-        dao: DatasetRecordsDAO,
-        metrics: MetricsService,
+        storage: RecordsStorageService,
         search: SearchRecordsService,
         labeling: LabelingService,
     ):
-        self.__dao__ = dao
-        self.__metrics__ = metrics
-        self.__labeling__ = labeling
+        self.__storage__ = storage
         self.__search__ = search
-
-        self.__dao__.register_task_mappings(
-            TaskType.text_classification, text_classification_mappings()
-        )
+        self.__labeling__ = labeling
 
     def add_records(
         self,
         dataset: Dataset,
         records: List[CreationTextClassificationRecord],
     ):
+        # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
-        self.__metrics__.build_records_metrics(dataset, records)
-        failed = self.__dao__.add_records(
+
+        failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_class=TextClassificationRecordDB,
+            record_type=TextClassificationRecordDB,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
@@ -233,17 +203,15 @@ class TextClassificationService:
 
     def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
         try:
-            results = self.__dao__.search_records(
+            results = self.__search__.search(
                 dataset,
-                search=RecordSearch(include_default_aggregations=False),
+                record_type=TextClassificationRecord,
                 size=1,
-                exclude_fields=["metrics", "metadata"],
             )
         except MissingDatasetRecordsError:  # No records index yet
             return None
-        records = [TextClassificationRecord.parse_obj(r) for r in results.records]
-        if records:
-            return records[0].multi_label
+        if results.records:
+            return results.records[0].multi_label
 
     def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
         """
