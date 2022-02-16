@@ -81,24 +81,6 @@ class MetricsService:
         if metrics:
             return metrics.find_metric(metric)
 
-    @staticmethod
-    def build_records_metrics(dataset: BaseDatasetDB, records: List[BaseRecord]):
-        """
-        Applies metrics calculation at record level for a given set of records
-
-        Parameters
-        ----------
-        dataset:
-            The records dataset
-        records:
-            A list of records
-
-        """
-        metrics = TaskFactory.get_task_metrics(dataset.task)
-        if metrics:
-            for record in records:
-                record.metrics = metrics.record_metrics(record)
-
     def summarize_metric(
         self,
         dataset: BaseDatasetDB,
