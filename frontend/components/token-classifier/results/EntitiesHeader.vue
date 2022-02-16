@@ -34,13 +34,19 @@
       @click="onActiveEntity(entity)"
     >
       {{ entity.text }}
-      <span v-if="entity.shortcut" class="shortcut">[{{entity.shortcut}}]</span>
+      <span v-if="entity.shortcut" class="shortcut"
+        >[{{ entity.shortcut }}]</span
+      >
     </span>
     <ReButton
       v-if="dataset.entities.length > entitiesNumber"
       class="entities__container__button"
       @click="toggleEntitiesNumber"
-      >{{ showEntitySelector ? "Show less" : `+ ${dataset.entities.length - entitiesNumber}` }}</ReButton
+      >{{
+        showEntitySelector
+          ? "Show less"
+          : `+ ${dataset.entities.length - entitiesNumber}`
+      }}</ReButton
     >
   </div>
 </template>
