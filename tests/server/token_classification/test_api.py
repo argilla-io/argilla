@@ -16,7 +16,6 @@ from typing import Callable
 
 import pytest
 
-from rubrix.server.commons.errors import WrongTaskError
 from rubrix.server.tasks.commons import BulkResponse, SortableField
 from rubrix.server.tasks.token_classification import (
     TokenClassificationQuery,
@@ -27,12 +26,11 @@ from rubrix.server.tasks.token_classification.api import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
-from tests.server.test_helpers import client
 
 
-def test_load_as_different_task():
+def test_load_as_different_task(mocked_client):
     dataset = "test_load_as_different_task"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -43,7 +41,7 @@ def test_load_as_different_task():
             }
         ]
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -52,7 +50,7 @@ def test_load_as_different_task():
         ).dict(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json={},
     )
@@ -69,9 +67,9 @@ def test_load_as_different_task():
     }
 
 
-def test_search_special_characters():
+def test_search_special_characters(mocked_client):
     dataset = "test_search_special_characters"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -82,7 +80,7 @@ def test_search_special_characters():
             }
         ]
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -91,7 +89,7 @@ def test_search_special_characters():
         ).dict(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
         json=TokenClassificationSearchRequest(
             query=TokenClassificationQuery(query_text="\!")
@@ -102,9 +100,9 @@ def test_search_special_characters():
     assert results.total == 1
 
 
-def test_some_sort():
+def test_some_sort(mocked_client):
     dataset = "test_some_sort"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -115,7 +113,7 @@ def test_some_sort():
             }
         ]
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -124,7 +122,7 @@ def test_some_sort():
         ).dict(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
         json=TokenClassificationSearchRequest(
             sort=[SortableField(id="babba")],
@@ -156,10 +154,10 @@ def test_some_sort():
     ],
 )
 def test_create_records_for_token_classification(
-    include_metrics: bool, metrics_validator: Callable
+    mocked_client, include_metrics: bool, metrics_validator: Callable
 ):
     dataset = "test_create_records_for_token_classification"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_label = "TEST"
     expected_records = 2
     record = {
@@ -177,7 +175,7 @@ def test_create_records_for_token_classification(
     }
     records = [TokenClassificationRecord.parse_obj(record)] * expected_records
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -196,7 +194,7 @@ def test_create_records_for_token_classification(
     if include_metrics is not None:
         search_url += f"?include_metrics={include_metrics}"
 
-    response = client.post(search_url)
+    response = mocked_client.post(search_url)
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
 
@@ -219,9 +217,9 @@ def test_create_records_for_token_classification(
         assert metrics_validator(record)
 
 
-def test_multiple_mentions_in_same_record():
+def test_multiple_mentions_in_same_record(mocked_client):
     dataset = "test_multiple_mentions_in_same_record"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     entity_a, entity_b = ("TESTA", "TESTB")
 
     records = [
@@ -259,7 +257,7 @@ def test_multiple_mentions_in_same_record():
             },
         ]
     ]
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -274,7 +272,7 @@ def test_multiple_mentions_in_same_record():
     assert bulk_response.failed == 0
     assert bulk_response.processed == 3
 
-    response = client.post(f"/api/datasets/{dataset}/TokenClassification:search")
+    response = mocked_client.post(f"/api/datasets/{dataset}/TokenClassification:search")
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
     assert "This" in results.aggregations.predicted_mentions[entity_a]
@@ -283,11 +281,11 @@ def test_multiple_mentions_in_same_record():
     assert results.aggregations.predicted_mentions[entity_b]["is"] == 1
 
 
-def test_show_not_aggregable_metadata_fields():
+def test_show_not_aggregable_metadata_fields(mocked_client):
     dataset = "test_show_not_aggregable_metadata_fields"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkData(
             records=[
@@ -318,7 +316,7 @@ def test_show_not_aggregable_metadata_fields():
 
     assert response.status_code == 200, response.json()
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
         json={},
     )

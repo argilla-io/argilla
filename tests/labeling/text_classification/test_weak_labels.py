@@ -33,13 +33,12 @@ from rubrix.labeling.text_classification.weak_labels import (
     NoRulesFoundError,
     WeakLabels,
 )
-from tests.server.test_helpers import client
 
 
-@pytest.fixture(scope="module")
-def log_dataset() -> str:
+@pytest.fixture
+def log_dataset(mocked_client) -> str:
     dataset_name = "test_dataset_for_applier"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
@@ -59,7 +58,7 @@ def log_dataset() -> str:
             [1, 2, 3],
         )
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=records,
@@ -159,6 +158,7 @@ def test_no_records_found_error(monkeypatch):
 )
 def test_apply(
     monkeypatch,
+    mocked_client,
     log_dataset,
     rules,
     label2int,
@@ -166,8 +166,8 @@ def test_apply(
     expected_matrix,
     expected_annotation_array,
 ):
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     if label2int == {}:
         with pytest.raises(MissingLabelError) as error:
@@ -418,9 +418,9 @@ def test_dataset_type_error():
         WeakLabels([1, 2, 3])
 
 
-def test_rules_from_dataset(monkeypatch, log_dataset):
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+def test_rules_from_dataset(monkeypatch, mocked_client, log_dataset):
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     mock_rules = [Rule(query="mock", label="mock")]
     monkeypatch.setattr(

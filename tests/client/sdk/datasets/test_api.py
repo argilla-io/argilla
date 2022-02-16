@@ -31,7 +31,6 @@ from rubrix.client.sdk.commons.models import (
 from rubrix.client.sdk.datasets.api import _build_response, get_dataset
 from rubrix.client.sdk.datasets.models import Dataset, TaskType
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
-from tests.server.test_helpers import client
 
 
 @pytest.fixture
@@ -39,14 +38,14 @@ def sdk_client():
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
 
 
-def test_get_dataset(sdk_client, monkeypatch):
-    monkeypatch.setattr(httpx, "get", client.get)
+def test_get_dataset(mocked_client, sdk_client, monkeypatch):
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
 
     # create test dataset
     bulk_data = TextClassificationBulkData(records=[])
     dataset_name = "test_dataset"
-    client.delete(f"/api/datasets/{dataset_name}")
-    client.post(
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
         json=bulk_data.dict(by_alias=True),
     )

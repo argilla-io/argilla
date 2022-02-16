@@ -16,7 +16,6 @@
 """
 This module configures the global fastapi application
 """
-import logging
 import os
 from pathlib import Path
 
@@ -33,7 +32,7 @@ from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
-from ..logging import LoguruLoggerHandler
+from ..logging import configure_logging
 from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
@@ -116,30 +115,7 @@ def configure_app_security(app: FastAPI):
 
 def configure_app_logging(app: FastAPI):
     """Configure app logging using"""
-    intercept_handler = LoguruLoggerHandler()
-
-    if not intercept_handler.is_available:
-        return
-
-    def _inner_logging_config():
-        logging.basicConfig(handlers=[intercept_handler], level=logging.WARNING)
-        for name in logging.root.manager.loggerDict:
-            logger = logging.getLogger(name)
-            logger.handlers = []
-
-        for name in [
-            "uvicorn",
-            "uvicorn.lifespan",
-            "uvicorn.error",
-            "uvicorn.access",
-            "fastapi",
-        ]:
-            logger = logging.getLogger(name)
-            logger.propagate = False
-            logger.handlers = [intercept_handler]
-
-    _inner_logging_config()
-    app.on_event("startup")(_inner_logging_config)
+    app.on_event("startup")(configure_logging)
 
 
 app = FastAPI(

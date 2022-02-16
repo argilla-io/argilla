@@ -57,4 +57,4 @@ def test_logging_handler(mocker):
     logger.handlers = [handler]
     logger.setLevel(logging.INFO)  # Force trace
     logger.info("This is a test")
-    handler.emit.assert_called_once()
+    handler.emit.assert_called()

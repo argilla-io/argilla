@@ -2,11 +2,9 @@ import pytest
 
 import rubrix
 from rubrix import TokenClassificationRecord
-from tests.server.test_helpers import client, mocking_client
 
 
-def test_log_with_empty_text(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_with_empty_text(mocked_client):
     dataset = "test_log_with_empty_text"
     text = " "
 
@@ -18,8 +16,7 @@ def test_log_with_empty_text(monkeypatch):
         )
 
 
-def test_log_with_empty_tokens_list(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_with_empty_tokens_list(mocked_client):
     dataset = "test_log_with_empty_text"
     text = "The text"
 
@@ -34,8 +31,7 @@ def test_log_with_empty_tokens_list(monkeypatch):
         )
 
 
-def test_log_record_that_makes_me_cry(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_record_that_makes_me_cry(mocked_client):
     dataset = "test_log_record_that_makes_me_cry"
     record = TokenClassificationRecord(
         text="'Secret Story : Última hora' debuta con un pobre 8.7% en el access de Telecinco.. . PROGRAMAS CON MEJOR CUOTA DEL LUNES (POR CADENAS). . ",
