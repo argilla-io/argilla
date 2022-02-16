@@ -40,7 +40,7 @@
       v-if="dataset.entities.length > entitiesNumber"
       class="entities__container__button"
       @click="toggleEntitiesNumber"
-      >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
+      >{{ showEntitySelector ? "Show less" : `+ ${dataset.entities.length - entitiesNumber}` }}</ReButton
     >
   </div>
 </template>
@@ -169,7 +169,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.active,
@@ -183,15 +183,15 @@ $hue: 360;
   .entities__selector__option.color_#{$i - 1} span {
     background: $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} {
-    background: white;
-    &:hover {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
-    }
-    &:active {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
-    }
-  }
+  // .entities__selector__option.color_#{$i - 1} {
+  //   background: white;
+  //   &:hover {
+  //     background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
+  //   }
+  //   &:active {
+  //     background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
+  //   }
+  // }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
   }
