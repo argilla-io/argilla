@@ -38,7 +38,8 @@ def test_log_record_that_makes_me_cry(monkeypatch):
     mocking_client(monkeypatch, client)
     dataset = "test_log_record_that_makes_me_cry"
     record = TokenClassificationRecord(
-        text="'Secret Story : Última hora' debuta con un pobre 8.7% en el access de Telecinco.. . PROGRAMAS CON MEJOR CUOTA DEL LUNES (POR CADENAS). . ",
+        text="'Secret Story : Última hora' debuta con un pobre 8.7% en el access de Telecinco.. . "
+        "PROGRAMAS CON MEJOR CUOTA DEL LUNES (POR CADENAS). . ",
         tokens=[
             "'",
             "Secret",
@@ -433,6 +434,7 @@ def test_log_record_that_makes_me_cry(monkeypatch):
             },
         ],
         "tokens_length": 31,
+        "text_length": 137,
         "predicted": {
             "mentions": [
                 {

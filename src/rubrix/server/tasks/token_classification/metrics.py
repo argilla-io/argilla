@@ -312,7 +312,7 @@ class TokenMetrics(BaseModel):
     custom: Dict[str, Any] = None
 
 
-class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
+class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
     """Configured metrics for token classification"""
 
     _PREDICTED_MENTIONS_NAMESPACE = "metrics.predicted.mentions"
@@ -438,8 +438,10 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
         """Compute metrics at record level"""
+        base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
         return {
+            **base_metrics,
             "tokens": cls.build_tokens_metrics(record),
             "tokens_length": len(record.tokens),
             **cls.build_mentions_metrics(record),

@@ -110,7 +110,7 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
         return f"{self.nested_path}.{inner_field}"
 
 
-class BaseTaskMetrics(GenericModel, Generic[GenericRecord]):
+class BaseTaskMetrics(BaseModel):
     """
     Base class encapsulating related task metrics
 
