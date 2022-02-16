@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
 
@@ -12,6 +12,7 @@ class TaskConfig(BaseModel):
     query: Any
     record: Type[BaseRecord]
     metrics: Optional[Type[BaseTaskMetrics]]
+    es_mappings: Dict[str, Any]
 
 
 class TaskFactory:
@@ -23,14 +24,16 @@ class TaskFactory:
         cls,
         task_type: TaskType,
         query_request: Type[Any],
+        es_mappings: Dict[str, Any],
         record_class: Type[BaseRecord],
         metrics: Optional[Type[BaseTaskMetrics]] = None,
     ):
-        if metrics:
-            metrics.configure_es_index()
-
         cls._REGISTERED_TASKS[task_type] = TaskConfig(
-            task=task_type, query=query_request, record=record_class, metrics=metrics
+            task=task_type,
+            es_mappings=es_mappings,
+            query=query_request,
+            record=record_class,
+            metrics=metrics,
         )
 
     @classmethod
@@ -53,3 +56,10 @@ class TaskFactory:
         if not config:
             raise WrongTaskError(f"No configuration found for task {task}")
         return config.record
+
+    @classmethod
+    def get_task_mappings(cls, task: TaskType) -> Dict[str, Any]:
+        config = cls.get_task_by_task_type(task)
+        if not config:
+            raise WrongTaskError(f"No configuration found for task {task}")
+        return config.es_mappings
