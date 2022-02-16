@@ -7,12 +7,12 @@ from rubrix.server.tasks.commons import TaskType
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import SortConfig
+from rubrix.server.tasks.search.query_builder import EsQueryBuilder
 from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from tests.server.test_helpers import client, mocking_client
 
 
 @pytest.fixture
@@ -26,18 +26,26 @@ def dao(es_wrapper: ElasticsearchWrapper):
 
 
 @pytest.fixture
-def metrics(dao: DatasetRecordsDAO):
-    return MetricsService.get_instance(dao=dao)
+def query_builder(dao: DatasetRecordsDAO):
+    return EsQueryBuilder.get_instance(dao=dao)
 
 
 @pytest.fixture
-def service(dao: DatasetRecordsDAO, metrics: MetricsService):
-    return SearchRecordsService.get_instance(dao=dao, metrics=metrics)
+def metrics(dao: DatasetRecordsDAO, query_builder: EsQueryBuilder):
+    return MetricsService.get_instance(dao=dao, query_builder=query_builder)
 
 
-def test_failing_metrics(service, monkeypatch):
+@pytest.fixture
+def service(
+    dao: DatasetRecordsDAO, metrics: MetricsService, query_builder: EsQueryBuilder
+):
+    return SearchRecordsService.get_instance(
+        dao=dao, metrics=metrics, query_builder=query_builder
+    )
+
+
+def test_failing_metrics(service, mocked_client):
     dataset = Dataset(name="test_failing_metrics", task=TaskType.text_classification)
-    mocking_client(monkeypatch, client)
 
     rubrix.delete(dataset.name)
     rubrix.log(

@@ -1,4 +1,3 @@
-import httpx
 import pytest
 
 import rubrix
@@ -11,20 +10,11 @@ from rubrix.metrics.token_classification import (
     entity_labels,
     f1,
     mention_length,
-    tokens_length,
-    token_length,
-    token_frequency,
     token_capitalness,
+    token_frequency,
+    token_length,
+    tokens_length,
 )
-from tests.server.test_helpers import client
-
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
 
 
 def log_some_data(dataset: str):
@@ -66,8 +56,7 @@ def log_some_data(dataset: str):
     )
 
 
-def test_search_by_nested_metric(monkeypatch):
-    mocking_client(monkeypatch)
+def test_search_by_nested_metric(mocked_client):
     dataset = "test_search_by_nested_metric"
     rb.delete(dataset)
     log_some_data(dataset)
@@ -76,8 +65,7 @@ def test_search_by_nested_metric(monkeypatch):
     assert len(df) > 0
 
 
-def test_tokens_length(monkeypatch):
-    mocking_client(monkeypatch)
+def test_tokens_length(mocked_client):
     dataset = "test_tokens_length"
     log_some_data(dataset)
 
@@ -87,8 +75,7 @@ def test_tokens_length(monkeypatch):
     results.visualize()
 
 
-def test_token_length(monkeypatch):
-    mocking_client(monkeypatch)
+def test_token_length(mocked_client):
     dataset = "test_token_length"
     log_some_data(dataset)
 
@@ -98,8 +85,7 @@ def test_token_length(monkeypatch):
     results.visualize()
 
 
-def test_token_frequency(monkeypatch):
-    mocking_client(monkeypatch)
+def test_token_frequency(mocked_client):
     dataset = "test_token_frequency"
     log_some_data(dataset)
 
@@ -109,8 +95,7 @@ def test_token_frequency(monkeypatch):
     results.visualize()
 
 
-def test_token_capitalness(monkeypatch):
-    mocking_client(monkeypatch)
+def test_token_capitalness(mocked_client):
     dataset = "test_token_capitalness"
     log_some_data(dataset)
 
@@ -120,8 +105,7 @@ def test_token_capitalness(monkeypatch):
     results.visualize()
 
 
-def test_mentions_length(monkeypatch):
-    mocking_client(monkeypatch)
+def test_mentions_length(mocked_client):
     dataset = "test_mentions_length"
     log_some_data(dataset)
 
@@ -146,8 +130,7 @@ def test_mentions_length(monkeypatch):
     results.visualize()
 
 
-def test_compute_for_as_string(monkeypatch):
-    mocking_client(monkeypatch)
+def test_compute_for_as_string(mocked_client):
     dataset = "test_compute_for_as_string"
     log_some_data(dataset)
 
@@ -163,8 +146,7 @@ def test_compute_for_as_string(monkeypatch):
         entity_density(dataset, compute_for="not-found")
 
 
-def test_entity_density(monkeypatch):
-    mocking_client(monkeypatch)
+def test_entity_density(mocked_client):
     dataset = "test_entity_density"
     log_some_data(dataset)
 
@@ -179,8 +161,7 @@ def test_entity_density(monkeypatch):
     results.visualize()
 
 
-def test_entity_labels(monkeypatch):
-    mocking_client(monkeypatch)
+def test_entity_labels(mocked_client):
     dataset = "test_entity_labels"
 
     log_some_data(dataset)
@@ -196,8 +177,7 @@ def test_entity_labels(monkeypatch):
     results.visualize()
 
 
-def test_entity_capitalness(monkeypatch):
-    mocking_client(monkeypatch)
+def test_entity_capitalness(mocked_client):
     dataset = "test_entity_capitalness"
     rubrix.delete(dataset)
     log_some_data(dataset)
@@ -213,8 +193,7 @@ def test_entity_capitalness(monkeypatch):
     results.visualize()
 
 
-def test_entity_consistency(monkeypatch):
-    mocking_client(monkeypatch)
+def test_entity_consistency(mocked_client):
     dataset = "test_entity_consistency"
     rubrix.delete(dataset)
     log_some_data(dataset)
@@ -262,8 +241,7 @@ def test_entity_consistency(monkeypatch):
         (entity_labels, {}),
     ],
 )
-def test_metrics_without_data(metric, expected_results, monkeypatch):
-    mocking_client(monkeypatch)
+def test_metrics_without_data(mocked_client, metric, expected_results, monkeypatch):
     dataset = "test_metrics_without_data"
     rb.delete(dataset)
 
@@ -284,8 +262,7 @@ def test_metrics_without_data(metric, expected_results, monkeypatch):
     results.visualize()
 
 
-def test_metrics_for_text_classification(monkeypatch):
-    mocking_client(monkeypatch)
+def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_token_classification"
 
     text = "test the f1 metric of the token classification task"

@@ -25,12 +25,11 @@ from rubrix.server.tasks.text_classification.api import (
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
 )
-from tests.server.test_helpers import client
 
 
-def test_create_records_for_text_classification_with_multi_label():
+def test_create_records_for_text_classification_with_multi_label(mocked_client):
     dataset = "test_create_records_for_text_classification_with_multi_label"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     records = [
         TextClassificationRecord.parse_obj(data)
@@ -69,7 +68,7 @@ def test_create_records_for_text_classification_with_multi_label():
             },
         ]
     ]
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -84,7 +83,7 @@ def test_create_records_for_text_classification_with_multi_label():
     assert bulk_response.failed == 0
     assert bulk_response.processed == 2
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             tags={"new": "tag"},
@@ -93,7 +92,9 @@ def test_create_records_for_text_classification_with_multi_label():
         ).dict(by_alias=True),
     )
 
-    get_dataset = Dataset.parse_obj(client.get(f"/api/datasets/{dataset}").json())
+    get_dataset = Dataset.parse_obj(
+        mocked_client.get(f"/api/datasets/{dataset}").json()
+    )
     assert get_dataset.tags == {
         "env": "test",
         "class": "text classification",
@@ -106,7 +107,7 @@ def test_create_records_for_text_classification_with_multi_label():
 
     assert response.status_code == 200, response.json()
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search", json={}
     )
 
@@ -117,9 +118,9 @@ def test_create_records_for_text_classification_with_multi_label():
     assert results.records[0].predicted is None
 
 
-def test_create_records_for_text_classification():
+def test_create_records_for_text_classification(mocked_client):
     dataset = "test_create_records_for_text_classification"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
     metadata = {"config": {"the": "config"}}
     classification_bulk = TextClassificationBulkData(
@@ -141,7 +142,7 @@ def test_create_records_for_text_classification():
             )
         ],
     )
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=classification_bulk.dict(by_alias=True),
     )
@@ -152,13 +153,13 @@ def test_create_records_for_text_classification():
     assert bulk_response.failed == 0
     assert bulk_response.processed == 1
 
-    response = client.get(f"/api/datasets/{dataset}")
+    response = mocked_client.get(f"/api/datasets/{dataset}")
     assert response.status_code == 200
     created_dataset = Dataset.parse_obj(response.json())
     assert created_dataset.tags == tags
     assert created_dataset.metadata == metadata
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search", json={}
     )
 
@@ -177,9 +178,9 @@ def test_create_records_for_text_classification():
     }
 
 
-def test_partial_record_update():
+def test_partial_record_update(mocked_client):
     name = "test_partial_record_update"
-    assert client.delete(f"/api/datasets/{name}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{name}").status_code == 200
 
     record = TextClassificationRecord(
         **{
@@ -200,7 +201,7 @@ def test_partial_record_update():
         records=[record],
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{name}/TextClassification:bulk",
         json=bulk.dict(by_alias=True),
     )
@@ -219,12 +220,12 @@ def test_partial_record_update():
 
     bulk.records = [record]
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{name}/TextClassification:bulk",
         json=bulk.dict(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{name}/TextClassification:search",
         json={
             "query": TextClassificationQuery(predicted=PredictionStatus.OK).dict(
@@ -261,11 +262,11 @@ def test_partial_record_update():
     )
 
 
-def test_sort_by_last_updated():
+def test_sort_by_last_updated(mocked_client):
     dataset = "test_sort_by_last_updated"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     for i in range(0, 10):
-        client.post(
+        mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
             json=TextClassificationBulkData(
                 records=[
@@ -280,7 +281,7 @@ def test_sort_by_last_updated():
             ).dict(by_alias=True),
         )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={"sort": [{"id": "last_updated", "order": "asc"}]},
     )
@@ -288,10 +289,10 @@ def test_sort_by_last_updated():
     assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
 
 
-def test_sort_by_id_as_default():
+def test_sort_by_id_as_default(mocked_client):
     dataset = "test_sort_by_id_as_default"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
-    response = client.post(
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=[
@@ -306,7 +307,7 @@ def test_sort_by_id_as_default():
             ],
         ).dict(by_alias=True),
     )
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={},
     )
@@ -327,12 +328,12 @@ def test_sort_by_id_as_default():
     ]
 
 
-def test_some_sort_by():
+def test_some_sort_by(mocked_client):
     dataset = "test_some_sort_by"
 
     expected_records_length = 50
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
-    client.post(
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=[
@@ -350,7 +351,7 @@ def test_some_sort_by():
             ],
         ).dict(by_alias=True),
     )
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={
             "sort": [
@@ -374,7 +375,7 @@ def test_some_sort_by():
         }
     }
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={
             "sort": [
@@ -400,11 +401,11 @@ def test_some_sort_by():
     ]
 
 
-def test_disable_aggregations_when_scroll():
+def test_disable_aggregations_when_scroll(mocked_client):
     dataset = "test_disable_aggregations_when_scroll"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -430,7 +431,7 @@ def test_disable_aggregations_when_scroll():
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.processed == 100
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=10",
         json={},
     )
@@ -440,11 +441,11 @@ def test_disable_aggregations_when_scroll():
     assert results.aggregations is None
 
 
-def test_include_event_timestamp():
+def test_include_event_timestamp(mocked_client):
     dataset = "test_include_event_timestamp"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -471,7 +472,7 @@ def test_include_event_timestamp():
     bulk_response = BulkResponse.parse_obj(response.json())
     assert bulk_response.processed == 100
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=10",
         json={},
     )
@@ -481,11 +482,11 @@ def test_include_event_timestamp():
     assert all(map(lambda record: record.event_timestamp is not None, results.records))
 
 
-def test_words_cloud():
+def test_words_cloud(mocked_client):
     dataset = "test_language_detection"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             records=[
@@ -512,7 +513,7 @@ def test_words_cloud():
     )
     BulkResponse.parse_obj(response.json())
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json={},
     )
@@ -521,11 +522,11 @@ def test_words_cloud():
     assert results.aggregations.words is not None
 
 
-def test_metadata_with_point_in_field_name():
+def test_metadata_with_point_in_field_name(mocked_client):
     dataset = "test_metadata_with_point_in_field_name"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             records=[
@@ -547,7 +548,7 @@ def test_metadata_with_point_in_field_name():
         ).json(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?limit=0",
         json={},
     )
@@ -558,11 +559,11 @@ def test_metadata_with_point_in_field_name():
     assert results.aggregations.metadata.get("field.two", {})["2"] == 2
 
 
-def test_wrong_text_query():
+def test_wrong_text_query(mocked_client):
     dataset = "test_wrong_text_query"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             records=[
@@ -577,7 +578,7 @@ def test_wrong_text_query():
         ).json(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json=TextClassificationSearchRequest(
             query=TextClassificationQuery(query_text="!")
@@ -592,11 +593,11 @@ def test_wrong_text_query():
     }
 
 
-def test_search_using_text():
+def test_search_using_text(mocked_client):
     dataset = "test_search_using_text"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         data=TextClassificationBulkData(
             records=[
@@ -611,7 +612,7 @@ def test_search_using_text():
         ).json(by_alias=True),
     )
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json=TextClassificationSearchRequest(
             query=TextClassificationQuery(query_text="text: texto")
@@ -620,7 +621,7 @@ def test_search_using_text():
     assert response.status_code == 200
     assert response.json()["total"] == 1
 
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json=TextClassificationSearchRequest(
             query=TextClassificationQuery(query_text="text.exact: texto")

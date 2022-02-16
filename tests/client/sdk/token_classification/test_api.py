@@ -27,7 +27,6 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
-from tests.server.test_helpers import client
 
 
 @pytest.fixture
@@ -55,11 +54,11 @@ def bulk_data():
     )
 
 
-def test_bulk(sdk_client, bulk_data, monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
+def test_bulk(sdk_client, mocked_client, bulk_data, monkeypatch):
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
 
     dataset_name = "test_dataset"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_data)
 
     assert response.status_code == 200
@@ -67,13 +66,13 @@ def test_bulk(sdk_client, bulk_data, monkeypatch):
 
 
 @pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])
-def test_data(limit, expected, sdk_client, bulk_data, monkeypatch):
+def test_data(mocked_client, limit, expected, sdk_client, bulk_data, monkeypatch):
     # TODO: Not sure how to test the streaming part of the response here
-    monkeypatch.setattr(httpx, "stream", client.stream)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     dataset_name = "test_dataset"
-    client.delete(f"/api/datasets/{dataset_name}")
-    client.post(
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TokenClassification:bulk",
         json=bulk_data.dict(by_alias=True),
     )

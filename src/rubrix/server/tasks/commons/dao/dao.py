@@ -153,9 +153,6 @@ class DatasetRecordsDAO:
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
-
-        # TODO(@frascuchon): detect settings.disable_es_index_template_creation env var
-        #  and show alternative to customize dataset index configuration
         self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(

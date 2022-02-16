@@ -4,11 +4,9 @@ import rubrix
 from rubrix import TextClassificationRecord, TokenClassificationRecord
 from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
 from rubrix.server.commons.settings import settings
-from tests.server.test_helpers import client, mocking_client
 
 
-def test_log_records_with_multi_and_single_label_task(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_records_with_multi_and_single_label_task(mocked_client):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
@@ -37,8 +35,7 @@ def test_log_records_with_multi_and_single_label_task(monkeypatch):
         rubrix.log(records[1], name=dataset)
 
 
-def test_delete_and_create_for_different_task(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_delete_and_create_for_different_task(mocked_client):
     dataset = "test_delete_and_create_for_different_task"
     text = "This is a text"
 
@@ -53,8 +50,7 @@ def test_delete_and_create_for_different_task(monkeypatch):
     rubrix.load(dataset)
 
 
-def test_log_records_with_empty_metadata_list(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_records_with_empty_metadata_list(mocked_client):
     dataset = "test_log_records_with_empty_metadata_list"
 
     rubrix.delete(dataset)
@@ -73,8 +69,7 @@ def test_log_records_with_empty_metadata_list(monkeypatch):
         assert meta == {}
 
 
-def test_logging_with_metadata_limits_exceeded(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_logging_with_metadata_limits_exceeded(mocked_client):
     dataset = "test_logging_with_metadata_limits_exceeded"
 
     rubrix.delete(dataset)
@@ -93,8 +88,7 @@ def test_logging_with_metadata_limits_exceeded(monkeypatch):
         rubrix.log(expected_record, name=dataset)
 
 
-def test_log_with_other_task(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_log_with_other_task(mocked_client):
     dataset = "test_log_with_other_task"
 
     rubrix.delete(dataset)
@@ -110,8 +104,7 @@ def test_log_with_other_task(monkeypatch):
         )
 
 
-def test_dynamics_metadata(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_dynamics_metadata(mocked_client):
     dataset = "test_dynamics_metadata"
     rubrix.log(
         TextClassificationRecord(inputs="This is a text", metadata={"a": "value"}),

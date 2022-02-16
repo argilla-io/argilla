@@ -1,9 +1,7 @@
 from tests.monitoring.helpers import mock_monitor
-from tests.server.test_helpers import client, mocking_client
 
 
-def test_flair_monitoring(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_flair_monitoring(mocked_client, monkeypatch):
 
     from flair.data import Sentence
     from flair.models import SequenceTagger
