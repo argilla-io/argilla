@@ -46,10 +46,6 @@ from rubrix.client.models import (
 from rubrix.logging import configure_logging
 from rubrix.monitoring.model_monitor import monitor
 
-configure_logging()
-
-_LOGGER = getLogger(__name__)
-
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
 except pkg_resources.DistributionNotFound:
@@ -71,10 +67,14 @@ except ModuleNotFoundError as ex:
 
     app = fallback_app
 
+configure_logging()
 
 _client: Optional[
     RubrixClient
 ] = None  # Client will be stored here to pass it through functions
+
+
+_LOGGER = getLogger(__name__)
 
 
 def _client_instance() -> RubrixClient:
