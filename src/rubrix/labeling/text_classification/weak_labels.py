@@ -90,7 +90,7 @@ class WeakLabels:
         self._dataset = dataset
 
         self._rules = rules or load_rules(dataset)
-        if self._rules == []:
+        if not self._rules:
             raise NoRulesFoundError(
                 f"No rules were found in the given dataset '{dataset}'"
             )
@@ -134,7 +134,7 @@ class WeakLabels:
 
         if self._records[0].multi_label:
             raise MultiLabelError(
-                "Multi-label text classification is not yet supported."
+                "For multi-label text classification, use the `rb.labeling.text_classification.WeakMultiLabels` class."
             )
 
         # apply rules -> create the weak label matrix, annotation array, final label2int mapping
@@ -177,7 +177,7 @@ class WeakLabels:
         for n, record in tqdm(
             enumerate(self._records), total=len(self._records), desc="Applying rules"
         ):
-            # First: fill annotation array
+            # FIRST: fill annotation array
             try:
                 annotation = _label2int[record.annotation]
             except KeyError as error:
@@ -192,9 +192,15 @@ class WeakLabels:
 
             annotation_array[n] = annotation
 
-            # Second: fill weak label matrix
+            # SECOND: fill weak label matrix
             for m, rule in enumerate(self._rules):
                 weak_label = rule(record)
+                if isinstance(weak_label, list):
+                    if len(weak_label) != 1:
+                        raise MultiLabelError(
+                            "For rules that do not return exactly 1 label, use the `WeakMultiLabels` class."
+                        )
+                    weak_label = weak_label[0]
 
                 try:
                     weak_label = _label2int[weak_label]
@@ -261,7 +267,7 @@ class WeakLabels:
         if has_annotation is False:
             return [rec for rec in self._records if rec.annotation is None]
 
-        return self._records
+        return list(self._records)
 
     def annotation(
         self,
@@ -272,7 +278,7 @@ class WeakLabels:
 
         Args:
             include_missing: If True, returns an array of the length of the record list (``self.records()``).
-                For this we will fill the array with the ``self.label2int[None]`` integer for records without an annotation.
+                For this, we will fill the array with the ``self.label2int[None]`` integer for records without an annotation.
             exclude_missing_annotations: DEPRECATED
 
         Returns:
@@ -311,7 +317,7 @@ class WeakLabels:
         Args:
             normalize_by_coverage: Normalize the overlaps and conflicts by the respective coverage.
             annotation: An optional array with ints holding the annotations.
-                By default we will use ``self.annotation(exclude_missing_annotations=False)``.
+                By default, we will use ``self.annotation(include_missing=True)``.
 
         Returns:
             The summary statistics for each rule in a pandas DataFrame.
@@ -319,6 +325,447 @@ class WeakLabels:
         has_weak_label = self._matrix != self._label2int[None]
 
         # polarity (label)
+        polarity = [
+            set(
+                self._int2label[integer]
+                for integer in np.unique(
+                    self._matrix[:, i][self._matrix[:, i] != self._label2int[None]]
+                )
+            )
+            for i in range(len(self._rules))
+        ]
+        polarity.append(set().union(*polarity))
+
+        # coverage
+        coverage = has_weak_label.sum(axis=0) / len(self._records)
+        coverage = np.append(
+            coverage,
+            (has_weak_label.sum(axis=1) > 0).sum() / len(self._records),
+        )
+
+        # overlaps
+        has_overlaps = has_weak_label.sum(axis=1) > 1
+        overlaps = self._compute_overlaps_conflicts(
+            has_weak_label, has_overlaps, coverage, normalize_by_coverage
+        )
+
+        # conflicts
+        # TODO: For a lot of records (~1e6), this could become slow (~10s) ... a vectorized solution would be better.
+        has_conflicts = np.apply_along_axis(
+            lambda x: len(np.unique(x[x != self._label2int[None]])) > 1,
+            axis=1,
+            arr=self._matrix,
+        )
+        conflicts = self._compute_overlaps_conflicts(
+            has_weak_label, has_conflicts, coverage, normalize_by_coverage
+        )
+
+        # index for the summary
+        index = list(self._rules_name2index.keys()) + ["total"]
+
+        # only add annotated_coverage, correct, incorrect and precision if we have annotations
+        if (
+            any(self._annotation_array != self._label2int[None])
+            or annotation is not None
+        ):
+            # annotated coverage
+            has_annotation = (
+                annotation if annotation is not None else self._annotation_array
+            ) != self._label2int[None]
+            annotated_coverage = (
+                has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
+            )
+            annotated_coverage = np.append(
+                annotated_coverage,
+                (has_weak_label[has_annotation].sum(axis=1) > 0).sum()
+                / has_annotation.sum(),
+            )
+
+            # correct/incorrect
+            correct, incorrect = self._compute_correct_incorrect(
+                has_weak_label,
+                annotation if annotation is not None else self._annotation_array,
+            )
+
+            # precision
+            precision = correct / (correct + incorrect)
+
+            return pd.DataFrame(
+                {
+                    "label": polarity,
+                    "coverage": coverage,
+                    "annotated_coverage": annotated_coverage,
+                    "overlaps": overlaps,
+                    "conflicts": conflicts,
+                    "correct": correct,
+                    "incorrect": incorrect,
+                    "precision": precision,
+                },
+                index=index,
+            )
+
+        return pd.DataFrame(
+            {
+                "label": polarity,
+                "coverage": coverage,
+                "overlaps": overlaps,
+                "conflicts": conflicts,
+            },
+            index=index,
+        )
+
+    def _compute_overlaps_conflicts(
+        self,
+        has_weak_label: np.ndarray,
+        has_overlaps_or_conflicts: np.ndarray,
+        coverage: np.ndarray,
+        normalize_by_coverage: bool,
+    ) -> np.ndarray:
+        """Helper method to compute the overlaps/conflicts and optionally normalize them by the respective coverage"""
+        overlaps_or_conflicts = (
+            has_weak_label
+            * np.repeat(has_overlaps_or_conflicts, len(self._rules)).reshape(
+                has_weak_label.shape
+            )
+        ).sum(axis=0) / len(self._records)
+        # total
+        overlaps_or_conflicts = np.append(
+            overlaps_or_conflicts, has_overlaps_or_conflicts.sum() / len(self._records)
+        )
+
+        if normalize_by_coverage:
+            overlaps_or_conflicts /= coverage
+            return np.nan_to_num(overlaps_or_conflicts)
+
+        return overlaps_or_conflicts
+
+    def _compute_correct_incorrect(
+        self, has_weak_label: np.ndarray, annotation: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
+        annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(
+            self._matrix.shape
+        )
+
+        # correct
+        correct_with_abstain = annotation_matrix == self._matrix
+        correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
+
+        # incorrect
+        incorrect_with_abstain = annotation_matrix != self._matrix
+        incorrect = np.where(
+            has_weak_label & (annotation_matrix != self._label2int[None]),
+            incorrect_with_abstain,
+            False,
+        ).sum(axis=0)
+
+        # add totals at the end
+        return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
+
+    def show_records(
+        self,
+        labels: Optional[List[str]] = None,
+        rules: Optional[List[Union[str, int]]] = None,
+    ) -> pd.DataFrame:
+        """Shows records in a pandas DataFrame, optionally filtered by weak labels and non-abstaining rules.
+
+        If you provide both ``labels`` and ``rules``, we take the intersection of both filters.
+
+        Args:
+            labels: All of these labels are in the record's weak labels. If None, do not filter by labels.
+            rules: All of these rules did not abstain for the record. If None, do not filter by rules.
+                You can refer to the rules by their (function) name or by their index in the ``self.rules`` list.
+
+        Returns:
+            The optionally filtered records as a pandas DataFrame.
+        """
+        # get labels mask
+        if labels is not None:
+            labels = [self._label2int[label] for label in labels]
+            idx_by_labels = np.isin(self._matrix, labels).sum(axis=1) >= len(labels)
+        else:
+            idx_by_labels = np.ones_like(self._records).astype(bool)
+
+        # get rule mask
+        if rules is not None:
+            rules = [
+                self._rules_name2index[rule] if isinstance(rule, str) else rule
+                for rule in rules
+            ]
+            idx_by_rules = (self._matrix[:, rules] != self._label2int[None]).sum(
+                axis=1
+            ) == len(rules)
+        else:
+            idx_by_rules = np.ones_like(self._records).astype(bool)
+
+        # apply mask
+        filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
+
+        return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
+
+    def change_mapping(self, label2int: Dict[str, int]):
+        """Allows you to change the mapping between labels and integers.
+
+        This will update the ``self.matrix`` as well as the ``self.annotation``.
+
+        Args:
+            label2int: New label to integer mapping. Must cover all previous labels.
+        """
+        # save masks for swapping
+        label_masks = {}
+        annotation_masks = {}
+
+        for label in self._label2int:
+            # Check new label2int mapping
+            if label not in label2int:
+                raise MissingLabelError(
+                    f"The label '{label}' is missing in the new mapping."
+                )
+            # compute masks
+            label_masks[label] = self._matrix == self._label2int[label]
+            annotation_masks[label] = self._annotation_array == self._label2int[label]
+
+        # swap integers
+        for label in self._label2int:
+            self._matrix[label_masks[label]] = label2int[label]
+            self._annotation_array[annotation_masks[label]] = label2int[label]
+
+        # update mapping dicts
+        self._label2int = label2int.copy()
+        self._int2label = {val: key for key, val in self._label2int.items()}
+
+
+class WeakMultiLabels:
+    """Computes the weak labels of a multi-label text classification dataset by applying a given list of rules.
+
+    Args:
+        dataset: Name of the dataset to which the rules will be applied.
+        rules: A list of rules (labeling functions). They must return a string, or ``None`` in case of abstention.
+            If None, we will use the rules of the dataset (Default).
+        ids: An optional list of record ids to filter the dataset before applying the rules.
+        query: An optional ElasticSearch query with the
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
+            to filter the dataset before applying the rules.
+
+    Raises:
+        NoRulesFoundError: When you do not provide rules, and the dataset has no rules either.
+        DuplicatedRuleNameError: When you provided multiple rules with the same name.
+        SingleLabelError: When trying to get weak labels for a single-label text classification task.
+        NoRecordsFoundError: When the filtered dataset is empty.
+    """
+
+    def __init__(
+        self,
+        dataset: str,
+        rules: Optional[List[Callable]] = None,
+        ids: Optional[List[Union[int, str]]] = None,
+        query: Optional[str] = None,
+    ):
+        if not isinstance(dataset, str):
+            raise TypeError(
+                f"The name of the dataset must be a string, but you provided: {dataset}"
+            )
+        self._dataset = dataset
+
+        self._rules = rules or load_rules(dataset)
+        if not self._rules:
+            raise NoRulesFoundError(
+                f"No rules were found in the given dataset '{dataset}'"
+            )
+
+        self._rules_index2name = {
+            # covers our Rule class, snorkel's LabelingFunction class and arbitrary methods
+            index: (
+                getattr(rule, "name", None)
+                or (
+                    getattr(rule, "__name__", None)
+                    # allow multiple lambda functions
+                    if getattr(rule, "__name__", None) != "<lambda>"
+                    else None
+                )
+                or f"rule_{index}"
+            )
+            for index, rule in enumerate(self._rules)
+        }
+        # raise error if there are duplicates
+        counts = Counter(self._rules_index2name.values())
+        if len(counts.keys()) < len(self._rules):
+            raise DuplicatedRuleNameError(
+                f"Following rule names are duplicated x times: { {key: val for key, val in counts.items() if val > 1} }"
+                " Please make sure to provide unique rule names."
+            )
+        self._rules_name2index = {
+            val: key for key, val in self._rules_index2name.items()
+        }
+
+        # load records and check compatibility
+        self._records: DatasetForTextClassification = load(
+            dataset, query=query, ids=ids, as_pandas=False
+        )
+        if not self._records:
+            raise NoRecordsFoundError(
+                f"No records found in dataset '{dataset}'"
+                + (f" with query '{query}'" if query else "")
+                + (" and" if query and ids else "")
+                + (f" with ids {ids}." if ids else ".")
+            )
+
+        if not self._records[0].multi_label:
+            raise SingleLabelError(
+                "For single-label text classification, use the `rb.labeling.text_classification.WeakLabels` class."
+            )
+
+        # apply rules -> create the weak label tensor, annotation matrix, label list
+        self._tensor, self._annotation_matrix, self._labels = self._apply_rules()
+
+    def _apply_rules(self) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+        # call apply on the ElasticSearch rules
+        for rule in tqdm(self._rules, desc="Preparing rules"):
+            if isinstance(rule, Rule):
+                rule.apply(self._dataset)
+
+        # TODO: use server api to get labels
+        labels = sorted(["a", "b"])
+
+        # create weak label tensor, annotation matrix
+        weak_label_tensor = np.empty(
+            (len(self._records), len(self._rules), len(labels)), dtype=np.short
+        )
+        annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.short)
+
+        for n, record in tqdm(
+            enumerate(self._records), total=len(self._records), desc="Applying rules"
+        ):
+            # FIRST: fill annotation matrix
+            if record.annotation is None:
+                # "abstain" is an array with -1
+                annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.short)
+            else:
+                annotation_matrix[n] = np.array(
+                    [1 if label in record.annotation else 0 for label in labels],
+                    dtype=np.short,
+                )
+
+            # SECOND: fill weak label tensor
+            for m, rule in enumerate(self._rules):
+                weak_labels: Optional[Union[str, List[str]]] = rule(record)
+                if isinstance(weak_labels, str):
+                    weak_labels: Optional[List[str]] = [weak_labels]
+
+                if weak_labels is None:
+                    weak_label_tensor[n, m] = -1 * np.ones(len(labels))
+                else:
+                    weak_label_tensor[n, m] = np.array(
+                        [1 if label in weak_labels else 0 for label in labels],
+                        dtype=np.short,
+                    )
+
+        return weak_label_tensor, annotation_matrix, labels
+
+    @property
+    def rules(self) -> List[Callable]:
+        """The rules (labeling functions) that were used to produce the weak labels."""
+        return self._rules
+
+    @property
+    def labels(self) -> List[str]:
+        """The labels of the multi-label text classification dataset."""
+        return self._labels
+
+    def tensor(self, has_annotation: Optional[bool] = None) -> np.ndarray:
+        """Returns the weak label tensor, or optionally just a part of it.
+
+        It has the dimensions ("nr of record" x "nr of rules" x "nr of labels").
+        It holds a 1 or 0 in case a rule votes for a label or not. If the rule abstains, it holds a -1 for each label.
+
+        Args:
+            has_annotation: If True, return only the part of the tensor that has a corresponding annotation.
+                If False, return only the part of the tensor that has NOT a corresponding annotation.
+                By default, we return the whole weak label tensor.
+
+        Returns:
+            The weak label tensor, or optionally just a part of it.
+        """
+        if has_annotation is True:
+            return self._tensor[self._annotation_matrix.sum(1) >= 0]
+        if has_annotation is False:
+            return self._tensor[self._annotation_matrix.sum(1) < 0]
+
+        return self._tensor
+
+    def records(
+        self, has_annotation: Optional[bool] = None
+    ) -> List[TextClassificationRecord]:
+        """Returns the records corresponding to the weak label tensor
+
+        Args:
+            has_annotation: If True, return only the records that have an annotation. If False, return only the records
+                that have NO annotation. By default, we return all the records.
+
+        Returns:
+            A list of records, or optionally just a part of them.
+        """
+        if has_annotation is True:
+            return [rec for rec in self._records if rec.annotation is not None]
+        if has_annotation is False:
+            return [rec for rec in self._records if rec.annotation is None]
+
+        return list(self._records)
+
+    def annotation(
+        self,
+        include_missing: bool = False,
+    ) -> np.ndarray:
+        """Returns the annotation labels as a matrix of integers.
+
+        It has the dimensions ("nr of record" x "nr of labels").
+        It holds a 1 or 0 to indicate if the record is annotated with the corresponding label.
+        In case there is no annotation for the record, it holds a -1 for each label.
+
+        Args:
+            include_missing: If True, returns a matrix of the length of the record list (``self.records()``).
+                For this, we will fill the matrix with -1 for records without an annotation.
+
+        Returns:
+            The annotation labels as a matrix of integers.
+        """
+        if include_missing:
+            return self._annotation_matrix
+
+        return self._annotation_matrix[self._annotation_matrix.sum(1) >= 0]
+
+    def summary(
+        self,
+        normalize_by_coverage: bool = False,
+        annotation: Optional[np.ndarray] = None,
+    ) -> pd.DataFrame:
+        """Returns following summary statistics for each rule:
+
+        - **label**: Set of unique labels returned by the rule, excluding "None" (abstain).
+        - **coverage**: Fraction of the records labeled by the rule.
+        - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
+        - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
+        - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
+        - **correct**: Number of labels the rule labeled correctly (if annotations are available).
+        - **incorrect**: Number of labels the rule labeled incorrectly or missed (if annotations are available).
+        - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
+
+        Args:
+            normalize_by_coverage: Normalize the overlaps and conflicts by the respective coverage.
+            annotation: An optional matrix with ints holding the annotations (see ``self.annotation``).
+                By default, we will use ``self.annotation(include_missing=True)``.
+
+        Returns:
+            The summary statistics for each rule in a pandas DataFrame.
+        """
+        has_weak_label = self._tensor.sum(2) >= 0
+
+        # polarity (label)
+        generator_over_rules = (
+            # remove abstentions, get indices of votes
+            np.nonzero(self._tensor[:, m, :][self._tensor[:, m, :].sum(1) >= 0])[1]
+            for m in range(len(self._rules))
+        )
         polarity = [
             set(
                 self._int2label[integer]
@@ -550,4 +997,8 @@ class MultiLabelError(WeakLabelsError):
 
 
 class MissingLabelError(WeakLabelsError):
+    pass
+
+
+class SingleLabelError(WeakLabelsError):
     pass
