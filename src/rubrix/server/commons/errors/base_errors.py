@@ -39,6 +39,11 @@ class RubrixServerError(Exception):
             else None
         )
 
+    def __str__(self):
+        args = self.arguments or {}
+        printable_args = ",".join([f"{k}={v}" for k, v in args.items()])
+        return f"{self.code}({printable_args})"
+
 
 class ValidationError(RubrixServerError):
     """Generic data validation error out of request"""
