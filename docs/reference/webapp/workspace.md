@@ -17,7 +17,11 @@ The list consists of following columns:
 - **Name**: The name of the dataset, can be sorted alphabetically.
 - **Tags**: User defined tags for the dataset.
 - **Task**: The [task](../../guides/task_examples.ipynb) of the dataset.
+<<<<<<< HEAD
+- **Created at**: When was the dateset first logged by the client.
+=======
 - **Created at**: When was the dataset first logged by the client.
+>>>>>>> e6a9425170af416527db09a40757b0ff9cb0fc0a
 - **Updated at**: When was the dataset last modified, either via the Rubrix web app or the client.
 
 ## Side bar
