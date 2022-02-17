@@ -25,7 +25,7 @@ class Rule:
 
     Args:
         query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_.
-        label: The label associated to the query.
+        label: The label associated to the query. Can also be a list of labels.
         name: An optional name for the rule to be used as identifier in the
             `rubrix.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
 
@@ -42,7 +42,7 @@ class Rule:
     def __init__(
         self,
         query: str,
-        label: str,
+        label: Union[str, List[str]],
         name: Optional[str] = None,
         author: Optional[str] = None,
     ):
@@ -58,7 +58,7 @@ class Rule:
         return self._query
 
     @property
-    def label(self) -> str:
+    def label(self) -> Union[str, List[str]]:
         """The rule label"""
         return self._label
 
@@ -117,14 +117,16 @@ class Rule:
             "precision": metrics.precision if metrics.precision is not None else None,
         }
 
-    def __call__(self, record: TextClassificationRecord) -> Optional[str]:
+    def __call__(
+        self, record: TextClassificationRecord
+    ) -> Optional[Union[str, List[str]]]:
         """Check if the given record is among the matching ids from the ``self.apply`` call.
 
         Args:
             record: The record to be labelled.
 
         Returns:
-            A label if the record id is among the matching ids, otherwise None.
+            A label or list of labels if the record id is among the matching ids, otherwise None.
 
         Raises:
             RuleNotAppliedError: If the rule was not applied to the dataset before.
