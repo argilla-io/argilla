@@ -1,3 +1,4 @@
+import logging
 from typing import Iterable, List, Optional, Set, Type
 
 from fastapi import Depends
@@ -21,6 +22,8 @@ class SearchRecordsService:
     """Generic service for search records operations"""
 
     _INSTANCE: "SearchRecordsService" = None
+
+    __LOGGER__ = logging.getLogger(__name__)
 
     @classmethod
     def get_instance(
@@ -85,12 +88,18 @@ class SearchRecordsService:
             record_from=record_from,
             exclude_fields=exclude_fields,
         )
-        metrics_results = {
-            metric: self.__metrics__.summarize_metric(
-                dataset=dataset, metric=metric, query=query
-            )
-            for metric in metrics or []
-        }
+        metrics_results = {}
+        for metric_id in metrics or []:
+            try:
+                metrics = self.__metrics__.summarize_metric(
+                    dataset=dataset, metric=metric_id, query=query
+                )
+                metrics_results[metric_id] = metrics
+            except Exception as ex:
+                self.__LOGGER__.warning(
+                    "Cannot compute metric [%s]. Error: %s", metric_id, ex
+                )
+                metrics_results[metric_id] = {}
 
         return SearchResults(
             total=results.total,
