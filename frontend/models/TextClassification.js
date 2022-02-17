@@ -48,9 +48,10 @@ class TextClassificationSearchQuery extends BaseSearchQuery {
   score;
 
   constructor(data) {
-    const { score, confidence, ...superData } = data;
+    const { score, confidence, uncovered_by_rules, ...superData } = data;
     super(superData);
     this.score = score;
+    this.uncovered_by_rules = uncovered_by_rules;
     // TODO: remove backward compatibility
     if (confidence) {
       this.score = confidence;
@@ -114,6 +115,9 @@ class TextClassificationDataset extends ObservationDataset {
         },
       ],
     });
+    if (!this.labelingRules) {
+      await this.refreshRules();
+    }
     return entity.find(this.id);
   }
 

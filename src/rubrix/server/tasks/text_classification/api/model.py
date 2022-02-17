@@ -477,6 +477,8 @@ class TextClassificationQuery(BaseSearchQuery):
 
     predicted: Optional[PredictionStatus]
         The task prediction status
+    uncovered_by_rules:
+        Only return records that are NOT covered by these rules.
 
     uncovered_by_rules:
         Only return records that are NOT covered by these rules.

@@ -59,6 +59,13 @@
               :filter="filter"
               @apply="onApply"
             />
+            <FilterUncoveredByRules
+              v-else-if="showUncoveredByRulesFilter"
+              class="filter"
+              :filter="filter"
+              :dataset="dataset"
+              @apply="onApply"
+            />
           </span>
           <a
             v-if="
@@ -167,6 +174,14 @@ export default {
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },
+    showUncoveredByRulesFilter() {
+      return (
+        this.dataset.rules &&
+        this.dataset.rules.length &&
+        !this.dataset.isMultiLabel &&
+        this.dataset.task === "TextClassification"
+      );
+    },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
@@ -210,7 +225,16 @@ export default {
             a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
-      return [...filters, ...sortedMetadataFilters];
+      const uncoveredByRules = {
+        id: "uncovered_by_rules",
+        key: "uncovered_by_rules",
+        group: "Annotations",
+        options: [true, false],
+        selected:
+          this.dataset.query.uncovered_by_rules &&
+          this.dataset.query.uncovered_by_rules.length > 0,
+      };
+      return [...filters, ...sortedMetadataFilters, uncoveredByRules];
     },
   },
   methods: {
@@ -337,7 +361,6 @@ $number-size: 18px;
 }
 
 .filter {
-  display: block;
   margin-bottom: 1em;
 }
 </style>

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterUncoveredByRules renders properly 1`] = `
+<recheckbox value="true" class="re-checkbox--dark">
+  Only records not covered by rules
+</recheckbox>
+`;
