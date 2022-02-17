@@ -65,7 +65,7 @@ export default {
     getEntitiesByOrigin(origin) {
       return origin === "annotation"
         ? this.record.annotatedEntities
-        : this.record.prediction && this.record.prediction.entities;
+        : (this.record.prediction && this.record.prediction.entities) || [];
     },
     async onValidate(record) {
       await this.validate({
