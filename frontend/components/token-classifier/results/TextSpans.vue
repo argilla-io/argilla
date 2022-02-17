@@ -226,11 +226,13 @@ export default {
       const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
       const endToken =
         this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
-      const matchedPrediction = this.record.prediction.entities.find(
-        (ent) =>
-          ent.start === (startToken && startToken.start) &&
-          ent.end === (endToken && endToken.end)
-      );
+      const matchedPrediction =
+        this.record.prediction &&
+        this.record.prediction.entities.find(
+          (ent) =>
+            ent.start === (startToken && startToken.start) &&
+            ent.end === (endToken && endToken.end)
+        );
       if (matchedPrediction) {
         this.suggestedLabel = matchedPrediction.label;
       }
