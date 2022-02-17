@@ -4,7 +4,7 @@
     class="re-checkbox--dark"
     :value="filter.selected"
   >
-    Not covered by rules
+    Only records not covered by rules
   </ReCheckbox>
 </template>
 
