@@ -217,6 +217,12 @@ class TestDatasetForTextClassification:
         rec = rb.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
         assert rec.inputs == {"text": "mock"}
 
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForTextClassification(
+            [rb.TextClassificationRecord(inputs="mock")]
+        )
+        assert dataset.to_datasets()["metadata"] == [None]
+
     @pytest.mark.parametrize(
         "records",
         [
@@ -280,6 +286,12 @@ class TestDatasetForTokenClassification:
         rec = rb.DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock" and rec.tokens == ["mock"]
 
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForTokenClassification(
+            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        )
+        assert dataset.to_datasets()["metadata"] == [None]
+
     def test_to_from_pandas(self, tokenclassification_records):
         expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
 
@@ -331,6 +343,10 @@ class TestDatasetForText2Text:
         rec = rb.DatasetForText2Text.from_datasets(ds)[0]
         assert rec.prediction[0][0] == "ejemplo"
         assert rec.prediction[0][1] == pytest.approx(1.0)
+
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])
+        assert dataset.to_datasets()["metadata"] == [None]
 
     def test_to_from_pandas(self, text2text_records):
         expected_dataset = rb.DatasetForText2Text(text2text_records)
