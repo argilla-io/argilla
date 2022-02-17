@@ -189,15 +189,6 @@ $hue: 360;
   .entities__selector__option.color_#{$i - 1} span {
     background: $rcolor;
   }
-  // .entities__selector__option.color_#{$i - 1} {
-  //   background: white;
-  //   &:hover {
-  //     background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
-  //   }
-  //   &:active {
-  //     background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
-  //   }
-  // }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
   }
