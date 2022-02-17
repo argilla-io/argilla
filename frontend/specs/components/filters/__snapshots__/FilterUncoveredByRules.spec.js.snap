@@ -2,6 +2,6 @@
 
 exports[`FilterUncoveredByRules renders properly 1`] = `
 <recheckbox value="true" class="re-checkbox--dark">
-  Not covered by rules
+  Only records not covered by rules
 </recheckbox>
 `;
