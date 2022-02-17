@@ -16,7 +16,7 @@ dependencies:
   # docs, pandoc needs conda ...
   - pandoc==2.12
   # we need this to ensure syntax highlighting in the notebook code cells for the docs
-  - ipython
+  - ipython<8.0.0
   # for building the frontend
   - nodejs~=14.17.0
   - pip:

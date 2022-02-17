@@ -11,7 +11,7 @@ dependencies:
   # pandoc needs conda ...
   - pandoc==2.12
   # we need this to ensure syntax highlighting in the notebook code cells
-  - ipython
+  - ipython<8.0.0
   - pip:
       - sphinx==4.1.2
       - sphinx_rtd_theme==0.5.2
