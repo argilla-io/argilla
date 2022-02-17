@@ -295,7 +295,7 @@ export default {
     top: 1em;
     min-width: 220px;
     z-index: 9;
-    background: $bg;
+    background: palette(grey, smooth);
     font-weight: 600;
     padding: 0.8em;
     border-radius: 1px;
@@ -415,7 +415,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     &.annotation ::v-deep .highlight__content {
       background: $rcolor;
@@ -446,7 +446,7 @@ $hue: 360;
     &:active,
     &.active,
     &:hover {
-      border: 2px solid darken($rcolor, 50%);
+      border: 2px solid mix(black, $rcolor, 20%);
     }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
