@@ -32,6 +32,7 @@
     "node-sass": "^5.0.0",
     "nuxt": "^2.14.6",
     "nuxt-highlightjs": "^1.0.1",
+    "nuxt-mq": "^2.0.2",
     "sass-loader": "^10.1.0",
     "stringz": "^2.1.0",
     "v-click-outside": "^3.1.2",
@@ -41,7 +42,7 @@
     "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.0",
+    "@babel/core": "7.17.2",
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@nuxt/test-utils": "^0.2.2",

@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RecordTextClassification renders properly 1`] = `
+<div class="record">
+  <div class="record--left">
+    <recordinputs data="[object Object]" query-text="mock test"></recordinputs>
+    <classifierexplorationarea dataset="[object Object]" record="[object Object]"></classifierexplorationarea>
+    <!---->
+  </div>
+  <div class="record__labels">
+    <!---->
+  </div>
+</div>
+`;

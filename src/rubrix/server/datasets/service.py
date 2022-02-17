@@ -24,7 +24,9 @@ from rubrix.server.commons.errors import (
     ForbiddenOperationError,
     WrongTaskError,
 )
-from .dao import DatasetsDAO, create_datasets_dao
+
+from ..security.model import User
+from .dao import DatasetsDAO
 from .model import (
     CopyDatasetRequest,
     CreationDatasetRequest,
@@ -33,7 +35,6 @@ from .model import (
     TaskType,
     UpdateDatasetRequest,
 )
-from ..security.model import User
 
 
 class DatasetsService:
@@ -43,7 +44,7 @@ class DatasetsService:
 
     @classmethod
     def get_instance(
-        cls, dao: DatasetsDAO = Depends(create_datasets_dao)
+        cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
     ) -> "DatasetsService":
 
         """
@@ -191,6 +192,7 @@ class DatasetsService:
         data: UpdateDatasetRequest,
         user: User,
         workspace: Optional[str],
+        task: Optional[str] = None,
     ) -> Dataset:
         """
         Updates an existing dataset. Fields in update data are
@@ -206,13 +208,15 @@ class DatasetsService:
             The current user
         workspace:
             The workspace where dataset belongs to
+        task:
+            If provided, is used to match the existing dataset
 
         Returns
         -------
             The updated dataset
         """
 
-        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
+        found = self.find_by_name(name, task=task, user=user, workspace=workspace)
 
         data.tags = {**found.tags, **data.tags}
         data.metadata = {**found.metadata, **data.metadata}
@@ -257,6 +261,7 @@ class DatasetsService:
                 data=UpdateDatasetRequest(tags=dataset.tags, metadata=dataset.metadata),
                 user=user,
                 workspace=workspace,
+                task=task,
             )
         except EntityNotFoundError:
             return self.create(
@@ -292,8 +297,12 @@ class DatasetsService:
         dataset_workspace = user.check_workspace(dataset_workspace)
 
         try:
-            self.find_by_name(data.name, task=None, user=user, workspace=dataset_workspace)
-            raise EntityAlreadyExistsError(name=data.name, type=Dataset, workspace=dataset_workspace)
+            self.find_by_name(
+                data.name, task=None, user=user, workspace=dataset_workspace
+            )
+            raise EntityAlreadyExistsError(
+                name=data.name, type=Dataset, workspace=dataset_workspace
+            )
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 

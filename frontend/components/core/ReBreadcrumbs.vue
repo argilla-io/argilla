@@ -35,7 +35,9 @@
         class="breadcrumbs__copy"
         href="#"
         @click.prevent="
-          copyToClipboard(filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name)
+          copyToClipboard(
+            filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name
+          )
         "
       >
         <svgicon name="copy" width="12" height="13" />

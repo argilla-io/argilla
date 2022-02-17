@@ -273,3 +273,8 @@ a {
     pointer-events: none;
     z-index: -1
 }
+.highlight-text {
+  display: inline;
+  font-weight: 600;
+  color: $secondary-color;
+}

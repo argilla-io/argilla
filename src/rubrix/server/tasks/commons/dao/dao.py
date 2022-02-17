@@ -20,20 +20,24 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
-from rubrix.server.commons.es_helpers import (
-    DATASETS_RECORDS_INDEX_TEMPLATE,
-    aggregations,
-    parse_aggregations,
+from rubrix.server.commons.errors import ClosedDatasetError, MissingDatasetRecordsError
+from rubrix.server.commons.es_helpers import aggregations, parse_aggregations
+from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
+from rubrix.server.commons.es_wrapper import (
+    ClosedIndexError,
+    ElasticsearchWrapper,
+    IndexNotFoundError,
+    create_es_wrapper,
 )
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper, create_es_wrapper
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.commons.settings import settings
-from rubrix.server.datasets.dao import (
-    DATASETS_RECORDS_INDEX_NAME,
-    dataset_records_index,
-)
 from rubrix.server.datasets.model import BaseDatasetDB
-from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError
+from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError, TaskType
+from rubrix.server.tasks.commons.dao.es_config import (
+    mappings,
+    tasks_common_mappings,
+    tasks_common_settings,
+)
 from rubrix.server.tasks.commons.dao.model import RecordSearch, RecordSearchResults
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
@@ -47,56 +51,37 @@ class _IndexTemplateExtensions:
     dynamic_templates: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
 
 
-_extensions = _IndexTemplateExtensions()
-
-
-def extends_index_properties(extended_properties: Dict[str, Any]):
+def dataset_records_index(dataset_id: str) -> str:
     """
-    Add explict properties configuration to rubrix index template
+    Returns dataset records index for a given dataset id
 
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
+    The dataset info is stored in two elasticsearch indices. The main
+    index where all datasets definition are stored and
+    an specific dataset index for data records.
+
+    This function calculates the corresponding dataset records index
+    for a given dataset id.
 
     Parameters
     ----------
-    extended_properties:
-        The properties dictionary configuration. Several properties could be configured here
+    dataset_id
+
+    Returns
+    -------
+        The dataset records index name
 
     """
-    _extensions.properties.append(extended_properties)
-
-
-def extends_index_dynamic_templates(*templates: Dict[str, Any]):
-    """
-    Add dynamic mapping template configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/7.x/dynamic-templates.html#dynamic-templates
-
-    Parameters
-    ----------
-    templates:
-        One or several mapping templates
-    """
-    _extensions.dynamic_templates.extend(templates)
-
-
-def extends_index_analyzers(analyzers: Dict[str, Any]):
-    """
-    Add index analysis configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer.html
-
-    Parameters
-    ----------
-    analyzers:
-        The analyzers configuration. Several analyzers could be configured here
-    """
-    _extensions.analyzers.append(analyzers)
+    return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
 
 
 class DatasetRecordsDAO:
     """Datasets records DAO"""
 
     _INSTANCE = None
+
+    # Keep info about elasticsearch mappings per task
+    # This info must be provided by each task using dao.register_task_mappings method
+    _MAPPINGS_BY_TASKS = {}
 
     @classmethod
     def get_instance(
@@ -122,26 +107,7 @@ class DatasetRecordsDAO:
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
-
-        template = DATASETS_RECORDS_INDEX_TEMPLATE.copy()
-
-        if _extensions.analyzers:
-            for analyzer in _extensions.analyzers:
-                template["settings"]["analysis"]["analyzer"].update(analyzer)
-
-        if _extensions.dynamic_templates:
-            for dynamic_template in _extensions.dynamic_templates:
-                template["mappings"]["dynamic_templates"].append(dynamic_template)
-
-        if _extensions.properties:
-            for property in _extensions.properties:
-                template["mappings"]["properties"].update(property)
-
-        self._es.create_index_template(
-            name=DATASETS_RECORDS_INDEX_NAME,
-            template=template,
-            force_recreate=not settings.disable_es_index_template_creation,
-        )
+        self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(
         self,
@@ -180,15 +146,18 @@ class DatasetRecordsDAO:
                 db_record.last_updated = now
             documents.append(db_record.dict(exclude_none=False))
 
-        index_name = dataset_records_index(dataset.id)
-
-        self._es.create_index(index=index_name)
+        index_name = self.create_dataset_index(dataset)
         self._configure_metadata_fields(index_name, metadata_values)
         return self._es.add_documents(
             index=index_name,
             documents=documents,
             doc_id=lambda _record: _record.get("id"),
         )
+
+    def get_metadata_schema(self, dataset: BaseDatasetDB) -> Dict[str, str]:
+        """Get metadata fields schema for provided dataset"""
+        records_index = dataset_records_index(dataset.id)
+        return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
 
     def search_records(
         self,
@@ -232,24 +201,26 @@ class DatasetRecordsDAO:
             "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": aggregation_requests,
         }
-        results = self._es.search(index=records_index, query=es_query, size=size)
+
+        try:
+            results = self._es.search(index=records_index, query=es_query, size=size)
+        except ClosedIndexError:
+            raise ClosedDatasetError(dataset.name)
+        except IndexNotFoundError:
+            raise MissingDatasetRecordsError(
+                f"No records index found for dataset {dataset.name}"
+            )
 
         if compute_aggregations and search.include_default_aggregations:
             current_aggrs = results.get("aggregations", {})
             for aggr in [
-                aggregations.predicted_as(),
                 aggregations.predicted_by(),
-                aggregations.annotated_as(),
                 aggregations.annotated_by(),
                 aggregations.status(),
                 aggregations.predicted(),
                 aggregations.words_cloud(),
                 aggregations.score(),
-                aggregations.custom_fields(
-                    self._es.get_field_mapping(
-                        index=records_index, field_name="metadata.*"
-                    )
-                ),
+                aggregations.custom_fields(self.get_metadata_schema(dataset)),
             ]:
                 if aggr:
                     aggr_results = self._es.search(
@@ -270,12 +241,13 @@ class DatasetRecordsDAO:
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
-            parsed_aggregations = unflatten_dict(
-                parsed_aggregations, stop_keys=["metadata"]
-            )
 
-            result.words = parsed_aggregations.pop("words", {})
-            result.metadata = parsed_aggregations.pop("metadata", {})
+            if search.include_default_aggregations:
+                parsed_aggregations = unflatten_dict(
+                    parsed_aggregations, stop_keys=["metadata"]
+                )
+                result.words = parsed_aggregations.pop("words", {})
+                result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
 
         return result
@@ -315,8 +287,8 @@ class DatasetRecordsDAO:
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
             if metadata_length > settings.metadata_fields_limit:
-                raise MetadataLimitExceededError.new_error(
-                    metadata_length, limit=settings.metadata_fields_limit
+                raise MetadataLimitExceededError(
+                    length=metadata_length, limit=settings.metadata_fields_limit
                 )
 
         def detect_nested_type(v: Any) -> bool:
@@ -337,9 +309,57 @@ class DatasetRecordsDAO:
                 self._es.create_field_mapping(
                     index,
                     field_name=f"metadata.{field}",
-                    type="nested",
-                    include_in_root=True,
+                    mapping=mappings.nested_field(),
                 )
+
+    def register_task_mappings(self, task_type: TaskType, mappings: Dict[str, Any]):
+        """
+        Register an index mappings configuration for provided task.
+
+        Args:
+            task_type:
+                The task Type
+            mappings:
+                The elasticsearch index mappings section configuration
+        """
+        self._MAPPINGS_BY_TASKS[task_type] = mappings.copy()
+
+    def create_dataset_index(
+        self, dataset: BaseDatasetDB, force_recreate: bool = False
+    ) -> str:
+        """
+        Creates a dataset records elasticsearch index based on dataset task type
+
+        Args:
+            dataset:
+                The dataset
+            force_recreate:
+                If True, the index will be deleted and recreated
+
+        Returns:
+            The generated index name.
+        """
+        _mappings = tasks_common_mappings()
+        task_mappings = self._MAPPINGS_BY_TASKS[dataset.task]
+        for k in task_mappings:
+            if isinstance(task_mappings[k], list):
+                _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
+            else:
+                _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
+
+        index_name = dataset_records_index(dataset.id)
+        self._es.create_index(
+            index=index_name,
+            settings=tasks_common_settings(),
+            mappings={**tasks_common_mappings(), **_mappings},
+            force_recreate=force_recreate,
+        )
+        return index_name
+
+    def get_dataset_schema(self, dataset: BaseDatasetDB) -> Dict[str, Any]:
+        """Return inner elasticsearch index configuration"""
+        index_name = dataset_records_index(dataset.id)
+        return self._es.__client__.indices.get_mapping(index=index_name)
 
 
 _instance: Optional[DatasetRecordsDAO] = None

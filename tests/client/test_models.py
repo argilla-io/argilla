@@ -12,18 +12,21 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import datetime
 import json
+from typing import Any, Optional
 
 import numpy
+import pandas as pd
 import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.client.models import (
-    BaseRecord,
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
+    _Validators,
 )
 
 
@@ -38,9 +41,14 @@ from rubrix.client.models import (
 )
 def test_text_classification_record(annotation, status, expected_status):
     """Just testing its dynamic defaults"""
-    record = TextClassificationRecord(
-        inputs={"text": "test"}, annotation=annotation, status=status
-    )
+    if status:
+        record = TextClassificationRecord(
+            inputs={"text": "test"}, annotation=annotation, status=status
+        )
+    else:
+        record = TextClassificationRecord(
+            inputs={"text": "test"}, annotation=annotation
+        )
     assert record.status == expected_status
 
 
@@ -71,6 +79,25 @@ def test_token_classification_record(annotation, status, expected_status):
     assert record.status == expected_status
 
 
+@pytest.mark.parametrize(
+    "prediction,expected",
+    [
+        (None, None),
+        ([("mock", 0, 4)], [("mock", 0, 4, 1.0)]),
+        ([("mock", 0, 4, 0.5)], [("mock", 0, 4, 0.5)]),
+        (
+            [("mock", 0, 4), ("mock", 0, 4, 0.5)],
+            [("mock", 0, 4, 1.0), ("mock", 0, 4, 0.5)],
+        ),
+    ],
+)
+def test_token_classification_prediction_validator(prediction, expected):
+    record = TokenClassificationRecord(
+        text="this", tokens=["this"], prediction=prediction
+    )
+    assert record.prediction == expected
+
+
 def test_text_classification_record_none_inputs():
     """Test validation error for None in inputs"""
     with pytest.raises(ValidationError):
@@ -99,11 +126,47 @@ def test_model_serialization_with_numpy_nan():
 
 
 def test_warning_when_only_agent():
+    class MockRecord(_Validators):
+        prediction: Optional[Any] = None
+        prediction_agent: Optional[str] = None
+        annotation: Optional[Any] = None
+        annotation_agent: Optional[str] = None
+
     with pytest.warns(
         UserWarning, match="`prediction_agent` will not be logged to the server."
     ):
-        BaseRecord(prediction_agent="mock")
+        MockRecord(prediction_agent="mock")
     with pytest.warns(
         UserWarning, match="`annotation_agent` will not be logged to the server."
     ):
-        BaseRecord(annotation_agent="mock")
+        MockRecord(annotation_agent="mock")
+
+
+def test_forbid_extra():
+    class MockRecord(_Validators):
+        mock: str
+
+    with pytest.raises(ValidationError):
+        MockRecord(mock="mock", extra_argument="mock")
+
+
+def test_nat_to_none():
+    class MockRecord(_Validators):
+        event_timestamp: Optional[datetime.datetime] = None
+
+    record = MockRecord(event_timestamp=pd.NaT)
+    assert record.event_timestamp is None
+
+
+@pytest.mark.parametrize(
+    "prediction,expected",
+    [
+        (None, None),
+        (["mock"], [("mock", 1.0)]),
+        ([("mock", 0.5)], [("mock", 0.5)]),
+        (["mock", ("mock", 0.5)], [("mock", 1.0), ("mock", 0.5)]),
+    ],
+)
+def test_text2text_prediction_validator(prediction, expected):
+    record = Text2TextRecord(text="mock", prediction=prediction)
+    assert record.prediction == expected

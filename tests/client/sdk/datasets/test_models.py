@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from rubrix.client.sdk.datasets.models import Dataset
+import pytest
+
+from rubrix.client.sdk.datasets.models import Dataset, TaskType
 from rubrix.server.datasets.model import Dataset as ServerDataset
 
 
@@ -23,3 +25,8 @@ def test_dataset_schema(helpers):
     assert helpers.remove_description(client_schema) == helpers.remove_description(
         server_schema
     )
+
+
+def test_TaskType_enum():
+    with pytest.raises(ValueError, match="mock is not a valid TaskType"):
+        TaskType("mock")

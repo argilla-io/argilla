@@ -21,22 +21,26 @@ import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 class TextClassificationRecord extends BaseRecord {
   inputs;
 
-  constructor({
-    inputs,
-    explanation,
-    multi_label,
-    predicted_as,
-    ...superData
-  }) {
+  constructor({ inputs, explanation, multi_label, ...superData }) {
     super(superData);
     this.inputs = inputs;
     this.explanation = explanation;
     this.multi_label = multi_label;
-    this.predicted_as = predicted_as;
   }
 
   recordTitle() {
     return this.inputs;
+  }
+
+  get predicted_as() {
+    if (this.prediction === undefined) {
+      return [];
+    }
+    let labels = this.prediction.labels;
+    if (this.multi_label) {
+      return labels.filter((l) => l.score > 0.5).map((l) => l.class);
+    }
+    return [this.prediction.labels[0].class];
   }
 }
 
@@ -175,7 +179,9 @@ class TextClassificationDataset extends ObservationDataset {
           }
         ),
       };
-      overalMetrics.precisionAverage /= rulesMetrics.length;
+      overalMetrics.precisionAverage =
+        overalMetrics.totalCorrects /
+        (overalMetrics.totalCorrects + overalMetrics.totalIncorrects);
     }
 
     return overalMetrics;

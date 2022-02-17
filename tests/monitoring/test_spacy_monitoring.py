@@ -1,10 +1,8 @@
 import rubrix as rb
 from tests.monitoring.helpers import mock_monitor
-from tests.server.test_helpers import client, mocking_client
 
 
-def test_spacy_ner_monitor(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_spacy_ner_monitor(monkeypatch, mocked_client):
     dataset = "spacy-dataset"
     rb.delete(dataset)
 

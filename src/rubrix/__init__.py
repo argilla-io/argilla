@@ -17,10 +17,9 @@
 This module contains the interface to access Rubrix's REST API.
 """
 
-
-import logging
 import os
 import re
+from logging import getLogger
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
@@ -28,6 +27,14 @@ import pkg_resources
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client import RubrixClient
+from rubrix.client.datasets import (
+    Dataset,
+    DatasetForText2Text,
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+    read_datasets,
+    read_pandas,
+)
 from rubrix.client.models import (
     BulkResponse,
     Record,
@@ -36,6 +43,7 @@ from rubrix.client.models import (
     TokenAttributions,
     TokenClassificationRecord,
 )
+from rubrix.logging import configure_logging
 from rubrix.monitoring.model_monitor import monitor
 
 try:
@@ -44,11 +52,29 @@ except pkg_resources.DistributionNotFound:
     # package is not installed
     pass
 
-_LOGGER = logging.getLogger(__name__)
+try:
+    from rubrix.server.server import app
+except ModuleNotFoundError as ex:
+    module_name = ex.name
+
+    def fallback_app(*args, **kwargs):
+        raise RuntimeError(
+            "\n"
+            f"Cannot start rubrix server. Some dependencies was not found:[{module_name}].\n"
+            "Please, install missing modules or reinstall rubrix with server extra deps:\n"
+            "pip install rubrix[server]"
+        )
+
+    app = fallback_app
+
+configure_logging()
 
 _client: Optional[
     RubrixClient
 ] = None  # Client will be stored here to pass it through functions
+
+
+_LOGGER = getLogger(__name__)
 
 
 def _client_instance() -> RubrixClient:
@@ -127,7 +153,7 @@ def set_workspace(ws: str) -> None:
 
 
 def log(
-    records: Union[Record, Iterable[Record]],
+    records: Union[Record, Iterable[Record], Dataset],
     name: str,
     tags: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Any]] = None,
@@ -190,8 +216,8 @@ def load(
     ids: Optional[List[Union[str, int]]] = None,
     limit: Optional[int] = None,
     as_pandas: bool = True,
-) -> Union[pandas.DataFrame, List[Record]]:
-    """Loads a dataset as a pandas DataFrame or a list of records.
+) -> Union[pandas.DataFrame, Dataset]:
+    """Loads a dataset as a pandas DataFrame or a Dataset.
 
     Args:
         name: The dataset name.
@@ -199,10 +225,10 @@ def load(
             `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
-        as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
+        as_pandas: If True, return a pandas DataFrame. If False, return a Dataset.
 
     Returns:
-        The dataset as a pandas Dataframe or a list of records.
+        The dataset as a pandas Dataframe or a Dataset.
 
     Examples:
         >>> import rubrix as rb

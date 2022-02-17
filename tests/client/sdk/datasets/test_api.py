@@ -17,6 +17,11 @@ import pytest
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors import (
+    GenericApiError,
+    NotFoundApiError,
+    ValidationApiError,
+)
 from rubrix.client.sdk.commons.models import (
     ErrorMessage,
     HTTPValidationError,
@@ -26,7 +31,6 @@ from rubrix.client.sdk.commons.models import (
 from rubrix.client.sdk.datasets.api import _build_response, get_dataset
 from rubrix.client.sdk.datasets.models import Dataset, TaskType
 from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
-from tests.server.test_helpers import client
 
 
 @pytest.fixture
@@ -34,14 +38,14 @@ def sdk_client():
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
 
 
-def test_get_dataset(sdk_client, monkeypatch):
-    monkeypatch.setattr(httpx, "get", client.get)
+def test_get_dataset(mocked_client, sdk_client, monkeypatch):
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
 
     # create test dataset
     bulk_data = TextClassificationBulkData(records=[])
     dataset_name = "test_dataset"
-    client.delete(f"/api/datasets/{dataset_name}")
-    client.post(
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
         json=bulk_data.dict(by_alias=True),
     )
@@ -55,29 +59,15 @@ def test_get_dataset(sdk_client, monkeypatch):
 @pytest.mark.parametrize(
     "status_code, expected",
     [
-        (200, Dataset),
-        (404, ErrorMessage),
-        (500, ErrorMessage),
-        (422, HTTPValidationError),
+        (404, NotFoundApiError),
+        (500, GenericApiError),
+        (422, ValidationApiError),
     ],
 )
 def test_build_response(status_code, expected):
-    server_response = None
-    if status_code == 200:
-        server_response = Dataset(name="test", task=TaskType.text_classification)
-    elif status_code == 404:
-        server_response = ErrorMessage(detail="test")
-    elif status_code == 500:
-        server_response = ErrorMessage(detail="test")
-    elif status_code == 422:
-        server_response = HTTPValidationError(
-            detail=[ValidationError(loc=["test"], msg="test", type="test")]
-        )
-
     httpx_response = httpx.Response(
-        status_code=status_code, content=server_response.json()
+        status_code=status_code,
+        json={"detail": {"code": "error.code", "params": {"foo": "bar"}}},
     )
-    response = _build_response(httpx_response)
-
-    assert isinstance(response, Response)
-    assert isinstance(response.parsed, expected)
+    with pytest.raises(expected):
+        _build_response(httpx_response, name="mock-ds")

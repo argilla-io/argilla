@@ -1,18 +1,7 @@
 import httpx
 
-from tests.server.test_helpers import client
 
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
-
-
-def test_status_distribution(monkeypatch):
-    mocking_client(monkeypatch)
+def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
 
     import rubrix as rb
@@ -46,8 +35,7 @@ def test_status_distribution(monkeypatch):
     results.visualize()
 
 
-def test_text_length(monkeypatch):
-    mocking_client(monkeypatch)
+def test_text_length(mocked_client):
     dataset = "test_text_length"
 
     import rubrix as rb

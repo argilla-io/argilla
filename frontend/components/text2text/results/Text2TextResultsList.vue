@@ -21,6 +21,9 @@
     :metadata-item="selectedMetadataItem"
     @closeMetadata="resetMetadataItem"
   >
+    <template slot="results-header">
+      <results-title :dataset="dataset" />
+    </template>
     <template v-slot:record="{ record }">
       <RecordText2Text
         :dataset="dataset"

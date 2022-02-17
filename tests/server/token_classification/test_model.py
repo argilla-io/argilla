@@ -77,6 +77,33 @@ def test_entities_with_spaces():
     )
 
 
+def test_model_dict():
+    record = TokenClassificationRecord(
+        id="1",
+        text="This is  a  great  space",
+        tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
+        prediction=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=9, end=24, label="test"),
+            ],
+        ),
+    )
+
+    assert record.dict(exclude_none=True) == {
+        "id": 1,
+        "metrics": {},
+        "prediction": {
+            "agent": "test",
+            "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
+        },
+        "raw_text": "This is  a  great  space",
+        "status": "Default",
+        "text": "This is  a  great  space",
+        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
+    }
+
+
 def test_too_long_metadata():
     text = "On one ones o no"
     record = TokenClassificationRecord.parse_obj(
@@ -147,5 +174,32 @@ def test_misaligned_entity_mentions_with_spaces_right():
             agent="heuristics",
             entities=[EntitySpan(start=4, end=21, label="MONEY", score=1.0)],
             score=None,
+        ),
+    )
+
+
+def test_custom_tokens_splitting():
+    TokenClassificationRecord(
+        text="ThisisMr.Bean, a character  playedby actor RowanAtkinson",
+        tokens=[
+            "This",
+            "is",
+            "Mr.",
+            "Bean",
+            "a",
+            "character",
+            "played",
+            "by",
+            "actor",
+            "Rowan",
+            "Atkinson",
+        ],
+        annotation=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=9, end=13, label="PERSON"),
+                EntitySpan(start=43, end=48, label="NAME"),
+                EntitySpan(start=48, end=56, label="SURNAME"),
+            ],
         ),
     )

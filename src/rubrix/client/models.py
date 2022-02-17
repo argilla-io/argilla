@@ -21,70 +21,52 @@ import datetime
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import pandas as pd
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import limit_value_length
 
 
-class BaseRecord(BaseModel):
-    """Base class for our record models
+class _Validators(BaseModel):
+    """Base class for our record models that takes care of general validations"""
 
-    Args:
-        prediction:
-            The predictions for your record.
-        annotation:
-            The annotations for your record.
-        prediction_agent:
-            Name of the prediction agent. By default, this is set to the hostname of your machine.
-        annotation_agent:
-            Name of the prediction agent. By default, this is set to the hostname of your machine.
-        id:
-            The id of the record. By default (`None`), we will generate a unique ID for you.
-        metadata:
-            Meta data for the record. Defaults to `{}`.
-        status:
-            The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
-            If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
-        event_timestamp:
-            The timestamp of the record.
-        metrics:
-            READ ONLY! Metrics at record level provided by the server when using `rb.load`.
-            This attribute will be ignored when using `rb.log`.
-    """
-
-    prediction: Optional[Any] = None
-    annotation: Optional[Any] = None
-    prediction_agent: Optional[str] = None
-    annotation_agent: Optional[str] = None
-    id: Optional[Union[int, str]] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    status: Optional[str] = None
-    event_timestamp: Optional[datetime.datetime] = None
-    metrics: Optional[Dict[str, Any]] = None
-
-    @validator("metadata", pre=True)
-    def check_value_length(cls, metadata):
-        return _limit_metadata_values(metadata)
-
-    @root_validator
-    def _check_agents(cls, values):
-        """Triggers a warning when ONLY agents are provided"""
-        if (
-            values.get("annotation_agent") is not None
-            and values.get("annotation") is None
-        ):
+    @validator("metadata", check_fields=False)
+    def _check_value_length(cls, v):
+        """Checks metadata values length and apply value truncation for large values"""
+        new_metadata = limit_value_length(v, max_length=MAX_KEYWORD_LENGTH)
+        if new_metadata != v:
             warnings.warn(
-                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
+                "Some metadata values exceed the max length. "
+                f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
             )
-        if (
-            values.get("prediction_agent") is not None
-            and values.get("prediction") is None
-        ):
+
+        return new_metadata
+
+    @validator("prediction_agent", check_fields=False)
+    def _check_prediction_agent(cls, v, values):
+        """Triggers a warning when ONLY prediction agent is provided"""
+        if v and values["prediction"] is None:
             warnings.warn(
                 "You provided an `prediction_agent`, but no `prediction`. The `prediction_agent` will not be logged to the server."
             )
-        return values
+        return v
+
+    @validator("annotation_agent", check_fields=False)
+    def _check_annotation_agent(cls, v, values):
+        """Triggers a warning when ONLY annotation agent is provided"""
+        if v and values["annotation"] is None:
+            warnings.warn(
+                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
+            )
+        return v
+
+    @validator("event_timestamp", check_fields=False)
+    def _nat_to_none(cls, v):
+        """Converts pandas `NaT`s to `None`s"""
+        if v is pd.NaT:
+            return None
+        return v
 
     @root_validator
     def _check_and_update_status(cls, values):
@@ -92,18 +74,11 @@ class BaseRecord(BaseModel):
         values["status"] = values.get("status") or (
             "Default" if values.get("annotation") is None else "Validated"
         )
+
         return values
 
-
-def _limit_metadata_values(metadata: Dict[str, Any]) -> Dict[str, Any]:
-    """Checks metadata values length and apply value truncation for large values"""
-    new_value = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
-    if new_value != metadata:
-        warnings.warn(
-            "Some metadata values exceed the max length. "
-            f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
-        )
-    return new_value
+    class Config:
+        extra = "forbid"
 
 
 class BulkResponse(BaseModel):
@@ -134,7 +109,7 @@ class TokenAttributions(BaseModel):
     attributions: Dict[str, float] = Field(default_factory=dict)
 
 
-class TextClassificationRecord(BaseRecord):
+class TextClassificationRecord(_Validators):
     """Record for text classification
 
     Args:
@@ -143,10 +118,10 @@ class TextClassificationRecord(BaseRecord):
         prediction:
             A list of tuples containing the predictions for the record.
             The first entry of the tuple is the predicted label, the second entry is its corresponding score.
-        annotation:
-            A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         prediction_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        annotation:
+            A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
         multi_label:
@@ -178,10 +153,19 @@ class TextClassificationRecord(BaseRecord):
     inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
 
     prediction: Optional[List[Tuple[str, float]]] = None
+    prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
-    multi_label: bool = False
+    annotation_agent: Optional[str] = None
 
+    multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
+
+    id: Optional[Union[int, str]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    status: Optional[str] = None
+    event_timestamp: Optional[datetime.datetime] = None
+
+    metrics: Optional[Dict[str, Any]] = None
 
     @validator("inputs", pre=True)
     def input_as_dict(cls, inputs):
@@ -191,7 +175,7 @@ class TextClassificationRecord(BaseRecord):
         return dict(text=inputs)
 
 
-class TokenClassificationRecord(BaseRecord):
+class TokenClassificationRecord(_Validators):
     """Record for a token classification task
 
     Args:
@@ -203,12 +187,12 @@ class TokenClassificationRecord(BaseRecord):
         prediction:
             A list of tuples containing the predictions for the record. The first entry of the tuple is the name of
             predicted entity, the second and third entry correspond to the start and stop character index of the entity.
-            EXPERIMENTAL: The fourth entry is optional and corresponds to the score of the entity.
+            The fourth entry is optional and corresponds to the score of the entity (a float number between 0 and 1).
+        prediction_agent:
+            Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation:
             A list of tuples containing annotations (gold labels) for the record. The first entry of the tuple is the
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
-        prediction_agent:
-            Name of the prediction agent. By default, this is set to the hostname of your machine.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
         id:
@@ -239,10 +223,34 @@ class TokenClassificationRecord(BaseRecord):
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
     ] = None
+    prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
+    annotation_agent: Optional[str] = None
+
+    id: Optional[Union[int, str]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    status: Optional[str] = None
+    event_timestamp: Optional[datetime.datetime] = None
+
+    metrics: Optional[Dict[str, Any]] = None
+
+    @validator("prediction")
+    def add_default_score(
+        cls,
+        prediction: Optional[
+            List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+        ],
+    ):
+        """Adds the default score to the predictions if it is missing"""
+        if prediction is None:
+            return prediction
+        return [
+            (pred[0], pred[1], pred[2], 1.0) if len(pred) == 3 else pred
+            for pred in prediction
+        ]
 
 
-class Text2TextRecord(BaseRecord):
+class Text2TextRecord(_Validators):
     """Record for a text to text task
 
     Args:
@@ -251,10 +259,10 @@ class Text2TextRecord(BaseRecord):
         prediction:
             A list of strings or tuples containing predictions for the input text.
             If tuples, the first entry is the predicted text, the second entry is its corresponding score.
-        annotation:
-            A string representing the expected output text for the given input text.
         prediction_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        annotation:
+            A string representing the expected output text for the given input text.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
         id:
@@ -281,7 +289,16 @@ class Text2TextRecord(BaseRecord):
     text: str
 
     prediction: Optional[List[Union[str, Tuple[str, float]]]] = None
+    prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
+    annotation_agent: Optional[str] = None
+
+    id: Optional[Union[int, str]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    status: Optional[str] = None
+    event_timestamp: Optional[datetime.datetime] = None
+
+    metrics: Optional[Dict[str, Any]] = None
 
     @validator("prediction")
     def prediction_as_tuples(
@@ -290,9 +307,7 @@ class Text2TextRecord(BaseRecord):
         """Preprocess the predictions and wraps them in a tuple if needed"""
         if prediction is None:
             return prediction
-        if all([isinstance(pred, tuple) for pred in prediction]):
-            return prediction
-        return [(text, 1.0) for text in prediction]
+        return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
 Record = Union[TextClassificationRecord, TokenClassificationRecord, Text2TextRecord]

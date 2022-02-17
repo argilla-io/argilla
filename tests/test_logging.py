@@ -12,8 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import logging
 
-from rubrix.logging import LoggingMixin
+from rubrix.logging import LoggingMixin, LoguruLoggerHandler
 
 
 class LoggingForTest(LoggingMixin):
@@ -46,3 +47,14 @@ def test_logging_mixin_without_breaking_constructors():
     another_child = LoggingForTestChild(a=15)
     # Check logger without call property method
     assert another_child.__getattribute__("__logger__") == child.logger
+
+
+def test_logging_handler(mocker):
+    mocker.patch.object(LoguruLoggerHandler, "emit", autospec=True)
+    handler = LoguruLoggerHandler()
+
+    logger = logging.getLogger(__name__)
+    logger.handlers = [handler]
+    logger.setLevel(logging.INFO)  # Force trace
+    logger.info("This is a test")
+    handler.emit.assert_called()

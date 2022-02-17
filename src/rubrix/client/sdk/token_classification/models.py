@@ -46,7 +46,8 @@ class TokenClassificationAnnotation(BaseAnnotation):
 
 class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
     tokens: List[str] = Field(min_items=1)
-    text: str = Field(alias="raw_text")
+
+    text: str
 
     @validator("text")
     def check_text_content(cls, text: str):
@@ -81,7 +82,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
         return cls(
             tokens=record.tokens,
-            raw_text=record.text,
+            text=record.text,
             prediction=prediction,
             annotation=annotation,
             status=record.status,
@@ -116,7 +117,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             event_timestamp=self.event_timestamp,
             status=self.status,
             metadata=self.metadata or {},
-            metrics=self.metrics,
+            metrics=self.metrics or {},
         )
 
 
@@ -128,6 +129,7 @@ class TokenClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
+    advanced_query_dsl: bool = False
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)

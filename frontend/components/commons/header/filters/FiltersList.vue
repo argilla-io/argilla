@@ -298,6 +298,7 @@ $number-size: 18px;
     }
     &__item {
       position: relative;
+      flex-shrink: 0;
     }
     &__sort {
       svg {
@@ -323,6 +324,7 @@ $number-size: 18px;
       color: $font-secondary;
       @include font-size(15px);
       font-family: $sff;
+      white-space: nowrap;
       &:hover {
         background: palette(grey, smooth);
       }

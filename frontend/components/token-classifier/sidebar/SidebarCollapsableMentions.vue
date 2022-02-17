@@ -32,7 +32,7 @@
       class="sidebar__view-more"
       href="#"
       @click.prevent="$emit('limit', k)"
-      >{{ limit === 3 ? `view more` : `view less` }}</a
+      >{{ limit === 3 ? `show more` : `show less` }}</a
     >
   </div>
 </template>

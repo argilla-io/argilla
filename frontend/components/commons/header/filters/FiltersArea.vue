@@ -21,13 +21,11 @@
       <div class="container">
         <div class="filters__row">
           <SearchBar
-            :expand-searchbar="expandSearchbar"
             class="filters__searchbar"
             :dataset="dataset"
             @submit="onTextQuerySearch"
           />
           <FiltersList
-            v-if="!expandSearchbar"
             :dataset="dataset"
             @applyFilter="onApplyFilter"
             @applyMetaFilter="onApplyMetaFilter"
@@ -50,10 +48,6 @@ export default {
     dataset: {
       type: Object,
       default: () => ({}),
-    },
-    expandSearchbar: {
-      type: Boolean,
-      default: false,
     },
   },
   data: () => ({
@@ -125,6 +119,13 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   margin-left: 0;
+  padding-right: calc(4em + 45px);
+  .--metrics & {
+    @include media(">desktop") {
+      padding-right: calc(294px + 100px);
+      transition: padding 0.1s ease-in-out;
+    }
+  }
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;
@@ -156,13 +157,14 @@ export default {
   &__content {
     padding: 1em 0;
     position: relative;
-    padding-right: 45px;
+    max-width: calc(100% - 300px);
     .fixed-header & {
       padding: 0.5em 45px 0.5em 0;
     }
   }
   &__searchbar {
     margin-right: 2em;
+    width: 100%;
     &.--extended {
       width: 100%;
       margin-right: 0;

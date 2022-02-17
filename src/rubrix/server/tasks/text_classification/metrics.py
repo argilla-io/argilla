@@ -28,7 +28,7 @@ class F1Metric(PythonMetric):
 
     def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
-        # TODO: This must be precalculated with using a global dataset metric
+        # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {
             label for record in filtered_records for label in record.annotated_as
         }
@@ -126,6 +126,16 @@ class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
+        TermsAggregation(
+            id="predicted_as",
+            name="Predicted labels distribution",
+            field="predicted_as",
+        ),
+        TermsAggregation(
+            id="annotated_as",
+            name="Annotated labels distribution",
+            field="annotated_as",
+        ),
         F1Metric(
             id="F1",
             name="F1 Metrics for single-label",

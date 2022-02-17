@@ -15,24 +15,78 @@ on:
     types: [published]
 
 jobs:
-  build:
-    name: Build python package
+  test:
+    name: Check tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16, 7.17 ]
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-      - name: Setup ElasticSearch 🔎
-        uses: getong/elasticsearch-action@v1.2
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        id: filter
         with:
-          elasticsearch version: 7.4.2
+          filters: |
+            python_code:
+              - 'src/**'
+              - 'tests/**'
+            frontend:
+              - 'frontend/**'
+
+      - name: Setup ElasticSearch 🔎
+        if: steps.filter.outputs.python_code == 'true'
+        uses: ankane/setup-elasticsearch@v1
+        with:
+          elasticsearch-version: ${{ matrix.elasticsearch }}
+
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
+        if: steps.filter.outputs.python_code == 'true'
         with:
           environment-file: environment_dev.yml
           activate-environment: rubrix
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
+        env:
+          # Increase this value to reset cache if setup.cfg has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
+
+      - name: Run tests 📈
+        if: steps.filter.outputs.python_code == 'true'
+        run: |
+          pytest --cov=rubrix --cov-report=xml
+          pip install "spacy<3.0" && python -m spacy download en_core_web_sm
+          pytest tests/monitoring/test_spacy_monitoring.py
+
+      - name: Upload Coverage to Codecov 📦
+        uses: codecov/codecov-action@v1
+        if: steps.filter.outputs.python_code == 'true'
+        with:
+          files: ./coverage.xml
+          flags: pytest
+          fail_ci_if_error: true
+
+  build:
+    name: Build the python package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+
       - name: Cache pip 👜
         uses: actions/cache@v2
         env:
@@ -41,22 +95,17 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
-      - name: Run tests 📈
-        run: |
-          pytest --cov=rubrix --cov-report=xml
-          pip install "spacy<3.0" && python -m spacy download en_core_web_sm
-          pytest tests/monitoring/test_spacy_monitoring.py
 
-      - name: Upload Coverage to Codecov 📦
-        uses: codecov/codecov-action@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          files: ./coverage.xml
-          flags: pytest
-          fail_ci_if_error: true
+          node-version: '14'
+
       - name: Build Package 🍟
         run: |
           pip install -U build
           scripts/build_distribution.sh
+
       - name: Upload package artifact
         uses: actions/upload-artifact@v2
         with:
@@ -67,7 +116,8 @@ jobs:
     name: Build latest docker image
     runs-on: ubuntu-latest
     needs:
-    - build
+      - test
+      - build
     defaults:
       run:
         shell: bash -l {0}
@@ -85,7 +135,6 @@ jobs:
         with:
           images: recognai/rubrix
       - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -95,7 +144,7 @@ jobs:
         with:
           context: .
           file: release.Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -107,7 +156,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
     needs:
-      - build
+      - deploy_docker
     defaults:
       run:
         shell: bash -l {0}

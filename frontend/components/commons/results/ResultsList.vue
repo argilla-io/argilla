@@ -16,82 +16,84 @@
   -->
 
 <template>
-  <div class="content">
-    <slot name="header" />
-    <div class="results-scroll" id="scroll">
-      <DynamicScroller
-        page-mode
-        class="scroller"
-        :items="visibleRecords"
-        :min-item-size="150"
-        :buffer="200"
-        :style="{ paddingTop: `${dataset.viewSettings.headerHeight}px` }"
-      >
-        <template #before>
-          <slot name="results-header" />
-          <results-empty
-            :title="emptySearchInfo.title"
-            :message="emptySearchInfo.message"
-            :icon="emptySearchInfo.icon"
-            v-if="dataset.results.total === 0"
-          />
-          <results-loading
-            v-if="showLoader"
-            :size="dataset.viewSettings.pagination.size"
-          />
-        </template>
-        <template v-slot="{ item, index, active }">
-          <DynamicScrollerItem
-            v-show="!showLoader && dataset.results.total > 0"
-            :watch-data="true"
-            class="content__li"
-            :item="item"
-            :active="active"
-            key-field="id"
-            :index="index"
-            :data-index="index"
-          >
-            <results-record
-              @show-metadata="onShowMetadata"
-              :key="`${dataset.name}-${item.id}`"
-              :dataset="dataset"
+  <span>
+    <div class="content">
+      <slot name="header" />
+      <div class="results-scroll" id="scroll">
+        <DynamicScroller
+          page-mode
+          class="scroller"
+          :items="visibleRecords"
+          :min-item-size="150"
+          :buffer="200"
+          :style="{ paddingTop: `${dataset.viewSettings.headerHeight}px` }"
+        >
+          <template #before>
+            <slot name="results-header" />
+            <results-empty
+              :title="emptySearchInfo.title"
+              :message="emptySearchInfo.message"
+              :icon="emptySearchInfo.icon"
+              v-if="dataset.results.total === 0"
+            />
+            <results-loading
+              v-if="showLoader"
+              :size="dataset.viewSettings.pagination.size"
+            />
+          </template>
+          <template v-slot="{ item, index, active }">
+            <DynamicScrollerItem
+              v-show="!showLoader && dataset.results.total > 0"
+              :watch-data="true"
+              class="content__li"
               :item="item"
+              :active="active"
+              key-field="id"
+              :index="index"
+              :data-index="index"
             >
-              <slot name="record" :record="item" />
-            </results-record>
-          </DynamicScrollerItem>
-        </template>
-        <template #after>
-          <pagination-end-alert
-            :limit="paginationLimit"
-            v-if="isLastPagePaginable"
-          />
-        </template>
-      </DynamicScroller>
-      <LazyReModal
-        modal-class="modal-secondary"
-        modal-position="modal-center"
-        :modal-custom="true"
-        :prevent-body-scroll="true"
-        :modal-visible="selectedRecord !== undefined"
-        @close-modal="onCloseMetadata"
-      >
-        <Metadata
-          v-if="selectedRecord"
-          :applied-filters="dataset.query.metadata"
-          :metadata-items="selectedRecord.metadata"
-          :title="selectedRecord.recordTitle()"
-          @metafilterApply="onApplyMetadataFilter"
-          @cancel="onCloseMetadata"
-        />
-      </LazyReModal>
+              <results-record
+                @show-metadata="onShowMetadata"
+                :key="`${dataset.name}-${item.id}`"
+                :dataset="dataset"
+                :item="item"
+              >
+                <slot name="record" :record="item" />
+              </results-record>
+            </DynamicScrollerItem>
+          </template>
+          <template #after>
+            <pagination-end-alert
+              :limit="paginationLimit"
+              v-if="isLastPagePaginable"
+            />
+          </template>
+        </DynamicScroller>
+      </div>
+      <RePagination
+        :total-items="dataset.results.total"
+        :pagination-settings="dataset.viewSettings.pagination"
+        @changePage="onPagination"
+      />
     </div>
-    <RePagination
-      :total-items="dataset.results.total"
-      :pagination-settings="dataset.viewSettings.pagination"
-      @changePage="onPagination"
-    />
-  </div>
+    <LazyReModal
+      modal-class="modal-secondary"
+      modal-position="modal-center"
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      :modal-visible="selectedRecord !== undefined"
+      @close-modal="onCloseMetadata"
+    >
+      <Metadata
+        v-if="selectedRecord"
+        :applied-filters="dataset.query.metadata"
+        :metadata-items="selectedRecord.metadata"
+        :title="selectedRecord.recordTitle()"
+        @metafilterApply="onApplyMetadataFilter"
+        @cancel="onCloseMetadata"
+      />
+    </LazyReModal>
+  </span>
 </template>
 <script>
 import "assets/icons/empty-results";
@@ -192,6 +194,7 @@ export default {
   margin-bottom: 0;
   list-style: none;
   padding-right: calc(4em + 45px);
+  z-index: 0;
   .--metrics & {
     @include media(">desktop") {
       width: 100%;
@@ -220,14 +223,15 @@ export default {
   }
 }
 </style>
+
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
-   padding-bottom: 260px;
-   .fixed-header & {
+  padding-bottom: 260px;
+  .fixed-header & {
     padding-bottom: 260px;
-   }
- }
+  }
+}
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }

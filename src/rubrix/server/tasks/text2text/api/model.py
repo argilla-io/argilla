@@ -15,7 +15,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
@@ -26,12 +26,13 @@ from rubrix.server.tasks.commons.api.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
+    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 
 class ExtendedEsRecordDataFieldNames(str, Enum):
@@ -84,13 +85,7 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
         """The task type"""
         return TaskType.text2text
 
-    @property
-    def predicted(self) -> Optional[PredictionStatus]:
-        """Won't apply"""
-        return None
-
-    @property
-    def words(self) -> str:
+    def all_text(self) -> str:
         return self.text
 
     @property
@@ -123,9 +118,9 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
         return text
 
 
-class Text2TextRecordDB(CreationText2TextRecord):
+class Text2TextRecord(CreationText2TextRecord):
     """
-    The db text2text task record
+    The output text2text task record
 
     Attributes:
     -----------
@@ -139,20 +134,22 @@ class Text2TextRecordDB(CreationText2TextRecord):
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
+    def extended_fields(self):
+        return {}
+
+
+class Text2TextRecordDB(Text2TextRecord):
+    """The db text2text task record"""
+
     def extended_fields(self) -> Dict[str, Any]:
         return {
-            ExtendedEsRecordDataFieldNames.text_predicted: self.predicted_as,
-            ExtendedEsRecordDataFieldNames.text_annotated: self.annotated_as,
+            EsRecordDataFieldNames.annotated_as: self.annotated_as,
+            EsRecordDataFieldNames.predicted_as: self.predicted_as,
+            EsRecordDataFieldNames.annotated_by: self.annotated_by,
+            EsRecordDataFieldNames.predicted_by: self.predicted_by,
+            EsRecordDataFieldNames.score: self.scores,
+            "words": self.all_text(),
         }
-
-
-class Text2TextRecord(Text2TextRecordDB):
-    """
-    The output text2text task record
-    """
-
-    def extended_fields(self) -> Dict[str, Any]:
-        return {}
 
 
 class Text2TextBulkData(UpdateDatasetRequest):
@@ -170,7 +167,7 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(BaseModel):
+class Text2TextQuery(BaseSearchQuery):
     """
     API Filters for text2text
 
@@ -198,19 +195,8 @@ class Text2TextQuery(BaseModel):
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
-
     score: Optional[ScoreRange] = Field(default=None)
-
-    status: List[TaskStatus] = Field(default_factory=list)
-
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     def as_elasticsearch(self) -> Dict[str, Any]:
         """Build an elasticsearch query part from search query"""

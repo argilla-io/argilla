@@ -127,7 +127,7 @@ def mock_response_text2text(monkeypatch):
     )  # apply the monkeypatch for requests.get to mock_get
 
 
-def test_text_classification(mock_response_text):
+def test_text_classification(mock_response_text, mocked_client):
     """Testing text classification with log function
 
     It checks a Response is generated.
@@ -297,6 +297,7 @@ def test_wrong_response(mock_response_200, mock_wrong_bulk_response):
         )
 
 
+@pytest.mark.skip
 def test_info_message(mock_response_200, mock_response_text, caplog):
     """Testing initialization info message
 
@@ -328,7 +329,5 @@ def test_info_message(mock_response_200, mock_response_text, caplog):
         records=records,
         tags={"type": "sentiment classifier", "lang": "spanish"},
     )
-
-    print(caplog.text)
 
     assert "Rubrix has been initialized on http://localhost:6900" in caplog.text

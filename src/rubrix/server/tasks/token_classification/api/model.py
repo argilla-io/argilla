@@ -12,9 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -29,9 +29,9 @@ from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -104,61 +104,117 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     """
 
     tokens: List[str] = Field(min_items=1)
-    text: str = Field(alias="raw_text")
+    text: str = Field()
+    _raw_text: Optional[str] = Field(alias="raw_text")
+
+    __chars2tokens__: Dict[int, int] = None
+    __tokens2chars__: Dict[int, Tuple[int, int]] = None
+
+    @root_validator(pre=True)
+    def accept_old_fashion_text_field(cls, values):
+        text, raw_text = values.get("text"), values.get("raw_text")
+        text = text or raw_text
+        values["text"] = cls.check_text_content(text)
+
+        return values
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__()
+
+        self.check_annotation(self.prediction)
+        self.check_annotation(self.annotation)
+
+    def char_id2token_id(self, char_idx: int) -> Optional[int]:
+        return self.__chars2tokens__.get(char_idx)
+
+    def token_span(self, token_idx: int) -> Tuple[int, int]:
+        if token_idx not in self.__tokens2chars__:
+            raise IndexError(f"Token id {token_idx} out of bounds")
+        return self.__tokens2chars__[token_idx]
 
     @validator("text")
     def check_text_content(cls, text: str):
         assert text and text.strip(), "No text or empty text provided"
         return text
 
-    @root_validator(skip_on_failure=True)
-    def data_validation(cls, values):
-        prediction = values.get("prediction")
-        annotation = values.get("annotation")
-        text = values["text"]
-        tokens = values["tokens"]
+    def __build_indices_map__(
+        self,
+    ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
+        """
+        Build the indices mapping between text characters and tokens where belongs to,
+        and vice versa.
 
-        cls.check_annotation(prediction, text, tokens)
-        cls.check_annotation(annotation, text, tokens)
+        chars2tokens index contains is the token idx where i char is contained (if any).
 
-        return values
+        Out-of-token characters won't be included in this map,
+        so access should be using ``chars2tokens_map.get(i)``
+        instead of ``chars2tokens_map[i]``.
 
-    @staticmethod
+        """
+
+        def chars2tokens_index():
+            chars_map = {}
+            current_token = 0
+            current_token_char_start = 0
+            for idx, char in enumerate(self.text):
+                relative_idx = idx - current_token_char_start
+                if (
+                    relative_idx < len(self.tokens[current_token])
+                    and char == self.tokens[current_token][relative_idx]
+                ):
+                    chars_map[idx] = current_token
+                elif (
+                    current_token + 1 < len(self.tokens)
+                    and relative_idx >= len(self.tokens[current_token])
+                    and char == self.tokens[current_token + 1][0]
+                ):
+                    current_token += 1
+                    current_token_char_start += relative_idx
+                    chars_map[idx] = current_token
+
+            return chars_map
+
+        def tokens2chars_index(
+            chars2tokens: Dict[int, int]
+        ) -> Dict[int, Tuple[int, int]]:
+            tokens2chars_map = defaultdict(list)
+            for c, t in chars2tokens.items():
+                tokens2chars_map[t].append(c)
+
+            return {
+                token_idx: (min(chars), max(chars))
+                for token_idx, chars in tokens2chars_map.items()
+            }
+
+        chars2tokens_idx = chars2tokens_index()
+        return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
+
     def check_annotation(
+        self,
         annotation: Optional[TokenClassificationAnnotation],
-        text: str,
-        tokens: List[str],
     ):
         """Validates entities in terms of offset spans"""
         if annotation:
-            tokens = [t for t in tokens if t.strip()]  # clean empty tokens (if any)
             for entity in annotation.entities:
-                mention = text[entity.start : entity.end]
+                mention = self.text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
 
-                idx = 0
-                while mention and idx < len(tokens):
-                    current_token = tokens[idx]
-                    current_mention = mention
-                    jdx = idx
-                    while (
-                        current_mention.strip().startswith(current_token)
-                        and current_mention
-                        and jdx <= len(tokens)
-                    ):
-                        current_mention = current_mention.strip()
-                        current_mention = current_mention[len(current_token) :]
-                        jdx += 1
-                        if jdx < len(tokens):
-                            current_token = tokens[jdx]
+                token_start = self.char_id2token_id(entity.start)
+                token_end = self.char_id2token_id(entity.end - 1)
 
-                    if not current_mention:
-                        mention = current_mention
-                    idx += 1
+                assert not (
+                    token_start is None or token_end is None
+                ), f"Provided entity span {self.text[entity.start: entity.end]} is not aligned with provided tokens."
+                "Some entity chars could be reference characters out of tokens"
+
+                span_start, _ = self.token_span(token_start)
+                _, span_end = self.token_span(token_end)
 
                 assert (
-                    not mention
-                ), f"Defined offset [{text[entity.start: entity.end]}] is a misaligned entity mention"
+                    self.text[span_start : span_end + 1] == mention
+                ), f"Defined offset [{self.text[entity.start: entity.end]}] is a misaligned entity mention"
 
     def task(cls) -> TaskType:
         """The record task type"""
@@ -188,23 +244,8 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             return []
         return [self.prediction.score]
 
-    @property
-    def words(self) -> str:
+    def all_text(self) -> str:
         return self.text
-
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            **super().extended_fields(),
-            # See ../service/service.py
-            PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self.predicted_mentions()
-            ],
-            MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label}
-                for mention, entity in self.annotated_mentions()
-            ],
-        }
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
@@ -245,9 +286,10 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     class Config:
         allow_population_by_field_name = True
+        underscore_attrs_are_private = True
 
 
-class TokenClassificationRecord(CreationTokenClassificationRecord):
+class TokenClassificationRecordDB(CreationTokenClassificationRecord):
     """
     The main token classification task record
 
@@ -262,6 +304,29 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
 
     last_updated: datetime = None
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
+
+    def extended_fields(self) -> Dict[str, Any]:
+
+        return {
+            **super().extended_fields(),
+            # See ../service/service.py
+            PREDICTED_MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label, "score": entity.score}
+                for mention, entity in self.predicted_mentions()
+            ],
+            MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label}
+                for mention, entity in self.annotated_mentions()
+            ],
+            "words": self.all_text(),
+        }
+
+
+class TokenClassificationRecord(TokenClassificationRecordDB):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {
+            "raw_text": self.text,  # Maintain results compatibility
+        }
 
 
 class TokenClassificationBulkData(UpdateDatasetRequest):
@@ -279,46 +344,25 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseModel):
+class TokenClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     def as_elasticsearch(self) -> Dict[str, Any]:
@@ -344,17 +388,11 @@ class TokenClassificationQuery(BaseModel):
         query_text = filters.text_query(self.query_text)
         all_filters.extend(query_filters)
 
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
+        return filters.boolean_filter(
+            must_query=query_text,
+            should_filters=all_filters,
+            minimum_should_match=len(all_filters),
+        )
 
 
 class TokenClassificationSearchRequest(BaseModel):

@@ -35,27 +35,35 @@ Quickstart
 
 Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
 
+.. code-block:: bash
 
-Make sure you have ``Docker`` installed and run (check the :ref:`setup and installation section <setup-and-installation>` for a more detailed installation process):
+   pip install rubrix[server] transformers[torch] datasets
+
+If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ running, make sure you have `Docker` installed and run:
+
+.. note::
+   Check the :ref:`setup and installation section <setup-and-installation>` for further options and configurations regarding Elasticsearch.
 
 .. code-block:: bash
 
-   mkdir rubrix && cd rubrix
+   docker run -d \
+     --name elasticsearch-for-rubrix \
+     -p 9200:9200 -p 9300:9300 \
+     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+     -e "discovery.type=single-node" \
+     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
-And then run:
+
+Then simply run:
 
 .. code-block:: bash
 
-   wget -O docker-compose.yml https://git.io/rb-docker && docker-compose up
+   python -m rubrix
 
-Install Rubrix python library (and ``transformers``, ``pytorch`` and ``datasets`` libraries for this example):
-
-.. code-block:: bash
-
-   pip install rubrix transformers datasets torch
+Afterward, you should be able to access the web app at `http://localhost:6900/ <http://localhost:6900/>`__.
+**The default username and password are** ``rubrix`` **and** ``1234``.
 
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
-
 
 **Why**:
 
@@ -172,6 +180,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/weak-supervision
    guides/monitoring
    guides/metrics
+   guides/datasets
 
 .. toctree::
    :maxdepth: 3

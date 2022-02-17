@@ -46,7 +46,7 @@ def bulk(
         json=json_body.dict(by_alias=True),
     )
 
-    return build_bulk_response(response)
+    return build_bulk_response(response, name=name, body=json_body)
 
 
 def data(

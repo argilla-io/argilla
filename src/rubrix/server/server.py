@@ -16,26 +16,25 @@
 """
 This module configures the global fastapi application
 """
-
 import os
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from brotli_asgi import BrotliMiddleware
-
-from pydantic import ValidationError
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.commons.errors import (
-    common_exception_handler,
-    validation_exception_handler,
-)
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
-from rubrix.server.datasets.dao import DatasetsDAO, create_datasets_dao
+from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
+from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
+
+from ..logging import configure_logging
+from .commons.errors import APIErrorHandler
+from .commons.settings import settings
 from .commons.settings import settings as api_settings
 from .routes import api_router
 
@@ -56,8 +55,10 @@ def configure_middleware(app: FastAPI):
 
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
-    api.exception_handler(500)(common_exception_handler)
-    api.exception_handler(ValidationError)(validation_exception_handler)
+    api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(RequestValidationError)(
+        APIErrorHandler.common_exception_handler
+    )
 
 
 def configure_api_router(app: FastAPI):
@@ -83,20 +84,38 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_app_startup(app: FastAPI):
+def configure_app_storage(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
-        es_wrapper = create_es_wrapper()
-        datasets: DatasetsDAO = create_datasets_dao(es=es_wrapper)
-        dataset_records: DatasetRecordsDAO = dataset_records_dao(es=es_wrapper)
-        datasets.init()
-        dataset_records.init()
+        import opensearchpy
+
+        try:
+            es_wrapper = create_es_wrapper()
+            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
+            datasets: DatasetsDAO = DatasetsDAO.get_instance(
+                es_wrapper, records_dao=dataset_records
+            )
+            datasets.init()
+            dataset_records.init()
+        except opensearchpy.exceptions.ConnectionError as error:
+            raise ConfigError(
+                f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
+                "is not available or not responding.\n"
+                "Please make sure your Elasticsearch instance is launched and correctly running and\n"
+                "you have the necessary access permissions. "
+                "Once you have verified this, restart the Rubrix server.\n"
+            ) from error
 
 
 def configure_app_security(app: FastAPI):
 
     if hasattr(auth, "router"):
         app.include_router(auth.router)
+
+
+def configure_app_logging(app: FastAPI):
+    """Configure app logging using"""
+    app.on_event("startup")(configure_logging)
 
 
 app = FastAPI(
@@ -110,11 +129,12 @@ app = FastAPI(
 )
 
 for app_configure in [
+    configure_app_logging,
     configure_middleware,
     configure_api_exceptions,
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_app_startup,
+    configure_app_storage,
 ]:
     app_configure(app)

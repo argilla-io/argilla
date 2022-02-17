@@ -24,7 +24,6 @@ from rubrix.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
-from tests.server.test_helpers import client, mocking_client
 
 
 @pytest.fixture(
@@ -116,7 +115,7 @@ def test_sort_by(monkeypatch, sort_by, expected):
 def test_kwargs(monkeypatch, records):
     is_multi_label = records[0].multi_label
 
-    def mock_get_noise_indices(s, psx, **kwargs):
+    def mock_get_noise_indices(s, psx, n_jobs, **kwargs):
         assert kwargs == {
             "multi_label": is_multi_label,
             "sorted_index_method": "normalized_margin",
@@ -193,9 +192,7 @@ def test_missing_predictions():
 
 
 @pytest.fixture
-def dataset(monkeypatch, records):
-    mocking_client(monkeypatch, client)
-
+def dataset(mocked_client, records):
     dataset = "dataset_for_label_errors"
 
     rb.log(records, name=dataset)

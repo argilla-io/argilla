@@ -29,9 +29,6 @@
         </rules-metrics>
       </div>
     </div>
-    <p class="rule__records" v-if="dataset.results.total > 0">
-      Records ({{ dataset.results.total | formatNumber }})
-    </p>
   </div>
 </template>
 <script>
@@ -136,9 +133,6 @@ export default {
     &.active {
       box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
     }
-  }
-  &__records {
-    color: $font-secondary;
   }
   &__button {
     float: left;
