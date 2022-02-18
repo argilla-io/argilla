@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 import sys
+from time import sleep
 
 import datasets
 import pandas as pd
@@ -21,6 +23,8 @@ import pytest
 import rubrix as rb
 from rubrix.client.datasets import DatasetBase, WrongRecordTypeError
 from rubrix.client.models import TextClassificationRecord
+
+_HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
 
 def test_init_NotImplementedError():
@@ -218,6 +222,12 @@ class TestDatasetForTextClassification:
         rec = rb.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
         assert rec.inputs == {"text": "mock"}
 
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForTextClassification(
+            [rb.TextClassificationRecord(inputs="mock")]
+        )
+        assert dataset.to_datasets()["metadata"] == [None]
+
     @pytest.mark.parametrize(
         "records",
         [
@@ -239,6 +249,34 @@ class TestDatasetForTextClassification:
         assert isinstance(dataset, rb.DatasetForTextClassification)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_push_to_hub(self, request, records):
+        records = request.getfixturevalue(records)
+        dataset_rb = rb.DatasetForTextClassification(records)
+        dataset_rb.to_datasets().push_to_hub(
+            "rubrix/_test_text_classification_records",
+            token=_HF_HUB_ACCESS_TOKEN,
+            private=True,
+        )
+        sleep(1)
+        dataset_ds = datasets.load_dataset(
+            "rubrix/_test_text_classification_records",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+
+        assert isinstance(dataset_ds, datasets.Dataset)
 
 
 class TestDatasetForTokenClassification:
@@ -281,6 +319,12 @@ class TestDatasetForTokenClassification:
         rec = rb.DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock" and rec.tokens == ["mock"]
 
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForTokenClassification(
+            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        )
+        assert dataset.to_datasets()["metadata"] == [None]
+
     def test_to_from_pandas(self, tokenclassification_records):
         expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
 
@@ -294,6 +338,26 @@ class TestDatasetForTokenClassification:
         assert isinstance(dataset, rb.DatasetForTokenClassification)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_push_to_hub(self, tokenclassification_records):
+        dataset_rb = rb.DatasetForTokenClassification(tokenclassification_records)
+        dataset_rb.to_datasets().push_to_hub(
+            "rubrix/_test_token_classification_records",
+            token=_HF_HUB_ACCESS_TOKEN,
+            private=True,
+        )
+        sleep(1)
+        dataset_ds = datasets.load_dataset(
+            "rubrix/_test_token_classification_records",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+
+        assert isinstance(dataset_ds, datasets.Dataset)
 
 
 class TestDatasetForText2Text:
@@ -333,6 +397,10 @@ class TestDatasetForText2Text:
         assert rec.prediction[0][0] == "ejemplo"
         assert rec.prediction[0][1] == pytest.approx(1.0)
 
+    def test_datasets_empty_metadata(self):
+        dataset = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])
+        assert dataset.to_datasets()["metadata"] == [None]
+
     def test_to_from_pandas(self, text2text_records):
         expected_dataset = rb.DatasetForText2Text(text2text_records)
 
@@ -346,6 +414,26 @@ class TestDatasetForText2Text:
         assert isinstance(dataset, rb.DatasetForText2Text)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_push_to_hub(self, text2text_records):
+        dataset_rb = rb.DatasetForText2Text(text2text_records)
+        dataset_rb.to_datasets().push_to_hub(
+            "rubrix/_test_text2text_records",
+            token=_HF_HUB_ACCESS_TOKEN,
+            private=True,
+        )
+        sleep(1)
+        dataset_ds = datasets.load_dataset(
+            "rubrix/_test_text2text_records",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+
+        assert isinstance(dataset_ds, datasets.Dataset)
 
 
 def _compare_datasets(dataset, expected_dataset):
