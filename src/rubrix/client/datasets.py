@@ -380,8 +380,6 @@ class DatasetForTextClassification(DatasetBase):
                     if row["explanation"] is not None
                     else None
                 )
-            if row.get("metadata", "no metadata in dict") is None:
-                del row["metadata"]
 
             records.append(TextClassificationRecord(**row))
 
@@ -515,8 +513,7 @@ class DatasetForTokenClassification(DatasetBase):
                 row["prediction"] = entities_to_tuple(row["prediction"])
             if row.get("annotation"):
                 row["annotation"] = entities_to_tuple(row["annotation"])
-            if row.get("metadata", "no metadata in dict") is None:
-                del row["metadata"]
+
             records.append(TokenClassificationRecord(**row))
 
         return cls(records)
@@ -634,8 +631,7 @@ class DatasetForText2Text(DatasetBase):
                 row["prediction"] = [
                     extract_prediction(pred) for pred in row["prediction"]
                 ]
-            if row.get("metadata", "no metadata in dict") is None:
-                del row["metadata"]
+
             records.append(Text2TextRecord(**row))
 
         return cls(records)

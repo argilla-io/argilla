@@ -43,6 +43,12 @@ class _Validators(BaseModel):
 
         return new_metadata
 
+    @validator("metadata", check_fields=False)
+    def _none_to_empty_dict(cls, v):
+        if v is None:
+            return {}
+        return v
+
     @validator("prediction_agent", check_fields=False)
     def _check_prediction_agent(cls, v, values):
         """Triggers a warning when ONLY prediction agent is provided"""
@@ -161,7 +167,7 @@ class TextClassificationRecord(_Validators):
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
     id: Optional[Union[int, str]] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
 
@@ -228,7 +234,7 @@ class TokenClassificationRecord(_Validators):
     annotation_agent: Optional[str] = None
 
     id: Optional[Union[int, str]] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
 
@@ -294,7 +300,7 @@ class Text2TextRecord(_Validators):
     annotation_agent: Optional[str] = None
 
     id: Optional[Union[int, str]] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
 
