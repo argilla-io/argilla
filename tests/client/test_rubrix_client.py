@@ -17,8 +17,10 @@ import datetime
 from time import sleep
 from typing import Iterable
 
+import datasets
 import httpx
 import pandas
+import pandas as pd
 import pytest
 
 import rubrix
@@ -181,6 +183,9 @@ def test_general_log_load(monkeypatch, request, records, dataset_class):
     # log list of records
     rubrix.log(records, name=dataset_names[1])
     dataset = rubrix.load(dataset_names[1], as_pandas=False)
+    # check if returned records can be converted to other formats
+    assert isinstance(dataset.to_datasets(), datasets.Dataset)
+    assert isinstance(dataset.to_pandas(), pd.DataFrame)
     assert len(dataset) == len(records)
     for record, expected in zip(dataset, records):
         expected.metrics = record.metrics
