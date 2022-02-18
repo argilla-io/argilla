@@ -21,9 +21,6 @@
     :metadata-item="selectedMetadataRecord"
     @onCloseMetadata="onCloseMetadata"
   >
-    <template slot="results-header">
-      <results-title :dataset="dataset" />
-    </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"

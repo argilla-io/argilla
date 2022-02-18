@@ -53,9 +53,6 @@ export default {
   display: flex;
   &__content {
     width: 100%;
-    .fixed-header & {
-      z-index: 3;
-    }
   }
 }
 .container {

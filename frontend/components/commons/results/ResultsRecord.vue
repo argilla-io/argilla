@@ -122,10 +122,8 @@ export default {
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
-    border: 1px solid white;
-    min-height: 130px;
+    border: 1px solid palette(grey, smooth);
     &:hover {
-      border: 1px solid palette(grey, smooth);
       ::v-deep .edit {
         opacity: 1;
         pointer-events: all;

@@ -30,15 +30,15 @@
         >
           <template #before>
             <slot name="results-header" />
+            <results-loading
+              v-if="showLoader"
+              :size="dataset.viewSettings.pagination.size"
+            />
             <results-empty
               :title="emptySearchInfo.title"
               :message="emptySearchInfo.message"
               :icon="emptySearchInfo.icon"
-              v-if="dataset.results.total === 0"
-            />
-            <results-loading
-              v-if="showLoader"
-              :size="dataset.viewSettings.pagination.size"
+              v-else-if="dataset.results.total === 0"
             />
           </template>
           <template v-slot="{ item, index, active }">
@@ -136,31 +136,11 @@ export default {
       return false;
     },
   },
-  mounted() {
-    const scroll = document.getElementById("scroll");
-    if (scroll) {
-      this.scrollComponent = scroll;
-      this.scrollComponent.addEventListener("scroll", this.onScroll);
-    }
-  },
-  beforeDestroy() {
-    if (this.scrollComponent)
-      this.scrollComponent.removeEventListener("scroll", this.onScroll);
-  },
   methods: {
     ...mapActions({
       paginate: "entities/datasets/paginate",
       search: "entities/datasets/search",
     }),
-    onScroll() {
-      if (document.getElementById("scroll").scrollTop > 0) {
-        document.getElementsByTagName("body")[0].classList.add("fixed-header");
-      } else {
-        document
-          .getElementsByTagName("body")[0]
-          .classList.remove("fixed-header");
-      }
-    },
     async onApplyMetadataFilter(metadata) {
       this.onCloseMetadata();
       this.search({
@@ -217,9 +197,9 @@ export default {
     }
   }
   &__li {
-    padding-bottom: 10px;
+    margin-bottom: -1px;
     position: relative;
-    min-height: 140px;
+    min-height: 80px;
   }
 }
 </style>
@@ -227,10 +207,7 @@ export default {
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
-  padding-bottom: 260px;
-  .fixed-header & {
-    padding-bottom: 260px;
-  }
+  padding-bottom: 180px;
 }
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;

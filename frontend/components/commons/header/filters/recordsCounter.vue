@@ -1,5 +1,5 @@
 <template>
-  <p class="records-title" v-if="dataset.results.total > 0">
+  <p class="records-counter" v-if="dataset.results.total > 0">
     Records
     <span v-if="showWhenFiltered && areFiltersApplied.length"
       >with filters applied</span
@@ -38,8 +38,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.records-title {
-  color: $font-secondary;
+.records-counter {
+  color: palette(grey, medium);
+  margin-left: auto;
+  margin-right: 0;
+  display: block;
+  text-align: right;
 }
 </style>

@@ -108,41 +108,11 @@ export default {
   position: fixed;
   background: $bg;
   z-index: 3;
-  &:not(.sticky) {
-    position: relative;
-  }
   ::v-deep .header__filters {
     position: relative;
   }
-  .fixed-header & {
-    animation: header-fixed 0.3s ease-in-out;
-    z-index: 4;
-    box-shadow: 1px 1px 6px $font-medium-color;
-    ::v-deep .filters__title,
-    ::v-deep .topbar {
-      display: none;
-    }
-    ::v-deep .global-actions {
-      margin-top: 0;
-      padding-top: 0;
-      background: $bg;
-      border: none;
-      min-height: 60px;
-    }
-  }
-  .fixed-header .--annotation & {
-    ::v-deep .filters__area {
-      display: none;
-    }
-  }
-}
-
-@keyframes header-fixed {
-  0% {
-    transform: translateY(-150px);
-  }
-  100% {
-    transform: translateY(0);
+  &:not(.sticky) {
+    position: relative;
   }
 }
 </style>

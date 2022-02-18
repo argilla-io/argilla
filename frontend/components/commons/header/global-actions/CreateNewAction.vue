@@ -19,9 +19,9 @@
   <div class="new-label__container">
     <reButton
       v-if="!showLabelCreation"
-      class="new-label__main-button button-secondary--outline"
+      class="new-label__main-button button-secondary"
       @click="openLabelCreation()"
-      ><svgicon name="plus" width="10" height="10" />{{ text }}</reButton
+      >{{ text }}</reButton
     >
     <div v-else class="new-label">
       <input
@@ -48,7 +48,7 @@ export default {
     text: {
       type: String,
       required: false,
-      default: "Create new label",
+      default: "Add new label",
     },
   },
   data: () => ({

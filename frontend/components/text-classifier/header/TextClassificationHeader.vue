@@ -19,8 +19,9 @@
   <div class="header__filters">
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
-      :dataset="dataset"
-    />
+      :dataset="dataset">
+      <records-counter :dataset="dataset" :show-when-filtered="showRulesArea"></records-counter>
+    </filters-area>
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
@@ -68,6 +69,9 @@ export default {
     },
     viewMode() {
       return this.dataset.viewSettings.viewMode;
+    },
+    showRulesArea() {
+      return this.viewMode === "labelling-rules";
     },
   },
   methods: {
