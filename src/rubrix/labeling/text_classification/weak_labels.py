@@ -745,13 +745,12 @@ class WeakMultiLabels:
         - **coverage**: Fraction of the records labeled by the rule.
         - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
-        - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
         - **correct**: Number of labels the rule labeled correctly (if annotations are available).
         - **incorrect**: Number of labels the rule labeled incorrectly or missed (if annotations are available).
         - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
 
         Args:
-            normalize_by_coverage: Normalize the overlaps and conflicts by the respective coverage.
+            normalize_by_coverage: Normalize the overlaps by the respective coverage.
             annotation: An optional matrix with ints holding the annotations (see ``self.annotation``).
                 By default, we will use ``self.annotation(include_missing=True)``.
 
@@ -761,19 +760,18 @@ class WeakMultiLabels:
         has_weak_label = self._tensor.sum(2) >= 0
 
         # polarity (label)
-        generator_over_rules = (
-            # remove abstentions, get indices of votes
-            np.nonzero(self._tensor[:, m, :][self._tensor[:, m, :].sum(1) >= 0])[1]
-            for m in range(len(self._rules))
-        )
         polarity = [
             set(
-                self._int2label[integer]
-                for integer in np.unique(
-                    self._matrix[:, i][self._matrix[:, i] != self._label2int[None]]
-                )
+                [
+                    self._labels[i]
+                    # get indices of votes
+                    for i in np.nonzero(
+                        # remove abstentions
+                        self._tensor[:, m, :][self._tensor[:, m, :].sum(1) >= 0]
+                    )[1]
+                ]
             )
-            for i in range(len(self._rules))
+            for m in range(len(self._rules))
         ]
         polarity.append(set().union(*polarity))
 
@@ -790,29 +788,17 @@ class WeakMultiLabels:
             has_weak_label, has_overlaps, coverage, normalize_by_coverage
         )
 
-        # conflicts
-        # TODO: For a lot of records (~1e6), this could become slow (~10s) ... a vectorized solution would be better.
-        has_conflicts = np.apply_along_axis(
-            lambda x: len(np.unique(x[x != self._label2int[None]])) > 1,
-            axis=1,
-            arr=self._matrix,
-        )
-        conflicts = self._compute_overlaps_conflicts(
-            has_weak_label, has_conflicts, coverage, normalize_by_coverage
-        )
-
         # index for the summary
         index = list(self._rules_name2index.keys()) + ["total"]
 
         # only add annotated_coverage, correct, incorrect and precision if we have annotations
-        if (
-            any(self._annotation_array != self._label2int[None])
-            or annotation is not None
-        ):
+        if any(self._annotation_matrix != -1) or annotation is not None:
             # annotated coverage
             has_annotation = (
-                annotation if annotation is not None else self._annotation_array
-            ) != self._label2int[None]
+                annotation
+                if annotation is not None
+                else self._annotation_matrix.sum(1) >= 0
+            )
             annotated_coverage = (
                 has_weak_label[has_annotation].sum(axis=0) / has_annotation.sum()
             )
@@ -825,7 +811,7 @@ class WeakMultiLabels:
             # correct/incorrect
             correct, incorrect = self._compute_correct_incorrect(
                 has_weak_label,
-                annotation if annotation is not None else self._annotation_array,
+                annotation if annotation is not None else self._annotation_matrix,
             )
 
             # precision
@@ -837,7 +823,6 @@ class WeakMultiLabels:
                     "coverage": coverage,
                     "annotated_coverage": annotated_coverage,
                     "overlaps": overlaps,
-                    "conflicts": conflicts,
                     "correct": correct,
                     "incorrect": incorrect,
                     "precision": precision,
@@ -850,7 +835,6 @@ class WeakMultiLabels:
                 "label": polarity,
                 "coverage": coverage,
                 "overlaps": overlaps,
-                "conflicts": conflicts,
             },
             index=index,
         )
@@ -884,18 +868,17 @@ class WeakMultiLabels:
         self, has_weak_label: np.ndarray, annotation: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
-        annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(
-            self._matrix.shape
-        )
+        # transform annotation to matrix/tensor
+        annotation = np.repeat(annotation, len(self._rules)).reshape(self._tensor.shape)
 
         # correct
-        correct_with_abstain = annotation_matrix == self._matrix
+        correct_with_abstain = (annotation == self._tensor).sum(2)
         correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
 
         # incorrect
-        incorrect_with_abstain = annotation_matrix != self._matrix
+        incorrect_with_abstain = (annotation != self._tensor).sum(2)
         incorrect = np.where(
-            has_weak_label & (annotation_matrix != self._label2int[None]),
+            has_weak_label & (annotation != -1),
             incorrect_with_abstain,
             False,
         ).sum(axis=0)
@@ -922,8 +905,8 @@ class WeakMultiLabels:
         """
         # get labels mask
         if labels is not None:
-            labels = [self._label2int[label] for label in labels]
-            idx_by_labels = np.isin(self._matrix, labels).sum(axis=1) >= len(labels)
+            labels = [self._labels.index(label) for label in labels]
+            idx_by_labels = np.any((self._tensor.sum(1) > 0)[:, labels], axis=0)
         else:
             idx_by_labels = np.ones_like(self._records).astype(bool)
 
@@ -933,9 +916,7 @@ class WeakMultiLabels:
                 self._rules_name2index[rule] if isinstance(rule, str) else rule
                 for rule in rules
             ]
-            idx_by_rules = (self._matrix[:, rules] != self._label2int[None]).sum(
-                axis=1
-            ) == len(rules)
+            idx_by_rules = (self._tensor[:, rules, :].sum()).sum(axis=1) == len(rules)
         else:
             idx_by_rules = np.ones_like(self._records).astype(bool)
 
