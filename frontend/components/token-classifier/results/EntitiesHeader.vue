@@ -30,7 +30,9 @@
         :class="[
           `color_${entity.colorId}`,
           activeEntity === entity.text ? 'active' : '',
-          annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
+          annotationEnabled
+            ? 'non-selectable--show-sort-code'
+            : 'non-selectable',
         ]"
         @click="onActiveEntity(entity)"
       >
@@ -119,7 +121,7 @@ export default {
     padding: 0.2em 0.5em;
     background: palette(white);
     border-radius: 3px;
-    box-shadow: 0 1px 2px 0 rgba(185,185,185,0.50);
+    box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
