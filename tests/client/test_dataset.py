@@ -83,7 +83,6 @@ def test_to_dataframe(monkeypatch, singlelabel_textclassification_records):
     assert list(df.columns) == list(TextClassificationRecord.__fields__)
 
 
-@pytest.mark.skip
 def test_from_datasets(monkeypatch, caplog):
     monkeypatch.setattr(
         "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
@@ -222,6 +221,15 @@ class TestDatasetForTextClassification:
         rec = rb.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
         assert rec.inputs == {"text": "mock"}
 
+    def test_from_to_datasets_id(self):
+        dataset_rb = rb.DatasetForTextClassification(
+            [rb.TextClassificationRecord(inputs="mock")]
+        )
+        dataset_ds = dataset_rb.to_datasets()
+        assert dataset_ds["id"] == [None]
+
+        assert rb.read_datasets(dataset_ds, task="TextClassification")[0].id is None
+
     def test_datasets_empty_metadata(self):
         dataset = rb.DatasetForTextClassification(
             [rb.TextClassificationRecord(inputs="mock")]
@@ -319,6 +327,15 @@ class TestDatasetForTokenClassification:
         rec = rb.DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock" and rec.tokens == ["mock"]
 
+    def test_from_to_datasets_id(self):
+        dataset_rb = rb.DatasetForTokenClassification(
+            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        )
+        dataset_ds = dataset_rb.to_datasets()
+        assert dataset_ds["id"] == [None]
+
+        assert rb.read_datasets(dataset_ds, task="TokenClassification")[0].id is None
+
     def test_datasets_empty_metadata(self):
         dataset = rb.DatasetForTokenClassification(
             [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
@@ -396,6 +413,13 @@ class TestDatasetForText2Text:
         rec = rb.DatasetForText2Text.from_datasets(ds)[0]
         assert rec.prediction[0][0] == "ejemplo"
         assert rec.prediction[0][1] == pytest.approx(1.0)
+
+    def test_from_to_datasets_id(self):
+        dataset_rb = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])
+        dataset_ds = dataset_rb.to_datasets()
+        assert dataset_ds["id"] == [None]
+
+        assert rb.read_datasets(dataset_ds, task="Text2Text")[0].id is None
 
     def test_datasets_empty_metadata(self):
         dataset = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])

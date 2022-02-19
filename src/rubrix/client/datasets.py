@@ -338,7 +338,9 @@ class DatasetForTextClassification(DatasetBase):
                     for rec in self._records
                 ]
             elif key == "id":
-                ds_dict[key] = [str(rec.id) for rec in self._records]
+                ds_dict[key] = [
+                    None if rec.id is None else str(rec.id) for rec in self._records
+                ]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
@@ -487,7 +489,9 @@ class DatasetForTokenClassification(DatasetBase):
                     entities_to_dict(rec.annotation) for rec in self._records
                 ]
             elif key == "id":
-                ds_dict[key] = [str(rec.id) for rec in self._records]
+                ds_dict[key] = [
+                    None if rec.id is None else str(rec.id) for rec in self._records
+                ]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
@@ -608,7 +612,9 @@ class DatasetForText2Text(DatasetBase):
                     for rec in self._records
                 ]
             elif key == "id":
-                ds_dict[key] = [str(rec.id) for rec in self._records]
+                ds_dict[key] = [
+                    None if rec.id is None else str(rec.id) for rec in self._records
+                ]
             elif key == "metadata":
                 ds_dict[key] = [getattr(rec, key) or None for rec in self._records]
             else:
