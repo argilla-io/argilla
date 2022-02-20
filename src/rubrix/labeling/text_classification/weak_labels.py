@@ -624,8 +624,14 @@ class WeakMultiLabels:
             if isinstance(rule, Rule):
                 rule.apply(self._dataset)
 
-        # TODO: use server api to get labels
-        labels = sorted(["a", "b"])
+        # TODO: use REST API to get labels (needs a fix first)
+        labels = []
+        for rec in self._records:
+            if rec.prediction:
+                labels += [pred[0] for pred in rec.prediction]
+            if rec.annotation:
+                labels += [ann for ann in rec.annotation]
+        labels = sorted(list(set(labels)))
 
         # create weak label tensor, annotation matrix
         weak_label_tensor = np.empty(
@@ -916,7 +922,9 @@ class WeakMultiLabels:
                 self._rules_name2index[rule] if isinstance(rule, str) else rule
                 for rule in rules
             ]
-            idx_by_rules = (self._tensor[:, rules, :].sum()).sum(axis=1) == len(rules)
+            idx_by_rules = (self._tensor[:, rules, :].sum(axis=2) >= 0).sum(
+                axis=1
+            ) == len(rules)
         else:
             idx_by_rules = np.ones_like(self._records).astype(bool)
 
@@ -924,37 +932,6 @@ class WeakMultiLabels:
         filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
 
         return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
-
-    def change_mapping(self, label2int: Dict[str, int]):
-        """Allows you to change the mapping between labels and integers.
-
-        This will update the ``self.matrix`` as well as the ``self.annotation``.
-
-        Args:
-            label2int: New label to integer mapping. Must cover all previous labels.
-        """
-        # save masks for swapping
-        label_masks = {}
-        annotation_masks = {}
-
-        for label in self._label2int:
-            # Check new label2int mapping
-            if label not in label2int:
-                raise MissingLabelError(
-                    f"The label '{label}' is missing in the new mapping."
-                )
-            # compute masks
-            label_masks[label] = self._matrix == self._label2int[label]
-            annotation_masks[label] = self._annotation_array == self._label2int[label]
-
-        # swap integers
-        for label in self._label2int:
-            self._matrix[label_masks[label]] = label2int[label]
-            self._annotation_array[annotation_masks[label]] = label2int[label]
-
-        # update mapping dicts
-        self._label2int = label2int.copy()
-        self._int2label = {val: key for key, val in self._label2int.items()}
 
 
 class WeakLabelsError(Exception):
