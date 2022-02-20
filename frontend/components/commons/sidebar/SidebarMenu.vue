@@ -128,11 +128,7 @@ export default {
       return this.dataset !== undefined;
     },
     showLabellingRules() {
-      return (
-        this.isDatasetView &&
-        !this.dataset.isMultiLabel &&
-        this.dataset.task === "TextClassification"
-      );
+      return this.isDatasetView && this.dataset.task === "TextClassification";
     },
   },
   watch: {

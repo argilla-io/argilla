@@ -110,6 +110,11 @@
                     >
                       {{ itemValue(item, column) | percent }}
                     </span>
+                    <span v-else-if="column.type === 'array'">
+                      <p v-for="(arrayItem, index) in itemValue(item, column)" :key="index">
+                        {{arrayItem}}{{index + 1 === itemValue(item, column).length ? '' : ','}}
+                      </p>
+                    </span>
                     <span v-else-if="column.type === 'object'">
                       <p
                         v-for="key in Object.keys(itemValue(item, column))"
@@ -448,9 +453,6 @@ export default {
       border-bottom: none;
       padding-top: 0;
       padding-bottom: 0.2em;
-      // &:hover {
-      //   background:transparent ;
-      // }
     }
     button:not(.re-button) {
       cursor: pointer;
@@ -486,8 +488,6 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      // text-overflow: ellipsis;
-      // overflow: hidden;
       &:nth-last-of-type(-n + 2) {
         max-width: 120px;
       }
@@ -497,9 +497,6 @@ export default {
       &:nth-of-type(2) {
         min-width: 30%;
       }
-      // .task span {
-      //   display: flex;
-      // }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
@@ -524,15 +521,6 @@ export default {
     margin-top: 5em;
     height: auto;
   }
-  // &__item:not(.disabled) {
-  //   &:hover,
-  //   &:focus {
-  //     background: $line-lighter-color;
-  //     #{$this}__header & {
-  //       background: transparent;
-  //     }
-  //   }
-  // }
   &__actions {
     position: absolute;
     right: 2em;
@@ -592,6 +580,13 @@ export default {
     max-width: 280px;
     font-weight: 600;
     word-break: break-word;
+  }
+  .array {
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+      display: block;
+    }
   }
   .text {
     color: $font-medium-color;

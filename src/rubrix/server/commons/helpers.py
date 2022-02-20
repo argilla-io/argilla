@@ -84,7 +84,7 @@ def unflatten_dict(
 
     """
     resultDict = {}
-
+    stop_keys = stop_keys or []
     for key, value in data.items():
         if key is not None:
             parts = key.split(sep)
