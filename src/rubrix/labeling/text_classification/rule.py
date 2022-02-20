@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Union
 
 import rubrix as rb
 from rubrix import TextClassificationRecord
-from rubrix import _client_instance as client
+from rubrix.client import api
 from rubrix.client.sdk.text_classification.models import LabelingRule
 
 
@@ -25,7 +25,7 @@ class Rule:
 
     Args:
         query: An ElasticSearch query with the `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_.
-        label: The label associated to the query.
+        label: The label associated to the query. Can also be a list of labels.
         name: An optional name for the rule to be used as identifier in the
             `rubrix.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
 
@@ -42,7 +42,7 @@ class Rule:
     def __init__(
         self,
         query: str,
-        label: str,
+        label: Union[str, List[str]],
         name: Optional[str] = None,
         author: Optional[str] = None,
     ):
@@ -58,7 +58,7 @@ class Rule:
         return self._query
 
     @property
-    def label(self) -> str:
+    def label(self) -> Union[str, List[str]]:
         """The rule label"""
         return self._label
 
@@ -99,8 +99,7 @@ class Rule:
         Returns:
             The rule metrics.
         """
-        current_client = client()
-        metrics = current_client.rule_metrics_for_dataset(
+        metrics = api.active_api().rule_metrics_for_dataset(
             dataset=dataset,
             rule=LabelingRule(
                 query=self.query, label=self.label, author=self.author or "None"
@@ -117,14 +116,16 @@ class Rule:
             "precision": metrics.precision if metrics.precision is not None else None,
         }
 
-    def __call__(self, record: TextClassificationRecord) -> Optional[str]:
+    def __call__(
+        self, record: TextClassificationRecord
+    ) -> Optional[Union[str, List[str]]]:
         """Check if the given record is among the matching ids from the ``self.apply`` call.
 
         Args:
             record: The record to be labelled.
 
         Returns:
-            A label if the record id is among the matching ids, otherwise None.
+            A label or list of labels if the record id is among the matching ids, otherwise None.
 
         Raises:
             RuleNotAppliedError: If the rule was not applied to the dataset before.
@@ -151,12 +152,11 @@ def load_rules(dataset: str) -> List[Rule]:
     Returns:
         A list of rules defined in the given dataset.
     """
-    current_client = client()
-    rules = current_client.fetch_dataset_labeling_rules(dataset)
+    rules = api.active_api().fetch_dataset_labeling_rules(dataset)
     return [
         Rule(
             query=rule.query,
-            label=rule.label,
+            label=rule.label or rule.labels,
             name=rule.description,
             author=rule.author,
         )

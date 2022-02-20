@@ -326,7 +326,9 @@ async def create_rule(
 async def compute_rule_metrics(
     name: str,
     query: str,
-    label: Optional[str] = Query(None, description="Label related to query rule"),
+    labels: Optional[List[str]] = Query(
+        None, description="Label related to query rule", alias="label"
+    ),
     common_params: CommonTaskQueryParams = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
@@ -342,7 +344,7 @@ async def compute_rule_metrics(
     )
 
     return service.compute_rule_metrics(
-        Dataset.parse_obj(dataset), rule_query=query, label=label
+        Dataset.parse_obj(dataset), rule_query=query, labels=labels
     )
 
 
@@ -459,7 +461,7 @@ async def update_rule(
     rule = service.update_labeling_rule(
         Dataset.parse_obj(dataset),
         rule_query=query,
-        label=update.label,
+        labels=update.labels,
         description=update.description,
     )
     return rule

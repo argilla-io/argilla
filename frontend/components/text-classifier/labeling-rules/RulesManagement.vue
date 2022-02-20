@@ -79,7 +79,7 @@ export default {
           class: "table-info__title",
           type: "action",
         },
-        { name: "Label", field: "label", class: "text" },
+        { name: "Labels", field: "labels", class: "array", type: "array" },
         {
           name: "Coverage",
           field: "coverage",
@@ -158,7 +158,7 @@ export default {
             name: r.description,
             query: r.query,
             kind: "select",
-            label: r.label,
+            labels: r.labels,
             ...this.metricsForRule(r),
             created_at: r.created_at,
           };
@@ -244,7 +244,7 @@ export default {
 <style lang="scss" scoped>
 .rules-management {
   padding-left: 4em;
-  padding-top: 7em;
+  padding-top: 2em;
   overflow: auto;
   height: 100vh;
   &__container {
