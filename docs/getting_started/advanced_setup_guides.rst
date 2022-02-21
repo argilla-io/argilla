@@ -291,6 +291,7 @@ First, you need to install the master version of our python client:
 Then, the easiest way to get the master version of our web app up and running is via docker-compose:
 
 .. note::
+    For now, we only provide the master version of our web app via docker.  
     If you want to run the web app of the master branch **without** docker, we refer you to our :ref:`development-setup`.
 
 .. code-block:: shell
