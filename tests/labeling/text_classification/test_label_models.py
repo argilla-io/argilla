@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import FlyingSquid, Epoxy, Snorkel, WeakLabels
+from rubrix.labeling.text_classification import Epoxy, FlyingSquid, Snorkel, WeakLabels
 from rubrix.labeling.text_classification.label_models import (
     LabelModel,
     MissingAnnotationError,
@@ -55,8 +55,9 @@ def weak_labels(monkeypatch):
 @pytest.fixture
 def embeddings():
     np.random.seed(0)
-    word_embeddings = np.random.random((4,1024))
+    word_embeddings = np.random.random((4, 1024))
     return word_embeddings
+
 
 @pytest.fixture
 def weak_labels_from_guide(monkeypatch, resources):
@@ -567,8 +568,8 @@ class TestFlyingSquid:
             ("HAM", 0.17630165139123552),
         ]
 
+
 class TestEpoxy:
-    
     def test_not_installed(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "epoxy", None)
         with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):

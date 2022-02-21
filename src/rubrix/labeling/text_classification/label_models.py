@@ -15,15 +15,20 @@
 import hashlib
 import importlib
 import logging
+import sys
+from collections.abc import Iterator
 from enum import Enum
 from os import stat
 from typing import Dict, List, Optional, Union
-from collections.abc import Iterator
+
 import numpy as np
-import sys
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import WeakLabels
+from rubrix.labeling.text_classification.weak_labels import (
+    WeakLabels,
+    WeakLabelsEmbeddings,
+)
+from rubrix.tests.labeling.text_classification.test_label_models import embeddings
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -535,8 +540,6 @@ class FlyingSquid(LabelModel):
         wl_matrix_i[abstain_mask] = 0
         wl_matrix_i[other_mask] = 1
 
-        # epoxy
-
         return wl_matrix_i
 
     def predict(
@@ -753,6 +756,7 @@ class FlyingSquid(LabelModel):
 
         return metrics
 
+
 class Epoxy(FlyingSquid):
     """The label model by `Epoxy <https://github.com/HazyResearch/epoxy>`__.
         This label model is an extension to the label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
@@ -776,25 +780,28 @@ class Epoxy(FlyingSquid):
     """
 
     def __init__(
-        self, 
-        weak_labels: WeakLabels, 
-        thresholds: List[float] = None,  
-        embeddings: np.ndarray = None, 
-        **kwargs):
-        
+        self,
+        weak_labels: WeakLabelsEmbeddings,
+        thresholds: List[float] = None,
+        **kwargs,
+    ):
+
         libraries = {
             "epoxy": """
                 'epoxy' must be installed to use the `Epoxy` label model!
                 You can install 'epoxy' with the command: `pip install epoxy`
                 """,
-            "faiss": """ 
+            "faiss": """
                 'faiss' must be installed to use the `Epoxy` label model!
-                You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`           
+                You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`
             """,
-            ("flyingsquid", "pgmpy"): """ 
+            (
+                "flyingsquid",
+                "pgmpy",
+            ): """
                 'flyingsquid' must be installed to use the `Epoxy` label model! "
                 "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`
-            """
+            """,
         }
 
         for key, value in libraries.items():
@@ -809,42 +816,41 @@ class Epoxy(FlyingSquid):
                     raise ModuleNotFoundError(value)
 
         self.thresholds = thresholds
-        self.embeddings = embeddings
 
         super().__init__(weak_labels, **kwargs)
 
     @classmethod
     def _fit_and_score(
-        cls, 
-        weak_labels: WeakLabels, 
-        embeddings: np.ndarray = None, 
-        score: str = "accuracy", 
-        thresholds: List[float] = None, 
-        tie_break_policy: str = "random") -> float:
+        cls,
+        weak_labels: WeakLabelsEmbeddings,
+        score: str = "accuracy",
+        thresholds: List[float] = None,
+        tie_break_policy: str = "random",
+    ) -> float:
         """Helper function to instantiate an Epoxy model, and fit and score weak labels.
 
         Args:
             weak_labels (WeakLabels): A `WeakLabels` object containing the weak labels and records.
-            embeddings (np.ndarray, optional): Sentence embeddings for each record on the weak label matrix. 
+            embeddings (np.ndarray, optional): Sentence embeddings for each record on the weak label matrix.
                 Defaults to None.
-            score (str, optional): The score to be optimized. 
+            score (str, optional): The score to be optimized.
                 More information on the `score` method of the parent class, FlyingSquid.
                 Defaults to "accuracy".
             thresholds (List[float], optional): A list of thresholds.
-            tie_break_policy (str, optional): Tie break policy during score optimization. 
-                More information on the `score` method of the parent class, FlyingSquid. 
+            tie_break_policy (str, optional): Tie break policy during score optimization.
+                More information on the `score` method of the parent class, FlyingSquid.
                 Defaults to "random".
 
         Returns:
             float: The metric measured after fitting and scoring the weak label matrix.
         """
-        epoxy_instance = cls(weak_labels, thresholds=thresholds, embeddings=embeddings)
+        epoxy_instance = cls(weak_labels, thresholds=thresholds)
         epoxy_instance.fit()
         result = epoxy_instance.score(tie_break_policy=tie_break_policy)[score]
         return result
 
     @staticmethod
-    def _generate_first_search_space(weak_labels: WeakLabels, num: int = 20):
+    def _generate_first_search_space(weak_labels: WeakLabelsEmbeddings, num: int = 20):
         """Helper function to the `grid_search_threshold` method.
                 In the first search space, all thresholds in an array are set to the same value.
 
@@ -861,7 +867,9 @@ class Epoxy(FlyingSquid):
             yield [x] * thresholds_len
 
     @staticmethod
-    def _generate_second_search_space(thresholds: np.ndarray, num: int = 20, index: int = 0):
+    def _generate_second_search_space(
+        thresholds: np.ndarray, num: int = 20, index: int = 0
+    ):
         """Helper function to the `grid_search_threshold` method.
                 In the second search space, the thresholds are optimized one by one.
 
@@ -871,7 +879,7 @@ class Epoxy(FlyingSquid):
             index (int, optional): The index of the threshold that will be optimized. Defaults to 0.
 
         Yields:
-            Iterator[List[float]]: A generator for all threshold arrays in the second search space 
+            Iterator[List[float]]: A generator for all threshold arrays in the second search space
                 for a given index.
         """
         arr = thresholds.copy()
@@ -883,33 +891,32 @@ class Epoxy(FlyingSquid):
 
     @classmethod
     def grid_search_threshold(
-        cls, 
-        weak_labels: WeakLabels,
-        embeddings: Union[None, np.ndarray] = None,
+        cls,
+        weak_labels: WeakLabelsEmbeddings,
         score: str = "accuracy",
         tie_break_policy: str = "random",
-        first_space_num: int = 20, 
-        second_space_num: int = 20, 
-        second_space_subset: Union[None, List[int]] = None) -> List[float]:
+        first_space_num: int = 20,
+        second_space_num: int = 20,
+        second_space_subset: Union[None, List[int]] = None,
+    ) -> List[float]:
         """Perform grid search to find the optimal threshold for the Epoxy model.
                 The grid search is performed in two steps. In the first step, the same value is set to all thresholds.
                 In the second step, the thresholds are optimized one by one.
 
-                Smaller values for first_space_num and second_space_num will speed up the grid search while 
+                Smaller values for first_space_num and second_space_num will speed up the grid search while
                 decreasing precision.
 
         Args:
             weak_labels: The original weak label matrix.
-            embeddings: Sentence embeddings for each sentence on the matrix.
-            score: The score to be optimized. 
+            score: The score to be optimized.
                 More information on the `score` method of the parent class, FlyingSquid.
-            tie_break_policy: Tie break policy during score optimization. 
+            tie_break_policy: Tie break policy during score optimization.
                 More information on the `score` method of the parent class, FlyingSquid.
-            first_space_num: Size of the first search space during grid search. 
+            first_space_num: Size of the first search space during grid search.
                 Defaults to 20.
-            second_space_num: Size of the second search space during grid search. 
+            second_space_num: Size of the second search space during grid search.
                 Defaults to 20.
-            second_space_subset: A list of the indexes of all the thresholds that will be optimized during the 
+            second_space_subset: A list of the indexes of all the thresholds that will be optimized during the
                 second step of the grid search. The thresholds will be optimized in the order given in the list.
                 If no list is given, all thresholds will be optimized, from left to right.
         Returns:
@@ -919,31 +926,36 @@ class Epoxy(FlyingSquid):
         output = None
         max_metric = 0
 
-        for threshold in cls._generate_first_search_space(weak_labels, num=first_space_num):
+        for threshold in cls._generate_first_search_space(
+            weak_labels, num=first_space_num
+        ):
 
             result = cls._fit_and_score(
                 weak_labels,
                 score=score,
-                embeddings=embeddings, 
                 thresholds=threshold,
-                tie_break_policy=tie_break_policy)
+                tie_break_policy=tie_break_policy,
+            )
 
             if result >= max_metric:
                 output = threshold
                 max_metric = result
 
             _LOGGER.debug(
-                    """
+                """
                     Searching on the first search space.
                     Current values:
                     - current threshold: {0}
                     - best threshold: {1}
-                    """.format(str(threshold), str(output))
+                    """.format(
+                    str(threshold), str(output)
+                )
             )
 
-
         _LOGGER.debug(
-            "Exited from the first search space. Best threshold: {0}".format(str(output))
+            "Exited from the first search space. Best threshold: {0}".format(
+                str(output)
+            )
         )
 
         if not second_space_subset:
@@ -954,9 +966,7 @@ class Epoxy(FlyingSquid):
             current_index = second_space_subset.pop(0)
 
             for threshold in cls._generate_second_search_space(
-                thresholds=output,
-                num=second_space_num,
-                index=current_index
+                thresholds=output, num=second_space_num, index=current_index
             ):
 
                 _LOGGER.debug(
@@ -965,27 +975,29 @@ class Epoxy(FlyingSquid):
                     Current values:
                     - threshold: {0}
                     - index: {1}
-                    - second_space_subset: {2} 
-                    """.format(str(threshold), str(current_index), str(second_space_subset))
+                    - second_space_subset: {2}
+                    """.format(
+                        str(threshold), str(current_index), str(second_space_subset)
+                    )
                 )
 
                 result = cls._fit_and_score(
                     weak_labels,
                     score=score,
-                    embeddings=embeddings, 
                     thresholds=threshold,
-                    tie_break_policy=tie_break_policy)
+                    tie_break_policy=tie_break_policy,
+                )
 
                 if result >= max_metric:
                     output = threshold
                     max_metric = result
-            
+
         _LOGGER.debug("End of the grid search. Best thresholds: {0}".format(output))
         return output
 
     def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
         """Helper function to copy and transform the weak label matrix with respect to a target label.
-                This function performs the same operations as the parent function, and then extends the 
+                This function performs the same operations as the parent function, and then extends the
                 weak label matrix with the nearest neighbors for each record.
 
         Args:
@@ -996,7 +1008,7 @@ class Epoxy(FlyingSquid):
             A copy of the weak label matrix, transformed with respect to the target label,
                 and extended with the nearest neighbors for each record.
         """
-        if not 'epoxy.epoxy.Epoxy' in sys.modules:
+        if not "epoxy.epoxy.Epoxy" in sys.modules:
             from epoxy import Epoxy as EpoxyModel
 
         L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
@@ -1006,10 +1018,37 @@ class Epoxy(FlyingSquid):
         else:
             thresholds = self.thresholds
 
-        epoxy_model = EpoxyModel(L_matrix, self.embeddings)
-        epoxy_model.preprocess(L_matrix, self.embeddings)
+        embeddings = self._weak_labels.get_embeddings(
+            has_annotation=None if self._include_annotated_records else False
+        )
+
+        epoxy_model = EpoxyModel(L_matrix, embeddings)
+        epoxy_model.preprocess(L_matrix, embeddings)
         L_extended = epoxy_model.extend(thresholds)
         return L_extended
+
+    def fit(self, include_annotated_records: bool = False, **kwargs):
+        self._include_annotated_records = include_annotated_records
+        super().fit(include_annotated_records, **kwargs)
+
+    def predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        prediction_agent: str = "FlyingSquid",
+        verbose: bool = True,
+        tie_break_policy: str = "abstain",
+    ) -> List[TextClassificationRecord]:
+
+        self._include_annotated_records = include_annotated_records
+
+        super().predict(
+            include_annotated_records=include_annotated_records,
+            include_abstentions=include_abstentions,
+            prediction_agent=prediction_agent,
+            verbose=verbose,
+            tie_break_policy=tie_break_policy,
+        )
 
 
 class LabelModelError(Exception):
