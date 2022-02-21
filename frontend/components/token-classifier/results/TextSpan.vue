@@ -33,7 +33,8 @@
       @mouseup="endSelection"
       @mouseover="overSelection"
       v-html="$highlightSearch(dataset.query.text, text)"
-    /><span v-if="showEntitiesSelector" class="entities__selector__container">
+    />
+    <span v-if="showEntitiesSelector" class="entities__selector__container">
       <div
         v-click-outside="onClickOutside"
         class="entities__selector"

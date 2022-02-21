@@ -35,7 +35,7 @@
       />
     </span>
     <span class="highlight__label">
-      <span @click="removeEntity" class="highlight__tooltip__container">
+      <span class="highlight__tooltip__container">
         <span
           :class="[
             'highlight__tooltip',
@@ -47,16 +47,18 @@
           }}</span>
           <span
             >{{ span.entity.label }}
-            <svgicon
-              v-if="annotationEnabled && span.origin === 'annotation'"
-              width="8"
-              height="8"
-              name="cross"
-            ></svgicon>
           </span>
         </span>
       </span>
     </span>
+    <svgicon
+      class="remove-button"
+      @click="removeEntity"
+      v-if="annotationEnabled && span.origin === 'annotation'"
+      width="10"
+      height="10"
+      name="cross"
+    ></svgicon>
   </span>
 </template>
 <script>
@@ -125,7 +127,7 @@ export default {
   // display: inline-flex;
   border-radius: 2px;
   padding: 0;
-  margin-right: -3.62px;
+  margin-right: calc(-3.62px * 2);
   &.editable {
     cursor: pointer;
   }
@@ -147,8 +149,7 @@ export default {
     padding-bottom: 1px;
   }
   &__tooltip {
-    pointer-events: all;
-    cursor: pointer;
+    cursor: default;
     display: block;
     border-radius: 2px;
     padding: 5px 10px 6px 10px;
@@ -182,18 +183,6 @@ export default {
       @include font-size(12px);
       font-weight: normal;
     }
-    &--icon {
-      padding-right: 20px;
-      .svg-icon {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        cursor: pointer;
-        .prediction & {
-          top: 16px;
-        }
-      }
-    }
   }
   &__tooltip:after {
     margin: auto;
@@ -213,6 +202,19 @@ export default {
     opacity: 1;
     transition-delay: 0s;
     z-index: 4;
+  }
+}
+.remove-button {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  background: $bg;
+  border-radius: 3px;
+  padding: 2px;
+  z-index: 3;
+  &:hover {
+    background: palette(grey, dark);
+    fill: palette(white);
   }
 }
 </style>
