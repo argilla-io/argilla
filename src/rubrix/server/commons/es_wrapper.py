@@ -64,7 +64,10 @@ class ElasticsearchWrapper(LoggingMixin):
         """
 
         if cls._INSTANCE is None:
-            es_client = OpenSearch(hosts=settings.elasticsearch)
+            es_client = OpenSearch(
+                hosts=settings.elasticsearch,
+                verify_certs=settings.elasticsearch_ssl_verify,
+            )
             cls._INSTANCE = cls(es_client)
 
         return cls._INSTANCE
