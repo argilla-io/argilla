@@ -31,11 +31,11 @@
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
+      @mouseover="overSelection"
       v-html="$highlightSearch(dataset.query.text, text)"
-    /><span class="entities__selector__container">
+    /><span v-if="showEntitiesSelector" class="entities__selector__container">
       <div
         v-click-outside="onClickOutside"
-        v-if="showEntitiesSelector"
         class="entities__selector"
       >
         <span v-show="!addnewSlotVisible">
@@ -196,6 +196,11 @@ export default {
         this.$emit("startSelection", this.spanId);
       }
     },
+    overSelection() {
+      if (this.annotationEnabled) {
+        this.$emit("overSelection", this.spanId);
+      }
+    },
     endSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
@@ -335,18 +340,20 @@ export default {
   display: inline;
   line-height: 18px;
   @include font-size(0);
-  &::selection {
-    background: none !important;
-  }
   &__text {
     display: inline;
     position: relative;
     @include font-size(18px);
+    margin: 0 -2px;
+    padding: 0 2px;
   }
   &__whitespace {
     @include font-size(18px);
-    &::selection {
-      background: none !important;
+    cursor: default !important;
+  }
+  &:first-child() {
+    .span__text {
+      padding-left: 0
     }
   }
 }
@@ -368,31 +375,15 @@ export default {
   .span__whitespace {
     background: palette(grey, smooth);
   }
-  span::selection {
-    background: none !important;
-  }
-  ::v-deep .highlight-text {
-    &::selection {
-      background: none !important;
-    }
-  }
 }
 .last-selected {
   .span__whitespace {
     background: none;
   }
 }
-.span span {
-  display: inline;
-  &::selection {
-    background: palette(grey, smooth);
-  }
-  ::v-deep .highlight-text {
-    &::selection {
-      background: palette(grey, smooth);
-    }
-  }
-}
+// .span span {
+//   display: inline;
+// }
 .list__item--annotation-mode span span {
   cursor: text;
 }

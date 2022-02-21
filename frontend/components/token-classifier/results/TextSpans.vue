@@ -33,11 +33,12 @@
         :dataset="dataset"
         :suggestedLabel="suggestedLabel"
         :class="[
-          isSelected(i) ? 'selected' : '',
-          isLastSelected(i) ? 'last-selected' : '',
+          isSelected(i, selectionStart, selectionEnd) || isSelected(i, selectionStart, selectionOver) ? 'selected' : '',
+          isLastSelected(i, selectionEnd) || isLastSelected(i,selectionOver) ? 'last-selected' : '',
         ]"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
+        @overSelection="onOverSelection"
         @selectEntity="onSelectEntity"
         @changeEntityLabel="onChangeEntityLabel"
         @removeEntity="onRemoveEntity"
@@ -72,6 +73,7 @@ export default {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      selectionOver: undefined,
       suggestedLabel: undefined,
     };
   },
@@ -158,6 +160,7 @@ export default {
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
+      this.selectionOver = undefined;
       this.suggestedLabel = undefined;
     },
     onStartSelection(spanId) {
@@ -166,6 +169,13 @@ export default {
     },
     onEndSelection(spanId) {
       this.selectionEnd = spanId;
+    },
+    onOverSelection(spanId) {
+      if (this.selectionStart !== undefined && !this.selectionEnd) {
+        this.selectionOver = spanId;
+      } else {
+        this.selectionOver = undefined;
+      }
     },
     onSelectEntity(entity) {
       const from = Math.min(this.selectionStart, this.selectionEnd);
@@ -203,18 +213,19 @@ export default {
       entities.splice(found, 1);
       this.updateAnnotatedEntities(entities);
       this.onReset();
-    },
-    isSelected(i) {
-      const init = Math.min(this.selectionStart, this.selectionEnd);
-      const end = Math.max(this.selectionStart, this.selectionEnd);
+    },  
+    isSelected(i, start, end) {
+      const tokenInit = Math.min(start, end);
+      const tokenEnd = Math.max(start, end);
       this.suggestEntity();
-      if (i >= init && i <= end) {
+      console.log(i,tokenInit, tokenEnd)
+      if (i >= tokenInit && i <= tokenEnd) {
+        console.log(i)
         return true;
       }
       return false;
     },
-    isLastSelected(i) {
-      const end = Math.max(this.selectionStart, this.selectionEnd);
+    isLastSelected(i, end) {
       if (i === end) {
         return true;
       }
@@ -244,6 +255,9 @@ export default {
 .content {
   &__input {
     padding-right: 200px;
+    ::selection {
+      background: none !important;
+    }
   }
   &__actions-buttons {
     margin-right: 0;

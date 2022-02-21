@@ -141,18 +141,4 @@ export default {
     opacity: 0;
   }
 }
-// .prediction {
-//   pointer-events: none;
-//   ::v-deep {
-//     .highlight__content {
-//       pointer-events: all;
-//     }
-//   }
-// }
-// .annotation {
-//   pointer-events: none;
-//   * > {
-//     pointer-events: all;
-//   }
-// }
 </style>

@@ -129,9 +129,6 @@ export default {
   &.editable {
     cursor: pointer;
   }
-  ::selection {
-    background: none;
-  }
   &--block {
     display: block;
     .highlight__content:after {
