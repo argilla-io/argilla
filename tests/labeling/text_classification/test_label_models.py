@@ -265,7 +265,7 @@ class TestSnorkel:
         assert list(metrics.keys())[:3] == ["negative", "positive", "neutral"]
 
     def test_score_without_annotations(self, weak_labels):
-        weak_labels._annotation_array = np.array([], dtype=np.short)
+        weak_labels._annotation = np.array([], dtype=np.short)
         label_model = Snorkel(weak_labels)
 
         with pytest.raises(MissingAnnotationError, match="need annotated records"):
