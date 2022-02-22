@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, validator
 
 from rubrix.server.commons.es_helpers import filters
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
@@ -269,4 +269,9 @@ class Text2TextSearchAggregations(BaseSearchResultsAggregations):
 class Text2TextSearchResults(
     BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
 ):
+    pass
+
+
+class Text2TextDatasetDB(DatasetDB):
+    task: TaskType = Field(default=TaskType.text2text, const=True)
     pass

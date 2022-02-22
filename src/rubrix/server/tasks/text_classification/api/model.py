@@ -141,6 +141,8 @@ class TextClassificationDatasetDB(DatasetDB):
             A list of dataset labeling rules
     """
 
+    task: TaskType = Field(default=TaskType.text_classification, const=True)
+
     rules: List[LabelingRule] = Field(default_factory=list)
 
 
