@@ -28,7 +28,6 @@ from rubrix.labeling.text_classification.weak_labels import (
     WeakLabels,
     WeakLabelsEmbeddings,
 )
-from rubrix.tests.labeling.text_classification.test_label_models import embeddings
 
 _LOGGER = logging.getLogger(__name__)
 
