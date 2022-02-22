@@ -20,7 +20,7 @@ class mappings:
             "ignore_above": MAX_KEYWORD_LENGTH,
         }
         if enable_text_search:
-            mapping["properties"] = {"text": mappings.text_field()}
+            mapping["fields"] = {"text": mappings.text_field()}
         return mapping
 
     @staticmethod
