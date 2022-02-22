@@ -290,6 +290,10 @@ First, you need to install the master version of our python client:
 
 Then, the easiest way to get the master version of our web app up and running is via docker-compose:
 
+.. note::
+    For now, we only provide the master version of our web app via docker.  
+    If you want to run the web app of the master branch **without** docker, we refer you to our :ref:`development-setup`.
+
 .. code-block:: shell
 
     # get the docker-compose yaml file
@@ -306,4 +310,3 @@ If you want to use vanilla docker (and have your own Elasticsearch instance runn
 
     docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name rubrix recognai/rubrix:master
 
-If you want to execute the server code of the master branch manually, we refer you to our :ref:`development-setup`.
