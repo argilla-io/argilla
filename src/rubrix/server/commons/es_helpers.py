@@ -25,22 +25,23 @@ from rubrix.server.tasks.commons import (
     TaskStatus,
 )
 from rubrix.server.tasks.commons.api import EsRecordDataFieldNames
+from rubrix.server.tasks.commons.dao.es_config import mappings
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
-    def resolve_type(info):
+    def resolve_mapping(info) -> Dict[str, Any]:
         the_type = info.get("type")
         if the_type == "number":
-            return "float"
+            return {"type": "float"}
         if the_type == "integer":
-            return "integer"
-        return "keyword"
+            return {"type": "integer"}
+        return mappings.keyword_field(enable_text_search=True)
 
     return {
         "type": "nested",
         "include_in_root": True,
         "properties": {
-            key: {"type": resolve_type(info)}
+            key: resolve_mapping(info)
             for key, info in model_class.schema()["properties"].items()
         },
     }

@@ -27,8 +27,8 @@ def text_classification_mappings():
             },
             "predicted": mappings.keyword_field(),
             "multi_label": {"type": "boolean"},
-            "annotated_as": mappings.keyword_field(),
-            "predicted_as": mappings.keyword_field(),
+            "annotated_as": mappings.keyword_field(enable_text_search=True),
+            "predicted_as": mappings.keyword_field(enable_text_search=True),
             "score": mappings.decimal_field(),
         },
         "dynamic_templates": [
