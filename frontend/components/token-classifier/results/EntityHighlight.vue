@@ -17,6 +17,8 @@
 
 <template>
   <span
+    @mouseover="showTooltip = true"
+    @mouseout="showTooltip = false"
     :class="[
       'highlight',
       span.origin,
@@ -34,31 +36,15 @@
         v-html="$highlightSearch(dataset.query.text, text)"
       />
     </span>
-    <span class="highlight__label">
-      <span class="highlight__tooltip__container">
-        <span
-          :class="[
-            'highlight__tooltip',
-            annotationEnabled ? 'highlight__tooltip--icon' : '',
-          ]"
-        >
-          <span class="highlight__tooltip__origin" v-if="span.origin">{{
-            span.origin === "prediction" ? "pred." : "annot."
-          }}</span>
-          <span
-            >{{ span.entity.label }}
-          </span>
-        </span>
-      </span>
-    </span>
     <svgicon
       class="remove-button"
       @click="removeEntity"
       v-if="annotationEnabled && span.origin === 'annotation'"
-      width="10"
-      height="10"
+      width="11"
+      height="11"
       name="cross"
     ></svgicon>
+    <lazy-text-span-tooltip v-if="showTooltip" :span="span" />
   </span>
 </template>
 <script>
@@ -84,6 +70,7 @@ export default {
       singleClickDelay: 300,
       doubleClicked: false,
       clicked: false,
+      showTooltip: false,
     };
   },
   computed: {
@@ -120,14 +107,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .highlight {
-  @include font-size(18px);
+  @include font-size(0);
   line-height: 1em;
   position: relative;
   cursor: default;
   // display: inline-flex;
   border-radius: 2px;
   padding: 0;
-  margin-right: calc(-3.62px * 2);
   &.editable {
     cursor: pointer;
   }
@@ -141,80 +127,26 @@ export default {
       height: 100%;
     }
   }
-  &__label {
-    @include font-size(0px);
-  }
   &__content {
+    @include font-size(18px);
     display: inline;
     padding-bottom: 1px;
   }
-  &__tooltip {
-    cursor: default;
-    display: block;
-    border-radius: 2px;
-    padding: 5px 10px 6px 10px;
-    margin-bottom: 0.5em;
-    transition: opacity 0.5s ease, z-index 0.2s ease;
-    white-space: nowrap;
-    user-select: none;
-    font-weight: 600;
-    min-width: 80px;
-    @include font-size(16px);
-    .prediction & {
-      margin-top: 0.5em;
-    }
-    & > span {
-      display: block;
-    }
-    &__container {
-      position: absolute;
-      right: 50%;
-      transform: translateX(50%);
-      opacity: 0;
-      z-index: -1;
-      .annotation & {
-        bottom: 100%;
-      }
-      .prediction & {
-        top: calc(100% + 8px);
-      }
-    }
-    &__origin {
-      @include font-size(12px);
-      font-weight: normal;
-    }
-  }
-  &__tooltip:after {
-    margin: auto;
-    position: absolute;
-    right: 0;
-    left: 0;
-    .annotation & {
-      @include triangle(bottom, 6px, 6px, auto);
-      bottom: 2px;
-    }
-    .prediction & {
-      @include triangle(top, 6px, 6px, auto);
-      top: 3px;
-    }
-  }
-  &:hover .highlight__tooltip__container {
+  &:hover .remove-button {
     opacity: 1;
-    transition-delay: 0s;
-    z-index: 4;
+    z-index: 5;
   }
 }
 .remove-button {
+  opacity: 0;
+  z-index: -1;
   position: absolute;
-  top: -3px;
-  right: 0;
-  background: $bg;
+  top: -23px;
+  right: -3px;
   border-radius: 3px;
+  min-width: 10px;
+  background: palette(grey, dark);
+  fill: palette(white);
   padding: 2px;
-  z-index: 3;
-  &:hover {
-    background: palette(grey, dark);
-    fill: palette(white);
-  }
 }
 </style>
