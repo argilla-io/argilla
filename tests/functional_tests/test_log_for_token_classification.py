@@ -456,7 +456,7 @@ def test_search_keywords(mocked_client):
     rubrix.delete(dataset)
     rubrix.log(name=dataset, records=dataset_rb)
 
-    df = rubrix.load(dataset, query="li*")
+    df = rubrix.load(dataset, query="lis*")
     assert not df.empty
     assert "search_keywords" in df.columns
     top_keywords = set(
@@ -468,10 +468,4 @@ def test_search_keywords(mocked_client):
             for keyword in keywords
         ]
     )
-    assert {
-        "listened",
-        "little",
-        "lived",
-        "listen",
-        "light",
-    } == top_keywords, top_keywords
+    assert {"listened", "listen"} == top_keywords, top_keywords

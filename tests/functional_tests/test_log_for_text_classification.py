@@ -60,7 +60,7 @@ def test_search_keywords(mocked_client):
     rubrix.delete(dataset)
     rubrix.log(name=dataset, records=dataset_rb)
 
-    df = rubrix.load(dataset, query="li*")
+    df = rubrix.load(dataset, query="lim*")
     assert not df.empty
     assert "search_keywords" in df.columns
     top_keywords = set(
@@ -72,7 +72,7 @@ def test_search_keywords(mocked_client):
             for keyword in keywords
         ]
     )
-    assert {"link", "like", "limit"} == top_keywords, top_keywords
+    assert {"limit", "limits", "limited"} == top_keywords, top_keywords
 
 
 def test_log_records_with_empty_metadata_list(mocked_client):
