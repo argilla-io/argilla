@@ -24,7 +24,7 @@
           page-mode
           class="scroller"
           :items="visibleRecords"
-          :min-item-size="150"
+          :min-item-size="550"
           :buffer="200"
           :style="{ paddingTop: `${dataset.viewSettings.headerHeight}px` }"
         >
