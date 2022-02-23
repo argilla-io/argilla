@@ -18,7 +18,7 @@
 <template>
   <div class="header__filters">
     <filters-area :dataset="dataset">
-      <records-counter :dataset="dataset"></records-counter>
+      <records-counter :total="dataset.results.total"></records-counter>
     </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action

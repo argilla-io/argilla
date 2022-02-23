@@ -1,9 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RecordsCounter renders properly 1`] = `
-<p class="records-counter">
-  Records
-  <span>with filters applied</span>
-  (400)
-</p>
-`;
+exports[`RecordsCounter renders properly 1`] = ``;
