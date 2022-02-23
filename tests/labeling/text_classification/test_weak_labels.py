@@ -71,13 +71,13 @@ def log_dataset(mocked_client) -> str:
 
 @pytest.fixture
 def rules(monkeypatch) -> List[Callable]:
-    def first_rule(record: TextClassificationRecord) -> Optional[str]:
+    def first_rule(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
         if "negative" in record.inputs["text"]:
             return "negative"
 
-    def rule2(record: TextClassificationRecord) -> Optional[str]:
+    def rule2(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
         if "positive" in record.inputs["text"]:
-            return "positive"
+            return ["positive"]
 
     rule2.__name__ = ""
 
@@ -229,6 +229,25 @@ class TestWeakLabelsBase:
         assert weak_labels._rules_name2index == {"rule_0": 0, "rule_1": 1}
         assert weak_labels.rules[0](None) == "mock"
 
+    def test_not_implemented_errors(self, monkeypatch):
+        def mock_load(*args, **kwargs):
+            return ["mock"]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+
+        weak_labels = WeakLabelsBase(rules=["mock"], dataset="mock")
+
+        with pytest.raises(NotImplementedError):
+            weak_labels.matrix()
+        with pytest.raises(NotImplementedError):
+            weak_labels.annotation()
+        with pytest.raises(NotImplementedError):
+            weak_labels.summary()
+        with pytest.raises(NotImplementedError):
+            weak_labels.show_records()
+
 
 class TestWeakLabels:
     def test_multi_label_error(self, monkeypatch):
@@ -296,6 +315,12 @@ class TestWeakLabels:
         assert weak_labels.int2label == {v: k for k, v in expected_label2int.items()}
         assert (weak_labels.matrix() == expected_matrix).all()
         assert (weak_labels._annotation == expected_annotation_array).all()
+
+    def test_apply_MultiLabelError(self, log_dataset):
+        with pytest.raises(
+            MultiLabelError, match="For rules that do not return exactly 1 label"
+        ):
+            WeakLabels(rules=[lambda x: ["a", "b"]], dataset=log_dataset)
 
     def test_matrix_annotation_properties(self, monkeypatch):
         expected_records = [

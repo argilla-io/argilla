@@ -648,8 +648,8 @@ class WeakMultiLabels(WeakLabelsBase):
         NoRecordsFoundError: When the filtered dataset is empty.
 
     Examples:
-        >>> # Get the 3 dimensional weak label matrix from a dataset with rules:
-        >>> weak_labels = WeakLabels(dataset="my_dataset")
+        >>> # Get the 3 dimensional weak label matrix from a multi-label classification dataset with rules:
+        >>> weak_labels = WeakMultiLabels(dataset="my_dataset")
         >>> weak_labels.matrix()
         >>> weak_labels.summary()
         >>>
@@ -657,7 +657,7 @@ class WeakMultiLabels(WeakLabelsBase):
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
         ...     return ["Positive", "Slang"] if "next level" in record.inputs["text"] else None
         >>> another_rule = Rule(query="amped OR psyched", label=["Positive", "Slang"])
-        >>> weak_labels = WeakLabels(dataset="my_dataset", rules=[awesome_rule, another_rule])
+        >>> weak_labels = WeakMultiLabels(dataset="my_dataset", rules=[awesome_rule, another_rule])
         >>> weak_labels.matrix()
         >>> weak_labels.summary()
     """
@@ -685,14 +685,24 @@ class WeakMultiLabels(WeakLabelsBase):
             if isinstance(rule, Rule):
                 rule.apply(self._dataset)
 
-        # TODO: use REST API to get labels (needs a fix first)
-        labels = []
-        for rec in self._records:
-            if rec.prediction:
-                labels += [pred[0] for pred in rec.prediction]
-            if rec.annotation:
-                labels += [ann for ann in rec.annotation]
-        labels = sorted(list(set(labels)))
+        # we make two passes over the records:
+        # FIRST: Get labels from rules and annotations
+        annotations, weak_labels = [], []
+        for record in tqdm(
+            self._records, total=len(self._records), desc="Applying rules"
+        ):
+            annotations.append(
+                record.annotation
+                if isinstance(record.annotation, list)
+                else [record.annotation]
+            )
+            weak_labels.append([np.atleast_1d(rule(record)) for rule in self._rules])
+
+        annotation_set = {ann for anns in annotations for ann in anns}
+        weak_label_set = {
+            wl for wl_record in weak_labels for wl_rule in wl_record for wl in wl_rule
+        }
+        labels = sorted(list(annotation_set.union(weak_label_set) - {None}))
 
         # create weak label matrix (3D), annotation matrix
         weak_label_matrix = np.empty(
@@ -700,30 +710,28 @@ class WeakMultiLabels(WeakLabelsBase):
         )
         annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.short)
 
-        for n, record in tqdm(
-            enumerate(self._records), total=len(self._records), desc="Applying rules"
+        # SECOND: Fill arrays with weak labels
+        for n, annotation_n, weak_label_n in tqdm(
+            zip(range(len(annotations)), annotations, weak_labels),
+            desc="Filling weak label matrix",
         ):
-            # FIRST: fill annotation matrix
-            if record.annotation is None:
+            # first: fill annotation matrix
+            if annotation_n == [None]:
                 # "abstain" is an array with -1
                 annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.short)
             else:
                 annotation_matrix[n] = np.array(
-                    [1 if label in record.annotation else 0 for label in labels],
+                    [1 if label in annotation_n else 0 for label in labels],
                     dtype=np.short,
                 )
 
-            # SECOND: fill weak label matrix (3D)
-            for m, rule in enumerate(self._rules):
-                weak_labels: Optional[Union[str, List[str]]] = rule(record)
-                if isinstance(weak_labels, str):
-                    weak_labels: Optional[List[str]] = [weak_labels]
-
-                if weak_labels is None:
+            # second: fill weak label matrix (3D)
+            for m, weak_labels_m in enumerate(weak_label_n):
+                if weak_labels_m.tolist() == [None]:
                     weak_label_matrix[n, m] = -1 * np.ones(len(labels))
                 else:
                     weak_label_matrix[n, m] = np.array(
-                        [1 if label in weak_labels else 0 for label in labels],
+                        [1 if label in weak_labels_m else 0 for label in labels],
                         dtype=np.short,
                     )
 
