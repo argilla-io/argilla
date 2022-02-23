@@ -118,6 +118,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             status=self.status,
             metadata=self.metadata or {},
             metrics=self.metrics or {},
+            search_keywords=self.search_keywords or None,
         )
 
 
