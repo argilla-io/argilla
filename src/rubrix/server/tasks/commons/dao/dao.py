@@ -282,7 +282,10 @@ class DatasetRecordsDAO:
             An iterable over found dataset records
         """
         search = search or RecordSearch()
-        es_query = {"query": search.query}
+        es_query = {
+            "query": search.query,
+            "highlight": self.__configure_query_highlight__(),
+        }
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
         )
