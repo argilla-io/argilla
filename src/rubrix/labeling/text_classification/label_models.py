@@ -844,8 +844,15 @@ class Epoxy(FlyingSquid):
             float: The metric measured after fitting and scoring the weak label matrix.
         """
         epoxy_instance = cls(weak_labels, thresholds=thresholds)
+
+        _LOGGER.debug("Fitting Epoxy instance.")
         epoxy_instance.fit()
+
+        _LOGGER.debug(
+            "Scoring Epoxy instance with {0} tie break policy".format(tie_break_policy)
+        )
         result = epoxy_instance.score(tie_break_policy=tie_break_policy)[score]
+
         return result
 
     @staticmethod
@@ -889,7 +896,7 @@ class Epoxy(FlyingSquid):
             yield trial
 
     @classmethod
-    def grid_search_threshold(
+    def grid_search(
         cls,
         weak_labels: WeakLabelsEmbeddings,
         score: str = "accuracy",
@@ -1021,6 +1028,16 @@ class Epoxy(FlyingSquid):
             has_annotation=None if self._include_annotated_records else False
         )
 
+        _LOGGER.debug(
+            """
+            L_matrix: {0}
+            embeddings: {1}
+            _include_annotated_records: {2}
+            """.format(
+                L_matrix.shape, embeddings.shape, self._include_annotated_records
+            )
+        )
+
         epoxy_model = EpoxyModel(L_matrix, embeddings)
         epoxy_model.preprocess(L_matrix, embeddings)
         L_extended = epoxy_model.extend(thresholds)
@@ -1041,13 +1058,23 @@ class Epoxy(FlyingSquid):
 
         self._include_annotated_records = include_annotated_records
 
-        super().predict(
+        return super().predict(
             include_annotated_records=include_annotated_records,
             include_abstentions=include_abstentions,
             prediction_agent=prediction_agent,
             verbose=verbose,
             tie_break_policy=tie_break_policy,
         )
+
+    def score(
+        self,
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        verbose: bool = False,
+    ) -> Dict[str, float]:
+
+        self._include_annotated_records = True
+
+        return super().score(tie_break_policy=tie_break_policy, verbose=verbose)
 
 
 class LabelModelError(Exception):
