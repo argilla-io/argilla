@@ -105,7 +105,7 @@ export default {
   right: 0;
   left: 0;
   transform: translateY(0);
-  position: fixed;
+  position: sticky;
   background: $bg;
   z-index: 3;
   ::v-deep .header__filters {

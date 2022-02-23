@@ -20,6 +20,18 @@
     <div class="rule-labels-definition__info">
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
+        <svgicon
+          class="rule__records__info"
+          v-if="areFiltersApplied.length"
+          name="info"
+          width="12"
+          height="12"
+        />
+        <span
+          class="rule__records__tooltip"
+          data-title="Filters are not part of the Rule, but are applied to the record list below"
+        >
+        </span>
         Records:
         <strong>{{ coveredRecords }}</strong>
       </p>
@@ -84,6 +96,7 @@
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { TextClassificationDataset } from "@/models/TextClassification";
+import "assets/icons/info";
 
 export default {
   props: {
@@ -104,6 +117,12 @@ export default {
     };
   },
   computed: {
+    areFiltersApplied() {
+      const appliedFilters = Object.keys(this.dataset.query)
+        .filter((f) => f !== "text")
+        .map((key) => this.dataset.query[key]);
+      return appliedFilters.filter((v) => v && Object.values(v).length);
+    },
     currentRule() {
       return this.dataset.getCurrentLabelingRule();
     },
@@ -215,6 +234,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$color: #333346;
 %item {
   // width: calc(25% - 5px);
   min-width: 80px;
@@ -302,8 +322,56 @@ export default {
     text-align: right;
     @include font-size(14px);
     margin-left: 0.5em;
+    position: relative;
     strong {
       font-weight: 600;
+    }
+    &__info {
+      position: absolute;
+      top: -0.8em;
+      right: -0.8em;
+      cursor: pointer;
+      &:hover {
+        & + .rule__records__tooltip:after,
+        & + .rule__records__tooltip:before {
+          display: block;
+          opacity: 1;
+          z-index: 1;
+          width: auto;
+          height: auto;
+          overflow: visible;
+        }
+      }
+    }
+    &__tooltip {
+      position: absolute;
+      top: -0.8em;
+      right: -0.8em;
+      width: 12px;
+      @extend %hastooltip;
+      &:after {
+        padding: 0.5em 1em;
+        top: calc(100% + 24px);
+        right: 50%;
+        transform: translateX(50%);
+        background: $color;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        @include font-size(14px);
+        font-weight: 600;
+        margin-bottom: 0.5em;
+        min-width: 240px;
+        white-space: break-spaces;
+        text-align: left;
+      }
+      &:before {
+        right: calc(50% - 7px);
+        top: 17px;
+        border-bottom: 7px solid $color;
+        border-right: 7px solid transparent;
+        border-left: 7px solid transparent;
+      }
     }
   }
   &__labels {
