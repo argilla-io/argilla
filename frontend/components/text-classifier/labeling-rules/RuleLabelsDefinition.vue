@@ -20,6 +20,8 @@
     <div class="rule-labels-definition__info">
       <p class="rule__description">{{ query }}</p>
       <p class="rule__records">
+        Records:
+        <strong>{{ coveredRecords }}</strong>
         <svgicon
           class="rule__records__info"
           v-if="areFiltersApplied.length"
@@ -30,10 +32,7 @@
         <span
           class="rule__records__tooltip"
           data-title="Filters are not part of the Rule, but are applied to the record list below"
-        >
-        </span>
-        Records:
-        <strong>{{ coveredRecords }}</strong>
+        />
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -327,9 +326,7 @@ $color: #333346;
       font-weight: 600;
     }
     &__info {
-      position: absolute;
-      top: -0.8em;
-      right: -0.8em;
+      fill: $color;
       cursor: pointer;
       &:hover {
         & + .rule__records__tooltip:after,
@@ -345,9 +342,7 @@ $color: #333346;
     }
     &__tooltip {
       position: absolute;
-      top: -0.8em;
-      right: -0.8em;
-      width: 12px;
+      right: -5px;
       @extend %hastooltip;
       &:after {
         padding: 0.5em 1em;
