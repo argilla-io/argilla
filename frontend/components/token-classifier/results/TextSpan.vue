@@ -34,58 +34,55 @@
       @mouseover="overSelection"
       v-html="$highlightSearch(dataset.query.text, text)"
     />
-    <span v-if="showEntitiesSelector" class="entities__selector__container">
+    <span class="entities__selector__container">
       <div
+        v-if="showEntitiesSelector"
         v-click-outside="onClickOutside"
         class="entities__selector"
       >
-        <span v-show="!addnewSlotVisible">
-          <ul class="entities__selector__options">
-            <li
-              class="entities__selector__option suggestion"
-              :class="[
-                `color_${suggestedEntity.colorId}`,
-                activeEntity === -1 ? 'active' : null,
-              ]"
-              v-if="suggestedEntity"
-              @click="selectEntity(suggestedEntity)"
+        <ul class="entities__selector__options">
+          <li
+            class="entities__selector__option suggestion"
+            :class="[
+              `color_${suggestedEntity.colorId}`,
+              activeEntity === -1 ? 'active' : null,
+            ]"
+            v-if="suggestedEntity"
+            @click="selectEntity(suggestedEntity)"
+          >
+            <span>{{ suggestedEntity.text }}</span>
+            <span class="entity__sort-code">[space]</span>
+          </li>
+          <li
+            class="entities__selector__option suggestion"
+            :class="[
+              `color_${lastSelectedEntity.colorId}`,
+              activeEntity === -1 ? 'active' : null,
+            ]"
+            v-else-if="lastSelectedEntity.text"
+            @click="selectEntity(lastSelectedEntity)"
+          >
+            <span>{{ lastSelectedEntity.text }}</span>
+            <span class="entity__sort-code">[space]</span>
+          </li>
+          <li
+            v-for="(entity, index) in formattedEntities"
+            tabindex="0"
+            :focused="activeEntity === index"
+            :key="index"
+            class="entities__selector__option"
+            :class="[
+              `color_${entity.colorId}`,
+              activeEntity === index ? 'active' : null,
+            ]"
+            @click="selectEntity(entity)"
+          >
+            <span>{{ entity.text }}</span>
+            <span class="entity__sort-code"
+              >[{{ activeEntity === index ? "enter" : entity.shortCut }}]</span
             >
-              <span>{{ suggestedEntity.text }}</span>
-              <span class="entity__sort-code">[space]</span>
-            </li>
-            <li
-              class="entities__selector__option suggestion"
-              :class="[
-                `color_${lastSelectedEntity.colorId}`,
-                activeEntity === -1 ? 'active' : null,
-              ]"
-              v-else-if="lastSelectedEntity.text"
-              @click="selectEntity(lastSelectedEntity)"
-            >
-              <span>{{ lastSelectedEntity.text }}</span>
-              <span class="entity__sort-code">[space]</span>
-            </li>
-            <li
-              v-for="(entity, index) in formattedEntities"
-              tabindex="0"
-              :focused="activeEntity === index"
-              :key="index"
-              class="entities__selector__option"
-              :class="[
-                `color_${entity.colorId}`,
-                activeEntity === index ? 'active' : null,
-              ]"
-              @click="selectEntity(entity)"
-            >
-              <span>{{ entity.text }}</span>
-              <span class="entity__sort-code"
-                >[{{
-                  activeEntity === index ? "enter" : entity.shortCut
-                }}]</span
-              >
-            </li>
-          </ul>
-        </span>
+          </li>
+        </ul>
       </div>
     </span>
     <span class="span__whitespace" v-html="whiteSpace"></span>
@@ -124,11 +121,7 @@ export default {
     },
   },
   data: () => ({
-    newSlot: "",
     showEntitiesSelector: false,
-    addnewSlotVisible: false,
-    controlPressed: false,
-    controlKey: undefined,
     activeEntity: -1,
   }),
   computed: {
@@ -178,13 +171,18 @@ export default {
       );
     },
   },
+  watch: {
+    async showEntitiesSelector(n, o) {
+      if (n !== o) {
+        await this.dataset.viewSettings.disableShortCutPagination(n);
+      }
+    },
+  },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
   },
   destroyed() {
     window.removeEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
   },
   methods: {
     ...mapActions({
@@ -237,19 +235,10 @@ export default {
       this.showEntitiesSelector = false;
       this.resetActiveEntity();
     },
-    keyUp(event) {
-      if (this.controlKey === event.key) {
-        this.controlPressed = false;
-      }
-    },
     resetActiveEntity() {
       this.activeEntity = -1;
     },
     keyDown(event) {
-      if (event.ctrlKey) {
-        this.controlKey = event.key;
-        this.controlPressed = true;
-      }
       const cmd = String.fromCharCode(event.keyCode).toUpperCase();
       if (this.showEntitiesSelector && cmd) {
         const element = document.getElementsByClassName("active");
@@ -345,17 +334,12 @@ export default {
     display: inline;
     position: relative;
     @include font-size(18px);
-    margin: 0 -2px;
-    padding: 0 2px;
+    margin: 0 -1.5px;
+    padding: 0 1.5px;
   }
   &__whitespace {
     @include font-size(18px);
     cursor: default !important;
-  }
-  &:first-child() {
-    .span__text {
-      padding-left: 0
-    }
   }
 }
 

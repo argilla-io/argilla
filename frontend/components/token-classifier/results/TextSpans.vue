@@ -33,8 +33,13 @@
         :dataset="dataset"
         :suggestedLabel="suggestedLabel"
         :class="[
-          isSelected(i, selectionStart, selectionEnd) || isSelected(i, selectionStart, selectionOver) ? 'selected' : '',
-          isLastSelected(i, selectionEnd) || isLastSelected(i,selectionOver) ? 'last-selected' : '',
+          isSelected(i, selectionStart, selectionEnd) ||
+          isSelected(i, selectionStart, selectionOver)
+            ? 'selected'
+            : '',
+          isLastSelected(i, selectionEnd) || isLastSelected(i, selectionOver)
+            ? 'last-selected'
+            : '',
         ]"
         @startSelection="onStartSelection"
         @endSelection="onEndSelection"
@@ -171,7 +176,10 @@ export default {
       this.selectionEnd = spanId;
     },
     onOverSelection(spanId) {
-      if (this.selectionStart !== undefined && !this.selectionEnd) {
+      if (
+        this.selectionStart !== undefined &&
+        this.selectionEnd === undefined
+      ) {
         this.selectionOver = spanId;
       } else {
         this.selectionOver = undefined;
@@ -213,14 +221,12 @@ export default {
       entities.splice(found, 1);
       this.updateAnnotatedEntities(entities);
       this.onReset();
-    },  
+    },
     isSelected(i, start, end) {
       const tokenInit = Math.min(start, end);
       const tokenEnd = Math.max(start, end);
       this.suggestEntity();
-      console.log(i,tokenInit, tokenEnd)
       if (i >= tokenInit && i <= tokenEnd) {
-        console.log(i)
         return true;
       }
       return false;
@@ -257,21 +263,6 @@ export default {
     padding-right: 200px;
     ::selection {
       background: none !important;
-    }
-  }
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
-      & + .re-button {
-        margin-left: 1em;
-      }
     }
   }
 }
