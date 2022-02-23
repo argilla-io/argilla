@@ -15,6 +15,7 @@
 
 import dataclasses
 import datetime
+import re
 from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 import deprecated
@@ -83,6 +84,12 @@ class DatasetRecordsDAO:
     # This info must be provided by each task using dao.register_task_mappings method
     _MAPPINGS_BY_TASKS = {}
 
+    __HIGHLIGHT_PRE_TAG__ = "<@@-rb-key>"
+    __HIGHLIGHT_POST_TAG__ = "</@@-rb-key>"
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
+    )
+
     @classmethod
     def get_instance(
         cls,
@@ -112,7 +119,7 @@ class DatasetRecordsDAO:
     def add_records(
         self,
         dataset: BaseDatasetDB,
-        records: List[BaseRecord],
+        records: List[DBRecord],
         record_class: Type[DBRecord],
     ) -> int:
         """
@@ -144,7 +151,9 @@ class DatasetRecordsDAO:
             db_record = record_class.parse_obj(r)
             if now:
                 db_record.last_updated = now
-            documents.append(db_record.dict(exclude_none=False))
+            documents.append(
+                db_record.dict(exclude_none=False, exclude={"search_keywords"})
+            )
 
         index_name = self.create_dataset_index(dataset)
         self._configure_metadata_fields(index_name, metadata_values)
@@ -200,6 +209,7 @@ class DatasetRecordsDAO:
             "query": search.query or {"match_all": {}},
             "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": aggregation_requests,
+            "highlight": self.__configure_query_highlight__(),
         }
 
         try:
@@ -237,7 +247,7 @@ class DatasetRecordsDAO:
 
         result = RecordSearchResults(
             total=total,
-            records=list(map(self.esdoc2record, docs)),
+            records=list(map(self.__esdoc2record__, docs)),
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
@@ -272,17 +282,33 @@ class DatasetRecordsDAO:
             An iterable over found dataset records
         """
         search = search or RecordSearch()
-        es_query = {
-            "query": search.query,
-        }
+        es_query = {"query": search.query}
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
         )
         for doc in docs:
-            yield self.esdoc2record(doc)
+            yield self.__esdoc2record__(doc)
 
-    def esdoc2record(self, doc):
-        return {**doc["_source"], "id": doc["_id"]}
+    def __esdoc2record__(self, doc: Dict[str, Any]):
+        return {
+            **doc["_source"],
+            "id": doc["_id"],
+            "search_keywords": self.__parse_highlight_results__(doc),
+        }
+
+    @classmethod
+    def __parse_highlight_results__(cls, doc: Dict[str, Any]) -> Optional[List[str]]:
+        highlight_info = doc.get("highlight")
+        if not highlight_info:
+            return None
+
+        search_keywords = []
+        for content in highlight_info.values():
+            if not isinstance(content, list):
+                content = [content]
+            for text in content:
+                search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
+        return list(set(search_keywords))
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
@@ -360,6 +386,15 @@ class DatasetRecordsDAO:
         """Return inner elasticsearch index configuration"""
         index_name = dataset_records_index(dataset.id)
         return self._es.__client__.indices.get_mapping(index=index_name)
+
+    @classmethod
+    def __configure_query_highlight__(cls):
+        return {
+            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
+            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
+            "require_field_match": False,
+            "fields": {"text": {}},
+        }
 
 
 _instance: Optional[DatasetRecordsDAO] = None
