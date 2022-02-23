@@ -1,10 +1,10 @@
 import logging
-from typing import Iterable, List, Optional, Set, Type
+from typing import Iterable, Optional, Set, Type
 
 from fastapi import Depends
 
 from rubrix.server.commons.es_helpers import sort_by2elasticsearch
-from rubrix.server.datasets.model import Dataset
+from rubrix.server.datasets.service import Dataset
 from rubrix.server.tasks.commons import BaseRecord, EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.commons.dao.model import RecordSearch

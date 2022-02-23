@@ -277,7 +277,9 @@ def test_dataset_copy(mocked_client):
         assert df.equals(df_copy)
 
         with pytest.raises(AlreadyExistsApiError):
-            rubrix.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
+            rubrix.copy(
+                dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace
+            )
     finally:
         rubrix.init()  # reset workspace
 

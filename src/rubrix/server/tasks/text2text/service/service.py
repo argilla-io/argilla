@@ -28,6 +28,7 @@ from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.storage.service import RecordsStorageService
 from rubrix.server.tasks.text2text.api.model import (
     CreationText2TextRecord,
+    Text2TextDatasetDB,
     Text2TextQuery,
     Text2TextRecord,
     Text2TextRecordDB,
@@ -64,7 +65,7 @@ class Text2TextService:
 
     def add_records(
         self,
-        dataset: Dataset,
+        dataset: Text2TextDatasetDB,
         records: List[CreationText2TextRecord],
     ):
         failed = self.__storage__.store_records(
@@ -76,7 +77,7 @@ class Text2TextService:
 
     def search(
         self,
-        dataset: Dataset,
+        dataset: Text2TextDatasetDB,
         query: Text2TextQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -149,7 +150,7 @@ class Text2TextService:
 
     def read_dataset(
         self,
-        dataset: Dataset,
+        dataset: Text2TextDatasetDB,
         query: Optional[Text2TextQuery] = None,
     ) -> Iterable[Text2TextRecord]:
         """
