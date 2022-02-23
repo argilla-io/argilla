@@ -37,7 +37,7 @@ class RecordsStorageService:
         self,
         dataset: BaseDatasetDB,
         records: List[Record],
-        record_type: Type[BaseRecord],
+        record_type: Type[Record],
     ) -> int:
         """Store a set of records"""
         self._compute_record_metrics(dataset, records)
