@@ -21,8 +21,11 @@ from fastapi import Depends
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper
 from rubrix.server.tasks.commons import TaskType
 
+from ..commons import es_helpers
+from ..commons.errors import WrongTaskError
 from ..commons.es_settings import DATASETS_INDEX_NAME, DATASETS_INDEX_TEMPLATE
 from ..tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_index
+from ..tasks.commons.task_factory import TaskFactory
 from .model import DatasetDB
 
 BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
@@ -73,7 +76,11 @@ class DatasetsDAO:
         )
         self._es.create_index(DATASETS_INDEX_NAME)
 
-    def list_datasets(self, owner_list: List[str] = None) -> List[DatasetDB]:
+    def list_datasets(
+        self,
+        owner_list: List[str] = None,
+        task: Optional[TaskType] = None,
+    ) -> List[BaseDatasetDB]:
         """
         List the dataset for an owner list
 
@@ -87,16 +94,28 @@ class DatasetsDAO:
             A list of datasets for a given owner list, if any. All datasets, otherwise
 
         """
-        query = {}
+        filters = []
+        dataset_type = DatasetDB
         if owner_list:
-            query = {"query": {"terms": {"owner.keyword": owner_list}}}
+            filters.append({"terms": {"owner.keyword": owner_list}})
+        if task:
+            filters.append({"term": {"task.keyword": task}})
+            dataset_type = TaskFactory.get_task_dataset(task)
+
         docs = self._es.list_documents(
             index=DATASETS_INDEX_NAME,
-            query=query,
+            query={
+                "query": es_helpers.filters.boolean_filter(
+                    should_filters=filters, minimum_should_match=len(filters)
+                )
+            }
+            if filters
+            else None,
         )
-        return [self._es_doc_to_dataset(doc) for doc in docs]
 
-    def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
+        return [self._es_doc_to_dataset(doc, ds_class=dataset_type) for doc in docs]
+
+    def create_dataset(self, dataset: BaseDatasetDB) -> BaseDatasetDB:
         """
         Stores a dataset in elasticsearch and creates corresponding dataset records index
 
@@ -120,8 +139,8 @@ class DatasetsDAO:
 
     def update_dataset(
         self,
-        dataset: DatasetDB,
-    ) -> DatasetDB:
+        dataset: BaseDatasetDB,
+    ) -> BaseDatasetDB:
         """
         Updates an stored dataset
 
@@ -145,7 +164,7 @@ class DatasetsDAO:
         )
         return dataset
 
-    def delete_dataset(self, dataset: DatasetDB):
+    def delete_dataset(self, dataset: BaseDatasetDB):
         """
         Deletes indices related to provided dataset
 
@@ -160,31 +179,12 @@ class DatasetsDAO:
         finally:
             self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
 
-    def find_by_id(
-        self, dataset_id: str, ds_class: Type[BaseDatasetDB] = DatasetDB
+    def find_by_name(
+        self,
+        name: str,
+        owner: Optional[str],
+        task: Optional[TaskType] = None,
     ) -> Optional[BaseDatasetDB]:
-        """
-        Finds a dataset db by its id
-
-        Parameters
-        ----------
-        dataset_id:
-            The dataset id
-        ds_class:
-            Class used for data deserialization. Class could be an specialization
-            of DatasetDB. Default ``DatasetDB``
-
-        Returns
-        -------
-            The dataset instance if found. ``None`` otherwise
-        """
-        document = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=dataset_id
-        )
-        if document:
-            return self._es_doc_to_dataset(document, ds_class=ds_class)
-
-    def find_by_name(self, name: str, owner: Optional[str]) -> Optional[DatasetDB]:
         """
         Finds a dataset by name
 
@@ -199,9 +199,12 @@ class DatasetsDAO:
         -------
             The found dataset if any. None otherwise
         """
-        dataset = DatasetDB(name=name, owner=owner, task=TaskType.text_classification)
+        dataset_id = DatasetDB.build_dataset_id(
+            name=name,
+            owner=owner,
+        )
         document = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=dataset.id
+            index=DATASETS_INDEX_NAME, doc_id=dataset_id
         )
         if not document and owner is None:
             # We must search by name since we have no owner
@@ -219,7 +222,21 @@ class DatasetsDAO:
                 )
 
             document = results[0]
-        return self._es_doc_to_dataset(document) if document else None
+
+        if document is None:
+            return None
+
+        base_ds = self._es_doc_to_dataset(document)
+        if task is None:
+            return base_ds
+
+        if task != base_ds.task:
+            raise WrongTaskError(
+                detail=f"Provided task {task} cannot be applied to dataset"
+            )
+
+        dataset_type = TaskFactory.get_task_dataset(task)
+        return self._es_doc_to_dataset(document, ds_class=dataset_type)
 
     @staticmethod
     def _es_doc_to_dataset(
@@ -233,16 +250,16 @@ class DatasetsDAO:
             return {data["key"]: json.loads(data["value"]) for data in key_value_list}
 
         source = doc["_source"]
-        tags = source.pop("tags", [])
-        metadata = source.pop("metadata", [])
+        tags = source.get("tags", [])
+        metadata = source.get("metadata", [])
 
-        return ds_class.parse_obj(
-            {
-                **source,
-                "tags": __key_value_list_to_dict__(tags),
-                "metadata": __key_value_list_to_dict__(metadata),
-            }
-        )
+        data = {
+            **source,
+            "tags": __key_value_list_to_dict__(tags),
+            "metadata": __key_value_list_to_dict__(metadata),
+        }
+
+        return ds_class.parse_obj(data)
 
     @staticmethod
     def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
@@ -252,8 +269,8 @@ class DatasetsDAO:
             ]
 
         data = dataset.dict(by_alias=True)
-        tags = data.pop("tags", {})
-        metadata = data.pop("metadata", {})
+        tags = data.get("tags", {})
+        metadata = data.get("metadata", {})
 
         return {
             **data,

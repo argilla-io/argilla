@@ -81,12 +81,17 @@ class BaseDatasetDB(CreationDatasetRequest):
     created_at: datetime = None
     last_updated: datetime = None
 
+    @classmethod
+    def build_dataset_id(cls, name: str, owner: Optional[str] = None) -> str:
+        """Build a dataset id for a given name and owner"""
+        if owner:
+            return f"{owner}.{name}"
+        return name
+
     @property
     def id(self) -> str:
         """The dataset id. Compounded by owner and name"""
-        if self.owner:
-            return f"{self.owner}.{self.name}"
-        return self.name
+        return self.build_dataset_id(self.name, self.owner)
 
 
 class DatasetDB(BaseDatasetDB):
