@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.es_helpers import filters
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
@@ -432,4 +432,9 @@ class TokenClassificationAggregations(BaseSearchResultsAggregations):
 class TokenClassificationSearchResults(
     BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
 ):
+    pass
+
+
+class TokenClassificationDatasetDB(DatasetDB):
+    task: TaskType = Field(default=TaskType.token_classification, const=True)
     pass

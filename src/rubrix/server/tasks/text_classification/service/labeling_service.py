@@ -8,6 +8,7 @@ from rubrix.server.commons.es_helpers import filters
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.datasets.model import BaseDatasetDB
+from rubrix.server.datasets.service import DatasetsService
 
 from ...commons import EsRecordDataFieldNames
 from ...commons.dao.dao import DatasetRecordsDAO
@@ -158,53 +159,42 @@ class LabelingService:
     @classmethod
     def get_instance(
         cls,
-        dao: DatasetsDAO = Depends(DatasetsDAO.get_instance),
+        datasets: DatasetsDAO = Depends(DatasetsDAO.get_instance),
         records: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ):
         if cls._INSTANCE is None:
-            cls._INSTANCE = cls(dao, records)
+            cls._INSTANCE = cls(datasets, records)
         return cls._INSTANCE
 
-    def __init__(self, dao: DatasetsDAO, records: DatasetRecordsDAO):
-        self.__dao__ = dao
+    def __init__(self, datasets: DatasetsDAO, records: DatasetRecordsDAO):
+        self.__datasets__ = datasets
         self.__records__ = records
 
-    def _find_text_classification_dataset(
-        self, dataset: BaseDatasetDB
-    ) -> TextClassificationDatasetDB:
-        found_ds = self.__dao__.find_by_id(
-            dataset.id, ds_class=TextClassificationDatasetDB
-        )
-        if found_ds is None:
-            raise EntityNotFoundError(dataset.name, dataset.__class__)
-        return found_ds
-
-    def list_rules(self, dataset: BaseDatasetDB) -> List[LabelingRule]:
+    def list_rules(self, dataset: TextClassificationDatasetDB) -> List[LabelingRule]:
         """List a set of rules for a given dataset"""
-        found_ds = self._find_text_classification_dataset(dataset)
-        return found_ds.rules
+        return dataset.rules
 
-    def delete_rule(self, dataset: BaseDatasetDB, rule_query: str):
+    def delete_rule(self, dataset: TextClassificationDatasetDB, rule_query: str):
         """Delete a rule from a dataset by its defined query string"""
-        found_ds = self._find_text_classification_dataset(dataset)
-        new_rules_set = [r for r in found_ds.rules if r.query != rule_query]
-        if len(found_ds.rules) != new_rules_set:
-            found_ds.rules = new_rules_set
-            self.__dao__.update_dataset(found_ds)
+        new_rules_set = [r for r in dataset.rules if r.query != rule_query]
+        if len(dataset.rules) != new_rules_set:
+            dataset.rules = new_rules_set
+            self.__datasets__.update_dataset(dataset)
 
-    def add_rule(self, dataset: BaseDatasetDB, rule: LabelingRule) -> LabelingRule:
+    def add_rule(
+        self, dataset: TextClassificationDatasetDB, rule: LabelingRule
+    ) -> LabelingRule:
         """Adds a rule to a dataset"""
-        found_ds = self._find_text_classification_dataset(dataset)
-        for r in found_ds.rules:
+        for r in dataset.rules:
             if r.query == rule.query:
                 raise EntityAlreadyExistsError(rule.query, type=LabelingRule)
-        found_ds.rules.append(rule)
-        self.__dao__.update_dataset(found_ds)
+        dataset.rules.append(rule)
+        self.__datasets__.update_dataset(dataset)
         return rule
 
     def compute_rule_metrics(
         self,
-        dataset: BaseDatasetDB,
+        dataset: TextClassificationDatasetDB,
         rule_query: str,
         labels: Optional[List[str]] = None,
     ) -> Tuple[int, int, LabelingRuleSummary]:
@@ -227,10 +217,9 @@ class LabelingService:
         )
 
         metrics = LabelingRuleSummary.parse_obj(rule_metrics_summary)
-
         return results.total, annotated_records, metrics
 
-    def _count_annotated_records(self, dataset: BaseDatasetDB) -> int:
+    def _count_annotated_records(self, dataset: TextClassificationDatasetDB) -> int:
         results = self.__records__.search_records(
             dataset,
             size=0,
@@ -242,9 +231,8 @@ class LabelingService:
         return results.total
 
     def all_rules_metrics(
-        self, dataset: BaseDatasetDB
+        self, dataset: TextClassificationDatasetDB
     ) -> Tuple[int, int, DatasetLabelingRulesSummary]:
-        rules = self.list_rules(dataset)
         annotated_records = self._count_annotated_records(dataset)
         results = self.__records__.search_records(
             dataset,
@@ -252,7 +240,7 @@ class LabelingService:
             search=RecordSearch(
                 include_default_aggregations=False,
                 aggregations=self.__dataset_rules_metrics__.aggregation_request(
-                    all_rules=rules
+                    all_rules=dataset.rules
                 ),
             ),
         )
@@ -268,20 +256,17 @@ class LabelingService:
         )
 
     def find_rule_by_query(
-        self, dataset: BaseDatasetDB, rule_query: str
+        self, dataset: TextClassificationDatasetDB, rule_query: str
     ) -> LabelingRule:
         rule_query = rule_query.strip()
-        for rule in self.list_rules(dataset):
+        for rule in dataset.rules:
             if rule.query == rule_query:
                 return rule
         raise EntityNotFoundError(rule_query, type=LabelingRule)
 
-    def replace_rule(self, dataset: BaseDatasetDB, rule: LabelingRule):
-        found_ds = self._find_text_classification_dataset(dataset)
-
-        for idx, r in enumerate(found_ds.rules):
+    def replace_rule(self, dataset: TextClassificationDatasetDB, rule: LabelingRule):
+        for idx, r in enumerate(dataset.rules):
             if r.query == rule.query:
-                found_ds.rules[idx] = rule
+                dataset.rules[idx] = rule
                 break
-
-        self.__dao__.update_dataset(found_ds)
+        self.__datasets__.update_dataset(dataset)

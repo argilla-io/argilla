@@ -32,6 +32,7 @@ from rubrix.server.tasks.text_classification.api.model import (
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleMetricsSummary,
+    TextClassificationDatasetDB,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationRecordDB,
@@ -74,7 +75,7 @@ class TextClassificationService:
 
     def add_records(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         records: List[CreationTextClassificationRecord],
     ):
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
@@ -89,7 +90,7 @@ class TextClassificationService:
 
     def search(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         query: TextClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -169,7 +170,7 @@ class TextClassificationService:
 
     def read_dataset(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         query: Optional[TextClassificationQuery] = None,
     ) -> Iterable[TextClassificationRecord]:
         """
@@ -189,7 +190,9 @@ class TextClassificationService:
         )
 
     def _check_multi_label_integrity(
-        self, dataset: Dataset, records: List[CreationTextClassificationRecord]
+        self,
+        dataset: TextClassificationDatasetDB,
+        records: List[CreationTextClassificationRecord],
     ):
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
@@ -201,7 +204,9 @@ class TextClassificationService:
                 )
             )
 
-    def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
+    def _is_dataset_multi_label(
+        self, dataset: TextClassificationDatasetDB
+    ) -> Optional[bool]:
         try:
             results = self.__search__.search(
                 dataset,
@@ -213,7 +218,9 @@ class TextClassificationService:
         if results.records:
             return results.records[0].multi_label
 
-    def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
+    def get_labeling_rules(
+        self, dataset: TextClassificationDatasetDB
+    ) -> Iterable[LabelingRule]:
         """
         Gets rules for a given dataset
 
@@ -229,7 +236,9 @@ class TextClassificationService:
         """
         return self.__labeling__.list_rules(dataset)
 
-    def add_labeling_rule(self, dataset: Dataset, rule: LabelingRule) -> None:
+    def add_labeling_rule(
+        self, dataset: TextClassificationDatasetDB, rule: LabelingRule
+    ) -> None:
         """
         Adds a labeling rule
 
@@ -245,7 +254,7 @@ class TextClassificationService:
 
     def update_labeling_rule(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         rule_query: str,
         labels: List[str],
         description: Optional[str] = None,
@@ -272,7 +281,7 @@ class TextClassificationService:
         self.__labeling__.replace_rule(dataset, found_rule)
         return found_rule
 
-    def find_labeling_rule(self, dataset: Dataset, rule_query: str):
+    def find_labeling_rule(self, dataset: TextClassificationDatasetDB, rule_query: str):
         """
         Find a labeling rule given a rule query string
 
@@ -286,7 +295,9 @@ class TextClassificationService:
         """
         return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
 
-    def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
+    def delete_labeling_rule(
+        self, dataset: TextClassificationDatasetDB, rule_query: str
+    ):
         """
         Deletes a rule from a dataset.
 
@@ -307,7 +318,7 @@ class TextClassificationService:
 
     def compute_rule_metrics(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         rule_query: str,
         labels: Optional[List[str]] = None,
     ) -> LabelingRuleMetricsSummary:
@@ -364,7 +375,7 @@ class TextClassificationService:
             precision=metrics.precision if annotated > 0 else None,
         )
 
-    def compute_overall_rules_metrics(self, dataset: Dataset):
+    def compute_overall_rules_metrics(self, dataset: TextClassificationDatasetDB):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
         coverage = metrics.covered_records / total if total else None
         coverage_annotated = (

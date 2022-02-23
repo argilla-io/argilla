@@ -22,24 +22,18 @@ from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
-    TaskType,
 )
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
-from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import SortConfig
 from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.storage.service import RecordsStorageService
 from rubrix.server.tasks.token_classification.api.model import (
     CreationTokenClassificationRecord,
     TokenClassificationAggregations,
+    TokenClassificationDatasetDB,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationRecordDB,
     TokenClassificationSearchResults,
-)
-from rubrix.server.tasks.token_classification.dao.es_config import (
-    token_classification_mappings,
 )
 
 
@@ -71,7 +65,7 @@ class TokenClassificationService:
 
     def add_records(
         self,
-        dataset: Dataset,
+        dataset: TokenClassificationDatasetDB,
         records: List[CreationTokenClassificationRecord],
     ):
         failed = self.__storage__.store_records(
@@ -83,7 +77,7 @@ class TokenClassificationService:
 
     def search(
         self,
-        dataset: Dataset,
+        dataset: TokenClassificationDatasetDB,
         query: TokenClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -171,7 +165,7 @@ class TokenClassificationService:
 
     def read_dataset(
         self,
-        dataset: Dataset,
+        dataset: TokenClassificationDatasetDB,
         query: TokenClassificationQuery,
     ) -> Iterable[TokenClassificationRecord]:
         """
