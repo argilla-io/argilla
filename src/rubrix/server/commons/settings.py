@@ -59,6 +59,7 @@ class ApiSettings(BaseSettings):
     __DATASETS_RECORDS_INDEX_NAME__ = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
 
     elasticsearch: str = "http://localhost:9200"
+    elasticsearch_ssl_verify: bool = True
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
@@ -116,6 +117,9 @@ class ApiSettings(BaseSettings):
     class Config:
         # TODO: include a common prefix for all rubrix env vars.
         fields = {
+            "elasticsearch_ssl_verify": {
+                "env": "RUBRIX_ELASTICSEARCH_SSL_VERIFY",
+            },
             "metadata_fields_limit": {"env": "RUBRIX_METADATA_FIELDS_LIMIT"},
             "namespace": {
                 "env": "RUBRIX_NAMESPACE",
