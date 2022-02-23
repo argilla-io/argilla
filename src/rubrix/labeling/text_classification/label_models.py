@@ -671,6 +671,16 @@ class FlyingSquid(LabelModel):
 
         return probas
 
+    def get_is_max(self, verbose: bool = False):
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+        probabilities = self._predict(wl_matrix, verbose)
+
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        return is_max
+
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -709,13 +719,7 @@ class FlyingSquid(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        wl_matrix = self._weak_labels.matrix(has_annotation=True)
-        probabilities = self._predict(wl_matrix, verbose)
-
-        # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
+        is_max = self.get_is_max(verbose)
         is_tie = is_max.sum(axis=1) > 1
 
         prediction = np.argmax(is_max, axis=1)
