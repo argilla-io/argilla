@@ -35,6 +35,12 @@
         @click="onValidate(record)"
         >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
       >
+      <re-button
+        v-if="record.annotatedEntities.length"
+        class="button-primary--outline"
+        @click="onClearAnnotations()"
+        >Clear annotations</re-button
+      >
     </div>
   </div>
 </template>
@@ -61,6 +67,7 @@ export default {
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     getEntitiesByOrigin(origin) {
       return origin === "annotation"
@@ -80,6 +87,19 @@ export default {
               entities: record.annotatedEntities,
               origin: "annotation",
             },
+          },
+        ],
+      });
+    },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotatedEntities: [],
           },
         ],
       });
@@ -115,8 +135,8 @@ export default {
     .re-button {
       min-height: 32px;
       line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
+      display: inline-block;
+      margin: 1.5em 0 0 0;
       & + .re-button {
         margin-left: 1em;
       }
