@@ -348,11 +348,11 @@ $color: #333346;
     }
     &__tooltip {
       position: absolute;
-      right: -5px;
+      right: 6px;
       @extend %hastooltip;
       &:after {
         padding: 0.5em 1em;
-        top: calc(100% + 24px);
+        top: calc(100% + 20px);
         right: 50%;
         transform: translateX(50%);
         background: $color;
@@ -369,7 +369,7 @@ $color: #333346;
       }
       &:before {
         right: calc(50% - 7px);
-        top: 17px;
+        top: 13px;
         border-bottom: 7px solid $color;
         border-right: 7px solid transparent;
         border-left: 7px solid transparent;
