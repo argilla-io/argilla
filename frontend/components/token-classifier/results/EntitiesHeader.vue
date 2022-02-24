@@ -16,38 +16,42 @@
   -->
 
 <template>
-  <div
-    :class="[
-      'entities__container',
-      activeEntity ? 'entities__container--multiple' : '',
-    ]"
-  >
-    <span
-      v-for="(entity, index) in visibleEntities"
-      :key="index"
-      class="entity"
+  <div class="container">
+    <div
       :class="[
-        `color_${entity.colorId}`,
-        activeEntity === entity.text ? 'active' : '',
-        annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
+        'entities__container',
+        activeEntity ? 'entities__container--multiple' : '',
       ]"
-      @click="onActiveEntity(entity)"
     >
-      {{ entity.text }}
-      <span v-if="entity.shortcut" class="shortcut"
-        >[{{ entity.shortcut }}]</span
+      <span
+        v-for="(entity, index) in visibleEntities"
+        :key="index"
+        class="entity"
+        :class="[
+          `color_${entity.colorId}`,
+          activeEntity === entity.text ? 'active' : '',
+          annotationEnabled
+            ? 'non-selectable--show-sort-code'
+            : 'non-selectable',
+        ]"
+        @click="onActiveEntity(entity)"
       >
-    </span>
-    <ReButton
-      v-if="dataset.entities.length > entitiesNumber"
-      class="entities__container__button"
-      @click="toggleEntitiesNumber"
-      >{{
-        showEntitySelector
-          ? "Show less"
-          : `+ ${dataset.entities.length - entitiesNumber}`
-      }}</ReButton
-    >
+        {{ entity.text }}
+        <span v-if="entity.shortcut" class="shortcut"
+          >[{{ entity.shortcut }}]</span
+        >
+      </span>
+      <ReButton
+        v-if="dataset.entities.length > entitiesNumber"
+        class="entities__container__button"
+        @click="toggleEntitiesNumber"
+        >{{
+          showEntitySelector
+            ? "Show less"
+            : `+ ${dataset.entities.length - entitiesNumber}`
+        }}</ReButton
+      >
+    </div>
   </div>
 </template>
 
@@ -104,22 +108,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container {
+  @extend %container;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-left: 0;
+  padding-right: calc(4em + 45px);
+}
 .entities {
   &__container {
-    margin-bottom: 1em;
-    padding: 0 4em;
-    width: calc(100% - 120px);
-    .--metrics & {
-      @include media(">desktop") {
-        padding-right: calc(294px + 100px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      width: 100%;
-      padding-right: 100px;
-    }
+    margin-bottom: 0.7em;
+    padding: 0.2em 0.5em;
+    background: palette(white);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
@@ -131,7 +133,7 @@ export default {
       border: 0;
       background: none;
       &:hover {
-        background: palette(grey, smooth) !important;
+        background: $bg !important;
         transition: background 0.2s ease-in-out;
       }
     }
@@ -144,7 +146,7 @@ export default {
 }
 .entity {
   padding: 0.3em;
-  margin: 1em 1em 0 0;
+  margin: 0.5em;
   position: relative;
   display: inline-flex;
   align-items: center;

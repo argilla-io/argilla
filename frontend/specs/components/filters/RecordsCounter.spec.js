@@ -1,8 +1,8 @@
 import { mount } from "@vue/test-utils";
-import ResultsTitle from "@/components/commons/results/ResultsTitle";
+import RecordsCounter from "@/components/commons/header/filters/RecordsCounter";
 
-function mountResultsTitle() {
-  return mount(ResultsTitle, {
+function mountRecordsCounter() {
+  return mount(RecordsCounter, {
     propsData: {
       dataset: {
         task: "TextClassification",
@@ -29,12 +29,12 @@ function mountResultsTitle() {
   });
 }
 
-describe("ResultsTitle", () => {
+describe("RecordsCounter", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
   test("renders properly", () => {
-    const wrapper = mountResultsTitle();
+    const wrapper = mountRecordsCounter();
     expect(wrapper).toMatchSnapshot();
   });
 });

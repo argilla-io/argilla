@@ -20,7 +20,9 @@
     <filters-area
       v-if="!dataset.viewSettings.visibleRulesList"
       :dataset="dataset"
-    />
+    >
+      <records-counter :total="dataset.results.total"></records-counter>
+    </filters-area>
     <explain-help-info v-if="isExplainedRecord" :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action
