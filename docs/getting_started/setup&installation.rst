@@ -27,7 +27,7 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 
 .. code-block:: bash
 
-   conda install -c conda-forge rubrix
+   conda install -c conda-forge rubrix-server
 
 
 2. Launch the web app
