@@ -31,7 +31,7 @@
         />
         <span
           class="rule__records__tooltip"
-          data-title="Filters are not part of the Rule, but are applied to the record list below"
+          data-title="Filters are not part of the rule, but are applied to the record list below"
         />
       </p>
     </div>
@@ -314,7 +314,7 @@ $color: #333346;
     margin-top: auto;
   }
   &__records {
-    color: palette(grey, medium);
+    color: palette(grey, dark);
     margin-left: auto;
     margin-top: 0;
     white-space: nowrap;
@@ -322,10 +322,16 @@ $color: #333346;
     @include font-size(14px);
     margin-left: 0.5em;
     position: relative;
+    line-height: 1em;
+    display: flex;
+    align-items: center;
     strong {
       font-weight: 600;
+      margin-left: 0.2em;
     }
     &__info {
+      min-width: 12px;
+      margin-left: 0.3em;
       fill: $color;
       cursor: pointer;
       &:hover {
@@ -359,6 +365,7 @@ $color: #333346;
         min-width: 240px;
         white-space: break-spaces;
         text-align: left;
+        line-height: 1.4em;
       }
       &:before {
         right: calc(50% - 7px);
