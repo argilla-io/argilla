@@ -15,7 +15,7 @@ function mountSortList() {
           order: "asc",
           placeholder: "Select labels",
           type: "select",
-        }
+        },
       ],
       sortOptions: [
         {
@@ -28,8 +28,8 @@ function mountSortList() {
           placeholder: "Select labels",
           selected: undefined,
           type: "select",
-        }
-      ]
+        },
+      ],
     },
   });
 }

@@ -41,8 +41,8 @@ export default {
     },
     topPosition() {
       return this.annotationEnabled
-        ? `${this.dataset.viewSettings.headerHeight - 60}px`
-        : `${this.dataset.viewSettings.headerHeight + 10}px`;
+        ? `${this.dataset.viewSettings.headerHeight - 63}px`
+        : `${this.dataset.viewSettings.headerHeight}px`;
     },
   },
 };
@@ -70,9 +70,6 @@ export default {
     margin-left: 1em;
     display: block !important;
     right: 100px;
-  }
-  .fixed-header .--annotation & {
-    margin-top: 70px;
   }
   &__content {
     border-radius: 2px;
