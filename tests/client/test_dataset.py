@@ -282,23 +282,24 @@ class TestDatasetForTextClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     @pytest.mark.parametrize(
-        "records",
+        "name",
         [
             "singlelabel_textclassification_records",
             "multilabel_textclassification_records",
         ],
     )
-    def test_push_to_hub(self, request, records):
-        records = request.getfixturevalue(records)
+    def test_push_to_hub(self, request, name: str):
+        records = request.getfixturevalue(name)
+        dataset_name = f"rubrix/_test_text_classification_records-{name}"
         dataset_rb = rb.DatasetForTextClassification(records)
         dataset_rb.to_datasets().push_to_hub(
-            "rubrix/_test_text_classification_records",
+            dataset_name,
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
-            "rubrix/_test_text_classification_records",
+            dataset_name,
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
