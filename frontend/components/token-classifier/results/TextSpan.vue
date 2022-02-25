@@ -16,30 +16,29 @@
   -->
 
 <template>
-  <span class="span">
+  <span>
     <EntityHighlight
-      v-if="span.entity"
-      :text="text"
+      v-if="token.entity"
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
-      :span="span"
+      :span="token"
       :dataset="dataset"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
-    />
-    <span
-      v-else
+    /><span
       class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
       @mouseover="overSelection"
-      v-html="$highlightSearch(dataset.query.text, text)"
-    />
-    <span class="entities__selector__container">
-      <div
-        v-if="showEntitiesSelector"
-        v-click-outside="onClickOutside"
-        class="entities__selector"
-      >
+      v-else
+      v-for="(t, i) in token.tokens"
+      :key="i"
+      v-html="
+        `${$highlightSearch(dataset.query.text, t.text)}${
+          token.hasSpaceAfter ? ' ' : ''
+        }`
+      "
+    ></span><span v-if="showEntitiesSelector" class="entities__selector__container">
+      <div v-click-outside="onClickOutside" class="entities__selector">
         <ul class="entities__selector__options">
           <li
             class="entities__selector__option suggestion"
@@ -85,14 +84,11 @@
         </ul>
       </div>
     </span>
-    <span class="span__whitespace" v-html="whiteSpace"></span>
   </span>
 </template>
 
 <script>
 import ClickOutside from "v-click-outside";
-import "assets/icons/cross";
-import { substring } from "stringz";
 import { mapActions } from "vuex";
 
 export default {
@@ -104,14 +100,6 @@ export default {
       type: Object,
       required: true,
     },
-    spanId: {
-      type: Number,
-      required: true,
-    },
-    spans: {
-      type: Array,
-      required: true,
-    },
     dataset: {
       type: Object,
       required: true,
@@ -119,35 +107,26 @@ export default {
     suggestedLabel: {
       type: String,
     },
+    token: {
+      type: Object,
+      required: true,
+    },
+    spanId: {
+      type: Number,
+      required: true,
+    },
   },
   data: () => ({
     showEntitiesSelector: false,
     activeEntity: -1,
   }),
   computed: {
-    span() {
-      return this.spans[this.spanId];
-    },
     lastSelectedEntity() {
       return this.dataset.lastSelectedEntity;
     },
-    text() {
-      return substring(
-        this.record.text,
-        this.spans[this.spanId].start,
-        this.spans[this.spanId].end
-      );
-    },
-    whiteSpace() {
-      return substring(
-        this.record.text,
-        this.spans[this.spanId].end,
-        this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
-      );
-    },
     tag_color() {
       return this.dataset.entities.filter(
-        (entity) => entity.text === this.span.entity.label
+        (entity) => entity.text === this.token.entity.label
       )[0].colorId;
     },
     filteredEntities() {
@@ -211,14 +190,14 @@ export default {
       }
     },
     openTagSelector() {
-      if (this.span.origin !== "prediction") {
+      if (this.token.origin !== "prediction") {
         this.showEntitiesSelector = !this.showEntitiesSelector;
         this.startSelection();
         this.endSelection();
       }
     },
     removeEntity() {
-      this.$emit("removeEntity", this.span.entity);
+      this.$emit("removeEntity", this.token.entity);
       this.showEntitiesSelector = false;
     },
     onClickOutside() {
@@ -229,8 +208,8 @@ export default {
         dataset: this.dataset,
         lastSelectedEntity: entityLabel,
       });
-      this.span.entity
-        ? this.$emit("changeEntityLabel", this.span.entity, entityLabel.text)
+      this.token.entity
+        ? this.$emit("changeEntityLabel", this.token.entity, entityLabel.text)
         : this.$emit("selectEntity", entityLabel.text);
       this.showEntitiesSelector = false;
       this.resetActiveEntity();
@@ -283,6 +262,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+// span {
+//   position: relative;
+// }
 .entities {
   &__selector {
     position: absolute;

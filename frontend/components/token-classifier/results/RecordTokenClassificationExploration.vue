@@ -17,7 +17,8 @@
 
 <template>
   <div class="origins">
-    <text-spans
+    <text-spans-static
+      v-once
       v-for="origin in entitiesOrigin"
       :key="origin"
       :dataset="dataset"

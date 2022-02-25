@@ -18,14 +18,22 @@
 <template>
   <div>
     <div class="origins">
-      <text-spans
-        v-for="origin in entitiesOrigin"
-        :key="origin"
+      <text-spans-static
+        v-once
+        key="prediction"
         :dataset="dataset"
-        :origin="origin"
+        origin="prediction"
         :record="record"
-        :class="origin"
-        :entities="getEntitiesByOrigin(origin)"
+        class="prediction"
+        :entities="getEntitiesByOrigin('prediction')"
+      />
+      <text-spans
+        key="annotation"
+        :dataset="dataset"
+        origin="annotation"
+        :record="record"
+        class="annotation"
+        :entities="getEntitiesByOrigin('annotation')"
       />
     </div>
     <div class="content__actions-buttons">
@@ -49,11 +57,6 @@
 import { mapActions } from "vuex";
 
 export default {
-  data: function () {
-    return {
-      entitiesOrigin: ["prediction", "annotation"],
-    };
-  },
   props: {
     dataset: {
       type: Object,
@@ -110,22 +113,10 @@ export default {
 
 <style lang="scss" scoped>
 .content {
-  position: relative;
-  white-space: pre-wrap;
-  & > div:nth-child(2) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    ::v-deep {
-      .span__text {
-        opacity: 1;
-      }
-    }
-  }
   &__input {
     padding-right: 200px;
+    // display: flex;
+    // flex-wrap: wrap;
   }
   &__actions-buttons {
     margin-right: 0;
@@ -143,7 +134,7 @@ export default {
     }
   }
 }
-.origins > div:nth-child(1) {
+.origins > .prediction {
   position: absolute;
   top: 0;
   left: 0;

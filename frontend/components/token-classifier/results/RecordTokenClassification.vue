@@ -65,7 +65,7 @@ export default {
 }
 .content {
   position: relative;
-  white-space: pre-wrap;
+  white-space: pre-line;
   &__input {
     padding-right: 200px;
   }

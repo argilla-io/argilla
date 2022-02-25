@@ -16,45 +16,44 @@
   -->
 
 <template>
-  <div>
-    <div
-      v-if="textSpans.length"
-      ref="list"
-      class="content__input"
-      @mouseup="reset($event)"
-      v-click-outside="onReset"
-    >
-      <TextSpan
-        v-for="(token, i) in textSpans"
-        :key="i"
-        :record="record"
-        :span-id="i"
-        :spans="textSpans"
-        :dataset="dataset"
-        :suggestedLabel="suggestedLabel"
-        :class="[
-          isSelected(i, selectionStart, selectionEnd) ||
-          isSelected(i, selectionStart, selectionOver)
-            ? 'selected'
-            : '',
-          isLastSelected(i, selectionEnd) || isLastSelected(i, selectionOver)
-            ? 'last-selected'
-            : '',
-        ]"
-        @startSelection="onStartSelection"
-        @endSelection="onEndSelection"
-        @overSelection="onOverSelection"
-        @selectEntity="onSelectEntity"
-        @changeEntityLabel="onChangeEntityLabel"
-        @removeEntity="onRemoveEntity"
-        @updateRecordEntities="$emit('updateRecordEntities')"
-      />
-    </div>
+  <div
+    v-if="textSpans.length"
+    ref="list"
+    class="content__input"
+    @mouseup="reset($event)"
+    v-click-outside="onReset"
+  >
+    <TextSpan
+      v-for="(token, i) in textSpans"
+      :key="i"
+      :record="record"
+      :token="token"
+      :span-id="i"
+      :dataset="dataset"
+      :suggestedLabel="suggestedLabel"
+      :class="[
+        isSelected(i, selectionStart, selectionEnd) ||
+        isSelected(i, selectionStart, selectionOver)
+          ? 'selected'
+          : '',
+        isLastSelected(i, selectionEnd) || isLastSelected(i, selectionOver)
+          ? 'last-selected'
+          : '',
+      ]"
+      @startSelection="onStartSelection"
+      @endSelection="onEndSelection"
+      @overSelection="onOverSelection"
+      @selectEntity="onSelectEntity"
+      @changeEntityLabel="onChangeEntityLabel"
+      @removeEntity="onRemoveEntity"
+      @updateRecordEntities="$emit('updateRecordEntities')"
+    />
   </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import { indexOf, length } from "stringz";
 
 export default {
   props: {
@@ -83,6 +82,27 @@ export default {
     };
   },
   computed: {
+    visualTokens() {
+      const { visualTokens } = this.record.tokens.reduce(
+        ({ visualTokens, startPosition }, token) => {
+          const start = indexOf(this.record.text, token, startPosition);
+          const end = start + length(token);
+          const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
+          return {
+            visualTokens: [
+              ...visualTokens,
+              { start, end, text: token, hasSpaceAfter: hasSpaceAfter },
+            ],
+            startPosition: end,
+          };
+        },
+        {
+          visualTokens: [],
+          startPosition: 0,
+        }
+      );
+      return Object.freeze(visualTokens);
+    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -103,34 +123,33 @@ export default {
 
       let idx = 0;
       let textSpans = [];
-      const entities = normalizedEntities(
-        this.entities,
-        this.record.visualTokens
-      );
-      while (idx < this.record.visualTokens.length) {
+      const entities = normalizedEntities(this.entities, this.visualTokens);
+      while (idx < this.visualTokens.length) {
         const entity = entities.find(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
         if (entity) {
           textSpans.push({
             entity,
-            tokens: this.record.visualTokens.slice(
+            tokens: this.visualTokens.slice(
               entity.start_token,
               entity.end_token
             ),
             start: entity.start,
             end: entity.end,
             origin: this.origin,
+            hasSpaceAfter: entity.hasSpaceAfter,
           });
           idx = entity.end_token;
         } else {
-          const token = this.record.visualTokens[idx];
+          const token = this.visualTokens[idx];
           textSpans.push({
             entity: undefined,
             tokens: [token],
             start: token.start,
             end: token.end,
             origin: this.origin,
+            hasSpaceAfter: token.hasSpaceAfter,
           });
           idx++;
         }
