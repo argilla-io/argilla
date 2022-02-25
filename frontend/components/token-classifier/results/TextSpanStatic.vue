@@ -16,16 +16,23 @@
   -->
 
 <template>
-  <span class="span__text">
+  <span>
     <EntityHighlight
       v-if="token.entity"
       :class="['color_' + tag_color]"
       :span="token"
       :dataset="dataset"
-    /><template
+    /><span
+      class="span__text"
       v-else
-      v-for="t in token.tokens"
-    >{{$highlightSearch(dataset.query.text, t.text) + token.hasSpaceAfter ? ' ' : ''}}</template>
+      v-for="(t, i) in token.tokens"
+      :key="i"
+      v-html="
+        `${$highlightSearch(dataset.query.text, t.text)}${
+          token.hasSpaceAfter ? ' ' : ''
+        }`
+      "
+    ></span>
   </span>
 </template>
 
