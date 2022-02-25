@@ -50,6 +50,31 @@ def test_delete_and_create_for_different_task(mocked_client):
     rubrix.load(dataset)
 
 
+def test_search_keywords(mocked_client):
+    dataset = "test_search_keywords"
+    from datasets import load_dataset
+
+    dataset_ds = load_dataset("Recognai/sentiment-banking", split="train")
+    dataset_rb = rubrix.read_datasets(dataset_ds, task="TextClassification")
+
+    rubrix.delete(dataset)
+    rubrix.log(name=dataset, records=dataset_rb)
+
+    df = rubrix.load(dataset, query="lim*")
+    assert not df.empty
+    assert "search_keywords" in df.columns
+    top_keywords = set(
+        [
+            keyword
+            for keywords in df.search_keywords.value_counts(sort=True, ascending=False)
+            .index[:3]
+            .tolist()
+            for keyword in keywords
+        ]
+    )
+    assert {"limit", "limits", "limited"} == top_keywords, top_keywords
+
+
 def test_log_records_with_empty_metadata_list(mocked_client):
     dataset = "test_log_records_with_empty_metadata_list"
 
