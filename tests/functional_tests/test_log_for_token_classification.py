@@ -446,3 +446,28 @@ def test_log_record_that_makes_me_cry(mocked_client):
         },
         "annotated": {"mentions": []},
     }
+
+
+def test_search_keywords(mocked_client):
+    dataset = "test_search_keywords"
+    from datasets import load_dataset
+
+    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
+    dataset_rb = rubrix.read_datasets(dataset_ds, task="TokenClassification")
+
+    rubrix.delete(dataset)
+    rubrix.log(name=dataset, records=dataset_rb)
+
+    df = rubrix.load(dataset, query="lis*")
+    assert not df.empty
+    assert "search_keywords" in df.columns
+    top_keywords = set(
+        [
+            keyword
+            for keywords in df.search_keywords.value_counts(sort=True, ascending=False)
+            .index[:3]
+            .tolist()
+            for keyword in keywords
+        ]
+    )
+    assert {"listened", "listen"} == top_keywords, top_keywords
