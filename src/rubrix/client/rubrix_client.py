@@ -19,7 +19,6 @@ import logging
 import socket
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-import httpx
 import pandas
 from tqdm.auto import tqdm
 
@@ -104,34 +103,14 @@ class RubrixClient:
             api_url: Address from which the API is serving.
             api_key: Authentication token.
             workspace: Active workspace for this client session.
-            timeout: Seconds to considered a connection timeout.
+            timeout: Seconds to wait before raising a connection timeout.
         """
 
-        self._client = None  # Variable to store the client after the init
-
-        try:
-            response = httpx.get(url=f"{api_url}/api/docs/spec.json")
-        except ConnectionRefusedError:
-            raise Exception("Connection Refused: cannot connect to the API.")
-
-        if response.status_code != 200:
-            raise Exception(
-                "Connection error: Undetermined error connecting to the Rubrix Server. "
-                "The API answered with a {} code: {}".format(
-                    response.status_code, response.content
-                )
-            )
         self._client = AuthenticatedClient(
             base_url=api_url, token=api_key, timeout=timeout
         )
 
-        response = whoami(client=self._client)
-
-        whoami_response_status = response.status_code
-        if whoami_response_status == 401:
-            raise Exception("Authentication error: invalid credentials.")
-
-        self.__current_user__: User = response.parsed
+        self.__current_user__: User = whoami(client=self._client)
         if workspace:
             self.set_workspace(workspace)
 
