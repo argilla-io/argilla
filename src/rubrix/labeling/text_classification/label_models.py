@@ -668,7 +668,7 @@ class FlyingSquid(LabelModel):
 
         return probas
 
-    def get_is_max(self, verbose: bool = False):
+    def _get_score_objects(self, verbose: bool = False):
         wl_matrix = self._weak_labels.matrix(has_annotation=True)
         probabilities = self._predict(wl_matrix, verbose)
 
@@ -676,7 +676,23 @@ class FlyingSquid(LabelModel):
         is_max = (
             np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
         )
-        return is_max
+        is_tie = is_max.sum(axis=1) > 1
+
+        prediction = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotation = np.array(
+            [
+                self._labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
+        )
+        fsInt2wlInt = {
+            i: self._weak_labels.label2int[label]
+            for i, label in enumerate(self._labels)
+        }
+
+        return is_max, is_tie, prediction, annotation, fsInt2wlInt
 
     def score(
         self,
@@ -716,17 +732,8 @@ class FlyingSquid(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        is_max = self.get_is_max(verbose)
-        is_tie = is_max.sum(axis=1) > 1
-
-        prediction = np.argmax(is_max, axis=1)
-        # we need to transform the indexes!
-        annotation = np.array(
-            [
-                self._labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
-            dtype=np.short,
+        is_max, is_tie, prediction, annotation, fsInt2wlInt = self._get_score_objects(
+            verbose=verbose
         )
 
         if not is_tie.any():
@@ -746,10 +753,6 @@ class FlyingSquid(LabelModel):
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        fsInt2wlInt = {
-            i: self._weak_labels.label2int[label]
-            for i, label in enumerate(self._labels)
-        }
         metrics = self._compute_metrics(
             prediction=prediction, annotation=annotation, int2int=fsInt2wlInt
         )
@@ -1057,6 +1060,29 @@ class Epoxy(FlyingSquid):
             tie_break_policy=tie_break_policy,
         )
 
+    def _compute_metrics(
+        self,
+        annotation: np.ndarray,
+        prediction: np.ndarray,
+        is_tie: np.ndarray,
+        int2int: Optional[Dict[int, int]] = None,
+    ) -> Dict[str, float]:
+        prediction_partial, annotation_partial = (
+            prediction[~is_tie],
+            annotation[~is_tie],
+        )
+        standard_metrics = super()._compute_metrics(
+            annotation_partial, prediction_partial, int2int
+        )
+
+        accuracy = standard_metrics["accuracy"]
+        coverage = len(prediction[~is_tie]) / len(annotation)
+        metrics = {
+            "efficacy": (accuracy + coverage) / 2,
+            "fscore": 2 * (accuracy * coverage) / (accuracy + coverage),
+        }
+        return metrics
+
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -1065,7 +1091,27 @@ class Epoxy(FlyingSquid):
 
         self._include_annotated_records = True
 
-        return super().score(tie_break_policy=tie_break_policy, verbose=verbose)
+        is_max, is_tie, prediction, annotation, fsInt2wlInt = self._get_score_objects(
+            verbose=verbose
+        )
+
+        if not is_tie.any():
+            pass
+        elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+            pass
+        else:
+            raise NotImplementedError(
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+            )
+
+        metrics = self._compute_metrics(
+            prediction=prediction,
+            annotation=annotation,
+            int2int=fsInt2wlInt,
+            is_tie=is_tie,
+        )
+
+        return metrics
 
 
 class LabelModelError(Exception):
