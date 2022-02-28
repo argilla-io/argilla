@@ -103,7 +103,7 @@ class RubrixClient:
             api_url: Address from which the API is serving.
             api_key: Authentication token.
             workspace: Active workspace for this client session.
-            timeout: Seconds to consider a connection timeout.
+            timeout: Seconds to wait before raising a connection timeout.
         """
 
         self._client = AuthenticatedClient(
