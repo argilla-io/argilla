@@ -121,14 +121,15 @@ def test_from_pandas(monkeypatch, caplog):
     )
 
 
-def test_dict_to_datasets(monkeypatch, caplog):
+def test_to_datasets(monkeypatch, caplog):
     monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+    monkeypatch.setattr(
+        "rubrix.client.datasets.DatasetBase._to_datasets_dict",
+        lambda x: {"metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]},
+    )
 
-    dict_with_incompatible_metadata = {
-        "metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]
-    }
     ds = DatasetBase()
-    datasets_ds = ds._dict_to_datasets(dict_with_incompatible_metadata)
+    datasets_ds = ds.to_datasets()
     assert datasets_ds.features == {}
     assert len(datasets_ds) == 0
     assert len(caplog.record_tuples) == 1
@@ -286,6 +287,29 @@ class TestDatasetForTextClassification:
         )
 
         assert isinstance(dataset_ds, datasets.Dataset)
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            "singlelabel_textclassification_records",
+            "multilabel_textclassification_records",
+        ],
+    )
+    def test_prepare_for_training(self, request, records):
+        records = request.getfixturevalue(records)
+
+        ds = rb.DatasetForTextClassification(records)
+        train = ds.prepare_for_training()
+
+        assert isinstance(train, datasets.Dataset)
+        assert train.column_names == ["text", "label"]
+        assert len(train) == 2
+        assert train[1]["text"] == "mock3 mock3"
+        assert train.features["text"] == datasets.Value("string")
+        if records[0].multi_label:
+            assert train.features["label"] == [datasets.ClassLabel(names=["a", "b"])]
+        else:
+            assert train.features["label"] == datasets.ClassLabel(names=["a"])
 
 
 class TestDatasetForTokenClassification:
