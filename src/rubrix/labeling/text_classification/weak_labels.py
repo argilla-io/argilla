@@ -528,30 +528,6 @@ class WeakLabels:
         self._int2label = {val: key for key, val in self._label2int.items()}
 
 
-class WeakLabelsEmbeddings(WeakLabels):
-    def __init__(self, dataset, embedding_func=None, **kwargs):
-        super().__init__(dataset, **kwargs)
-        self._embeddings = embedding_func(self._records)
-
-    def get_embeddings(self, has_annotation: Optional[bool] = None) -> np.ndarray:
-        """Returns the embeddings, or optionally just a part of them.
-
-        Args:
-            has_annotation: If True, return only the part of the embeddings that has a corresponding annotation.
-                If False, return only the part of the embeddings that has NOT a corresponding annotation.
-                By default, we return the whole embeddings.
-
-        Returns:
-            The embeddings, or optionally just a part of them.
-        """
-        if has_annotation is True:
-            return self._embeddings[self._annotation_array != self._label2int[None]]
-        if has_annotation is False:
-            return self._embeddings[self._annotation_array == self._label2int[None]]
-
-        return self._embeddings
-
-
 class WeakLabelsError(Exception):
     pass
 

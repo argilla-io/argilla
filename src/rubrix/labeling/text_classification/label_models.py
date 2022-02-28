@@ -24,10 +24,7 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import (
-    WeakLabels,
-    WeakLabelsEmbeddings,
-)
+from rubrix.labeling.text_classification.weak_labels import WeakLabels
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -784,8 +781,9 @@ class Epoxy(FlyingSquid):
 
     def __init__(
         self,
-        weak_labels: WeakLabelsEmbeddings,
-        thresholds: List[float] = None,
+        weak_labels: WeakLabels,
+        embeddings: np.ndarray,
+        thresholds: Union[float, List[float], None] = None,
         **kwargs,
     ):
 
@@ -818,49 +816,17 @@ class Epoxy(FlyingSquid):
                 except:
                     raise ModuleNotFoundError(value)
 
-        self.thresholds = thresholds
+        if isinstance(thresholds, float):
+            self._thresholds = [thresholds] * len(weak_labels.shape[1])
+        else:
+            self._thresholds = thresholds
+
+        self._embeddings = embeddings
+        self._kwargs = kwargs
 
         super().__init__(weak_labels, **kwargs)
 
-    @classmethod
-    def _fit_and_score(
-        cls,
-        weak_labels: WeakLabelsEmbeddings,
-        score: str = "accuracy",
-        thresholds: List[float] = None,
-        tie_break_policy: str = "random",
-    ) -> float:
-        """Helper function to instantiate an Epoxy model, and fit and score weak labels.
-
-        Args:
-            weak_labels (WeakLabels): A `WeakLabels` object containing the weak labels and records.
-            embeddings (np.ndarray, optional): Sentence embeddings for each record on the weak label matrix.
-                Defaults to None.
-            score (str, optional): The score to be optimized.
-                More information on the `score` method of the parent class, FlyingSquid.
-                Defaults to "accuracy".
-            thresholds (List[float], optional): A list of thresholds.
-            tie_break_policy (str, optional): Tie break policy during score optimization.
-                More information on the `score` method of the parent class, FlyingSquid.
-                Defaults to "random".
-
-        Returns:
-            float: The metric measured after fitting and scoring the weak label matrix.
-        """
-        epoxy_instance = cls(weak_labels, thresholds=thresholds)
-
-        _LOGGER.debug("Fitting Epoxy instance.")
-        epoxy_instance.fit()
-
-        _LOGGER.debug(
-            "Scoring Epoxy instance with {0} tie break policy".format(tie_break_policy)
-        )
-        result = epoxy_instance.score(tie_break_policy=tie_break_policy)[score]
-
-        return result
-
-    @staticmethod
-    def _generate_first_search_space(weak_labels: WeakLabelsEmbeddings, num: int = 20):
+    def _generate_first_search_space(self, num: int = 20):
         """Helper function to the `grid_search_threshold` method.
                 In the first search space, all thresholds in an array are set to the same value.
 
@@ -871,14 +837,13 @@ class Epoxy(FlyingSquid):
         Yields:
             Iterator[List[float]]: A generator for all threshold arrays in the first search space.
         """
-        thresholds_len = weak_labels.matrix().shape[1]
+        thresholds_len = self._weak_labels.matrix().shape[1]
         linspace = np.linspace(0, 1, num=num)
         for x in linspace:
             yield [x] * thresholds_len
 
-    @staticmethod
     def _generate_second_search_space(
-        thresholds: np.ndarray, num: int = 20, index: int = 0
+        self, thresholds: np.ndarray, num: int = 20, index: int = 0
     ):
         """Helper function to the `grid_search_threshold` method.
                 In the second search space, the thresholds are optimized one by one.
@@ -899,15 +864,15 @@ class Epoxy(FlyingSquid):
             trial[index] = item
             yield trial
 
-    @classmethod
-    def grid_search(
-        cls,
-        weak_labels: WeakLabelsEmbeddings,
+    def _grid_search(
+        self,
         score: str = "accuracy",
         tie_break_policy: str = "random",
         first_space_num: int = 20,
         second_space_num: int = 20,
         second_space_subset: Union[None, List[int]] = None,
+        include_annotated_records: Union[None, bool] = False,
+        **kwargs,
     ) -> List[float]:
         """Perform grid search to find the optimal threshold for the Epoxy model.
                 The grid search is performed in two steps. In the first step, the same value is set to all thresholds.
@@ -917,7 +882,6 @@ class Epoxy(FlyingSquid):
                 decreasing precision.
 
         Args:
-            weak_labels: The original weak label matrix.
             score: The score to be optimized.
                 More information on the `score` method of the parent class, FlyingSquid.
             tie_break_policy: Tie break policy during score optimization.
@@ -929,6 +893,9 @@ class Epoxy(FlyingSquid):
             second_space_subset: A list of the indexes of all the thresholds that will be optimized during the
                 second step of the grid search. The thresholds will be optimized in the order given in the list.
                 If no list is given, all thresholds will be optimized, from left to right.
+            **kwargs: Passed on to the FlyingSquid's
+                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
+                method.
         Returns:
             The optimal threshold array found after grid search.
         """
@@ -936,16 +903,11 @@ class Epoxy(FlyingSquid):
         output = None
         max_metric = 0
 
-        for threshold in cls._generate_first_search_space(
-            weak_labels, num=first_space_num
-        ):
+        for threshold in self._generate_first_search_space(num=first_space_num):
 
-            result = cls._fit_and_score(
-                weak_labels,
-                score=score,
-                thresholds=threshold,
-                tie_break_policy=tie_break_policy,
-            )
+            self._thresholds = threshold
+            self.fit(include_annotated_records=include_annotated_records, **kwargs)
+            result = self.score(tie_break_policy=tie_break_policy)[score]
 
             if result >= max_metric:
                 output = threshold
@@ -975,7 +937,7 @@ class Epoxy(FlyingSquid):
 
             current_index = second_space_subset.pop(0)
 
-            for threshold in cls._generate_second_search_space(
+            for threshold in self._generate_second_search_space(
                 thresholds=output, num=second_space_num, index=current_index
             ):
 
@@ -991,12 +953,9 @@ class Epoxy(FlyingSquid):
                     )
                 )
 
-                result = cls._fit_and_score(
-                    weak_labels,
-                    score=score,
-                    thresholds=threshold,
-                    tie_break_policy=tie_break_policy,
-                )
+                self._thresholds = threshold
+                self.fit(include_annotated_records=include_annotated_records, **kwargs)
+                result = self.score(tie_break_policy=tie_break_policy)[score]
 
                 if result >= max_metric:
                     output = threshold
@@ -1004,6 +963,30 @@ class Epoxy(FlyingSquid):
 
         _LOGGER.debug("End of the grid search. Best thresholds: {0}".format(output))
         return output
+
+    def _get_embeddings(self, has_annotation: Optional[bool] = None) -> np.ndarray:
+        """Returns the embeddings, or optionally just a part of them.
+
+        Args:
+            has_annotation: If True, return only the part of the embeddings that has a corresponding annotation.
+                If False, return only the part of the embeddings that has NOT a corresponding annotation.
+                By default, we return the whole embeddings.
+
+        Returns:
+            The embeddings, or optionally just a part of them.
+        """
+        if has_annotation is True:
+            return self._embeddings[
+                self._weak_labels._annotation_array
+                != self._weak_labels._label2int[None]
+            ]
+        if has_annotation is False:
+            return self._embeddings[
+                self._weak_labels._annotation_array
+                == self._weak_labels._label2int[None]
+            ]
+
+        return self._embeddings
 
     def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
         """Helper function to copy and transform the weak label matrix with respect to a target label.
@@ -1023,12 +1006,7 @@ class Epoxy(FlyingSquid):
 
         L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
 
-        if not self.thresholds:
-            thresholds = [1.0] * L_matrix.shape[1]
-        else:
-            thresholds = self.thresholds
-
-        embeddings = self._weak_labels.get_embeddings(
+        embeddings = self._get_embeddings(
             has_annotation=None if self._include_annotated_records else False
         )
 
@@ -1044,11 +1022,20 @@ class Epoxy(FlyingSquid):
 
         epoxy_model = EpoxyModel(L_matrix, embeddings)
         epoxy_model.preprocess(L_matrix, embeddings)
-        L_extended = epoxy_model.extend(thresholds)
+        L_extended = epoxy_model.extend(self._thresholds)
         return L_extended
 
-    def fit(self, include_annotated_records: bool = False, **kwargs):
+    def fit(
+        self,
+        include_annotated_records: bool = False,
+        grid_search_kwargs: dict = {},
+        **kwargs,
+    ):
         self._include_annotated_records = include_annotated_records
+
+        if not self._thresholds:
+            self._thresholds = self._grid_search(**grid_search_kwargs)
+
         super().fit(include_annotated_records, **kwargs)
 
     def predict(

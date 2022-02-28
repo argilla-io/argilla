@@ -19,13 +19,7 @@ import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import (
-    Epoxy,
-    FlyingSquid,
-    Snorkel,
-    WeakLabels,
-    WeakLabelsEmbeddings,
-)
+from rubrix.labeling.text_classification import Epoxy, FlyingSquid, Snorkel, WeakLabels
 from rubrix.labeling.text_classification.label_models import (
     LabelModel,
     MissingAnnotationError,
@@ -56,36 +50,6 @@ def weak_labels(monkeypatch):
     monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
 
     return WeakLabels(rules=[lambda: None] * 3, dataset="mock")
-
-
-@pytest.fixture
-def weak_labels_embeddings(monkeypatch):
-    def mock_load(*args, **kwargs):
-        return [TextClassificationRecord(inputs="test", id=i) for i in range(4)]
-
-    monkeypatch.setattr(
-        "rubrix.labeling.text_classification.weak_labels.load", mock_load
-    )
-
-    def mock_embedding_func(records):
-        np.random.seed(0)
-        word_embeddings = np.random.random((len(records), 1024))
-        return word_embeddings
-
-    def mock_apply(self, *args, **kwargs):
-        weak_label_matrix = np.array(
-            [[0, 1, -1], [2, 0, -1], [-1, -1, -1], [0, 2, 2]],
-            dtype=np.short,
-        )
-        annotation_array = np.array([0, 1, -1, 2], dtype=np.short)
-        label2int = {None: -1, "negative": 0, "positive": 1, "neutral": 2}
-        return weak_label_matrix, annotation_array, label2int
-
-    monkeypatch.setattr(WeakLabelsEmbeddings, "_apply_rules", mock_apply)
-
-    return WeakLabelsEmbeddings(
-        rules=[lambda: None] * 3, dataset="mock", embedding_func=mock_embedding_func
-    )
 
 
 @pytest.fixture
@@ -602,19 +566,26 @@ class TestEpoxy:
     def test_not_installed(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "epoxy", None)
         with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):
-            Epoxy(None)
+            Epoxy(weak_labels=None, embeddings=None)
 
-    def test_init(self, weak_labels_embeddings):
-        label_model = Epoxy(weak_labels_embeddings)
+    def test_init(self, weak_labels):
+        np.random.seed(0)
+        embeddings = np.random.random((len(weak_labels._records), 1024))
+        label_model = Epoxy(weak_labels=weak_labels, embeddings=embeddings)
         assert label_model._labels == ["negative", "positive", "neutral"]
 
         with pytest.raises(ValueError, match="must not contain 'm'"):
-            Epoxy(weak_labels=weak_labels_embeddings, m="mock")
+            Epoxy(weak_labels=weak_labels, embeddings=embeddings, m="mock")
 
-        weak_labels_embeddings._rules = weak_labels_embeddings.rules[:2]
+        weak_labels._rules = weak_labels.rules[:2]
         with pytest.raises(TooFewRulesError, match="at least three"):
-            Epoxy(weak_labels=weak_labels_embeddings)
+            Epoxy(weak_labels=weak_labels, embeddings=embeddings)
 
-    def test_grid_search(self, weak_labels_embeddings):
-        threshold = Epoxy.grid_search(weak_labels_embeddings)
-        assert threshold == [1.0, 1.0, 1.0]
+    def test_grid_search(self, weak_labels):
+        np.random.seed(0)
+        embeddings = np.random.random((len(weak_labels._records), 1024))
+        label_model = Epoxy(
+            weak_labels=weak_labels, embeddings=embeddings, thresholds=None
+        )
+        label_model.fit()
+        assert label_model._thresholds == [1.0, 1.0, 1.0]
