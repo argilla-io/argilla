@@ -450,7 +450,7 @@ def test_search_keywords(mocked_client):
     dataset = "test_search_keywords"
     from datasets import load_dataset
 
-    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner_sm", split="train")
+    dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
     dataset_rb = rubrix.read_datasets(dataset_ds, task="TokenClassification")
 
     rubrix.delete(dataset)
