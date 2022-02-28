@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import functools
 import logging
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -28,6 +29,26 @@ from rubrix.client.models import (
 from rubrix.client.sdk.datasets.models import TaskType
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _requires_datasets(func):
+    @functools.wraps(func)
+    def check_if_datasets_installed(*args, **kwargs):
+        try:
+            import datasets
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'datasets' must be installed to use `to_datasets`! "
+                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+            )
+        if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
+            raise ModuleNotFoundError(
+                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
+                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
+            )
+        return func(*args, **kwargs)
+
+    return check_if_datasets_installed
 
 
 class DatasetBase:
@@ -93,55 +114,32 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
+    @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
 
         Returns:
             A `datasets.Dataset` containing your records.
         """
-        try:
-            import datasets
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'datasets' must be installed to use `to_datasets`! "
-                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
-            )
-        if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
-            raise ModuleNotFoundError(
-                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
-                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
-            )
+        import datasets
 
         ds_dict = self._to_datasets_dict()
 
-        return self._dict_to_datasets(ds_dict)
-
-    def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.Dataset`"""
-        raise NotImplementedError
-
-    def _dict_to_datasets(self, records_dict: Dict) -> "datasets.Dataset":
-        """Helper method to create a datasets Dataset from a dict, removing the 'metadata' key from the dict if necessary.
-
-        Args:
-            records_dict: A dict containing dataset records.
-
-        Returns:
-            A datasets Dataset object, without the metadata, if it is incompatible with the Dataset format.
-        """
-        from datasets import Dataset
-
         try:
-            dataset = Dataset.from_dict(records_dict)
-        # try without metadata
+            dataset = datasets.Dataset.from_dict(ds_dict)
+        # try without metadata, since it is more prone to incompatible structures
         except Exception:
-            del records_dict["metadata"]
-            dataset = Dataset.from_dict(records_dict)
+            del ds_dict["metadata"]
+            dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
                 "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
             )
 
         return dataset
+
+    def _to_datasets_dict(self) -> Dict:
+        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.Dataset`"""
+        raise NotImplementedError
 
     @classmethod
     def from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
@@ -228,6 +226,18 @@ class DatasetBase:
         """
         raise NotImplementedError
 
+    @_requires_datasets
+    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        Args:
+            **kwargs: Specific to the tasks
+
+        Returns:
+            A datasets Dataset.
+        """
+        raise NotImplementedError
+
 
 def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
@@ -243,9 +253,9 @@ def _prepend_docstring(record_type: Type[Record]):
             list does not correspond to the dataset type.
     """
 
-    def docstring_decorator(fn):
-        fn.__doc__ = docstring + (fn.__doc__ or "")
-        return fn
+    def docstring_decorator(cls):
+        cls.__doc__ = docstring + (cls.__doc__ or "")
+        return cls
 
     return docstring_decorator
 
@@ -391,6 +401,48 @@ class DatasetForTextClassification(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
         return cls(
             [TextClassificationRecord(**row) for row in dataframe.to_dict("records")]
+        )
+
+    @_requires_datasets
+    def prepare_for_training(self) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        This will return a "datasets.Dataset" with two columns: "text" and "label"
+        - Records without an annotation are removed.
+        - The "text" column is taken from the _inputs_ attribute of the records.
+            If there is more than one key in the dictionary, the values will be joined together with white space.
+        - The "label" column corresponds to the _annotation_ attribute of the records.
+        - Labels are transformed to integers.
+
+        Returns:
+            A datasets.Dataset with two columns: "text" and "label".
+        """
+        import datasets
+
+        labels = set()
+        for rec in self._records:
+            annotation = (
+                rec.annotation if isinstance(rec.annotation, list) else [rec.annotation]
+            )
+            if annotation == [None]:
+                continue
+            labels.update(annotation)
+
+        class_label = datasets.ClassLabel(names=sorted(list(labels)))
+        features = datasets.Features(
+            text=datasets.Value("string"),
+            label=[class_label] if self._records[0].multi_label else class_label,
+        )
+
+        text, label = [], []
+        for rec in self._records:
+            if not rec.annotation:
+                continue
+            label.append(rec.annotation)
+            text.append(" ".join(rec.inputs.values()))
+
+        return datasets.Dataset.from_dict(
+            {"text": text, "label": label}, features=features
         )
 
 
