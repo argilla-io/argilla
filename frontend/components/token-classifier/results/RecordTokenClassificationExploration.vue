@@ -18,14 +18,22 @@
 <template>
   <div class="origins">
     <text-spans-static
+      v-if="record.prediction"
       v-once
-      v-for="origin in entitiesOrigin"
-      :key="origin"
+      key="prediction"
       :dataset="dataset"
+      origin="prediction"
       :record="record"
-      :origin="origin"
-      :class="origin"
-      :entities="getEntitiesByOrigin(origin)"
+      class="prediction"
+      :entities="getEntitiesByOrigin('prediction')"
+    />
+    <text-spans
+      key="annotation"
+      :dataset="dataset"
+      origin="annotation"
+      :record="record"
+      class="annotation"
+      :entities="getEntitiesByOrigin('annotation')"
     />
   </div>
 </template>
@@ -41,11 +49,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data: function () {
-    return {
-      entitiesOrigin: ["prediction", "annotation"],
-    };
   },
   methods: {
     getEntitiesByOrigin(origin) {
@@ -69,7 +72,11 @@ export default {
   bottom: 0;
   ::v-deep {
     .span__text {
-      opacity: 0;
+      opacity: 1;
+      color: transparent;
+      .highlight {
+        color: palette(grey, dark)
+      }
     }
   }
 }

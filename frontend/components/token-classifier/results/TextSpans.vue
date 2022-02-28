@@ -36,9 +36,7 @@
         isSelected(i, selectionStart, selectionOver)
           ? 'selected'
           : '',
-        isLastSelected(i, selectionEnd) || isLastSelected(i, selectionOver)
-          ? 'last-selected'
-          : '',
+        isLastSelected(i, selectionEnd) ? 'last-selected' : '',
       ]"
       @startSelection="onStartSelection"
       @endSelection="onEndSelection"
@@ -257,11 +255,12 @@ export default {
       return false;
     },
     suggestEntity() {
+      const spans = [...this.textSpans];
       const from = Math.min(this.selectionStart, this.selectionEnd);
       const to = Math.max(this.selectionStart, this.selectionEnd);
-      const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
+      const startToken = spans[from] && spans[from].tokens[0];
       const endToken =
-        this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
+        spans[to] && spans[to].tokens[spans[to].tokens.length - 1];
       const matchedPrediction =
         this.record.prediction &&
         this.record.prediction.entities.find(

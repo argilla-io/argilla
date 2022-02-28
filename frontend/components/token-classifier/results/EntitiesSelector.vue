@@ -107,7 +107,6 @@ export default {
         dataset: this.dataset,
         lastSelectedEntity: entityLabel,
       });
-      console.log(entityLabel.text);
       this.token.entity
         ? this.$emit("changeEntityLabel", this.token.entity, entityLabel.text)
         : this.$emit("selectEntity", entityLabel.text);
@@ -163,11 +162,7 @@ export default {
 <style lang="scss" scoped>
 .entities {
   &__selector {
-    position: absolute;
-    left: -35%;
-    top: 1em;
     min-width: 220px;
-    z-index: 9;
     background: palette(grey, smooth);
     font-weight: 600;
     padding: 0.8em;
@@ -177,6 +172,10 @@ export default {
       line-height: 1em;
       display: inline-block;
       white-space: pre-line;
+      position: absolute;
+      left: -60%;
+      top: 2em;
+      z-index: 9;
     }
     &__options {
       max-height: 142px;

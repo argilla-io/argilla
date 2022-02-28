@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <span>
+  <span class="span__text">
     <EntityHighlight
       v-if="token.entity"
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
@@ -25,7 +25,6 @@
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
     /><span
-      class="span__text"
       @mousedown="startSelection"
       @mouseup="endSelection"
       @mouseover="overSelection"
@@ -37,59 +36,23 @@
           token.hasSpaceAfter ? ' ' : ''
         }`
       "
-    ></span><span v-if="showEntitiesSelector" class="entities__selector__container">
-      <div v-click-outside="onClickOutside" class="entities__selector">
-        <ul class="entities__selector__options">
-          <li
-            class="entities__selector__option suggestion"
-            :class="[
-              `color_${suggestedEntity.colorId}`,
-              activeEntity === -1 ? 'active' : null,
-            ]"
-            v-if="suggestedEntity"
-            @click="selectEntity(suggestedEntity)"
-          >
-            <span>{{ suggestedEntity.text }}</span>
-            <span class="entity__sort-code">[space]</span>
-          </li>
-          <li
-            class="entities__selector__option suggestion"
-            :class="[
-              `color_${lastSelectedEntity.colorId}`,
-              activeEntity === -1 ? 'active' : null,
-            ]"
-            v-else-if="lastSelectedEntity.text"
-            @click="selectEntity(lastSelectedEntity)"
-          >
-            <span>{{ lastSelectedEntity.text }}</span>
-            <span class="entity__sort-code">[space]</span>
-          </li>
-          <li
-            v-for="(entity, index) in formattedEntities"
-            tabindex="0"
-            :focused="activeEntity === index"
-            :key="index"
-            class="entities__selector__option"
-            :class="[
-              `color_${entity.colorId}`,
-              activeEntity === index ? 'active' : null,
-            ]"
-            @click="selectEntity(entity)"
-          >
-            <span>{{ entity.text }}</span>
-            <span class="entity__sort-code"
-              >[{{ activeEntity === index ? "enter" : entity.shortCut }}]</span
-            >
-          </li>
-        </ul>
-      </div>
-    </span>
+    ></span
+    ><lazy-entities-selector
+      :dataset="dataset"
+      :suggestedLabel="suggestedLabel"
+      :token="token"
+      :formattedEntities="formattedEntities"
+      :showEntitiesSelector="showEntitiesSelector"
+      v-if="showEntitiesSelector"
+      @selectEntity="onSelectEntity"
+      @changeEntityLabel="onChangeEntity"
+      v-click-outside="onClickOutside"
+    />
   </span>
 </template>
 
 <script>
 import ClickOutside from "v-click-outside";
-import { mapActions } from "vuex";
 
 export default {
   directives: {
@@ -118,12 +81,8 @@ export default {
   },
   data: () => ({
     showEntitiesSelector: false,
-    activeEntity: -1,
   }),
   computed: {
-    lastSelectedEntity() {
-      return this.dataset.lastSelectedEntity;
-    },
     tag_color() {
       return this.dataset.entities.filter(
         (entity) => entity.text === this.token.entity.label
@@ -144,30 +103,8 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
-    suggestedEntity() {
-      return this.formattedEntities.find(
-        (ent) => ent.text === this.suggestedLabel
-      );
-    },
-  },
-  watch: {
-    async showEntitiesSelector(n, o) {
-      if (n !== o) {
-        await this.dataset.viewSettings.disableShortCutPagination(n);
-      }
-    },
-  },
-  mounted() {
-    window.addEventListener("keydown", this.keyDown);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
   },
   methods: {
-    ...mapActions({
-      updateLastSelectedEntity:
-        "entities/token_classification/updateLastSelectedEntity",
-    }),
     startSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", undefined);
@@ -203,110 +140,18 @@ export default {
     onClickOutside() {
       this.showEntitiesSelector = false;
     },
-    async selectEntity(entityLabel) {
-      await this.updateLastSelectedEntity({
-        dataset: this.dataset,
-        lastSelectedEntity: entityLabel,
-      });
-      this.token.entity
-        ? this.$emit("changeEntityLabel", this.token.entity, entityLabel.text)
-        : this.$emit("selectEntity", entityLabel.text);
+    onSelectEntity(entityLabel) {
+      this.$emit("selectEntity", entityLabel);
       this.showEntitiesSelector = false;
-      this.resetActiveEntity();
     },
-    resetActiveEntity() {
-      this.activeEntity = -1;
-    },
-    keyDown(event) {
-      const cmd = String.fromCharCode(event.keyCode).toUpperCase();
-      if (this.showEntitiesSelector && cmd) {
-        const element = document.getElementsByClassName("active");
-        event.preventDefault();
-        // enter
-        if (event.keyCode === 13) {
-          if (this.activeEntity !== -1) {
-            this.selectEntity(this.formattedEntities[this.activeEntity]);
-          }
-          //space
-        } else if (event.keyCode === 32) {
-          if (this.suggestedEntity) {
-            this.selectEntity(this.suggestedEntity);
-          } else if (this.lastSelectedEntity) {
-            this.selectEntity(this.lastSelectedEntity);
-          }
-          //down
-        } else if (
-          event.keyCode === 40 &&
-          this.activeEntity + 1 < this.formattedEntities.length
-        ) {
-          this.activeEntity++;
-          if (element[0] && element[0].offsetTop >= 90) {
-            element[0].parentNode.scrollTop = element[0].offsetTop - 2;
-          }
-          //up
-        } else if (event.keyCode === 38 && this.activeEntity >= 0) {
-          this.activeEntity--;
-          if (element[0]) {
-            element[0].parentNode.scrollTop =
-              element[0].offsetTop - element[0].offsetHeight - 8;
-          }
-        } else {
-          const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
-          if (entity) {
-            this.selectEntity(entity);
-          }
-        }
-      }
+    onChangeEntity(token, entityLabel) {
+      this.$emit("changeEntityLabel", token, entityLabel);
+      this.showEntitiesSelector = false;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-// span {
-//   position: relative;
-// }
-.entities {
-  &__selector {
-    position: absolute;
-    left: -35%;
-    top: 1em;
-    min-width: 220px;
-    z-index: 9;
-    background: palette(grey, smooth);
-    font-weight: 600;
-    padding: 0.8em;
-    border-radius: 1px;
-    &__container {
-      @include font-size(14px);
-      line-height: 1em;
-      display: inline-block;
-      white-space: pre-line;
-    }
-    &__options {
-      max-height: 142px;
-      overflow-y: scroll;
-      padding-left: 0;
-      margin: 0;
-      overscroll-behavior: contain;
-      position: relative;
-    }
-    &__option {
-      display: flex;
-      transition: all 0.2s ease;
-      padding: 0.5em;
-      position: relative;
-      cursor: pointer;
-      margin-top: 2px;
-      margin-bottom: 2px;
-      &.suggestion {
-        margin-bottom: 0.5em;
-      }
-      span {
-        cursor: pointer !important;
-      }
-    }
-  }
-}
 .span {
   position: relative;
   display: inline;
@@ -348,25 +193,8 @@ export default {
     background: none;
   }
 }
-// .span span {
-//   display: inline;
-// }
 .list__item--annotation-mode span span {
   cursor: text;
-}
-.entity {
-  &.non-selectable,
-  &.non-selectable--show-sort-code {
-    cursor: default;
-    pointer-events: none;
-  }
-  &__sort-code {
-    margin-left: auto;
-    margin-right: 0;
-    .non-selectable & {
-      display: none;
-    }
-  }
 }
 // ner colors
 
@@ -396,11 +224,11 @@ $hue: 360;
   .tag.color_#{$i - 1} span {
     background: $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} {
+  ::v-deep .entities__selector__option.color_#{$i - 1} {
     background: $rcolor;
     border: 2px solid $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} {
+  ::v-deep .entities__selector__option.color_#{$i - 1} {
     &:active,
     &.active,
     &:hover {

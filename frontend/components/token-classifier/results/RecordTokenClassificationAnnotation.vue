@@ -19,6 +19,7 @@
   <div>
     <div class="origins">
       <text-spans-static
+        v-if="record.prediction"
         v-once
         key="prediction"
         :dataset="dataset"
@@ -142,14 +143,17 @@ export default {
   bottom: 0;
   ::v-deep {
     .span__text {
-      opacity: 0;
+      color: transparent;
+      & > * {
+        color: palette(grey, dark);
+      }
     }
-    .highlight__content__text {
-      opacity: 0;
+    .highlight__content {
+      color: transparent
     }
   }
   ::v-deep .highlight-text {
-    opacity: 0;
+    opacity: 1;
   }
 }
 </style>

@@ -18,6 +18,7 @@
 <template>
   <div v-if="textSpans.length" ref="list" class="content__input">
     <text-span-static
+      v-once
       v-for="(token, i) in textSpans"
       :key="i"
       :record="record"
@@ -53,7 +54,9 @@ export default {
       const recordHasEmoji = this.record.text.containsEmoji;
       const { visualTokens } = this.record.tokens.reduce(
         ({ visualTokens, startPosition }, token) => {
-          const start = recordHasEmoji ? indexOf(this.record.text, token, startPosition) : this.record.text.indexOf(token, startPosition);
+          const start = recordHasEmoji
+            ? indexOf(this.record.text, token, startPosition)
+            : this.record.text.indexOf(token, startPosition);
           const end = start + (recordHasEmoji ? length(token) : token.length);
           const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
           return {

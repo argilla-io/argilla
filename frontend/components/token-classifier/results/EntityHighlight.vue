@@ -17,26 +17,30 @@
 
 <template>
   <span
-    @mouseover="showTooltip = true"
-    @mouseout="showTooltip = false"
+    @mouseenter="showTooltip = true"
+    @mouseleave="showTooltip = false"
     :class="[
       'highlight',
       span.origin,
       // isText ? '' : 'highlight--block',
       annotationEnabled ? 'editable' : null,
     ]"
-  >
-    <span
-      class="highlight__content"
+    ><span
+      v-for="(token, i) in span.tokens"
+      :key="i"
+      :class="[
+        token.hasSpaceAfter && i + 1 === span.tokens.length
+          ? 'whitespace'
+          : null,
+        'highlight__content',
+      ]"
       @click="openTagSelector"
       @dblclick="removeEntity"
+      >{{ token.text
+      }}{{
+        token.hasSpaceAfter && i + 1 !== span.tokens.length ? " " : ""
+      }}</span
     >
-      <span class="highlight__content__text">
-        <template v-for="token in span.tokens"
-          >{{ token.text }}{{ token.hasSpaceAfter ? ' ' : ''}}<span v-if="span.tokens[span.tokens.length - 1].hasSpaceAfter" class="space"></span
-        ></template>
-      </span>
-    </span>
     <svgicon
       class="remove-button"
       @click="removeEntity"
@@ -106,14 +110,8 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.space {
-  background: #ffffff;
-  width: 4px;
-  position: absolute;
-  top: -18px;
-  height: 31px;
-  right: 0;
-  pointer-events: none;
+.whitespace {
+  margin-right: 3.5px;
 }
 .highlight {
   @include font-size(0);
