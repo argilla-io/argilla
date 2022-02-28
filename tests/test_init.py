@@ -23,7 +23,7 @@ import pytest
 import rubrix
 from rubrix.client import RubrixClient
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.errors import UnauthorizedApiError
+from rubrix.client.sdk.commons.errors import GenericApiError, UnauthorizedApiError
 
 
 @pytest.fixture
@@ -145,10 +145,7 @@ def test_init_incorrect(mock_response_500):
     """
 
     rubrix._client = None  # assert empty client
-    with pytest.raises(
-        Exception,
-        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
-    ):
+    with pytest.raises(GenericApiError):
         rubrix.init()
 
 
@@ -179,10 +176,7 @@ def test_init_token_incorrect(mock_response_500):
         Mocked correct http response
     """
     rubrix._client = None  # assert empty client
-    with pytest.raises(
-        Exception,
-        match="Connection error: Undetermined error connecting to the Rubrix Server. The API answered with a 500 code: b",
-    ):
+    with pytest.raises(GenericApiError):
         rubrix.init(api_key="422")
 
 
