@@ -644,7 +644,6 @@ class WeakMultiLabels(WeakLabelsBase):
     Raises:
         NoRulesFoundError: When you do not provide rules, and the dataset has no rules either.
         DuplicatedRuleNameError: When you provided multiple rules with the same name.
-        SingleLabelError: When trying to get weak labels for a single-label text classification task.
         NoRecordsFoundError: When the filtered dataset is empty.
 
     Examples:
@@ -670,11 +669,6 @@ class WeakMultiLabels(WeakLabelsBase):
         query: Optional[str] = None,
     ):
         super().__init__(dataset=dataset, rules=rules, ids=ids, query=query)
-
-        if not self._records[0].multi_label:
-            raise SingleLabelError(
-                "For single-label text classification, use the `rb.labeling.text_classification.WeakLabels` class."
-            )
 
         # apply rules -> create the weak label matrix (3D), annotation (2D), label list
         self._matrix, self._annotation, self._labels = self._apply_rules()
@@ -975,8 +969,4 @@ class MultiLabelError(WeakLabelsError):
 
 
 class MissingLabelError(WeakLabelsError):
-    pass
-
-
-class SingleLabelError(WeakLabelsError):
     pass

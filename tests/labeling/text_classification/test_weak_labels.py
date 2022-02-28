@@ -31,7 +31,6 @@ from rubrix.labeling.text_classification.weak_labels import (
     MultiLabelError,
     NoRecordsFoundError,
     NoRulesFoundError,
-    SingleLabelError,
     WeakLabelsBase,
 )
 
@@ -536,17 +535,6 @@ class TestWeakLabels:
 
 
 class TestWeakMultiLabels:
-    def test_single_label_error(self, monkeypatch):
-        def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", multi_label=False)]
-
-        monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
-        )
-
-        with pytest.raises(SingleLabelError):
-            WeakMultiLabels(rules=[lambda x: None], dataset="mock")
-
     def test_apply(
         self,
         log_multilabel_dataset,
