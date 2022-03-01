@@ -231,7 +231,7 @@ class DatasetBase:
         """Prepares the dataset for training.
 
         Args:
-            **kwargs: Specific to the tasks
+            **kwargs: Specific to the task of the dataset.
 
         Returns:
             A datasets Dataset.
@@ -264,13 +264,15 @@ def _prepend_docstring(record_type: Type[Record]):
 class DatasetForTextClassification(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Passing in a list of records:
         >>> records = [
         ...     rb.TextClassificationRecord(inputs="example"),
@@ -278,6 +280,7 @@ class DatasetForTextClassification(DatasetBase):
         ... ]
         >>> dataset = rb.DatasetForTextClassification(records)
         >>> assert len(dataset) == 2
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TextClassificationRecord(inputs={"text": "example"})
@@ -407,42 +410,58 @@ class DatasetForTextClassification(DatasetBase):
     def prepare_for_training(self) -> "datasets.Dataset":
         """Prepares the dataset for training.
 
-        This will return a "datasets.Dataset" with two columns: "text" and "label"
-        - Records without an annotation are removed.
-        - The "text" column is taken from the _inputs_ attribute of the records.
-            If there is more than one key in the dictionary, the values will be joined together with white space.
-        - The "label" column corresponds to the _annotation_ attribute of the records.
-        - Labels are transformed to integers.
+        This will return a ``datasets.Dataset`` with a *label* column,
+        and one column for each key in the *inputs* dictionary of the records:
+            - Records without an annotation are removed.
+            - The *label* column corresponds to the annotations of the records.
+            - Labels are transformed to integers.
 
         Returns:
-            A datasets.Dataset with two columns: "text" and "label".
+            A datasets Dataset with a *label* column and several *inputs* columns.
+
+        Examples:
+            >>> import rubrix as rb
+            >>> rb_dataset = rb.DatasetForTextClassification([
+            ...     rb.TextClassificationRecord(
+            ...         inputs={"header": "my header", "content": "my content"},
+            ...         annotation="SPAM",
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'header': Value(dtype='string'),
+             'content': Value(dtype='string'),
+             'label': ClassLabel(num_classes=1, names=['SPAM'])}
+
         """
         import datasets
 
-        labels = set()
+        inputs_keys = {
+            key: None
+            for rec in self._records
+            for key in rec.inputs
+            if rec.annotation is not None
+        }.keys()
+        ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
         for rec in self._records:
-            annotation = (
-                rec.annotation if isinstance(rec.annotation, list) else [rec.annotation]
-            )
-            if annotation == [None]:
+            if rec.annotation is None:
                 continue
-            labels.update(annotation)
+            for key in inputs_keys:
+                ds_dict[key].append(rec.inputs.get(key))
+            ds_dict["label"].append(rec.annotation)
 
-        class_label = datasets.ClassLabel(names=sorted(list(labels)))
-        features = datasets.Features(
-            text=datasets.Value("string"),
-            label=[class_label] if self._records[0].multi_label else class_label,
-        )
+        if self._records[0].multi_label:
+            labels = {label: None for labels in ds_dict["label"] for label in labels}
+        else:
+            labels = {label: None for label in ds_dict["label"]}
 
-        text, label = [], []
-        for rec in self._records:
-            if not rec.annotation:
-                continue
-            label.append(rec.annotation)
-            text.append(" ".join(rec.inputs.values()))
+        class_label = datasets.ClassLabel(names=sorted(labels.keys()))
+        feature_dict = {
+            **{key: datasets.Value("string") for key in inputs_keys},
+            "label": [class_label] if self._records[0].multi_label else class_label,
+        }
 
         return datasets.Dataset.from_dict(
-            {"text": text, "label": label}, features=features
+            ds_dict, features=datasets.Features(feature_dict)
         )
 
 
@@ -450,14 +469,16 @@ class DatasetForTextClassification(DatasetBase):
 class DatasetForTokenClassification(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForTokenClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Looping over the dataset:
         >>> assert len(dataset) == 2
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Passing in a list of records:
         >>> import rubrix as rb
         >>> records = [
@@ -465,6 +486,7 @@ class DatasetForTokenClassification(DatasetBase):
         ...     rb.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
         ... ]
         >>> dataset = rb.DatasetForTokenClassification(records)
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TokenClassificationRecord(text="example", tokens=["example"])
@@ -585,10 +607,11 @@ class DatasetForTokenClassification(DatasetBase):
 class DatasetForText2Text(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForText2Text.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Passing in a list of records:
         >>> records = [
         ...     rb.Text2TextRecord(text="example"),
@@ -596,9 +619,11 @@ class DatasetForText2Text(DatasetBase):
         ... ]
         >>> dataset = rb.DatasetForText2Text(records)
         >>> assert len(dataset) == 2
+        >>>
         >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.Text2TextRecord(text="example"})
