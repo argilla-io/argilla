@@ -13,17 +13,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""This file reflects the user facing API."""
+"""This file reflects the user facing API.
+If you want to add something here, remember to add it as normal import in the _TYPE_CHECKING section,
+as well as in the `_import_structure` dictionary.
+"""
 
-from typing import TYPE_CHECKING
+import sys as _sys
+from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from rubrix.logging import configure_logging
 
 from . import _version
+from .utils import _LazyRubrixModule
 
 __version__ = _version.version
 
-if TYPE_CHECKING:
+if _TYPE_CHECKING:
     from rubrix.client.api import (
         copy,
         delete,
@@ -49,30 +54,40 @@ if TYPE_CHECKING:
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
 
-# try:
-#     from rubrix.server.server import app
-# except ModuleNotFoundError as ex:
-#     _module_name = ex.name
-#
-#     def fallback_app(*args, **kwargs):
-#         raise RuntimeError(
-#             "\n"
-#             f"Cannot start rubrix server. Some dependencies was not found:[{_module_name}].\n"
-#             "Please, install missing modules or reinstall rubrix with server extra deps:\n"
-#             "pip install rubrix[server]"
-#         )
-#
-#     app = fallback_app
-
 _import_structure = {
-    "client.models": ["TextClassificationRecord"],
-    "server.server": ["app"],
+    "client.api": [
+        "copy",
+        "delete",
+        "get_workspace",
+        "init",
+        "load",
+        "log",
+        "set_workspace",
+    ],
+    "client.models": [
+        "Text2TextRecord",
+        "TextClassificationRecord",
+        "TokenClassificationRecord",
+        "TokenAttributions",
+    ],
+    "client.datasets": [
+        "DatasetForText2Text",
+        "DatasetForTextClassification",
+        "DatasetForTokenClassification",
+        "read_datasets",
+        "read_pandas",
+    ],
+    "monitoring.model_monitor": ["monitor"],
+    "server.app": ["app"],
 }
-_deprecated_import_structure = {"client.models": ["Record"]}
 
-import sys as _sys
-
-from .utils import _LazyRubrixModule
+# can be removed in a future version
+_deprecated_import_structure = {
+    "client.models": ["Record", "BulkResponse"],
+    "client.datasets": ["Dataset"],
+    "client.rubrix_client": ["RubrixClient"],
+    "_constants": ["DEFAULT_API_KEY"],
+}
 
 _sys.modules[__name__] = _LazyRubrixModule(
     __name__,

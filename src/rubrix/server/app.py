@@ -12,5 +12,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+try:
+    from rubrix.server.server import app
+except ModuleNotFoundError as ex:
+    _module_name = ex.name
 
-from .rubrix_client import RubrixClient
+    def fallback_app(*args, **kwargs):
+        raise RuntimeError(
+            "\n"
+            f"Cannot start rubrix server. Some dependencies was not found:[{_module_name}].\n"
+            "Please, install missing modules or reinstall rubrix with server extra deps:\n"
+            "pip install rubrix[server]"
+        )
+
+    app = fallback_app

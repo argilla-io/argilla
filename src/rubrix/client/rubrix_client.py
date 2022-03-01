@@ -1,4 +1,5 @@
 #  coding=utf-8
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,7 @@
 
 import logging
 import socket
+import warnings
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
@@ -105,6 +107,11 @@ class RubrixClient:
             workspace: Active workspace for this client session.
             timeout: Seconds to wait before raising a connection timeout.
         """
+        warnings.warn(
+            f"The 'RubrixClient' class is deprecated and will be removed in a future version! "
+            f"Use the `rubrix.client.api` module instead. Make sure to adapt your code.",
+            category=FutureWarning,
+        )
 
         self._client = AuthenticatedClient(
             base_url=api_url, token=api_key, timeout=timeout

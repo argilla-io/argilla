@@ -29,9 +29,10 @@
 #  limitations under the License.
 import importlib
 import os
+import warnings
 from itertools import chain
 from types import ModuleType
-from typing import Any
+from typing import Any, Optional
 
 
 class _LazyRubrixModule(ModuleType):
@@ -65,7 +66,14 @@ class _LazyRubrixModule(ModuleType):
         self._objects = {} if extra_objects is None else extra_objects
         self._name = name
         self._import_structure = import_structure
+
+        # deprecated stuff
+        deprecated_import_structure = deprecated_import_structure or {}
         self._deprecated_modules = set(deprecated_import_structure.keys())
+        self._deprecated_class_to_module = {}
+        for key, values in deprecated_import_structure.items():
+            for value in values:
+                self._deprecated_class_to_module[value] = key
 
     # Needed for autocompletion in an IDE
     def __dir__(self):
@@ -78,13 +86,20 @@ class _LazyRubrixModule(ModuleType):
         return result
 
     def __getattr__(self, name: str) -> Any:
-        print(name)
         if name in self._objects:
             return self._objects[name]
         if name in self._modules:
             value = self._get_module(name)
+        # special treatment for app
         elif name in self._class_to_module.keys():
             module = self._get_module(self._class_to_module[name])
+            value = getattr(module, name)
+        elif name in self._deprecated_modules:
+            value = self._get_module(name, deprecated=True)
+        elif name in self._deprecated_class_to_module.keys():
+            module = self._get_module(
+                self._deprecated_class_to_module[name], deprecated=True, class_name=name
+            )
             value = getattr(module, name)
         else:
             raise AttributeError(f"module {self.__name__} has no attribute {name}")
@@ -92,17 +107,26 @@ class _LazyRubrixModule(ModuleType):
         setattr(self, name, value)
         return value
 
-    def _app(self, name):
-        print(name)
-        return self._get_module(name)
+    def _get_module(
+        self,
+        module_name: str,
+        deprecated: bool = False,
+        class_name: Optional[str] = None,
+    ):
+        if deprecated:
+            warnings.warn(
+                f"Importing '{class_name or module_name}' from the rubrix namespace (that is "
+                f"`rubrix.{class_name or module_name}`) is deprecated and will not work in a future version. "
+                f"Make sure you update your code accordingly.",
+                category=FutureWarning,
+            )
 
-    def _get_module(self, module_name: str):
         try:
-            print("importing", module_name)
             return importlib.import_module("." + module_name, self.__name__)
         except Exception as e:
             raise RuntimeError(
-                f"Failed to import {self.__name__}.{module_name} because of the following error (look up to see its traceback):\n{e}"
+                f"Failed to import {self.__name__}.{module_name} because of the following error "
+                f"(look up to see its traceback):\n{e}"
             ) from e
 
     def __reduce__(self):
