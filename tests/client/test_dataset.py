@@ -302,9 +302,10 @@ class TestDatasetForTextClassification:
         train = ds.prepare_for_training()
 
         assert isinstance(train, datasets.Dataset)
-        assert train.column_names == ["text", "label"]
+        assert train.column_names == ["text", "context", "label"]
         assert len(train) == 2
-        assert train[1]["text"] == "mock3 mock3"
+        assert train[1]["text"] == "mock3"
+        assert train[1]["context"] == "mock3"
         assert train.features["text"] == datasets.Value("string")
         if records[0].multi_label:
             assert train.features["label"] == [datasets.ClassLabel(names=["a", "b"])]
