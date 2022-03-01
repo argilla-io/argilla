@@ -142,6 +142,9 @@ def set_workspace(workspace: str):
     Args:
         workspace: The new workspace
     """
+    if workspace is None:
+        raise Exception("Must provide a workspace")
+
     if workspace != get_workspace():
         if workspace == _USER.username:
             _CLIENT.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME, None)
