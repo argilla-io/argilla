@@ -37,9 +37,8 @@
         :entities="getEntitiesByOrigin('annotation')"
       />
     </div>
-    <div class="content__actions-buttons">
+    <div class="content__actions-buttons" v-if="record.status !== 'Validated'">
       <re-button
-        v-if="record.status !== 'Validated'"
         class="button-primary"
         @click="onValidate(record)"
         >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
@@ -125,6 +124,7 @@ export default {
     display: flex;
     min-width: 20%;
     .re-button {
+      min-width: 137px;
       min-height: 32px;
       line-height: 32px;
       display: inline-block;

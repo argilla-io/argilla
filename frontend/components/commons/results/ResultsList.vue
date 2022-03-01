@@ -211,6 +211,7 @@ export default {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
+    padding-bottom: 310px;
     transition: padding 0s ease-in-out 0.1s;
     &::-webkit-scrollbar {
       display: none;
@@ -228,9 +229,6 @@ export default {
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
   padding-bottom: 260px;
-  .fixed-header & {
-    padding-bottom: 260px;
-  }
 }
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
