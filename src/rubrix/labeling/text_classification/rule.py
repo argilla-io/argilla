@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Union
 
 import rubrix as rb
 from rubrix import TextClassificationRecord
-from rubrix import _client_instance as client
+from rubrix.client import api
 from rubrix.client.sdk.text_classification.models import LabelingRule
 
 
@@ -99,8 +99,7 @@ class Rule:
         Returns:
             The rule metrics.
         """
-        current_client = client()
-        metrics = current_client.rule_metrics_for_dataset(
+        metrics = api.rule_metrics_for_dataset(
             dataset=dataset,
             rule=LabelingRule(
                 query=self.query, label=self.label, author=self.author or "None"
@@ -153,8 +152,7 @@ def load_rules(dataset: str) -> List[Rule]:
     Returns:
         A list of rules defined in the given dataset.
     """
-    current_client = client()
-    rules = current_client.fetch_dataset_labeling_rules(dataset)
+    rules = api.fetch_dataset_labeling_rules(dataset)
     return [
         Rule(
             query=rule.query,
