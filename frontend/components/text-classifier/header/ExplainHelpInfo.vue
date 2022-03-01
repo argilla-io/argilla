@@ -81,9 +81,6 @@ export default {
     width: 100%;
     padding-right: 100px;
   }
-  .fixed-header & {
-    display: none;
-  }
   &__panel {
     border: 1px solid #f48e5f57;
     padding: 3em 2em 0.5em 2em;

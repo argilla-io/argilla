@@ -55,7 +55,13 @@ The last step is to build the static UI files in case you want to work on the UI
 
     bash scripts/build_frontend.sh
 
-Now you are ready to take *Rubrix* to the next level 🚀
+If you want to run the web app now, simply execute:
+
+.. code-block:: bash
+
+    python -m rubrix
+
+Congrats, you are ready to take *Rubrix* to the next level 🚀
 
 
 Building the documentation

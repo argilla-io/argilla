@@ -56,9 +56,7 @@ export default {
   text-align: center;
   width: 100%;
   display: flex;
-  margin-top: 10vh;
-  margin-bottom: 10vh;
-  height: auto;
+  height: calc(100vh - 400px);
   #{$this}__content {
     align-items: center;
     margin: auto;

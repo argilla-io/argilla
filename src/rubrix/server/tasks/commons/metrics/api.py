@@ -98,7 +98,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         """
         dataset = datasets.find_by_name(
-            name, task=cfg.task, user=current_user, workspace=teams_query.workspace
+            user=current_user, name=name, task=cfg.task, workspace=teams_query.workspace
         )
         metrics = metrics.get_dataset_metrics(dataset=dataset)
         return [MetricInfo.parse_obj(metric) for metric in metrics]
@@ -146,7 +146,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         """
         dataset = datasets.find_by_name(
-            name, task=cfg.task, user=current_user, workspace=teams_query.workspace
+            user=current_user, name=name, task=cfg.task, workspace=teams_query.workspace
         )
         return metrics.summarize_metric(
             dataset=dataset,

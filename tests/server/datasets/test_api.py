@@ -54,7 +54,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "CreationDatasetRequest",
+                "model": "TextClassificationDatasetDB",
             },
         }
     }
@@ -76,7 +76,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "CreationDatasetRequest",
+                "model": "TokenClassificationDatasetDB",
             },
         }
     }

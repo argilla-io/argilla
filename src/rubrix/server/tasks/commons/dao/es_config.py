@@ -12,21 +12,28 @@ DEFAULT_SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]  # TODO: env var configur
 
 class mappings:
     @staticmethod
-    def keyword_field():
+    def keyword_field(enable_text_search: bool = False):
         """Mappings config for keyword field"""
-        return {
+        mapping = {
             "type": "keyword",
             # TODO: Use environment var and align with fields validators
             "ignore_above": MAX_KEYWORD_LENGTH,
         }
+        if enable_text_search:
+            mapping["fields"] = {"text": mappings.text_field()}
+        return mapping
 
     @staticmethod
-    def path_match_keyword_template(path: str):
+    def path_match_keyword_template(
+        path: str, enable_text_search_in_keywords: bool = False
+    ):
         """Dynamic template mappings config for keyword field based on path match"""
         return {
             "path_match": path,
             "match_mapping_type": "string",
-            "mapping": mappings.keyword_field(),
+            "mapping": mappings.keyword_field(
+                enable_text_search=enable_text_search_in_keywords
+            ),
         }
 
     @staticmethod
@@ -134,7 +141,11 @@ def dynamic_metrics_text():
 
 
 def dynamic_metadata_text():
-    return {"metadata.*": mappings.path_match_keyword_template(path="metadata.*")}
+    return {
+        "metadata.*": mappings.path_match_keyword_template(
+            path="metadata.*", enable_text_search_in_keywords=True
+        )
+    }
 
 
 def tasks_common_mappings():
@@ -152,8 +163,8 @@ def tasks_common_mappings():
             "status": mappings.keyword_field(),
             "event_timestamp": {"type": "date"},
             "last_updated": {"type": "date"},
-            "annotated_by": mappings.keyword_field(),
-            "predicted_by": mappings.keyword_field(),
+            "annotated_by": mappings.keyword_field(enable_text_search=True),
+            "predicted_by": mappings.keyword_field(enable_text_search=True),
             "metrics": {"dynamic": True, "type": "object"},
             "metadata": {"dynamic": True, "type": "object"},
         },

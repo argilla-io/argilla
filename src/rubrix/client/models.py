@@ -147,7 +147,9 @@ class TextClassificationRecord(_Validators):
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rb.load`.
             This attribute will be ignored when using `rb.log`.
-
+        search_keywords:
+            READ ONLY! Relevant record keywords/terms for provided query when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
     Examples:
         >>> import rubrix as rb
         >>> record = rb.TextClassificationRecord(
@@ -172,6 +174,7 @@ class TextClassificationRecord(_Validators):
     event_timestamp: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
+    search_keywords: Optional[List[str]] = None
 
     @validator("inputs", pre=True)
     def input_as_dict(cls, inputs):
@@ -213,7 +216,9 @@ class TokenClassificationRecord(_Validators):
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rb.load`.
             This attribute will be ignored when using `rb.log`.
-
+        search_keywords:
+            READ ONLY! Relevant record keywords/terms for provided query when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
     Examples:
         >>> import rubrix as rb
         >>> record = rb.TokenClassificationRecord(
@@ -239,6 +244,7 @@ class TokenClassificationRecord(_Validators):
     event_timestamp: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
+    search_keywords: Optional[List[str]] = None
 
     @validator("prediction")
     def add_default_score(
@@ -283,6 +289,9 @@ class Text2TextRecord(_Validators):
         metrics:
             READ ONLY! Metrics at record level provided by the server when using `rb.load`.
             This attribute will be ignored when using `rb.log`.
+        search_keywords:
+            READ ONLY! Relevant record keywords/terms for provided query when using `rb.load`.
+            This attribute will be ignored when using `rb.log`.
 
     Examples:
         >>> import rubrix as rb
@@ -305,6 +314,7 @@ class Text2TextRecord(_Validators):
     event_timestamp: Optional[datetime.datetime] = None
 
     metrics: Optional[Dict[str, Any]] = None
+    search_keywords: Optional[List[str]] = None
 
     @validator("prediction")
     def prediction_as_tuples(

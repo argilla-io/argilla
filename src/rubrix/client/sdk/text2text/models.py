@@ -94,6 +94,7 @@ class Text2TextRecord(CreationText2TextRecord):
             id=self.id,
             event_timestamp=self.event_timestamp,
             metrics=self.metrics or None,
+            search_keywords=self.search_keywords or None,
         )
 
 
