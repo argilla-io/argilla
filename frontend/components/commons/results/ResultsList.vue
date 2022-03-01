@@ -190,7 +190,7 @@ export default {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
-    padding-bottom: 310px;
+    padding-bottom: 260px;
     transition: padding 0s ease-in-out 0.1s;
     &::-webkit-scrollbar {
       display: none;
