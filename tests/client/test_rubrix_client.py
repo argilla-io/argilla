@@ -31,7 +31,7 @@ from rubrix import (
     Text2TextRecord,
     TextClassificationRecord,
 )
-from rubrix.client.rubrix_client import InputValueError
+from rubrix.client.api import InputValueError
 from rubrix.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     ForbiddenApiError,
