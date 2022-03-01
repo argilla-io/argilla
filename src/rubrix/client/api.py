@@ -102,6 +102,7 @@ def init(
         >>> rb.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
     """
     global _CLIENT
+    global _USER
 
     api_url = api_url or os.getenv("RUBRIX_API_URL", "http://localhost:6900")
     # Checking that the api_url does not end in '/'
@@ -129,7 +130,7 @@ def init(
     if whoami_response_status == 401:
         raise Exception("Authentication error: invalid credentials.")
 
-    _CURRENT_USER: User = response.parsed
+    _USER = response.parsed
 
     if workspace:
         set_workspace(workspace)
