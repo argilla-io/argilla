@@ -17,15 +17,15 @@ function mountEntitiesSelector() {
         labels: ["A", "B"],
       },
       formattedEntities: [
-        {  
+        {
           colorId: 14,
-          shortCut:"1",
-          text:"Arreglo",
+          shortCut: "1",
+          text: "Arreglo",
         },
-        {      
+        {
           colorId: 1,
           shortCut: "2",
-          text:"CARDINAL",
+          text: "CARDINAL",
         },
       ],
       token: {

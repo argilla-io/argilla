@@ -75,7 +75,7 @@ export default {
       opacity: 1;
       color: transparent;
       .highlight {
-        color: palette(grey, dark)
+        color: palette(grey, dark);
       }
     }
   }

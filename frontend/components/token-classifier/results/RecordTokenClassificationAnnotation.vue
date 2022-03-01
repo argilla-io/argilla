@@ -149,7 +149,7 @@ export default {
       }
     }
     .highlight__content {
-      color: transparent
+      color: transparent;
     }
   }
   ::v-deep .highlight-text {
