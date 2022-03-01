@@ -84,13 +84,6 @@ export default {
       );
     },
   },
-  watch: {
-    async showEntitiesSelector(n, o) {
-      if (n !== o) {
-        await this.dataset.viewSettings.disableShortCutPagination(n);
-      }
-    },
-  },
   mounted() {
     window.addEventListener("keydown", this.keyDown);
   },

@@ -104,6 +104,13 @@ export default {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
   },
+  watch: {
+    async showEntitiesSelector(n, o) {
+      if (n !== o) {
+        await this.dataset.viewSettings.disableShortCutPagination(n);
+      }
+    },
+  },
   methods: {
     startSelection() {
       if (this.annotationEnabled) {
