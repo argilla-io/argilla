@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 """This file reflects the user facing API.
-If you want to add something here, remember to add it as normal import in the _TYPE_CHECKING section,
+If you want to add something here, remember to add it as normal import in the _TYPE_CHECKING section (for IDEs),
 as well as in the `_import_structure` dictionary.
 """
 

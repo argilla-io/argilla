@@ -1,5 +1,4 @@
 #  coding=utf-8
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-"""The Rubrix client, used by the rubrix.__init__ module"""
+"""
+The Rubrix client, used by the rubrix.__init__ module.
+DEPRECATED, CAN BE REMOVED IN A FUTURE VERSION. USE THE rubrix.client.api MODULE INSTEAD!
+"""
 
 import logging
 import socket
@@ -82,7 +83,7 @@ class InputValueError(RubrixClientError):
 
 
 class RubrixClient:
-    """Class definition for Rubrix Client"""
+    """DEPRECATED. Class definition for Rubrix Client"""
 
     _LOGGER = logging.getLogger(__name__)
     _WARNED_ABOUT_AS_PANDAS = False
@@ -99,7 +100,7 @@ class RubrixClient:
         workspace: Optional[str] = None,
         timeout: int = 60,
     ):
-        """Client setup function.
+        """DEPRECATED. Client setup function.
 
         Args:
             api_url: Address from which the API is serving.
