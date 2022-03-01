@@ -17,25 +17,30 @@
 
 <template>
   <span
-    @mouseover="showTooltip = true"
-    @mouseout="showTooltip = false"
+    @mouseenter="showTooltip = true"
+    @mouseleave="showTooltip = false"
     :class="[
       'highlight',
       span.origin,
-      isText ? '' : 'highlight--block',
+      // isText ? '' : 'highlight--block',
       annotationEnabled ? 'editable' : null,
     ]"
-  >
-    <span
-      class="highlight__content"
+    ><span
+      v-for="(token, i) in span.tokens"
+      :key="i"
+      :class="[
+        token.hasSpaceAfter && i + 1 === span.tokens.length
+          ? 'whitespace'
+          : null,
+        'highlight__content',
+      ]"
       @click="openTagSelector"
       @dblclick="removeEntity"
+      >{{ token.text
+      }}{{
+        token.hasSpaceAfter && i + 1 !== span.tokens.length ? " " : ""
+      }}</span
     >
-      <span
-        class="highlight__content__text"
-        v-html="$highlightSearch(dataset.query.text, text)"
-      />
-    </span>
     <svgicon
       class="remove-button"
       @click="removeEntity"
@@ -56,9 +61,8 @@ export default {
       type: Object,
       required: true,
     },
-    text: {
+    whiteSpace: {
       type: String,
-      required: true,
     },
     dataset: {
       type: Object,
@@ -74,9 +78,9 @@ export default {
     };
   },
   computed: {
-    isText() {
-      return this.text.replace(/\s/g, "").length;
-    },
+    // isText() {
+    //   return this.text.replace(/\s/g, "").length;
+    // },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
@@ -106,6 +110,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.whitespace {
+  margin-right: 3.5px;
+}
 .highlight {
   @include font-size(0);
   line-height: 1em;
@@ -129,6 +136,7 @@ export default {
   }
   &__content {
     @include font-size(18px);
+    white-space: normal;
     display: inline;
     padding-bottom: 1px;
   }

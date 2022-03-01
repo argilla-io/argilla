@@ -19,45 +19,16 @@
   <span class="span__text">
     <EntityHighlight
       v-if="token.entity"
-      :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
+      :class="['color_' + tag_color]"
       :span="token"
       :dataset="dataset"
-      @openTagSelector="openTagSelector"
-      @removeEntity="removeEntity"
-    /><span
-      @mousedown="startSelection"
-      @mouseup="endSelection"
-      @mouseover="overSelection"
-      v-else
-      v-for="(t, i) in token.tokens"
-      :key="i"
-      v-html="
-        `${$highlightSearch(dataset.query.text, t.text)}${
-          token.hasSpaceAfter ? ' ' : ''
-        }`
-      "
-    ></span
-    ><lazy-entities-selector
-      :dataset="dataset"
-      :suggestedLabel="suggestedLabel"
-      :token="token"
-      :formattedEntities="formattedEntities"
-      :showEntitiesSelector="showEntitiesSelector"
-      v-if="showEntitiesSelector"
-      @selectEntity="onSelectEntity"
-      @changeEntityLabel="onChangeEntity"
-      v-click-outside="onClickOutside"
-    />
+    /><template v-else v-for="t in token.tokens">{{ t.text }}</template
+    ><template>{{ token.hasSpaceAfter ? " " : "" }}</template>
   </span>
 </template>
 
 <script>
-import ClickOutside from "v-click-outside";
-
 export default {
-  directives: {
-    clickOutside: ClickOutside.directive,
-  },
   props: {
     record: {
       type: Object,
@@ -67,91 +38,63 @@ export default {
       type: Object,
       required: true,
     },
-    suggestedLabel: {
-      type: String,
-    },
     token: {
       type: Object,
       required: true,
     },
-    spanId: {
-      type: Number,
-      required: true,
-    },
   },
-  data: () => ({
-    showEntitiesSelector: false,
-  }),
   computed: {
     tag_color() {
       return this.dataset.entities.filter(
         (entity) => entity.text === this.token.entity.label
       )[0].colorId;
     },
-    filteredEntities() {
-      return this.dataset.entities
-        .filter((entity) => entity.text)
-        .sort((a, b) => a.text.localeCompare(b.text));
-    },
-    formattedEntities() {
-      const characters = "1234567890".split("");
-      return this.filteredEntities.map((ent, index) => ({
-        ...ent,
-        shortCut: characters[index],
-      }));
-    },
-    annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
-    },
-  },
-  methods: {
-    startSelection() {
-      if (this.annotationEnabled) {
-        this.$emit("endSelection", undefined);
-        this.$emit("startSelection", this.spanId);
-      }
-    },
-    overSelection() {
-      if (this.annotationEnabled) {
-        this.$emit("overSelection", this.spanId);
-      }
-    },
-    endSelection() {
-      if (this.annotationEnabled) {
-        this.$emit("endSelection", this.spanId);
-        if (this.formattedEntities.length == 1) {
-          this.selectEntity(this.formattedEntities[0]);
-        } else {
-          this.showEntitiesSelector = true;
-        }
-      }
-    },
-    openTagSelector() {
-      if (this.token.origin !== "prediction") {
-        this.showEntitiesSelector = !this.showEntitiesSelector;
-        this.startSelection();
-        this.endSelection();
-      }
-    },
-    removeEntity() {
-      this.$emit("removeEntity", this.token.entity);
-      this.showEntitiesSelector = false;
-    },
-    onClickOutside() {
-      this.showEntitiesSelector = false;
-    },
-    onSelectEntity(entityLabel) {
-      this.$emit("selectEntity", entityLabel);
-      this.showEntitiesSelector = false;
-    },
-    onChangeEntity(token, entityLabel) {
-      this.$emit("changeEntityLabel", token, entityLabel);
-      this.showEntitiesSelector = false;
-    },
   },
 };
 </script>
 <style lang="scss" scoped>
+.entities {
+  &__selector {
+    position: absolute;
+    left: -35%;
+    top: 1em;
+    min-width: 220px;
+    z-index: 9;
+    background: palette(grey, smooth);
+    font-weight: 600;
+    padding: 0.8em;
+    border-radius: 1px;
+    &__container {
+      @include font-size(14px);
+      line-height: 1em;
+      display: inline-block;
+      white-space: pre-line;
+    }
+    &__options {
+      max-height: 142px;
+      overflow-y: scroll;
+      padding-left: 0;
+      margin: 0;
+      overscroll-behavior: contain;
+      position: relative;
+    }
+    &__option {
+      display: flex;
+      transition: all 0.2s ease;
+      padding: 0.5em;
+      position: relative;
+      cursor: pointer;
+      margin-top: 2px;
+      margin-bottom: 2px;
+      &.suggestion {
+        margin-bottom: 0.5em;
+      }
+      span {
+        cursor: pointer !important;
+      }
+    }
+  }
+}
 .span {
   position: relative;
   display: inline;
@@ -193,8 +136,25 @@ export default {
     background: none;
   }
 }
+// .span span {
+//   display: inline;
+// }
 .list__item--annotation-mode span span {
   cursor: text;
+}
+.entity {
+  &.non-selectable,
+  &.non-selectable--show-sort-code {
+    cursor: default;
+    pointer-events: none;
+  }
+  &__sort-code {
+    margin-left: auto;
+    margin-right: 0;
+    .non-selectable & {
+      display: none;
+    }
+  }
 }
 // ner colors
 
@@ -224,11 +184,11 @@ $hue: 360;
   .tag.color_#{$i - 1} span {
     background: $rcolor;
   }
-  ::v-deep .entities__selector__option.color_#{$i - 1} {
+  .entities__selector__option.color_#{$i - 1} {
     background: $rcolor;
     border: 2px solid $rcolor;
   }
-  ::v-deep .entities__selector__option.color_#{$i - 1} {
+  .entities__selector__option.color_#{$i - 1} {
     &:active,
     &.active,
     &:hover {

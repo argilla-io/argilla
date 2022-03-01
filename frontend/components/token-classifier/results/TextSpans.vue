@@ -16,45 +16,42 @@
   -->
 
 <template>
-  <div>
-    <div
-      v-if="textSpans.length"
-      ref="list"
-      class="content__input"
-      @mouseup="reset($event)"
-      v-click-outside="onReset"
-    >
-      <TextSpan
-        v-for="(token, i) in textSpans"
-        :key="i"
-        :record="record"
-        :span-id="i"
-        :spans="textSpans"
-        :dataset="dataset"
-        :suggestedLabel="suggestedLabel"
-        :class="[
-          isSelected(i, selectionStart, selectionEnd) ||
-          isSelected(i, selectionStart, selectionOver)
-            ? 'selected'
-            : '',
-          isLastSelected(i, selectionEnd) || isLastSelected(i, selectionOver)
-            ? 'last-selected'
-            : '',
-        ]"
-        @startSelection="onStartSelection"
-        @endSelection="onEndSelection"
-        @overSelection="onOverSelection"
-        @selectEntity="onSelectEntity"
-        @changeEntityLabel="onChangeEntityLabel"
-        @removeEntity="onRemoveEntity"
-        @updateRecordEntities="$emit('updateRecordEntities')"
-      />
-    </div>
+  <div
+    v-if="textSpans.length"
+    ref="list"
+    class="content__input"
+    @mouseup="reset($event)"
+    v-click-outside="onReset"
+  >
+    <TextSpan
+      v-for="(token, i) in textSpans"
+      :key="i"
+      :record="record"
+      :token="token"
+      :span-id="i"
+      :dataset="dataset"
+      :suggestedLabel="suggestedLabel"
+      :class="[
+        isSelected(i, selectionStart, selectionEnd) ||
+        isSelected(i, selectionStart, selectionOver)
+          ? 'selected'
+          : '',
+        isLastSelected(i, selectionEnd) ? 'last-selected' : '',
+      ]"
+      @startSelection="onStartSelection"
+      @endSelection="onEndSelection"
+      @overSelection="onOverSelection"
+      @selectEntity="onSelectEntity"
+      @changeEntityLabel="onChangeEntityLabel"
+      @removeEntity="onRemoveEntity"
+      @updateRecordEntities="$emit('updateRecordEntities')"
+    />
   </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import { indexOf, length } from "stringz";
 
 export default {
   props: {
@@ -83,6 +80,30 @@ export default {
     };
   },
   computed: {
+    visualTokens() {
+      const recordHasEmoji = this.record.text.containsEmoji;
+      const { visualTokens } = this.record.tokens.reduce(
+        ({ visualTokens, startPosition }, token) => {
+          const start = recordHasEmoji
+            ? indexOf(this.record.text, token, startPosition)
+            : this.record.text.indexOf(token, startPosition);
+          const end = start + (recordHasEmoji ? length(token) : token.length);
+          const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
+          return {
+            visualTokens: [
+              ...visualTokens,
+              { start, end, text: token, hasSpaceAfter: hasSpaceAfter },
+            ],
+            startPosition: end,
+          };
+        },
+        {
+          visualTokens: [],
+          startPosition: 0,
+        }
+      );
+      return Object.freeze(visualTokens);
+    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -103,34 +124,33 @@ export default {
 
       let idx = 0;
       let textSpans = [];
-      const entities = normalizedEntities(
-        this.entities,
-        this.record.visualTokens
-      );
-      while (idx < this.record.visualTokens.length) {
+      const entities = normalizedEntities(this.entities, this.visualTokens);
+      while (idx < this.visualTokens.length) {
         const entity = entities.find(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
         if (entity) {
           textSpans.push({
             entity,
-            tokens: this.record.visualTokens.slice(
+            tokens: this.visualTokens.slice(
               entity.start_token,
               entity.end_token
             ),
             start: entity.start,
             end: entity.end,
             origin: this.origin,
+            hasSpaceAfter: entity.hasSpaceAfter,
           });
           idx = entity.end_token;
         } else {
-          const token = this.record.visualTokens[idx];
+          const token = this.visualTokens[idx];
           textSpans.push({
             entity: undefined,
             tokens: [token],
             start: token.start,
             end: token.end,
             origin: this.origin,
+            hasSpaceAfter: token.hasSpaceAfter,
           });
           idx++;
         }
@@ -238,11 +258,12 @@ export default {
       return false;
     },
     suggestEntity() {
+      const spans = [...this.textSpans];
       const from = Math.min(this.selectionStart, this.selectionEnd);
       const to = Math.max(this.selectionStart, this.selectionEnd);
-      const startToken = this.textSpans[from] && this.textSpans[from].tokens[0];
+      const startToken = spans[from] && spans[from].tokens[0];
       const endToken =
-        this.textSpans[to] && this.textSpans[to].tokens.reverse()[0];
+        spans[to] && spans[to].tokens[spans[to].tokens.length - 1];
       const matchedPrediction =
         this.record.prediction &&
         this.record.prediction.entities.find(
