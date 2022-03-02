@@ -21,7 +21,7 @@ as well as in the `_import_structure` dictionary.
 import sys as _sys
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
-from rubrix.logging import configure_logging
+from rubrix.logging import configure_logging as _configure_logging
 
 from . import _version
 from .utils import _LazyRubrixModule
@@ -98,4 +98,4 @@ _sys.modules[__name__] = _LazyRubrixModule(
     extra_objects={"__version__": __version__},
 )
 
-configure_logging()
+_configure_logging()
