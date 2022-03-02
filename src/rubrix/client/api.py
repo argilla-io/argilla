@@ -109,9 +109,14 @@ def init(
     api_key = api_key or os.getenv("RUBRIX_API_KEY", DEFAULT_API_KEY)
     workspace = workspace or os.getenv("RUBRIX_WORKSPACE")
 
-    _CLIENT = AuthenticatedClient(base_url=api_url, token=api_key, timeout=timeout)
-
-    _USER = whoami(client=_CLIENT)
+    try:
+        _CLIENT = AuthenticatedClient(base_url=api_url, token=api_key, timeout=timeout)
+        _USER = whoami(client=_CLIENT)
+    # if something goes wrong, we don't want to store the CLIENT/USER
+    except Exception as error:
+        _USER = None
+        _CLIENT = None
+        raise error
 
     if workspace:
         set_workspace(workspace)
