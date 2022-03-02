@@ -129,8 +129,11 @@ export default {
         const entity = entities.find(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
-        let index = textSpans.length
-        if (entity && entity.start >= textSpans[index > 0 ? index - 1 : index].end) {
+        let index = textSpans.length;
+        if (
+          entity &&
+          entity.start >= textSpans[index > 0 ? index - 1 : index].end
+        ) {
           textSpans.push({
             entity,
             tokens: this.visualTokens.slice(
