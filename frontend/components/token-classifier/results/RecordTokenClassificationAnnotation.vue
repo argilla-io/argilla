@@ -44,7 +44,7 @@
         >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
       >
       <re-button
-        v-if="record.annotatedEntities.length"
+        :disabled="!record.annotatedEntities.length"
         class="button-primary--outline"
         @click="onClearAnnotations()"
         >Clear annotations</re-button
@@ -125,8 +125,8 @@ export default {
     min-width: 20%;
     .re-button {
       min-width: 137px;
-      min-height: 32px;
-      line-height: 32px;
+      min-height: 34px;
+      line-height: 34px;
       display: inline-block;
       margin: 1.5em 0 0 0;
       & + .re-button {
