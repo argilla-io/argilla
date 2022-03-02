@@ -12,17 +12,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-try:
-    from rubrix.server.server import app
-except ModuleNotFoundError as ex:
-    _module_name = ex.name
+import sys
+from importlib import reload
 
-    def fallback_app(*args, **kwargs):
-        raise RuntimeError(
-            "\n"
-            f"Cannot start rubrix server. Some dependencies were not found:[{_module_name}].\n"
-            "Please, install missing modules or reinstall rubrix with server extra deps:\n"
-            "pip install rubrix[server]"
-        )
+import pytest
 
-    app = fallback_app
+from rubrix.server import app
+
+
+def test_fallback_app(monkeypatch):
+    monkeypatch.setitem(sys.modules, "rubrix.server.server", None)
+    reload(app)
+
+    with pytest.raises(RuntimeError, match="Cannot start rubrix server"):
+        app.app()
