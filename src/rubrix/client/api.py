@@ -17,7 +17,6 @@ import os
 import re
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-import httpx
 import pandas
 from tqdm.auto import tqdm
 
@@ -110,27 +109,9 @@ def init(
     api_key = api_key or os.getenv("RUBRIX_API_KEY", DEFAULT_API_KEY)
     workspace = workspace or os.getenv("RUBRIX_WORKSPACE")
 
-    try:
-        response = httpx.get(url=f"{api_url}/api/docs/spec.json")
-    except ConnectionRefusedError:
-        raise Exception("Connection Refused: cannot connect to the API.")
-
-    if response.status_code != 200:
-        raise Exception(
-            "Connection error: Undetermined error connecting to the Rubrix Server. "
-            "The API answered with a {} code: {}".format(
-                response.status_code, response.content
-            )
-        )
-
     _CLIENT = AuthenticatedClient(base_url=api_url, token=api_key, timeout=timeout)
 
-    response = whoami(client=_CLIENT)
-    whoami_response_status = response.status_code
-    if whoami_response_status == 401:
-        raise Exception("Authentication error: invalid credentials.")
-
-    _USER = response.parsed
+    _USER = whoami(client=_CLIENT)
 
     if workspace:
         set_workspace(workspace)
@@ -144,6 +125,9 @@ def set_workspace(workspace: str):
     """
     if workspace is None:
         raise Exception("Must provide a workspace")
+
+    if _CLIENT is None:
+        init()
 
     if workspace != get_workspace():
         if workspace == _USER.username:
