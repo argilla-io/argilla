@@ -13,12 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import hashlib
-import importlib
 import logging
-import sys
-from collections.abc import Iterator
 from enum import Enum
-from os import stat
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -91,85 +87,6 @@ class LabelModel:
             A list of records that include the predictions of the label model.
         """
         raise NotImplementedError
-
-    def _compute_metrics(
-        self,
-        annotation: np.ndarray,
-        prediction: np.ndarray,
-        int2int: Optional[Dict[int, int]] = None,
-    ) -> Dict[str, float]:
-        """Helper method to compute the metrics.
-
-        - accuracy
-        - micro/macro averages for precision, recall and f1
-        - precision, recall, f1 and support for each label
-
-        For more details about the metrics, check out the
-        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
-
-        Args:
-            annotation: Array containing the annotations.
-            prediction: Array containing te predictions.
-            int2int: Optional int2int mapping, in case the label model requires its own mapping.
-
-        Returns:
-            A dictionary containing the metrics
-        """
-        # sklearn is a dependency of snorkel, so it should be installed
-        from sklearn.metrics import precision_recall_fscore_support
-
-        int2int = int2int or {i: i for i in self._weak_labels.int2label.keys()}
-
-        # accuracy
-        metrics = {"accuracy": (prediction == annotation).sum() / len(prediction)}
-
-        # precision, recall, f1, support micro average
-        precision, recall, f1, support = precision_recall_fscore_support(
-            y_true=annotation,
-            y_pred=prediction,
-            average="micro",
-        )
-        metrics.update(
-            {
-                "micro_precision": precision,
-                "micro_recall": recall,
-                "micro_f1": f1,
-            }
-        )
-
-        # precision, recall, f1, support macro average
-        precision, recall, f1, support = precision_recall_fscore_support(
-            y_true=annotation,
-            y_pred=prediction,
-            average="macro",
-        )
-        metrics.update(
-            {
-                "macro_precision": precision,
-                "macro_recall": recall,
-                "macro_f1": f1,
-            }
-        )
-
-        # precision, recall, f1, support per label
-        precision, recall, f1, support = precision_recall_fscore_support(
-            y_true=annotation, y_pred=prediction
-        )
-        metricIdx2labelIdx = {
-            i: label_idx for i, label_idx in enumerate(sorted(int2int.keys()))
-        }
-        for i, per_label in enumerate(zip(precision, recall, f1, support)):
-            label = self._weak_labels.int2label[int2int[metricIdx2labelIdx[i]]]
-            metrics.update(
-                {
-                    f"precision_{label}": per_label[0],
-                    f"recall_{label}": per_label[1],
-                    f"f1_{label}": per_label[2],
-                    f"support_{label}": per_label[3],
-                }
-            )
-
-        return metrics
 
 
 class Snorkel(LabelModel):
@@ -368,8 +285,10 @@ class Snorkel(LabelModel):
         return records_with_prediction
 
     def score(
-        self, tie_break_policy: Union[TieBreakPolicy, str] = "abstain"
-    ) -> Dict[str, float]:
+        self,
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        output_str: bool = False,
+    ) -> Union[Dict[str, float], str]:
         """Returns some scores/metrics of the label model with respect to the annotated records.
 
         The metrics are:
@@ -390,15 +309,18 @@ class Snorkel(LabelModel):
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
+            output_str: If True, return output as nicely formatted string.
 
         Returns:
-            The scores/metrics as a dictionary.
+            The scores/metrics in a dictionary or as a nicely formatted str.
 
         .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
+        from sklearn.metrics import classification_report
+
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
@@ -425,13 +347,17 @@ class Snorkel(LabelModel):
         if self._need_remap:
             annotation = self._copy_and_remap(annotation)
 
-        metrics = self._compute_metrics(
-            annotation=annotation,
-            prediction=predictions[idx],
-            int2int=self._snorkelInt2weaklabelsInt,
-        )
+        target_names = [
+            self._weak_labels.int2label[i]
+            for i in list(self._weaklabelsInt2snorkelInt.keys())[1:]
+        ]
 
-        return metrics
+        return classification_report(
+            annotation,
+            predictions[idx],
+            target_names=target_names[: annotation.max() + 1],
+            output_dict=not output_str,
+        )
 
 
 class FlyingSquid(LabelModel):
@@ -668,37 +594,12 @@ class FlyingSquid(LabelModel):
 
         return probas
 
-    def _get_score_objects(self, verbose: bool = False):
-        wl_matrix = self._weak_labels.matrix(has_annotation=True)
-        probabilities = self._predict(wl_matrix, verbose)
-
-        # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
-        is_tie = is_max.sum(axis=1) > 1
-
-        prediction = np.argmax(is_max, axis=1)
-        # we need to transform the indexes!
-        annotation = np.array(
-            [
-                self._labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
-            dtype=np.short,
-        )
-        fsInt2wlInt = {
-            i: self._weak_labels.label2int[label]
-            for i, label in enumerate(self._labels)
-        }
-
-        return is_max, is_tie, prediction, annotation, fsInt2wlInt
-
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
-    ) -> Dict[str, float]:
+        output_str: bool = False,
+    ) -> Union[Dict[str, float], str]:
         """Returns some scores/metrics of the label model with respect to the annotated records.
 
         The metrics are:
@@ -719,9 +620,10 @@ class FlyingSquid(LabelModel):
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all of the labeling functions abstained.
             verbose: If True, print out messages of the progress to stderr.
+            output_str: If True, return output as nicely formatted string.
 
         Returns:
-            The scores/metrics as a dictionary.
+            The scores/metrics in a dictionary or as a nicely formatted str.
 
         .. note:: Metrics are only calculated over non-abstained predictions!
 
@@ -729,11 +631,35 @@ class FlyingSquid(LabelModel):
             NotFittedError: If the label model was still not fitted.
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
         """
+        try:
+            import sklearn
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'sklearn' must be installed to compute the metrics! "
+                "You can install 'sklearn' with the command: `pip install scikit-learn`"
+            )
+        from sklearn.metrics import classification_report
+
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        is_max, is_tie, prediction, annotation, fsInt2wlInt = self._get_score_objects(
-            verbose=verbose
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+        probabilities = self._predict(wl_matrix, verbose)
+
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        is_tie = is_max.sum(axis=1) > 1
+
+        prediction = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotation = np.array(
+            [
+                self._labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
         )
 
         if not is_tie.any():
@@ -753,11 +679,28 @@ class FlyingSquid(LabelModel):
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        metrics = self._compute_metrics(
-            prediction=prediction, annotation=annotation, int2int=fsInt2wlInt
+        return classification_report(
+            annotation,
+            prediction,
+            target_names=self._labels[: annotation.max() + 1],
+            output_dict=not output_str,
         )
 
-        return metrics
+
+class LabelModelError(Exception):
+    pass
+
+
+class MissingAnnotationError(LabelModelError):
+    pass
+
+
+class TooFewRulesError(LabelModelError):
+    pass
+
+
+class NotFittedError(LabelModelError):
+    pass
 
 
 class Epoxy(FlyingSquid):
@@ -1112,19 +1055,3 @@ class Epoxy(FlyingSquid):
         )
 
         return metrics
-
-
-class LabelModelError(Exception):
-    pass
-
-
-class MissingAnnotationError(LabelModelError):
-    pass
-
-
-class TooFewRulesError(LabelModelError):
-    pass
-
-
-class NotFittedError(LabelModelError):
-    pass
