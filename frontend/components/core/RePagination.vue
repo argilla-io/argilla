@@ -200,12 +200,14 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
-      const elem = document.querySelector("body");
-      if (elem === document.activeElement) {
-        if (event.keyCode === 39) {
-          this.nextPage();
-        } else if (event.keyCode === 37) {
-          this.prevPage();
+      if (!this.paginationSettings.disabledShortCutPagination) {
+        const elem = document.querySelector("body");
+        if (elem === document.activeElement) {
+          if (event.keyCode === 39) {
+            this.nextPage();
+          } else if (event.keyCode === 37) {
+            this.prevPage();
+          }
         }
       }
     },

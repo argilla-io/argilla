@@ -27,6 +27,7 @@ class Pagination extends Model {
       page: this.number(1),
       pageSizeOptions: this.attr([1, 5, 10, 20]),
       maxRecordsLimit: this.number(10000),
+      disabledShortCutPagination: this.boolean(false),
     };
   }
 
@@ -68,6 +69,15 @@ export default class DatasetViewSettings extends Model {
       where: this.$id,
       data: {
         visibleRulesList: false,
+      },
+    });
+  }
+
+  async disableShortCutPagination(value) {
+    return await Pagination.update({
+      where: this.$id,
+      data: {
+        disabledShortCutPagination: value,
       },
     });
   }

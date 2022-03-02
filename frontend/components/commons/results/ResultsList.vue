@@ -24,7 +24,7 @@
           page-mode
           class="scroller"
           :items="visibleRecords"
-          :min-item-size="150"
+          :min-item-size="550"
           :buffer="200"
         >
           <template #before>
@@ -190,6 +190,7 @@ export default {
     height: 100vh !important;
     overflow: auto;
     padding-left: 4em;
+    padding-bottom: 260px;
     transition: padding 0s ease-in-out 0.1s;
     &::-webkit-scrollbar {
       display: none;
@@ -206,7 +207,8 @@ export default {
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
-  padding-bottom: 180px;
+  padding-bottom: 260px;
+
 }
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
