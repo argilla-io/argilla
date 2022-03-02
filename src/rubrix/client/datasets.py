@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import functools
 import logging
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -28,6 +29,26 @@ from rubrix.client.models import (
 from rubrix.client.sdk.datasets.models import TaskType
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _requires_datasets(func):
+    @functools.wraps(func)
+    def check_if_datasets_installed(*args, **kwargs):
+        try:
+            import datasets
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'datasets' must be installed to use `to_datasets`! "
+                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+            )
+        if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
+            raise ModuleNotFoundError(
+                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
+                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
+            )
+        return func(*args, **kwargs)
+
+    return check_if_datasets_installed
 
 
 class DatasetBase:
@@ -93,55 +114,32 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
+    @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
 
         Returns:
             A `datasets.Dataset` containing your records.
         """
-        try:
-            import datasets
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'datasets' must be installed to use `to_datasets`! "
-                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
-            )
-        if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
-            raise ModuleNotFoundError(
-                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
-                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
-            )
+        import datasets
 
         ds_dict = self._to_datasets_dict()
 
-        return self._dict_to_datasets(ds_dict)
-
-    def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.Dataset`"""
-        raise NotImplementedError
-
-    def _dict_to_datasets(self, records_dict: Dict) -> "datasets.Dataset":
-        """Helper method to create a datasets Dataset from a dict, removing the 'metadata' key from the dict if necessary.
-
-        Args:
-            records_dict: A dict containing dataset records.
-
-        Returns:
-            A datasets Dataset object, without the metadata, if it is incompatible with the Dataset format.
-        """
-        from datasets import Dataset
-
         try:
-            dataset = Dataset.from_dict(records_dict)
-        # try without metadata
+            dataset = datasets.Dataset.from_dict(ds_dict)
+        # try without metadata, since it is more prone to incompatible structures
         except Exception:
-            del records_dict["metadata"]
-            dataset = Dataset.from_dict(records_dict)
+            del ds_dict["metadata"]
+            dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
                 "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
             )
 
         return dataset
+
+    def _to_datasets_dict(self) -> Dict:
+        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.Dataset`"""
+        raise NotImplementedError
 
     @classmethod
     def from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
@@ -228,6 +226,18 @@ class DatasetBase:
         """
         raise NotImplementedError
 
+    @_requires_datasets
+    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        Args:
+            **kwargs: Specific to the task of the dataset.
+
+        Returns:
+            A datasets Dataset.
+        """
+        raise NotImplementedError
+
 
 def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
@@ -243,9 +253,9 @@ def _prepend_docstring(record_type: Type[Record]):
             list does not correspond to the dataset type.
     """
 
-    def docstring_decorator(fn):
-        fn.__doc__ = docstring + (fn.__doc__ or "")
-        return fn
+    def docstring_decorator(cls):
+        cls.__doc__ = docstring + (cls.__doc__ or "")
+        return cls
 
     return docstring_decorator
 
@@ -254,13 +264,15 @@ def _prepend_docstring(record_type: Type[Record]):
 class DatasetForTextClassification(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Passing in a list of records:
         >>> records = [
         ...     rb.TextClassificationRecord(inputs="example"),
@@ -268,6 +280,7 @@ class DatasetForTextClassification(DatasetBase):
         ... ]
         >>> dataset = rb.DatasetForTextClassification(records)
         >>> assert len(dataset) == 2
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TextClassificationRecord(inputs={"text": "example"})
@@ -393,19 +406,79 @@ class DatasetForTextClassification(DatasetBase):
             [TextClassificationRecord(**row) for row in dataframe.to_dict("records")]
         )
 
+    @_requires_datasets
+    def prepare_for_training(self) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        This will return a ``datasets.Dataset`` with a *label* column,
+        and one column for each key in the *inputs* dictionary of the records:
+            - Records without an annotation are removed.
+            - The *label* column corresponds to the annotations of the records.
+            - Labels are transformed to integers.
+
+        Returns:
+            A datasets Dataset with a *label* column and several *inputs* columns.
+
+        Examples:
+            >>> import rubrix as rb
+            >>> rb_dataset = rb.DatasetForTextClassification([
+            ...     rb.TextClassificationRecord(
+            ...         inputs={"header": "my header", "content": "my content"},
+            ...         annotation="SPAM",
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'header': Value(dtype='string'),
+             'content': Value(dtype='string'),
+             'label': ClassLabel(num_classes=1, names=['SPAM'])}
+
+        """
+        import datasets
+
+        inputs_keys = {
+            key: None
+            for rec in self._records
+            for key in rec.inputs
+            if rec.annotation is not None
+        }.keys()
+        ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
+        for rec in self._records:
+            if rec.annotation is None:
+                continue
+            for key in inputs_keys:
+                ds_dict[key].append(rec.inputs.get(key))
+            ds_dict["label"].append(rec.annotation)
+
+        if self._records[0].multi_label:
+            labels = {label: None for labels in ds_dict["label"] for label in labels}
+        else:
+            labels = {label: None for label in ds_dict["label"]}
+
+        class_label = datasets.ClassLabel(names=sorted(labels.keys()))
+        feature_dict = {
+            **{key: datasets.Value("string") for key in inputs_keys},
+            "label": [class_label] if self._records[0].multi_label else class_label,
+        }
+
+        return datasets.Dataset.from_dict(
+            ds_dict, features=datasets.Features(feature_dict)
+        )
+
 
 @_prepend_docstring(TokenClassificationRecord)
 class DatasetForTokenClassification(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForTokenClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Looping over the dataset:
         >>> assert len(dataset) == 2
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Passing in a list of records:
         >>> import rubrix as rb
         >>> records = [
@@ -413,6 +486,7 @@ class DatasetForTokenClassification(DatasetBase):
         ...     rb.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
         ... ]
         >>> dataset = rb.DatasetForTokenClassification(records)
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.TokenClassificationRecord(text="example", tokens=["example"])
@@ -533,10 +607,11 @@ class DatasetForTokenClassification(DatasetBase):
 class DatasetForText2Text(DatasetBase):
     """
     Examples:
-        >>> import rubrix as rb
         >>> # Import/export records:
+        >>> import rubrix as rb
         >>> dataset = rb.DatasetForText2Text.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
+        >>>
         >>> # Passing in a list of records:
         >>> records = [
         ...     rb.Text2TextRecord(text="example"),
@@ -544,9 +619,11 @@ class DatasetForText2Text(DatasetBase):
         ... ]
         >>> dataset = rb.DatasetForText2Text(records)
         >>> assert len(dataset) == 2
+        >>>
         >>> # Looping over the dataset:
         >>> for record in dataset:
         ...     print(record)
+        >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
         ... rb.Text2TextRecord(text="example"})
