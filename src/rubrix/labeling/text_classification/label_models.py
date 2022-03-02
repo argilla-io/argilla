@@ -594,6 +594,28 @@ class FlyingSquid(LabelModel):
 
         return probas
 
+    def _get_score_objects(self, verbose: bool = False):
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+        probabilities = self._predict(wl_matrix, verbose)
+
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        is_tie = is_max.sum(axis=1) > 1
+
+        prediction = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotation = np.array(
+            [
+                self._labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
+        )
+
+        return is_max, is_tie, prediction, annotation
+
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -643,23 +665,8 @@ class FlyingSquid(LabelModel):
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        wl_matrix = self._weak_labels.matrix(has_annotation=True)
-        probabilities = self._predict(wl_matrix, verbose)
-
-        # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
-        is_tie = is_max.sum(axis=1) > 1
-
-        prediction = np.argmax(is_max, axis=1)
-        # we need to transform the indexes!
-        annotation = np.array(
-            [
-                self._labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
-            dtype=np.short,
+        is_max, is_tie, prediction, annotation = self._get_score_objects(
+            verbose=verbose
         )
 
         if not is_tie.any():
@@ -685,22 +692,6 @@ class FlyingSquid(LabelModel):
             target_names=self._labels[: annotation.max() + 1],
             output_dict=not output_str,
         )
-
-
-class LabelModelError(Exception):
-    pass
-
-
-class MissingAnnotationError(LabelModelError):
-    pass
-
-
-class TooFewRulesError(LabelModelError):
-    pass
-
-
-class NotFittedError(LabelModelError):
-    pass
 
 
 class Epoxy(FlyingSquid):
@@ -1055,3 +1046,19 @@ class Epoxy(FlyingSquid):
         )
 
         return metrics
+
+
+class LabelModelError(Exception):
+    pass
+
+
+class MissingAnnotationError(LabelModelError):
+    pass
+
+
+class TooFewRulesError(LabelModelError):
+    pass
+
+
+class NotFittedError(LabelModelError):
+    pass
