@@ -18,22 +18,34 @@
 <template>
   <div>
     <div class="origins">
-      <text-spans
-        v-for="origin in entitiesOrigin"
-        :key="origin"
+      <text-spans-static
+        v-if="record.prediction"
+        v-once
+        key="prediction"
         :dataset="dataset"
-        :origin="origin"
+        origin="prediction"
         :record="record"
-        :class="origin"
-        :entities="getEntitiesByOrigin(origin)"
+        class="prediction"
+        :entities="getEntitiesByOrigin('prediction')"
+      />
+      <text-spans
+        key="annotation"
+        :dataset="dataset"
+        origin="annotation"
+        :record="record"
+        class="annotation"
+        :entities="getEntitiesByOrigin('annotation')"
       />
     </div>
-    <div class="content__actions-buttons">
+    <div class="content__actions-buttons" v-if="record.status !== 'Validated'">
+      <re-button class="button-primary" @click="onValidate(record)">{{
+        record.status === "Edited" ? "Save" : "Validate"
+      }}</re-button>
       <re-button
-        v-if="record.status !== 'Validated'"
-        class="button-primary"
-        @click="onValidate(record)"
-        >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
+        :disabled="!record.annotatedEntities.length"
+        class="button-primary--outline"
+        @click="onClearAnnotations()"
+        >Clear annotations</re-button
       >
     </div>
   </div>
@@ -43,11 +55,6 @@
 import { mapActions } from "vuex";
 
 export default {
-  data: function () {
-    return {
-      entitiesOrigin: ["prediction", "annotation"],
-    };
-  },
   props: {
     dataset: {
       type: Object,
@@ -61,6 +68,7 @@ export default {
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     getEntitiesByOrigin(origin) {
       return origin === "annotation"
@@ -84,28 +92,29 @@ export default {
         ],
       });
     },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotatedEntities: [],
+          },
+        ],
+      });
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .content {
-  position: relative;
-  white-space: pre-wrap;
-  & > div:nth-child(2) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    ::v-deep {
-      .span__text {
-        opacity: 1;
-      }
-    }
-  }
   &__input {
     padding-right: 200px;
+    // display: flex;
+    // flex-wrap: wrap;
   }
   &__actions-buttons {
     margin-right: 0;
@@ -113,17 +122,18 @@ export default {
     display: flex;
     min-width: 20%;
     .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
+      min-width: 137px;
+      min-height: 34px;
+      line-height: 34px;
+      display: inline-block;
+      margin: 1.5em 0 0 0;
       & + .re-button {
         margin-left: 1em;
       }
     }
   }
 }
-.origins > div:nth-child(1) {
+.origins > .prediction {
   position: absolute;
   top: 0;
   left: 0;
@@ -131,28 +141,17 @@ export default {
   bottom: 0;
   ::v-deep {
     .span__text {
-      opacity: 0;
+      color: transparent;
+      & > * {
+        color: palette(grey, dark);
+      }
     }
-    .highlight__content__text {
-      opacity: 0;
+    .highlight__content {
+      color: transparent;
     }
   }
   ::v-deep .highlight-text {
-    opacity: 0;
+    opacity: 1;
   }
 }
-// .prediction {
-//   pointer-events: none;
-//   ::v-deep {
-//     .highlight__content {
-//       pointer-events: all;
-//     }
-//   }
-// }
-// .annotation {
-//   pointer-events: none;
-//   * > {
-//     pointer-events: all;
-//   }
-// }
 </style>
