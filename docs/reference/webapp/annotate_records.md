@@ -13,7 +13,7 @@ You can access the _Annotate mode_ via the sidebar of the [Dataset page](dataset
 
 The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
 In addition, the _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including the metadata of your records.
-For example, you can use the [Status filter](link_filter_guide_status_section) to hide already annotated records (_Status: Default_), or to only show annotated records when revising previous annotations (_Status: Validated_).
+For example, you can use the **Status filter** to hide already annotated records (_Status: Default_), or to only show annotated records when revising previous annotations (_Status: Validated_).
 
 You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
 
