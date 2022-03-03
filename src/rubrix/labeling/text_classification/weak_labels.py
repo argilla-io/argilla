@@ -108,6 +108,11 @@ class WeakLabelsBase:
         return self._rules
 
     @property
+    def labels(self) -> List[str]:
+        """The list of labels."""
+        raise NotImplementedError
+
+    @property
     def cardinality(self) -> int:
         """The number of labels."""
         raise NotImplementedError
@@ -372,6 +377,10 @@ class WeakLabels(WeakLabelsBase):
     @property
     def cardinality(self) -> int:
         return len(self._label2int) - 1
+
+    @property
+    def labels(self) -> List[str]:
+        return [key for key in self._label2int.keys() if key is not None]
 
     @property
     def label2int(self) -> Dict[Optional[str], int]:
