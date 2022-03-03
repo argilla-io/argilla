@@ -127,7 +127,7 @@ export default {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
         if (this.formattedEntities.length == 1) {
-          this.selectEntity(this.formattedEntities[0]);
+          this.onSelectEntity(this.formattedEntities[0].text);
         } else {
           this.showEntitiesSelector = true;
         }

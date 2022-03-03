@@ -313,7 +313,7 @@ class TokenMetrics(BaseModel):
     custom: Dict[str, Any] = None
 
 
-class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
+class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
     """Configured metrics for token classification"""
 
     _PREDICTED_NAMESPACE = "metrics.predicted"
@@ -401,6 +401,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
         """Compute metrics at record level"""
+        base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
         annotated_tags = record.annotated_iob_tags() or []
         predicted_tags = record.predicted_iob_tags() or []
@@ -409,6 +410,7 @@ class TokenClassificationMetrics(BaseTaskMetrics[TokenClassificationRecord]):
             record, predicted_tags or annotated_tags
         )
         return {
+            **base_metrics,
             "tokens": tokens_metrics,
             "tokens_length": len(record.tokens),
             "predicted": {

@@ -38,11 +38,9 @@
       />
     </div>
     <div class="content__actions-buttons" v-if="record.status !== 'Validated'">
-      <re-button
-        class="button-primary"
-        @click="onValidate(record)"
-        >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
-      >
+      <re-button class="button-primary" @click="onValidate(record)">{{
+        record.status === "Edited" ? "Save" : "Validate"
+      }}</re-button>
       <re-button
         :disabled="!record.annotatedEntities.length"
         class="button-primary--outline"

@@ -5,9 +5,9 @@ from rubrix.server.tasks.commons.metrics.model.base import BaseMetric, BaseTaskM
 from rubrix.server.tasks.text2text import Text2TextRecord
 
 
-class Text2TextMetrics(BaseTaskMetrics[Text2TextRecord]):
+class Text2TextMetrics(CommonTasksMetrics[Text2TextRecord]):
     """
     Configured metrics for text2text task
     """
 
-    metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics
+    pass

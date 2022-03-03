@@ -122,7 +122,7 @@ class DatasetLabels(TermsAggregation):
         return {"labels": [k for k in (aggregation_result or {}).keys()]}
 
 
-class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
+class TextClassificationMetrics(CommonTasksMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
