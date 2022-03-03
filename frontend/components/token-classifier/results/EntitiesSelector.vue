@@ -166,7 +166,7 @@ export default {
       display: inline-block;
       white-space: pre-line;
       position: absolute;
-      left: -60%;
+      left: -30%;
       top: 2em;
       z-index: 9;
     }
