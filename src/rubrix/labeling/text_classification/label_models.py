@@ -15,12 +15,12 @@
 import hashlib
 import logging
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import WeakLabels
+from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class LabelModel:
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
         """
         raise NotImplementedError
 
@@ -72,21 +72,128 @@ class LabelModel:
     def predict(
         self,
         include_annotated_records: bool = False,
-        include_abstentions: bool = False,
         prediction_agent: str = "LabelModel",
         **kwargs,
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            **kwargs: Specific to the label model implementations
 
         Returns:
             A list of records that include the predictions of the label model.
         """
         raise NotImplementedError
+
+
+class MajorityVoter(LabelModel):
+    """A basic label model that computes the majority vote across all rules.
+
+    For multi-label classification, it will simply vote for all labels with a non-zero probability,
+    that is labels that got at least one vote by the rules.
+
+    Args:
+        weak_labels: The weak labels object.
+    """
+
+    def __init__(self, weak_labels: Union[WeakLabels, WeakMultiLabels]):
+        super().__init__(weak_labels=weak_labels)
+
+    def fit(self, *args, **kwargs):
+        raise NotImplementedError("No need to call fit on the 'MajorityVoter'!")
+
+    def predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        prediction_agent: str = "MajorityVoter",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        **kwargs,
+    ) -> List[TextClassificationRecord]:
+        """Applies the label model.
+
+        Args:
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            tie_break_policy: Policy to break ties. You can choose among three policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
+        wl_matrix = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
+
+        probabilities = np.zeros(wl_matrix.shape[0], self._weak_labels.cardinality)
+        raise NotImplementedError
+
+        # add predictions to records
+        records_with_prediction = []
+        for i, prob, rec in zip(
+            range(len(probabilities)),
+            probabilities,
+            self._weak_labels.records(
+                has_annotation=None if include_annotated_records else False
+            ),
+        ):
+            # Check if model abstains, that is if the highest probability is assigned to more than one label
+            # 1.e-8 is taken from the abs tolerance of np.isclose
+            equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+            tie = False
+            if len(equal_prob_idx) > 1:
+                tie = True
+
+            # maybe skip record
+            if not include_abstentions and (
+                tie and tie_break_policy is TieBreakPolicy.ABSTAIN
+            ):
+                continue
+
+            if not tie:
+                pred_for_rec = [
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
+                ]
+            # resolve ties following the tie break policy
+            elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+                pred_for_rec = None
+            elif tie_break_policy is TieBreakPolicy.RANDOM:
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
+                    equal_prob_idx
+                )
+                for idx in range(len(prob)):
+                    if idx == equal_prob_idx[random_idx]:
+                        prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                    else:
+                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                            len(prob) - 1
+                        )
+                pred_for_rec = [
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
+                ]
+            else:
+                raise NotImplementedError(
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                )
+
+            records_with_prediction.append(rec.copy(deep=True))
+            records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
+
+        return records_with_prediction
 
 
 class Snorkel(LabelModel):
@@ -157,7 +264,7 @@ class Snorkel(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
@@ -211,8 +318,8 @@ class Snorkel(LabelModel):
         """Returns a list of records that contain the predictions of the label model
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
             tie_break_policy: Policy to break ties. You can choose among three policies:
 
@@ -221,7 +328,7 @@ class Snorkel(LabelModel):
                 - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -308,7 +415,7 @@ class Snorkel(LabelModel):
                 - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
             output_str: If True, return output as nicely formatted string.
 
         Returns:
@@ -404,15 +511,12 @@ class FlyingSquid(LabelModel):
 
         self._init_kwargs = kwargs
         self._models: List[FlyingSquidLabelModel] = []
-        self._labels = [
-            label for label in self._weak_labels.label2int.keys() if label is not None
-        ]
 
     def fit(self, include_annotated_records: bool = False, **kwargs):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
             **kwargs: Passed on to the FlyingSquid's
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
@@ -426,7 +530,9 @@ class FlyingSquid(LabelModel):
         # much of the implementation is taken from wrench:
         # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
         # If binary, we only need one model
-        for i in range(1 if len(self._labels) == 2 else len(self._labels)):
+        for i in range(
+            1 if self._weak_labels.cardinality == 2 else self._weak_labels.cardinality
+        ):
             model = self._FlyingSquidLabelModel(
                 m=len(self._weak_labels.rules), **self._init_kwargs
             )
@@ -454,7 +560,9 @@ class FlyingSquid(LabelModel):
         """
         wl_matrix_i = weak_label_matrix.copy()
 
-        target_mask = wl_matrix_i == self._weak_labels.label2int[self._labels[i]]
+        target_mask = (
+            wl_matrix_i == self._weak_labels.label2int[self._weak_labels.labels[i]]
+        )
         abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
         other_mask = (~target_mask) & (~abstain_mask)
 
@@ -470,13 +578,13 @@ class FlyingSquid(LabelModel):
         include_abstentions: bool = False,
         prediction_agent: str = "FlyingSquid",
         verbose: bool = True,
-        tie_break_policy: str = "abstain",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
             verbose: If True, print out messages of the progress to stderr.
             tie_break_policy: Policy to break ties. You can choose among two policies:
@@ -485,7 +593,7 @@ class FlyingSquid(LabelModel):
                 - `random`: randomly choose among tied option using deterministic hash
 
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -525,7 +633,8 @@ class FlyingSquid(LabelModel):
 
             if not tie:
                 pred_for_rec = [
-                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
                 ]
             # resolve ties following the tie break policy
             elif tie_break_policy is TieBreakPolicy.ABSTAIN:
@@ -542,7 +651,8 @@ class FlyingSquid(LabelModel):
                             len(prob) - 1
                         )
                 pred_for_rec = [
-                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
                 ]
             else:
                 raise NotImplementedError(
@@ -576,9 +686,9 @@ class FlyingSquid(LabelModel):
                 "This FlyingSquid instance is not fitted yet. Call `fit` before using this model."
             )
         # create predictions for each label
-        if len(self._labels) > 2:
-            probas = np.zeros((len(weak_label_matrix), len(self._labels)))
-            for i in range(len(self._labels)):
+        if self._weak_labels.cardinality > 2:
+            probas = np.zeros((len(weak_label_matrix), self._weak_labels.cardinality))
+            for i in range(self._weak_labels.cardinality):
                 wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, i)
                 probas[:, i] = self._models[i].predict_proba(
                     L_matrix=wl_matrix_i, verbose=verbose
@@ -618,7 +728,7 @@ class FlyingSquid(LabelModel):
                 - `random`: randomly choose among tied option using deterministic hash
 
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
             verbose: If True, print out messages of the progress to stderr.
             output_str: If True, return output as nicely formatted string.
 
@@ -656,7 +766,7 @@ class FlyingSquid(LabelModel):
         # we need to transform the indexes!
         annotation = np.array(
             [
-                self._labels.index(self._weak_labels.int2label[i])
+                self._weak_labels.labels.index(self._weak_labels.int2label[i])
                 for i in self._weak_labels.annotation()
             ],
             dtype=np.short,
@@ -682,7 +792,7 @@ class FlyingSquid(LabelModel):
         return classification_report(
             annotation,
             prediction,
-            target_names=self._labels[: annotation.max() + 1],
+            target_names=self._weak_labels.labels[: annotation.max() + 1],
             output_dict=not output_str,
         )
 
