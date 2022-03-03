@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, Generic, List
 
 from rubrix.server.tasks.commons import EsRecordDataFieldNames, TaskStatus
 from rubrix.server.tasks.commons.metrics.model.base import (
@@ -12,7 +12,7 @@ from rubrix.server.tasks.commons.metrics.model.base import (
 )
 
 
-class CommonTasksMetrics(BaseTaskMetrics[GenericRecord]):
+class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
     """Common task metrics"""
 
     @classmethod
