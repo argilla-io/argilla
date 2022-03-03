@@ -9,6 +9,7 @@ def cautious_classification_report(
     y_true,
     y_pred,
     labels=None,
+    model_labels=None,
     target_names=None,
     sample_weight=None,
     digits=2,
@@ -30,31 +31,39 @@ def cautious_classification_report(
             "Formatted string output is not implemented for cautious_classification_report."
         )
 
-    y_true_partial = y_true[~is_tie]
-    y_pred_partial = y_pred[~is_tie]
+    if not is_tie.any():
+        y_true_partial = y_true
+        y_pred_partial = y_pred
+    else:
+        y_true_partial = y_true[~is_tie]
+        y_pred_partial = y_pred[~is_tie]
+
+    if y_true_partial.any() and target_names is None:
+        target_names = model_labels[: y_true_partial.max() + 1]
 
     coverage = len(y_true_partial) / len(y_true)
 
-    report_partial = classification_report(
-        y_true_partial,
-        y_pred_partial,
-        labels=labels,
-        target_names=target_names,
-        sample_weight=sample_weight,
-        digits=digits,
-        output_dict=True,
-        zero_division=zero_division,
-    )
-
     report_final = {}
 
-    accuracy = report_partial["accuracy"]
-
-    report_final["efficacy"] = (accuracy + coverage) / 2
-
-    report_final["fscore_cautious"] = 2 * (accuracy * coverage) / (accuracy + coverage)
-
-    report_final.update(report_partial)
+    if y_true_partial.any():
+        report_partial = classification_report(
+            y_true_partial,
+            y_pred_partial,
+            labels=labels,
+            target_names=target_names,
+            sample_weight=sample_weight,
+            digits=digits,
+            output_dict=True,
+            zero_division=zero_division,
+        )
+        accuracy = report_partial["accuracy"]
+        report_final = {
+            "efficacy": (accuracy + coverage) / 2,
+            "fscore_cautious": 2 * (accuracy * coverage) / (accuracy + coverage),
+        }
+        report_final.update(report_partial)
+    else:
+        report_final = {"accuracy": 0, "efficacy": 0, "fscore_cautious": 0}
 
     return report_final
 

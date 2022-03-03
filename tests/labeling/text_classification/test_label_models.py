@@ -566,7 +566,7 @@ class TestEpoxy:
     def test_not_installed(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "epoxy", None)
         with pytest.raises(ModuleNotFoundError, match="pip install epoxy"):
-            Epoxy(weak_labels=None, embeddings=None)
+            Epoxy(None)
 
     def test_init(self, weak_labels):
         np.random.seed(0)

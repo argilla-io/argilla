@@ -13,7 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import hashlib
+import importlib
 import logging
+import sys
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
@@ -719,7 +721,7 @@ class Epoxy(FlyingSquid):
     def __init__(
         self,
         weak_labels: WeakLabels,
-        embeddings: np.ndarray,
+        embeddings: np.ndarray = None,
         thresholds: Union[float, List[float], None] = None,
         **kwargs,
     ):
@@ -803,8 +805,8 @@ class Epoxy(FlyingSquid):
 
     def _grid_search(
         self,
-        score: str = "accuracy",
-        tie_break_policy: str = "random",
+        score: str = "fscore_cautious",
+        tie_break_policy: str = "abstain",
         first_space_num: int = 20,
         second_space_num: int = 20,
         second_space_subset: Union[None, List[int]] = None,
@@ -994,58 +996,54 @@ class Epoxy(FlyingSquid):
             tie_break_policy=tie_break_policy,
         )
 
-    def _compute_metrics(
-        self,
-        annotation: np.ndarray,
-        prediction: np.ndarray,
-        is_tie: np.ndarray,
-        int2int: Optional[Dict[int, int]] = None,
-    ) -> Dict[str, float]:
-        prediction_partial, annotation_partial = (
-            prediction[~is_tie],
-            annotation[~is_tie],
-        )
-        standard_metrics = super()._compute_metrics(
-            annotation_partial, prediction_partial, int2int
-        )
-
-        accuracy = standard_metrics["accuracy"]
-        coverage = len(prediction[~is_tie]) / len(annotation)
-        metrics = {
-            "efficacy": (accuracy + coverage) / 2,
-            "fscore": 2 * (accuracy * coverage) / (accuracy + coverage),
-        }
-        return metrics
-
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
     ) -> Dict[str, float]:
 
+        try:
+            import sklearn
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'sklearn' must be installed to compute the metrics! "
+                "You can install 'sklearn' with the command: `pip install scikit-learn`"
+            )
+        from rubrix.metrics.text_classification import cautious_classification_report
+
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
         self._include_annotated_records = True
 
-        is_max, is_tie, prediction, annotation, fsInt2wlInt = self._get_score_objects(
+        is_max, is_tie, prediction, annotation = self._get_score_objects(
             verbose=verbose
         )
 
-        if not is_tie.any():
-            pass
-        elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+        if TieBreakPolicy.ABSTAIN:
             pass
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for Epoxy!"
             )
 
-        metrics = self._compute_metrics(
-            prediction=prediction,
-            annotation=annotation,
-            int2int=fsInt2wlInt,
-            is_tie=is_tie,
+        _LOGGER.debug(
+            """
+            annotation: {0},
+            prediction: {1},
+            is_tie: {2}
+            """.format(
+                str(annotation.shape), str(prediction.shape), str(is_tie.shape)
+            )
         )
 
-        return metrics
+        return cautious_classification_report(
+            annotation,
+            prediction,
+            model_labels=self._labels,
+            output_dict=True,
+            is_tie=is_tie,
+        )
 
 
 class LabelModelError(Exception):
