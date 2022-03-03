@@ -96,8 +96,12 @@ export default {
       let textSpans = [];
       const entities = normalizedEntities(this.entities, this.visualTokens);
       while (idx < this.visualTokens.length) {
-        const entity = entities.find(
+        let index = textSpans.length;
+        const entityArray = entities.filter(
           (entity) => entity.start_token <= idx && idx < entity.end_token
+        );
+        const entity = entityArray.find(
+          (e) => e.start >= textSpans[index > 0 ? index - 1 : index].end
         );
         if (entity) {
           textSpans.push({
