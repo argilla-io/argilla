@@ -36,11 +36,7 @@
       ]"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      >{{ token.text
-      }}{{
-        token.hasSpaceAfter && i + 1 !== span.tokens.length ? " " : ""
-      }}</span
-    >
+      v-html="`${$highlightSearch(dataset.query.text, token.text)}${token.hasSpaceAfter && i + 1 !== span.tokens.length ? ' ' : ''}`"></span>
     <svgicon
       class="remove-button"
       @click="removeEntity"
@@ -136,7 +132,7 @@ export default {
   }
   &__content {
     @include font-size(18px);
-    white-space: normal;
+    white-space: pre-line;
     display: inline;
     padding-bottom: 1px;
   }
