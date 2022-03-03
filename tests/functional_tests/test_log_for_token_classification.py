@@ -133,6 +133,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 {"tag": "O", "value": "."},
             ],
         },
+        "text_length": 137,
         "tokens": [
             {
                 "capitalness": "UPPER",
@@ -477,21 +478,6 @@ def test_log_record_that_makes_me_cry(mocked_client):
             },
         ],
         "tokens_length": 31,
-        "text_length": 137,
-        "predicted": {
-            "mentions": [
-                {
-                    "value": "access",
-                    "label": "ENG",
-                    "score": 1.0,
-                    "capitalness": "LOWER",
-                    "density": 0.03225806451612903,
-                    "tokens_length": 1,
-                    "chars_length": 6,
-                }
-            ]
-        },
-        "annotated": {"mentions": []},
     }
 
 
