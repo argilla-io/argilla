@@ -247,6 +247,29 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def all_text(self) -> str:
         return self.text
 
+    def predicted_iob_tags(self) -> Optional[List[str]]:
+        if self.prediction is None:
+            return None
+        return self.spans2iob(self.prediction.entities)
+
+    def annotated_iob_tags(self) -> Optional[List[str]]:
+        if self.annotation is None:
+            return None
+        return self.spans2iob(self.annotation.entities)
+
+    def spans2iob(self, spans: List[EntitySpan]) -> Optional[List[str]]:
+        if spans is None:
+            return None
+        tags = ["O"] * len(self.tokens)
+        for entity in spans:
+            token_start = self.char_id2token_id(entity.start)
+            token_end = self.char_id2token_id(entity.end - 1)
+            tags[token_start] = f"B-{entity.label}"
+            for idx in range(token_start + 1, token_end + 1):
+                tags[idx] = f"I-{entity.label}"
+
+        return tags
+
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
