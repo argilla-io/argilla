@@ -126,14 +126,14 @@ export default {
       let textSpans = [];
       const entities = normalizedEntities(this.entities, this.visualTokens);
       while (idx < this.visualTokens.length) {
-        const entity = entities.find(
+        let index = textSpans.length;
+        const entityArray = entities.filter(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
-        let index = textSpans.length;
-        if (
-          entity &&
-          entity.start >= textSpans[index > 0 ? index - 1 : index].end
-        ) {
+        const entity = entityArray.find(
+          (e) => e.start >= textSpans[index > 0 ? index - 1 : index].end
+        );
+        if (entity) {
           textSpans.push({
             entity,
             tokens: this.visualTokens.slice(
