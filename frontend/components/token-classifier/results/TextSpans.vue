@@ -130,8 +130,8 @@ export default {
         const entityArray = entities.filter(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
-        const entity = entityArray.find(
-          (e) => e.start >= textSpans[index > 0 ? index - 1 : index].end
+        const entity = entityArray.find((e) =>
+          index > 0 ? e.start >= textSpans[index - 1].end : true
         );
         if (entity) {
           textSpans.push({
