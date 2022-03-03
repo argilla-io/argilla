@@ -60,10 +60,16 @@ def cautious_classification_report(
         report_final = {
             "efficacy": (accuracy + coverage) / 2,
             "fscore_cautious": 2 * (accuracy * coverage) / (accuracy + coverage),
+            "coverage": coverage,
         }
         report_final.update(report_partial)
     else:
-        report_final = {"accuracy": 0, "efficacy": 0, "fscore_cautious": 0}
+        report_final = {
+            "accuracy": 0,
+            "efficacy": 0,
+            "fscore_cautious": 0,
+            "coverage": 0,
+        }
 
     return report_final
 
