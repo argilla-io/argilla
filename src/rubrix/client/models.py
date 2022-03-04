@@ -87,7 +87,6 @@ class _Validators(BaseModel):
 
     class Config:
         extra = "forbid"
-        underscore_attrs_are_private = True
 
 
 class BulkResponse(BaseModel):
@@ -231,6 +230,9 @@ class TokenClassificationRecord(_Validators):
         ... )
     """
 
+    text: str = Field(min_length=1)
+    tokens: List[str] = Field(min_items=1)
+
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
     ] = None
@@ -245,9 +247,6 @@ class TokenClassificationRecord(_Validators):
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
-
-    text: str = Field(min_length=1)
-    tokens: List[str] = Field(min_items=1)
 
     @validator("prediction")
     def add_default_score(
