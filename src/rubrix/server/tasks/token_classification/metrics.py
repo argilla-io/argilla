@@ -17,6 +17,7 @@ from rubrix.server.tasks.commons.metrics.model.base import (
 )
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
+    TokenClassificationAnnotation,
     TokenClassificationRecord,
 )
 
@@ -282,6 +283,11 @@ class MentionMetrics(BaseModel):
     chars_length: int = Field(g=0)
 
 
+class TokenTagMetrics(BaseModel):
+    value: str
+    tag: str
+
+
 class TokenMetrics(BaseModel):
     """
     Token metrics stored in elasticsearch for token classification
@@ -292,7 +298,7 @@ class TokenMetrics(BaseModel):
         char_start: The token character start position in sentence
         char_end: The token character end position in sentence
         score: Token score info
-        tag: Token tag info
+        tag: Token tag info. Deprecated: Use metrics.predicted.tags or metrics.annotated.tags instead
         custom: extra token level info
     """
 
@@ -303,15 +309,21 @@ class TokenMetrics(BaseModel):
     length: int
     capitalness: str
     score: Optional[float] = None
-    tag: Optional[str] = None
+    tag: Optional[str] = None  # TODO: remove!
     custom: Dict[str, Any] = None
 
 
 class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
     """Configured metrics for token classification"""
 
-    _PREDICTED_MENTIONS_NAMESPACE = "metrics.predicted.mentions"
-    _ANNOTATED_MENTIONS_NAMESPACE = "metrics.annotated.mentions"
+    _PREDICTED_NAMESPACE = "metrics.predicted"
+    _ANNOTATED_NAMESPACE = "metrics.annotated"
+
+    _PREDICTED_MENTIONS_NAMESPACE = f"{_PREDICTED_NAMESPACE}.mentions"
+    _ANNOTATED_MENTIONS_NAMESPACE = f"{_ANNOTATED_NAMESPACE}.mentions"
+
+    _PREDICTED_TAGS_NAMESPACE = f"{_PREDICTED_NAMESPACE}.tags"
+    _ANNOTATED_TAGS_NAMESPACE = f"{_ANNOTATED_NAMESPACE}.tags"
 
     _TOKENS_NAMESPACE = "metrics.tokens"
 
@@ -333,75 +345,44 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         return "MIDDLE"
 
     @staticmethod
-    def spans2iob(
-        spans: List[EntitySpan], record: TokenClassificationRecord
-    ) -> List[str]:
-        if not spans:
-            return []
-
-        tags = ["O"] * len(record.tokens)
-        for entity in spans:
-            token_start = record.char_id2token_id(entity.start)
-            token_end = record.char_id2token_id(entity.end - 1)
-            tags[token_start] = f"B-{entity.label}"
-            for idx in range(token_start + 1, token_end + 1):
-                tags[idx] = f"I-{entity.label}"
-
-        return tags
-
-    @staticmethod
-    def build_mentions_metrics(
-        record: TokenClassificationRecord,
-    ) -> Dict[str, Any]:
-        """Given a list of mentions with its entity spans, Compute all required metrics"""
-
-        def mentions_metrics(mentions: List[Tuple[str, EntitySpan]]):
-            def mention_tokens_length(entity: EntitySpan) -> int:
-                """Compute mention tokens length"""
-                return len(
-                    set(
-                        [
-                            token_idx
-                            for i in range(entity.start, entity.end)
-                            for token_idx in [record.char_id2token_id(i)]
-                            if token_idx is not None
-                        ]
-                    )
+    def mentions_metrics(
+        record: TokenClassificationRecord, mentions: List[Tuple[str, EntitySpan]]
+    ):
+        def mention_tokens_length(entity: EntitySpan) -> int:
+            """Compute mention tokens length"""
+            return len(
+                set(
+                    [
+                        token_idx
+                        for i in range(entity.start, entity.end)
+                        for token_idx in [record.char_id2token_id(i)]
+                        if token_idx is not None
+                    ]
                 )
+            )
 
-            return [
-                MentionMetrics(
-                    value=mention,
-                    label=entity.label,
-                    score=entity.score,
-                    capitalness=TokenClassificationMetrics.capitalness(mention),
-                    density=TokenClassificationMetrics.density(
-                        _tokens_length, sentence_length=len(record.tokens)
-                    ),
-                    tokens_length=_tokens_length,
-                    chars_length=len(mention),
-                )
-                for mention, entity in mentions
-                for _tokens_length in [
-                    mention_tokens_length(entity),
-                ]
+        return [
+            MentionMetrics(
+                value=mention,
+                label=entity.label,
+                score=entity.score,
+                capitalness=TokenClassificationMetrics.capitalness(mention),
+                density=TokenClassificationMetrics.density(
+                    _tokens_length, sentence_length=len(record.tokens)
+                ),
+                tokens_length=_tokens_length,
+                chars_length=len(mention),
+            )
+            for mention, entity in mentions
+            for _tokens_length in [
+                mention_tokens_length(entity),
             ]
-
-        return {
-            "predicted": {"mentions": mentions_metrics(record.predicted_mentions())},
-            "annotated": {"mentions": mentions_metrics(record.annotated_mentions())},
-        }
+        ]
 
     @classmethod
     def build_tokens_metrics(
-        cls, record: TokenClassificationRecord
+        cls, record: TokenClassificationRecord, tags: Optional[List[str]] = None
     ) -> List[TokenMetrics]:
-        spans = (
-            record.prediction.entities
-            if record.prediction
-            else (record.annotation.entities if record.annotation else None)
-        )
-        tags = cls.spans2iob(spans, record)
 
         return [
             TokenMetrics(
@@ -422,11 +403,30 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
+        annotated_tags = record.annotated_iob_tags() or []
+        predicted_tags = record.predicted_iob_tags() or []
+
+        tokens_metrics = cls.build_tokens_metrics(
+            record, predicted_tags or annotated_tags
+        )
         return {
             **base_metrics,
-            "tokens": cls.build_tokens_metrics(record),
+            "tokens": tokens_metrics,
             "tokens_length": len(record.tokens),
-            **cls.build_mentions_metrics(record),
+            "predicted": {
+                "mentions": cls.mentions_metrics(record, record.predicted_mentions()),
+                "tags": [
+                    TokenTagMetrics(tag=tag, value=token)
+                    for tag, token in zip(predicted_tags, record.tokens)
+                ],
+            },
+            "annotated": {
+                "mentions": cls.mentions_metrics(record, record.annotated_mentions()),
+                "tags": [
+                    TokenTagMetrics(tag=tag, value=token)
+                    for tag, token in zip(annotated_tags, record.tokens)
+                ],
+            },
         }
 
     _TOKENS_METRICS = [
@@ -520,6 +520,14 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
             mention_field="value",
             labels_field="label",
         ),
+        EntityConsistency(
+            id="predicted_tag_consistency",
+            name="Token tag consistency for predictions",
+            description="Computes token tag variability for top-k predicted tags",
+            nested_path=_PREDICTED_TAGS_NAMESPACE,
+            mention_field="value",
+            labels_field="tag",
+        ),
     ]
 
     _ANNOTATED_METRICS = [
@@ -571,6 +579,14 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
             nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
             mention_field="value",
             labels_field="label",
+        ),
+        EntityConsistency(
+            id="annotated_tag_consistency",
+            name="Token tag consistency for annotations",
+            description="Computes token tag variability for top-k annotated tags",
+            nested_path=_ANNOTATED_TAGS_NAMESPACE,
+            mention_field="value",
+            labels_field="tag",
         ),
     ]
 
