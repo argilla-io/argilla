@@ -85,7 +85,7 @@ class LoguruLoggerHandler(logging.Handler):
                 "Cannot find required package for logging.\n"
                 "Please, install `loguru` by typing:\n"
                 "pip install loguru\n"
-                "if you want to enable enhanced server api logging"
+                "if you want to enable enhanced logging"
             )
             self.emit = lambda record: None
 
