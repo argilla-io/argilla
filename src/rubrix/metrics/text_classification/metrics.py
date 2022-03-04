@@ -23,7 +23,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.compute_metric(name, metric="F1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -49,7 +49,7 @@ def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.compute_metric(name, metric="MultiLabelF1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="MultiLabelF1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

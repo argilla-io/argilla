@@ -26,7 +26,7 @@ def tokens_length(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the raw histogram data with bins of size 5
     """
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="tokens_length", query=query, interval=interval
     )
 
@@ -60,7 +60,7 @@ def token_frequency(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the top-50 tokens frequency
     """
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="token_frequency", query=query, size=tokens
     )
 
@@ -90,7 +90,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token length distribution
     """
-    metric = api.compute_metric(name, metric="token_length", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="token_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -119,7 +119,9 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token capitalness distribution
     """
-    metric = api.compute_metric(name, metric="token_capitalness", query=query)
+    metric = api.ACTIVE_API.compute_metric(
+        name, metric="token_capitalness", query=query
+    )
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -192,7 +194,7 @@ def mention_length(
         level in accepted_levels
     ), f"Unexpected value for level. Accepted values are {accepted_levels}"
 
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_mention_{level}_length",
         query=query,
@@ -234,7 +236,7 @@ def entity_labels(
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_labels",
         query=query,
@@ -275,7 +277,7 @@ def entity_density(
         >>> summary = entity_density(name="example-dataset")
         >>> summary.visualize()
     """
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_density",
         query=query,
@@ -320,7 +322,7 @@ def entity_capitalness(
         >>> summary = entity_capitalness(name="example-dataset")
         >>> summary.visualize()
     """
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_capitalness",
         query=query,
@@ -369,7 +371,7 @@ def entity_consistency(
         # TODO: Warning???
         threshold = 2
 
-    metric = api.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_consistency",
         query=query,
@@ -415,7 +417,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> import pandas as pd
         >>> pd.DataFrame(summary.data.values(), index=summary.data.keys())
     """
-    metric = api.compute_metric(name, metric="F1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

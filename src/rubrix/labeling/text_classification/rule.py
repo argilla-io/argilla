@@ -99,7 +99,7 @@ class Rule:
         Returns:
             The rule metrics.
         """
-        metrics = api.rule_metrics_for_dataset(
+        metrics = api.ACTIVE_API.rule_metrics_for_dataset(
             dataset=dataset,
             rule=LabelingRule(
                 query=self.query, label=self.label, author=self.author or "None"
@@ -152,7 +152,7 @@ def load_rules(dataset: str) -> List[Rule]:
     Returns:
         A list of rules defined in the given dataset.
     """
-    rules = api.fetch_dataset_labeling_rules(dataset)
+    rules = api.ACTIVE_API.fetch_dataset_labeling_rules(dataset)
     return [
         Rule(
             query=rule.query,
