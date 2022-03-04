@@ -187,18 +187,6 @@ export default {
       }
     }
   }
-  p {
-    display: flex;
-    align-items: flex-end;
-    font-size: 18px;
-    font-size: 1.125rem;
-    margin-top: 0;
-    margin-bottom: 2em;
-    font-weight: 600;
-    svg {
-      margin-right: 0.5em;
-    }
-  }
   .entity {
     margin-top: 1em;
     margin-bottom: 0.5em;
