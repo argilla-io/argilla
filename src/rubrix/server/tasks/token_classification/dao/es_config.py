@@ -3,6 +3,7 @@ from rubrix.server.tasks.commons.dao.es_config import mappings
 from rubrix.server.tasks.token_classification.metrics import (
     MentionMetrics,
     TokenMetrics,
+    TokenTagMetrics,
 )
 
 
@@ -19,6 +20,7 @@ def mentions_mappings():
 
 def token_classification_mappings():
     metrics_mentions_mappings = nested_mappings_from_base_model(MentionMetrics)
+    metrics_tags_mappings = nested_mappings_from_base_model(TokenTagMetrics)
     _mentions_mappings = mentions_mappings()  # TODO: remove
     return {
         "_source": mappings.source(
@@ -46,5 +48,7 @@ def token_classification_mappings():
             "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
             "metrics.predicted.mentions": metrics_mentions_mappings,
             "metrics.annotated.mentions": metrics_mentions_mappings,
+            "metrics.predicted.tags": metrics_tags_mappings,
+            "metrics.annotated.tags": metrics_tags_mappings,
         },
     }
