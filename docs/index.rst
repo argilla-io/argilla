@@ -97,24 +97,26 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
    labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
+   records = []
    for record in dataset:
        prediction = model(record['text'], labels)
 
-       item = rb.TextClassificationRecord(
-           inputs=record["text"],
-           prediction=list(zip(prediction['labels'], prediction['scores'])),
+       records.append(
+           rb.TextClassificationRecord(
+               inputs=record["text"],
+               prediction=list(zip(prediction['labels'], prediction['scores'])),
+           )
        )
 
-       rb.log(item, name="news_zeroshot")
+   rb.log(records, name="news_zeroshot")
 
 
 Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
-.. raw:: html
+Let's filter the records predicted as `Sports` with high probability and use the bulk-labeling feature for labeling 5 records as `Sports`:
 
-   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4" type="video/mp4"></video>
-
+.. image:: images/zero_shot_example.png
 
 After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
