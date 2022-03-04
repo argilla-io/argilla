@@ -188,22 +188,25 @@ dataset = load_dataset("ag_news", split='test[0:100]')
 
 labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
+records = []
 for item in dataset:
     prediction = model(item['text'], labels)
 
-    record = rb.TextClassificationRecord(
-        inputs=item["text"],
-        prediction=list(zip(prediction['labels'], prediction['scores']))
+    records.append(
+        rb.TextClassificationRecord(
+            inputs=item["text"],
+            prediction=list(zip(prediction['labels'], prediction['scores']))
+        )
     )
 
-    rb.log(record, name="news_zeroshot")
+rb.log(records, name="news_zeroshot")
 ```
 
 ### 2. Explore, Filter and Label
 
-Now let's access our Rubrix dataset and start annotating data. Let's filter the records predicted as `Business` with high probability and use the bulk-labeling feature for labeling 15 records as `Business`:
+Now let's access our Rubrix dataset and start annotating data. Let's filter the records predicted as `Sports` with high probability and use the bulk-labeling feature for labeling 5 records as `Sports`:
 
-https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4
+![](docs/images/zero_shot_example.png)
 
 ### 3. Load and create a training set
 
