@@ -208,7 +208,6 @@ export default {
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
   padding-bottom: 260px;
-
 }
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
