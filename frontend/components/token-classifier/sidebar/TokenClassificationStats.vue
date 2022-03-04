@@ -160,6 +160,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 .sidebar {
@@ -184,18 +185,6 @@ export default {
       &.active {
         background: palette(grey, light);
       }
-    }
-  }
-  p {
-    display: flex;
-    align-items: flex-end;
-    font-size: 18px;
-    font-size: 1.125rem;
-    margin-top: 0;
-    margin-bottom: 2em;
-    font-weight: 600;
-    svg {
-      margin-right: 0.5em;
     }
   }
   .entity {

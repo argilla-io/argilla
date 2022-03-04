@@ -41,8 +41,8 @@ export default {
     },
     topPosition() {
       return this.annotationEnabled
-        ? `${this.dataset.viewSettings.headerHeight - 60}px`
-        : `${this.dataset.viewSettings.headerHeight + 10}px`;
+        ? `${this.dataset.viewSettings.headerHeight - 63}px`
+        : `${this.dataset.viewSettings.headerHeight}px`;
     },
   },
 };

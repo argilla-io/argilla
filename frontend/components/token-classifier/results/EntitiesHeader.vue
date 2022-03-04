@@ -111,13 +111,12 @@ export default {
 .container {
   @extend %container;
   padding-top: 0;
-  padding-bottom: 0;
+  padding-bottom: 0.7em;
   margin-left: 0;
   padding-right: calc(4em + 45px);
 }
 .entities {
   &__container {
-    margin-bottom: 0.7em;
     padding: 0.2em 0.5em;
     background: palette(white);
     border-radius: 3px;
