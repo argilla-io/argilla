@@ -664,6 +664,10 @@ class FlyingSquid(LabelModel):
             )
         from sklearn.metrics import classification_report
 
+        from rubrix.metrics.text_classification.metrics import (
+            cautious_classification_report,
+        )
+
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
@@ -675,7 +679,7 @@ class FlyingSquid(LabelModel):
             pass
         # resolve ties
         elif tie_break_policy is TieBreakPolicy.ABSTAIN:
-            prediction, annotation = prediction[~is_tie], annotation[~is_tie]
+            pass
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
@@ -688,12 +692,21 @@ class FlyingSquid(LabelModel):
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        return classification_report(
-            annotation,
-            prediction,
-            target_names=self._labels[: annotation.max() + 1],
-            output_dict=not output_str,
-        )
+        if tie_break_policy is TieBreakPolicy.ABSTAIN:
+            return cautious_classification_report(
+                annotation,
+                prediction,
+                model_labels=self._labels,
+                output_dict=not output_str,
+                is_tie=is_tie,
+            )
+        else:
+            return classification_report(
+                annotation,
+                prediction,
+                target_names=self._labels[: annotation.max() + 1],
+                output_dict=not output_str,
+            )
 
 
 class Epoxy(FlyingSquid):

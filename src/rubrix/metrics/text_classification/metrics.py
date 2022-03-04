@@ -1,5 +1,7 @@
 from typing import Optional
 
+import pandas as pd
+
 from rubrix import _client_instance as client
 from rubrix.metrics import helpers
 from rubrix.metrics.models import MetricSummary
@@ -17,6 +19,7 @@ def cautious_classification_report(
     zero_division="warn",
     is_tie=None,
 ):
+
     try:
         import sklearn
     except ModuleNotFoundError:
@@ -26,10 +29,23 @@ def cautious_classification_report(
         )
     from sklearn.metrics import classification_report
 
-    if not output_dict:
-        raise NotImplementedError(
-            "Formatted string output is not implemented for cautious_classification_report."
-        )
+    def report_to_str(report, metrics):
+        for metric in metrics:
+            report.update(
+                {
+                    metric: {
+                        "precision": None,
+                        "recall": None,
+                        "f1-score": report[metric],
+                        "support": report["macro avg"]["support"],
+                    }
+                }
+            )
+        df = pd.DataFrame(report).transpose()
+        df = df.astype(float).applymap(lambda x: "{:,.2f}".format(x))
+        df["support"] = df["support"].astype(float).apply(lambda x: "{:,g}".format(x))
+        df = df.replace(["nan", "None"], "")
+        return df.to_string()
 
     if not is_tie.any():
         y_true_partial = y_true
@@ -56,20 +72,36 @@ def cautious_classification_report(
             output_dict=True,
             zero_division=zero_division,
         )
+
         accuracy = report_partial["accuracy"]
+
         report_final = {
             "efficacy": (accuracy + coverage) / 2,
             "fscore_cautious": 2 * (accuracy * coverage) / (accuracy + coverage),
             "coverage": coverage,
         }
+
         report_final.update(report_partial)
-    else:
+
+        if not output_dict:
+            report_final = report_to_str(
+                report_final, ["efficacy", "fscore_cautious", "coverage"]
+            )
+
+    elif output_dict:
         report_final = {
             "accuracy": 0,
             "efficacy": 0,
             "fscore_cautious": 0,
             "coverage": 0,
         }
+    else:
+        report_final = """
+            accuracy            0.0
+            efficacy            0.0
+            fscore_cautious     0.0
+            coverage            0.0
+        """
 
     return report_final
 
