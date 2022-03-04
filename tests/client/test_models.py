@@ -80,6 +80,20 @@ def test_token_classification_record(annotation, status, expected_status, expect
     assert record.spans2iob(record.annotation) == expected_iob
 
 
+def test_token_classification_with_mutation():
+    text_a = "The text"
+    text_b = "Another text sample here !!!"
+
+    record = TokenClassificationRecord(
+        text=text_a, tokens=text_a.split(" "), annotation=[]
+    )
+    assert record.spans2iob(record.annotation) == ["O"] * len(text_a.split(" "))
+
+    record.text = text_b
+    record.tokens = text_b.split(" ")
+    assert record.spans2iob(record.annotation) == ["O"] * len(text_b.split(" "))
+
+
 @pytest.mark.parametrize(
     "prediction,expected",
     [

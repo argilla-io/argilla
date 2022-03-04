@@ -20,6 +20,7 @@ This module contains the data models for the interface
 import datetime
 import warnings
 from collections import defaultdict
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -230,9 +231,6 @@ class TokenClassificationRecord(_Validators):
         ... )
     """
 
-    text: str
-    tokens: List[str]
-
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
     ] = None
@@ -248,12 +246,8 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    __chars2tokens__: Dict[int, int] = None
-    __tokens2chars__: Dict[int, Tuple[int, int]] = None
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__()
+    text: str = Field(min_length=1)
+    tokens: List[str] = Field(min_items=1)
 
     @validator("prediction")
     def add_default_score(
@@ -270,8 +264,10 @@ class TokenClassificationRecord(_Validators):
             for pred in prediction
         ]
 
+    @staticmethod
+    @lru_cache(maxsize=256)
     def __build_indices_map__(
-        self,
+        text: str, tokens: Tuple
     ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
         """
         Build the indices mapping between text characters and tokens where belongs to,
@@ -285,21 +281,21 @@ class TokenClassificationRecord(_Validators):
 
         """
 
-        def chars2tokens_index():
+        def chars2tokens_index(text_, tokens_):
             chars_map = {}
             current_token = 0
             current_token_char_start = 0
-            for idx, char in enumerate(self.text):
+            for idx, char in enumerate(text_):
                 relative_idx = idx - current_token_char_start
                 if (
-                    relative_idx < len(self.tokens[current_token])
-                    and char == self.tokens[current_token][relative_idx]
+                    relative_idx < len(tokens_[current_token])
+                    and char == tokens_[current_token][relative_idx]
                 ):
                     chars_map[idx] = current_token
                 elif (
-                    current_token + 1 < len(self.tokens)
-                    and relative_idx >= len(self.tokens[current_token])
-                    and char == self.tokens[current_token + 1][0]
+                    current_token + 1 < len(tokens_)
+                    and relative_idx >= len(tokens_[current_token])
+                    and char == tokens_[current_token + 1][0]
                 ):
                     current_token += 1
                     current_token_char_start += relative_idx
@@ -319,7 +315,7 @@ class TokenClassificationRecord(_Validators):
                 for token_idx, chars in tokens2chars_map.items()
             }
 
-        chars2tokens_idx = chars2tokens_index()
+        chars2tokens_idx = chars2tokens_index(text_=text, tokens_=tokens)
         return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
 
     def char_id2token_id(self, char_idx: int) -> Optional[int]:
@@ -327,16 +323,18 @@ class TokenClassificationRecord(_Validators):
         Given a character id, returns the token id it belongs to.
         ``None`` otherwise
         """
-        return self.__chars2tokens__.get(char_idx)
+        chars2tokens, _ = self.__build_indices_map__(self.text, tuple(self.tokens))
+        return chars2tokens.get(char_idx)
 
     def token_span(self, token_idx: int) -> Tuple[int, int]:
         """
         Given a token id, returns the start and end characters.
         Raises an ``IndexError`` if token id is out of tokens list indices
         """
-        if token_idx not in self.__tokens2chars__:
+        _, tokens2chars = self.__build_indices_map__(self.text, tuple(self.tokens))
+        if token_idx not in tokens2chars:
             raise IndexError(f"Token id {token_idx} out of bounds")
-        return self.__tokens2chars__[token_idx]
+        return tokens2chars[token_idx]
 
     def spans2iob(
         self, spans: Optional[List[Tuple[str, int, int]]] = None
