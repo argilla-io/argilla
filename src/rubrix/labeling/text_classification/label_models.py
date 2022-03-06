@@ -110,7 +110,41 @@ class MajorityVoter(LabelModel):
         include_abstentions: bool = False,
         prediction_agent: str = "MajorityVoter",
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-        **kwargs,
+    ) -> List[TextClassificationRecord]:
+        """Applies the label model.
+
+        Args:
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            tie_break_policy: Policy to break ties (IGNORED FOR MULTI LABEL!). You can choose among two policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        if isinstance(self._weak_labels, WeakMultiLabels):
+            return self._multi_label_predict(
+                include_annotated_records, include_abstentions, prediction_agent
+            )
+        return self._single_label_predict(
+            include_annotated_records,
+            include_abstentions,
+            prediction_agent,
+            tie_break_policy,
+        )
+
+    def _single_label_predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        prediction_agent: str = "MajorityVoter",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
 
@@ -136,8 +170,18 @@ class MajorityVoter(LabelModel):
             has_annotation=None if include_annotated_records else False
         )
 
-        probabilities = np.zeros(wl_matrix.shape[0], self._weak_labels.cardinality)
-        raise NotImplementedError
+        counts = np.column_stack(
+            [
+                np.count_nonzero(
+                    wl_matrix == self._weak_labels.label2int[label], axis=1
+                )
+                for label in self._weak_labels.labels
+            ]
+        )
+        with np.errstate(invalid="ignore"):
+            probabilities = np.nan_to_num(
+                counts / counts.sum(axis=1).reshape(len(counts), -1)
+            )
 
         # add predictions to records
         records_with_prediction = []
@@ -186,8 +230,65 @@ class MajorityVoter(LabelModel):
                 ]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for {self.__class__.__name__}!"
                 )
+
+            records_with_prediction.append(rec.copy(deep=True))
+            records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
+
+        return records_with_prediction
+
+    def _multi_label_predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        prediction_agent: str = "MajorityVoter",
+    ) -> List[TextClassificationRecord]:
+        """Applies the label model.
+
+        Args:
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        wl_matrix = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
+
+        # turn abstentions (-1) into 0
+        counts = np.where(wl_matrix == -1, 0, wl_matrix).sum(axis=1)
+        with np.errstate(invalid="ignore"):
+            probabilities = np.nan_to_num(
+                counts / counts.sum(axis=1).reshape(len(counts), -1)
+            )
+
+        all_rules_abstained = wl_matrix.sum(axis=1).sum(axis=1) == (
+            -1 * self._weak_labels.cardinality * len(self._weak_labels.rules)
+        )
+
+        # add predictions to records
+        records_with_prediction = []
+        for all_abstained, prob, rec in zip(
+            all_rules_abstained,
+            probabilities,
+            self._weak_labels.records(
+                has_annotation=None if include_annotated_records else False
+            ),
+        ):
+            # maybe skip record
+            if not include_abstentions and all_abstained:
+                continue
+
+            pred_for_rec = None
+            if not all_abstained:
+                pred_for_rec = [
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
+                ]
 
             records_with_prediction.append(rec.copy(deep=True))
             records_with_prediction[-1].prediction = pred_for_rec
@@ -232,21 +333,16 @@ class Snorkel(LabelModel):
         # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
         if self._weak_labels.label2int[None] != -1 or sorted(
             self._weak_labels.int2label
-        ) != list(range(-1, len(self._weak_labels.label2int) - 1)):
+        ) != list(range(-1, self._weak_labels.cardinality)):
             self._need_remap = True
-
-            labels = [None] + [
-                label for label in self._weak_labels.label2int if label is not None
-            ]
-
             self._weaklabelsInt2snorkelInt = {
                 self._weak_labels.label2int[label]: i
-                for i, label in enumerate(labels, -1)
+                for i, label in enumerate([None] + self._weak_labels.labels, -1)
             }
         else:
             self._need_remap = False
             self._weaklabelsInt2snorkelInt = {
-                i: i for i in range(-1, len(self._weak_labels.label2int) - 1)
+                i: i for i in range(-1, self._weak_labels.cardinality)
             }
 
         self._snorkelInt2weaklabelsInt = {
@@ -255,7 +351,7 @@ class Snorkel(LabelModel):
 
         # instantiate Snorkel's label model
         self._model = SnorkelLabelModel(
-            cardinality=len(self._weak_labels.label2int) - 1,
+            cardinality=self._weak_labels.cardinality,
             verbose=verbose,
             device=device,
         )
@@ -454,15 +550,10 @@ class Snorkel(LabelModel):
         if self._need_remap:
             annotation = self._copy_and_remap(annotation)
 
-        target_names = [
-            self._weak_labels.int2label[i]
-            for i in list(self._weaklabelsInt2snorkelInt.keys())[1:]
-        ]
-
         return classification_report(
             annotation,
             predictions[idx],
-            target_names=target_names[: annotation.max() + 1],
+            target_names=self._weak_labels.labels[: annotation.max() + 1],
             output_dict=not output_str,
         )
 
