@@ -231,7 +231,7 @@ class TokenClassificationRecord(_Validators):
     """
 
     text: str = Field(min_length=1)
-    tokens: List[str] = Field(min_items=1)
+    tokens: Tuple[str, ...] = Field(min_items=1)
 
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
@@ -247,6 +247,12 @@ class TokenClassificationRecord(_Validators):
 
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
+
+    def __setattr__(self, name: str, value: Any):
+        """Make text and tokens immutable"""
+        if name in ["text", "tokens"]:
+            raise AttributeError(f"You cannot assign a new value to `{name}`")
+        super().__setattr__(name, value)
 
     @validator("prediction")
     def add_default_score(
