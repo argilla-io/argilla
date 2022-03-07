@@ -72,10 +72,13 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
         ],
     )
 
+    time.sleep(0.2)
     assert mock_log.was_called
-    time.sleep(0.200)
+
     mock_log.was_called = False
     mock.get("/another/predict/route")
+
+    time.sleep(0.2)
     assert not mock_log.was_called
 
 
