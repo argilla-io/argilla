@@ -179,7 +179,10 @@ class MajorityVoter(LabelModel):
         with np.errstate(invalid="ignore"):
             probabilities = counts / counts.sum(axis=1).reshape(len(counts), -1)
 
-        return np.nan_to_num(probabilities)
+        # we treat abstentions as ties among all labels (see snorkel)
+        probabilities[np.isnan(probabilities)] = 1.0 / len(self._weak_labels.labels)
+
+        return probabilities
 
     def _make_single_label_records(
         self,
@@ -234,12 +237,12 @@ class MajorityVoter(LabelModel):
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                for idx in range(len(prob)):
-                    if idx == equal_prob_idx[random_idx]:
+                for idx in equal_prob_idx:
+                    if idx == random_idx:
                         prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
                         prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                            len(prob) - 1
+                            len(equal_prob_idx) - 1
                         )
                 pred_for_rec = [
                     (self._weak_labels.labels[idx], prob[idx])
@@ -375,7 +378,9 @@ class MajorityVoter(LabelModel):
 
             probabilities = self._compute_single_label_probs(wl_matrix)
 
-            annotation, prediction = self._score_single_label(probabilities)
+            annotation, prediction = self._score_single_label(
+                probabilities, tie_break_policy
+            )
 
         return classification_report(
             annotation,
@@ -630,13 +635,15 @@ class Snorkel(LabelModel):
             pred_for_rec = None
             if pred != -1:
                 # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
-                if np.isclose(prob, prob.max()).sum() > 1:
-                    for idx in range(len(prob)):
+                # 1.e-8 is taken from the abs tolerance of np.isclose
+                equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+                if len(equal_prob_idx) > 1:
+                    for idx in equal_prob_idx:
                         if idx == pred:
                             prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                         else:
                             prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                                len(prob) - 1
+                                len(equal_prob_idx) - 1
                             )
 
                 pred_for_rec = [
@@ -901,12 +908,12 @@ class FlyingSquid(LabelModel):
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                for idx in range(len(prob)):
-                    if idx == equal_prob_idx[random_idx]:
+                for idx in equal_prob_idx:
+                    if idx == random_idx:
                         prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
                         prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                            len(prob) - 1
+                            len(equal_prob_idx) - 1
                         )
                 pred_for_rec = [
                     (self._weak_labels.labels[i], prob[i])
