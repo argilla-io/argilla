@@ -718,9 +718,9 @@ class WeakMultiLabels(WeakLabelsBase):
 
         # create weak label matrix (3D), annotation matrix
         weak_label_matrix = np.empty(
-            (len(self._records), len(self._rules), len(labels)), dtype=np.short
+            (len(self._records), len(self._rules), len(labels)), dtype=np.byte
         )
-        annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.short)
+        annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.byte)
 
         # SECOND: Fill arrays with weak labels
         for n, annotation_n, weak_label_n in tqdm(
@@ -730,11 +730,11 @@ class WeakMultiLabels(WeakLabelsBase):
             # first: fill annotation matrix
             if annotation_n == [None]:
                 # "abstain" is an array with -1
-                annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.short)
+                annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.byte)
             else:
                 annotation_matrix[n] = np.array(
                     [1 if label in annotation_n else 0 for label in labels],
-                    dtype=np.short,
+                    dtype=np.byte,
                 )
 
             # second: fill weak label matrix (3D)
@@ -744,7 +744,7 @@ class WeakMultiLabels(WeakLabelsBase):
                 else:
                     weak_label_matrix[n, m] = np.array(
                         [1 if label in weak_labels_m else 0 for label in labels],
-                        dtype=np.short,
+                        dtype=np.byte,
                     )
 
         return weak_label_matrix, annotation_matrix, labels
