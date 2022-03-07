@@ -21,6 +21,7 @@ import datetime
 import logging
 import warnings
 from collections import defaultdict
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -252,6 +253,23 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
+    __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
+    __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+
+    def __setattr__(self, name: str, value: Any):
+        """Make text and tokens immutable"""
+        if name in ["text", "tokens"]:
+            raise AttributeError(f"You cannot assign a new value to `{name}`")
+        super().__setattr__(name, value)
+
+    @validator("tokens", pre=True)
+    def _normalize_tokens(cls, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
+        assert len(value) > 0, "At least one token should be provided"
+        return value
+
     @validator("prediction")
     def add_default_score(
         cls,
@@ -302,6 +320,7 @@ class TokenClassificationRecord(_Validators):
                     current_token += 1
                     current_token_char_start += relative_idx
                     chars_map[idx] = current_token
+
             return chars_map
 
         def tokens2chars_index(

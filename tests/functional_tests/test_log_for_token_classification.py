@@ -23,7 +23,7 @@ def test_log_with_empty_tokens_list(mocked_client):
     rubrix.delete(dataset)
     with pytest.raises(
         Exception,
-        match="ensure this value has at least 1 items",
+        match="At least one token should be provided",
     ):
         rubrix.log(
             TokenClassificationRecord(id=0, text=text, tokens=[]),

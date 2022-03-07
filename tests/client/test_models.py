@@ -63,53 +63,21 @@ def test_text_classification_input_string():
 
 
 @pytest.mark.parametrize(
-    ("annotation", "status", "expected_status"),
+    ("annotation", "status", "expected_status", "expected_iob"),
     [
-        (None, None, "Default"),
-        ([("test", 0, 5)], None, "Validated"),
-        (None, "Discarded", "Discarded"),
-        ([("test", 0, 5)], "Discarded", "Discarded"),
+        (None, None, "Default", None),
+        ([("test", 0, 4)], None, "Validated", ["B-test", "O"]),
+        (None, "Discarded", "Discarded", None),
+        ([("test", 0, 9)], "Discarded", "Discarded", ["B-test", "I-test"]),
     ],
 )
-def test_token_classification_record(annotation, status, expected_status):
+def test_token_classification_record(annotation, status, expected_status, expected_iob):
     """Just testing its dynamic defaults"""
     record = TokenClassificationRecord(
         text="test text", tokens=["test", "text"], annotation=annotation, status=status
     )
     assert record.status == expected_status
     assert record.spans2iob(record.annotation) == expected_iob
-
-
-def test_token_classification_validations():
-    with pytest.raises(
-        AssertionError,
-        match="Missing fields: "
-        "At least one of `text` or `tokens` argument must be provided!",
-    ):
-        TokenClassificationRecord()
-
-    tokens = ["test", "text"]
-    annotation = [("test", 0, 4)]
-    with pytest.raises(
-        AssertionError,
-        match="Missing field `text`: "
-        "char level spans must be provided with a raw text sentence",
-    ):
-        TokenClassificationRecord(tokens=tokens, annotation=annotation)
-
-    with pytest.raises(
-        AssertionError,
-        match="Missing field `text`: "
-        "char level spans must be provided with a raw text sentence",
-    ):
-        TokenClassificationRecord(tokens=tokens, prediction=annotation)
-
-    TokenClassificationRecord(
-        text=" ".join(tokens), tokens=tokens, prediction=annotation
-    )
-
-    record = TokenClassificationRecord(tokens=tokens)
-    assert record.text == "test text"
 
 
 def test_token_classification_with_mutation():
