@@ -259,16 +259,18 @@ class MajorityVoter(LabelModel):
             has_annotation=None if include_annotated_records else False
         )
 
-        # turn abstentions (-1) into 0
-        counts = np.where(wl_matrix == -1, 0, wl_matrix).sum(axis=1)
-        with np.errstate(invalid="ignore"):
-            probabilities = np.nan_to_num(
-                counts / counts.sum(axis=1).reshape(len(counts), -1)
-            )
-
         all_rules_abstained = wl_matrix.sum(axis=1).sum(axis=1) == (
             -1 * self._weak_labels.cardinality * len(self._weak_labels.rules)
         )
+
+        # turn abstentions (-1) into 0
+        counts = np.where(wl_matrix == -1, 0, wl_matrix).sum(axis=1)
+        probabilities = np.where(counts > 0, 1, 0)
+        # more nuanced "probability", not sure if useful though
+        # with np.errstate(invalid="ignore"):
+        #     probabilities = np.nan_to_num(
+        #         counts / counts.sum(axis=1).reshape(len(counts), -1)
+        #     )
 
         # add predictions to records
         records_with_prediction = []
