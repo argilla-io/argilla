@@ -19,9 +19,15 @@ import numpy as np
 import pytest
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import FlyingSquid, Snorkel, WeakLabels
+from rubrix.labeling.text_classification import (
+    FlyingSquid,
+    Snorkel,
+    WeakLabels,
+    WeakMultiLabels,
+)
 from rubrix.labeling.text_classification.label_models import (
     LabelModel,
+    MajorityVoter,
     MissingAnnotationError,
     NotFittedError,
     TieBreakPolicy,
@@ -32,7 +38,12 @@ from rubrix.labeling.text_classification.label_models import (
 @pytest.fixture
 def weak_labels(monkeypatch):
     def mock_load(*args, **kwargs):
-        return [TextClassificationRecord(text="test", id=i) for i in range(4)]
+        return [
+            TextClassificationRecord(text="test", annotation="negative"),
+            TextClassificationRecord(text="test", annotation="positive"),
+            TextClassificationRecord(text="test"),
+            TextClassificationRecord(text="test", annotation="neutral"),
+        ]
 
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -74,6 +85,45 @@ def weak_labels_from_guide(monkeypatch, resources):
     return WeakLabels(rules=[lambda x: "mock"] * matrix.shape[1], dataset="mock")
 
 
+@pytest.fixture
+def weak_multi_labels(monkeypatch):
+    def mock_load(*args, **kwargs):
+        return [
+            TextClassificationRecord(
+                inputs="test", multi_label=True, annotation=["scared"]
+            ),
+            TextClassificationRecord(
+                inputs="test", multi_label=True, annotation=["sad", "scared"]
+            ),
+            TextClassificationRecord(inputs="test", multi_label=True),
+            TextClassificationRecord(inputs="test", multi_label=True, annotation=[]),
+        ]
+
+    monkeypatch.setattr(
+        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+    )
+
+    def mock_apply(self, *args, **kwargs):
+        weak_label_matrix = np.array(
+            [
+                [[0, 0, 1], [-1, -1, -1]],
+                [[0, 1, 1], [1, 0, 1]],
+                [[-1, -1, -1], [-1, -1, -1]],
+                [[0, 0, 0], [0, 0, 0]],
+            ],
+            dtype=np.byte,
+        )
+        annotation_array = np.array(
+            [[0, 0, 1], [1, 0, 1], [-1, -1, -1], [0, 0, 0]], dtype=np.byte
+        )
+        labels = ["sad", "happy", "scared"]
+        return weak_label_matrix, annotation_array, labels
+
+    monkeypatch.setattr(WeakMultiLabels, "_apply_rules", mock_apply)
+
+    return WeakMultiLabels(rules=[lambda: None] * 2, dataset="mock")
+
+
 def test_tie_break_policy_enum():
     with pytest.raises(ValueError, match="mock is not a valid TieBreakPolicy"):
         TieBreakPolicy("mock")
@@ -94,6 +144,114 @@ class TestLabelModel:
             label_model.score()
         with pytest.raises(NotImplementedError):
             label_model.predict()
+
+
+class TestMajorityVoter:
+    def test_no_need_to_fit_error(self):
+        mj = MajorityVoter(None)
+        with pytest.raises(NotImplementedError, match="No need to call"):
+            mj.fit()
+
+    @pytest.mark.parametrize(
+        "wls, include_annotated_records, expected",
+        [
+            ("weak_labels", True, 4),
+            ("weak_labels", False, 1),
+            ("weak_multi_labels", True, 4),
+            ("weak_multi_labels", False, 1),
+        ],
+    )
+    def test_predict(
+        self, monkeypatch, request, wls, include_annotated_records, expected
+    ):
+        def compute_probs(self, wl_matrix, **kwargs):
+            assert len(wl_matrix) == expected
+            compute_probs.called = None
+
+        def make_records(self, probabilities, records, **kwargs):
+            assert probabilities is None
+            print(records)
+            return records
+
+        single_or_multi = "multi" if wls == "weak_multi_labels" else "single"
+        monkeypatch.setattr(
+            MajorityVoter, f"_compute_{single_or_multi}_label_probs", compute_probs
+        )
+        monkeypatch.setattr(
+            MajorityVoter, f"_make_{single_or_multi}_label_records", make_records
+        )
+
+        weak_labels = request.getfixturevalue(wls)
+        mj = MajorityVoter(weak_labels)
+
+        assert (
+            len(mj.predict(include_annotated_records=include_annotated_records))
+            == expected
+        )
+        assert hasattr(compute_probs, "called")
+
+    def test_compute_single_label_probs(self, weak_labels):
+        mj = MajorityVoter(weak_labels)
+        probs = mj._compute_single_label_probs(weak_labels.matrix())
+
+        expected = np.array(
+            [
+                [0.5, 0.5, 0.0],
+                [0.5, 0, 0.5],
+                [1.0 / 3, 1.0 / 3, 1.0 / 3],
+                [1.0 / 3, 0.0, 2.0 / 3],
+            ]
+        )
+        assert np.allclose(probs, expected)
+
+    @pytest.mark.parametrize(
+        "include_abstentions,tie_break_policy,expected",
+        [
+            (True, TieBreakPolicy.ABSTAIN, 4),
+            (False, TieBreakPolicy.ABSTAIN, 1),
+            (True, TieBreakPolicy.RANDOM, 4),
+            (False, TieBreakPolicy.RANDOM, 4),
+        ],
+    )
+    def test_make_single_label_records(
+        self, weak_labels, include_abstentions, tie_break_policy, expected
+    ):
+        mj = MajorityVoter(weak_labels)
+        probs = mj._compute_single_label_probs(weak_labels.matrix())
+
+        records = mj._make_single_label_records(
+            probs,
+            weak_labels.records(),
+            include_abstentions,
+            prediction_agent="mock",
+            tie_break_policy=tie_break_policy,
+        )
+
+        assert records[-1].prediction_agent == "mock"
+        assert records[-1].prediction == [
+            ("neutral", 2.0 / 3),
+            ("negative", 1.0 / 3),
+            ("positive", 0.0),
+        ]
+        assert len(records) == expected
+        if include_abstentions and tie_break_policy is TieBreakPolicy.ABSTAIN:
+            assert all(rec.prediction is None for rec in records[:3])
+        if tie_break_policy is TieBreakPolicy.RANDOM:
+            assert records[2].prediction == [
+                ("negative", 1.0 / 3 + 0.0001),
+                ("neutral", 1.0 / 3 - 0.00005),
+                ("positive", 1.0 / 3 - 0.00005),
+            ]
+
+    def test_compute_multi_label_probs(self, weak_multi_labels):
+        mj = MajorityVoter(weak_multi_labels)
+        probabilities = mj._compute_multi_label_probs(weak_multi_labels.matrix())
+
+        expected = np.array(
+            [[0, 0, 1], [1, 1, 1], [np.nan, np.nan, np.nan], [0, 0, 0]],
+            dtype=np.float16,
+        )
+        assert np.allclose(probabilities, expected, equal_nan=True)
 
 
 class TestSnorkel:
@@ -298,7 +456,6 @@ class TestFlyingSquid:
 
     def test_init(self, weak_labels):
         label_model = FlyingSquid(weak_labels)
-        assert label_model._labels == ["negative", "positive", "neutral"]
 
         with pytest.raises(ValueError, match="must not contain 'm'"):
             FlyingSquid(weak_labels, m="mock")
