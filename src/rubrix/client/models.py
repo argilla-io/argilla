@@ -21,6 +21,7 @@ import datetime
 import logging
 import warnings
 from collections import defaultdict
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -381,6 +382,7 @@ class TokenClassificationRecord(_Validators):
                     current_token += 1
                     current_token_char_start += relative_idx
                     chars_map[idx] = current_token
+
             return chars_map
 
         def tokens2chars_index(

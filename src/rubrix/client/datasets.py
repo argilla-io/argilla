@@ -877,7 +877,7 @@ class DatasetForTokenClassification(DatasetBase):
         return dataset.map(parse_tags_from_example)
 
     @classmethod
-    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
         return cls(
             [TokenClassificationRecord(**row) for row in dataframe.to_dict("records")]
         )

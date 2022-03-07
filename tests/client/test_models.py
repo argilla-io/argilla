@@ -63,15 +63,15 @@ def test_text_classification_input_string():
 
 
 @pytest.mark.parametrize(
-    ("annotation", "status", "expected_status"),
+    ("annotation", "status", "expected_status", "expected_iob"),
     [
-        (None, None, "Default"),
-        ([("test", 0, 5)], None, "Validated"),
-        (None, "Discarded", "Discarded"),
-        ([("test", 0, 5)], "Discarded", "Discarded"),
+        (None, None, "Default", None),
+        ([("test", 0, 4)], None, "Validated", ["B-test", "O"]),
+        (None, "Discarded", "Discarded", None),
+        ([("test", 0, 9)], "Discarded", "Discarded", ["B-test", "I-test"]),
     ],
 )
-def test_token_classification_record(annotation, status, expected_status):
+def test_token_classification_record(annotation, status, expected_status, expected_iob):
     """Just testing its dynamic defaults"""
     record = TokenClassificationRecord(
         text="test text", tokens=["test", "text"], annotation=annotation, status=status
