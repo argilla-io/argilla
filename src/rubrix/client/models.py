@@ -19,10 +19,12 @@ This module contains the data models for the interface
 
 import datetime
 import warnings
+from collections import defaultdict
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import limit_value_length
@@ -228,8 +230,8 @@ class TokenClassificationRecord(_Validators):
         ... )
     """
 
-    text: str
-    tokens: List[str]
+    text: str = Field(min_length=1)
+    tokens: Union[List[str], Tuple[str, ...]]
 
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
@@ -246,6 +248,23 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
+    __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
+    __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+
+    def __setattr__(self, name: str, value: Any):
+        """Make text and tokens immutable"""
+        if name in ["text", "tokens"]:
+            raise AttributeError(f"You cannot assign a new value to `{name}`")
+        super().__setattr__(name, value)
+
+    @validator("tokens", pre=True)
+    def _normalize_tokens(cls, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
+        assert len(value) > 0, "At least one token should be provided"
+        return value
+
     @validator("prediction")
     def add_default_score(
         cls,
@@ -260,6 +279,105 @@ class TokenClassificationRecord(_Validators):
             (pred[0], pred[1], pred[2], 1.0) if len(pred) == 3 else pred
             for pred in prediction
         ]
+
+    @staticmethod
+    def __build_indices_map__(
+        text: str, tokens: Tuple[str, ...]
+    ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
+        """
+        Build the indices mapping between text characters and tokens where belongs to,
+        and vice versa.
+
+        chars2tokens index contains is the token idx where i char is contained (if any).
+
+        Out-of-token characters won't be included in this map,
+        so access should be using ``chars2tokens_map.get(i)``
+        instead of ``chars2tokens_map[i]``.
+
+        """
+
+        def chars2tokens_index(text_, tokens_):
+            chars_map = {}
+            current_token = 0
+            current_token_char_start = 0
+            for idx, char in enumerate(text_):
+                relative_idx = idx - current_token_char_start
+                if (
+                    relative_idx < len(tokens_[current_token])
+                    and char == tokens_[current_token][relative_idx]
+                ):
+                    chars_map[idx] = current_token
+                elif (
+                    current_token + 1 < len(tokens_)
+                    and relative_idx >= len(tokens_[current_token])
+                    and char == tokens_[current_token + 1][0]
+                ):
+                    current_token += 1
+                    current_token_char_start += relative_idx
+                    chars_map[idx] = current_token
+
+            return chars_map
+
+        def tokens2chars_index(
+            chars2tokens: Dict[int, int]
+        ) -> Dict[int, Tuple[int, int]]:
+            tokens2chars_map = defaultdict(list)
+            for c, t in chars2tokens.items():
+                tokens2chars_map[t].append(c)
+
+            return {
+                token_idx: (min(chars), max(chars))
+                for token_idx, chars in tokens2chars_map.items()
+            }
+
+        chars2tokens_idx = chars2tokens_index(text_=text, tokens_=tokens)
+        return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
+
+    def char_id2token_id(self, char_idx: int) -> Optional[int]:
+        """
+        Given a character id, returns the token id it belongs to.
+        ``None`` otherwise
+        """
+
+        if self.__chars2tokens__ is None:
+            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
+                self.text, tuple(self.tokens)
+            )
+        return self.__chars2tokens__.get(char_idx)
+
+    def token_span(self, token_idx: int) -> Tuple[int, int]:
+        """
+        Given a token id, returns the start and end characters.
+        Raises an ``IndexError`` if token id is out of tokens list indices
+        """
+        if self.__tokens2chars__ is None:
+            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
+                self.text, tuple(self.tokens)
+            )
+        if token_idx not in self.__tokens2chars__:
+            raise IndexError(f"Token id {token_idx} out of bounds")
+        return self.__tokens2chars__[token_idx]
+
+    def spans2iob(
+        self, spans: Optional[List[Tuple[str, int, int]]] = None
+    ) -> Optional[List[str]]:
+        """Build the iob tags sequence for a list of spans annoations"""
+
+        if spans is None:
+            return None
+
+        tags = ["O"] * len(self.tokens)
+        for label, start, end in spans:
+            token_start = self.char_id2token_id(start)
+            token_end = self.char_id2token_id(end - 1)
+            assert (
+                token_start is not None and token_end is not None
+            ), "Provided spans are missaligned at token level"
+            tags[token_start] = f"B-{label}"
+            for idx in range(token_start + 1, token_end + 1):
+                tags[idx] = f"I-{label}"
+
+        return tags
 
 
 class Text2TextRecord(_Validators):

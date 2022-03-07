@@ -63,20 +63,38 @@ def test_text_classification_input_string():
 
 
 @pytest.mark.parametrize(
-    ("annotation", "status", "expected_status"),
+    ("annotation", "status", "expected_status", "expected_iob"),
     [
-        (None, None, "Default"),
-        ([("test", 0, 5)], None, "Validated"),
-        (None, "Discarded", "Discarded"),
-        ([("test", 0, 5)], "Discarded", "Discarded"),
+        (None, None, "Default", None),
+        ([("test", 0, 4)], None, "Validated", ["B-test", "O"]),
+        (None, "Discarded", "Discarded", None),
+        ([("test", 0, 9)], "Discarded", "Discarded", ["B-test", "I-test"]),
     ],
 )
-def test_token_classification_record(annotation, status, expected_status):
+def test_token_classification_record(annotation, status, expected_status, expected_iob):
     """Just testing its dynamic defaults"""
     record = TokenClassificationRecord(
         text="test text", tokens=["test", "text"], annotation=annotation, status=status
     )
     assert record.status == expected_status
+    assert record.spans2iob(record.annotation) == expected_iob
+
+
+def test_token_classification_with_mutation():
+    text_a = "The text"
+    text_b = "Another text sample here !!!"
+
+    record = TokenClassificationRecord(
+        text=text_a, tokens=text_a.split(" "), annotation=[]
+    )
+    assert record.spans2iob(record.annotation) == ["O"] * len(text_a.split(" "))
+
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
+        record.text = text_b
+    with pytest.raises(
+        AttributeError, match="You cannot assign a new value to `tokens`"
+    ):
+        record.tokens = text_b.split(" ")
 
 
 @pytest.mark.parametrize(
