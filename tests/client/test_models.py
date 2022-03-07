@@ -89,9 +89,12 @@ def test_token_classification_with_mutation():
     )
     assert record.spans2iob(record.annotation) == ["O"] * len(text_a.split(" "))
 
-    record.text = text_b
-    record.tokens = text_b.split(" ")
-    assert record.spans2iob(record.annotation) == ["O"] * len(text_b.split(" "))
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
+        record.text = text_b
+    with pytest.raises(
+        AttributeError, match="You cannot assign a new value to `tokens`"
+    ):
+        record.tokens = text_b.split(" ")
 
 
 @pytest.mark.parametrize(

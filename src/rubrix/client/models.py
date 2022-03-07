@@ -24,7 +24,7 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import limit_value_length
@@ -231,7 +231,7 @@ class TokenClassificationRecord(_Validators):
     """
 
     text: str = Field(min_length=1)
-    tokens: Tuple[str, ...] = Field(min_items=1)
+    tokens: Union[List[str], Tuple[str, ...]]
 
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
@@ -248,11 +248,22 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
+    __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
+    __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+
     def __setattr__(self, name: str, value: Any):
         """Make text and tokens immutable"""
         if name in ["text", "tokens"]:
             raise AttributeError(f"You cannot assign a new value to `{name}`")
         super().__setattr__(name, value)
+
+    @validator("tokens", pre=True)
+    def _normalize_tokens(cls, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
+        assert len(value) > 0, "At least one token should be provided"
+        return value
 
     @validator("prediction")
     def add_default_score(
@@ -270,9 +281,8 @@ class TokenClassificationRecord(_Validators):
         ]
 
     @staticmethod
-    @lru_cache(maxsize=256)
     def __build_indices_map__(
-        text: str, tokens: Tuple
+        text: str, tokens: Tuple[str, ...]
     ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
         """
         Build the indices mapping between text characters and tokens where belongs to,
@@ -328,18 +338,25 @@ class TokenClassificationRecord(_Validators):
         Given a character id, returns the token id it belongs to.
         ``None`` otherwise
         """
-        chars2tokens, _ = self.__build_indices_map__(self.text, tuple(self.tokens))
-        return chars2tokens.get(char_idx)
+
+        if self.__chars2tokens__ is None:
+            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
+                self.text, tuple(self.tokens)
+            )
+        return self.__chars2tokens__.get(char_idx)
 
     def token_span(self, token_idx: int) -> Tuple[int, int]:
         """
         Given a token id, returns the start and end characters.
         Raises an ``IndexError`` if token id is out of tokens list indices
         """
-        _, tokens2chars = self.__build_indices_map__(self.text, tuple(self.tokens))
-        if token_idx not in tokens2chars:
+        if self.__tokens2chars__ is None:
+            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
+                self.text, tuple(self.tokens)
+            )
+        if token_idx not in self.__tokens2chars__:
             raise IndexError(f"Token id {token_idx} out of bounds")
-        return tokens2chars[token_idx]
+        return self.__tokens2chars__[token_idx]
 
     def spans2iob(
         self, spans: Optional[List[Tuple[str, int, int]]] = None
