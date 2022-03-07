@@ -348,7 +348,7 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
     aggregations: Aggregations = None
 
 
-class ScoreRange(BaseModel):
+class QueryRange(BaseModel):
     """Score range filter"""
 
     range_from: float = Field(default=0.0, alias="from")
@@ -356,3 +356,7 @@ class ScoreRange(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+
+
+class ScoreRange(QueryRange):
+    pass

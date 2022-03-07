@@ -28,6 +28,7 @@ from rubrix.server.tasks.commons.api.model import (
     BaseSearchResults,
     BaseSearchResultsAggregations,
     PredictionStatus,
+    QueryRange,
     ScoreRange,
     SortableField,
     TaskStatus,
@@ -513,45 +514,6 @@ class TextClassificationQuery(BaseSearchQuery):
         default_factory=list,
         description="List of rule queries that WILL NOT cover the resulting records",
     )
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        """Build an elasticsearch query part from search query"""
-
-        if self.ids:
-            return {"ids": {"values": self.ids}}
-
-        all_filters = filters.metadata(self.metadata)
-        query_filters = [
-            query_filter
-            for query_filter in [
-                filters.predicted_as(self.predicted_as),
-                filters.predicted_by(self.predicted_by),
-                filters.annotated_as(self.annotated_as),
-                filters.annotated_by(self.annotated_by),
-                filters.status(self.status),
-                filters.predicted(self.predicted),
-                filters.score(self.score),
-            ]
-            if query_filter
-        ]
-        query_text = filters.text_query(self.query_text)
-        all_filters.extend(query_filters)
-
-        return filters.boolean_filter(
-            must_query=query_text or {"match_all": {}},
-            must_not_query=filters.boolean_filter(
-                should_filters=[
-                    filters.text_query(query) for query in self.uncovered_by_rules
-                ]
-            )
-            if self.uncovered_by_rules
-            else None,
-            filter_query=filters.boolean_filter(
-                should_filters=all_filters, minimum_should_match=len(all_filters)
-            )
-            if all_filters
-            else None,
-        )
 
 
 class TextClassificationSearchRequest(BaseModel):

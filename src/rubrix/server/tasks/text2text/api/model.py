@@ -19,7 +19,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
@@ -197,39 +196,6 @@ class Text2TextQuery(BaseSearchQuery):
 
     score: Optional[ScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        """Build an elasticsearch query part from search query"""
-
-        if self.ids:
-            return {"ids": {"values": self.ids}}
-
-        all_filters = filters.metadata(self.metadata)
-        query_filters = [
-            query_filter
-            for query_filter in [
-                filters.predicted_by(self.predicted_by),
-                filters.annotated_by(self.annotated_by),
-                filters.status(self.status),
-                filters.predicted(self.predicted),
-                filters.score(self.score),
-            ]
-            if query_filter
-        ]
-        query_text = filters.text_query(self.query_text)
-        all_filters.extend(query_filters)
-
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
 
 
 class Text2TextSearchRequest(BaseModel):
