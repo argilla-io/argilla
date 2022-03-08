@@ -539,6 +539,32 @@ class DatasetForTokenClassification(DatasetBase):
         return super().from_pandas(dataframe)
 
     def prepare_for_training(self) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
+        and an additional  *ner_tags* column:
+            - Records without an annotation are removed.
+            - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
+            - The iob tags are transformed to integers.
+
+        Returns:
+            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
+
+        Examples:
+            >>> import rubrix as rb
+            >>> rb_dataset = rb.DatasetForTokenClassification([
+            ...     rb.DatasetForTokenClassification(
+            ...         text="The text",
+            ...         tokens=["the", "text"],
+            ...         annotation=[("TAG", 0, 2)],
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'text': Value(dtype='string'),
+             'tokens': Sequence(Value(dtype='string')),
+             'ner_tags': ClassLabel(num_classes=2, names=['O','B-TAG'])}
+
+        """
         import datasets
 
         class_tags = ["O"]
