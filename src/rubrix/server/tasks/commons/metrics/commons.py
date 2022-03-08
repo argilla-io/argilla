@@ -27,6 +27,7 @@ class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
             description="Computes the input text length distribution",
             field="metrics.text_length",
             # TODO(@frascuchon): This won't work once words is excluded from _source
+            # TODO: Implement changes with backward compatibility
             script="params._source.words.length()",
             fixed_interval=1,
         ),
@@ -52,6 +53,7 @@ class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
             name="Inputs words cloud",
             description="The words cloud for dataset inputs",
             # TODO(@frascuchon): This won't work once words is excluded from _source
+            # TODO: Implement changes with backward compatibility
             default_field=EsRecordDataFieldNames.words,
         ),
         MetadataAggregations(id="metadata", name="Metadata fields stats"),
