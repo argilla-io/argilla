@@ -437,7 +437,7 @@ class MajorityVoter(LabelModel):
                 prediction[i] = equal_prob_idx[random_idx]
         else:
             raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for MajorityVoter!"
             )
 
         return annotation, prediction
@@ -454,17 +454,13 @@ class MajorityVoter(LabelModel):
             A tuple of the annotation and prediction array.
         """
         prediction = np.where(probabilities > 0.5, 1, 0)
-        annotation = np.array(
-            [
-                self._weak_labels.labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
-            dtype=np.short,
-        )
 
         is_abstain = np.isnan(probabilities).all(axis=1)
 
-        prediction, annotation = prediction[~is_abstain], annotation[~is_abstain]
+        prediction, annotation = (
+            prediction[~is_abstain],
+            self._weak_labels.annotation()[~is_abstain],
+        )
 
         return annotation, prediction
 
