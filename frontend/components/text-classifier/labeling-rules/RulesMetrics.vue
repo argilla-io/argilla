@@ -173,38 +173,6 @@ export default {
     formatNumber(value) {
       return isNaN(value) ? "-" : this.$options.filters.percent(value);
     },
-    async getMetrics() {
-      this.metricsTotal = await this.getRulesMetrics({
-        dataset: this.dataset,
-      });
-    },
-    async getMetricsByRules() {
-      const responses = await Promise.all(
-        this.rules.map((rule) => {
-          return this.getRuleruleMetrics({
-            dataset: this.dataset,
-            query: rule.query,
-            labels: rule.labels,
-          });
-        })
-      );
-
-      responses.forEach((response, idx) => {
-        this.metricsByRules[this.rules[idx].query] = response;
-      });
-    },
-    async getruleMetrics() {
-      if (this.query !== undefined) {
-        const response = await this.getRuleruleMetrics({
-          dataset: this.dataset,
-          query: this.query,
-          labels: this.activeLabel,
-        });
-        this.ruleMetrics = response;
-      } else {
-        this.ruleMetrics = {};
-      }
-    },
     getValuesByMetricType(type) {
       return Object.keys(this.metricsByRules).map((key) => {
         return this.metricsByRules[key][type] || 0;
