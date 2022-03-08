@@ -538,6 +538,7 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
+    @_requires_datasets
     def prepare_for_training(self) -> "datasets.Dataset":
         """Prepares the dataset for training.
 
