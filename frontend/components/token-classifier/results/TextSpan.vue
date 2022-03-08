@@ -22,6 +22,7 @@
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
       :span="token"
       :dataset="dataset"
+      :record="record"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
     /><span
@@ -32,7 +33,7 @@
       v-for="(t, i) in token.tokens"
       :key="i"
       v-html="
-        `${$highlightSearch(dataset.query.text, t.text)}${
+        `${$highlightKeywords(t.text, record.search_keywords)}${
           token.hasSpaceAfter ? ' ' : ''
         }`
       "
