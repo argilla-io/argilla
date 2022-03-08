@@ -301,6 +301,8 @@ class DatasetForTextClassification(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
+        inputs: Optional[Union[str, List[str]]] = None,
+        annotation: Optional[str] = None,
     ) -> "DatasetForTextClassification":
         """Imports records from a `datasets.Dataset`.
 
@@ -308,6 +310,8 @@ class DatasetForTextClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            inputs: A list of field names used as record inputs. Default: `None`
+            annotation: The field name used as record annotation. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -322,6 +326,41 @@ class DatasetForTextClassification(DatasetBase):
             ... })
             >>> DatasetForTextClassification.from_datasets(ds)
         """
+        import datasets
+
+        assert not isinstance(dataset, datasets.DatasetDict), (
+            "ERROR: `datasets.DatasetDict` are not supported. "
+            "Please, select the dataset split before"
+        )
+
+        if inputs:
+            if isinstance(inputs, str):
+                inputs = [inputs]
+
+            def parse_inputs_from_dataset(example):
+                return {
+                    "inputs": example[inputs[0]]
+                    if len(inputs) == 1
+                    else {k: example[k] for k in inputs}
+                }
+
+            dataset = dataset.map(parse_inputs_from_dataset).remove_columns(inputs)
+
+        if annotation:
+            labels = dataset.features[annotation]
+            int2str = (
+                labels.int2str
+                if isinstance(labels, datasets.ClassLabel)
+                else lambda x: x
+            )
+
+            def parse_annotation(example):
+                return {"annotation": int2str(example["annotation"])}
+
+            dataset = dataset.rename_column(annotation, "annotation").map(
+                parse_annotation
+            )
+
         return super().from_datasets(dataset)
 
     @classmethod
@@ -750,6 +789,9 @@ class DatasetForText2Text(DatasetBase):
             ... })
             >>> DatasetForText2Text.from_datasets(ds)
         """
+
+        dataset.features
+
         # we implement this to have more specific type hints
         return super().from_datasets(dataset)
 
