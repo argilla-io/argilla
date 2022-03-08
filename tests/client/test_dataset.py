@@ -21,7 +21,11 @@ import pandas as pd
 import pytest
 
 import rubrix as rb
-from rubrix.client.datasets import DatasetBase, WrongRecordTypeError
+from rubrix.client.datasets import (
+    DatasetBase,
+    DatasetForTokenClassification,
+    WrongRecordTypeError,
+)
 from rubrix.client.models import TextClassificationRecord
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
@@ -401,6 +405,70 @@ class TestDatasetForTokenClassification:
         )
 
         assert isinstance(dataset_ds, datasets.Dataset)
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training(self):
+        ner_dataset = datasets.load_dataset(
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        rb_dataset: DatasetForTokenClassification = rb.read_datasets(
+            ner_dataset, task="TokenClassification"
+        )
+        for r in rb_dataset:
+            r.annotation = [
+                (label, start, end) for label, start, end, _ in r.prediction
+            ]
+
+        train = rb_dataset.prepare_for_training()
+        assert isinstance(train, datasets.Dataset)
+        assert "ner_tags" in train.column_names
+        assert len(train) == 100
+        assert train.features["ner_tags"] == [
+            datasets.ClassLabel(
+                names=[
+                    "O",
+                    "B-CARDINAL",
+                    "I-CARDINAL",
+                    "B-DATE",
+                    "I-DATE",
+                    "B-FAC",
+                    "I-FAC",
+                    "B-GPE",
+                    "I-GPE",
+                    "B-LANGUAGE",
+                    "I-LANGUAGE",
+                    "B-LOC",
+                    "I-LOC",
+                    "B-NORP",
+                    "I-NORP",
+                    "B-ORDINAL",
+                    "I-ORDINAL",
+                    "B-ORG",
+                    "I-ORG",
+                    "B-PERSON",
+                    "I-PERSON",
+                    "B-PRODUCT",
+                    "I-PRODUCT",
+                    "B-QUANTITY",
+                    "I-QUANTITY",
+                    "B-TIME",
+                    "I-TIME",
+                    "B-WORK_OF_ART",
+                    "I-WORK_OF_ART",
+                ]
+            )
+        ]
+
+        train.push_to_hub(
+            "rubrix/_test_token_classification_training",
+            token=_HF_HUB_ACCESS_TOKEN,
+            private=True,
+        )
 
 
 class TestDatasetForText2Text:
