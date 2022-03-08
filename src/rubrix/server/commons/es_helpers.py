@@ -19,89 +19,9 @@ from typing import Any, Dict, List, Optional, Type, Union
 from pydantic import BaseModel
 from stopwordsiso import stopwords
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_settings import DATASETS_RECORDS_INDEX_NAME
-from rubrix.server.commons.settings import settings
-from rubrix.server.tasks.commons import (
-    PredictionStatus,
-    ScoreRange,
-    SortableField,
-    TaskStatus,
-)
+from rubrix.server.tasks.commons import SortableField, TaskStatus
 from rubrix.server.tasks.commons.api import EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.es_config import mappings
-
-SUPPORTED_LANGUAGES = ["es", "en", "fr", "de"]
-DATASETS_RECORDS_INDEX_TEMPLATE = {
-    "settings": {
-        "number_of_shards": settings.es_records_index_shards,
-        "number_of_replicas": settings.es_records_index_replicas,
-        "analysis": {
-            "analyzer": {
-                "multilingual_stop_analyzer": {
-                    "type": "stop",
-                    "stopwords": [w for w in stopwords(SUPPORTED_LANGUAGES)],
-                },
-                "extended_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "whitespace",
-                    "filter": ["lowercase", "asciifolding"],
-                },
-            }
-        },
-    },
-    "index_patterns": [DATASETS_RECORDS_INDEX_NAME.format("*")],
-    "mappings": {
-        "properties": {
-            EsRecordDataFieldNames.event_timestamp: {"type": "date"},
-            # TODO(in new index version): Data based on text field with multiple fields:
-            #   - keywords: for words aggregations
-            #   - extended: including stop words and special characters in search
-            EsRecordDataFieldNames.words: {
-                "type": "text",
-                "fielddata": True,
-                "analyzer": "multilingual_stop_analyzer",
-                "fields": {
-                    "extended": {"type": "text", "analyzer": "extended_analyzer"}
-                },
-            },
-            EsRecordDataFieldNames.predicted_as: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.predicted_by: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.annotated_as: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.annotated_by: {
-                "type": "keyword",
-                "ignore_above": MAX_KEYWORD_LENGTH,
-            },
-            EsRecordDataFieldNames.status: {
-                "type": "keyword",
-            },
-            EsRecordDataFieldNames.predicted: {
-                "type": "keyword",
-            },
-        },
-        "dynamic_templates": [
-            {
-                "metadata_strings": {
-                    "path_match": "metadata.*",
-                    "match_mapping_type": "string",
-                    "mapping": {
-                        "type": "keyword",
-                        "ignore_above": MAX_KEYWORD_LENGTH,
-                    },
-                }
-            },
-        ],
-    },
-}
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
@@ -292,42 +212,35 @@ class filters:
         ]
 
     @staticmethod
-    def predicted_as(predicted_as: List[str] = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted as terms"""
-        if not predicted_as:
+    def terms_filter(field: str, values: List[Any]) -> Optional[Dict[str, Any]]:
+        if not values:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.predicted_as): predicted_as
-            }
-        }
+        return {"terms": {field: values}}
 
     @staticmethod
-    def annotated_as(annotated_as: List[str] = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted as terms"""
-
-        if not annotated_as:
+    def term_filter(field: str, value: Any) -> Optional[Dict[str, Any]]:
+        if value is None:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.annotated_as): annotated_as
-            }
-        }
+        return {"term": {field: value}}
 
     @staticmethod
-    def predicted(predicted: PredictionStatus = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted status"""
-        if predicted is None:
+    def range_filter(
+        field: str, value_from: Optional[Any] = None, value_to: Optional[Any] = None
+    ) -> Optional[Dict[str, Any]]:
+        filter_data = {}
+        if value_from is not None:
+            filter_data["gte"] = value_from
+        if value_to is not None:
+            filter_data["lte"] = value_to
+        if not filter_data:
             return None
-        return {
-            "term": {decode_field_name(EsRecordDataFieldNames.predicted): predicted}
-        }
+        return {"range": {field: filter_data}}
 
     @staticmethod
     def text_query(text_query: Optional[str]) -> Dict[str, Any]:
         """Filter records matching text query"""
         if text_query is None:
-            return {"match_all": {}}
+            return filters.match_all()
         return filters.boolean_filter(
             should_filters=[
                 {
@@ -350,23 +263,12 @@ class filters:
         )
 
     @staticmethod
-    def score(
-        score: Optional[ScoreRange],
-    ) -> Optional[Dict[str, Any]]:
-        if score is None:
-            return None
-
-        score_filter = {}
-        if score.range_from is not None:
-            score_filter["gte"] = score.range_from
-        if score.range_to is not None:
-            score_filter["lte"] = score.range_to
-
-        return {"range": {EsRecordDataFieldNames.score: score_filter}}
-
-    @classmethod
-    def match_all(cls):
+    def match_all():
         return {"match_all": {}}
+
+    @staticmethod
+    def ids_filter(ids: List[str]):
+        return {"ids": {"values": ids}}
 
 
 class aggregations:

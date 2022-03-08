@@ -19,7 +19,6 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
@@ -387,35 +386,6 @@ class TokenClassificationQuery(BaseSearchQuery):
     annotated_as: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        """Build an elasticsearch query part from search query"""
-
-        if self.ids:
-            return {"ids": {"values": self.ids}}
-
-        all_filters = filters.metadata(self.metadata)
-        query_filters = [
-            query_filter
-            for query_filter in [
-                filters.predicted_as(self.predicted_as),
-                filters.predicted_by(self.predicted_by),
-                filters.annotated_as(self.annotated_as),
-                filters.annotated_by(self.annotated_by),
-                filters.status(self.status),
-                filters.predicted(self.predicted),
-                filters.score(self.score),
-            ]
-            if query_filter
-        ]
-        query_text = filters.text_query(self.query_text)
-        all_filters.extend(query_filters)
-
-        return filters.boolean_filter(
-            must_query=query_text,
-            should_filters=all_filters,
-            minimum_should_match=len(all_filters),
-        )
 
 
 class TokenClassificationSearchRequest(BaseModel):

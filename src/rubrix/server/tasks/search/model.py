@@ -1,7 +1,6 @@
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
 
 from rubrix.server.tasks.commons import BaseRecord, SortableField, TaskStatus
 
@@ -44,10 +43,6 @@ class BaseSearchQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
 
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        # TODO: Hide transformations in DAO component
-        raise NotImplementedError()
 
 
 class SortConfig(BaseModel):
