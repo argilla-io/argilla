@@ -125,7 +125,8 @@ class DatasetBase:
 
         ds_dict = self._to_datasets_dict()
         # TODO: THIS FIELD IS ONLY AT CLIENT API LEVEL. NOT SENSE HERE FOR NOW
-        del ds_dict["search_keywords"]
+        if "search_keywords" in ds_dict:
+            del ds_dict["search_keywords"]
 
         try:
             dataset = datasets.Dataset.from_dict(ds_dict)

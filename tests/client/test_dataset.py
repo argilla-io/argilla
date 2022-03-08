@@ -212,7 +212,20 @@ class TestDatasetForTextClassification:
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
-        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.column_names == [
+            "inputs",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "multi_label",
+            "explanation",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
         assert dataset_ds.features["prediction"] == [
             {"label": datasets.Value("string"), "score": datasets.Value("float64")}
         ]
@@ -329,7 +342,19 @@ class TestDatasetForTokenClassification:
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
-        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.column_names == [
+            "text",
+            "tokens",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
         assert dataset_ds.features["prediction"] == [
             {
                 "label": datasets.Value("string"),
@@ -483,7 +508,18 @@ class TestDatasetForText2Text:
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
-        assert dataset_ds.column_names == list(expected_dataset[0].__fields__.keys())
+        assert dataset_ds.column_names == [
+            "text",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
         assert dataset_ds.features["prediction"] == [
             {
                 "text": datasets.Value("string"),
