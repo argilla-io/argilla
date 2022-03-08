@@ -17,6 +17,7 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
+import _ from 'lodash';
 
 class TextClassificationRecord extends BaseRecord {
   inputs;
@@ -191,10 +192,10 @@ class TextClassificationDataset extends ObservationDataset {
     return overalMetrics;
   }
 
-  async _persistRule({ query, label, description }) {
+  async _persistRule({ query, labels, description }) {
     const { response } = await TextClassificationDataset.api().post(
       `/datasets/${this.task}/${this.name}/labeling/rules`,
-      { query, label, description },
+      { query, labels, description },
       {
         // Ignore errors related to rule not found
         validateStatus: function (status) {
@@ -205,15 +206,15 @@ class TextClassificationDataset extends ObservationDataset {
     if (response.status === 409) {
       await TextClassificationDataset.api().patch(
         `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
-        { label, description }
+        { labels, description }
       );
     }
   }
 
-  async _fetchRuleMetrics({ query, label }) {
+  async _fetchRuleMetrics({ query, labels }) {
     var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
-    if (label !== undefined) {
-      url += `?label=${label}`;
+    if (labels !== undefined) {
+      url += `?labels=${labels}`;
     }
     const { response } = await TextClassificationDataset.api().get(url);
 
@@ -310,17 +311,19 @@ class TextClassificationDataset extends ObservationDataset {
     return this.activeRuleMetrics === null ? undefined : this.activeRuleMetrics;
   }
 
-  async setCurrentLabelingRule({ query, label }) {
+  async setCurrentLabelingRule({ query, labels }) {
+    console.log('xxxxxxxxxx', query, labels)
     if (
       this.currentLabelingRule &&
       query === this.currentLabelingRule.query &&
-      label === this.currentLabelingRule.label
+      _.isEqual(_.sortBy(labels), _.sortBy(this.currentLabelingRule.labels))
     ) {
       return;
     }
 
-    let rule = this.findRuleByQuery(query, label);
+    let rule = this.findRuleByQuery(query, labels);
     let ruleMetrics = this.getMetricsByRule(rule);
+    console.log('rule???', rule, ruleMetrics)
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
@@ -328,18 +331,17 @@ class TextClassificationDataset extends ObservationDataset {
         name: this.name,
         activeRule: rule || {
           query,
-          label,
+          labels,
           description: query,
         },
         activeRuleMetrics:
-          ruleMetrics || (await this._fetchRuleMetrics({ query, label })),
+          ruleMetrics || (await this._fetchRuleMetrics({ query, labels })),
       },
     });
   }
 
   async storeLabelingRule(activeRule) {
     await this._persistRule(activeRule);
-
     const rules = this.rules.filter((rule) => rule.query !== activeRule.query);
     const perRuleQueryMetrics = {
       ...this.perRuleQueryMetrics,
@@ -401,9 +403,11 @@ class TextClassificationDataset extends ObservationDataset {
     });
   }
 
-  findRuleByQuery(query, label = undefined) {
+  findRuleByQuery(query, labels = undefined) {
     for (let rule of this.labelingRules || []) {
-      if (rule.query === query && [rule.label, undefined].includes(label)) {
+      const labelsAreEqual = _.isEqual(_.sortBy(rule.labels), _.sortBy(labels));
+      // console.log(query, 'rule.labels:', rule.labels, 'labels:', labels, labelsAreEqual)
+      if (rule.query === query && (!labels || labelsAreEqual)) {
         return rule;
       }
     }

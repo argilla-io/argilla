@@ -184,7 +184,7 @@ export default {
           return this.getRuleruleMetrics({
             dataset: this.dataset,
             query: rule.query,
-            label: rule.label,
+            labels: rule.labels,
           });
         })
       );
@@ -198,7 +198,7 @@ export default {
         const response = await this.getRuleruleMetrics({
           dataset: this.dataset,
           query: this.query,
-          label: this.activeLabel,
+          labels: this.activeLabel,
         });
         this.ruleMetrics = response;
       } else {

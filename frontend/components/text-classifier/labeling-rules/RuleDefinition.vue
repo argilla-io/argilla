@@ -61,9 +61,9 @@ export default {
   },
   watch: {
     async query(newValue) {
+      console.log('newQuery', newValue)
       await this.updateCurrentRule({
         query: newValue,
-        label: (this.currentRule || {}).label,
       });
     },
   },
@@ -91,19 +91,19 @@ export default {
     },
   },
   methods: {
-    async updateCurrentRule({ query, label }) {
+    async updateCurrentRule({ query, labels }) {
       if (!query) {
         return await this.dataset.clearCurrentLabelingRule();
       }
-      if (label) {
+      if (labels) {
         await this.dataset.setCurrentLabelingRule({
           query,
-          label,
+          labels,
         });
       } else {
         await this.dataset.setCurrentLabelingRule({
           query,
-          label: undefined,
+          labels: undefined,
         });
       }
       this.saved = false;

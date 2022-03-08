@@ -79,7 +79,7 @@ export default {
           class: "table-info__title",
           type: "action",
         },
-        { name: "Label", field: "label", class: "text" },
+        { name: "Labels", field: "labels", class: "labels", type: "array" },
         {
           name: "Coverage",
           field: "coverage",
@@ -158,7 +158,7 @@ export default {
             name: r.description,
             query: r.query,
             kind: "select",
-            label: r.label,
+            labels: r.labels,
             ...this.metricsForRule(r),
             created_at: r.created_at,
           };
