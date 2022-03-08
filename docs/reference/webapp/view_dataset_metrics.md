@@ -14,7 +14,7 @@ This submenu is useful when users need to know how many records are annotated, v
 
 When clicking on this menu, not only the progress is shown, but also the number of labels and records.
 
-![Progress menu](../../_static/reference/webapp/progress.png)
+![Progress menu](../../_static/reference/webapp/progress_bar.png)
 
 ### Stats
 
