@@ -197,12 +197,8 @@ export default {
   watch: {
     selectedLabels: {
       handler: function (newValue) {
-        if (!_.isEqual(
-        _.sortBy(newValue),
-        _.sortBy(this.currentRule.labels)
-      )) {
+        if (!_.isEqual(_.sortBy(newValue), _.sortBy(this.currentRule.labels))) {
           // Here send description too --> update Rule
-          console.log('watcher')
           this.$emit("update-rule", {
             query: this.query,
             labels: newValue,

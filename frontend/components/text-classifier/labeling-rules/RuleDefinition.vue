@@ -61,7 +61,6 @@ export default {
   },
   watch: {
     async query(newValue) {
-      console.log('newQuery', newValue)
       await this.updateCurrentRule({
         query: newValue,
       });
