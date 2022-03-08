@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Dict, Optional, TypeVar
 
 from fastapi import Depends
@@ -5,7 +6,9 @@ from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
 from rubrix.server.commons import es_helpers
+from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import BaseDatasetDB, Dataset
+from rubrix.server.tasks.commons import QueryRange
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.search.model import BaseSearchQuery
 
@@ -34,7 +37,7 @@ class EsQueryBuilder:
             return es_helpers.filters.match_all()
 
         if not query.advanced_query_dsl or not query.query_text:
-            return query.as_elasticsearch()
+            return self.to_es_query(query)
 
         text_search = query.query_text
         new_query = query.copy(update={"query_text": None})
@@ -52,5 +55,47 @@ class EsQueryBuilder:
         query_text = es_query_builder(query_tree)
 
         return es_helpers.filters.boolean_filter(
-            filter_query=new_query.as_elasticsearch(), must_query=query_text
+            filter_query=self.to_es_query(new_query), must_query=query_text
+        )
+
+    @staticmethod
+    def to_es_query(query: BaseSearchQuery) -> Dict[str, Any]:
+        if query.ids:
+            return filters.ids_filter(query.ids)
+
+        query_text = filters.text_query(query.query_text)
+        all_filters = filters.metadata(query.metadata)
+        query_data = query.dict(
+            exclude={"query_text", "metadata", "uncovered_by_rules"}
+        )
+        for key, value in query_data.items():
+            if value is None:
+                continue
+            key_filter = None
+            if isinstance(value, list):
+                key_filter = filters.terms_filter(key, value)
+            elif isinstance(value, (str, Enum)):
+                key_filter = filters.term_filter(key, value)
+            elif isinstance(value, QueryRange):
+                key_filter = filters.range_filter(
+                    field=key, value_from=value.range_from, value_to=value.range_to
+                )
+            else:
+                print("Ups...", key, value)
+
+            if key_filter:
+                all_filters.append(key_filter)
+
+        return filters.boolean_filter(
+            must_query=query_text or filters.match_all(),
+            filter_query=filters.boolean_filter(
+                should_filters=all_filters, minimum_should_match=len(all_filters)
+            )
+            if all_filters
+            else None,
+            must_not_query=filters.boolean_filter(
+                should_filters=[filters.text_query(q) for q in query.uncovered_by_rules]
+            )
+            if hasattr(query, "uncovered_by_rules") and query.uncovered_by_rules
+            else None,
         )

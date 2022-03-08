@@ -18,6 +18,7 @@ from pydantic import ValidationError
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.settings import settings
 from rubrix.server.tasks.commons import TaskStatus
+from rubrix.server.tasks.search.query_builder import EsQueryBuilder
 from rubrix.server.tasks.text_classification import TextClassificationQuery
 from rubrix.server.tasks.text_classification.api import (
     ClassPrediction,
@@ -280,7 +281,8 @@ def test_validate_without_labels_for_single_label(annotation):
 def test_query_with_uncovered_by_rules():
 
     query = TextClassificationQuery(uncovered_by_rules=["query", "other*"])
-    assert query.as_elasticsearch() == {
+
+    assert EsQueryBuilder.to_es_query(query) == {
         "bool": {
             "must": {"match_all": {}},
             "must_not": {

@@ -69,7 +69,9 @@ class LabelingRulesMetric(ElasticsearchMetric):
 
         if labels is not None:
             for label in labels:
-                rule_label_annotated_filter = filters.annotated_as([label])
+                rule_label_annotated_filter = filters.term_filter(
+                    "annotated_as", value=label
+                )
                 encoded_label = self._encode_label_name(label)
                 aggr_filters.update(
                     {

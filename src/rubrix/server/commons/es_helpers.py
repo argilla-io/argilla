@@ -18,12 +18,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
-from rubrix.server.tasks.commons import (
-    PredictionStatus,
-    ScoreRange,
-    SortableField,
-    TaskStatus,
-)
+from rubrix.server.tasks.commons import SortableField, TaskStatus
 from rubrix.server.tasks.commons.api import EsRecordDataFieldNames
 from rubrix.server.tasks.commons.dao.es_config import mappings
 
@@ -216,42 +211,35 @@ class filters:
         ]
 
     @staticmethod
-    def predicted_as(predicted_as: List[str] = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted as terms"""
-        if not predicted_as:
+    def terms_filter(field: str, values: List[Any]) -> Optional[Dict[str, Any]]:
+        if not values:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.predicted_as): predicted_as
-            }
-        }
+        return {"terms": {field: values}}
 
     @staticmethod
-    def annotated_as(annotated_as: List[str] = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted as terms"""
-
-        if not annotated_as:
+    def term_filter(field: str, value: Any) -> Optional[Dict[str, Any]]:
+        if value is None:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.annotated_as): annotated_as
-            }
-        }
+        return {"term": {field: value}}
 
     @staticmethod
-    def predicted(predicted: PredictionStatus = None) -> Optional[Dict[str, Any]]:
-        """Filter records with given predicted status"""
-        if predicted is None:
+    def range_filter(
+        field: str, value_from: Optional[Any] = None, value_to: Optional[Any] = None
+    ) -> Optional[Dict[str, Any]]:
+        filter_data = {}
+        if value_from is not None:
+            filter_data["gte"] = value_from
+        if value_to is not None:
+            filter_data["lte"] = value_to
+        if not filter_data:
             return None
-        return {
-            "term": {decode_field_name(EsRecordDataFieldNames.predicted): predicted}
-        }
+        return {"range": {field: filter_data}}
 
     @staticmethod
     def text_query(text_query: Optional[str]) -> Dict[str, Any]:
         """Filter records matching text query"""
         if text_query is None:
-            return {"match_all": {}}
+            return filters.match_all()
         return filters.boolean_filter(
             should_filters=[
                 {
@@ -274,23 +262,12 @@ class filters:
         )
 
     @staticmethod
-    def score(
-        score: Optional[ScoreRange],
-    ) -> Optional[Dict[str, Any]]:
-        if score is None:
-            return None
-
-        score_filter = {}
-        if score.range_from is not None:
-            score_filter["gte"] = score.range_from
-        if score.range_to is not None:
-            score_filter["lte"] = score.range_to
-
-        return {"range": {EsRecordDataFieldNames.score: score_filter}}
-
-    @classmethod
-    def match_all(cls):
+    def match_all():
         return {"match_all": {}}
+
+    @staticmethod
+    def ids_filter(ids: List[str]):
+        return {"ids": {"values": ids}}
 
 
 class aggregations:
