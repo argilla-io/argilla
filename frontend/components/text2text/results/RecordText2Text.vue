@@ -18,10 +18,7 @@
 <template>
   <div class="record">
     <div class="record--left record__item">
-      <record-string-text-2-text
-        :query-text="dataset.query.text"
-        :text="record.text"
-      />
+      <record-string-text-2-text :record="record" />
       <div>
         <text-2-text-list
           ref="list"
