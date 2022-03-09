@@ -112,7 +112,7 @@
                     </span>
                     <span v-else-if="column.type === 'array'">
                       <p v-for="item in itemValue(item, column)" :key="item">
-                        {{ item }}
+                        "{{ item }}"
                       </p>
                     </span>
                     <span v-else-if="column.type === 'object'">
