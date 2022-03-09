@@ -1013,6 +1013,7 @@ class Epoxy(FlyingSquid):
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
         verbose: bool = False,
+        output_str: bool = False,
     ) -> Dict[str, float]:
 
         try:
@@ -1054,7 +1055,7 @@ class Epoxy(FlyingSquid):
             annotation,
             prediction,
             model_labels=self._labels,
-            output_dict=True,
+            output_dict=not output_str,
             is_tie=is_tie,
         )
 

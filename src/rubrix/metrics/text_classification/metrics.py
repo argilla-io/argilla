@@ -41,11 +41,36 @@ def cautious_classification_report(
                     }
                 }
             )
+        report["accuracy"] = {
+            "precision": None,
+            "recall": None,
+            "f1-score": report["accuracy"],
+            "support": report["macro avg"]["support"],
+        }
+
         df = pd.DataFrame(report).transpose()
+
         df = df.astype(float).applymap(lambda x: "{:,.2f}".format(x))
         df["support"] = df["support"].astype(float).apply(lambda x: "{:,g}".format(x))
+
+        df["bool_field"] = df["precision"].apply(lambda x: x == "nan")
+        df = df.sort_values(by=["bool_field"], ascending=True)
+        df = df.drop("bool_field", axis=1)
+
+        df = df.reset_index()
+        boundary = df.index[(df["precision"] == "nan").argmax()] + 1
+        df = df.set_index("index")
+        df.index.name = None
         df = df.replace(["nan", "None"], "")
-        return df.to_string()
+
+        output = df.to_string().split("\n")
+        try:
+            output = output[:boundary] + ["\n"] + output[boundary:]
+        except:
+            raise Exception(str(boundary))
+        output = "\n".join(output)
+
+        return output
 
     if not is_tie.any():
         y_true_partial = y_true
