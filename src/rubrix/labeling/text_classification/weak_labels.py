@@ -851,9 +851,7 @@ class WeakMultiLabels(WeakLabelsBase):
             )
 
             # correct/incorrect
-            correct, incorrect = self._compute_correct_incorrect(
-                has_weak_label, annotation
-            )
+            correct, incorrect = self._compute_correct_incorrect(annotation)
 
             # precision
             precision = correct / (correct + incorrect)
@@ -881,7 +879,7 @@ class WeakMultiLabels(WeakLabelsBase):
         )
 
     def _compute_correct_incorrect(
-        self, has_weak_label: np.ndarray, annotation: np.ndarray
+        self, annotation: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
         # transform annotation to tensor
@@ -890,20 +888,14 @@ class WeakMultiLabels(WeakLabelsBase):
         )
 
         # correct, we don't want to count the "correct non predictions"
-        correct_with_abstain = ((annotation == self._matrix) & (self._matrix == 1)).sum(
-            2
-        )
-        correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
+        correct = ((annotation == self._matrix) & (self._matrix == 1)).sum(2).sum(0)
 
         # incorrect, we don't want to count the "misses", since we focus on precision, not recall
-        incorrect_with_abstain = (
-            (annotation != self._matrix) & (self._matrix == 1)
-        ).sum(2)
-        incorrect = np.where(
-            has_weak_label & (annotation.sum(2) >= 0),
-            incorrect_with_abstain,
-            False,
-        ).sum(axis=0)
+        incorrect = (
+            ((annotation != self._matrix) & (self._matrix == 1) & (annotation != -1))
+            .sum(2)
+            .sum(0)
+        )
 
         # add totals at the end
         return np.append(correct, correct.sum()), np.append(incorrect, incorrect.sum())
