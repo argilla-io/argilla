@@ -312,7 +312,6 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async setCurrentLabelingRule({ query, labels }) {
-    console.log("xxxxxxxxxx", query, labels);
     if (
       this.currentLabelingRule &&
       query === this.currentLabelingRule.query &&
@@ -323,7 +322,6 @@ class TextClassificationDataset extends ObservationDataset {
 
     let rule = this.findRuleByQuery(query, labels);
     let ruleMetrics = this.getMetricsByRule(rule);
-    console.log("rule???", rule, ruleMetrics);
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
