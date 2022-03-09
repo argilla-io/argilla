@@ -554,16 +554,28 @@ class DatasetForTokenClassification(DatasetBase):
         Examples:
             >>> import rubrix as rb
             >>> rb_dataset = rb.DatasetForTokenClassification([
-            ...     rb.DatasetForTokenClassification(
+            ...     rb.TokenClassificationRecord(
             ...         text="The text",
-            ...         tokens=["the", "text"],
+            ...         tokens=["The", "text"],
             ...         annotation=[("TAG", 0, 2)],
             ...     )
             ... ])
             >>> rb_dataset.prepare_for_training().features
             {'text': Value(dtype='string'),
-             'tokens': Sequence(Value(dtype='string')),
-             'ner_tags': ClassLabel(num_classes=2, names=['O','B-TAG'])}
+             'tokens': Sequence(feature=Value(dtype='string'), length=-1),
+             'prediction': Value(dtype='null'),
+             'prediction_agent': Value(dtype='null'),
+             'annotation': [{'end': Value(dtype='int64'),
+               'label': Value(dtype='string'),
+               'start': Value(dtype='int64')}],
+             'annotation_agent': Value(dtype='null'),
+             'id': Value(dtype='null'),
+             'metadata': Value(dtype='null'),
+             'status': Value(dtype='string'),
+             'event_timestamp': Value(dtype='null'),
+             'metrics': Value(dtype='null'),
+             'ner_tags': [ClassLabel(num_classes=3, names=['O', 'B-TAG', 'I-TAG'])]}
+
 
         """
         import datasets
