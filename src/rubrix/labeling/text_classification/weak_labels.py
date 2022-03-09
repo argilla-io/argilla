@@ -885,7 +885,9 @@ class WeakMultiLabels(WeakLabelsBase):
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
         # transform annotation to tensor
-        annotation = np.repeat(annotation, len(self._rules)).reshape(self._matrix.shape)
+        annotation = np.repeat(annotation, len(self._rules), axis=0).reshape(
+            self._matrix.shape
+        )
 
         # correct, we don't want to count the "correct non predictions"
         correct_with_abstain = ((annotation == self._matrix) & (self._matrix == 1)).sum(
