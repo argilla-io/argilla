@@ -692,6 +692,28 @@ class TestWeakMultiLabels:
         )
         pd.testing.assert_frame_equal(summary, expected)
 
+    def test_compute_correct_incorrect(self, monkeypatch):
+        def mock_load(*args, **kwargs):
+            return [TextClassificationRecord(inputs="mock")]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+
+        def mock_apply(self, *args, **kwargs):
+            weak_label_matrix = np.array([[[1, 0, 1, 0], [0, 1, 0, 1]]], dtype=np.short)
+            return weak_label_matrix, None, None
+
+        monkeypatch.setattr(WeakMultiLabels, "_apply_rules", mock_apply)
+
+        weak_labels = WeakMultiLabels(rules=[lambda x: "mock"] * 2, dataset="mock")
+        correct, incorrect = weak_labels._compute_correct_incorrect(
+            annotation=np.array([[1, 0, 1, 0]])
+        )
+
+        assert np.allclose(correct, np.array([2, 0, 2]))
+        assert np.allclose(incorrect, np.array([0, 2, 2]))
+
     def test_show_records(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
             return [
