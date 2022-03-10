@@ -209,3 +209,57 @@ def test_dataset_metrics(mocked_client):
             json={},
         )
         assert response.status_code == 200, f"{metric}: {response.json()}"
+
+
+def test_dataset_labels_for_text_classification(mocked_client):
+    records = [
+        TextClassificationRecord.parse_obj(data)
+        for data in [
+            {
+                "id": 0,
+                "inputs": {"text": "Some test data"},
+                "prediction": {"agent": "test", "labels": [{"class": "A"}]},
+            },
+            {
+                "id": 1,
+                "inputs": {"text": "Some test data"},
+                "annotation": {"agent": "test", "labels": [{"class": "B"}]},
+            },
+            {
+                "id": 2,
+                "inputs": {"text": "Some test data"},
+                "prediction": {
+                    "agent": "test",
+                    "labels": [
+                        {"class": "A", "score": 0.5},
+                        {
+                            "class": "D",
+                            "score": 0.5,
+                        },
+                    ],
+                },
+                "annotation": {"agent": "test", "labels": [{"class": "E"}]},
+            },
+        ]
+    ]
+    request = TextClassificationBulkData(records=records)
+    dataset = "test_dataset_labels_for_text_classification"
+
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    assert (
+        mocked_client.post(
+            f"/api/datasets/{dataset}/TextClassification:bulk",
+            json=request.dict(by_alias=True),
+        ).status_code
+        == 200
+    )
+
+    response = mocked_client.post(
+        f"/api/datasets/TextClassification/{dataset}/metrics/dataset_labels:summary",
+        json={},
+    )
+    assert response.status_code == 200
+    response = response.json()
+    labels = response["labels"]
+    assert sorted(labels) == ["A", "B", "D", "E"]
