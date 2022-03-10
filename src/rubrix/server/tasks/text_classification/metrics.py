@@ -90,11 +90,17 @@ class DatasetLabels(PythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset labels", const=True)
 
-    def apply(self, records: Iterable[GenericRecord]) -> Dict[str, Any]:
+    def apply(self, records: Iterable[TextClassificationRecord]) -> Dict[str, Any]:
         ds_labels = set()
         for record in records:
-            ds_labels.update([label for label in record.annotated_as])
-            ds_labels.update([label for label in record.predicted_as])
+            if record.annotation:
+                ds_labels.update(
+                    [label.class_label for label in record.annotation.labels]
+                )
+            if record.prediction:
+                ds_labels.update(
+                    [label.class_label for label in record.prediction.labels]
+                )
         return {"labels": ds_labels or []}
 
 
