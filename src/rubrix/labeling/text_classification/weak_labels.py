@@ -726,6 +726,7 @@ class WeakMultiLabels(WeakLabelsBase):
         for n, annotation_n, weak_label_n in tqdm(
             zip(range(len(annotations)), annotations, weak_labels),
             desc="Filling weak label matrix",
+            total=len(annotations),
         ):
             # first: fill annotation matrix
             if annotation_n == [None]:
