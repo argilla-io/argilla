@@ -148,6 +148,7 @@ class DatasetBase:
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
+        id: Optional[str] = None,
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -159,6 +160,7 @@ class DatasetBase:
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            id: The field name used as record id. Default: `None`
             text: The field name used as record text. Default: `None`
             annotation: The field name used as record annotation. Default: `None`
             metadata: The field name used as record metadata. Default: `None`
@@ -172,8 +174,14 @@ class DatasetBase:
             "ERROR: `datasets.DatasetDict` are not supported. "
             "Please, select the dataset split before"
         )
+
         dataset = cls._prepare_hf_dataset(
-            dataset, text=text, annotation=annotation, metadata=metadata, **kwargs
+            dataset,
+            id=id,
+            text=text,
+            annotation=annotation,
+            metadata=metadata,
+            **kwargs,
         )
 
         not_supported_columns = [
@@ -194,12 +202,14 @@ class DatasetBase:
     def _prepare_hf_dataset(
         cls,
         dataset: "dataset.Dataset",
+        id: Optional[str] = None,
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
         **kwargs,
     ) -> "dataclasses.Dataset":
         for field, parser in [
+            (id, cls._parse_id_field),
             (text, cls._parse_text_field),
             (metadata, cls._parse_metadata_field),
             (annotation, cls._parse_annotation_field),
@@ -280,13 +290,16 @@ class DatasetBase:
         raise NotImplementedError
 
     @classmethod
+    def _parse_id_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        return dataset.rename_column(field, "id")
+
+    @classmethod
     def _parse_text_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
-        def parse_text_from_dataset(example):
-            return {"text": example[field]}
-
-        return dataset.map(parse_text_from_dataset).remove_columns(field)
+        return dataset.rename_column(field, "text")
 
     @classmethod
     def _parse_metadata_field(
@@ -299,7 +312,7 @@ class DatasetBase:
         def parse_metadata_from_dataset(example):
             return {"metadata": {k: example[k] for k in fields}}
 
-        return dataset.map(parse_metadata_from_dataset)
+        return dataset.map(parse_metadata_from_dataset).remove_columns(fields)
 
     @classmethod
     def _parse_annotation_field(
@@ -367,6 +380,7 @@ class DatasetForTextClassification(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
+        id: Optional[str] = None,
         inputs: Optional[Union[str, List[str]]] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -377,6 +391,7 @@ class DatasetForTextClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            id: The field name used as record id. Default: `None`
             inputs: A list of field names used for record inputs. Default: `None`
             annotation: The field name used as record annotation. Default: `None`
             metadata: The field name used as record metadata. Default: `None`
@@ -396,7 +411,7 @@ class DatasetForTextClassification(DatasetBase):
         """
 
         return super().from_datasets(
-            dataset, annotation=annotation, metadata=metadata, inputs=inputs
+            dataset, id=id, annotation=annotation, metadata=metadata, inputs=inputs
         )
 
     @classmethod
@@ -439,13 +454,15 @@ class DatasetForTextClassification(DatasetBase):
 
         return ds_dict
 
+    @classmethod
     def _parse_annotation_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
         import datasets
 
-        # TODO: Multi-label
         labels = dataset.features[field]
+        if isinstance(labels, datasets.Sequence):
+            labels = labels.feature
         int2str = (
             labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
         )
@@ -459,15 +476,10 @@ class DatasetForTextClassification(DatasetBase):
     def _prepare_hf_dataset(
         cls,
         dataset: "dataset.Dataset",
-        text: Optional[str] = None,
         inputs: Optional[Union[str, List[str]]] = None,
-        annotation: Optional[str] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
+        **kwargs,
     ) -> "dataclasses.Dataset":
-        dataset = super()._prepare_hf_dataset(
-            dataset, text=text, annotation=annotation, metadata=metadata
-        )
-
+        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
         if inputs:
             dataset = cls._parse_inputs_field(dataset, fields=inputs)
         return dataset
@@ -808,18 +820,13 @@ class DatasetForTokenClassification(DatasetBase):
     def _prepare_hf_dataset(
         cls,
         dataset: "dataset.Dataset",
-        text: Optional[str] = None,
         tokens: Optional[str] = None,
         tags: Optional[str] = None,
-        annotation: Optional[str] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
+        **kwargs,
     ) -> "dataclasses.Dataset":
-        dataset = super()._prepare_hf_dataset(
-            dataset, text=text, annotation=annotation, metadata=metadata
-        )
+        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
 
-        if tokens:
-            dataset = cls._parse_tokens_field(dataset, field=tokens)
+        dataset = cls._parse_tokens_field(dataset, field=tokens or "tokens")
         if tags:
             dataset = cls._parse_tags_field(dataset, field=tags)
         return dataset
