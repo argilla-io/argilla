@@ -223,7 +223,7 @@ def test_dataset_labels_for_text_classification(mocked_client):
             {
                 "id": 1,
                 "inputs": {"text": "Some test data"},
-                "annotation": {"agent": "test", "labels": [{"class": "C"}]},
+                "annotation": {"agent": "test", "labels": [{"class": "B"}]},
             },
             {
                 "id": 2,
@@ -233,12 +233,12 @@ def test_dataset_labels_for_text_classification(mocked_client):
                     "labels": [
                         {"class": "A", "score": 0.5},
                         {
-                            "class": "B",
+                            "class": "D",
                             "score": 0.5,
                         },
                     ],
                 },
-                "annotation": {"agent": "test", "labels": [{"class": "D"}]},
+                "annotation": {"agent": "test", "labels": [{"class": "E"}]},
             },
         ]
     ]
@@ -262,4 +262,4 @@ def test_dataset_labels_for_text_classification(mocked_client):
     assert response.status_code == 200
     response = response.json()
     labels = response["labels"]
-    assert sorted(labels) == ["A", "C", "D"]
+    assert sorted(labels) == ["A", "B", "D", "E"]
