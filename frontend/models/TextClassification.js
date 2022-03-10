@@ -272,16 +272,28 @@ class TextClassificationDataset extends ObservationDataset {
   get labels() {
     const { labels } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
     const aggregations = this.globalResults.aggregations;
+    const label2str = (label) => label.class;
+    const recordsLabels = this.results.records.flatMap((record) => {
+      return []
+        .concat(
+          record.annotation ? record.annotation.labels.map(label2str) : []
+        )
+        .concat(
+          record.prediction ? record.prediction.labels.map(label2str) : []
+        );
+    });
 
     const uniqueLabels = [
       ...new Set(
         (labels || [])
           .filter((l) => l && l.trim())
           .concat(this._labels || [])
+          .concat(recordsLabels)
           .concat(Object.keys(aggregations.annotated_as))
           .concat(Object.keys(aggregations.predicted_as))
       ),
     ];
+
     uniqueLabels.sort();
     return uniqueLabels;
   }

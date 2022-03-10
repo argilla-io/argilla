@@ -103,9 +103,6 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
-    labels: {
-      type: Array,
-    },
     isSaved: {
       type: Boolean,
       default: false,
@@ -162,6 +159,9 @@ export default {
     },
     query() {
       return this.dataset.query.text;
+    },
+    labels() {
+      return this.dataset.labels.map((l) => ({ class: l, selected: false }));
     },
     filteredLabels() {
       return this.labels.filter((label) =>

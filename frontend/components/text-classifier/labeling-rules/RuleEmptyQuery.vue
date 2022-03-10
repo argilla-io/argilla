@@ -57,9 +57,6 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    },
-    labels: {
-      type: Array,
     }
   },
   data: () => {
@@ -70,6 +67,9 @@ export default {
   computed: {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
+    },
+    labels() {
+      return this.dataset.labels.map((l) => ({ class: l, selected: false }));;
     },
     query() {
       return this.dataset.query.text;
