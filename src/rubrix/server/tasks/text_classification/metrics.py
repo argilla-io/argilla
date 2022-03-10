@@ -4,7 +4,7 @@ from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
+from rubrix.server.tasks.commons.metrics import CommonTasksMetrics, GenericRecord
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
     PythonMetric,
