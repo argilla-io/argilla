@@ -71,8 +71,60 @@ export default {
     query() {
       return this.dataset.query.text;
     },
+    annotationLabels() {
+      const annotationLabels = [];
+      this.dataset.results.records.map((record) => {
+        if (record.annotation) {
+          record.annotation.labels.map((label) => {
+            annotationLabels.push(label.class);
+          });
+        }
+      });
+      const uniqueLabels = [...new Set(annotationLabels)];
+      return uniqueLabels.map((label) => (label = { class: label }));
+    },
+    predictionLabels() {
+      const predictionLabels = [];
+      this.dataset.results.records.map((record) => {
+        if (record.prediction) {
+          record.prediction.labels.map((label) => {
+            predictionLabels.push(label.class);
+          });
+        }
+      });
+      const uniqueLabels = [...new Set(predictionLabels)];
+      return uniqueLabels.map((label) => (label = { class: label }));
+    },
     labels() {
-      return this.dataset.labels.map((l) => ({ class: l, selected: false }));
+      // Setup all record labels
+      const labels = Object.assign(
+        {},
+        ...this.dataset.labels.map((label) => ({
+          [label]: { selected: false },
+        }))
+      );
+      // Update info with annotated ones
+      this.annotationLabels.forEach((label) => {
+        labels[label.class] = {
+          class: label.class,
+          selected: true,
+        };
+      });
+      // Update info with predicted ones
+      this.predictionLabels.forEach((label) => {
+        const currentLabel = labels[label.class] || label;
+        labels[label.class] = {
+          ...currentLabel,
+          selected: false,
+        };
+      });
+      // Dict -> list
+      return Object.entries(labels).map(([key, value]) => {
+        return {
+          class: key,
+          ...value,
+        };
+      });
     },
     sortedLabels() {
       return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));

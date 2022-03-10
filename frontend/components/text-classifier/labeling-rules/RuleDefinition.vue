@@ -2,10 +2,11 @@
   <div>
     <div class="rule__area">
       <div :class="[query ? 'active' : null, 'rule__container']">
-        <rule-empty-query :dataset="dataset" v-if="!query" />
+        <rule-empty-query :dataset="dataset" :labels="labels" v-if="!query" />
         <rule-labels-definition
           v-else
           :dataset="dataset"
+          :labels="labels"
           :isSaved="saved"
           @save-rule="saveRule"
           @update-rule="updateCurrentRule"
@@ -88,6 +89,61 @@ export default {
     },
     rulesMetrics() {
       return this.dataset.labelingRulesMetrics;
+    },
+    annotationLabels() {
+      const annotationLabels = [];
+      this.dataset.results.records.map((record) => {
+        if (record.annotation) {
+          record.annotation.labels.map((label) => {
+            annotationLabels.push(label.class);
+          });
+        }
+      });
+      const uniqueLabels = [...new Set(annotationLabels)];
+      return uniqueLabels.map((label) => (label = { class: label }));
+    },
+    predictionLabels() {
+      const predictionLabels = [];
+      this.dataset.results.records.map((record) => {
+        if (record.prediction) {
+          record.prediction.labels.map((label) => {
+            predictionLabels.push(label.class);
+          });
+        }
+      });
+      const uniqueLabels = [...new Set(predictionLabels)];
+      return uniqueLabels.map((label) => (label = { class: label }));
+    },
+    labels() {
+      // Setup all record labels
+      const labels = Object.assign(
+        {},
+        ...this.dataset.labels.map((label) => ({
+          [label]: { selected: false },
+        }))
+      );
+      // Update info with annotated ones
+      this.annotationLabels.forEach((label) => {
+        labels[label.class] = {
+          class: label.class,
+          selected: true,
+        };
+      });
+      // Update info with predicted ones
+      this.predictionLabels.forEach((label) => {
+        const currentLabel = labels[label.class] || label;
+        labels[label.class] = {
+          ...currentLabel,
+          selected: false,
+        };
+      });
+      // Dict -> list
+      return Object.entries(labels).map(([key, value]) => {
+        return {
+          class: key,
+          ...value,
+        };
+      });
     },
   },
   methods: {
