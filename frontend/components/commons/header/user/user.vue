@@ -46,6 +46,7 @@
         <p class="user__workspace__name">{{ workspace }}</p>
       </a>
       <a class="user__logout" href="#" @click.prevent="logout"> Log out </a>
+      <span class="copyright">© 2022 Rubrix (0.12.0)</span>
     </div>
   </div>
 </template>
@@ -132,7 +133,7 @@ $buttonSize: 30px;
     @include font-size(12px);
     font-weight: 600;
     color: palette(grey, medium);
-    padding: 1.2em;
+    padding: 1.2em 1.2em 0.8em 1.2em;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
     min-width: 200px;
     a {
@@ -182,5 +183,14 @@ $buttonSize: 30px;
       }
     }
   }
+}
+.copyright {
+  display: block;
+  @include font-size(11px);
+  text-transform: uppercase;
+  font-weight: 400;
+  color: palette(grey, dark);
+  line-height: 1em;
+  margin-top: 1em;
 }
 </style>
