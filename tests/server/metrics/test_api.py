@@ -260,4 +260,6 @@ def test_dataset_labels_for_text_classification(mocked_client):
         json={},
     )
     assert response.status_code == 200
-    assert response.json() == {"labels": ["A", "C", "D"]}
+    response = response.json()
+    labels = response["labels"]
+    assert sorted(labels) == ["A", "C", "D"]
