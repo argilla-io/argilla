@@ -214,7 +214,8 @@ class TextClassificationDataset extends ObservationDataset {
   async _fetchRuleMetrics({ query, labels }) {
     var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
     if (labels !== undefined) {
-      url += `?label=${labels.join('&')}`;
+      const urlLabels = labels.map(label => `label=${label}`)
+      url += `?${urlLabels.join('&')}`;
     }
     const { response } = await TextClassificationDataset.api().get(url);
 
