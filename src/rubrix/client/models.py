@@ -125,8 +125,11 @@ class TextClassificationRecord(_Validators):
     """Record for text classification
 
     Args:
+        text:
+            The input of the record. Provide either 'text' or 'inputs'.
         inputs:
-            The inputs of the record
+            Various inputs of the record (see examples below).
+            Provide either 'text' or 'inputs'.
         prediction:
             A list of tuples containing the predictions for the record.
             The first entry of the tuple is the predicted label, the second entry is its corresponding score.
@@ -157,14 +160,26 @@ class TextClassificationRecord(_Validators):
             READ ONLY! Relevant record keywords/terms for provided query when using `rb.load`.
             This attribute will be ignored when using `rb.log`.
     Examples:
+        >>> # Single text input
         >>> import rubrix as rb
         >>> record = rb.TextClassificationRecord(
-        ...     inputs={"text": "my first rubrix example"},
-        ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+        ...     text="My first rubrix example",
+        ...     prediction=[('eng', 0.9), ('esp', 0.1)]
+        ... )
+        >>>
+        >>> # Various inputs
+        >>> record = rb.TextClassificationRecord(
+        ...     inputs={
+        ...         "subject": "Has ganado 1 million!",
+        ...         "body": "Por usar Rubrix te ha tocado este premio: <link>"
+        ...     },
+        ...     prediction=[('spam', 0.99), ('ham', 0.01)],
+        ...     annotation="spam"
         ... )
     """
 
-    inputs: Union[str, List[str], Dict[str, Union[str, List[str]]]]
+    text: Optional[str] = None
+    inputs: Optional[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = None
 
     prediction: Optional[List[Tuple[str, float]]] = None
     prediction_agent: Optional[str] = None
@@ -182,12 +197,29 @@ class TextClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    @validator("inputs", pre=True)
-    def input_as_dict(cls, inputs):
-        """Preprocess record inputs and wraps as dictionary if needed"""
-        if isinstance(inputs, dict):
-            return inputs
-        return dict(text=inputs)
+    @root_validator
+    def _check_text_and_inputs(cls, values):
+        """Check if either text or inputs were provided. Copy text to inputs."""
+        if (values.get("text") is None and values.get("inputs") is None) or (
+            values.get("text") is not None and values.get("inputs") is not None
+        ):
+            raise ValueError(
+                "For a TextClassificationRecord you must provide either 'text' or 'inputs'"
+            )
+        if isinstance(values.get("text"), str):
+            values["inputs"] = dict(text=values["text"])
+        if not isinstance(values["inputs"], dict):
+            values["inputs"] = dict(text=values["inputs"])
+        if len(values["inputs"]) == 1 and isinstance(values["inputs"].get("text"), str):
+            values["text"] = values["inputs"]["text"]
+
+        return values
+
+    def __setattr__(self, name: str, value: Any):
+        """Make text and inputs immutable"""
+        if name in ["text", "inputs"]:
+            raise AttributeError(f"You cannot assign a new value to `{name}`")
+        super().__setattr__(name, value)
 
 
 class TokenClassificationRecord(_Validators):
