@@ -598,6 +598,13 @@ export default {
     font-weight: 600;
     word-break: break-word;
   }
+  .array {
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+      display: block;
+    }
+  }
   .text {
     color: $font-medium-color;
     p {

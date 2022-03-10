@@ -151,7 +151,7 @@ export default {
         return "The rule was saved";
       }
       if (queryWithLabelsIsStored) {
-        return "This query with this labels are already saved as rule";
+        return `This query with this ${this.labels.length === 1 ? 'label' : 'labels'} are already saved as rule`;
       }
     },
     coveredRecords() {

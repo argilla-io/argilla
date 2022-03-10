@@ -79,7 +79,7 @@ export default {
           class: "table-info__title",
           type: "action",
         },
-        { name: "Labels", field: "labels", class: "labels", type: "array" },
+        { name: "Labels", field: "labels", class: "array", type: "array" },
         {
           name: "Coverage",
           field: "coverage",
