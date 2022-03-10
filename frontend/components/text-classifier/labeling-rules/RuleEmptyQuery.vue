@@ -68,11 +68,11 @@ export default {
     maxVisibleLabels() {
       return DatasetViewSettings.MAX_VISIBLE_LABELS;
     },
-    query() {
-      return this.dataset.query.text;
-    },
     labels() {
       return this.dataset.labels.map((l) => ({ class: l, selected: false }));
+    },
+    query() {
+      return this.dataset.query.text;
     },
     sortedLabels() {
       return this.labels.slice().sort((a, b) => (a.score > b.score ? -1 : 1));
