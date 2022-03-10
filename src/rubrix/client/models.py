@@ -201,18 +201,10 @@ class TextClassificationRecord(_Validators):
     def _check_text_and_inputs(cls, values):
         """Check if either text or inputs were provided. Copy text to inputs."""
         if (values.get("text") is None and values.get("inputs") is None) or (
-            values.get("text") is not None
-            and values.get("inputs") is not None
-            and values["text"] != values["inputs"].get("text")
+            values.get("text") is not None and values.get("inputs") is not None
         ):
             raise ValueError(
                 "For a TextClassificationRecord you must provide either 'text' or 'inputs'"
-            )
-        if isinstance(values.get("inputs"), str):
-            warnings.warn(
-                "In the future, the `inputs` argument of the `TextClassificationRecord` will not accept strings."
-                "Please use the `text` argument in that case. Make sure to adapt your code accordingly.",
-                category=FutureWarning,
             )
         if isinstance(values.get("text"), str):
             values["inputs"] = dict(text=values["text"])
