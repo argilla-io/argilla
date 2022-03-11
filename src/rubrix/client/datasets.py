@@ -355,16 +355,16 @@ class DatasetForTextClassification(DatasetBase):
         >>>
         >>> # Passing in a list of records:
         >>> records = [
-        ...     rb.TextClassificationRecord(inputs="example"),
-        ...     rb.TextClassificationRecord(inputs="another example"),
+        ...     rb.TextClassificationRecord(text="example"),
+        ...     rb.TextClassificationRecord(text="another example"),
         ... ]
         >>> dataset = rb.DatasetForTextClassification(records)
         >>> assert len(dataset) == 2
         >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
-        ... rb.TextClassificationRecord(inputs={"text": "example"})
-        >>> dataset[0] = rb.TextClassificationRecord(inputs="replaced example")
+        ... rb.TextClassificationRecord(text="example")
+        >>> dataset[0] = rb.TextClassificationRecord(text="replaced example")
     """
 
     _RECORD_TYPE = TextClassificationRecord

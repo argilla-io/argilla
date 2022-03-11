@@ -80,16 +80,10 @@ def test_log_records_with_empty_metadata_list(mocked_client):
 
     rb.delete(dataset)
     expected_records = [
-        rb.TextClassificationRecord(
-            inputs="The input text", metadata={"emptyList": []}
-        ),
-        rb.TextClassificationRecord(
-            inputs="The input text", metadata={"emptyTuple": ()}
-        ),
-        rb.TextClassificationRecord(
-            inputs="The input text", metadata={"emptyDict": {}}
-        ),
-        rb.TextClassificationRecord(inputs="The input text", metadata={"none": None}),
+        rb.TextClassificationRecord(text="The input text", metadata={"emptyList": []}),
+        rb.TextClassificationRecord(text="The input text", metadata={"emptyTuple": ()}),
+        rb.TextClassificationRecord(text="The input text", metadata={"emptyDict": {}}),
+        rb.TextClassificationRecord(text="The input text", metadata={"none": None}),
     ]
     rb.log(expected_records, name=dataset)
 
@@ -105,7 +99,7 @@ def test_logging_with_metadata_limits_exceeded(mocked_client):
 
     rb.delete(dataset)
     expected_record = rb.TextClassificationRecord(
-        inputs="The input text",
+        text="The input text",
         metadata={k: k for k in range(0, settings.metadata_fields_limit + 1)},
     )
     with pytest.raises(BadRequestApiError):
@@ -124,7 +118,7 @@ def test_log_with_other_task(mocked_client):
 
     rb.delete(dataset)
     record = rb.TextClassificationRecord(
-        inputs="The input text",
+        text="The input text",
     )
     rb.log(record, name=dataset)
 
@@ -138,11 +132,11 @@ def test_log_with_other_task(mocked_client):
 def test_dynamics_metadata(mocked_client):
     dataset = "test_dynamics_metadata"
     rb.log(
-        rb.TextClassificationRecord(inputs="This is a text", metadata={"a": "value"}),
+        rb.TextClassificationRecord(text="This is a text", metadata={"a": "value"}),
         name=dataset,
     )
 
     rb.log(
-        rb.TextClassificationRecord(inputs="Another text", metadata={"b": "value"}),
+        rb.TextClassificationRecord(text="Another text", metadata={"b": "value"}),
         name=dataset,
     )
