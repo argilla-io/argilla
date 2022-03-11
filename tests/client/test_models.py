@@ -62,6 +62,32 @@ def test_text_classification_input_string():
     ) == TextClassificationRecord(inputs=dict(text=["A text", "another text"]))
 
 
+def test_text_classification_text_inputs():
+    with pytest.raises(ValueError, match="either 'text' or 'inputs'"):
+        TextClassificationRecord()
+
+    with pytest.raises(ValueError, match="either 'text' or 'inputs'"):
+        TextClassificationRecord(text="mock", inputs={"text": "mock_test"})
+
+    with pytest.warns(
+        FutureWarning,
+        match="the `inputs` argument of the `TextClassificationRecord` will not accept strings.",
+    ):
+        TextClassificationRecord(inputs="mock")
+
+    assert TextClassificationRecord(text="mock") == TextClassificationRecord(
+        inputs={"text": "mock"}
+    )
+
+    assert TextClassificationRecord(inputs=["mock"]) == TextClassificationRecord(
+        inputs={"text": ["mock"]}
+    )
+
+    assert TextClassificationRecord(
+        text="mock", inputs={"text": "mock"}
+    ) == TextClassificationRecord(inputs={"text": "mock"})
+
+
 @pytest.mark.parametrize(
     ("annotation", "status", "expected_status", "expected_iob"),
     [
