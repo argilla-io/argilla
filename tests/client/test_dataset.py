@@ -695,8 +695,9 @@ def _compare_datasets(dataset, expected_dataset):
             # TODO: have to think about how we deal with `None`s
             if col in ["metadata", "metrics"]:
                 continue
-            if getattr(rec, col) != getattr(expected, col):
-                raise AssertionError(f"Wrong column value {col}")
+            assert getattr(rec, col) == getattr(
+                expected, col
+            ), f"Wrong column value '{col}'"
 
 
 @pytest.mark.parametrize(

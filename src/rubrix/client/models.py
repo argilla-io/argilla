@@ -58,7 +58,8 @@ class _Validators(BaseModel):
         """Triggers a warning when ONLY prediction agent is provided"""
         if v and values["prediction"] is None:
             warnings.warn(
-                "You provided an `prediction_agent`, but no `prediction`. The `prediction_agent` will not be logged to the server."
+                "You provided an `prediction_agent`, but no `prediction`. "
+                "The `prediction_agent` will not be logged to the server."
             )
         return v
 
@@ -67,7 +68,8 @@ class _Validators(BaseModel):
         """Triggers a warning when ONLY annotation agent is provided"""
         if v and values["annotation"] is None:
             warnings.warn(
-                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
+                "You provided an `annotation_agent`, but no `annotation`. "
+                "The `annotation_agent` will not be logged to the server."
             )
         return v
 
