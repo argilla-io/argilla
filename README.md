@@ -1,4 +1,8 @@
 
+![](https://user-images.githubusercontent.com/1107111/157880110-81008ddc-a376-4592-9ecf-d42a43cbf895.svg)
+
+<br/>
+
 <div align="center">
     <h3><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a>
     | <a href="https://docs.rubrix.ml">📚 Docs</a>
@@ -6,8 +10,9 @@
     | <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a></h3>
 </div>
 
-![](https://user-images.githubusercontent.com/1107111/157880110-81008ddc-a376-4592-9ecf-d42a43cbf895.svg)
 
+<br/>
+<br/>
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
