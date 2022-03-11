@@ -4,7 +4,46 @@
 
 You can search records by using full-text queries (a normal search), or by Elasticsearch with its [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax).
 
-This component enables:
+- Using the `text` and `text.exact` fields
+  + standard and whitespace analyzers
+  + Examples: `text:The phrase` `text.exact:THE PHRASE`
+
+- Default search by `words` and `words.extended`
+  + Search are based on both fields. The default search use both fields.
+  + `words` and `words.extended` deprecation disclaims
+  + ->  promote to prefixed `text:` searches instead default
+
+- Using other fields in search:
+  + Selective inputs search for text classification (`inputs.*` and `inputs.*.exact`)
+  + Metadata values: `metadata.split: train` *ONLY AS KEYWORD
+
+- Filters as query text search
+  + You can use filters in search
+  + `predicted_as: POSITIVE`
+  + `status:Validated`
+  + `annotated_by: john`
+
+- Combining fields (AND OR NOT....)
+  + You can use boolean operator to compose fields or terms in search
+  + Default operator for keywords is the AND operator
+  + `text:(Mike OR Anna)`
+  + `annotated_as: john OR status:Default`
+  + `NOT(_exists_:predicted_as)`
+
+- Some interesting query dsl features:
+  + Regular patterns
+    + `text:/joh?n(ath[oa]n)/`
+  + Ranges
+    + `score:[0.7 TO 0.8]`
+  + Phrase search
+    + `text:"the phrase your're looking for"`
+  + fuzziness
+    + `rubri~`
+  + boosting
+    + `inputs.subject:Rubrix^2 AND inputs.body:better`
+
+- Fields glossary (and kind)
+  - TODO
 
 1. **Full-text queries** over all record `inputs`.
 
