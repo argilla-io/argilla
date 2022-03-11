@@ -1,6 +1,6 @@
 
 <div align="center">
-    <h2><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a>
+    <h3><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a>
     | <a href="https://docs.rubrix.ml">📚 Docs</a>
 | <a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a>
     | <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a></h2>
