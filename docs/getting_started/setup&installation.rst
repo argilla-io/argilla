@@ -21,7 +21,7 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 
 .. code-block:: bash
 
-   pip install rubrix[server]==0.12.0
+   pip install rubrix[server]==0.12.1
 
 **with conda**
 
