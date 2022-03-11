@@ -124,6 +124,9 @@ class DatasetBase:
         import datasets
 
         ds_dict = self._to_datasets_dict()
+        # TODO: THIS FIELD IS ONLY AT CLIENT API LEVEL. NOT SENSE HERE FOR NOW
+        if "search_keywords" in ds_dict:
+            del ds_dict["search_keywords"]
 
         try:
             dataset = datasets.Dataset.from_dict(ds_dict)
@@ -535,6 +538,88 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
+    @_requires_datasets
+    def prepare_for_training(self) -> "datasets.Dataset":
+        """Prepares the dataset for training.
+
+        This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
+        and an additional  *ner_tags* column:
+            - Records without an annotation are removed.
+            - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
+            - The iob tags are transformed to integers.
+
+        Returns:
+            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
+
+        Examples:
+            >>> import rubrix as rb
+            >>> rb_dataset = rb.DatasetForTokenClassification([
+            ...     rb.TokenClassificationRecord(
+            ...         text="The text",
+            ...         tokens=["The", "text"],
+            ...         annotation=[("TAG", 0, 2)],
+            ...     )
+            ... ])
+            >>> rb_dataset.prepare_for_training().features
+            {'text': Value(dtype='string'),
+             'tokens': Sequence(feature=Value(dtype='string'), length=-1),
+             'prediction': Value(dtype='null'),
+             'prediction_agent': Value(dtype='null'),
+             'annotation': [{'end': Value(dtype='int64'),
+               'label': Value(dtype='string'),
+               'start': Value(dtype='int64')}],
+             'annotation_agent': Value(dtype='null'),
+             'id': Value(dtype='null'),
+             'metadata': Value(dtype='null'),
+             'status': Value(dtype='string'),
+             'event_timestamp': Value(dtype='null'),
+             'metrics': Value(dtype='null'),
+             'ner_tags': [ClassLabel(num_classes=3, names=['O', 'B-TAG', 'I-TAG'])]}
+
+
+        """
+        import datasets
+
+        class_tags = ["O"]
+        class_tags.extend(
+            [
+                f"{pre}-{label}"
+                for label in sorted(self.__all_labels__())
+                for pre in ["B", "I"]
+            ]
+        )
+        class_tags = datasets.ClassLabel(names=class_tags)
+
+        def spans2iob(example):
+            r = TokenClassificationRecord(
+                text=example["text"],
+                tokens=example["tokens"],
+                annotation=self.__entities_to_tuple__(example["annotation"]),
+            )
+            return class_tags.str2int(r.spans2iob(r.annotation))
+
+        ds = (
+            self.to_datasets()
+            .filter(self.__only_annotations__)
+            .map(
+                lambda example: {"ner_tags": spans2iob(example)},
+            )
+        )
+        new_features = ds.features.copy()
+        new_features["ner_tags"] = [class_tags]
+        return ds.cast(new_features)
+
+    def __all_labels__(self):
+        all_labels = set()
+        for record in self._records:
+            if record.annotation:
+                all_labels.update([label for label, _, _ in record.annotation])
+
+        return list(all_labels)
+
+    def __only_annotations__(self, data) -> bool:
+        return data["annotation"] is not None
+
     def _to_datasets_dict(self) -> Dict:
         """Helper method to put token classification records in a `datasets.Dataset`"""
         # create a dict first, where we make the necessary transformations
@@ -573,24 +658,28 @@ class DatasetForTokenClassification(DatasetBase):
 
         return ds_dict
 
+    @staticmethod
+    def __entities_to_tuple__(
+        entities,
+    ) -> List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]:
+        return [
+            (ent["label"], ent["start"], ent["end"])
+            if len(ent) == 3
+            else (ent["label"], ent["start"], ent["end"], ent["score"] or 1.0)
+            for ent in entities
+        ]
+
     @classmethod
     def _from_datasets(
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTokenClassification":
-        def entities_to_tuple(entities):
-            return [
-                (ent["label"], ent["start"], ent["end"])
-                if len(ent) == 3
-                else (ent["label"], ent["start"], ent["end"], ent["score"] or 1.0)
-                for ent in entities
-            ]
 
         records = []
         for row in dataset:
             if row.get("prediction"):
-                row["prediction"] = entities_to_tuple(row["prediction"])
+                row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
             if row.get("annotation"):
-                row["annotation"] = entities_to_tuple(row["annotation"])
+                row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
 
             records.append(TokenClassificationRecord(**row))
 
