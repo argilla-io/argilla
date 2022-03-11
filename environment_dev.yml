@@ -25,6 +25,7 @@ dependencies:
       - sphinx_rtd_theme==0.5.2
       - myst-parser==0.16.1
       - nbsphinx==0.8.7
+      - nbformat<5.2.0 # Installs ipython-genutils, with a new version (>0.8.8) of nbsphinx this can probably go away.
       - sphinxext.opengraph==0.4.2
       # code formatting
       - pre-commit==2.15.0
