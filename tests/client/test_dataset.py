@@ -403,6 +403,9 @@ class TestDatasetForTokenClassification:
         assert ds._RECORD_TYPE == rb.TokenClassificationRecord
         assert ds._records == tokenclassification_records
 
+    @pytest.mark.skip(
+        reason="This test is failing. See this issue https://github.com/huggingface/datasets/issues/3676"
+    )
     def test_to_from_datasets(self, tokenclassification_records):
         expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
 
