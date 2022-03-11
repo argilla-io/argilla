@@ -688,6 +688,37 @@ class TestDatasetForText2Text:
 
         assert isinstance(dataset_ds, datasets.Dataset)
 
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_from_dataset_with_non_rubrix_format(self):
+        import datasets
+
+        ds = datasets.load_dataset(
+            "rubrix/big_patent_a_test_100",
+            split="test",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+        )
+
+        rb_ds = rb.DatasetForText2Text.from_datasets(
+            ds, text="description", annotation="abstract"
+        )
+
+        again_the_ds = rb_ds.to_datasets()
+        assert again_the_ds.column_names == [
+            "text",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
+
 
 def _compare_datasets(dataset, expected_dataset):
     for rec, expected in zip(dataset, expected_dataset):

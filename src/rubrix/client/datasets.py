@@ -318,7 +318,7 @@ class DatasetBase:
     def _parse_annotation_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
-        return dataset
+        return dataset.rename_column(field, "annotation")
 
 
 def _prepend_docstring(record_type: Type[Record]):
