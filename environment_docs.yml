@@ -17,5 +17,6 @@ dependencies:
       - sphinx_rtd_theme==0.5.2
       - myst-parser==0.16.1
       - nbsphinx==0.8.7
+      - nbformat<5.2.0 # This will install ipython-genutils
       - sphinxext.opengraph==0.4.2
       - -e .
