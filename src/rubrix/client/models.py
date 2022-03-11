@@ -206,6 +206,12 @@ class TextClassificationRecord(_Validators):
             raise ValueError(
                 "For a TextClassificationRecord you must provide either 'text' or 'inputs'"
             )
+        if isinstance(values.get("inputs"), str):
+            warnings.warn(
+                "In the future, the `inputs` argument of the `TextClassificationRecord` will not accept strings."
+                "Please use the `text` argument in that case. Make sure to adapt your code accordingly.",
+                category=FutureWarning,
+            )
         if isinstance(values.get("text"), str):
             values["inputs"] = dict(text=values["text"])
         if not isinstance(values["inputs"], dict):
