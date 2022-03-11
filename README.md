@@ -3,6 +3,8 @@
 </p>
 <h3> Open-source framework to label, refine and monitor data for NLP</h3>
 
+![](docs/images/og_rubrix_dark.svg)
+
 https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
 
 <p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
