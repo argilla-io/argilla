@@ -201,7 +201,9 @@ class TextClassificationRecord(_Validators):
     def _check_text_and_inputs(cls, values):
         """Check if either text or inputs were provided. Copy text to inputs."""
         if (values.get("text") is None and values.get("inputs") is None) or (
-            values.get("text") is not None and values.get("inputs") is not None
+            values.get("text") is not None
+            and values.get("inputs") is not None
+            and values["text"] != values["inputs"].get("text")
         ):
             raise ValueError(
                 "For a TextClassificationRecord you must provide either 'text' or 'inputs'"
