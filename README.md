@@ -1,11 +1,13 @@
-<p align="left">
-    <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
-</p>
-<h3> Open-source framework to label, refine and monitor data for NLP</h3>
 
-https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
+<div align="center">
+    <h2><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a>
+    | <a href="https://docs.rubrix.ml">📚 Docs</a>
+| <a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a><
+    | <a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a></h2>
+</div>
 
-<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
+![](https://user-images.githubusercontent.com/1107111/157880110-81008ddc-a376-4592-9ecf-d42a43cbf895.svg)
+
 
 <p align="center">
     <a href="https://github.com/recognai/rubrix/actions">
@@ -40,12 +42,8 @@ https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-b
 
 </p>
 
-<p align="center">
-    <h3><a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"> 👩🏾‍💻 Join the community on Slack</a></h3>
-    <h3><a href="https://docs.rubrix.ml">📚 Docs</a></h3>
-    <h3><a href="https://github.com/recognai/rubrix/#get-started">🚀 Get started</a></h3>
-    <h3><a href="https://github.com/recognai/rubrix/#quick-links">🔗 Quick links</a></h3>
-</p>
+
+
 
 ## What is Rubrix?
 
@@ -60,6 +58,15 @@ Why Rubrix?
 - **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Rubrix optimizes the experience for these core users to **make your teams more productive**.
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
+
+## Example
+
+Interactive weak supervision. Building a news classifier with user search queries:
+
+https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
+
+Check the [tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supervision-with-rubrix.html) for more details.
+
 
 ## Features
 
