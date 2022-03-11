@@ -76,6 +76,29 @@ For more details about fastapi and uvicorn, see `here <https://fastapi.tiangolo.
 
 Fastapi also provides beautiful REST API docs that you can check at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
 
+Environment variables
+---------------------
+
+Here we will give you a list of useful environment variables that you can set to configure your client or server.
+
+Client
+^^^^^^
+
+- ``RUBRIX_API_URL``: The default API URL when calling :meth:`rubrix.init`.
+
+- ``RUBRIX_API_KEY``: The default API key when calling :meth:`rubrix.init``.
+
+- ``RUBRIX_WORKSPACE``: The default workspace when calling :meth:`rubrix.init``.
+
+Server
+^^^^^^
+
+- ``ELASTICSEARCH``: URL of the endpoint of the Elasticsearch instance.
+
+- ``CORS_ORIGINS``: List of host patterns for CORS origin access.
+
+- ``DOCS_ENABLED``: If False, disables openapi docs endpoint at */api/docs*.
+
 
 .. _launching-the-web-app-via-docker:
 
