@@ -1,6 +1,3 @@
-<p align="left">
-    <img src="docs/images/rubrix_logo.svg" alt="drawing" width="200" />
-</p>
 <h3> Open-source framework to label, refine and monitor data for NLP</h3>
 
 ![](docs/images/og_rubrix_dark.svg)
