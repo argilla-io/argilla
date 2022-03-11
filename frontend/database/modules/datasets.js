@@ -444,6 +444,10 @@ const getters = {
 };
 
 const actions = {
+  async getRubrixVersion() {
+    const response = await this.$axios.$get("_info");
+    return response.rubrix_version;
+  },
   async updateDatasetRecords(_, { dataset, records }) {
     return await _updateDatasetRecords({
       dataset,

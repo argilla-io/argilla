@@ -46,7 +46,7 @@
         <p class="user__workspace__name">{{ workspace }}</p>
       </a>
       <a class="user__logout" href="#" @click.prevent="logout"> Log out </a>
-      <span class="copyright">© 2022 Rubrix (0.12.0)</span>
+      <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
   </div>
 </template>
@@ -58,6 +58,7 @@ export default {
   data: () => {
     return {
       visibleSelector: false,
+      rubrixVersion: undefined,
     };
   },
   computed: {
@@ -68,9 +69,12 @@ export default {
       return currentWorkspace(this.$route);
     },
   },
+  async fetch() {
+    this.rubrixVersion = await this.getRubrixVersion();
+  },
   methods: {
     ...mapActions({
-      fetchDatasets: "entities/datasets/fetchAll",
+      getRubrixVersion: "entities/datasets/getRubrixVersion",
     }),
     firstChar(name) {
       return name.charAt(0);
