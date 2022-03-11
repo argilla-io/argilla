@@ -578,6 +578,7 @@ class DatasetForTextClassification(DatasetBase):
             for key in rec.inputs
             if rec.annotation is not None
         }.keys()
+
         ds_dict = {**{key: [] for key in inputs_keys}, "label": []}
         for rec in self._records:
             if rec.annotation is None:
@@ -591,7 +592,12 @@ class DatasetForTextClassification(DatasetBase):
         else:
             labels = {label: None for label in ds_dict["label"]}
 
-        class_label = datasets.ClassLabel(names=sorted(labels.keys()))
+        class_label = (
+            datasets.ClassLabel(names=sorted(labels.keys()))
+            if ds_dict["label"]
+            # in case we don't have any labels, ClassLabel fails with Dataset.from_dict({"labels": []})
+            else datasets.Value("string")
+        )
         feature_dict = {
             **{key: datasets.Value("string") for key in inputs_keys},
             "label": [class_label] if self._records[0].multi_label else class_label,
