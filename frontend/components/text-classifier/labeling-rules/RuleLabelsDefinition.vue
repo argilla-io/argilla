@@ -151,7 +151,7 @@ export default {
         return "The rule was saved";
       }
       if (queryWithLabelsIsStored) {
-        return `This query with this ${this.dataset.isMultiLabel ? 'labels' : 'label'} are already saved as rule`;
+        return `This query with this ${this.selectedLabels.length > 1 ? 'labels' : 'label'} are already saved as rule`;
       }
     },
     coveredRecords() {
