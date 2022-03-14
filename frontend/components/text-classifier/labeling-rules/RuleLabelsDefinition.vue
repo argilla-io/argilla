@@ -150,7 +150,7 @@ export default {
       if (this.isSaved) {
         return "The rule was saved";
       }
-      if (queryWithLabelsIsStored) {
+      if (this.selectedLabels && queryWithLabelsIsStored) {
         return `This query with this ${this.selectedLabels.length > 1 ? 'labels' : 'label'} are already saved as rule`;
       }
     },
