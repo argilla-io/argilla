@@ -244,7 +244,7 @@ export default {
 <style lang="scss" scoped>
 .rules-management {
   padding-left: 4em;
-  padding-top: 7em;
+  padding-top: 2em;
   overflow: auto;
   height: 100vh;
   &__container {
