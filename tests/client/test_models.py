@@ -87,6 +87,14 @@ def test_text_classification_text_inputs():
         text="mock", inputs={"text": "mock"}
     ) == TextClassificationRecord(inputs={"text": "mock"})
 
+    rec = TextClassificationRecord(text="mock")
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
+        rec.text = "mock"
+    with pytest.raises(
+        AttributeError, match="You cannot assign a new value to `inputs`"
+    ):
+        rec.inputs = "mock"
+
 
 @pytest.mark.parametrize(
     ("annotation", "status", "expected_status", "expected_iob"),
