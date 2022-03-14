@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRubrixVersion: "entities/datasets/getRubrixVersion",
+      getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
     }),
     firstChar(name) {
       return name.charAt(0);
