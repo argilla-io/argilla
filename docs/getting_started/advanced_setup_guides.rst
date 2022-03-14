@@ -59,6 +59,7 @@ Server configurations
 
 By default, the Rubrix server will look for your ES endpoint at ``http://localhost:9200``.
 But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
+Have a look at the list of available `environment variables`_ to further configure the Rubrix server.
 
 Since the Rubrix server is built on fastapi, you can launch it using **uvicorn** directly:
 
@@ -77,12 +78,35 @@ For more details about fastapi and uvicorn, see `here <https://fastapi.tiangolo.
 Fastapi also provides beautiful REST API docs that you can check at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
 
 Environment variables
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
-Here we will give you a list of useful environment variables that you can set to configure your client or server.
+You can set following environment variables to further configure your server and client.
+
+Server
+""""""
+
+- ``ELASTICSEARCH``: URL of the connection endpoint of the Elasticsearch instance (Default: http://localhost:9200 ).
+
+- ``RUBRIX_ELASTICSEARCH_SSL_VERIFY``: If "False", disables SSL certificate verification when connection to the
+    Elasticsearch backend.
+
+- ``RUBRIX_NAMESPACE``: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same
+    Elasticsearch instance for several independent Rubrix instances.
+
+- ``RUBRIX_DEFAULT_ES_SEARCH_ANALYZER``: Default analyzer for textual fields excluding the metadata
+    (Default: "standard")
+
+- ``RUBRIX_EXACT_ES_SEARCH_ANALYZER``: Default analyzer for ``*.exact`` fields in textual information
+    (Default: "whitespace").
+
+- ``METADATA_FIELDS_LIMIT``: Max number of fields in the metadata (Default: 50, max: 100).
+
+- ``CORS_ORIGINS``: List of host patterns for CORS origin access.
+
+- ``DOCS_ENABLED``: If False, disables openapi docs endpoint at */api/docs*.
 
 Client
-^^^^^^
+""""""
 
 - ``RUBRIX_API_URL``: The default API URL when calling :meth:`rubrix.init`.
 
@@ -90,14 +114,6 @@ Client
 
 - ``RUBRIX_WORKSPACE``: The default workspace when calling :meth:`rubrix.init``.
 
-Server
-^^^^^^
-
-- ``ELASTICSEARCH``: URL of the endpoint of the Elasticsearch instance.
-
-- ``CORS_ORIGINS``: List of host patterns for CORS origin access.
-
-- ``DOCS_ENABLED``: If False, disables openapi docs endpoint at */api/docs*.
 
 
 .. _launching-the-web-app-via-docker:
