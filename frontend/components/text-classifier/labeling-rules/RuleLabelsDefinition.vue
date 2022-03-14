@@ -151,8 +151,8 @@ export default {
         return "The rule was saved";
       }
       if (this.selectedLabels && queryWithLabelsIsStored) {
-        return `This query with this ${
-          this.selectedLabels.length > 1 ? "labels" : "label"
+        return `This query with ${
+          this.selectedLabels.length > 1 ? "these labels" : "this label"
         } are already saved as rule`;
       }
     },
