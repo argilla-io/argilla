@@ -18,9 +18,9 @@ This module contains the data models for the interface
 """
 
 import datetime
+import logging
 import warnings
 from collections import defaultdict
-from functools import lru_cache
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -28,6 +28,8 @@ from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.helpers import limit_value_length
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class _Validators(BaseModel):
@@ -56,7 +58,8 @@ class _Validators(BaseModel):
         """Triggers a warning when ONLY prediction agent is provided"""
         if v and values["prediction"] is None:
             warnings.warn(
-                "You provided an `prediction_agent`, but no `prediction`. The `prediction_agent` will not be logged to the server."
+                "You provided an `prediction_agent`, but no `prediction`. "
+                "The `prediction_agent` will not be logged to the server."
             )
         return v
 
@@ -65,7 +68,8 @@ class _Validators(BaseModel):
         """Triggers a warning when ONLY annotation agent is provided"""
         if v and values["annotation"] is None:
             warnings.warn(
-                "You provided an `annotation_agent`, but no `annotation`. The `annotation_agent` will not be logged to the server."
+                "You provided an `annotation_agent`, but no `annotation`. "
+                "The `annotation_agent` will not be logged to the server."
             )
         return v
 
@@ -230,8 +234,8 @@ class TokenClassificationRecord(_Validators):
         ... )
     """
 
-    text: str = Field(min_length=1)
-    tokens: Union[List[str], Tuple[str, ...]]
+    text: Optional[str] = Field(None, min_length=1)
+    tokens: Optional[Union[List[str], Tuple[str, ...]]] = None
 
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
@@ -250,6 +254,51 @@ class TokenClassificationRecord(_Validators):
 
     __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
     __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+
+    def __init__(
+        self,
+        text: str = None,
+        tokens: List[str] = None,
+        tags: Optional[List[str]] = None,
+        **data,
+    ):
+        if text is None and tokens is None:
+            raise AssertionError(
+                "Missing fields: At least one of `text` or `tokens` argument must be provided!"
+            )
+
+        if (data.get("annotation") or data.get("prediction")) and text is None:
+            raise AssertionError(
+                "Missing field `text`: "
+                "char level spans must be provided with a raw text sentence"
+            )
+
+        if text is None:
+            text = " ".join(tokens)
+
+        super().__init__(text=text, tokens=tokens, **data)
+        if self.annotation and tags:
+            _LOGGER.warning("Annotation already provided, `tags` won't be used")
+            return
+        if tags:
+            self.annotation = self.__tags2entities__(tags)
+
+    def __tags2entities__(self, tags: List[str]) -> List[Tuple[str, int, int]]:
+        idx = 0
+        entities = []
+        while idx < len(tags):
+            tag = tags[idx]
+            prefix, entity = tag.split("-")
+            if tag == "B":
+                char_start, char_end = self.token_span(token_idx=idx)
+                entities.append(
+                    {"entity": entity, "start": char_start, "end": char_end}
+                )
+            elif prefix in ["I", "L"]:
+                _, char_end = self.token_span(token_idx=idx)
+                entities[-1]["end"] = char_end
+            idx += 1
+        return [(value["entity"], value["start"], value["end"]) for value in entities]
 
     def __setattr__(self, name: str, value: Any):
         """Make text and tokens immutable"""
@@ -315,7 +364,6 @@ class TokenClassificationRecord(_Validators):
                     current_token += 1
                     current_token_char_start += relative_idx
                     chars_map[idx] = current_token
-
             return chars_map
 
         def tokens2chars_index(

@@ -329,6 +329,73 @@ class TestDatasetForTextClassification:
         else:
             assert train.features["label"] == datasets.ClassLabel(names=["a"])
 
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_from_dataset_with_non_rubrix_format_multilabel(self):
+        import datasets
+
+        ds = datasets.load_dataset(
+            "rubrix/go_emotions_test_100",
+            split="test",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+        )
+
+        rb_ds = rb.DatasetForTextClassification.from_datasets(
+            ds,
+            inputs="text",
+            annotation="labels",
+        )
+        again_the_ds = rb_ds.to_datasets()
+        assert again_the_ds.column_names == [
+            "inputs",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "multi_label",
+            "explanation",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_from_dataset_with_non_rubrix_format(self):
+        import datasets
+
+        ds = datasets.load_dataset(
+            "rubrix/app_reviews_train_100",
+            split="train",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+        )
+
+        rb_ds = rb.DatasetForTextClassification.from_datasets(
+            ds, inputs="review", annotation="star", metadata=["package_name", "date"]
+        )
+
+        again_the_ds = rb_ds.to_datasets()
+        assert again_the_ds.column_names == [
+            "inputs",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "multi_label",
+            "explanation",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
+
 
 class TestDatasetForTokenClassification:
     def test_init(self, tokenclassification_records):
@@ -495,6 +562,38 @@ class TestDatasetForTokenClassification:
             private=True,
         )
 
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_from_dataset_with_non_rubrix_format(self):
+        import datasets
+
+        ds = datasets.load_dataset(
+            "rubrix/wikiann_es_test_100",
+            split="test",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+        )
+
+        rb_ds = rb.DatasetForTokenClassification.from_datasets(
+            ds, tags="ner_tags", metadata=["spans"]
+        )
+
+        again_the_ds = rb_ds.to_datasets()
+        assert again_the_ds.column_names == [
+            "text",
+            "tokens",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
+
 
 class TestDatasetForText2Text:
     def test_init(self, text2text_records):
@@ -589,6 +688,37 @@ class TestDatasetForText2Text:
 
         assert isinstance(dataset_ds, datasets.Dataset)
 
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_from_dataset_with_non_rubrix_format(self):
+        import datasets
+
+        ds = datasets.load_dataset(
+            "rubrix/big_patent_a_test_100",
+            split="test",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+        )
+
+        rb_ds = rb.DatasetForText2Text.from_datasets(
+            ds, text="description", annotation="abstract"
+        )
+
+        again_the_ds = rb_ds.to_datasets()
+        assert again_the_ds.column_names == [
+            "text",
+            "prediction",
+            "prediction_agent",
+            "annotation",
+            "annotation_agent",
+            "id",
+            "metadata",
+            "status",
+            "event_timestamp",
+            "metrics",
+        ]
+
 
 def _compare_datasets(dataset, expected_dataset):
     for rec, expected in zip(dataset, expected_dataset):
@@ -596,7 +726,9 @@ def _compare_datasets(dataset, expected_dataset):
             # TODO: have to think about how we deal with `None`s
             if col in ["metadata", "metrics"]:
                 continue
-            assert getattr(rec, col) == getattr(expected, col)
+            assert getattr(rec, col) == getattr(
+                expected, col
+            ), f"Wrong column value '{col}'"
 
 
 @pytest.mark.parametrize(
