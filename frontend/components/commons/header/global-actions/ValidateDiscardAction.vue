@@ -75,15 +75,14 @@ export default {
   },
   watch: {
     visibleRecords(newValue) {
-      if (!newValue.every((record) => record.selected)) {
+      if (newValue.every((record) => record.selected)) {
+        this.allSelected = true;
+      } else {
         this.allSelected = false;
       }
     },
     allSelected(allSelected) {
-      if (
-        allSelected ||
-        this.visibleRecords.every((record) => record.selected)
-      ) {
+      if (allSelected) {
         this.updateRecords({
           dataset: this.dataset,
           records: this.visibleRecords.map((record) => {
