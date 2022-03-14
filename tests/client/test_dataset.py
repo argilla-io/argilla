@@ -213,6 +213,7 @@ class TestDatasetForTextClassification:
 
         assert isinstance(dataset_ds, datasets.Dataset)
         assert dataset_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",
