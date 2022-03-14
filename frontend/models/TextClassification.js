@@ -214,8 +214,8 @@ class TextClassificationDataset extends ObservationDataset {
   async _fetchRuleMetrics({ query, labels }) {
     var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
     if (labels !== undefined) {
-      const urlLabels = labels.map(label => `label=${label}`)
-      url += `?${urlLabels.join('&')}`;
+      const urlLabels = labels.map((label) => `label=${label}`);
+      url += `?${urlLabels.join("&")}`;
     }
     const { response } = await TextClassificationDataset.api().get(url);
 
@@ -347,6 +347,7 @@ class TextClassificationDataset extends ObservationDataset {
       [activeRule.query]: this.activeRuleMetrics,
     };
     let rule = await this._getRule({ query: activeRule.query });
+    rule = rule ? rule : activeRule;
     rules.push(rule);
 
     const overalMetrics = await this._fetchOveralMetrics(
@@ -405,7 +406,6 @@ class TextClassificationDataset extends ObservationDataset {
   findRuleByQuery(query, labels = undefined) {
     for (let rule of this.labelingRules || []) {
       const labelsAreEqual = _.isEqual(_.sortBy(rule.labels), _.sortBy(labels));
-      // console.log(query, 'rule.labels:', rule.labels, 'labels:', labels, labelsAreEqual)
       if (rule.query === query && (!labels || labelsAreEqual)) {
         return rule;
       }
