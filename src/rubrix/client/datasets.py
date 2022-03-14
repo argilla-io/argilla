@@ -145,17 +145,44 @@ class DatasetBase:
         raise NotImplementedError
 
     @classmethod
-    def from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
+    def from_datasets(
+        cls,
+        dataset: "datasets.Dataset",
+        id: Optional[str] = None,
+        text: Optional[str] = None,
+        annotation: Optional[str] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
+        **kwargs,
+    ) -> "Dataset":
         """Imports records from a `datasets.Dataset`.
 
         Columns that are not supported are ignored.
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            id: The field name used as record id. Default: `None`
+            text: The field name used as record text. Default: `None`
+            annotation: The field name used as record annotation. Default: `None`
+            metadata: The field name used as record metadata. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
         """
+        import datasets
+
+        assert not isinstance(dataset, datasets.DatasetDict), (
+            "ERROR: `datasets.DatasetDict` are not supported. "
+            "Please, select the dataset split before"
+        )
+
+        dataset = cls._prepare_hf_dataset(
+            dataset,
+            id=id,
+            text=text,
+            annotation=annotation,
+            metadata=metadata,
+            **kwargs,
+        )
 
         not_supported_columns = [
             col
@@ -164,11 +191,30 @@ class DatasetBase:
         ]
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model and are ignored: {not_supported_columns}"
+                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__}"
+                f" model and are ignored: {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
-
         return cls._from_datasets(dataset)
+
+    @classmethod
+    def _prepare_hf_dataset(
+        cls,
+        dataset: "dataset.Dataset",
+        id: Optional[str] = None,
+        text: Optional[str] = None,
+        annotation: Optional[str] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
+    ) -> "dataclasses.Dataset":
+        for field, parser in [
+            (id, cls._parse_id_field),
+            (text, cls._parse_text_field),
+            (metadata, cls._parse_metadata_field),
+            (annotation, cls._parse_annotation_field),
+        ]:
+            if field:
+                dataset = parser(dataset, field)
+        return dataset
 
     @classmethod
     def _from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
@@ -241,6 +287,37 @@ class DatasetBase:
         """
         raise NotImplementedError
 
+    @classmethod
+    def _parse_id_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        return dataset.rename_column(field, "id")
+
+    @classmethod
+    def _parse_text_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        return dataset.rename_column(field, "text")
+
+    @classmethod
+    def _parse_metadata_field(
+        cls, dataset: "datasets.Dataset", fields: Union[str, List[str]]
+    ) -> "datasets.Dataset":
+
+        if isinstance(fields, str):
+            fields = [fields]
+
+        def parse_metadata_from_dataset(example):
+            return {"metadata": {k: example[k] for k in fields}}
+
+        return dataset.map(parse_metadata_from_dataset).remove_columns(fields)
+
+    @classmethod
+    def _parse_annotation_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        return dataset.rename_column(field, "annotation")
+
 
 def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
@@ -301,6 +378,10 @@ class DatasetForTextClassification(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
+        id: Optional[str] = None,
+        inputs: Optional[Union[str, List[str]]] = None,
+        annotation: Optional[str] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
     ) -> "DatasetForTextClassification":
         """Imports records from a `datasets.Dataset`.
 
@@ -308,6 +389,10 @@ class DatasetForTextClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            id: The field name used as record id. Default: `None`
+            inputs: A list of field names used for record inputs. Default: `None`
+            annotation: The field name used as record annotation. Default: `None`
+            metadata: The field name used as record metadata. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -322,7 +407,10 @@ class DatasetForTextClassification(DatasetBase):
             ... })
             >>> DatasetForTextClassification.from_datasets(ds)
         """
-        return super().from_datasets(dataset)
+
+        return super().from_datasets(
+            dataset, id=id, annotation=annotation, metadata=metadata, inputs=inputs
+        )
 
     @classmethod
     def from_pandas(
@@ -365,9 +453,40 @@ class DatasetForTextClassification(DatasetBase):
         return ds_dict
 
     @classmethod
+    def _parse_annotation_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        import datasets
+
+        labels = dataset.features[field]
+        if isinstance(labels, datasets.Sequence):
+            labels = labels.feature
+        int2str = (
+            labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
+        )
+
+        def parse_annotation(example):
+            return {"annotation": int2str(example["annotation"])}
+
+        return dataset.rename_column(field, "annotation").map(parse_annotation)
+
+    @classmethod
+    def _prepare_hf_dataset(
+        cls,
+        dataset: "dataset.Dataset",
+        inputs: Optional[Union[str, List[str]]] = None,
+        **kwargs,
+    ) -> "dataclasses.Dataset":
+        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
+        if inputs:
+            dataset = cls._parse_inputs_field(dataset, fields=inputs)
+        return dataset
+
+    @classmethod
     def _from_datasets(
         cls, dataset: "datasets.Dataset"
     ) -> "DatasetForTextClassification":
+
         records = []
         for row in dataset:
             if row.get("inputs") and isinstance(row["inputs"], dict):
@@ -399,9 +518,24 @@ class DatasetForTextClassification(DatasetBase):
                     else None
                 )
 
-            records.append(TextClassificationRecord(**row))
-
+            records.append(TextClassificationRecord.parse_obj(row))
         return cls(records)
+
+    @classmethod
+    def _parse_inputs_field(
+        cls, dataset: "datasets.Dataset", fields: Optional[Union[str, List[str]]]
+    ) -> "datasets.Dataset":
+        if isinstance(fields, str):
+            fields = [fields]
+
+        def parse_inputs_from_dataset(example):
+            return {
+                "inputs": example[fields[0]]
+                if len(fields) == 1
+                else {k: example[k] for k in fields}
+            }
+
+        return dataset.map(parse_inputs_from_dataset)
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -504,7 +638,12 @@ class DatasetForTokenClassification(DatasetBase):
 
     @classmethod
     def from_datasets(
-        cls, dataset: "datasets.Dataset"
+        cls,
+        dataset: "datasets.Dataset",
+        text: Optional[str] = None,
+        tokens: Optional[str] = None,
+        tags: Optional[str] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
     ) -> "DatasetForTokenClassification":
         """Imports records from a `datasets.Dataset`.
 
@@ -512,6 +651,10 @@ class DatasetForTokenClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            text: The field name used as record text. Default: `None`
+            tokens: The field name used as record tokens. Default: `None`
+            tags: The field name used as record tags. Default: `None`
+            metadata: The field name used as record metadata. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -528,7 +671,9 @@ class DatasetForTokenClassification(DatasetBase):
             >>> DatasetForTokenClassification.from_datasets(ds)
         """
         # we implement this to have more specific type hints
-        return super().from_datasets(dataset)
+        return super().from_datasets(
+            dataset, text=text, tokens=tokens, tags=tags, metadata=metadata
+        )
 
     @classmethod
     def from_pandas(
@@ -670,8 +815,24 @@ class DatasetForTokenClassification(DatasetBase):
         ]
 
     @classmethod
+    def _prepare_hf_dataset(
+        cls,
+        dataset: "dataset.Dataset",
+        tokens: Optional[str] = None,
+        tags: Optional[str] = None,
+        **kwargs,
+    ) -> "dataclasses.Dataset":
+        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
+        if tokens:
+            dataset = cls._parse_tokens_field(dataset, field=tokens)
+        if tags:
+            dataset = cls._parse_tags_field(dataset, field=tags)
+        return dataset
+
+    @classmethod
     def _from_datasets(
-        cls, dataset: "datasets.Dataset"
+        cls,
+        dataset: "datasets.Dataset",
     ) -> "DatasetForTokenClassification":
 
         records = []
@@ -680,10 +841,40 @@ class DatasetForTokenClassification(DatasetBase):
                 row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
             if row.get("annotation"):
                 row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
-
-            records.append(TokenClassificationRecord(**row))
-
+            records.append(TokenClassificationRecord.parse_obj(row))
         return cls(records)
+
+    @classmethod
+    def _parse_tokens_field(
+        cls, dataset: "datasets.Dataset", field: str
+    ) -> "datasets.Dataset":
+        def parse_tokens_from_example(example):
+            tokens: List[str] = example[field]
+            data = {"tokens": tokens}
+
+            if "text" not in example:
+                data["text"] = " ".join(tokens)
+            return data
+
+        return dataset.map(parse_tokens_from_example)
+
+    @classmethod
+    def _parse_tags_field(
+        cls, dataset: "datasets.Dataset", field: str = str
+    ) -> "datasets.Dataset":
+        import datasets
+
+        labels = dataset.features[field]
+        if isinstance(labels, list):
+            labels = labels[0]
+        int2str = (
+            labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
+        )
+
+        def parse_tags_from_example(example):
+            return {"tags": [int2str(t) for t in example[field] or []]}
+
+        return dataset.map(parse_tags_from_example)
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -726,13 +917,22 @@ class DatasetForText2Text(DatasetBase):
         super().__init__(records=records)
 
     @classmethod
-    def from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
+    def from_datasets(
+        cls,
+        dataset: "datasets.Dataset",
+        text: Optional[str] = None,
+        annotation: Optional[str] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
+    ) -> "DatasetForText2Text":
         """Imports records from a `datasets.Dataset`.
 
         Columns that are not supported are ignored.
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            text: The field name used as record text. Default: `None`
+            annotation: The field name used as record annotation. Default: `None`
+            metadata: The field name used as record metadata. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -750,8 +950,11 @@ class DatasetForText2Text(DatasetBase):
             ... })
             >>> DatasetForText2Text.from_datasets(ds)
         """
+
         # we implement this to have more specific type hints
-        return super().from_datasets(dataset)
+        return super().from_datasets(
+            dataset, text=text, annotation=annotation, metadata=metadata
+        )
 
     @classmethod
     def from_pandas(

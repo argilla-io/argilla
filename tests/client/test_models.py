@@ -77,6 +77,56 @@ def test_token_classification_record(annotation, status, expected_status):
         text="test text", tokens=["test", "text"], annotation=annotation, status=status
     )
     assert record.status == expected_status
+    assert record.spans2iob(record.annotation) == expected_iob
+
+
+def test_token_classification_validations():
+    with pytest.raises(
+        AssertionError,
+        match="Missing fields: "
+        "At least one of `text` or `tokens` argument must be provided!",
+    ):
+        TokenClassificationRecord()
+
+    tokens = ["test", "text"]
+    annotation = [("test", 0, 4)]
+    with pytest.raises(
+        AssertionError,
+        match="Missing field `text`: "
+        "char level spans must be provided with a raw text sentence",
+    ):
+        TokenClassificationRecord(tokens=tokens, annotation=annotation)
+
+    with pytest.raises(
+        AssertionError,
+        match="Missing field `text`: "
+        "char level spans must be provided with a raw text sentence",
+    ):
+        TokenClassificationRecord(tokens=tokens, prediction=annotation)
+
+    TokenClassificationRecord(
+        text=" ".join(tokens), tokens=tokens, prediction=annotation
+    )
+
+    record = TokenClassificationRecord(tokens=tokens)
+    assert record.text == "test text"
+
+
+def test_token_classification_with_mutation():
+    text_a = "The text"
+    text_b = "Another text sample here !!!"
+
+    record = TokenClassificationRecord(
+        text=text_a, tokens=text_a.split(" "), annotation=[]
+    )
+    assert record.spans2iob(record.annotation) == ["O"] * len(text_a.split(" "))
+
+    with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
+        record.text = text_b
+    with pytest.raises(
+        AttributeError, match="You cannot assign a new value to `tokens`"
+    ):
+        record.tokens = text_b.split(" ")
 
 
 @pytest.mark.parametrize(
