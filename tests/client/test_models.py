@@ -80,6 +80,38 @@ def test_token_classification_record(annotation, status, expected_status, expect
     assert record.spans2iob(record.annotation) == expected_iob
 
 
+def test_token_classification_validations():
+    with pytest.raises(
+        AssertionError,
+        match="Missing fields: "
+        "At least one of `text` or `tokens` argument must be provided!",
+    ):
+        TokenClassificationRecord()
+
+    tokens = ["test", "text"]
+    annotation = [("test", 0, 4)]
+    with pytest.raises(
+        AssertionError,
+        match="Missing field `text`: "
+        "char level spans must be provided with a raw text sentence",
+    ):
+        TokenClassificationRecord(tokens=tokens, annotation=annotation)
+
+    with pytest.raises(
+        AssertionError,
+        match="Missing field `text`: "
+        "char level spans must be provided with a raw text sentence",
+    ):
+        TokenClassificationRecord(tokens=tokens, prediction=annotation)
+
+    TokenClassificationRecord(
+        text=" ".join(tokens), tokens=tokens, prediction=annotation
+    )
+
+    record = TokenClassificationRecord(tokens=tokens)
+    assert record.text == "test text"
+
+
 def test_token_classification_with_mutation():
     text_a = "The text"
     text_b = "Another text sample here !!!"

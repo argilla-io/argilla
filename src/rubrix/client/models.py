@@ -234,8 +234,8 @@ class TokenClassificationRecord(_Validators):
         ... )
     """
 
-    text: str = Field(min_length=1)
-    tokens: Union[List[str], Tuple[str, ...]]
+    text: Optional[str] = Field(None, min_length=1)
+    tokens: Optional[Union[List[str], Tuple[str, ...]]] = None
 
     prediction: Optional[
         List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
@@ -255,13 +255,31 @@ class TokenClassificationRecord(_Validators):
     __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
     __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
 
-    def __init__(self, tags: Optional[List[str]] = None, **data):
-        super().__init__(**data)
+    def __init__(
+        self,
+        text: str = None,
+        tokens: List[str] = None,
+        tags: Optional[List[str]] = None,
+        **data,
+    ):
+        if text is None and tokens is None:
+            raise AssertionError(
+                "Missing fields: At least one of `text` or `tokens` argument must be provided!"
+            )
 
+        if data.get("annotation") or data.get("prediction") and text is None:
+            raise AssertionError(
+                "Missing field `text`: "
+                "char level spans must be provided with a raw text sentence"
+            )
+
+        if text is None:
+            text = " ".join(tokens)
+
+        super().__init__(text=text, tokens=tokens, **data)
         if self.annotation and tags:
             _LOGGER.warning("Annotation already provided, `tags` won't be used")
             return
-
         if tags:
             self.annotation = self.__tags2entities__(tags)
 

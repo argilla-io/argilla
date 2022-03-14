@@ -195,7 +195,6 @@ class DatasetBase:
                 f" model and are ignored: {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
-
         return cls._from_datasets(dataset)
 
     @classmethod
@@ -206,7 +205,6 @@ class DatasetBase:
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
-        **kwargs,
     ) -> "dataclasses.Dataset":
         for field, parser in [
             (id, cls._parse_id_field),
@@ -825,8 +823,8 @@ class DatasetForTokenClassification(DatasetBase):
         **kwargs,
     ) -> "dataclasses.Dataset":
         dataset = super()._prepare_hf_dataset(dataset, **kwargs)
-
-        dataset = cls._parse_tokens_field(dataset, field=tokens or "tokens")
+        if tokens:
+            dataset = cls._parse_tokens_field(dataset, field=tokens)
         if tags:
             dataset = cls._parse_tags_field(dataset, field=tags)
         return dataset
