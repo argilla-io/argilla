@@ -46,6 +46,7 @@
         <p class="user__workspace__name">{{ workspace }}</p>
       </a>
       <a class="user__logout" href="#" @click.prevent="logout"> Log out </a>
+      <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
   </div>
 </template>
@@ -57,6 +58,7 @@ export default {
   data: () => {
     return {
       visibleSelector: false,
+      rubrixVersion: undefined,
     };
   },
   computed: {
@@ -67,9 +69,12 @@ export default {
       return currentWorkspace(this.$route);
     },
   },
+  async fetch() {
+    this.rubrixVersion = await this.getRubrixVersion();
+  },
   methods: {
     ...mapActions({
-      fetchDatasets: "entities/datasets/fetchAll",
+      getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
     }),
     firstChar(name) {
       return name.charAt(0);
@@ -132,7 +137,7 @@ $buttonSize: 30px;
     @include font-size(12px);
     font-weight: 600;
     color: palette(grey, medium);
-    padding: 1.2em;
+    padding: 1.2em 1.2em 0.8em 1.2em;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
     min-width: 200px;
     a {
@@ -182,5 +187,13 @@ $buttonSize: 30px;
       }
     }
   }
+}
+.copyright {
+  display: block;
+  @include font-size(11px);
+  font-weight: 400;
+  color: palette(grey, dark);
+  line-height: 1em;
+  margin-top: 1em;
 }
 </style>

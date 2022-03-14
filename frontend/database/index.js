@@ -20,12 +20,13 @@ import { Database } from "@vuex-orm/core";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-
+import { RubrixInfo } from "@/models/RubrixInfo";
 import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 
+import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
 
 import text_classification from "@/database/modules/text_classification";
@@ -39,7 +40,7 @@ database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);
 database.register(Notification, notifications);
-
+database.register(RubrixInfo, info);
 database.register(ObservationDataset, datasets);
 database.register(Text2TextDataset);
 database.register(TextClassificationDataset, text_classification);
