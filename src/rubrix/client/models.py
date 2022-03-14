@@ -267,7 +267,7 @@ class TokenClassificationRecord(_Validators):
                 "Missing fields: At least one of `text` or `tokens` argument must be provided!"
             )
 
-        if data.get("annotation") or data.get("prediction") and text is None:
+        if (data.get("annotation") or data.get("prediction")) and text is None:
             raise AssertionError(
                 "Missing field `text`: "
                 "char level spans must be provided with a raw text sentence"
