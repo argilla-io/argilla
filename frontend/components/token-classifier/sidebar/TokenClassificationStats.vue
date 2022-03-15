@@ -23,10 +23,6 @@
       :options="options"
       @selectOption="onSelectOption"
     />
-    <StatsErrorDistribution
-      v-if="selectedOption.id === 'error'"
-      :dataset="dataset"
-    />
     <div v-if="selectedOption.id === 'mentions'">
       <div class="sidebar__tabs">
         <a
@@ -106,12 +102,6 @@ export default {
         id: "mentions",
         name: "Mentions",
       });
-      if (Object.values(this.dataset.results.aggregations.predicted).length) {
-        options.push({
-          id: "error",
-          name: "Error Distribution",
-        });
-      }
       return options;
     },
     existMentions() {
