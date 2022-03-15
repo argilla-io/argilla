@@ -20,6 +20,10 @@ def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
         return empty_visualization()
 
     keys, values = zip(*data.items())
+    keys = [
+        key.encode("unicode-escape").decode() if isinstance(key, str) else key
+        for key in keys
+    ]
     fig = go.Figure(data=go.Bar(y=values, x=keys))
     fig.update_layout(
         title=title,
