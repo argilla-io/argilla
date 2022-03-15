@@ -63,7 +63,7 @@ Another similar task to Text Classification, but yet a bit different, is Multi-l
 .. code-block:: python
 
    record = rb.TextClassificationRecord(
-        inputs="I can't wait to travel to Egypts and visit the pyramids",
+        text="I can't wait to travel to Egypts and visit the pyramids",
 
         multi_label = True,
 
