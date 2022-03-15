@@ -63,6 +63,7 @@ export default {
     async query(newValue) {
       await this.updateCurrentRule({
         query: newValue,
+        labels: (this.currentRule || {}).labels,
       });
     },
   },
