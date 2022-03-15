@@ -416,9 +416,11 @@ class ElasticsearchWrapper(LoggingMixin):
 
         """
         if partial_update:
-            self.__client__.update(index=index, id=doc_id, body={"doc": document})
+            self.__client__.update(
+                index=index, id=doc_id, body={"doc": document}, refresh=True
+            )
         else:
-            self.__client__.index(index=index, id=doc_id, body=document)
+            self.__client__.index(index=index, id=doc_id, body=document, refresh=True)
 
     def open_index(self, index: str):
         """
