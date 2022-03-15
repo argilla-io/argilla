@@ -354,7 +354,7 @@ def entity_consistency(
     name: str,
     query: Optional[str] = None,
     compute_for: Union[str, ComputeFor] = Predictions,
-    mentions: int = 10,
+    mentions: int = 100,
     threshold: int = 2,
 ):
     """Computes the consistency for top entity mentions in the dataset.
