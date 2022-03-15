@@ -46,7 +46,8 @@ class HuggingFaceMonitor(BaseMonitor):
 
         for input_, metadata, predictions in data:
             record = TextClassificationRecord(
-                inputs=input_,
+                text=input_ if isinstance(input_, str) else None,
+                inputs=input_ if not isinstance(input_, str) else None,
                 prediction=[
                     (prediction.label, prediction.score) for prediction in predictions
                 ],

@@ -60,7 +60,7 @@ def test_init(monkeypatch, singlelabel_textclassification_records):
     ):
         DatasetBase(
             records=[
-                rb.TextClassificationRecord(inputs="test"),
+                rb.TextClassificationRecord(text="test"),
                 rb.Text2TextRecord(text="test"),
             ],
         )
@@ -214,6 +214,7 @@ class TestDatasetForTextClassification:
 
         assert isinstance(dataset_ds, datasets.Dataset)
         assert dataset_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",
@@ -350,6 +351,7 @@ class TestDatasetForTextClassification:
         )
         again_the_ds = rb_ds.to_datasets()
         assert again_the_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",
@@ -383,6 +385,7 @@ class TestDatasetForTextClassification:
 
         again_the_ds = rb_ds.to_datasets()
         assert again_the_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",

@@ -33,7 +33,7 @@ def records(request):
     if request.param:
         return [
             rb.TextClassificationRecord(
-                inputs="test", annotation=anot, prediction=pred, multi_label=True, id=i
+                text="test", annotation=anot, prediction=pred, multi_label=True, id=i
             )
             for i, anot, pred in zip(
                 range(2 * 6),
@@ -43,9 +43,7 @@ def records(request):
         ]
 
     return [
-        rb.TextClassificationRecord(
-            inputs="test", annotation=anot, prediction=pred, id=i
-        )
+        rb.TextClassificationRecord(text="test", annotation=anot, prediction=pred, id=i)
         for i, anot, pred in zip(
             range(2 * 6),
             ["good", "bad"] * 6,
@@ -67,8 +65,8 @@ def test_not_installed(monkeypatch):
 
 def test_no_records():
     records = [
-        rb.TextClassificationRecord(inputs="test", prediction=[("mock", 0.0)]),
-        rb.TextClassificationRecord(inputs="test", annotation="test"),
+        rb.TextClassificationRecord(text="test", prediction=[("mock", 0.0)]),
+        rb.TextClassificationRecord(text="test", annotation="test"),
     ]
 
     with pytest.raises(
@@ -79,7 +77,7 @@ def test_no_records():
 
 def test_multi_label_warning(caplog):
     record = rb.TextClassificationRecord(
-        inputs="test", prediction=[("mock", 0.0)], annotation="mock"
+        text="test", prediction=[("mock", 0.0)], annotation="mock"
     )
     find_label_errors([record], multi_label="True")
     assert (

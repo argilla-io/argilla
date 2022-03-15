@@ -23,7 +23,7 @@ def test_metrics_for_text_classification(mocked_client):
         [
             rb.TextClassificationRecord(
                 id=1,
-                inputs={"text": "my first rubrix example"},
+                text="my first rubrix example",
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
@@ -81,7 +81,7 @@ def test_f1_without_results(mocked_client):
         [
             rb.TextClassificationRecord(
                 id=1,
-                inputs={"text": "my first rubrix example"},
+                text="my first rubrix example",
             ),
             rb.TextClassificationRecord(
                 id=2,
