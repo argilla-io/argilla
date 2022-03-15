@@ -89,7 +89,7 @@ def test_name(name, expected):
 def test_apply(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
-        rule(TextClassificationRecord(inputs="test"))
+        rule(TextClassificationRecord(text="test"))
 
     monkeypatch.setattr(httpx, "get", mocked_client.get)
     monkeypatch.setattr(httpx, "stream", mocked_client.stream)

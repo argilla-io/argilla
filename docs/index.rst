@@ -103,7 +103,7 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
        records.append(
            rb.TextClassificationRecord(
-               inputs=record["text"],
+               text=record["text"],
                prediction=list(zip(prediction['labels'], prediction['scores'])),
            )
        )
@@ -130,7 +130,7 @@ After a few iterations of data annotation, we can load the Rubrix dataset and cr
 
    # select text input and the annotated label
    train_df = pd.DataFrame({
-      "text": rb_df.inputs.transform(lambda r: r["text"]),
+      "text": rb_df.text,
       "label": rb_df.annotation,
    })
 

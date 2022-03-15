@@ -32,7 +32,7 @@ from rubrix.labeling.text_classification.label_models import (
 @pytest.fixture
 def weak_labels(monkeypatch):
     def mock_load(*args, **kwargs):
-        return [TextClassificationRecord(inputs="test", id=i) for i in range(4)]
+        return [TextClassificationRecord(text="test", id=i) for i in range(4)]
 
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -60,9 +60,7 @@ def weak_labels_from_guide(monkeypatch, resources):
     matrix, annotation = matrix_and_annotation[:, :-1], matrix_and_annotation[:, -1]
 
     def mock_load(*args, **kwargs):
-        return [
-            TextClassificationRecord(inputs="mock", id=i) for i in range(len(matrix))
-        ]
+        return [TextClassificationRecord(text="mock", id=i) for i in range(len(matrix))]
 
     monkeypatch.setattr(
         "rubrix.labeling.text_classification.weak_labels.load", mock_load
