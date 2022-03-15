@@ -193,7 +193,7 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async _persistRule({ query, labels, description }) {
-    const { response } = await TextClassificationDataset.api().post(
+    let { response } = await TextClassificationDataset.api().post(
       `/datasets/${this.task}/${this.name}/labeling/rules`,
       { query, labels, description },
       {
@@ -204,11 +204,14 @@ class TextClassificationDataset extends ObservationDataset {
       }
     );
     if (response.status === 409) {
-      await TextClassificationDataset.api().patch(
+      const apiResult = await TextClassificationDataset.api().patch(
         `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
         { labels, description }
       );
+      response = apiResult.response;
     }
+
+    return response.data;
   }
 
   async _fetchRuleMetrics({ query, labels }) {
@@ -340,13 +343,17 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async storeLabelingRule(activeRule) {
-    await this._persistRule(activeRule);
+    let rule = await this._persistRule(activeRule);
+
     const rules = this.rules.filter((rule) => rule.query !== activeRule.query);
     const perRuleQueryMetrics = {
       ...this.perRuleQueryMetrics,
       [activeRule.query]: this.activeRuleMetrics,
     };
-    let rule = await this._getRule({ query: activeRule.query });
+    if (rule === undefined) {
+      rule = await this._getRule({ query: activeRule.query });
+    }
+
     rules.push(rule);
 
     const overalMetrics = await this._fetchOveralMetrics(
