@@ -130,7 +130,7 @@ export default {
       },
     },
     encoding: {
-      x: { field: "key", type: "quantitative", scale: { domain: [0.0, 1.0] } },
+      x: { bin: { maxbins: 100 }, field: "key", type: "quantitative", scale: { domain: [0.0, 1.0] } },
       y: { field: "count", type: "quantitative", aggregate: "sum" },
     },
   }),
