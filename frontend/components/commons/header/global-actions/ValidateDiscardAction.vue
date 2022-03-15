@@ -78,7 +78,7 @@ export default {
       this.allSelected = newValue.every((record) => record.selected);
     },
     allSelected(allSelected) {
-      if (allSelected) {
+      if (allSelected || this.visibleRecords.every((record) => record.selected)) {
         this.updateRecords({
           dataset: this.dataset,
           records: this.visibleRecords.map((record) => {
