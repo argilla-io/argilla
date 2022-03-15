@@ -91,6 +91,7 @@ class TextClassificationDataset extends ObservationDataset {
       // Some kind of metrics fields
       globalResults: this.attr({}),
       // labeling rules fields
+      isMultiLabel: this.boolean(false),
       rules: this.attr(null),
       rulesOveralMetrics: this.attr(null),
       perRuleQueryMetrics: this.attr(null),
@@ -106,6 +107,7 @@ class TextClassificationDataset extends ObservationDataset {
   async initialize() {
     const { labels } = await this.fetchMetricSummary("dataset_labels");
     const entity = this.getTaskDatasetClass();
+    const isMultiLabel = this.results.records.some((r) => r.multi_label);
     await entity.insertOrUpdate({
       where: this.id,
       data: [
@@ -113,6 +115,7 @@ class TextClassificationDataset extends ObservationDataset {
           owner: this.owner,
           name: this.name,
           _labels: labels,
+          isMultiLabel,
         },
       ],
     });
@@ -268,10 +271,6 @@ class TextClassificationDataset extends ObservationDataset {
         rules,
       },
     });
-  }
-
-  get isMultiLabel() {
-    return this.results.records.some((r) => r.multi_label);
   }
 
   get labels() {
