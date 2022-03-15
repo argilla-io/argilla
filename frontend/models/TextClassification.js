@@ -347,7 +347,6 @@ class TextClassificationDataset extends ObservationDataset {
       [activeRule.query]: this.activeRuleMetrics,
     };
     let rule = await this._getRule({ query: activeRule.query });
-    rule = rule ? rule : activeRule;
     rules.push(rule);
 
     const overalMetrics = await this._fetchOveralMetrics(
