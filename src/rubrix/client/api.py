@@ -204,7 +204,7 @@ class Api:
         Examples:
             >>> import rubrix as rb
             >>> record = rb.TextClassificationRecord(
-            ...     inputs={"text": "my first rubrix example"},
+            ...     text="my first rubrix example",
             ...     prediction=[('spam', 0.8), ('ham', 0.2)]
             ... )
             >>> rb.log(record, name="example-dataset")

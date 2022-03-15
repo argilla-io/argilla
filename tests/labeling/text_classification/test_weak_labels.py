@@ -71,11 +71,11 @@ def log_dataset(mocked_client) -> str:
 @pytest.fixture
 def rules(monkeypatch) -> List[Callable]:
     def first_rule(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
-        if "negative" in record.inputs["text"]:
+        if "negative" in record.text:
             return "negative"
 
     def rule2(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
-        if "positive" in record.inputs["text"]:
+        if "positive" in record.text:
             return ["positive"]
 
     rule2.__name__ = ""
@@ -127,11 +127,11 @@ def log_multilabel_dataset(mocked_client) -> str:
 @pytest.fixture
 def multilabel_rules(monkeypatch) -> List[Callable]:
     def first_rule(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
-        if "negative" in record.inputs["text"]:
+        if "negative" in record.text:
             return []
 
     def rule2(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
-        if "positive" in record.inputs["text"]:
+        if "positive" in record.text:
             return ["negative", "positive"]
 
     rule2.__name__ = ""
@@ -204,8 +204,8 @@ class TestWeakLabelsBase:
 
     def test_rules_records_properties(self, monkeypatch):
         expected_records = [
-            TextClassificationRecord(inputs="test without annot"),
-            TextClassificationRecord(inputs="test with annot", annotation="positive"),
+            TextClassificationRecord(text="test without annot"),
+            TextClassificationRecord(text="test with annot", annotation="positive"),
         ]
 
         def mock_load(*args, **kwargs):
@@ -251,7 +251,7 @@ class TestWeakLabelsBase:
 class TestWeakLabels:
     def test_multi_label_error(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", multi_label=True)]
+            return [TextClassificationRecord(text="test", multi_label=True)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -323,8 +323,8 @@ class TestWeakLabels:
 
     def test_matrix_annotation_properties(self, monkeypatch):
         expected_records = [
-            TextClassificationRecord(inputs="test without annot"),
-            TextClassificationRecord(inputs="test with annot", annotation="positive"),
+            TextClassificationRecord(text="test without annot"),
+            TextClassificationRecord(text="test with annot", annotation="positive"),
         ]
 
         def mock_load(*args, **kwargs):

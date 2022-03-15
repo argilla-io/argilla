@@ -37,7 +37,7 @@ def bulk_data():
     }
     records = [
         ClientTextClassificationRecord(
-            inputs="test",
+            text="test",
             prediction=[("test", 0.5)],
             prediction_agent="agent",
             annotation="test1",

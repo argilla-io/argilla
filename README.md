@@ -140,7 +140,7 @@ The following code will log one record into a dataset called `example-dataset`:
 import rubrix as rb
 
 rb.log(
-    rb.TextClassificationRecord(inputs="My first Rubrix example"),
+    rb.TextClassificationRecord(text="My first Rubrix example"),
     name='example-dataset'
 )
 ```
@@ -210,7 +210,7 @@ for item in dataset:
 
     records.append(
         rb.TextClassificationRecord(
-            inputs=item["text"],
+            text=item["text"],
             prediction=list(zip(prediction['labels'], prediction['scores']))
         )
     )
@@ -237,7 +237,7 @@ rb_df = rb_df[rb_df.status == "Validated"]
 
 # select text input and the annotated label
 train_df = pd.DataFrame({
-    "text": rb_df.inputs.transform(lambda r: r["text"]),
+    "text": rb_df.text,
     "label": rb_df.annotation,
 })
 ```

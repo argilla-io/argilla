@@ -255,7 +255,7 @@ class WeakLabels(WeakLabelsBase):
         >>>
         >>> # Get the weak label matrix from rules defined in Python:
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
-        ...     return "Positive" if "awesome" in record.inputs["text"] else None
+        ...     return "Positive" if "awesome" in record.text else None
         >>> another_rule = Rule(query="good OR best", label="Positive")
         >>> weak_labels = WeakLabels(dataset="my_dataset", rules=[awesome_rule, another_rule])
         >>> weak_labels.matrix()
@@ -654,7 +654,7 @@ class WeakMultiLabels(WeakLabelsBase):
         >>>
         >>> # Get the 3 dimensional weak label matrix from rules defined in Python:
         >>> def awesome_rule(record: TextClassificationRecord) -> str:
-        ...     return ["Positive", "Slang"] if "next level" in record.inputs["text"] else None
+        ...     return ["Positive", "Slang"] if "next level" in record.text else None
         >>> another_rule = Rule(query="amped OR psyched", label=["Positive", "Slang"])
         >>> weak_labels = WeakMultiLabels(dataset="my_dataset", rules=[awesome_rule, another_rule])
         >>> weak_labels.matrix()
