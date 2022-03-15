@@ -23,10 +23,6 @@
       :options="options"
       @selectOption="onSelectOption"
     />
-    <StatsErrorDistribution
-      v-if="selectedOption.id === 'error'"
-      :dataset="dataset"
-    />
     <template v-if="selectedOption.id === 'keywords'">
       <div class="scroll">
         <div v-for="(counter, keyword) in getKeywords" :key="keyword">
@@ -70,12 +66,6 @@ export default {
         id: "keywords",
         name: "Keywords",
       });
-      if (Object.values(this.dataset.results.aggregations.predicted).length) {
-        options.push({
-          id: "error",
-          name: "Error Distribution",
-        });
-      }
       return options;
     },
   },
