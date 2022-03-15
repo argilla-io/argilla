@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 from typing import Any, Dict, Optional, TypeVar
 
@@ -8,7 +9,7 @@ from luqum.parser import parser
 from rubrix.server.commons import es_helpers
 from rubrix.server.commons.es_helpers import filters
 from rubrix.server.datasets.model import BaseDatasetDB, Dataset
-from rubrix.server.tasks.commons import QueryRange
+from rubrix.server.tasks.commons import QueryRange, ScoreRange
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.search.model import BaseSearchQuery
 
@@ -17,6 +18,7 @@ SearchQuery = TypeVar("SearchQuery", bound=BaseSearchQuery)
 
 class EsQueryBuilder:
     _INSTANCE: "EsQueryBuilder" = None
+    _LOGGER = logging.getLogger(__name__)
 
     @classmethod
     def get_instance(
@@ -58,8 +60,8 @@ class EsQueryBuilder:
             filter_query=self.to_es_query(new_query), must_query=query_text
         )
 
-    @staticmethod
-    def to_es_query(query: BaseSearchQuery) -> Dict[str, Any]:
+    @classmethod
+    def to_es_query(cls, query: BaseSearchQuery) -> Dict[str, Any]:
         if query.ids:
             return filters.ids_filter(query.ids)
 
@@ -72,6 +74,8 @@ class EsQueryBuilder:
             if value is None:
                 continue
             key_filter = None
+            if isinstance(value, dict):
+                value = getattr(query, key)  # check the original field type
             if isinstance(value, list):
                 key_filter = filters.terms_filter(key, value)
             elif isinstance(value, (str, Enum)):
@@ -81,7 +85,7 @@ class EsQueryBuilder:
                     field=key, value_from=value.range_from, value_to=value.range_to
                 )
             else:
-                print("Ups...", key, value)
+                cls._LOGGER.warning(f"Cannot parse query value {value} for key {key}")
 
             if key_filter:
                 all_filters.append(key_filter)
