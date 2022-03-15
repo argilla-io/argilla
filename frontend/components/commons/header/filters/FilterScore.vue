@@ -113,8 +113,9 @@ export default {
     config: {
       mark: {
         color: "#D9D7E4",
-        binSpacing: 0,
+        binSpacing: 0
       },
+
       bar: {
         binSpacing: 0,
         discreteBandSize: 0,
@@ -129,7 +130,7 @@ export default {
       },
     },
     encoding: {
-      x: { field: "key", type: "ordinal", scale: { rangeStep: null } },
+      x: { field: "key", type: "quantitative", scale: { domain: [0.0, 1.0] } },
       y: { field: "count", type: "quantitative", aggregate: "sum" },
     },
   }),
@@ -137,7 +138,7 @@ export default {
     options() {
       let test = Object.keys(this.filter.options).map((key) => {
         return {
-          key: key,
+          key: Number(key),
           count: this.filter.options[key],
         };
       });
