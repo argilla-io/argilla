@@ -75,10 +75,7 @@ export default {
   },
   watch: {
     visibleRecords(newValue) {
-      if (newValue.every((record) => record.selected)) {
-        this.allSelected = true;
-      } else {
-        this.allSelected = false;
+     this.allSelected = newValue.every((record) => record.selected));
       }
     },
     allSelected(allSelected) {
