@@ -350,6 +350,7 @@ class TestDatasetForTextClassification:
         )
         again_the_ds = rb_ds.to_datasets()
         assert again_the_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",
@@ -383,6 +384,7 @@ class TestDatasetForTextClassification:
 
         again_the_ds = rb_ds.to_datasets()
         assert again_the_ds.column_names == [
+            "text",
             "inputs",
             "prediction",
             "prediction_agent",
