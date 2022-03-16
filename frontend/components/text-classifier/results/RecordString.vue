@@ -50,8 +50,8 @@ export default {
   },
   computed: {
     keywords() {
-      return this.record.search_keywords
-    }
+      return this.record.search_keywords;
+    },
   },
   methods: {
     isList(record) {

@@ -36,8 +36,8 @@ export default {
   props: {
     record: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data: () => ({
     showFullRecord: false,
