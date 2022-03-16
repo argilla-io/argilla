@@ -34,6 +34,7 @@ class BaseRecord {
     status,
     selected,
     event_timestamp,
+    search_keywords,
   }) {
     this.id = id;
     this.metadata = metadata;
@@ -43,6 +44,7 @@ class BaseRecord {
     this.status = status;
     this.selected = selected || false;
     this.event_timestamp = event_timestamp;
+    this.search_keywords = search_keywords || [];
   }
 
   recordTitle() {

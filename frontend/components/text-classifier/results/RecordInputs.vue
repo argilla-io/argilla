@@ -26,11 +26,10 @@
           <span class="record__key">{{ index }}:</span>
           <LazyRecordExplain
             v-if="explanation"
-            :predicted="predicted"
-            :query-text="queryText"
+            :record="record"
             :explain="explanation[index]"
           />
-          <LazyRecordString v-else :query-text="queryText" :text="text" />
+          <LazyRecordString v-else :record="record" :text="text" />
         </span>
       </span>
     </div>
@@ -47,27 +46,22 @@
 <script>
 export default {
   props: {
-    data: {
+    record: {
       type: Object,
-      required: true,
-    },
-    queryText: {
-      type: String,
-    },
-    predicted: {
-      type: String,
-      default: undefined,
-    },
-    explanation: {
-      type: Object,
-      default: () => undefined,
-    },
+      required: true
+    }
   },
   data: () => ({
     showFullRecord: false,
     scrollHeight: undefined,
   }),
   computed: {
+    data() {
+      return this.record.inputs;
+    },
+    explanation() {
+      return this.record.explanation;
+    },
     visibleRecordHeight() {
       return this.$mq === "lg" ? 468 : 174;
     },

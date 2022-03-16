@@ -396,7 +396,12 @@ class DatasetRecordsDAO:
             "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
             "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
             "require_field_match": False,
-            "fields": {"text": {}},
+            "fields": {
+                "text": {},
+                # TODO: `words` will be removed once the migration will be completed.
+                #  This configuration is included just for old datasets records
+                "words": {},
+            },
         }
 
 
