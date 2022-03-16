@@ -213,7 +213,7 @@ $color: #333346;
   &__title {
     padding-bottom: 0;
     color: $lighter-color;
-    @include font-size(22);
+    @include font-size(22px);
     font-weight: bold;
     margin-top: 0;
   }

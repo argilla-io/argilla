@@ -116,7 +116,7 @@ export default {
 }
 
 .highlight {
-  @include font-size(0);
+  font-size: 0;
   line-height: 1em;
   position: relative;
   cursor: default; // display: inline-flex;
