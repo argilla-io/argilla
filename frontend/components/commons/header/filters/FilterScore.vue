@@ -122,7 +122,7 @@ export default {
         continuousBandSize: 0,
       },
       axis: {
-        labels: false,
+        // labels: false,
       },
       view: {
         height: 100,
@@ -274,7 +274,7 @@ export default {
     .score {
       ::v-deep svg {
         max-width: 100%;
-        height: 100px !important;
+        height: 200px !important;
       }
     }
     .filter__buttons {
@@ -326,12 +326,12 @@ export default {
   line {
     stroke: none !important;
   }
-  .role-axis {
-    display: none !important;
-  }
-  .role-legend {
-    display: none !important;
-  }
+  // .role-axis {
+  //   display: none !important;
+  // }
+  // .role-legend {
+  //   display: none !important;
+  // }
   text {
     font-weight: normal !important;
     font-family: $ff !important;
