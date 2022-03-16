@@ -20,7 +20,7 @@
     ref="list"
     :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
   >
-    <span class="record__content" v-html="$highlightSearch(queryText, text)">
+    <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
     <a
       href="#"
@@ -34,20 +34,22 @@
 <script>
 export default {
   props: {
-    text: {
-      type: [String, Array],
-      required: true,
-    },
-    queryText: {
-      type: String,
-      default: undefined,
-    },
+    record: {
+      type: Object,
+      required: true
+    }
   },
   data: () => ({
     showFullRecord: false,
     scrollHeight: undefined,
   }),
   computed: {
+    text() {
+      return this.record.text;
+    },
+    keywords() {
+      return this.record.search_keywords;
+    },
     visibleRecordHeight() {
       return this.$mq === "lg" ? 570 : 260;
     },

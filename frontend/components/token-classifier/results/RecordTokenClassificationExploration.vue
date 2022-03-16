@@ -21,18 +21,20 @@
       v-if="record.prediction"
       v-once
       key="prediction"
-      :dataset="dataset"
       origin="prediction"
-      :record="record"
       class="prediction"
+      :dataset="dataset"
+      :record="record"
+      :visualTokens="visualTokens"
       :entities="getEntitiesByOrigin('prediction')"
     />
     <text-spans
       key="annotation"
-      :dataset="dataset"
       origin="annotation"
-      :record="record"
       class="annotation"
+      :dataset="dataset"
+      :record="record"
+      :visualTokens="visualTokens"
       :entities="getEntitiesByOrigin('annotation')"
     />
   </div>
@@ -47,6 +49,10 @@ export default {
     },
     record: {
       type: Object,
+      required: true,
+    },
+    visualTokens: {
+      type: Array,
       required: true,
     },
   },

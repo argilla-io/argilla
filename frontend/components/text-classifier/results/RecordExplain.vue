@@ -33,19 +33,18 @@
 <script>
 export default {
   props: {
-    queryText: {
-      type: String,
-      default: undefined,
+    record: {
+      type: Object,
+      required: true,
     },
     explain: {
       type: Array,
-    },
-    predicted: {
-      type: String,
-      default: undefined,
-    },
+    }
   },
   computed: {
+    predicted() {
+      return this.record.predicted;
+    },
     explainFormatted() {
       // TODO ALLOW FOR MULTI LABEL
       return this.explain.map((token) => {
@@ -58,8 +57,8 @@ export default {
           percent = Math.round(Math.log10(percent) ** p * s);
         }
         return {
-          text: this.queryText
-            ? this.$highlightSearch(this.queryText, token.token)
+          text: this.record.search_keywords
+            ? this.$highlightKeywords(token.token, this.record.search_keywords)
             : token.token,
           percent: percent.toString(),
           grad,

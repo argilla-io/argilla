@@ -22,6 +22,7 @@
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
       :span="token"
       :dataset="dataset"
+      :record="record"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
     /><span
@@ -31,11 +32,7 @@
       v-else
       v-for="(t, i) in token.tokens"
       :key="i"
-      v-html="
-        `${$highlightSearch(dataset.query.text, t.text)}${
-          token.hasSpaceAfter ? ' ' : ''
-        }`
-      "
+      v-html="visualizeToken(t)"
     ></span
     ><lazy-entities-selector
       :dataset="dataset"
@@ -154,6 +151,12 @@ export default {
     onChangeEntity(token, entityLabel) {
       this.$emit("changeEntityLabel", token, entityLabel);
       this.showEntitiesSelector = false;
+    },
+    visualizeToken(token) {
+      let text = token.highlighted
+        ? this.$htmlHighlightText(token.text)
+        : this.$htmlText(token.text);
+      return `${text}${token.hasSpaceAfter ? " " : ""}`;
     },
   },
 };

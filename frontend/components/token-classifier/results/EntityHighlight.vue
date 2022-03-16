@@ -19,12 +19,7 @@
   <span
     @mouseenter="showTooltip = true"
     @mouseleave="showTooltip = false"
-    :class="[
-      'highlight',
-      span.origin,
-      // isText ? '' : 'highlight--block',
-      annotationEnabled ? 'editable' : null,
-    ]"
+    :class="['highlight', span.origin, annotationEnabled ? 'editable' : null]"
     ><span
       v-for="(token, i) in span.tokens"
       :key="i"
@@ -36,11 +31,7 @@
       ]"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="
-        `${$highlightSearch(dataset.query.text, token.text)}${
-          token.hasSpaceAfter && i + 1 !== span.tokens.length ? ' ' : ''
-        }`
-      "
+      v-html="visualizeToken(token, i)"
     ></span>
     <svgicon
       class="remove-button"
@@ -53,6 +44,7 @@
     <lazy-text-span-tooltip v-if="showTooltip" :span="span" />
   </span>
 </template>
+
 <script>
 import "assets/icons/cross";
 
@@ -69,6 +61,10 @@ export default {
       type: Object,
       required: true,
     },
+    record: {
+      type: Object,
+      required: true,
+    }
   },
   data: () => {
     return {
@@ -79,9 +75,6 @@ export default {
     };
   },
   computed: {
-    // isText() {
-    //   return this.text.replace(/\s/g, "").length;
-    // },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
@@ -107,19 +100,26 @@ export default {
         }, this.singleClickDelay);
       }
     },
+    visualizeToken(token, i) {
+      let text = token.highlighted
+        ? this.$htmlHighlightText(token.text)
+        : this.$htmlText(token.text);
+      return `${text}${token.hasSpaceAfter && i + 1 !== this.span.tokens.length ? " " : ""}`;
+    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .whitespace {
   margin-right: 3.5px;
 }
+
 .highlight {
   @include font-size(0);
   line-height: 1em;
   position: relative;
-  cursor: default;
-  // display: inline-flex;
+  cursor: default; // display: inline-flex;
   border-radius: 2px;
   padding: 0;
   &.editable {
@@ -146,6 +146,7 @@ export default {
     z-index: 5;
   }
 }
+
 .remove-button {
   opacity: 0;
   z-index: -1;
