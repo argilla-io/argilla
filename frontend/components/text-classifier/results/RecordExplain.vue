@@ -101,7 +101,7 @@ export default {
 }
 @for $i from 0 through 100 {
   .grad-#{$i} {
-    $bg: hsla(40, 100%, 100 - $i * 0.5, 1);
+    $bg: hsla(40, 100%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -112,7 +112,7 @@ export default {
     }
   }
   .grad-neg-#{$i} {
-    $bg: hsla(200, 60%, 100 - $i * 0.5, 1);
+    $bg: hsla(200, 60%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -123,7 +123,7 @@ export default {
     }
   }
   .grad-plus-#{$i} {
-    $bg: hsla(100, 60%, 100 - $i * 0.5, 1);
+    $bg: hsla(100, 60%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -134,7 +134,7 @@ export default {
     }
   }
   .grad-rest-#{$i} {
-    $bg: hsla(0, 80%, 100 - $i * 0.5, 1);
+    $bg: hsla(0, 80%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
