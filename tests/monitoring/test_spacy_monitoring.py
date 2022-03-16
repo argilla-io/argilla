@@ -12,7 +12,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     nlp = rb.monitor(nlp, dataset=dataset, sample_rate=0.1)
     mock_monitor(nlp, monkeypatch)
 
-    for _ in range(0, 100):
+    for _ in range(0, 20):
         nlp("Paris is my favourite city")
 
     df = rb.load(dataset)
@@ -20,14 +20,14 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     assert df.text.unique().tolist() == ["Paris is my favourite city"]
 
     rb.delete(dataset)
-    list(nlp.pipe(["This is a text"] * 100))
+    list(nlp.pipe(["This is a text"] * 20))
 
     df = rb.load(dataset)
     assert 1 < len(df) <= 20
     assert df.text.unique().tolist() == ["This is a text"]
 
     rb.delete(dataset)
-    list(nlp.pipe([("This is a text", {"meta": "data"})] * 100, as_tuples=True))
+    list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
     df = rb.load(dataset)
     assert 1 < len(df) <= 20
