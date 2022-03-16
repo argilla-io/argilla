@@ -246,6 +246,10 @@ class TestWeakLabelsBase:
             weak_labels.summary()
         with pytest.raises(NotImplementedError):
             weak_labels.show_records()
+        with pytest.raises(NotImplementedError):
+            _ = weak_labels.labels
+        with pytest.raises(NotImplementedError):
+            _ = weak_labels.cardinality
 
 
 class TestWeakLabels:

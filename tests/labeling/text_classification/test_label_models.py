@@ -242,6 +242,22 @@ class TestMajorityVoter:
                 ("positive", 1.0 / 3 - 0.00005),
             ]
 
+    def test_make_single_label_records_with_not_implemented_tbp(self, weak_labels):
+        mj = MajorityVoter(weak_labels)
+        probs = mj._compute_single_label_probs(weak_labels.matrix())
+
+        with pytest.raises(
+            NotImplementedError,
+            match="tie break policy 'true-random' is not implemented",
+        ):
+            mj._make_single_label_records(
+                probs,
+                weak_labels.records(),
+                True,
+                prediction_agent="mock",
+                tie_break_policy=TieBreakPolicy.TRUE_RANDOM,
+            )
+
     def test_compute_multi_label_probs(self, weak_multi_labels):
         mj = MajorityVoter(weak_multi_labels)
         probabilities = mj._compute_multi_label_probs(weak_multi_labels.matrix())
@@ -350,6 +366,22 @@ class TestMajorityVoter:
         )
         assert np.allclose(annotation, expected[0])
         assert np.allclose(prediction, expected[1])
+
+    def test_score_single_label_no_ties(self, weak_labels):
+        mj = MajorityVoter(weak_labels)
+
+        probabilities = np.array(
+            [[0.5, 0.3, 0.0], [0.5, 0.0, 0.0], [1.0 / 3, 0.0, 2.0 / 3]]
+        )
+
+        _, prediction = mj._score_single_label(
+            probabilities=probabilities, tie_break_policy=TieBreakPolicy.ABSTAIN
+        )
+        _, prediction2 = mj._score_single_label(
+            probabilities=probabilities, tie_break_policy=TieBreakPolicy.RANDOM
+        )
+
+        assert np.allclose(prediction, prediction2)
 
     def test_score_multi_label(self, weak_multi_labels):
         mj = MajorityVoter(weak_multi_labels)
