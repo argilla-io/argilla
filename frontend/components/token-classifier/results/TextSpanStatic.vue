@@ -22,6 +22,7 @@
       :class="['color_' + tag_color]"
       :span="token"
       :dataset="dataset"
+      :record="record"
     /><template v-else v-for="t in token.tokens">{{ t.text }}</template
     ><template>{{ token.hasSpaceAfter ? " " : "" }}</template>
   </span>

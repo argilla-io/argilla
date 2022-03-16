@@ -3,7 +3,7 @@ import pytest
 import rubrix
 from rubrix.server.commons.es_wrapper import ElasticsearchWrapper
 from rubrix.server.datasets.model import Dataset
-from rubrix.server.tasks.commons import TaskType
+from rubrix.server.tasks.commons import ScoreRange, TaskType
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 from rubrix.server.tasks.commons.metrics.service import MetricsService
 from rubrix.server.tasks.search.model import SortConfig
@@ -42,6 +42,23 @@ def service(
     return SearchRecordsService.get_instance(
         dao=dao, metrics=metrics, query_builder=query_builder
     )
+
+
+def test_query_builder_with_query_range(query_builder):
+    es_query = query_builder(
+        "ds", query=TextClassificationQuery(score=ScoreRange(range_from=10))
+    )
+    assert es_query == {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "minimum_should_match": 1,
+                    "should": [{"range": {"score": {"gte": 10.0}}}],
+                }
+            },
+            "must": {"match_all": {}},
+        }
+    }
 
 
 def test_failing_metrics(service, mocked_client):

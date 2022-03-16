@@ -31,9 +31,13 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
 )
 from rubrix.server.tasks.text_classification.api.model import (
-    TextClassificationBulkData as ServerTextClassificationBulkData,
     LabelingRule as ServerLabelingRule,
+)
+from rubrix.server.tasks.text_classification.api.model import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
+)
+from rubrix.server.tasks.text_classification.api.model import (
+    TextClassificationBulkData as ServerTextClassificationBulkData,
 )
 from rubrix.server.tasks.text_classification.api.model import (
     TextClassificationQuery as ServerTextClassificationQuery,
@@ -116,7 +120,7 @@ def test_from_client_annotation(annotation, expected):
 )
 def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expected):
     record = TextClassificationRecord(
-        inputs="test",
+        text="test",
         prediction=[("label1", 0.5), ("label2", 0.5)],
         annotation="label1",
         prediction_agent=pred_agent,
@@ -156,6 +160,7 @@ def test_to_client(multi_label, expected):
 
     record = sdk_record.to_client()
 
+    assert record.text == "test"
     assert record.prediction == [("label1", 0.5), ("label2", 0.5)]
     assert record.prediction_agent == "pred_agent"
     assert record.annotation_agent == "annot_agent"

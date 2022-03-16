@@ -16,24 +16,48 @@
  */
 
 export default (context, inject) => {
-  const highlightSearch = function (query, text) {
-    const escapedText = text
+  const escapeText = function (text) {
+    return text
       .toString()
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  };
+
+  const regexFromTerm = function (term) {
+    let q = term.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
+    return new RegExp(q, "gi");
+  };
+
+  const highlightSearch = function (query, text) {
+    const escapedText = escapeText(text);
     if (!query) {
-      return escapedText;
+      return text;
     }
-    let q = query.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
+
     return escapedText
       .toString()
       .replace(
-        new RegExp(q, "gi"),
+        regexFromTerm(query),
         (match) => `<span class="highlight-text">${match}</span>`
       );
   };
+
+  const highlightKeywords = function (text, keywords) {
+    let escapedText = escapeText(text).toString();
+
+    (keywords || []).forEach((keyword) => {
+      escapedText = escapedText.replace(
+        regexFromTerm(keyword),
+        (match) => `<span class="highlight-text">${match}</span>`
+      );
+    });
+
+    return escapedText;
+  };
+
   inject("highlightSearch", highlightSearch);
+  inject("highlightKeywords", highlightKeywords);
 };
