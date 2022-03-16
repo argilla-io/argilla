@@ -46,7 +46,7 @@
         :id="label.class"
         :key="`${label.class}`"
         v-model="selectedLabelsVModel"
-        :allow-multiple="false"
+        :allow-multiple="dataset.isMultiLabel"
         :label="label"
         class="label-button"
         :data-title="label.class"
@@ -95,6 +95,7 @@
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { TextClassificationDataset } from "@/models/TextClassification";
+import _ from "lodash";
 import "assets/icons/info";
 
 export default {
@@ -130,23 +131,29 @@ export default {
       return this.dataset.getCurrentLabelingRuleMetrics() || {};
     },
 
-    selectedLabel() {
-      if (this.selectedLabelsVModel !== undefined) {
-        return this.selectedLabelsVModel[0];
+    selectedLabels() {
+      if (this.selectedLabelsVModel.length) {
+        return this.selectedLabelsVModel;
       }
     },
 
     ruleInfo() {
       // TODO: We can improve this
+      const storedRule =
+        this.currentRule &&
+        this.dataset.findRuleByQuery(this.currentRule.query);
+      const storedRuleLabels = storedRule && storedRule.labels;
+      const queryWithLabelsIsStored = _.isEqual(
+        _.sortBy(storedRuleLabels),
+        _.sortBy(this.selectedLabels)
+      );
       if (this.isSaved) {
         return "The rule was saved";
       }
-      if (
-        this.currentRule &&
-        this.selectedLabelsVModel.length &&
-        this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)
-      ) {
-        return "This query with this label are already saved as rule";
+      if (this.selectedLabels && queryWithLabelsIsStored) {
+        return `This query with ${
+          this.selectedLabels.length > 1 ? "these labels" : "this label"
+        } are already saved as rule`;
       }
     },
     coveredRecords() {
@@ -190,16 +197,21 @@ export default {
     },
   },
   watch: {
-    selectedLabel(newValue) {
-      // Here send description too --> update Rule
-      this.$emit("update-rule", {
-        query: this.query,
-        label: newValue,
-      });
+    selectedLabels: {
+      handler: function (newValue) {
+        if (!_.isEqual(_.sortBy(newValue), _.sortBy(this.currentRule.labels))) {
+          // Here send description too --> update Rule
+          this.$emit("update-rule", {
+            query: this.query,
+            labels: newValue,
+          });
+        }
+      },
+      deep: true,
     },
     currentRule(newValue) {
-      if (newValue && newValue.label) {
-        this.selectedLabelsVModel = [newValue.label];
+      if (newValue && newValue.labels) {
+        this.selectedLabelsVModel = [...newValue.labels];
       }
     },
   },
@@ -211,7 +223,7 @@ export default {
       this.collapseLabels();
       this.$emit("save-rule", {
         query: this.currentRule.query,
-        label: this.selectedLabel,
+        labels: this.selectedLabels,
       });
     },
     expandLabels() {

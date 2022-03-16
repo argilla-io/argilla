@@ -17,6 +17,7 @@
 
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
+import _ from "lodash";
 
 class TextClassificationRecord extends BaseRecord {
   inputs;
@@ -90,6 +91,7 @@ class TextClassificationDataset extends ObservationDataset {
       // Some kind of metrics fields
       globalResults: this.attr({}),
       // labeling rules fields
+      isMultiLabel: this.boolean(false),
       rules: this.attr(null),
       rulesOveralMetrics: this.attr(null),
       perRuleQueryMetrics: this.attr(null),
@@ -105,6 +107,7 @@ class TextClassificationDataset extends ObservationDataset {
   async initialize() {
     const { labels } = await this.fetchMetricSummary("dataset_labels");
     const entity = this.getTaskDatasetClass();
+    const isMultiLabel = this.results.records.some((r) => r.multi_label);
     await entity.insertOrUpdate({
       where: this.id,
       data: [
@@ -112,6 +115,7 @@ class TextClassificationDataset extends ObservationDataset {
           owner: this.owner,
           name: this.name,
           _labels: labels,
+          isMultiLabel,
         },
       ],
     });
@@ -191,10 +195,10 @@ class TextClassificationDataset extends ObservationDataset {
     return overalMetrics;
   }
 
-  async _persistRule({ query, label, description }) {
-    const { response } = await TextClassificationDataset.api().post(
+  async _persistRule({ query, labels, description }) {
+    let { response } = await TextClassificationDataset.api().post(
       `/datasets/${this.task}/${this.name}/labeling/rules`,
-      { query, label, description },
+      { query, labels, description },
       {
         // Ignore errors related to rule not found
         validateStatus: function (status) {
@@ -203,17 +207,21 @@ class TextClassificationDataset extends ObservationDataset {
       }
     );
     if (response.status === 409) {
-      await TextClassificationDataset.api().patch(
+      const apiResult = await TextClassificationDataset.api().patch(
         `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
-        { label, description }
+        { labels, description }
       );
+      response = apiResult.response;
     }
+
+    return response.data;
   }
 
-  async _fetchRuleMetrics({ query, label }) {
+  async _fetchRuleMetrics({ query, labels }) {
     var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
-    if (label !== undefined) {
-      url += `?label=${label}`;
+    if (labels !== undefined) {
+      const urlLabels = labels.map((label) => `label=${label}`);
+      url += `?${urlLabels.join("&")}`;
     }
     const { response } = await TextClassificationDataset.api().get(url);
 
@@ -263,10 +271,6 @@ class TextClassificationDataset extends ObservationDataset {
         rules,
       },
     });
-  }
-
-  get isMultiLabel() {
-    return this.results.records.some((r) => r.multi_label);
   }
 
   get labels() {
@@ -322,16 +326,16 @@ class TextClassificationDataset extends ObservationDataset {
     return this.activeRuleMetrics === null ? undefined : this.activeRuleMetrics;
   }
 
-  async setCurrentLabelingRule({ query, label }) {
+  async setCurrentLabelingRule({ query, labels }) {
     if (
       this.currentLabelingRule &&
       query === this.currentLabelingRule.query &&
-      label === this.currentLabelingRule.label
+      _.isEqual(_.sortBy(labels), _.sortBy(this.currentLabelingRule.labels))
     ) {
       return;
     }
 
-    let rule = this.findRuleByQuery(query, label);
+    let rule = this.findRuleByQuery(query, labels);
     let ruleMetrics = this.getMetricsByRule(rule);
 
     await TextClassificationDataset.insertOrUpdate({
@@ -340,24 +344,27 @@ class TextClassificationDataset extends ObservationDataset {
         name: this.name,
         activeRule: rule || {
           query,
-          label,
+          labels,
           description: query,
         },
         activeRuleMetrics:
-          ruleMetrics || (await this._fetchRuleMetrics({ query, label })),
+          ruleMetrics || (await this._fetchRuleMetrics({ query, labels })),
       },
     });
   }
 
   async storeLabelingRule(activeRule) {
-    await this._persistRule(activeRule);
+    let rule = await this._persistRule(activeRule);
 
     const rules = this.rules.filter((rule) => rule.query !== activeRule.query);
     const perRuleQueryMetrics = {
       ...this.perRuleQueryMetrics,
       [activeRule.query]: this.activeRuleMetrics,
     };
-    let rule = await this._getRule({ query: activeRule.query });
+    if (rule === undefined) {
+      rule = await this._getRule({ query: activeRule.query });
+    }
+
     rules.push(rule);
 
     const overalMetrics = await this._fetchOveralMetrics(
@@ -413,9 +420,10 @@ class TextClassificationDataset extends ObservationDataset {
     });
   }
 
-  findRuleByQuery(query, label = undefined) {
+  findRuleByQuery(query, labels = undefined) {
     for (let rule of this.labelingRules || []) {
-      if (rule.query === query && [rule.label, undefined].includes(label)) {
+      const labelsAreEqual = _.isEqual(_.sortBy(rule.labels), _.sortBy(labels));
+      if (rule.query === query && (!labels || labelsAreEqual)) {
         return rule;
       }
     }
