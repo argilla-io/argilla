@@ -39,7 +39,7 @@ export default {
     },
     explain: {
       type: Array,
-    }
+    },
   },
   computed: {
     predicted() {
