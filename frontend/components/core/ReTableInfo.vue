@@ -111,16 +111,9 @@
                       {{ itemValue(item, column) | percent }}
                     </span>
                     <span v-else-if="column.type === 'array'">
-                      <template
-                        v-for="(arrayItem, index) in itemValue(item, column)"
-                      >
-                        {{ arrayItem
-                        }}{{
-                          index + 1 === itemValue(item, column).length
-                            ? ""
-                            : ", "
-                        }}
-                      </template>
+                      <p v-for="(arrayItem, index) in itemValue(item, column)" :key="index">
+                        {{arrayItem}}{{index + 1 === itemValue(item, column).length ? '' : ','}}
+                      </p>
                     </span>
                     <span v-else-if="column.type === 'object'">
                       <p
@@ -460,9 +453,6 @@ export default {
       border-bottom: none;
       padding-top: 0;
       padding-bottom: 0.2em;
-      // &:hover {
-      //   background:transparent ;
-      // }
     }
     button:not(.re-button) {
       cursor: pointer;
@@ -590,6 +580,13 @@ export default {
     max-width: 280px;
     font-weight: 600;
     word-break: break-word;
+  }
+  .array {
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+      display: block;
+    }
   }
   .text {
     color: $font-medium-color;
