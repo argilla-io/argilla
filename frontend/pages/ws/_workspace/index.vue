@@ -69,6 +69,7 @@ export default {
     querySearch: undefined,
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
+      { name: "Workspace", field: "owner", class: "text", type: "text" },
       { name: "Tags", field: "tags", class: "text", type: "object" },
       { name: "Task", field: "task", class: "task", type: "task" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },

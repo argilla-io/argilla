@@ -494,9 +494,12 @@ export default {
       &:nth-last-of-type(3) {
         max-width: 180px;
       }
-      &:nth-of-type(2) {
-        min-width: 30%;
-      }
+      // &:nth-of-type(2) {
+      //   min-width: 30%;
+      // }
+      // .task span {
+      //   display: flex;
+      // }
       &:first-child {
         flex-shrink: 0;
         min-width: 220px;
