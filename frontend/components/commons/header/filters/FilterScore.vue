@@ -113,7 +113,7 @@ export default {
     config: {
       mark: {
         color: "#D9D7E4",
-        binSpacing: 0
+        binSpacing: 0,
       },
 
       bar: {
@@ -122,7 +122,7 @@ export default {
         continuousBandSize: 0,
       },
       axis: {
-        // labels: false,
+        labels: false,
       },
       view: {
         height: 100,
@@ -130,7 +130,12 @@ export default {
       },
     },
     encoding: {
-      x: { scale: {zero: true}, bin: { maxbins: 100, extent: [0.0, 1.0] }, field: "key", type: "quantitative" },
+      x: {
+        scale: { zero: true },
+        bin: { maxbins: 100, extent: [0.0, 1.0] },
+        field: "key",
+        type: "quantitative",
+      },
       y: { field: "count", type: "quantitative", aggregate: "sum" },
     },
   }),
@@ -229,8 +234,8 @@ export default {
     text-align: center;
   }
   .range__container {
-    margin-top: -8px;
-    padding: 0 0.5em;
+    margin-top: 2px;
+    padding: 0;
   }
   .range {
     @include font-size(14px);
@@ -274,7 +279,7 @@ export default {
     .score {
       ::v-deep svg {
         max-width: 100%;
-        height: 200px !important;
+        height: 100px !important;
       }
     }
     .filter__buttons {
@@ -326,12 +331,12 @@ export default {
   line {
     stroke: none !important;
   }
-  // .role-axis {
-  //   display: none !important;
-  // }
-  // .role-legend {
-  //   display: none !important;
-  // }
+  .role-axis {
+    display: none !important;
+  }
+  .role-legend {
+    display: none !important;
+  }
   text {
     font-weight: normal !important;
     font-family: $ff !important;
