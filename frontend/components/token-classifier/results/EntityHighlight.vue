@@ -68,7 +68,7 @@ export default {
     record: {
       type: Object,
       required: true,
-    }
+    },
   },
   data: () => {
     return {
