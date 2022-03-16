@@ -3,7 +3,7 @@
 exports[`RecordTextClassification renders properly 1`] = `
 <div class="record">
   <div class="record--left">
-    <recordinputs data="[object Object]" query-text="mock test"></recordinputs>
+    <recordinputs record="[object Object]"></recordinputs>
     <classifierexplorationarea dataset="[object Object]" record="[object Object]"></classifierexplorationarea>
     <!---->
   </div>

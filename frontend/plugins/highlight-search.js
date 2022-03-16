@@ -16,24 +16,65 @@
  */
 
 export default (context, inject) => {
-  const highlightSearch = function (query, text) {
-    const escapedText = text
+  const htmlText = function (text) {
+    return text
       .toString()
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
-    if (!query) {
-      return escapedText;
-    }
-    let q = query.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
-    return escapedText
-      .toString()
-      .replace(
-        new RegExp(q, "gi"),
-        (match) => `<span class="highlight-text">${match}</span>`
-      );
   };
+
+  function htmlHighlightText(text) {
+    return `<span class="highlight-text">${htmlText(text)}</span>`;
+  }
+
+  const regexFromTerm = function (term) {
+    let q = term.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "");
+    return new RegExp(q, "gi");
+  };
+
+  const highlightSearch = function (query, text) {
+    const escapedText = htmlText(text);
+    if (!query) {
+      return text;
+    }
+
+    return escapedText.replace(
+      regexFromTerm(query),
+      (match) => `<span class="highlight-text">${match}</span>`
+    );
+  };
+
+  const highlightKeywords = function (text, keywords) {
+    const sortedKeywords = ([...keywords] || []).sort(
+      (a, b) => b.length - a.length
+    );
+    text = htmlText(text);
+    sortedKeywords.forEach((keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
+      text = text.replace(regex, (match) => htmlHighlightText(match));
+    });
+
+    return text;
+  };
+
+  const keywordsSpans = function (text, keywords) {
+    return (keywords || []).flatMap((keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
+      return [...text.matchAll(regex)].map((match) => {
+        return {
+          start: match.index,
+          end: match.index + match[0].length,
+        };
+      });
+    });
+  };
+
   inject("highlightSearch", highlightSearch);
+  inject("highlightKeywords", highlightKeywords);
+  inject("keywordsSpans", keywordsSpans);
+  inject("htmlText", htmlText);
+  inject("htmlHighlightText", htmlHighlightText);
 };
