@@ -92,7 +92,10 @@ class UsersService:
 _instance: Optional[UsersService] = None
 
 
-def create_users_service(dao: UsersDAO = Depends(create_users_dao)) -> UsersService:
+def create_users_service(
+    dao: UsersDAO = Depends(create_users_dao),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+) -> UsersService:
     """
     Creates an users service instance
 
@@ -108,5 +111,5 @@ def create_users_service(dao: UsersDAO = Depends(create_users_dao)) -> UsersServ
     global _instance
 
     if _instance is None:
-        _instance = UsersService(users=dao)
+        _instance = UsersService(users=dao, datasets=datasets)
     return _instance

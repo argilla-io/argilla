@@ -66,7 +66,7 @@ export default {
       return this.$auth.user;
     },
     userWorkspaces() {
-      return this.user.workspaces.map(ws => {
+      return (this.user.workspaces || []).map(ws => {
         if (ws === "") {
           return NO_WORKSPACE
         }

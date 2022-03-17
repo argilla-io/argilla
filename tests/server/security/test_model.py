@@ -35,7 +35,7 @@ def test_workspace_validator(wrong_workspace):
 
 def test_check_non_provided_workspaces():
     user = User(username="test")
-    assert not user.check_workspaces([])  # super-user
+    assert user.check_workspaces([]) == ["test"]
 
     user.workspaces = ["ws"]
     assert user.check_workspaces([]) == [user.default_workspace] + user.workspaces
@@ -69,14 +69,17 @@ def test_workspace_for_superuser():
     user = User(username="admin")
     assert user.default_workspace == "admin"
 
-    assert user.check_workspace("some") == "some"
+    with pytest.raises(ForbiddenOperationError):
+        assert user.check_workspace("some") == "some"
+
+    user.workspaces = ["some"]
     assert user.check_workspaces(["some"]) == ["some"]
 
 
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
-        (None, []),
+        (None, ["user"]),
         ([], ["user"]),
         (["a"], ["user", "a"]),
     ],

@@ -63,14 +63,12 @@ class User(BaseModel):
 
         """
         workspaces = [w for w in workspaces or [] if w is not None]
-        if workspaces or self.is_superuser():
+        if workspaces:
             for workspace in workspaces:
                 self.check_workspace(workspace)
             return workspaces
 
-        if self.is_superuser():
-            return []
-        return [self.default_workspace] + self.workspaces
+        return [self.default_workspace] + (self.workspaces or [])
 
     def check_workspace(self, workspace: str) -> str:
         """
@@ -86,12 +84,10 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if self.is_superuser():
-            return workspace
         if not workspace or workspace == self.default_workspace:
             return self.default_workspace
-        if workspace not in self.workspaces:
-            raise ForbiddenOperationError(f"Missing or protected workspace {workspace}")
+        if workspace not in (self.workspaces or []):
+            raise ForbiddenOperationError(f"Missing workspace {workspace}")
         return workspace
 
     def is_superuser(self) -> bool:
