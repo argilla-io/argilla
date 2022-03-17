@@ -50,7 +50,7 @@ Rubrix is flexible with input and output shapes, which means you can model relat
 Text2Text
 ^^^^^^^^^
 
-The most typical and oldest task in this category is probably `Machine Translation<http://nlpprogress.com/english/machine_translation.html>`_:
+The most typical and oldest task in this category is probably `Machine Translation <http://nlpprogress.com/english/machine_translation.html>`__:
 
 ..
 

@@ -103,7 +103,7 @@ Check the [tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supe
 Getting started with Rubrix is as easy as:
 
 ```bash
-pip install rubrix[server]
+pip install "rubrix[server]"
 ```
 
 If you don't have [Elasticsearch (ES)](https://www.elastic.co/elasticsearch) running, make sure you have `Docker` installed and run:
@@ -111,12 +111,7 @@ If you don't have [Elasticsearch (ES)](https://www.elastic.co/elasticsearch) run
 > :information_source: **Check [our documentation](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations regarding Elasticsearch.**
 
 ```bash
-docker run -d \
- --name elasticsearch-for-rubrix \
- -p 9200:9200 -p 9300:9300 \
- -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
- -e "discovery.type=single-node" \
- docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 ```
 
 Then simply run:
