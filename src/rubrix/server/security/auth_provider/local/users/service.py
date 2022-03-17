@@ -13,9 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Optional
+
 from fastapi import Depends
 from passlib.context import CryptContext
-from typing import Optional
+
+from rubrix.server.datasets.service import DatasetsService
 
 from .dao import UsersDAO, create_users_dao
 from .model import User
@@ -26,8 +29,21 @@ class UsersService:
 
     __PWD_CONTEXT__ = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def __init__(self, users: UsersDAO):
+    __INSTANCE__: Optional["UsersService"] = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        users: UsersDAO = Depends(create_users_dao),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    ) -> "UsersService":
+        if not cls.__INSTANCE__:
+            cls.__INSTANCE__ = cls(users=users, datasets=datasets)
+        return cls.__INSTANCE__
+
+    def __init__(self, users: UsersDAO, datasets: DatasetsService):
         self.__dao__ = users
+        self.__datasets__ = datasets
 
     def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """
@@ -50,10 +66,21 @@ class UsersService:
             return user
 
     def get_user(self, username) -> Optional[User]:
-        return self.__dao__.get_user(username)
+        user = self.__dao__.get_user(username)
+        if user:
+            user = self._enrich_user(user)
+        return user
+
+    def _enrich_user(self, user: User) -> User:
+        if user.is_superuser():
+            user.workspaces = self.__datasets__.all_workspaces()
+        return user
 
     async def find_user_by_api_key(self, api_key: str) -> Optional[User]:
-        return await self.__dao__.get_user_by_api_key(api_key)
+        user = await self.__dao__.get_user_by_api_key(api_key)
+        if user:
+            user = self._enrich_user(user)
+        return user
 
     def __verify_password__(self, password: str, hashed_password: str) -> bool:
         return self.__PWD_CONTEXT__.verify(password, hashed_password)

@@ -19,9 +19,8 @@ from pydantic import BaseModel, Field, validator
 
 from rubrix.server.commons.errors import ForbiddenOperationError
 
-
-_ID_REGEX = re.compile(r"^[a-zA-Z0-9_\-]*$")
-_EMAIL_REGEX_PATTERN = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
+_ID_REGEX = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
+_EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 
 class User(BaseModel):
@@ -35,6 +34,9 @@ class User(BaseModel):
 
     @validator("workspaces", each_item=True)
     def check_workspace_pattern(cls, workspace: str):
+        """Check workspace pattern"""
+        if not workspace:
+            return workspace
         assert _ID_REGEX.match(
             workspace
         ), f"Wrong workspace format. Workspace must match pattern {_ID_REGEX.pattern}"
@@ -42,8 +44,7 @@ class User(BaseModel):
 
     @property
     def default_workspace(self) -> Optional[str]:
-        if self.workspaces is None:
-            return None
+        """Get the default user workspace"""
         return self.username
 
     def check_workspaces(self, workspaces: List[str]) -> List[str]:
@@ -61,15 +62,15 @@ class User(BaseModel):
             Original workspace names if user belongs to them
 
         """
-        workspaces = [w for w in workspaces or [] if w]
-        if workspaces:
+        workspaces = [w for w in workspaces or [] if w is not None]
+        if workspaces or self.is_superuser():
             for workspace in workspaces:
                 self.check_workspace(workspace)
             return workspaces
 
-        if self.workspaces is None:  # Super user
+        if self.is_superuser():
             return []
-        return [self.default_workspace]
+        return [self.default_workspace] + self.workspaces
 
     def check_workspace(self, workspace: str) -> str:
         """
@@ -85,13 +86,17 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
+        if self.is_superuser():
+            return workspace
         if not workspace or workspace == self.default_workspace:
             return self.default_workspace
-        if self.workspaces is None:
-            return workspace
         if workspace not in self.workspaces:
             raise ForbiddenOperationError(f"Missing or protected workspace {workspace}")
         return workspace
+
+    def is_superuser(self) -> bool:
+        """Check if a user is superuser"""
+        return self.workspaces is None
 
 
 class Token(BaseModel):

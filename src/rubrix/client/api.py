@@ -111,7 +111,7 @@ class Api:
         )
         self._user: User = whoami(client=self._client)
 
-        if workspace:
+        if workspace is not None:
             self.set_workspace(workspace)
 
     def set_workspace(self, workspace: str):
