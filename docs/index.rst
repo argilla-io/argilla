@@ -198,6 +198,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/08-error_analysis_using_loss
    tutorials/09-automatic_fastapi_log
    tutorials/skweak
+   tutorials/weak-supervision-multi-label
 
 .. toctree::
    :maxdepth: 4
