@@ -22,12 +22,7 @@ Simply run the following command:
 
 .. code-block:: bash
 
-   docker run -d \
-     --name elasticsearch-for-rubrix \
-     -p 9200:9200 -p 9300:9300 \
-     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-     -e "discovery.type=single-node" \
-     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+   docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
 
