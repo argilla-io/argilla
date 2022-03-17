@@ -53,7 +53,11 @@
 
 <script>
 import { mapActions } from "vuex";
-import { setWorkspace, currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
+import {
+  setWorkspace,
+  currentWorkspace,
+  NO_WORKSPACE,
+} from "@/models/Workspace";
 export default {
   data: () => {
     return {
@@ -66,12 +70,14 @@ export default {
       return this.$auth.user;
     },
     userWorkspaces() {
-      return (this.user.workspaces || []).map(ws => {
-        if (ws === "") {
-          return NO_WORKSPACE
-        }
-        return ws
-      }).filter(ws => ws !== this.user.username)
+      return (this.user.workspaces || [])
+        .map((ws) => {
+          if (ws === "") {
+            return NO_WORKSPACE;
+          }
+          return ws;
+        })
+        .filter((ws) => ws !== this.user.username);
     },
     currentWorkspace() {
       return currentWorkspace(this.$route);
