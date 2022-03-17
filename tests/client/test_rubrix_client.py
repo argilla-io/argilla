@@ -448,6 +448,8 @@ def test_client_workspace(rb_client):
     ws = rb_client.active_workspace
     assert ws == "rubrix"
 
+    rb_client.__current_user__.workspaces = ["rubrix", "other-workspace"]
+
     rb_client.set_workspace("other-workspace")
     assert rb_client.active_workspace == "other-workspace"
 

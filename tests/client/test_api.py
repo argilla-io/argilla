@@ -547,8 +547,8 @@ def test_client_workspace(mocked_client):
         ws = api.get_workspace()
         assert ws == "rubrix"
 
-        api.set_workspace("other-workspace")
-        assert api.get_workspace() == "other-workspace"
+        api.set_workspace("")
+        assert api.get_workspace() == ""
 
         with pytest.raises(Exception, match="Must provide a workspace"):
             api.set_workspace(None)
