@@ -46,12 +46,7 @@ If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ 
 
 .. code-block:: bash
 
-   docker run -d \
-     --name elasticsearch-for-rubrix \
-     -p 9200:9200 -p 9300:9300 \
-     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-     -e "discovery.type=single-node" \
-     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+   docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 
 Then simply run:
