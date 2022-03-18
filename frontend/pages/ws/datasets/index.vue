@@ -21,7 +21,8 @@
     <div v-else class="wrapper">
       <div class="main">
         <app-header
-          :breadcrumbs="[{ link: `/ws/${workspace}`, name: workspace }]"
+          :copy-button="false"
+          :breadcrumbs="[{ link: `/ws/datasets`, name: 'Datasets' }]"
           :sticky="false"
         />
         <Error
@@ -44,6 +45,7 @@
               :query-search="querySearch"
               :global-actions="false"
               search-on="name"
+              filterFromRoute="owner"
               :visible-modal-id="datasetCompositeId"
               :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
@@ -69,9 +71,9 @@ export default {
     querySearch: undefined,
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
-      { name: "Workspace", field: "owner", class: "text", type: "text" },
+      { name: "Workspace", field: "owner", class: "text", type: "text", filtrable: "true" },
       { name: "Tags", field: "tags", class: "text", type: "object" },
-      { name: "Task", field: "task", class: "task", type: "task" },
+      { name: "Task", field: "task", class: "task", type: "task", filtrable: "true" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       {
         name: "Updated at",
@@ -140,7 +142,7 @@ export default {
       if (workspace === null || workspace === "null") {
         workspace = this.workspace;
       }
-      return `/ws/${workspace}/${dataset.name}`;
+      return `/ws/datasets/${dataset.name}?owner=${workspace}`;
     },
 
     onActionClicked(action, dataset) {
