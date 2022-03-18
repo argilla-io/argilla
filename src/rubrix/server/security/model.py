@@ -19,14 +19,14 @@ from pydantic import BaseModel, Field, validator
 
 from rubrix.server.commons.errors import ForbiddenOperationError
 
-_ID_REGEX = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
+WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 
 class User(BaseModel):
     """Base user model"""
 
-    username: str = Field(regex=_ID_REGEX.pattern)
+    username: str = Field(regex=WORKSPACE_NAME_PATTERN.pattern)
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
@@ -37,9 +37,9 @@ class User(BaseModel):
         """Check workspace pattern"""
         if not workspace:
             return workspace
-        assert _ID_REGEX.match(
+        assert WORKSPACE_NAME_PATTERN.match(
             workspace
-        ), f"Wrong workspace format. Workspace must match pattern {_ID_REGEX.pattern}"
+        ), f"Wrong workspace format. Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
         return workspace
 
     @property
