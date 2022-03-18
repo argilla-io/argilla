@@ -14,11 +14,11 @@ class CommonTaskQueryParams:
         None,
         alias="workspace",
         description="The workspace where dataset belongs to. If not provided default user team will be used",
-        regex=WORKSPACE_NAME_PATTERN,
+        regex=WORKSPACE_NAME_PATTERN.pattern,
     )
 
     __workspace_header__: str = Header(
-        None, alias=RUBRIX_WORKSPACE_HEADER_NAME, regex=WORKSPACE_NAME_PATTERN
+        None, alias=RUBRIX_WORKSPACE_HEADER_NAME, regex=WORKSPACE_NAME_PATTERN.pattern
     )
 
     @property
