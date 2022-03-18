@@ -91,16 +91,21 @@ $buttonSize: 30px;
   &__content {
     position: absolute;
     top: 3.5em;
-    right: 0;
-    padding-top: 1em;
+    right: -1em;
+    padding-top: 1.5em;
     background: $lighter-color;
-    border-radius: 3px;
+    border-radius: 5px;
     @include font-size(14px);
     font-weight: 400;
     color: palette(grey, medium);
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
-    min-width: 200px;
-    text-align: center;
+    box-shadow: 0 5px 12px 0 rgba(204,204,204,0.50);
+    min-width: 290px;
+    &:after {
+      position: absolute; 
+      top: -12px;
+      right: 1.2em;
+      @include triangle(top, 12px, 12px, white);
+    }
     a {
       text-decoration: none;
     }
@@ -108,20 +113,17 @@ $buttonSize: 30px;
   &__name {
     color: palette(grey, dark);
     @include font-size(16px);
-    margin-bottom: 0.5em;
-    margin-top: 0;
+    margin: 0 1.5em 0.3em 1.5em;
+    font-weight: 600;
   }
   &__mail {
-    margin-bottom: 1em;
-    margin-top: 0;
+    margin: 0 1.5em 2em 1.5em;
   }
   &__link {
     display: flex;
     align-items: center;
-    margin-top: 0.5em;
-    text-align: left;
     color: palette(grey, medium);
-    margin-left: 1em;
+    margin: 0.5em 1.5em 1.5em 1.5em;
     .svg-icon {
       margin-right: 0.5em;
     }
@@ -137,5 +139,8 @@ $buttonSize: 30px;
   margin-top: 1.5em;
   padding: 1em;
   background: #fcfcfc;
+  text-align: right;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 </style>
