@@ -2,6 +2,61 @@
 
 <video width="100%" controls><source src="../../_static/reference/webapp/search_records.mp4" type="video/mp4"></video>
 
+The search bar in Rubrix is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
+It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Rubrix's data model.
+
+## Search fields
+
+An important concept when searching with Elasticsearch is the *field* concept.
+Every search in Rubrix is directed to a specific field of the record's underlying data model.
+For example, writing `text:fox` in the search bar will search for records with the word `fox` in the field `text`.
+
+If you do not provide any fields in your query string, by default Rubrix will search in the fields `word` and `word.extended`.
+For a complete list of available fields, their content and their type, have a look at the field glossary below.
+
+```{note}
+The default behavior when not specifying any fields in the search, will likely change in the near future.
+We recommend emulating the future behavior by using the `text` field for your default searches, that is change `brown fox` to `text:(brown fox)`, for example.
+```
+
+## `text` and `text.exact`
+
+The (arguably) most important fields are the `text` and `text.exact` fields.
+They both contain the text of the records, however in two different forms:
+
+- the `text` field uses Elasticsearch's [standard analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-standard-analyzer.html) that ignores capitalization and removes most of the punctuatio;
+- the `text.exact` field uses the [whitespace analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-whitespace-analyzer.html) that differentiates between lower and upper case, and does take into account punctuation;
+
+Let's have a look at a few examples.
+Suppose we have 2 records with the following text:
+
+1. *The quick brown fox jumped over the lazy dog.*
+2. *THE DOG HATED THE FOX!*
+
+The queries `text:dog.` and `text.fox` would match both of the records, while the queries `text.exact:dog` and `text.exact:fox` would match none.
+However, the queries `text.exact:dog.` and `text.exact:fox` would both yield only the first record, while the queries `text.exact:DOG` or `text.exact:FOX!` would return the second record.
+You can see how the `text.exact field can be used to search in a more fine-grained manner.
+
+## Words and phrases
+
+## Field types
+
+### metadata fields
+
+### filters as query string
+
+## Combine fields
+
+## Query string features
+
+### Escaping special characters
+
+## Field glossary
+
+
+
+
+
 You can search records by using full-text queries (a normal search), or by Elasticsearch with its [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax).
 
 - Using the `text` and `text.exact` fields
