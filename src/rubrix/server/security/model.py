@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from rubrix.server.commons.errors import ForbiddenOperationError
+from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperationError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
@@ -37,9 +37,10 @@ class User(BaseModel):
         """Check workspace pattern"""
         if not workspace:
             return workspace
-        assert WORKSPACE_NAME_PATTERN.match(
-            workspace
-        ), f"Wrong workspace format. Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+        assert WORKSPACE_NAME_PATTERN.match(workspace), (
+            "Wrong workspace format. "
+            f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+        )
         return workspace
 
     @property
@@ -87,7 +88,7 @@ class User(BaseModel):
         if not workspace or workspace == self.default_workspace:
             return self.default_workspace
         if workspace not in (self.workspaces or []):
-            raise ForbiddenOperationError(f"Missing workspace {workspace}")
+            raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
 
     def is_superuser(self) -> bool:
