@@ -385,6 +385,7 @@ class DatasetForTextClassification(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
+        text: Optional[str] = None,
         id: Optional[str] = None,
         inputs: Optional[Union[str, List[str]]] = None,
         annotation: Optional[str] = None,
@@ -396,6 +397,7 @@ class DatasetForTextClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            text: The field name used as record text. Default: `None`
             id: The field name used as record id. Default: `None`
             inputs: A list of field names used for record inputs. Default: `None`
             annotation: The field name used as record annotation. Default: `None`
@@ -416,7 +418,12 @@ class DatasetForTextClassification(DatasetBase):
         """
 
         return super().from_datasets(
-            dataset, id=id, annotation=annotation, metadata=metadata, inputs=inputs
+            dataset,
+            text=text,
+            id=id,
+            annotation=annotation,
+            metadata=metadata,
+            inputs=inputs,
         )
 
     @classmethod
@@ -1048,12 +1055,15 @@ Dataset = Union[
 ]
 
 
-def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Dataset:
+def read_datasets(
+    dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs
+) -> Dataset:
     """Reads a datasets Dataset and returns a Rubrix Dataset
 
     Args:
         dataset: Dataset to be read in.
-        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"]
+        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"].
+        **kwargs: Passed on to the task-specific ``DatasetFor*.from_datasets()`` method.
 
     Returns:
         A Rubrix dataset for the given task.
@@ -1095,11 +1105,11 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Da
         task = TaskType(task)
 
     if task is TaskType.text_classification:
-        return DatasetForTextClassification.from_datasets(dataset)
+        return DatasetForTextClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.token_classification:
-        return DatasetForTokenClassification.from_datasets(dataset)
+        return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
-        return DatasetForText2Text.from_datasets(dataset)
+        return DatasetForText2Text.from_datasets(dataset, **kwargs)
     raise NotImplementedError(
         "Reading a datasets Dataset is not implemented for the given task!"
     )
