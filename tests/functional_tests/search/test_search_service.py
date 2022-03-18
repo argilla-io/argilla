@@ -62,7 +62,12 @@ def test_query_builder_with_query_range(query_builder):
 
 
 def test_failing_metrics(service, mocked_client):
-    dataset = Dataset(name="test_failing_metrics", task=TaskType.text_classification)
+
+    dataset = Dataset(
+        name="test_failing_metrics",
+        owner=rubrix.get_workspace(),
+        task=TaskType.text_classification,
+    )
 
     rubrix.delete(dataset.name)
     rubrix.log(
