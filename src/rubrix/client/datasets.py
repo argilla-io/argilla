@@ -542,14 +542,7 @@ class DatasetForTextClassification(DatasetBase):
         if isinstance(fields, str):
             fields = [fields]
 
-        def parse_inputs_from_dataset(example):
-            return {
-                "inputs": example[fields[0]]
-                if len(fields) == 1
-                else {k: example[k] for k in fields}
-            }
-
-        return dataset.map(parse_inputs_from_dataset)
+        return dataset.map(lambda example: {k: example[k] for k in fields})
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
