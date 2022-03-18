@@ -176,15 +176,9 @@ def create_local_auth_provider():
     from .users.dao import create_users_dao
 
     settings = Settings()
-    es_wrapper = create_es_wrapper()
 
     users_service = UsersService.get_instance(
         users=create_users_dao(),
-        datasets=DatasetsService.get_instance(
-            dao=DatasetsDAO.get_instance(
-                es=es_wrapper, records_dao=DatasetRecordsDAO.get_instance(es_wrapper)
-            )
-        ),
     )
 
     return LocalAuthProvider(users=users_service, settings=settings)

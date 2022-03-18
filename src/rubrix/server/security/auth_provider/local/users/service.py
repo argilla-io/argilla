@@ -13,12 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import Depends
 from passlib.context import CryptContext
 
-from rubrix.server.datasets.service import DatasetsService
+from rubrix.server.datasets.dao import NO_WORKSPACE
 
 from .dao import UsersDAO, create_users_dao
 from .model import User
@@ -35,15 +35,13 @@ class UsersService:
     def get_instance(
         cls,
         users: UsersDAO = Depends(create_users_dao),
-        datasets: DatasetsService = Depends(DatasetsService.get_instance),
     ) -> "UsersService":
         if not cls.__INSTANCE__:
-            cls.__INSTANCE__ = cls(users=users, datasets=datasets)
+            cls.__INSTANCE__ = cls(users=users)
         return cls.__INSTANCE__
 
-    def __init__(self, users: UsersDAO, datasets: DatasetsService):
+    def __init__(self, users: UsersDAO):
         self.__dao__ = users
-        self.__datasets__ = datasets
 
     def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """
@@ -67,19 +65,23 @@ class UsersService:
 
     def get_user(self, username) -> Optional[User]:
         user = self.__dao__.get_user(username)
-        if user:
-            user = self._enrich_user(user)
+        if user and user.is_superuser():
+            user.workspaces = [NO_WORKSPACE] + list(self._fetch_all_workspaces())
         return user
 
-    def _enrich_user(self, user: User) -> User:
-        if user.is_superuser():
-            user.workspaces = self.__datasets__.all_workspaces()
-        return user
+    def _fetch_all_workspaces(self) -> List[str]:
+        return list(
+            set(
+                workspace
+                for user in self.__dao__.all_users()
+                for workspace in user.check_workspaces([])  # return ALL workspaces
+            )
+        )
 
     async def find_user_by_api_key(self, api_key: str) -> Optional[User]:
         user = await self.__dao__.get_user_by_api_key(api_key)
-        if user:
-            user = self._enrich_user(user)
+        if user and user.is_superuser():
+            user.workspaces = [NO_WORKSPACE] + list(self._fetch_all_workspaces())
         return user
 
     def __verify_password__(self, password: str, hashed_password: str) -> bool:
@@ -87,29 +89,3 @@ class UsersService:
 
     def __get_password_hash__(self, password: str):
         return self.__PWD_CONTEXT__.hash(password)
-
-
-_instance: Optional[UsersService] = None
-
-
-def create_users_service(
-    dao: UsersDAO = Depends(create_users_dao),
-    datasets: DatasetsService = Depends(DatasetsService.get_instance),
-) -> UsersService:
-    """
-    Creates an users service instance
-
-    Parameters
-    ----------
-    dao:
-        The users data access object
-
-    Returns
-    -------
-        An service instance
-    """
-    global _instance
-
-    if _instance is None:
-        _instance = UsersService(users=dao, datasets=datasets)
-    return _instance
