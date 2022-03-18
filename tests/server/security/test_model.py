@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.commons.errors import ForbiddenOperationError
+from rubrix.server.commons.errors import EntityNotFoundError
 from rubrix.server.security.model import User
 
 
@@ -40,7 +40,7 @@ def test_check_non_provided_workspaces():
     user.workspaces = ["ws"]
     assert user.check_workspaces([]) == [user.default_workspace] + user.workspaces
 
-    with pytest.raises(ForbiddenOperationError, match="not-found"):
+    with pytest.raises(EntityNotFoundError, match="not-found"):
         assert user.check_workspaces(["ws", "not-found"])
 
 
@@ -52,7 +52,7 @@ def test_check_user_workspaces():
 
     assert user.check_workspace(a_ws) == a_ws
     assert user.check_workspaces(expected_workspaces) == expected_workspaces
-    with pytest.raises(ForbiddenOperationError):
+    with pytest.raises(EntityNotFoundError):
         assert user.check_workspaces(["not-found-ws"])
 
 
@@ -69,7 +69,7 @@ def test_workspace_for_superuser():
     user = User(username="admin")
     assert user.default_workspace == "admin"
 
-    with pytest.raises(ForbiddenOperationError):
+    with pytest.raises(EntityNotFoundError):
         assert user.check_workspace("some") == "some"
 
     user.workspaces = ["some"]
