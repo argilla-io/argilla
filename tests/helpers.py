@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from starlette.testclient import TestClient
 
 from rubrix._constants import API_KEY_HEADER_NAME
@@ -8,6 +9,10 @@ class SecuredClient:
     def __init__(self, client: TestClient):
         self._client = client
         self._header = {API_KEY_HEADER_NAME: settings.default_apikey}
+
+    @property
+    def fastpi_app(self) -> FastAPI:
+        return self._client.app
 
     def delete(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
