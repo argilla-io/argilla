@@ -390,7 +390,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
 
     # Overrides the users dao config
     try:
-        auth.users.__dao__.__users__["rubrix"].workspaces = [new_workspace]
+        mocked_client.add_workspaces_to_rubrix_user([new_workspace])
 
         mocked_client.delete(f"/api/datasets/{dataset}")
         mocked_client.delete(f"/api/datasets/{dataset_copy}")
@@ -414,7 +414,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         with pytest.raises(AlreadyExistsApiError):
             api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
     finally:
-        auth.users.__dao__.__users__["rubrix"].workspaces = None
+        mocked_client.reset_rubrix_workspaces()
         api.init()  # reset workspace
 
 
