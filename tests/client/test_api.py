@@ -356,11 +356,11 @@ def test_delete_dataset(mocked_client):
 def test_dataset_copy(mocked_client):
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
-    new_workspace = "new-workspace"
+    other_workspace = "test_dataset_copy_ws"
 
     mocked_client.delete(f"/api/datasets/{dataset}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={other_workspace}")
 
     api.log(
         rb.TextClassificationRecord(
@@ -379,8 +379,8 @@ def test_dataset_copy(mocked_client):
 
     with pytest.raises(AlreadyExistsApiError):
         api.copy(dataset, name_of_copy=dataset_copy)
-    with pytest.raises(ForbiddenApiError, match=f"Missing workspace {new_workspace}"):
-        api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
+    with pytest.raises(NotFoundApiError, match=other_workspace):
+        api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
 
 
 def test_dataset_copy_to_another_workspace(mocked_client):
