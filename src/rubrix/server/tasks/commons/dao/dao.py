@@ -90,6 +90,10 @@ class DatasetRecordsDAO:
         rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
     )
 
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
+
     @classmethod
     def get_instance(
         cls,
@@ -292,15 +296,27 @@ class DatasetRecordsDAO:
         for doc in docs:
             yield self.__esdoc2record__(doc)
 
-    def __esdoc2record__(self, doc: Dict[str, Any]):
+    def __esdoc2record__(
+        self,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = True,
+    ):
         return {
             **doc["_source"],
             "id": doc["_id"],
-            "search_keywords": self.__parse_highlight_results__(doc),
+            "search_keywords": self.__parse_highlight_results__(
+                doc, query=query, is_phrase_query=is_phrase_query
+            ),
         }
 
     @classmethod
-    def __parse_highlight_results__(cls, doc: Dict[str, Any]) -> Optional[List[str]]:
+    def __parse_highlight_results__(
+        cls,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
         highlight_info = doc.get("highlight")
         if not highlight_info:
             return None
@@ -310,6 +326,8 @@ class DatasetRecordsDAO:
             if not isinstance(content, list):
                 content = [content]
             for text in content:
+                if is_phrase_query:
+                    text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
                 search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
         return list(set(search_keywords))
 
