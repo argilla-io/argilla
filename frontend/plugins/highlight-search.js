@@ -47,10 +47,13 @@ export default (context, inject) => {
 
   const highlightKeywords = function (text, keywords) {
     let escapedText = escapeText(text).toString();
+    const sortedKeywords = ([...keywords] || []).sort(
+      (a, b) => b.length - a.length
+    );
 
-    (keywords || []).forEach((keyword) => {
+    sortedKeywords.forEach((keyword) => {
       escapedText = escapedText.replace(
-        regexFromTerm(keyword),
+        new RegExp(keyword, "gi"),
         (match) => `<span class="highlight-text">${match}</span>`
       );
     });
