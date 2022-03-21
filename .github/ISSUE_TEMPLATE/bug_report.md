@@ -30,5 +30,6 @@ If applicable, add screenshots to help explain your problem.
  - ElasticSearch Version [e.g. 7.10.2]:
  - Docker Image (optional) [e.g. rubrix:v0.10.0]:  
 
+
 **Additional context**
 Add any other context about the problem here.
