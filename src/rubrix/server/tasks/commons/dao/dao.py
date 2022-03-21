@@ -325,10 +325,11 @@ class DatasetRecordsDAO:
         for content in highlight_info.values():
             if not isinstance(content, list):
                 content = [content]
-            for text in content:
-                if is_phrase_query:
-                    text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
-                search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
+            search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
         return list(set(search_keywords))
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
