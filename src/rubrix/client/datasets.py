@@ -66,6 +66,14 @@ class DatasetBase:
 
     _RECORD_TYPE = None
 
+    @classmethod
+    def _record_init_args(cls) -> List[str]:
+        """
+        Helper the returns the field list available for creation of inner records.
+        The ``_RECORD_TYPE.__fields__`` will be returned as default
+        """
+        return [field for field in cls._RECORD_TYPE.__fields__]
+
     def __init__(self, records: Optional[List[Record]] = None):
         if self._RECORD_TYPE is None:
             raise NotImplementedError(
@@ -185,9 +193,7 @@ class DatasetBase:
         )
 
         not_supported_columns = [
-            col
-            for col in dataset.column_names
-            if col not in cls._RECORD_TYPE.__fields__
+            col for col in dataset.column_names if col not in cls._record_init_args()
         ]
         if not_supported_columns:
             _LOGGER.warning(
@@ -251,11 +257,12 @@ class DatasetBase:
             The imported records in a Rubrix Dataset.
         """
         not_supported_columns = [
-            col for col in dataframe.columns if col not in cls._RECORD_TYPE.__fields__
+            col for col in dataframe.columns if col not in cls._record_init_args()
         ]
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model and are ignored: {not_supported_columns}"
+                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model "
+                f"and are ignored: {not_supported_columns}"
             )
             dataframe = dataframe.drop(columns=not_supported_columns)
 
@@ -638,6 +645,12 @@ class DatasetForTokenClassification(DatasetBase):
 
     _RECORD_TYPE = TokenClassificationRecord
 
+    @classmethod
+    def _record_init_args(cls) -> List[str]:
+        """Adds the `tags` argument to default record init arguments"""
+        parent_fields = super(DatasetForTokenClassification, cls)._record_init_args()
+        return parent_fields + ["tags"]  # compute annotation from tags
+
     def __init__(self, records: Optional[List[TokenClassificationRecord]] = None):
         # we implement this to have more specific type hints
         super().__init__(records=records)
@@ -871,8 +884,8 @@ class DatasetForTokenClassification(DatasetBase):
         import datasets
 
         labels = dataset.features[field]
-        if isinstance(labels, list):
-            labels = labels[0]
+        if isinstance(labels, datasets.Sequence):
+            labels = labels.feature
         int2str = (
             labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
         )

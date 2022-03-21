@@ -331,15 +331,16 @@ class TokenClassificationRecord(_Validators):
         entities = []
         while idx < len(tags):
             tag = tags[idx]
-            prefix, entity = tag.split("-")
-            if tag == "B":
-                char_start, char_end = self.token_span(token_idx=idx)
-                entities.append(
-                    {"entity": entity, "start": char_start, "end": char_end}
-                )
-            elif prefix in ["I", "L"]:
-                _, char_end = self.token_span(token_idx=idx)
-                entities[-1]["end"] = char_end
+            if tag != "O":
+                prefix, entity = tag.split("-")
+                if prefix == "B":
+                    char_start, char_end = self.token_span(token_idx=idx)
+                    entities.append(
+                        {"entity": entity, "start": char_start, "end": char_end}
+                    )
+                elif prefix in ["I", "L"]:
+                    _, char_end = self.token_span(token_idx=idx)
+                    entities[-1]["end"] = char_end
             idx += 1
         return [(value["entity"], value["start"], value["end"]) for value in entities]
 
