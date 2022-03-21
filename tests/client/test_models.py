@@ -114,6 +114,21 @@ def test_token_classification_record(annotation, status, expected_status, expect
     assert record.spans2iob(record.annotation) == expected_iob
 
 
+@pytest.mark.parametrize(
+    ("tokens", "tags", "annotation"),
+    [
+        (["Una", "casa"], ["O", "B-OBJ"], [("OBJ", 4, 7)]),
+        (["Matias", "Aguado"], ["B-PER", "I-PER"], [("PER", 0, 12)]),
+        (["Todo", "Todo", "Todo"], ["B-T", "I-T", "L-T"], [("T", 0, 13)]),
+        (["Una", "casa"], ["O", "U-OBJ"], []),
+    ],
+)
+def test_token_classification_with_tokens_and_tags(tokens, tags, annotation):
+    record = TokenClassificationRecord(tokens=tokens, tags=tags)
+    assert record.annotation is not None
+    assert record.annotation == annotation
+
+
 def test_token_classification_validations():
     with pytest.raises(
         AssertionError,
