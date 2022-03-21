@@ -50,10 +50,10 @@ export default (context, inject) => {
     const sortedKeywords = ([...keywords] || []).sort(
       (a, b) => b.length - a.length
     );
-
     sortedKeywords.forEach((keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
       escapedText = escapedText.replace(
-        new RegExp(keyword, "gi"),
+        regex,
         (match) => `<span class="highlight-text">${match}</span>`
       );
     });
