@@ -33,23 +33,35 @@ Suppose we have 2 records with the following text:
 1. *The quick brown fox jumped over the lazy dog.*
 2. *THE LAZY DOG HATED THE QUICK BROWN FOX!*
 
-The queries `text:dog.` and `text.fox` would match both of the records, while the queries `text.exact:dog` and `text.exact:FOX` would match none.
-However, the queries `text.exact:dog.` and `text.exact:fox` would both yield only the first record, while the queries `text.exact:DOG` or `text.exact:FOX!` would return the second record.
+Now consider these queries:
+
+- `text:dog.` or `text:fox`: matches both of the records.
+- `text.exact:dog` or `text.exact:FOX`: matches none of the records.
+- `text.exact:dog.` or `text.exact:fox`: matches only the first record.
+- `text.exact:DOG` or `text.exact:FOX!`: matches only the second record.
+
 You can see how the `text.exact` field can be used to search in a more fine-grained manner.
 
 ### TextClassificationRecord's `inputs`
 
 For [text classification records](../python/python_client.rst#rubrix.client.models.TextClassificationRecord) you can take advantage of the multiple `inputs` when performing a search.
 For example, if we uploaded records with `inputs={"subject": ..., "body": ...}`, you can direct your searches to only one of those inputs by specifying the `inputs.subject` or `inputs.body` field in your query.
-So to look for records in which the *subject* contains the word *news*, you would search for `inputs.subject:news`.
-Again, as with the `text` field, you can also use the white space analyzer to perform more fine-grained searches by specifying the `exact` field: `inputs.subject.exact:NEWS`.
+So to look for records in which the *subject* contains the word *news*, you would search for
+
+- `inputs.subject:news`
+
+Again, as with the `text` field, you can also use the white space analyzer to perform more fine-grained searches by specifying the `exact` field:
+
+- `inputs.subject.exact:NEWS`
 
 ## Words and phrases
 
 Apart from single words you can also search for *phrases* by surrounding multiples words with double quotes.
 This searches for all the words in the phrase, in the same order.
 
-Taking the two examples from above, `text:"lazy dog hated"` will return only the second example.
+If we take the two examples from above, then following query will only return the second example:
+
+- `text:"lazy dog hated"`
 
 ## Metadata fields
 
@@ -57,7 +69,7 @@ You also have the metadata of your records available when performing a search.
 Imagine you provided the split to which the record belongs to as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
 Then you could only search your training data by specifying the corresponding field in your query:
 
-- `metadata.split:train`.
+- `metadata.split:train`
 
 Metadata are indexed as keywords.
 This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
@@ -80,7 +92,7 @@ You can, however, use wild cards.
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
 Following examples showcase the power of these operators:
 
-- `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default one, that is equivalent: `text:(quick fox)`.
+- `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
 - `text:(quick AND fox AND NOT news)`: Returns records that contain the words *quick* and *fox*, **and do not** contain *news*.
 - `metadata.split:train AND text:fox`: Returns records that contain the word *fox* and that have a metadata *"split: train"*.
