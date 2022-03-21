@@ -107,6 +107,16 @@ class WeakLabelsBase:
         """The rules (labeling functions) that were used to produce the weak labels."""
         return self._rules
 
+    @property
+    def labels(self) -> List[str]:
+        """The list of labels."""
+        raise NotImplementedError
+
+    @property
+    def cardinality(self) -> int:
+        """The number of labels."""
+        raise NotImplementedError
+
     def records(
         self, has_annotation: Optional[bool] = None
     ) -> List[TextClassificationRecord]:
@@ -363,6 +373,14 @@ class WeakLabels(WeakLabelsBase):
                 weak_label_matrix[n, m] = weak_label
 
         return weak_label_matrix, annotation_array, _label2int
+
+    @property
+    def cardinality(self) -> int:
+        return len(self._label2int) - 1
+
+    @property
+    def labels(self) -> List[str]:
+        return [key for key in self._label2int.keys() if key is not None]
 
     @property
     def label2int(self) -> Dict[Optional[str], int]:
@@ -700,23 +718,24 @@ class WeakMultiLabels(WeakLabelsBase):
 
         # create weak label matrix (3D), annotation matrix
         weak_label_matrix = np.empty(
-            (len(self._records), len(self._rules), len(labels)), dtype=np.short
+            (len(self._records), len(self._rules), len(labels)), dtype=np.byte
         )
-        annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.short)
+        annotation_matrix = np.empty((len(self._records), len(labels)), dtype=np.byte)
 
         # SECOND: Fill arrays with weak labels
         for n, annotation_n, weak_label_n in tqdm(
             zip(range(len(annotations)), annotations, weak_labels),
             desc="Filling weak label matrix",
+            total=len(annotations),
         ):
             # first: fill annotation matrix
             if annotation_n == [None]:
                 # "abstain" is an array with -1
-                annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.short)
+                annotation_matrix[n] = -1 * np.ones(len(labels), dtype=np.byte)
             else:
                 annotation_matrix[n] = np.array(
                     [1 if label in annotation_n else 0 for label in labels],
-                    dtype=np.short,
+                    dtype=np.byte,
                 )
 
             # second: fill weak label matrix (3D)
@@ -726,7 +745,7 @@ class WeakMultiLabels(WeakLabelsBase):
                 else:
                     weak_label_matrix[n, m] = np.array(
                         [1 if label in weak_labels_m else 0 for label in labels],
-                        dtype=np.short,
+                        dtype=np.byte,
                     )
 
         return weak_label_matrix, annotation_matrix, labels
@@ -735,6 +754,10 @@ class WeakMultiLabels(WeakLabelsBase):
     def labels(self) -> List[str]:
         """The labels of the multi-label text classification dataset."""
         return self._labels
+
+    @property
+    def cardinality(self) -> int:
+        return len(self._labels)
 
     def matrix(self, has_annotation: Optional[bool] = None) -> np.ndarray:
         """Returns the 3 dimensional weak label matrix, or optionally just a part of it.
