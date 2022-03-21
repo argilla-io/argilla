@@ -20,21 +20,13 @@ function defaultWorkspace(user) {
 }
 
 function currentWorkspace(route) {
-  return route.params.workspace;
-}
-function workspaceHome(ws) {
-  return `/ws/${ws}`;
+  return route.query.owner;
 }
 
-function setWorkspace(router, workspace) {
-  router.push(workspaceHome(workspace));
-}
 
 const NO_WORKSPACE = "-";
 export {
   defaultWorkspace,
   currentWorkspace,
-  setWorkspace,
-  workspaceHome,
   NO_WORKSPACE,
 };
