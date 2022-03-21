@@ -6,10 +6,7 @@
       :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
     >
       {{ column.name }}
-      <svgicon
-        color="#4C4EA3"
-        name="filtrable-column"
-      />
+      <svgicon color="#4C4EA3" name="filtrable-column" />
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
       <input
@@ -21,10 +18,7 @@
       />
       <ul>
         <li
-          v-for="option in filterOptions(
-            this.options,
-            searchText
-          )"
+          v-for="option in filterOptions(this.options, searchText)"
           :key="option"
         >
           <ReCheckbox
@@ -37,15 +31,13 @@
           </ReCheckbox>
         </li>
         <li
-          v-if="
-            !Object.entries(filterOptions(this.options, searchText)).length
-          "
+          v-if="!Object.entries(filterOptions(this.options, searchText)).length"
         >
           0 results
         </li>
       </ul>
     </div>
-  </div>  
+  </div>
 </template>
 
 <script>
@@ -63,32 +55,32 @@ export default {
     data: {
       type: Array,
       required: true,
-    }
+    },
   },
   data() {
     return {
       searchText: undefined,
       visibleFilter: false,
       selectedOptions: [],
-    }
+    };
   },
   mounted() {
     this.$nextTick(() => {
       if (this.filters[this.column.field]) {
         this.selectedOptions = [this.filters[this.column.field]] || [];
       }
-    })
+    });
   },
   computed: {
     options() {
-      const rawOptions = this.data.map(item => item[this.column.field]);
-      return [...new Set(rawOptions)]
+      const rawOptions = this.data.map((item) => item[this.column.field]);
+      return [...new Set(rawOptions)];
     },
   },
   watch: {
     selectedOptions() {
-      this.$emit('applyFilters', this.column, this.selectedOptions);
-    }
+      this.$emit("applyFilters", this.column, this.selectedOptions);
+    },
   },
   methods: {
     openFilter() {
@@ -101,16 +93,18 @@ export default {
       if (text === undefined) {
         return options;
       }
-      let filtered = options.filter(id =>
+      let filtered = options.filter((id) =>
         id.toLowerCase().match(text.toLowerCase())
       );
       return filtered;
     },
     datasetsCounter(option) {
-      return this.data.filter(dataset => dataset[this.column.field] === option).length;
+      return this.data.filter(
+        (dataset) => dataset[this.column.field] === option
+      ).length;
     },
-  }
-}
+  },
+};
 </script>
 <style lang="scss" scoped>
 .table__filter {
@@ -125,7 +119,7 @@ export default {
   right: auto;
   min-width: 270px;
   border-radius: 3px;
-  box-shadow: 0 5px 12px 0 rgba(204,204,204,0.70);
+  box-shadow: 0 5px 12px 0 rgba(204, 204, 204, 0.7);
   ul {
     list-style: none;
     max-height: 220px;
@@ -138,7 +132,7 @@ export default {
   }
   .re-checkbox {
     margin: 0;
-    width: 100%!important;
+    width: 100% !important;
     cursor: default;
   }
 }
@@ -199,4 +193,3 @@ button {
   }
 }
 </style>
-

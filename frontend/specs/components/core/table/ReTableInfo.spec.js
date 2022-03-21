@@ -16,7 +16,7 @@ function mountReTableInfo() {
           filtrable: "true",
           name: "Workspace",
           type: "text",
-        }
+        },
       ],
       data: [
         {
@@ -31,20 +31,20 @@ function mountReTableInfo() {
         },
       ],
       deleteModalContent: {
-        text:"You are about to delete: <strong>undefined</strong>. This action cannot be undone",
-        title:"Delete confirmation",
+        text: "You are about to delete: <strong>undefined</strong>. This action cannot be undone",
+        title: "Delete confirmation",
       },
       emptySearchInfo: {
-        title:"0 datasets found",
+        title: "0 datasets found",
       },
-      globalActions:false,
-      groupBy:undefined,
-      hideButton:false,
-      noDataInfo:undefined,
+      globalActions: false,
+      groupBy: undefined,
+      hideButton: false,
+      noDataInfo: undefined,
       querySearch: undefined,
-      filterFromRoute:"owner",
+      filterFromRoute: "owner",
       searchOn: "name",
-      sortedByField:"last_updated",
+      sortedByField: "last_updated",
       sortedOrder: "desc",
       visibleModalId: undefined,
     },

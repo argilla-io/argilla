@@ -1,19 +1,21 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
-    <a
-      class="user__button"
-      href="#"
-      @click.prevent="showSelector"
-    >
+    <a class="user__button" href="#" @click.prevent="showSelector">
       {{ firstChar(user.username) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
       <p class="user__name">{{ user.username }}</p>
       <p class="user__mail">{{ user.email }}</p>
-      <a class="user__link" href="https://docs.rubrix.ml/en/stable/" target="_blank">
-        <svgicon name="docs"></svgicon> View docs </a>
+      <a
+        class="user__link"
+        href="https://docs.rubrix.ml/en/stable/"
+        target="_blank"
+      >
+        <svgicon name="docs"></svgicon> View docs
+      </a>
       <a class="user__link" href="#" @click.prevent="logout">
-        <svgicon name="logout"></svgicon> Log out </a>
+        <svgicon name="logout"></svgicon> Log out
+      </a>
       <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
   </div>
@@ -98,10 +100,10 @@ $buttonSize: 30px;
     @include font-size(14px);
     font-weight: 400;
     color: palette(grey, medium);
-    box-shadow: 0 5px 12px 0 rgba(204,204,204,0.50);
+    box-shadow: 0 5px 12px 0 rgba(204, 204, 204, 0.5);
     min-width: 290px;
     &:after {
-      position: absolute; 
+      position: absolute;
       top: -12px;
       right: 1.2em;
       @include triangle(top, 12px, 12px, white);

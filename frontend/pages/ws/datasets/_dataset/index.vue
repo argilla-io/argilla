@@ -53,8 +53,11 @@ export default {
     }),
     breadcrumbs() {
       return [
-        { link: { path: '/ws/datasets' }, name: 'Datasets' },
-        { link: { path: `/ws/datasets?owner=${this.$route.query.owner}`}, name: this.workspace },
+        { link: { path: "/ws/datasets" }, name: "Datasets" },
+        {
+          link: { path: `/ws/datasets?owner=${this.$route.query.owner}` },
+          name: this.workspace,
+        },
         {
           link: this.$route.fullPath,
           name: this.dataset ? this.dataset.name : undefined,

@@ -5,7 +5,7 @@ function mountTableFiltrableColumn() {
   return mount(TableFiltrableColumn, {
     propsData: {
       filters: {
-        owner: ["recognai"]
+        owner: ["recognai"],
       },
       column: {
         class: "text",

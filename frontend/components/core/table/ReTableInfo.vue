@@ -26,7 +26,13 @@
               :key="key"
               class="table-info__item__col"
             >
-              <lazy-table-filtrable-column :column="column" :data="data" :filters="filters" v-if="column.filtrable" @applyFilters="onApplyFilters" />
+              <lazy-table-filtrable-column
+                :column="column"
+                :data="data"
+                :filters="filters"
+                v-if="column.filtrable"
+                @applyFilters="onApplyFilters"
+              />
               <button
                 v-else
                 :data-title="column.tooltip"
@@ -34,12 +40,7 @@
                 @click="sort(column)"
               >
                 {{ column.name }}
-                <svgicon
-                  color="#4C4EA3"
-                  width="15"
-                  height="15"
-                  name="sort"
-                />
+                <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
               </button>
             </div>
           </div>
@@ -108,8 +109,16 @@
                       {{ itemValue(item, column) | percent }}
                     </span>
                     <span v-else-if="column.type === 'array'">
-                      <p v-for="(arrayItem, index) in itemValue(item, column)" :key="index">
-                        {{arrayItem}}{{index + 1 === itemValue(item, column).length ? '' : ','}}
+                      <p
+                        v-for="(arrayItem, index) in itemValue(item, column)"
+                        :key="index"
+                      >
+                        {{ arrayItem
+                        }}{{
+                          index + 1 === itemValue(item, column).length
+                            ? ""
+                            : ","
+                        }}
                       </p>
                     </span>
                     <span v-else-if="column.type === 'array'">
@@ -281,7 +290,7 @@ export default {
     filterFromRoute: {
       type: String,
       default: undefined,
-    }
+    },
   },
   data() {
     return {
@@ -290,7 +299,7 @@ export default {
       sortedBy: this.sortedByField,
       allRecordsSelected: false,
       selectedItems: [],
-      filters: {}
+      filters: {},
     };
   },
   computed: {
@@ -316,11 +325,9 @@ export default {
       };
       const matchFilters = (item) => {
         if (Object.values(this.filters).length) {
-          return Object.keys(this.filters).every(key => {
-            return this.filters[key]
-              .toString()
-              .includes(item[key]);
-            })
+          return Object.keys(this.filters).every((key) => {
+            return this.filters[key].toString().includes(item[key]);
+          });
         }
         return true;
       };
@@ -351,7 +358,11 @@ export default {
   },
   mounted() {
     if (this.filterFromRoute && this.$route.query[this.filterFromRoute]) {
-      this.$set(this.filters, this.filterFromRoute, this.$route.query[this.filterFromRoute])
+      this.$set(
+        this.filters,
+        this.filterFromRoute,
+        this.$route.query[this.filterFromRoute]
+      );
     }
     this.filteredResults.forEach((r) => {
       const rec = r;
@@ -377,9 +388,9 @@ export default {
     },
     onApplyFilters(column, selectedOptions) {
       if (selectedOptions.length) {
-        this.$set(this.filters, column.field, selectedOptions)
+        this.$set(this.filters, column.field, selectedOptions);
       } else {
-        this.$delete(this.filters, column.field)
+        this.$delete(this.filters, column.field);
       }
     },
     filteredResultsByGroup(group) {
