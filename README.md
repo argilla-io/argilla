@@ -1,5 +1,5 @@
 
-![](https://user-images.githubusercontent.com/1107111/157880110-81008ddc-a376-4592-9ecf-d42a43cbf895.svg)
+![](docs/images/og_rubrix.png)
 
 <br/>
 
