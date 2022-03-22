@@ -461,6 +461,12 @@ class TestDatasetForTokenClassification:
 
         assert rb.read_datasets(dataset_ds, task="TokenClassification")[0].id is None
 
+    def test_prepare_for_training_empty(self):
+        dataset = rb.DatasetForTokenClassification(
+            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        )
+        assert len(dataset.prepare_for_training()) == 0
+
     def test_datasets_empty_metadata(self):
         dataset = rb.DatasetForTokenClassification(
             [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
