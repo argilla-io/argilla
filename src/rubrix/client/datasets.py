@@ -744,6 +744,15 @@ class DatasetForTokenClassification(DatasetBase):
         """
         import datasets
 
+        has_annotations = False
+        for rec in self._records:
+            if rec.annotation is not None:
+                has_annotations = True
+                break
+
+        if not has_annotations:
+            return datasets.Dataset.from_dict({})
+
         class_tags = ["O"]
         class_tags.extend(
             [
@@ -765,12 +774,11 @@ class DatasetForTokenClassification(DatasetBase):
         ds = (
             self.to_datasets()
             .filter(self.__only_annotations__)
-            .map(
-                lambda example: {"ner_tags": spans2iob(example)},
-            )
+            .map(lambda example: {"ner_tags": spans2iob(example)})
         )
         new_features = ds.features.copy()
         new_features["ner_tags"] = [class_tags]
+
         return ds.cast(new_features)
 
     def __all_labels__(self):
