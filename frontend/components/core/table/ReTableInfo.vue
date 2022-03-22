@@ -521,11 +521,8 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      &:nth-last-of-type(-n + 2) {
+      &:nth-last-of-type(-n + 1) {
         max-width: 120px;
-      }
-      &:nth-last-of-type(3) {
-        max-width: 180px;
       }
       &:first-child {
         flex-shrink: 0;
