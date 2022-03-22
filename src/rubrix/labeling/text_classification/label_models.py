@@ -16,10 +16,12 @@ import hashlib
 import importlib
 import logging
 import sys
+import time
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+import pandas as pd
 
 from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels
@@ -816,13 +818,24 @@ class Epoxy(FlyingSquid):
             trial[index] = item
             yield trial
 
-    def _grid_search(
+    def _get_training_data(self):
+        records_for_training = self.predict()
+        training_data = pd.DataFrame(
+            [
+                {
+                    "text": rec.inputs["text"],
+                    "label": self.weak_labels.label2int[rec.prediction[0][0]],
+                }
+                for rec in records_for_training
+            ]
+        )
+        return training_data
+
+    def grid_search(
         self,
-        score: str = "fscore_cautious",
-        tie_break_policy: str = "abstain",
-        first_space_num: int = 20,
-        second_space_num: int = 20,
-        second_space_subset: Union[None, List[int]] = None,
+        space_num: int = 20,
+        space_subset: Union[None, List[int]] = None,
+        optimize_all: bool = True,
         include_annotated_records: Union[None, bool] = False,
         **kwargs,
     ) -> List[float]:
@@ -851,70 +864,40 @@ class Epoxy(FlyingSquid):
         Returns:
             The optimal threshold array found after grid search.
         """
+        if optimize_all:
+            for thresholds in self._generate_first_search_space(num=space_num):
 
-        output = None
-        max_metric = 0
-
-        for threshold in self._generate_first_search_space(num=first_space_num):
-
-            self._thresholds = threshold
-            self.fit(include_annotated_records=include_annotated_records, **kwargs)
-            result = self.score(tie_break_policy=tie_break_policy)[score]
-
-            if result >= max_metric:
-                output = threshold
-                max_metric = result
-
-            _LOGGER.debug(
-                """
-                    Searching on the first search space.
-                    Current values:
-                    - current threshold: {0}
-                    - best threshold: {1}
-                    """.format(
-                    str(threshold), str(output)
-                )
-            )
-
-        _LOGGER.debug(
-            "Exited from the first search space. Best threshold: {0}".format(
-                str(output)
-            )
-        )
-
-        if not second_space_subset:
-            second_space_subset = [i for i in range(len(output))]
-
-        while second_space_subset:
-
-            current_index = second_space_subset.pop(0)
-
-            for threshold in self._generate_second_search_space(
-                thresholds=output, num=second_space_num, index=current_index
-            ):
-
-                _LOGGER.debug(
-                    """
-                    Searching on the second search space.
-                    Current values:
-                    - threshold: {0}
-                    - index: {1}
-                    - second_space_subset: {2}
-                    """.format(
-                        str(threshold), str(current_index), str(second_space_subset)
-                    )
-                )
-
-                self._thresholds = threshold
+                self._thresholds = thresholds
                 self.fit(include_annotated_records=include_annotated_records, **kwargs)
-                result = self.score(tie_break_policy=tie_break_policy)[score]
+                output_dict = {
+                    "data": self._get_training_data(),
+                    "thresholds": thresholds,
+                }
+                yield output_dict
+        else:
 
-                if result >= max_metric:
-                    output = threshold
-                    max_metric = result
+            if not space_subset:
+                space_subset = [i for i in range(len(self._thresholds))]
 
-        _LOGGER.debug("End of the grid search. Best thresholds: {0}".format(output))
-        return output
+            while space_subset:
+
+                current_index = space_subset.pop(0)
+
+                for thresholds in self._generate_second_search_space(
+                    thresholds=self._thresholds, num=space_num, index=current_index
+                ):
+                    self._thresholds = thresholds
+                    self.fit(
+                        include_annotated_records=include_annotated_records, **kwargs
+                    )
+                    output_dict = {
+                        "data": self._get_training_data(),
+                        "thresholds": thresholds,
+                    }
+                    yield output_dict
+
+    def set_thresholds(self, thresholds):
+        self._thresholds = thresholds
 
     def _get_embeddings(self, has_annotation: Optional[bool] = None) -> np.ndarray:
         """Returns the embeddings, or optionally just a part of them.
@@ -977,6 +960,22 @@ class Epoxy(FlyingSquid):
         L_extended = epoxy_model.extend(self._thresholds)
         return L_extended
 
+    def thresholds(self):
+        return {"best": self._thresholds, "candidates": self._candidates}
+
+    def thresholds_summary(
+        self,
+        metric_fields=["random_accuracy", "coverage", "accuracy", "fscore_cautious"],
+    ):
+        output = []
+        for row in self._candidates:
+            new_row = {}
+            new_row["threshold"] = row["threshold"]
+            for metric in metric_fields:
+                new_row[metric] = row["metrics"][metric]
+            output.append(new_row)
+        return pd.DataFrame(output)
+
     def fit(
         self,
         include_annotated_records: bool = False,
@@ -984,10 +983,6 @@ class Epoxy(FlyingSquid):
         **kwargs,
     ):
         self._include_annotated_records = include_annotated_records
-
-        if not self._thresholds:
-            self._thresholds = self._grid_search(**grid_search_kwargs)
-
         super().fit(include_annotated_records, **kwargs)
 
     def predict(

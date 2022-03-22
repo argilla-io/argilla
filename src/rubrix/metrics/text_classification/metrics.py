@@ -1,5 +1,7 @@
+from collections import Counter
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from rubrix import _client_instance as client
@@ -50,7 +52,7 @@ def cautious_classification_report(
 
         df = pd.DataFrame(report).transpose()
 
-        df = df.astype(float).applymap(lambda x: "{:,.2f}".format(x))
+        df = df.astype(float).applymap(lambda x: "{:.2f}".format(x))
         df["support"] = df["support"].astype(float).apply(lambda x: "{:,g}".format(x))
 
         df["bool_field"] = df["precision"].apply(lambda x: x == "nan")
@@ -75,9 +77,15 @@ def cautious_classification_report(
     if not is_tie.any():
         y_true_partial = y_true
         y_pred_partial = y_pred
+
+        y_true_tie = []
+        y_pred_tie = []
     else:
         y_true_partial = y_true[~is_tie]
         y_pred_partial = y_pred[~is_tie]
+
+        y_true_tie = y_true[is_tie]
+        y_pred_tie = y_pred[is_tie]
 
     if y_true_partial.any() and target_names is None:
         target_names = model_labels[: y_true_partial.max() + 1]
@@ -100,31 +108,18 @@ def cautious_classification_report(
 
         accuracy = report_partial["accuracy"]
 
-        report_final = {
-            "efficacy": (accuracy + coverage) / 2,
-            "fscore_cautious": 2 * (accuracy * coverage) / (accuracy + coverage),
-            "coverage": coverage,
-        }
+        report_final = {"coverage": coverage}
 
         report_final.update(report_partial)
 
         if not output_dict:
-            report_final = report_to_str(
-                report_final, ["efficacy", "fscore_cautious", "coverage"]
-            )
+            report_final = report_to_str(report_final, ["coverage"])
 
     elif output_dict:
-        report_final = {
-            "accuracy": 0,
-            "efficacy": 0,
-            "fscore_cautious": 0,
-            "coverage": 0,
-        }
+        report_final = {"accuracy": 0, "coverage": 0}
     else:
         report_final = """
             accuracy            0.0
-            efficacy            0.0
-            fscore_cautious     0.0
             coverage            0.0
         """
 
