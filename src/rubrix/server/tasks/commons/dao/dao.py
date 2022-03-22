@@ -207,7 +207,7 @@ class DatasetRecordsDAO:
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
             "query": search.query or {"match_all": {}},
-            "sort": search.sort or [{"_id": {"order": "asc"}}],
+            "sort": search.sort or [{"id": {"order": "asc"}}],
             "aggs": aggregation_requests,
             "highlight": self.__configure_query_highlight__(),
         }

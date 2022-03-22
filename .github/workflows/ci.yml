@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16, 7.17 ]
+        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16, 7.17, 8.0 ]
     defaults:
       run:
         shell: bash -l {0}
