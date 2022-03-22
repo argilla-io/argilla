@@ -33,6 +33,7 @@ from rubrix.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
+from rubrix.server.security import auth
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 
@@ -355,11 +356,11 @@ def test_delete_dataset(mocked_client):
 def test_dataset_copy(mocked_client):
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
-    new_workspace = "new-workspace"
+    other_workspace = "test_dataset_copy_ws"
 
     mocked_client.delete(f"/api/datasets/{dataset}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={other_workspace}")
 
     api.log(
         rb.TextClassificationRecord(
@@ -378,10 +379,34 @@ def test_dataset_copy(mocked_client):
 
     with pytest.raises(AlreadyExistsApiError):
         api.copy(dataset, name_of_copy=dataset_copy)
+    with pytest.raises(NotFoundApiError, match=other_workspace):
+        api.copy(dataset, name_of_copy=dataset_copy, workspace=other_workspace)
 
-    api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
 
+def test_dataset_copy_to_another_workspace(mocked_client):
+    dataset = "test_dataset_copy_to_another_workspace"
+    dataset_copy = "new_dataset"
+    new_workspace = "my-fun-workspace"
+
+    # Overrides the users dao config
     try:
+        mocked_client.add_workspaces_to_rubrix_user([new_workspace])
+
+        mocked_client.delete(f"/api/datasets/{dataset}")
+        mocked_client.delete(f"/api/datasets/{dataset_copy}")
+        mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
+
+        api.log(
+            rb.TextClassificationRecord(
+                id=0,
+                inputs="This is the record input",
+                annotation_agent="test",
+                annotation=["T"],
+            ),
+            name=dataset,
+        )
+        df = api.load(dataset)
+        api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
         api.set_workspace(new_workspace)
         df_copy = api.load(dataset_copy)
         assert df.equals(df_copy)
@@ -389,6 +414,7 @@ def test_dataset_copy(mocked_client):
         with pytest.raises(AlreadyExistsApiError):
             api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
     finally:
+        mocked_client.reset_rubrix_workspaces()
         api.init()  # reset workspace
 
 
@@ -547,8 +573,8 @@ def test_client_workspace(mocked_client):
         ws = api.get_workspace()
         assert ws == "rubrix"
 
-        api.set_workspace("other-workspace")
-        assert api.get_workspace() == "other-workspace"
+        api.set_workspace("")
+        assert api.get_workspace() == ""
 
         with pytest.raises(Exception, match="Must provide a workspace"):
             api.set_workspace(None)
@@ -585,3 +611,30 @@ def test_load_sort(mocked_client):
     assert list(df.id) == [1, 2, 11]
     df = api.load(name=dataset, ids=["1str", "2str", "11str"])
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+def test_load_workspace_from_different_workspace(mocked_client):
+    records = [
+        rb.TextClassificationRecord(
+            inputs="test text",
+            id=i,
+        )
+        for i in ["1str", 1, 2, 11, "2str", "11str"]
+    ]
+
+    dataset = "test_load_workspace_from_different_workspace"
+    workspace = api.get_workspace()
+    try:
+        api.set_workspace("")  # empty workspace
+        api.delete(dataset)
+        api.log(records, name=dataset)
+
+        # check sorting policies
+        df = api.load(name=dataset)
+        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
+
+        api.set_workspace(workspace)
+        df = api.load(name=dataset)
+        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
+    finally:
+        api.set_workspace(workspace)

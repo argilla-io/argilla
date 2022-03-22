@@ -111,7 +111,7 @@ class Api:
         )
         self._user: User = whoami(client=self._client)
 
-        if workspace:
+        if workspace is not None:
             self.set_workspace(workspace)
 
     def set_workspace(self, workspace: str):
@@ -125,9 +125,8 @@ class Api:
 
         if workspace != self.get_workspace():
             if workspace == self._user.username:
-                self._client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME, None)
-                return
-            if (
+                self._client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME, workspace)
+            elif (
                 self._user.workspaces is not None
                 and workspace not in self._user.workspaces
             ):

@@ -32,8 +32,7 @@ from rubrix import (
     TextClassificationRecord,
 )
 from rubrix._constants import DEFAULT_API_KEY
-from rubrix.client import rubrix_client
-from rubrix.client.api import InputValueError
+from rubrix.client import RubrixClient, rubrix_client
 from rubrix.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     ForbiddenApiError,
@@ -45,12 +44,13 @@ from rubrix.client.sdk.commons.errors import (
 from rubrix.server.tasks.text_classification import TextClassificationSearchResults
 from tests.server.test_api import create_some_data_for_text_classification
 
+API_URL = api_url = "http://localhost:6900"
+
 
 @pytest.fixture
 def rb_client(mocked_client):
-    return rubrix_client.RubrixClient(
-        api_url="http://localhost:6900", api_key=DEFAULT_API_KEY
-    )
+
+    return rubrix_client.RubrixClient(API_URL, api_key=DEFAULT_API_KEY)
 
 
 def test_log_something(monkeypatch, mocked_client, rb_client):
@@ -255,14 +255,44 @@ def test_delete_dataset(mocked_client, rb_client):
         rb_client.load(name=dataset_name)
 
 
+def test_copy_dataset_to_another_workspace(mocked_client, rb_client):
+    dataset = "test_copy_dataset_to_another_workspace"
+    copy = "test_copy_dataset_to_another_workspace_copy"
+    workspace = "test_copy_dataset_to_another_workspace-ws"
+
+    rb_client.log(
+        TextClassificationRecord(
+            id=0,
+            inputs="This is the record input",
+            annotation_agent="test",
+            annotation=["T"],
+        ),
+        name=dataset,
+    )
+    df = rb_client.load(name=dataset)
+
+    try:
+        mocked_client.add_workspaces_to_rubrix_user([workspace])
+        mocked_client.delete(f"/api/datasets/{copy}?workspace={workspace}")
+
+        new_rb_client = RubrixClient(API_URL, api_key=DEFAULT_API_KEY)
+        new_rb_client.copy(dataset, target=copy, target_workspace=workspace)
+        new_rb_client.set_workspace(workspace)
+        df_copy = new_rb_client.load(copy)
+        assert df.equals(df_copy)
+
+        with pytest.raises(AlreadyExistsApiError):
+            new_rb_client.copy(copy, target=copy, target_workspace=workspace)
+    finally:
+        mocked_client.reset_rubrix_workspaces()
+
+
 def test_dataset_copy(mocked_client, rb_client):
     dataset = "test_dataset_copy"
     dataset_copy = "new_dataset"
-    new_workspace = "new-workspace"
 
     mocked_client.delete(f"/api/datasets/{dataset}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
 
     rb_client.log(
         TextClassificationRecord(
@@ -281,17 +311,6 @@ def test_dataset_copy(mocked_client, rb_client):
 
     with pytest.raises(AlreadyExistsApiError):
         rb_client.copy(dataset, target=dataset_copy)
-
-    rb_client.copy(dataset, target=dataset_copy, target_workspace=new_workspace)
-
-    rb_client.set_workspace(new_workspace)
-    df_copy = rb_client.load(dataset_copy)
-    assert df.equals(df_copy)
-
-    with pytest.raises(AlreadyExistsApiError):
-        rb_client.copy(
-            dataset_copy, target=dataset_copy, target_workspace=new_workspace
-        )
 
 
 def test_update_record(mocked_client, rb_client):
@@ -447,6 +466,8 @@ def test_load_text2text(rb_client):
 def test_client_workspace(rb_client):
     ws = rb_client.active_workspace
     assert ws == "rubrix"
+
+    rb_client.__current_user__.workspaces = ["rubrix", "other-workspace"]
 
     rb_client.set_workspace("other-workspace")
     assert rb_client.active_workspace == "other-workspace"
