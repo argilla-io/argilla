@@ -105,7 +105,7 @@ $buttonSize: 34px;
     &:after {
       position: absolute;
       top: -12px;
-      right: 1.2em;
+      right: 1.3em;
       @include triangle(top, 12px, 12px, white);
     }
     a {
