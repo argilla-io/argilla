@@ -82,17 +82,13 @@ Server
 
 - ``ELASTICSEARCH``: URL of the connection endpoint of the Elasticsearch instance (Default: http://localhost:9200 ).
 
-- ``RUBRIX_ELASTICSEARCH_SSL_VERIFY``: If "False", disables SSL certificate verification when connection to the
-    Elasticsearch backend.
+- ``RUBRIX_ELASTICSEARCH_SSL_VERIFY``: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.
 
-- ``RUBRIX_NAMESPACE``: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same
-    Elasticsearch instance for several independent Rubrix instances.
+- ``RUBRIX_NAMESPACE``: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Rubrix instances.
 
-- ``RUBRIX_DEFAULT_ES_SEARCH_ANALYZER``: Default analyzer for textual fields excluding the metadata
-    (Default: "standard")
+- ``RUBRIX_DEFAULT_ES_SEARCH_ANALYZER``: Default analyzer for textual fields excluding the metadata (Default: "standard").
 
-- ``RUBRIX_EXACT_ES_SEARCH_ANALYZER``: Default analyzer for ``*.exact`` fields in textual information
-    (Default: "whitespace").
+- ``RUBRIX_EXACT_ES_SEARCH_ANALYZER``: Default analyzer for ``*.exact`` fields in textual information (Default: "whitespace").
 
 - ``METADATA_FIELDS_LIMIT``: Max number of fields in the metadata (Default: 50, max: 100).
 
@@ -105,9 +101,9 @@ Client
 
 - ``RUBRIX_API_URL``: The default API URL when calling :meth:`rubrix.init`.
 
-- ``RUBRIX_API_KEY``: The default API key when calling :meth:`rubrix.init``.
+- ``RUBRIX_API_KEY``: The default API key when calling :meth:`rubrix.init`.
 
-- ``RUBRIX_WORKSPACE``: The default workspace when calling :meth:`rubrix.init``.
+- ``RUBRIX_WORKSPACE``: The default workspace when calling :meth:`rubrix.init`.
 
 
 
