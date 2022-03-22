@@ -30,7 +30,7 @@
     </app-header>
     <error
       v-if="$fetchState.error"
-      link="/ws/datasets"
+      link="/datasets"
       :where="datasetName"
       :error="$fetchState.error"
     ></error>
@@ -53,9 +53,9 @@ export default {
     }),
     breadcrumbs() {
       return [
-        { link: { path: "/ws/datasets" }, name: "Datasets" },
+        { link: { path: "/datasets" }, name: "Datasets" },
         {
-          link: { path: `/ws/datasets?owner=${this.$route.query.owner}` },
+          link: { path: `/datasets?workspace=${this.$route.params.workspace}` },
           name: this.workspace,
         },
         {

@@ -20,7 +20,7 @@ function defaultWorkspace(user) {
 }
 
 function currentWorkspace(route) {
-  return route.query.owner;
+  return route.params.workspace;
 }
 
 

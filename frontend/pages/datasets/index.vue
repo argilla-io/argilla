@@ -22,7 +22,7 @@
       <div class="main">
         <app-header
           :copy-button="false"
-          :breadcrumbs="[{ link: `/ws/datasets`, name: 'Datasets' }]"
+          :breadcrumbs="[{ link: `/datasets`, name: 'Datasets' }]"
           :sticky="false"
         />
         <Error
@@ -45,7 +45,7 @@
               :query-search="querySearch"
               :global-actions="false"
               search-on="name"
-              filterFromRoute="owner"
+              :filter-from-route="{ query: 'workspace', field: 'owner' }"
               :visible-modal-id="datasetCompositeId"
               :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
@@ -154,7 +154,7 @@ export default {
       if (workspace === null || workspace === "null") {
         workspace = this.workspace;
       }
-      return `/ws/datasets/${dataset.name}?owner=${workspace}`;
+      return `/datasets/${workspace}/${dataset.name}`;
     },
 
     onActionClicked(action, dataset) {

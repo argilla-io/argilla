@@ -288,8 +288,13 @@ export default {
       default: undefined,
     },
     filterFromRoute: {
-      type: String,
-      default: undefined,
+      type: Object,
+      default: () => {
+        return {
+          query: undefined,
+          field: undefined,
+        };
+      },
     },
   },
   data() {
@@ -357,11 +362,14 @@ export default {
     this.sortedBy = this.sortedByField;
   },
   mounted() {
-    if (this.filterFromRoute && this.$route.query[this.filterFromRoute]) {
+    if (
+      this.filterFromRoute.query &&
+      this.$route.query[this.filterFromRoute.query]
+    ) {
       this.$set(
         this.filters,
-        this.filterFromRoute,
-        this.$route.query[this.filterFromRoute]
+        this.filterFromRoute.field,
+        this.$route.query[this.filterFromRoute.query]
       );
     }
     this.filteredResults.forEach((r) => {
