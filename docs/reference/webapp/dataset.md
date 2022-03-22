@@ -16,7 +16,7 @@ The page is composed of 4 major components:
 ![Search bar](../../_static/reference/webapp/search_bar.png)
 
 Rubrix's _search bar_ is a powerful tool that allows you to thoroughly explore your dataset, and quickly navigate through the records.
-You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
+You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Rubrix's [data models](../python/python_client.rst#module-rubrix.client.models).
 You can find more information about how to use the search bar in our detailed [search guide](search_records.md).
 
 ## Filters
