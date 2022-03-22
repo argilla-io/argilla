@@ -141,8 +141,11 @@ $buttonSize: 34px;
   margin-top: 1.5em;
   padding: 1em;
   background: #fcfcfc;
+<<<<<<< HEAD
   text-align: right;
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
+=======
+>>>>>>> f4bf8517... new user dropdown
 }
 </style>
