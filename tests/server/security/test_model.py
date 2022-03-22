@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.commons.errors import ForbiddenOperationError
+from rubrix.server.commons.errors import EntityNotFoundError
 from rubrix.server.security.model import User
 
 
@@ -25,7 +25,9 @@ def test_username_validator(wrong_name):
         User(username=wrong_name)
 
 
-@pytest.mark.parametrize("wrong_workspace", ["work space", "work/space", "work.space"])
+@pytest.mark.parametrize(
+    "wrong_workspace", ["work space", "work/space", "work.space", "_", "-"]
+)
 def test_workspace_validator(wrong_workspace):
     with pytest.raises(ValidationError):
         User(username="username", workspaces=[wrong_workspace])
@@ -33,12 +35,12 @@ def test_workspace_validator(wrong_workspace):
 
 def test_check_non_provided_workspaces():
     user = User(username="test")
-    assert not user.check_workspaces([])  # super-user
+    assert user.check_workspaces([]) == ["test"]
 
     user.workspaces = ["ws"]
-    assert user.check_workspaces([]) == [user.default_workspace]
+    assert user.check_workspaces([]) == [user.default_workspace] + user.workspaces
 
-    with pytest.raises(ForbiddenOperationError, match="not-found"):
+    with pytest.raises(EntityNotFoundError, match="not-found"):
         assert user.check_workspaces(["ws", "not-found"])
 
 
@@ -50,14 +52,14 @@ def test_check_user_workspaces():
 
     assert user.check_workspace(a_ws) == a_ws
     assert user.check_workspaces(expected_workspaces) == expected_workspaces
-    with pytest.raises(ForbiddenOperationError):
+    with pytest.raises(EntityNotFoundError):
         assert user.check_workspaces(["not-found-ws"])
 
 
 def test_default_workspace():
 
     user = User(username="admin")
-    assert user.default_workspace is None
+    assert user.default_workspace == "admin"
 
     test_user = User(username="test", workspaces=["ws"])
     assert test_user.default_workspace == test_user.username
@@ -65,17 +67,24 @@ def test_default_workspace():
 
 def test_workspace_for_superuser():
     user = User(username="admin")
-    assert user.default_workspace is None
+    assert user.default_workspace == "admin"
 
-    assert user.check_workspace("some") == "some"
+    with pytest.raises(EntityNotFoundError):
+        assert user.check_workspace("some") == "some"
+
+    assert user.check_workspace(None) == "admin"
+    assert user.check_workspace("") == ""
+
+    user.workspaces = ["some"]
     assert user.check_workspaces(["some"]) == ["some"]
+
 
 @pytest.mark.parametrize(
     "workspaces, expected",
     [
-        (None, []),
+        (None, ["user"]),
         ([], ["user"]),
-        (["a"], ["user"]),
+        (["a"], ["user", "a"]),
     ],
 )
 def test_check_workspaces_with_default(workspaces, expected):

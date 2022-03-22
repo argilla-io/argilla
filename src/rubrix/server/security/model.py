@@ -17,17 +17,16 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from rubrix.server.commons.errors import ForbiddenOperationError
+from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperationError
 
-
-_ID_REGEX = re.compile(r"^[a-zA-Z0-9_\-]*$")
-_EMAIL_REGEX_PATTERN = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
+WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
+_EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 
 
 class User(BaseModel):
     """Base user model"""
 
-    username: str = Field(regex=_ID_REGEX.pattern)
+    username: str = Field(regex=WORKSPACE_NAME_PATTERN.pattern)
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
@@ -35,15 +34,18 @@ class User(BaseModel):
 
     @validator("workspaces", each_item=True)
     def check_workspace_pattern(cls, workspace: str):
-        assert _ID_REGEX.match(
-            workspace
-        ), f"Wrong workspace format. Workspace must match pattern {_ID_REGEX.pattern}"
+        """Check workspace pattern"""
+        if not workspace:
+            return workspace
+        assert WORKSPACE_NAME_PATTERN.match(workspace), (
+            "Wrong workspace format. "
+            f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+        )
         return workspace
 
     @property
     def default_workspace(self) -> Optional[str]:
-        if self.workspaces is None:
-            return None
+        """Get the default user workspace"""
         return self.username
 
     def check_workspaces(self, workspaces: List[str]) -> List[str]:
@@ -61,15 +63,13 @@ class User(BaseModel):
             Original workspace names if user belongs to them
 
         """
-        workspaces = [w for w in workspaces or [] if w]
+        workspaces = [w for w in workspaces or [] if w is not None]
         if workspaces:
             for workspace in workspaces:
                 self.check_workspace(workspace)
             return workspaces
 
-        if self.workspaces is None:  # Super user
-            return []
-        return [self.default_workspace]
+        return [self.default_workspace] + (self.workspaces or [])
 
     def check_workspace(self, workspace: str) -> str:
         """
@@ -85,13 +85,17 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if not workspace or workspace == self.default_workspace:
+        if workspace is None or workspace == self.default_workspace:
             return self.default_workspace
-        if self.workspaces is None:
+        if not workspace and self.is_superuser():
             return workspace
-        if workspace not in self.workspaces:
-            raise ForbiddenOperationError(f"Missing or protected workspace {workspace}")
+        if workspace not in (self.workspaces or []):
+            raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
+
+    def is_superuser(self) -> bool:
+        """Check if a user is superuser"""
+        return self.workspaces is None or "" in self.workspaces
 
 
 class Token(BaseModel):

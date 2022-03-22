@@ -27,9 +27,9 @@
           {{ user.username }}<span>Private Workspace</span>
         </p>
       </a>
-      <p v-if="user.workspaces">Team workspaces</p>
+      <p v-if="userWorkspaces">Team workspaces</p>
       <a
-        v-for="workspace in user.workspaces"
+        v-for="workspace in userWorkspaces"
         :key="workspace"
         href="#"
         class="user__workspace"
@@ -53,7 +53,11 @@
 
 <script>
 import { mapActions } from "vuex";
-import { setWorkspace, currentWorkspace } from "@/models/Workspace";
+import {
+  setWorkspace,
+  currentWorkspace,
+  NO_WORKSPACE,
+} from "@/models/Workspace";
 export default {
   data: () => {
     return {
@@ -64,6 +68,16 @@ export default {
   computed: {
     user() {
       return this.$auth.user;
+    },
+    userWorkspaces() {
+      return (this.user.workspaces || [])
+        .map((ws) => {
+          if (ws === "") {
+            return NO_WORKSPACE;
+          }
+          return ws;
+        })
+        .filter((ws) => ws !== this.user.username);
     },
     currentWorkspace() {
       return currentWorkspace(this.$route);

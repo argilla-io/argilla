@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from fastapi import Header, Query
 
 from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
+from rubrix.server.security.model import WORKSPACE_NAME_PATTERN
 
 
 @dataclass
@@ -20,4 +21,10 @@ class CommonTaskQueryParams:
     @property
     def workspace(self) -> str:
         """Return read workspace. Query param prior to header param"""
-        return self.__workspace_param__ or self.__workspace_header__
+        workspace = self.__workspace_param__ or self.__workspace_header__
+        if workspace:
+            assert WORKSPACE_NAME_PATTERN.match(workspace), (
+                "Wrong workspace format. "
+                f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+            )
+        return workspace

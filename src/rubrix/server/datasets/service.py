@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, TypeVar, cast
 
 from fastapi import Depends
 
+from rubrix.server.commons import es_helpers
 from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -65,26 +66,39 @@ class DatasetsService:
         owner = user.check_workspace(workspace)
 
         if task is None:
-            found_ds = self.__dao__.find_by_name(name=name, owner=owner)
+            found_ds = self.__find_by_name_with_superuser_fallback__(
+                user, name=name, owner=owner
+            )
             if found_ds:
                 task = found_ds.task
 
-        found_ds = self.__dao__.find_by_name(
-            name=name,
-            owner=owner,
-            task=task,
+        found_ds = self.__find_by_name_with_superuser_fallback__(
+            user, name=name, owner=owner, task=task
         )
 
         if found_ds is None:
             raise EntityNotFoundError(name=name, type=Dataset)
         if found_ds.owner and owner and found_ds.owner != owner:
             raise ForbiddenOperationError()
+
         return cast(Dataset, found_ds)
+
+    def __find_by_name_with_superuser_fallback__(
+        self,
+        user: User,
+        name: str,
+        owner: Optional[str],
+        task: Optional[str] = None,
+    ):
+        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task)
+        if not found_ds and user.is_superuser():
+            found_ds = self.__dao__.find_by_name(name=name, owner=None, task=task)
+        return found_ds
 
     def delete(self, user: User, dataset: Dataset):
         user.check_workspace(dataset.owner)
-        found = self.__dao__.find_by_name(
-            name=dataset.name, owner=dataset.owner, task=dataset.task
+        found = self.__find_by_name_with_superuser_fallback__(
+            user=user, name=dataset.name, owner=dataset.owner, task=dataset.task
         )
         if found:
             self.__dao__.delete_dataset(dataset)
@@ -108,14 +122,20 @@ class DatasetsService:
         return self.__dao__.update_dataset(updated)
 
     def list(
-        self, user: User, workspaces: List[str], task: Optional[TaskType] = None
+        self,
+        user: User,
+        workspaces: Optional[List[str]],
+        task: Optional[TaskType] = None,
     ) -> List[Dataset]:
         owners = user.check_workspaces(workspaces)
 
         datasets = []
         for task_config in TaskFactory.get_all_configs():
             datasets.extend(
-                self.__dao__.list_datasets(owner_list=owners, task=task_config.task)
+                self.__dao__.list_datasets(
+                    owner_list=owners,
+                    task=task_config.task,
+                )
             )
         return datasets
 
@@ -173,3 +193,10 @@ class DatasetsService:
         )
 
         return copy_dataset
+
+    def all_workspaces(self) -> List[str]:
+        """Retrieve all dataset workspaces"""
+
+        workspaces = self.__dao__.get_all_workspaces()
+        # include the non-workspace workspace?
+        return workspaces
