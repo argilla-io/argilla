@@ -45,7 +45,7 @@ export default {
       getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
     }),
     firstChar(name) {
-      return name.charAt(0);
+      return name.slice(0,2);
     },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
@@ -62,7 +62,7 @@ export default {
 </script>
 
 <style scope lang="scss">
-$buttonSize: 30px;
+$buttonSize: 34px;
 %circle {
   height: $buttonSize;
   width: $buttonSize;
@@ -86,7 +86,7 @@ $buttonSize: 30px;
     color: $primary-color;
     will-change: auto;
     &:hover {
-      transform: scale3d(1.1, 1.1, 1.1) translateZ(0);
+      transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
       transition: all 0.2s ease-in-out;
     }
   }
