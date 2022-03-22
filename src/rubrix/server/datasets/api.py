@@ -53,11 +53,11 @@ def list_datasets(
 
     Returns
     -------
-        A list of datasets visibles by current user
+        A list of datasets visible by current user
     """
     return service.list(
         user=current_user,
-        workspaces=[ds_params.workspace],
+        workspaces=[ds_params.workspace] if ds_params.workspace is not None else None,
     )
 
 

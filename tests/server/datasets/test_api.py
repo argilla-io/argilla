@@ -93,7 +93,7 @@ def test_list_datasets(mocked_client):
 
     datasets = [Dataset.parse_obj(item) for item in response.json()]
     assert len(datasets) > 0
-    assert dataset in [ds.id for ds in datasets]
+    assert dataset in [ds.name for ds in datasets]
 
 
 def test_update_dataset(mocked_client):

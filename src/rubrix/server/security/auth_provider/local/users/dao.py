@@ -13,9 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Dict, Iterable, Optional
+
 import yaml
+
 from rubrix.server.security.auth_provider.local.settings import settings
-from typing import Dict, Optional
 
 from .model import UserInDB
 
@@ -48,6 +50,10 @@ class UsersDAO:
         for user in self.__users__.values():
             if api_key == user.api_key:
                 return user
+
+    def all_users(self) -> Iterable[UserInDB]:
+        for user in self.__users__.values():
+            yield user
 
 
 _instance: Optional[UsersDAO] = None

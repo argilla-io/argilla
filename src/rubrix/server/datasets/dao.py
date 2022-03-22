@@ -30,6 +30,8 @@ from .model import DatasetDB
 
 BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
 
+NO_WORKSPACE = ""
+
 
 class DatasetsDAO:
     """Datasets DAO"""
@@ -97,9 +99,24 @@ class DatasetsDAO:
         filters = []
         dataset_type = DatasetDB
         if owner_list:
-            filters.append({"terms": {"owner.keyword": owner_list}})
+            owners_filter = es_helpers.filters.terms_filter("owner.keyword", owner_list)
+            if NO_WORKSPACE in owner_list:
+                filters.append(
+                    es_helpers.filters.boolean_filter(
+                        minimum_should_match=1,  # OR Condition
+                        should_filters=[
+                            es_helpers.filters.boolean_filter(
+                                must_not_query=es_helpers.filters.exists_field("owner")
+                            ),
+                            owners_filter,
+                        ],
+                    )
+                )
+            else:
+                filters.append(owners_filter)
+
         if task:
-            filters.append({"term": {"task.keyword": task}})
+            filters.append(es_helpers.filters.term_filter("task.keyword", task))
             dataset_type = TaskFactory.get_task_dataset(task)
 
         docs = self._es.list_documents(
@@ -301,3 +318,17 @@ class DatasetsDAO:
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open_index(dataset_records_index(dataset.id))
+
+    def get_all_workspaces(self) -> List[str]:
+        """Get all datasets (Only for super users)"""
+
+        workspaces_dict = self._es.aggregate(
+            index=DATASETS_INDEX_NAME,
+            aggregation=es_helpers.aggregations.terms_aggregation(
+                "owner.keyword",
+                missing=NO_WORKSPACE,
+                size=500,  # TODO: A max number of workspaces env var could be leveraged by this.
+            ),
+        )
+
+        return [k for k in workspaces_dict]

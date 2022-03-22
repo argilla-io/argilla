@@ -23,6 +23,8 @@ from opensearchpy.helpers import scan as es_scan
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.errors import InvalidTextSearchError
 
+from . import es_helpers
+
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -545,6 +547,17 @@ class ElasticsearchWrapper(LoggingMixin):
             return self.__client__.info()
         except OpenSearchException as ex:
             return {"error": ex}
+
+    def aggregate(self, index: str, aggregation: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply an aggregation over the index returning ONLY the agg results"""
+        aggregation_name = "aggregation"
+        results = self.search(
+            index=index, size=0, query={"aggs": {aggregation_name: aggregation}}
+        )
+
+        return es_helpers.parse_aggregations(results["aggregations"]).get(
+            aggregation_name
+        )
 
 
 _instance = None  # The singleton instance

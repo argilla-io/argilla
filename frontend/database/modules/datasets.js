@@ -17,7 +17,7 @@
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { currentWorkspace, defaultWorkspace } from "@/models/Workspace";
+import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 
 const isObject = (obj) => obj && typeof obj === "object";
@@ -526,9 +526,6 @@ const actions = {
 
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
-    if (workspace !== defaultWorkspace($nuxt.$auth.user)) {
-      url += `?workspace=${workspace}`;
-    }
     const deleteResults = await ObservationDataset.api().delete(url, {
       delete: [workspace, name],
     });
@@ -547,9 +544,8 @@ const actions = {
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
       dataTransformer: ({ data }) => {
-        const owner = defaultWorkspace($nuxt.$auth.user);
         return data.map((datasource) => {
-          datasource.owner = datasource.owner || owner;
+          datasource.owner = datasource.owner || NO_WORKSPACE;
           return datasource;
         });
       },

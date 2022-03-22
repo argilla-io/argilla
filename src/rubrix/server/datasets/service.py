@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, TypeVar, cast
 
 from fastapi import Depends
 
+from rubrix.server.commons import es_helpers
 from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -108,14 +109,20 @@ class DatasetsService:
         return self.__dao__.update_dataset(updated)
 
     def list(
-        self, user: User, workspaces: List[str], task: Optional[TaskType] = None
+        self,
+        user: User,
+        workspaces: Optional[List[str]],
+        task: Optional[TaskType] = None,
     ) -> List[Dataset]:
         owners = user.check_workspaces(workspaces)
 
         datasets = []
         for task_config in TaskFactory.get_all_configs():
             datasets.extend(
-                self.__dao__.list_datasets(owner_list=owners, task=task_config.task)
+                self.__dao__.list_datasets(
+                    owner_list=owners,
+                    task=task_config.task,
+                )
             )
         return datasets
 
@@ -173,3 +180,10 @@ class DatasetsService:
         )
 
         return copy_dataset
+
+    def all_workspaces(self) -> List[str]:
+        """Retrieve all dataset workspaces"""
+
+        workspaces = self.__dao__.get_all_workspaces()
+        # include the non-workspace workspace?
+        return workspaces
