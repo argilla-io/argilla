@@ -619,9 +619,8 @@ class TestDatasetForTokenClassification:
             dataset_ds, tokens="empty_tokens"
         )
 
-        assert len(caplog.record_tuples) == 1
-        assert caplog.record_tuples[0][1] == 30
-        assert caplog.record_tuples[0][2] == "Ignoring row with no tokens."
+        assert caplog.record_tuples[1][1] == 30
+        assert caplog.record_tuples[1][2] == "Ignoring row with no tokens."
 
         assert len(dataset_rb) == 1
         assert dataset_rb[0].tokens == ["mock"]
