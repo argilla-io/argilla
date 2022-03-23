@@ -475,14 +475,21 @@ class DatasetForTextClassification(DatasetBase):
         labels = dataset.features[field]
         if isinstance(labels, datasets.Sequence):
             labels = labels.feature
-        int2str = (
-            labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
-        )
 
-        def parse_annotation(example):
-            return {"annotation": int2str(example["annotation"])}
+        dataset = dataset.rename_column(field, "annotation")
 
-        return dataset.rename_column(field, "annotation").map(parse_annotation)
+        if not isinstance(labels, datasets.ClassLabel):
+            return dataset
+
+        def int2str_for_annotation(example):
+            try:
+                return {"annotation": labels.int2str(example["annotation"])}
+            # integers don't have to map to the names ...
+            # it seems that sometimes -1 is used to denote ... something ...
+            except ValueError:
+                return {"annotation": example["annotation"]}
+
+        return dataset.map(int2str_for_annotation)
 
     @classmethod
     def _prepare_hf_dataset(
