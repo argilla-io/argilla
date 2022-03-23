@@ -51,7 +51,6 @@
 
 <script>
 import { mapActions } from "vuex";
-import { indexOf, length } from "stringz";
 
 export default {
   props: {
@@ -64,6 +63,11 @@ export default {
     },
     record: {
       type: Object,
+      required: true,
+    },
+
+    visualTokens: {
+      type: Array,
       required: true,
     },
     origin: {
@@ -80,30 +84,6 @@ export default {
     };
   },
   computed: {
-    visualTokens() {
-      const recordHasEmoji = this.record.text.containsEmoji;
-      const { visualTokens } = this.record.tokens.reduce(
-        ({ visualTokens, startPosition }, token) => {
-          const start = recordHasEmoji
-            ? indexOf(this.record.text, token, startPosition)
-            : this.record.text.indexOf(token, startPosition);
-          const end = start + (recordHasEmoji ? length(token) : token.length);
-          const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
-          return {
-            visualTokens: [
-              ...visualTokens,
-              { start, end, text: token, hasSpaceAfter: hasSpaceAfter },
-            ],
-            startPosition: end,
-          };
-        },
-        {
-          visualTokens: [],
-          startPosition: 0,
-        }
-      );
-      return Object.freeze(visualTokens);
-    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {

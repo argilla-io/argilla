@@ -21,11 +21,13 @@
       <record-token-classification-annotation
         :dataset="dataset"
         :record="record"
+        :visualTokens="visualTokens"
         v-if="annotationEnabled"
       />
       <record-token-classification-exploration
         :dataset="dataset"
         :record="record"
+        :visualTokens="visualTokens"
         v-else
       />
     </div>
@@ -33,6 +35,8 @@
 </template>
 
 <script>
+import { indexOf, length } from "stringz";
+
 export default {
   props: {
     dataset: {
@@ -47,6 +51,43 @@ export default {
   computed: {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
+    },
+    visualTokens() {
+      // This is used for both, annotation ad exploration components
+      const recordHasEmoji = this.record.text.containsEmoji;
+      const searchKeywordsSpans = this.$keywordsSpans(
+        this.record.text,
+        this.record.search_keywords
+      );
+      const { visualTokens } = this.record.tokens.reduce(
+        ({ visualTokens, startPosition }, token) => {
+          const start = recordHasEmoji
+            ? indexOf(this.record.text, token, startPosition)
+            : this.record.text.indexOf(token, startPosition);
+          const end = start + (recordHasEmoji ? length(token) : token.length);
+          const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
+
+          let highlighted = false;
+          for (let highlight of searchKeywordsSpans) {
+            if (highlight.start === start || highlight.end === end) {
+              highlighted = true;
+              break;
+            }
+          }
+          return {
+            visualTokens: [
+              ...visualTokens,
+              { start, end, highlighted, text: token, hasSpaceAfter },
+            ],
+            startPosition: end,
+          };
+        },
+        {
+          visualTokens: [],
+          startPosition: 0,
+        }
+      );
+      return visualTokens;
     },
   },
 };
