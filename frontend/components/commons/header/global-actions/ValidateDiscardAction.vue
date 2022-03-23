@@ -130,13 +130,13 @@ export default {
       min-width: 170px;
     }
     ::v-deep .dropdown__content {
-      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
+      box-shadow: $shadow;
+      border-radius: $border-radius;
       border: none;
     }
   }
   &__button {
-    border-radius: 3px;
+    border-radius: $border-radius;
     height: 33px;
     border: none;
     min-width: 80px;

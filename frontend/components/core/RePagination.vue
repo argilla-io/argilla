@@ -253,7 +253,7 @@ $pagination-size: 30px;
     padding: 0 10px;
     transition: color 200ms ease-in-out;
     outline: none;
-    border-radius: 3px;
+    border-radius: $border-radius;
     svg {
       margin-top: 1px;
     }
@@ -335,8 +335,8 @@ $pagination-size: 30px;
       bottom: 3em;
       left: 0;
       right: 0;
-      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
+      box-shadow: $shadow;
+      border-radius: $border-radius;
       margin: 2px;
       a {
         display: block;
@@ -354,6 +354,7 @@ $pagination-size: 30px;
       text-decoration: none;
       background: $lighter-color;
       padding: 0.5em 1em;
+      border-radius: $border-radius;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;

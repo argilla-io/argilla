@@ -147,12 +147,12 @@ $buttonSize: 30px;
     top: 3em;
     right: 0;
     background: $lighter-color;
-    border-radius: 3px;
+    border-radius: $border-radius;
     @include font-size(12px);
     font-weight: 600;
     color: palette(grey, medium);
     padding: 1.2em 1.2em 0.8em 1.2em;
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: $shadow;
     min-width: 200px;
     a {
       text-decoration: none;
@@ -174,7 +174,7 @@ $buttonSize: 30px;
     padding: 0.7em;
     margin: 0 -0.5em 0 -0.5em;
     transition: background-color 0.3s ease-in-out;
-    border-radius: 3px;
+    border-radius: $border-radius;
     &:hover {
       background: #f5f5f5;
       transition: background-color 0.3s ease-in-out;
