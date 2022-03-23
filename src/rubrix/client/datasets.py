@@ -317,7 +317,9 @@ class DatasetBase:
         def parse_metadata_from_dataset(example):
             return {"metadata": {k: example[k] for k in fields}}
 
-        return dataset.map(parse_metadata_from_dataset).remove_columns(fields)
+        return dataset.map(
+            parse_metadata_from_dataset, desc="Parsing metadata"
+        ).remove_columns(fields)
 
     @classmethod
     def _parse_annotation_field(
@@ -489,7 +491,7 @@ class DatasetForTextClassification(DatasetBase):
             except ValueError:
                 return {"annotation": None}
 
-        return dataset.map(int2str_for_annotation)
+        return dataset.map(int2str_for_annotation, desc="Parsing annotation")
 
     @classmethod
     def _prepare_hf_dataset(
@@ -549,7 +551,10 @@ class DatasetForTextClassification(DatasetBase):
         if isinstance(fields, str):
             fields = [fields]
 
-        return dataset.map(lambda example: {"inputs": {k: example[k] for k in fields}})
+        return dataset.map(
+            lambda example: {"inputs": {k: example[k] for k in fields}},
+            desc="Parsing inputs",
+        )
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -890,7 +895,7 @@ class DatasetForTokenClassification(DatasetBase):
                 data["text"] = " ".join(tokens)
             return data
 
-        return dataset.map(parse_tokens_from_example)
+        return dataset.map(parse_tokens_from_example, desc="Parsing tokens")
 
     @classmethod
     def _parse_tags_field(
@@ -908,7 +913,7 @@ class DatasetForTokenClassification(DatasetBase):
         def parse_tags_from_example(example):
             return {"tags": [int2str(t) for t in example[field] or []]}
 
-        return dataset.map(parse_tags_from_example)
+        return dataset.map(parse_tags_from_example, desc="Parsing tags")
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
