@@ -395,6 +395,22 @@ class TestDatasetForTextClassification:
             "metrics",
         ]
 
+    def test_from_datasets_with_annotation_arg(self):
+        dataset_ds = datasets.Dataset.from_dict(
+            {"text": ["mock", "mock2"], "label": [0, -1]},
+            features=datasets.Features(
+                {
+                    "text": datasets.Value("string"),
+                    "label": datasets.ClassLabel(names=["HAM"]),
+                }
+            ),
+        )
+        dataset_rb = rb.DatasetForTextClassification.from_datasets(
+            dataset_ds, annotation="label"
+        )
+
+        assert [rec.annotation for rec in dataset_rb] == ["HAM", None]
+
 
 class TestDatasetForTokenClassification:
     def test_init(self, tokenclassification_records):
@@ -597,22 +613,18 @@ class TestDatasetForTokenClassification:
             "metrics",
         ]
 
+    def test_from_datasets_with_empty_tokens(self, caplog):
+        dataset_ds = datasets.Dataset.from_dict({"empty_tokens": [["mock"], []]})
+        dataset_rb = rb.DatasetForTokenClassification.from_datasets(
+            dataset_ds, tokens="empty_tokens"
+        )
 
-def test_from_datasets_with_annotation_arg():
-    dataset_ds = datasets.Dataset.from_dict(
-        {"text": ["mock", "mock2"], "label": [0, -1]},
-        features=datasets.Features(
-            {
-                "text": datasets.Value("string"),
-                "label": datasets.ClassLabel(names=["HAM"]),
-            }
-        ),
-    )
-    dataset_rb = rb.DatasetForTextClassification.from_datasets(
-        dataset_ds, annotation="label"
-    )
+        assert len(caplog.record_tuples) == 1
+        assert caplog.record_tuples[0][1] == 30
+        assert caplog.record_tuples[0][2] == "Ignoring row with no tokens."
 
-    assert [rec.annotation for rec in dataset_rb] == ["HAM", None]
+        assert len(dataset_rb) == 1
+        assert dataset_rb[0].tokens == ["mock"]
 
 
 class TestDatasetForText2Text:
