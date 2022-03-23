@@ -45,7 +45,7 @@ export default {
       getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
     }),
     firstChar(name) {
-      return name.slice(0,2);
+      return name.slice(0, 2);
     },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
@@ -100,7 +100,7 @@ $buttonSize: 34px;
     @include font-size(14px);
     font-weight: 400;
     color: palette(grey, medium);
-    box-shadow: 0 5px 12px 0 rgba(204, 204, 204, 0.5);
+    box-shadow: $shadow;
     min-width: 290px;
     &:after {
       position: absolute;

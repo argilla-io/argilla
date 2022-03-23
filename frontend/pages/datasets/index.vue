@@ -78,7 +78,6 @@ export default {
         type: "text",
         filtrable: "true",
       },
-      { name: "Tags", field: "tags", class: "text", type: "object" },
       {
         name: "Task",
         field: "task",
@@ -86,6 +85,7 @@ export default {
         type: "task",
         filtrable: "true",
       },
+      { name: "Tags", field: "tags", class: "text", type: "object" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       {
         name: "Updated at",

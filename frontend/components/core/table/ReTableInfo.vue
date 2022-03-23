@@ -122,8 +122,16 @@
                       </p>
                     </span>
                     <span v-else-if="column.type === 'array'">
-                      <p v-for="(arrayItem, index) in itemValue(item, column)" :key="index">
-                        {{arrayItem}}{{index + 1 === itemValue(item, column).length ? '' : ','}}
+                      <p
+                        v-for="(arrayItem, index) in itemValue(item, column)"
+                        :key="index"
+                      >
+                        {{ arrayItem
+                        }}{{
+                          index + 1 === itemValue(item, column).length
+                            ? ""
+                            : ","
+                        }}
                       </p>
                     </span>
                     <span v-else-if="column.type === 'object'">

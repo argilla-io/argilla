@@ -99,7 +99,15 @@ export default {
       return filtered;
     },
     datasetsCounter(option) {
-      return this.data.filter(
+      const keys = Object.keys(this.filters).filter(
+        (k) => k !== this.column.field
+      );
+      const filteredData = this.data.filter((dataset) => {
+        return keys.every((key) => {
+          return this.filters[key].includes(dataset[key]);
+        });
+      });
+      return filteredData.filter(
         (dataset) => dataset[this.column.field] === option
       ).length;
     },
@@ -111,15 +119,15 @@ export default {
   background: $bg;
   position: absolute;
   top: 50px;
-  left: 0;
+  left: -1em;
   margin-top: 0;
   padding: 10px 20px;
   z-index: 3;
   transform: translate(0);
   right: auto;
   min-width: 270px;
-  border-radius: 3px;
-  box-shadow: 0 5px 12px 0 rgba(204, 204, 204, 0.7);
+  border-radius: $border-radius;
+  box-shadow: $shadow;
   ul {
     list-style: none;
     max-height: 220px;
@@ -177,14 +185,19 @@ button {
   color: $font-secondary;
   @include font-size(14px);
   font-family: $sff;
+  &:hover,
   &.active {
     background: $bg;
     min-height: 40px;
     padding: 0 1em;
-    border-radius: 3px;
+    margin: 0 -1em;
+    border-radius: $border-radius;
     color: $primary-color;
-    ::v-deep svg * {
-      fill: $primary-color !important;
+    ::v-deep svg {
+      margin-right: 0;
+      & > * {
+        fill: $primary-color !important;
+      }
     }
   }
   .svg-icon {
