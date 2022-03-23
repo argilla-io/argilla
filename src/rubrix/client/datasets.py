@@ -880,6 +880,9 @@ class DatasetForTokenClassification(DatasetBase):
                 row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
             if row.get("annotation"):
                 row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
+            if not row["tokens"]:
+                _LOGGER.warning(f"Ignoring row with no tokens.")
+                continue
             records.append(TokenClassificationRecord.parse_obj(row))
         return cls(records)
 
