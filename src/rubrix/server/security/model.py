@@ -95,7 +95,7 @@ class User(BaseModel):
 
     def is_superuser(self) -> bool:
         """Check if a user is superuser"""
-        return self.workspaces is None
+        return self.workspaces is None or "" in self.workspaces
 
 
 class Token(BaseModel):
