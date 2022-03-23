@@ -92,7 +92,7 @@ $buttonSize: 34px;
   }
   &__content {
     position: absolute;
-    top: 3.5em;
+    top: 3.8em;
     right: -1em;
     padding-top: 1.5em;
     background: $lighter-color;
@@ -101,7 +101,7 @@ $buttonSize: 34px;
     font-weight: 400;
     color: palette(grey, medium);
     box-shadow: $shadow;
-    min-width: 290px;
+    min-width: 300px;
     &:after {
       position: absolute;
       top: -12px;
