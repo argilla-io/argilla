@@ -66,26 +66,39 @@ class DatasetsService:
         owner = user.check_workspace(workspace)
 
         if task is None:
-            found_ds = self.__dao__.find_by_name(name=name, owner=owner)
+            found_ds = self.__find_by_name_with_superuser_fallback__(
+                user, name=name, owner=owner
+            )
             if found_ds:
                 task = found_ds.task
 
-        found_ds = self.__dao__.find_by_name(
-            name=name,
-            owner=owner,
-            task=task,
+        found_ds = self.__find_by_name_with_superuser_fallback__(
+            user, name=name, owner=owner, task=task
         )
 
         if found_ds is None:
             raise EntityNotFoundError(name=name, type=Dataset)
         if found_ds.owner and owner and found_ds.owner != owner:
             raise ForbiddenOperationError()
+
         return cast(Dataset, found_ds)
+
+    def __find_by_name_with_superuser_fallback__(
+        self,
+        user: User,
+        name: str,
+        owner: Optional[str],
+        task: Optional[str] = None,
+    ):
+        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task)
+        if not found_ds and user.is_superuser():
+            found_ds = self.__dao__.find_by_name(name=name, owner=None, task=task)
+        return found_ds
 
     def delete(self, user: User, dataset: Dataset):
         user.check_workspace(dataset.owner)
-        found = self.__dao__.find_by_name(
-            name=dataset.name, owner=dataset.owner, task=dataset.task
+        found = self.__find_by_name_with_superuser_fallback__(
+            user=user, name=dataset.name, owner=dataset.owner, task=dataset.task
         )
         if found:
             self.__dao__.delete_dataset(dataset)

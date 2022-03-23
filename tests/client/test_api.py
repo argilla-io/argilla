@@ -611,3 +611,30 @@ def test_load_sort(mocked_client):
     assert list(df.id) == [1, 2, 11]
     df = api.load(name=dataset, ids=["1str", "2str", "11str"])
     assert list(df.id) == ["11str", "1str", "2str"]
+
+
+def test_load_workspace_from_different_workspace(mocked_client):
+    records = [
+        rb.TextClassificationRecord(
+            inputs="test text",
+            id=i,
+        )
+        for i in ["1str", 1, 2, 11, "2str", "11str"]
+    ]
+
+    dataset = "test_load_workspace_from_different_workspace"
+    workspace = api.get_workspace()
+    try:
+        api.set_workspace("")  # empty workspace
+        api.delete(dataset)
+        api.log(records, name=dataset)
+
+        # check sorting policies
+        df = api.load(name=dataset)
+        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
+
+        api.set_workspace(workspace)
+        df = api.load(name=dataset)
+        assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
+    finally:
+        api.set_workspace(workspace)
