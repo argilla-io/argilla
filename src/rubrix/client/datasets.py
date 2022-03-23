@@ -485,9 +485,9 @@ class DatasetForTextClassification(DatasetBase):
             try:
                 return {"annotation": labels.int2str(example["annotation"])}
             # integers don't have to map to the names ...
-            # it seems that sometimes -1 is used to denote ... something ...
+            # it seems that sometimes -1 is used to denote "no label"
             except ValueError:
-                return {"annotation": example["annotation"]}
+                return {"annotation": None}
 
         return dataset.map(int2str_for_annotation)
 
