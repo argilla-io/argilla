@@ -298,13 +298,13 @@ class DatasetBase:
     def _parse_id_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "id")
+        return dataset.rename_column(field, "id").remove_columns(field)
 
     @classmethod
     def _parse_text_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "text")
+        return dataset.rename_column(field, "text").remove_columns(field)
 
     @classmethod
     def _parse_metadata_field(
@@ -325,7 +325,7 @@ class DatasetBase:
     def _parse_annotation_field(
         cls, dataset: "datasets.Dataset", field: str
     ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "annotation")
+        return dataset.rename_column(field, "annotation").remove_columns(field)
 
 
 def _prepend_docstring(record_type: Type[Record]):
@@ -478,7 +478,7 @@ class DatasetForTextClassification(DatasetBase):
         if isinstance(labels, datasets.Sequence):
             labels = labels.feature
 
-        dataset = dataset.rename_column(field, "annotation")
+        dataset = dataset.rename_column(field, "annotation").remove_columns(field)
 
         if not isinstance(labels, datasets.ClassLabel):
             return dataset
@@ -554,7 +554,7 @@ class DatasetForTextClassification(DatasetBase):
         return dataset.map(
             lambda example: {"inputs": {k: example[k] for k in fields}},
             desc="Parsing inputs",
-        )
+        ).remove_columns(fields)
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -898,7 +898,9 @@ class DatasetForTokenClassification(DatasetBase):
                 data["text"] = " ".join(tokens)
             return data
 
-        return dataset.map(parse_tokens_from_example, desc="Parsing tokens")
+        return dataset.map(
+            parse_tokens_from_example, desc="Parsing tokens"
+        ).remove_columns(field)
 
     @classmethod
     def _parse_tags_field(
@@ -916,7 +918,9 @@ class DatasetForTokenClassification(DatasetBase):
         def parse_tags_from_example(example):
             return {"tags": [int2str(t) for t in example[field] or []]}
 
-        return dataset.map(parse_tags_from_example, desc="Parsing tags")
+        return dataset.map(parse_tags_from_example, desc="Parsing tags").remove_columns(
+            field
+        )
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
