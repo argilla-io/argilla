@@ -13,7 +13,7 @@
       <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
       more information.
     </p>
-    <re-code :code="generateCodeSnippet(workspace)"></re-code>
+    <re-code :code="generateCodeSnippet()"></re-code>
   </div>
 </template>
 
@@ -28,14 +28,11 @@ export default {
   },
 
   methods: {
-    generateCodeSnippet(ws) {
+    generateCodeSnippet() {
       return `import rubrix as rb
 
-# If you are using the default installation you can skip this line
-rb.set_workspace("${ws}")
-
 rb.log(
-  rb.TextClassificationRecord(inputs="my first rubrix example"), 
+  rb.TextClassificationRecord(text="my first rubrix example"),
   name='example-dataset'
 )`;
     },
