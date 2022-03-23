@@ -77,7 +77,7 @@ class BaseDatasetDB(CreationDatasetRequest):
     """
 
     task: TaskType
-    owner: str = None
+    owner: Optional[str] = None
     created_at: datetime = None
     last_updated: datetime = None
 
