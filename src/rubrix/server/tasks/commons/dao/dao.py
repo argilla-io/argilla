@@ -213,7 +213,7 @@ class DatasetRecordsDAO:
             "query": search.query or {"match_all": {}},
             "sort": search.sort or [{"_id": {"order": "asc"}}],
             "aggs": aggregation_requests,
-            "highlight": self.__configure_query_highlight__(),
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
 
         try:
@@ -288,7 +288,7 @@ class DatasetRecordsDAO:
         search = search or RecordSearch()
         es_query = {
             "query": search.query,
-            "highlight": self.__configure_query_highlight__(),
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
@@ -410,7 +410,8 @@ class DatasetRecordsDAO:
         return self._es.__client__.indices.get_mapping(index=index_name)
 
     @classmethod
-    def __configure_query_highlight__(cls):
+    def __configure_query_highlight__(cls, task: TaskType):
+
         return {
             "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
             "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
@@ -420,6 +421,7 @@ class DatasetRecordsDAO:
                 # TODO: `words` will be removed once the migration will be completed.
                 #  This configuration is included just for old datasets records
                 "words": {},
+                **({"inputs.*": {}} if task == TaskType.text_classification else {}),
             },
         }
 
