@@ -25,14 +25,8 @@
           <svgicon name="drop-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
-          <li>
-            <a
-              v-for="item in availableItemsPerPage"
-              :key="item"
-              href="#"
-              @click.prevent="changePageSize(item)"
-              >{{ item }}</a
-            >
+          <li v-for="item in availableItemsPerPage" :key="item">
+            <a href="#" @click.prevent="changePageSize(item)">{{ item }}</a>
           </li>
         </ul>
       </div>
@@ -337,14 +331,23 @@ $pagination-size: 30px;
       right: 0;
       box-shadow: $shadow;
       border-radius: $border-radius;
-      margin: 2px;
+      li {
+        &:first-child:hover a {
+          border-top-left-radius: $border-radius;
+          border-top-right-radius: $border-radius;
+        }
+        &:last-child:hover a {
+          border-bottom-left-radius: $border-radius;
+          border-bottom-right-radius: $border-radius;
+        }
+      }
       a {
         display: block;
         color: $font-secondary-dark;
         border-radius: 1px;
         margin: 2px;
         &:hover {
-          background: palette(grey, smooth);
+          background: $bg;
         }
       }
     }
