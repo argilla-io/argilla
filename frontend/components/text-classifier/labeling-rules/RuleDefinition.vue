@@ -126,7 +126,7 @@ export default {
     background: rgba($lighter-color, 0.4);
     border: 1px solid $lighter-color;
     width: 100%;
-    border-radius: 5px;
+    border-radius: $border-radius;
     &.active {
       box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
     }

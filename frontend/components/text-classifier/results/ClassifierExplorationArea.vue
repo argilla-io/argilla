@@ -140,7 +140,7 @@ export default {
     font-weight: 600;
     outline: none;
     padding: 0.5em;
-    border-radius: 5px;
+    border-radius: $border-radius;
     transition: all 0.2s ease-in-out;
     display: inline-block;
     &:hover {

@@ -70,7 +70,7 @@ export default {
     align-items: center;
     padding: 0 20px;
     transition: all 0.2s ease;
-    border-radius: 3px;
+    border-radius: $border-radius;
     &:after {
       content: "";
       border-color: $darker-color;
@@ -127,6 +127,7 @@ export default {
     top: 50px;
     left: 0;
     margin-top: 0;
+    box-shadow: $shadow;
     background: $lighter-color;
     border: 1px solid $primary-color;
     padding: 10px 20px 10px 20px;

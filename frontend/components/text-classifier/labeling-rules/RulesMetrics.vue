@@ -206,7 +206,7 @@ $color: #333346;
     background: $primary-color;
     margin-left: 1em;
     color: $lighter-color;
-    border-radius: 5px;
+    border-radius: $border-radius;
     margin-bottom: 2em;
     padding: 30px;
   }
