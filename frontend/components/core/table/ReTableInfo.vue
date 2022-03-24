@@ -121,19 +121,6 @@
                         }}
                       </p>
                     </span>
-                    <span v-else-if="column.type === 'array'">
-                      <p
-                        v-for="(arrayItem, index) in itemValue(item, column)"
-                        :key="index"
-                      >
-                        {{ arrayItem
-                        }}{{
-                          index + 1 === itemValue(item, column).length
-                            ? ""
-                            : ","
-                        }}
-                      </p>
-                    </span>
                     <span v-else-if="column.type === 'object'">
                       <p
                         v-for="key in Object.keys(itemValue(item, column))"
@@ -296,13 +283,10 @@ export default {
       type: String,
       default: undefined,
     },
-    filterFromRoute: {
-      type: Object,
+    activeFilters: {
+      type: Array,
       default: () => {
-        return {
-          query: undefined,
-          field: undefined,
-        };
+        return [];
       },
     },
   },
@@ -315,6 +299,11 @@ export default {
       selectedItems: [],
       filters: {},
     };
+  },
+  mounted() {
+    (this.activeFilters || []).forEach(({ column, values }) => {
+      this.$set(this.filters, column, values);
+    });
   },
   computed: {
     resultsAvailable() {
@@ -370,24 +359,6 @@ export default {
   beforeMount() {
     this.sortedBy = this.sortedByField;
   },
-  mounted() {
-    if (
-      this.filterFromRoute.query &&
-      this.$route.query[this.filterFromRoute.query]
-    ) {
-      const filters = JSON.parse(this.$route.query[this.filterFromRoute.query] ? Base64.decode(this.$route.query[this.filterFromRoute.query]) : "[]")
-      this.$set(
-        this.filters,
-        this.filterFromRoute.field,
-        filters
-      );
-      console.log(this.filters)
-    }
-    this.filteredResults.forEach((r) => {
-      const rec = r;
-      rec.selectedRecord = false;
-    });
-  },
   methods: {
     itemValue(item, column) {
       if (column.subfield) {
@@ -411,7 +382,7 @@ export default {
       } else {
         this.$delete(this.filters, column.field);
       }
-      this.$router.push({query: {[this.filterFromRoute.query]: Base64.encodeURI(JSON.stringify(this.filters[column.field]))}});
+      this.$emit("filter-applied", { column: column.field, values: selectedOptions });
     },
     filteredResultsByGroup(group) {
       if (this.groupBy) {

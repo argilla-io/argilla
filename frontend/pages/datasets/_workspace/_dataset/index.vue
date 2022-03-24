@@ -53,11 +53,10 @@ export default {
       findByName: "entities/datasets/findByName",
     }),
     breadcrumbs() {
-      const query = Base64.encodeURI(JSON.stringify(this.$route.params.workspace));
       return [
         { link: { path: "/datasets" }, name: "Datasets" },
         {
-          link: { path: `/datasets?workspace=${query}` },
+          link: { path: `/datasets?workspace=${this.workspace}` },
           name: this.workspace,
         },
         {

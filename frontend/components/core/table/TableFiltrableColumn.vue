@@ -67,7 +67,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       if (this.filters[this.column.field]) {
-        this.selectedOptions = [this.filters[this.column.field]] || [];
+        this.selectedOptions = this.filters[this.column.field];
       }
     });
   },
