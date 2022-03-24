@@ -41,7 +41,6 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
-import { Base64 } from "js-base64";
 
 export default {
   layout: "app",

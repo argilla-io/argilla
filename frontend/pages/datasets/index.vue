@@ -119,11 +119,9 @@ export default {
     activeFilters() {
       const workspaces = this.workspaces;
       if (workspaces) {
-        return [
-          { column: "owner", values: workspaces }
-        ]
+        return [{ column: "owner", values: workspaces }];
       }
-      return []
+      return [];
     },
     datasets() {
       return ObservationDataset.all().map((dataset) => {
@@ -137,13 +135,13 @@ export default {
     workspaces() {
       let _workspaces = this.$route.query.workspace;
       if (typeof _workspaces == "string") {
-        _workspaces = [_workspaces]
+        _workspaces = [_workspaces];
       }
       return _workspaces;
     },
     workspace() {
       // THIS IS WRONG !!!
-      this.$route.query.workspace
+      this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
     deleteConfirmationContent() {
@@ -171,7 +169,7 @@ export default {
     onColumnFilterApplied({ column, values }) {
       if (column === "owner") {
         if (values !== this.workspaces) {
-          this.$router.replace({ query: { workspace: values } })
+          this.$router.replace({ query: { workspace: values } });
         }
       }
     },
