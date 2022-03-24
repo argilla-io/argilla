@@ -48,7 +48,7 @@ export default {
     text: {
       type: String,
       required: false,
-      default: "Add new label",
+      default: "Create label",
     },
   },
   data: () => ({

@@ -18,6 +18,7 @@
 <template>
   <div class="container">
     <div
+      v-if="visibleEntities.length"
       :class="[
         'entities__container',
         activeEntity ? 'entities__container--multiple' : '',

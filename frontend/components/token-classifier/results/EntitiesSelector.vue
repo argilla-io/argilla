@@ -1,7 +1,7 @@
 <template>
   <span class="entities__selector__container">
     <div class="entities__selector">
-      <ul class="entities__selector__options">
+      <ul v-if="formattedEntities.length" class="entities__selector__options">
         <li
           class="entities__selector__option suggestion"
           :class="[
@@ -44,11 +44,16 @@
           >
         </li>
       </ul>
+      <div v-else class="entities__selector--empty">
+        <svgicon name="error" width="17" height="17" />
+        <p>No labels available</p>
+      </div>
     </div>
   </span>
 </template>
 
 <script>
+import "assets/icons/error";
 import { mapActions } from "vuex";
 export default {
   data: () => ({
@@ -159,7 +164,7 @@ export default {
     background: palette(grey, smooth);
     font-weight: 600;
     padding: 0.8em;
-    border-radius: 1px;
+    border-radius: 5px;
     &__container {
       @include font-size(14px);
       line-height: 1em;
@@ -191,6 +196,17 @@ export default {
       }
       span {
         cursor: pointer !important;
+      }
+    }
+    &--empty {
+      display: flex;
+      align-items: center;
+      .svg-icon {
+        margin-right: 0.5em;
+      }
+      p {
+        margin: 0;
+        font-weight: 400;
       }
     }
   }
