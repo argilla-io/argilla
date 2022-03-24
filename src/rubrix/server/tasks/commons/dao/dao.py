@@ -203,7 +203,7 @@ class DatasetRecordsDAO:
             {**(search.aggregations or {})} if compute_aggregations else {}
         )
 
-        sort_config = self.__normalize_sort_config__(records_index, search)
+        sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
 
         es_query = {
             "_source": {"excludes": exclude_fields or []},
@@ -266,19 +266,19 @@ class DatasetRecordsDAO:
 
     def __normalize_sort_config__(
         self, index: str, sort: Optional[List[Dict[str, Any]]] = None
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         id_field = "id"
         id_keyword_field = "id.keyword"
-        sort_config = sort or [{id_field: {"order": "asc"}}]
+        sort_config = []
 
-        for sort_config in sort:
-            for field in sort_config:
-                if field == id_field:
-                    if self._es.get_field_mapping(index, field_name=id_keyword_field):
-                        cfg = sort_config.pop(field)
-                        sort_config[id_keyword_field] = cfg
-                    break
-
+        for sort_field in sort or [{id_field: {"order": "asc"}}]:
+            for field in sort_field:
+                if field == id_field and self._es.get_field_mapping(
+                    index=index, field_name=id_keyword_field
+                ):
+                    sort_config.append({id_keyword_field: sort_field[field]})
+                else:
+                    sort_config.append(sort_field)
         return sort_config
 
     def scan_dataset(
