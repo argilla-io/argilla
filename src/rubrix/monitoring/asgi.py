@@ -21,10 +21,18 @@ import threading
 from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response, StreamingResponse
-from starlette.types import Message, Receive
+try:
+    import starlette
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "'starlette' must be installed to use the middleware feature! "
+        "You can install 'starlette' with the command: `pip install starlette>=0.13.0`"
+    )
+else:
+    from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse, Response, StreamingResponse
+    from starlette.types import Message, Receive
 
 import rubrix
 from rubrix.client.models import (
