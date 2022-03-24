@@ -59,6 +59,7 @@ export default {
         this.record.text,
         this.record.search_keywords
       );
+
       const { visualTokens } = this.record.tokens.reduce(
         ({ visualTokens, startPosition }, token) => {
           const start = recordHasEmoji
@@ -69,7 +70,7 @@ export default {
 
           let highlighted = false;
           for (let highlight of searchKeywordsSpans) {
-            if (highlight.start === start || highlight.end === end) {
+            if (highlight.start <= start && highlight.end >= end) {
               highlighted = true;
               break;
             }
