@@ -271,7 +271,7 @@ $color: #333346;
     font-family: $sff;
     outline: none;
     padding: 0.5em;
-    border-radius: 5px;
+    border-radius: $border-radius;
     transition: all 0.2s ease-in-out;
     display: inline-block;
     &:hover {

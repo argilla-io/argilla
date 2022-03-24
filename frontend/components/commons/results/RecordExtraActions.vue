@@ -150,8 +150,8 @@ export default {
     right: 0.7em;
     top: 2em;
     background: white;
-    border-radius: 3px;
-    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+    border-radius: $border-radius;
+    box-shadow: $shadow;
     padding: 3px;
     min-width: 135px;
     z-index: 1;
@@ -164,7 +164,7 @@ export default {
       cursor: pointer;
       display: block;
       border-bottom: 1px solid palette(grey, smooth);
-      border-radius: 3px;
+      border-radius: $border-radius;
       background: white;
       transition: background 0.3s ease-in-out;
       &:last-child {

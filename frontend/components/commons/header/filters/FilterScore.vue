@@ -201,7 +201,7 @@ export default {
   align-items: center;
   padding: 0 1em;
   transition: all 0.2s ease;
-  border-radius: 3px;
+  border-radius: $border-radius;
   &:hover,
   &:focus {
     border: 1px solid $primary-color;
@@ -266,7 +266,7 @@ export default {
     min-height: auto;
     transition: height 0.1s ease-in-out;
     overflow: visible;
-    border-radius: 3px;
+    border-radius: $border-radius;
     z-index: 4;
     width: 400px;
     max-width: 100vw;

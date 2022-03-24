@@ -160,7 +160,7 @@ export default {
     @include font-size(20px);
     margin: 0 0 0 0.5em;
     background: palette(grey, light);
-    border-radius: 5px;
+    border-radius: $border-radius;
     min-width: 50px;
     min-height: 45px;
     text-align: center;
