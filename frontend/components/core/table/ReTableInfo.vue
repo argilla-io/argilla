@@ -233,6 +233,7 @@
 </template>
 
 <script>
+import { Base64 } from "js-base64";
 import "assets/icons/delete";
 import "assets/icons/refresh";
 import "assets/icons/copy";
@@ -374,11 +375,13 @@ export default {
       this.filterFromRoute.query &&
       this.$route.query[this.filterFromRoute.query]
     ) {
+      const filters = JSON.parse(this.$route.query[this.filterFromRoute.query] ? Base64.decode(this.$route.query[this.filterFromRoute.query]) : "[]")
       this.$set(
         this.filters,
         this.filterFromRoute.field,
-        this.$route.query[this.filterFromRoute.query]
+        filters
       );
+      console.log(this.filters)
     }
     this.filteredResults.forEach((r) => {
       const rec = r;
@@ -408,6 +411,7 @@ export default {
       } else {
         this.$delete(this.filters, column.field);
       }
+      this.$router.push({query: {[this.filterFromRoute.query]: Base64.encodeURI(JSON.stringify(this.filters[column.field]))}});
     },
     filteredResultsByGroup(group) {
       if (this.groupBy) {

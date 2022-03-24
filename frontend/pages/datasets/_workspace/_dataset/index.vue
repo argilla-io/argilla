@@ -41,6 +41,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
+import { Base64 } from "js-base64";
 
 export default {
   layout: "app",
@@ -52,10 +53,11 @@ export default {
       findByName: "entities/datasets/findByName",
     }),
     breadcrumbs() {
+      const query = Base64.encodeURI(JSON.stringify(this.$route.params.workspace));
       return [
         { link: { path: "/datasets" }, name: "Datasets" },
         {
-          link: { path: `/datasets?workspace=${this.$route.params.workspace}` },
+          link: { path: `/datasets?workspace=${query}` },
           name: this.workspace,
         },
         {
