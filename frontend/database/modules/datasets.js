@@ -526,10 +526,10 @@ const actions = {
 
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
+    if (workspace !== NO_WORKSPACE) {
+      url += `?workspace=${workspace}`;
+    }
     const deleteResults = await ObservationDataset.api().delete(url, {
-      headers: {
-        "X-Rubrix-Workspace": workspace,
-      },
       delete: [workspace, name],
     });
     return deleteResults;
