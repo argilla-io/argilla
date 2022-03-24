@@ -301,7 +301,9 @@ export default {
     };
   },
   mounted() {
-    (this.activeFilters || []).forEach(({ column, values }) => this.filters[column] = values);
+    (this.activeFilters || []).forEach(({ column, values }) => {
+      this.$set(this.filters, column, values);
+    });
   },
   computed: {
     resultsAvailable() {
