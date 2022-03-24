@@ -54,7 +54,7 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 52px 20px 20px 25px;
+  padding: 50px 20px 50px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(18px);
