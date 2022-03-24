@@ -31,7 +31,7 @@
       ]"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="visualizeToken(token)"
+      v-html="visualizeToken(token, i)"
     ></span>
     <svgicon
       class="remove-button"
@@ -100,11 +100,11 @@ export default {
         }, this.singleClickDelay);
       }
     },
-    visualizeToken(token) {
+    visualizeToken(token, i) {
       let text = token.highlighted
         ? this.$htmlHighlightText(token.text)
         : this.$htmlText(token.text);
-      return `${text}${token.hasSpaceAfter ? " " : ""}`;
+      return `${text}${token.hasSpaceAfter && i + 1 !== this.span.tokens.length ? " " : ""}`;
     },
   },
 };
