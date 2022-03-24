@@ -86,16 +86,14 @@ export default {
 }
 
 .form {
-  border-radius: 3px;
+  border-radius: $border-radius;
   background: $lighter-color;
   margin: auto;
   display: inline-block;
   padding: 2em 4em 1.5em 4em;
-  box-shadow: 29px 29px 57px #d0d0d1, -29px -29px 57px #ffffff;
+  box-shadow: $shadow;
   text-align: center;
   max-width: 300px;
-  // box-shadow: 0 2px 44px 16px #DFDFDF;
-  border-radius: 3px;
   &__logo {
     text-align: center;
     margin-bottom: 1em;

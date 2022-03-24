@@ -252,7 +252,7 @@ export default {
     background: rgba($lighter-color, 0.4);
     border: 1px solid $lighter-color;
     width: 100%;
-    border-radius: 5px;
+    border-radius: $border-radius;
   }
   &__title {
     color: $font-secondary-dark;

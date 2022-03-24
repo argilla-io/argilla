@@ -62,7 +62,7 @@ export default {
   margin-right: auto;
   margin-left: 0;
   pointer-events: all;
-  border-radius: 5px;
+  border-radius: $border-radius;
   @include font-size(14px);
   .svg-icon {
     fill: $font-secondary;
