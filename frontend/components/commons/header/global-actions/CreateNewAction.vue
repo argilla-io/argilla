@@ -25,6 +25,7 @@
     >
     <div v-else class="new-label">
       <input
+        ref="labelCreation"
         v-model="label"
         autofocus
         class="new-label__input"
@@ -67,6 +68,9 @@ export default {
     },
     openLabelCreation() {
       this.showLabelCreation = true;
+      this.$nextTick(() => {
+        this.$refs.labelCreation.focus();
+      });
     },
     reset() {
       this.label = undefined;
