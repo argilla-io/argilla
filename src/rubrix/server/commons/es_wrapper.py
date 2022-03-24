@@ -384,7 +384,6 @@ class ElasticsearchWrapper(LoggingMixin):
             return {
                 key: list(definition["mapping"].values())[0]["type"]
                 for key, definition in response[index]["mappings"].items()
-                if not key.endswith(".raw")  # Drop raw version of fields
             }
         except NotFoundError:
             # No mapping data
