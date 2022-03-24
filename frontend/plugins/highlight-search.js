@@ -41,24 +41,23 @@ export default (context, inject) => {
       return text;
     }
 
-    return escapedText
-      .toString()
-      .replace(
-        regexFromTerm(query),
-        (match) => `<span class="highlight-text">${match}</span>`
-      );
+    return escapedText.replace(
+      regexFromTerm(query),
+      (match) => `<span class="highlight-text">${match}</span>`
+    );
   };
 
   const highlightKeywords = function (text, keywords) {
     const sortedKeywords = ([...keywords] || []).sort(
       (a, b) => b.length - a.length
     );
+    text = htmlText(text);
     sortedKeywords.forEach((keyword) => {
       const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
       text = text.replace(regex, (match) => htmlHighlightText(match));
     });
 
-    return htmlText(text);
+    return text;
   };
 
   const keywordsSpans = function (text, keywords) {
