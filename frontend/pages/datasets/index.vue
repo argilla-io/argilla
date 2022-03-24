@@ -44,13 +44,14 @@
               :columns="tableColumns"
               :query-search="querySearch"
               :global-actions="false"
-              search-on="name"
-              :filter-from-route="{ query: 'workspace', field: 'owner' }"
               :visible-modal-id="datasetCompositeId"
               :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
+              :active-filters="activeFilters"
+              search-on="name"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
+              @filter-applied="onColumnFilterApplied"
               @close-modal="closeModal"
             />
           </div>
@@ -115,6 +116,15 @@ export default {
     await this.fetchDatasets();
   },
   computed: {
+    activeFilters() {
+      const workspaces = this.workspaces;
+      if (workspaces) {
+        return [
+          { column: "owner", values: workspaces }
+        ]
+      }
+      return []
+    },
     datasets() {
       return ObservationDataset.all().map((dataset) => {
         return {
@@ -124,7 +134,16 @@ export default {
         };
       });
     },
+    workspaces() {
+      let _workspaces = this.$route.query.workspace;
+      if (typeof _workspaces == "string") {
+        _workspaces = [_workspaces]
+      }
+      return _workspaces;
+    },
     workspace() {
+      // THIS IS WRONG !!!
+      this.$route.query.workspace
       return currentWorkspace(this.$route);
     },
     deleteConfirmationContent() {
@@ -149,6 +168,14 @@ export default {
       _deleteDataset: "entities/datasets/deleteDataset",
     }),
 
+    onColumnFilterApplied({ column, values }) {
+      if (column === "owner") {
+        if (values !== this.workspaces) {
+          this.$router.replace({ query: { workspace: values } })
+        }
+      }
+    },
+
     datasetWorkspace(dataset) {
       var workspace = dataset.owner;
       if (workspace === null || workspace === "null") {
@@ -171,7 +198,6 @@ export default {
         case "confirm-delete":
           this.deleteDataset(dataset);
           break;
-
         default:
           console.warn(action);
       }
