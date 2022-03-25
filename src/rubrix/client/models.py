@@ -299,6 +299,52 @@ class TokenClassificationRecord(_Validators):
     __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
     __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
 
+    def __init__(
+        self,
+        text: str = None,
+        tokens: List[str] = None,
+        tags: Optional[List[str]] = None,
+        **data,
+    ):
+        if text is None and tokens is None:
+            raise AssertionError(
+                "Missing fields: At least one of `text` or `tokens` argument must be provided!"
+            )
+
+        if (data.get("annotation") or data.get("prediction")) and text is None:
+            raise AssertionError(
+                "Missing field `text`: "
+                "char level spans must be provided with a raw text sentence"
+            )
+
+        if text is None:
+            text = " ".join(tokens)
+
+        super().__init__(text=text, tokens=tokens, **data)
+        if self.annotation and tags:
+            _LOGGER.warning("Annotation already provided, `tags` won't be used")
+            return
+        if tags:
+            self.annotation = self.__tags2entities__(tags)
+
+    def __tags2entities__(self, tags: List[str]) -> List[Tuple[str, int, int]]:
+        idx = 0
+        entities = []
+        while idx < len(tags):
+            tag = tags[idx]
+            if tag != "O":
+                prefix, entity = tag.split("-")
+                if prefix == "B":
+                    char_start, char_end = self.token_span(token_idx=idx)
+                    entities.append(
+                        {"entity": entity, "start": char_start, "end": char_end}
+                    )
+                elif prefix in ["I", "L"]:
+                    _, char_end = self.token_span(token_idx=idx)
+                    entities[-1]["end"] = char_end
+            idx += 1
+        return [(value["entity"], value["start"], value["end"]) for value in entities]
+
     def __setattr__(self, name: str, value: Any):
         """Make text and tokens immutable"""
         if name in ["text", "tokens"]:
