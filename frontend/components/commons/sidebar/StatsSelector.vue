@@ -84,7 +84,7 @@ export default {
   &__header {
     cursor: pointer;
     border: 1px solid palette(grey, smooth);
-    border-radius: 5px;
+    border-radius: $border-radius;
     padding: 0.5em 1em;
     color: $font-secondary-dark;
     @include font-size(13px);

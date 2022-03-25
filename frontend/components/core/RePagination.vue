@@ -287,6 +287,7 @@ $pagination-size: 30px;
       text-decoration: none;
       min-width: $pagination-size;
       height: $pagination-size;
+      border-radius: $border-radius;
       margin: auto 0.5em;
       outline: none;
       padding: 5px;
