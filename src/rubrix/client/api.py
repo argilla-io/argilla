@@ -219,7 +219,7 @@ class Api:
 
         if not re.match(DATASET_NAME_REGEX_PATTERN, name):
             raise InputValueError(
-                f"Provided name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
+                f"Provided dataset name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
                 "Please, use a valid name for your dataset"
             )
 
