@@ -22,7 +22,11 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 import pandas
 from tqdm.auto import tqdm
 
-from rubrix._constants import DEFAULT_API_KEY, RUBRIX_WORKSPACE_HEADER_NAME
+from rubrix._constants import (
+    DATASET_NAME_REGEX_PATTERN,
+    DEFAULT_API_KEY,
+    RUBRIX_WORKSPACE_HEADER_NAME,
+)
 from rubrix.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -211,7 +215,13 @@ class Api:
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
         if not name:
-            raise InputValueError("Empty project name has been passed as argument.")
+            raise InputValueError("Empty dataset name has been passed as argument.")
+
+        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
+            raise InputValueError(
+                f"Provided dataset name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
+                "Please, use a valid name for your dataset"
+            )
 
         if isinstance(records, Record.__args__):
             records = [records]

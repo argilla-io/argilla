@@ -22,6 +22,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
+from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 from rubrix.server.tasks.commons import TaskType
 
 
@@ -49,7 +50,7 @@ class CreationDatasetRequest(UpdateDatasetRequest):
         the  dataset name
     """
 
-    name: str = Field(regex="^(?!-|_)[a-z0-9-_]+$")
+    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
 
 
 class CopyDatasetRequest(CreationDatasetRequest):
