@@ -12,11 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-"""The Rubrix client, used by the rubrix.__init__ module"""
+"""
+The Rubrix client, used by the rubrix.__init__ module.
+DEPRECATED, CAN BE REMOVED IN A FUTURE VERSION. USE THE rubrix.client.api MODULE INSTEAD!
+"""
 
 import logging
 import socket
+import warnings
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas
@@ -80,7 +83,7 @@ class InputValueError(RubrixClientError):
 
 
 class RubrixClient:
-    """Class definition for Rubrix Client"""
+    """DEPRECATED. Class definition for Rubrix Client"""
 
     _LOGGER = logging.getLogger(__name__)
     _WARNED_ABOUT_AS_PANDAS = False
@@ -97,7 +100,7 @@ class RubrixClient:
         workspace: Optional[str] = None,
         timeout: int = 60,
     ):
-        """Client setup function.
+        """DEPRECATED. Client setup function.
 
         Args:
             api_url: Address from which the API is serving.
@@ -105,6 +108,11 @@ class RubrixClient:
             workspace: Active workspace for this client session.
             timeout: Seconds to wait before raising a connection timeout.
         """
+        warnings.warn(
+            f"The 'RubrixClient' class is deprecated and will be removed in a future version! "
+            f"Use the `rubrix.client.api` module instead. Make sure to adapt your code.",
+            category=FutureWarning,
+        )
 
         self._client = AuthenticatedClient(
             base_url=api_url, token=api_key, timeout=timeout

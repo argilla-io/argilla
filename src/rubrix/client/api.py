@@ -84,8 +84,8 @@ class Api:
     ):
         """Init the Python client.
 
-        We will automatically init a default client for you when calling other client methods.
-        The arguments provided here will overwrite your corresponding environment variables.
+        Passing an api_url disables environment variable reading, which will provide
+        default values.
 
         Args:
             api_url: Address of the REST API. If `None` (default) and the env variable ``RUBRIX_API_URL`` is not set,
