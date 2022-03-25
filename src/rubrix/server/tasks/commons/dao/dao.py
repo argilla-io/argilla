@@ -90,6 +90,10 @@ class DatasetRecordsDAO:
         rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
     )
 
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
+
     @classmethod
     def get_instance(
         cls,
@@ -203,13 +207,15 @@ class DatasetRecordsDAO:
             {**(search.aggregations or {})} if compute_aggregations else {}
         )
 
+        sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
+
         es_query = {
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
             "query": search.query or {"match_all": {}},
-            "sort": search.sort or [{"_id": {"order": "asc"}}],
+            "sort": sort_config,
             "aggs": aggregation_requests,
-            "highlight": self.__configure_query_highlight__(),
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
 
         try:
@@ -262,6 +268,23 @@ class DatasetRecordsDAO:
 
         return result
 
+    def __normalize_sort_config__(
+        self, index: str, sort: Optional[List[Dict[str, Any]]] = None
+    ) -> List[Dict[str, Any]]:
+        id_field = "id"
+        id_keyword_field = "id.keyword"
+        sort_config = []
+
+        for sort_field in sort or [{id_field: {"order": "asc"}}]:
+            for field in sort_field:
+                if field == id_field and self._es.get_field_mapping(
+                    index=index, field_name=id_keyword_field
+                ):
+                    sort_config.append({id_keyword_field: sort_field[field]})
+                else:
+                    sort_config.append(sort_field)
+        return sort_config
+
     def scan_dataset(
         self,
         dataset: BaseDatasetDB,
@@ -284,7 +307,7 @@ class DatasetRecordsDAO:
         search = search or RecordSearch()
         es_query = {
             "query": search.query,
-            "highlight": self.__configure_query_highlight__(),
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
@@ -292,15 +315,27 @@ class DatasetRecordsDAO:
         for doc in docs:
             yield self.__esdoc2record__(doc)
 
-    def __esdoc2record__(self, doc: Dict[str, Any]):
+    def __esdoc2record__(
+        self,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = True,
+    ):
         return {
             **doc["_source"],
             "id": doc["_id"],
-            "search_keywords": self.__parse_highlight_results__(doc),
+            "search_keywords": self.__parse_highlight_results__(
+                doc, query=query, is_phrase_query=is_phrase_query
+            ),
         }
 
     @classmethod
-    def __parse_highlight_results__(cls, doc: Dict[str, Any]) -> Optional[List[str]]:
+    def __parse_highlight_results__(
+        cls,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
         highlight_info = doc.get("highlight")
         if not highlight_info:
             return None
@@ -309,8 +344,11 @@ class DatasetRecordsDAO:
         for content in highlight_info.values():
             if not isinstance(content, list):
                 content = [content]
-            for text in content:
-                search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
+            search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
         return list(set(search_keywords))
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
@@ -391,7 +429,8 @@ class DatasetRecordsDAO:
         return self._es.__client__.indices.get_mapping(index=index_name)
 
     @classmethod
-    def __configure_query_highlight__(cls):
+    def __configure_query_highlight__(cls, task: TaskType):
+
         return {
             "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
             "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
@@ -401,6 +440,7 @@ class DatasetRecordsDAO:
                 # TODO: `words` will be removed once the migration will be completed.
                 #  This configuration is included just for old datasets records
                 "words": {},
+                **({"inputs.*": {}} if task == TaskType.text_classification else {}),
             },
         }
 

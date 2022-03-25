@@ -116,7 +116,7 @@ export default {
   }
   &__button {
     display: inline-block;
-    border-radius: 5px;
+    border-radius: $border-radius;
     padding: 0.5em;
     transition: all 0.2s ease;
     @include font-size(14px);

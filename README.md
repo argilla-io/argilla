@@ -244,9 +244,78 @@ Rubrix main components are:
 
 ![](docs/images/rubrix_intro.svg)
 
+
+## FAQ
+
+### What is Rubrix?
+
+Rubrix is an open-source MLOps tool for building and managing training data for Natural Language Processing.
+
+### What can I use Rubrix for?
+
+Rubrix is useful if you want to:
+
+- create a data set for training a model.
+- evaluate and improve an existing model.
+- monitor an existing model to improve it over time and gather more training data.
+
+### What do I need to start using Rubrix?
+
+You need to have a running instance of Elasticsearch and install the Rubrix Python library.
+
+The library is used to read and write data into Rubrix.
+To get started we highly recommend using Jupyter Notebooks so you might want to install Jupyter Lab or use Jupiter support for VS Code for example.
+
+### How can I "upload" data into Rubrix?
+
+Currently, the only way to upload data into Rubrix is by using the Python library.
+This is based on the assumption that there's rarely a perfectly prepared dataset in the format expected by the data annotation tool.
+
+Rubrix is designed to enable fast iteration for users that are closer to data and models, namely data scientists and NLP/ML/Data engineers.
+If you are familiar with libraries like Weights & Biases or MLFlow, you'll find Rubrix `log` and `load` methods intuitive.
+That said, Rubrix gives you different shortcuts and utils to make loading data into Rubrix a breeze, such as the ability to read datasets directly from the Hugging Face Hub.
+
+In summary, the recommended process for uploading data into Rubrix would be following:
+
+(1) Install Rubrix Python library,
+
+(2) Open a Jupyter Notebook,
+
+(3) Make sure you have a Rubrix server instance up and running,
+
+(4) Read your source dataset using Pandas, Hugging Face datasets, or any other library,
+
+(5) Do any data preparation, pre-processing, or pre-annotation with a pretrained model, and
+
+(6) Transform your dataset rows/records into Rubrix records and log them into a Rubrix dataset using `rb.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
+
+### How can I train a model
+
+The training datasets curated with Rubrix are model agnostic.
+You can choose one of many amazing frameworks to train your model, like [transformers](https://huggingface.co/docs/transformers/), [spaCy](https://spacy.io/), [flair](https://github.com/flairNLP/flair) or [sklearn](https://scikit-learn.org).
+Check out our [cookbook](https://rubrix.readthedocs.io/en/stable/guides/cookbook.html) and our [tutorials](https://rubrix.readthedocs.io/en/stable) on how Rubrix integrates with these frameworks.
+
+If you want to train a Hugging Face transformer, we provide a neat shortcut to [prepare your Rubrix dataset for training](https://rubrix.readthedocs.io/en/stable/reference/python/python_client.html#rubrix.client.datasets.DatasetForTextClassification.prepare_for_training).
+
+### Can Rubrix share the Elasticsearch Instance/cluster?
+
+Yes, you can use the same Elasticsearch instance/cluster for Rubrix and other applications.
+You only need to perform some configuration, check the Advanced installation guide in the [docs](https://docs.rubrix.ml/).
+
+### How to solve an exceeded flood-stage watermark in Elasticsearch?
+
+By default, Elasticsearch is quite conservative regarding the disk space it is allowed to use.
+If less than 5% of your disk is free, Elasticsearch can enforce a read-only block on every index, and as a consequence, Rubrix stops working.
+To solve this, you can simply increase the watermark by executing the following command in your terminal:
+
+```bash
+curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'{"persistent": {"cluster.routing.allocation.disk.watermark.flood_stage":"99%"}}'
+```
+
 ## Community
 
-As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started. Feel free to use the Discussion forum or the Issues and we'll be pleased to help out.
+As a new open-source project, we are eager to hear your thoughts, fix bugs, and help you get started.
+Feel free to [join us on Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g), use the [Discussion forum](https://github.com/recognai/rubrix/discussions) or [open Issues](https://github.com/recognai/rubrix/issues) and we'll be pleased to help out.
 
 ## Contributors
 

@@ -51,7 +51,7 @@ export default {
   background-color: #333346;
   color: white;
   padding: 2em !important;
-  border-radius: 5px;
+  border-radius: $border-radius;
   text-align: left;
   font-weight: 600;
   @include font-size(12px);

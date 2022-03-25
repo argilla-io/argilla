@@ -134,16 +134,16 @@ export default {
   margin: 0px auto;
   padding: 1.5em;
   background-color: $lighter-color;
-  border-radius: 3px;
-  box-shadow: 0px 2px 4px 3px rgba(0, 0, 0, 0.27);
+  border-radius: $border-radius;
+  box-shadow: $shadow;
   transition: $swift-ease-in-out;
   position: relative;
   text-align: left;
   pointer-events: all;
 }
 .modal-primary {
-  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-  border-radius: 3px;
+  box-shadow: $shadow;
+  border-radius: $border-radius;
   max-width: 520px;
   ::v-deep .modal__title {
     font-weight: normal;
@@ -154,8 +154,8 @@ export default {
   }
 }
 .modal-secondary {
-  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-  border-radius: 3px;
+  box-shadow: $shadow;
+  border-radius: $border-radius;
   max-width: 400px;
   ::v-deep .modal__text {
     margin-bottom: 2em;

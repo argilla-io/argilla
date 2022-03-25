@@ -89,10 +89,17 @@ class F1Metric(PythonMetric):
 class DatasetLabels(PythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset labels", const=True)
+    max_processed_records: int = 10000
 
     def apply(self, records: Iterable[TextClassificationRecord]) -> Dict[str, Any]:
         ds_labels = set()
-        for record in records:
+        for _ in range(
+            0, self.max_processed_records
+        ):  # Only a few of records will be parsed
+            record = next(records, None)
+            if record is None:
+                break
+
             if record.annotation:
                 ds_labels.update(
                     [label.class_label for label in record.annotation.labels]
