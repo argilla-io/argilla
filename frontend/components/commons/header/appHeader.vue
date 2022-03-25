@@ -22,7 +22,7 @@
     :class="['header', sticky && dataset ? 'sticky' : null]"
   >
     <ReTopbarBrand>
-      <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copy-button="true" />
+      <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copy-button="copyButton" />
       <user />
     </ReTopbarBrand>
     <slot />
@@ -46,6 +46,10 @@ export default {
       type: Array,
     },
     sticky: {
+      type: Boolean,
+      default: true,
+    },
+    copyButton: {
       type: Boolean,
       default: true,
     },

@@ -30,7 +30,7 @@
     </app-header>
     <error
       v-if="$fetchState.error"
-      :link="errorLink"
+      link="/datasets"
       :where="datasetName"
       :error="$fetchState.error"
     ></error>
@@ -40,7 +40,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { currentWorkspace, workspaceHome } from "@/models/Workspace";
+import { currentWorkspace } from "@/models/Workspace";
 
 export default {
   layout: "app",
@@ -53,7 +53,11 @@ export default {
     }),
     breadcrumbs() {
       return [
-        { link: { path: workspaceHome(this.workspace) }, name: this.workspace },
+        { link: { path: "/datasets" }, name: "Datasets" },
+        {
+          link: { path: `/datasets?workspace=${this.workspace}` },
+          name: this.workspace,
+        },
         {
           link: this.$route.fullPath,
           name: this.dataset ? this.dataset.name : undefined,
@@ -73,9 +77,6 @@ export default {
     },
     workspace() {
       return currentWorkspace(this.$route);
-    },
-    errorLink() {
-      return workspaceHome(this.workspace);
     },
     areMetricsVisible() {
       return this.dataset && this.dataset.viewSettings.visibleMetrics;
