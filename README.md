@@ -28,18 +28,18 @@
         <a href="https://hub.docker.com/r/recognai/rubrix">
         <img alt="CI" src="https://img.shields.io/docker/pulls/recognai/rubrix">
     </a>
-    <a href="https://anaconda.org/conda-forge/rubrix">
+    <!--a href="https://anaconda.org/conda-forge/rubrix">
         <img alt="CI" src="https://img.shields.io/conda/pn/conda-forge/rubrix?logo=anaconda&style=flat">
-    </a>
+    </a-->
     <a href="https://anaconda.org/conda-forge/rubrix">
         <img alt="CI" src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
     </a>
     <a href="https://rubrix.readthedocs.io/en/stable/">
         <img alt="CI" src="https://img.shields.io/static/v1?logo=readthedocs&style=flat&color=pink&label=docs&message=rubrix">
     </a>
-    <a href="https://github.com/ambv/black">
+    <!--a href="https://github.com/ambv/black">
         <img alt="CI" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
-    </a>
+    </a-->
     <a href="https://twitter.com/rubrixml">
         <img alt="CI" src="https://img.shields.io/twitter/follow/rubrixml.svg?style=social&label=Follow">
     </a>
@@ -49,10 +49,6 @@
 
 
 
-
-https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
-
-<p align="center">Example: Interactive weak supervision. Building a text classifier with user search queries</p>
 
 ## What is Rubrix?
 

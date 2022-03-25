@@ -207,6 +207,7 @@ Note that provided analyzers names should be defined as built-in ones. If you wa
 customized analyzer, you should create it inside an index_template matching Rubrix index names (`.rubrix*.records-v0),
 and then provide the analyzer name using the specific environment variable.
 
+.. _deploy-to-aws-instance-using-docker-machine:
 
 Deploy to aws instance using docker-machine
 -------------------------------------------

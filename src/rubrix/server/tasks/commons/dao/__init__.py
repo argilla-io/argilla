@@ -12,9 +12,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from .dao import (
-    extends_index_properties,
-    extends_index_dynamic_templates,
-    extends_index_analyzers,
-)

@@ -1,13 +1,8 @@
-from collections import defaultdict
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.commons.es_helpers import (
-    aggregations,
-    nested_mappings_from_base_model,
-)
-from rubrix.server.tasks.commons.dao import extends_index_properties
+from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
@@ -402,19 +397,6 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
             for token_idx, token_value in enumerate(record.tokens)
             for char_start, char_end in [record.token_span(token_idx)]
         ]
-
-    @classmethod
-    def configure_es_index(cls):
-        """Configure mentions as nested properties"""
-
-        mentions_configuration = nested_mappings_from_base_model(MentionMetrics)
-        extends_index_properties(
-            {
-                cls._PREDICTED_MENTIONS_NAMESPACE: mentions_configuration,
-                cls._ANNOTATED_MENTIONS_NAMESPACE: mentions_configuration,
-                cls._TOKENS_NAMESPACE: nested_mappings_from_base_model(TokenMetrics),
-            }
-        )
 
     @classmethod
     def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:

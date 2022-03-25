@@ -44,7 +44,6 @@ def token_classification_mappings():
             "predicted_mentions": _mentions_mappings,  # TODO: remove
             "mentions": _mentions_mappings,  # TODO: remove
             "tokens": mappings.keyword_field(),
-            # TODO: This must be unified with metrics.py module
             "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
             "metrics.predicted.mentions": metrics_mentions_mappings,
             "metrics.annotated.mentions": metrics_mentions_mappings,
