@@ -164,7 +164,7 @@ export default {
     background: palette(grey, smooth);
     font-weight: 600;
     padding: 0.8em;
-    border-radius: 5px;
+    border-radius: $border-radius;
     &__container {
       @include font-size(14px);
       line-height: 1em;

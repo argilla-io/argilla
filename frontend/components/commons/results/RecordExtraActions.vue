@@ -163,12 +163,15 @@ export default {
       color: $font-secondary-dark;
       cursor: pointer;
       display: block;
-      border-bottom: 1px solid palette(grey, smooth);
-      border-radius: $border-radius;
       background: white;
       transition: background 0.3s ease-in-out;
+      &:first-child {
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
+      }
       &:last-child {
-        border-bottom: none;
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
       }
       &:hover {
         transition: background 0.3s ease-in-out;
