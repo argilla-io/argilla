@@ -215,7 +215,7 @@ class Api:
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
         if not name:
-            raise InputValueError("Empty project name has been passed as argument.")
+            raise InputValueError("Empty dataset name has been passed as argument.")
 
         if not re.match(DATASET_NAME_REGEX_PATTERN, name):
             raise InputValueError(
