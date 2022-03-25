@@ -96,13 +96,18 @@ $buttonSize: 34px;
     right: -1em;
     padding-top: 1.5em;
     background: $lighter-color;
-    border-radius: $border-radius;
-    @include font-size(12px);
-    font-weight: 600;
+    border-radius: 5px;
+    @include font-size(14px);
+    font-weight: 400;
     color: palette(grey, medium);
-    padding: 1.2em 1.2em 0.8em 1.2em;
     box-shadow: $shadow;
-    min-width: 200px;
+    min-width: 300px;
+    &:after {
+      position: absolute;
+      top: -12px;
+      right: 1.3em;
+      @include triangle(top, 12px, 12px, white);
+    }
     a {
       text-decoration: none;
     }
@@ -119,35 +124,10 @@ $buttonSize: 34px;
   &__link {
     display: flex;
     align-items: center;
-    outline: none !important;
-    padding: 0.7em;
-    margin: 0 -0.5em 0 -0.5em;
-    transition: background-color 0.3s ease-in-out;
-    border-radius: $border-radius;
-    &:hover {
-      background: #f5f5f5;
-      transition: background-color 0.3s ease-in-out;
-    }
-    &__circle {
-      @extend %circle;
-      margin-right: 0.7em;
-      background: palette(grey, dark);
-      color: $lighter-color;
-      &.active {
-        background: $primary-color;
-      }
-    }
-    &__name {
-      color: palette(grey, dark);
-      margin-top: 0;
-      margin-bottom: 0;
-      line-height: 1.4em;
-      span {
-        display: block;
-        margin-top: 0;
-        margin-bottom: 0;
-        color: palette(grey, medium);
-      }
+    color: palette(grey, medium);
+    margin: 0.5em 1.5em 1.5em 1.5em;
+    .svg-icon {
+      margin-right: 0.5em;
     }
   }
 }
