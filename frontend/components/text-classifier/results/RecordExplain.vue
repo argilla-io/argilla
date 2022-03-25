@@ -58,7 +58,7 @@ export default {
         }
         return {
           text: this.record.search_keywords
-            ? this.$highlightKeyword(token.token, this.record.search_keywords)
+            ? this.$highlightKeywords(token.token, this.record.search_keywords)
             : token.token,
           percent: percent.toString(),
           grad,
