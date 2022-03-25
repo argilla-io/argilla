@@ -317,7 +317,9 @@ class DatasetBase:
         def parse_metadata_from_dataset(example):
             return {"metadata": {k: example[k] for k in fields}}
 
-        return dataset.map(parse_metadata_from_dataset).remove_columns(fields)
+        return dataset.map(
+            parse_metadata_from_dataset, desc="Parsing metadata"
+        ).remove_columns(fields)
 
     @classmethod
     def _parse_annotation_field(
@@ -385,6 +387,7 @@ class DatasetForTextClassification(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
+        text: Optional[str] = None,
         id: Optional[str] = None,
         inputs: Optional[Union[str, List[str]]] = None,
         annotation: Optional[str] = None,
@@ -396,6 +399,7 @@ class DatasetForTextClassification(DatasetBase):
 
         Args:
             dataset: A datasets Dataset from which to import the records.
+            text: The field name used as record text. Default: `None`
             id: The field name used as record id. Default: `None`
             inputs: A list of field names used for record inputs. Default: `None`
             annotation: The field name used as record annotation. Default: `None`
@@ -416,7 +420,12 @@ class DatasetForTextClassification(DatasetBase):
         """
 
         return super().from_datasets(
-            dataset, id=id, annotation=annotation, metadata=metadata, inputs=inputs
+            dataset,
+            text=text,
+            id=id,
+            annotation=annotation,
+            metadata=metadata,
+            inputs=inputs,
         )
 
     @classmethod
@@ -468,14 +477,21 @@ class DatasetForTextClassification(DatasetBase):
         labels = dataset.features[field]
         if isinstance(labels, datasets.Sequence):
             labels = labels.feature
-        int2str = (
-            labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
-        )
 
-        def parse_annotation(example):
-            return {"annotation": int2str(example["annotation"])}
+        dataset = dataset.rename_column(field, "annotation")
 
-        return dataset.rename_column(field, "annotation").map(parse_annotation)
+        if not isinstance(labels, datasets.ClassLabel):
+            return dataset
+
+        def int2str_for_annotation(example):
+            try:
+                return {"annotation": labels.int2str(example["annotation"])}
+            # integers don't have to map to the names ...
+            # it seems that sometimes -1 is used to denote "no label"
+            except ValueError:
+                return {"annotation": None}
+
+        return dataset.map(int2str_for_annotation, desc="Parsing annotation")
 
     @classmethod
     def _prepare_hf_dataset(
@@ -535,14 +551,10 @@ class DatasetForTextClassification(DatasetBase):
         if isinstance(fields, str):
             fields = [fields]
 
-        def parse_inputs_from_dataset(example):
-            return {
-                "inputs": example[fields[0]]
-                if len(fields) == 1
-                else {k: example[k] for k in fields}
-            }
-
-        return dataset.map(parse_inputs_from_dataset)
+        return dataset.map(
+            lambda example: {"inputs": {k: example[k] for k in fields}},
+            desc="Parsing inputs",
+        )
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -868,6 +880,9 @@ class DatasetForTokenClassification(DatasetBase):
                 row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
             if row.get("annotation"):
                 row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
+            if not row["tokens"]:
+                _LOGGER.warning(f"Ignoring row with no tokens.")
+                continue
             records.append(TokenClassificationRecord.parse_obj(row))
         return cls(records)
 
@@ -883,7 +898,7 @@ class DatasetForTokenClassification(DatasetBase):
                 data["text"] = " ".join(tokens)
             return data
 
-        return dataset.map(parse_tokens_from_example)
+        return dataset.map(parse_tokens_from_example, desc="Parsing tokens")
 
     @classmethod
     def _parse_tags_field(
@@ -901,7 +916,7 @@ class DatasetForTokenClassification(DatasetBase):
         def parse_tags_from_example(example):
             return {"tags": [int2str(t) for t in example[field] or []]}
 
-        return dataset.map(parse_tags_from_example)
+        return dataset.map(parse_tags_from_example, desc="Parsing tags")
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
@@ -1048,12 +1063,15 @@ Dataset = Union[
 ]
 
 
-def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Dataset:
+def read_datasets(
+    dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs
+) -> Dataset:
     """Reads a datasets Dataset and returns a Rubrix Dataset
 
     Args:
         dataset: Dataset to be read in.
-        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"]
+        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"].
+        **kwargs: Passed on to the task-specific ``DatasetFor*.from_datasets()`` method.
 
     Returns:
         A Rubrix dataset for the given task.
@@ -1095,11 +1113,11 @@ def read_datasets(dataset: "datasets.Dataset", task: Union[str, TaskType]) -> Da
         task = TaskType(task)
 
     if task is TaskType.text_classification:
-        return DatasetForTextClassification.from_datasets(dataset)
+        return DatasetForTextClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.token_classification:
-        return DatasetForTokenClassification.from_datasets(dataset)
+        return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
-        return DatasetForText2Text.from_datasets(dataset)
+        return DatasetForText2Text.from_datasets(dataset, **kwargs)
     raise NotImplementedError(
         "Reading a datasets Dataset is not implemented for the given task!"
     )
