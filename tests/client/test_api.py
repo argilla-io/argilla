@@ -214,7 +214,7 @@ def test_not_found_response(mocked_client):
 
 def test_log_without_name(mocked_client):
     with pytest.raises(
-        api.InputValueError, match="Empty project name has been passed as argument."
+        api.InputValueError, match="Empty dataset name has been passed as argument."
     ):
         api.log(
             rb.TextClassificationRecord(
@@ -325,7 +325,7 @@ def test_log_with_generator(mocked_client, monkeypatch):
 def test_create_ds_with_wrong_name(mocked_client):
     dataset_name = "Test Create_ds_with_wrong_name"
 
-    with pytest.raises(ValidationApiError):
+    with pytest.raises(InputValueError):
         api.log(
             rb.TextClassificationRecord(
                 inputs={"text": "The text data"},
