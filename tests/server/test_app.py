@@ -12,17 +12,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-import logging
 import sys
+from importlib import reload
 
-from rubrix.logging import LoguruLoggerHandler
-from rubrix.utils import _LazyRubrixModule
+import pytest
 
-
-def test_lazy_module():
-    assert isinstance(sys.modules["rubrix"], _LazyRubrixModule)
+from rubrix.server import app
 
 
-def test_configure_logging_call():
-    assert isinstance(logging.getLogger("rubrix").handlers[0], LoguruLoggerHandler)
+def test_fallback_app(monkeypatch):
+    monkeypatch.setitem(sys.modules, "rubrix.server.server", None)
+    reload(app)
+
+    with pytest.raises(RuntimeError, match="Cannot start rubrix server"):
+        app.app()

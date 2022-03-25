@@ -1,6 +1,6 @@
 from typing import Optional
 
-from rubrix import _client_instance as client
+from rubrix.client import api
 from rubrix.metrics import helpers
 from rubrix.metrics.models import MetricSummary
 
@@ -23,8 +23,7 @@ def text_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
-    current_client = client()
-    metric = current_client.compute_metric(name, metric="text_length", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="text_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -52,8 +51,7 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
-    current_client = client()
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="status_distribution", query=query
     )
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from rubrix import _client_instance as client
+from rubrix.client import api
 from rubrix.metrics import helpers
 from rubrix.metrics.models import MetricSummary
 
@@ -23,8 +23,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    current_client = client()
-    metric = current_client.compute_metric(name, metric="F1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -50,8 +49,7 @@ def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    current_client = client()
-    metric = current_client.compute_metric(name, metric="MultiLabelF1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="MultiLabelF1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from rubrix import DEFAULT_API_KEY
+from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.errors import UnauthorizedApiError
 from rubrix.client.sdk.users.api import whoami

@@ -1,7 +1,23 @@
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+import rubrix as rb
+from rubrix.metrics.text_classification import f1, f1_multilabel
+
+
 def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_text_classification"
-
-    import rubrix as rb
 
     rb.log(
         [
@@ -20,8 +36,6 @@ def test_metrics_for_text_classification(mocked_client):
         ],
         name=dataset,
     )
-
-    from rubrix.metrics.text_classification import f1, f1_multilabel
 
     results = f1(dataset)
     assert results
@@ -62,7 +76,6 @@ def test_metrics_for_text_classification(mocked_client):
 
 def test_f1_without_results(mocked_client):
     dataset = "test_f1_without_results"
-    import rubrix as rb
 
     rb.log(
         [
@@ -77,8 +90,6 @@ def test_f1_without_results(mocked_client):
         ],
         name=dataset,
     )
-
-    from rubrix.metrics.text_classification import f1
 
     results = f1(dataset)
     assert results

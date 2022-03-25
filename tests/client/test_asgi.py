@@ -22,7 +22,6 @@ from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
 
 import rubrix
-from rubrix import TextClassificationRecord, TokenClassificationRecord
 from rubrix.monitoring.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
 
 
@@ -59,7 +58,7 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
             self.was_called = True
             assert name == expected_dataset_name
             assert len(records) == 2
-            assert isinstance(records[0], TextClassificationRecord)
+            assert isinstance(records[0], rubrix.TextClassificationRecord)
 
     mock_log = MockLog()
     monkeypatch.setattr(rubrix, "log", mock_log)
@@ -113,7 +112,7 @@ def test_rubrix_middleware_for_token_classification(monkeypatch):
             self.was_called = True
             assert name == expected_dataset_name
             assert len(records) == 2
-            assert isinstance(records[0], TokenClassificationRecord)
+            assert isinstance(records[0], rubrix.TokenClassificationRecord)
 
     mock_log = MockLog()
     monkeypatch.setattr(rubrix, "log", mock_log)
