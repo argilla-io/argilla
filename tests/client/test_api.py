@@ -24,6 +24,7 @@ import pytest
 
 import rubrix as rb
 from rubrix.client import api
+from rubrix.client.api import InputValueError
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -351,6 +352,14 @@ def test_delete_dataset(mocked_client):
     sleep(1)
     with pytest.raises(NotFoundApiError):
         api.load(name=dataset_name)
+
+
+def test_log_with_wrong_name(mocked_client):
+    with pytest.raises(InputValueError):
+        api.log(name="Bad name", records=["whatever"])
+
+    with pytest.raises(InputValueError):
+        api.log(name="anotherWrongName", records=["whatever"])
 
 
 def test_dataset_copy(mocked_client):
