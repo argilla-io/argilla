@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-function defaultWorkspace(user) {
-  return user.username;
-}
-
-function currentWorkspace(route) {
-  return route.params.workspace;
-}
-
-const NO_WORKSPACE = "-";
-export { defaultWorkspace, currentWorkspace, NO_WORKSPACE };
+/* eslint-disable */
+var icon = require('vue-svgicon')
+icon.register({
+  'filtrable-column': {
+    width: 15,
+    height: 11,
+    viewBox: '0 0 15 11',
+    data: '<path pid="0" d="M.008.008v1.769h14.15V.008H.008zm2.527 6.064h9.096V4.304H2.535v1.768zm2.527 4.296h4.042V8.599H5.062v1.769z" _fill="#0508D9" fill-rule="nonzero"/>'
+  }
+})

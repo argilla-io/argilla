@@ -26,23 +26,21 @@
               :key="key"
               class="table-info__item__col"
             >
+              <lazy-table-filtrable-column
+                :column="column"
+                :data="data"
+                :filters="filters"
+                v-if="column.filtrable"
+                @applyFilters="onApplyFilters"
+              />
               <button
+                v-else
                 :data-title="column.tooltip"
-                v-if="!column.hidden"
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
                 {{ column.name }}
-                <svgicon
-                  color="#4C4EA3"
-                  width="7"
-                  height="7"
-                  :name="
-                    sortedBy === column.field && sortOrder === 'desc'
-                      ? 'chev-top'
-                      : 'chev-bottom'
-                  "
-                />
+                <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
               </button>
             </div>
           </div>
@@ -227,8 +225,7 @@ import "assets/icons/refresh";
 import "assets/icons/copy";
 import "assets/icons/copy-url";
 import "assets/icons/datasource";
-import "assets/icons/chev-top";
-import "assets/icons/chev-bottom";
+import "assets/icons/sort";
 export default {
   props: {
     data: {
@@ -285,6 +282,12 @@ export default {
       type: String,
       default: undefined,
     },
+    activeFilters: {
+      type: Array,
+      default: () => {
+        return [];
+      },
+    },
   },
   data() {
     return {
@@ -293,17 +296,17 @@ export default {
       sortedBy: this.sortedByField,
       allRecordsSelected: false,
       selectedItems: [],
+      filters: {},
     };
+  },
+  mounted() {
+    (this.activeFilters || []).forEach(({ column, values }) => {
+      this.$set(this.filters, column, values);
+    });
   },
   computed: {
     resultsAvailable() {
       return this.filteredResults.length !== 0;
-    },
-    dataSchema() {
-      if (this.data && this.data.length > 0) {
-        return Object.keys(this.data[0]);
-      }
-      return [];
     },
     filterActions() {
       return this.actions.filter((a) => a.hide !== this.hideButton);
@@ -322,6 +325,14 @@ export default {
         }
         return false;
       };
+      const matchFilters = (item) => {
+        if (Object.values(this.filters).length) {
+          return Object.keys(this.filters).every((key) => {
+            return this.filters[key].toString().includes(item[key]);
+          });
+        }
+        return true;
+      };
       const itemComparator = (a, b) => {
         let modifier = 1;
         if (this.sortedOrder === "desc") modifier = -1;
@@ -329,7 +340,7 @@ export default {
         if (a[this.sortedBy] > b[this.sortedBy]) return 1 * modifier;
         return 0;
       };
-      const results = this.data.filter(matchSearch);
+      const results = this.data.filter(matchSearch).filter(matchFilters);
       return results.sort(itemComparator);
     },
     groups() {
@@ -347,19 +358,7 @@ export default {
   beforeMount() {
     this.sortedBy = this.sortedByField;
   },
-  mounted() {
-    this.filteredResults.forEach((r) => {
-      const rec = r;
-      rec.selectedRecord = false;
-    });
-  },
   methods: {
-    itemDisabled(item) {
-      if (item.status) {
-        return item.status.toLowerCase() !== "ready";
-      }
-      return undefined;
-    },
     itemValue(item, column) {
       if (column.subfield) {
         return item[column.field][column.subfield];
@@ -375,6 +374,17 @@ export default {
       if (column.field === this.sortedBy) {
         this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
       }
+    },
+    onApplyFilters(column, selectedOptions) {
+      if (selectedOptions.length) {
+        this.$set(this.filters, column.field, selectedOptions);
+      } else {
+        this.$delete(this.filters, column.field);
+      }
+      this.$emit("filter-applied", {
+        column: column.field,
+        values: selectedOptions,
+      });
     },
     filteredResultsByGroup(group) {
       if (this.groupBy) {
@@ -440,12 +450,10 @@ export default {
   }
   &__header {
     background: $lighter-color;
-    min-height: auto;
+    min-height: 50px;
     position: relative;
-    padding-bottom: 0.3em;
     margin-top: 1em;
     margin-bottom: 3px;
-    padding: 1em 0;
     &__checkbox {
       margin: 0 !important;
     }
@@ -456,11 +464,13 @@ export default {
       margin-bottom: 0 !important;
     }
     #{$this}__item {
-      min-height: auto;
+      min-height: 50px;
       background: none;
       border-bottom: none;
-      padding-top: 0;
+      padding-top: 0.2em;
       padding-bottom: 0.2em;
+      display: flex;
+      align-items: center;
     }
     button:not(.re-button) {
       cursor: pointer;
@@ -496,14 +506,8 @@ export default {
       text-align: left;
       margin-right: 1.5em;
       flex: 1 1 0px;
-      &:nth-last-of-type(-n + 2) {
+      &:nth-last-of-type(-n + 1) {
         max-width: 120px;
-      }
-      &:nth-last-of-type(3) {
-        max-width: 180px;
-      }
-      &:nth-of-type(2) {
-        min-width: 30%;
       }
       &:first-child {
         flex-shrink: 0;

@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-function defaultWorkspace(user) {
-  return user.username;
-}
-
-function currentWorkspace(route) {
-  return route.params.workspace;
-}
-
-const NO_WORKSPACE = "-";
-export { defaultWorkspace, currentWorkspace, NO_WORKSPACE };
+/* eslint-disable */
+var icon = require('vue-svgicon')
+icon.register({
+  'sort-table': {
+    width: 13,
+    height: 14,
+    viewBox: '0 0 13 14',
+    data: ''
+  }
+})

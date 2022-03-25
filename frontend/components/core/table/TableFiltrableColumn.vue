@@ -1,0 +1,208 @@
+<template>
+  <div class="filter__container" v-if="column.filtrable">
+    <button
+      :data-title="column.tooltip"
+      @click="openFilter(column)"
+      :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
+    >
+      {{ column.name }}
+      <svgicon color="#4C4EA3" name="filtrable-column" />
+    </button>
+    <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
+      <input
+        v-model="searchText"
+        class="filter-options"
+        type="text"
+        autofocus
+        placeholder="Search"
+      />
+      <ul>
+        <li
+          v-for="option in filterOptions(this.options, searchText)"
+          :key="option"
+        >
+          <ReCheckbox
+            :id="option"
+            v-model="selectedOptions"
+            class="re-checkbox--dark"
+            :value="option"
+          >
+            {{ option }} ({{ datasetsCounter(option) | formatNumber }})
+          </ReCheckbox>
+        </li>
+        <li
+          v-if="!Object.entries(filterOptions(this.options, searchText)).length"
+        >
+          0 results
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import "assets/icons/filtrable-column";
+export default {
+  props: {
+    column: {
+      type: Object,
+      required: true,
+    },
+    filters: {
+      type: Object,
+      required: true,
+    },
+    data: {
+      type: Array,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      searchText: undefined,
+      visibleFilter: false,
+      selectedOptions: [],
+    };
+  },
+  mounted() {
+    this.$nextTick(() => {
+      if (this.filters[this.column.field]) {
+        this.selectedOptions = this.filters[this.column.field];
+      }
+    });
+  },
+  computed: {
+    options() {
+      const rawOptions = this.data.map((item) => item[this.column.field]);
+      return [...new Set(rawOptions)];
+    },
+  },
+  watch: {
+    selectedOptions() {
+      this.$emit("applyFilters", this.column, this.selectedOptions);
+    },
+  },
+  methods: {
+    openFilter() {
+      this.visibleFilter = true;
+    },
+    close() {
+      this.visibleFilter = false;
+    },
+    filterOptions(options, text) {
+      if (text === undefined) {
+        return options;
+      }
+      let filtered = options.filter((id) =>
+        id.toLowerCase().match(text.toLowerCase())
+      );
+      return filtered;
+    },
+    datasetsCounter(option) {
+      const keys = Object.keys(this.filters).filter(
+        (k) => k !== this.column.field
+      );
+      const filteredData = this.data.filter((dataset) => {
+        return keys.every((key) => {
+          return this.filters[key].includes(dataset[key]);
+        });
+      });
+      return filteredData.filter(
+        (dataset) => dataset[this.column.field] === option
+      ).length;
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+.table__filter {
+  background: $bg;
+  position: absolute;
+  top: 50px;
+  left: -1em;
+  margin-top: 0;
+  padding: 10px 20px;
+  z-index: 3;
+  transform: translate(0);
+  right: auto;
+  min-width: 270px;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  ul {
+    list-style: none;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 0 -1em;
+    padding: 0 1em 1em;
+  }
+  li {
+    padding: 0.4em 0;
+  }
+  .re-checkbox {
+    margin: 0;
+    width: 100% !important;
+    cursor: default;
+  }
+}
+.highlight-text {
+  display: inline-block;
+  // font-weight: 600;
+  background: #ffbf00;
+  line-height: 16px;
+}
+
+.filter {
+  &__container {
+    position: relative;
+  }
+  &__buttons {
+    margin-top: 1em;
+    text-align: right;
+    display: flex;
+    & > * {
+      display: block !important;
+      width: 100%;
+      margin-right: 0.5em;
+      min-height: 38px;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+.filter-options {
+  border: none;
+  outline: none;
+  height: 40px;
+  background: transparent;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding-left: 0;
+  color: $font-secondary;
+  @include font-size(14px);
+  font-family: $sff;
+  &:hover,
+  &.active {
+    background: $bg;
+    min-height: 40px;
+    padding: 0 1em;
+    margin: 0 -1em;
+    border-radius: $border-radius;
+    color: $primary-color;
+    ::v-deep svg {
+      margin-right: 0;
+      & > * {
+        fill: $primary-color !important;
+      }
+    }
+  }
+  .svg-icon {
+    margin-left: 0.5em;
+    margin-right: 1em;
+  }
+}
+</style>

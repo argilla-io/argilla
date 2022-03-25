@@ -20,7 +20,9 @@
 <script>
 export default {
   mounted() {
-    this.$router.push("/datasets");
+    this.$router.push(
+      `/datasets/${this.$route.params.id}/${this.$route.params.dataset}`
+    );
   },
 };
 </script>
