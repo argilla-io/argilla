@@ -51,7 +51,7 @@ export default {
 .sidebar {
   top: 0;
   min-height: 300px;
-  border-radius: 5px;
+  border-radius: $border-radius;
   width: 280px;
   position: absolute;
   right: 100px;
