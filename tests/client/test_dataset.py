@@ -335,8 +335,6 @@ class TestDatasetForTextClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_rubrix_format_multilabel(self):
-        import datasets
-
         ds = datasets.load_dataset(
             "rubrix/go_emotions_test_100",
             split="test",
@@ -370,8 +368,6 @@ class TestDatasetForTextClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_rubrix_format(self):
-        import datasets
-
         ds = datasets.load_dataset(
             "rubrix/app_reviews_train_100",
             split="train",
@@ -398,6 +394,22 @@ class TestDatasetForTextClassification:
             "event_timestamp",
             "metrics",
         ]
+
+    def test_from_datasets_with_annotation_arg(self):
+        dataset_ds = datasets.Dataset.from_dict(
+            {"text": ["mock", "mock2"], "label": [0, -1]},
+            features=datasets.Features(
+                {
+                    "text": datasets.Value("string"),
+                    "label": datasets.ClassLabel(names=["HAM"]),
+                }
+            ),
+        )
+        dataset_rb = rb.DatasetForTextClassification.from_datasets(
+            dataset_ds, annotation="label"
+        )
+
+        assert [rec.annotation for rec in dataset_rb] == ["HAM", None]
 
 
 class TestDatasetForTokenClassification:
@@ -576,8 +588,6 @@ class TestDatasetForTokenClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_rubrix_format(self):
-        import datasets
-
         ds = datasets.load_dataset(
             "rubrix/wikiann_es_test_100",
             split="test",
@@ -602,6 +612,18 @@ class TestDatasetForTokenClassification:
             "event_timestamp",
             "metrics",
         ]
+
+    def test_from_datasets_with_empty_tokens(self, caplog):
+        dataset_ds = datasets.Dataset.from_dict({"empty_tokens": [["mock"], []]})
+        dataset_rb = rb.DatasetForTokenClassification.from_datasets(
+            dataset_ds, tokens="empty_tokens"
+        )
+
+        assert caplog.record_tuples[1][1] == 30
+        assert caplog.record_tuples[1][2] == "Ignoring row with no tokens."
+
+        assert len(dataset_rb) == 1
+        assert dataset_rb[0].tokens == ["mock"]
 
 
 class TestDatasetForText2Text:
@@ -702,8 +724,6 @@ class TestDatasetForText2Text:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_from_dataset_with_non_rubrix_format(self):
-        import datasets
-
         ds = datasets.load_dataset(
             "rubrix/big_patent_a_test_100",
             split="test",
