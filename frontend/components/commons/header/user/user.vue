@@ -1,51 +1,21 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
-    <a
-      v-if="currentWorkspace"
-      class="user__button"
-      href="#"
-      @click.prevent="showSelector"
-    >
-      {{ firstChar(currentWorkspace) }}
+    <a class="user__button" href="#" @click.prevent="showSelector">
+      {{ firstChar(user.username) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
+      <p class="user__name">{{ user.username }}</p>
       <p class="user__mail">{{ user.email }}</p>
       <a
-        href="#"
-        class="user__workspace"
-        @click="selectWorkspace(user.username)"
+        class="user__link"
+        href="https://docs.rubrix.ml/en/stable/"
+        target="_blank"
       >
-        <div
-          :class="[
-            currentWorkspace === user.username ? 'active' : null,
-            'user__workspace__circle',
-          ]"
-        >
-          {{ firstChar(user.username) }}
-        </div>
-        <p class="user__workspace__name">
-          {{ user.username }}<span>Private Workspace</span>
-        </p>
+        <svgicon name="docs"></svgicon> View docs
       </a>
-      <p v-if="userWorkspaces">Team workspaces</p>
-      <a
-        v-for="workspace in userWorkspaces"
-        :key="workspace"
-        href="#"
-        class="user__workspace"
-        @click="selectWorkspace(workspace)"
-      >
-        <div
-          :class="[
-            currentWorkspace === workspace ? 'active' : null,
-            'user__workspace__circle',
-          ]"
-        >
-          {{ firstChar(workspace) }}
-        </div>
-        <p class="user__workspace__name">{{ workspace }}</p>
+      <a class="user__link" href="#" @click.prevent="logout">
+        <svgicon name="logout"></svgicon> Log out
       </a>
-      <a class="user__logout" href="#" @click.prevent="logout"> Log out </a>
       <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
   </div>
@@ -53,11 +23,8 @@
 
 <script>
 import { mapActions } from "vuex";
-import {
-  setWorkspace,
-  currentWorkspace,
-  NO_WORKSPACE,
-} from "@/models/Workspace";
+import "assets/icons/docs";
+import "assets/icons/logout";
 export default {
   data: () => {
     return {
@@ -69,19 +36,6 @@ export default {
     user() {
       return this.$auth.user;
     },
-    userWorkspaces() {
-      return (this.user.workspaces || [])
-        .map((ws) => {
-          if (ws === "") {
-            return NO_WORKSPACE;
-          }
-          return ws;
-        })
-        .filter((ws) => ws !== this.user.username);
-    },
-    currentWorkspace() {
-      return currentWorkspace(this.$route);
-    },
   },
   async fetch() {
     this.rubrixVersion = await this.getRubrixVersion();
@@ -91,7 +45,7 @@ export default {
       getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
     }),
     firstChar(name) {
-      return name.charAt(0);
+      return name.slice(0, 2);
     },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
@@ -103,18 +57,12 @@ export default {
       await this.$auth.logout();
       await this.$auth.strategy.token.reset();
     },
-    async selectWorkspace(workspace) {
-      if (this.currentWorkspace !== workspace) {
-        return await setWorkspace(this.$router, workspace);
-      }
-      this.close();
-    },
   },
 };
 </script>
 
 <style scope lang="scss">
-$buttonSize: 30px;
+$buttonSize: 34px;
 %circle {
   height: $buttonSize;
   width: $buttonSize;
@@ -138,14 +86,15 @@ $buttonSize: 30px;
     color: $primary-color;
     will-change: auto;
     &:hover {
-      transform: scale3d(1.1, 1.1, 1.1) translateZ(0);
+      transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
       transition: all 0.2s ease-in-out;
     }
   }
   &__content {
     position: absolute;
-    top: 3em;
-    right: 0;
+    top: 3.8em;
+    right: -1em;
+    padding-top: 1.5em;
     background: $lighter-color;
     border-radius: $border-radius;
     @include font-size(12px);
@@ -158,16 +107,16 @@ $buttonSize: 30px;
       text-decoration: none;
     }
   }
+  &__name {
+    color: palette(grey, dark);
+    @include font-size(16px);
+    margin: 0 1.5em 0.3em 1.5em;
+    font-weight: 600;
+  }
   &__mail {
-    margin-bottom: 1em;
-    margin-top: 0;
+    margin: 0 1.5em 2em 1.5em;
   }
-  &__logout {
-    display: block;
-    @include font-size(14px);
-    margin-top: 0.5em;
-  }
-  &__workspace {
+  &__link {
     display: flex;
     align-items: center;
     outline: none !important;
@@ -209,6 +158,11 @@ $buttonSize: 30px;
   font-weight: 400;
   color: palette(grey, dark);
   line-height: 1em;
-  margin-top: 1em;
+  margin-top: 1.5em;
+  padding: 1em;
+  background: #fcfcfc;
+  text-align: right;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 </style>

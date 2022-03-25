@@ -21,7 +21,8 @@
     <div v-else class="wrapper">
       <div class="main">
         <app-header
-          :breadcrumbs="[{ link: `/ws/${workspace}`, name: workspace }]"
+          :copy-button="false"
+          :breadcrumbs="[{ link: `/datasets`, name: 'Datasets' }]"
           :sticky="false"
         />
         <Error
@@ -43,12 +44,14 @@
               :columns="tableColumns"
               :query-search="querySearch"
               :global-actions="false"
-              search-on="name"
               :visible-modal-id="datasetCompositeId"
               :delete-modal-content="deleteConfirmationContent"
               :empty-search-info="emptySearchInfo"
+              :active-filters="activeFilters"
+              search-on="name"
               @sort-column="onSortColumns"
               @onActionClicked="onActionClicked"
+              @filter-applied="onColumnFilterApplied"
               @close-modal="closeModal"
             />
           </div>
@@ -69,8 +72,21 @@ export default {
     querySearch: undefined,
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
+      {
+        name: "Workspace",
+        field: "owner",
+        class: "text",
+        type: "text",
+        filtrable: "true",
+      },
+      {
+        name: "Task",
+        field: "task",
+        class: "task",
+        type: "task",
+        filtrable: "true",
+      },
       { name: "Tags", field: "tags", class: "text", type: "object" },
-      { name: "Task", field: "task", class: "task", type: "task" },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       {
         name: "Updated at",
@@ -100,6 +116,13 @@ export default {
     await this.fetchDatasets();
   },
   computed: {
+    activeFilters() {
+      const workspaces = this.workspaces;
+      if (workspaces) {
+        return [{ column: "owner", values: workspaces }];
+      }
+      return [];
+    },
     datasets() {
       return ObservationDataset.all().map((dataset) => {
         return {
@@ -109,7 +132,16 @@ export default {
         };
       });
     },
+    workspaces() {
+      let _workspaces = this.$route.query.workspace;
+      if (typeof _workspaces == "string") {
+        _workspaces = [_workspaces];
+      }
+      return _workspaces;
+    },
     workspace() {
+      // THIS IS WRONG !!!
+      this.$route.query.workspace;
       return currentWorkspace(this.$route);
     },
     deleteConfirmationContent() {
@@ -134,12 +166,20 @@ export default {
       _deleteDataset: "entities/datasets/deleteDataset",
     }),
 
+    onColumnFilterApplied({ column, values }) {
+      if (column === "owner") {
+        if (values !== this.workspaces) {
+          this.$router.replace({ query: { workspace: values } });
+        }
+      }
+    },
+
     datasetWorkspace(dataset) {
       var workspace = dataset.owner;
       if (workspace === null || workspace === "null") {
         workspace = this.workspace;
       }
-      return `/ws/${workspace}/${dataset.name}`;
+      return `/datasets/${workspace}/${dataset.name}`;
     },
 
     onActionClicked(action, dataset) {
@@ -156,7 +196,6 @@ export default {
         case "confirm-delete":
           this.deleteDataset(dataset);
           break;
-
         default:
           console.warn(action);
       }
