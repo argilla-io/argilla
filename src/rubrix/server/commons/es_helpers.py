@@ -17,7 +17,6 @@ import math
 from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
-from stopwordsiso import stopwords
 
 from rubrix.server.tasks.commons import SortableField, TaskStatus
 from rubrix.server.tasks.commons.api import EsRecordDataFieldNames

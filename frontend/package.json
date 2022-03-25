@@ -43,7 +43,7 @@
     "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.0",
+    "@babel/core": "7.17.2",
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@nuxt/test-utils": "^0.2.2",

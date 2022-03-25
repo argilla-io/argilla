@@ -715,10 +715,6 @@ class Snorkel(LabelModel):
 
         # metrics are only calculated for non-abstained data points
         idx = predictions != -1
-        if not idx.all():
-            _LOGGER.warning(
-                "Metrics are only calculated over non-abstained predictions!"
-            )
 
         annotation = self._weak_labels.annotation()[idx]
         if self._need_remap:

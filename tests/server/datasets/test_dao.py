@@ -21,9 +21,15 @@ from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.tasks.commons import TaskType
 from rubrix.server.tasks.commons.dao.dao import dataset_records_dao
+from rubrix.server.tasks.text_classification.dao.es_config import (
+    text_classification_mappings,
+)
 
 es_wrapper = create_es_wrapper()
 records = dataset_records_dao(es_wrapper)
+records.register_task_mappings(
+    TaskType.text_classification, text_classification_mappings()
+)
 dao = DatasetsDAO.get_instance(es_wrapper, records)
 
 
