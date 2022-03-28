@@ -23,16 +23,12 @@
     ><span
       v-for="(token, i) in span.tokens"
       :key="i"
-      :class="[
-        token.hasSpaceAfter && i + 1 === span.tokens.length
-          ? 'whitespace'
-          : null,
-        'highlight__content',
-      ]"
+      class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
       v-html="visualizeToken(token, i)"
-    ></span>
+    ></span
+    ><span class="whitespace">{{ charsBetweenTokens }}</span>
     <svgicon
       class="remove-button"
       @click="removeEntity"
@@ -78,6 +74,9 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    charsBetweenTokens() {
+      return this.span.tokens.at(-1).charsBetweenTokens;
+    },
   },
   methods: {
     openTagSelector() {
@@ -105,7 +104,9 @@ export default {
         ? this.$htmlHighlightText(token.text)
         : this.$htmlText(token.text);
       return `${text}${
-        token.hasSpaceAfter && i + 1 !== this.span.tokens.length ? " " : ""
+        token.charsBetweenTokens && i + 1 !== this.span.tokens.length
+          ? token.charsBetweenTokens
+          : ""
       }`;
     },
   },
@@ -113,8 +114,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.whitespace {
-  margin-right: 3.5px;
+::v-deep .whitespace {
+  background: palette(white);
+  padding-bottom: 3px;
+  border-bottom: 5px solid palette(white);
+  @include font-size(18px);
+  white-space: pre-line;
+  display: inline;
 }
 
 .highlight {

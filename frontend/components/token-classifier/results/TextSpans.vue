@@ -123,7 +123,7 @@ export default {
             start: entity.start,
             end: entity.end,
             origin: this.origin,
-            hasSpaceAfter: entity.hasSpaceAfter,
+            charsBetweenTokens: entity.charsBetweenTokens,
           });
           idx = entity.end_token;
         } else {
@@ -134,7 +134,7 @@ export default {
             start: token.start,
             end: token.end,
             origin: this.origin,
-            hasSpaceAfter: token.hasSpaceAfter,
+            charsBetweenTokens: token.charsBetweenTokens,
           });
           idx++;
         }
