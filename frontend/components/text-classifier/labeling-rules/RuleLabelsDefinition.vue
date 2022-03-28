@@ -153,7 +153,7 @@ export default {
       if (this.selectedLabels && queryWithLabelsIsStored) {
         return `This query with ${
           this.selectedLabels.length > 1 ? "these labels" : "this label"
-        } are already saved as rule`;
+        } is already saved as rule`;
       }
     },
     coveredRecords() {
