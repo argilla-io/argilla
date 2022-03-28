@@ -329,18 +329,34 @@ class TokenClassificationRecord(_Validators):
     def __tags2entities__(self, tags: List[str]) -> List[Tuple[str, int, int]]:
         idx = 0
         entities = []
+        entity_starts = False
         while idx < len(tags):
             tag = tags[idx]
+            if tag == "O":
+                entity_starts = False
             if tag != "O":
                 prefix, entity = tag.split("-")
-                if prefix == "B":
+                if prefix in ["B", "U"]:
+                    if prefix == "B":
+                        entity_starts = True
                     char_start, char_end = self.token_span(token_idx=idx)
                     entities.append(
-                        {"entity": entity, "start": char_start, "end": char_end}
+                        {"entity": entity, "start": char_start, "end": char_end + 1}
                     )
                 elif prefix in ["I", "L"]:
+                    if not entity_starts:
+                        _LOGGER.warning(
+                            "Detected non-starting tag and first entity token was not found."
+                            f"Assuming {tag} as first entity token"
+                        )
+                        entity_starts = True
+                        char_start, char_end = self.token_span(token_idx=idx)
+                        entities.append(
+                            {"entity": entity, "start": char_start, "end": char_end + 1}
+                        )
+
                     _, char_end = self.token_span(token_idx=idx)
-                    entities[-1]["end"] = char_end
+                    entities[-1]["end"] = char_end + 1
             idx += 1
         return [(value["entity"], value["start"], value["end"]) for value in entities]
 
