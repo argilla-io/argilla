@@ -511,7 +511,12 @@ export default {
       }
       &:first-child {
         flex-shrink: 0;
-        min-width: 220px;
+        min-width: 240px;
+        a {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
     }
     .svg-icon {
@@ -553,8 +558,10 @@ export default {
     display: block;
     @include font-size(15px);
     word-break: break-word;
-    display: flex;
-    align-items: center;
+    span {
+      display: flex;
+      align-items: center;
+    }
     .button-icon {
       margin-left: 5px;
       padding: 0;
@@ -564,11 +571,13 @@ export default {
       }
     }
     a {
-      width: 100%;
       text-decoration: none;
       &:hover {
         color: $primary-color;
       }
+    }
+    .svg-icon {
+      max-width: 13px;
     }
   }
   &__group {
