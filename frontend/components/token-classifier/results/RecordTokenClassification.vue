@@ -61,12 +61,22 @@ export default {
       );
 
       const { visualTokens } = this.record.tokens.reduce(
-        ({ visualTokens, startPosition }, token) => {
+        ({ visualTokens, startPosition }, token, index) => {
           const start = recordHasEmoji
             ? indexOf(this.record.text, token, startPosition)
             : this.record.text.indexOf(token, startPosition);
+          const nextStart = recordHasEmoji
+            ? indexOf(
+                this.record.text,
+                this.record.tokens[index + 1],
+                startPosition
+              )
+            : this.record.text.indexOf(
+                this.record.tokens[index + 1],
+                startPosition
+              );
           const end = start + (recordHasEmoji ? length(token) : token.length);
-          const hasSpaceAfter = this.record.text.slice(end, end + 1) === " ";
+          const charsBetweenTokens = this.record.text.slice(end, nextStart);
 
           let highlighted = false;
           for (let highlight of searchKeywordsSpans) {
@@ -78,7 +88,7 @@ export default {
           return {
             visualTokens: [
               ...visualTokens,
-              { start, end, highlighted, text: token, hasSpaceAfter },
+              { start, end, highlighted, text: token, charsBetweenTokens },
             ],
             startPosition: end,
           };
