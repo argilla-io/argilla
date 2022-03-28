@@ -13,18 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import hashlib
-import importlib
 import logging
-import sys
-import time
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
-import pandas as pd
 
 from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import WeakLabels
+from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,7 +61,7 @@ class LabelModel:
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
         """
         raise NotImplementedError
 
@@ -76,21 +72,397 @@ class LabelModel:
     def predict(
         self,
         include_annotated_records: bool = False,
-        include_abstentions: bool = False,
         prediction_agent: str = "LabelModel",
         **kwargs,
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            **kwargs: Specific to the label model implementations
 
         Returns:
             A list of records that include the predictions of the label model.
         """
         raise NotImplementedError
+
+
+class MajorityVoter(LabelModel):
+    """A basic label model that computes the majority vote across all rules.
+
+    For multi-label classification, it will simply vote for all labels with a non-zero probability,
+    that is labels that got at least one vote by the rules.
+
+    Args:
+        weak_labels: The weak labels object.
+    """
+
+    def __init__(self, weak_labels: Union[WeakLabels, WeakMultiLabels]):
+        super().__init__(weak_labels=weak_labels)
+
+    def fit(self, *args, **kwargs):
+        raise NotImplementedError("No need to call fit on the 'MajorityVoter'!")
+
+    def predict(
+        self,
+        include_annotated_records: bool = False,
+        include_abstentions: bool = False,
+        prediction_agent: str = "MajorityVoter",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+    ) -> List[TextClassificationRecord]:
+        """Applies the label model.
+
+        Args:
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL!). You can choose among two policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        wl_matrix = self._weak_labels.matrix(
+            has_annotation=None if include_annotated_records else False
+        )
+        records = self._weak_labels.records(
+            has_annotation=None if include_annotated_records else False
+        )
+
+        if isinstance(self._weak_labels, WeakMultiLabels):
+            probabilities = self._compute_multi_label_probs(wl_matrix)
+
+            return self._make_multi_label_records(
+                probabilities=probabilities,
+                records=records,
+                include_abstentions=include_abstentions,
+                prediction_agent=prediction_agent,
+            )
+
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
+        probabilities = self._compute_single_label_probs(wl_matrix)
+
+        return self._make_single_label_records(
+            probabilities=probabilities,
+            records=records,
+            include_abstentions=include_abstentions,
+            prediction_agent=prediction_agent,
+            tie_break_policy=tie_break_policy,
+        )
+
+    def _compute_single_label_probs(self, wl_matrix: np.ndarray) -> np.ndarray:
+        """Helper methods that computes the probabilities.
+
+        Args:
+            wl_matrix: The weak label matrix.
+
+        Returns:
+            A matrix of "probabilities" with nr or records x nr of labels.
+            The label order matches the one from `self.weak_labels.labels`.
+        """
+        counts = np.column_stack(
+            [
+                np.count_nonzero(
+                    wl_matrix == self._weak_labels.label2int[label], axis=1
+                )
+                for label in self._weak_labels.labels
+            ]
+        )
+        with np.errstate(invalid="ignore"):
+            probabilities = counts / counts.sum(axis=1).reshape(len(counts), -1)
+
+        # we treat abstentions as ties among all labels (see snorkel)
+        probabilities[np.isnan(probabilities)] = 1.0 / len(self._weak_labels.labels)
+
+        return probabilities
+
+    def _make_single_label_records(
+        self,
+        probabilities: np.ndarray,
+        records: List[TextClassificationRecord],
+        include_abstentions: bool,
+        prediction_agent: str,
+        tie_break_policy: TieBreakPolicy,
+    ):
+        """Helper method to create records given predicted probabilities.
+
+        Args:
+            probabilities: The predicted probabilities.
+            records: The records associated with the probabilities.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+            tie_break_policy: Policy to break ties. You can choose among two policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        records_with_prediction = []
+        for i, prob, rec in zip(range(len(records)), probabilities, records):
+            # Check if model abstains, that is if the highest probability is assigned to more than one label
+            # 1.e-8 is taken from the abs tolerance of np.isclose
+            equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+            tie = False
+            if len(equal_prob_idx) > 1:
+                tie = True
+
+            # maybe skip record
+            if not include_abstentions and (
+                tie and tie_break_policy is TieBreakPolicy.ABSTAIN
+            ):
+                continue
+
+            if not tie:
+                pred_for_rec = [
+                    (self._weak_labels.labels[idx], prob[idx])
+                    for idx in np.argsort(prob)[::-1]
+                ]
+            # resolve ties following the tie break policy
+            elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+                pred_for_rec = None
+            elif tie_break_policy is TieBreakPolicy.RANDOM:
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
+                    equal_prob_idx
+                )
+                for idx in equal_prob_idx:
+                    if idx == random_idx:
+                        prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                    else:
+                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                            len(equal_prob_idx) - 1
+                        )
+                pred_for_rec = [
+                    (self._weak_labels.labels[idx], prob[idx])
+                    for idx in np.argsort(prob)[::-1]
+                ]
+            else:
+                raise NotImplementedError(
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for {self.__class__.__name__}!"
+                )
+
+            records_with_prediction.append(rec.copy(deep=True))
+            records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
+
+        return records_with_prediction
+
+    def _compute_multi_label_probs(self, wl_matrix: np.ndarray) -> np.ndarray:
+        """Helper methods that computes the probabilities.
+
+        Args:
+            wl_matrix: The weak label matrix.
+
+        Returns:
+            A matrix of "probabilities" with nr or records x nr of labels.
+            The label order matches the one from `self.weak_labels.labels`.
+        """
+        # turn abstentions (-1) into 0
+        counts = np.where(wl_matrix == -1, 0, wl_matrix).sum(axis=1)
+        # binary probability, predict all labels with at least one vote
+        probabilities = np.where(counts > 0, 1, 0).astype(np.float16)
+
+        all_rules_abstained = wl_matrix.sum(axis=1).sum(axis=1) == (
+            -1 * self._weak_labels.cardinality * len(self._weak_labels.rules)
+        )
+        probabilities[all_rules_abstained] = [np.nan] * len(self._weak_labels.labels)
+
+        # more "nuanced probability", not sure if useful though
+        # with np.errstate(invalid="ignore"):
+        #     probabilities = counts / counts.sum(axis=1).reshape(len(counts), -1)
+
+        return probabilities
+
+    def _make_multi_label_records(
+        self,
+        probabilities: np.ndarray,
+        records: List[TextClassificationRecord],
+        include_abstentions: bool,
+        prediction_agent: str,
+    ) -> List[TextClassificationRecord]:
+        """Helper method to create records given predicted probabilities.
+
+        Args:
+            probabilities: The predicted probabilities.
+            records: The records associated with the probabilities.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
+            prediction_agent: String used for the ``prediction_agent`` in the returned records.
+
+        Returns:
+            A list of records that include the predictions of the label model.
+        """
+        records_with_prediction = []
+        for prob, rec in zip(probabilities, records):
+            all_abstained = np.isnan(prob).all()
+            # maybe skip record
+            if not include_abstentions and all_abstained:
+                continue
+
+            pred_for_rec = None
+            if not all_abstained:
+                pred_for_rec = [
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
+                ]
+
+            records_with_prediction.append(rec.copy(deep=True))
+            records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction_agent = prediction_agent
+
+        return records_with_prediction
+
+    def score(
+        self,
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        output_str: bool = False,
+    ) -> Union[Dict[str, float], str]:
+        """Returns some scores/metrics of the label model with respect to the annotated records.
+
+        The metrics are:
+
+        - accuracy
+        - micro/macro averages for precision, recall and f1
+        - precision, recall, f1 and support for each label
+
+        For more details about the metrics, check out the
+        `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
+
+        Args:
+            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among two policies:
+
+                - `abstain`: Do not provide any prediction
+                - `random`: randomly choose among tied option using deterministic hash
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+            output_str: If True, return output as nicely formatted string.
+
+        Returns:
+            The scores/metrics in a dictionary or as a nicely formatted str.
+
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
+        Raises:
+            MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
+        """
+        try:
+            import sklearn
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'sklearn' must be installed to compute the metrics! "
+                "You can install 'sklearn' with the command: `pip install scikit-learn`"
+            )
+        from sklearn.metrics import classification_report
+
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+
+        if isinstance(self._weak_labels, WeakMultiLabels):
+            probabilities = self._compute_multi_label_probs(wl_matrix)
+
+            annotation, prediction = self._score_multi_label(probabilities)
+        else:
+            if isinstance(tie_break_policy, str):
+                tie_break_policy = TieBreakPolicy(tie_break_policy)
+
+            probabilities = self._compute_single_label_probs(wl_matrix)
+
+            annotation, prediction = self._score_single_label(
+                probabilities, tie_break_policy
+            )
+
+        return classification_report(
+            annotation,
+            prediction,
+            target_names=self._weak_labels.labels[: annotation.max() + 1],
+            output_dict=not output_str,
+        )
+
+    def _score_single_label(
+        self, probabilities: np.ndarray, tie_break_policy: TieBreakPolicy
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Helper method to compute scores for single-label classifications.
+
+        Args:
+            probabilities: The probabilities.
+            tie_break_policy: Policy to break ties. You can choose among two policies:
+
+                - `abstain`: Exclude from scores.
+                - `random`: randomly choose among tied option using deterministic hash.
+
+                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
+                as is the case when all the labeling functions (rules) abstained.
+
+        Returns:
+            A tuple of the annotation and prediction array.
+        """
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        is_tie = is_max.sum(axis=1) > 1
+
+        prediction = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotation = np.array(
+            [
+                self._weak_labels.labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
+        )
+
+        if not is_tie.any():
+            pass
+        # resolve ties
+        elif tie_break_policy is TieBreakPolicy.ABSTAIN:
+            prediction, annotation = prediction[~is_tie], annotation[~is_tie]
+        elif tie_break_policy is TieBreakPolicy.RANDOM:
+            for i in np.nonzero(is_tie)[0]:
+                equal_prob_idx = np.nonzero(is_max[i])[0]
+                random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
+                    equal_prob_idx
+                )
+                prediction[i] = equal_prob_idx[random_idx]
+        else:
+            raise NotImplementedError(
+                f"The tie break policy '{tie_break_policy.value}' is not implemented for MajorityVoter!"
+            )
+
+        return annotation, prediction
+
+    def _score_multi_label(
+        self, probabilities: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Helper method to compute scores for multi-label classifications.
+
+        Args:
+            probabilities: The probabilities.
+
+        Returns:
+            A tuple of the annotation and prediction array.
+        """
+        prediction = np.where(probabilities > 0.5, 1, 0)
+
+        is_abstain = np.isnan(probabilities).all(axis=1)
+
+        prediction, annotation = (
+            prediction[~is_abstain],
+            self._weak_labels.annotation()[~is_abstain],
+        )
+
+        return annotation, prediction
 
 
 class Snorkel(LabelModel):
@@ -129,21 +501,16 @@ class Snorkel(LabelModel):
         # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
         if self._weak_labels.label2int[None] != -1 or sorted(
             self._weak_labels.int2label
-        ) != list(range(-1, len(self._weak_labels.label2int) - 1)):
+        ) != list(range(-1, self._weak_labels.cardinality)):
             self._need_remap = True
-
-            labels = [None] + [
-                label for label in self._weak_labels.label2int if label is not None
-            ]
-
             self._weaklabelsInt2snorkelInt = {
                 self._weak_labels.label2int[label]: i
-                for i, label in enumerate(labels, -1)
+                for i, label in enumerate([None] + self._weak_labels.labels, -1)
             }
         else:
             self._need_remap = False
             self._weaklabelsInt2snorkelInt = {
-                i: i for i in range(-1, len(self._weak_labels.label2int) - 1)
+                i: i for i in range(-1, self._weak_labels.cardinality)
             }
 
         self._snorkelInt2weaklabelsInt = {
@@ -152,7 +519,7 @@ class Snorkel(LabelModel):
 
         # instantiate Snorkel's label model
         self._model = SnorkelLabelModel(
-            cardinality=len(self._weak_labels.label2int) - 1,
+            cardinality=self._weak_labels.cardinality,
             verbose=verbose,
             device=device,
         )
@@ -161,7 +528,7 @@ class Snorkel(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
@@ -215,8 +582,8 @@ class Snorkel(LabelModel):
         """Returns a list of records that contain the predictions of the label model
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
             tie_break_policy: Policy to break ties. You can choose among three policies:
 
@@ -225,7 +592,7 @@ class Snorkel(LabelModel):
                 - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -264,13 +631,15 @@ class Snorkel(LabelModel):
             pred_for_rec = None
             if pred != -1:
                 # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
-                if np.isclose(prob, prob.max()).sum() > 1:
-                    for idx in range(len(prob)):
+                # 1.e-8 is taken from the abs tolerance of np.isclose
+                equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+                if len(equal_prob_idx) > 1:
+                    for idx in equal_prob_idx:
                         if idx == pred:
                             prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                         else:
                             prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                                len(prob) - 1
+                                len(equal_prob_idx) - 1
                             )
 
                 pred_for_rec = [
@@ -312,7 +681,7 @@ class Snorkel(LabelModel):
                 - `true-random`: randomly choose among the tied options. NOTE: repeated runs may have slightly different results due to differences in broken ties
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
             output_str: If True, return output as nicely formatted string.
 
         Returns:
@@ -351,15 +720,10 @@ class Snorkel(LabelModel):
         if self._need_remap:
             annotation = self._copy_and_remap(annotation)
 
-        target_names = [
-            self._weak_labels.int2label[i]
-            for i in list(self._weaklabelsInt2snorkelInt.keys())[1:]
-        ]
-
         return classification_report(
             annotation,
             predictions[idx],
-            target_names=target_names[: annotation.max() + 1],
+            target_names=self._weak_labels.labels[: annotation.max() + 1],
             output_dict=not output_str,
         )
 
@@ -408,15 +772,12 @@ class FlyingSquid(LabelModel):
 
         self._init_kwargs = kwargs
         self._models: List[FlyingSquidLabelModel] = []
-        self._labels = [
-            label for label in self._weak_labels.label2int.keys() if label is not None
-        ]
 
     def fit(self, include_annotated_records: bool = False, **kwargs):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the training.
             **kwargs: Passed on to the FlyingSquid's
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
@@ -430,7 +791,9 @@ class FlyingSquid(LabelModel):
         # much of the implementation is taken from wrench:
         # https://github.com/JieyuZ2/wrench/blob/main/wrench/labelmodel/flyingsquid.py
         # If binary, we only need one model
-        for i in range(1 if len(self._labels) == 2 else len(self._labels)):
+        for i in range(
+            1 if self._weak_labels.cardinality == 2 else self._weak_labels.cardinality
+        ):
             model = self._FlyingSquidLabelModel(
                 m=len(self._weak_labels.rules), **self._init_kwargs
             )
@@ -458,7 +821,9 @@ class FlyingSquid(LabelModel):
         """
         wl_matrix_i = weak_label_matrix.copy()
 
-        target_mask = wl_matrix_i == self._weak_labels.label2int[self._labels[i]]
+        target_mask = (
+            wl_matrix_i == self._weak_labels.label2int[self._weak_labels.labels[i]]
+        )
         abstain_mask = wl_matrix_i == self._weak_labels.label2int[None]
         other_mask = (~target_mask) & (~abstain_mask)
 
@@ -474,13 +839,13 @@ class FlyingSquid(LabelModel):
         include_abstentions: bool = False,
         prediction_agent: str = "FlyingSquid",
         verbose: bool = True,
-        tie_break_policy: str = "abstain",
+        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
     ) -> List[TextClassificationRecord]:
         """Applies the label model.
 
         Args:
-            include_annotated_records: Whether or not to include annotated records.
-            include_abstentions: Whether or not to include records in the output, for which the label model abstained.
+            include_annotated_records: Whether to include annotated records.
+            include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
             verbose: If True, print out messages of the progress to stderr.
             tie_break_policy: Policy to break ties. You can choose among two policies:
@@ -489,7 +854,7 @@ class FlyingSquid(LabelModel):
                 - `random`: randomly choose among tied option using deterministic hash
 
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -529,7 +894,8 @@ class FlyingSquid(LabelModel):
 
             if not tie:
                 pred_for_rec = [
-                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
                 ]
             # resolve ties following the tie break policy
             elif tie_break_policy is TieBreakPolicy.ABSTAIN:
@@ -538,15 +904,16 @@ class FlyingSquid(LabelModel):
                 random_idx = int(hashlib.sha1(f"{i}".encode()).hexdigest(), 16) % len(
                     equal_prob_idx
                 )
-                for idx in range(len(prob)):
-                    if idx == equal_prob_idx[random_idx]:
+                for idx in equal_prob_idx:
+                    if idx == random_idx:
                         prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
                         prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                            len(prob) - 1
+                            len(equal_prob_idx) - 1
                         )
                 pred_for_rec = [
-                    (self._labels[i], prob[i]) for i in np.argsort(prob)[::-1]
+                    (self._weak_labels.labels[i], prob[i])
+                    for i in np.argsort(prob)[::-1]
                 ]
             else:
                 raise NotImplementedError(
@@ -580,9 +947,9 @@ class FlyingSquid(LabelModel):
                 "This FlyingSquid instance is not fitted yet. Call `fit` before using this model."
             )
         # create predictions for each label
-        if len(self._labels) > 2:
-            probas = np.zeros((len(weak_label_matrix), len(self._labels)))
-            for i in range(len(self._labels)):
+        if self._weak_labels.cardinality > 2:
+            probas = np.zeros((len(weak_label_matrix), self._weak_labels.cardinality))
+            for i in range(self._weak_labels.cardinality):
                 wl_matrix_i = self._copy_and_transform_wl_matrix(weak_label_matrix, i)
                 probas[:, i] = self._models[i].predict_proba(
                     L_matrix=wl_matrix_i, verbose=verbose
@@ -597,28 +964,6 @@ class FlyingSquid(LabelModel):
             )
 
         return probas
-
-    def _get_score_objects(self, verbose: bool = False):
-        wl_matrix = self._weak_labels.matrix(has_annotation=True)
-        probabilities = self._predict(wl_matrix, verbose)
-
-        # 1.e-8 is taken from the abs tolerance of np.isclose
-        is_max = (
-            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
-        )
-        is_tie = is_max.sum(axis=1) > 1
-
-        prediction = np.argmax(is_max, axis=1)
-        # we need to transform the indexes!
-        annotation = np.array(
-            [
-                self._labels.index(self._weak_labels.int2label[i])
-                for i in self._weak_labels.annotation()
-            ],
-            dtype=np.short,
-        )
-
-        return is_max, is_tie, prediction, annotation
 
     def score(
         self,
@@ -644,7 +989,7 @@ class FlyingSquid(LabelModel):
                 - `random`: randomly choose among tied option using deterministic hash
 
                 The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all of the labeling functions abstained.
+                as is the case when all the labeling functions (rules) abstained.
             verbose: If True, print out messages of the progress to stderr.
             output_str: If True, return output as nicely formatted string.
 
@@ -666,22 +1011,33 @@ class FlyingSquid(LabelModel):
             )
         from sklearn.metrics import classification_report
 
-        from rubrix.metrics.text_classification.metrics import (
-            cautious_classification_report,
-        )
-
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        is_max, is_tie, prediction, annotation = self._get_score_objects(
-            verbose=verbose
+        wl_matrix = self._weak_labels.matrix(has_annotation=True)
+        probabilities = self._predict(wl_matrix, verbose)
+
+        # 1.e-8 is taken from the abs tolerance of np.isclose
+        is_max = (
+            np.abs(probabilities.max(axis=1, keepdims=True) - probabilities) < 1.0e-8
+        )
+        is_tie = is_max.sum(axis=1) > 1
+
+        prediction = np.argmax(is_max, axis=1)
+        # we need to transform the indexes!
+        annotation = np.array(
+            [
+                self._weak_labels.labels.index(self._weak_labels.int2label[i])
+                for i in self._weak_labels.annotation()
+            ],
+            dtype=np.short,
         )
 
         if not is_tie.any():
             pass
         # resolve ties
         elif tie_break_policy is TieBreakPolicy.ABSTAIN:
-            pass
+            prediction, annotation = prediction[~is_tie], annotation[~is_tie]
         elif tie_break_policy is TieBreakPolicy.RANDOM:
             for i in np.nonzero(is_tie)[0]:
                 equal_prob_idx = np.nonzero(is_max[i])[0]
@@ -694,364 +1050,11 @@ class FlyingSquid(LabelModel):
                 f"The tie break policy '{tie_break_policy.value}' is not implemented for FlyingSquid!"
             )
 
-        if tie_break_policy is TieBreakPolicy.ABSTAIN:
-            return cautious_classification_report(
-                annotation,
-                prediction,
-                model_labels=self._labels,
-                output_dict=not output_str,
-                is_tie=is_tie,
-            )
-        else:
-            return classification_report(
-                annotation,
-                prediction,
-                target_names=self._labels[: annotation.max() + 1],
-                output_dict=not output_str,
-            )
-
-
-class Epoxy(FlyingSquid):
-    """The label model by `Epoxy <https://github.com/HazyResearch/epoxy>`__.
-        This label model is an extension to the label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
-
-    Args:
-        weak_labels: A `WeakLabels` object containing the weak labels and records.
-        thresholds: A list of thresholds. If the cosine similarity between a blank record and an annotated record
-            is above the threshold assigned to its labeling function, the blank record will receive the same label.
-        embeddings: An array of sentence embeddings for each record on the weak label matrix.
-        **kwargs: Passed on to the init of the FlyingSquid's
-            `LabelModel <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L18>`__.
-
-    Examples:
-        >>> from rubrix.labeling.text_classification import WeakLabels
-        >>> weak_labels = WeakLabels(dataset="my_dataset")
-        >>> dev_weak_labels = WeakLabels(dataset="dev_dataset")
-        >>> thresholds = Epoxy.grid_search_threshold(dev_weak_labels, embeddings=embeddings)
-        >>> label_model = Epoxy(weak_labels, thresholds=thresholds, embeddings=embeddings)
-        >>> label_model.fit()
-        >>> records = label_model.predict()
-    """
-
-    def __init__(
-        self,
-        weak_labels: WeakLabels,
-        embeddings: np.ndarray = None,
-        thresholds: Union[float, List[float], None] = None,
-        **kwargs,
-    ):
-
-        libraries = {
-            "epoxy": """
-                'epoxy' must be installed to use the `Epoxy` label model!
-                You can install 'epoxy' with the command: `pip install epoxy`
-                """,
-            "faiss": """
-                'faiss' must be installed to use the `Epoxy` label model!
-                You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`
-            """,
-            (
-                "flyingsquid",
-                "pgmpy",
-            ): """
-                'flyingsquid' must be installed to use the `Epoxy` label model! "
-                "You can install 'flyingsquid' with the command: `pip install pgmpy flyingsquid`
-            """,
-        }
-
-        for key, value in libraries.items():
-            if isinstance(key, str):
-                iterable = (key,)
-            elif isinstance(key, tuple):
-                iterable = key
-            for item in iterable:
-                try:
-                    importlib.import_module(item)
-                except:
-                    raise ModuleNotFoundError(value)
-
-        if isinstance(thresholds, float):
-            self._thresholds = [thresholds] * len(weak_labels.shape[1])
-        else:
-            self._thresholds = thresholds
-
-        self._embeddings = embeddings
-        self._kwargs = kwargs
-
-        super().__init__(weak_labels, **kwargs)
-
-    def _generate_first_search_space(self, num: int = 20):
-        """Helper function to the `grid_search_threshold` method.
-                In the first search space, all thresholds in an array are set to the same value.
-
-        Args:
-            weak_labels (WeakLabels): A `WeakLabels` object containing the weak labels and records.
-            num (int, optional): Size of the first search space during grid search. Defaults to 20.
-
-        Yields:
-            Iterator[List[float]]: A generator for all threshold arrays in the first search space.
-        """
-        thresholds_len = self._weak_labels.matrix().shape[1]
-        linspace = np.linspace(0, 1, num=num)
-        for x in linspace:
-            yield [x] * thresholds_len
-
-    def _generate_second_search_space(
-        self, thresholds: np.ndarray, num: int = 20, index: int = 0
-    ):
-        """Helper function to the `grid_search_threshold` method.
-                In the second search space, the thresholds are optimized one by one.
-
-        Args:
-            thresholds (np.ndarray): The starting list of thresholds.
-            num (int, optional): Size of the second search space during grid search. Defaults to 20.
-            index (int, optional): The index of the threshold that will be optimized. Defaults to 0.
-
-        Yields:
-            Iterator[List[float]]: A generator for all threshold arrays in the second search space
-                for a given index.
-        """
-        arr = thresholds.copy()
-        linspace = np.linspace(0, 1, num=num)
-        for item in linspace:
-            trial = arr.copy()
-            trial[index] = item
-            yield trial
-
-    def _get_training_data(self):
-        records_for_training = self.predict()
-        training_data = pd.DataFrame(
-            [
-                {
-                    "text": rec.inputs["text"],
-                    "label": self.weak_labels.label2int[rec.prediction[0][0]],
-                }
-                for rec in records_for_training
-            ]
-        )
-        return training_data
-
-    def grid_search(
-        self,
-        space_num: int = 20,
-        space_subset: Union[None, List[int]] = None,
-        optimize_all: bool = True,
-        include_annotated_records: Union[None, bool] = False,
-        **kwargs,
-    ) -> List[float]:
-        """Perform grid search to find the optimal threshold for the Epoxy model.
-                The grid search is performed in two steps. In the first step, the same value is set to all thresholds.
-                In the second step, the thresholds are optimized one by one.
-
-                Smaller values for first_space_num and second_space_num will speed up the grid search while
-                decreasing precision.
-
-        Args:
-            score: The score to be optimized.
-                More information on the `score` method of the parent class, FlyingSquid.
-            tie_break_policy: Tie break policy during score optimization.
-                More information on the `score` method of the parent class, FlyingSquid.
-            first_space_num: Size of the first search space during grid search.
-                Defaults to 20.
-            second_space_num: Size of the second search space during grid search.
-                Defaults to 20.
-            second_space_subset: A list of the indexes of all the thresholds that will be optimized during the
-                second step of the grid search. The thresholds will be optimized in the order given in the list.
-                If no list is given, all thresholds will be optimized, from left to right.
-            **kwargs: Passed on to the FlyingSquid's
-                `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
-                method.
-        Returns:
-            The optimal threshold array found after grid search.
-        """
-        if optimize_all:
-            for thresholds in self._generate_first_search_space(num=space_num):
-
-                self._thresholds = thresholds
-                self.fit(include_annotated_records=include_annotated_records, **kwargs)
-                output_dict = {
-                    "data": self._get_training_data(),
-                    "thresholds": thresholds,
-                }
-                yield output_dict
-        else:
-
-            if not space_subset:
-                space_subset = [i for i in range(len(self._thresholds))]
-
-            while space_subset:
-
-                current_index = space_subset.pop(0)
-
-                for thresholds in self._generate_second_search_space(
-                    thresholds=self._thresholds, num=space_num, index=current_index
-                ):
-                    self._thresholds = thresholds
-                    self.fit(
-                        include_annotated_records=include_annotated_records, **kwargs
-                    )
-                    output_dict = {
-                        "data": self._get_training_data(),
-                        "thresholds": thresholds,
-                    }
-                    yield output_dict
-
-    def set_thresholds(self, thresholds):
-        self._thresholds = thresholds
-
-    def _get_embeddings(self, has_annotation: Optional[bool] = None) -> np.ndarray:
-        """Returns the embeddings, or optionally just a part of them.
-
-        Args:
-            has_annotation: If True, return only the part of the embeddings that has a corresponding annotation.
-                If False, return only the part of the embeddings that has NOT a corresponding annotation.
-                By default, we return the whole embeddings.
-
-        Returns:
-            The embeddings, or optionally just a part of them.
-        """
-        if has_annotation is True:
-            return self._embeddings[
-                self._weak_labels._annotation_array
-                != self._weak_labels._label2int[None]
-            ]
-        if has_annotation is False:
-            return self._embeddings[
-                self._weak_labels._annotation_array
-                == self._weak_labels._label2int[None]
-            ]
-
-        return self._embeddings
-
-    def _copy_and_transform_wl_matrix(self, weak_label_matrix: np.ndarray, i: int):
-        """Helper function to copy and transform the weak label matrix with respect to a target label.
-                This function performs the same operations as the parent function, and then extends the
-                weak label matrix with the nearest neighbors for each record.
-
-        Args:
-            weak_label_matrix: The original weak label matrix.
-            i: Index of the target label.
-
-        Returns:
-            A copy of the weak label matrix, transformed with respect to the target label,
-                and extended with the nearest neighbors for each record.
-        """
-        if not "epoxy.epoxy.Epoxy" in sys.modules:
-            from epoxy import Epoxy as EpoxyModel
-
-        L_matrix = super()._copy_and_transform_wl_matrix(weak_label_matrix, i)
-
-        embeddings = self._get_embeddings(
-            has_annotation=None if self._include_annotated_records else False
-        )
-
-        _LOGGER.debug(
-            """
-            L_matrix: {0}
-            embeddings: {1}
-            _include_annotated_records: {2}
-            """.format(
-                L_matrix.shape, embeddings.shape, self._include_annotated_records
-            )
-        )
-
-        epoxy_model = EpoxyModel(L_matrix, embeddings)
-        epoxy_model.preprocess(L_matrix, embeddings)
-        L_extended = epoxy_model.extend(self._thresholds)
-        return L_extended
-
-    def thresholds(self):
-        return {"best": self._thresholds, "candidates": self._candidates}
-
-    def thresholds_summary(
-        self,
-        metric_fields=["random_accuracy", "coverage", "accuracy", "fscore_cautious"],
-    ):
-        output = []
-        for row in self._candidates:
-            new_row = {}
-            new_row["threshold"] = row["threshold"]
-            for metric in metric_fields:
-                new_row[metric] = row["metrics"][metric]
-            output.append(new_row)
-        return pd.DataFrame(output)
-
-    def fit(
-        self,
-        include_annotated_records: bool = False,
-        grid_search_kwargs: dict = {},
-        **kwargs,
-    ):
-        self._include_annotated_records = include_annotated_records
-        super().fit(include_annotated_records, **kwargs)
-
-    def predict(
-        self,
-        include_annotated_records: bool = False,
-        include_abstentions: bool = False,
-        prediction_agent: str = "FlyingSquid",
-        verbose: bool = True,
-        tie_break_policy: str = "abstain",
-    ) -> List[TextClassificationRecord]:
-
-        self._include_annotated_records = include_annotated_records
-
-        return super().predict(
-            include_annotated_records=include_annotated_records,
-            include_abstentions=include_abstentions,
-            prediction_agent=prediction_agent,
-            verbose=verbose,
-            tie_break_policy=tie_break_policy,
-        )
-
-    def score(
-        self,
-        tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-        verbose: bool = False,
-        output_str: bool = False,
-    ) -> Dict[str, float]:
-
-        try:
-            import sklearn
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'sklearn' must be installed to compute the metrics! "
-                "You can install 'sklearn' with the command: `pip install scikit-learn`"
-            )
-        from rubrix.metrics.text_classification import cautious_classification_report
-
-        if isinstance(tie_break_policy, str):
-            tie_break_policy = TieBreakPolicy(tie_break_policy)
-
-        self._include_annotated_records = True
-
-        is_max, is_tie, prediction, annotation = self._get_score_objects(
-            verbose=verbose
-        )
-
-        if TieBreakPolicy.ABSTAIN:
-            pass
-        else:
-            raise NotImplementedError(
-                f"The tie break policy '{tie_break_policy.value}' is not implemented for Epoxy!"
-            )
-
-        _LOGGER.debug(
-            """
-            annotation: {0},
-            prediction: {1},
-            is_tie: {2}
-            """.format(
-                str(annotation.shape), str(prediction.shape), str(is_tie.shape)
-            )
-        )
-
-        return cautious_classification_report(
+        return classification_report(
             annotation,
             prediction,
-            model_labels=self._labels,
+            target_names=self._weak_labels.labels[: annotation.max() + 1],
             output_dict=not output_str,
-            is_tie=is_tie,
         )
 
 
