@@ -156,7 +156,7 @@ export default {
       let text = token.highlighted
         ? this.$htmlHighlightText(token.text)
         : this.$htmlText(token.text);
-      return `${text}${token.hasSpaceAfter ? " " : ""}`;
+      return `${text}${token.charsBetweenTokens}`;
     },
   },
 };
