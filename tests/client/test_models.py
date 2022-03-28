@@ -117,10 +117,11 @@ def test_token_classification_record(annotation, status, expected_status, expect
 @pytest.mark.parametrize(
     ("tokens", "tags", "annotation"),
     [
-        (["Una", "casa"], ["O", "B-OBJ"], [("OBJ", 4, 7)]),
-        (["Matias", "Aguado"], ["B-PER", "I-PER"], [("PER", 0, 12)]),
-        (["Todo", "Todo", "Todo"], ["B-T", "I-T", "L-T"], [("T", 0, 13)]),
-        (["Una", "casa"], ["O", "U-OBJ"], []),
+        (["Una", "casa"], ["O", "B-OBJ"], [("OBJ", 4, 8)]),
+        (["Matias", "Aguado"], ["B-PER", "I-PER"], [("PER", 0, 13)]),
+        (["Todo", "Todo", "Todo"], ["B-T", "I-T", "L-T"], [("T", 0, 14)]),
+        (["Una", "casa"], ["O", "U-OBJ"], [("OBJ", 4, 8)]),
+        (["Todo", "Todo", "Todo"], ["I-T", "I-T", "O"], [("T", 0, 9)]),
     ],
 )
 def test_token_classification_with_tokens_and_tags(tokens, tags, annotation):
