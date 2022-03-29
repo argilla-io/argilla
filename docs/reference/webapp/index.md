@@ -5,7 +5,7 @@ To launch the web app, please have a look at our [setup and installation guide](
 
 ## Pages
 
-- [**Workspace**](workspace.md): Search, access and share your datasets in a unified place
+- [**Dataset list**](dataset_list.md): Search, access and share your datasets in a unified place
 - [**Dataset**](dataset.md): Dive into your dataset to explore and annotate your records
 
 ```{toctree}
@@ -13,7 +13,7 @@ To launch the web app, please have a look at our [setup and installation guide](
 :caption: Pages
 :hidden:
 
-workspace
+dataset list
 dataset
 ```
 
