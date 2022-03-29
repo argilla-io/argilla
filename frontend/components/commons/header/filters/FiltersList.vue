@@ -178,7 +178,6 @@ export default {
       return (
         this.dataset.rules &&
         this.dataset.rules.length &&
-        !this.dataset.isMultiLabel &&
         this.dataset.task === "TextClassification"
       );
     },
