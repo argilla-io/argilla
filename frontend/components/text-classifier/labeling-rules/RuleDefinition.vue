@@ -61,7 +61,13 @@ export default {
   },
   watch: {
     async query(newValue) {
-      await this.dataset.setCurrentLabelingRule({ query: newValue });
+      this.saved = false;
+      const rule = this.dataset.findRuleByQuery(newValue, undefined);
+      await this.dataset.setCurrentLabelingRule(
+        rule
+          ? rule
+          : { query: newValue, labels: (this.currentRule || {}).labels }
+      );
     },
   },
   computed: {
