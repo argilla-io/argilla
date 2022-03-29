@@ -17,13 +17,25 @@
 
 <template>
   <div class="origins">
-    <text-spans
-      v-for="origin in entitiesOrigin"
-      :key="origin"
+    <text-spans-static
+      v-if="record.prediction"
+      v-once
+      key="prediction"
+      origin="prediction"
+      class="prediction"
       :dataset="dataset"
       :record="record"
-      :class="origin"
-      :entities="getEntitiesByOrigin(origin)"
+      :visualTokens="visualTokens"
+      :entities="getEntitiesByOrigin('prediction')"
+    />
+    <text-spans
+      key="annotation"
+      origin="annotation"
+      class="annotation"
+      :dataset="dataset"
+      :record="record"
+      :visualTokens="visualTokens"
+      :entities="getEntitiesByOrigin('annotation')"
     />
   </div>
 </template>
@@ -39,11 +51,10 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data: function () {
-    return {
-      entitiesOrigin: ["prediction", "annotation"],
-    };
+    visualTokens: {
+      type: Array,
+      required: true,
+    },
   },
   methods: {
     getEntitiesByOrigin(origin) {
@@ -67,7 +78,11 @@ export default {
   bottom: 0;
   ::v-deep {
     .span__text {
-      opacity: 0;
+      opacity: 1;
+      color: transparent;
+      .highlight {
+        color: palette(grey, dark);
+      }
     }
   }
 }
@@ -87,5 +102,12 @@ export default {
       pointer-events: all;
     }
   }
+}
+::v-deep .highlight__tooltip__container {
+  pointer-events: all;
+  cursor: default;
+}
+::v-deep .highlight__tooltip {
+  cursor: default;
 }
 </style>

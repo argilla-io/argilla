@@ -23,6 +23,8 @@ from opensearchpy.helpers import scan as es_scan
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.errors import InvalidTextSearchError
 
+from . import es_helpers
+
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -64,7 +66,10 @@ class ElasticsearchWrapper(LoggingMixin):
         """
 
         if cls._INSTANCE is None:
-            es_client = OpenSearch(hosts=settings.elasticsearch)
+            es_client = OpenSearch(
+                hosts=settings.elasticsearch,
+                verify_certs=settings.elasticsearch_ssl_verify,
+            )
             cls._INSTANCE = cls(es_client)
 
         return cls._INSTANCE
@@ -158,6 +163,8 @@ class ElasticsearchWrapper(LoggingMixin):
             if rex.error == "index_closed_exception":
                 raise ClosedIndexError(index)
             raise GenericSearchError(rex)
+        except NotFoundError as nex:
+            raise IndexNotFoundError(nex)
         except OpenSearchException as ex:
             raise GenericSearchError(ex)
 
@@ -348,7 +355,9 @@ class ElasticsearchWrapper(LoggingMixin):
         except NotFoundError:
             return {}
 
-    def get_field_mapping(self, index: str, field_name: str) -> Dict[str, str]:
+    def get_field_mapping(
+        self, index: str, field_name: Optional[str] = None
+    ) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
         consist on a dictionary with full field name as key and its type as value
@@ -368,14 +377,13 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         try:
             response = self.__client__.indices.get_field_mapping(
-                fields=field_name,
+                fields=field_name or "*",
                 index=index,
                 ignore_unavailable=False,
             )
             return {
                 key: list(definition["mapping"].values())[0]["type"]
                 for key, definition in response[index]["mappings"].items()
-                if not key.endswith(".raw")  # Drop raw version of fields
             }
         except NotFoundError:
             # No mapping data
@@ -409,9 +417,11 @@ class ElasticsearchWrapper(LoggingMixin):
 
         """
         if partial_update:
-            self.__client__.update(index=index, id=doc_id, body={"doc": document})
+            self.__client__.update(
+                index=index, id=doc_id, body={"doc": document}, refresh=True
+            )
         else:
-            self.__client__.index(index=index, id=doc_id, body=document)
+            self.__client__.index(index=index, id=doc_id, body=document, refresh=True)
 
     def open_index(self, index: str):
         """
@@ -536,6 +546,17 @@ class ElasticsearchWrapper(LoggingMixin):
             return self.__client__.info()
         except OpenSearchException as ex:
             return {"error": ex}
+
+    def aggregate(self, index: str, aggregation: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply an aggregation over the index returning ONLY the agg results"""
+        aggregation_name = "aggregation"
+        results = self.search(
+            index=index, size=0, query={"aggs": {aggregation_name: aggregation}}
+        )
+
+        return es_helpers.parse_aggregations(results["aggregations"]).get(
+            aggregation_name
+        )
 
 
 _instance = None  # The singleton instance

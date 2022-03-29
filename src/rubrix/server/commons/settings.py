@@ -16,11 +16,11 @@
 """
 Common environment vars / settings
 """
-
+import logging
 from typing import List
 from urllib.parse import urlparse
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class ApiSettings(BaseSettings):
@@ -53,10 +53,13 @@ class ApiSettings(BaseSettings):
 
     """
 
+    __LOGGER__ = logging.getLogger(__name__)
+
     __DATASETS_INDEX_NAME__ = ".rubrix<NAMESPACE>.datasets-v0"
     __DATASETS_RECORDS_INDEX_NAME__ = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
 
     elasticsearch: str = "http://localhost:9200"
+    elasticsearch_ssl_verify: bool = True
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
@@ -71,11 +74,24 @@ class ApiSettings(BaseSettings):
 
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
+    # TODO(@frascuchon): remove in v0.12.0
     disable_es_index_template_creation: bool = False
 
     metadata_fields_limit: int = Field(
         default=50, gt=0, le=100, description="Max number of fields in metadata"
     )
+
+    @validator("disable_es_index_template_creation", always=True)
+    def check_index_template_creation_value(cls, value):
+
+        if value is True:
+            cls.__LOGGER__.warning(
+                "The environment variable DISABLE_ES_INDEX_TEMPLATE_CREATION won't be used anymore.\n"
+                "If you want customize the dataset creation index, please refer documentation "
+                "https://rubrix.readthedocs.io/en/stable"
+                "/getting_started/advanced_setup_guides.html#change-elasticsearch-index-analyzers"
+            )
+        return value
 
     @property
     def dataset_index_name(self) -> str:
@@ -101,6 +117,9 @@ class ApiSettings(BaseSettings):
     class Config:
         # TODO: include a common prefix for all rubrix env vars.
         fields = {
+            "elasticsearch_ssl_verify": {
+                "env": "RUBRIX_ELASTICSEARCH_SSL_VERIFY",
+            },
             "metadata_fields_limit": {"env": "RUBRIX_METADATA_FIELDS_LIMIT"},
             "namespace": {
                 "env": "RUBRIX_NAMESPACE",

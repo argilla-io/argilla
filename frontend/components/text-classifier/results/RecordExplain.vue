@@ -33,19 +33,18 @@
 <script>
 export default {
   props: {
-    queryText: {
-      type: String,
-      default: undefined,
+    record: {
+      type: Object,
+      required: true,
     },
     explain: {
       type: Array,
     },
-    predicted: {
-      type: String,
-      default: undefined,
-    },
   },
   computed: {
+    predicted() {
+      return this.record.predicted;
+    },
     explainFormatted() {
       // TODO ALLOW FOR MULTI LABEL
       return this.explain.map((token) => {
@@ -58,8 +57,8 @@ export default {
           percent = Math.round(Math.log10(percent) ** p * s);
         }
         return {
-          text: this.queryText
-            ? this.$highlightSearch(this.queryText, token.token)
+          text: this.record.search_keywords
+            ? this.$highlightKeywords(token.token, this.record.search_keywords)
             : token.token,
           percent: percent.toString(),
           grad,
@@ -87,13 +86,6 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  background: #ffbf00;
-  line-height: 16px;
-}
-</style>
 <style lang="scss" scoped>
 %grad {
   .atom__tooltip {
@@ -109,7 +101,7 @@ export default {
 }
 @for $i from 0 through 100 {
   .grad-#{$i} {
-    $bg: hsla(40, 100%, 100 - $i * 0.5, 1);
+    $bg: hsla(40, 100%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -120,7 +112,7 @@ export default {
     }
   }
   .grad-neg-#{$i} {
-    $bg: hsla(200, 60%, 100 - $i * 0.5, 1);
+    $bg: hsla(200, 60%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -131,7 +123,7 @@ export default {
     }
   }
   .grad-plus-#{$i} {
-    $bg: hsla(100, 60%, 100 - $i * 0.5, 1);
+    $bg: hsla(100, 60%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -142,7 +134,7 @@ export default {
     }
   }
   .grad-rest-#{$i} {
-    $bg: hsla(0, 80%, 100 - $i * 0.5, 1);
+    $bg: hsla(0, 80%, 100% - $i * 0.5, 1);
     @extend %grad;
     background: $bg;
     .atom__tooltip {

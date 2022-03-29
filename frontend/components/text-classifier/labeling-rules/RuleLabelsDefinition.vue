@@ -22,6 +22,17 @@
       <p class="rule__records">
         Records:
         <strong>{{ coveredRecords }}</strong>
+        <svgicon
+          class="rule__records__info"
+          v-if="areFiltersApplied.length"
+          name="info"
+          width="12"
+          height="12"
+        />
+        <span
+          class="rule__records__tooltip"
+          data-title="Filters are not part of the rule, but are applied to the record list below"
+        />
       </p>
     </div>
     <div class="rule__labels" v-if="labels.length">
@@ -35,7 +46,7 @@
         :id="label.class"
         :key="`${label.class}`"
         v-model="selectedLabelsVModel"
-        :allow-multiple="false"
+        :allow-multiple="dataset.isMultiLabel"
         :label="label"
         class="label-button"
         :data-title="label.class"
@@ -84,6 +95,8 @@
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { TextClassificationDataset } from "@/models/TextClassification";
+import _ from "lodash";
+import "assets/icons/info";
 
 export default {
   props: {
@@ -104,6 +117,12 @@ export default {
     };
   },
   computed: {
+    areFiltersApplied() {
+      const appliedFilters = Object.keys(this.dataset.query)
+        .filter((f) => f !== "text")
+        .map((key) => this.dataset.query[key]);
+      return appliedFilters.filter((v) => v && Object.values(v).length);
+    },
     currentRule() {
       return this.dataset.getCurrentLabelingRule();
     },
@@ -112,23 +131,29 @@ export default {
       return this.dataset.getCurrentLabelingRuleMetrics() || {};
     },
 
-    selectedLabel() {
-      if (this.selectedLabelsVModel !== undefined) {
-        return this.selectedLabelsVModel[0];
+    selectedLabels() {
+      if (this.selectedLabelsVModel.length) {
+        return this.selectedLabelsVModel;
       }
     },
 
     ruleInfo() {
       // TODO: We can improve this
+      const storedRule =
+        this.currentRule &&
+        this.dataset.findRuleByQuery(this.currentRule.query);
+      const storedRuleLabels = storedRule && storedRule.labels;
+      const queryWithLabelsIsStored = _.isEqual(
+        _.sortBy(storedRuleLabels),
+        _.sortBy(this.selectedLabels)
+      );
       if (this.isSaved) {
         return "The rule was saved";
       }
-      if (
-        this.currentRule &&
-        this.selectedLabelsVModel.length &&
-        this.dataset.findRuleByQuery(this.currentRule.query, this.selectedLabel)
-      ) {
-        return "This query with this label are already saved as rule";
+      if (this.selectedLabels && queryWithLabelsIsStored) {
+        return `This query with ${
+          this.selectedLabels.length > 1 ? "these labels" : "this label"
+        } is already saved as rule`;
       }
     },
     coveredRecords() {
@@ -172,16 +197,21 @@ export default {
     },
   },
   watch: {
-    selectedLabel(newValue) {
-      // Here send description too --> update Rule
-      this.$emit("update-rule", {
-        query: this.query,
-        label: newValue,
-      });
+    selectedLabels: {
+      handler: function (newValue) {
+        if (!_.isEqual(_.sortBy(newValue), _.sortBy(this.currentRule.labels))) {
+          // Here send description too --> update Rule
+          this.$emit("update-rule", {
+            query: this.query,
+            labels: newValue,
+          });
+        }
+      },
+      deep: true,
     },
     currentRule(newValue) {
-      if (newValue && newValue.label) {
-        this.selectedLabelsVModel = [newValue.label];
+      if (newValue && newValue.labels) {
+        this.selectedLabelsVModel = [...newValue.labels];
       }
     },
   },
@@ -193,7 +223,7 @@ export default {
       this.collapseLabels();
       this.$emit("save-rule", {
         query: this.currentRule.query,
-        label: this.selectedLabel,
+        labels: this.selectedLabels,
       });
     },
     expandLabels() {
@@ -215,6 +245,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$color: #333346;
 %item {
   // width: calc(25% - 5px);
   min-width: 80px;
@@ -240,7 +271,7 @@ export default {
     font-family: $sff;
     outline: none;
     padding: 0.5em;
-    border-radius: 5px;
+    border-radius: $border-radius;
     transition: all 0.2s ease-in-out;
     display: inline-block;
     &:hover {
@@ -295,15 +326,66 @@ export default {
     margin-top: auto;
   }
   &__records {
-    color: palette(grey, medium);
+    color: palette(grey, dark);
     margin-left: auto;
     margin-top: 0;
     white-space: nowrap;
     text-align: right;
     @include font-size(14px);
     margin-left: 0.5em;
+    position: relative;
+    line-height: 1em;
+    display: flex;
+    align-items: center;
     strong {
       font-weight: 600;
+      margin-left: 0.2em;
+    }
+    &__info {
+      min-width: 12px;
+      margin-left: 0.3em;
+      fill: $color;
+      cursor: pointer;
+      &:hover {
+        & + .rule__records__tooltip:after,
+        & + .rule__records__tooltip:before {
+          display: block;
+          opacity: 1;
+          z-index: 1;
+          width: auto;
+          height: auto;
+          overflow: visible;
+        }
+      }
+    }
+    &__tooltip {
+      position: absolute;
+      right: 6px;
+      @extend %hastooltip;
+      &:after {
+        padding: 0.5em 1em;
+        top: calc(100% + 20px);
+        right: 50%;
+        transform: translateX(50%);
+        background: $color;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        @include font-size(14px);
+        font-weight: 600;
+        margin-bottom: 0.5em;
+        min-width: 240px;
+        white-space: break-spaces;
+        text-align: left;
+        line-height: 1.4em;
+      }
+      &:before {
+        right: calc(50% - 7px);
+        top: 13px;
+        border-bottom: 7px solid $color;
+        border-right: 7px solid transparent;
+        border-left: 7px solid transparent;
+      }
     }
   }
   &__labels {

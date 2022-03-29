@@ -16,30 +16,36 @@
   -->
 
 <template>
-  <div>
-    <div
-      v-if="textSpans.length"
-      ref="list"
-      class="content__input"
-      @mouseup="reset($event)"
-      v-click-outside="onReset"
-    >
-      <TextSpan
-        v-for="(token, i) in textSpans"
-        :key="i"
-        :record="record"
-        :span-id="i"
-        :spans="textSpans"
-        :dataset="dataset"
-        :class="isSelected(i) ? 'selected' : ''"
-        @startSelection="onStartSelection"
-        @endSelection="onEndSelection"
-        @selectEntity="onSelectEntity"
-        @changeEntityLabel="onChangeEntityLabel"
-        @removeEntity="onRemoveEntity"
-        @updateRecordEntities="$emit('updateRecordEntities')"
-      />
-    </div>
+  <div
+    v-if="textSpans.length"
+    ref="list"
+    class="content__input"
+    @mouseup="reset($event)"
+    v-click-outside="onReset"
+  >
+    <TextSpan
+      v-for="(token, i) in textSpans"
+      :key="i"
+      :record="record"
+      :token="token"
+      :span-id="i"
+      :dataset="dataset"
+      :suggestedLabel="suggestedLabel"
+      :class="[
+        isSelected(i, selectionStart, selectionEnd) ||
+        isSelected(i, selectionStart, selectionOver)
+          ? 'selected'
+          : '',
+        isLastSelected(i, selectionEnd) ? 'last-selected' : '',
+      ]"
+      @startSelection="onStartSelection"
+      @endSelection="onEndSelection"
+      @overSelection="onOverSelection"
+      @selectEntity="onSelectEntity"
+      @changeEntityLabel="onChangeEntityLabel"
+      @removeEntity="onRemoveEntity"
+      @updateRecordEntities="$emit('updateRecordEntities')"
+    />
   </div>
 </template>
 
@@ -48,6 +54,9 @@ import { mapActions } from "vuex";
 
 export default {
   props: {
+    entities: {
+      type: Array,
+    },
     dataset: {
       type: Object,
       required: true,
@@ -56,17 +65,25 @@ export default {
       type: Object,
       required: true,
     },
+
+    visualTokens: {
+      type: Array,
+      required: true,
+    },
+    origin: {
+      type: String,
+      required: true,
+    },
   },
   data: function () {
     return {
       selectionStart: undefined,
       selectionEnd: undefined,
+      selectionOver: undefined,
+      suggestedLabel: undefined,
     };
   },
   computed: {
-    entities() {
-      return this.record.annotatedEntities;
-    },
     textSpans() {
       // TODO Simplify !!!
       const normalizedEntities = (entities, tokens) => {
@@ -87,32 +104,37 @@ export default {
 
       let idx = 0;
       let textSpans = [];
-      const entities = normalizedEntities(
-        this.entities,
-        this.record.visualTokens
-      );
-      while (idx < this.record.visualTokens.length) {
-        const entity = entities.find(
+      const entities = normalizedEntities(this.entities, this.visualTokens);
+      while (idx < this.visualTokens.length) {
+        let index = textSpans.length;
+        const entityArray = entities.filter(
           (entity) => entity.start_token <= idx && idx < entity.end_token
+        );
+        const entity = entityArray.find((e) =>
+          index > 0 ? e.start >= textSpans[index - 1].end : true
         );
         if (entity) {
           textSpans.push({
             entity,
-            tokens: this.record.visualTokens.slice(
+            tokens: this.visualTokens.slice(
               entity.start_token,
               entity.end_token
             ),
             start: entity.start,
             end: entity.end,
+            origin: this.origin,
+            charsBetweenTokens: entity.charsBetweenTokens,
           });
           idx = entity.end_token;
         } else {
-          const token = this.record.visualTokens[idx];
+          const token = this.visualTokens[idx];
           textSpans.push({
             entity: undefined,
             tokens: [token],
             start: token.start,
             end: token.end,
+            origin: this.origin,
+            charsBetweenTokens: token.charsBetweenTokens,
           });
           idx++;
         }
@@ -147,25 +169,36 @@ export default {
     onReset() {
       this.selectionStart = undefined;
       this.selectionEnd = undefined;
+      this.selectionOver = undefined;
+      this.suggestedLabel = undefined;
     },
     onStartSelection(spanId) {
+      this.suggestedLabel = undefined;
       this.selectionStart = spanId;
     },
     onEndSelection(spanId) {
       this.selectionEnd = spanId;
+    },
+    onOverSelection(spanId) {
+      if (
+        this.selectionStart !== undefined &&
+        this.selectionEnd === undefined
+      ) {
+        this.selectionOver = spanId;
+      } else {
+        this.selectionOver = undefined;
+      }
     },
     onSelectEntity(entity) {
       const from = Math.min(this.selectionStart, this.selectionEnd);
       const to = Math.max(this.selectionStart, this.selectionEnd);
       const startToken = this.textSpans[from].tokens[0];
       const endToken = this.textSpans[to].tokens.reverse()[0];
-
       let entities = [...this.entities];
       entities.push({
         start: startToken.start,
         end: endToken.end,
         label: entity,
-        origin: "annotation",
       });
       this.updateAnnotatedEntities(entities);
       this.onReset();
@@ -175,7 +208,7 @@ export default {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
-          ? { ...ent, label: newLabel, origin: "annotation" }
+          ? { ...ent, label: newLabel }
           : ent;
       });
       this.updateAnnotatedEntities(entities);
@@ -193,44 +226,48 @@ export default {
       this.updateAnnotatedEntities(entities);
       this.onReset();
     },
-    groupByOrigin(entities) {
-      let annotation = entities.filter((e) => e.origin == "annotation");
-      let prediction = entities.filter((e) => e.origin == "prediction");
-      return {
-        annotation,
-        prediction,
-      };
-    },
-    isSelected(i) {
-      const init = Math.min(this.selectionStart, this.selectionEnd);
-      const end = Math.max(this.selectionStart, this.selectionEnd);
-      if (i >= init && i <= end) {
+    isSelected(i, start, end) {
+      const tokenInit = Math.min(start, end);
+      const tokenEnd = Math.max(start, end);
+      this.suggestEntity();
+      if (i >= tokenInit && i <= tokenEnd) {
         return true;
       }
       return false;
     },
+    isLastSelected(i, end) {
+      if (i === end) {
+        return true;
+      }
+      return false;
+    },
+    suggestEntity() {
+      const spans = [...this.textSpans];
+      const from = Math.min(this.selectionStart, this.selectionEnd);
+      const to = Math.max(this.selectionStart, this.selectionEnd);
+      const startToken = spans[from] && spans[from].tokens[0];
+      const endToken =
+        spans[to] && spans[to].tokens[spans[to].tokens.length - 1];
+      const matchedPrediction =
+        this.record.prediction &&
+        this.record.prediction.entities.find(
+          (ent) =>
+            ent.start === (startToken && startToken.start) &&
+            ent.end === (endToken && endToken.end)
+        );
+      if (matchedPrediction) {
+        this.suggestedLabel = matchedPrediction.label;
+      }
+    },
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .content {
   &__input {
     padding-right: 200px;
-  }
-  &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
-    display: flex;
-    min-width: 20%;
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
-      & + .re-button {
-        margin-left: 1em;
-      }
+    ::selection {
+      background: none !important;
     }
   }
 }

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, Union
 
 import pydantic
 from starlette import status
@@ -38,6 +38,11 @@ class RubrixServerError(Exception):
             if vars(self)
             else None
         )
+
+    def __str__(self):
+        args = self.arguments or {}
+        printable_args = ",".join([f"{k}={v}" for k, v in args.items()])
+        return f"{self.code}({printable_args})"
 
 
 class ValidationError(RubrixServerError):
@@ -146,9 +151,9 @@ class EntityNotFoundError(RubrixServerError):
 
     HTTP_STATUS = status.HTTP_404_NOT_FOUND
 
-    def __init__(self, name: str, type: Type):
+    def __init__(self, name: str, type: Union[Type, str]):
         self.name = name
-        self.type = type.__name__
+        self.type = type if isinstance(type, str) else type.__name__
 
 
 class ClosedDatasetError(BadRequestError):

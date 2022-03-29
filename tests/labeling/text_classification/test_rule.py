@@ -24,13 +24,12 @@ from rubrix.client.sdk.text_classification.models import (
 from rubrix.labeling.text_classification import Rule, load_rules
 from rubrix.labeling.text_classification.rule import RuleNotAppliedError
 from rubrix.server.commons.errors import EntityNotFoundError
-from tests.server.test_helpers import client, mocking_client
 
 
-@pytest.fixture(scope="module")
-def log_dataset_without_annotations() -> str:
+@pytest.fixture
+def log_dataset_without_annotations(mocked_client) -> str:
     dataset_name = "test_dataset_for_rule"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
@@ -40,7 +39,7 @@ def log_dataset_without_annotations() -> str:
         )
         for text, idx in zip(["negative", "positive"], [1, 2])
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=records,
@@ -50,10 +49,10 @@ def log_dataset_without_annotations() -> str:
     return dataset_name
 
 
-@pytest.fixture(scope="module")
-def log_dataset() -> str:
+@pytest.fixture
+def log_dataset(mocked_client) -> str:
     dataset_name = "test_dataset_for_rule"
-    client.delete(f"/api/datasets/{dataset_name}")
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
@@ -69,7 +68,7 @@ def log_dataset() -> str:
             ["negative", "positive"], ["negative", "positive"], [1, 2]
         )
     ]
-    client.post(
+    mocked_client.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk",
         json=TextClassificationBulkData(
             records=records,
@@ -87,21 +86,21 @@ def test_name(name, expected):
     assert rule.name == expected
 
 
-def test_apply(monkeypatch, log_dataset):
+def test_apply(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     with pytest.raises(RuleNotAppliedError):
-        rule(TextClassificationRecord(inputs="test"))
+        rule(TextClassificationRecord(text="test"))
 
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     rule.apply(log_dataset)
     assert rule._matching_ids == {1: None}
 
 
-def test_call(monkeypatch, log_dataset):
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+def test_call(monkeypatch, mocked_client, log_dataset):
+    monkeypatch.setattr(httpx, "get", mocked_client.get)
+    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     rule.apply(log_dataset)
@@ -111,10 +110,9 @@ def test_call(monkeypatch, log_dataset):
     assert rule(records[1]) is None
 
 
-def test_load_rules(monkeypatch, log_dataset):
-    mocking_client(monkeypatch, client)
+def test_load_rules(mocked_client, log_dataset):
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
         json={"query": "a query", "label": "LALA"},
     )
@@ -125,14 +123,13 @@ def test_load_rules(monkeypatch, log_dataset):
     assert rules[0].label == "LALA"
 
 
-def test_copy_dataset_with_rules(monkeypatch, log_dataset):
+def test_copy_dataset_with_rules(mocked_client, log_dataset):
     import rubrix as rb
 
-    mocking_client(monkeypatch, client)
     rule = Rule(query="a query", label="LALA")
-    delete_rule_silently(log_dataset, rule)
+    delete_rule_silently(mocked_client, log_dataset, rule)
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
         json=vars(rule),
     )
@@ -181,12 +178,11 @@ def test_copy_dataset_with_rules(monkeypatch, log_dataset):
         ),
     ],
 )
-def test_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
-    mocking_client(monkeypatch, client)
+def test_rule_metrics(mocked_client, log_dataset, rule, expected_metrics):
 
-    delete_rule_silently(log_dataset, rule)
+    delete_rule_silently(mocked_client, log_dataset, rule)
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
         json={"query": rule.query, "label": rule.label},
     )
@@ -231,12 +227,11 @@ def test_rule_metrics(monkeypatch, log_dataset, rule, expected_metrics):
     ],
 )
 def test_rule_metrics_without_annotated(
-    monkeypatch, log_dataset_without_annotations, rule, expected_metrics
+    mocked_client, log_dataset_without_annotations, rule, expected_metrics
 ):
-    mocking_client(monkeypatch, client)
-    delete_rule_silently(log_dataset_without_annotations, rule)
+    delete_rule_silently(mocked_client, log_dataset_without_annotations, rule)
 
-    client.post(
+    mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset_without_annotations}/labeling/rules",
         json={"query": rule.query, "label": rule.label},
     )
@@ -245,7 +240,7 @@ def test_rule_metrics_without_annotated(
     assert metrics == expected_metrics
 
 
-def delete_rule_silently(dataset: str, rule: Rule):
+def delete_rule_silently(client, dataset: str, rule: Rule):
     try:
         client.delete(
             f"/api/datasets/TextClassification/{dataset}/labeling/rules/{rule.query}"

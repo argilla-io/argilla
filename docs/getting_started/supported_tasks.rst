@@ -21,7 +21,7 @@ According to the amazing `NLP Progress resource by Seb Ruder <http://nlpprogress
 
 Rubrix is flexible with input and output shapes, which means you can model many related tasks like for example:
 
-* `Sentiment analysis <http://nlpprogress.com/english/sentiment_analysis.html>`_ 
+* `Sentiment analysis <http://nlpprogress.com/english/sentiment_analysis.html>`_
 * `Natural Language Inference <http://nlpprogress.com/english/natural_language_inference.html>`_
 * `Semantic Textual Similarity <https://paperswithcode.com/task/semantic-textual-similarity>`_
 * `Stance detection <http://nlpprogress.com/english/stance_detection.html>`_
@@ -42,10 +42,28 @@ The most well-known task in this category is probably `Named Entity Recognition 
 
 Rubrix is flexible with input and output shapes, which means you can model related tasks like for example:
 
-
 * Named entity recognition
 * Part of speech tagging
 * Slot filling
+
+
+Text2Text
+^^^^^^^^^
+
+The most typical and oldest task in this category is probably `Machine Translation <http://nlpprogress.com/english/machine_translation.html>`__:
+
+..
+
+   Machine translation is the task of translating a sentence in a source language to a different target language.
+
+The common frame of this category is that the modal receives and outputs a sequence of tokens.
+It encompasses a variety of tasks such as
+
+* text summarization
+* machine translation
+* natural language generation
+* paraphrase generation, etc.
+
 
 Tasks on the roadmap
 --------------------
@@ -53,8 +71,6 @@ Tasks on the roadmap
 Natural language processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-* Text2Text, covering summarization, machine translation, natural language generation, etc.
 * Question answering
 * `Keyphrase extraction <https://paperswithcode.com/task/keyword-extraction>`_
 * `Relationship Extraction <http://nlpprogress.com/english/relationship_extraction.html>`_
@@ -62,12 +78,10 @@ Natural language processing
 Computer vision
 ^^^^^^^^^^^^^^^
 
-
 * Image classification
 * Image captioning
 
 Speech
 ^^^^^^
-
 
 * Speech2Text

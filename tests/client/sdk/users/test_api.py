@@ -1,22 +1,30 @@
 import httpx
 import pytest
 
-from rubrix import DEFAULT_API_KEY
+from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors import UnauthorizedApiError
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
-from tests.server.test_helpers import client
 
 
-@pytest.fixture
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
+def test_whoami(mocked_client):
+    sdk_client = AuthenticatedClient(
+        base_url="http://localhost:6900", token=DEFAULT_API_KEY
+    )
+    user = whoami(client=sdk_client)
+    assert isinstance(user, User)
 
 
-def test_whoami(sdk_client, monkeypatch):
-    monkeypatch.setattr(httpx, "get", client.get)
+def test_whoami_with_auth_error(mocked_client):
+    with pytest.raises(UnauthorizedApiError):
+        whoami(
+            AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
+        )
 
-    response = whoami(client=sdk_client)
 
-    assert response.status_code == 200
-    assert isinstance(response.parsed, User)
+def test_whoami_with_connection_error():
+    with pytest.raises(httpx.ConnectError):
+        whoami(
+            AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
+        )

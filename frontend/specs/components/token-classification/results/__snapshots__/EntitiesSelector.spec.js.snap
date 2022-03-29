@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EntitiesSelector renders properly 1`] = `
+<span class="entities__selector__container"><div class="entities__selector"><ul class="entities__selector__options"><li class="entities__selector__option suggestion color_14 active"><span>Arreglo</span> <span class="entity__sort-code">[space]</span></li>
+<li tabindex="0" class="entities__selector__option color_14"><span>Arreglo</span> <span class="entity__sort-code">[1]</span></li>
+<li tabindex="0" class="entities__selector__option color_1"><span>CARDINAL</span> <span class="entity__sort-code">[2]</span></li>
+</ul>
+</div>
+</span>
+`;

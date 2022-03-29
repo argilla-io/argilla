@@ -15,12 +15,11 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from rubrix.server.commons.es_helpers import filters
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons.api.model import (
     BaseAnnotation,
     BaseRecord,
@@ -30,9 +29,9 @@ from rubrix.server.tasks.commons.api.model import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 
 class ExtendedEsRecordDataFieldNames(str, Enum):
@@ -167,7 +166,7 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(BaseModel):
+class Text2TextQuery(BaseSearchQuery):
     """
     API Filters for text2text
 
@@ -195,52 +194,8 @@ class Text2TextQuery(BaseModel):
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
-
     score: Optional[ScoreRange] = Field(default=None)
-
-    status: List[TaskStatus] = Field(default_factory=list)
-
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        """Build an elasticsearch query part from search query"""
-
-        if self.ids:
-            return {"ids": {"values": self.ids}}
-
-        all_filters = filters.metadata(self.metadata)
-        query_filters = [
-            query_filter
-            for query_filter in [
-                filters.predicted_by(self.predicted_by),
-                filters.annotated_by(self.annotated_by),
-                filters.status(self.status),
-                filters.predicted(self.predicted),
-                filters.score(self.score),
-            ]
-            if query_filter
-        ]
-        query_text = filters.text_query(self.query_text)
-        all_filters.extend(query_filters)
-
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
 
 
 class Text2TextSearchRequest(BaseModel):
@@ -280,4 +235,9 @@ class Text2TextSearchAggregations(BaseSearchResultsAggregations):
 class Text2TextSearchResults(
     BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
 ):
+    pass
+
+
+class Text2TextDatasetDB(DatasetDB):
+    task: TaskType = Field(default=TaskType.text2text, const=True)
     pass

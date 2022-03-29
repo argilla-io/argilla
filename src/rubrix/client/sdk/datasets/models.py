@@ -15,11 +15,9 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
-from typing import Dict
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 
 class TaskType(str, Enum):
@@ -27,6 +25,12 @@ class TaskType(str, Enum):
     token_classification = "TokenClassification"
     text2text = "Text2Text"
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
 
 
 class BaseDatasetModel(BaseModel):

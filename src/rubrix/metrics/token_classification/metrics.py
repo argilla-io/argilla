@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from rubrix import _client_instance as client
+from rubrix.client import api
 from rubrix.metrics import helpers
 from rubrix.metrics.models import MetricSummary
 
@@ -26,9 +26,7 @@ def tokens_length(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the raw histogram data with bins of size 5
     """
-    current_client = client()
-
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="tokens_length", query=query, interval=interval
     )
 
@@ -62,9 +60,7 @@ def token_frequency(
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the top-50 tokens frequency
     """
-    current_client = client()
-
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="token_frequency", query=query, size=tokens
     )
 
@@ -94,9 +90,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token length distribution
     """
-    current_client = client()
-
-    metric = current_client.compute_metric(name, metric="token_length", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="token_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -125,9 +119,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token capitalness distribution
     """
-    current_client = client()
-
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name, metric="token_capitalness", query=query
     )
 
@@ -196,14 +188,13 @@ def mention_length(
         >>> summary.visualize() # will plot a histogram chart with results
         >>> summary.data # the raw histogram data with bins of size 2
     """
-    current_client = client()
     level = (level or "token").lower().strip()
     accepted_levels = ["token", "char"]
     assert (
         level in accepted_levels
     ), f"Unexpected value for level. Accepted values are {accepted_levels}"
 
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_mention_{level}_length",
         query=query,
@@ -245,9 +236,7 @@ def entity_labels(
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """
-    current_client = client()
-
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_labels",
         query=query,
@@ -288,8 +277,7 @@ def entity_density(
         >>> summary = entity_density(name="example-dataset")
         >>> summary.visualize()
     """
-    current_client = client()
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_density",
         query=query,
@@ -334,8 +322,7 @@ def entity_capitalness(
         >>> summary = entity_capitalness(name="example-dataset")
         >>> summary.visualize()
     """
-    current_client = client()
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_capitalness",
         query=query,
@@ -354,7 +341,7 @@ def entity_consistency(
     name: str,
     query: Optional[str] = None,
     compute_for: Union[str, ComputeFor] = Predictions,
-    mentions: int = 10,
+    mentions: int = 100,
     threshold: int = 2,
 ):
     """Computes the consistency for top entity mentions in the dataset.
@@ -384,8 +371,7 @@ def entity_consistency(
         # TODO: Warning???
         threshold = 2
 
-    current_client = client()
-    metric = current_client.compute_metric(
+    metric = api.ACTIVE_API.compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_consistency",
         query=query,
@@ -431,8 +417,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> import pandas as pd
         >>> pd.DataFrame(summary.data.values(), index=summary.data.keys())
     """
-    current_client = client()
-    metric = current_client.compute_metric(name, metric="F1", query=query)
+    metric = api.ACTIVE_API.compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

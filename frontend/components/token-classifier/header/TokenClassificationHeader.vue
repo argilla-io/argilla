@@ -17,12 +17,9 @@
 
 <template>
   <div class="header__filters">
-    <header-title
-      v-if="dataset.results.records"
-      title="Token Classification"
-      :dataset="dataset"
-    />
-    <filters-area :dataset="dataset" />
+    <filters-area :dataset="dataset">
+      <records-counter :total="dataset.results.total"></records-counter>
+    </filters-area>
     <entities-header :dataset="dataset" />
     <global-actions :dataset="dataset">
       <validate-discard-action

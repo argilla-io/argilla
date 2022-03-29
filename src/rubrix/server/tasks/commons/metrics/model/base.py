@@ -14,7 +14,10 @@ from pydantic import BaseModel, root_validator
 from pydantic.generics import GenericModel
 
 from rubrix.server.commons.es_helpers import aggregations
+from rubrix.server.commons.helpers import unflatten_dict
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import BaseRecord
+from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
 GenericRecord = TypeVar("GenericRecord", bound=BaseRecord)
 
@@ -107,7 +110,7 @@ class NestedPathElasticsearchMetric(ElasticsearchMetric):
         return f"{self.nested_path}.{inner_field}"
 
 
-class BaseTaskMetrics(GenericModel, Generic[GenericRecord]):
+class BaseTaskMetrics(BaseModel):
     """
     Base class encapsulating related task metrics
 
@@ -194,7 +197,7 @@ class HistogramAggregation(ElasticsearchMetric):
     script: Optional[Union[str, Dict[str, Any]]] = None
     fixed_interval: Optional[float] = None
 
-    def aggregation_request(self, interval: float) -> Dict[str, Any]:
+    def aggregation_request(self, interval: Optional[float] = None) -> Dict[str, Any]:
         if self.fixed_interval:
             interval = self.fixed_interval
         return {
@@ -266,3 +269,34 @@ class NestedHistogramAggregation(NestedPathElasticsearchMetric):
 
     def inner_aggregation(self, interval: float) -> Dict[str, Any]:
         return self.histogram.aggregation_request(interval)
+
+
+class WordCloudAggregation(ElasticsearchMetric):
+    default_field: str
+
+    def aggregation_request(
+        self, text_field: str = None, size: int = None
+    ) -> Dict[str, Any]:
+        field = text_field or self.default_field
+        return TermsAggregation(
+            id=f"{self.id}_{field}" if text_field else self.id,
+            name=f"Words cloud for field {field}",
+            field=field,
+        ).aggregation_request(size=size)
+
+
+class MetadataAggregations(ElasticsearchMetric):
+    def aggregation_request(
+        self,
+        dataset: Dataset,
+        dao: DatasetRecordsDAO,
+        size: int = None,
+    ) -> Dict[str, Any]:
+
+        return aggregations.custom_fields(
+            fields_definitions=dao.get_metadata_schema(dataset), size=size
+        )
+
+    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
+        data = unflatten_dict(aggregation_result, stop_keys=["metadata"])
+        return data.get("metadata", {})

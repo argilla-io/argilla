@@ -179,6 +179,13 @@ class BaseRecord(GenericModel, Generic[Annotation]):
     prediction: Optional[Annotation] = None
     annotation: Optional[Annotation] = None
     metrics: Dict[str, Any] = Field(default_factory=dict)
+    search_keywords: Optional[List[str]] = None
+
+    @validator("search_keywords")
+    def remove_duplicated_keywords(cls, value) -> List[str]:
+        """Remove duplicated keywords"""
+        if value:
+            return list(set(value))
 
     @validator("id", always=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -341,7 +348,7 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
     aggregations: Aggregations = None
 
 
-class ScoreRange(BaseModel):
+class QueryRange(BaseModel):
     """Score range filter"""
 
     range_from: float = Field(default=0.0, alias="from")
@@ -349,3 +356,7 @@ class ScoreRange(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+
+
+class ScoreRange(QueryRange):
+    pass

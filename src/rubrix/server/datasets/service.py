@@ -14,53 +14,33 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import ClassVar, List, Optional
+from typing import Any, Dict, List, Optional, TypeVar, cast
 
 from fastapi import Depends
 
+from rubrix.server.commons import es_helpers
 from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
-    WrongTaskError,
 )
+from rubrix.server.datasets.dao import DatasetsDAO
+from rubrix.server.datasets.model import DatasetDB
+from rubrix.server.security.model import User
+from rubrix.server.tasks.commons import TaskType
+from rubrix.server.tasks.commons.task_factory import TaskFactory
 
-from ..security.model import User
-from .dao import DatasetsDAO
-from .model import (
-    CopyDatasetRequest,
-    CreationDatasetRequest,
-    Dataset,
-    DatasetDB,
-    TaskType,
-    UpdateDatasetRequest,
-)
+Dataset = TypeVar("Dataset", bound=DatasetDB)
 
 
 class DatasetsService:
-    """Datasets service"""
 
-    _INSTANCE: ClassVar["DatasetsService"] = None
+    _INSTANCE: "DatasetsService" = None
 
     @classmethod
     def get_instance(
         cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
     ) -> "DatasetsService":
-
-        """
-        Creates an instance of service
-
-        Parameters
-        ----------
-        dao:
-            The datasets dao
-
-        Returns
-        -------
-            An instance of dataset service
-
-        """
-
         if not cls._INSTANCE:
             cls._INSTANCE = cls(dao)
         return cls._INSTANCE
@@ -68,300 +48,155 @@ class DatasetsService:
     def __init__(self, dao: DatasetsDAO):
         self.__dao__ = dao
 
-    def list(
-        self, user: User, workspaces: List[str], task_type: Optional[TaskType] = None
-    ) -> List[Dataset]:
-        """
-        List datasets for a list of owners and task types
-
-        Parameters
-        ----------
-        user:
-            The request user
-        workspaces:
-            A list of selected user teams
-        task_type:
-            The task type: Optional
-
-        Returns
-        -------
-            A list of datasets
-        """
-        owners = user.check_workspaces(workspaces)
-
-        return [
-            Dataset(**obs.dict())
-            for obs in self.__dao__.list_datasets(owner_list=owners)
-            if task_type is None or task_type == obs.task
-        ]
-
-    def create(
-        self,
-        dataset: CreationDatasetRequest,
-        task: TaskType,
-        user: User,
-        workspace: Optional[str],
-    ) -> Dataset:
-        """
-        Creates a datasets from given creation request
-
-        Parameters
-        ----------
-        dataset:
-            The dataset creation fields
-        task:
-            The dataset task
-        user:
-            The current user
-        workspace:
-            The user workspace selected for dataset creation
-
-        Returns
-        -------
-            The created dataset
-
-        """
-        owner = user.check_workspace(workspace)
+    def create_dataset(self, user: User, dataset: Dataset) -> Dataset:
+        user.check_workspace(dataset.owner)
         date_now = datetime.utcnow()
-        db_dataset = DatasetDB(
-            **dataset.dict(by_alias=True),
-            task=task,
-            owner=owner,
-            created_at=date_now,
-            last_updated=date_now,
-        )
-        created_dataset = self.__dao__.create_dataset(db_dataset)
-        return Dataset.parse_obj(created_dataset)
+
+        dataset.created_at = date_now
+        dataset.last_updated = date_now
+        return self.__dao__.create_dataset(dataset)
 
     def find_by_name(
-        self, name: str, task: Optional[TaskType], user: User, workspace: Optional[str]
-    ) -> DatasetDB:
-        """
-        Find a dataset by name
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        task:
-            Related dataset task
-        user:
-            The current user
-        workspace:
-            The user workspace where dataset belongs to
-
-        Returns
-        -------
-            - The found dataset
-            - EntityNotFoundError if not found
-            - ForbiddenOperationError if user cannot access the dataset
-
-        """
+        self,
+        user: User,
+        name: str,
+        task: Optional[TaskType] = None,
+        workspace: Optional[str] = None,
+    ) -> Dataset:
         owner = user.check_workspace(workspace)
-        found = self.__dao__.find_by_name(name, owner=owner)
-        if not found:
+
+        if task is None:
+            found_ds = self.__find_by_name_with_superuser_fallback__(
+                user, name=name, owner=owner
+            )
+            if found_ds:
+                task = found_ds.task
+
+        found_ds = self.__find_by_name_with_superuser_fallback__(
+            user, name=name, owner=owner, task=task
+        )
+
+        if found_ds is None:
             raise EntityNotFoundError(name=name, type=Dataset)
-        if found.owner and owner and found.owner != owner:
+        if found_ds.owner and owner and found_ds.owner != owner:
             raise ForbiddenOperationError()
-        if task and found.task != task:
-            raise WrongTaskError(f"Provided task {task} cannot be applied to dataset")
-        return found
 
-    def delete(self, name: str, user: User, workspace: Optional[str]):
-        """
-        Deletes a dataset.
+        return cast(Dataset, found_ds)
 
-        Parameters
-        ----------
-        name:
-            The dataset name
-        user:
-            The current user
-        workspace:
-            The team where dataset belongs to
+    def __find_by_name_with_superuser_fallback__(
+        self,
+        user: User,
+        name: str,
+        owner: Optional[str],
+        task: Optional[str] = None,
+    ):
+        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task)
+        if not found_ds and user.is_superuser():
+            found_ds = self.__dao__.find_by_name(name=name, owner=None, task=task)
+        return found_ds
 
-        """
-        owner = user.check_workspace(workspace)
-        found = self.__dao__.find_by_name(name, owner)
+    def delete(self, user: User, dataset: Dataset):
+        user.check_workspace(dataset.owner)
+        found = self.__find_by_name_with_superuser_fallback__(
+            user=user, name=dataset.name, owner=dataset.owner, task=dataset.task
+        )
         if found:
-            self.__dao__.delete_dataset(found)
+            self.__dao__.delete_dataset(dataset)
 
     def update(
         self,
-        name: str,
-        data: UpdateDatasetRequest,
         user: User,
-        workspace: Optional[str],
-        task: Optional[str] = None,
+        dataset: Dataset,
+        tags: Dict[str, str],
+        metadata: Dict[str, Any],
     ) -> Dataset:
-        """
-        Updates an existing dataset. Fields in update data are
-        merged with store ones. Updates cannot remove data fields.
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        data:
-            The update fields
-        user:
-            The current user
-        workspace:
-            The workspace where dataset belongs to
-        task:
-            If provided, is used to match the existing dataset
-
-        Returns
-        -------
-            The updated dataset
-        """
-
-        found = self.find_by_name(name, task=task, user=user, workspace=workspace)
-
-        data.tags = {**found.tags, **data.tags}
-        data.metadata = {**found.metadata, **data.metadata}
-        updated = found.copy(
-            update={**data.dict(by_alias=True), "last_updated": datetime.utcnow()}
+        found = self.find_by_name(
+            user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
         )
 
-        self.__dao__.update_dataset(updated)
-        return Dataset(**updated.dict(by_alias=True))
+        dataset.tags = {**found.tags, **(tags or {})}
+        dataset.metadata = {**found.metadata, **(metadata or {})}
+        updated = found.copy(
+            update={**dataset.dict(by_alias=True), "last_updated": datetime.utcnow()}
+        )
+        return self.__dao__.update_dataset(updated)
 
-    def upsert(
+    def list(
         self,
-        dataset: CreationDatasetRequest,
-        task: TaskType,
         user: User,
-        workspace: Optional[str],
-    ) -> Dataset:
-        """
-        Inserts or updates the dataset. Updates only affects to updatable fields
+        workspaces: Optional[List[str]],
+        task: Optional[TaskType] = None,
+    ) -> List[Dataset]:
+        owners = user.check_workspaces(workspaces)
 
-        Parameters
-        ----------
-        dataset:
-            The dataset data
-        task:
-            Selected task when dataset does not exists. Won't be used
-            if dataset already exists
-        user:
-            The current user
-        workspace:
-            The dataset where dataset belongs to
-
-        Returns
-        -------
-
-            The updated or created dataset
-
-        """
-        try:
-            return self.update(
-                name=dataset.name,
-                data=UpdateDatasetRequest(tags=dataset.tags, metadata=dataset.metadata),
-                user=user,
-                workspace=workspace,
-                task=task,
+        datasets = []
+        for task_config in TaskFactory.get_all_configs():
+            datasets.extend(
+                self.__dao__.list_datasets(
+                    owner_list=owners,
+                    task=task_config.task,
+                )
             )
-        except EntityNotFoundError:
-            return self.create(
-                dataset=dataset, task=task, user=user, workspace=workspace
-            )
+        return datasets
+
+    def close(self, user: User, dataset: Dataset):
+        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
+        self.__dao__.close(found)
+
+    def open(self, user: User, dataset: Dataset):
+        found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
+        self.__dao__.open(found)
 
     def copy_dataset(
         self,
-        name: str,
-        data: CopyDatasetRequest,
         user: User,
-        workspace: Optional[str],
+        dataset: Dataset,
+        copy_name: str,
+        copy_workspace: Optional[str] = None,
+        copy_tags: Dict[str, Any] = None,
+        copy_metadata: Dict[str, Any] = None,
     ) -> Dataset:
-        """
-        Copies a dataset into another
 
-        Parameters
-        ----------
-        name:
-            The source dataset name
-        data:
-            A copy request configuration
-        user:
-            The current user
-        workspace:
-            The workspace where source dataset belongs to
-
-        Returns
-        -------
-
-        """
-        dataset_workspace = data.target_workspace or workspace
+        dataset_workspace = copy_workspace or dataset.owner
         dataset_workspace = user.check_workspace(dataset_workspace)
 
         try:
-            self.find_by_name(
-                data.name, task=None, user=user, workspace=dataset_workspace
+            found = self.find_by_name(
+                user=user, name=copy_name, workspace=dataset_workspace
             )
             raise EntityAlreadyExistsError(
-                name=data.name, type=Dataset, workspace=dataset_workspace
+                name=found.name, type=found.__class__, workspace=dataset_workspace
             )
         except (EntityNotFoundError, ForbiddenOperationError):
             pass
 
-        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
+        copy_dataset = dataset.copy()
+
+        copy_dataset.name = copy_name
+        copy_dataset.owner = dataset_workspace
+
         date_now = datetime.utcnow()
+        copy_dataset.created_at = date_now
+        copy_dataset.last_updated = date_now
 
-        created_dataset = DatasetDB(
-            name=data.name,
-            task=found.task,
-            owner=dataset_workspace,
-            created_at=date_now,
-            last_updated=date_now,
-            tags={**found.tags, **data.tags},
-            metadata={
-                **found.metadata,
-                **data.metadata,
-                "source_workspace": workspace,
-                "copied_from": found.name,
-            },
-        )
+        copy_dataset.tags = {**copy_dataset.tags, **(copy_tags or {})}
+        copy_dataset.metadata = {
+            **copy_dataset.metadata,
+            **(copy_metadata or {}),
+            "source_workspace": dataset.owner,
+            "copied_from": dataset.name,
+        }
+
         self.__dao__.copy(
-            source=found,
-            target=created_dataset,
+            source=dataset,
+            target=copy_dataset,
         )
 
-        return Dataset.parse_obj(created_dataset)
+        return copy_dataset
 
-    def close_dataset(self, name: str, user: User, workspace: Optional[str]):
-        """
-        Closes a dataset. That means that all related dataset resources
-        will be releases, but dataset cannot be explored
+    def all_workspaces(self) -> List[str]:
+        """Retrieve all dataset workspaces"""
 
-        Parameters
-        ----------
-        name:
-            The dataset name
-        user:
-            The current user
-        workspace:
-            The workspace where dataset belongs to
-
-        """
-        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
-        self.__dao__.close(found)
-
-    def open_dataset(self, name: str, user: User, workspace: Optional[str]):
-        """
-        Open a dataset. That means that all related dataset resources
-        will be loaded and dataset will be ready for searches
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        user:
-            The current user
-        workspace:
-            The workspace where dataset belongs to
-
-        """
-        found = self.find_by_name(name, task=None, user=user, workspace=workspace)
-        self.__dao__.open(found)
+        workspaces = self.__dao__.get_all_workspaces()
+        # include the non-workspace workspace?
+        return workspaces

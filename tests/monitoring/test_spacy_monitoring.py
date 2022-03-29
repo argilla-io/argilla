@@ -1,37 +1,40 @@
+import random
+
 import rubrix as rb
 from tests.monitoring.helpers import mock_monitor
-from tests.server.test_helpers import client, mocking_client
 
 
-def test_spacy_ner_monitor(monkeypatch):
-    mocking_client(monkeypatch, client)
+def test_spacy_ner_monitor(monkeypatch, mocked_client):
     dataset = "spacy-dataset"
     rb.delete(dataset)
 
     import spacy
 
     nlp = spacy.load("en_core_web_sm")
-    nlp = rb.monitor(nlp, dataset=dataset, sample_rate=0.1)
+    nlp = rb.monitor(nlp, dataset=dataset, sample_rate=0.5)
     mock_monitor(nlp, monkeypatch)
 
-    for _ in range(0, 100):
+    random.seed(42)
+
+    for _ in range(0, 20):
         nlp("Paris is my favourite city")
 
     df = rb.load(dataset)
-    assert 1 < len(df) <= 20
+    assert len(df) == 11
+    # assert 10 - std < len(df) < 10 + std
     assert df.text.unique().tolist() == ["Paris is my favourite city"]
 
     rb.delete(dataset)
-    list(nlp.pipe(["This is a text"] * 100))
+    list(nlp.pipe(["This is a text"] * 20))
 
     df = rb.load(dataset)
-    assert 1 < len(df) <= 20
+    assert len(df) == 6
     assert df.text.unique().tolist() == ["This is a text"]
 
     rb.delete(dataset)
-    list(nlp.pipe([("This is a text", {"meta": "data"})] * 100, as_tuples=True))
+    list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
     df = rb.load(dataset)
-    assert 1 < len(df) <= 20
+    assert len(df) == 14
     for metadata in df.metadata.values.tolist():
         assert metadata == {"meta": "data"}

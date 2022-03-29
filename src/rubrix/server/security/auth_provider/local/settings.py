@@ -14,7 +14,8 @@
 #  limitations under the License.
 
 from pydantic import BaseSettings
-from rubrix import DEFAULT_API_KEY
+
+from rubrix._constants import DEFAULT_API_KEY
 
 
 class Settings(BaseSettings):

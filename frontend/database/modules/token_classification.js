@@ -16,6 +16,14 @@
  */
 
 import { ObservationDataset } from "@/models/Dataset";
+import { TokenClassificationDataset } from "@/models/TokenClassification";
+
+async function _updateLastSelectedEntity({ id, lastSelectedEntity }) {
+  return await TokenClassificationDataset.update({
+    where: id,
+    data: { lastSelectedEntity },
+  });
+}
 
 const getters = {};
 
@@ -24,6 +32,12 @@ const actions = {
     return await ObservationDataset.dispatch("setUserData", {
       dataset,
       data: { entities },
+    });
+  },
+  async updateLastSelectedEntity(_, { dataset, lastSelectedEntity }) {
+    await _updateLastSelectedEntity({
+      id: dataset.id,
+      lastSelectedEntity,
     });
   },
 };

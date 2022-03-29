@@ -128,7 +128,8 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             }
             if self.explanation
             else None,
-            metrics=self.metrics,
+            metrics=self.metrics or None,
+            search_keywords=self.search_keywords or None,
         )
 
 
@@ -140,6 +141,7 @@ class TextClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
+    advanced_query_dsl: bool = False
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)
@@ -180,7 +182,8 @@ class LabelingRule(BaseModel):
 
     """
 
-    label: str
+    label: str = None
+    labels: List[str] = Field(default_factory=list)
     query: str
     description: Optional[str] = None
     author: str

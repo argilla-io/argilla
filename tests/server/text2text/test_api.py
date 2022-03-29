@@ -4,12 +4,11 @@ from rubrix.server.tasks.text2text import (
     CreationText2TextRecord,
     Text2TextSearchResults,
 )
-from tests.server.test_helpers import client
 
 
-def test_search_records():
+def test_search_records(mocked_client):
     dataset = "test_search_records"
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     records = [
         CreationText2TextRecord.parse_obj(data)
@@ -31,7 +30,7 @@ def test_search_records():
             },
         ]
     ]
-    response = client.post(
+    response = mocked_client.post(
         f"/api/datasets/{dataset}/Text2Text:bulk",
         json=Text2TextBulkData(
             tags={"env": "test", "class": "text classification"},
@@ -46,7 +45,7 @@ def test_search_records():
     assert bulk_response.failed == 0
     assert bulk_response.processed == 2
 
-    response = client.post(f"/api/datasets/{dataset}/Text2Text:search", json={})
+    response = mocked_client.post(f"/api/datasets/{dataset}/Text2Text:search", json={})
     assert response.status_code == 200, response.json()
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2

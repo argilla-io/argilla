@@ -16,9 +16,7 @@
   -->
 
 <template>
-  <form
-    @submit.prevent="submit(query)"
-  >
+  <form @submit.prevent="submit(query)">
     <div :class="['searchbar__container', { active: query }]">
       <ReInputContainer class="searchbar">
         <svgicon
@@ -101,8 +99,9 @@ export default {
   margin-right: 0;
   margin-left: auto;
   pointer-events: all;
-  border-radius: 5px;
+  border-radius: 3px;
   min-width: 100%;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
   &__container {
     position: relative;
     margin-right: auto;
@@ -125,7 +124,7 @@ export default {
     margin: auto 1em auto 1em;
   }
   &:hover {
-    box-shadow: 0px 3px 8px 3px rgba(222, 222, 222, 0.4);
+    box-shadow: $shadow;
   }
 }
 </style>

@@ -20,7 +20,7 @@
     ref="list"
     :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
   >
-    <span class="record__content" v-html="$highlightSearch(queryText, text)">
+    <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
     <a
       href="#"
@@ -34,13 +34,9 @@
 <script>
 export default {
   props: {
-    text: {
-      type: [String, Array],
+    record: {
+      type: Object,
       required: true,
-    },
-    queryText: {
-      type: String,
-      default: undefined,
     },
   },
   data: () => ({
@@ -48,8 +44,14 @@ export default {
     scrollHeight: undefined,
   }),
   computed: {
+    text() {
+      return this.record.text;
+    },
+    keywords() {
+      return this.record.search_keywords;
+    },
     visibleRecordHeight() {
-      return this.$mq === "lg" ? 550 : 240;
+      return this.$mq === "lg" ? 570 : 260;
     },
   },
   updated() {
@@ -68,22 +70,14 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
-  line-height: 16px;
-}
-</style>
 <style lang="scss" scoped>
 .record {
   &__collapsed {
     .record__content {
-      max-height: 240px;
+      max-height: 260px;
       overflow: hidden;
       @include media(">xxl") {
-        max-height: 550px;
+        max-height: 570px;
       }
     }
   }
@@ -97,14 +91,13 @@ export default {
   }
   &__button {
     display: inline-block;
-    border-radius: 5px;
+    border-radius: $border-radius;
     padding: 0.5em;
     transition: all 0.2s ease;
     @include font-size(14px);
     font-weight: 400;
     background: none;
-    margin-top: 1.5em;
-    margin-bottom: 1em;
+    margin-top: 1em;
     font-weight: 600;
     text-decoration: none;
     line-height: 1;

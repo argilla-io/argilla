@@ -3,6 +3,7 @@ from rubrix.server.tasks.commons.dao.es_config import mappings
 from rubrix.server.tasks.token_classification.metrics import (
     MentionMetrics,
     TokenMetrics,
+    TokenTagMetrics,
 )
 
 
@@ -12,13 +13,15 @@ def mentions_mappings():
         "properties": {
             "mention": mappings.keyword_field(),
             "entity": mappings.keyword_field(),
+            "score": mappings.decimal_field(),
         },
     }
 
 
 def token_classification_mappings():
     metrics_mentions_mappings = nested_mappings_from_base_model(MentionMetrics)
-    _mentions_mappings = mentions_mappings()
+    metrics_tags_mappings = nested_mappings_from_base_model(TokenTagMetrics)
+    _mentions_mappings = mentions_mappings()  # TODO: remove
     return {
         "_source": mappings.source(
             excludes=[
@@ -35,15 +38,16 @@ def token_classification_mappings():
         ),
         "properties": {
             "predicted": mappings.keyword_field(),
-            "annotated_as": mappings.keyword_field(),
-            "predicted_as": mappings.keyword_field(),
+            "annotated_as": mappings.keyword_field(enable_text_search=True),
+            "predicted_as": mappings.keyword_field(enable_text_search=True),
             "score": {"type": "float"},
-            "predicted_mentions": _mentions_mappings,
-            "mentions": _mentions_mappings,
+            "predicted_mentions": _mentions_mappings,  # TODO: remove
+            "mentions": _mentions_mappings,  # TODO: remove
             "tokens": mappings.keyword_field(),
-            # TODO: This must be unified with metrics.py module
             "metrics.tokens": nested_mappings_from_base_model(TokenMetrics),
             "metrics.predicted.mentions": metrics_mentions_mappings,
             "metrics.annotated.mentions": metrics_mentions_mappings,
+            "metrics.predicted.tags": metrics_tags_mappings,
+            "metrics.annotated.tags": metrics_tags_mappings,
         },
     }

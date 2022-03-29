@@ -14,13 +14,12 @@
 #  limitations under the License.
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.es_helpers import filters
-from rubrix.server.datasets.model import UpdateDatasetRequest
+from rubrix.server.datasets.model import DatasetDB, UpdateDatasetRequest
 from rubrix.server.tasks.commons import (
     BaseAnnotation,
     BaseRecord,
@@ -29,9 +28,9 @@ from rubrix.server.tasks.commons import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
+from rubrix.server.tasks.search.model import BaseSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -247,6 +246,29 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def all_text(self) -> str:
         return self.text
 
+    def predicted_iob_tags(self) -> Optional[List[str]]:
+        if self.prediction is None:
+            return None
+        return self.spans2iob(self.prediction.entities)
+
+    def annotated_iob_tags(self) -> Optional[List[str]]:
+        if self.annotation is None:
+            return None
+        return self.spans2iob(self.annotation.entities)
+
+    def spans2iob(self, spans: List[EntitySpan]) -> Optional[List[str]]:
+        if spans is None:
+            return None
+        tags = ["O"] * len(self.tokens)
+        for entity in spans:
+            token_start = self.char_id2token_id(entity.start)
+            token_end = self.char_id2token_id(entity.end - 1)
+            tags[token_start] = f"B-{entity.label}"
+            for idx in range(token_start + 1, token_end + 1):
+                tags[idx] = f"I-{entity.label}"
+
+        return tags
+
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
             (mention, entity)
@@ -344,82 +366,26 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseModel):
+class TokenClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
     Attributes:
     -----------
-    ids: Optional[List[Union[str, int]]]
-        Record ids list
-
-    query_text: str
-        Text query over inputs
-    metadata: Optional[Dict[str, Union[str, List[str]]]]
-        Text query over metadata fields. Default=None
 
     predicted_as: List[str]
         List of predicted terms
     annotated_as: List[str]
         List of annotated terms
-    annotated_by: List[str]
-        List of annotation agents
-    predicted_by: List[str]
-        List of predicted agents
-    status: List[TaskStatus]
-        List of task status
     predicted: Optional[PredictionStatus]
         The task prediction status
 
     """
 
-    ids: Optional[List[Union[str, int]]]
-
-    query_text: str = Field(default=None)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
     score: Optional[ScoreRange] = Field(default=None)
-    status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
-
-    def as_elasticsearch(self) -> Dict[str, Any]:
-        """Build an elasticsearch query part from search query"""
-
-        if self.ids:
-            return {"ids": {"values": self.ids}}
-
-        all_filters = filters.metadata(self.metadata)
-        query_filters = [
-            query_filter
-            for query_filter in [
-                filters.predicted_as(self.predicted_as),
-                filters.predicted_by(self.predicted_by),
-                filters.annotated_as(self.annotated_as),
-                filters.annotated_by(self.annotated_by),
-                filters.status(self.status),
-                filters.predicted(self.predicted),
-                filters.score(self.score),
-            ]
-            if query_filter
-        ]
-        query_text = filters.text_query(self.query_text)
-        all_filters.extend(query_filters)
-
-        return {
-            "bool": {
-                "must": query_text or {"match_all": {}},
-                "filter": {
-                    "bool": {
-                        "should": all_filters,
-                        "minimum_should_match": len(all_filters),
-                    }
-                },
-            }
-        }
 
 
 class TokenClassificationSearchRequest(BaseModel):
@@ -459,4 +425,9 @@ class TokenClassificationAggregations(BaseSearchResultsAggregations):
 class TokenClassificationSearchResults(
     BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
 ):
+    pass
+
+
+class TokenClassificationDatasetDB(DatasetDB):
+    task: TaskType = Field(default=TaskType.token_classification, const=True)
     pass

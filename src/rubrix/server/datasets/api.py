@@ -15,13 +15,15 @@
 
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, Security
+from fastapi import APIRouter, Depends, Security
 
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
+
+from ..commons.api import CommonTaskQueryParams
+from ..commons.errors import EntityNotFoundError
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService
-from ..commons.api import CommonTaskQueryParams
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 
@@ -51,11 +53,11 @@ def list_datasets(
 
     Returns
     -------
-        A list of datasets visibles by current user
+        A list of datasets visible by current user
     """
     return service.list(
         user=current_user,
-        workspaces=[ds_params.workspace],
+        workspaces=[ds_params.workspace] if ds_params.workspace is not None else None,
     )
 
 
@@ -94,7 +96,7 @@ def get_dataset(
     """
     return Dataset.parse_obj(
         service.find_by_name(
-            name, task=None, user=current_user, workspace=ds_params.workspace
+            user=current_user, name=name, workspace=ds_params.workspace
         )
     )
 
@@ -136,11 +138,16 @@ def update_dataset(
     - NotAuthorizedError if user cannot access the found dataset
 
     """
+
+    found_ds = service.find_by_name(
+        user=current_user, name=name, workspace=ds_params.workspace
+    )
+
     return service.update(
-        name,
-        data=update_request,
         user=current_user,
-        workspace=ds_params.workspace,
+        dataset=found_ds,
+        tags=update_request.tags,
+        metadata=update_request.metadata,
     )
 
 
@@ -169,7 +176,13 @@ def delete_dataset(
         The current user
 
     """
-    service.delete(name, user=current_user, workspace=ds_params.workspace)
+    try:
+        found_ds = service.find_by_name(
+            user=current_user, name=name, workspace=ds_params.workspace
+        )
+        service.delete(user=current_user, dataset=found_ds)
+    except EntityNotFoundError:
+        pass
 
 
 @router.put(
@@ -197,7 +210,10 @@ def close_dataset(
         The current user
 
     """
-    service.close_dataset(name, user=current_user, workspace=ds_params.workspace)
+    found_ds = service.find_by_name(
+        user=current_user, name=name, workspace=ds_params.workspace
+    )
+    service.close(user=current_user, dataset=found_ds)
 
 
 @router.put(
@@ -225,7 +241,10 @@ def open_dataset(
         The current user
 
     """
-    service.open_dataset(name, user=current_user, workspace=ds_params.workspace)
+    found_ds = service.find_by_name(
+        user=current_user, name=name, workspace=ds_params.workspace
+    )
+    service.open(user=current_user, dataset=found_ds)
 
 
 @router.put(
@@ -258,7 +277,14 @@ def copy_dataset(
         The current user
 
     """
-
+    found = service.find_by_name(
+        user=current_user, name=name, workspace=ds_params.workspace
+    )
     return service.copy_dataset(
-        name=name, data=copy_request, user=current_user, workspace=ds_params.workspace
+        user=current_user,
+        dataset=found,
+        copy_name=copy_request.name,
+        copy_workspace=copy_request.target_workspace,
+        copy_tags=copy_request.tags,
+        copy_metadata=copy_request.metadata,
     )

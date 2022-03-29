@@ -12,18 +12,26 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-"""The Rubrix client, used by the rubrix.__init__ module"""
+"""
+The Rubrix client, used by the rubrix.__init__ module.
+DEPRECATED, CAN BE REMOVED IN A FUTURE VERSION. USE THE rubrix.client.api MODULE INSTEAD!
+"""
 
 import logging
 import socket
+import warnings
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-import httpx
 import pandas
 from tqdm.auto import tqdm
 
 from rubrix._constants import RUBRIX_WORKSPACE_HEADER_NAME
+from rubrix.client.datasets import (
+    Dataset,
+    DatasetForText2Text,
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+)
 from rubrix.client.metrics.models import MetricResults
 from rubrix.client.models import (
     BulkResponse,
@@ -75,9 +83,10 @@ class InputValueError(RubrixClientError):
 
 
 class RubrixClient:
-    """Class definition for Rubrix Client"""
+    """DEPRECATED. Class definition for Rubrix Client"""
 
     _LOGGER = logging.getLogger(__name__)
+    _WARNED_ABOUT_AS_PANDAS = False
 
     # Larger sizes will trigger a warning
     MAX_CHUNK_SIZE = 5000
@@ -91,40 +100,25 @@ class RubrixClient:
         workspace: Optional[str] = None,
         timeout: int = 60,
     ):
-        """Client setup function.
+        """DEPRECATED. Client setup function.
 
         Args:
             api_url: Address from which the API is serving.
             api_key: Authentication token.
             workspace: Active workspace for this client session.
-            timeout: Seconds to considered a connection timeout.
+            timeout: Seconds to wait before raising a connection timeout.
         """
+        warnings.warn(
+            f"The 'RubrixClient' class is deprecated and will be removed in a future version! "
+            f"Use the `rubrix.client.api` module instead. Make sure to adapt your code.",
+            category=FutureWarning,
+        )
 
-        self._client = None  # Variable to store the client after the init
-
-        try:
-            response = httpx.get(url=f"{api_url}/api/docs/spec.json")
-        except ConnectionRefusedError:
-            raise Exception("Connection Refused: cannot connect to the API.")
-
-        if response.status_code != 200:
-            raise Exception(
-                "Connection error: Undetermined error connecting to the Rubrix Server. "
-                "The API answered with a {} code: {}".format(
-                    response.status_code, response.content
-                )
-            )
         self._client = AuthenticatedClient(
             base_url=api_url, token=api_key, timeout=timeout
         )
 
-        response = whoami(client=self._client)
-
-        whoami_response_status = response.status_code
-        if whoami_response_status == 401:
-            raise Exception("Authentication error: invalid credentials.")
-
-        self.__current_user__: User = response.parsed
+        self.__current_user__: User = whoami(client=self._client)
         if workspace:
             self.set_workspace(workspace)
 
@@ -151,7 +145,7 @@ class RubrixClient:
 
     def log(
         self,
-        records: Union[Record, Iterable[Record]],
+        records: Union[Record, Iterable[Record], Dataset],
         name: str,
         tags: Optional[Dict[str, str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -259,8 +253,8 @@ class RubrixClient:
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
         as_pandas: bool = True,
-    ) -> Union[pandas.DataFrame, List[Record]]:
-        """Loads a dataset as a pandas DataFrame or a list of records.
+    ) -> Union[pandas.DataFrame, Dataset]:
+        """Loads a dataset as a pandas DataFrame or a Dataset.
 
         Args:
             name: The dataset name.
@@ -268,10 +262,10 @@ class RubrixClient:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
-            as_pandas: If True, return a pandas DataFrame. If False, return a list of records.
+            as_pandas: If True, return a pandas DataFrame. If False, return a Dataset.
 
         Returns:
-            The dataset as a pandas Dataframe or a list of records.
+            The dataset as a pandas Dataframe or a Dataset.
         """
         response = get_dataset(client=self._client, name=name)
         _check_response_errors(response)
@@ -280,23 +274,23 @@ class RubrixClient:
         task_config = {
             TaskType.text_classification: (
                 text_classification_data,
-                None,
                 TextClassificationQuery,
+                DatasetForTextClassification,
             ),
             TaskType.token_classification: (
                 token_classification_data,
-                None,
                 TokenClassificationQuery,
+                DatasetForTokenClassification,
             ),
             TaskType.text2text: (
                 text2text_data,
-                None,
                 Text2TextQuery,
+                DatasetForText2Text,
             ),
         }
 
         try:
-            get_dataset_data, map_fn, request_class = task_config[task]
+            get_dataset_data, request_class, dataset_class = task_config[task]
         except KeyError:
             raise ValueError(
                 f"Sorry, load method not supported for the '{task}' task. Supported tasks: "
@@ -318,9 +312,18 @@ class RubrixClient:
         except TypeError:
             records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
 
+        dataset = dataset_class(records_sorted_by_id)
+
+        if not self._WARNED_ABOUT_AS_PANDAS:
+            self._LOGGER.warning(
+                "The argument 'as_pandas' in `rb.load` will be deprecated in the future, and we will always return a `Dataset`. "
+                "To emulate the future behavior set `as_pandas=False`. To get a pandas DataFrame, call `Dataset.to_pandas()`"
+            )
+            self._WARNED_ABOUT_AS_PANDAS = True
+
         if as_pandas:
-            return pandas.DataFrame(map(lambda r: r.dict(), records_sorted_by_id))
-        return records_sorted_by_id
+            return dataset.to_pandas()
+        return dataset
 
     def copy(self, source: str, target: str, target_workspace: Optional[str] = None):
         """Makes a copy of the `source` dataset and saves it as `target`"""

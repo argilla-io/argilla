@@ -42,11 +42,6 @@ export default {
       selectedMetadataRecord: undefined,
     };
   },
-  computed: {
-    isExplainedRecord() {
-      return this.dataset.results.records.some((record) => record.explanation);
-    },
-  },
   methods: {
     onCloseMetadata() {
       this.selectedMetadataRecord = undefined;

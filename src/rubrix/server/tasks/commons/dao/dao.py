@@ -15,6 +15,7 @@
 
 import dataclasses
 import datetime
+import re
 from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 import deprecated
@@ -51,52 +52,6 @@ class _IndexTemplateExtensions:
     dynamic_templates: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
 
 
-_extensions = _IndexTemplateExtensions()
-
-
-def extends_index_properties(extended_properties: Dict[str, Any]):
-    """
-    Add explict properties configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-
-    Parameters
-    ----------
-    extended_properties:
-        The properties dictionary configuration. Several properties could be configured here
-
-    """
-    _extensions.properties.append(extended_properties)
-
-
-def extends_index_dynamic_templates(*templates: Dict[str, Any]):
-    """
-    Add dynamic mapping template configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/7.x/dynamic-templates.html#dynamic-templates
-
-    Parameters
-    ----------
-    templates:
-        One or several mapping templates
-    """
-    _extensions.dynamic_templates.extend(templates)
-
-
-def extends_index_analyzers(analyzers: Dict[str, Any]):
-    """
-    Add index analysis configuration to rubrix index template
-
-    See https://www.elastic.co/guide/en/elasticsearch/reference/current/analyzer.html
-
-    Parameters
-    ----------
-    analyzers:
-        The analyzers configuration. Several analyzers could be configured here
-    """
-    _extensions.analyzers.append(analyzers)
-
-
 def dataset_records_index(dataset_id: str) -> str:
     """
     Returns dataset records index for a given dataset id
@@ -129,6 +84,16 @@ class DatasetRecordsDAO:
     # This info must be provided by each task using dao.register_task_mappings method
     _MAPPINGS_BY_TASKS = {}
 
+    __HIGHLIGHT_PRE_TAG__ = "<@@-rb-key>"
+    __HIGHLIGHT_POST_TAG__ = "</@@-rb-key>"
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
+    )
+
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
+
     @classmethod
     def get_instance(
         cls,
@@ -153,15 +118,12 @@ class DatasetRecordsDAO:
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
-
-        # TODO(@frascuchon): detect settings.disable_es_index_template_creation env var
-        #  and show alternative to customize dataset index configuration
         self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(
         self,
         dataset: BaseDatasetDB,
-        records: List[BaseRecord],
+        records: List[DBRecord],
         record_class: Type[DBRecord],
     ) -> int:
         """
@@ -193,7 +155,9 @@ class DatasetRecordsDAO:
             db_record = record_class.parse_obj(r)
             if now:
                 db_record.last_updated = now
-            documents.append(db_record.dict(exclude_none=False))
+            documents.append(
+                db_record.dict(exclude_none=False, exclude={"search_keywords"})
+            )
 
         index_name = self.create_dataset_index(dataset)
         self._configure_metadata_fields(index_name, metadata_values)
@@ -202,6 +166,11 @@ class DatasetRecordsDAO:
             documents=documents,
             doc_id=lambda _record: _record.get("id"),
         )
+
+    def get_metadata_schema(self, dataset: BaseDatasetDB) -> Dict[str, str]:
+        """Get metadata fields schema for provided dataset"""
+        records_index = dataset_records_index(dataset.id)
+        return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
 
     def search_records(
         self,
@@ -238,12 +207,15 @@ class DatasetRecordsDAO:
             {**(search.aggregations or {})} if compute_aggregations else {}
         )
 
+        sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
+
         es_query = {
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
             "query": search.query or {"match_all": {}},
-            "sort": search.sort or [{"_id": {"order": "asc"}}],
+            "sort": sort_config,
             "aggs": aggregation_requests,
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
 
         try:
@@ -264,11 +236,7 @@ class DatasetRecordsDAO:
                 aggregations.predicted(),
                 aggregations.words_cloud(),
                 aggregations.score(),
-                aggregations.custom_fields(
-                    self._es.get_field_mapping(
-                        index=records_index, field_name="metadata.*"
-                    )
-                ),
+                aggregations.custom_fields(self.get_metadata_schema(dataset)),
             ]:
                 if aggr:
                     aggr_results = self._es.search(
@@ -285,19 +253,37 @@ class DatasetRecordsDAO:
 
         result = RecordSearchResults(
             total=total,
-            records=list(map(self.esdoc2record, docs)),
+            records=list(map(self.__esdoc2record__, docs)),
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
-            parsed_aggregations = unflatten_dict(
-                parsed_aggregations, stop_keys=["metadata"]
-            )
 
-            result.words = parsed_aggregations.pop("words", {})
-            result.metadata = parsed_aggregations.pop("metadata", {})
+            if search.include_default_aggregations:
+                parsed_aggregations = unflatten_dict(
+                    parsed_aggregations, stop_keys=["metadata"]
+                )
+                result.words = parsed_aggregations.pop("words", {})
+                result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
 
         return result
+
+    def __normalize_sort_config__(
+        self, index: str, sort: Optional[List[Dict[str, Any]]] = None
+    ) -> List[Dict[str, Any]]:
+        id_field = "id"
+        id_keyword_field = "id.keyword"
+        sort_config = []
+
+        for sort_field in sort or [{id_field: {"order": "asc"}}]:
+            for field in sort_field:
+                if field == id_field and self._es.get_field_mapping(
+                    index=index, field_name=id_keyword_field
+                ):
+                    sort_config.append({id_keyword_field: sort_field[field]})
+                else:
+                    sort_config.append(sort_field)
+        return sort_config
 
     def scan_dataset(
         self,
@@ -321,15 +307,49 @@ class DatasetRecordsDAO:
         search = search or RecordSearch()
         es_query = {
             "query": search.query,
+            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
         docs = self._es.list_documents(
             dataset_records_index(dataset.id), query=es_query
         )
         for doc in docs:
-            yield self.esdoc2record(doc)
+            yield self.__esdoc2record__(doc)
 
-    def esdoc2record(self, doc):
-        return {**doc["_source"], "id": doc["_id"]}
+    def __esdoc2record__(
+        self,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = True,
+    ):
+        return {
+            **doc["_source"],
+            "id": doc["_id"],
+            "search_keywords": self.__parse_highlight_results__(
+                doc, query=query, is_phrase_query=is_phrase_query
+            ),
+        }
+
+    @classmethod
+    def __parse_highlight_results__(
+        cls,
+        doc: Dict[str, Any],
+        query: Optional[str] = None,
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
+        highlight_info = doc.get("highlight")
+        if not highlight_info:
+            return None
+
+        search_keywords = []
+        for content in highlight_info.values():
+            if not isinstance(content, list):
+                content = [content]
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
+            search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
+        return list(set(search_keywords))
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
@@ -402,6 +422,27 @@ class DatasetRecordsDAO:
             force_recreate=force_recreate,
         )
         return index_name
+
+    def get_dataset_schema(self, dataset: BaseDatasetDB) -> Dict[str, Any]:
+        """Return inner elasticsearch index configuration"""
+        index_name = dataset_records_index(dataset.id)
+        return self._es.__client__.indices.get_mapping(index=index_name)
+
+    @classmethod
+    def __configure_query_highlight__(cls, task: TaskType):
+
+        return {
+            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
+            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
+            "require_field_match": False,
+            "fields": {
+                "text": {},
+                # TODO: `words` will be removed once the migration will be completed.
+                #  This configuration is included just for old datasets records
+                "words": {},
+                **({"inputs.*": {}} if task == TaskType.text_classification else {}),
+            },
+        }
 
 
 _instance: Optional[DatasetRecordsDAO] = None

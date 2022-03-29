@@ -14,6 +14,8 @@
 #  limitations under the License.
 
 from datetime import datetime, timedelta
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from fastapi.security import (
     OAuth2PasswordBearer,
@@ -21,14 +23,15 @@ from fastapi.security import (
     SecurityScopes,
 )
 from jose import JWTError, jwt
+
 from rubrix.server.commons.errors import InactiveUserError, UnauthorizedError
-from rubrix.server.security.auth_provider.base import (
-    AuthProvider,
-    api_key_header,
-)
+from rubrix.server.commons.es_wrapper import create_es_wrapper
+from rubrix.server.datasets.dao import DatasetsDAO
+from rubrix.server.datasets.service import DatasetsService
+from rubrix.server.security.auth_provider.base import AuthProvider, api_key_header
 from rubrix.server.security.auth_provider.local.users.service import UsersService
 from rubrix.server.security.model import Token, User
-from typing import Optional
+from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
 from .settings import Settings, settings
 
@@ -171,10 +174,11 @@ class LocalAuthProvider(AuthProvider):
 
 def create_local_auth_provider():
     from .users.dao import create_users_dao
-    from .users.service import create_users_service
 
     settings = Settings()
-    users_dao = create_users_dao()
-    users_service = create_users_service(users_dao)
+
+    users_service = UsersService.get_instance(
+        users=create_users_dao(),
+    )
 
     return LocalAuthProvider(users=users_service, settings=settings)

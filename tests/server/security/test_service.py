@@ -1,8 +1,9 @@
 import pytest
 
-from rubrix.server.security.auth_provider.local.users.service import create_users_service
+from rubrix.server.security.auth_provider.local.users.dao import create_users_dao
+from rubrix.server.security.auth_provider.local.users.service import UsersService
 
-usersService = create_users_service()
+usersService = UsersService.get_instance(users=create_users_dao())
 
 
 def test_authenticate_user():
@@ -19,4 +20,3 @@ def test_get_user():
 async def test_find_user_by_api_key():
     user = await usersService.find_user_by_api_key(api_key="rubrix.apikey")
     assert user.username == "rubrix"
-

@@ -75,7 +75,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
   }

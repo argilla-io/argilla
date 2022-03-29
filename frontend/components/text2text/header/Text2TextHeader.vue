@@ -17,12 +17,9 @@
 
 <template>
   <div class="header__filters">
-    <header-title
-      v-if="dataset.results.records"
-      title="Text2Text"
-      :dataset="dataset"
-    />
-    <filters-area :dataset="dataset" />
+    <filters-area :dataset="dataset">
+      <records-counter :total="dataset.results.total"></records-counter>
+    </filters-area>
     <global-actions :dataset="dataset">
       <validate-discard-action
         :dataset="dataset"

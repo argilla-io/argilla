@@ -22,12 +22,6 @@ function defaultWorkspace(user) {
 function currentWorkspace(route) {
   return route.params.workspace;
 }
-function workspaceHome(ws) {
-  return `/ws/${ws}`;
-}
 
-function setWorkspace(router, workspace) {
-  router.push(workspaceHome(workspace));
-}
-
-export { defaultWorkspace, currentWorkspace, setWorkspace, workspaceHome };
+const NO_WORKSPACE = "-";
+export { defaultWorkspace, currentWorkspace, NO_WORKSPACE };

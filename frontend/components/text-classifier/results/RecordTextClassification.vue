@@ -20,12 +20,7 @@
     <!-- annotation labels and prediction status -->
     <div class="record--left">
       <!-- record text -->
-      <RecordInputs
-        :predicted="record.predicted"
-        :data="record.inputs"
-        :explanation="record.explanation"
-        :query-text="dataset.query.text"
-      />
+      <RecordInputs :record="record" />
       <ClassifierAnnotationArea
         v-if="annotationEnabled"
         :dataset="dataset"
@@ -160,7 +155,10 @@ export default {
   display: flex;
   &--left {
     width: 100%;
-    padding: 15px 20px 20px 65px;
+    padding: 50px 20px 50px 50px;
+    .list__item--annotation-mode & {
+      padding-left: 65px;
+    }
   }
   &__labels {
     position: relative;

@@ -59,6 +59,13 @@
               :filter="filter"
               @apply="onApply"
             />
+            <FilterUncoveredByRules
+              v-else-if="showUncoveredByRulesFilter"
+              class="filter"
+              :filter="filter"
+              :dataset="dataset"
+              @apply="onApply"
+            />
           </span>
           <a
             v-if="
@@ -167,6 +174,14 @@ export default {
     isMultiLabel() {
       return this.dataset.isMultiLabel;
     },
+    showUncoveredByRulesFilter() {
+      return (
+        this.dataset.rules &&
+        this.dataset.rules.length &&
+        !this.dataset.isMultiLabel &&
+        this.dataset.task === "TextClassification"
+      );
+    },
     filterList() {
       const aggregations = this.dataset.results.aggregations;
       const filters = this.filters
@@ -210,7 +225,16 @@ export default {
             a.key.toLowerCase() > b.key.toLowerCase() ? 1 : -1
           )) ||
         [];
-      return [...filters, ...sortedMetadataFilters];
+      const uncoveredByRules = {
+        id: "uncovered_by_rules",
+        key: "uncovered_by_rules",
+        group: "Annotations",
+        options: [true, false],
+        selected:
+          this.dataset.query.uncovered_by_rules &&
+          this.dataset.query.uncovered_by_rules.length > 0,
+      };
+      return [...filters, ...sortedMetadataFilters, uncoveredByRules];
     },
   },
   methods: {
@@ -275,10 +299,10 @@ $number-size: 18px;
       margin: auto;
       position: absolute;
       top: calc(100% + 1em);
-      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+      box-shadow: $shadow;
       background: $lighter-color;
       padding: 20px 20px 10px 4em;
-      border-radius: 5px;
+      border-radius: $border-radius;
       max-height: 550px;
       &--sort {
         max-width: 410px;
@@ -319,7 +343,7 @@ $number-size: 18px;
       margin-bottom: 0;
       margin-top: 0;
       padding: 0.8em 1em;
-      border-radius: 5px;
+      border-radius: $border-radius;
       margin-right: 1em;
       color: $font-secondary;
       @include font-size(15px);
@@ -337,7 +361,6 @@ $number-size: 18px;
 }
 
 .filter {
-  display: block;
   margin-bottom: 1em;
 }
 </style>

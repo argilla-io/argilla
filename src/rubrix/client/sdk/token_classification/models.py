@@ -117,7 +117,8 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             event_timestamp=self.event_timestamp,
             status=self.status,
             metadata=self.metadata or {},
-            metrics=self.metrics,
+            metrics=self.metrics or None,
+            search_keywords=self.search_keywords or None,
         )
 
 
@@ -129,6 +130,7 @@ class TokenClassificationQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
+    advanced_query_dsl: bool = False
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     predicted_as: List[str] = Field(default_factory=list)

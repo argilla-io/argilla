@@ -17,38 +17,30 @@
 
 <template>
   <span
-    :class="['highlight', span.entity.origin, isText ? '' : 'highlight--block']"
-  >
-    <span
+    @mouseenter="showTooltip = true"
+    @mouseleave="showTooltip = false"
+    :class="['highlight', span.origin, annotationEnabled ? 'editable' : null]"
+    ><span
+      v-for="(token, i) in span.tokens"
+      :key="i"
       class="highlight__content"
       @click="openTagSelector"
       @dblclick="removeEntity"
-      v-html="$highlightSearch(dataset.query.text, text)"
-    />
-    <span class="highlight__label">
-      <span
-        :class="[
-          'highlight__tooltip',
-          annotationEnabled ? 'highlight__tooltip--icon' : '',
-        ]"
-      >
-        <span class="highlight__tooltip__origin" v-if="span.entity.origin">{{
-          span.entity.origin === "annotation" ? "annot." : "pred."
-        }}</span>
-        <span
-          >{{ span.entity.label }}
-          <svgicon
-            v-if="annotationEnabled"
-            width="8"
-            height="8"
-            name="cross"
-            @click="removeEntity"
-          ></svgicon>
-        </span>
-      </span>
-    </span>
+      v-html="visualizeToken(token, i)"
+    ></span
+    ><span class="whitespace">{{ charsBetweenTokens }}</span>
+    <svgicon
+      class="remove-button"
+      @click="removeEntity"
+      v-if="annotationEnabled && span.origin === 'annotation'"
+      width="11"
+      height="11"
+      name="cross"
+    ></svgicon>
+    <lazy-text-span-tooltip v-if="showTooltip" :span="span" />
   </span>
 </template>
+
 <script>
 import "assets/icons/cross";
 
@@ -58,11 +50,14 @@ export default {
       type: Object,
       required: true,
     },
-    text: {
+    whiteSpace: {
       type: String,
-      required: true,
     },
     dataset: {
+      type: Object,
+      required: true,
+    },
+    record: {
       type: Object,
       required: true,
     },
@@ -72,14 +67,15 @@ export default {
       singleClickDelay: 300,
       doubleClicked: false,
       clicked: false,
+      showTooltip: false,
     };
   },
   computed: {
-    isText() {
-      return this.text.replace(/\s/g, "").length;
-    },
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
+    },
+    charsBetweenTokens() {
+      return this.span.tokens.at(-1).charsBetweenTokens;
     },
   },
   methods: {
@@ -103,21 +99,39 @@ export default {
         }, this.singleClickDelay);
       }
     },
+    visualizeToken(token, i) {
+      let text = token.highlighted
+        ? this.$htmlHighlightText(token.text)
+        : this.$htmlText(token.text);
+      return `${text}${
+        token.charsBetweenTokens && i + 1 !== this.span.tokens.length
+          ? token.charsBetweenTokens
+          : ""
+      }`;
+    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
-.highlight {
+::v-deep .whitespace {
+  background: palette(white);
+  padding-bottom: 3px;
+  border-bottom: 5px solid palette(white);
   @include font-size(18px);
+  white-space: pre-line;
+  display: inline;
+}
+
+.highlight {
+  font-size: 0;
   line-height: 1em;
   position: relative;
-  cursor: default;
-  // display: inline-flex;
+  cursor: default; // display: inline-flex;
   border-radius: 2px;
   padding: 0;
-  margin-right: -3.2px;
-  ::selection {
-    background: none;
+  &.editable {
+    cursor: pointer;
   }
   &--block {
     display: block;
@@ -129,73 +143,28 @@ export default {
       height: 100%;
     }
   }
-  &__label {
-    @include font-size(0px);
-  }
   &__content {
+    @include font-size(18px);
+    white-space: pre-line;
     display: inline;
     padding-bottom: 1px;
   }
-  &__tooltip {
-    display: block;
-    position: absolute;
-    border-radius: 2px;
-    padding: 5px 10px 6px 10px;
-    opacity: 0;
-    z-index: -1;
-    margin-bottom: 0.5em;
-    transition: opacity 0.5s ease, z-index 0.2s ease;
-    white-space: nowrap;
-    user-select: none;
-    cursor: default;
-    font-weight: 600;
-    right: 50%;
-    transform: translateX(50%);
-    min-width: 80px;
-    @include font-size(16px);
-    & > span {
-      display: block;
-    }
-    &__origin {
-      @include font-size(12px);
-      font-weight: normal;
-    }
-    .annotation & {
-      bottom: 100%;
-    }
-    .prediction & {
-      top: calc(100% + 15px);
-    }
-    &--icon {
-      padding-right: 20px;
-      .svg-icon {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        cursor: pointer;
-      }
-    }
-  }
-  &__tooltip:after {
-    margin: auto;
-    position: absolute;
-    right: 0;
-    left: 0;
-    .annotation & {
-      @include triangle(bottom, 6px, 6px, auto);
-      bottom: 5px;
-      transform: translateY(10px);
-    }
-    .prediction & {
-      @include triangle(top, 6px, 6px, auto);
-      top: -15px;
-      transform: translateY(10px);
-    }
-  }
-  &:hover .highlight__tooltip {
+  &:hover .remove-button {
     opacity: 1;
-    transition-delay: 0s;
-    z-index: 4;
+    z-index: 5;
   }
+}
+
+.remove-button {
+  opacity: 0;
+  z-index: -1;
+  position: absolute;
+  top: -23px;
+  right: -3px;
+  border-radius: 3px;
+  min-width: 10px;
+  background: palette(grey, dark);
+  fill: palette(white);
+  padding: 2px;
 }
 </style>

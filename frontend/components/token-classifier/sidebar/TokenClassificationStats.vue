@@ -23,10 +23,6 @@
       :options="options"
       @selectOption="onSelectOption"
     />
-    <StatsErrorDistribution
-      v-if="selectedOption.id === 'error'"
-      :dataset="dataset"
-    />
     <div v-if="selectedOption.id === 'mentions'">
       <div class="sidebar__tabs">
         <a
@@ -106,12 +102,6 @@ export default {
         id: "mentions",
         name: "Mentions",
       });
-      if (Object.values(this.dataset.results.aggregations.predicted).length) {
-        options.push({
-          id: "error",
-          name: "Error Distribution",
-        });
-      }
       return options;
     },
     existMentions() {
@@ -160,6 +150,7 @@ export default {
     color: $font-secondary-dark;
     margin-top: 0.5em;
     @include font-size(20px);
+    font-weight: 700;
   }
 }
 .sidebar {
@@ -186,18 +177,6 @@ export default {
       }
     }
   }
-  p {
-    display: flex;
-    align-items: flex-end;
-    font-size: 18px;
-    font-size: 1.125rem;
-    margin-top: 0;
-    margin-bottom: 2em;
-    font-weight: 600;
-    svg {
-      margin-right: 0.5em;
-    }
-  }
   .entity {
     margin-top: 1em;
     margin-bottom: 0.5em;
@@ -215,7 +194,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.predicted_mentions {

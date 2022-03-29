@@ -17,7 +17,7 @@
 import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { currentWorkspace, defaultWorkspace } from "@/models/Workspace";
+import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
 import { Base64 } from "js-base64";
 
 const isObject = (obj) => obj && typeof obj === "object";
@@ -213,6 +213,10 @@ async function _updateViewSettings({ id, data }) {
 }
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
+  const { advancedQueryDsl } = $nuxt.$route.query;
+  if (advancedQueryDsl === null || advancedQueryDsl === "true") {
+    query.advanced_query_dsl = true;
+  }
   const { response } = await ObservationDataset.api().post(
     `/datasets/${dataset.name}/${dataset.task}:search?limit=${size}&from=${from}`,
     {
@@ -522,7 +526,7 @@ const actions = {
 
   async deleteDataset(_, { workspace, name }) {
     var url = `/datasets/${name}`;
-    if (workspace !== defaultWorkspace($nuxt.$auth.user)) {
+    if (workspace !== NO_WORKSPACE) {
       url += `?workspace=${workspace}`;
     }
     const deleteResults = await ObservationDataset.api().delete(url, {
@@ -543,9 +547,8 @@ const actions = {
     return await ObservationDataset.api().get("/datasets/", {
       persistBy: "create",
       dataTransformer: ({ data }) => {
-        const owner = defaultWorkspace($nuxt.$auth.user);
         return data.map((datasource) => {
-          datasource.owner = datasource.owner || owner;
+          datasource.owner = datasource.owner || NO_WORKSPACE;
           return datasource;
         });
       },

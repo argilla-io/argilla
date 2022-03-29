@@ -24,7 +24,6 @@ from rubrix.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
-from tests.server.test_helpers import client, mocking_client
 
 
 @pytest.fixture(
@@ -34,7 +33,7 @@ def records(request):
     if request.param:
         return [
             rb.TextClassificationRecord(
-                inputs="test", annotation=anot, prediction=pred, multi_label=True, id=i
+                text="test", annotation=anot, prediction=pred, multi_label=True, id=i
             )
             for i, anot, pred in zip(
                 range(2 * 6),
@@ -44,9 +43,7 @@ def records(request):
         ]
 
     return [
-        rb.TextClassificationRecord(
-            inputs="test", annotation=anot, prediction=pred, id=i
-        )
+        rb.TextClassificationRecord(text="test", annotation=anot, prediction=pred, id=i)
         for i, anot, pred in zip(
             range(2 * 6),
             ["good", "bad"] * 6,
@@ -68,8 +65,8 @@ def test_not_installed(monkeypatch):
 
 def test_no_records():
     records = [
-        rb.TextClassificationRecord(inputs="test", prediction=[("mock", 0.0)]),
-        rb.TextClassificationRecord(inputs="test", annotation="test"),
+        rb.TextClassificationRecord(text="test", prediction=[("mock", 0.0)]),
+        rb.TextClassificationRecord(text="test", annotation="test"),
     ]
 
     with pytest.raises(
@@ -80,7 +77,7 @@ def test_no_records():
 
 def test_multi_label_warning(caplog):
     record = rb.TextClassificationRecord(
-        inputs="test", prediction=[("mock", 0.0)], annotation="mock"
+        text="test", prediction=[("mock", 0.0)], annotation="mock"
     )
     find_label_errors([record], multi_label="True")
     assert (
@@ -193,9 +190,7 @@ def test_missing_predictions():
 
 
 @pytest.fixture
-def dataset(monkeypatch, records):
-    mocking_client(monkeypatch, client)
-
+def dataset(mocked_client, records):
     dataset = "dataset_for_label_errors"
 
     rb.log(records, name=dataset)

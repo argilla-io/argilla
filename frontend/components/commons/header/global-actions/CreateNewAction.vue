@@ -19,12 +19,13 @@
   <div class="new-label__container">
     <reButton
       v-if="!showLabelCreation"
-      class="new-label__main-button button-secondary--outline"
+      class="new-label__main-button button-secondary"
       @click="openLabelCreation()"
-      ><svgicon name="plus" width="10" height="10" />{{ text }}</reButton
+      >{{ text }}</reButton
     >
     <div v-else class="new-label">
       <input
+        ref="labelCreation"
         v-model="label"
         autofocus
         class="new-label__input"
@@ -48,7 +49,7 @@ export default {
     text: {
       type: String,
       required: false,
-      default: "Create new label",
+      default: "Create label",
     },
   },
   data: () => ({
@@ -67,6 +68,9 @@ export default {
     },
     openLabelCreation() {
       this.showLabelCreation = true;
+      this.$nextTick(() => {
+        this.$refs.labelCreation.focus();
+      });
     },
     reset() {
       this.label = undefined;

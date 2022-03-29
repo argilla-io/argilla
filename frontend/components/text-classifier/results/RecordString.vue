@@ -21,7 +21,7 @@
       <div v-for="item in text" :key="item.index">
         <span
           class="record__content"
-          v-html="$highlightSearch(queryText, item)"
+          v-html="$highlightKeywords(item, keywords)"
         >
         </span>
       </div>
@@ -30,21 +30,27 @@
     <span
       v-else
       class="record__content"
-      v-html="$highlightSearch(queryText, text)"
+      v-html="$highlightKeywords(text, keywords)"
     >
     </span>
   </div>
 </template>
+
 <script>
 export default {
   props: {
+    record: {
+      type: Object,
+      required: true,
+    },
     text: {
       type: [String, Array],
       required: true,
     },
-    queryText: {
-      type: String,
-      default: undefined,
+  },
+  computed: {
+    keywords() {
+      return this.record.search_keywords;
     },
   },
   methods: {
@@ -54,14 +60,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
-  line-height: 16px;
-}
-</style>
+
 <style lang="scss" scoped>
 .record {
   &__content {

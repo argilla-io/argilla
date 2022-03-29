@@ -16,11 +16,20 @@ def text_classification_mappings():
             ]
         ),
         "properties": {
+            "inputs": {
+                "type": "object",
+                "dynamic": True,
+            },
+            "explanation": {
+                "type": "object",
+                "dynamic": True,
+                "enabled": False,  # Won't search by explanation
+            },
             "predicted": mappings.keyword_field(),
             "multi_label": {"type": "boolean"},
-            "annotated_as": mappings.keyword_field(),
-            "predicted_as": mappings.keyword_field(),
-            "score": {"type": "float"},
+            "annotated_as": mappings.keyword_field(enable_text_search=True),
+            "predicted_as": mappings.keyword_field(enable_text_search=True),
+            "score": mappings.decimal_field(),
         },
         "dynamic_templates": [
             {"inputs.*": {"path_match": "inputs.*", "mapping": mappings.text_field()}}

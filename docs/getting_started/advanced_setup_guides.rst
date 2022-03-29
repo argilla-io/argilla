@@ -22,12 +22,7 @@ Simply run the following command:
 
 .. code-block:: bash
 
-   docker run -d \
-     --name elasticsearch-for-rubrix \
-     -p 9200:9200 -p 9300:9300 \
-     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-     -e "discovery.type=single-node" \
-     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+   docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 This will create an ES docker container named *"elasticsearch-for-rubrix"* that will run in the background.
 
@@ -57,8 +52,9 @@ We recommend ES version 7.10 to work with Rubrix.
 Server configurations
 ---------------------
 
-By default, the :ref:`Rubrix server <...>` will look for your ES endpoint at ``http://localhost:9200``.
+By default, the Rubrix server will look for your ES endpoint at ``http://localhost:9200``.
 But you can customize this by setting the ``ELASTICSEARCH`` environment variable.
+Have a look at the list of available `environment variables`_ to further configure the Rubrix server.
 
 Since the Rubrix server is built on fastapi, you can launch it using **uvicorn** directly:
 
@@ -75,6 +71,40 @@ Since the Rubrix server is built on fastapi, you can launch it using **uvicorn**
 For more details about fastapi and uvicorn, see `here <https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn>`_
 
 Fastapi also provides beautiful REST API docs that you can check at `http://localhost:6900/api/docs <http://localhost:6900/api/docs>`__.
+
+Environment variables
+^^^^^^^^^^^^^^^^^^^^^
+
+You can set following environment variables to further configure your server and client.
+
+Server
+""""""
+
+- ``ELASTICSEARCH``: URL of the connection endpoint of the Elasticsearch instance (Default: http://localhost:9200 ).
+
+- ``RUBRIX_ELASTICSEARCH_SSL_VERIFY``: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.
+
+- ``RUBRIX_NAMESPACE``: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Rubrix instances.
+
+- ``RUBRIX_DEFAULT_ES_SEARCH_ANALYZER``: Default analyzer for textual fields excluding the metadata (Default: "standard").
+
+- ``RUBRIX_EXACT_ES_SEARCH_ANALYZER``: Default analyzer for ``*.exact`` fields in textual information (Default: "whitespace").
+
+- ``METADATA_FIELDS_LIMIT``: Max number of fields in the metadata (Default: 50, max: 100).
+
+- ``CORS_ORIGINS``: List of host patterns for CORS origin access.
+
+- ``DOCS_ENABLED``: If False, disables openapi docs endpoint at */api/docs*.
+
+Client
+""""""
+
+- ``RUBRIX_API_URL``: The default API URL when calling :meth:`rubrix.init`.
+
+- ``RUBRIX_API_KEY``: The default API key when calling :meth:`rubrix.init`.
+
+- ``RUBRIX_WORKSPACE``: The default workspace when calling :meth:`rubrix.init`.
+
 
 
 .. _launching-the-web-app-via-docker:
@@ -168,9 +198,10 @@ Below you can see a screenshot for setting up a new *rubrix* Role and its permis
 Change elasticsearch index analyzers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, for indexing text fields, Rubrix uses the `standard` analyzer for general search and the `whitespace` analyzer for more exact queries (required by certain rules in the weak supervision module).
- If those analyzers don't fit your use case, you can change them using the following environment variables:
-`RUBRIX_DEFAULT_ES_SEARCH_ANALYZER` and `RUBRIX_EXACT_ES_SEARCH_ANALYZER`.
+By default, for indexing text fields, Rubrix uses the `standard` analyzer for general search and the `whitespace`
+analyzer for more exact queries (required by certain rules in the weak supervision module). If those analyzers
+don't fit your use case, you can change them using the following environment variables:
+``RUBRIX_DEFAULT_ES_SEARCH_ANALYZER`` and ``RUBRIX_EXACT_ES_SEARCH_ANALYZER``.
 
 Note that provided analyzers names should be defined as built-in ones. If you want to use a
 customized analyzer, you should create it inside an index_template matching Rubrix index names (`.rubrix*.records-v0),
@@ -290,6 +321,10 @@ First, you need to install the master version of our python client:
 
 Then, the easiest way to get the master version of our web app up and running is via docker-compose:
 
+.. note::
+    For now, we only provide the master version of our web app via docker.
+    If you want to run the web app of the master branch **without** docker, we refer you to our :ref:`development-setup`.
+
 .. code-block:: shell
 
     # get the docker-compose yaml file
@@ -306,4 +341,3 @@ If you want to use vanilla docker (and have your own Elasticsearch instance runn
 
     docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name rubrix recognai/rubrix:master
 
-If you want to execute the server code of the master branch manually, we refer you to our :ref:`development-setup`.

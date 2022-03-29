@@ -21,6 +21,11 @@ import logging
 from logging import Logger
 from typing import Type
 
+try:
+    from loguru import logger
+except ModuleNotFoundError:
+    logger = None
+
 
 def full_qualified_class_name(_class: Type) -> str:
     """Calculates the full qualified name (module + class) of a class"""
@@ -53,3 +58,73 @@ class LoggingMixin:
     def logger(self) -> logging.Logger:
         """Return the logger configured for the class"""
         return self.__logger__
+
+
+class LoguruLoggerHandler(logging.Handler):
+    """This logging handler enables an easy way to use loguru fo all built-in logger traces"""
+
+    __LOGLEVEL_MAPPING__ = {
+        50: "CRITICAL",
+        40: "ERROR",
+        30: "WARNING",
+        20: "INFO",
+        10: "DEBUG",
+        0: "NOTSET",
+    }
+
+    @property
+    def is_available(self) -> bool:
+        """Return True if handler can tackle log records. False otherwise"""
+        return logger is not None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not self.is_available:
+            logging.getLogger(__name__).warning(
+                "Cannot find required package for logging.\n"
+                "Please, install `loguru` by typing:\n"
+                "pip install loguru\n"
+                "if you want to enable enhanced logging"
+            )
+            self.emit = lambda record: None
+
+    def emit(self, record: logging.LogRecord):
+
+        try:
+            level = logger.level(record.levelname).name
+        except AttributeError:
+            level = self.__LOGLEVEL_MAPPING__[record.levelno]
+
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        log = logger.bind(request_id="rubrix")
+        log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+def configure_logging():
+    """Normalizes logging configuration for rubrix and its dependencies"""
+    intercept_handler = LoguruLoggerHandler()
+    if not intercept_handler.is_available:
+        return
+
+    logging.basicConfig(handlers=[intercept_handler], level=logging.WARNING)
+    for name in logging.root.manager.loggerDict:
+        logger_ = logging.getLogger(name)
+        logger_.handlers = []
+
+    for name in [
+        "uvicorn",
+        "uvicorn.lifespan",
+        "uvicorn.error",
+        "uvicorn.access",
+        "fastapi",
+        "rubrix",
+        "rubrix.server",
+    ]:
+        logger_ = logging.getLogger(name)
+        logger_.propagate = False
+        logger_.handlers = [intercept_handler]

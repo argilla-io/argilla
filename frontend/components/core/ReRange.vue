@@ -1160,7 +1160,7 @@ export default {
   -webkit-user-select: none;
   -moz-user-select: none;
   -o-user-select: none;
-  padding: 0;
+  padding: 0 !important;
   &.vue-slider-disabled {
     .vue-slider-dot {
       background: $line-light-color;

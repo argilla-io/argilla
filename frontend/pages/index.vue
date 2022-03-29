@@ -20,7 +20,7 @@
 <script>
 export default {
   mounted() {
-    this.$router.push("/ws");
+    this.$router.push("/datasets");
   },
 };
 </script>

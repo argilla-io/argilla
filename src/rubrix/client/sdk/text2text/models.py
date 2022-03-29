@@ -93,7 +93,8 @@ class Text2TextRecord(CreationText2TextRecord):
             metadata=self.metadata or {},
             id=self.id,
             event_timestamp=self.event_timestamp,
-            metrics=self.metrics,
+            metrics=self.metrics or None,
+            search_keywords=self.search_keywords or None,
         )
 
 
@@ -105,6 +106,7 @@ class Text2TextQuery(BaseModel):
     ids: Optional[List[Union[str, int]]]
 
     query_text: str = Field(default=None)
+    advanced_query_dsl: bool = False
 
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)

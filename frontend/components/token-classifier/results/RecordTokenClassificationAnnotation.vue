@@ -17,13 +17,37 @@
 
 <template>
   <div>
-    <text-spans :dataset="dataset" :record="record" />
-    <div class="content__actions-buttons">
+    <div class="origins">
+      <text-spans-static
+        v-if="record.prediction"
+        v-once
+        key="prediction"
+        origin="prediction"
+        class="prediction"
+        :dataset="dataset"
+        :record="record"
+        :visualTokens="visualTokens"
+        :entities="getEntitiesByOrigin('prediction')"
+      />
+      <text-spans
+        key="annotation"
+        origin="annotation"
+        class="annotation"
+        :dataset="dataset"
+        :record="record"
+        :visualTokens="visualTokens"
+        :entities="getEntitiesByOrigin('annotation')"
+      />
+    </div>
+    <div class="content__actions-buttons" v-if="record.status !== 'Validated'">
+      <re-button class="button-primary" @click="onValidate(record)">{{
+        record.status === "Edited" ? "Save" : "Validate"
+      }}</re-button>
       <re-button
-        v-if="record.status !== 'Validated'"
-        class="button-primary"
-        @click="onValidate(record)"
-        >{{ record.status === "Edited" ? "Save" : "Validate" }}</re-button
+        :disabled="!record.annotatedEntities.length"
+        class="button-primary--outline"
+        @click="onClearAnnotations()"
+        >Clear annotations</re-button
       >
     </div>
   </div>
@@ -42,12 +66,21 @@ export default {
       type: Object,
       required: true,
     },
+    visualTokens: {
+      type: Array,
+      required: true,
+    },
   },
   methods: {
     ...mapActions({
       validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
     }),
-
+    getEntitiesByOrigin(origin) {
+      return origin === "annotation"
+        ? this.record.annotatedEntities
+        : (this.record.prediction && this.record.prediction.entities) || [];
+    },
     async onValidate(record) {
       await this.validate({
         // TODO: Move this as part of token classification dataset logic
@@ -59,7 +92,21 @@ export default {
             annotatedEntities: undefined,
             annotation: {
               entities: record.annotatedEntities,
+              origin: "annotation",
             },
+          },
+        ],
+      });
+    },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotatedEntities: [],
           },
         ],
       });
@@ -70,22 +117,10 @@ export default {
 
 <style lang="scss" scoped>
 .content {
-  position: relative;
-  white-space: pre-wrap;
-  & > div:nth-child(2) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    ::v-deep {
-      .span__text {
-        opacity: 0;
-      }
-    }
-  }
   &__input {
     padding-right: 200px;
+    // display: flex;
+    // flex-wrap: wrap;
   }
   &__actions-buttons {
     margin-right: 0;
@@ -93,14 +128,36 @@ export default {
     display: flex;
     min-width: 20%;
     .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
+      min-width: 137px;
+      min-height: 34px;
+      line-height: 34px;
+      display: inline-block;
+      margin: 1.5em 0 0 0;
       & + .re-button {
         margin-left: 1em;
       }
     }
+  }
+}
+.origins > .prediction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  ::v-deep {
+    .span__text {
+      color: transparent;
+      & > * {
+        color: palette(grey, dark);
+      }
+    }
+    .highlight__content {
+      color: transparent;
+    }
+  }
+  ::v-deep .highlight-text {
+    opacity: 1;
   }
 }
 </style>

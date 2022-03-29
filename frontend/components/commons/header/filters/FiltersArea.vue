@@ -20,19 +20,21 @@
     <div class="filters__content">
       <div class="container">
         <div class="filters__row">
-          <SearchBar
-            class="filters__searchbar"
-            :dataset="dataset"
-            @submit="onTextQuerySearch"
-          />
-          <FiltersList
-            :dataset="dataset"
-            @applyFilter="onApplyFilter"
-            @applyMetaFilter="onApplyMetaFilter"
-            @applySortBy="onApplySortBy"
-            @removeAllMetadataFilters="onRemoveAllMetadataFilters"
-            @removeFiltersByGroup="onRemoveFiltersByGroup"
-          ></FiltersList>
+          <div class="filters__block">
+            <SearchBar
+              class="filters__searchbar"
+              :dataset="dataset"
+              @submit="onTextQuerySearch"
+            />
+            <FiltersList
+              :dataset="dataset"
+              @applyFilter="onApplyFilter"
+              @applyMetaFilter="onApplyMetaFilter"
+              @applySortBy="onApplySortBy"
+              @removeAllMetadataFilters="onRemoveAllMetadataFilters"
+              @removeFiltersByGroup="onRemoveFiltersByGroup"
+            ></FiltersList>
+          </div>
           <slot />
         </div>
       </div>
@@ -120,12 +122,6 @@ export default {
   padding-bottom: 0;
   margin-left: 0;
   padding-right: calc(4em + 45px);
-  .--metrics & {
-    @include media(">desktop") {
-      padding-right: calc(294px + 100px);
-      transition: padding 0.1s ease-in-out;
-    }
-  }
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;
@@ -142,29 +138,29 @@ export default {
 
 .filters {
   &__area {
-    display: block;
+    display: flex;
+    align-items: center;
     top: -1em;
     left: 0;
     right: 0;
-    .fixed-header & {
-      border-bottom: 1px solid $line-light-color;
-    }
   }
   &__row {
     display: flex;
     align-items: center;
   }
   &__content {
-    padding: 1em 0;
+    padding: 0.5em 0 0.5em 0;
     position: relative;
-    .fixed-header & {
-      padding: 0.5em 45px 0.5em 0;
-    }
+    width: 100%;
+  }
+  &__block {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 300px);
   }
   &__searchbar {
     margin-right: 2em;
     width: 100%;
-    max-width: 450px;
     &.--extended {
       width: 100%;
       margin-right: 0;

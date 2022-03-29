@@ -1,27 +1,29 @@
-import httpx
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+import rubrix as rb
+from rubrix.metrics.text_classification import f1, f1_multilabel
 
-from tests.server.test_helpers import client
 
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
-
-
-def test_metrics_for_text_classification(monkeypatch):
-    mocking_client(monkeypatch)
+def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_text_classification"
-
-    import rubrix as rb
 
     rb.log(
         [
             rb.TextClassificationRecord(
                 id=1,
-                inputs={"text": "my first rubrix example"},
+                text="my first rubrix example",
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
@@ -34,8 +36,6 @@ def test_metrics_for_text_classification(monkeypatch):
         ],
         name=dataset,
     )
-
-    from rubrix.metrics.text_classification import f1, f1_multilabel
 
     results = f1(dataset)
     assert results
@@ -74,16 +74,14 @@ def test_metrics_for_text_classification(monkeypatch):
     results.visualize()
 
 
-def test_f1_without_results(monkeypatch):
-    mocking_client(monkeypatch)
+def test_f1_without_results(mocked_client):
     dataset = "test_f1_without_results"
-    import rubrix as rb
 
     rb.log(
         [
             rb.TextClassificationRecord(
                 id=1,
-                inputs={"text": "my first rubrix example"},
+                text="my first rubrix example",
             ),
             rb.TextClassificationRecord(
                 id=2,
@@ -92,8 +90,6 @@ def test_f1_without_results(monkeypatch):
         ],
         name=dataset,
     )
-
-    from rubrix.metrics.text_classification import f1
 
     results = f1(dataset)
     assert results

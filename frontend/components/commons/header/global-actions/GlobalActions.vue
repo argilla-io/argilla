@@ -65,19 +65,12 @@ export default {
   text-align: left;
   padding: 1em 1.4em;
   background: $lighter-color;
-  border-radius: 1px;
+  border-radius: 3px 3px 1px 1px;
+  border: 1px solid palette(grey, smooth);
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: -1px;
   &--exploration {
     position: relative;
-  }
-  .fixed-header & {
-    margin-top: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    background: $bg;
-    border: none;
-    min-height: 70px;
   }
 }
 </style>

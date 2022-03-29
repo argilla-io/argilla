@@ -150,8 +150,8 @@ export default {
     right: 0.7em;
     top: 2em;
     background: white;
-    border-radius: 3px;
-    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
+    border-radius: $border-radius;
+    box-shadow: $shadow;
     padding: 3px;
     min-width: 135px;
     z-index: 1;
@@ -163,12 +163,15 @@ export default {
       color: $font-secondary-dark;
       cursor: pointer;
       display: block;
-      border-bottom: 1px solid palette(grey, smooth);
-      border-radius: 3px;
       background: white;
       transition: background 0.3s ease-in-out;
+      &:first-child {
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
+      }
       &:last-child {
-        border-bottom: none;
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
       }
       &:hover {
         transition: background 0.3s ease-in-out;

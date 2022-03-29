@@ -21,11 +21,13 @@
       <record-token-classification-annotation
         :dataset="dataset"
         :record="record"
+        :visualTokens="visualTokens"
         v-if="annotationEnabled"
       />
       <record-token-classification-exploration
         :dataset="dataset"
         :record="record"
+        :visualTokens="visualTokens"
         v-else
       />
     </div>
@@ -33,6 +35,8 @@
 </template>
 
 <script>
+import { indexOf, length } from "stringz";
+
 export default {
   props: {
     dataset: {
@@ -48,21 +52,72 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
+    visualTokens() {
+      // This is used for both, annotation ad exploration components
+      const recordHasEmoji = this.record.text.containsEmoji;
+      const searchKeywordsSpans = this.$keywordsSpans(
+        this.record.text,
+        this.record.search_keywords
+      );
+
+      const { visualTokens } = this.record.tokens.reduce(
+        ({ visualTokens, startPosition }, token, index) => {
+          const start = recordHasEmoji
+            ? indexOf(this.record.text, token, startPosition)
+            : this.record.text.indexOf(token, startPosition);
+          const nextStart = recordHasEmoji
+            ? indexOf(
+                this.record.text,
+                this.record.tokens[index + 1],
+                startPosition
+              )
+            : this.record.text.indexOf(
+                this.record.tokens[index + 1],
+                startPosition
+              );
+          const end = start + (recordHasEmoji ? length(token) : token.length);
+          const charsBetweenTokens = this.record.text.slice(end, nextStart);
+
+          let highlighted = false;
+          for (let highlight of searchKeywordsSpans) {
+            if (highlight.start <= start && highlight.end >= end) {
+              highlighted = true;
+              break;
+            }
+          }
+          return {
+            visualTokens: [
+              ...visualTokens,
+              { start, end, highlighted, text: token, charsBetweenTokens },
+            ],
+            startPosition: end,
+          };
+        },
+        {
+          visualTokens: [],
+          startPosition: 0,
+        }
+      );
+      return visualTokens;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .record {
-  padding: 52px 20px 20px 65px;
+  padding: 50px 20px 50px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(18px);
   line-height: 34px;
+  .list__item--annotation-mode & {
+    padding-left: 65px;
+  }
 }
 .content {
   position: relative;
-  white-space: pre-wrap;
+  white-space: pre-line;
   &__input {
     padding-right: 200px;
   }

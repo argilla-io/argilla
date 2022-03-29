@@ -16,67 +16,40 @@
   -->
 
 <template>
-  <span class="span">
+  <span class="span__text">
     <EntityHighlight
-      v-if="span.entity"
-      :text="text"
+      v-if="token.entity"
       :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
-      :span="span"
+      :span="token"
       :dataset="dataset"
+      :record="record"
       @openTagSelector="openTagSelector"
       @removeEntity="removeEntity"
-    />
-    <span
-      v-else
-      class="span__text"
+    /><span
       @mousedown="startSelection"
       @mouseup="endSelection"
-      v-html="$highlightSearch(dataset.query.text, text)"
-    /><span class="entities__selector__container">
-      <div
-        v-click-outside="onClickOutside"
-        v-if="showEntitiesSelector"
-        class="entities__selector"
-      >
-        <span v-show="!addnewSlotVisible">
-          <input
-            v-model="searchEntity"
-            class="entities__selector__search"
-            type="text"
-            placeholder="Select entity..."
-            @focus="isFocused = true"
-          />
-          <ul class="entities__selector__options">
-            <li
-              v-for="(entity, index) in formattedEntities"
-              :key="index"
-              class="entities__selector__option"
-              :class="`color_${entity.colorId}`"
-              @click="selectEntity(entity.text)"
-            >
-              <span v-if="controlPressed" class="entity__sort-code"
-                >[{{ entity.shortCut }}]</span
-              >
-              <span>{{ entity.text }}</span>
-              <svgicon
-                v-if="span.entity && entity.text === span.entity.label"
-                color="#bababa"
-                name="check"
-              />
-            </li>
-          </ul>
-        </span>
-      </div>
-    </span>
-    <span class="span__whitespace" v-html="whiteSpace"></span>
+      @mouseover="overSelection"
+      v-else
+      v-for="(t, i) in token.tokens"
+      :key="i"
+      v-html="visualizeToken(t)"
+    ></span
+    ><lazy-entities-selector
+      :dataset="dataset"
+      :suggestedLabel="suggestedLabel"
+      :token="token"
+      :formattedEntities="formattedEntities"
+      :showEntitiesSelector="showEntitiesSelector"
+      v-if="showEntitiesSelector"
+      @selectEntity="onSelectEntity"
+      @changeEntityLabel="onChangeEntity"
+      v-click-outside="onClickOutside"
+    />
   </span>
 </template>
 
 <script>
 import ClickOutside from "v-click-outside";
-import "assets/icons/check";
-import "assets/icons/cross";
-import { substring } from "stringz";
 
 export default {
   directives: {
@@ -87,56 +60,34 @@ export default {
       type: Object,
       required: true,
     },
-    spanId: {
-      type: Number,
-      required: true,
-    },
-    spans: {
-      type: Array,
-      required: true,
-    },
     dataset: {
       type: Object,
       required: true,
     },
+    suggestedLabel: {
+      type: String,
+    },
+    token: {
+      type: Object,
+      required: true,
+    },
+    spanId: {
+      type: Number,
+      required: true,
+    },
   },
   data: () => ({
-    searchEntity: "",
-    newSlot: "",
     showEntitiesSelector: false,
-    addnewSlotVisible: false,
-    isFocused: false,
-    controlPressed: false,
-    controlKey: undefined,
   }),
   computed: {
-    span() {
-      return this.spans[this.spanId];
-    },
-    text() {
-      return substring(
-        this.record.text,
-        this.spans[this.spanId].start,
-        this.spans[this.spanId].end
-      );
-    },
-    whiteSpace() {
-      return substring(
-        this.record.text,
-        this.spans[this.spanId].end,
-        this.spans[this.spanId + 1] ? this.spans[this.spanId + 1].start : ""
-      );
-    },
     tag_color() {
       return this.dataset.entities.filter(
-        (entity) => entity.text === this.span.entity.label
+        (entity) => entity.text === this.token.entity.label
       )[0].colorId;
     },
     filteredEntities() {
       return this.dataset.entities
-        .filter((entity) =>
-          entity.text.toLowerCase().includes(this.searchEntity.toLowerCase())
-        )
+        .filter((entity) => entity.text)
         .sort((a, b) => a.text.localeCompare(b.text));
     },
     formattedEntities() {
@@ -150,13 +101,12 @@ export default {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
   },
-  mounted() {
-    window.addEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.keyDown);
-    window.addEventListener("keyup", this.keyUp);
+  watch: {
+    async showEntitiesSelector(n, o) {
+      if (n !== o) {
+        await this.dataset.viewSettings.disableShortCutPagination(n);
+      }
+    },
   },
   methods: {
     startSelection() {
@@ -165,122 +115,68 @@ export default {
         this.$emit("startSelection", this.spanId);
       }
     },
+    overSelection() {
+      if (this.annotationEnabled) {
+        this.$emit("overSelection", this.spanId);
+      }
+    },
     endSelection() {
       if (this.annotationEnabled) {
         this.$emit("endSelection", this.spanId);
-        this.showEntitiesSelector = true;
+        if (this.formattedEntities.length == 1) {
+          this.onSelectEntity(this.formattedEntities[0].text);
+        } else {
+          this.showEntitiesSelector = true;
+        }
       }
     },
     openTagSelector() {
-      this.showEntitiesSelector = !this.showEntitiesSelector;
-      this.startSelection();
-      this.endSelection();
+      if (this.token.origin !== "prediction") {
+        this.showEntitiesSelector = !this.showEntitiesSelector;
+        this.startSelection();
+        this.endSelection();
+      }
     },
     removeEntity() {
-      this.$emit("removeEntity", this.span.entity);
+      this.$emit("removeEntity", this.token.entity);
       this.showEntitiesSelector = false;
     },
     onClickOutside() {
       this.showEntitiesSelector = false;
-      this.searchEntity = "";
     },
-    selectEntity(entityLabel) {
-      this.span.entity
-        ? this.$emit("changeEntityLabel", this.span.entity, entityLabel)
-        : this.$emit("selectEntity", entityLabel);
+    onSelectEntity(entityLabel) {
+      this.$emit("selectEntity", entityLabel);
       this.showEntitiesSelector = false;
-      this.searchEntity = "";
     },
-    keyUp(event) {
-      if (this.controlKey === event.key) {
-        this.controlPressed = false;
-      }
+    onChangeEntity(token, entityLabel) {
+      this.$emit("changeEntityLabel", token, entityLabel);
+      this.showEntitiesSelector = false;
     },
-    keyDown(event) {
-      if (event.ctrlKey) {
-        this.controlKey = event.key;
-        this.controlPressed = true;
-      }
-      const cmd = String.fromCharCode(event.keyCode).toUpperCase();
-      if (this.controlPressed && this.showEntitiesSelector && cmd) {
-        const entity = this.formattedEntities.find((t) => t.shortCut === cmd);
-        if (entity) {
-          this.selectEntity(entity.text);
-        }
-      }
+    visualizeToken(token) {
+      let text = token.highlighted
+        ? this.$htmlHighlightText(token.text)
+        : this.$htmlText(token.text);
+      return `${text}${token.charsBetweenTokens}`;
     },
   },
 };
 </script>
-<style lang="scss">
-.highlight-text {
-  display: inline-block;
-  background: #ffbf00 !important;
-  line-height: 16px;
-}
-</style>
 <style lang="scss" scoped>
-.entities {
-  &__selector {
-    position: absolute;
-    left: -35%;
-    top: 2em;
-    min-width: 160px;
-    z-index: 9;
-    background: white;
-    border: 1px solid $primary-color;
-    font-weight: 600;
-    &__container {
-      @include font-size(14px);
-      line-height: 1em;
-      display: inline-block;
-      white-space: pre-line;
-    }
-    &__search {
-      width: 100%;
-      padding: 0.5em;
-      border: 0;
-      outline: none;
-      background: $lighter-color;
-      border-bottom: 1px solid $line-light-color;
-    }
-    &__options {
-      max-height: 146px;
-      overflow-y: scroll;
-      padding-left: 0;
-    }
-    &__option {
-      display: flex;
-      transition: all 0.2s ease;
-      padding: 5px;
-      padding-right: 2em;
-      position: relative;
-      cursor: pointer;
-      span {
-        padding: 3px;
-      }
-      .svg-icon {
-        position: absolute;
-        right: 0.5em;
-        top: 1em;
-        margin: auto 0 auto auto;
-        @include font-size(12px);
-      }
-    }
-  }
-}
 .span {
   position: relative;
   display: inline;
-  line-height: 1em;
-  @include font-size(0);
+  line-height: 18px;
+  font-size: 0;
   &__text {
-    @include font-size(18px);
     display: inline;
     position: relative;
+    @include font-size(18px);
+    margin: 0 -1.5px;
+    padding: 0 1.5px;
   }
   &__whitespace {
     @include font-size(18px);
+    cursor: default !important;
   }
 }
 
@@ -289,41 +185,33 @@ export default {
   z-index: 3;
 }
 .selected {
-  ::v-deep .span__text {
-    line-height: 1.5em;
+  cursor: pointer;
+  position: relative;
+  background: palette(grey, smooth);
+  .prediction ::v-deep .highlight__content {
     background: palette(grey, smooth);
   }
-  span::selection {
-    background: none !important;
+  .span__text {
+    background: palette(grey, smooth);
   }
-}
-.span span {
-  &::selection {
+  .span__whitespace {
     background: palette(grey, smooth);
   }
 }
-.entity {
-  &.non-selectable,
-  &.non-selectable--show-sort-code {
-    cursor: default;
-    pointer-events: none;
+.last-selected {
+  .span__whitespace {
+    background: none;
   }
-  &__sort-code {
-    @include font-size(12px);
-    color: $font-medium-color;
-    font-weight: lighter;
-    margin-left: 0.5em;
-    .non-selectable & {
-      display: none;
-    }
-  }
+}
+.list__item--annotation-mode span span {
+  cursor: text;
 }
 // ner colors
 
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     &.annotation ::v-deep .highlight__content {
       background: $rcolor;
@@ -346,16 +234,15 @@ $hue: 360;
   .tag.color_#{$i - 1} span {
     background: $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} span {
+  ::v-deep .entities__selector__option.color_#{$i - 1} {
     background: $rcolor;
+    border: 2px solid $rcolor;
   }
-  .entities__selector__option.color_#{$i - 1} {
-    background: white;
+  ::v-deep .entities__selector__option.color_#{$i - 1} {
+    &:active,
+    &.active,
     &:hover {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
-    }
-    &:active {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
+      border: 2px solid mix(black, $rcolor, 20%);
     }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {

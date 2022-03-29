@@ -11,11 +11,12 @@ dependencies:
   # tests
   - pytest
   - pytest-cov
+  - pytest-mock
   - pytest-asyncio
   # docs, pandoc needs conda ...
   - pandoc==2.12
   # we need this to ensure syntax highlighting in the notebook code cells for the docs
-  - ipython
+  - ipython<8.0.0
   # for building the frontend
   - nodejs~=14.17.0
   - pip:
@@ -24,11 +25,13 @@ dependencies:
       - sphinx_rtd_theme==0.5.2
       - myst-parser==0.16.1
       - nbsphinx==0.8.7
+      - nbformat<5.2.0 # Installs ipython-genutils, with a new version (>0.8.8) of nbsphinx this can probably go away.
       - sphinxext.opengraph==0.4.2
       # code formatting
       - pre-commit==2.15.0
       # extra test dependencies
       - cleanlab
+      - datasets>1.17.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
       - flair==0.10
       - flyingsquid

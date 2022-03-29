@@ -25,14 +25,8 @@
           <svgicon name="drop-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
-          <li>
-            <a
-              v-for="item in availableItemsPerPage"
-              :key="item"
-              href="#"
-              @click.prevent="changePageSize(item)"
-              >{{ item }}</a
-            >
+          <li v-for="item in availableItemsPerPage" :key="item">
+            <a href="#" @click.prevent="changePageSize(item)">{{ item }}</a>
           </li>
         </ul>
       </div>
@@ -200,12 +194,14 @@ export default {
       this.showOptions = false;
     },
     keyDown(event) {
-      const elem = document.querySelector("body");
-      if (elem === document.activeElement) {
-        if (event.keyCode === 39) {
-          this.nextPage();
-        } else if (event.keyCode === 37) {
-          this.prevPage();
+      if (!this.paginationSettings.disabledShortCutPagination) {
+        const elem = document.querySelector("body");
+        if (elem === document.activeElement) {
+          if (event.keyCode === 39) {
+            this.nextPage();
+          } else if (event.keyCode === 37) {
+            this.prevPage();
+          }
         }
       }
     },
@@ -251,7 +247,7 @@ $pagination-size: 30px;
     padding: 0 10px;
     transition: color 200ms ease-in-out;
     outline: none;
-    border-radius: 3px;
+    border-radius: $border-radius;
     svg {
       margin-top: 1px;
     }
@@ -291,6 +287,7 @@ $pagination-size: 30px;
       text-decoration: none;
       min-width: $pagination-size;
       height: $pagination-size;
+      border-radius: $border-radius;
       margin: auto 0.5em;
       outline: none;
       padding: 5px;
@@ -333,16 +330,25 @@ $pagination-size: 30px;
       bottom: 3em;
       left: 0;
       right: 0;
-      box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
-      margin: 2px;
+      box-shadow: $shadow;
+      border-radius: $border-radius;
+      li {
+        &:first-child:hover a {
+          border-top-left-radius: $border-radius;
+          border-top-right-radius: $border-radius;
+        }
+        &:last-child:hover a {
+          border-bottom-left-radius: $border-radius;
+          border-bottom-right-radius: $border-radius;
+        }
+      }
       a {
         display: block;
         color: $font-secondary-dark;
         border-radius: 1px;
         margin: 2px;
         &:hover {
-          background: palette(grey, smooth);
+          background: $bg;
         }
       }
     }
@@ -352,6 +358,7 @@ $pagination-size: 30px;
       text-decoration: none;
       background: $lighter-color;
       padding: 0.5em 1em;
+      border-radius: $border-radius;
       .svg-icon {
         fill: $primary-color;
         margin-left: 1em;

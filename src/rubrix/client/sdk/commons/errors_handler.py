@@ -22,6 +22,9 @@ def handle_response_error(
         response_content = {}
     error_type = GenericApiError
     error_detail = response_content.get("detail")
+    if not isinstance(error_detail, dict):  # normalize detail if not data structure
+        error_detail = {"response": error_detail}
+
     error_args = error_detail if error_detail else response_content
 
     if response.status_code == BadRequestApiError.HTTP_STATUS:

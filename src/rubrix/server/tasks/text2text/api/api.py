@@ -20,12 +20,14 @@ from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
 from rubrix.server.commons.api import CommonTaskQueryParams
-from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.commons.errors import EntityNotFoundError
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
+from rubrix.server.tasks.commons.task_factory import TaskFactory
 from rubrix.server.tasks.text2text.api.model import (
     Text2TextBulkData,
     Text2TextQuery,
@@ -82,12 +84,23 @@ def bulk_records(
     """
 
     task = TASK_TYPE
-    dataset = datasets.upsert(
-        CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        task=task,
-        user=current_user,
-        workspace=common_params.workspace,
-    )
+    owner = current_user.check_workspace(common_params.workspace)
+    try:
+        dataset = datasets.find_by_name(
+            current_user, name=name, task=task, workspace=owner
+        )
+        datasets.update(
+            user=current_user,
+            dataset=dataset,
+            tags=bulk.tags,
+            metadata=bulk.metadata,
+        )
+    except EntityNotFoundError:
+        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
+        dataset.owner = owner
+        datasets.create_dataset(user=current_user, dataset=dataset)
+
     result = service.add_records(
         dataset=dataset,
         records=bulk.records,
@@ -148,10 +161,10 @@ def search_records(
     search = search or Text2TextSearchRequest()
     query = search.query or Text2TextQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+        user=current_user, name=name, task=TASK_TYPE, workspace=common_params.workspace
     )
     result = service.search(
-        dataset=Dataset.parse_obj(dataset),
+        dataset=dataset,
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -231,9 +244,9 @@ async def stream_data(
     """
     query = query or Text2TextQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+        user=current_user, name=name, task=TASK_TYPE, workspace=common_params.workspace
     )
-    data_stream = service.read_dataset(Dataset.parse_obj(dataset), query=query)
+    data_stream = service.read_dataset(dataset, query=query)
 
     return scan_data_response(
         data_stream=data_stream,

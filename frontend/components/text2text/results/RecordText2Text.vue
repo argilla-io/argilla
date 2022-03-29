@@ -18,10 +18,7 @@
 <template>
   <div class="record">
     <div class="record--left record__item">
-      <record-string-text-2-text
-        :query-text="dataset.query.text"
-        :text="record.text"
-      />
+      <record-string-text-2-text :record="record" />
       <div>
         <text-2-text-list
           ref="list"
@@ -148,7 +145,10 @@ export default {
   }
   &--left {
     width: 100%;
-    padding: 15px 20px 20px 20px;
+    padding: 50px 50px 20px 50px;
+    .list__item--annotation-mode & {
+      padding-left: 65px;
+    }
   }
 }
 </style>

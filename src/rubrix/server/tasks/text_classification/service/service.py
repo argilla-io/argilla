@@ -18,38 +18,29 @@ from typing import Iterable, List, Optional
 from fastapi import Depends
 
 from rubrix.server.commons.errors import MissingDatasetRecordsError
-from rubrix.server.commons.es_helpers import aggregations, sort_by2elasticsearch
 from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
-    TaskType,
 )
-from rubrix.server.tasks.commons.dao import extends_index_dynamic_templates
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO, dataset_records_dao
-from rubrix.server.tasks.commons.dao.model import RecordSearch
-from rubrix.server.tasks.commons.metrics.service import MetricsService
+from rubrix.server.tasks.search.model import SortConfig
+from rubrix.server.tasks.search.service import SearchRecordsService
+from rubrix.server.tasks.storage.service import RecordsStorageService
 from rubrix.server.tasks.text_classification.api.model import (
     CreationTextClassificationRecord,
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleMetricsSummary,
+    TextClassificationDatasetDB,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
-from rubrix.server.tasks.text_classification.dao.es_config import (
-    text_classification_mappings,
-)
 from rubrix.server.tasks.text_classification.service.labeling_service import (
     LabelingService,
-)
-
-extends_index_dynamic_templates(
-    {"inputs": {"path_match": "inputs.*", "mapping": {"type": "text"}}}
 )
 
 
@@ -64,61 +55,42 @@ class TextClassificationService:
     @classmethod
     def get_instance(
         cls,
-        dao: DatasetRecordsDAO = Depends(dataset_records_dao),
+        storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         labeling: LabelingService = Depends(LabelingService.get_instance),
-        metrics: MetricsService = Depends(MetricsService.get_instance),
+        search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ) -> "TextClassificationService":
-        """
-        Creates a service instance for text classification operations
-
-        Parameters
-        ----------
-        dao:
-            The dataset records dao dependency
-        labeling:
-            The labeling service dependency
-        metrics:
-            The metrics service dependency
-
-        Returns
-        -------
-            A dataset records service instance
-        """
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao, metrics, labeling=labeling)
+            cls._INSTANCE = cls(storage, labeling=labeling, search=search)
         return cls._INSTANCE
 
     def __init__(
         self,
-        dao: DatasetRecordsDAO,
-        metrics: MetricsService,
+        storage: RecordsStorageService,
+        search: SearchRecordsService,
         labeling: LabelingService,
     ):
-        self.__dao__ = dao
-        self.__metrics__ = metrics
+        self.__storage__ = storage
+        self.__search__ = search
         self.__labeling__ = labeling
-
-        self.__dao__.register_task_mappings(
-            TaskType.text_classification, text_classification_mappings()
-        )
 
     def add_records(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         records: List[CreationTextClassificationRecord],
     ):
+        # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
-        self.__metrics__.build_records_metrics(dataset, records)
-        failed = self.__dao__.add_records(
+
+        failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_class=TextClassificationRecordDB,
+            record_type=TextClassificationRecordDB,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
     def search(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         query: TextClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -146,49 +118,59 @@ class TextClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-        results = self.__dao__.search_records(
+
+        results = self.__search__.search(
             dataset,
-            search=RecordSearch(
-                query=query.as_elasticsearch(),
-                sort=sort_by2elasticsearch(
-                    sort_by,
-                    valid_fields=[
-                        "metadata",
-                        EsRecordDataFieldNames.last_updated,
-                        EsRecordDataFieldNames.score,
-                        EsRecordDataFieldNames.predicted,
-                        EsRecordDataFieldNames.predicted_as,
-                        EsRecordDataFieldNames.predicted_by,
-                        EsRecordDataFieldNames.annotated_as,
-                        EsRecordDataFieldNames.annotated_by,
-                        EsRecordDataFieldNames.status,
-                        EsRecordDataFieldNames.event_timestamp,
-                    ],
-                ),
-                aggregations={
-                    **aggregations.predicted_as(),
-                    **aggregations.annotated_as(),
-                },
-            ),
-            size=size,
+            query=query,
+            record_type=TextClassificationRecord,
             record_from=record_from,
-            exclude_fields=["metrics"] if exclude_metrics else None,
+            size=size,
+            exclude_metrics=exclude_metrics,
+            metrics={
+                "words_cloud",
+                "predicted_by",
+                "predicted_as",
+                "annotated_by",
+                "annotated_as",
+                "error_distribution",
+                "status_distribution",
+                "metadata",
+                "score",
+            },
+            sort_config=SortConfig(
+                sort_by=sort_by,
+                valid_fields=[
+                    "metadata",
+                    EsRecordDataFieldNames.last_updated,
+                    EsRecordDataFieldNames.score,
+                    EsRecordDataFieldNames.predicted,
+                    EsRecordDataFieldNames.predicted_as,
+                    EsRecordDataFieldNames.predicted_by,
+                    EsRecordDataFieldNames.annotated_as,
+                    EsRecordDataFieldNames.annotated_by,
+                    EsRecordDataFieldNames.status,
+                    EsRecordDataFieldNames.event_timestamp,
+                ],
+            ),
         )
+
+        if results.metrics:
+            results.metrics["words"] = results.metrics["words_cloud"]
+            results.metrics["status"] = results.metrics["status_distribution"]
+            results.metrics["predicted"] = results.metrics["error_distribution"]
+            results.metrics["predicted"].pop("unknown", None)
+
         return TextClassificationSearchResults(
             total=results.total,
-            records=[TextClassificationRecord.parse_obj(r) for r in results.records],
-            aggregations=TextClassificationSearchAggregations(
-                **results.aggregations,
-                words=results.words,
-                metadata=results.metadata or {},
-            )
-            if results.aggregations
+            records=results.records,
+            aggregations=TextClassificationSearchAggregations.parse_obj(results.metrics)
+            if results.metrics
             else None,
         )
 
     def read_dataset(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         query: Optional[TextClassificationQuery] = None,
     ) -> Iterable[TextClassificationRecord]:
         """
@@ -203,13 +185,14 @@ class TextClassificationService:
             the provided query filters. Optional
 
         """
-        for db_record in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=query.as_elasticsearch())
-        ):
-            yield TextClassificationRecord.parse_obj(db_record)
+        yield from self.__search__.scan_records(
+            dataset, query=query, record_type=TextClassificationRecord
+        )
 
     def _check_multi_label_integrity(
-        self, dataset: Dataset, records: List[TextClassificationRecord]
+        self,
+        dataset: TextClassificationDatasetDB,
+        records: List[CreationTextClassificationRecord],
     ):
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
@@ -221,21 +204,23 @@ class TextClassificationService:
                 )
             )
 
-    def _is_dataset_multi_label(self, dataset: Dataset) -> Optional[bool]:
+    def _is_dataset_multi_label(
+        self, dataset: TextClassificationDatasetDB
+    ) -> Optional[bool]:
         try:
-            results = self.__dao__.search_records(
+            results = self.__search__.search(
                 dataset,
-                search=RecordSearch(include_default_aggregations=False),
+                record_type=TextClassificationRecord,
                 size=1,
-                exclude_fields=["metrics", "metadata"],
             )
         except MissingDatasetRecordsError:  # No records index yet
             return None
-        records = [TextClassificationRecord.parse_obj(r) for r in results.records]
-        if records:
-            return records[0].multi_label
+        if results.records:
+            return results.records[0].multi_label
 
-    def get_labeling_rules(self, dataset: Dataset) -> Iterable[LabelingRule]:
+    def get_labeling_rules(
+        self, dataset: TextClassificationDatasetDB
+    ) -> Iterable[LabelingRule]:
         """
         Gets rules for a given dataset
 
@@ -251,7 +236,9 @@ class TextClassificationService:
         """
         return self.__labeling__.list_rules(dataset)
 
-    def add_labeling_rule(self, dataset: Dataset, rule: LabelingRule) -> None:
+    def add_labeling_rule(
+        self, dataset: TextClassificationDatasetDB, rule: LabelingRule
+    ) -> None:
         """
         Adds a labeling rule
 
@@ -262,20 +249,14 @@ class TextClassificationService:
 
         rule:
             The rule
-
         """
-        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
-        if is_multi_label_dataset is not None:
-            assert (
-                not is_multi_label_dataset
-            ), "Labeling rules are not supported for multi-label datasets"
         self.__labeling__.add_rule(dataset, rule)
 
     def update_labeling_rule(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         rule_query: str,
-        label: str,
+        labels: List[str],
         description: Optional[str] = None,
     ) -> LabelingRule:
         """
@@ -293,14 +274,14 @@ class TextClassificationService:
         """
         found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
 
-        found_rule.label = label
+        found_rule.labels = labels
+        found_rule.label = labels[0] if len(labels) == 1 else None
         if description is not None:
             found_rule.description = description
-
         self.__labeling__.replace_rule(dataset, found_rule)
         return found_rule
 
-    def find_labeling_rule(self, dataset: Dataset, rule_query: str):
+    def find_labeling_rule(self, dataset: TextClassificationDatasetDB, rule_query: str):
         """
         Find a labeling rule given a rule query string
 
@@ -314,7 +295,9 @@ class TextClassificationService:
         """
         return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
 
-    def delete_labeling_rule(self, dataset: Dataset, rule_query: str):
+    def delete_labeling_rule(
+        self, dataset: TextClassificationDatasetDB, rule_query: str
+    ):
         """
         Deletes a rule from a dataset.
 
@@ -335,9 +318,9 @@ class TextClassificationService:
 
     def compute_rule_metrics(
         self,
-        dataset: Dataset,
+        dataset: TextClassificationDatasetDB,
         rule_query: str,
-        label: Optional[str],
+        labels: Optional[List[str]] = None,
     ) -> LabelingRuleMetricsSummary:
         """
         Compute metrics for a given rule. It's not necessary that query rule
@@ -354,28 +337,28 @@ class TextClassificationService:
         rule_query:
             The provided rule query. If already created in dataset, the ``label``
             param will be omitted
-        label:
+        labels:
             Label used for the rule metrics. If not provided and no rule was stored with the
             provided query, no precision will be computed.
-            Otherwise, the label from the stored rule will be used to compute the metrics.
+            Otherwise, the labels from the stored rule will be used to compute the metrics.
 
         Returns
         -------
 
-            Metrics summary for rule and label
+            Metrics summary for rule and labels
 
         """
 
         rule_query = rule_query.strip()
 
-        if label is None:
+        if labels is None:
             for rule in self.get_labeling_rules(dataset):
                 if rule.query == rule_query:
-                    label = rule.label
+                    labels = rule.labels
                     break
 
         total, annotated, metrics = self.__labeling__.compute_rule_metrics(
-            dataset, rule_query=rule_query, label=label
+            dataset, rule_query=rule_query, labels=labels
         )
 
         coverage = metrics.covered_records / total if total > 0 else None
@@ -392,7 +375,7 @@ class TextClassificationService:
             precision=metrics.precision if annotated > 0 else None,
         )
 
-    def compute_overall_rules_metrics(self, dataset: Dataset):
+    def compute_overall_rules_metrics(self, dataset: TextClassificationDatasetDB):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
         coverage = metrics.covered_records / total if total else None
         coverage_annotated = (

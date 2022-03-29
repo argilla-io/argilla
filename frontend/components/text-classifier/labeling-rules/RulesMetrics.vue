@@ -173,38 +173,6 @@ export default {
     formatNumber(value) {
       return isNaN(value) ? "-" : this.$options.filters.percent(value);
     },
-    async getMetrics() {
-      this.metricsTotal = await this.getRulesMetrics({
-        dataset: this.dataset,
-      });
-    },
-    async getMetricsByRules() {
-      const responses = await Promise.all(
-        this.rules.map((rule) => {
-          return this.getRuleruleMetrics({
-            dataset: this.dataset,
-            query: rule.query,
-            label: rule.label,
-          });
-        })
-      );
-
-      responses.forEach((response, idx) => {
-        this.metricsByRules[this.rules[idx].query] = response;
-      });
-    },
-    async getruleMetrics() {
-      if (this.query !== undefined) {
-        const response = await this.getRuleruleMetrics({
-          dataset: this.dataset,
-          query: this.query,
-          label: this.activeLabel,
-        });
-        this.ruleMetrics = response;
-      } else {
-        this.ruleMetrics = {};
-      }
-    },
     getValuesByMetricType(type) {
       return Object.keys(this.metricsByRules).map((key) => {
         return this.metricsByRules[key][type] || 0;
@@ -238,14 +206,14 @@ $color: #333346;
     background: $primary-color;
     margin-left: 1em;
     color: $lighter-color;
-    border-radius: 5px;
+    border-radius: $border-radius;
     margin-bottom: 2em;
     padding: 30px;
   }
   &__title {
     padding-bottom: 0;
     color: $lighter-color;
-    @include font-size(22);
+    @include font-size(22px);
     font-weight: bold;
     margin-top: 0;
   }

@@ -1,13 +1,12 @@
-from typing import Any, ClassVar, Dict, Iterable, List, Optional
+from typing import Any, ClassVar, Dict, Iterable, List
 
 from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
+from rubrix.server.tasks.commons.metrics import CommonTasksMetrics, GenericRecord
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
-    BaseTaskMetrics,
     PythonMetric,
     TermsAggregation,
 )
@@ -28,7 +27,7 @@ class F1Metric(PythonMetric):
 
     def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
-        # TODO: This must be precalculated with using a global dataset metric
+        # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {
             label for record in filtered_records for label in record.annotated_as
         }
@@ -87,45 +86,45 @@ class F1Metric(PythonMetric):
         }
 
 
-class DatasetLabels(TermsAggregation):
+class DatasetLabels(PythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset labels", const=True)
-    fixed_size: int = Field(1500, const=True)
-    script: Dict[str, Any] = Field(
-        {
-            "lang": "painless",
-            "source": """
-            def all_labels = [];
-            def predicted = doc.containsKey('prediction.labels.class_label.keyword')
-                ? doc['prediction.labels.class_label.keyword'] : null;
-            def annotated = doc.containsKey('annotation.labels.class_label.keyword')
-                ? doc['annotation.labels.class_label.keyword'] : null;
+    max_processed_records: int = 10000
 
-            if (predicted != null && predicted.size() > 0) {
-              for (int i = 0; i < predicted.length; i++) {
-                all_labels.add(predicted[i])
-              }
-            }
+    def apply(self, records: Iterable[TextClassificationRecord]) -> Dict[str, Any]:
+        ds_labels = set()
+        for _ in range(
+            0, self.max_processed_records
+        ):  # Only a few of records will be parsed
+            record = next(records, None)
+            if record is None:
+                break
 
-            if (annotated != null && annotated.size() > 0) {
-              for (int i = 0; i < annotated.length; i++) {
-                all_labels.add(annotated[i])
-              }
-            }
-            return all_labels;
-            """,
-        },
-        const=True,
-    )
-
-    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
-        return {"labels": [k for k in (aggregation_result or {}).keys()]}
+            if record.annotation:
+                ds_labels.update(
+                    [label.class_label for label in record.annotation.labels]
+                )
+            if record.prediction:
+                ds_labels.update(
+                    [label.class_label for label in record.prediction.labels]
+                )
+        return {"labels": ds_labels or []}
 
 
-class TextClassificationMetrics(BaseTaskMetrics[TextClassificationRecord]):
+class TextClassificationMetrics(CommonTasksMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
     metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
+        TermsAggregation(
+            id="predicted_as",
+            name="Predicted labels distribution",
+            field="predicted_as",
+        ),
+        TermsAggregation(
+            id="annotated_as",
+            name="Annotated labels distribution",
+            field="annotated_as",
+        ),
         F1Metric(
             id="F1",
             name="F1 Metrics for single-label",

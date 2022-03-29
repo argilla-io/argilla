@@ -128,11 +128,7 @@ export default {
       return this.dataset !== undefined;
     },
     showLabellingRules() {
-      return (
-        this.isDatasetView &&
-        !this.dataset.isMultiLabel &&
-        this.dataset.task === "TextClassification"
-      );
+      return this.isDatasetView && this.dataset.task === "TextClassification";
     },
   },
   watch: {
@@ -181,9 +177,6 @@ $color: #333346;
   min-width: 90px;
   border-left: 1px solid palette(grey, smooth);
   z-index: 2;
-  .fixed-header & {
-    top: 0;
-  }
   p {
     text-align: center;
     font-weight: 600;

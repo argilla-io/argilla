@@ -37,7 +37,7 @@ Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``
 
 .. code-block:: bash
 
-   pip install rubrix[server] transformers[torch] datasets
+   pip install "rubrix[server]" "transformers[torch]" datasets
 
 If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ running, make sure you have `Docker` installed and run:
 
@@ -46,12 +46,7 @@ If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ 
 
 .. code-block:: bash
 
-   docker run -d \
-     --name elasticsearch-for-rubrix \
-     -p 9200:9200 -p 9300:9300 \
-     -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-     -e "discovery.type=single-node" \
-     docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+   docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 
 Then simply run:
@@ -97,24 +92,26 @@ Use your favourite editor or a Jupyter notebook to run the following:
 
    labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
+   records = []
    for record in dataset:
        prediction = model(record['text'], labels)
 
-       item = rb.TextClassificationRecord(
-           inputs=record["text"],
-           prediction=list(zip(prediction['labels'], prediction['scores'])),
+       records.append(
+           rb.TextClassificationRecord(
+               text=record["text"],
+               prediction=list(zip(prediction['labels'], prediction['scores'])),
+           )
        )
 
-       rb.log(item, name="news_zeroshot")
+   rb.log(records, name="news_zeroshot")
 
 
 Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
 **The default username and password are** ``rubrix`` **and** ``1234``.
 
-.. raw:: html
+Let's filter the records predicted as `Sports` with high probability and use the bulk-labeling feature for labeling 5 records as `Sports`:
 
-   <video width="100%" controls><source src="https://user-images.githubusercontent.com/1107111/132261244-b9151571-608e-4a41-8f34-e9dc1c8b8e38.mp4" type="video/mp4"></video>
-
+.. image:: images/zero_shot_example.png
 
 After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
@@ -128,7 +125,7 @@ After a few iterations of data annotation, we can load the Rubrix dataset and cr
 
    # select text input and the annotated label
    train_df = pd.DataFrame({
-      "text": rb_df.inputs.transform(lambda r: r["text"]),
+      "text": rb_df.text,
       "label": rb_df.annotation,
    })
 
@@ -180,6 +177,8 @@ You can join the conversation on our Github page and our Github forum.
    guides/weak-supervision
    guides/monitoring
    guides/metrics
+   guides/datasets
+   guides/queries
 
 .. toctree::
    :maxdepth: 3
@@ -195,6 +194,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/08-error_analysis_using_loss
    tutorials/09-automatic_fastapi_log
    tutorials/skweak
+   tutorials/weak-supervision-multi-label
 
 .. toctree::
    :maxdepth: 4

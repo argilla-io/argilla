@@ -115,6 +115,7 @@ export default {
         color: "#D9D7E4",
         binSpacing: 0,
       },
+
       bar: {
         binSpacing: 0,
         discreteBandSize: 0,
@@ -129,7 +130,12 @@ export default {
       },
     },
     encoding: {
-      x: { field: "key", type: "ordinal", scale: { rangeStep: null } },
+      x: {
+        scale: { zero: true },
+        bin: { maxbins: 100, extent: [0.0, 1.0] },
+        field: "key",
+        type: "quantitative",
+      },
       y: { field: "count", type: "quantitative", aggregate: "sum" },
     },
   }),
@@ -137,7 +143,7 @@ export default {
     options() {
       let test = Object.keys(this.filter.options).map((key) => {
         return {
-          key: key,
+          key: Number(key),
           count: this.filter.options[key],
         };
       });
@@ -195,7 +201,7 @@ export default {
   align-items: center;
   padding: 0 1em;
   transition: all 0.2s ease;
-  border-radius: 3px;
+  border-radius: $border-radius;
   &:hover,
   &:focus {
     border: 1px solid $primary-color;
@@ -228,8 +234,8 @@ export default {
     text-align: center;
   }
   .range__container {
-    margin-top: -8px;
-    padding: 0 0.5em;
+    margin-top: 2px;
+    padding: 0;
   }
   .range {
     @include font-size(14px);
@@ -260,7 +266,7 @@ export default {
     min-height: auto;
     transition: height 0.1s ease-in-out;
     overflow: visible;
-    border-radius: 3px;
+    border-radius: $border-radius;
     z-index: 4;
     width: 400px;
     max-width: 100vw;

@@ -22,13 +22,13 @@ Let's take a look at Rubrix's components and methods:
 Dataset
 ^^^^^^^
 
-A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``Pandas.Dataframe`` from a Python app, script, or a Jupyter/Colab notebook. 
+A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``Pandas.Dataframe`` from a Python app, script, or a Jupyter/Colab notebook.
 
 
 Record
 ^^^^^^
 
-A record is a data item composed of ``inputs`` and, optionally, ``predictions`` and ``annotations``. Usually, inputs are the information your model receives (for example: 'Macbeth'). 
+A record is a data item composed of ``text`` inputs and, optionally, ``predictions`` and ``annotations``.
 
 Think of predictions as the classification that your system made over that input (for example: 'Virginia Woolf'), and think of annotations as the ground truth that you manually assign to that input (because you know that, in this case, it would be 'William Shakespeare'). Records are defined by the type of ``Task``\ they are related to. Let's see three different examples:
 
@@ -42,10 +42,9 @@ Let's see examples of a spam classifier.
 .. code-block:: python
 
     record = rb.TextClassificationRecord(
-        inputs={
-            "text": "Access this link to get free discounts!"
-        },
-        prediction = [('SPAM', 0.8), ('HAM', 0.2)]
+        text="Access this link to get free discounts!",
+
+        prediction = [('SPAM', 0.8), ('HAM', 0.2)],
         prediction_agent = "link or reference to agent",
 
         annotation = "SPAM",
@@ -54,7 +53,6 @@ Let's see examples of a spam classifier.
         metadata={  # Information about this record
             "split": "train"
         },
-
    )
 
 Multi-label text classification record
@@ -65,9 +63,8 @@ Another similar task to Text Classification, but yet a bit different, is Multi-l
 .. code-block:: python
 
    record = rb.TextClassificationRecord(
-        inputs={
-            "text": "I can't wait to travel to Egypts and visit the pyramids"
-        },
+        text="I can't wait to travel to Egypts and visit the pyramids",
+
         multi_label = True,
 
         prediction = [('travel', 0.8), ('history', 0.6), ('economy', 0.3), ('sports', 0.2)],
@@ -127,7 +124,7 @@ A prediction is a piece information assigned to a record, a label or a set of la
 Metadata
 ^^^^^^^^
 
-Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record... Feel free to use it as you need! 
+Metada will hold extra information that you want your record to have: if it belongs to the training or the test dataset, a quick fact about something regarding that specific record... Feel free to use it as you need!
 
 Methods
 -------

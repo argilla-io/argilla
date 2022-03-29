@@ -21,17 +21,13 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 
 .. code-block:: bash
 
-   pip install rubrix[server]
+   pip install "rubrix[server]"
 
 **with conda**
 
 .. code-block:: bash
 
-   conda install -c conda-forge rubrix
-
-.. note::
-   Conda for now only installs the Python client of Rubrix.
-   This means, you have to launch the web app via :ref:`docker <launching-the-web-app-via-docker>` or :ref:`docker-compose <launching-the-web-app-via-docker-compose>`.
+   conda install -c conda-forge rubrix-server
 
 
 2. Launch the web app
@@ -69,7 +65,7 @@ The following code will log one record into a data set called ``example-dataset`
    import rubrix as rb
 
    rb.log(
-       rb.TextClassificationRecord(inputs="My first Rubrix example"),
+       rb.TextClassificationRecord(text="My first Rubrix example"),
        name='example-dataset'
    )
 

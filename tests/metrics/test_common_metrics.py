@@ -1,21 +1,23 @@
-import httpx
+#  coding=utf-8
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+import rubrix as rb
+from rubrix.metrics.commons import records_status, text_length
 
-from tests.server.test_helpers import client
 
-
-def mocking_client(monkeypatch):
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
-
-
-def test_status_distribution(monkeypatch):
-    mocking_client(monkeypatch)
+def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
-
-    import rubrix as rb
 
     rb.delete(dataset)
 
@@ -38,19 +40,14 @@ def test_status_distribution(monkeypatch):
         name=dataset,
     )
 
-    from rubrix.metrics.commons import records_status
-
     results = records_status(dataset)
     assert results
     assert results.data == {"Default": 1, "Validated": 1}
     results.visualize()
 
 
-def test_text_length(monkeypatch):
-    mocking_client(monkeypatch)
+def test_text_length(mocked_client):
     dataset = "test_text_length"
-
-    import rubrix as rb
 
     rb.delete(dataset)
 
@@ -78,8 +75,6 @@ def test_text_length(monkeypatch):
         ],
         name=dataset,
     )
-
-    from rubrix.metrics.commons import text_length
 
     results = text_length(dataset)
     assert results

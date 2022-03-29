@@ -16,7 +16,6 @@
 """
 This module configures the global fastapi application
 """
-
 import os
 from pathlib import Path
 
@@ -33,6 +32,7 @@ from rubrix.server.datasets.dao import DatasetsDAO
 from rubrix.server.security import auth
 from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
+from ..logging import configure_logging
 from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
@@ -84,7 +84,7 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_app_startup(app: FastAPI):
+def configure_app_storage(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
         import opensearchpy
@@ -93,7 +93,7 @@ def configure_app_startup(app: FastAPI):
             es_wrapper = create_es_wrapper()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
             datasets: DatasetsDAO = DatasetsDAO.get_instance(
-                es_wrapper, dataset_records
+                es_wrapper, records_dao=dataset_records
             )
             datasets.init()
             dataset_records.init()
@@ -101,17 +101,21 @@ def configure_app_startup(app: FastAPI):
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
                 "is not available or not responding.\n"
-                "Please make sure your Elasticsearch instance is launched and correctly running and "
+                "Please make sure your Elasticsearch instance is launched and correctly running and\n"
                 "you have the necessary access permissions. "
                 "Once you have verified this, restart the Rubrix server.\n"
-                f"Error detail: [{error}]"
-            )
+            ) from error
 
 
 def configure_app_security(app: FastAPI):
 
     if hasattr(auth, "router"):
         app.include_router(auth.router)
+
+
+def configure_app_logging(app: FastAPI):
+    """Configure app logging using"""
+    app.on_event("startup")(configure_logging)
 
 
 app = FastAPI(
@@ -125,11 +129,12 @@ app = FastAPI(
 )
 
 for app_configure in [
+    configure_app_logging,
     configure_middleware,
     configure_api_exceptions,
     configure_app_security,
     configure_api_router,
     configure_app_statics,
-    configure_app_startup,
+    configure_app_storage,
 ]:
     app_configure(app)

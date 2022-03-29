@@ -20,12 +20,14 @@ from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
 from rubrix.server.commons.api import CommonTaskQueryParams
-from rubrix.server.datasets.model import CreationDatasetRequest, Dataset
+from rubrix.server.commons.errors import EntityNotFoundError
+from rubrix.server.datasets.model import Dataset
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.tasks.commons.api import BulkResponse, PaginationParams, TaskType
 from rubrix.server.tasks.commons.helpers import takeuntil
+from rubrix.server.tasks.commons.task_factory import TaskFactory
 from rubrix.server.tasks.text_classification.api.model import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
@@ -89,12 +91,23 @@ def bulk_records(
     """
 
     task = TASK_TYPE
-    dataset = datasets.upsert(
-        CreationDatasetRequest(**{**bulk.dict(), "name": name}),
-        task=task,
-        user=current_user,
-        workspace=common_params.workspace,
-    )
+    owner = current_user.check_workspace(common_params.workspace)
+    try:
+        dataset = datasets.find_by_name(
+            current_user, name=name, task=task, workspace=owner
+        )
+        datasets.update(
+            user=current_user,
+            dataset=dataset,
+            tags=bulk.tags,
+            metadata=bulk.metadata,
+        )
+    except EntityNotFoundError:
+        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
+        dataset.owner = owner
+        datasets.create_dataset(user=current_user, dataset=dataset)
+
     result = service.add_records(
         dataset=dataset,
         records=bulk.records,
@@ -157,10 +170,10 @@ def search_records(
     search = search or TextClassificationSearchRequest()
     query = search.query or TextClassificationQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+        user=current_user, name=name, task=TASK_TYPE, workspace=common_params.workspace
     )
     result = service.search(
-        dataset=Dataset.parse_obj(dataset),
+        dataset=dataset,
         query=query,
         sort_by=search.sort,
         record_from=pagination.from_,
@@ -242,10 +255,10 @@ async def stream_data(
     """
     query = query or TextClassificationQuery()
     dataset = datasets.find_by_name(
-        name, task=TASK_TYPE, user=current_user, workspace=common_params.workspace
+        user=current_user, name=name, task=TASK_TYPE, workspace=common_params.workspace
     )
-    data_stream = service.read_dataset(Dataset.parse_obj(dataset), query=query)
 
+    data_stream = service.read_dataset(dataset, query=query)
     return scan_data_response(
         data_stream=data_stream,
         limit=limit,
@@ -270,13 +283,13 @@ async def list_labeling_rules(
 ) -> List[LabelingRule]:
 
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
-    return list(service.get_labeling_rules(Dataset.parse_obj(dataset)))
+    return list(service.get_labeling_rules(dataset))
 
 
 @router.post(
@@ -298,9 +311,9 @@ async def create_rule(
 ) -> LabelingRule:
 
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
@@ -309,7 +322,7 @@ async def create_rule(
         author=current_user.username,
     )
     service.add_labeling_rule(
-        Dataset.parse_obj(dataset),
+        dataset,
         rule=rule,
     )
 
@@ -326,7 +339,9 @@ async def create_rule(
 async def compute_rule_metrics(
     name: str,
     query: str,
-    label: Optional[str] = Query(None, description="Label related to query rule"),
+    labels: Optional[List[str]] = Query(
+        None, description="Label related to query rule", alias="label"
+    ),
     common_params: CommonTaskQueryParams = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
@@ -335,15 +350,13 @@ async def compute_rule_metrics(
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> LabelingRuleMetricsSummary:
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
-    return service.compute_rule_metrics(
-        Dataset.parse_obj(dataset), rule_query=query, label=label
-    )
+    return service.compute_rule_metrics(dataset, rule_query=query, labels=labels)
 
 
 @router.get(
@@ -363,13 +376,13 @@ async def compute_dataset_rules_metrics(
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> DatasetLabelingRulesMetricsSummary:
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
-    return service.compute_overall_rules_metrics(Dataset.parse_obj(dataset))
+    return service.compute_overall_rules_metrics(dataset)
 
 
 @router.delete(
@@ -389,13 +402,13 @@ async def delete_labeling_rule(
 ) -> None:
 
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
-    service.delete_labeling_rule(Dataset.parse_obj(dataset), rule_query=query)
+    service.delete_labeling_rule(dataset, rule_query=query)
 
 
 @router.get(
@@ -417,14 +430,14 @@ async def get_rule(
 ) -> LabelingRule:
 
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
     rule = service.find_labeling_rule(
-        Dataset.parse_obj(dataset),
+        dataset,
         rule_query=query,
     )
     return rule
@@ -450,16 +463,16 @@ async def update_rule(
 ) -> LabelingRule:
 
     dataset = datasets.find_by_name(
-        name,
-        task=TASK_TYPE,
         user=current_user,
+        name=name,
+        task=TASK_TYPE,
         workspace=common_params.workspace,
     )
 
     rule = service.update_labeling_rule(
-        Dataset.parse_obj(dataset),
+        dataset,
         rule_query=query,
-        label=update.label,
+        labels=update.labels,
         description=update.description,
     )
     return rule

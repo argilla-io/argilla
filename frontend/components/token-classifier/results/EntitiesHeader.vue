@@ -16,31 +16,43 @@
   -->
 
 <template>
-  <div
-    :class="[
-      'entities__container',
-      activeEntity ? 'entities__container--multiple' : '',
-    ]"
-  >
-    <span
-      v-for="(entity, index) in visibleEntities"
-      :key="index"
-      class="entity"
+  <div class="container">
+    <div
+      v-if="visibleEntities.length"
       :class="[
-        `color_${entity.colorId}`,
-        activeEntity === entity.text ? 'active' : '',
-        annotationEnabled ? 'non-selectable--show-sort-code' : 'non-selectable',
+        'entities__container',
+        activeEntity ? 'entities__container--multiple' : '',
       ]"
-      @click="onActiveEntity(entity)"
     >
-      {{ entity.text }}
-    </span>
-    <ReButton
-      v-if="dataset.entities.length > entitiesNumber"
-      class="entities__container__button"
-      @click="toggleEntitiesNumber"
-      >{{ showEntitySelector ? "Show less" : "Show all" }}</ReButton
-    >
+      <span
+        v-for="(entity, index) in visibleEntities"
+        :key="index"
+        class="entity"
+        :class="[
+          `color_${entity.colorId}`,
+          activeEntity === entity.text ? 'active' : '',
+          annotationEnabled
+            ? 'non-selectable--show-sort-code'
+            : 'non-selectable',
+        ]"
+        @click="onActiveEntity(entity)"
+      >
+        {{ entity.text }}
+        <span v-if="entity.shortcut" class="shortcut"
+          >[{{ entity.shortcut }}]</span
+        >
+      </span>
+      <ReButton
+        v-if="dataset.entities.length > entitiesNumber"
+        class="entities__container__button"
+        @click="toggleEntitiesNumber"
+        >{{
+          showEntitySelector
+            ? "Show less"
+            : `+ ${dataset.entities.length - entitiesNumber}`
+        }}</ReButton
+      >
+    </div>
   </div>
 </template>
 
@@ -63,9 +75,11 @@ export default {
   }),
   computed: {
     visibleEntities() {
+      const characters = "1234567890".split("");
       let entities = [...this.dataset.entities]
         .sort((a, b) => a.text.localeCompare(b.text))
-        .map((ent) => ({
+        .map((ent, index) => ({
+          shortcut: characters[index],
           ...ent,
         }));
 
@@ -95,22 +109,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container {
+  @extend %container;
+  padding-top: 0;
+  padding-bottom: 0.7em;
+  margin-left: 0;
+  padding-right: calc(4em + 45px);
+}
 .entities {
   &__container {
-    margin-bottom: 1em;
-    padding: 0 4em;
-    width: calc(100% - 120px);
-    .--metrics & {
-      @include media(">desktop") {
-        padding-right: calc(294px + 100px);
-        transition: padding 0.1s ease-in-out;
-      }
-    }
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      width: 100%;
-      padding-right: 100px;
-    }
+    padding: 0.2em 0.5em;
+    background: palette(white);
+    border-radius: $border-radius;
+    box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
+    min-height: 48px;
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
@@ -118,11 +130,11 @@ export default {
       color: $secondary-color !important;
       transition: background 0.2s ease-in-out;
       padding: 5px;
-      border-radius: 5px;
+      border-radius: $border-radius;
       border: 0;
       background: none;
       &:hover {
-        background: palette(grey, smooth) !important;
+        background: $bg !important;
         transition: background 0.2s ease-in-out;
       }
     }
@@ -135,9 +147,10 @@ export default {
 }
 .entity {
   padding: 0.3em;
-  margin: 1em 1em 0 0;
+  margin: 0.5em;
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   max-height: 28px;
   border: 2px solid transparent;
@@ -151,11 +164,10 @@ export default {
     cursor: default;
     pointer-events: none;
   }
-  &__sort-code {
-    @include font-size(12px);
-    color: $font-medium-color;
+  .shortcut {
+    @include font-size(14px);
     font-weight: lighter;
-    margin-left: 0.5em;
+    margin-left: 1em;
     .non-selectable & {
       display: none;
     }
@@ -166,7 +178,7 @@ export default {
 $colors: 50;
 $hue: 360;
 @for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + ($hue * $i / $colors), 100% - $i / 2, 80%, 1);
+  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
     &.active,
@@ -179,15 +191,6 @@ $hue: 360;
   }
   .entities__selector__option.color_#{$i - 1} span {
     background: $rcolor;
-  }
-  .entities__selector__option.color_#{$i - 1} {
-    background: white;
-    &:hover {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 97%, 1);
-    }
-    &:active {
-      background: hsla(($colors * $i) + ($hue * $i / $colors), 100%, 94%, 1);
-    }
   }
   .color_#{$i - 1} ::v-deep .highlight__tooltip {
     background: $rcolor;
