@@ -512,11 +512,6 @@ export default {
       &:first-child {
         flex-shrink: 0;
         min-width: 240px;
-        a {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
       }
     }
     .svg-icon {
