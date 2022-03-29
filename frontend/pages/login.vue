@@ -108,10 +108,10 @@ export default {
   }
   &__button {
     margin: 2em auto 0 auto;
-    text-align: center;
-    display: block;
+    text-align: center !important;;
+    display: block !important;;
     width: 100%;
-    min-height: 36px;
+    min-height: 36px !important;
   }
   &__input {
     position: relative;
