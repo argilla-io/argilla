@@ -61,6 +61,7 @@ export default {
   },
   watch: {
     async query(newValue) {
+      this.saved = false;
       const rule = this.dataset.findRuleByQuery(newValue, undefined);
       await this.dataset.setCurrentLabelingRule(
         rule
