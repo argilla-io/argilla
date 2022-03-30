@@ -211,7 +211,7 @@ class Api:
             ...     prediction=[('spam', 0.8), ('ham', 0.2)]
             ... )
             >>> rb.log(record, name="example-dataset")
-            1 records logged to http://localhost:6900/ws/rubrix/example-dataset
+            1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
         if not name:
@@ -290,8 +290,13 @@ class Api:
 
         # TODO: improve logging policy in library
         if verbose:
+            workspace = self.get_workspace()
+            if (
+                not workspace
+            ):  # Just for backward comp. with datasets with no workspaces
+                workspace = "-"
             print(
-                f"{processed} records logged to {self._client.base_url + '/ws/' + self.get_workspace() + '/' + name}"
+                f"{processed} records logged to {self._client.base_url + '/datasets/' + workspace + '/' + name}"
             )
 
         # Creating a composite BulkResponse with the total processed and failed
