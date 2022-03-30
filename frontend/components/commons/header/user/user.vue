@@ -134,7 +134,6 @@ $buttonSize: 34px;
 .copyright {
   display: block;
   @include font-size(11px);
-  text-transform: uppercase;
   font-weight: 400;
   color: palette(grey, dark);
   line-height: 1em;
