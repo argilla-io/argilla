@@ -450,8 +450,8 @@ class WeakLabels(WeakLabelsBase):
         - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
         - **conflicts**: Fraction of the records where the rule disagrees with at least one other rule.
-        - **correct**: Number of records the rule labeled correctly (if annotations are available).
-        - **incorrect**: Number of records the rule labeled incorrectly (if annotations are available).
+        - **correct**: Number of labels the rule predicted correctly (if annotations are available).
+        - **incorrect**: Number of labels the rule predicted incorrectly (if annotations are available).
         - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
 
 
@@ -813,8 +813,8 @@ class WeakMultiLabels(WeakLabelsBase):
         - **coverage**: Fraction of the records labeled by the rule.
         - **annotated_coverage**: Fraction of annotated records labeled by the rule (if annotations are available).
         - **overlaps**: Fraction of the records labeled by the rule together with at least one other rule.
-        - **correct**: Number of labels the rule labeled correctly (if annotations are available).
-        - **incorrect**: Number of labels the rule labeled incorrectly or missed (if annotations are available).
+        - **correct**: Number of labels the rule predicted correctly (if annotations are available).
+        - **incorrect**: Number of labels the rule predicted incorrectly or missed (if annotations are available).
         - **precision**: Fraction of correct labels given by the rule (if annotations are available). The precision does not penalize the rule for abstains.
 
         Args:
