@@ -3,23 +3,30 @@
 Client
 ======
 
-Here we describe the Python client of Rubrix that we divide into two basic modules:
+Here we describe the Python client of Rubrix that we divide into three basic modules:
 
-- Methods: These methods make up the interface to interact with Rubrix's REST API.
-- Models: You need to wrap your data in these data models for Rubrix to understand it.
+- :ref:`python ref methods`: These methods make up the interface to interact with Rubrix's REST API.
+- :ref:`python ref records`: You need to wrap your data in these *Records* for Rubrix to understand it.
+- :ref:`python ref datasets`: Datasets: You can wrap your records around these *Datasets* for extra functionality.
+
+.. _python ref methods:
 
 Methods
 -------
 
 .. automodule:: rubrix
-   :members:
+   :members: init, log, load, copy, delete, set_workspace, get_workspace
 
-Models
-------
+.. _python ref records:
+
+Records
+-------
 
 .. automodule:: rubrix.client.models
    :members:
    :exclude-members: BaseRecord, BulkResponse
+
+.. _python ref datasets:
 
 Datasets
 --------
