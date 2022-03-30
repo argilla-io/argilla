@@ -13,7 +13,7 @@ To launch the web app, please have a look at our [setup and installation guide](
 :caption: Pages
 :hidden:
 
-dataset list
+homepage
 dataset
 ```
 
@@ -37,5 +37,4 @@ define_rules
 search_records
 filter_records
 view_dataset_metrics
-switch_workspaces
 ```
