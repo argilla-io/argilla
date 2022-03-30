@@ -5,7 +5,7 @@ To launch the web app, please have a look at our [setup and installation guide](
 
 ## Pages
 
-- [**Homepage**](homepage.md): Search, access and share your datasets in a unified place
+- [**Home page**](homepage.md): Search, access and share your datasets in a unified place
 - [**Dataset**](dataset.md): Dive into your dataset to explore and annotate your records
 
 ```{toctree}
