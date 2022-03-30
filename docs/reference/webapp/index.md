@@ -5,7 +5,7 @@ To launch the web app, please have a look at our [setup and installation guide](
 
 ## Pages
 
-- [**Dataset list**](dataset_list.md): Search, access and share your datasets in a unified place
+- [**Homepage**](homepage.md): Search, access and share your datasets in a unified place
 - [**Dataset**](dataset.md): Dive into your dataset to explore and annotate your records
 
 ```{toctree}
@@ -25,7 +25,6 @@ dataset
 - [**Search records**](search_records.md): Search your records with the powerful elasticsearch query syntax
 - [**Filter records**](filter_records.md): Quickly filter your records by predictions, annotations or their metadata
 - [**View dataset metrics**](view_dataset_metrics.md): View insightful metrics of your dataset
-- [**Switch workspaces**](switch_workspaces.md): Switch your workspace and access shared datasets
 
 ```{toctree}
 :maxdepth: 1
