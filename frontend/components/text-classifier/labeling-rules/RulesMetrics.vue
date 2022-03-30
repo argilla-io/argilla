@@ -146,7 +146,7 @@ export default {
           overall: {
             description: "Total:",
             tooltip:
-              "Total number of records the rules labeled correctly/incorrectly (if annotations are available)",
+              "Total number of labels the rules predicted correctly/incorrectly (if annotations are available)",
             value: isNaN(this.metricsTotal.totalCorrects)
               ? "-/-"
               : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
@@ -157,7 +157,7 @@ export default {
                 ? `${this.ruleMetrics.correct}/${this.ruleMetrics.incorrect}`
                 : "-/-",
             tooltip:
-              "Number of records the rule labeled correctly/incorrectly (if annotations are available)",
+              "Number of labels the rule predicted correctly/incorrectly (if annotations are available)",
           },
         },
       ];

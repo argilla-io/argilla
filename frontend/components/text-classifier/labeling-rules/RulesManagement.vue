@@ -99,14 +99,14 @@ export default {
           field: "correct",
           class: "text",
           tooltip:
-            "Number of records the rule labeled correctly (if annotations are available)",
+            "Number of labels the rule predicted correctly (if annotations are available)",
         },
         {
           name: "Incorrect",
           field: "incorrect",
           class: "text",
           tooltip:
-            "Number of records the rule labeled incorrectly (if annotations are available)",
+            "Number of labels the rule predicted incorrectly (if annotations are available)",
         },
         {
           name: "Precision",
