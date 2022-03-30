@@ -15,7 +15,7 @@ In the center of the page you see the list of datasets available for **your user
 The list consists of following columns:
 
 - **Name**: The name of the dataset, can be sorted alphabetically.
-- **Workspace**: A filtrable column in which the datasets of one or different workspaces can be chosen to be seen.
+- **Workspace**: A filtrable column showing the workspace to which the dataset belongs.
 - **Task**: The [task](../../guides/task_examples.ipynb) of the dataset. This is a filtrable column.
 - **Tags**: User defined tags for the dataset.
 - **Created at**: When was the dataset first logged by the client.
@@ -25,5 +25,5 @@ The list consists of following columns:
 
 You can find a user icon and a refresh button on the top right:
 
-- **User icon**: This icon, which shows the initials of your username, allows you **log out** or **view the reference docs**.
+- **User icon**: This icon shows the initials of your username and allows you to **log out** or **view the reference docs**.
 - **Refresh**: This button updates the list of datasets in case you just logged new data from the client.
