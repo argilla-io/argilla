@@ -68,7 +68,7 @@ Why Rubrix?
 
 Interactive weak supervision. Building a news classifier with user search queries:
 
-https://user-images.githubusercontent.com/1107111/148930791-ed4c3640-aa74-41b1-bfc5-5717e137bc1b.mp4
+https://user-images.githubusercontent.com/15979778/160816779-e5ba8cf8-1223-40fe-ac95-63652d1f73d4.mp4
 
 Check the [tutorial](https://rubrix.readthedocs.io/en/master/tutorials/weak-supervision-with-rubrix.html) for more details.
 
