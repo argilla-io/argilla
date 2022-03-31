@@ -93,13 +93,13 @@ def test_init_correct(mock_response_200):
     """
 
     api.init()
-    assert api.ACTIVE_API._client == AuthenticatedClient(
+    assert api.__ACTIVE_API__._client == AuthenticatedClient(
         base_url="http://localhost:6900", token="rubrix.apikey", timeout=60.0
     )
-    assert api.ACTIVE_API._user == api.User(username="booohh")
+    assert api.__ACTIVE_API__._user == api.User(username="booohh")
 
     api.init(api_url="mock_url", api_key="mock_key", workspace="mock_ws", timeout=42)
-    assert api.ACTIVE_API._client == AuthenticatedClient(
+    assert api.__ACTIVE_API__._client == AuthenticatedClient(
         base_url="mock_url",
         token="mock_key",
         timeout=42,
@@ -139,7 +139,7 @@ def test_init_evironment_url(mock_response_200, monkeypatch):
     monkeypatch.setenv("RUBRIX_WORKSPACE", "mock_workspace")
     api.init()
 
-    assert api.ACTIVE_API._client == AuthenticatedClient(
+    assert api.__ACTIVE_API__._client == AuthenticatedClient(
         base_url="mock_url",
         token="mock_key",
         timeout=60,
@@ -153,7 +153,7 @@ def test_trailing_slash(mock_response_200):
     It checks the trailing slash is removed in all cases
     """
     api.init(api_url="http://mock.com/")
-    assert api.ACTIVE_API._client.base_url == "http://mock.com"
+    assert api.__ACTIVE_API__._client.base_url == "http://mock.com"
 
 
 def test_log_something(monkeypatch, mocked_client):
@@ -589,7 +589,7 @@ def test_client_workspace(mocked_client):
             api.set_workspace(None)
 
         # Mocking user
-        api.ACTIVE_API._user.workspaces = ["a", "b"]
+        api.__ACTIVE_API__._user.workspaces = ["a", "b"]
 
         with pytest.raises(Exception, match="Wrong provided workspace c"):
             api.set_workspace("c")
