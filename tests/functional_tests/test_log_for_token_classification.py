@@ -2,6 +2,9 @@ import pytest
 
 import rubrix
 from rubrix import TokenClassificationRecord
+from rubrix.client import api
+from rubrix.client.sdk.commons.errors import NotFoundApiError
+from rubrix.metrics import __ALL__ as ALL_METRICS
 
 
 def test_log_with_empty_text(mocked_client):
@@ -29,6 +32,16 @@ def test_log_with_empty_tokens_list(mocked_client):
             TokenClassificationRecord(id=0, text=text, tokens=[]),
             name=dataset,
         )
+
+
+def test_call_metrics_with_no_api_client_initialized(mocked_client):
+
+    for metric in ALL_METRICS:
+
+        api.__ACTIVE_API__ = None
+
+        with pytest.raises(NotFoundApiError):
+            metric("not_found")
 
 
 def test_log_record_that_makes_me_cry(mocked_client):
