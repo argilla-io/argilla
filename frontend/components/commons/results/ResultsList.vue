@@ -197,7 +197,6 @@ export default {
     }
   }
   &__li {
-    margin-bottom: -1px;
     position: relative;
     min-height: 80px;
   }
