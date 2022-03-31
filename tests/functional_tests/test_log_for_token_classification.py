@@ -4,7 +4,7 @@ import rubrix
 from rubrix import TokenClassificationRecord
 from rubrix.client import api
 from rubrix.client.sdk.commons.errors import NotFoundApiError
-from rubrix.metrics import __ALL__ as ALL_METRICS
+from rubrix.metrics import __all__ as ALL_METRICS
 
 
 def test_log_with_empty_text(mocked_client):
