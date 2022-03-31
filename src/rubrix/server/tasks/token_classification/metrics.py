@@ -469,6 +469,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
                 id="capitalness",
                 field="capitalness",
                 name="",
+                # missing="OTHER",
             ),
         ),
     ]
