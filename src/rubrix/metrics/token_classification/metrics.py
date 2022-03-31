@@ -105,6 +105,14 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
 def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
     """Computes the token capitalness distribution
 
+        ``UPPER``: All charactes in the token are upper case.
+
+        ``LOWER``: All charactes in the token are lower case.
+
+        ``FIRST``: The first character in the token is upper case.
+
+        ``MIDDLE``: Some characters in the token between the first and the last character are upper case.
+
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
@@ -300,13 +308,13 @@ def entity_capitalness(
 ) -> MetricSummary:
     """Computes the entity capitalness. The entity capitalness splits the entity mention shape in 4 groups:
 
-        ``UPPER``: All charactes in entity mention are upper case
+        ``UPPER``: All charactes in entity mention are upper case.
 
-        ``LOWER``: All charactes in entity mention are lower case
+        ``LOWER``: All charactes in entity mention are lower case.
 
-        ``FIRST``: The mention is capitalized
+        ``FIRST``: The first character in the mention is upper case.
 
-        ``MIDDLE``: Some character in mention between first and last is capitalized
+        ``MIDDLE``: Some characters in the mention between the first and the last character are upper case.
 
     Args:
         name: The dataset name.
