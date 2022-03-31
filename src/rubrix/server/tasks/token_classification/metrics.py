@@ -6,7 +6,6 @@ from rubrix.server.commons.es_helpers import aggregations
 from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
 from rubrix.server.tasks.commons.metrics.model.base import (
     BaseMetric,
-    BaseTaskMetrics,
     ElasticsearchMetric,
     HistogramAggregation,
     NestedHistogramAggregation,
@@ -17,7 +16,6 @@ from rubrix.server.tasks.commons.metrics.model.base import (
 )
 from rubrix.server.tasks.token_classification.api.model import (
     EntitySpan,
-    TokenClassificationAnnotation,
     TokenClassificationRecord,
 )
 
