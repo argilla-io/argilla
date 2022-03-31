@@ -111,7 +111,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
 
         ``FIRST``: The first character in the token is upper case.
 
-        ``MIDDLE``: Some characters in the token between the first and the last character are upper case.
+        ``MIDDLE``: First character in the token is lower case and at least one other character is upper case.
 
     Args:
         name: The dataset name.
@@ -314,7 +314,7 @@ def entity_capitalness(
 
         ``FIRST``: The first character in the mention is upper case.
 
-        ``MIDDLE``: Some characters in the mention between the first and the last character are upper case.
+        ``MIDDLE``: First character in the mention is lower case and at least one other character is upper case.
 
     Args:
         name: The dataset name.
