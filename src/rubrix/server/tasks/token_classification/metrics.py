@@ -277,7 +277,7 @@ class MentionMetrics(BaseModel):
     value: str
     label: str
     score: float = Field(ge=0.0)
-    capitalness: str = Field(...)
+    capitalness: Optional[str] = Field(None)
     density: float = Field(ge=0.0)
     tokens_length: int = Field(g=0)
     chars_length: int = Field(g=0)
@@ -307,7 +307,7 @@ class TokenMetrics(BaseModel):
     char_start: int
     char_end: int
     length: int
-    capitalness: str
+    capitalness: Optional[str] = None
     score: Optional[float] = None
     tag: Optional[str] = None  # TODO: remove!
     custom: Dict[str, Any] = None
@@ -333,16 +333,18 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         return value / sentence_length
 
     @staticmethod
-    def capitalness(value: str) -> str:
+    def capitalness(value: str) -> Optional[str]:
         """Compute capitalness for a string value"""
         value = value.strip()
-        if value.upper() == value:
+        if value.isupper():
             return "UPPER"
-        if value.lower() == value:
+        if value.islower():
             return "LOWER"
         if value[0].isupper():
             return "FIRST"
-        return "MIDDLE"
+        if any([c.isupper() for c in value[1:]]):
+            return "MIDDLE"
+        return None
 
     @staticmethod
     def mentions_metrics(
