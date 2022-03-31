@@ -123,12 +123,7 @@ export default {
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid palette(grey, smooth);
-    &:hover {
-      ::v-deep .edit {
-        opacity: 1;
-        pointer-events: all;
-      }
-    }
+    border-bottom: 0;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
