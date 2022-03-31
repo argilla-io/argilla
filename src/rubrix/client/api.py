@@ -494,7 +494,7 @@ class Api:
             )
 
 
-ACTIVE_API: Optional[Api] = None
+__ACTIVE_API__: Optional[Api] = None
 
 
 def active_api() -> Api:
@@ -502,10 +502,10 @@ def active_api() -> Api:
 
     If Active API is None, initialize a default one.
     """
-    global ACTIVE_API
-    if ACTIVE_API is None:
-        ACTIVE_API = Api()
-    return ACTIVE_API
+    global __ACTIVE_API__
+    if __ACTIVE_API__ is None:
+        __ACTIVE_API__ = Api()
+    return __ACTIVE_API__
 
 
 def api_wrapper(api_method: Callable):
@@ -530,8 +530,8 @@ def api_wrapper(api_method: Callable):
 
 @api_wrapper(Api.__init__)
 def init(*args, **kwargs):
-    global ACTIVE_API
-    ACTIVE_API = Api(*args, **kwargs)
+    global __ACTIVE_API__
+    __ACTIVE_API__ = Api(*args, **kwargs)
 
 
 @api_wrapper(Api.set_workspace)
