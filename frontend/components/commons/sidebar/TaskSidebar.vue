@@ -30,7 +30,6 @@
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
-import capitalize from "~/components/core/utils/capitalize";
 import SidebarMenu from "./SidebarMenu";
 import SidebarPanel from "./SidebarPanel";
 export default {
@@ -102,7 +101,7 @@ export default {
       });
     },
     componentName(metric) {
-      return `${this.currentTask}${capitalize(metric)}`;
+      return `${this.currentTask}${this.$options.filters.capitalize(metric)}`;
     },
   },
 };
