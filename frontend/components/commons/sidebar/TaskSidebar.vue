@@ -1,22 +1,27 @@
 <template>
   <div>
-    <SidebarMenu
+    <component
+      ref="menu"
+      v-if="dataset"
+      :is="currentTaskSidebar"
       :dataset="dataset"
+      :current-metric="currentMetric"
       @refresh="onRefresh"
-      @showMetric="onShowSidebarInfo"
-      @changeViewMode="onChangeViewMode"
+      @show-metrics="onShowSidebarInfo"
+      @change-view-mode="onChangeViewMode"
     />
-    <!-- TODO: Use media queries -->
     <SidebarPanel
-      v-if="sidebarVisible"
+      v-if="currentMetric"
       :dataset="dataset"
       :class="dataset.task"
+      @close-panel="onClosePanel"
     >
-      <div v-show="sidebarInfoType === 'progress'">
-        <component :is="currentTaskProgress" :dataset="dataset" />
-      </div>
-      <div v-show="sidebarInfoType === 'stats'">
-        <component :is="currentTaskStats" :dataset="dataset" />
+      <div
+        v-for="metricType in metricsTypes"
+        :key="metricType"
+        v-show="currentMetric === metricType"
+      >
+        <component :is="componentName(metricType)" :dataset="dataset" />
       </div>
     </SidebarPanel>
   </div>
@@ -25,6 +30,7 @@
 <script>
 import { mapActions } from "vuex";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
+import capitalize from "~/components/core/utils/capitalize";
 import SidebarMenu from "./SidebarMenu";
 import SidebarPanel from "./SidebarPanel";
 export default {
@@ -34,27 +40,23 @@ export default {
       type: Object,
       required: true,
     },
+    sidebarItems: {
+      type: Array,
+    },
   },
   data: () => ({
-    sidebarInfoType: "progress",
-    sidebarVisible: false,
-    width: window.innerWidth,
+    currentMetric: undefined,
   }),
   computed: {
+    currentTaskSidebar() {
+      return this.currentTask + "Sidebar";
+    },
     currentTask() {
       return this.dataset.task;
     },
-    currentTaskProgress() {
-      return this.currentTask + "Progress";
+    metricsTypes() {
+      return this.$refs.menu.metricsTypes;
     },
-    currentTaskStats() {
-      return this.currentTask + "Stats";
-    },
-  },
-  updated() {
-    window.onresize = () => {
-      this.width = window.innerWidth;
-    };
   },
   methods: {
     ...mapActions({
@@ -71,20 +73,34 @@ export default {
         dataset: this.dataset,
         value: value,
       });
+      this.currentMetric = this.metricsTypes.includes(this.currentMetric)
+        ? this.currentMetric
+        : this.onShowSidebarInfo(false);
     },
     onShowSidebarInfo(info) {
-      if (this.sidebarInfoType !== info) {
-        this.sidebarVisible = true;
+      if (this.currentMetric !== info) {
+        this.currentMetric = info;
       } else {
-        this.sidebarVisible = !this.sidebarVisible;
+        this.currentMetric = undefined;
       }
-      this.sidebarInfoType = info;
       DatasetViewSettings.update({
         where: this.dataset.name,
         data: {
-          visibleMetrics: this.sidebarVisible,
+          visibleMetrics: this.currentMetric,
         },
       });
+    },
+    onClosePanel() {
+      this.currentMetric = undefined;
+      DatasetViewSettings.update({
+        where: this.dataset.name,
+        data: {
+          visibleMetrics: false,
+        },
+      });
+    },
+    componentName(metricType) {
+      return `${this.currentTask}${capitalize(metricType)}`;
     },
   },
 };

@@ -105,10 +105,13 @@ label {
   color: $font-secondary-dark;
 }
 .scroll {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 200px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
+  .--paginated & {
+    max-height: calc(100vh - 250px);
+  }
 }
 .records-number {
   margin-right: 0;

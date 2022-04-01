@@ -185,7 +185,7 @@ export default {
     font-weight: 600;
   }
   .scroll {
-    max-height: calc(100vh - 500px);
+    max-height: calc(100vh - 300px);
     padding-right: 1em;
     margin-right: -1em;
     overflow: auto;

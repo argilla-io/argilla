@@ -57,7 +57,7 @@
           </div>
         </div>
       </div>
-      <sidebar-menu @refresh="$fetch" />
+      <sidebar-menu @refresh="$fetch" :sidebar-items="sidebarItems" />
     </div>
   </div>
 </template>
@@ -122,6 +122,17 @@ export default {
         return [{ column: "owner", values: workspaces }];
       }
       return [];
+    },
+    sidebarItems() {
+      return [
+        {
+          id: "refresh",
+          tooltip: "Refresh",
+          icon: "refresh",
+          group: "Refresh",
+          action: "refresh",
+        },
+      ];
     },
     datasets() {
       return ObservationDataset.all().map((dataset) => {

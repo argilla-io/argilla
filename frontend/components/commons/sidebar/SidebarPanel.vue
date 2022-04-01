@@ -16,12 +16,14 @@
   -->
 
 <template>
-  <aside
-    :style="{ top: topPosition }"
-    :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']"
-  >
+  <aside :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']">
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
+        <svgicon
+          @click="closePanel"
+          class="sidebar__panel__button"
+          name="double-chev"
+        ></svgicon>
         <slot></slot>
       </div>
     </div>
@@ -39,37 +41,50 @@ export default {
     annotationEnabled() {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
-    topPosition() {
-      return this.annotationEnabled
-        ? `${this.dataset.viewSettings.headerHeight - 63}px`
-        : `${this.dataset.viewSettings.headerHeight}px`;
+  },
+  methods: {
+    closePanel() {
+      this.$emit("close-panel");
     },
   },
 };
 </script>
 <style lang="scss" scoped>
+$topbarHeight: 55px;
+$paginationHeight: 63px;
+$sidebarMenuWidth: 90px;
 .sidebar {
-  top: 0;
-  min-height: 300px;
-  border-radius: $border-radius;
+  top: $topbarHeight;
+  min-height: calc(100vh - $topbarHeight);
   width: 280px;
   position: absolute;
-  right: 100px;
+  right: $sidebarMenuWidth;
   background: white;
   padding: 1em 1.5em;
   overflow: auto;
   transition: top 0.2s ease-in-out;
   border: 1px solid palette(grey, smooth);
   box-shadow: 0 1px 9px 0 palette(grey, smooth);
-  border-radius: 3px;
   z-index: 1;
+  .--paginated & {
+    min-height: calc(100vh - $topbarHeight - $paginationHeight);
+  }
   @include media(">desktop") {
     border-radius: 1px;
     border: none;
     box-shadow: none;
     margin-left: 1em;
     display: block !important;
-    right: 100px;
+    right: $sidebarMenuWidth;
+  }
+  &__panel {
+    &__button {
+      position: absolute;
+      right: 2em;
+      top: 2em;
+      pointer-events: all;
+      cursor: pointer;
+    }
   }
   &__content {
     border-radius: 2px;

@@ -7,7 +7,7 @@
   >
     <svgicon
       v-if="type !== 'Refresh'"
-      v-show="activeView === id"
+      v-show="activeView.includes(id)"
       class="sidebar-button__icon-help"
       :name="type === 'Mode' ? 'check3' : 'double-chev'"
     ></svgicon>
@@ -27,8 +27,8 @@ import "assets/icons/check3";
 export default {
   props: {
     activeView: {
-      type: String,
-      default: undefined,
+      type: Array,
+      default: () => [],
     },
     tooltip: {
       type: String,
