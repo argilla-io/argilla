@@ -21,7 +21,7 @@
       <div class="sidebar__info">
         <p>{{ group }}</p>
         <sidebar-button
-          v-for="button in sidebarItems.filter(
+          v-for="button in filteredSidebarItems.filter(
             (button) => button.group === group
           )"
           :id="button.id"
@@ -54,6 +54,17 @@ export default {
     },
   },
   computed: {
+    filteredSidebarItems() {
+      return this.sidebarItems.filter(
+        (item) =>
+          item.group !== "Metrics" || this.metricsByViewMode.includes(item.id)
+      );
+    },
+    metricsByViewMode() {
+      return this.sidebarItems.find(
+        (item) => item.id === this.dataset.viewSettings.viewMode
+      ).relatedMetrics;
+    },
     sidebarGroups() {
       const groups = [
         ...new Set(this.sidebarItems.map((button) => button.group)),

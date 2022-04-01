@@ -3,7 +3,7 @@
     <SidebarMenu
       :current-metric="currentMetric"
       :dataset="dataset"
-      :sidebar-items="filteredSidebarItems"
+      :sidebar-items="sidebarItems"
       @refresh="$emit('refresh')"
       @show-metrics="onShowMetrics"
       @change-view-mode="onChangeViewMode"
@@ -64,19 +64,6 @@ export default {
         },
       ],
     };
-  },
-  computed: {
-    filteredSidebarItems() {
-      return this.sidebarItems.filter(
-        (item) =>
-          item.group !== "Metrics" || this.metricsTypes.includes(item.id)
-      );
-    },
-    metricsTypes() {
-      return this.sidebarItems.find(
-        (item) => item.id === this.dataset.viewSettings.viewMode
-      ).relatedMetrics;
-    },
   },
   methods: {
     onChangeViewMode(value) {

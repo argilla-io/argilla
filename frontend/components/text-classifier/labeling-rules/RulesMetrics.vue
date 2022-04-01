@@ -4,7 +4,7 @@
     <div class="rule-metrics">
       <template>
         <div
-          :class="[metricsType, 'rule-metrics__item']"
+          class='rule-metrics__item'
           v-for="metric in metrics"
           :key="metric.name"
         >
@@ -64,10 +64,6 @@ export default {
 
     ruleMetrics() {
       return this.dataset.getCurrentLabelingRuleMetrics() || {};
-    },
-
-    onlyOveralMetrics() {
-      return this.metricsType === "overall";
     },
     query() {
       return this.dataset.query.text;
@@ -140,11 +136,8 @@ export default {
   },
   methods: {
     metricsTitle(metric) {
-      return this.onlyOveralMetrics
-        ? metric.overall.tooltip
-        : metric.rule.tooltip;
+      return metric.rule.tooltip;
     },
-
     formatNumber(value) {
       return isNaN(value) ? "-" : this.$options.filters.percent(value);
     },

@@ -17,11 +17,11 @@
       @close-panel="onClosePanel"
     >
       <div
-        v-for="metricType in metricsTypes"
-        :key="metricType"
-        v-show="currentMetric === metricType"
+        v-for="metric in metricsByViewMode"
+        :key="metric"
+        v-show="currentMetric === metric"
       >
-        <component :is="componentName(metricType)" :dataset="dataset" />
+        <component :is="componentName(metric)" :dataset="dataset" />
       </div>
     </SidebarPanel>
   </div>
@@ -40,9 +40,6 @@ export default {
       type: Object,
       required: true,
     },
-    sidebarItems: {
-      type: Array,
-    },
   },
   data: () => ({
     currentMetric: undefined,
@@ -54,8 +51,13 @@ export default {
     currentTask() {
       return this.dataset.task;
     },
-    metricsTypes() {
-      return this.$refs.menu.metricsTypes;
+    metricsByViewMode() {
+      return this.sidebarItems.find(
+        (item) => item.id === this.dataset.viewSettings.viewMode
+      ).relatedMetrics;
+    },
+    sidebarItems() {
+      return this.$refs.menu.sidebarItems;
     },
   },
   methods: {
@@ -73,7 +75,7 @@ export default {
         dataset: this.dataset,
         value: value,
       });
-      this.currentMetric = this.metricsTypes.includes(this.currentMetric)
+      this.currentMetric = this.metricsByViewMode.includes(this.currentMetric)
         ? this.currentMetric
         : this.onShowSidebarInfo(false);
     },
@@ -99,8 +101,8 @@ export default {
         },
       });
     },
-    componentName(metricType) {
-      return `${this.currentTask}${capitalize(metricType)}`;
+    componentName(metric) {
+      return `${this.currentTask}${capitalize(metric)}`;
     },
   },
 };
