@@ -1,7 +1,6 @@
 <template>
   <div class="rule-metrics__container">
     <p class="rule-metrics__title">{{ title }}</p>
-    <slot name="button-top" />
     <div class="rule-metrics">
       <template>
         <div
@@ -12,17 +11,17 @@
           <p class="metric__title" :data-title="metricsTitle(metric)">
             {{ metric.name }}
           </p>
-          <p class="metric__rule" v-if="!onlyOveralMetrics">
+          <p class="metric__rule">
             <transition name="fade" mode="out-in" appear>
               <strong :key="metric.rule.value">{{ metric.rule.value }}</strong>
             </transition>
           </p>
-          <span class="metric__overall">
-            <template v-if="!onlyOveralMetrics">{{
-              metric.overall.description
-            }}</template>
+          <span class="metric__records" v-if="metric.records">
             <transition name="fade" mode="out-in" appear>
-              <span v-html="metric.overall.value" :key="metric.overall.value" />
+              <span
+                v-html="`${metric.records.value}/${metric.records.total}`"
+                :key="metric.records.value"
+              />
             </transition>
           </span>
         </div>
@@ -41,18 +40,9 @@ export default {
       type: TextClassificationDataset,
       required: true,
     },
-
     title: {
       type: String,
       required: true,
-    },
-
-    metricsType: {
-      type: String,
-      default: "all",
-      validator: (value) => {
-        return ["all", "overall"].includes(value);
-      },
     },
   },
   data: () => {
@@ -94,48 +84,41 @@ export default {
       return [
         {
           name: "Coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Percentage of records labeled by any rule",
-            value: `${this.formatNumber(
-              this.metricsTotal.coverage
-            )} <span class="records-number">(${this.$options.filters.formatNumber(
-              Math.round(
-                this.metricsTotal.coverage * this.dataset.globalResults.total
-              ) || 0
-            )} records)</span>`,
-          },
           rule: {
             value: this.formatNumber(this.ruleMetrics.coverage),
             tooltip: "Percentage of records labeled by the rule",
           },
+          records: {
+            value: this.$options.filters.formatNumber(
+              Math.round(
+                this.ruleMetrics.coverage * this.dataset.globalResults.total
+              ) || 0
+            ),
+            total: this.$options.filters.formatNumber(
+              this.dataset.globalResults.total || 0
+            ),
+          },
         },
         {
           name: "Annotated coverage",
-          overall: {
-            description: "Total:",
-            tooltip: "Percentage of annotated records labeled by any rule",
-            value: `${this.formatNumber(
-              this.metricsTotal.coverage_annotated
-            )} <span class="records-number">(${this.$options.filters.formatNumber(
-              Math.round(
-                this.metricsTotal.coverage_annotated *
-                  this.metricsTotal.annotated_records
-              ) || 0
-            )} records)</span>`,
-          },
           rule: {
             value: this.formatNumber(this.ruleMetrics.coverage_annotated),
             tooltip: "Percentage of annotated records labeled by the rule",
           },
+          records: {
+            value: this.$options.filters.formatNumber(
+              Math.round(
+                this.ruleMetrics.coverage_annotated *
+                  this.ruleMetrics.annotated_records
+              ) || 0
+            ),
+            total: this.$options.filters.formatNumber(
+              this.ruleMetrics.annotated_records || 0
+            ),
+          },
         },
         {
           name: "Precision",
-          overall: {
-            description: "Avg:",
-            tooltip: "Average percentage of correct labels given by the rules",
-            value: this.formatNumber(this.metricsTotal.precisionAverage),
-          },
           rule: {
             value: this.formatNumber(this.ruleMetrics.precision),
             tooltip: "Percentage of correct labels given by the rule",
@@ -143,14 +126,6 @@ export default {
         },
         {
           name: "Correct/incorrect",
-          overall: {
-            description: "Total:",
-            tooltip:
-              "Total number of labels the rules predicted correctly/incorrectly (if annotations are available)",
-            value: isNaN(this.metricsTotal.totalCorrects)
-              ? "-/-"
-              : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`,
-          },
           rule: {
             value:
               this.ruleMetrics.correct !== undefined
@@ -177,20 +152,6 @@ export default {
       return Object.keys(this.metricsByRules).map((key) => {
         return this.metricsByRules[key][type] || 0;
       });
-    },
-    getTotal(type) {
-      return this.getValuesByMetricType(type).reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        0
-      );
-    },
-    getAverage(type) {
-      const filteredValues = Object.keys(this.metricsByRules)
-        .filter((key) => this.metricsByRules[key].coverage_annotated > 0)
-        .map((k) => {
-          return this.metricsByRules[k][type];
-        });
-      return this.getTotal(type) / filteredValues.length;
     },
   },
 };
@@ -219,27 +180,17 @@ $color: #333346;
   }
   &__item {
     min-height: 82px;
-    &.all {
-      .metric {
-        &__rule {
-          @include font-size(20px);
-          font-weight: 600;
-          margin-top: 0.2em;
-          margin-bottom: 0.2em;
-        }
-        &__overall {
-          span {
-            font-weight: 800;
-          }
-        }
-      }
-    }
-    &.overall {
-      span {
-        display: block;
+    .metric {
+      &__rule {
         @include font-size(20px);
-        font-weight: 800;
+        font-weight: 600;
         margin-top: 0.2em;
+        margin-bottom: 0.2em;
+      }
+      &__records {
+        span {
+          font-weight: 400;
+        }
       }
     }
   }
