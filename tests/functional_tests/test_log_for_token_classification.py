@@ -149,7 +149,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
         "text_length": 137,
         "tokens": [
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 0,
                 "char_start": 0,
                 "custom": None,
@@ -182,7 +182,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "Story",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 14,
                 "char_start": 14,
                 "custom": None,
@@ -215,7 +215,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "hora",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 27,
                 "char_start": 27,
                 "custom": None,
@@ -270,7 +270,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "pobre",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 52,
                 "char_start": 49,
                 "custom": None,
@@ -336,7 +336,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "Telecinco",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 80,
                 "char_start": 79,
                 "custom": None,
@@ -347,7 +347,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "..",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 82,
                 "char_start": 82,
                 "custom": None,
@@ -424,7 +424,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "LUNES",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 120,
                 "char_start": 120,
                 "custom": None,
@@ -457,7 +457,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": "CADENAS",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 132,
                 "char_start": 132,
                 "custom": None,
@@ -468,7 +468,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": ")",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 133,
                 "char_start": 133,
                 "custom": None,
@@ -479,7 +479,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                 "value": ".",
             },
             {
-                "capitalness": "UPPER",
+                "capitalness": None,
                 "char_end": 135,
                 "char_start": 135,
                 "custom": None,

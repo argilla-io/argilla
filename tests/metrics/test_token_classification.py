@@ -19,7 +19,7 @@ from rubrix.metrics.token_classification import (
 
 def log_some_data(dataset: str):
     rubrix.delete(dataset)
-    text = "My first rubrix example"
+    text = "My first rubrix example \n"
     tokens = text.split(" ")
     rb.log(
         [
@@ -71,7 +71,7 @@ def test_tokens_length(mocked_client):
 
     results = tokens_length(dataset)
     assert results
-    assert results.data == {"4.0": 4}
+    assert results.data == {"5.0": 4}
     results.visualize()
 
 
@@ -81,7 +81,15 @@ def test_token_length(mocked_client):
 
     results = token_length(dataset)
     assert results
-    assert results.data == {"2.0": 4, "3.0": 0, "4.0": 0, "5.0": 4, "6.0": 4, "7.0": 4}
+    assert results.data == {
+        "1.0": 4,
+        "2.0": 4,
+        "3.0": 0,
+        "4.0": 0,
+        "5.0": 4,
+        "6.0": 4,
+        "7.0": 4,
+    }
     results.visualize()
 
 
@@ -91,7 +99,7 @@ def test_token_frequency(mocked_client):
 
     results = token_frequency(dataset)
     assert results
-    assert results.data == {"My": 4, "example": 4, "first": 4, "rubrix": 4}
+    assert results.data == {"\n": 4, "My": 4, "example": 4, "first": 4, "rubrix": 4}
     results.visualize()
 
 
@@ -136,7 +144,7 @@ def test_compute_for_as_string(mocked_client):
 
     results = entity_density(dataset, compute_for="Predictions")
     assert results
-    assert results.data == {"0.25": 4}
+    assert results.data == {"0.2": 4}
     results.visualize()
 
     with pytest.raises(
@@ -152,12 +160,12 @@ def test_entity_density(mocked_client):
 
     results = entity_density(dataset)
     assert results
-    assert results.data == {"0.25": 4}
+    assert results.data == {"0.2": 4}
     results.visualize()
 
     results = entity_density(dataset, compute_for=Annotations)
     assert results
-    assert results.data == {"0.25": 4}
+    assert results.data == {"0.2": 4}
     results.visualize()
 
 
