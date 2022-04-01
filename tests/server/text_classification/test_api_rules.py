@@ -2,7 +2,6 @@ import pytest
 
 from rubrix.server.tasks.text_classification import (
     CreateLabelingRule,
-    DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
@@ -96,6 +95,7 @@ def test_dataset_update_rule(mocked_client):
     "rule",
     [
         CreateLabelingRule(query="a query", description="Description", label="LALA"),
+        CreateLabelingRule(query="/a qu?ry/", description="Description", label="LALA"),
         CreateLabelingRule(
             query="another query", description="Description", labels=["A", "B", "C"]
         ),
@@ -131,6 +131,9 @@ def test_dataset_with_rules(mocked_client, rule):
     [
         CreateLabelingRule(query="a query", description="Description", label="LALA"),
         CreateLabelingRule(
+            query="/a qu(e|E)ry/", description="Description", label="LALA"
+        ),
+        CreateLabelingRule(
             query="another query", description="Description", labels=["A", "B", "C"]
         ),
     ],
@@ -163,13 +166,13 @@ def test_delete_dataset_rules(mocked_client):
     response = mocked_client.post(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules",
         json=CreateLabelingRule(
-            query="a query", label="TEST", description="Description"
+            query="/a query/", label="TEST", description="Description"
         ).dict(),
     )
     assert response.status_code == 200
 
     response = mocked_client.delete(
-        f"/api/datasets/TextClassification/{dataset}/labeling/rules/{'a query'}"
+        f"/api/datasets/TextClassification/{dataset}/labeling/rules//a query/"
     )
     assert response.status_code == 200
 
@@ -314,6 +317,18 @@ def test_rule_metrics_with_missing_label(mocked_client):
                 "total_records": 1,
             },
         ),
+        (
+            CreateLabelingRule(query="/eje.*o/", labels=["A", "o.k."]),
+            {
+                "annotated_records": 1,
+                "correct": 1.0,
+                "coverage": 1.0,
+                "coverage_annotated": 1.0,
+                "incorrect": 1.0,
+                "precision": 0.5,
+                "total_records": 1,
+            },
+        ),
     ],
 )
 def test_rule_metrics_with_missing_label_for_stored_rule(
@@ -376,7 +391,7 @@ def test_create_rules_and_then_log(mocked_client):
         ),
         (
             [
-                CreateLabelingRule(query="ejemplo", label="TEST"),
+                CreateLabelingRule(query="/eje.?plo/", label="TEST"),
                 CreateLabelingRule(query="bad request", label="TEST"),
                 CreateLabelingRule(query="other", labels=["A", "B"]),
             ],

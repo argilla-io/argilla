@@ -330,7 +330,7 @@ async def create_rule(
 
 
 @router.get(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}/metrics",
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query:path}}/metrics",
     operation_id="compute_rule_metrics",
     description="Computes dataset labeling rule metrics",
     response_model=LabelingRuleMetricsSummary,
@@ -386,7 +386,7 @@ async def compute_dataset_rules_metrics(
 
 
 @router.delete(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query:path}}",
     operation_id="delete_labeling_rule",
     description="Deletes a labeling rule from dataset",
 )
@@ -412,7 +412,7 @@ async def delete_labeling_rule(
 
 
 @router.get(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query:path}}",
     operation_id="get_rule",
     description="Get the dataset labeling rule",
     response_model=LabelingRule,
@@ -444,7 +444,7 @@ async def get_rule(
 
 
 @router.patch(
-    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query}}",
+    f"{NEW_BASE_ENDPOINT}/labeling/rules/{{query:path}}",
     operation_id="update_rule",
     description="Update dataset labeling rule attributes",
     response_model=LabelingRule,
