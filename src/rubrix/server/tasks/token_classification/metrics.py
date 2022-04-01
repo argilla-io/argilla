@@ -333,7 +333,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
     @staticmethod
     def capitalness(value: str) -> Optional[str]:
         """Compute capitalness for a string value"""
-        value = value.strip()
+        value = value.strip() or " "
         if value.isupper():
             return "UPPER"
         if value.islower():
