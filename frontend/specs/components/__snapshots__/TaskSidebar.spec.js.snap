@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TaskSidebar Show sidebar panel 1`] = `
-<div>
+<div class="sidebar__container">
   <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
   <!---->
 </div>
 `;
 
 exports[`TaskSidebar renders properly 1`] = `
-<div>
+<div class="sidebar__container">
   <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
   <!---->
 </div>
