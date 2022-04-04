@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="sidebar__container">
     <component
       ref="menu"
       v-if="dataset"
@@ -106,3 +106,12 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.sidebar {
+  &__container {
+    z-index: 1;
+  }
+}
+</style>
+

@@ -82,6 +82,7 @@ $sidebarMenuWidth: 90px;
       top: 2em;
       pointer-events: all;
       cursor: pointer;
+      z-index: 99;
     }
   }
   &__content {
