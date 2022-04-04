@@ -42,6 +42,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.api import bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets import api as datasets_api
@@ -225,8 +226,6 @@ class Api:
 
         if isinstance(records, Record.__args__):
             records = [records]
-        # this transforms a Dataset* to a list of *Record
-        records = list(records)
 
         tags = tags or {}
         metadata = metadata or {}
@@ -245,39 +244,30 @@ class Api:
 
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
-            bulk_records_function = text_classification_api.bulk
-            to_sdk_model = CreationTextClassificationRecord.from_client
-
+            creation_class = CreationTextClassificationRecord
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
-            bulk_records_function = token_classification_api.bulk
-            to_sdk_model = CreationTokenClassificationRecord.from_client
-
+            creation_class = CreationTokenClassificationRecord
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
-            bulk_records_function = text2text_api.bulk
-            to_sdk_model = CreationText2TextRecord.from_client
-
-        # Record type is not recognised
+            creation_class = CreationText2TextRecord
         else:
             raise InputValueError(
-                f"Unknown record type passed as argument for [{','.join(map(str, records[0:5]))}...] "
-                f"Available values are {Record.__args__}"
+                f"Unknown record type {record_type}. Available values are {Record.__args__}"
             )
 
-        processed = 0
-        failed = 0
+        processed, failed = 0, 0
         progress_bar = tqdm(total=len(records), disable=not verbose)
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
 
-            response = bulk_records_function(
+            response = bulk(
                 client=self._client,
                 name=name,
                 json_body=bulk_class(
                     tags=tags,
                     metadata=metadata,
-                    records=[to_sdk_model(r) for r in chunk],
+                    records=[creation_class.from_client(r) for r in chunk],
                 ),
             )
 
@@ -296,7 +286,7 @@ class Api:
             ):  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
             print(
-                f"{processed} records logged to {self._client.base_url + '/datasets/' + workspace + '/' + name}"
+                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}"
             )
 
         # Creating a composite BulkResponse with the total processed and failed
