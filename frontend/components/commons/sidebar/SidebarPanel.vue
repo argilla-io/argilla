@@ -61,11 +61,9 @@ $sidebarMenuWidth: 90px;
   right: $sidebarMenuWidth;
   background: white;
   padding: 1em 1.5em;
-  overflow: auto;
   transition: top 0.2s ease-in-out;
   border: 1px solid palette(grey, smooth);
   box-shadow: 0 1px 9px 0 palette(grey, smooth);
-  z-index: 1;
   .--paginated & {
     min-height: calc(100vh - $topbarHeight - $paginationHeight);
   }

@@ -27,6 +27,7 @@
     <ReProgress
       re-mode="determinate"
       :progress="coverage.percent * 100"
+      :tooltip="`${coverage.records}/${totalRecords}`"
     ></ReProgress>
     <div class="progress__info">
       <p class="progress__info__text">Annotated Coverage</p>
@@ -36,7 +37,9 @@
     </div>
     <ReProgress
       re-mode="determinate"
+      color="#A1A2CC"
       :progress="annotatedCoverage.percent * 100"
+      :tooltip="`${annotatedCoverage.records}/${metricsTotal.annotated_records}`"
     ></ReProgress>
     <div class="progress__info">
       <p class="progress__info__text">Precision average</p>
@@ -125,6 +128,11 @@ export default {
       return isNaN(this.metricsTotal.totalCorrects)
         ? "-/-"
         : `${this.metricsTotal.totalCorrects}/${this.metricsTotal.totalIncorrects}`;
+    },
+    totalRecords() {
+      return this.$options.filters.formatNumber(
+        this.dataset.globalResults.total
+      );
     },
   },
   methods: {

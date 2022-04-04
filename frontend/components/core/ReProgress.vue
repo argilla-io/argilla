@@ -17,13 +17,18 @@
 
 <template>
   <transition name="re-progress" appear>
-    <div class="re-progress">
-      <div class="re-progress-track" :style="styles"></div>
-      <div
-        v-if="multiple && progressSecondary"
-        class="re-progress-track--secondary"
-        :style="stylesSecondary"
-      />
+    <div class="re-progress__container">
+      <p v-if="tooltip" class="re-progress__tooltip" :style="tooltipStyles">
+        {{ tooltip }}
+      </p>
+      <div class="re-progress">
+        <div class="re-progress-track" :style="styles"></div>
+        <div
+          v-if="multiple && progressSecondary"
+          class="re-progress-track--secondary"
+          :style="stylesSecondary"
+        />
+      </div>
     </div>
   </transition>
 </template>
@@ -43,11 +48,24 @@ export default {
       default: false,
       type: Boolean,
     },
+    color: {
+      type: String,
+    },
+    tooltip: {
+      default: undefined,
+      type: String,
+    },
   },
   computed: {
     styles() {
       return {
         width: `${this.progress}%`,
+        backgroundColor: this.color,
+      };
+    },
+    tooltipStyles() {
+      return {
+        left: `${this.progress}%`,
       };
     },
     stylesSecondary() {
@@ -71,6 +89,39 @@ export default {
   border-top-left-radius: 0;
   border-bottom-right-radius: 10px;
   margin: 0 0 1.5em 0;
+  &__container {
+    position: relative;
+    &:hover {
+      .re-progress__tooltip {
+        clip-path: none;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out 0.3s;
+      }
+    }
+  }
+  &__tooltip {
+    padding: 0.5em 1em;
+    top: -5px;
+    transform: none;
+    background: $secondary-color;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    @include font-size(14px);
+    font-weight: 600;
+    position: absolute;
+    margin: 0 0 0 6px;
+    z-index: 1;
+    clip-path: circle(0);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out 0.3s;
+    &:before {
+      @include triangle(left, 6px, 6px, $secondary-color);
+      position: absolute;
+      left: -6px;
+      top: calc(50% - 6px);
+    }
+  }
   &--minimal {
     @extend .re-progress;
     height: 2px;

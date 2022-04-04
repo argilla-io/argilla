@@ -102,7 +102,7 @@ $color: #333346;
   min-height: 100vh;
   min-width: 90px;
   border-left: 1px solid palette(grey, smooth);
-  z-index: 3;
+  z-index: 1;
   p {
     text-align: center;
     font-weight: 600;
@@ -113,6 +113,7 @@ $color: #333346;
     position: relative;
     display: block;
     outline: none;
+    z-index: 3;
   }
   &__info {
     position: relative;
