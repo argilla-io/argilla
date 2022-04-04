@@ -68,7 +68,12 @@ class EsQueryBuilder:
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
         query_data = query.dict(
-            exclude={"query_text", "metadata", "uncovered_by_rules"}
+            exclude={
+                "advanced_query_dsl",
+                "query_text",
+                "metadata",
+                "uncovered_by_rules",
+            }
         )
         for key, value in query_data.items():
             if value is None:
