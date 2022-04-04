@@ -4,7 +4,7 @@
     <div class="rule-metrics">
       <template>
         <div
-          class='rule-metrics__item'
+          class="rule-metrics__item"
           v-for="metric in metrics"
           :key="metric.name"
         >
