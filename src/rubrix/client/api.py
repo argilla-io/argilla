@@ -180,8 +180,7 @@ class Api:
             >>> import rubrix as rb
             >>> rb.delete(name="example-dataset")
         """
-        response = datasets_api.delete_dataset(client=self._client, name=name)
-        self.check_response_errors(response)
+        datasets_api.delete_dataset(client=self._client, name=name)
 
     def log(
         self,
@@ -271,7 +270,6 @@ class Api:
                 ),
             )
 
-            self.check_response_errors(response)
             processed += response.parsed.processed
             failed += response.parsed.failed
 
@@ -319,7 +317,6 @@ class Api:
             >>> dataset = rb.load(name="example-dataset")
         """
         response = datasets_api.get_dataset(client=self._client, name=name)
-        self.check_response_errors(response)
         task = response.parsed.task
 
         task_config = {
@@ -354,8 +351,6 @@ class Api:
             limit=limit,
         )
 
-        self.check_response_errors(response)
-
         records = [sdk_record.to_client() for sdk_record in response.parsed]
         try:
             records_sorted_by_id = sorted(records, key=lambda x: x.id)
@@ -379,12 +374,9 @@ class Api:
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
-        self.check_response_errors(response)
-
         response = metrics_api.get_dataset_metrics(
             self._client, name=name, task=response.parsed.task
         )
-        self.check_response_errors(response)
 
         return response.parsed
 
@@ -403,7 +395,6 @@ class Api:
         size: Optional[int] = None,
     ) -> MetricResults:
         response = datasets_api.get_dataset(self._client, name)
-        self.check_response_errors(response)
 
         metric_ = self.get_metric(name, metric=metric)
         assert metric_ is not None, f"Metric {metric} not found !!!"
@@ -417,14 +408,13 @@ class Api:
             interval=interval,
             size=size,
         )
-        self.check_response_errors(response)
+
         return MetricResults(**metric_.dict(), results=response.parsed)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = text_classification_api.fetch_dataset_labeling_rules(
             self._client, name=dataset
         )
-        self.check_response_errors(response)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
@@ -434,54 +424,8 @@ class Api:
         response = text_classification_api.dataset_rule_metrics(
             self._client, name=dataset, query=rule.query, label=rule.label
         )
-        self.check_response_errors(response)
 
         return LabelingRuleMetricsSummary.parse_obj(response.parsed)
-
-    @staticmethod
-    def check_response_errors(response: Response) -> None:
-        """Checks response status codes and raise corresponding error if found"""
-
-        http_status = response.status_code
-        response_data = response.parsed
-
-        if http_status == 401:
-            raise Exception(
-                "Unauthorized error: invalid credentials. The API answered with a {} code: {}".format(
-                    http_status, response_data
-                )
-            )
-
-        elif http_status == 403:
-            raise Exception(
-                "Forbidden error: you have not been authorised to access this dataset. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif http_status == 404:
-            raise Exception(
-                "Not found error. The API answered with a {} code: {}".format(
-                    http_status, response_data
-                )
-            )
-
-        elif http_status == 422:
-            raise Exception(
-                "Unprocessable entity error: Something is wrong in your records. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif 400 <= http_status < 500:
-            raise Exception(
-                "Request error: API cannot answer. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif http_status >= 500:
-            raise Exception(
-                "Connection error: API is not responding. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
 
 
 __ACTIVE_API__: Optional[Api] = None
