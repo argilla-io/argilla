@@ -18,6 +18,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from this import d
 from tqdm.auto import tqdm
 
 from rubrix import load
@@ -409,6 +410,101 @@ class WeakLabels(WeakLabelsBase):
             return self._matrix[self._annotation == self._label2int[None]]
 
         return self._matrix
+
+    def _find_dists_and_nearest(
+        self, matrix_length, embeddings, mat_abstains, support, gpu=False
+    ):
+        try:
+            import faiss
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'faiss' must be installed to extend a weak label matrix! "
+                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
+            )
+        faiss.normalize_L2(embeddings)
+        embeddings_length = embeddings.shape[1]
+
+        label_fn_indexes = [
+            faiss.IndexFlatIP(embeddings_length) for i in range(matrix_length)
+        ]
+
+        if gpu:
+            res = faiss.StandardGpuResources()
+            label_fn_indexes = [
+                faiss.index_cpu_to_gpu(res, 0, x) for x in label_fn_indexes
+            ]
+
+        for i in range(matrix_length):
+            label_fn_indexes[i].add(embeddings[support[i]])
+
+        dists_and_nearest = []
+        for i in range(matrix_length):
+            embs_query = np.copy(embeddings[mat_abstains[i]])
+            faiss.normalize_L2(embs_query)
+            dists_and_nearest.append(label_fn_indexes[i].search(embs_query, 1))
+
+        dists = [
+            dist_and_nearest[0].flatten() for dist_and_nearest in dists_and_nearest
+        ]
+        nearest = [
+            dist_and_nearest[1].flatten() for dist_and_nearest in dists_and_nearest
+        ]
+
+        return dists, nearest
+
+    def extend_matrix(
+        self,
+        embeddings,
+        thresholds,
+        gpu=False,
+        has_annotation: Optional[bool] = None,
+        cache=None,
+    ) -> np.ndarray:
+        """Returns the extended weak label matrix, or optionally just a part of it.
+           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
+
+        Args:
+            embeddings: sentence embeddings for each row of the weak labels matrix.
+            thresholds: thresholds for the minimum cosine similarity between sentences for a rule to be expanded.
+            gpu: Perform FAISS similarity queries on GPU.
+            has_annotation: If True, return only the part of the matrix that has a corresponding annotation.
+                If False, return only the part of the matrix that has NOT a corresponding annotation.
+                By default, we return the whole weak label matrix.
+
+        Returns:
+            The extended weak label matrix, or optionally just a part of it.
+        """
+
+        wl_matrix = self.matrix(has_annotation=has_annotation)
+        matrix_length = wl_matrix.shape[1]
+        none_label_int = self._label2int[None]
+
+        support = []
+        for i in range(matrix_length):
+            support.append(np.argwhere(wl_matrix[:, i] != none_label_int).flatten())
+
+        mat_abstains = [
+            np.argwhere(wl_matrix[:, i] == none_label_int).flatten()
+            for i in range(matrix_length)
+        ]
+
+        if cache:
+            dists = cache[0]
+            nearest = cache[1]
+        else:
+            embeddings_copy = np.copy(embeddings).astype(np.float32)
+            dists, nearest = self._find_dists_and_nearest(
+                matrix_length, embeddings_copy, mat_abstains, support, gpu=gpu
+            )
+
+        expanded_wl_matrix = np.copy(wl_matrix)
+        new_points = [(dists[i] > thresholds[i]) for i in range(matrix_length)]
+        for i in range(matrix_length):
+            expanded_wl_matrix[mat_abstains[i][new_points[i]], i] = wl_matrix[
+                support[i], i
+            ][nearest[i][new_points[i]]]
+
+        return expanded_wl_matrix, (dists, nearest)
 
     def annotation(
         self,
