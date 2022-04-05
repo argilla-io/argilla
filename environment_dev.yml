@@ -40,5 +40,6 @@ dependencies:
       - snorkel>=0.9.7
       - spacy==3.1.0
       - transformers[torch]
+      - loguru
       # install Rubrix in editable mode
       - -e .[server]
