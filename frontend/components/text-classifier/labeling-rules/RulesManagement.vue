@@ -267,11 +267,13 @@ export default {
   &__table {
     margin-bottom: 2em !important;
     ::v-deep {
-      .table-info__item__col:nth-of-type(2) {
-        min-width: 100px;
+      .table-info__item__col {
+        width: 130px;
       }
       .table-info__item__col:first-child {
-        min-width: 120px;
+        width: auto;
+        min-width: auto;
+        flex-grow: 1.5;
       }
       .table-info__body {
         overflow: visible;

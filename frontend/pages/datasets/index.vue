@@ -66,6 +66,7 @@
 import { ObservationDataset } from "@/models/Dataset";
 import { mapActions } from "vuex";
 import { currentWorkspace } from "@/models/Workspace";
+import { Base64 } from "js-base64";
 export default {
   layout: "app",
   data: () => ({
@@ -86,7 +87,13 @@ export default {
         type: "task",
         filtrable: "true",
       },
-      { name: "Tags", field: "tags", class: "text", type: "object" },
+      {
+        name: "Tags",
+        field: "tags",
+        class: "text",
+        type: "object",
+        filtrable: "true",
+      },
       { name: "Created at", field: "created_at", class: "date", type: "date" },
       {
         name: "Updated at",
@@ -118,10 +125,13 @@ export default {
   computed: {
     activeFilters() {
       const workspaces = this.workspaces;
-      if (workspaces) {
-        return [{ column: "owner", values: workspaces }];
-      }
-      return [];
+      const tasks = this.tasks;
+      const tags = this.tags;
+      return [
+        { column: "owner", values: workspaces || [] },
+        { column: "task", values: tasks || [] },
+        { column: "tags", values: tags || [] },
+      ];
     },
     datasets() {
       return ObservationDataset.all().map((dataset) => {
@@ -138,6 +148,22 @@ export default {
         _workspaces = [_workspaces];
       }
       return _workspaces;
+    },
+    tasks() {
+      let _tasks = this.$route.query.task;
+      if (typeof _tasks == "string") {
+        _tasks = [_tasks];
+      }
+      return _tasks;
+    },
+    tags() {
+      let _tags = this.$route.query.tags
+        ? JSON.parse(Base64.decode(this.$route.query.tags))
+        : undefined;
+      if (typeof _tags == "string") {
+        _tags = [_tags];
+      }
+      return _tags;
     },
     workspace() {
       // THIS IS WRONG !!!
@@ -169,7 +195,26 @@ export default {
     onColumnFilterApplied({ column, values }) {
       if (column === "owner") {
         if (values !== this.workspaces) {
-          this.$router.replace({ query: { workspace: values } });
+          this.$router.push({
+            query: { ...this.$route.query, workspace: values },
+          });
+        }
+      }
+      if (column === "task") {
+        if (values !== this.tasks) {
+          this.$router.push({ query: { ...this.$route.query, task: values } });
+        }
+      }
+      if (column === "tags") {
+        if (values !== this.tags) {
+          this.$router.push({
+            query: {
+              ...this.$route.query,
+              tags: values.length
+                ? Base64.encodeURI(JSON.stringify(values))
+                : undefined,
+            },
+          });
         }
       }
     },
