@@ -301,6 +301,9 @@ class WeakLabels(WeakLabelsBase):
         self._matrix, self._annotation, self._label2int = self._apply_rules(label2int)
         self._int2label = {v: k for k, v in self._label2int.items()}
 
+        # matrix extension objects
+        self._extended_matrix = self._extension_queries = None
+
     def _apply_rules(
         self, label2int: Optional[Dict[str, int]]
     ) -> Tuple[np.ndarray, np.ndarray, Dict[Optional[str], int]]:
@@ -404,12 +407,16 @@ class WeakLabels(WeakLabelsBase):
         Returns:
             The weak label matrix, or optionally just a part of it.
         """
-        if has_annotation is True:
-            return self._matrix[self._annotation != self._label2int[None]]
-        if has_annotation is False:
-            return self._matrix[self._annotation == self._label2int[None]]
+        matrix_object = (
+            self._matrix if self._extended_matrix is None else self._extended_matrix
+        )
 
-        return self._matrix
+        if has_annotation is True:
+            return matrix_object[self._annotation != self._label2int[None]]
+        if has_annotation is False:
+            return matrix_object[self._annotation == self._label2int[None]]
+
+        return matrix_object
 
     def _find_dists_and_nearest(
         self, matrix_length, embeddings, mat_abstains, support, gpu=False
@@ -453,12 +460,7 @@ class WeakLabels(WeakLabelsBase):
         return dists, nearest
 
     def extend_matrix(
-        self,
-        embeddings,
-        thresholds,
-        gpu=False,
-        has_annotation: Optional[bool] = None,
-        cache=None,
+        self, thresholds, embeddings: Optional[np.ndarray] = None, gpu=False
     ) -> np.ndarray:
         """Returns the extended weak label matrix, or optionally just a part of it.
            Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
@@ -475,36 +477,40 @@ class WeakLabels(WeakLabelsBase):
             The extended weak label matrix, or optionally just a part of it.
         """
 
-        wl_matrix = self.matrix(has_annotation=has_annotation)
-        matrix_length = wl_matrix.shape[1]
+        matrix_length = self._matrix.shape[1]
         none_label_int = self._label2int[None]
 
         support = []
         for i in range(matrix_length):
-            support.append(np.argwhere(wl_matrix[:, i] != none_label_int).flatten())
+            support.append(np.argwhere(self._matrix[:, i] != none_label_int).flatten())
 
         mat_abstains = [
-            np.argwhere(wl_matrix[:, i] == none_label_int).flatten()
+            np.argwhere(self._matrix[:, i] == none_label_int).flatten()
             for i in range(matrix_length)
         ]
 
-        if cache:
-            dists = cache[0]
-            nearest = cache[1]
-        else:
+        if not embeddings is None:
             embeddings_copy = np.copy(embeddings).astype(np.float32)
             dists, nearest = self._find_dists_and_nearest(
                 matrix_length, embeddings_copy, mat_abstains, support, gpu=gpu
             )
+        elif self._extension_queries:
+            dists = self._extension_queries[0]
+            nearest = self._extension_queries[1]
+        else:
+            raise NotImplementedError(
+                "Embeddings are not optional on the first time a matrix is extended."
+            )
 
-        expanded_wl_matrix = np.copy(wl_matrix)
+        extended_matrix = np.copy(self._matrix)
         new_points = [(dists[i] > thresholds[i]) for i in range(matrix_length)]
         for i in range(matrix_length):
-            expanded_wl_matrix[mat_abstains[i][new_points[i]], i] = wl_matrix[
+            extended_matrix[mat_abstains[i][new_points[i]], i] = self._matrix[
                 support[i], i
             ][nearest[i][new_points[i]]]
 
-        return expanded_wl_matrix, (dists, nearest)
+        self._extended_matrix = extended_matrix
+        self._extension_queries = (dists, nearest)
 
     def annotation(
         self,
@@ -560,14 +566,14 @@ class WeakLabels(WeakLabelsBase):
             The summary statistics for each rule in a pandas DataFrame.
         """
         annotation = annotation if annotation is not None else self._annotation
-        has_weak_label = self._matrix != self._label2int[None]
+        has_weak_label = self.matrix() != self._label2int[None]
 
         # polarity (label)
         polarity = [
             set(
                 self._int2label[integer]
                 for integer in np.unique(
-                    self._matrix[:, i][self._matrix[:, i] != self._label2int[None]]
+                    self.matrix()[:, i][self.matrix()[:, i] != self._label2int[None]]
                 )
             )
             for i in range(len(self._rules))
@@ -592,7 +598,7 @@ class WeakLabels(WeakLabelsBase):
         has_conflicts = np.apply_along_axis(
             lambda x: len(np.unique(x[x != self._label2int[None]])) > 1,
             axis=1,
-            arr=self._matrix,
+            arr=self.matrix(),
         )
         conflicts = self._compute_overlaps_conflicts(
             has_weak_label, has_conflicts, coverage, normalize_by_coverage
@@ -652,15 +658,15 @@ class WeakLabels(WeakLabelsBase):
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
         annotation_matrix = np.repeat(annotation, len(self._rules)).reshape(
-            self._matrix.shape
+            self.matrix().shape
         )
 
         # correct
-        correct_with_abstain = annotation_matrix == self._matrix
+        correct_with_abstain = annotation_matrix == self.matrix()
         correct = np.where(has_weak_label, correct_with_abstain, False).sum(axis=0)
 
         # incorrect
-        incorrect_with_abstain = annotation_matrix != self._matrix
+        incorrect_with_abstain = annotation_matrix != self.matrix()
         incorrect = np.where(
             has_weak_label & (annotation_matrix != self._label2int[None]),
             incorrect_with_abstain,
@@ -690,7 +696,7 @@ class WeakLabels(WeakLabelsBase):
         # get labels mask
         if labels is not None:
             labels = [self._label2int[label] for label in labels]
-            idx_by_labels = np.isin(self._matrix, labels).sum(axis=1) >= len(labels)
+            idx_by_labels = np.isin(self.matrix(), labels).sum(axis=1) >= len(labels)
         else:
             idx_by_labels = np.ones_like(self._records).astype(bool)
 
@@ -700,7 +706,7 @@ class WeakLabels(WeakLabelsBase):
                 self._rules_name2index[rule] if isinstance(rule, str) else rule
                 for rule in rules
             ]
-            idx_by_rules = (self._matrix[:, rules] != self._label2int[None]).sum(
+            idx_by_rules = (self.matrix()[:, rules] != self._label2int[None]).sum(
                 axis=1
             ) == len(rules)
         else:
@@ -730,12 +736,12 @@ class WeakLabels(WeakLabelsBase):
                     f"The label '{label}' is missing in the new mapping."
                 )
             # compute masks
-            label_masks[label] = self._matrix == self._label2int[label]
+            label_masks[label] = self.matrix() == self._label2int[label]
             annotation_masks[label] = self._annotation == self._label2int[label]
 
         # swap integers
         for label in self._label2int:
-            self._matrix[label_masks[label]] = label2int[label]
+            self.matrix()[label_masks[label]] = label2int[label]
             self._annotation[annotation_masks[label]] = label2int[label]
 
         # update mapping dicts
