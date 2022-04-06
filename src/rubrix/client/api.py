@@ -44,7 +44,6 @@ from rubrix.client.models import (
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.api import bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
-from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets import api as datasets_api
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics import api as metrics_api
@@ -75,11 +74,11 @@ from rubrix.client.sdk.users.models import User
 _LOGGER = logging.getLogger(__name__)
 _WARNED_ABOUT_AS_PANDAS = False
 
-# Larger sizes will trigger a warning
-_MAX_CHUNK_SIZE = 5000
-
 
 class Api:
+    # Larger sizes will trigger a warning
+    _MAX_CHUNK_SIZE = 5000
+
     def __init__(
         self,
         api_url: Optional[str] = None,
@@ -234,11 +233,11 @@ class Api:
         except IndexError:
             raise InputValueError("Empty record list has been passed as argument.")
 
-        if chunk_size > _MAX_CHUNK_SIZE:
+        if chunk_size > self._MAX_CHUNK_SIZE:
             _LOGGER.warning(
                 """The introduced chunk size is noticeably large, timeout errors may occur.
                 Consider a chunk size smaller than %s""",
-                _MAX_CHUNK_SIZE,
+                self._MAX_CHUNK_SIZE,
             )
 
         if record_type is TextClassificationRecord:
