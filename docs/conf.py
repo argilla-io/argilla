@@ -113,7 +113,9 @@ html_css_files = ["css/custom.css"]
 html_theme_options = {"logo_only": True}
 
 # Open graph meta
-ogp_image = "https://repository-images.githubusercontent.com/362500938/02330f7b-922b-4534-9e8d-895a00f10057"
+ogp_image = (
+    "https://raw.githubusercontent.com/recognai/rubrix/master/docs/images/og_rubrix.png"
+)
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',
