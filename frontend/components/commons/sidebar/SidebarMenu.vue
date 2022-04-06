@@ -99,9 +99,12 @@ $color: #333346;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
   min-height: 100vh;
-  min-width: 70px;
+  min-width: $sidebarMenuWidth;
   border-left: 1px solid palette(grey, smooth);
   z-index: 1;
+  .--metrics & {
+    border-color: transparent;
+  }
   p {
     text-align: center;
     font-weight: 600;

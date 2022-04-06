@@ -110,6 +110,7 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   &__container {
+    position: relative;
     z-index: 1;
   }
 }

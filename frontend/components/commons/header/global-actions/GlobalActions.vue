@@ -45,17 +45,16 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 4em;
-  padding-right: calc(4em + 25px);
+  padding-right: calc($sidebarMenuWidth + 15px);
   .--metrics & {
     @include media(">desktop") {
-      padding-right: calc(294px + 80px);
+      padding-right: calc($sidebarWidth + 25px);
       transition: padding 0.1s ease-in-out;
     }
   }
   @include media(">desktop") {
     transition: padding 0.1s ease-in-out;
     width: 100%;
-    padding-right: 80px;
   }
 }
 .global-actions {

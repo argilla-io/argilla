@@ -46,19 +46,19 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$topbarHeight: 55px;
+$topbarHeight: 56px;
 $sidebarMenuWidth: 70px;
 .sidebar {
-  top: $topbarHeight;
+  top: 0;
   min-height: calc(100vh - $topbarHeight);
-  width: 280px;
+  width: $sidebarPanelWidth;
   position: absolute;
   right: $sidebarMenuWidth;
   background: $bg;
   padding: 1em 1.5em;
   transition: top 0.2s ease-in-out;
   border: 1px solid palette(grey, smooth);
-  box-shadow: $shadow;
+  box-shadow: -4px 15px 16px -1px #c7c7c7;
   @include media(">desktop") {
     border-radius: 1px;
     border: none;
