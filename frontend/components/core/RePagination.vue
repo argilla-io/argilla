@@ -227,12 +227,14 @@ $pagination-size: 30px;
     align-items: center;
     background: palette(grey, light);
     border-top: 1px solid palette(grey, smooth);
-    padding-right: calc(4em + 45px);
     min-height: 63px;
     z-index: 99;
-    @include media(">desktop") {
-      width: 100%;
-      padding-right: 100px;
+    padding-right: calc(4em + 25px);
+    .--metrics & {
+      @include media(">desktop") {
+        padding-right: calc(294px + 80px);
+        transition: padding 0.1s ease-in-out;
+      }
     }
   }
   &__arrow {

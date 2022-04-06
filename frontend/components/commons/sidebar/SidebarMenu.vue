@@ -96,11 +96,10 @@ $color: #333346;
   position: fixed;
   top: 56px;
   right: 0;
-  background: $bg;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
   min-height: 100vh;
-  min-width: 90px;
+  min-width: 70px;
   border-left: 1px solid palette(grey, smooth);
   z-index: 1;
   p {
@@ -108,6 +107,7 @@ $color: #333346;
     font-weight: 600;
     @include font-size(12px);
     color: $color;
+    margin-bottom: 0.5em;
   }
   a {
     position: relative;
@@ -118,7 +118,7 @@ $color: #333346;
   &__info {
     position: relative;
     z-index: 1;
-    margin-bottom: 5em;
+    margin-bottom: 2em;
   }
 }
 a[data-title]:not(.active) {

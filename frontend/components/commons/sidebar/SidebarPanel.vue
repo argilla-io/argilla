@@ -16,13 +16,13 @@
   -->
 
 <template>
-  <aside :class="['sidebar', annotationEnabled ? 'annotation' : 'explore']">
+  <aside class="sidebar">
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
         <svgicon
           @click="closePanel"
           class="sidebar__panel__button"
-          name="double-chev"
+          name="chev-right"
         ></svgicon>
         <slot></slot>
       </div>
@@ -30,16 +30,12 @@
   </aside>
 </template>
 <script>
+import "assets/icons/chev-right";
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
-    },
-  },
-  computed: {
-    annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
     },
   },
   methods: {
@@ -51,26 +47,21 @@ export default {
 </script>
 <style lang="scss" scoped>
 $topbarHeight: 55px;
-$paginationHeight: 63px;
-$sidebarMenuWidth: 90px;
+$sidebarMenuWidth: 70px;
 .sidebar {
   top: $topbarHeight;
   min-height: calc(100vh - $topbarHeight);
   width: 280px;
   position: absolute;
   right: $sidebarMenuWidth;
-  background: white;
+  background: $bg;
   padding: 1em 1.5em;
   transition: top 0.2s ease-in-out;
   border: 1px solid palette(grey, smooth);
-  box-shadow: 0 1px 9px 0 palette(grey, smooth);
-  .--paginated & {
-    min-height: calc(100vh - $topbarHeight - $paginationHeight);
-  }
+  box-shadow: $shadow;
   @include media(">desktop") {
     border-radius: 1px;
     border: none;
-    box-shadow: none;
     margin-left: 1em;
     display: block !important;
     right: $sidebarMenuWidth;
@@ -78,11 +69,20 @@ $sidebarMenuWidth: 90px;
   &__panel {
     &__button {
       position: absolute;
-      right: 2em;
+      left: 1.5em;
       top: 2em;
       pointer-events: all;
       cursor: pointer;
-      z-index: 99;
+      z-index: 2;
+      border-radius: 3px;
+      padding: 5px;
+      background: palette(grey, smooth);
+      box-sizing: content-box;
+      max-width: 8px;
+      max-height: 8px;
+      &:hover {
+        background: darken(palette(grey, smooth), 5%);
+      }
     }
   }
   &__content {
@@ -90,6 +90,12 @@ $sidebarMenuWidth: 90px;
     @include font-size(13px);
     &:first-child {
       padding-top: 0;
+    }
+  }
+  ::v-deep {
+    .sidebar__title {
+      margin-bottom: 2em;
+      margin-left: 1.5em;
     }
   }
 }

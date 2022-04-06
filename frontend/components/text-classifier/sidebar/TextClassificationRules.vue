@@ -26,6 +26,7 @@
     </div>
     <ReProgress
       re-mode="determinate"
+      color="#4C4EA3"
       :progress="coverage.percent * 100"
       :tooltip="`${coverage.records}/${totalRecords}`"
     ></ReProgress>
@@ -43,24 +44,39 @@
     ></ReProgress>
     <div class="progress__info">
       <p class="progress__info__text">Precision average</p>
-      <span class="progress__info__percent">{{ precision | percent }}</span>
+      <transition name="fade" mode="out-in" appear
+        ><span :key="precision" class="progress__info__percent">{{
+          precision | percent
+        }}</span></transition
+      >
     </div>
     <div class="progress__info">
       <p class="progress__info__text">Correct/Incorrect</p>
-      <span class="progress__info__percent">{{ correctAndIncorrect }}</span>
+      <transition name="fade" mode="out-in" appear
+        ><span :key="correctAndIncorrect" class="progress__info__percent">{{
+          correctAndIncorrect
+        }}</span></transition
+      >
     </div>
+    <span class="space"></span>
     <div class="progress__info">
       <p class="progress__info__text">Total rules</p>
-      <span class="progress__info__percent">{{ dataset.rules.length }}</span>
+      <transition name="fade" mode="out-in" appear
+        ><span :key="dataset.rules.length" class="progress__info__percent">{{
+          dataset.rules.length
+        }}</span></transition
+      >
     </div>
     <template v-if="labels.length">
       <div class="scroll">
         <div v-for="label in labels" :key="label.index">
           <div class="info">
             <label>{{ label.label }}</label>
-            <span class="records-number">{{
-              label.counter | formatNumber
-            }}</span>
+            <transition name="fade" mode="out-in" appear
+              ><span class="records-number">{{
+                label.counter | formatNumber
+              }}</span></transition
+            >
           </div>
         </div>
       </div>
@@ -171,17 +187,18 @@ label {
   color: $font-secondary-dark;
 }
 .scroll {
-  max-height: calc(100vh - 450px);
+  max-height: calc(100vh - 400px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
-  .--paginated & {
-    max-height: calc(100vh - 500px);
-  }
 }
 .records-number {
   margin-right: 0;
   margin-left: auto;
+}
+.space {
+  margin-bottom: 2em;
+  display: block;
 }
 .progress {
   float: right;
@@ -193,7 +210,8 @@ label {
     align-items: center;
     color: $font-secondary-dark;
     font-weight: 600;
-    margin-bottom: 1.5em;
+    margin-bottom: 0.5em;
+    margin-top: 1em;
     &__text {
       margin: 0;
     }

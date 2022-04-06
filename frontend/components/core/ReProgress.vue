@@ -19,9 +19,10 @@
   <transition name="re-progress" appear>
     <div class="re-progress__container">
       <p v-if="tooltip" class="re-progress__tooltip" :style="tooltipStyles">
-        {{ tooltip }}
+        <span class="triangle" :style="tooltipTriangleStyles"></span
+        >{{ tooltip }}
       </p>
-      <div class="re-progress">
+      <div class="re-progress" :style="backgroundStyles">
         <div class="re-progress-track" :style="styles"></div>
         <div
           v-if="multiple && progressSecondary"
@@ -63,9 +64,20 @@ export default {
         backgroundColor: this.color,
       };
     },
+    backgroundStyles() {
+      return {
+        backgroundColor: this.color,
+      };
+    },
     tooltipStyles() {
       return {
-        left: `${this.progress}%`,
+        left: this.progress > 80 ? `80%` : `${this.progress}%`,
+        backgroundColor: this.color,
+      };
+    },
+    tooltipTriangleStyles() {
+      return {
+        borderRightColor: this.color,
       };
     },
     stylesSecondary() {
@@ -83,12 +95,22 @@ export default {
   height: 22px;
   position: relative;
   overflow: hidden;
-  background: palette(grey, light);
+  background: #a1a2cc;
   border-top-left-radius: 0;
   border-top-right-radius: 10px;
   border-top-left-radius: 0;
   border-bottom-right-radius: 10px;
   margin: 0 0 1.5em 0;
+  &:before {
+    content: "";
+    position: absolute;
+    background: white;
+    opacity: 0.7;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
   &__container {
     position: relative;
     &:hover {
@@ -115,7 +137,8 @@ export default {
     clip-path: circle(0);
     opacity: 0;
     transition: opacity 0.5s ease-in-out 0.3s;
-    &:before {
+    border-color: lime !important;
+    .triangle {
       @include triangle(left, 6px, 6px, $secondary-color);
       position: absolute;
       left: -6px;

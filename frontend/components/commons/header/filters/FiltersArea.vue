@@ -121,10 +121,10 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   margin-left: 0;
-  padding-right: calc(4em + 45px);
+  padding-right: calc(4em + 25px);
   .--metrics & {
     @include media(">desktop") {
-      padding-right: calc(294px + 100px);
+      padding-right: calc(294px + 80px);
       transition: padding 0.1s ease-in-out;
     }
   }

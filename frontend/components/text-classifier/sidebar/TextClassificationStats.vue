@@ -109,9 +109,6 @@ label {
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
-  .--paginated & {
-    max-height: calc(100vh - 250px);
-  }
 }
 .records-number {
   margin-right: 0;

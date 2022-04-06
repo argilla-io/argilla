@@ -1,16 +1,17 @@
 <template>
   <a
     class="sidebar-button"
+    :class="[type.toLowerCase(), activeView.includes(id) ? 'active' : '']"
     href="#"
-    :data-title="tooltip"
+    :data-title="!activeView.includes(id) ? tooltip : null"
     @click="$emit('button-action', id)"
   >
-    <svgicon
+    <!-- <svgicon
       v-if="type !== 'Refresh'"
       v-show="activeView.includes(id)"
       class="sidebar-button__icon-help"
       :name="type === 'Mode' ? 'check3' : 'double-chev'"
-    ></svgicon>
+    ></svgicon> -->
     <svgicon :name="icon"></svgicon>
   </a>
 </template>
@@ -22,8 +23,6 @@ import "assets/icons/annotate-view";
 import "assets/icons/labelling-rules-view";
 import "assets/icons/progress";
 import "assets/icons/metrics";
-import "assets/icons/double-chev";
-import "assets/icons/check3";
 export default {
   props: {
     activeView: {
@@ -64,6 +63,27 @@ $color: #333346;
     position: absolute;
     left: 0.8em;
   }
+  &.active {
+    &.mode {
+      .svg-icon {
+        background: palette(grey, smooth);
+        border-radius: $border-radius;
+      }
+    }
+    &.metrics {
+      position: relative;
+      &:before {
+        content: "";
+        height: 38px;
+        width: 2px;
+        background: $color;
+        border-radius: 2px;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    }
+  }
 }
 .svg-icon {
   display: block;
@@ -71,7 +91,9 @@ $color: #333346;
   margin: auto;
   width: 24px;
   height: 24px;
-  margin-bottom: 1.5em;
   fill: $color;
+  padding: 0.5em;
+  box-sizing: content-box;
+  margin-bottom: 0.5em;
 }
 </style>

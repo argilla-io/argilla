@@ -22,7 +22,6 @@
       'app',
       annotationEnabled ? '--annotation' : '',
       areMetricsVisible ? '--metrics' : '',
-      isPaginationVisible ? '--paginated' : '',
     ]"
     v-else
   >
@@ -84,9 +83,6 @@ export default {
     },
     annotationEnabled() {
       return this.dataset && this.dataset.viewSettings.viewMode === "annotate";
-    },
-    isPaginationVisible() {
-      return !this.dataset.viewSettings.visibleRulesList;
     },
   },
   methods: {
