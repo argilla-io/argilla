@@ -181,6 +181,9 @@ export default {
     width: 100% !important;
     cursor: default;
   }
+  ::v-deep .checkbox-label {
+    line-height: 13px;
+  }
 }
 .highlight-text {
   display: inline-block;
