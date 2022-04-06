@@ -13,6 +13,7 @@ from rubrix.server.tasks.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
+from rubrix.server.tasks.token_classification import TokenClassificationQuery
 
 
 @pytest.fixture
@@ -57,6 +58,62 @@ def test_query_builder_with_query_range(query_builder):
                 }
             },
             "must": {"match_all": {}},
+        }
+    }
+
+
+def test_query_builder_with_nested(query_builder, mocked_client):
+    dataset = Dataset(
+        name="test_query_builder_with_nested",
+        owner=rubrix.get_workspace(),
+        task=TaskType.token_classification,
+    )
+    rubrix.delete(dataset.name)
+    rubrix.log(
+        name=dataset.name,
+        records=rubrix.TokenClassificationRecord(
+            text="Michael is a professor at Harvard",
+            tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
+            prediction=[("NAME", 0, 7, 0.9), ("LOC", 26, 33, 0.12)],
+        ),
+    )
+
+    es_query = query_builder(
+        dataset=dataset,
+        query=TokenClassificationQuery(
+            advanced_query_dsl=True,
+            query_text="metrics.predicted.mentions:(label:NAME AND score:[* TO 0.1])",
+        ),
+    )
+
+    assert es_query == {
+        "bool": {
+            "filter": {"bool": {"must": {"match_all": {}}}},
+            "must": {
+                "nested": {
+                    "path": "metrics.predicted.mentions",
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "term": {
+                                        "metrics.predicted.mentions.label": {
+                                            "value": "NAME"
+                                        }
+                                    }
+                                },
+                                {
+                                    "range": {
+                                        "metrics.predicted.mentions.score": {
+                                            "lte": "0.1"
+                                        }
+                                    }
+                                },
+                            ]
+                        }
+                    },
+                }
+            },
         }
     }
 
