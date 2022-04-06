@@ -17,19 +17,6 @@
 
 <template>
   <div class="metadata">
-    <div v-if="typeof title === 'object'">
-      <p
-        v-for="name in title"
-        :key="name.index"
-        class="metadata__title"
-        :title="name"
-      >
-        <span v-if="!Array.isArray(name)">{{ name | truncate(100) }}</span>
-      </p>
-    </div>
-    <div v-else>
-      <p class="metadata__title">{{ title }}</p>
-    </div>
     <div class="metadata__container">
       <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
         <div class="metadata__blocks">
@@ -65,14 +52,6 @@
 
 <script>
 export default {
-  filters: {
-    truncate(string, value) {
-      if (string.length > value) {
-        return `${string.substring(0, value)}...`;
-      }
-      return string;
-    },
-  },
   props: {
     metadataItems: {
       type: Object,
@@ -152,20 +131,6 @@ export default {
   max-width: 500px;
   margin: auto;
   pointer-events: all;
-  &__title {
-    color: $font-dark-color;
-    font-weight: 600;
-    margin-top: 2em;
-    margin-right: 2em;
-    white-space: pre-line;
-    display: none;
-    &:first-child {
-      margin-top: 0;
-    }
-    &:nth-child(-n + 5) {
-      display: block;
-    }
-  }
   &__container {
     max-height: 50vh;
     overflow-y: auto;
