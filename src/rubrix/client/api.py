@@ -17,7 +17,7 @@ import os
 import re
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas
 from tqdm.auto import tqdm
@@ -213,46 +213,12 @@ class Api:
             1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
-        if not name:
-            raise InputValueError("Empty dataset name has been passed as argument.")
-
-        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
-            raise InputValueError(
-                f"Provided dataset name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
-                "Please, use a valid name for your dataset"
-            )
-
-        if isinstance(records, Record.__args__):
-            records = [records]
-
         tags = tags or {}
         metadata = metadata or {}
 
-        try:
-            record_type = type(records[0])
-        except IndexError:
-            raise InputValueError("Empty record list has been passed as argument.")
-
-        if chunk_size > self._MAX_CHUNK_SIZE:
-            _LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout errors may occur.
-                Consider a chunk size smaller than %s""",
-                self._MAX_CHUNK_SIZE,
-            )
-
-        if record_type is TextClassificationRecord:
-            bulk_class = TextClassificationBulkData
-            creation_class = CreationTextClassificationRecord
-        elif record_type is TokenClassificationRecord:
-            bulk_class = TokenClassificationBulkData
-            creation_class = CreationTokenClassificationRecord
-        elif record_type is Text2TextRecord:
-            bulk_class = Text2TextBulkData
-            creation_class = CreationText2TextRecord
-        else:
-            raise InputValueError(
-                f"Unknown record type {record_type}. Available values are {Record.__args__}"
-            )
+        bulk_class, creation_class = self._log(
+            records=records, name=name, chunk_size=chunk_size
+        )
 
         processed, failed = 0, 0
         progress_bar = tqdm(total=len(records), disable=not verbose)
@@ -288,6 +254,62 @@ class Api:
 
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
+
+    def _log(
+        self,
+        records: Union[Record, Iterable[Record], Dataset],
+        name: str,
+        chunk_size: int,
+    ) -> Tuple:
+        """This helper method avoids code duplication in the AsyncApi class.
+
+        Args:
+            records: The record, an iterable of records, or a dataset to log.
+            name: The dataset name.
+            chunk_size: The chunk size for a data bulk.
+
+        Returns:
+            A tuple containing the "BulkData" and "Creation" class.
+        """
+        if not name:
+            raise InputValueError("Empty dataset name has been passed as argument.")
+
+        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
+            raise InputValueError(
+                f"Provided dataset name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
+                "Please, use a valid name for your dataset"
+            )
+
+        if isinstance(records, Record.__args__):
+            records = [records]
+
+        try:
+            record_type = type(records[0])
+        except IndexError:
+            raise InputValueError("Empty record list has been passed as argument.")
+
+        if chunk_size > self._MAX_CHUNK_SIZE:
+            _LOGGER.warning(
+                """The introduced chunk size is noticeably large, timeout errors may occur.
+                Consider a chunk size smaller than %s""",
+                self._MAX_CHUNK_SIZE,
+            )
+
+        if record_type is TextClassificationRecord:
+            bulk_class = TextClassificationBulkData
+            creation_class = CreationTextClassificationRecord
+        elif record_type is TokenClassificationRecord:
+            bulk_class = TokenClassificationBulkData
+            creation_class = CreationTokenClassificationRecord
+        elif record_type is Text2TextRecord:
+            bulk_class = Text2TextBulkData
+            creation_class = CreationText2TextRecord
+        else:
+            raise InputValueError(
+                f"Unknown record type {record_type}. Available values are {Record.__args__}"
+            )
+
+        return bulk_class, creation_class
 
     def load(
         self,
