@@ -7,8 +7,6 @@ from rubrix.server.commons.errors import EntityAlreadyExistsError, EntityNotFoun
 from rubrix.server.commons.es_helpers import filters
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.datasets.dao import DatasetsDAO
-from rubrix.server.datasets.model import BaseDatasetDB
-from rubrix.server.datasets.service import DatasetsService
 
 from ...commons import EsRecordDataFieldNames
 from ...commons.dao.dao import DatasetRecordsDAO
