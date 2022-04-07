@@ -18,12 +18,12 @@ from typing import Iterable, List, Optional
 from fastapi import Depends
 
 from rubrix.server.commons.errors import MissingDatasetRecordsError
-from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
 )
+from rubrix.server.tasks.commons.service import TaskService
 from rubrix.server.tasks.search.model import SortConfig
 from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.storage.service import RecordsStorageService
@@ -44,7 +44,7 @@ from rubrix.server.tasks.text_classification.service.labeling_service import (
 )
 
 
-class TextClassificationService:
+class TextClassificationService(TaskService):
     """
     Text classification service
 
@@ -238,7 +238,7 @@ class TextClassificationService:
 
     def add_labeling_rule(
         self, dataset: TextClassificationDatasetDB, rule: LabelingRule
-    ) -> None:
+    ) -> LabelingRule:
         """
         Adds a labeling rule
 
@@ -252,6 +252,7 @@ class TextClassificationService:
         """
         self.__normalized_rule__(rule)
         self.__labeling__.add_rule(dataset, rule)
+        return rule
 
     def update_labeling_rule(
         self,

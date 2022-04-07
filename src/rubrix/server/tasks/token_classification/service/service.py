@@ -17,12 +17,12 @@ from typing import Iterable, List
 
 from fastapi import Depends
 
-from rubrix.server.datasets.model import Dataset
 from rubrix.server.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     SortableField,
 )
+from rubrix.server.tasks.commons.service import TaskService
 from rubrix.server.tasks.search.model import SortConfig
 from rubrix.server.tasks.search.service import SearchRecordsService
 from rubrix.server.tasks.storage.service import RecordsStorageService
@@ -37,7 +37,7 @@ from rubrix.server.tasks.token_classification.api.model import (
 )
 
 
-class TokenClassificationService:
+class TokenClassificationService(TaskService):
     """
     Token classification service
 

@@ -108,7 +108,7 @@ def configure_router() -> APIRouter:
                 task=cfg.task,
             )
 
-            rule = await service.find_labeling_rule(dataset, query=query)
+            rule = await service.find_labeling_rule(dataset, rule_query=query)
             return cfg.output_rule_class.parse_obj(rule)
 
         "PATCH  /datasets/:task/:name/labeling/rules/:query"  # Partial update of dataset rule
