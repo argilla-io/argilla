@@ -24,7 +24,7 @@
     >
       {{ selectedOption.name }}
     </p>
-    <p v-else>{{ selectedOption.name }}</p>
+    <p class="sidebar__subtitle" v-else>{{ selectedOption.name }}</p>
     <transition name="fade">
       <ul
         v-if="showOptionsSelector"

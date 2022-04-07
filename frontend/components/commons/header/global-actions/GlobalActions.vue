@@ -45,18 +45,7 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 4em;
-  padding-right: calc(4em + 45px);
-  .--metrics & {
-    @include media(">desktop") {
-      padding-right: calc(294px + 100px);
-      transition: padding 0.1s ease-in-out;
-    }
-  }
-  @include media(">desktop") {
-    transition: padding 0.1s ease-in-out;
-    width: 100%;
-    padding-right: 100px;
-  }
+  @extend %collapsable-if-metrics !optional;
 }
 .global-actions {
   display: flex;

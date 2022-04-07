@@ -81,6 +81,16 @@
     margin: 0 auto;
     padding: 4em;
 }
+%collapsable-if-metrics {
+  padding-right: calc($sidebarMenuWidth + 15px);
+  transition: padding 0.25s linear 0.2s;
+  .--metrics & {
+    @include media(">desktop") {
+      padding-right: calc($sidebarWidth + 25px);
+      transition: padding 0.25s linear;
+    }
+  }
+}
 
 // buttons
 %button {
@@ -202,12 +212,12 @@
       width: auto;
       height: auto;
       opacity: 1;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.1s ease 0.2s;
       z-index: 2;
     }
     &:before {
       opacity: 1;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.1s ease 0.2s;
     }
   }
 }

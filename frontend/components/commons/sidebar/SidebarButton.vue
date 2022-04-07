@@ -1,16 +1,11 @@
 <template>
   <a
     class="sidebar-button"
+    :class="[type.toLowerCase(), activeView.includes(id) ? 'active' : '']"
     href="#"
-    :data-title="tooltip"
+    :data-title="!activeView.includes(id) ? tooltip : null"
     @click="$emit('button-action', id)"
   >
-    <svgicon
-      v-if="type !== 'Refresh'"
-      v-show="activeView === id"
-      class="sidebar-button__icon-help"
-      :name="type === 'Mode' ? 'check3' : 'double-chev'"
-    ></svgicon>
     <svgicon :name="icon"></svgicon>
   </a>
 </template>
@@ -22,13 +17,11 @@ import "assets/icons/annotate-view";
 import "assets/icons/labelling-rules-view";
 import "assets/icons/progress";
 import "assets/icons/metrics";
-import "assets/icons/double-chev";
-import "assets/icons/check3";
 export default {
   props: {
     activeView: {
-      type: String,
-      default: undefined,
+      type: Array,
+      default: () => [],
     },
     tooltip: {
       type: String,
@@ -64,6 +57,39 @@ $color: #333346;
     position: absolute;
     left: 0.8em;
   }
+  &.mode {
+    &:hover {
+      .svg-icon {
+        background: palette(grey, smooth);
+        border-radius: $border-radius;
+      }
+    }
+  }
+  &.active {
+    &.mode {
+      .svg-icon {
+        background: palette(grey, smooth);
+        border-radius: $border-radius;
+      }
+    }
+    &.metrics {
+      position: relative;
+      .svg-icon {
+        animation: move-horizontal 0.2s ease-in-out 0.2s;
+        animation-fill-mode: backwards;
+      }
+      &.active:before {
+        content: "";
+        height: 38px;
+        width: 2px;
+        border-radius: 2px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: $color;
+      }
+    }
+  }
 }
 .svg-icon {
   display: block;
@@ -71,7 +97,18 @@ $color: #333346;
   margin: auto;
   width: 24px;
   height: 24px;
-  margin-bottom: 1.5em;
   fill: $color;
+  padding: 0.5em;
+  box-sizing: content-box;
+  margin-bottom: 0.5em;
+}
+
+@keyframes move-horizontal {
+  0% {
+    transform: translateX(0.3em);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

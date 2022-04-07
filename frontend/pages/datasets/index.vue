@@ -59,7 +59,11 @@
           </div>
         </div>
       </div>
-      <sidebar-menu @refresh="$fetch" />
+      <sidebar-menu
+        class="home__sidebar"
+        @refresh="$fetch"
+        :sidebar-items="sidebarItems"
+      />
     </div>
   </div>
 </template>
@@ -134,6 +138,17 @@ export default {
         { column: "owner", values: workspaces || [] },
         { column: "task", values: tasks || [] },
         { column: "tags", values: tags || [] },
+      ];
+    },
+    sidebarItems() {
+      return [
+        {
+          id: "refresh",
+          tooltip: "Refresh",
+          icon: "refresh",
+          group: "Refresh",
+          action: "refresh",
+        },
       ];
     },
     datasets() {
@@ -309,7 +324,7 @@ export default {
   @extend %container;
   padding-top: 0.2em;
   padding-bottom: 0;
-  padding-right: calc(4em + 45px);
+  padding-right: calc($sidebarMenuWidth + 15px);
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;
@@ -340,5 +355,14 @@ export default {
   margin-right: 1em;
   margin-bottom: 2em;
   @include font-size(18px);
+}
+
+.home {
+  &__sidebar.sidebar {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    border-left: 1px solid palette(grey, smooth);
+  }
 }
 </style>

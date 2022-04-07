@@ -201,11 +201,17 @@ export default {
     border: 1px solid $primary-color;
     color: $primary-color;
     text-transform: none;
+    .svg-icon {
+      fill: $primary-color;
+    }
     &:hover,
     &:focus {
       background: transparent;
       border-color: darken($primary-color, 10%);
       color: darken($primary-color, 10%);
+      .svg-icon {
+        fill: darken($primary-color, 10%);
+      }
     }
     &[disabled] {
       background-color: transparent;

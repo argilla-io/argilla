@@ -55,7 +55,7 @@ export default {
   color: $lighter-color;
   padding-top: 0;
   padding-bottom: 0;
-  padding-right: 2em;
+  padding-right: 1.2em;
   padding-left: 4em;
   a {
     text-decoration: none;

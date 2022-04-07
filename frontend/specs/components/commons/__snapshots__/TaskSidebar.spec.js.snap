@@ -1,26 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TaskSidebar Show sidebar panel 1`] = `
-<div>
-  <div class="sidebar"><span><div class="sidebar__info"><p>Mode</p> <sidebar-button id="explore" icon="explore-view" tooltip="Explore" type="Mode"></sidebar-button><sidebar-button id="annotate" icon="annotate-view" tooltip="Annotate" type="Mode"></sidebar-button><sidebar-button id="labelling-rules" icon="labelling-rules-view" tooltip="Define rules" type="Mode"></sidebar-button></div></span><span><div class="sidebar__info"><p>Metrics</p> <sidebar-button id="progress" icon="progress" tooltip="Progress" type="Metrics"></sidebar-button><sidebar-button id="stats" icon="metrics" tooltip="Stats" type="Metrics"></sidebar-button></div></span><span><div class="sidebar__info"><p>Refresh</p> <sidebar-button id="refresh" icon="refresh" tooltip="Refresh" type="Refresh"></sidebar-button></div></span> </div>
-  <aside class="sidebar explore TextClassification">
+<div class="sidebar__container">
+  <aside class="sidebar TextClassification">
     <div class="sidebar__wrapper">
-      <div class="sidebar__content">
-        <div>
-          <textclassificationprogress dataset="[object Object]"></textclassificationprogress>
-        </div>
-        <div style="display: none;">
-          <textclassificationstats dataset="[object Object]"></textclassificationstats>
-        </div>
+      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 6 9" class="svg-icon svg-fill" style="width: 6px; height: 8px;">
+            <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+          </svg></a>
+        <transition-stub name="fade" appear="true" duration="500">
+          <!---->
+        </transition-stub>
       </div>
     </div>
   </aside>
+  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
 </div>
 `;
 
 exports[`TaskSidebar renders properly 1`] = `
-<div>
-  <div class="sidebar"><span><div class="sidebar__info"><p>Mode</p> <sidebar-button id="explore" active-view="explore" icon="explore-view" tooltip="Explore" type="Mode"></sidebar-button><sidebar-button id="annotate" active-view="explore" icon="annotate-view" tooltip="Annotate" type="Mode"></sidebar-button><sidebar-button id="labelling-rules" active-view="explore" icon="labelling-rules-view" tooltip="Define rules" type="Mode"></sidebar-button></div></span><span><div class="sidebar__info"><p>Metrics</p> <sidebar-button id="progress" icon="progress" tooltip="Progress" type="Metrics"></sidebar-button><sidebar-button id="stats" icon="metrics" tooltip="Stats" type="Metrics"></sidebar-button></div></span><span><div class="sidebar__info"><p>Refresh</p> <sidebar-button id="refresh" icon="refresh" tooltip="Refresh" type="Refresh"></sidebar-button></div></span> </div>
-  <!---->
+<div class="sidebar__container">
+  <aside class="sidebar TextClassification">
+    <div class="sidebar__wrapper">
+      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 6 9" class="svg-icon svg-fill" style="width: 6px; height: 8px;">
+            <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+          </svg></a>
+        <transition-stub name="fade" appear="true" duration="500">
+          <!---->
+        </transition-stub>
+      </div>
+    </div>
+  </aside>
+  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
 </div>
 `;

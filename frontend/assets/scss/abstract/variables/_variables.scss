@@ -153,3 +153,8 @@ $swift-ease-in-out: all $swift-ease-in-out-duration $swift-ease-in-out-timing-fu
 $swift-linear-duration: 0.15s !default;
 $swift-linear-timing-function: linear !default;
 $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;
+
+// sidebar
+$sidebarPanelWidth: 280px;
+$sidebarMenuWidth: 70px;
+$sidebarWidth: $sidebarPanelWidth + $sidebarMenuWidth;

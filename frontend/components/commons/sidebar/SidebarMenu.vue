@@ -17,18 +17,20 @@
 
 <template>
   <div class="sidebar">
-    <span v-for="group in sidebarButtonGroups" :key="group.name">
+    <span v-for="group in sidebarGroups" :key="group">
       <div class="sidebar__info">
-        <p>{{ group.name }}</p>
+        <p>{{ group }}</p>
         <sidebar-button
-          v-for="button in group.elements"
+          v-for="button in filteredSidebarItems.filter(
+            (button) => button.group === group
+          )"
           :id="button.id"
           :key="button.id"
-          :active-view="group.isActive"
+          :active-view="[viewMode, currentMetric]"
           :icon="button.icon"
           :tooltip="button.tooltip"
-          :type="group.name"
-          @button-action="group.action"
+          :type="group"
+          @button-action="action(button.action, button.id)"
         />
       </div>
     </span>
@@ -44,78 +46,29 @@ export default {
       requried: false,
       default: undefined,
     },
-  },
-  data: () => {
-    return {
-      currentViewMode: "explore",
-      width: window.innerWidth,
-      visibleSidebarInfo: undefined,
-    };
+    sidebarItems: {
+      type: Array,
+    },
+    currentMetric: {
+      type: String,
+    },
   },
   computed: {
-    sidebarButtonGroups() {
-      // TODO: sidebar must be customized for task view
-      var groups = [];
-      if (this.isDatasetView) {
-        const modeGroup = {
-          name: "Mode",
-          action: this.onChangeViewMode,
-          isActive: this.currentViewMode,
-          elements: [
-            {
-              id: "explore",
-              tooltip: "Explore",
-              icon: "explore-view",
-            },
-            {
-              id: "annotate",
-              tooltip: "Annotate",
-              icon: "annotate-view",
-            },
-          ],
-        };
-
-        if (this.showLabellingRules) {
-          modeGroup.elements.push({
-            id: "labelling-rules",
-            tooltip: "Define rules",
-            icon: "labelling-rules-view",
-          });
-        }
-        groups.push(modeGroup);
-
-        const metrics = {
-          name: "Metrics",
-          condition: this.isDatasetView,
-          action: this.onShowMetric,
-          isActive: this.visibleSidebarInfo,
-          elements: [
-            {
-              id: "progress",
-              tooltip: "Progress",
-              icon: "progress",
-            },
-            {
-              id: "stats",
-              tooltip: "Stats",
-              icon: "metrics",
-            },
-          ],
-        };
-        groups.push(metrics);
-      }
-      const refresh = {
-        name: "Refresh",
-        action: this.onRefresh,
-        elements: [
-          {
-            id: "refresh",
-            tooltip: "Refresh",
-            icon: "refresh",
-          },
-        ],
-      };
-      groups.push(refresh);
+    filteredSidebarItems() {
+      return this.sidebarItems.filter(
+        (item) =>
+          item.group !== "Metrics" || this.metricsByViewMode.includes(item.id)
+      );
+    },
+    metricsByViewMode() {
+      return this.sidebarItems.find(
+        (item) => item.id === this.dataset.viewSettings.viewMode
+      ).relatedMetrics;
+    },
+    sidebarGroups() {
+      const groups = [
+        ...new Set(this.sidebarItems.map((button) => button.group)),
+      ];
       return groups;
     },
     viewMode() {
@@ -127,37 +80,10 @@ export default {
     isDatasetView() {
       return this.dataset !== undefined;
     },
-    showLabellingRules() {
-      return this.isDatasetView && this.dataset.task === "TextClassification";
-    },
-  },
-  watch: {
-    viewMode(newValue) {
-      this.currentViewMode = newValue;
-    },
-  },
-  updated() {
-    window.onresize = () => {
-      this.width = window.innerWidth;
-    };
-  },
-  mounted() {
-    this.currentViewMode = this.viewMode;
   },
   methods: {
-    onShowMetric(info) {
-      this.$emit("showMetric", info);
-      if (this.visibleSidebarInfo !== info) {
-        this.visibleSidebarInfo = info;
-      } else {
-        this.visibleSidebarInfo = undefined;
-      }
-    },
-    onChangeViewMode(id) {
-      this.$emit("changeViewMode", id);
-    },
-    onRefresh() {
-      this.$emit("refresh");
+    action(action, id) {
+      this.$emit(action, id);
     },
   },
 };
@@ -167,31 +93,37 @@ export default {
 $sidebar-button-size: 45px;
 $color: #333346;
 .sidebar {
-  position: fixed;
-  top: 56px;
-  right: 0;
-  background: $bg;
+  top: 0;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
   min-height: 100vh;
-  min-width: 90px;
-  border-left: 1px solid palette(grey, smooth);
-  z-index: 2;
+  min-width: $sidebarMenuWidth;
+  background: $bg;
+  box-shadow: none;
+  pointer-events: all;
+  z-index: 1;
+  transition: box-shadow 0.2s ease-in-out 0.4s;
+  .--metrics & {
+    box-shadow: inset 1px 1px 5px -2px #c7c7c7;
+    transition: box-shadow 0.2s ease-in-out;
+  }
   p {
     text-align: center;
     font-weight: 600;
     @include font-size(12px);
     color: $color;
+    margin-bottom: 0.5em;
   }
   a {
     position: relative;
     display: block;
     outline: none;
+    z-index: 3;
   }
   &__info {
     position: relative;
     z-index: 1;
-    margin-bottom: 5em;
+    margin-bottom: 2em;
   }
 }
 a[data-title]:not(.active) {

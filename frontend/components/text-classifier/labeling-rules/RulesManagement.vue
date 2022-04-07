@@ -2,27 +2,14 @@
   <div v-if="isVisible" class="rules-management">
     <ReLoading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error">
-      <rules-metrics
-        title="Overall Metrics"
-        :dataset="dataset"
-        metrics-type="overall"
-      >
-        <template #button-top>
-          <re-button
-            class="rules-management__close button-quaternary--outline"
-            @click="hideList"
-          >
-            <svgicon
-              name="chev-left"
-              color="white"
-              width="12"
-              height="12"
-            ></svgicon
-            >Back to query view</re-button
-          >
-        </template>
-      </rules-metrics>
       <div class="rules-management__container">
+        <re-button
+          class="rules-management__close button-tertiary--outline"
+          @click="hideList"
+        >
+          <svgicon name="chev-left" width="12" height="12"></svgicon>Back to
+          query view</re-button
+        >
         <p class="rules-management__title">
           Rules
           <span v-if="formattedRules.length"
@@ -119,21 +106,22 @@ export default {
           field: "correct",
           class: "text",
           tooltip:
-            "Number of labels the rule predicted correctly (if annotations are available)",
+            "Number of labels the rule predicted correctly with respect to the annotations",
         },
         {
           name: "Incorrect",
           field: "incorrect",
           class: "text",
           tooltip:
-            "Number of labels the rule predicted incorrectly (if annotations are available)",
+            "Number of labels the rule predicted incorrectly with respect to the annotations",
         },
         {
           name: "Precision",
           field: "precision",
           class: "text",
           type: "percentage",
-          tooltip: "Percentage of correct labels given by the rule",
+          tooltip:
+            "Percentage of correct labels given by the rule with respect to the annotations",
         },
         {
           name: "Created at",
@@ -247,14 +235,16 @@ export default {
 .rules-management {
   padding-left: 4em;
   padding-top: 2em;
+  margin-bottom: 2em;
   overflow: auto;
   height: 100vh;
   &__container {
-    padding: 20px;
+    padding: 20px 20px 50px 20px;
     background: rgba($lighter-color, 0.4);
     border: 1px solid $lighter-color;
     width: 100%;
     border-radius: $border-radius;
+    position: relative;
   }
   &__title {
     color: $font-secondary-dark;
@@ -295,25 +285,8 @@ export default {
   }
   &__close {
     position: absolute;
-    right: 30px;
-    top: 30px;
-  }
-}
-.rule-metrics {
-  &__container {
-    width: 100%;
-    margin-left: 0 !important;
-    margin-bottom: 20px;
-    min-height: 180px;
-    &::v-deep {
-      .rule-metrics {
-        display: flex;
-        &__item {
-          width: 100%;
-          margin-top: 1em;
-        }
-      }
-    }
+    right: 1.5em;
+    top: 1.5em;
   }
 }
 </style>
