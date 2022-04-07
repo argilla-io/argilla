@@ -37,6 +37,7 @@
           </div>
           <div>
             <ReTableInfo
+              ref="table"
               :data="datasets"
               :sorted-order="sortedOrder"
               :sorted-by-field="sortedByField"
@@ -121,6 +122,13 @@ export default {
   }),
   async fetch() {
     await this.fetchDatasets();
+  },
+  watch: {
+    $route(val) {
+      if (val.fullPath === "/datasets") {
+        this.$fetch();
+      }
+    },
   },
   computed: {
     activeFilters() {
