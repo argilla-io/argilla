@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
+    "sphinxcontrib.openapi",
 ]
 
 # Do not execute the notebooks when building the docs
