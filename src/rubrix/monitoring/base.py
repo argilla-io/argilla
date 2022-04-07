@@ -6,16 +6,6 @@ import wrapt
 
 from rubrix.client.api import active_api
 from rubrix.client.async_api import AsyncApi
-from rubrix.monitoring.helpers import start_loop_in_thread
-
-_LOGGING_LOOP = None
-
-
-def _get_current_loop():
-    global _LOGGING_LOOP
-    if not _LOGGING_LOOP:
-        _LOGGING_LOOP = start_loop_in_thread()
-    return _LOGGING_LOOP
 
 
 class ModelNotSupportedError(Exception):
@@ -28,13 +18,10 @@ class BaseMonitor(wrapt.ObjectProxy):
 
     Attributes:
     -----------
-
     dataset:
         Rubrix dataset name
-
     sample_rate:
         The portion of the data to store in Rubrix. Default = 0.2
-
     """
 
     def __init__(
