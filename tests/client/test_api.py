@@ -307,7 +307,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
 def test_passing_wrong_iterable_data(mocked_client):
     dataset_name = "test_log_single_records"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    with pytest.raises(Exception, match="Unknown record type passed"):
+    with pytest.raises(Exception, match="Unknown record type"):
         api.log({"a": "010", "b": 100}, name=dataset_name)
 
 

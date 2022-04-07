@@ -221,7 +221,7 @@ class Api:
         tags = tags or {}
         metadata = metadata or {}
 
-        bulk_class, creation_class = self._log(
+        records, bulk_class, creation_class = self._log(
             records=records, name=name, chunk_size=chunk_size
         )
 
@@ -285,20 +285,21 @@ class Api:
                 "Please, use a valid name for your dataset"
             )
 
-        if isinstance(records, Record.__args__):
-            records = [records]
-
-        try:
-            record_type = type(records[0])
-        except IndexError:
-            raise InputValueError("Empty record list has been passed as argument.")
-
         if chunk_size > self._MAX_CHUNK_SIZE:
             _LOGGER.warning(
                 """The introduced chunk size is noticeably large, timeout errors may occur.
                 Consider a chunk size smaller than %s""",
                 self._MAX_CHUNK_SIZE,
             )
+
+        if isinstance(records, Record.__args__):
+            records = [records]
+        records = list(records)
+
+        try:
+            record_type = type(records[0])
+        except IndexError:
+            raise InputValueError("Empty record list has been passed as argument.")
 
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
@@ -314,7 +315,7 @@ class Api:
                 f"Unknown record type {record_type}. Available values are {Record.__args__}"
             )
 
-        return bulk_class, creation_class
+        return records, bulk_class, creation_class
 
     def load(
         self,
