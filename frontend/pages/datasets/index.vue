@@ -283,9 +283,11 @@ export default {
       this.datasetCompositeId = undefined;
     },
     clearFilters() {
-      this.activeFilters.forEach((filter) => {
-        this.$refs.table.onApplyFilters({ field: filter.column }, []);
-      });
+      if (this.$refs.table) {
+        this.activeFilters.forEach((filter) => {
+          this.$refs.table.onApplyFilters({ field: filter.column }, []);
+        });
+      }
     },
   },
 };
