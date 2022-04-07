@@ -17,7 +17,7 @@
 
 <template>
   <div class="app__content">
-    <div :class="['grid', annotationEnabled ? 'grid--editable' : '']">
+    <div class="grid">
       <Results :dataset="dataset" />
     </div>
   </div>
@@ -34,9 +34,6 @@ export default {
     },
   },
   computed: {
-    annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
-    },
     workspace() {
       return currentWorkspace(this.$route);
     },

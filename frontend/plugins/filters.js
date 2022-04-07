@@ -20,3 +20,10 @@ Vue.filter("percent", function (value) {
   });
   return formatter.format(value);
 });
+
+Vue.filter("capitalize", function (value) {
+  const capitalize = ([firstLetter, ...restOfWord]) =>
+    firstLetter.toUpperCase() + restOfWord.join("");
+
+  return capitalize(value);
+});

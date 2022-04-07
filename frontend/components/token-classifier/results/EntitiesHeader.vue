@@ -118,7 +118,7 @@ export default {
   padding-top: 0;
   padding-bottom: 0.7em;
   margin-left: 0;
-  padding-right: calc(4em + 45px);
+  @extend %collapsable-if-metrics !optional;
 }
 .entities {
   &__wrapper {

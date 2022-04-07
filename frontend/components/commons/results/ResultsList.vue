@@ -167,25 +167,12 @@ export default {
 <style lang="scss" scoped>
 .content {
   $this: &;
-  padding: 0;
   width: 100%;
   position: relative;
   margin-bottom: 0;
   list-style: none;
-  padding-right: calc(4em + 45px);
   z-index: 0;
-  .--metrics & {
-    @include media(">desktop") {
-      width: 100%;
-      padding-right: calc(294px + 100px);
-      transition: padding 0.1s ease-in-out;
-    }
-  }
-  @include media(">desktop") {
-    transition: padding 0.1s ease-in-out;
-    width: 100%;
-    padding-right: 100px;
-  }
+  @extend %collapsable-if-metrics !optional;
   .results-scroll {
     height: 100vh !important;
     overflow: auto;

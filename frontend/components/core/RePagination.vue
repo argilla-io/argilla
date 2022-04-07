@@ -218,21 +218,23 @@ $pagination-size: 30px;
   margin: auto;
   font-weight: 600;
   &__container {
-    padding-left: 4em;
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
+    right: $sidebarMenuWidth;
     display: flex;
     align-items: center;
     background: palette(grey, light);
     border-top: 1px solid palette(grey, smooth);
-    padding-right: calc(4em + 45px);
     min-height: 63px;
     z-index: 99;
-    @include media(">desktop") {
-      width: 100%;
-      padding-right: 100px;
+    padding-right: 1em;
+    padding-left: 4em;
+    .--metrics & {
+      @include media(">desktop") {
+        padding-right: calc(294px + 10px);
+        transition: padding 0.1s ease-in-out;
+      }
     }
   }
   &__arrow {

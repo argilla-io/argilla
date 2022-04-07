@@ -67,18 +67,7 @@ export default {
   margin-top: 0em;
   margin-bottom: 1em;
   padding-left: 4em;
-  padding-right: calc(4em + 45px);
-  .--metrics & {
-    @include media(">desktop") {
-      transition: padding 0.1s ease-in-out;
-      padding-right: calc(294px + 100px);
-    }
-  }
-  @include media(">desktop") {
-    transition: padding 0.1s ease-in-out;
-    width: 100%;
-    padding-right: 100px;
-  }
+  @extend %collapsable-if-metrics !optional;
   &__panel {
     border: 1px solid #f48e5f57;
     padding: 3em 2em 0.5em 2em;
