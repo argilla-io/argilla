@@ -22,7 +22,7 @@
       <div class="main">
         <app-header
           :copy-button="false"
-          :breadcrumbs="[{ link: `/datasets`, name: 'Datasets' }]"
+          :breadcrumbs="breadcrumbs"
           :sticky="false"
         />
         <Error
@@ -123,14 +123,10 @@ export default {
   async fetch() {
     await this.fetchDatasets();
   },
-  watch: {
-    $route(val) {
-      if (val.fullPath === "/datasets") {
-        this.clearFilters();
-      }
-    },
-  },
   computed: {
+    breadcrumbs() {
+      return [{ action: this.clearFilters(), name: 'Datasets' }]
+    },
     activeFilters() {
       const workspaces = this.workspaces;
       const tasks = this.tasks;
