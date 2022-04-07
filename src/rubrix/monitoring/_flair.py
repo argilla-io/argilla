@@ -1,16 +1,14 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import rubrix
 from rubrix import TokenClassificationRecord
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
 try:
-
+    from flair import __version__ as _flair_version
     from flair.data import Sentence
     from flair.models import SequenceTagger
-    from flair import __version__ as _flair_version
 except ModuleNotFoundError:
     Sentence = MissingType
     SequenceTagger = MissingType
@@ -18,7 +16,7 @@ except ModuleNotFoundError:
 
 
 class FlairMonitor(BaseMonitor):
-    def _log2rubrix(self, data: List[Tuple[Sentence, Dict[str, Any]]]):
+    async def _log2rubrix(self, data: List[Tuple[Sentence, Dict[str, Any]]]):
         records = [
             TokenClassificationRecord(
                 text=sentence.to_original_text(),
@@ -34,7 +32,7 @@ class FlairMonitor(BaseMonitor):
             for sentence, meta in data
         ]
 
-        rubrix.log(
+        await self._async_api.log(
             records,
             name=self.dataset,
             verbose=False,

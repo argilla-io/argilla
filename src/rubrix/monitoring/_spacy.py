@@ -45,11 +45,11 @@ class SpacyNERMonitor(BaseMonitor):
             event_timestamp=datetime.utcnow(),
         )
 
-    def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
+    async def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
         record = self.doc2token_classification(
             doc, agent=self.__wrapped__.path.name, metadata=metadata
         )
-        rb.log(
+        await self._async_api.log(
             record,
             name=self.dataset,
             tags={k: v for k, v in self.__wrapped__.meta.items() if isinstance(v, str)},

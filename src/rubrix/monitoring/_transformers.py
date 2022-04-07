@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
-import rubrix
 from rubrix import TextClassificationRecord
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
@@ -34,7 +33,7 @@ class HuggingFaceMonitor(BaseMonitor):
         config_dict = config.to_dict()
         return config_dict.get("transformers_version", _transformers_version)
 
-    def _log2rubrix(
+    async def _log2rubrix(
         self,
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
@@ -62,7 +61,7 @@ class HuggingFaceMonitor(BaseMonitor):
         if multi_label:
             dataset_name += "_multi"
 
-        rubrix.log(
+        await self._async_api.log(
             records,
             name=dataset_name,
             tags={
@@ -74,7 +73,6 @@ class HuggingFaceMonitor(BaseMonitor):
             metadata=config.to_dict(),
             verbose=False,
         )
-        pass
 
 
 class ZeroShotMonitor(HuggingFaceMonitor):
