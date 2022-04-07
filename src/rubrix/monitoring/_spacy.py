@@ -3,6 +3,8 @@ from typing import Any, Dict, Optional
 
 import rubrix as rb
 from rubrix import TokenClassificationRecord
+from rubrix.client.api import active_api
+from rubrix.client.models import BulkResponse
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
@@ -45,17 +47,19 @@ class SpacyNERMonitor(BaseMonitor):
             event_timestamp=datetime.utcnow(),
         )
 
-    async def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
+    async def _log2rubrix(
+        self, doc: Doc, metadata: Optional[Dict[str, Any]] = None
+    ) -> BulkResponse:
         record = self.doc2token_classification(
             doc, agent=self.__wrapped__.path.name, metadata=metadata
         )
-        await self._async_api.log(
+        response = await rb.log_async(
             record,
             name=self.dataset,
             tags={k: v for k, v in self.__wrapped__.meta.items() if isinstance(v, str)},
             metadata=self.__model__.meta,
-            verbose=False,
         )
+        return response
 
     def pipe(self, *args, **kwargs):
         as_tuples = kwargs.get("as_tuples")
@@ -68,7 +72,7 @@ class SpacyNERMonitor(BaseMonitor):
             else:
                 doc = r
             if self.is_record_accepted():
-                self.log_async(doc, metadata)
+                self._log_future = self.log_async(doc, metadata)
             yield r
 
     def __call__(self, *args, **kwargs):
@@ -76,7 +80,7 @@ class SpacyNERMonitor(BaseMonitor):
         doc = self.__wrapped__(*args, **kwargs)
         try:
             if self.is_record_accepted():
-                self.log_async(doc, metadata)
+                self._log_future = self.log_async(doc, metadata)
         finally:
             return doc
 

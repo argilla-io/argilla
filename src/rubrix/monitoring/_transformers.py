@@ -3,12 +3,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
+import rubrix as rb
 from rubrix import TextClassificationRecord
+from rubrix.client.models import BulkResponse
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
 try:
-
     from transformers import (
         Pipeline,
         TextClassificationPipeline,
@@ -37,7 +38,7 @@ class HuggingFaceMonitor(BaseMonitor):
         self,
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
-    ):
+    ) -> BulkResponse:
         """Register a list of tuples including inputs and its predictions for text classification task"""
         records = []
         config = self.__model__.model.config
@@ -61,7 +62,7 @@ class HuggingFaceMonitor(BaseMonitor):
         if multi_label:
             dataset_name += "_multi"
 
-        await self._async_api.log(
+        response = await rb.log_async(
             records,
             name=dataset_name,
             tags={
@@ -73,6 +74,8 @@ class HuggingFaceMonitor(BaseMonitor):
             metadata=config.to_dict(),
             verbose=False,
         )
+
+        return response
 
 
 class ZeroShotMonitor(HuggingFaceMonitor):
@@ -120,7 +123,9 @@ class ZeroShotMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self.log_async(filtered_data, multi_label=multi_label)
+                self._log_future = self.log_async(
+                    filtered_data, multi_label=multi_label
+                )
 
         finally:
             return batch_predictions
@@ -152,7 +157,7 @@ class TextClassificationMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self.log_async(filtered_data)
+                self._log_future = self.log_async(filtered_data)
 
         finally:
             return batch_predictions
