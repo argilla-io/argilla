@@ -26,64 +26,60 @@
       height="14"
       @click="onRemovescoreRange()"
     />
-    <div class="filter__row__content">
-      <p class="filter__label">{{ filter.name }}:</p>
-      <div
-        class="filter__item filter__item--score"
-        :class="{
-          'filter__item--open': scoreExpanded,
-          highlighted: filter.selected,
-        }"
-        @click="expandScore"
-      >
-        <div class="score-content">
-          <vega-lite
-            class="score"
-            :data="options"
-            :autosize="autosize"
-            :config="config"
-            :mark="mark"
-            :encoding="encoding"
-          />
+    <p class="filter__label">{{ filter.name }}:</p>
+    <div
+      class="filter__item filter__item--score"
+      :class="{
+        'filter__item--open': scoreExpanded,
+        highlighted: filter.selected,
+      }"
+      @click="expandScore"
+    >
+      <div class="score-content">
+        <vega-lite
+          class="score"
+          :data="options"
+          :autosize="autosize"
+          :config="config"
+          :mark="mark"
+          :encoding="encoding"
+        />
+      </div>
+    </div>
+    <div
+      v-if="scoreExpanded"
+      v-click-outside="onClose"
+      class="filter__item filter__item--score"
+      :class="{ expanded: scoreExpanded }"
+    >
+      <div class="score-content">
+        <p class="range__panel">{{ min }}% to {{ max }}%</p>
+        <vega-lite
+          class="score"
+          :data="options"
+          :autosize="autosize"
+          :config="config"
+          :mark="mark"
+          :encoding="encoding"
+        />
+        <div class="range__container">
+          <ReRange
+            v-if="scoreExpanded"
+            ref="slider"
+            v-bind="rangeOptions"
+            v-model="scoreRanges"
+          ></ReRange>
         </div>
       </div>
-      <div
-        v-if="scoreExpanded"
-        v-click-outside="onClose"
-        class="filter__item filter__item--score"
-        :class="{ expanded: scoreExpanded }"
-      >
-        <div class="score-content">
-          <p class="range__panel">
-            {{ min | percent(0, 2) }} to {{ max | percent(0, 2) }}
-          </p>
-          <vega-lite
-            class="score"
-            :data="options"
-            :autosize="autosize"
-            :config="config"
-            :mark="mark"
-            :encoding="encoding"
-          />
-          <div class="range__container">
-            <ReRange
-              v-if="scoreExpanded"
-              ref="slider"
-              v-bind="rangeOptions"
-              v-model="scoreRanges"
-            ></ReRange>
-          </div>
-        </div>
-        <div class="filter__buttons">
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
-            @click="onClose()"
-            >Cancel</ReButton
-          >
-          <ReButton class="button-primary--small" @click="onApplyscoreRange"
-            >Apply</ReButton
-          >
-        </div>
+      <div class="filter__buttons">
+        <ReButton
+          class="button-tertiary--small button-tertiary--outline"
+          @click="onClose()"
+          >Cancel</ReButton
+        >
+        <ReButton class="button-primary--small" @click="onApplyscoreRange"
+          >Apply</ReButton
+        >
       </div>
     </div>
   </div>
@@ -157,10 +153,10 @@ export default {
       return this.scoreExpanded;
     },
     min() {
-      return this.scoreRanges[0] * 0.01;
+      return this.scoreRanges[0];
     },
     max() {
-      return this.scoreRanges[1] * 0.01;
+      return this.scoreRanges[1];
     },
   },
   beforeMount() {
@@ -178,8 +174,8 @@ export default {
     },
     onApplyscoreRange() {
       this.$emit("apply", this.filter, {
-        from: this.min,
-        to: this.max,
+        from: this.min * 0.01,
+        to: this.max * 0.01,
       });
       this.scoreExpanded = false;
     },
@@ -321,15 +317,11 @@ export default {
   &__row {
     display: flex;
     align-items: center;
-    &__content {
-      position: relative;
-      display: flex;
-      align-items: center;
-      width: 100%;
-      .filter__item--score:not(.expanded) {
-        margin-left: auto;
-        width: 270px;
-      }
+    position: relative;
+    .filter__item--score:not(.expanded) {
+      margin-right: 0;
+      margin-left: auto;
+      width: 270px;
     }
   }
 }
