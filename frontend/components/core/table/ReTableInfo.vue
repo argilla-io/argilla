@@ -39,7 +39,7 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                {{ column.name }}
+                <span>{{ column.name }}</span>
                 <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
               </button>
             </div>
@@ -65,7 +65,13 @@
               :key="String(item.id)"
             >
               <div class="table-info__item">
-                <!-- <ReCheckbox v-if="globalActions" v-model="item.selectedRecord" class="list__item__checkbox" :value="item.name" @change="onCheckboxChanged($event, item.id, key)" /> -->
+                <re-checkbox
+                  v-if="globalActions"
+                  v-model="item.selectedRecord"
+                  class="list__item__checkbox"
+                  :value="item.name"
+                  @change="onCheckboxChanged($event, item.id)"
+                />
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
@@ -192,26 +198,6 @@
               </div>
             </li>
           </ul>
-          <!-- <ReModal :modal-custom="true" :prevent-body-scroll="true" modal-class="modal-primary" :modal-visible="visibleModalId === 'all'" modal-position="modal-center" @close-modal="$emit('close-modal')">
-            <div>
-              <p class="modal__title">Delete confirmation</p>
-              <span>
-                You are about to delete: <br />
-                <span v-for="item in selectedItems" :key="item.id">
-                  <strong>{{ item.actionName }}</strong><br /></span>
-              </span>
-              <p>This process cannot be undone</p>
-              <br />
-              <div class="modal-buttons">
-                <ReButton class="button-tertiary--small button-tertiary--outline" @click="$emit('close-modal')">
-                  Cancel
-                </ReButton>
-                <ReButton class="button-primary--small" @click="$emit('delete-multiple')">
-                  Yes, delete
-                </ReButton>
-              </div>
-            </div>
-          </ReModal> -->
         </div>
       </template>
       <ResultsEmpty v-else :title="emptySearchInfo.title" />
@@ -328,7 +314,13 @@ export default {
       const matchFilters = (item) => {
         if (Object.values(this.filters).length) {
           return Object.keys(this.filters).every((key) => {
-            return this.filters[key].toString().includes(item[key]);
+            if (this.isObject(item[key])) {
+              return this.filters[key].find(
+                (filter) => filter.value === item[key][filter.key]
+              );
+            } else {
+              return this.filters[key].toString().includes(item[key]);
+            }
           });
         }
         return true;
@@ -359,6 +351,9 @@ export default {
     this.sortedBy = this.sortedByField;
   },
   methods: {
+    isObject(obj) {
+      return Object.prototype.toString.call(obj) === "[object Object]";
+    },
     itemValue(item, column) {
       if (column.subfield) {
         return item[column.field][column.subfield];
@@ -482,8 +477,12 @@ export default {
       color: $font-secondary;
       @include font-size(14px);
       font-family: $sff;
+      text-align: left;
+      span {
+        white-space: nowrap;
+      }
       .svg-icon {
-        margin-left: 0.5em;
+        margin-left: 5px;
       }
     }
   }
@@ -504,7 +503,7 @@ export default {
     outline: none;
     &__col {
       text-align: left;
-      margin-right: 1.5em;
+      margin-right: 1em;
       flex: 1 1 0px;
       &:nth-last-of-type(-n + 1) {
         max-width: 120px;
@@ -602,6 +601,7 @@ export default {
       margin-top: 0;
       margin-bottom: 0;
       display: block;
+      word-break: break-all;
     }
   }
   .text {

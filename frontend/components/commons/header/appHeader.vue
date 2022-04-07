@@ -22,7 +22,11 @@
     :class="['header', sticky && dataset ? 'sticky' : null]"
   >
     <ReTopbarBrand>
-      <ReBreadcrumbs :breadcrumbs="breadcrumbs" :copy-button="copyButton" />
+      <ReBreadcrumbs
+        :breadcrumbs="breadcrumbs"
+        :copy-button="copyButton"
+        @breadcrumb-action="$emit('breadcrumb-action', $event)"
+      />
       <user />
     </ReTopbarBrand>
     <slot />
