@@ -19,7 +19,7 @@
       <ul>
         <li
           v-for="option in filterOptions(this.options, searchText)"
-          :key="option"
+          :key="option.index"
         >
           <ReCheckbox
             :id="option"
@@ -27,7 +27,8 @@
             class="re-checkbox--dark"
             :value="option"
           >
-            {{ option }} ({{ datasetsCounter(option) | formatNumber }})
+            {{ isObject(option) ? `${option.key}: ${option.value}` : option }}
+            ({{ tableItemsCounter(option) | formatNumber }})
           </ReCheckbox>
         </li>
         <li
@@ -74,15 +75,42 @@ export default {
   computed: {
     options() {
       const rawOptions = this.data.map((item) => item[this.column.field]);
-      return [...new Set(rawOptions)];
+      if (rawOptions.every((option) => this.isObject(option))) {
+        const removedEmptyOptions = rawOptions
+          .filter((opt) => Object.values(opt).length)
+          .flatMap((opt) => opt);
+        const optionsArray = Object.values(removedEmptyOptions).flatMap(
+          (options) =>
+            Object.keys(options).map((key) => {
+              return { key: key, value: options[key] };
+            })
+        );
+        const keys = ["key", "value"];
+        return optionsArray.filter(
+          (
+            (s) => (o) =>
+              ((k) => !s.has(k) && s.add(k))(keys.map((k) => o[k]).join("|"))
+          )(new Set())
+        );
+      } else {
+        return [...new Set(rawOptions)];
+      }
     },
   },
   watch: {
     selectedOptions() {
       this.$emit("applyFilters", this.column, this.selectedOptions);
     },
+    filters(val) {
+      if (!Object.keys(val).length) {
+        this.selectedOptions = [];
+      }
+    },
   },
   methods: {
+    isObject(obj) {
+      return Object.prototype.toString.call(obj) === "[object Object]";
+    },
     openFilter() {
       this.visibleFilter = true;
     },
@@ -94,22 +122,37 @@ export default {
         return options;
       }
       let filtered = options.filter((id) =>
-        id.toLowerCase().match(text.toLowerCase())
+        JSON.stringify(id).toLowerCase().match(text.toLowerCase())
       );
       return filtered;
     },
-    datasetsCounter(option) {
+    tableItemsCounter(option) {
       const keys = Object.keys(this.filters).filter(
         (k) => k !== this.column.field
       );
-      const filteredData = this.data.filter((dataset) => {
+      const filteredData = this.data.filter((tableItem) => {
         return keys.every((key) => {
-          return this.filters[key].includes(dataset[key]);
+          if (this.filters[key].every((f) => this.isObject(f))) {
+            return this.filters[key].find(
+              (f) => f.value === tableItem[key][f.key]
+            );
+          } else {
+            return this.filters[key].includes(tableItem[key]);
+          }
         });
       });
-      return filteredData.filter(
-        (dataset) => dataset[this.column.field] === option
-      ).length;
+      if (
+        filteredData.every((data) => this.isObject(data[this.column.field]))
+      ) {
+        return filteredData.filter(
+          (tableItem) =>
+            tableItem[this.column.field][option.key] === option.value
+        ).length;
+      } else {
+        return filteredData.filter(
+          (tableItem) => tableItem[this.column.field] === option
+        ).length;
+      }
     },
   },
 };
@@ -142,6 +185,9 @@ export default {
     margin: 0;
     width: 100% !important;
     cursor: default;
+  }
+  ::v-deep .checkbox-label {
+    line-height: 13px;
   }
 }
 .highlight-text {
@@ -201,7 +247,7 @@ button {
     }
   }
   .svg-icon {
-    margin-left: 0.5em;
+    margin-left: 5px;
     margin-right: 1em;
   }
 }

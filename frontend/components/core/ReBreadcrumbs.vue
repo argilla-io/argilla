@@ -18,15 +18,20 @@
 <template>
   <div class="breadcrumbs">
     <ul>
-      <li>
+      <li v-for="breadcrumb in filteredBreadcrumbs" :key="breadcrumb.name">
         <NuxtLink
-          v-for="breadcrumb in filteredBreadcrumbs"
-          :key="breadcrumb.name"
           class="breadcrumbs__item"
+          v-if="breadcrumb.link"
           :to="breadcrumb.link"
         >
           {{ breadcrumb.name }}
         </NuxtLink>
+        <span
+          class="breadcrumbs__item --action"
+          v-else
+          @click="$emit('breadcrumb-action', breadcrumb.action)"
+          >{{ breadcrumb.name }}</span
+        >
       </li>
     </ul>
     <re-action-tooltip tooltip="Copied">
@@ -84,10 +89,24 @@ export default {
   display: flex;
   align-items: center;
   ul {
-    display: inline-block;
+    display: flex;
     padding-left: 0;
     font-weight: normal;
     list-style: none;
+  }
+  li {
+    margin: auto 0.5em auto auto;
+    &:not(:last-child):after {
+      content: "/";
+      margin-left: 0.5em;
+    }
+    &:last-child {
+      font-weight: 600;
+      a {
+        cursor: default;
+        pointer-events: none;
+      }
+    }
   }
   &__copy {
     .svg-icon {
@@ -95,16 +114,11 @@ export default {
     }
   }
   &__item {
-    margin: auto 0.5em auto auto;
     color: $lighter-color;
     text-decoration: none;
     outline: none;
-    &:not(:last-child):after {
-      content: "/";
-      margin-left: 0.5em;
-    }
-    &:last-child {
-      font-weight: 600;
+    &.--action {
+      cursor: pointer;
     }
   }
 }
