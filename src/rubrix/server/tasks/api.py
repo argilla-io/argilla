@@ -40,7 +40,7 @@ from .token_classification import (
 from .token_classification import api as token_classification
 from .token_classification.dao.es_config import token_classification_mappings
 
-router = APIRouter()
+router = APIRouter(deprecated=True)
 
 TaskFactory.register_task(
     task_type=TaskType.token_classification,

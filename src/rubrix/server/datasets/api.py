@@ -25,7 +25,7 @@ from ..commons.errors import EntityNotFoundError
 from .model import CopyDatasetRequest, Dataset, UpdateDatasetRequest
 from .service import DatasetsService
 
-router = APIRouter(tags=["datasets"], prefix="/datasets")
+router = APIRouter(tags=["datasets"], prefix="/datasets", deprecated=True)
 
 
 @router.get(
