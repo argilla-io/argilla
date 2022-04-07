@@ -172,19 +172,18 @@ export default {
   position: relative;
   margin-bottom: 0;
   list-style: none;
-  padding-right: calc(4em + 45px);
+  padding-right: calc($sidebarMenuWidth + 15px);
   z-index: 0;
   .--metrics & {
     @include media(">desktop") {
       width: 100%;
-      padding-right: calc(294px + 100px);
+      padding-right: calc($sidebarWidth + 25px);
       transition: padding 0.1s ease-in-out;
     }
   }
   @include media(">desktop") {
     transition: padding 0.1s ease-in-out;
     width: 100%;
-    padding-right: 100px;
   }
   .results-scroll {
     height: 100vh !important;

@@ -92,8 +92,8 @@ $buttonSize: 34px;
   }
   &__content {
     position: absolute;
-    top: 3.8em;
-    right: -1em;
+    top: 3.5em;
+    right: -0.5em;
     padding-top: 1.5em;
     background: $lighter-color;
     border-radius: 5px;
@@ -104,9 +104,9 @@ $buttonSize: 34px;
     min-width: 300px;
     &:after {
       position: absolute;
-      top: -12px;
-      right: 1.3em;
-      @include triangle(top, 12px, 12px, white);
+      top: -10px;
+      right: 1em;
+      @include triangle(top, 10px, 10px, white);
     }
     a {
       text-decoration: none;
