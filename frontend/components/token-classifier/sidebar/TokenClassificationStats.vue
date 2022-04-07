@@ -53,7 +53,10 @@
         >
           <span
             :class="[
-              `color_${entities.filter((e) => e.text === key)[0].colorId}`,
+              `color_${
+                entities.filter((e) => e.text === key)[0].colorId %
+                $entitiesMaxColors
+              }`,
               'entity',
               activeTab,
             ]"

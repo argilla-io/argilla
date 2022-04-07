@@ -29,7 +29,7 @@
         :key="index"
         class="entity"
         :class="[
-          `color_${entity.colorId}`,
+          `color_${entity.colorId % $entitiesMaxColors}`,
           activeEntity === entity.text ? 'active' : '',
           annotationEnabled
             ? 'non-selectable--show-sort-code'

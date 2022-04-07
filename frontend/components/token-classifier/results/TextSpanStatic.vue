@@ -46,9 +46,11 @@ export default {
   },
   computed: {
     tag_color() {
-      return this.dataset.entities.filter(
-        (entity) => entity.text === this.token.entity.label
-      )[0].colorId;
+      return (
+        this.dataset.entities.filter(
+          (entity) => entity.text === this.token.entity.label
+        )[0].colorId % this.$entitiesMaxColors
+      );
     },
   },
 };

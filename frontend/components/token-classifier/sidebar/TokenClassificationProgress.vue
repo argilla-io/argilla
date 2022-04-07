@@ -22,7 +22,10 @@
         <div v-if="counter > 0" class="info">
           <label
             :class="[
-              `color_${entities.filter((e) => e.text === label)[0].colorId}`,
+              `color_${
+                entities.filter((e) => e.text === label)[0].colorId %
+                $entitiesMaxColors
+              }`,
               'entity',
             ]"
             >{{ label }}</label

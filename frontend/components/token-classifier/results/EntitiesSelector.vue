@@ -5,7 +5,7 @@
         <li
           class="entities__selector__option suggestion"
           :class="[
-            `color_${suggestedEntity.colorId}`,
+            `color_${suggestedEntity.colorId % $entitiesMaxColors}`,
             activeEntity === -1 ? 'active' : null,
           ]"
           v-if="suggestedEntity"
@@ -17,7 +17,7 @@
         <li
           class="entities__selector__option suggestion"
           :class="[
-            `color_${lastSelectedEntity.colorId}`,
+            `color_${lastSelectedEntity.colorId % $entitiesMaxColors}`,
             activeEntity === -1 ? 'active' : null,
           ]"
           v-else-if="lastSelectedEntity.text"
@@ -33,7 +33,7 @@
           :key="index"
           class="entities__selector__option"
           :class="[
-            `color_${entity.colorId}`,
+            `color_${entity.colorId % $entitiesMaxColors}`,
             activeEntity === index ? 'active' : null,
           ]"
           @click="selectEntity(entity)"
