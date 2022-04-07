@@ -118,6 +118,11 @@ class Api:
         if workspace is not None:
             self.set_workspace(workspace)
 
+    @property
+    def client(self):
+        """The underlying authenticated client"""
+        return self._client
+
     def set_workspace(self, workspace: str):
         """Sets the active workspace.
 
