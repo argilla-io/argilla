@@ -27,9 +27,9 @@
           {{ breadcrumb.name }}
         </NuxtLink>
         <span
-          class="breadcrumbs__item"
+          class="breadcrumbs__item --action"
           v-else
-          @click="$emit(breadcrumb.action)"
+          @click="$emit('breadcrumb-action', breadcrumb.action)"
           >{{ breadcrumb.name }}</span
         >
       </li>
@@ -102,6 +102,10 @@ export default {
     }
     &:last-child {
       font-weight: 600;
+      a {
+        cursor: default;
+        pointer-events: none;
+      }
     }
   }
   &__copy {
@@ -113,6 +117,9 @@ export default {
     color: $lighter-color;
     text-decoration: none;
     outline: none;
+    &.--action {
+      cursor: pointer;
+    }
   }
 }
 </style>

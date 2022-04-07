@@ -24,6 +24,7 @@
           :copy-button="false"
           :breadcrumbs="breadcrumbs"
           :sticky="false"
+          @breadcrumb-action="onBreadcrumbAction($event)"
         />
         <Error
           v-if="$fetchState.error"
@@ -72,6 +73,7 @@ export default {
   layout: "app",
   data: () => ({
     querySearch: undefined,
+    breadcrumbs: [{ action: "clearFilters", name: "Datasets" }],
     tableColumns: [
       { name: "Name", field: "name", class: "table-info__title", type: "link" },
       {
@@ -124,9 +126,6 @@ export default {
     await this.fetchDatasets();
   },
   computed: {
-    breadcrumbs() {
-      return [{ action: this.clearFilters(), name: 'Datasets' }]
-    },
     activeFilters() {
       const workspaces = this.workspaces;
       const tasks = this.tasks;
@@ -282,11 +281,17 @@ export default {
     closeModal() {
       this.datasetCompositeId = undefined;
     },
-    clearFilters() {
+    async clearFilters() {
       if (this.$refs.table) {
-        this.activeFilters.forEach((filter) => {
+        await this.activeFilters.forEach((filter) => {
           this.$refs.table.onApplyFilters({ field: filter.column }, []);
         });
+        this.$router.push({ path: "/datasets" });
+      }
+    },
+    onBreadcrumbAction(e) {
+      if (e === "clearFilters") {
+        this.clearFilters();
       }
     },
   },
