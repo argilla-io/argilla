@@ -170,6 +170,15 @@ $hue: 360;
     &.prediction ::v-deep .highlight__content {
       padding-bottom: 3px;
       border-bottom: 5px solid $rcolor;
+      position: relative;
+      &:after {
+        content: "";
+        border-top: 1px solid darken($rcolor, 50%);
+        position: absolute;
+        top: 26px;
+        left: 0;
+        right: 0;
+      }
     }
     &.annotation ::v-deep .highlight__tooltip:after {
       border-color: $rcolor transparent transparent transparent;

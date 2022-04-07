@@ -112,7 +112,7 @@ export default {
     mark: "area",
     config: {
       mark: {
-        color: "#D9D7E4",
+        color: "#0508d9",
         binSpacing: 0,
       },
 
@@ -197,15 +197,16 @@ export default {
   background: $lighter-color;
   width: auto;
   height: 45px;
-  border: 1px solid $line-smooth-color;
   align-items: center;
   padding: 0 1em;
   transition: all 0.2s ease;
   border-radius: $border-radius;
-  &:hover,
-  &:focus {
+  &:not(.expanded) {
+    border: 1px solid $line-smooth-color;
+  }
+  &:not(.expanded):hover,
+  &:not(.expanded):focus {
     border: 1px solid $primary-color;
-    background: $lighter-color;
     transition: border 0.2s ease, background 0.2s ease;
   }
   &:after {
@@ -219,7 +220,7 @@ export default {
     transform: translateY(-50%) rotate(133deg);
     transition: all 1.5s ease;
     position: absolute;
-    right: 2.1em;
+    right: 1.5em;
     top: 50%;
     pointer-events: none;
   }
@@ -229,8 +230,6 @@ export default {
   }
   .score-content {
     width: 100%;
-    padding-right: 0.8em;
-    padding-left: 0.8em;
     text-align: center;
   }
   .range__container {
@@ -258,20 +257,16 @@ export default {
   &.expanded {
     margin-top: 10px;
     position: absolute;
-    top: 0;
-    background: $lighter-color;
+    top: 40px;
+    right: 0;
+    background: $bg;
     padding: 20px 20px 10px 20px;
-    min-height: auto;
-    height: auto;
-    min-height: auto;
-    transition: height 0.1s ease-in-out;
+    width: 270px;
     overflow: visible;
     border-radius: $border-radius;
     z-index: 4;
-    width: 400px;
-    max-width: 100vw;
-    min-height: 210px;
-    border: 1px solid $primary-color;
+    box-shadow: $shadow;
+    min-height: 270px;
     pointer-events: all;
     &:after {
       content: none;
@@ -313,9 +308,16 @@ export default {
     margin-right: 1em;
     cursor: pointer;
   }
+  &__item {
+    &--open {
+      background: $bg;
+      border-color: $bg !important;
+    }
+  }
   &__row {
     display: flex;
     align-items: center;
+    position: relative;
     .filter__item--score:not(.expanded) {
       margin-right: 0;
       margin-left: auto;
