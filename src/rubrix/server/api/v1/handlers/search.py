@@ -5,12 +5,13 @@ from typing import Iterable, List, Optional
 from fastapi import APIRouter, Body, Depends, Query, Security
 from starlette.responses import StreamingResponse
 
-from rubrix.server.api.v2.config.factory import __all__ as all_tasks
-from rubrix.server.api.v2.models.commons.params import (
+from rubrix.server.api.v1 import API_VERSION
+from rubrix.server.api.v1.config.factory import __all__ as all_tasks
+from rubrix.server.api.v1.models.commons.params import (
     NameEndpointHandlerParams,
     PaginationParams,
 )
-from rubrix.server.api.v2.models.search import BaseSearchResults
+from rubrix.server.api.v1.models.search import BaseSearchResults
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -63,7 +64,7 @@ class EndpointParams(NameEndpointHandlerParams):
 
 def configure_router() -> APIRouter:
 
-    router = APIRouter(tags=["v2 - Search"])
+    router = APIRouter(tags=[f"{API_VERSION} / Search"])
 
     for cfg in all_tasks:
         base_endpoint = f"/{cfg.task}/{{name}}"

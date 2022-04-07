@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Type
 
-from rubrix.server.api.v2.models.datasets import (
+from rubrix.server.api.v1.models.datasets import (
     BaseDataset,
     DatasetCreate,
     DatasetUpdate,
 )
-from rubrix.server.api.v2.models.weak_supervision import _Rule, _RuleCreate, _RuleUpdate
+from rubrix.server.api.v1.models.weak_supervision import _Rule, _RuleCreate, _RuleUpdate
 from rubrix.server.tasks.commons import BaseRecord
 from rubrix.server.tasks.commons.service import TaskService
 from rubrix.server.tasks.search.model import BaseSearchQuery
