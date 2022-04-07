@@ -117,7 +117,7 @@ export default {
         return options;
       }
       let filtered = options.filter((id) =>
-        id.toLowerCase().match(text.toLowerCase())
+        JSON.stringify(id).toLowerCase().match(text.toLowerCase())
       );
       return filtered;
     },
