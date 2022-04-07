@@ -37,6 +37,23 @@ class AsyncApi(Api):
         self._event_loop = None
         self._thread = None
 
+    @classmethod
+    def from_api(cls, api: Api) -> "AsyncApi":
+        """Instantiate an AsyncApi from an existing Api object.
+
+        Args:
+            api: The existing Api object
+
+        Returns:
+            The equivalent AsyncApi object
+        """
+        return cls(
+            api_url=api.client.base_url,
+            api_key=api.client.token,
+            workspace=api.get_workspace(),
+            timeout=api.client.timeout,
+        )
+
     @property
     def event_loop(self) -> Optional[asyncio.AbstractEventLoop]:
         """The event loop."""
@@ -47,11 +64,11 @@ class AsyncApi(Api):
         """The thread where the event loop runs."""
         return self._thread
 
-    def _setup_loop_in_thread(self):
-        """Setups the eventloop in a new thread.
+    def setup_loop_in_thread(self):
+        """Setups the event loop in a new thread.
 
-        This does nothing, if the eventloop is already running in its own thread.
-        Otherwise, it will create/start an eventloop in a newly created Thread.
+        This does nothing, if the event loop is already running in its own thread.
+        Otherwise, it will create/start an event loop in a newly created Thread.
         """
         if self._event_loop is None:
             self._event_loop = asyncio.new_event_loop()
@@ -64,7 +81,7 @@ class AsyncApi(Api):
     def future_log(self, *args, **kwargs) -> asyncio.Future:
         """Logs records to Rubrix in another thread with asyncio.
 
-        This is useful if you want to asynchronously log records to Rubrix and do not care about the eventloop.
+        This is useful if you want to asynchronously log records to Rubrix and do not care about the event loop.
 
         Args:
             *args/**kwargs: Passed on to ``self.log``
@@ -74,9 +91,9 @@ class AsyncApi(Api):
 
         Example:
         """
-        self._setup_loop_in_thread()
+        self.setup_loop_in_thread()
         future_response = asyncio.run_coroutine_threadsafe(
-            self.log(*args, **kwargs), self._loop
+            self.log(*args, **kwargs), self._event_loop
         )
 
         return future_response
