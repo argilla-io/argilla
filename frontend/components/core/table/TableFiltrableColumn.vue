@@ -101,6 +101,11 @@ export default {
     selectedOptions() {
       this.$emit("applyFilters", this.column, this.selectedOptions);
     },
+    filters(val) {
+      if (!Object.keys(val).length) {
+        this.selectedOptions = [];
+      }
+    },
   },
   methods: {
     isObject(obj) {

@@ -126,7 +126,7 @@ export default {
   watch: {
     $route(val) {
       if (val.fullPath === "/datasets") {
-        this.$fetch();
+        this.clearFilters();
       }
     },
   },
@@ -199,7 +199,6 @@ export default {
       fetchDatasets: "entities/datasets/fetchAll",
       _deleteDataset: "entities/datasets/deleteDataset",
     }),
-
     onColumnFilterApplied({ column, values }) {
       if (column === "owner") {
         if (values !== this.workspaces) {
@@ -226,7 +225,6 @@ export default {
         }
       }
     },
-
     datasetWorkspace(dataset) {
       var workspace = dataset.owner;
       if (workspace === null || workspace === "null") {
@@ -234,7 +232,6 @@ export default {
       }
       return `/datasets/${workspace}/${dataset.name}`;
     },
-
     onActionClicked(action, dataset) {
       switch (action) {
         case "delete":
@@ -288,6 +285,11 @@ export default {
     },
     closeModal() {
       this.datasetCompositeId = undefined;
+    },
+    clearFilters() {
+      this.activeFilters.forEach((filter) => {
+        this.$refs.table.onApplyFilters({ field: filter.column }, []);
+      });
     },
   },
 };
