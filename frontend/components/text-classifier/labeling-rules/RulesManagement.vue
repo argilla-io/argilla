@@ -72,7 +72,27 @@ export default {
       querySearch: undefined,
       visibleModalId: undefined,
       isLoading: undefined,
-      tableColumns: [
+      sortedOrder: "desc",
+      sortedByField: "created_at",
+      actions: [{ name: "delete", icon: "delete", title: "Delete rule" }],
+      noDataInfo: {
+        title: "0 rules defined",
+        message: `You have not defined any rules for this dataset yet.`,
+        icon: "empty-rules",
+      },
+      emptySearchInfo: {
+        title: "0 rules found",
+      },
+    };
+  },
+  async fetch() {
+    if (!this.rules) {
+      await this.dataset.refreshRules();
+    }
+  },
+  computed: {
+    tableColumns() {
+      return [
         {
           name: "Query",
           field: "query",
@@ -88,7 +108,7 @@ export default {
           tooltip: "Percentage of records labeled by the rule",
         },
         {
-          name: "Annot. Cover.",
+          name: this.$mq >= "sm" ? "An. Cover." : "Annot. Cover.",
           field: "coverage_annotated",
           class: "text",
           type: "percentage",
@@ -121,26 +141,8 @@ export default {
           class: "date",
           type: "date",
         },
-      ],
-      sortedOrder: "desc",
-      sortedByField: "created_at",
-      actions: [{ name: "delete", icon: "delete", title: "Delete rule" }],
-      noDataInfo: {
-        title: "0 rules defined",
-        message: `You have not defined any rules for this dataset yet.`,
-        icon: "empty-rules",
-      },
-      emptySearchInfo: {
-        title: "0 rules found",
-      },
-    };
-  },
-  async fetch() {
-    if (!this.rules) {
-      await this.dataset.refreshRules();
-    }
-  },
-  computed: {
+      ];
+    },
     rules() {
       return this.dataset.labelingRules;
     },
@@ -266,12 +268,21 @@ export default {
   }
   &__table {
     margin-bottom: 2em !important;
+    @include media("<=desktop") {
+      ::v-deep .table-info__header {
+        .table-info__item__col:first-child button {
+          width: 70px;
+        }
+      }
+    }
     ::v-deep {
-      .table-info__item__col:nth-of-type(2) {
-        min-width: 100px;
+      .table-info__item__col {
+        width: 130px;
       }
       .table-info__item__col:first-child {
-        min-width: 120px;
+        width: auto;
+        min-width: auto;
+        flex-grow: 1.5;
       }
       .table-info__body {
         overflow: visible;
