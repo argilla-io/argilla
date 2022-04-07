@@ -102,8 +102,9 @@ class TokenClassificationDataset extends ObservationDataset {
       ),
     ];
     return names.map((name, index) => {
+      const colorLimit = 50;
       return {
-        colorId: index,
+        colorId: index % colorLimit,
         text: name,
       };
     });
