@@ -39,7 +39,7 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                {{ column.name }}
+                <span>{{ column.name }}</span>
                 <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
               </button>
             </div>
@@ -477,9 +477,12 @@ export default {
       color: $font-secondary;
       @include font-size(14px);
       font-family: $sff;
-      white-space: nowrap;
+      text-align: left;
+      span {
+        white-space: nowrap;
+      }
       .svg-icon {
-        margin-left: 0.5em;
+        margin-left: 5px;
       }
     }
   }
@@ -500,7 +503,7 @@ export default {
     outline: none;
     &__col {
       text-align: left;
-      margin-right: 1.5em;
+      margin-right: 1em;
       flex: 1 1 0px;
       &:nth-last-of-type(-n + 1) {
         max-width: 120px;
@@ -598,6 +601,7 @@ export default {
       margin-top: 0;
       margin-bottom: 0;
       display: block;
+      word-break: break-all;
     }
   }
   .text {

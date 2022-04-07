@@ -231,7 +231,6 @@ button {
   color: $font-secondary;
   @include font-size(14px);
   font-family: $sff;
-  white-space: nowrap;
   &:hover,
   &.active {
     background: $bg;
@@ -248,7 +247,7 @@ button {
     }
   }
   .svg-icon {
-    margin-left: 0.5em;
+    margin-left: 5px;
     margin-right: 1em;
   }
 }
