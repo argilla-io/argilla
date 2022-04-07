@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import logging
 import os
 import re
@@ -42,7 +43,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import bulk
+from rubrix.client.sdk.commons.api import async_bulk, bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.datasets import api as datasets_api
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
@@ -274,7 +275,7 @@ class Api:
             chunk_size: The chunk size for a data bulk.
 
         Returns:
-            A tuple containing the "BulkData" and "Creation" class.
+            A tuple containing the records, the "BulkData" class, and the "Creation" class.
         """
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
@@ -316,6 +317,63 @@ class Api:
             )
 
         return records, bulk_class, creation_class
+
+    async def log_async(
+        self,
+        records: Union[Record, Iterable[Record], Dataset],
+        name: str,
+        tags: Optional[Dict[str, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        chunk_size: int = 500,
+    ) -> BulkResponse:
+        """Logs Records to Rubrix with asyncio.
+
+        Args:
+            records: The record, an iterable of records, or a dataset to log.
+            name: The dataset name.
+            tags: A dictionary of tags related to the dataset.
+            metadata: A dictionary of extra info for the dataset.
+            chunk_size: The chunk size for a data bulk.
+
+        Returns:
+            Summary of the response from the REST API
+
+        Examples:
+            >>> # Log asynchronously from your notebook
+            >>> import asyncio
+            >>> import rubrix as rb
+            >>> from rubrix.utils import setup_loop_in_thread
+            >>> loop, _ = setup_loop_in_thread()
+            >>> future_response = asyncio.run_coroutine_threadsafe(
+            ...     rb.log_async(my_records, dataset_name), loop
+            ... )
+        """
+        tags = tags or {}
+        metadata = metadata or {}
+
+        records, bulk_class, creation_class = self._log(
+            records=records, name=name, chunk_size=chunk_size
+        )
+
+        processed, failed = 0, 0
+        for i in range(0, len(records), chunk_size):
+            chunk = records[i : i + chunk_size]
+
+            response = await async_bulk(
+                client=self._client,
+                name=name,
+                json_body=bulk_class(
+                    tags=tags,
+                    metadata=metadata,
+                    records=[creation_class.from_client(r) for r in chunk],
+                ),
+            )
+
+            processed += response.parsed.processed
+            failed += response.parsed.failed
+
+        # Creating a composite BulkResponse with the total processed and failed
+        return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
         self,
@@ -476,9 +534,17 @@ def api_wrapper(api_method: Callable):
     """
 
     def decorator(func):
-        @wraps(api_method)
-        def wrapped_func(*args, **kwargs):
-            return func(*args, **kwargs)
+        if asyncio.iscoroutinefunction(api_method):
+
+            @wraps(api_method)
+            async def wrapped_func(*args, **kwargs):
+                return await func(*args, **kwargs)
+
+        else:
+
+            @wraps(api_method)
+            def wrapped_func(*args, **kwargs):
+                return func(*args, **kwargs)
 
         sign = signature(api_method)
         wrapped_func.__signature__ = sign.replace(
@@ -518,6 +584,11 @@ def delete(*args, **kwargs):
 @api_wrapper(Api.log)
 def log(*args, **kwargs):
     return active_api().log(*args, **kwargs)
+
+
+@api_wrapper(Api.log_async)
+def log_async(*args, **kwargs):
+    return active_api().log_async(*args, **kwargs)
 
 
 @api_wrapper(Api.load)
