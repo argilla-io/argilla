@@ -26,6 +26,7 @@
       height="14"
       @click="onRemovescoreRange()"
     />
+    <div class="filter__row__content">
     <p class="filter__label">{{ filter.name }}:</p>
     <div
       class="filter__item filter__item--score"
@@ -81,6 +82,7 @@
           >Apply</ReButton
         >
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -317,11 +319,15 @@ export default {
   &__row {
     display: flex;
     align-items: center;
-    position: relative;
-    .filter__item--score:not(.expanded) {
-      margin-right: 0;
-      margin-left: auto;
-      width: 270px;
+    &__content {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      .filter__item--score:not(.expanded) {
+        margin-left: auto;
+        width: 270px;
+      }
     }
   }
 }
