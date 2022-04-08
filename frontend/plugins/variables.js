@@ -1,4 +1,4 @@
-export default (inject) => {
+export default (context, inject) => {
   // colors range for entities
-  inject("entitiesMaxColors"), 50;
+  inject("entitiesMaxColors", 50);
 };
