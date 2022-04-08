@@ -63,6 +63,14 @@ $color: #333346;
     position: absolute;
     left: 0.8em;
   }
+  &.mode {
+    &:hover {
+      .svg-icon {
+        background: palette(grey, smooth);
+        border-radius: $border-radius;
+      }
+    }
+  }
   &.active {
     &.mode {
       .svg-icon {
