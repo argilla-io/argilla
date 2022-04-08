@@ -27,62 +27,62 @@
       @click="onRemovescoreRange()"
     />
     <div class="filter__row__content">
-    <p class="filter__label">{{ filter.name }}:</p>
-    <div
-      class="filter__item filter__item--score"
-      :class="{
-        'filter__item--open': scoreExpanded,
-        highlighted: filter.selected,
-      }"
-      @click="expandScore"
-    >
-      <div class="score-content">
-        <vega-lite
-          class="score"
-          :data="options"
-          :autosize="autosize"
-          :config="config"
-          :mark="mark"
-          :encoding="encoding"
-        />
-      </div>
-    </div>
-    <div
-      v-if="scoreExpanded"
-      v-click-outside="onClose"
-      class="filter__item filter__item--score"
-      :class="{ expanded: scoreExpanded }"
-    >
-      <div class="score-content">
-        <p class="range__panel">{{ min }}% to {{ max }}%</p>
-        <vega-lite
-          class="score"
-          :data="options"
-          :autosize="autosize"
-          :config="config"
-          :mark="mark"
-          :encoding="encoding"
-        />
-        <div class="range__container">
-          <ReRange
-            v-if="scoreExpanded"
-            ref="slider"
-            v-bind="rangeOptions"
-            v-model="scoreRanges"
-          ></ReRange>
+      <p class="filter__label">{{ filter.name }}:</p>
+      <div
+        class="filter__item filter__item--score"
+        :class="{
+          'filter__item--open': scoreExpanded,
+          highlighted: filter.selected,
+        }"
+        @click="expandScore"
+      >
+        <div class="score-content">
+          <vega-lite
+            class="score"
+            :data="options"
+            :autosize="autosize"
+            :config="config"
+            :mark="mark"
+            :encoding="encoding"
+          />
         </div>
       </div>
-      <div class="filter__buttons">
-        <ReButton
-          class="button-tertiary--small button-tertiary--outline"
-          @click="onClose()"
-          >Cancel</ReButton
-        >
-        <ReButton class="button-primary--small" @click="onApplyscoreRange"
-          >Apply</ReButton
-        >
+      <div
+        v-if="scoreExpanded"
+        v-click-outside="onClose"
+        class="filter__item filter__item--score"
+        :class="{ expanded: scoreExpanded }"
+      >
+        <div class="score-content">
+          <p class="range__panel">{{ min }}% to {{ max }}%</p>
+          <vega-lite
+            class="score"
+            :data="options"
+            :autosize="autosize"
+            :config="config"
+            :mark="mark"
+            :encoding="encoding"
+          />
+          <div class="range__container">
+            <ReRange
+              v-if="scoreExpanded"
+              ref="slider"
+              v-bind="rangeOptions"
+              v-model="scoreRanges"
+            ></ReRange>
+          </div>
+        </div>
+        <div class="filter__buttons">
+          <ReButton
+            class="button-tertiary--small button-tertiary--outline"
+            @click="onClose()"
+            >Cancel</ReButton
+          >
+          <ReButton class="button-primary--small" @click="onApplyscoreRange"
+            >Apply</ReButton
+          >
+        </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
