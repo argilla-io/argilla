@@ -19,7 +19,10 @@
   <span class="span__text">
     <EntityHighlight
       v-if="token.entity"
-      :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
+      :class="[
+        'color_' + (tag_color % this.$entitiesMaxColors),
+        { zindex3: showEntitiesSelector },
+      ]"
       :span="token"
       :dataset="dataset"
       :record="record"
@@ -81,11 +84,9 @@ export default {
   }),
   computed: {
     tag_color() {
-      return (
-        this.dataset.entities.filter(
-          (entity) => entity.text === this.token.entity.label
-        )[0].colorId % this.$entitiesMaxColors
-      );
+      return this.dataset.entities.filter(
+        (entity) => entity.text === this.token.entity.label
+      )[0].colorId;
     },
     filteredEntities() {
       return this.dataset.entities
