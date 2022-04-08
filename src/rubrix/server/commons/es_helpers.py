@@ -273,7 +273,7 @@ class filters:
 class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
 
-    DEFAULT_AGGREGATION_SIZE = 100
+    DEFAULT_AGGREGATION_SIZE = 1000  # TODO: Improve this logic
 
     @staticmethod
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
