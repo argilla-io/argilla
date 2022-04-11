@@ -23,6 +23,10 @@ class DatasetCopy(DatasetCreate):
 
 
 class TextClassificationSettings(BaseModel):
+    multi_label: bool = Field(
+        default=False,
+        description="If true, dataset is ready to multi-label text classification",
+    )
     allowed_labels: Optional[Union[List[str], List[int]]] = None
 
 
