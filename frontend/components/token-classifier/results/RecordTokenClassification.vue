@@ -77,7 +77,6 @@ export default {
               );
           const end = start + (recordHasEmoji ? length(token) : token.length);
           const charsBetweenTokens = this.record.text.slice(end, nextStart);
-
           let highlighted = false;
           for (let highlight of searchKeywordsSpans) {
             if (highlight.start <= start && highlight.end >= end) {

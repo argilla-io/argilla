@@ -1,5 +1,6 @@
 import { mount } from "@vue/test-utils";
 import EntitiesSelector from "@/components/token-classifier/results/EntitiesSelector";
+const $entitiesMaxColors = 50;
 
 function mountEntitiesSelector() {
   return mount(EntitiesSelector, {
@@ -41,6 +42,9 @@ function mountEntitiesSelector() {
       },
       showEntitiesSelector: true,
       suggestedLabel: "GPE",
+    },
+    mocks: {
+      $entitiesMaxColors,
     },
   });
 }
