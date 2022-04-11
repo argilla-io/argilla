@@ -10,13 +10,16 @@ from rubrix.server.security.model import WORKSPACE_NAME_PATTERN
 class CommonTaskQueryParams:
     """Common task query params"""
 
+    __WS_DESCRIPTION__ = "The workspace where dataset belongs to. If not provided default user workspace will be used"
     __workspace_param__: str = Query(
         None,
         alias="workspace",
-        description="The workspace where dataset belongs to. If not provided default user team will be used",
+        description=__WS_DESCRIPTION__,
     )
 
-    __workspace_header__: str = Header(None, alias=RUBRIX_WORKSPACE_HEADER_NAME)
+    __workspace_header__: str = Header(
+        None, description=__WS_DESCRIPTION__, alias=RUBRIX_WORKSPACE_HEADER_NAME
+    )
 
     @property
     def workspace(self) -> str:

@@ -5,13 +5,13 @@ from fastapi import APIRouter, Body, Depends, Path, Query, Security
 from rubrix.server.api.v1 import API_VERSION
 from rubrix.server.api.v1.config.factory import __all__ as all_tasks
 from rubrix.server.api.v1.models.commons.params import (
-    NameEndpointHandlerParams,
-    PaginationParams,
-    TaskNameEndpointHandlerParams,
+    DATASET_NAME_PATH_PARAM,
+    WorkspaceParams,
 )
 from rubrix.server.api.v1.models.weak_supervision import (
     DatasetRules,
     DatasetRulesMetrics,
+    PaginationParams,
     RuleMetrics,
 )
 from rubrix.server.datasets.service import DatasetsService
@@ -44,7 +44,8 @@ def configure_router() -> APIRouter:
             operation_id=f"{cfg.task}/get_dataset_labeling_rules",
         )
         async def get_dataset_labeling_rules(
-            params: NameEndpointHandlerParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            ws_params: WorkspaceParams = Depends(),
             pagination: PaginationParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
@@ -52,8 +53,8 @@ def configure_router() -> APIRouter:
         ) -> dataset_rules_class:
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
@@ -71,7 +72,8 @@ def configure_router() -> APIRouter:
         )
         async def create_dataset_rule(
             request: cfg.create_rule_class = Body(...),
-            params: NameEndpointHandlerParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
             user: User = Security(auth.get_user, scopes=["read", "write"]),
@@ -79,8 +81,8 @@ def configure_router() -> APIRouter:
 
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
@@ -95,23 +97,22 @@ def configure_router() -> APIRouter:
             operation_id=f"{cfg.task}/get_dataset_rule",
         )
         async def get_dataset_rule(
-            params: NameEndpointHandlerParams = Depends(),
-            query: str = Path(...),
+            name: str = DATASET_NAME_PATH_PARAM,
+            query: str = Path(..., description="The rule query"),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
             user: User = Security(auth.get_user, scopes=["read"]),
         ) -> cfg.output_rule_class:
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
             rule = await service.find_labeling_rule(dataset, rule_query=query)
             return cfg.output_rule_class.parse_obj(rule)
-
-        "PATCH  /datasets/:task/:name/labeling/rules/:query"  # Partial update of dataset rule
 
         @router.patch(
             f"{base_endpoint}/{{query:path}}",
@@ -120,16 +121,17 @@ def configure_router() -> APIRouter:
         )
         async def update_dataset_rule(
             request: cfg.update_rule_class = Body(...),
-            params: NameEndpointHandlerParams = Depends(),
-            query: str = Path(...),
+            name: str = DATASET_NAME_PATH_PARAM,
+            query: str = Path(..., description="The rule query"),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
             user: User = Security(auth.get_user, scopes=["read", "write"]),
         ) -> cfg.output_rule_class:
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
             rule = await service.update_labeling_rule(dataset, query, **request.dict())
@@ -141,16 +143,17 @@ def configure_router() -> APIRouter:
             operation_id=f"{cfg.task}/delete_dataset_rule",
         )
         async def delete_dataset_rule(
-            params: NameEndpointHandlerParams = Depends(),
-            query: str = Path(...),
+            name: str = DATASET_NAME_PATH_PARAM,
+            query: str = Path(..., description="The rule query"),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
             user: User = Security(auth.get_user, scopes=["read", "admin"]),
         ):
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
@@ -164,7 +167,8 @@ def configure_router() -> APIRouter:
             operation_id="dataset_rules_metrics",
         )
         async def dataset_rules_metrics(
-            params: NameEndpointHandlerParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(cfg.service_class.get_instance),
             user: User = Security(auth.get_user, scopes=["read", "compute"]),
@@ -172,8 +176,8 @@ def configure_router() -> APIRouter:
 
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
+                name=name,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
@@ -188,8 +192,9 @@ def configure_router() -> APIRouter:
             operation_id="dataset_rule_metrics",
         )
         async def dataset_rule_metrics(
-            params: TaskNameEndpointHandlerParams = Depends(),
-            query: str = Path(...),
+            name: str = DATASET_NAME_PATH_PARAM,
+            query: str = Path(..., description="The rule query"),
+            ws_params: WorkspaceParams = Depends(),
             labels: Optional[List[str]] = Query(
                 None, description="Label related to query rule", alias="label"
             ),
@@ -200,9 +205,9 @@ def configure_router() -> APIRouter:
 
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
-                workspace=params.common.workspace,
-                task=params.task,
+                name=name,
+                workspace=ws_params.workspace,
+                task=cfg.task,
             )
 
             metrics = service.compute_rule_metrics(

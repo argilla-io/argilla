@@ -1,32 +1,60 @@
 from dataclasses import dataclass
+from typing import Type
 
-from fastapi import Depends, Path
+from fastapi import Header, Path, Query
 
-from rubrix.server.api.v1.constants import DATASET_NAME_PATTERN
-from rubrix.server.api.v1.models.commons.task import TaskType
-from rubrix.server.commons.api import CommonTaskQueryParams as _CommonTaskQueryParams
-from rubrix.server.tasks.commons import PaginationParams as _PaginationParams
+from rubrix.server.api.v1.constants import (
+    DATASET_NAME_PATTERN,
+    RUBRIX_WORKSPACE_HEADER_NAME,
+    WORKSPACE_NAME_PATTERN,
+)
+
+TASK_TYPE_PATH_PARAM = Path(..., description="The dataset task type")
+DATASET_NAME_PATH_PARAM = Path(
+    ..., description="The dataset name", regex=DATASET_NAME_PATTERN
+)
+
+__WS_DESCRIPTION__ = "The workspace where dataset belongs to. If not provided default user workspace will be used"
+WORKSPACE_QUERY_PARAM = Query(
+    None,
+    alias="workspace",
+    description=__WS_DESCRIPTION__,
+)
+WORKSPACE_HEADER_PARAM = Header(
+    None, description=__WS_DESCRIPTION__, alias=RUBRIX_WORKSPACE_HEADER_NAME
+)
 
 
 @dataclass
-class CommonTaskQueryParams(_CommonTaskQueryParams):
-    pass
+class WorkspaceParams:
+
+    __workspace_query__: str = WORKSPACE_QUERY_PARAM
+    __workspace_header__: str = WORKSPACE_HEADER_PARAM
+
+    @property
+    def workspace(self) -> str:
+        """Return read workspace. Query param prior to header param"""
+        workspace = self.__workspace_query__ or self.__workspace_header__
+        if workspace:
+            assert WORKSPACE_NAME_PATTERN.match(workspace), (
+                "Wrong workspace format. "
+                f"Workspace must match pattern {WORKSPACE_NAME_PATTERN.pattern}"
+            )
+        return workspace
 
 
-@dataclass
-class PaginationParams(_PaginationParams):
-    pass
+def build_pagination_params(item_type: str) -> Type:
+    @dataclass()
+    class PaginationParams:
+        limit: int = Query(
+            50, gte=0, le=1000, description=f"Response {item_type} limit"
+        )
+        from_: int = Query(
+            0,
+            ge=0,
+            le=10000,
+            alias="from",
+            description=f"{item_type.title()} sequence from",
+        )
 
-
-@dataclass
-class NameEndpointHandlerParams:
-    name: str = Path(..., regex=DATASET_NAME_PATTERN)
-    common: CommonTaskQueryParams = Depends()
-
-
-@dataclass
-class TaskNameEndpointHandlerParams:
-
-    task: TaskType = Path(...)
-    name: str = Path(..., regex=DATASET_NAME_PATTERN)
-    common: CommonTaskQueryParams = Depends()
+    return PaginationParams

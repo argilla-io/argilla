@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, TypeVar, Union
 from pydantic import BaseModel, Field
 
 from rubrix.server.api.v1.constants import DATASET_NAME_PATTERN
+from rubrix.server.api.v1.models.commons.params import build_pagination_params
 
 DatasetSettings = TypeVar("DatasetSettings")
 
@@ -82,3 +83,6 @@ Dataset = Union[
 class DatasetsList(BaseModel):
     total: int
     data: List[Dataset]
+
+
+PaginationParams = build_pagination_params(item_type="dataset")

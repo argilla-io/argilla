@@ -4,6 +4,8 @@ from typing import Generic, List, Optional, TypeVar
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
+from rubrix.server.api.v1.models.commons.params import build_pagination_params
+
 
 class _RuleUpdate(BaseModel):
     description: Optional[str] = Field(
@@ -70,3 +72,6 @@ class DatasetRules(GenericModel, Generic[RuleType]):
 
     total: int
     rules: List[RuleType]
+
+
+PaginationParams = build_pagination_params(item_type="rule")

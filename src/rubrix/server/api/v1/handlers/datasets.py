@@ -6,17 +6,21 @@ from fastapi import APIRouter, Body, Depends, Path, Security
 from rubrix.server.api.v1.config.factory import __all__ as all_tasks
 from rubrix.server.api.v1.constants import (
     API_VERSION,
-    DATASET_NAME_PATTERN,
     TASK_DATASET_ENDPOINT,
     TASKS_PATTERN,
 )
 from rubrix.server.api.v1.models.commons.params import (
-    CommonTaskQueryParams,
-    PaginationParams,
-    TaskNameEndpointHandlerParams,
+    DATASET_NAME_PATH_PARAM,
+    TASK_TYPE_PATH_PARAM,
+    WorkspaceParams,
 )
 from rubrix.server.api.v1.models.commons.task import TaskType
-from rubrix.server.api.v1.models.datasets import Dataset, DatasetCopy, DatasetsList
+from rubrix.server.api.v1.models.datasets import (
+    Dataset,
+    DatasetCopy,
+    DatasetsList,
+    PaginationParams,
+)
 from rubrix.server.datasets.model import DatasetDB
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
@@ -33,42 +37,49 @@ def configure_router() -> APIRouter:
     router = APIRouter(tags=[f"{API_VERSION} / Datasets"])
 
     @router.get(
-        "/",
-        name="Get all datasets",
+        path="/",
+        name="get_datasets",
+        operation_id="get_datasets",
+        description="Get all datasets",
         status_code=HTTPStatus.OK,
-        response_model_exclude_none=True,
         response_model=DatasetsList,
-        operation_id="get_all_datasets",
+        response_model_exclude_none=True,
     )
-    async def get_all_datasets(
-        params: CommonTaskQueryParams = Depends(),
+    async def get_datasets(
+        ws_params: WorkspaceParams = Depends(),
+        pagination: PaginationParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["read"]),
+        user: User = Security(auth.get_user, scopes=["ReadDataset"]),
     ) -> DatasetsList:
         all_datasets = datasets.list(
             user=user,
-            workspaces=[params.workspace] if params.workspace is not None else None,
+            workspaces=[ws_params.workspace]
+            if ws_params.workspace is not None
+            else None,
         )
 
         return DatasetsList(total=len(all_datasets), data=all_datasets)
 
     @router.get(
         path="/{tasks}",
-        name="Get tasks datasets",
-        status_code=HTTPStatus.OK,
-        response_model_exclude_none=True,
-        response_model=DatasetsList,
+        name="get_datasets_by_tasks",
         operation_id="get_datasets_by_tasks",
+        description="Get datasets by tasks",
+        status_code=HTTPStatus.OK,
+        response_model=DatasetsList,
+        response_model_exclude_none=True,
     )
     async def get_datasets_by_tasks(
-        tasks: str = Path(..., regex=TASKS_PATTERN),
-        params: CommonTaskQueryParams = Depends(),
+        tasks: str = Path(
+            ..., regex=TASKS_PATTERN, description="Comma separated task types"
+        ),
+        ws_params: WorkspaceParams = Depends(),
         pagination: PaginationParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["read"]),
+        user: User = Security(auth.get_user, scopes=["ReadDataset"]),
     ):
         tasks = set([t.strip() for t in tasks.split(",")]) if tasks else {}
-        workspaces = [params.workspace] if params.workspace is not None else None
+        workspaces = [ws_params.workspace] if ws_params.workspace is not None else None
 
         all_datasets = [
             dataset
@@ -83,22 +94,27 @@ def configure_router() -> APIRouter:
         return DatasetsList(total=len(all_datasets), data=all_datasets)
 
     @router.post(
-        TASK_DATASET_ENDPOINT + ":copy",
+        path=TASK_DATASET_ENDPOINT + ":copy",
+        name="copy_dataset",
+        operation_id="copy_dataset",
+        description="Copy a dataset. Target dataset can be created in the same or another workspace",
+        status_code=HTTPStatus.OK,
         response_model=Dataset,
         response_model_exclude_none=True,
-        operation_id="copy_dataset",
     )
     async def copy_dataset(
-        params: TaskNameEndpointHandlerParams = Depends(),
-        request: DatasetCopy = Body(...),
+        task: TaskType = TASK_TYPE_PATH_PARAM,
+        name: str = DATASET_NAME_PATH_PARAM,
+        ws_params: WorkspaceParams = Depends(),
+        request: DatasetCopy = Body(..., description="Copy dataset info"),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["read", "write"]),
+        user: User = Security(auth.get_user, scopes=["CopyDataset"]),
     ) -> Dataset:
         found = datasets.find_by_name(
             user=user,
-            name=params.name,
-            workspace=params.common.workspace,
-            task=params.task,
+            task=task,
+            name=name,
+            workspace=ws_params.workspace,
         )
         return datasets.copy_dataset(
             user=user,
@@ -110,57 +126,74 @@ def configure_router() -> APIRouter:
         )
 
     @router.post(
-        TASK_DATASET_ENDPOINT + ":{action}", operation_id="open_and_close_dataset"
+        path=TASK_DATASET_ENDPOINT + ":{action}",
+        name="open_or_close_dataset",
+        operation_id="open_or_close_dataset",
+        description="Open/close a dataset",
+        status_code=HTTPStatus.OK,
+        response_model_exclude_none=True,
     )
-    async def open_and_close_dataset(
-        action: OpenCloseAction = Path(...),
-        params: TaskNameEndpointHandlerParams = Depends(),
+    async def open_or_close_dataset(
+        task: TaskType = TASK_TYPE_PATH_PARAM,
+        name: str = DATASET_NAME_PATH_PARAM,
+        action: OpenCloseAction = Path(..., description="The action to apply"),
+        ws_params: WorkspaceParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["read", "write"]),
     ):
         found_ds = datasets.find_by_name(
             user=user,
-            name=params.name,
-            workspace=params.common.workspace,
-            task=params.task,
+            task=task,
+            name=name,
+            workspace=ws_params.workspace,
         )
         method = datasets.open if action == OpenCloseAction.open else datasets.close
         return method(user=user, dataset=found_ds)
 
     @router.delete(
         path=TASK_DATASET_ENDPOINT,
-        name="Delete a dataset",
-        status_code=HTTPStatus.OK,
+        name="delete_dataset",
         operation_id="delete_dataset",
+        description="Delete a dataset",
+        status_code=HTTPStatus.OK,
+        response_model=Dataset,
+        response_model_exclude_none=True,
     )
     async def delete_dataset(
-        params: TaskNameEndpointHandlerParams = Depends(),
+        task: TaskType = TASK_TYPE_PATH_PARAM,
+        name: str = DATASET_NAME_PATH_PARAM,
+        ws_params: WorkspaceParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        user: User = Security(auth.get_user, scopes=["read", "write"]),
-    ):
+        user: User = Security(auth.get_user, scopes=["DeleteDatasets"]),
+    ) -> Dataset:
         found = datasets.find_by_name(
             user=user,
-            name=params.name,
-            task=TaskType(params.task),
-            workspace=params.common.workspace,
+            task=task,
+            name=name,
+            workspace=ws_params.workspace,
         )
         datasets.delete(user=user, dataset=found)
+        return found
 
     for cfg in all_tasks:
 
         @router.post(
             path=f"/{cfg.task}",
-            name=f"Create a new {cfg.task} dataset",
+            name=f"{cfg.task}/create_new_dataset",
+            operation_id=f"{cfg.task}/create_new_dataset",
+            description=f"Create a new {cfg.task} dataset",
             status_code=HTTPStatus.OK,
             response_model=cfg.output_dataset_class,
             response_model_exclude_none=True,
-            operation_id=f"{cfg.task}/create_new_dataset",
         )
         async def create_new_dataset(
-            request: cfg.create_dataset_class,
-            name: str = Path(..., regex=DATASET_NAME_PATTERN),
+            name: str = DATASET_NAME_PATH_PARAM,
+            request: cfg.create_dataset_class = Body(
+                ..., description=f"The {cfg.task} dataset"
+            ),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
-            user: User = Security(auth.get_user, scopes=["read", "write"]),
+            user: User = Security(auth.get_user, scopes=["CreateDatasets"]),
         ) -> cfg.output_dataset_class:
 
             dataset = datasets.create_dataset(
@@ -168,30 +201,33 @@ def configure_router() -> APIRouter:
                 dataset=DatasetDB(
                     name=name,
                     task=cfg.task,
+                    owner=user.check_workspace(ws_params.workspace),
                     **request.dict(),
                 ),
             )
-            return Dataset.parse_obj(dataset)
+            return cfg.output_dataset_class.parse_obj(dataset)
 
         base_endpoint = f"/{cfg.task}/{{name}}"
 
         @router.get(
             path=base_endpoint,
-            name=f"Get a {cfg.task} dataset",
+            name=f"{cfg.task}/get_dataset",
+            operation_id=f"{cfg.task}/get_dataset",
+            description=f"Get a {cfg.task} dataset",
+            status_code=HTTPStatus.OK,
             response_model=cfg.output_dataset_class,
             response_model_exclude_none=True,
-            operation_id=f"{cfg.task}/get_dataset",
         )
         async def get_dataset(
-            name: str = Path(..., regex=DATASET_NAME_PATTERN),
-            common: CommonTaskQueryParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            ws_params: WorkspaceParams = Depends(),
             service: DatasetsService = Depends(DatasetsService.get_instance),
-            user: User = Security(auth.get_user, scopes=["read"]),
-        ):
+            user: User = Security(auth.get_user, scopes=["ReadDataset"]),
+        ) -> cfg.output_dataset_class:
             found = service.find_by_name(
                 user=user,
                 name=name,
-                workspace=common.workspace,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 
@@ -199,22 +235,26 @@ def configure_router() -> APIRouter:
 
         @router.patch(
             base_endpoint,
-            name=f"Update a {cfg.task} dataset",
+            name=f"{cfg.task}/update_dataset",
             operation_id=f"{cfg.task}/update_dataset",
+            description=f"Update a {cfg.task} dataset",
+            status_code=HTTPStatus.OK,
             response_model=cfg.output_dataset_class,
             response_model_exclude_none=True,
         )
         def update_dataset(
-            request: cfg.update_dataset_class,
-            name: str = Path(..., regex=DATASET_NAME_PATTERN),
-            common: CommonTaskQueryParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            request: cfg.update_dataset_class = Body(
+                ..., description="Accepted fields for dataset update"
+            ),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
-            user: User = Security(auth.get_user, scopes=["read", "write"]),
+            user: User = Security(auth.get_user, scopes=["UpdateDatasetBasic"]),
         ) -> Dataset:
             found_ds = datasets.find_by_name(
                 user=user,
                 name=name,
-                workspace=common.workspace,
+                workspace=ws_params.workspace,
                 task=cfg.task,
             )
 

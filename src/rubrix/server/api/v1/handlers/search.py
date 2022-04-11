@@ -1,4 +1,3 @@
-import dataclasses
 import itertools
 from typing import Iterable, List, Optional
 
@@ -8,10 +7,10 @@ from starlette.responses import StreamingResponse
 from rubrix.server.api.v1 import API_VERSION
 from rubrix.server.api.v1.config.factory import __all__ as all_tasks
 from rubrix.server.api.v1.models.commons.params import (
-    NameEndpointHandlerParams,
-    PaginationParams,
+    DATASET_NAME_PATH_PARAM,
+    WorkspaceParams,
 )
-from rubrix.server.api.v1.models.search import BaseSearchResults
+from rubrix.server.api.v1.models.search import BaseSearchResults, PaginationParams
 from rubrix.server.datasets.service import DatasetsService
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -52,19 +51,16 @@ def _streaming_response(
     )
 
 
-@dataclasses.dataclass
-class EndpointParams(NameEndpointHandlerParams):
-    include_field: List[str] = Query(
-        None, description="Only provided fields will be returned in records"
-    )
-    exclude_field: List[str] = Query(
-        None, description="Exclude provided field from records"
-    )
-
-
 def configure_router() -> APIRouter:
 
     router = APIRouter(tags=[f"{API_VERSION} / Search"])
+
+    INCLUDE_FIELD_QUERY_PARAM = Query(
+        None, description="Only provided fields will be returned in records"
+    )
+    EXCLUDE_FIELD_QUERY_PARAM = Query(
+        None, description="Exclude provided field from records"
+    )
 
     for cfg in all_tasks:
         base_endpoint = f"/{cfg.task}/{{name}}"
@@ -76,15 +72,19 @@ def configure_router() -> APIRouter:
 
         @router.post(
             base_endpoint + "/search",
-            name=f"Search records in a {cfg.task} dataset",
+            name=f"{cfg.task}/search_records",
             operation_id=f"{cfg.task}/search_records",
+            description=f"Search records in a {cfg.task} dataset",
             response_model=search_results_class,
             response_model_exclude_none=True,
         )
         async def search_records(
             query: cfg.query_class = Body(...),
             sort: List[SortableField] = Body(...),
-            params: EndpointParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            include_field: List[str] = INCLUDE_FIELD_QUERY_PARAM,
+            exclude_field: List[str] = EXCLUDE_FIELD_QUERY_PARAM,
+            ws_params: WorkspaceParams = Depends(),
             pagination: PaginationParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             service: TaskService = Depends(service_class.get_instance),
@@ -93,9 +93,9 @@ def configure_router() -> APIRouter:
 
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
+                name=name,
                 task=cfg.task,
-                workspace=params.common.workspace,
+                workspace=ws_params.workspace,
             )
 
             results = await service.search(
@@ -120,19 +120,22 @@ def configure_router() -> APIRouter:
         )
         async def view_dataset(
             query: cfg.query_class = Body(...),
-            params: EndpointParams = Depends(),
+            name: str = DATASET_NAME_PATH_PARAM,
+            include_field: List[str] = INCLUDE_FIELD_QUERY_PARAM,
+            exclude_field: List[str] = EXCLUDE_FIELD_QUERY_PARAM,
             limit: Optional[int] = Query(
                 None, description="Limit loaded records", gt=0
             ),
+            ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
             search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
             user: User = Security(auth.get_user, scopes=["read"]),
         ) -> StreamingResponse:
             dataset = datasets.find_by_name(
                 user=user,
-                name=params.name,
+                name=name,
                 task=cfg.task,
-                workspace=params.common.workspace,
+                workspace=ws_params.workspace,
             )
 
             return _streaming_response(

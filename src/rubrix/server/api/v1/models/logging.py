@@ -15,7 +15,7 @@ class AddRecordsRequest(GenericModel, Generic[Record]):
     records: List[Record]
 
 
-class AddRecordsResponse(BaseModel):
+class LogRecordsResponse(BaseModel):
     processed: int
     failed: Optional[int] = None
 

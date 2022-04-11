@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperationError
+from rubrix.server.commons.errors import EntityNotFoundError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
 _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
