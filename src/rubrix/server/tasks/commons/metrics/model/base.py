@@ -58,7 +58,9 @@ class ElasticsearchMetric(BaseMetric):
     A metric summarized by using one or several elasticsearch aggregations
     """
 
-    def aggregation_request(self, *args, **kwargs) -> Dict[str, Any]:
+    def aggregation_request(
+        self, *args, **kwargs
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Configures the summary es aggregation definition
         """
@@ -291,11 +293,12 @@ class MetadataAggregations(ElasticsearchMetric):
         dataset: Dataset,
         dao: DatasetRecordsDAO,
         size: int = None,
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
 
-        return aggregations.custom_fields(
+        metadata_aggs = aggregations.custom_fields(
             fields_definitions=dao.get_metadata_schema(dataset), size=size
         )
+        return [{key: value} for key, value in metadata_aggs.items()]
 
     def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
         data = unflatten_dict(aggregation_result, stop_keys=["metadata"])
