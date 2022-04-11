@@ -48,7 +48,7 @@
           {{ filter.placeholder }}
         </span>
       </span>
-      <div slot="dropdown-content">
+      <div slot="dropdown-content" v-if="visible">
         <input
           v-model="searchText"
           class="filter-options"
