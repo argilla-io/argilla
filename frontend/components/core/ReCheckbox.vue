@@ -172,6 +172,7 @@ $checkbox-color-dark: $primary-color;
     padding-right: 2em;
     white-space: normal;
     text-transform: none;
+    word-break: break-all;
   }
 }
 
