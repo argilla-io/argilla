@@ -274,6 +274,7 @@ class aggregations:
     """Group of functions related to elasticsearch aggregations requests"""
 
     DEFAULT_AGGREGATION_SIZE = 1000  # TODO: Improve this logic
+    MAX_AGGREGATION_SIZE = 5000  # TODO: improve by setting env var
 
     @staticmethod
     def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
@@ -319,7 +320,10 @@ class aggregations:
             "meta": {"kind": "terms"},
             "terms": {
                 **query_part,
-                "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
+                "size": min(
+                    size or aggregations.DEFAULT_AGGREGATION_SIZE,
+                    aggregations.MAX_AGGREGATION_SIZE,
+                ),
                 "order": {"_count": "desc"},
                 **dynamic_args,
             },
