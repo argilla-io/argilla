@@ -195,6 +195,7 @@ export default {
         margin-bottom: 0.5em;
       }
       span {
+        word-break: break-all;
         cursor: pointer !important;
       }
     }

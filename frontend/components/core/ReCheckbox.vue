@@ -125,6 +125,8 @@ $checkbox-color-dark: $primary-color;
     text-align: center;
     vertical-align: middle;
     text-align: center;
+    margin-right: 0;
+    margin-left: auto;
     .svg-icon {
       fill: $lighter-color;
       transform: scale(0);
@@ -142,9 +144,9 @@ $checkbox-color-dark: $primary-color;
     }
   }
   .checkbox-label {
-    height: $checkbox-size;
+    word-break: break-all;
     line-height: $checkbox-size;
-    margin-right: auto;
+    margin-right: 0.5em;
   }
   &--dark {
     &.checked {
@@ -164,7 +166,6 @@ $checkbox-color-dark: $primary-color;
 .checkbox-label {
   .dropdown--filter & {
     height: auto;
-    padding-right: 2em;
     white-space: normal;
     text-transform: none;
     word-break: break-all;
