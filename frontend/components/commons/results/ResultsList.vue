@@ -174,15 +174,15 @@ export default {
   list-style: none;
   padding-right: calc($sidebarMenuWidth + 15px);
   z-index: 0;
+  transition: padding 0.5s ease-in-out;
   .--metrics & {
     @include media(">desktop") {
       width: 100%;
       padding-right: calc($sidebarWidth + 25px);
-      transition: padding 0.1s ease-in-out;
+      transition: padding 0.5s ease-in-out;
     }
   }
   @include media(">desktop") {
-    transition: padding 0.1s ease-in-out;
     width: 100%;
   }
   .results-scroll {

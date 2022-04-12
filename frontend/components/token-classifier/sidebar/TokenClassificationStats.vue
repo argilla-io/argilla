@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="sidebar--animation">
     <p class="sidebar__title">Stats</p>
     <StatsSelector
       :selected-option="selectedOption"
@@ -38,7 +38,7 @@
           >Annotated as</a
         >
       </div>
-      <div class="scroll">
+      <div class="scroll sidebar--animation">
         <div v-if="!existMentions">
           <span class="sidebar__tabs__empty"
             >There are no

@@ -3,13 +3,33 @@
 exports[`TaskSidebar Show sidebar panel 1`] = `
 <div class="sidebar__container">
   <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
-  <!---->
+  <aside class="sidebar TextClassification">
+    <div class="sidebar__wrapper">
+      <div class="sidebar__content"><svg version="1.1" viewBox="0 0 6 9" class="sidebar__panel__button svg-icon svg-fill">
+          <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+        </svg>
+        <transition-stub name="fade" appear="true" duration="500">
+          <!---->
+        </transition-stub>
+      </div>
+    </div>
+  </aside>
 </div>
 `;
 
 exports[`TaskSidebar renders properly 1`] = `
 <div class="sidebar__container">
   <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
-  <!---->
+  <aside class="sidebar TextClassification">
+    <div class="sidebar__wrapper">
+      <div class="sidebar__content"><svg version="1.1" viewBox="0 0 6 9" class="sidebar__panel__button svg-icon svg-fill">
+          <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+        </svg>
+        <transition-stub name="fade" appear="true" duration="500">
+          <!---->
+        </transition-stub>
+      </div>
+    </div>
+  </aside>
 </div>
 `;

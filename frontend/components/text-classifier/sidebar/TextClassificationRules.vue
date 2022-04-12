@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="sidebar--animation">
     <p class="sidebar__title">Overall rule metrics</p>
     <div class="progress__info">
       <p class="progress__info__text">Coverage</p>
@@ -68,7 +68,7 @@
       >
     </div>
     <template v-if="labels.length">
-      <div class="scroll">
+      <div class="scroll sidebar--animation">
         <div v-for="label in labels" :key="label.index">
           <div class="info">
             <label>{{ label.label }}</label>

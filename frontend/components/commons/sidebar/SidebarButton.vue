@@ -68,9 +68,15 @@ $color: #333346;
       .svg-icon {
         background: palette(grey, smooth);
         border-radius: $border-radius;
+        animation: move-horizontal 0.2s ease-in-out 0.2s;
+        animation-fill-mode: backwards;
       }
     }
     &.metrics {
+      .svg-icon {
+        animation: move-horizontal 0.2s ease-in-out 0.2s;
+        animation-fill-mode: backwards;
+      }
       position: relative;
       &:before {
         content: "";
@@ -95,5 +101,14 @@ $color: #333346;
   padding: 0.5em;
   box-sizing: content-box;
   margin-bottom: 0.5em;
+}
+
+@keyframes move-horizontal {
+  0% {
+    transform: translateX(0.3em);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

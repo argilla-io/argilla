@@ -1,8 +1,7 @@
 <template>
-  <div class="sidebar__container">
+  <div class="sidebar__container" v-if="dataset">
     <component
       ref="menu"
-      v-if="dataset"
       :is="currentTaskSidebar"
       :dataset="dataset"
       :current-metric="currentMetric"
@@ -11,18 +10,21 @@
       @change-view-mode="onChangeViewMode"
     />
     <SidebarPanel
-      v-if="currentMetric"
+      :class="[currentTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
-      :class="dataset.task"
       @close-panel="onClosePanel"
     >
-      <div
-        v-for="metric in metricsByViewMode"
-        :key="metric"
-        v-show="currentMetric === metric"
-      >
-        <component :is="componentName(metric)" :dataset="dataset" />
-      </div>
+      <transition name="fade" appear duration="500">
+        <span v-if="currentMetric">
+          <div
+            v-for="metric in metricsByViewMode"
+            :key="metric"
+            v-if="currentMetric === metric"
+          >
+            <component :is="componentName(metric)" :dataset="dataset" />
+          </div>
+        </span>
+      </transition>
     </SidebarPanel>
   </div>
 </template>

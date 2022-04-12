@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="sidebar--animation">
     <p class="sidebar__title">Stats</p>
     <StatsSelector
       :selected-option="selectedOption"
@@ -24,7 +24,7 @@
       @selectOption="onSelectOption"
     />
     <template v-if="selectedOption.id === 'keywords'">
-      <div class="scroll">
+      <div class="scroll sidebar--animation">
         <div v-for="(counter, keyword) in getKeywords" :key="keyword">
           <div v-if="counter > 0" class="info">
             <label>{{ keyword }}</label>

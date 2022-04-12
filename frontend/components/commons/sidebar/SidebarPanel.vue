@@ -53,24 +53,44 @@ $sidebarMenuWidth: 70px;
   min-height: calc(100vh - $topbarHeight);
   width: $sidebarPanelWidth;
   position: absolute;
-  right: $sidebarMenuWidth;
+  right: -$sidebarPanelWidth;
   background: $bg;
   padding: 1em 1.5em;
-  transition: top 0.2s ease-in-out;
-  border: 1px solid palette(grey, smooth);
-  box-shadow: -4px 15px 16px -1px #c7c7c7;
+  transition: right 0.5s cubic-bezier(0.61, -0.08, 0.52, 1.17),
+    box-shadow 0.1s ease-out;
+  box-shadow: none;
+  overflow: hidden;
+  background: $bg;
+  .sidebar__content {
+    display: block;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.2s ease-in-out;
+    transform: translateX(5em);
+  }
+  &.visible {
+    overflow: visible;
+    box-shadow: -4px 15px 16px -1px #c7c7c7;
+    right: $sidebarMenuWidth;
+    transition: right 0.5s ease-in-out, box-shadow 0.4s ease-in-out 0.6s;
+    .sidebar__content {
+      transform: translateX(0);
+      transition: opacity 0.2s ease-in-out 0.3s;
+      opacity: 1;
+    }
+  }
   @include media(">desktop") {
     border-radius: 1px;
     border: none;
     margin-left: 1em;
     display: block !important;
-    right: $sidebarMenuWidth;
+    right: -$sidebarPanelWidth;
   }
   &__panel {
     &__button {
       position: absolute;
-      left: 1.5em;
-      top: 2em;
+      left: 0;
+      top: 0.2em;
       pointer-events: all;
       cursor: pointer;
       z-index: 2;
@@ -80,8 +100,14 @@ $sidebarMenuWidth: 70px;
       box-sizing: content-box;
       max-width: 8px;
       max-height: 8px;
+      transform: translateX(-2em);
+      transition: transform 0.2s ease-in-out;
       &:hover {
         background: darken(palette(grey, smooth), 5%);
+      }
+      .visible & {
+        transform: translateX(0);
+        transition: transform 0.2s ease-in-out 0.4s;
       }
     }
   }
@@ -97,6 +123,25 @@ $sidebarMenuWidth: 70px;
       margin-bottom: 2em;
       margin-left: 1.5em;
     }
+  }
+}
+.visible ::v-deep .sidebar--animation {
+  @for $i from 1 through 40 {
+    & > *:nth-child(#{$i}) {
+      animation: move-horizontal 0.2s ease-in-out #{0.4 + $i * 0.05}s;
+      animation-fill-mode: backwards;
+    }
+  }
+}
+
+@keyframes move-horizontal {
+  0% {
+    transform: translateX(1.5em);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 </style>

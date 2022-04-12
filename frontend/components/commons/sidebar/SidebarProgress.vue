@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="annotationsProgress">
+  <div class="sidebar--animation" v-if="annotationsProgress">
     <p class="sidebar__title">Progress</p>
     <div class="progress__info">
       <p class="progress__info__text">Total</p>
@@ -32,7 +32,7 @@
       :progress="(totalValidated * 100) / total"
       :progress-secondary="(totalDiscarded * 100) / total"
     ></ReProgress>
-    <div class="scroll">
+    <div class="scroll sidebar--animation">
       <div>
         <div class="info">
           <span class="color-bullet validated"></span>
