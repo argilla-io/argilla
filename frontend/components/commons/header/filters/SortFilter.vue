@@ -170,9 +170,7 @@ export default {
     width: 100%;
     max-width: 280px;
     a {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-all;
       text-decoration: none;
       max-width: 250px;
       display: block;
