@@ -16,6 +16,7 @@ import asyncio
 import logging
 import os
 import re
+from asyncio import Future
 from functools import wraps
 from inspect import signature
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -71,9 +72,39 @@ from rubrix.client.sdk.token_classification.models import (
 )
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
+from rubrix.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
 _WARNED_ABOUT_AS_PANDAS = False
+
+
+class _RubrixLogAgent:
+    def __init__(self, api: "Api"):
+        self.__api__ = api
+        self.__loop__, self.__thread__ = setup_loop_in_thread()
+
+    @staticmethod
+    async def __log_internal__(api: "Api", *args, **kwargs):
+
+        try:
+            return await api.log_async(*args, **kwargs)
+        except Exception as ex:
+            _LOGGER.error(
+                f"Cannot log data {args, kwargs}\n"
+                f"Error of type {type(ex)}\n: {ex}. ({ex.args})"
+            )
+            raise ex
+
+    def log(self, *args, **kwargs) -> Future:
+        return asyncio.run_coroutine_threadsafe(
+            self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__
+        )
+
+    def __del__(self):
+        self.__loop__.stop()
+
+        del self.__loop__
+        del self.__thread__
 
 
 class Api:
@@ -118,6 +149,8 @@ class Api:
 
         if workspace is not None:
             self.set_workspace(workspace)
+
+        self._agent = _RubrixLogAgent(self)
 
     @property
     def client(self):
@@ -195,8 +228,54 @@ class Api:
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
         verbose: bool = True,
-    ) -> BulkResponse:
+        background: bool = False,
+    ) -> Union[BulkResponse, Future]:
         """Logs Records to Rubrix.
+
+        Args:
+            records: The record, an iterable of records, or a dataset to log.
+            name: The dataset name.
+            tags: A dictionary of tags related to the dataset.
+            metadata: A dictionary of extra info for the dataset.
+            chunk_size: The chunk size for a data bulk.
+            verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            background: If True, records will be logged without waiting to finish.
+
+        Returns:
+            Summary of the response from the REST API if background= False, an asyncio.Future otherwise
+
+        Examples:
+            >>> import rubrix as rb
+            >>> record = rb.TextClassificationRecord(
+            ...     text="my first rubrix example",
+            ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+            ... )
+            >>> rb.log(record, name="example-dataset")
+            1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
+            BulkResponse(dataset='example-dataset', processed=1, failed=0)
+        """
+        future = self._agent.log(
+            records=records,
+            name=name,
+            tags=tags,
+            metadata=metadata,
+            chunk_size=chunk_size,
+            verbose=verbose,
+        )
+        if background:
+            return future
+        return future.result()
+
+    async def log_async(
+        self,
+        records: Union[Record, Iterable[Record], Dataset],
+        name: str,
+        tags: Optional[Dict[str, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        chunk_size: int = 500,
+        verbose: bool = True,
+    ) -> BulkResponse:
+        """Logs Records to Rubrix with asyncio.
 
         Args:
             records: The record, an iterable of records, or a dataset to log.
@@ -210,14 +289,14 @@ class Api:
             Summary of the response from the REST API
 
         Examples:
+            >>> # Log asynchronously from your notebook
+            >>> import asyncio
             >>> import rubrix as rb
-            >>> record = rb.TextClassificationRecord(
-            ...     text="my first rubrix example",
-            ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+            >>> from rubrix.utils import setup_loop_in_thread
+            >>> loop, _ = setup_loop_in_thread()
+            >>> future_response = asyncio.run_coroutine_threadsafe(
+            ...     rb.log_async(my_records, dataset_name), loop
             ... )
-            >>> rb.log(record, name="example-dataset")
-            1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
-            BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
         tags = tags or {}
         metadata = metadata or {}
@@ -231,7 +310,7 @@ class Api:
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
 
-            response = bulk(
+            response = await async_bulk(
                 client=self._client,
                 name=name,
                 json_body=bulk_class(
@@ -249,6 +328,9 @@ class Api:
 
         # TODO: improve logging policy in library
         if verbose:
+            _LOGGER.info(
+                f"Processed {processed} records in dataset {name}. Failed: {failed}"
+            )
             workspace = self.get_workspace()
             if (
                 not workspace
@@ -317,63 +399,6 @@ class Api:
             )
 
         return records, bulk_class, creation_class
-
-    async def log_async(
-        self,
-        records: Union[Record, Iterable[Record], Dataset],
-        name: str,
-        tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        chunk_size: int = 500,
-    ) -> BulkResponse:
-        """Logs Records to Rubrix with asyncio.
-
-        Args:
-            records: The record, an iterable of records, or a dataset to log.
-            name: The dataset name.
-            tags: A dictionary of tags related to the dataset.
-            metadata: A dictionary of extra info for the dataset.
-            chunk_size: The chunk size for a data bulk.
-
-        Returns:
-            Summary of the response from the REST API
-
-        Examples:
-            >>> # Log asynchronously from your notebook
-            >>> import asyncio
-            >>> import rubrix as rb
-            >>> from rubrix.utils import setup_loop_in_thread
-            >>> loop, _ = setup_loop_in_thread()
-            >>> future_response = asyncio.run_coroutine_threadsafe(
-            ...     rb.log_async(my_records, dataset_name), loop
-            ... )
-        """
-        tags = tags or {}
-        metadata = metadata or {}
-
-        records, bulk_class, creation_class = self._log(
-            records=records, name=name, chunk_size=chunk_size
-        )
-
-        processed, failed = 0, 0
-        for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
-
-            response = await async_bulk(
-                client=self._client,
-                name=name,
-                json_body=bulk_class(
-                    tags=tags,
-                    metadata=metadata,
-                    records=[creation_class.from_client(r) for r in chunk],
-                ),
-            )
-
-            processed += response.parsed.processed
-            failed += response.parsed.failed
-
-        # Creating a composite BulkResponse with the total processed and failed
-        return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
         self,
