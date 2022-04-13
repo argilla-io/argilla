@@ -17,32 +17,32 @@ except ModuleNotFoundError:
 
 
 class FlairMonitor(BaseMonitor):
-    async def _log2rubrix(
+    def _prepare_log_data(
         self, data: List[Tuple[Sentence, Dict[str, Any]]]
-    ) -> BulkResponse:
-        records = [
-            TokenClassificationRecord(
-                text=sentence.to_original_text(),
-                tokens=[token.text for token in sentence.tokens],
-                metadata=meta,
-                prediction_agent=self.agent,
-                event_timestamp=datetime.utcnow(),
-                prediction=[
-                    (label.value, label.span.start_pos, label.span.end_pos, label.score)
-                    for label in sentence.get_labels(self.__model__.tag_type)
-                ],
-            )
-            for sentence, meta in data
-        ]
-
-        response = await self._async_api.log(
-            records,
+    ) -> Dict[str, Any]:
+        return dict(
+            records=[
+                TokenClassificationRecord(
+                    text=sentence.to_original_text(),
+                    tokens=[token.text for token in sentence.tokens],
+                    metadata=meta,
+                    prediction_agent=self.agent,
+                    event_timestamp=datetime.utcnow(),
+                    prediction=[
+                        (
+                            label.value,
+                            label.span.start_pos,
+                            label.span.end_pos,
+                            label.score,
+                        )
+                        for label in sentence.get_labels(self.__model__.tag_type)
+                    ],
+                )
+                for sentence, meta in data
+            ],
             name=self.dataset,
-            verbose=False,
             tags={**(self.tags or {}), "flair_version": _flair_version},
         )
-
-        return response
 
     def predict(self, sentences: Union[List[Sentence], Sentence], *args, **kwargs):
         metadata = kwargs.pop("metadata", None)

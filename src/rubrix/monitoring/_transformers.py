@@ -34,16 +34,19 @@ class HuggingFaceMonitor(BaseMonitor):
         config_dict = config.to_dict()
         return config_dict.get("transformers_version", _transformers_version)
 
-    async def _log2rubrix(
+    @property
+    def model_config(self):
+        return self.__model__.model.config
+
+    def _prepare_log_data(
         self,
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
-    ) -> BulkResponse:
-        """Register a list of tuples including inputs and its predictions for text classification task"""
-        records = []
-        config = self.__model__.model.config
-        agent = config.name_or_path
+    ) -> Dict[str, Any]:
 
+        agent = self.model_config.name_or_path
+
+        records = []
         for input_, metadata, predictions in data:
             record = TextClassificationRecord(
                 text=input_ if isinstance(input_, str) else None,
@@ -62,20 +65,20 @@ class HuggingFaceMonitor(BaseMonitor):
         if multi_label:
             dataset_name += "_multi"
 
-        response = await rb.log_async(
-            records,
+        return dict(
+            records=records,
             name=dataset_name,
             tags={
-                "name": config.name_or_path,
-                "transformers_version": self.fetch_transformers_version(config),
-                "model_type": config.model_type,
+                "name": self.model_config.name_or_path,
+                "transformers_version": self.fetch_transformers_version(
+                    self.model_config
+                ),
+                "model_type": self.model_config.model_type,
                 "task": self.__model__.task,
             },
-            metadata=config.to_dict(),
+            metadata=self.model_config.to_dict(),
             verbose=False,
         )
-
-        return response
 
 
 class ZeroShotMonitor(HuggingFaceMonitor):
@@ -123,9 +126,7 @@ class ZeroShotMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self._log_future = self.log_async(
-                    filtered_data, multi_label=multi_label
-                )
+                self.log_async(filtered_data, multi_label=multi_label)
 
         finally:
             return batch_predictions
@@ -157,7 +158,7 @@ class TextClassificationMonitor(HuggingFaceMonitor):
                 if self.is_record_accepted()
             ]
             if filtered_data:
-                self._log_future = self.log_async(filtered_data)
+                self.log_async(filtered_data)
 
         finally:
             return batch_predictions

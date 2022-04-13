@@ -1,11 +1,11 @@
 import asyncio
 import random
 import threading
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import wrapt
 
-from rubrix.client.models import BulkResponse
+import rubrix
 
 
 class ModelNotSupportedError(Exception):
@@ -44,8 +44,6 @@ class BaseMonitor(wrapt.ObjectProxy):
         self.sample_rate = sample_rate
         self.agent = agent
         self.tags = tags
-        self._event_loop, self._event_loop_thread, self._log_future = None, None, None
-        self._start_event_loop_if_needed()
 
     @property
     def __model__(self):
@@ -56,14 +54,14 @@ class BaseMonitor(wrapt.ObjectProxy):
         """Return True if a record should be logged to rubrix"""
         return random.uniform(0.0, 1.0) <= self.sample_rate
 
-    async def _log2rubrix(self, *args, **kwargs) -> BulkResponse:
+    def _prepare_log_data(self, *args, **kwargs) -> Dict[str, Any]:
         raise NotImplementedError()
 
     def log_async(self, *args, **kwargs):
-        self._start_event_loop_if_needed()
-        return asyncio.run_coroutine_threadsafe(
-            self._log2rubrix(*args, **kwargs), self._event_loop
-        )
+        log_args = self._prepare_log_data(*args, **kwargs)
+        log_args.pop("verbose", None)
+        log_args.pop("background", None)
+        return rubrix.log(**log_args, verbose=False, background=True)
 
     def _start_event_loop_if_needed(self):
         """Recreate loop/thread if needed"""
