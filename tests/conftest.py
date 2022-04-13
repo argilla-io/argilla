@@ -13,6 +13,7 @@ def mocked_client(monkeypatch):
     client = SecuredClient(TestClient(app, raise_server_exceptions=False))
 
     monkeypatch.setattr(httpx, "post", client.post)
+    monkeypatch.setattr(httpx.AsyncClient, "post", client.post_async)
     monkeypatch.setattr(httpx, "get", client.get)
     monkeypatch.setattr(httpx, "delete", client.delete)
     monkeypatch.setattr(httpx, "put", client.put)

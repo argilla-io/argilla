@@ -42,6 +42,9 @@ class SecuredClient:
         headers = {**self._header, **request_headers}
         return self._client.post(*args, headers=headers, **kwargs)
 
+    async def post_async(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
     def get(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
         headers = {**self._header, **request_headers}
