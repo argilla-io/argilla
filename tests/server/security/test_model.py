@@ -19,7 +19,9 @@ def test_email_validator(wrong_email):
         User(username="user", email=wrong_email)
 
 
-@pytest.mark.parametrize("wrong_name", ["user name", "user/name", "user.name"])
+@pytest.mark.parametrize(
+    "wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"]
+)
 def test_username_validator(wrong_name):
     with pytest.raises(ValidationError):
         User(username=wrong_name)

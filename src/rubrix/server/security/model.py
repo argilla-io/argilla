@@ -17,6 +17,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 from rubrix.server.commons.errors import EntityNotFoundError, ForbiddenOperationError
 
 WORKSPACE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_\-]*$")
@@ -26,7 +27,7 @@ _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 class User(BaseModel):
     """Base user model"""
 
-    username: str = Field(regex=WORKSPACE_NAME_PATTERN.pattern)
+    username: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
