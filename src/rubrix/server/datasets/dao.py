@@ -201,21 +201,22 @@ class DatasetsDAO:
         name: str,
         owner: Optional[str],
         task: Optional[TaskType] = None,
+        as_dataset_class: Optional[Type] = None,
     ) -> Optional[BaseDatasetDB]:
         """
         Finds a dataset by name
 
-        Parameters
-        ----------
-        name:
-            The dataset name
-        owner:
-            The dataset owner
+        Args:
+            name: The dataset name
+            owner: The dataset owner
+            task: If provided, expected dataset task
+            as_dataset_class: If provided, it will be used as data model for found dataset.
 
-        Returns
-        -------
+        Returns:
             The found dataset if any. None otherwise
+
         """
+
         dataset_id = DatasetDB.build_dataset_id(
             name=name,
             owner=owner,
@@ -252,7 +253,9 @@ class DatasetsDAO:
                 detail=f"Provided task {task} cannot be applied to dataset"
             )
 
-        dataset_type = TaskFactory.get_task_dataset(task)
+        dataset_type = (
+            as_dataset_class if as_dataset_class else TaskFactory.get_task_dataset(task)
+        )
         return self._es_doc_to_dataset(document, ds_class=dataset_type)
 
     @staticmethod

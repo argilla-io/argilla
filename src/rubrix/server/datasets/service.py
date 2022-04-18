@@ -14,11 +14,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TypeVar, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from fastapi import Depends
 
-from rubrix.server.commons import es_helpers
 from rubrix.server.commons.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -54,6 +53,7 @@ class DatasetsService:
 
         dataset.created_at = date_now
         dataset.last_updated = date_now
+
         return self.__dao__.create_dataset(dataset)
 
     def find_by_name(
@@ -62,6 +62,7 @@ class DatasetsService:
         name: str,
         task: Optional[TaskType] = None,
         workspace: Optional[str] = None,
+        as_dataset_class: Optional[Type] = None,
     ) -> Dataset:
         owner = user.check_workspace(workspace)
 
@@ -73,7 +74,7 @@ class DatasetsService:
                 task = found_ds.task
 
         found_ds = self.__find_by_name_with_superuser_fallback__(
-            user, name=name, owner=owner, task=task
+            user, name=name, owner=owner, task=task, as_dataset_class=as_dataset_class
         )
 
         if found_ds is None:
@@ -89,10 +90,15 @@ class DatasetsService:
         name: str,
         owner: Optional[str],
         task: Optional[str] = None,
+        as_dataset_class: Optional[Type] = None,
     ):
-        found_ds = self.__dao__.find_by_name(name=name, owner=owner, task=task)
+        found_ds = self.__dao__.find_by_name(
+            name=name, owner=owner, task=task, as_dataset_class=as_dataset_class
+        )
         if not found_ds and user.is_superuser():
-            found_ds = self.__dao__.find_by_name(name=name, owner=None, task=task)
+            found_ds = self.__dao__.find_by_name(
+                name=name, owner=None, task=task, as_dataset_class=as_dataset_class
+            )
         return found_ds
 
     def delete(self, user: User, dataset: Dataset):
