@@ -47,14 +47,17 @@ def build_pagination_params(item_type: str) -> Type:
     @dataclass()
     class PaginationParams:
         limit: int = Query(
-            50, gte=0, le=1000, description=f"Response {item_type} limit"
+            50,
+            gte=0,
+            le=1000,
+            description=f"Limit the number of {item_type.title()}s to return",
         )
         from_: int = Query(
             0,
             ge=0,
             le=10000,
             alias="from",
-            description=f"{item_type.title()} sequence from",
+            description=f"Number of {item_type.title()}s  to skip before returning results",
         )
 
     return PaginationParams
