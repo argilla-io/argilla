@@ -1,4 +1,5 @@
-from rubrix.server.api.v1.models.commons.task import TaskFactory, TaskType
+from rubrix.server.api.v1.models.commons.task import TaskType
+from rubrix.server.api.v1.models.commons.task_factory import TaskFactory
 from rubrix.server.api.v1.models.datasets import (
     DatasetUpdate,
     Text2TextDataset,
@@ -60,3 +61,19 @@ __all__ = [
         query_class=Text2TextQuery,
     ),
 ]
+
+
+def find_config_by_task(task: TaskType) -> TaskFactory:
+    """
+    Finds task factory configuration for a given task
+
+    Args:
+        task: The task type
+
+    Returns:
+        The related task factory configuration for given task
+    """
+    for cfg in __all__:
+        if cfg.task == task:
+            return cfg
+    raise RuntimeError(f"Not found info for task '{task}'")

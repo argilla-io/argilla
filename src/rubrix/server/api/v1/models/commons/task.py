@@ -1,39 +1,42 @@
-from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Type
 
-from rubrix.server.api.v1.models.datasets import (
-    BaseDataset,
-    DatasetCreate,
-    DatasetUpdate,
-)
-from rubrix.server.api.v1.models.weak_supervision import _Rule, _RuleCreate, _RuleUpdate
-from rubrix.server.tasks.commons import BaseRecord
-from rubrix.server.tasks.commons.service import TaskService
-from rubrix.server.tasks.search.model import BaseSearchQuery
+from rubrix.server.tasks.commons.api.model import TaskType as _TaskType
 
 
 class TaskType(str, Enum):
-    text_classification = "text-classification"
-    token_classification = "token-classification"
+    text_classification = "text_classification"
+    token_classification = "token_classification"
     text2text = "text2text"
 
+    def as_old_task_type(self) -> _TaskType:
+        """
+        Converts task type to old task type enum
 
-@dataclass
-class TaskFactory:
+        Returns:
+            The old task type enum version from defined
+        """
+        value = _TASK_TYPES_MAP_.get(self)
+        if not value:
+            raise RuntimeError(f"Unmapped value '{self}'")
+        return value
 
-    task: TaskType
-    # Common
-    service_class: Type[TaskService]
-    # Datasets
-    create_dataset_class: Type[DatasetCreate]
-    update_dataset_class: Type[DatasetUpdate]
-    output_dataset_class: Type[BaseDataset]
-    # Logging and search (Could be splitted)
-    record_class: Type[BaseRecord]
-    # Search
-    query_class: Type[BaseSearchQuery]
-    # Weak Supervision
-    create_rule_class: Optional[Type[_RuleCreate]] = None
-    update_rule_class: Optional[Type[_RuleUpdate]] = None
-    output_rule_class: Optional[Type[_Rule]] = None
+    @classmethod
+    def from_old_task_type(cls, value: _TaskType) -> "TaskType":
+        """
+        Build task type from old task definition
+
+        Args:
+            value: The old task type definition
+
+        Returns:
+            The task type
+
+        """
+        return TaskType(value.name)
+
+
+_TASK_TYPES_MAP_ = {
+    TaskType.text2text: _TaskType.text2text,
+    TaskType.token_classification: _TaskType.token_classification,
+    TaskType.text_classification: _TaskType.text_classification,
+}
