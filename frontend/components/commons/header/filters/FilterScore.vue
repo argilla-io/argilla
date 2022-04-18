@@ -54,7 +54,9 @@
         :class="{ expanded: scoreExpanded }"
       >
         <div class="score-content">
-          <p class="range__panel">{{ min }}% to {{ max }}%</p>
+          <p class="range__panel">
+            {{ min | percent(0, 2) }} to {{ max | percent(0, 2) }}
+          </p>
           <vega-lite
             class="score"
             :data="options"
@@ -155,10 +157,10 @@ export default {
       return this.scoreExpanded;
     },
     min() {
-      return this.scoreRanges[0];
+      return this.scoreRanges[0] * 0.01;
     },
     max() {
-      return this.scoreRanges[1];
+      return this.scoreRanges[1] * 0.01;
     },
   },
   beforeMount() {
@@ -176,8 +178,8 @@ export default {
     },
     onApplyscoreRange() {
       this.$emit("apply", this.filter, {
-        from: this.min * 0.01,
-        to: this.max * 0.01,
+        from: this.min,
+        to: this.max,
       });
       this.scoreExpanded = false;
     },
