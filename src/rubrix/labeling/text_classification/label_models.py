@@ -21,6 +21,7 @@ import numpy as np
 
 from rubrix import DatasetForTextClassification, TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
+from rubrix.client.datasets import Dataset
 
 _LOGGER = logging.getLogger(__name__)
 
