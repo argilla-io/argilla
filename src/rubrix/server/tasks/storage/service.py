@@ -24,15 +24,6 @@ class RecordsStorageService:
     def __init__(self, dao: DatasetRecordsDAO):
         self.__dao__ = dao
 
-        for task in [
-            TaskType.text2text,
-            TaskType.text_classification,
-            TaskType.token_classification,
-        ]:
-            self.__dao__.register_task_mappings(
-                task, TaskFactory.get_task_mappings(task)
-            )
-
     def store_records(
         self,
         dataset: BaseDatasetDB,

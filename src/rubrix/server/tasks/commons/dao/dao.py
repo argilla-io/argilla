@@ -119,6 +119,7 @@ class DatasetRecordsDAO:
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
+        # TODO: We should remove this line now
         self._es.delete_index_template(index_template=DATASETS_RECORDS_INDEX_NAME)
 
     def add_records(

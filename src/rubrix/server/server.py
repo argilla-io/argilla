@@ -37,6 +37,8 @@ from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
 from .routes import api_router
+from .tasks.commons import TaskType
+from .tasks.commons.task_factory import TaskFactory
 
 
 def configure_middleware(app: FastAPI):
@@ -97,6 +99,16 @@ def configure_app_storage(app: FastAPI):
             )
             datasets.init()
             dataset_records.init()
+
+            # TODO: Remove from here and centralize as part of task configuration
+            for task in [
+                TaskType.text2text,
+                TaskType.text_classification,
+                TaskType.token_classification,
+            ]:
+                dataset_records.register_task_mappings(
+                    task, TaskFactory.get_task_mappings(task)
+                )
         except opensearchpy.exceptions.ConnectionError as error:
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
