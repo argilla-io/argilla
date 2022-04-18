@@ -72,7 +72,12 @@ export default {
   computed: {
     normalizedMetadataItems() {
       return Object.keys(this.metadataItems).reduce(
-        (r, k) => ((r[k] = String(this.metadataItems[k])), r),
+        (r, k) => (
+          (r[k] = Array.isArray(this.metadataItems[k])
+            ? this.metadataItems[k]
+            : String(this.metadataItems[k])),
+          r
+        ),
         {}
       );
     },
