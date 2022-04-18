@@ -401,9 +401,8 @@ class Api:
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        as_pandas: bool = True,
-    ) -> Union[pandas.DataFrame, Dataset]:
-        """Loads a dataset as a pandas DataFrame or a Dataset.
+    ) -> Dataset:
+        """Loads a dataset as a Dataset.
 
         Args:
             name: The dataset name.
@@ -411,14 +410,12 @@ class Api:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
-            as_pandas: If True, return a pandas DataFrame. If False, return a Dataset.
 
         Returns:
-            The dataset as a pandas Dataframe or a Dataset.
+            The dataset as a Dataset.
 
         Examples:
             >>> import rubrix as rb
-            >>> dataframe = rb.load(name="example-dataset")
             >>> dataset = rb.load(name="example-dataset")
         """
         response = datasets_api.get_dataset(client=self._client, name=name)
@@ -465,16 +462,6 @@ class Api:
 
         dataset = dataset_class(records_sorted_by_id)
 
-        global _WARNED_ABOUT_AS_PANDAS
-        if not _WARNED_ABOUT_AS_PANDAS:
-            _LOGGER.warning(
-                "The argument 'as_pandas' in `rb.load` will be deprecated in the future, and we will always return a `Dataset`. "
-                "To emulate the future behavior set `as_pandas=False`. To get a pandas DataFrame, call `Dataset.to_pandas()`"
-            )
-            _WARNED_ABOUT_AS_PANDAS = True
-
-        if as_pandas:
-            return dataset.to_pandas()
         return dataset
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
