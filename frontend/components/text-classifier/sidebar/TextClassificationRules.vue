@@ -21,7 +21,7 @@
     <div class="progress__info">
       <p class="progress__info__text">Coverage</p>
       <span class="progress__info__percent">{{
-        coverage.percent | percent
+        coverage.percent || 0 | percent
       }}</span>
     </div>
     <ReProgress
@@ -33,7 +33,7 @@
     <div class="progress__info">
       <p class="progress__info__text">Annotated Coverage</p>
       <span class="progress__info__percent">{{
-        annotatedCoverage.percent | percent
+        annotatedCoverage.percent || 0 | percent
       }}</span>
     </div>
     <ReProgress
@@ -46,7 +46,7 @@
       <p class="progress__info__text">Precision average</p>
       <transition name="fade" mode="out-in" appear
         ><span :key="precision" class="progress__info__percent">{{
-          precision | percent
+          precision || 0 | percent
         }}</span></transition
       >
     </div>
