@@ -78,12 +78,7 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
-    [
-      "nuxt-highlightjs",
-      {
-        style: "dracula",
-      },
-    ],
+    "nuxt-highlightjs",
     [
       "nuxt-mq",
       {
