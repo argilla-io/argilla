@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm -rf docs/reference/api/v1/spec.json*
+rm -rf docs/reference/api/v1/openapi.json*
 
 python -m rubrix &
 RUBRIX_PID=$!
