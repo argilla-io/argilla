@@ -1,0 +1,13 @@
+.. _v1:
+
+V1
+===========
+
+.. openapi:: v1/openapi.json
+   :request:
+   :examples:
+   :group:
+   :include:
+     /datasets/*
+   :encoding: utf-8
+

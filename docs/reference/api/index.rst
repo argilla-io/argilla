@@ -1,10 +1,13 @@
-Rest API
+.. _api:
+
+REST API
 ========
 
-.. openapi:: spec.json
-   :request:
-   :examples:
-   :group:
-   :include:
-     /api/v1/*
-   :encoding: utf-8
+This sections includes the http API references
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Rest API
+   :hidden:
+
+   v1
