@@ -132,19 +132,21 @@ class DatasetsService:
         user: User,
         workspaces: Optional[List[str]],
         task: Optional[TaskType] = None,
+        task_dataset_map: Optional[Dict[TaskType, DatasetDB]] = None,
     ) -> List[Dataset]:
         owners = user.check_workspaces(workspaces)
 
-        datasets = []
-        for task_ in (
-            [task] if task else [cfg.task for cfg in TaskFactory.get_all_configs()]
-        ):
-            datasets.extend(
-                self.__dao__.list_datasets(
-                    owner_list=owners,
-                    task=task_,
-                )
-            )
+        task_dataset_map = task_dataset_map or {
+            cfg.task: cfg.dataset for cfg in TaskFactory.get_all_configs()
+        }
+        if task:
+            task_dataset_map = {task: task_dataset_map.get(task)}
+
+        datasets = self.__dao__.list_datasets(
+            owner_list=owners,
+            task_dataset_map=task_dataset_map,
+        )
+
         return datasets
 
     def close(self, user: User, dataset: Dataset):

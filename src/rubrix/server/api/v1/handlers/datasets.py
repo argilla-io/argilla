@@ -144,6 +144,11 @@ def configure_router() -> APIRouter:
     """Configure path routes to router"""
     router = APIRouter(tags=[f"Datasets"])
 
+    DEFAULT_TASK_DATASET_MAP = {
+        cfg.task.as_old_task_type(): __extended_dataset_class__(cfg)
+        for cfg in all_tasks
+    }
+
     @router.get(
         path="/",
         name="get_datasets",
@@ -165,6 +170,7 @@ def configure_router() -> APIRouter:
             workspaces=[ws_params.workspace]
             if ws_params.workspace is not None
             else None,
+            task_dataset_map=DEFAULT_TASK_DATASET_MAP,
         )
         return _datasets2DatasetsList(found_datasets)
 
@@ -196,6 +202,7 @@ def configure_router() -> APIRouter:
                 user=user,
                 workspaces=workspaces,
                 task=TaskType(task).as_old_task_type(),
+                task_dataset_map=DEFAULT_TASK_DATASET_MAP,
             )
         ]
 

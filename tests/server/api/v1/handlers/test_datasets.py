@@ -138,13 +138,21 @@ def test_create_dataset(
 
 
 def test_list_datasets(mocked_client, api_endpoint, created_datasets, defined_tasks):
+    def validate_datasets(datasets, expected_datasets):
+        for ds in datasets:
+            ds_was_found = False
+            for created_ds in expected_datasets:
+                if ds.name == created_ds["name"]:
+                    ds_was_found = True
+                    assert ds == ds.__class__.parse_obj(created_ds)
+            assert ds_was_found, ds
+
     response = mocked_client.get(f"{api_endpoint}")
     assert response.status_code == 200, response.json()
     get_all_datasets = DatasetsList.parse_obj(response.json())
 
     assert get_all_datasets.total == len(created_datasets)
-    for ds, expected_ds in zip(get_all_datasets.data, created_datasets):
-        assert ds.dict(), expected_ds
+    validate_datasets(get_all_datasets.data, created_datasets)
 
     for task in defined_tasks:
         datasets_by_task = [ds for ds in created_datasets if ds["task"] == task]
@@ -153,8 +161,7 @@ def test_list_datasets(mocked_client, api_endpoint, created_datasets, defined_ta
         assert response.status_code == 200, response.json()
         get_task_datasets = DatasetsList.parse_obj(response.json())
         assert get_task_datasets.total == len(datasets_by_task)
-        for ds, expected_ds in zip(get_task_datasets.data, datasets_by_task):
-            assert ds.dict(), expected_ds
+        validate_datasets(get_task_datasets.data, datasets_by_task)
 
 
 def test_open_and_close_datasets(mocked_client, api_endpoint, created_datasets):

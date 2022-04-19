@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import json
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from fastapi import Depends
@@ -81,7 +82,7 @@ class DatasetsDAO:
     def list_datasets(
         self,
         owner_list: List[str] = None,
-        task: Optional[TaskType] = None,
+        task_dataset_map: Optional[Dict[TaskType, Type[BaseDatasetDB]]] = None,
     ) -> List[BaseDatasetDB]:
         """
         List the dataset for an owner list
@@ -97,7 +98,6 @@ class DatasetsDAO:
 
         """
         filters = []
-        dataset_type = DatasetDB
         if owner_list:
             owners_filter = es_helpers.filters.terms_filter("owner.keyword", owner_list)
             if NO_WORKSPACE in owner_list:
@@ -115,9 +115,12 @@ class DatasetsDAO:
             else:
                 filters.append(owners_filter)
 
-        if task:
-            filters.append(es_helpers.filters.term_filter("task.keyword", task))
-            dataset_type = TaskFactory.get_task_dataset(task)
+        if task_dataset_map:
+            filters.append(
+                es_helpers.filters.terms_filter(
+                    "task.keyword", [task for task in task_dataset_map]
+                )
+            )
 
         docs = self._es.list_documents(
             index=DATASETS_INDEX_NAME,
@@ -130,7 +133,15 @@ class DatasetsDAO:
             else None,
         )
 
-        return [self._es_doc_to_dataset(doc, ds_class=dataset_type) for doc in docs]
+        if not task_dataset_map:
+            task_dataset_map = defaultdict(lambda x: DatasetDB)
+
+        return [
+            self._es_doc_to_dataset(doc, ds_class=ds_class)
+            for doc in docs
+            for task in [doc["_source"]["task"]]
+            for ds_class in [task_dataset_map[task]]
+        ]
 
     def create_dataset(self, dataset: BaseDatasetDB) -> BaseDatasetDB:
         """
