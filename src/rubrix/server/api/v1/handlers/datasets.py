@@ -30,11 +30,6 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 
 
-class OpenCloseAction(str, enum.Enum):
-    open = "open"
-    close = "close"
-
-
 def _configure_task_endpoints(router: APIRouter, cfg: TaskFactory):
     dataset_class = type(
         f"{cfg.task}_Dataset", (DatasetDB, cfg.output_dataset_class), {}
@@ -155,14 +150,7 @@ def configure_router() -> APIRouter:
             if ws_params.workspace is not None
             else None,
         )
-        all_datasets = []
-        for ds in found_datasets:
-            task_type = TaskType.from_old_task_type(ds.task)
-            cfg = find_config_by_task(task_type)
-            all_datasets.append(
-                cfg.output_dataset_class.parse_obj({**ds.dict(), "task": task_type})
-            )
-        return DatasetsList(total=len(found_datasets), data=all_datasets)
+        return _datasets2DatasetsList(found_datasets)
 
     @router.get(
         path="/{tasks}",
@@ -185,7 +173,7 @@ def configure_router() -> APIRouter:
         tasks = set([t.strip() for t in tasks.split(",")]) if tasks else {}
         workspaces = [ws_params.workspace] if ws_params.workspace is not None else None
         # TODO: implement pagination
-        all_datasets = [
+        found_datasets = [
             dataset
             for task in tasks
             for dataset in datasets.list(
@@ -195,6 +183,17 @@ def configure_router() -> APIRouter:
             )
         ]
 
+        return _datasets2DatasetsList(found_datasets)
+
+    def _datasets2DatasetsList(found_datasets) -> DatasetsList:
+        """Convert a list of datasets into a ``DatasetsList``"""
+        all_datasets = []
+        for ds in found_datasets:
+            task_type = TaskType.from_old_task_type(ds.task)
+            cfg = find_config_by_task(task_type)
+            all_datasets.append(
+                cfg.output_dataset_class.parse_obj({**ds.dict(), "task": task_type})
+            )
         return DatasetsList(total=len(all_datasets), data=all_datasets)
 
     @router.post(
@@ -229,14 +228,16 @@ def configure_router() -> APIRouter:
             copy_metadata=request.metadata,
         )
 
+    class OpenCloseAction(str, enum.Enum):
+        open = "open"
+        close = "close"
+
     @router.post(
         path=f"{TASK_DATASET_ENDPOINT}:{{action}}",
         name="open_or_close_dataset",
         operation_id="open_or_close_dataset",
         description="Open/close a dataset",
         status_code=HTTPStatus.OK,
-        response_model=Dataset,
-        response_model_exclude_none=True,
     )
     async def open_or_close_dataset(
         task: TaskType = TASK_TYPE_PATH_PARAM,
@@ -245,7 +246,8 @@ def configure_router() -> APIRouter:
         ws_params: WorkspaceParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["OpenCloseDataset"]),
-    ):
+    ) -> None:
+
         found_ds = datasets.find_by_name(
             user=user,
             task=task.as_old_task_type(),
@@ -254,8 +256,6 @@ def configure_router() -> APIRouter:
         )
         method = datasets.open if action == OpenCloseAction.open else datasets.close
         method(user=user, dataset=found_ds)
-
-        return found_ds
 
     @router.delete(
         path=TASK_DATASET_ENDPOINT,
@@ -280,7 +280,9 @@ def configure_router() -> APIRouter:
             workspace=ws_params.workspace,
         )
         datasets.delete(user=user, dataset=found)
-        return found
+
+        cfg = find_config_by_task(task)
+        return cfg.output_dataset_class.parse_obj({**found.dict(), "task": task})
 
     for cfg in all_tasks:
         # Per task endpoints configuration
