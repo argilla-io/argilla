@@ -73,9 +73,11 @@ export default {
     normalizedMetadataItems() {
       return Object.keys(this.metadataItems).reduce(
         (r, k) => (
-          (r[k] = Array.isArray(this.metadataItems[k])
-            ? this.metadataItems[k]
-            : String(this.metadataItems[k])),
+          (r[k] =
+            Array.isArray(this.metadataItems[k]) &&
+            this.metadataItems[k].length > 1
+              ? this.metadataItems[k]
+              : String(this.metadataItems[k])),
           r
         ),
         {}
@@ -94,7 +96,13 @@ export default {
     if (this.appliedFilters) {
       Object.keys(this.appliedFilters).map((key) => {
         if (
-          this.appliedFilters[key].includes(this.normalizedMetadataItems[key])
+          Array.isArray(this.normalizedMetadataItems[key])
+            ? this.appliedFilters[key].some((f) =>
+                this.normalizedMetadataItems[key].includes(f)
+              )
+            : this.appliedFilters[key].includes(
+                this.normalizedMetadataItems[key]
+              )
         ) {
           this.selectedMetadata.push(key);
         }
