@@ -183,3 +183,43 @@ def test_delete_datasets(mocked_client, api_endpoint, created_datasets):
         assert response.status_code == 200, response.json()
         response = mocked_client.get(f"{api_endpoint}/{task}/{name}")
         assert response.status_code == 404, response.json()
+
+
+def test_update_datasets(mocked_client, api_endpoint, created_datasets):
+    for dataset in created_datasets:
+        task, name = dataset["task"], dataset["name"]
+
+        current_tags = dataset["tags"]
+        current_metadata = dataset["metadata"]
+        response = mocked_client.patch(
+            f"{api_endpoint}/{task}/{name}",
+            json={"tags": {"This": "is"}, "metadata": {"an": "update"}},
+        )
+        assert response.status_code == 200, response.json()
+        updated_dataset = response.json()
+
+        response = mocked_client.get(f"{api_endpoint}/{task}/{name}")
+        assert response.status_code == 200, response.json()
+        assert updated_dataset == response.json()
+
+        assert current_tags != updated_dataset["tags"]
+        assert current_metadata != updated_dataset["metadata"]
+
+
+def test_copy_datasets(mocked_client, api_endpoint, created_datasets, defined_tasks):
+    for dataset in created_datasets:
+        task, name = dataset["task"], dataset["name"]
+        new_dataset_name = f"{name}_copy"
+        response = mocked_client.post(
+            f"{api_endpoint}/{task}/{name}:copy",
+            json={
+                "name": new_dataset_name,
+                "tags": {"This": "is"},
+                "metadata": {"a": "copy"},
+            },
+        )
+        assert response.status_code == 200, response.json()
+        copied_dataset = response.json()
+        response = mocked_client.get(f"{api_endpoint}/{task}/{name}")
+        assert response.status_code == 200, response.json()
+        assert copied_dataset == response.json()

@@ -1,6 +1,7 @@
 import datetime
 import enum
 from http import HTTPStatus
+from typing import Type
 
 from fastapi import APIRouter, Body, Depends, Path, Security
 
@@ -30,10 +31,15 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 
 
-def _configure_task_endpoints(router: APIRouter, cfg: TaskFactory):
-    dataset_class = type(
+def __extended_dataset_class__(cfg: TaskFactory):
+    return type(
         f"{cfg.task}_Dataset", (DatasetDB, cfg.output_dataset_class), {}
     )  # Mixing api dataset with service storage dataset
+
+
+def _configure_task_endpoints(router: APIRouter, cfg: TaskFactory):
+
+    dataset_class = __extended_dataset_class__(cfg)
 
     @router.post(
         path=f"/{cfg.task}",
@@ -115,13 +121,23 @@ def _configure_task_endpoints(router: APIRouter, cfg: TaskFactory):
             task=cfg.task.as_old_task_type(),
         )
         # TODO: allow to change some settings
-        updated = datasets.update(
+        datasets.update(
             user=user,
             dataset=found_ds,
             tags=request.tags,
             metadata=request.metadata,
         )
-        return cfg.output_dataset_class.parse_obj(updated)
+        updated_dataset = datasets.find_by_name(
+            user=user,
+            name=name,
+            workspace=ws_params.workspace,
+            task=cfg.task.as_old_task_type(),
+            as_dataset_class=dataset_class,
+        )
+
+        return cfg.output_dataset_class.parse_obj(
+            {**updated_dataset.dict(), "task": cfg.task}
+        )
 
 
 def configure_router() -> APIRouter:
@@ -219,7 +235,7 @@ def configure_router() -> APIRouter:
             name=name,
             workspace=ws_params.workspace,
         )
-        return datasets.copy_dataset(
+        datasets.copy_dataset(
             user=user,
             dataset=found,
             copy_name=request.name,
@@ -227,6 +243,17 @@ def configure_router() -> APIRouter:
             copy_tags=request.tags,
             copy_metadata=request.metadata,
         )
+
+        cfg = find_config_by_task(task)
+        dataset_class = __extended_dataset_class__(cfg)
+        found = datasets.find_by_name(
+            user=user,
+            task=task.as_old_task_type(),
+            name=name,
+            workspace=ws_params.workspace,
+            as_dataset_class=dataset_class,
+        )
+        return cfg.output_dataset_class.parse_obj({**found.dict(), "task": task})
 
     class OpenCloseAction(str, enum.Enum):
         open = "open"
