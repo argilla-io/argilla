@@ -65,17 +65,10 @@ export default {
           const start = recordHasEmoji
             ? indexOf(this.record.text, token, startPosition)
             : this.record.text.indexOf(token, startPosition);
-          const nextStart = recordHasEmoji
-            ? indexOf(
-                this.record.text,
-                this.record.tokens[index + 1],
-                startPosition
-              )
-            : this.record.text.indexOf(
-                this.record.tokens[index + 1],
-                startPosition
-              );
           const end = start + (recordHasEmoji ? length(token) : token.length);
+          const nextStart = recordHasEmoji
+            ? indexOf(this.record.text, this.record.tokens[index + 1], end)
+            : this.record.text.indexOf(this.record.tokens[index + 1], end);
           const charsBetweenTokens = this.record.text.slice(end, nextStart);
           let highlighted = false;
           for (let highlight of searchKeywordsSpans) {
