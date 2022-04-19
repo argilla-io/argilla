@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
+from rubrix.server.api import apis
 from rubrix.server.commons.es_wrapper import create_es_wrapper
 from rubrix.server.commons.static_rewrite import RewriteStaticFiles
 from rubrix.server.datasets.dao import DatasetsDAO
@@ -66,6 +67,7 @@ def configure_api_exceptions(api: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.include_router(api_router, prefix="/api")
+    app.mount("/api", apis)
 
 
 def configure_app_statics(app: FastAPI):

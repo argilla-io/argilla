@@ -20,14 +20,14 @@ set the required security dependencies if api security is enabled
 
 from fastapi import APIRouter
 
-from .commons.errors.base_errors import __ALL__
+from .commons.errors.base_errors import ALL_ERRORS
 from .datasets import api as datasets
 from .info import api as info
 from .tasks import api as tasks
 from .users import api as users
 
 api_router = APIRouter(
-    responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__}
+    responses={error.HTTP_STATUS: error.api_documentation() for error in ALL_ERRORS}
 )
 
 dependencies = []

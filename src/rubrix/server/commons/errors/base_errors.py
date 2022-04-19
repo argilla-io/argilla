@@ -166,7 +166,7 @@ class MissingDatasetRecordsError(BadRequestError):
         self.message = message
 
 
-__ALL__ = [
+ALL_ERRORS = [
     BadRequestError,
     EntityNotFoundError,
     ForbiddenOperationError,
