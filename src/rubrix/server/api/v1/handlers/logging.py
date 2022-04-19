@@ -23,7 +23,7 @@ RECORD_ID_PATH_PARAM = Path(..., description="The record id param")
 
 def configure_router() -> APIRouter:
 
-    router = APIRouter(tags=[f"{API_VERSION} / Logging"])
+    router = APIRouter(tags=[f"Logging"])
 
     for cfg in all_tasks:
         base_endpoint = f"/{cfg.task}/{{name}}"

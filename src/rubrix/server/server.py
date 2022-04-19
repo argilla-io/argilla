@@ -36,7 +36,7 @@ from ..logging import configure_logging
 from .commons.errors import APIErrorHandler
 from .commons.settings import settings
 from .commons.settings import settings as api_settings
-from .routes import api_router
+from .routes import api_app, api_router
 from .tasks.commons import TaskType
 from .tasks.commons.task_factory import TaskFactory
 
@@ -66,6 +66,7 @@ def configure_api_exceptions(api: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.include_router(api_router, prefix="/api")
+    app.mount("/api", api_app)  # Separate app for api paths
 
 
 def configure_app_statics(app: FastAPI):

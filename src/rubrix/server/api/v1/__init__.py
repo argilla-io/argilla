@@ -9,7 +9,7 @@ from rubrix.server.api.v1.handlers.weak_supervision import (
     __router__ as weak_supervision,
 )
 
-api_router = APIRouter(prefix=f"/{API_VERSION}/datasets")
+api_router = APIRouter(prefix="/datasets")
 
 dependencies = []
 for router in [datasets, logging, search, weak_supervision, metrics]:

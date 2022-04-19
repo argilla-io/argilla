@@ -22,7 +22,7 @@ from rubrix.server.tasks.commons.service import TaskService
 
 def configure_router() -> APIRouter:
     """Configure path routes to router"""
-    router = APIRouter(tags=[f"{API_VERSION} / Weak Supervision"])
+    router = APIRouter(tags=[f"Weak Supervision"])
 
     for cfg in all_tasks:
         base_endpoint = f"/{cfg.task}/{{name}}/labeling/rules"

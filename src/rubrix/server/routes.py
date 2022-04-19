@@ -18,7 +18,7 @@ This module configures the api routes under /api prefix, and
 set the required security dependencies if api security is enabled
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 
 from .api import v1
 from .commons.errors.base_errors import __ALL__
@@ -31,8 +31,21 @@ api_router = APIRouter(
     responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__}
 )
 
-
 dependencies = []
-
-for router in [users.router, datasets.router, info.router, tasks.router, v1.api_router]:
+for router in [users.router, datasets.router, info.router, tasks.router]:
     api_router.include_router(router, dependencies=dependencies)
+
+
+api_v1 = FastAPI(
+    description="Rubrix API v1 **EXPERIMENTAL**",
+    # Disable default openapi configuration
+    redoc_url=None,
+    version="v1",
+    responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__},
+)
+
+for router in [v1.api_router]:
+    api_v1.include_router(router, dependencies=dependencies)
+
+api_app = FastAPI()
+api_app.mount("/v1", api_v1)

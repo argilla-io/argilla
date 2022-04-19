@@ -23,7 +23,7 @@ from rubrix.server.tasks.commons.metrics.service import MetricsService
 
 def configure_router() -> APIRouter:
 
-    router = APIRouter(tags=[f"{API_VERSION} / Metrics"])
+    router = APIRouter(tags=[f"Metrics"])
 
     METRICS_PATH_PARAM = Path(..., description="The metric id")
 

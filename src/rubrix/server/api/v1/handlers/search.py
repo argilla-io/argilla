@@ -53,7 +53,7 @@ def _streaming_response(
 
 def configure_router() -> APIRouter:
 
-    router = APIRouter(tags=[f"{API_VERSION} / Search"])
+    router = APIRouter(tags=[f"Search"])
 
     INCLUDE_FIELD_QUERY_PARAM = Query(
         None, description="Only provided fields will be returned in records"

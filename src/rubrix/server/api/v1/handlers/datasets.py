@@ -131,7 +131,7 @@ def _configure_task_endpoints(router: APIRouter, cfg: TaskFactory):
 
 def configure_router() -> APIRouter:
     """Configure path routes to router"""
-    router = APIRouter(tags=[f"{API_VERSION} / Datasets"])
+    router = APIRouter(tags=[f"Datasets"])
 
     @router.get(
         path="/",
