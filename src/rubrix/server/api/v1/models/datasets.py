@@ -68,18 +68,6 @@ class AbstractBaseDataset(BaseModel):
 
     task: TaskType = Field(description="The dataset task type")
 
-    @classmethod
-    def build_dataset_id(cls, name: str, owner: Optional[str] = None) -> str:
-        """Build a dataset id for a given name and owner"""
-        if owner:
-            return f"{owner}.{name}"
-        return name
-
-    @property
-    def id(self) -> str:
-        """The dataset id. Compounded by owner and name"""
-        return self.build_dataset_id(self.name, self.owner)
-
 
 class TextClassificationDataset(AbstractBaseDataset, TextClassificationDatasetCreate):
     task: TaskType = Field(default=TaskType.text_classification, const=True)
