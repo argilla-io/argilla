@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from rubrix.server.api.v1.models.commons.task import TaskType
@@ -7,6 +9,15 @@ from rubrix.server.api.v1.models.datasets import (
     TextClassificationDatasetCreate,
     TokenClassificationDatasetCreate,
 )
+
+
+@pytest.fixture
+def defined_tasks() -> List[TaskType]:
+    return [
+        TaskType.text_classification,
+        TaskType.token_classification,
+        TaskType.text2text,
+    ]
 
 
 @pytest.fixture
@@ -126,7 +137,7 @@ def test_create_dataset(
     dataset_validation(mocked_client.get(f"{api_endpoint}/{task}/{dataset}"))
 
 
-def test_list_datasets(mocked_client, api_endpoint, created_datasets):
+def test_list_datasets(mocked_client, api_endpoint, created_datasets, defined_tasks):
     response = mocked_client.get(f"{api_endpoint}")
     assert response.status_code == 200, response.json()
     get_all_datasets = DatasetsList.parse_obj(response.json())
@@ -134,3 +145,41 @@ def test_list_datasets(mocked_client, api_endpoint, created_datasets):
     assert get_all_datasets.total == len(created_datasets)
     for ds, expected_ds in zip(get_all_datasets.data, created_datasets):
         assert ds.dict(), expected_ds
+
+    for task in defined_tasks:
+        datasets_by_task = [ds for ds in created_datasets if ds["task"] == task]
+        response = mocked_client.get(f"{api_endpoint}/{task}")
+
+        assert response.status_code == 200, response.json()
+        get_task_datasets = DatasetsList.parse_obj(response.json())
+        assert get_task_datasets.total == len(datasets_by_task)
+        for ds, expected_ds in zip(get_task_datasets.data, datasets_by_task):
+            assert ds.dict(), expected_ds
+
+
+def test_open_and_close_datasets(mocked_client, api_endpoint, created_datasets):
+    for dataset in created_datasets:
+        task, name = dataset["task"], dataset["name"]
+        # Opening a dataset for an already opened ds has no effect
+        response = mocked_client.post(f"{api_endpoint}/{task}/{name}:open")
+        assert response.status_code == 200, response.json()
+        # Closing a dataset will stop searches, metrics and weak supervision actions
+        response = mocked_client.post(f"{api_endpoint}/{task}/{name}:close")
+        assert response.status_code == 200, response.json()
+        # TODO: check that dataset cannot be explorable
+        # Nothing happens when closing a closed dataset
+        response = mocked_client.post(f"{api_endpoint}/{task}/{name}:close")
+        assert response.status_code == 200, response.json()
+        # We recover searches after reopen the dataset
+        response = mocked_client.post(f"{api_endpoint}/{task}/{name}:open")
+        assert response.status_code == 200, response.json()
+        # TODO: check that dataset cannot be explorable
+
+
+def test_delete_datasets(mocked_client, api_endpoint, created_datasets):
+    for dataset in created_datasets:
+        task, name = dataset["task"], dataset["name"]
+        response = mocked_client.delete(f"{api_endpoint}/{task}/{name}")
+        assert response.status_code == 200, response.json()
+        response = mocked_client.get(f"{api_endpoint}/{task}/{name}")
+        assert response.status_code == 404, response.json()
