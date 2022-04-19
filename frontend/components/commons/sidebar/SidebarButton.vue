@@ -76,8 +76,6 @@ $color: #333346;
       .svg-icon {
         background: palette(grey, smooth);
         border-radius: $border-radius;
-        animation: move-horizontal 0.2s ease-in-out 0.2s;
-        animation-fill-mode: backwards;
       }
     }
     &.metrics {
