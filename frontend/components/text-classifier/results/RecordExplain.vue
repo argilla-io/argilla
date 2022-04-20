@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div class="explain__content">
     <div
       v-for="tokenItem in explainFormatted"
       :key="tokenItem.index"
@@ -45,10 +45,18 @@ export default {
     predicted() {
       return this.record.predicted;
     },
+    prediction() {
+      const predictedLabel =
+        this.record.prediction &&
+        this.record.prediction.labels.reduce((max, obj) =>
+          max.score > obj.score ? max : obj
+        );
+      return predictedLabel.class;
+    },
     explainFormatted() {
       // TODO ALLOW FOR MULTI LABEL
       return this.explain.map((token) => {
-        const grad = Number(Object.values(token.attributions)).toFixed(3);
+        const grad = Number(token.attributions[this.prediction]).toFixed(3);
         let percent = Math.round(Math.abs(grad) * 100);
         if (percent !== 0) {
           /* eslint-disable no-mixed-operators */
@@ -193,5 +201,8 @@ export default {
 }
 .word {
   margin: 0 0.13em 0 0.12em;
+}
+.explain__content {
+  padding-top: 0.9em;
 }
 </style>

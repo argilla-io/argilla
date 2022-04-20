@@ -47,7 +47,7 @@
         model predicting a specific label.
       </p>
       <p>
-        [1-, 0] <strong>Negative attributions</strong> will always be blue and
+        [-1, 0] <strong>Negative attributions</strong> will always be blue and
         highlight those tokens that diverge the model from its final prediction.
       </p>
     </div>
