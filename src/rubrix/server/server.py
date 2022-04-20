@@ -69,14 +69,14 @@ def configure_api_router(app: FastAPI):
 def configure_app_statics(app: FastAPI):
     """Configure static folder for app"""
     parent_path = Path(__file__).parent.absolute()
+    statics_folder = Path(os.path.join(parent_path, "static"))
+    if not (statics_folder.exists() and statics_folder.is_dir()):
+        return
 
     app.mount(
         "/",
         RewriteStaticFiles(
-            directory=os.path.join(
-                parent_path,
-                "static",
-            ),
+            directory=statics_folder,
             html=True,
             check_dir=False,
         ),
