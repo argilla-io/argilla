@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import Record, TaskType
+from rubrix.server.apis.v0.models.commons.model import Record
 from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
 from rubrix.server.daos.records import DatasetRecordsDAO
