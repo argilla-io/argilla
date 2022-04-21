@@ -76,19 +76,9 @@ export default {
   },
   methods: {
     customClass(tokenItem) {
-      if (this.predicted !== undefined) {
-        if (Math.sign(tokenItem.grad) !== 1) {
-          return `grad-neg-${tokenItem.percent}`;
-        } else {
-          return this.predicted === "ko"
-            ? `grad-rest-${tokenItem.percent}`
-            : `grad-plus-${tokenItem.percent}`;
-        }
-      } else {
-        return Math.sign(tokenItem.grad) !== 1
-          ? `grad-rest-${tokenItem.percent}`
-          : `grad-neg-${tokenItem.percent}`;
-      }
+      return Math.sign(tokenItem.grad) !== 1
+        ? `grad-rest-${tokenItem.percent}`
+        : `grad-neg-${tokenItem.percent}`;
     },
   },
 };
