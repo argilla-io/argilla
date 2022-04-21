@@ -20,7 +20,7 @@
     ref="list"
     :class="showFullRecord ? 'record__expanded' : 'record__collapsed'"
   >
-    <div class="record__content">
+    <div :class="!explanation ? 'record__content' : ''">
       <span v-for="(text, index) in data" :key="index" class="record">
         <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
           <span class="record__key">{{ index }}:</span>
@@ -35,7 +35,7 @@
     </div>
     <a
       href="#"
-      v-if="scrollHeight >= visibleRecordHeight"
+      v-if="scrollHeight >= visibleRecordHeight && !explanation"
       class="record__button"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}

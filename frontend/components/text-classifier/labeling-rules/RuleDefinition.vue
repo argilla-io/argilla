@@ -13,11 +13,7 @@
         </rule-labels-definition>
       </div>
       <div class="rule__metrics">
-        <rules-metrics
-          title="Rule Metrics"
-          metrics-type="all"
-          :dataset="dataset"
-        >
+        <rules-metrics title="Rule Metrics" :dataset="dataset">
           <template #button-bottom>
             <re-button
               class="rule__button button-quaternary--outline"

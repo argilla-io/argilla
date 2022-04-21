@@ -40,6 +40,7 @@
 
 <script>
 import "assets/icons/check2";
+import _ from "lodash";
 export default {
   model: {
     prop: "areChecked",
@@ -55,7 +56,8 @@ export default {
     classes() {
       return {
         checked: Array.isArray(this.areChecked)
-          ? this.areChecked.includes(this.value)
+          ? this.areChecked.includes(this.value) ||
+            _.find(this.areChecked, this.value)
           : this.checked,
         disabled: this.disabled,
       };
@@ -76,7 +78,10 @@ export default {
       if (!this.disabled) {
         if (Array.isArray(this.areChecked)) {
           const checked = this.areChecked.slice();
-          const found = checked.indexOf(this.value);
+          const found =
+            typeof this.value === "string"
+              ? checked.indexOf(this.value)
+              : _.findIndex(checked, this.value);
           if (found !== -1) {
             checked.splice(found, 1);
           } else {
@@ -125,6 +130,8 @@ $checkbox-color-dark: $primary-color;
     text-align: center;
     vertical-align: middle;
     text-align: center;
+    margin-right: 0;
+    margin-left: auto;
     .svg-icon {
       fill: $lighter-color;
       transform: scale(0);
@@ -142,9 +149,9 @@ $checkbox-color-dark: $primary-color;
     }
   }
   .checkbox-label {
-    height: $checkbox-size;
+    word-break: break-all;
     line-height: $checkbox-size;
-    margin-right: auto;
+    margin-right: 0.5em;
   }
   &--dark {
     &.checked {
@@ -164,9 +171,9 @@ $checkbox-color-dark: $primary-color;
 .checkbox-label {
   .dropdown--filter & {
     height: auto;
-    padding-right: 2em;
     white-space: normal;
     text-transform: none;
+    word-break: break-all;
   }
 }
 

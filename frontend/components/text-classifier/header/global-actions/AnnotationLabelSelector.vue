@@ -160,6 +160,7 @@ export default {
     padding: 0.5em 0;
     text-align: left;
     font-weight: 400;
+    word-break: break-all;
     .re-checkbox {
       margin: 0;
       display: flex;

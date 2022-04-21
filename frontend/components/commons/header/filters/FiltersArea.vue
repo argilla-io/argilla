@@ -121,17 +121,11 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   margin-left: 0;
-  padding-right: calc(4em + 45px);
-  &--intro {
-    padding-top: 2em;
-    margin-bottom: 1.5em;
-    &:after {
-      border-bottom: 1px solid $line-light-color;
-      content: "";
-      margin-bottom: 1.5em;
-      position: absolute;
-      left: 0;
-      right: 0;
+  padding-right: calc($sidebarMenuWidth + 15px);
+  .--metrics & {
+    @include media(">desktop") {
+      padding-right: calc($sidebarWidth + 25px);
+      transition: padding 0.1s ease-in-out;
     }
   }
 }

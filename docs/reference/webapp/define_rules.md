@@ -37,10 +37,10 @@ If you want to add labels to the available list of labels, you can switch to the
 After entering a query and selecting labels, Rubrix provides you with some key metrics about the rule.
 Some metrics are only available if your dataset has also annotated records.
 
-- **Coverage**: Number of records (percentage) of records labeled by the rule
-- **Annotated coverage**: Number of records (percentage) of annotated records labeled by the rule
-- **Correct/incorrect**: Number of labels the rule predicted correctly/incorrectly (if annotations are available)
-- **Precision**: Percentage of correct labels given by the rule (if annotations are available)
+- **Coverage**: Percentage of records labeled by the rule.
+- **Annotated coverage**: Percentage of annotated records labeled by the rule.
+- **Correct/incorrect**: Number of labels the rule predicted correctly/incorrectly (if annotations are available).
+- **Precision**: Percentage of correct labels given by the rule (if annotations are available).
 
 ```{note}
 For multi-label classification tasks, we only count wrongly predicted labels as incorrect, not labels that the rule misses.

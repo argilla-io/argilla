@@ -53,7 +53,10 @@
         >
           <span
             :class="[
-              `color_${entities.filter((e) => e.text === key)[0].colorId}`,
+              `color_${
+                entities.filter((e) => e.text === key)[0].colorId %
+                $entitiesMaxColors
+              }`,
               'entity',
               activeTab,
             ]"
@@ -185,7 +188,7 @@ export default {
     font-weight: 600;
   }
   .scroll {
-    max-height: calc(100vh - 500px);
+    max-height: calc(100vh - 250px);
     padding-right: 1em;
     margin-right: -1em;
     overflow: auto;

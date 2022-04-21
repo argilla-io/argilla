@@ -55,6 +55,7 @@ export default {
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
     { src: "~/plugins/filters.js" },
+    { src: "~/plugins/variables.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -77,12 +78,7 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
-    [
-      "nuxt-highlightjs",
-      {
-        style: "dracula",
-      },
-    ],
+    "nuxt-highlightjs",
     [
       "nuxt-mq",
       {

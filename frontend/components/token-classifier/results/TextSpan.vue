@@ -19,7 +19,10 @@
   <span class="span__text">
     <EntityHighlight
       v-if="token.entity"
-      :class="['color_' + tag_color, { zindex3: showEntitiesSelector }]"
+      :class="[
+        'color_' + (tag_color % this.$entitiesMaxColors),
+        { zindex3: showEntitiesSelector },
+      ]"
       :span="token"
       :dataset="dataset"
       :record="record"

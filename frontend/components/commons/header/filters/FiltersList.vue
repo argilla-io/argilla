@@ -47,19 +47,19 @@
             )"
             :key="filter.id"
           >
-            <SelectFilter
+            <lazy-select-filter
               v-if="filter.type === 'select'"
               class="filter"
               :filter="filter"
               @apply="onApply"
             />
-            <FilterScore
+            <lazy-filter-score
               v-else-if="filter.type === 'score'"
               class="filter"
               :filter="filter"
               @apply="onApply"
             />
-            <FilterUncoveredByRules
+            <lazy-filter-uncovered-by-rules
               v-else-if="showUncoveredByRulesFilter"
               class="filter"
               :filter="filter"
@@ -76,7 +76,7 @@
             @click.prevent="removeFiltersByGroup(group)"
             >Remove all filters</a
           >
-          <SortList
+          <lazy-sort-list
             v-if="initialVisibleGroup === 'Sort'"
             :sort-options="filterList"
             :sort="dataset.sort"

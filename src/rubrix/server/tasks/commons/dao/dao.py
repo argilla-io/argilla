@@ -33,7 +33,8 @@ from rubrix.server.commons.es_wrapper import (
 from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.commons.settings import settings
 from rubrix.server.datasets.model import BaseDatasetDB
-from rubrix.server.tasks.commons import BaseRecord, MetadataLimitExceededError, TaskType
+from rubrix.server.tasks.commons import BaseRecord, TaskType
+from rubrix.server.tasks.commons.api.errors import MetadataLimitExceededError
 from rubrix.server.tasks.commons.dao.es_config import (
     mappings,
     tasks_common_mappings,
@@ -426,7 +427,12 @@ class DatasetRecordsDAO:
     def get_dataset_schema(self, dataset: BaseDatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
         index_name = dataset_records_index(dataset.id)
-        return self._es.__client__.indices.get_mapping(index=index_name)
+        response = self._es.__client__.indices.get_mapping(index=index_name)
+
+        if index_name in response:
+            response = response.get(index_name)
+
+        return response
 
     @classmethod
     def __configure_query_highlight__(cls, task: TaskType):
