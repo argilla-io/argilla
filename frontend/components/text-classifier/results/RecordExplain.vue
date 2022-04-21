@@ -45,10 +45,18 @@ export default {
     predicted() {
       return this.record.predicted;
     },
+    prediction() {
+      const predictedLabel =
+        this.record.prediction &&
+        this.record.prediction.labels.reduce((max, obj) =>
+          max.score > obj.score ? max : obj
+        );
+      return predictedLabel.class;
+    },
     explainFormatted() {
       // TODO ALLOW FOR MULTI LABEL
       return this.explain.map((token) => {
-        const grad = Number(Object.values(token.attributions)).toFixed(3);
+        const grad = Number(token.attributions[this.prediction]).toFixed(3);
         let percent = Math.round(Math.abs(grad) * 100);
         if (percent !== 0) {
           /* eslint-disable no-mixed-operators */
@@ -68,19 +76,9 @@ export default {
   },
   methods: {
     customClass(tokenItem) {
-      if (this.predicted !== undefined) {
-        if (Math.sign(tokenItem.grad) !== 1) {
-          return `grad-neg-${tokenItem.percent}`;
-        } else {
-          return this.predicted === "ko"
-            ? `grad-rest-${tokenItem.percent}`
-            : `grad-plus-${tokenItem.percent}`;
-        }
-      } else {
-        return Math.sign(tokenItem.grad) !== 1
-          ? `grad-rest-${tokenItem.percent}`
-          : `grad-plus-${tokenItem.percent}`;
-      }
+      return Math.sign(tokenItem.grad) !== 1
+        ? `grad-rest-${tokenItem.percent}`
+        : `grad-neg-${tokenItem.percent}`;
     },
   },
 };
