@@ -23,7 +23,10 @@ def test_email_validator(wrong_email):
     "wrong_name", ["user name", "user/name", "user.name", "UserName", "userName"]
 )
 def test_username_validator(wrong_name):
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError,
+        match=f"Wrong username. The username {wrong_name} does not match the pattern",
+    ):
         User(username=wrong_name)
 
 

@@ -27,11 +27,20 @@ _EMAIL_REGEX_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}"
 class User(BaseModel):
     """Base user model"""
 
-    username: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
+    username: str = Field()
     email: Optional[str] = Field(None, regex=_EMAIL_REGEX_PATTERN)
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
     workspaces: Optional[List[str]] = None
+
+    @validator("username")
+    def check_username(cls, value):
+        if not re.compile(DATASET_NAME_REGEX_PATTERN).match(value):
+            raise ValueError(
+                "Wrong username. "
+                f"The username {value} does not match the pattern {DATASET_NAME_REGEX_PATTERN}"
+            )
+        return value
 
     @validator("workspaces", each_item=True)
     def check_workspace_pattern(cls, workspace: str):
