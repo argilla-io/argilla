@@ -130,11 +130,13 @@ class DatasetsService:
         owners = user.check_workspaces(workspaces)
 
         datasets = []
-        for task_config in TaskFactory.get_all_configs():
+        for task_ in (
+            [task] if task else [cfg.task for cfg in TaskFactory.get_all_configs()]
+        ):
             datasets.extend(
                 self.__dao__.list_datasets(
                     owner_list=owners,
-                    task=task_config.task,
+                    task=task_,
                 )
             )
         return datasets
