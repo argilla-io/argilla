@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="explain__content">
+  <div>
     <div
       v-for="tokenItem in explainFormatted"
       :key="tokenItem.index"
@@ -87,7 +87,7 @@ export default {
       } else {
         return Math.sign(tokenItem.grad) !== 1
           ? `grad-rest-${tokenItem.percent}`
-          : `grad-plus-${tokenItem.percent}`;
+          : `grad-neg-${tokenItem.percent}`;
       }
     },
   },
@@ -201,8 +201,5 @@ export default {
 }
 .word {
   margin: 0 0.13em 0 0.12em;
-}
-.explain__content {
-  padding-top: 0.9em;
 }
 </style>
