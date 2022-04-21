@@ -3,13 +3,13 @@ from typing import Any, Dict, List, Optional, Tuple
 from fastapi import Depends
 from pydantic import BaseModel, Field
 
+from rubrix.server._helpers import unflatten_dict
 from rubrix.server.apis.v0.models.commons.model import EsRecordDataFieldNames
 from rubrix.server.apis.v0.models.metrics.base import ElasticsearchMetric
 from rubrix.server.apis.v0.models.text_classification import (
     LabelingRule,
     TextClassificationDatasetDB,
 )
-from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO

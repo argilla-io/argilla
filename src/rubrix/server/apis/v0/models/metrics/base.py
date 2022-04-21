@@ -12,9 +12,9 @@ from typing import (
 
 from pydantic import BaseModel, root_validator
 
+from rubrix.server._helpers import unflatten_dict
 from rubrix.server.apis.v0.models.commons.model import BaseRecord
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.commons.helpers import unflatten_dict
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import aggregations
 
