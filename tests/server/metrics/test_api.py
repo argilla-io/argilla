@@ -12,20 +12,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
 
-from rubrix.server.commons.errors import EntityNotFoundError, WrongTaskError
-from rubrix.server.tasks.commons.metrics import CommonTasksMetrics
-from rubrix.server.tasks.text2text import Text2TextBulkData, Text2TextRecord
-from rubrix.server.tasks.text_classification import (
+from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
+from rubrix.server.apis.v0.models.metrics.token_classification import (
+    TokenClassificationMetrics,
+)
+from rubrix.server.apis.v0.models.text2text import Text2TextBulkData, Text2TextRecord
+from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationBulkData,
     TextClassificationRecord,
 )
-from rubrix.server.tasks.token_classification import (
+from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
-from rubrix.server.tasks.token_classification.metrics import TokenClassificationMetrics
 
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 

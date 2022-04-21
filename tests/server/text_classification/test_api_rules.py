@@ -1,6 +1,6 @@
 import pytest
 
-from rubrix.server.tasks.text_classification import (
+from rubrix.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     LabelingRule,
     LabelingRuleMetricsSummary,

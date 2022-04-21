@@ -13,8 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.datasets.model import Dataset
-from rubrix.server.tasks.text_classification import TextClassificationBulkData
+from rubrix.server.apis.v0.models.datasets import Dataset
+from rubrix.server.apis.v0.models.text_classification import TextClassificationBulkData
 
 
 def test_delete_dataset(mocked_client):

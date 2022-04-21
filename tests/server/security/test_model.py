@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.commons.errors import EntityNotFoundError
+from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security.model import User
 
 
