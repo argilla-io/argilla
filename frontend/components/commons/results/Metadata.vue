@@ -115,7 +115,18 @@ export default {
   methods: {
     applySelectedFilters() {
       const filters = Object.keys(this.appliedFilters || {}).reduce(
-        (r, k) => ((r[k] = []), r),
+        (r, k) => (
+          (r[k] = Array.isArray(this.appliedFilters[k])
+            ? this.appliedFilters[k].length ===
+                this.normalizedMetadataItems[k].length &&
+              this.appliedFilters[k].every((f) =>
+                this.normalizedMetadataItems[k].includes(f)
+              )
+              ? []
+              : this.appliedFilters[k]
+            : []),
+          r
+        ),
         {}
       );
 
