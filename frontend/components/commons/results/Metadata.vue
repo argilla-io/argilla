@@ -95,8 +95,11 @@ export default {
   mounted() {
     if (this.appliedFilters) {
       Object.keys(this.appliedFilters).map((key) => {
+        const equalLength =
+          this.appliedFilters[key].length ===
+          this.normalizedMetadataItems[key].length;
         if (
-          Array.isArray(this.normalizedMetadataItems[key])
+          Array.isArray(this.normalizedMetadataItems[key]) && equalLength
             ? this.appliedFilters[key].every((f) =>
                 this.normalizedMetadataItems[key].includes(f)
               )
@@ -112,14 +115,7 @@ export default {
   methods: {
     applySelectedFilters() {
       const filters = Object.keys(this.appliedFilters || {}).reduce(
-        (r, k) => (
-          (r[k] = Array.isArray(this.appliedFilters[k])
-            ? this.appliedFilters[k].filter(
-                (v) => v !== this.normalizedMetadataItems[k]
-              )
-            : []),
-          r
-        ),
+        (r, k) => ((r[k] = []), r),
         {}
       );
 
@@ -128,11 +124,6 @@ export default {
       });
 
       this.$emit("metafilterApply", filters);
-    },
-    isApplied(item) {
-      if (this.appliedFilters) {
-        return Object.keys(this.appliedFilters).includes(item[0]);
-      }
     },
   },
 };
