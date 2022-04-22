@@ -97,7 +97,7 @@ export default {
       Object.keys(this.appliedFilters).map((key) => {
         if (
           Array.isArray(this.normalizedMetadataItems[key])
-            ? this.appliedFilters[key].some((f) =>
+            ? this.appliedFilters[key].every((f) =>
                 this.normalizedMetadataItems[key].includes(f)
               )
             : this.appliedFilters[key].includes(
