@@ -13,11 +13,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict
+from typing import Dict, TypeVar
 
+import httpx
 from pydantic import BaseModel, Field
 
 from rubrix._constants import API_KEY_HEADER_NAME
+from rubrix.client.sdk.commons.api import build_raw_response
 
 
 class Client(BaseModel):
@@ -37,6 +39,9 @@ class Client(BaseModel):
         return self.timeout
 
 
+ResponseType = TypeVar("ResponseType")
+
+
 class AuthenticatedClient(Client):
     """A Client which has been authenticated for use on secured endpoints"""
 
@@ -52,3 +57,42 @@ class AuthenticatedClient(Client):
 
     def __hash__(self):
         return hash((self.base_url, self.token))
+
+    def get(self, path: str, *args, **kwargs):
+        url = f"{self.base_url}/{path}"
+        response = httpx.get(
+            url=url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+            *args,
+            **kwargs,
+        )
+
+        return build_raw_response(response).parsed
+
+    def post(self, path: str, *args, **kwargs):
+        url = f"{self.base_url}/{path}"
+
+        response = httpx.post(
+            url=url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+            *args,
+            **kwargs,
+        )
+        return build_raw_response(response)
+
+    def put(self, path: str, *args, **kwargs):
+        url = f"{self.base_url}/{path}"
+
+        response = httpx.put(
+            url=url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+            *args,
+            **kwargs,
+        )
+        return build_raw_response(response)

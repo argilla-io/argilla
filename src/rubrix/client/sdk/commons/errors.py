@@ -2,6 +2,14 @@ class RubrixClientError(Exception):
     pass
 
 
+class ApiCompatibilityError(RubrixClientError):
+    def __str__(self):
+        return (
+            "\nThe rubrix server does not support this functionality."
+            "\nPlease, update your server instance or point to a compatible server instance."
+        )
+
+
 class RubrixApiResponseError(RubrixClientError):
 
     HTTP_STATUS: int

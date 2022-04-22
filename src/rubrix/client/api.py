@@ -29,6 +29,7 @@ from rubrix._constants import (
     DEFAULT_API_KEY,
     RUBRIX_WORKSPACE_HEADER_NAME,
 )
+from rubrix.client._apis.datasets import Datasets
 from rubrix.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -156,6 +157,10 @@ class Api:
     def client(self):
         """The underlying authenticated client"""
         return self._client
+
+    @property
+    def datasets(self) -> Datasets:
+        return Datasets(client=self._client)
 
     def set_workspace(self, workspace: str):
         """Sets the active workspace.

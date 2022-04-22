@@ -146,21 +146,26 @@ def build_list_response(
 ResponseType = TypeVar("ResponseType")
 
 
+def check_response_error(response: httpx.Response, **kwargs) -> bool:
+    if 200 <= response.status_code < 400:
+        return False
+    handle_response_error(response, **kwargs)
+
+
 def build_typed_response(
     response: httpx.Response,
     response_type_class: Type[ResponseType],
 ) -> Response[Union[ResponseType, ErrorMessage, HTTPValidationError]]:
     parsed_response = response.json()
-    if 200 <= response.status_code < 400:
-        parsed_response = response_type_class(**parsed_response)
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
 
-    return handle_response_error(response, expected_response=response_type_class)
+    check_response_error(response, expected_response=response_type_class)
+    parsed_response = response_type_class(**parsed_response)
+    return Response(
+        status_code=response.status_code,
+        content=response.content,
+        headers=response.headers,
+        parsed=parsed_response,
+    )
 
 
 def build_raw_response(

@@ -80,6 +80,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
+    "settings._settings": ["settings"],
     "server.app": ["app"],
 }
 
