@@ -19,7 +19,10 @@
   <span class="span__text">
     <EntityHighlight
       v-if="token.entity"
-      :class="['color_' + (tag_color % this.$entitiesMaxColors)]"
+      :class="[
+        'color_' + (tag_color % this.$entitiesMaxColors),
+        matchQueryClass,
+      ]"
       :span="token"
       :dataset="dataset"
       :record="record"
@@ -49,6 +52,17 @@ export default {
       return this.dataset.entities.filter(
         (entity) => entity.text === this.token.entity.label
       )[0].colorId;
+    },
+    queryScore() {
+      return this.dataset.query.score;
+    },
+    matchQueryClass() {
+      if (this.queryScore) {
+        const score = this.token.entity.score;
+        return score >= this.queryScore.from && score <= this.queryScore.to
+          ? undefined
+          : "excluded";
+      }
     },
   },
 };
@@ -185,6 +199,23 @@ $hue: 360;
     }
     &.prediction ::v-deep .highlight__tooltip:after {
       border-color: transparent transparent $rcolor transparent;
+    }
+    &.excluded ::v-deep {
+      .highlight__content {
+        border-color: lighten($rcolor, 10%);
+        &:after {
+          border-color: $rcolor;
+        }
+      }
+      .highlight__tooltip {
+        background: lighten($rcolor, 10%);
+        &:after {
+          border-color: transparent
+            transparent
+            lighten($rcolor, 10%)
+            transparent;
+        }
+      }
     }
     &.active,
     &.tag:hover {

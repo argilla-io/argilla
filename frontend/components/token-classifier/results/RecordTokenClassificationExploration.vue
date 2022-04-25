@@ -19,7 +19,6 @@
   <div class="origins">
     <text-spans-static
       v-if="record.prediction"
-      v-once
       key="prediction"
       origin="prediction"
       class="prediction"

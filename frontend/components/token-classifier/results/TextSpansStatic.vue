@@ -17,14 +17,25 @@
 
 <template>
   <div v-if="textSpans.length" ref="list" class="content__input">
-    <text-span-static
-      v-once
-      v-for="(token, i) in textSpans"
-      :key="i"
-      :record="record"
-      :token="token"
-      :dataset="dataset"
-    />
+    <template v-if="dataset.query.score">
+      <text-span-static
+        v-for="(token, i) in textSpans"
+        :key="i"
+        :record="record"
+        :token="token"
+        :dataset="dataset"
+      />
+    </template>
+    <template>
+      <text-span-static
+        v-for="(token, i) in textSpans"
+        v-once
+        :key="i"
+        :record="record"
+        :token="token"
+        :dataset="dataset"
+      />
+    </template>
   </div>
 </template>
 
