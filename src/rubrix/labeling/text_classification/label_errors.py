@@ -158,6 +158,13 @@ def _check_and_update_kwargs(
             kwargs["return_indices_ranked_by"] = "self_confidence"
         elif sort_by is SortBy.NONE:
             kwargs["return_indices_ranked_by"] = None
+        # TODO: Remove this once https://github.com/cleanlab/cleanlab/issues/243 is solved
+        elif kwargs["multi_label"]:
+            _LOGGER.warning(
+                "With cleanlab v2 and multi-label records there is an issue sorting records by 'likelihood' "
+                "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead."
+            )
+            kwargs["return_indices_ranked_by"] = "self_confidence"
 
 
 def _construct_s_and_psx(

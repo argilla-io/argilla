@@ -241,11 +241,5 @@ def dataset(mocked_client, records):
 
 def test_find_label_errors_integration(dataset):
     records = rb.load(dataset, as_pandas=False)
-    # Remove this once https://github.com/cleanlab/cleanlab/issues/243 is addressed
-    if (
-        parse_version(cleanlab.__version__) == parse_version("2.0.0")
-        and records[0].multi_label
-    ):
-        return
     recs = find_label_errors(records)
     assert [rec.id for rec in recs] == list(range(0, 11, 2)) + list(range(1, 12, 2))
