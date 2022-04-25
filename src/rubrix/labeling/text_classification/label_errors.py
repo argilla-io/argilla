@@ -17,6 +17,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from pkg_resources import parse_version
 
 from rubrix.client.datasets import DatasetForTextClassification
 from rubrix.client.models import TextClassificationRecord
@@ -59,7 +60,8 @@ def find_label_errors(
         metadata_key: The key added to the record's metadata that holds the order, if ``sort_by`` is not "none".
         n_jobs : Number of processing threads used by multiprocessing. If None, uses the number of threads
             on your CPU. Defaults to 1, which removes parallel processing.
-        **kwargs: Passed on to `cleanlab.pruning.get_noise_indices`
+        **kwargs: Passed on to `cleanlab.pruning.get_noise_indices` (cleanlab < 2.0)
+            or `cleanlab.filter.find_label_issues` (cleanlab >= 2.0)
 
     Returns:
         A list of records containing potential annotation/label errors
@@ -82,7 +84,10 @@ def find_label_errors(
             "You can install 'cleanlab' with the command: `pip install cleanlab`"
         )
     else:
-        from cleanlab.pruning import get_noise_indices
+        if parse_version(cleanlab.__version__) < parse_version("2.0"):
+            from cleanlab.pruning import get_noise_indices as find_label_issues
+        else:
+            from cleanlab.filter import find_label_issues
 
     if isinstance(sort_by, str):
         sort_by = SortBy(sort_by)
@@ -95,12 +100,12 @@ def find_label_errors(
         )
 
     # check and update kwargs for get_noise_indices
-    _check_and_update_kwargs(records[0], sort_by, kwargs)
+    _check_and_update_kwargs(cleanlab.__version__, records[0], sort_by, kwargs)
 
     # construct "noisy" label vector and probability matrix of the predictions
     s, psx = _construct_s_and_psx(records)
 
-    indices = get_noise_indices(s, psx, n_jobs=n_jobs, **kwargs)
+    indices = find_label_issues(s, psx, n_jobs=n_jobs, **kwargs)
 
     records_with_label_errors = np.array(records)[indices].tolist()
 
@@ -113,11 +118,12 @@ def find_label_errors(
 
 
 def _check_and_update_kwargs(
-    record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict
+    version: str, record: TextClassificationRecord, sort_by: SortBy, kwargs: Dict
 ):
     """Helper function to check and update the kwargs passed on to cleanlab's `get_noise_indices`.
 
     Args:
+        version: version of cleanlab
         record: One of the records passed in the `find_label_error` function.
         sort_by: The sorting policy.
         kwargs: The passed on kwargs.
@@ -125,22 +131,33 @@ def _check_and_update_kwargs(
     Raises:
         ValueError: If not supported kwargs ('sorted_index_method') are passed on.
     """
-    if "sorted_index_method" in kwargs:
-        raise ValueError(
-            "The 'sorted_index_method' kwarg is not supported, please use 'sort_by' instead."
-        )
-    kwargs["sorted_index_method"] = "normalized_margin"
-    if sort_by is SortBy.PREDICTION:
-        kwargs["sorted_index_method"] = "prob_given_label"
-    elif sort_by is SortBy.NONE:
-        kwargs["sorted_index_method"] = None
-
     if "multi_label" in kwargs:
         _LOGGER.warning(
             "You provided the kwarg 'multi_label', but it is determined automatically. "
             f"We will set it to '{record.multi_label}'."
         )
     kwargs["multi_label"] = record.multi_label
+
+    if parse_version(version) < parse_version("2.0"):
+        if "sorted_index_method" in kwargs:
+            raise ValueError(
+                "The 'sorted_index_method' kwarg is not supported, please use 'sort_by' instead."
+            )
+        kwargs["sorted_index_method"] = "normalized_margin"
+        if sort_by is SortBy.PREDICTION:
+            kwargs["sorted_index_method"] = "prob_given_label"
+        elif sort_by is SortBy.NONE:
+            kwargs["sorted_index_method"] = None
+    else:
+        if "return_indices_ranked_by" in kwargs:
+            raise ValueError(
+                "The 'return_indices_ranked_by' kwarg is not supported, please use 'sort_by' instead."
+            )
+        kwargs["return_indices_ranked_by"] = "normalized_margin"
+        if sort_by is SortBy.PREDICTION:
+            kwargs["return_indices_ranked_by"] = "self_confidence"
+        elif sort_by is SortBy.NONE:
+            kwargs["return_indices_ranked_by"] = None
 
 
 def _construct_s_and_psx(
