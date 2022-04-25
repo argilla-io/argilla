@@ -348,6 +348,7 @@ async function _updateDatasetRecords({
   dataset,
   records,
   persistBackend = false,
+  propagateError = false,
 }) {
   if (records.length === 0) {
     return;
@@ -383,6 +384,9 @@ async function _updateDatasetRecords({
         where: dataset.id,
         data: dataset,
       });
+      if (propagateError) {
+        throw error;
+      }
     }
   }
 
@@ -450,16 +454,17 @@ const actions = {
       records,
     });
   },
-  async discardAnnotations(_, { dataset, records }) {
+  async discardAnnotations(_, { dataset, records, propagateError = false }) {
     const newRecords = records.map((record) => ({
       ...record,
       selected: false,
       status: "Discarded",
     }));
-    await _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
+      propagateError,
     });
   },
   async resetRecord(_, { dataset, record }) {
@@ -482,13 +487,16 @@ const actions = {
       selected: false,
       status: "Default",
     }));
-    return _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
     });
   },
-  async validateAnnotations(_, { dataset, records, agent }) {
+  async validateAnnotations(
+    _,
+    { dataset, records, agent, propagateError = false }
+  ) {
     const newRecords = records.map((record) => ({
       ...record,
       annotation: {
@@ -498,10 +506,11 @@ const actions = {
       selected: false,
       status: "Validated",
     }));
-    return _updateDatasetRecords({
+    return await _updateDatasetRecords({
       dataset,
       records: newRecords,
       persistBackend: true,
+      propagateError,
     });
   },
   async setUserData(_, { dataset, data }) {

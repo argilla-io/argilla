@@ -39,7 +39,14 @@ export default ({ $axios, app }) => {
     }
     return config;
   });
-
+  $axios.onResponse(res => {
+    if (res.data.processed > 1) {
+      Notification.dispatch("notify", {
+        message: "The action has been completed",
+        type: "success",
+      });
+    }
+  })
   $axios.onError((error) => {
     const code = parseInt(error.response && error.response.status);
     if (error instanceof ExpiredAuthSessionError || [401, 403].includes(code)) {
