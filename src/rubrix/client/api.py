@@ -232,6 +232,8 @@ class Api:
     ) -> Union[BulkResponse, Future]:
         """Logs Records to Rubrix.
 
+        The logging happens asynchronously in a background thread.
+
         Args:
             records: The record, an iterable of records, or a dataset to log.
             name: The dataset name.
@@ -239,10 +241,12 @@ class Api:
             metadata: A dictionary of extra info for the dataset.
             chunk_size: The chunk size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
-            background: If True, records will be logged without waiting to finish.
+            background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
+                object. You probably want to set ``verbose`` to False in that case.
 
         Returns:
-            Summary of the response from the REST API if background= False, an asyncio.Future otherwise
+            Summary of the response from the REST API.
+            If the ``background`` argument is set to True, an ``asyncio.Future`` will be returned instead.
 
         Examples:
             >>> import rubrix as rb
@@ -253,6 +257,10 @@ class Api:
             >>> rb.log(record, name="example-dataset")
             1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
+            >>>
+            >>> # Logging records in the background
+            >>> rb.log(record, name="example-dataset", background=True, verbose=False)
+            <Future at 0x7f675a1fffa0 state=pending>
         """
         future = self._agent.log(
             records=records,
