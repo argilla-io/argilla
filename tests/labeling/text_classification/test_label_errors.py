@@ -157,7 +157,9 @@ def test_kwargs(monkeypatch, records):
             assert kwargs == {
                 "mock": "mock",
                 "multi_label": is_multi_label,
-                "return_indices_ranked_by": "normalized_margin",
+                "return_indices_ranked_by": "normalized_margin"
+                if not is_multi_label
+                else "self_confidence",
             }
             return []
 
