@@ -31,6 +31,18 @@ from rubrix.client.models import TextClassificationRecord
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
 
+def _push_to_hub_with_retries(ds: datasets.Dataset, retries: int = 3, **kwargs):
+    try:
+        return ds.push_to_hub(**kwargs)
+    except Exception as ex:
+        print(f"Found error pushing dataset with params {kwargs}. Error: {ex}")
+        if retries == 0:
+            print("No more retries will be done. Exiting...")
+        else:
+            print(f" Retring {retries} more times")
+        return _push_to_hub_with_retries(ds, retries=retries - 1, **kwargs)
+
+
 def test_init_NotImplementedError():
     with pytest.raises(NotImplementedError, match="has to define a `_RECORD_TYPE`"):
         DatasetBase()
@@ -292,8 +304,9 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(name)
         dataset_name = f"rubrix/_test_text_classification_records-{name}"
         dataset_rb = rb.DatasetForTextClassification(records)
-        dataset_rb.to_datasets().push_to_hub(
-            dataset_name,
+        _push_to_hub_with_retries(
+            dataset_rb.to_datasets(),
+            repo_id=dataset_name,
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
@@ -505,8 +518,9 @@ class TestDatasetForTokenClassification:
     )
     def test_push_to_hub(self, tokenclassification_records):
         dataset_rb = rb.DatasetForTokenClassification(tokenclassification_records)
-        dataset_rb.to_datasets().push_to_hub(
-            "rubrix/_test_token_classification_records",
+        _push_to_hub_with_retries(
+            dataset_rb.to_datasets(),
+            repo_id="rubrix/_test_token_classification_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
@@ -577,8 +591,9 @@ class TestDatasetForTokenClassification:
             )
         ]
 
-        train.push_to_hub(
-            "rubrix/_test_token_classification_training",
+        _push_to_hub_with_retries(
+            train,
+            repo_id="rubrix/_test_token_classification_training",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
@@ -705,8 +720,9 @@ class TestDatasetForText2Text:
     )
     def test_push_to_hub(self, text2text_records):
         dataset_rb = rb.DatasetForText2Text(text2text_records)
-        dataset_rb.to_datasets().push_to_hub(
-            "rubrix/_test_text2text_records",
+        _push_to_hub_with_retries(
+            dataset_rb.to_datasets(),
+            repo_id="rubrix/_test_text2text_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
