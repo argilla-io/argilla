@@ -15,7 +15,7 @@
 import pytest
 
 from rubrix.client.sdk.datasets.models import Dataset, TaskType
-from rubrix.server.datasets.model import Dataset as ServerDataset
+from rubrix.server.apis.v0.models.datasets import Dataset as ServerDataset
 
 
 def test_dataset_schema(helpers):

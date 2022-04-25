@@ -15,8 +15,8 @@
 
 import os
 
-from rubrix.server.tasks.commons import TaskStatus
-from rubrix.server.tasks.text_classification.api import (
+from rubrix.server.apis.v0.models.commons.model import TaskStatus
+from rubrix.server.apis.v0.models.text_classification import (
     TaskType,
     TextClassificationBulkData,
     TextClassificationRecord,

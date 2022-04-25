@@ -16,16 +16,15 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.settings import settings
-from rubrix.server.tasks.commons import TaskStatus
-from rubrix.server.tasks.search.query_builder import EsQueryBuilder
-from rubrix.server.tasks.text_classification import TextClassificationQuery
-from rubrix.server.tasks.text_classification.api import (
+from rubrix.server.apis.v0.models.commons.model import TaskStatus
+from rubrix.server.apis.v0.models.text_classification import (
     ClassPrediction,
     PredictionStatus,
     TextClassificationAnnotation,
+    TextClassificationQuery,
     TextClassificationRecord,
 )
+from rubrix.server.services.search.query_builder import EsQueryBuilder
 
 
 def test_flatten_metadata():

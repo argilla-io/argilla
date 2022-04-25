@@ -17,13 +17,13 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.tasks.search.query_builder import EsQueryBuilder
-from rubrix.server.tasks.token_classification.api.model import (
+from rubrix.server.apis.v0.models.token_classification import (
     EntitySpan,
     TokenClassificationAnnotation,
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
+from rubrix.server.services.search.query_builder import EsQueryBuilder
 
 
 def test_char_position():
