@@ -37,9 +37,9 @@
         <span v-if="appliedFilters.length">
           <p v-if="typeof appliedFilters === 'string'">{{ appliedFilters }}</p>
           <p
-            v-for="appliedFilter in appliedFilters"
+            v-for="(appliedFilter, index) in appliedFilters"
             v-else
-            :key="appliedFilter"
+            :key="index"
           >
             {{ appliedFilter }}
           </p>
