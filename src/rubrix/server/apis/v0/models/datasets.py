@@ -95,6 +95,7 @@ class BaseDatasetDB(CreationDatasetRequest):
         return self.build_dataset_id(self.name, self.owner)
 
 
+# TODO: Move this class to the services layer
 class DatasetDB(BaseDatasetDB):
     pass
 

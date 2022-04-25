@@ -27,6 +27,7 @@ from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
 from rubrix.logging import configure_logging
+from rubrix.server import apis
 from rubrix.server.apis.v0.settings.server import settings
 from rubrix.server.apis.v0.settings.server import settings as api_settings
 from rubrix.server.daos.datasets import DatasetsDAO
@@ -63,6 +64,7 @@ def configure_api_exceptions(api: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.include_router(api_router, prefix="/api")
+    app.mount("/api", apis.app)
 
 
 def configure_app_statics(app: FastAPI):
