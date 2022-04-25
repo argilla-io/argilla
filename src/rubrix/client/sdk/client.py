@@ -19,7 +19,7 @@ import httpx
 from pydantic import BaseModel, Field
 
 from rubrix._constants import API_KEY_HEADER_NAME
-from rubrix.client.sdk.commons.api import build_raw_response
+from rubrix.client.sdk._helpers import build_raw_response
 
 
 class Client(BaseModel):

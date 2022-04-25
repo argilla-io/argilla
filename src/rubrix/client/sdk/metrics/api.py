@@ -3,8 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
+from rubrix.client.sdk._helpers import build_raw_response
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import build_list_response, build_raw_response
+from rubrix.client.sdk.commons.api import build_list_response
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.metrics.models import MetricInfo
 

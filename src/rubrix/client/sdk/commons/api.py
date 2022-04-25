@@ -26,7 +26,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, List, Type, TypeVar, Union
 
 import httpx
 
@@ -141,34 +141,3 @@ def build_list_response(
         )
 
     return handle_response_error(response, item_class=item_class)
-
-
-ResponseType = TypeVar("ResponseType")
-
-
-def check_response_error(response: httpx.Response, **kwargs) -> bool:
-    if 200 <= response.status_code < 400:
-        return False
-    handle_response_error(response, **kwargs)
-
-
-def build_typed_response(
-    response: httpx.Response,
-    response_type_class: Type[ResponseType],
-) -> Response[Union[ResponseType, ErrorMessage, HTTPValidationError]]:
-    parsed_response = response.json()
-
-    check_response_error(response, expected_response=response_type_class)
-    parsed_response = response_type_class(**parsed_response)
-    return Response(
-        status_code=response.status_code,
-        content=response.content,
-        headers=response.headers,
-        parsed=parsed_response,
-    )
-
-
-def build_raw_response(
-    response: httpx.Response,
-) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
-    return build_typed_response(response, response_type_class=dict)
