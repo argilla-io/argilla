@@ -2,7 +2,6 @@
 
 exports[`TaskSidebar Show sidebar panel 1`] = `
 <div class="sidebar__container">
-  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
   <aside class="sidebar TextClassification">
     <div class="sidebar__wrapper">
       <div class="sidebar__content"><svg version="1.1" viewBox="0 0 6 9" class="sidebar__panel__button svg-icon svg-fill">
@@ -14,12 +13,12 @@ exports[`TaskSidebar Show sidebar panel 1`] = `
       </div>
     </div>
   </aside>
+  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
 </div>
 `;
 
 exports[`TaskSidebar renders properly 1`] = `
 <div class="sidebar__container">
-  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
   <aside class="sidebar TextClassification">
     <div class="sidebar__wrapper">
       <div class="sidebar__content"><svg version="1.1" viewBox="0 0 6 9" class="sidebar__panel__button svg-icon svg-fill">
@@ -31,5 +30,6 @@ exports[`TaskSidebar renders properly 1`] = `
       </div>
     </div>
   </aside>
+  <textclassificationsidebar dataset="[object Object]"></textclassificationsidebar>
 </div>
 `;
