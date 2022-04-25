@@ -1,14 +1,5 @@
 <template>
   <div class="sidebar__container" v-if="dataset">
-    <component
-      ref="menu"
-      :is="currentTaskSidebar"
-      :dataset="dataset"
-      :current-metric="currentMetric"
-      @refresh="onRefresh"
-      @show-metrics="onShowSidebarInfo"
-      @change-view-mode="onChangeViewMode"
-    />
     <SidebarPanel
       :class="[currentTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
@@ -26,6 +17,15 @@
         </span>
       </transition>
     </SidebarPanel>
+    <component
+      ref="menu"
+      :is="currentTaskSidebar"
+      :dataset="dataset"
+      :current-metric="currentMetric"
+      @refresh="onRefresh"
+      @show-metrics="onShowSidebarInfo"
+      @change-view-mode="onChangeViewMode"
+    />
   </div>
 </template>
 
@@ -112,8 +112,10 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   &__container {
-    position: relative;
     z-index: 1;
+    position: fixed;
+    display: flex;
+    right: 0;
   }
 }
 </style>

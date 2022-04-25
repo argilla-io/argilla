@@ -49,19 +49,21 @@ export default {
 $topbarHeight: 56px;
 $sidebarMenuWidth: 70px;
 .sidebar {
-  top: 0;
   min-height: calc(100vh - $topbarHeight);
   width: $sidebarPanelWidth;
-  position: absolute;
-  right: -$sidebarPanelWidth;
+  position: relative;
+  top: 0;
+  right: -$sidebarPanelWidth + 3px;
   background: $bg;
   padding: 1em 1.5em;
   transition: right 0.5s cubic-bezier(0.61, -0.08, 0.52, 1.17),
-    box-shadow 0.1s ease-out;
+  box-shadow 0.1s ease-out;
   box-shadow: none;
   overflow: hidden;
   background: $bg;
-  .sidebar__content {
+  z-index: -1;
+  border-left: 1px solid palette(grey, smooth);
+  &__content {
     display: block;
     position: relative;
     opacity: 0;
@@ -71,8 +73,8 @@ $sidebarMenuWidth: 70px;
   &.visible {
     overflow: visible;
     box-shadow: -4px 15px 16px -1px #c7c7c7;
-    right: $sidebarMenuWidth;
-    transition: right 0.5s ease-in-out, box-shadow 0.4s ease-in-out 0.6s;
+    right: 0;
+    transition: right 0.5s ease-in, box-shadow 0.4s ease-in-out 0.6s;
     .sidebar__content {
       transform: translateX(0);
       transition: opacity 0.2s ease-in-out 0.3s;
@@ -81,10 +83,9 @@ $sidebarMenuWidth: 70px;
   }
   @include media(">desktop") {
     border-radius: 1px;
-    border: none;
     margin-left: 1em;
     display: block !important;
-    right: -$sidebarPanelWidth;
+    right: -$sidebarPanelWidth + 1px;
   }
   &__panel {
     &__button {
