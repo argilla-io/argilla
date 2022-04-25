@@ -309,64 +309,6 @@ class Api:
         tags = tags or {}
         metadata = metadata or {}
 
-        records, bulk_class, creation_class = self._log(
-            records=records, name=name, chunk_size=chunk_size
-        )
-
-        processed, failed = 0, 0
-        progress_bar = tqdm(total=len(records), disable=not verbose)
-        for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
-
-            response = await async_bulk(
-                client=self._client,
-                name=name,
-                json_body=bulk_class(
-                    tags=tags,
-                    metadata=metadata,
-                    records=[creation_class.from_client(r) for r in chunk],
-                ),
-            )
-
-            processed += response.parsed.processed
-            failed += response.parsed.failed
-
-            progress_bar.update(len(chunk))
-        progress_bar.close()
-
-        # TODO: improve logging policy in library
-        if verbose:
-            _LOGGER.info(
-                f"Processed {processed} records in dataset {name}. Failed: {failed}"
-            )
-            workspace = self.get_workspace()
-            if (
-                not workspace
-            ):  # Just for backward comp. with datasets with no workspaces
-                workspace = "-"
-            print(
-                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}"
-            )
-
-        # Creating a composite BulkResponse with the total processed and failed
-        return BulkResponse(dataset=name, processed=processed, failed=failed)
-
-    def _log(
-        self,
-        records: Union[Record, Iterable[Record], Dataset],
-        name: str,
-        chunk_size: int,
-    ) -> Tuple:
-        """This helper method avoids code duplication in the AsyncApi class.
-
-        Args:
-            records: The record, an iterable of records, or a dataset to log.
-            name: The dataset name.
-            chunk_size: The chunk size for a data bulk.
-
-        Returns:
-            A tuple containing the records, the "BulkData" class, and the "Creation" class.
-        """
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
 
@@ -406,7 +348,43 @@ class Api:
                 f"Unknown record type {record_type}. Available values are {Record.__args__}"
             )
 
-        return records, bulk_class, creation_class
+        processed, failed = 0, 0
+        progress_bar = tqdm(total=len(records), disable=not verbose)
+        for i in range(0, len(records), chunk_size):
+            chunk = records[i : i + chunk_size]
+
+            response = await async_bulk(
+                client=self._client,
+                name=name,
+                json_body=bulk_class(
+                    tags=tags,
+                    metadata=metadata,
+                    records=[creation_class.from_client(r) for r in chunk],
+                ),
+            )
+
+            processed += response.parsed.processed
+            failed += response.parsed.failed
+
+            progress_bar.update(len(chunk))
+        progress_bar.close()
+
+        # TODO: improve logging policy in library
+        if verbose:
+            _LOGGER.info(
+                f"Processed {processed} records in dataset {name}. Failed: {failed}"
+            )
+            workspace = self.get_workspace()
+            if (
+                not workspace
+            ):  # Just for backward comp. with datasets with no workspaces
+                workspace = "-"
+            print(
+                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}"
+            )
+
+        # Creating a composite BulkResponse with the total processed and failed
+        return BulkResponse(dataset=name, processed=processed, failed=failed)
 
     def load(
         self,
