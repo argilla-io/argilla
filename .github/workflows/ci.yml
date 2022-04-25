@@ -69,7 +69,8 @@ jobs:
           pytest --cov=rubrix --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
-
+          pip install "cleanlab<2.0"
+          pytest tests/labeling/text_classification/test_label_errors.py
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         if: steps.filter.outputs.python_code == 'true'
