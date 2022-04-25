@@ -24,10 +24,12 @@ class Settings(BaseModel):
 
 
 class Datasets(AbstractApi):
+    _API_V1_PREFIX = "api/v1/datasets"
+
     @api_compatibility_check
     def create(self, name: str, task: TaskType, settings: Optional[Settings] = None):
         dataset = Dataset(name=name, task=task)
-        self.__client__.post(f"api/v1/{task}", json=dataset.dict())
+        self.__client__.post(f"{self._API_V1_PREFIX}/{task}", json=dataset.dict())
         if settings is not None:
             self.save_settings(dataset, settings=settings)
 
@@ -38,10 +40,14 @@ class Datasets(AbstractApi):
     @api_compatibility_check
     def save_settings(self, dataset: Dataset, settings: Settings):
         self.__client__.put(
-            f"api/v1/{dataset.task}/{dataset.name}/settings", json=settings
+            f"{self._API_V1_PREFIX}/{dataset.task}/{dataset.name}/settings",
+            json=settings.dict(),
         )
 
     @api_compatibility_check
     def get_settings(self, dataset: Dataset) -> Settings:
         # Here, we use a new fashion to connect to the Rubrix server api
-        return self.__client__.get(f"api/v1/{dataset.task}/{dataset.name}/settings")
+        response = self.__client__.get(
+            f"{self._API_V1_PREFIX}/{dataset.task}/{dataset.name}/settings"
+        )
+        return Settings.parse_obj(response)

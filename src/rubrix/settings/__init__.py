@@ -70,7 +70,9 @@ def save_settings(name: str, settings: Settings):
     ):
         return
 
-    _settings = _Settings.parse_obj(asdict(settings))
+    _settings = _Settings(
+        labels_schema={"labels": [asdict(l) for l in settings.labels_schema.labels]}
+    )
 
     active_api = api.active_api()
     datasets = active_api.datasets
