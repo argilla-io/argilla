@@ -62,7 +62,7 @@ __TASK_TO_SETTINGS__ = {
 }
 
 
-def _apply_validations(dataset: Dataset, settings: Settings):
+def _validate_settings(dataset: Dataset, settings: Settings):
     expected_class = __TASK_TO_SETTINGS__.get(dataset.task)
     if not expected_class:
         return
@@ -100,7 +100,7 @@ def save_settings(name: str, settings: Settings):
 
     try:
         dataset = datasets.find_by_name(name)
-        _apply_validations(dataset, settings)
+        _validate_settings(dataset, settings)
         datasets.save_settings(dataset, _settings)
     except NotFoundApiError:
         # TODO: find a normalized way to show a message here
