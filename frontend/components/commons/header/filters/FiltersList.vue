@@ -295,7 +295,7 @@ $number-size: 18px;
       right: -10em;
       margin: auto;
       position: absolute;
-      top: calc(100% + 1em);
+      top: calc(100% + 10px);
       box-shadow: $shadow;
       background: $lighter-color;
       padding: 20px 20px 10px 4em;

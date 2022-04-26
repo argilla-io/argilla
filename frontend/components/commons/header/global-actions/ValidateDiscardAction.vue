@@ -133,6 +133,7 @@ export default {
       box-shadow: $shadow;
       border-radius: $border-radius;
       border: none;
+      top: 45px;
     }
   }
   &__button {
