@@ -36,7 +36,7 @@ class DatasetSettingsValidator:
 
 class EmptyDatasetSettingsValidator(DatasetSettingsValidator):
     @classmethod
-    def get_instance(cls, *args, **kwargs) -> "DatasetSettingsValidator":
+    def get_instance(cls) -> "DatasetSettingsValidator":
         return cls()
 
     def validate(self, dataset: Dataset, settings: AbstractDatasetSettings):

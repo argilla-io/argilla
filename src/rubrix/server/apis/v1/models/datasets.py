@@ -36,7 +36,7 @@ class AbstractBaseDataset(BaseModel):
     task: TaskType = Field(description="The dataset task type")
 
 
-class Dataset(AbstractBaseDataset):
+class Dataset(AbstractBaseDataset, DatasetCreate):
     pass
 
 

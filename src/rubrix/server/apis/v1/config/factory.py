@@ -1,6 +1,9 @@
 from rubrix.server.apis.v1.models.commons.task import TaskType
 from rubrix.server.apis.v1.models.commons.task_factory import TaskFactory
-from rubrix.server.apis.v1.models.dataset_settings import TextClassificationSettings
+from rubrix.server.apis.v1.models.dataset_settings import (
+    TextClassificationSettings,
+    TokenClassificationSettings,
+)
 from rubrix.server.elasticseach.mappings.text2text import text2text_mappings
 from rubrix.server.elasticseach.mappings.text_classification import (
     text_classification_mappings,
@@ -12,12 +15,13 @@ from rubrix.server.elasticseach.mappings.token_classification import (
 __all__ = [
     TaskFactory(
         task=TaskType.text_classification,
-        settings_class=TextClassificationSettings,
         es_mapping=text_classification_mappings(),
+        settings_class=TextClassificationSettings,
     ),
     TaskFactory(
         task=TaskType.token_classification,
         es_mapping=token_classification_mappings(),
+        settings_class=TokenClassificationSettings,
     ),
     TaskFactory(
         task=TaskType.text2text,
