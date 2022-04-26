@@ -258,13 +258,6 @@ export default {
   }
   &__table {
     margin-bottom: 2em !important;
-    @include media("<=desktop") {
-      ::v-deep .table-info__header {
-        .table-info__item__col:first-child button {
-          width: 70px;
-        }
-      }
-    }
     ::v-deep {
       .table-info__item__col {
         width: 130px;

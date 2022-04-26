@@ -147,8 +147,11 @@ export default {
     width: calc(100% - 300px);
   }
   &__searchbar {
-    margin-right: 2em;
+    margin-right: 10px;
     width: 100%;
+    @include media(">desktop") {
+      margin-right: 15px;
+    }
     &.--extended {
       width: 100%;
       margin-right: 0;
