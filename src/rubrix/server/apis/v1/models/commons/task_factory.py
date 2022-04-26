@@ -9,19 +9,21 @@ from rubrix.server.apis.v1.models.datasets import (
     DatasetCreate,
     DatasetUpdate,
 )
+from rubrix.server.apis.v1.validators.dataset_settings.base import (
+    DatasetSettingsValidator,
+    EmptyDatasetSettingsValidator,
+)
 
 
 @dataclass
 class TaskFactory:
 
     task: TaskType
-
     es_mapping: Dict[str, Any]
-
     # Datasets
     create_dataset_class: Type[DatasetCreate] = DatasetCreate
     update_dataset_class: Type[DatasetUpdate] = DatasetUpdate
     output_dataset_class: Type[AbstractBaseDataset] = Dataset
-
     # Settings
     settings_class: Optional[Type[AbstractDatasetSettings]] = None
+    settings_validator: Type[DatasetSettingsValidator] = EmptyDatasetSettingsValidator

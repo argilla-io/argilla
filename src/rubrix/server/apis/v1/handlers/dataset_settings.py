@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from typing import Type
 
 from fastapi import APIRouter, Body, Depends, Security
@@ -57,6 +56,9 @@ def configure_router():
             name: str = DATASET_NAME_PATH_PARAM,
             ws_params: WorkspaceParams = Depends(),
             datasets: DatasetsService = Depends(DatasetsService.get_instance),
+            validator: cfg.settings_validator = Depends(
+                cfg.settings_validator.get_instance
+            ),
             user: User = Security(auth.get_user, scopes=["SaveDatasetSettings"]),
         ) -> DatasetSettings:
             found_ds = datasets.find_by_name(
@@ -66,12 +68,12 @@ def configure_router():
                 workspace=ws_params.workspace,
             )
 
+            validator.validate(found_ds, settings=request)
             settings = await datasets.save_settings(
                 user=user,
                 dataset=found_ds,
                 settings=svc_settings_class.parse_obj(request.dict()),
             )
-
             return cfg.settings_class.parse_obj(settings)
 
         for _task in [cfg.task, cfg.task.as_old_task_type()]:
@@ -90,7 +92,7 @@ def configure_router():
             )(save_settings)
 
     for cfg in all_tasks:
-        if cfg.settings_class:
+        if cfg.settings_class and cfg.settings_validator:
             configure_task_endpoints(router, cfg)
 
     return router
