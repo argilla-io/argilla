@@ -37,6 +37,9 @@ def test_settings_with_a_created_dataset(mocked_client):
     rb.delete(dataset)
     rb.log(rb.TextClassificationRecord(text="The input text"), name=dataset)
 
+    settings_ = rb.settings.load_settings(dataset)
+    assert settings_ is None
+
     classification_settings = TextClassificationSettings(labels_schema={"L1", "L2"})
     rb.settings.save_settings(dataset, classification_settings)
     settings_ = rb.settings.load_settings(dataset)

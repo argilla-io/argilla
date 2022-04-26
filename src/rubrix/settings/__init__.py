@@ -126,7 +126,11 @@ def load_settings(name: str) -> Optional[Settings]:
 
     datasets = active_api.datasets
     dataset = datasets.find_by_name(name)
-    settings = datasets.get_settings(dataset)
+
+    try:
+        settings = datasets.get_settings(dataset)
+    except NotFoundApiError:
+        return None
 
     settings_class = None
     if TaskType.text_classification == dataset.task:

@@ -16,10 +16,6 @@ class LabelSchema(object):
     name: str
     description: Optional[str] = None
 
-    def __post_init__(self):
-        if not self.id:
-            self.id = self.name
-
     def __hash__(self):
         return hash(self.id)
 

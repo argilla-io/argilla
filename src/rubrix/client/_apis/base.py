@@ -15,5 +15,6 @@ def api_compatibility_check(func):
             response = gap.ctx.get("response")
             if "Method Not Allowed" == response:
                 raise ApiCompatibilityError()
+            raise gap
 
     return inner

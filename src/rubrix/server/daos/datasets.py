@@ -350,7 +350,8 @@ class DatasetsDAO:
     ) -> Optional[SettingsDB]:
         doc = self._es.get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
         if doc:
-            return as_class.parse_obj(self.__get_doc_field__(doc, field="settings"))
+            settings = self.__get_doc_field__(doc, field="settings")
+            return as_class.parse_obj(settings) if settings else None
 
-    def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Any:
-        return doc["_source"][field]
+    def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
+        return doc["_source"].get(field)
