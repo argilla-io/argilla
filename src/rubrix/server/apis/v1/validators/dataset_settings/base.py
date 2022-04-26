@@ -35,6 +35,10 @@ class DatasetSettingsValidator:
 
 
 class EmptyDatasetSettingsValidator(DatasetSettingsValidator):
+    """
+    Noop validator for dataset settings (the default one)
+    """
+
     @classmethod
     def get_instance(cls) -> "DatasetSettingsValidator":
         return cls()
