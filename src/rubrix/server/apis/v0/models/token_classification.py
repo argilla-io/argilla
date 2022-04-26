@@ -239,6 +239,8 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     @property
     def scores(self) -> List[float]:
+        if not self.prediction:
+            return []
         if self.prediction.score is not None:
             return [self.prediction.score]
         return [e.score for e in self.prediction.entities]
