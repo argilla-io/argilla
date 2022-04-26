@@ -2,14 +2,38 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional, Set, Union
 
 from rubrix.client import api
+from rubrix.client._apis.datasets import Dataset
 from rubrix.client._apis.datasets import Settings as _Settings
 from rubrix.client.sdk.commons.errors import NotFoundApiError
 from rubrix.client.sdk.datasets.models import TaskType
-from rubrix.settings._base import AbstractSettings, LabelsSchema
+from rubrix.settings._base import AbstractSettings, LabelSchema, LabelsSchema
 
 
 @dataclass
-class TextClassificationSettings(AbstractSettings):
+class LabelsSchemaSettings(AbstractSettings):
+    """
+    A base dataset settings class for labels schema management
+
+    Args:
+        labels_schema: The label's schema for the dataset
+
+    """
+
+    labels_schema: Union[Set[str], LabelsSchema]
+
+    def __post_init__(self):
+        if isinstance(self.labels_schema, Set):
+            self.labels_schema = LabelsSchema.from_labels_set(self.labels_schema)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
+        labels_schema = data.get("labels_schema", {})
+        labels = {LabelSchema(**l) for l in labels_schema.get("labels", [])}
+        return cls(labels_schema=LabelsSchema(labels=labels))
+
+
+@dataclass
+class TextClassificationSettings(LabelsSchemaSettings):
     """
     The settings for text classification datasets
 
@@ -18,19 +42,9 @@ class TextClassificationSettings(AbstractSettings):
 
     """
 
-    labels_schema: Union[Set[str], LabelsSchema]
-
-    def __post_init__(self):
-        if isinstance(self.labels_schema, Set):
-            self.labels_schema = LabelsSchema.from_labels_set(self.labels_schema)
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TextClassificationSettings":
-        return cls(labels_schema=data.get("labels_schema", set()))
-
 
 @dataclass
-class TokenClassificationSettings(AbstractSettings):
+class TokenClassificationSettings(LabelsSchemaSettings):
     """
     The settings for token classification datasets
 
@@ -39,18 +53,25 @@ class TokenClassificationSettings(AbstractSettings):
 
     """
 
-    labels_schema: Union[Set[str], LabelsSchema]
-
-    def __post_init__(self):
-        if isinstance(self.labels_schema, Set):
-            self.labels_schema = LabelsSchema.from_labels_set(self.labels_schema)
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TokenClassificationSettings":
-        return cls(labels_schema=data.get("labels_schema", set()))
-
 
 Settings = Union[TextClassificationSettings, TokenClassificationSettings]
+
+__TASK_TO_SETTINGS__ = {
+    TaskType.text_classification: TextClassificationSettings,
+    TaskType.token_classification: TokenClassificationSettings,
+}
+
+
+def _apply_validations(dataset: Dataset, settings: Settings):
+    expected_class = __TASK_TO_SETTINGS__.get(dataset.task)
+    if not expected_class:
+        return
+
+    if expected_class != type(settings):
+        raise ValueError(
+            "Provided settings are not compatible with dataset task."
+            f"\nPlease provide a settings of type {expected_class.__name__}"
+        )
 
 
 def save_settings(name: str, settings: Settings):
@@ -79,6 +100,7 @@ def save_settings(name: str, settings: Settings):
 
     try:
         dataset = datasets.find_by_name(name)
+        _apply_validations(dataset, settings)
         datasets.save_settings(dataset, _settings)
     except NotFoundApiError:
         # TODO: find a normalized way to show a message here
@@ -109,8 +131,8 @@ def load_settings(name: str) -> Optional[Settings]:
     settings_class = None
     if TaskType.text_classification == dataset.task:
         settings_class = TextClassificationSettings
-    elif TaskType.text_classification == dataset.task:
-        settings_class = TextClassificationSettings
+    elif TaskType.token_classification == dataset.task:
+        settings_class = TokenClassificationSettings
 
     if settings_class and settings:
         return settings_class.from_dict(settings.dict())
