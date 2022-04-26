@@ -46,7 +46,7 @@ export default {
   padding-bottom: 0;
   padding-left: 4em;
   padding-right: calc($sidebarMenuWidth + 15px);
-  transition: padding 0.5s ease-in-out;
+  transition: padding 0.5s ease-in-out 0.2s;
   .--metrics & {
     @include media(">desktop") {
       padding-right: calc($sidebarWidth + 25px);

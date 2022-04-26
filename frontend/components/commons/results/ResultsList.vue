@@ -174,7 +174,7 @@ export default {
   list-style: none;
   padding-right: calc($sidebarMenuWidth + 15px);
   z-index: 0;
-  transition: padding 0.5s ease-in-out;
+  transition: padding 0.5s ease-in-out 0.2s;
   .--metrics & {
     @include media(">desktop") {
       width: 100%;

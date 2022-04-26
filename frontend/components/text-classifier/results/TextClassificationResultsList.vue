@@ -64,7 +64,7 @@ export default {
 <style lang="scss" scoped>
 .content {
   padding-right: calc($sidebarMenuWidth + 15px);
-  transition: padding 0.5s ease-in-out;
+  transition: padding 0.5s ease-in-out 0.2s;
   .--metrics & {
     @include media(">desktop") {
       width: 100%;
