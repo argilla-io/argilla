@@ -26,7 +26,7 @@
         :dataset="dataset"
       />
     </template>
-    <template>
+    <template v-else>
       <text-span-static
         v-for="(token, i) in textSpans"
         v-once
