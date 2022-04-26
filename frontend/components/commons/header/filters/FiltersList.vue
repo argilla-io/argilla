@@ -288,21 +288,24 @@ $number-size: 18px;
   $this: &;
   position: relative;
   display: inline-block;
-  z-index: 2;
   &__list {
     display: flex;
     &__content {
       width: 455px;
-      left: 0;
-      right: 0;
+      right: -10em;
       margin: auto;
       position: absolute;
-      top: calc(100% + 1em);
+      top: calc(100% + 10px);
       box-shadow: $shadow;
       background: $lighter-color;
       padding: 20px 20px 10px 4em;
       border-radius: $border-radius;
       max-height: 550px;
+      z-index: 2;
+      @include media(">desktop") {
+        left: 0;
+        right: 0;
+      }
       &--sort {
         max-width: 410px;
       }
@@ -310,13 +313,6 @@ $number-size: 18px;
         // width: 910px;
         max-height: 80vh;
         overflow: auto;
-        & > span {
-          // display: inline-block;
-          // width: 50%;
-          // &:nth-child(2n + 1) {
-          //   padding-right: 1em;
-          // }
-        }
       }
     }
     &__item {
@@ -341,13 +337,17 @@ $number-size: 18px;
       position: relative;
       margin-bottom: 0;
       margin-top: 0;
-      padding: 0.8em 1em;
+      padding: 0.8em;
       border-radius: $border-radius;
-      margin-right: 1em;
+      margin-right: 10px;
       color: $font-secondary;
       @include font-size(15px);
       font-family: $sff;
       white-space: nowrap;
+      @include media(">desktop") {
+        padding: 0.8em 1em;
+        margin-right: 15px;
+      }
       &:hover {
         background: palette(grey, smooth);
       }

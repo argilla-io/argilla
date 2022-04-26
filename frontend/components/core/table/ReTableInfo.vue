@@ -478,6 +478,11 @@ export default {
       @include font-size(14px);
       font-family: $sff;
       text-align: left;
+      @include media("<=desktop") {
+        .svg-icon {
+          display: block;
+        }
+      }
       span {
         white-space: nowrap;
       }
@@ -494,7 +499,7 @@ export default {
   &__item {
     position: relative;
     list-style: none;
-    padding: 2em 8em 2em 2em;
+    padding: 2em 5em 2em 2em;
     display: flex;
     width: 100%;
     border-bottom: 1px solid $line-light-color;
@@ -509,8 +514,9 @@ export default {
         max-width: 120px;
       }
       &:first-child {
-        flex-shrink: 0;
-        min-width: 240px;
+        width: auto;
+        min-width: auto;
+        flex-grow: 1.5;
       }
     }
     .svg-icon {

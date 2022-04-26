@@ -124,7 +124,7 @@ export default {
   }
   &__content {
     position: absolute;
-    top: 50px;
+    top: calc(100% + 10px);
     left: 0;
     margin-top: 0;
     box-shadow: $shadow;
