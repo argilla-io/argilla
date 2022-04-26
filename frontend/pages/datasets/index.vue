@@ -358,7 +358,7 @@ export default {
 }
 
 .home {
-  &__sidebar {
+  &__sidebar.sidebar {
     position: fixed;
     top: 56px;
     right: 0;
