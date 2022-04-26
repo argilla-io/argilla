@@ -17,7 +17,7 @@
 
 <template>
   <SidebarProgress :dataset="dataset">
-    <div v-if="annotationsProgress" class="labels sidebar--animation">
+    <div v-if="annotationsProgress" class="labels">
       <div v-for="(counter, label) in getInfo" :key="label">
         <div v-if="counter > 0" class="info">
           <label>{{ label }}</label>

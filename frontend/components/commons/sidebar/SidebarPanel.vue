@@ -19,11 +19,11 @@
   <aside class="sidebar">
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
-        <svgicon
-          @click="closePanel"
-          class="sidebar__panel__button"
-          name="chev-right"
-        ></svgicon>
+        <div class="sidebar__close">
+          <a href="#" @click.prevent="closePanel" class="sidebar__close__button"
+            ><svgicon name="chev-right" width="8"></svgicon
+          ></a>
+        </div>
         <slot></slot>
       </div>
     </div>
@@ -49,6 +49,7 @@ export default {
 $topbarHeight: 56px;
 $sidebarMenuWidth: 70px;
 .sidebar {
+  $this: &;
   min-height: calc(100vh - $topbarHeight);
   width: $sidebarPanelWidth;
   position: relative;
@@ -56,28 +57,58 @@ $sidebarMenuWidth: 70px;
   right: -$sidebarPanelWidth + 3px;
   background: $bg;
   padding: 1em 1.5em;
-  transition: right 0.5s cubic-bezier(0.61, -0.08, 0.52, 1.17),
-  box-shadow 0.1s ease-out;
-  box-shadow: none;
+  transition: right 0.5s cubic-bezier(0.61, -0.08, 0.52, 1.17);
   overflow: hidden;
   background: $bg;
   z-index: -1;
   border-left: 1px solid palette(grey, smooth);
+  &__close {
+    position: absolute;
+    top: -2em;
+    bottom: 0;
+    left: -2.5em;
+    width: 30px;
+    min-height: 100vh;
+    text-align: center;
+    &__button {
+      margin-top: 2em;
+      border-radius: 3px;
+      background: palette(grey, smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      transform: scale(0.3);
+      overflow: hidden;
+      transition: transform 0.1s ease-in-out;
+      opacity: 0;
+      &:hover {
+        background: darken(palette(grey, smooth), 5%);
+      }
+    }
+    &:hover {
+      #{$this}__close__button {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
   &__content {
     display: block;
     position: relative;
     opacity: 0;
-    transition: opacity 0.3s ease-out, transform 0.2s ease-in-out;
+    transition: opacity 0.1s ease-out 0.4s, transform 0.2s ease-in-out;
     transform: translateX(5em);
+    z-index: 0;
   }
   &.visible {
     overflow: visible;
-    box-shadow: -4px 15px 16px -1px #c7c7c7;
     right: 0;
-    transition: right 0.5s ease-in, box-shadow 0.4s ease-in-out 0.6s;
+    transition: right 0.5s ease-in;
     .sidebar__content {
       transform: translateX(0);
-      transition: opacity 0.2s ease-in-out 0.3s;
+      transition: opacity 0.1s ease-in-out 0.3s;
       opacity: 1;
     }
   }
@@ -86,31 +117,6 @@ $sidebarMenuWidth: 70px;
     margin-left: 1em;
     display: block !important;
     right: -$sidebarPanelWidth + 1px;
-  }
-  &__panel {
-    &__button {
-      position: absolute;
-      left: 0;
-      top: 0.2em;
-      pointer-events: all;
-      cursor: pointer;
-      z-index: 2;
-      border-radius: 3px;
-      padding: 5px;
-      background: palette(grey, smooth);
-      box-sizing: content-box;
-      max-width: 8px;
-      max-height: 8px;
-      transform: translateX(-2em);
-      transition: transform 0.2s ease-in-out;
-      &:hover {
-        background: darken(palette(grey, smooth), 5%);
-      }
-      .visible & {
-        transform: translateX(0);
-        transition: transform 0.2s ease-in-out 0.4s;
-      }
-    }
   }
   &__content {
     border-radius: 2px;
@@ -122,7 +128,6 @@ $sidebarMenuWidth: 70px;
   ::v-deep {
     .sidebar__title {
       margin-bottom: 2em;
-      margin-left: 1.5em;
     }
   }
 }
