@@ -27,10 +27,10 @@ author = "Recognai"
 # Normally the full version, including alpha/beta/rc tags.
 # But since rtd changes some files during the build process, the scm version becomes dirty,
 # so we just want to display the major and minor version in the tab title of the browser.
-release = ".".join(rb.__version__.split(".")[0:2])
+release = rb.__version__
 
 # The short X.Y version
-version = release
+version = ".".join(release.split(".")[0:2])
 
 
 # -- General configuration ---------------------------------------------------
