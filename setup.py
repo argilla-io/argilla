@@ -1,3 +1,7 @@
 from setuptools import setup
 
-setup(use_scm_version=True)
+version = {}
+with open("src/rubrix/_version.py") as fp:
+    exec(fp.read(), version)
+
+setup(version=version["version"])

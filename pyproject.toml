@@ -1,9 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-write_to = "src/rubrix/_version.py"
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
