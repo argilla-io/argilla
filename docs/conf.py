@@ -29,10 +29,6 @@ author = "Recognai"
 # so we just want to display the major and minor version in the tab title of the browser.
 release = ".".join(rb.__version__.split(".")[0:2])
 
-# If on the master branch, set release and version to 'master'
-if "origin/master" in os.popen("git log -n 1 --oneline --decorate").read():
-    release = "master"
-
 # The short X.Y version
 version = release
 
