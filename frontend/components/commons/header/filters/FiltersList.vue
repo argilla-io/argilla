@@ -301,7 +301,7 @@ $number-size: 18px;
       padding: 20px 20px 10px 4em;
       border-radius: $border-radius;
       max-height: 550px;
-      z-index: 1;
+      z-index: 2;
       @include media(">desktop") {
         left: 0;
         right: 0;
