@@ -105,14 +105,16 @@ $sidebarMenuWidth: 70px;
         opacity: 1;
         animation: zoom-out 0.3s ease-out forwards;
       }
+      .svg-icon {
+        color: $secondary-color;
+      }
     }
   }
   &__content {
     display: block;
     position: relative;
     opacity: 0;
-    transition: opacity 0.1s ease-out 0.4s, transform 0.2s ease-in-out 0.2s;
-    transform: translateX(5em);
+    transition: opacity 0.1s ease-out 0.6s;
     z-index: 0;
   }
   &.visible {
@@ -120,7 +122,6 @@ $sidebarMenuWidth: 70px;
     right: 0;
     transition: right 0.5s ease-in;
     .sidebar__content {
-      transform: translateX(0);
       transition: opacity 0.1s ease-in-out 0.2s;
       opacity: 1;
     }
@@ -141,6 +142,15 @@ $sidebarMenuWidth: 70px;
   ::v-deep {
     .sidebar__title {
       margin-bottom: 2em;
+      color: $font-secondary-dark;
+      margin-top: 0.2em;
+      @include font-size(20px);
+      font-weight: 700;
+    }
+    .sidebar__subtitle {
+      @include font-size(15px);
+      color: $font-secondary-dark;
+      font-weight: 600;
     }
   }
 }

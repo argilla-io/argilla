@@ -104,7 +104,7 @@ $color: #333346;
   z-index: 1;
   .--metrics & {
     box-shadow: inset 3px 0px 11px -5px #c7c7c7;
-    transition: box-shadow 0.3s ease-in-out 0.5s;
+    transition: box-shadow 0.2s ease-in-out;
   }
   p {
     text-align: center;
