@@ -202,18 +202,8 @@ $hue: 360;
     }
     &.excluded ::v-deep {
       .highlight__content {
-        border-color: lighten($rcolor, 10%);
         &:after {
-          border-color: $rcolor;
-        }
-      }
-      .highlight__tooltip {
-        background: lighten($rcolor, 10%);
-        &:after {
-          border-color: transparent
-            transparent
-            lighten($rcolor, 10%)
-            transparent;
+          content: none;
         }
       }
     }
