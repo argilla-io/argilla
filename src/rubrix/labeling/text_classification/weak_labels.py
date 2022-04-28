@@ -486,7 +486,7 @@ class WeakLabels(WeakLabelsBase):
             for i in range(matrix_length)
         ]
 
-        if not embeddings is None:
+        if embeddings is not None:
             embeddings_copy = np.copy(embeddings).astype(np.float32)
             dists, nearest = self._find_dists_and_nearest(
                 matrix_length, embeddings_copy, mat_abstains, support, gpu=gpu
