@@ -483,7 +483,10 @@ class Snorkel(LabelModel):
     """
 
     def __init__(
-        self, weak_labels: WeakLabels, verbose: bool = True, device: str = "cpu"
+        self,
+        weak_labels: Union[WeakLabels, WeakMultiLabels],
+        verbose: bool = True,
+        device: str = "cpu",
     ):
         try:
             import snorkel
@@ -497,32 +500,19 @@ class Snorkel(LabelModel):
 
         super().__init__(weak_labels)
 
-        # Check if we need to remap the weak labels to int mapping
-        # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
-        if self._weak_labels.label2int[None] != -1 or sorted(
-            self._weak_labels.int2label
-        ) != list(range(-1, self._weak_labels.cardinality)):
-            self._need_remap = True
-            self._weaklabelsInt2snorkelInt = {
-                self._weak_labels.label2int[label]: i
-                for i, label in enumerate([None] + self._weak_labels.labels, -1)
-            }
+        if isinstance(weak_labels, WeakLabels):
+            snorkel_model = SnorkelLabelModel(
+                cardinality=self._weak_labels.cardinality,
+                verbose=verbose,
+                device=device,
+            )
+            self._model = _SnorkelSingleLabel(weak_labels, snorkel_model)
         else:
-            self._need_remap = False
-            self._weaklabelsInt2snorkelInt = {
-                i: i for i in range(-1, self._weak_labels.cardinality)
-            }
-
-        self._snorkelInt2weaklabelsInt = {
-            val: key for key, val in self._weaklabelsInt2snorkelInt.items()
-        }
-
-        # instantiate Snorkel's label model
-        self._model = SnorkelLabelModel(
-            cardinality=self._weak_labels.cardinality,
-            verbose=verbose,
-            device=device,
-        )
+            snorkel_models = [
+                SnorkelLabelModel(cardinality=2, verbose=verbose, device=device)
+                for _ in range(weak_labels.cardinality)
+            ]
+            self._model = _SnorkelMultiLabel(weak_labels, snorkel_models)
 
     def fit(self, include_annotated_records: bool = False, **kwargs):
         """Fits the label model.
@@ -541,36 +531,8 @@ class Snorkel(LabelModel):
         l_train = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
-        if self._need_remap:
-            l_train = self._copy_and_remap(l_train)
 
-        self._model.fit(L_train=l_train, **kwargs)
-
-    def _copy_and_remap(self, matrix_or_array: np.ndarray):
-        """Helper function to copy and remap the weak label matrix or annotation array to be compatible with snorkel.
-
-        Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential.
-
-        Args:
-            matrix_or_array: The original weak label matrix or annotation array
-
-        Returns:
-            A copy of the weak label matrix, remapped to match snorkel's requirements.
-        """
-        matrix_or_array = matrix_or_array.copy()
-
-        # save masks for swapping
-        label_masks = {}
-
-        # compute masks
-        for idx in self._weaklabelsInt2snorkelInt:
-            label_masks[idx] = matrix_or_array == idx
-
-        # swap integers
-        for idx in self._weaklabelsInt2snorkelInt:
-            matrix_or_array[label_masks[idx]] = self._weaklabelsInt2snorkelInt[idx]
-
-        return matrix_or_array
+        self._model.fit(l_train, **kwargs)
 
     def predict(
         self,
@@ -726,6 +688,92 @@ class Snorkel(LabelModel):
             target_names=self._weak_labels.labels[: annotation.max() + 1],
             output_dict=not output_str,
         )
+
+
+class _SnorkelSingleLabel:
+    """Helper class for the Snorkel label model that holds the logic for the single label case.
+
+    Args:
+        weak_labels: The weak labels
+        model: The snorkel model
+    """
+
+    def __init__(
+        self, weak_labels: WeakLabels, model: "snorkel.labeling.model.LabelModel"
+    ):
+        self._weak_labels = weak_labels
+        self._model = model
+
+        # Check if we need to remap the "weak labels to int" mapping
+        # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
+        self._need_remap = False
+        self._weaklabelsInt2snorkelInt = {
+            i: i for i in range(-1, self._weak_labels.cardinality)
+        }
+        if self._weak_labels.label2int[None] != -1 or sorted(
+            self._weak_labels.int2label
+        ) != list(range(-1, self._weak_labels.cardinality)):
+            self._need_remap = True
+            self._weaklabelsInt2snorkelInt = {
+                self._weak_labels.label2int[label]: i
+                for i, label in enumerate([None] + self._weak_labels.labels, -1)
+            }
+
+        self._snorkelInt2weaklabelsInt = {
+            val: key for key, val in self._weaklabelsInt2snorkelInt.items()
+        }
+
+    def fit(self, l_train, **kwargs):
+        if self._need_remap:
+            l_train = self._copy_and_remap(l_train)
+
+        self._model.fit(L_train=l_train, **kwargs)
+
+    def _copy_and_remap(self, matrix_or_array: np.ndarray):
+        """Helper function to copy and remap the weak label matrix or annotation array to be compatible with snorkel.
+
+        Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential.
+
+        Args:
+            matrix_or_array: The original weak label matrix or annotation array
+
+        Returns:
+            A copy of the weak label matrix, remapped to match snorkel's requirements.
+        """
+        matrix_or_array = matrix_or_array.copy()
+
+        # save masks for swapping
+        label_masks = {}
+
+        # compute masks
+        for idx in self._weaklabelsInt2snorkelInt:
+            label_masks[idx] = matrix_or_array == idx
+
+        # swap integers
+        for idx in self._weaklabelsInt2snorkelInt:
+            matrix_or_array[label_masks[idx]] = self._weaklabelsInt2snorkelInt[idx]
+
+        return matrix_or_array
+
+
+class _SnorkelMultiLabel:
+    """Helper class for the Snorkel label model that holds the logic for the multi label case.
+
+    Args:
+        weak_labels: The weak labels.
+        models: The snorkel models, one for each label.
+    """
+
+    def __init__(
+        self,
+        weak_labels: WeakMultiLabels,
+        models: List["snorkel.labeling.model.LabelModel"],
+    ):
+        self._weak_labels = weak_labels
+        self._models = models
+
+    def fit(self, l_train: np.ndarray, **kwargs):
+        raise NotImplementedError
 
 
 class FlyingSquid(LabelModel):
