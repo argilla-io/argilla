@@ -115,7 +115,7 @@ class WeakLabelsBase:
     @property
     def cardinality(self) -> int:
         """The number of labels."""
-        raise NotImplementedError
+        return len(self.labels)
 
     def records(
         self, has_annotation: Optional[bool] = None
@@ -373,10 +373,6 @@ class WeakLabels(WeakLabelsBase):
                 weak_label_matrix[n, m] = weak_label
 
         return weak_label_matrix, annotation_array, _label2int
-
-    @property
-    def cardinality(self) -> int:
-        return len(self._label2int) - 1
 
     @property
     def labels(self) -> List[str]:
@@ -754,10 +750,6 @@ class WeakMultiLabels(WeakLabelsBase):
     def labels(self) -> List[str]:
         """The labels of the multi-label text classification dataset."""
         return self._labels
-
-    @property
-    def cardinality(self) -> int:
-        return len(self._labels)
 
     def matrix(self, has_annotation: Optional[bool] = None) -> np.ndarray:
         """Returns the 3 dimensional weak label matrix, or optionally just a part of it.
