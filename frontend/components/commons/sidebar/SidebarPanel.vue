@@ -19,16 +19,14 @@
   <aside class="sidebar">
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
-        <div class="sidebar__close">
-          <a
-            href="#"
-            @click.prevent="closePanel"
-            :class="{ 'zoom-out': animated }"
-            @animationend="animated = false"
-            class="sidebar__close__button"
-            ><svgicon name="chev-right" width="8"></svgicon
-          ></a>
-        </div>
+        <a
+          href="#"
+          @click.prevent="closePanel"
+          :class="{ 'zoom-out': animated }"
+          @animationend="animated = false"
+          class="sidebar__close-button"
+          ><svgicon name="chev-right" width="6" height="8"></svgicon
+        ></a>
         <slot></slot>
       </div>
     </div>
@@ -68,46 +66,37 @@ $sidebarMenuWidth: 70px;
   right: -$sidebarPanelWidth + 1px;
   background: $bg;
   padding: 1em 1.5em;
-  transition: right 0.5s cubic-bezier(0.61, -0.08, 0.52, 1.17) 0.2s;
-  background: $bg;
+  transition: right 0.5s linear 0.2s;
   z-index: -1;
   border-left: 1px solid palette(grey, smooth);
-  &__close {
-    position: absolute;
-    top: -2em;
-    bottom: 0;
-    left: -2.5em;
-    width: 30px;
-    min-height: 100vh;
-    text-align: center;
-    &:hover {
-      #{$this}__close__button:not(.zoom-out) {
-        opacity: 1;
-        transform: scale(1);
-        transition: transform 0.15s ease-in-out;
-      }
+  &:hover {
+    #{$this}__close-button:not(.zoom-out) {
+      opacity: 1;
+      transform: scale(1);
+      transition: transform 0.15s ease-in-out;
     }
-    &__button {
-      margin-top: 2em;
-      border-radius: 3px;
-      background: palette(grey, smooth);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      transform: scale(0);
-      overflow: hidden;
-      transition: transform 0.2s ease-in;
-      opacity: 0;
-      outline: 0;
-      &.zoom-out {
-        opacity: 1;
-        animation: zoom-out 0.3s ease-out forwards;
-      }
-      .svg-icon {
-        color: $secondary-color;
-      }
+  }
+  &__close-button {
+    position: absolute;
+    left: -2.5em;
+    top: 1px;
+    border-radius: 3px;
+    background: palette(grey, smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transform: scale(0);
+    overflow: hidden;
+    opacity: 0;
+    outline: 0;
+    &.zoom-out {
+      opacity: 1;
+      animation: zoom-out 0.3s ease-out forwards;
+    }
+    .svg-icon {
+      color: $secondary-color;
     }
   }
   &__content {
@@ -120,7 +109,7 @@ $sidebarMenuWidth: 70px;
   &.visible {
     overflow: visible;
     right: 0;
-    transition: right 0.5s ease-in;
+    transition: right 0.5s linear;
     .sidebar__content {
       transition: opacity 0.1s ease-in-out 0.2s;
       opacity: 1;
