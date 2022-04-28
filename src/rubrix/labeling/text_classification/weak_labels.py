@@ -461,7 +461,7 @@ class WeakLabels(WeakLabelsBase):
 
     def extend_matrix(
         self, thresholds, embeddings: Optional[np.ndarray] = None, gpu=False
-    ) -> np.ndarray:
+    ):
         """Returns the extended weak label matrix, or optionally just a part of it.
            Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
 
