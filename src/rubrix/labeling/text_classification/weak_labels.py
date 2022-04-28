@@ -472,9 +472,6 @@ class WeakLabels(WeakLabelsBase):
             has_annotation: If True, return only the part of the matrix that has a corresponding annotation.
                 If False, return only the part of the matrix that has NOT a corresponding annotation.
                 By default, we return the whole weak label matrix.
-
-        Returns:
-            The extended weak label matrix, or optionally just a part of it.
         """
 
         matrix_length = self._matrix.shape[1]
