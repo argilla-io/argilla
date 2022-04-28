@@ -63,17 +63,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .content {
-  padding-right: calc($sidebarMenuWidth + 15px);
-  transition: padding 0.5s ease-in-out 0.2s;
-  .--metrics & {
-    @include media(">desktop") {
-      width: 100%;
-      padding-right: calc($sidebarWidth + 25px);
-      transition: padding 0.5s ease-in-out;
-    }
-  }
-  @include media(">desktop") {
-    width: 100%;
-  }
+  @extend %collapsable-if-metrics !optional;
 }
 </style>
