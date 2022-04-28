@@ -116,6 +116,10 @@ export default {
     position: fixed;
     display: flex;
     right: 0;
+    pointer-events: none;
+    .--metrics & {
+      pointer-events: all;
+    }
   }
 }
 </style>

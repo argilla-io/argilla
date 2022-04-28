@@ -98,9 +98,10 @@ $color: #333346;
   min-width: $sidebar-button-size;
   min-height: 100vh;
   min-width: $sidebarMenuWidth;
-  z-index: 1;
   background: $bg;
   box-shadow: none;
+  pointer-events: all;
+  z-index: 1;
   .--metrics & {
     box-shadow: inset 3px 0px 11px -5px #c7c7c7;
     transition: box-shadow 0.3s ease-in-out 0.5s;
