@@ -16,16 +16,14 @@
   -->
 
 <template>
-  <div>
-    <SidebarMenu
-      :current-metric="currentMetric"
-      :dataset="dataset"
-      :sidebar-items="sidebarItems"
-      @refresh="$emit('refresh')"
-      @show-metrics="onShowMetrics"
-      @change-view-mode="onChangeViewMode"
-    />
-  </div>
+  <SidebarMenu
+    :current-metric="currentMetric"
+    :dataset="dataset"
+    :sidebar-items="sidebarItems"
+    @refresh="$emit('refresh')"
+    @show-metrics="onShowMetrics"
+    @change-view-mode="onChangeViewMode"
+  />
 </template>
 
 <script>

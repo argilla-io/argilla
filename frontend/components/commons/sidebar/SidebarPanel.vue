@@ -19,11 +19,14 @@
   <aside class="sidebar">
     <div class="sidebar__wrapper">
       <div class="sidebar__content">
-        <svgicon
-          @click="closePanel"
-          class="sidebar__panel__button"
-          name="chev-right"
-        ></svgicon>
+        <a
+          href="#"
+          @click.prevent="closePanel"
+          :class="{ 'zoom-out': animated }"
+          @animationend="animated = false"
+          class="sidebar__close-button"
+          ><svgicon name="chev-right" width="6" height="8"></svgicon
+        ></a>
         <slot></slot>
       </div>
     </div>
@@ -32,6 +35,11 @@
 <script>
 import "assets/icons/chev-right";
 export default {
+  data: () => {
+    return {
+      animated: false,
+    };
+  },
   props: {
     dataset: {
       type: Object,
@@ -41,6 +49,7 @@ export default {
   methods: {
     closePanel() {
       this.$emit("close-panel");
+      this.animated = true;
     },
   },
 };
@@ -49,41 +58,68 @@ export default {
 $topbarHeight: 56px;
 $sidebarMenuWidth: 70px;
 .sidebar {
-  top: 0;
+  $this: &;
   min-height: calc(100vh - $topbarHeight);
   width: $sidebarPanelWidth;
-  position: absolute;
-  right: $sidebarMenuWidth;
+  position: relative;
+  top: 0;
+  right: -$sidebarPanelWidth + 1px;
   background: $bg;
   padding: 1em 1.5em;
-  transition: top 0.2s ease-in-out;
-  border: 1px solid palette(grey, smooth);
-  box-shadow: -4px 15px 16px -1px #c7c7c7;
+  transition: right 0.25s linear 0.2s;
+  z-index: -1;
+  border-left: 1px solid palette(grey, smooth);
+  &:hover {
+    #{$this}__close-button:not(.zoom-out) {
+      opacity: 1;
+      transform: scale(1);
+      transition: transform 0.15s ease-in-out;
+    }
+  }
+  &__close-button {
+    position: absolute;
+    left: -2.5em;
+    top: 1px;
+    border-radius: 3px;
+    background: palette(grey, smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transform: scale(0);
+    overflow: hidden;
+    opacity: 0;
+    outline: 0;
+    &.zoom-out {
+      opacity: 1;
+      animation: zoom-out 0.3s ease-out forwards;
+    }
+    .svg-icon {
+      color: $secondary-color;
+    }
+  }
+  &__content {
+    display: block;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.1s ease-out 0.6s;
+    z-index: 0;
+  }
+  &.visible {
+    overflow: visible;
+    right: 0;
+    transition: right 0.25s linear;
+    .sidebar__content {
+      transition: opacity 0.1s ease-in-out 0.2s;
+      opacity: 1;
+    }
+  }
   @include media(">desktop") {
     border-radius: 1px;
-    border: none;
     margin-left: 1em;
     display: block !important;
-    right: $sidebarMenuWidth;
-  }
-  &__panel {
-    &__button {
-      position: absolute;
-      left: 1.5em;
-      top: 2em;
-      pointer-events: all;
-      cursor: pointer;
-      z-index: 2;
-      border-radius: 3px;
-      padding: 5px;
-      background: palette(grey, smooth);
-      box-sizing: content-box;
-      max-width: 8px;
-      max-height: 8px;
-      &:hover {
-        background: darken(palette(grey, smooth), 5%);
-      }
-    }
+    right: -$sidebarPanelWidth + 1px;
   }
   &__content {
     border-radius: 2px;
@@ -95,8 +131,28 @@ $sidebarMenuWidth: 70px;
   ::v-deep {
     .sidebar__title {
       margin-bottom: 2em;
-      margin-left: 1.5em;
+      color: $font-secondary-dark;
+      margin-top: 0.2em;
+      @include font-size(20px);
+      font-weight: 700;
     }
+    .sidebar__subtitle {
+      @include font-size(15px);
+      color: $font-secondary-dark;
+      font-weight: 600;
+    }
+  }
+}
+
+@keyframes zoom-out {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(0);
   }
 }
 </style>

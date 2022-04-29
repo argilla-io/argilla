@@ -59,7 +59,11 @@
           </div>
         </div>
       </div>
-      <sidebar-menu @refresh="$fetch" :sidebar-items="sidebarItems" />
+      <sidebar-menu
+        class="home__sidebar"
+        @refresh="$fetch"
+        :sidebar-items="sidebarItems"
+      />
     </div>
   </div>
 </template>
@@ -351,5 +355,14 @@ export default {
   margin-right: 1em;
   margin-bottom: 2em;
   @include font-size(18px);
+}
+
+.home {
+  &__sidebar.sidebar {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    border-left: 1px solid palette(grey, smooth);
+  }
 }
 </style>

@@ -106,21 +106,22 @@ export default {
           field: "correct",
           class: "text",
           tooltip:
-            "Number of labels the rule predicted correctly (if annotations are available)",
+            "Number of labels the rule predicted correctly with respect to the annotations",
         },
         {
           name: "Incorrect",
           field: "incorrect",
           class: "text",
           tooltip:
-            "Number of labels the rule predicted incorrectly (if annotations are available)",
+            "Number of labels the rule predicted incorrectly with respect to the annotations",
         },
         {
           name: "Precision",
           field: "precision",
           class: "text",
           type: "percentage",
-          tooltip: "Percentage of correct labels given by the rule",
+          tooltip:
+            "Percentage of correct labels given by the rule with respect to the annotations",
         },
         {
           name: "Created at",

@@ -1,8 +1,24 @@
 <template>
-  <div class="sidebar__container">
+  <div class="sidebar__container" v-if="dataset">
+    <SidebarPanel
+      :class="[currentTask, currentMetric ? 'visible' : '']"
+      :dataset="dataset"
+      @close-panel="onClosePanel"
+    >
+      <transition name="fade" appear duration="500">
+        <span v-if="currentMetric">
+          <div
+            v-for="metric in metricsByViewMode"
+            :key="metric"
+            v-if="currentMetric === metric"
+          >
+            <component :is="componentName(metric)" :dataset="dataset" />
+          </div>
+        </span>
+      </transition>
+    </SidebarPanel>
     <component
       ref="menu"
-      v-if="dataset"
       :is="currentTaskSidebar"
       :dataset="dataset"
       :current-metric="currentMetric"
@@ -10,20 +26,6 @@
       @show-metrics="onShowSidebarInfo"
       @change-view-mode="onChangeViewMode"
     />
-    <SidebarPanel
-      v-if="currentMetric"
-      :dataset="dataset"
-      :class="dataset.task"
-      @close-panel="onClosePanel"
-    >
-      <div
-        v-for="metric in metricsByViewMode"
-        :key="metric"
-        v-show="currentMetric === metric"
-      >
-        <component :is="componentName(metric)" :dataset="dataset" />
-      </div>
-    </SidebarPanel>
   </div>
 </template>
 
@@ -110,8 +112,14 @@ export default {
 <style lang="scss" scoped>
 .sidebar {
   &__container {
-    position: relative;
     z-index: 1;
+    position: fixed;
+    display: flex;
+    right: 0;
+    pointer-events: none;
+    .--metrics & {
+      pointer-events: all;
+    }
   }
 }
 </style>

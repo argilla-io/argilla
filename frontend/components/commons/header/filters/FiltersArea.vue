@@ -121,13 +121,7 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   margin-left: 0;
-  padding-right: calc($sidebarMenuWidth + 15px);
-  .--metrics & {
-    @include media(">desktop") {
-      padding-right: calc($sidebarWidth + 25px);
-      transition: padding 0.1s ease-in-out;
-    }
-  }
+  @extend %collapsable-if-metrics !optional;
 }
 
 .filters {

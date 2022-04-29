@@ -163,13 +163,11 @@ export default {
   top: 0;
   bottom: 0;
   left: 0;
-  transition: $swift-ease-out;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   background: $secondary-color;
-  transition: $swift-ease-out;
+  transition: all 2s ease-in-out;
   max-width: 100%;
-  transition-duration: 2s;
   &:last-of-type {
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;

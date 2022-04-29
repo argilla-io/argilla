@@ -6,12 +6,6 @@
     :data-title="!activeView.includes(id) ? tooltip : null"
     @click="$emit('button-action', id)"
   >
-    <!-- <svgicon
-      v-if="type !== 'Refresh'"
-      v-show="activeView.includes(id)"
-      class="sidebar-button__icon-help"
-      :name="type === 'Mode' ? 'check3' : 'double-chev'"
-    ></svgicon> -->
     <svgicon :name="icon"></svgicon>
   </a>
 </template>
@@ -63,6 +57,14 @@ $color: #333346;
     position: absolute;
     left: 0.8em;
   }
+  &.mode {
+    &:hover {
+      .svg-icon {
+        background: palette(grey, smooth);
+        border-radius: $border-radius;
+      }
+    }
+  }
   &.active {
     &.mode {
       .svg-icon {
@@ -72,15 +74,19 @@ $color: #333346;
     }
     &.metrics {
       position: relative;
-      &:before {
+      .svg-icon {
+        animation: move-horizontal 0.2s ease-in-out 0.2s;
+        animation-fill-mode: backwards;
+      }
+      &.active:before {
         content: "";
         height: 38px;
         width: 2px;
-        background: $color;
         border-radius: 2px;
         position: absolute;
         left: 0;
         top: 0;
+        background: $color;
       }
     }
   }
@@ -95,5 +101,14 @@ $color: #333346;
   padding: 0.5em;
   box-sizing: content-box;
   margin-bottom: 0.5em;
+}
+
+@keyframes move-horizontal {
+  0% {
+    transform: translateX(0.3em);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

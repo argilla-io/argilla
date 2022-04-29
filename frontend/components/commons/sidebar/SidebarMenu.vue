@@ -93,17 +93,19 @@ export default {
 $sidebar-button-size: 45px;
 $color: #333346;
 .sidebar {
-  position: fixed;
-  top: 56px;
-  right: 0;
+  top: 0;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
   min-height: 100vh;
   min-width: $sidebarMenuWidth;
-  border-left: 1px solid palette(grey, smooth);
+  background: $bg;
+  box-shadow: none;
+  pointer-events: all;
   z-index: 1;
+  transition: box-shadow 0.2s ease-in-out 0.4s;
   .--metrics & {
-    border-color: transparent;
+    box-shadow: inset 1px 1px 5px -2px #c7c7c7;
+    transition: box-shadow 0.2s ease-in-out;
   }
   p {
     text-align: center;

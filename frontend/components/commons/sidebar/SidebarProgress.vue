@@ -95,14 +95,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.sidebar {
-  &__title {
-    color: $font-secondary-dark;
-    margin-top: 0.5em;
-    @include font-size(20px);
-    font-weight: 700;
-  }
-}
 label {
   margin-top: 1.2em;
   margin-bottom: 0.5em;
