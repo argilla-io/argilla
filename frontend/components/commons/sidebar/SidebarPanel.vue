@@ -109,7 +109,7 @@ $sidebarMenuWidth: 70px;
   &.visible {
     overflow: visible;
     right: 0;
-    transition: right 0.4s linear;
+    transition: right 0.25s linear;
     .sidebar__content {
       transition: opacity 0.1s ease-in-out 0.2s;
       opacity: 1;
