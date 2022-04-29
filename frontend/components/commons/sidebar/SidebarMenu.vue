@@ -102,9 +102,9 @@ $color: #333346;
   box-shadow: none;
   pointer-events: all;
   z-index: 1;
-  transition: box-shadow 0.2s ease-in-out 0.7s;
+  transition: box-shadow 0.2s ease-in-out 0.4s;
   .--metrics & {
-    box-shadow: inset 3px 0px 11px -5px #c7c7c7;
+    box-shadow: inset 1px 1px 5px -2px #c7c7c7;
     transition: box-shadow 0.2s ease-in-out;
   }
   p {

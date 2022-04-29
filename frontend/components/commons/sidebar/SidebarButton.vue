@@ -74,7 +74,7 @@ $color: #333346;
       position: absolute;
       left: 0;
       top: 0;
-      transition: background-color 0.2s ease-in-out 0.6s;
+      transition: background-color 0.1s ease-in-out 0.4s;
     }
   }
   &.active {

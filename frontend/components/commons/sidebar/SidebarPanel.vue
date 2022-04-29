@@ -66,7 +66,7 @@ $sidebarMenuWidth: 70px;
   right: -$sidebarPanelWidth + 1px;
   background: $bg;
   padding: 1em 1.5em;
-  transition: right 0.5s linear 0.2s;
+  transition: right 0.25s linear 0.2s;
   z-index: -1;
   border-left: 1px solid palette(grey, smooth);
   &:hover {
@@ -109,7 +109,7 @@ $sidebarMenuWidth: 70px;
   &.visible {
     overflow: visible;
     right: 0;
-    transition: right 0.5s linear;
+    transition: right 0.4s linear;
     .sidebar__content {
       transition: opacity 0.1s ease-in-out 0.2s;
       opacity: 1;

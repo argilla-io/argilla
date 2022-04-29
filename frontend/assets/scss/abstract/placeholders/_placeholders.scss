@@ -83,11 +83,11 @@
 }
 %collapsable-if-metrics {
   padding-right: calc($sidebarMenuWidth + 15px);
-  transition: padding 0.5s linear 0.2s;
+  transition: padding 0.25s linear 0.2s;
   .--metrics & {
     @include media(">desktop") {
       padding-right: calc($sidebarWidth + 25px);
-      transition: padding 0.5s linear;
+      transition: padding 0.4s linear;
     }
   }
 }
