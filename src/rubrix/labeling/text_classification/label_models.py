@@ -15,7 +15,7 @@
 import hashlib
 import logging
 from enum import Enum
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -23,6 +23,9 @@ from rubrix import TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
+
+# When we break a tie, by how much shall we increase the probability of the winner?
+_PROBABILITY_INCREASE_ON_TIE_BREAK = 0.0001
 
 
 class TieBreakPolicy(Enum):
@@ -45,9 +48,6 @@ class LabelModel:
     Args:
         weak_labels: Every label model implementation needs at least a `WeakLabels` instance.
     """
-
-    # When we break a tie, by how much shall we increase the probability of the winner?
-    _PROBABILITY_INCREASE_ON_TIE_BREAK = 0.0001
 
     def __init__(self, weak_labels: WeakLabels):
         self._weak_labels = weak_labels
@@ -199,13 +199,7 @@ class MajorityVoter(LabelModel):
             records: The records associated with the probabilities.
             include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
-            tie_break_policy: Policy to break ties. You can choose among two policies:
-
-                - `abstain`: Do not provide any prediction
-                - `random`: randomly choose among tied option using deterministic hash
-
-                The last policy can introduce quite a bit of noise, especially when the tie is among many labels,
-                as is the case when all the labeling functions (rules) abstained.
+            tie_break_policy: Policy to break ties. See the ``MajorityVoter.predict`` method.
 
         Returns:
             A list of records that include the predictions of the label model.
@@ -239,9 +233,9 @@ class MajorityVoter(LabelModel):
                 )
                 for idx in equal_prob_idx:
                     if idx == random_idx:
-                        prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                        prob[idx] += _PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
-                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                        prob[idx] -= _PROBABILITY_INCREASE_ON_TIE_BREAK / (
                             len(equal_prob_idx) - 1
                         )
                 pred_for_rec = [
@@ -278,10 +272,6 @@ class MajorityVoter(LabelModel):
             -1 * self._weak_labels.cardinality * len(self._weak_labels.rules)
         )
         probabilities[all_rules_abstained] = [np.nan] * len(self._weak_labels.labels)
-
-        # more "nuanced probability", not sure if useful though
-        # with np.errstate(invalid="ignore"):
-        #     probabilities = counts / counts.sum(axis=1).reshape(len(counts), -1)
 
         return probabilities
 
@@ -549,7 +539,7 @@ class Snorkel(LabelModel):
             include_annotated_records: Whether to include annotated records.
             include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
-            tie_break_policy: Policy to break ties. You can choose among three policies:
+            tie_break_policy: Policy to break ties (IGNORED FOR MULTI_LABEL!). You can choose among three policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -561,62 +551,24 @@ class Snorkel(LabelModel):
         Returns:
             A list of records that include the predictions of the label model.
         """
-        if isinstance(tie_break_policy, str):
-            tie_break_policy = TieBreakPolicy(tie_break_policy)
-
         l_pred = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
         )
-        if self._need_remap:
-            l_pred = self._copy_and_remap(l_pred)
-
-        # get predictions and probabilities
-        predictions, probabilities = self._model.predict(
-            L=l_pred,
-            return_probs=True,
-            tie_break_policy=tie_break_policy.value,
+        predictions: List[Optional[List[Tuple[str, float]]]] = self._model.predict(
+            l_pred, tie_break_policy=tie_break_policy
         )
 
         # add predictions to records
+        records = self._weak_labels.records(
+            has_annotation=None if include_annotated_records else False
+        )
         records_with_prediction = []
-        for rec, pred, prob in zip(
-            self._weak_labels.records(
-                has_annotation=None if include_annotated_records else False
-            ),
-            predictions,
-            probabilities,
-        ):
-            if not include_abstentions and pred == -1:
+        for rec, pred in zip(records, predictions):
+            if not include_abstentions and pred is None:
                 continue
 
             records_with_prediction.append(rec.copy(deep=True))
-
-            # set predictions to None if model abstained
-            pred_for_rec = None
-            if pred != -1:
-                # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
-                # 1.e-8 is taken from the abs tolerance of np.isclose
-                equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
-                if len(equal_prob_idx) > 1:
-                    for idx in equal_prob_idx:
-                        if idx == pred:
-                            prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
-                        else:
-                            prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
-                                len(equal_prob_idx) - 1
-                            )
-
-                pred_for_rec = [
-                    (
-                        self._weak_labels.int2label[
-                            self._snorkelInt2weaklabelsInt[snorkel_idx]
-                        ],
-                        prob[snorkel_idx],
-                    )
-                    for snorkel_idx in np.argsort(prob)[::-1]
-                ]
-
-            records_with_prediction[-1].prediction = pred_for_rec
+            records_with_prediction[-1].prediction = pred
             records_with_prediction[-1].prediction_agent = prediction_agent
 
         return records_with_prediction
@@ -638,7 +590,7 @@ class Snorkel(LabelModel):
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
-            tie_break_policy: Policy to break ties. You can choose among three policies:
+            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among three policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -658,36 +610,21 @@ class Snorkel(LabelModel):
         """
         from sklearn.metrics import classification_report
 
-        if isinstance(tie_break_policy, str):
-            tie_break_policy = TieBreakPolicy(tie_break_policy)
-
         if self._weak_labels.annotation().size == 0:
             raise MissingAnnotationError(
                 "You need annotated records to compute scores/metrics for your label model."
             )
 
         l_pred = self._weak_labels.matrix(has_annotation=True)
-        if self._need_remap:
-            l_pred = self._copy_and_remap(l_pred)
 
-        # get predictions and probabilities
-        predictions, probabilities = self._model.predict(
-            L=l_pred,
-            return_probs=True,
-            tie_break_policy=tie_break_policy.value,
+        annotation, prediction, target_names = self._model.score(
+            self._weak_labels.annotation(), l_pred, tie_break_policy=tie_break_policy
         )
-
-        # metrics are only calculated for non-abstained data points
-        idx = predictions != -1
-
-        annotation = self._weak_labels.annotation()[idx]
-        if self._need_remap:
-            annotation = self._copy_and_remap(annotation)
 
         return classification_report(
             annotation,
-            predictions[idx],
-            target_names=self._weak_labels.labels[: annotation.max() + 1],
+            prediction,
+            target_names=target_names,
             output_dict=not output_str,
         )
 
@@ -710,15 +647,15 @@ class _SnorkelSingleLabel:
         # Snorkel expects the abstain id to be -1 and the rest of the labels to be sequential
         self._need_remap = False
         self._weaklabelsInt2snorkelInt = {
-            i: i for i in range(-1, self._weak_labels.cardinality)
+            i: i for i in range(-1, weak_labels.cardinality)
         }
-        if self._weak_labels.label2int[None] != -1 or sorted(
-            self._weak_labels.int2label
-        ) != list(range(-1, self._weak_labels.cardinality)):
+        if weak_labels.label2int[None] != -1 or sorted(weak_labels.int2label) != list(
+            range(-1, weak_labels.cardinality)
+        ):
             self._need_remap = True
             self._weaklabelsInt2snorkelInt = {
-                self._weak_labels.label2int[label]: i
-                for i, label in enumerate([None] + self._weak_labels.labels, -1)
+                weak_labels.label2int[label]: i
+                for i, label in enumerate([None] + weak_labels.labels, -1)
             }
 
         self._snorkelInt2weaklabelsInt = {
@@ -726,6 +663,14 @@ class _SnorkelSingleLabel:
         }
 
     def fit(self, l_train, **kwargs):
+        """Fits the underlying Snorkel label model
+
+        Args:
+            l_train: The weak label matrix
+            **kwargs: Passed on to the snorkel fit method
+
+        Returns:
+        """
         if self._need_remap:
             l_train = self._copy_and_remap(l_train)
 
@@ -757,6 +702,99 @@ class _SnorkelSingleLabel:
 
         return matrix_or_array
 
+    def predict(self, l_pred: np.ndarray, tie_break_policy: Union[str, TieBreakPolicy]):
+        """Returns the predictions of the label model.
+
+        Args:
+            l_pred: The weak label matrix
+            tie_break_policy: The policy to break ties, see the ``Snorkel.predict`` method.
+
+        Returns:
+            The predictions in Rubrix format
+        """
+        if isinstance(tie_break_policy, str):
+            tie_break_policy = TieBreakPolicy(tie_break_policy)
+
+        if self._need_remap:
+            l_pred = self._copy_and_remap(l_pred)
+
+        # get predictions and probabilities
+        snorkel_predictions, probabilities = self._model.predict(
+            L=l_pred,
+            return_probs=True,
+            tie_break_policy=tie_break_policy.value,
+        )
+
+        predictions = []
+        for snorkel_pred, prob in zip(snorkel_predictions, probabilities):
+            # set predictions to None if model abstained
+            if snorkel_pred == -1:
+                pred = None
+            else:
+                # If we have a tie, increase a bit the probability of the random winner (see tie_break_policy)
+                # 1.e-8 is taken from the abs tolerance of np.isclose
+                equal_prob_idx = np.nonzero(np.abs(prob.max() - prob) < 1.0e-8)[0]
+                if len(equal_prob_idx) > 1:
+                    for idx in equal_prob_idx:
+                        if idx == snorkel_pred:
+                            prob[idx] += _PROBABILITY_INCREASE_ON_TIE_BREAK
+                        else:
+                            prob[idx] -= _PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                                len(equal_prob_idx) - 1
+                            )
+
+                pred = [
+                    (
+                        self._weak_labels.int2label[
+                            self._snorkelInt2weaklabelsInt[snorkel_idx]
+                        ],
+                        prob[snorkel_idx],
+                    )
+                    for snorkel_idx in np.argsort(prob)[::-1]
+                ]
+
+            predictions.append(pred)
+
+        return predictions
+
+    def score(
+        self,
+        annotation: np.ndarray,
+        l_pred: np.ndarray,
+        tie_break_policy: Union[str, TieBreakPolicy],
+    ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+        """Computes the annotation and prediction array
+
+        Args:
+            annotation: The annotation array
+            l_pred: The weak label matrix
+            tie_break_policy: Policy to break the ties, see ``Snorkel.score()``.
+
+        Returns:
+            The masked annotation and prediction array, and a list of target names.
+        """
+        predictions = self.predict(l_pred, tie_break_policy=tie_break_policy)
+        prediction = np.array(
+            [
+                -1
+                if pred is None
+                else self._weaklabelsInt2snorkelInt[
+                    self._weak_labels.label2int[pred[0][0]]
+                ]
+                for pred in predictions
+            ]
+        )
+        # metrics are only calculated for non-abstained data points
+        abstention_mask = prediction != -1
+
+        annotation = annotation[abstention_mask]
+        if self._need_remap:
+            annotation = self._copy_and_remap(annotation)
+
+        target_names = self._weak_labels.labels[: annotation.max() + 1]
+
+        return annotation, prediction[abstention_mask], target_names
+
 
 class _SnorkelMultiLabel:
     """Helper class for the Snorkel label model that holds the logic for the multi label case.
@@ -775,7 +813,83 @@ class _SnorkelMultiLabel:
         self._models = models
 
     def fit(self, l_train: np.ndarray, **kwargs):
-        raise NotImplementedError
+        """Fits the model for each label using a 1vsAll approach.
+
+        Args:
+            l_train: The 3D weak multi label matrix
+        """
+        for i, model in enumerate(self._models):
+            model.fit(L_train=l_train[:, :, i], **kwargs)
+
+    def predict(self, l_pred, **kwargs) -> List[Optional[List[Tuple[str, float]]]]:
+        """Returns the predictions of the label models.
+
+        Args:
+            l_pred: The 3D weak multi label matrix
+            **kwargs: we need to absorb the tie_break_policy parameter
+
+        Returns:
+            The sorted predictions in Rubrix format
+        """
+        # 1. compute probabilities for each label
+        probs_per_label = np.full((l_pred.shape[0], l_pred.shape[2]), np.nan)
+        for i, model in enumerate(self._models):
+            _, probs = model.predict(
+                L=l_pred[:, :, i],
+                return_probs=True,
+            )
+            # we filter out the cases for which all rules abstained, in these cases snorkel assigns equal probabilities
+            has_weak_labels = l_pred[:, :, i].sum(axis=1) != -1 * l_pred.shape[1]
+            probs_for_1 = probs[has_weak_labels][:, 1]
+            # Since in our 1vsAll approach, the "All" label will always win, we have to normalize
+            # the "1" probability to get something meaningful. That's why we normalize it by its max value
+            probs_per_label[:, i][has_weak_labels] = probs_for_1 / probs_for_1.max()
+
+        # 2. construct predictions
+        predictions = []
+        for probs in probs_per_label:
+            # if all nan we mark the record as abstained by setting the predictions to None
+            if np.isnan(probs).all():
+                preds = None
+            else:
+                preds = [
+                    (label, (0.0 if np.isnan(prob) else prob))
+                    for label, prob in zip(self._weak_labels.labels, probs)
+                ]
+                preds = sorted(preds, key=lambda p: p[1], reverse=True)
+
+            predictions.append(preds)
+
+        return predictions
+
+    def score(
+        self, annotation: np.ndarray, l_pred: np.ndarray, **kwargs
+    ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+        """Computes the annotation and prediction array.
+
+        Args:
+            annotation: The annotation array
+            l_pred: The weak label matrix
+            **kwargs: We need to absorb the tie_break_policy argument
+
+        Returns:
+            The masked annotation and prediction array, and a list of target names.
+        """
+        predictions = self.predict(l_pred)
+        prediction = -1 * np.ones_like(annotation)
+        for i, pred in enumerate(predictions):
+            if pred is None:
+                continue
+            pred.sort(key=lambda x: self._weak_labels.labels.index(x[0]))
+            prediction[i] = np.array([1 if p[1] > 0.5 else 0 for p in pred])
+
+        abstention_mask = prediction.sum(axis=1) > -1
+
+        return (
+            annotation[abstention_mask],
+            prediction[abstention_mask],
+            self._weak_labels.labels,
+        )
 
 
 class FlyingSquid(LabelModel):
@@ -956,9 +1070,9 @@ class FlyingSquid(LabelModel):
                 )
                 for idx in equal_prob_idx:
                     if idx == random_idx:
-                        prob[idx] += self._PROBABILITY_INCREASE_ON_TIE_BREAK
+                        prob[idx] += _PROBABILITY_INCREASE_ON_TIE_BREAK
                     else:
-                        prob[idx] -= self._PROBABILITY_INCREASE_ON_TIE_BREAK / (
+                        prob[idx] -= _PROBABILITY_INCREASE_ON_TIE_BREAK / (
                             len(equal_prob_idx) - 1
                         )
                 pred_for_rec = [
