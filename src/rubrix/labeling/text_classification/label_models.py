@@ -19,7 +19,7 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
-from rubrix import TextClassificationRecord
+from rubrix import DatasetForTextClassification, TextClassificationRecord
 from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ class LabelModel:
         include_annotated_records: bool = False,
         prediction_agent: str = "LabelModel",
         **kwargs,
-    ) -> List[TextClassificationRecord]:
+    ) -> DatasetForTextClassification:
         """Applies the label model.
 
         Args:
@@ -83,7 +83,7 @@ class LabelModel:
             **kwargs: Specific to the label model implementations
 
         Returns:
-            A list of records that include the predictions of the label model.
+            A dataset of records that include the predictions of the label model.
         """
         raise NotImplementedError
 
@@ -110,7 +110,7 @@ class MajorityVoter(LabelModel):
         include_abstentions: bool = False,
         prediction_agent: str = "MajorityVoter",
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-    ) -> List[TextClassificationRecord]:
+    ) -> DatasetForTextClassification:
         """Applies the label model.
 
         Args:
@@ -126,7 +126,7 @@ class MajorityVoter(LabelModel):
                 as is the case when all the labeling functions (rules) abstained.
 
         Returns:
-            A list of records that include the predictions of the label model.
+            A dataset of records that include the predictions of the label model.
         """
         wl_matrix = self._weak_labels.matrix(
             has_annotation=None if include_annotated_records else False
@@ -136,27 +136,25 @@ class MajorityVoter(LabelModel):
         )
 
         if isinstance(self._weak_labels, WeakMultiLabels):
-            probabilities = self._compute_multi_label_probs(wl_matrix)
-
-            return self._make_multi_label_records(
-                probabilities=probabilities,
+            records = self._make_multi_label_records(
+                probabilities=self._compute_multi_label_probs(wl_matrix),
                 records=records,
                 include_abstentions=include_abstentions,
                 prediction_agent=prediction_agent,
             )
+        else:
+            if isinstance(tie_break_policy, str):
+                tie_break_policy = TieBreakPolicy(tie_break_policy)
 
-        if isinstance(tie_break_policy, str):
-            tie_break_policy = TieBreakPolicy(tie_break_policy)
+            records = self._make_single_label_records(
+                probabilities=self._compute_single_label_probs(wl_matrix),
+                records=records,
+                include_abstentions=include_abstentions,
+                prediction_agent=prediction_agent,
+                tie_break_policy=tie_break_policy,
+            )
 
-        probabilities = self._compute_single_label_probs(wl_matrix)
-
-        return self._make_single_label_records(
-            probabilities=probabilities,
-            records=records,
-            include_abstentions=include_abstentions,
-            prediction_agent=prediction_agent,
-            tie_break_policy=tie_break_policy,
-        )
+        return DatasetForTextClassification(records)
 
     def _compute_single_label_probs(self, wl_matrix: np.ndarray) -> np.ndarray:
         """Helper methods that computes the probabilities.
@@ -191,7 +189,7 @@ class MajorityVoter(LabelModel):
         include_abstentions: bool,
         prediction_agent: str,
         tie_break_policy: TieBreakPolicy,
-    ):
+    ) -> List[TextClassificationRecord]:
         """Helper method to create records given predicted probabilities.
 
         Args:
@@ -578,7 +576,7 @@ class Snorkel(LabelModel):
         include_abstentions: bool = False,
         prediction_agent: str = "Snorkel",
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-    ) -> List[TextClassificationRecord]:
+    ) -> DatasetForTextClassification:
         """Returns a list of records that contain the predictions of the label model
 
         Args:
@@ -595,7 +593,7 @@ class Snorkel(LabelModel):
                 as is the case when all the labeling functions (rules) abstained.
 
         Returns:
-            A list of records that include the predictions of the label model.
+            A dataset of records that include the predictions of the label model.
         """
         if isinstance(tie_break_policy, str):
             tie_break_policy = TieBreakPolicy(tie_break_policy)
@@ -655,7 +653,7 @@ class Snorkel(LabelModel):
             records_with_prediction[-1].prediction = pred_for_rec
             records_with_prediction[-1].prediction_agent = prediction_agent
 
-        return records_with_prediction
+        return DatasetForTextClassification(records_with_prediction)
 
     def score(
         self,
@@ -840,7 +838,7 @@ class FlyingSquid(LabelModel):
         prediction_agent: str = "FlyingSquid",
         verbose: bool = True,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
-    ) -> List[TextClassificationRecord]:
+    ) -> DatasetForTextClassification:
         """Applies the label model.
 
         Args:
@@ -857,7 +855,7 @@ class FlyingSquid(LabelModel):
                 as is the case when all the labeling functions (rules) abstained.
 
         Returns:
-            A list of records that include the predictions of the label model.
+            A dataset of records that include the predictions of the label model.
 
         Raises:
             NotFittedError: If the label model was still not fitted.
@@ -924,7 +922,7 @@ class FlyingSquid(LabelModel):
             records_with_prediction[-1].prediction = pred_for_rec
             records_with_prediction[-1].prediction_agent = prediction_agent
 
-        return records_with_prediction
+        return DatasetForTextClassification(records_with_prediction)
 
     def _predict(self, weak_label_matrix: np.ndarray, verbose: bool) -> np.ndarray:
         """Helper function that calls the ``predict_proba`` method of FlyingSquid's label model.
