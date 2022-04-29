@@ -25,6 +25,7 @@ from rubrix.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
+    WrongTaskError,
 )
 from rubrix.server.models.dataset_settings import SVCDatasetSettings
 from rubrix.server.security.model import User
@@ -52,11 +53,23 @@ class DatasetsService:
         self, user: User, dataset: Dataset, mappings: Dict[str, Any]
     ) -> Dataset:
         user.check_workspace(dataset.owner)
-        date_now = datetime.utcnow()
-
-        dataset.created_at = date_now
-        dataset.last_updated = date_now
-        return self.__dao__.create_dataset(dataset, mappings=mappings)
+        try:
+            self.find_by_name(
+                user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
+            )
+            raise EntityAlreadyExistsError(
+                name=dataset.name, type=Dataset, workspace=dataset.owner
+            )
+        except WrongTaskError:  # Found a dataset with same name but different task
+            raise EntityAlreadyExistsError(
+                name=dataset.name, type=Dataset, workspace=dataset.owner
+            )
+        except EntityNotFoundError:
+            # The dataset does not exist -> create it !
+            date_now = datetime.utcnow()
+            dataset.created_at = date_now
+            dataset.last_updated = date_now
+            return self.__dao__.create_dataset(dataset, mappings=mappings)
 
     def find_by_name(
         self,
@@ -243,3 +256,6 @@ class DatasetsService:
         """
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
+
+    def delete_settings(self, user: User, dataset: Dataset):
+        self.__dao__.delete_settings(dataset=dataset)
