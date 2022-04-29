@@ -19,7 +19,9 @@
   <div>
     <p class="sidebar__title">Overall rule metrics</p>
     <div class="progress__info">
-      <p class="progress__info__text">Coverage</p>
+      <p class="progress__info__text" :data-title="tooltip.coverage">
+        Coverage
+      </p>
       <span class="progress__info__percent">{{
         coverage.percent || 0 | percent
       }}</span>
@@ -31,7 +33,9 @@
       :tooltip="`${coverage.records}/${totalRecords}`"
     ></ReProgress>
     <div class="progress__info">
-      <p class="progress__info__text">Annotated Coverage</p>
+      <p class="progress__info__text" :data-title="tooltip.annotatedCoverage">
+        Annotated Coverage
+      </p>
       <span class="progress__info__percent">{{
         annotatedCoverage.percent || 0 | percent
       }}</span>
@@ -43,7 +47,9 @@
       :tooltip="`${annotatedCoverage.records}/${metricsTotal.annotated_records}`"
     ></ReProgress>
     <div class="progress__info">
-      <p class="progress__info__text">Precision average</p>
+      <p class="progress__info__text" :data-title="tooltip.precision">
+        Precision average
+      </p>
       <transition name="fade" mode="out-in" appear
         ><span :key="precision" class="progress__info__percent">{{
           precision || 0 | percent
@@ -51,7 +57,9 @@
       >
     </div>
     <div class="progress__info">
-      <p class="progress__info__text">Correct/Incorrect</p>
+      <p class="progress__info__text" :data-title="tooltip.correctAndIncorrect">
+        Correct/Incorrect
+      </p>
       <transition name="fade" mode="out-in" appear
         ><span :key="correctAndIncorrect" class="progress__info__percent">{{
           correctAndIncorrect
@@ -97,6 +105,16 @@ export default {
     return {};
   },
   computed: {
+    tooltip() {
+      return {
+        coverage: "Percentage of records labeled by the rules",
+        annotatedCoverage:
+          "Percentage of annotated records labeled by the rules",
+        precision: "Percentage of correct labels given by the rules",
+        correctAndIncorrect:
+          "Number of labels the rule predicted correctly/incorrectly with respect to the annotations",
+      };
+    },
     ruleMetrics() {
       return this.dataset.getCurrentLabelingRuleMetrics() || {};
     },
@@ -159,6 +177,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$color: #333346;
 label {
   display: block;
   width: calc(100% - 40px);
@@ -221,6 +240,32 @@ label {
       @include font-size(40px);
       font-weight: 700;
     }
+  }
+}
+p[data-title] {
+  position: relative;
+  @extend %hastooltip;
+  &:after {
+    padding: 0.5em 1em;
+    bottom: 100%;
+    right: 50%;
+    transform: translateX(50%);
+    background: $color;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    @include font-size(14px);
+    font-weight: 600;
+    margin-bottom: 0.5em;
+    min-width: 220px;
+    white-space: break-spaces;
+  }
+  &:before {
+    right: calc(50% - 7px);
+    top: -0.5em;
+    border-top: 7px solid $color;
+    border-right: 7px solid transparent;
+    border-left: 7px solid transparent;
   }
 }
 </style>

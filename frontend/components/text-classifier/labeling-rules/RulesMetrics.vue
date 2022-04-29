@@ -117,7 +117,8 @@ export default {
           name: "Precision",
           rule: {
             value: this.formatNumber(this.ruleMetrics.precision),
-            tooltip: "Percentage of correct labels given by the rule",
+            tooltip:
+              "Percentage of correct labels given by the rule with respect to the annotations",
           },
         },
         {
@@ -128,7 +129,7 @@ export default {
                 ? `${this.ruleMetrics.correct}/${this.ruleMetrics.incorrect}`
                 : "-/-",
             tooltip:
-              "Number of labels the rule predicted correctly/incorrectly (if annotations are available)",
+              "Number of labels the rule predicted correctly/incorrectly with respect to the annotations",
           },
         },
       ];
