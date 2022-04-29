@@ -29,7 +29,7 @@ from rubrix._constants import (
     DEFAULT_API_KEY,
     RUBRIX_WORKSPACE_HEADER_NAME,
 )
-from rubrix.client._apis.datasets import Datasets
+from rubrix.client.apis.datasets import Datasets
 from rubrix.client.datasets import (
     Dataset,
     DatasetForText2Text,
