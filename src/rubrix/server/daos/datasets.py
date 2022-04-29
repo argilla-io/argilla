@@ -353,5 +353,13 @@ class DatasetsDAO:
             settings = self.__get_doc_field__(doc, field="settings")
             return as_class.parse_obj(settings) if settings else None
 
+    def delete_settings(self, dataset: DatasetDB):
+        self._es.update_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=dataset.id,
+            script='ctx._source.remove("settings")',
+            partial_update=True,
+        )
+
     def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
         return doc["_source"].get(field)

@@ -76,6 +76,23 @@ def configure_router():
             )
             return cfg.settings_class.parse_obj(settings)
 
+        async def delete_settings(
+            name: str = DATASET_NAME_PATH_PARAM,
+            ws_params: WorkspaceParams = Depends(),
+            datasets: DatasetsService = Depends(DatasetsService.get_instance),
+            user: User = Security(auth.get_user, scopes=["DeleteDatasetSettings"]),
+        ):
+            found_ds = datasets.find_by_name(
+                user=user,
+                name=name,
+                task=cfg.task.as_old_task_type(),
+                workspace=ws_params.workspace,
+            )
+            await datasets.delete_settings(
+                user=user,
+                dataset=found_ds,
+            )
+
         for _task in [cfg.task, cfg.task.as_old_task_type()]:
             router_.get(
                 f"/{_task}/{{name}}/settings",
@@ -90,6 +107,12 @@ def configure_router():
                 operation_id=f"{_task}/get_settings",
                 response_model=cfg.settings_class,
             )(save_settings)
+
+            router_.delete(
+                f"/{_task}/{{name}}/settings",
+                name=f"{_task}/delete_settings",
+                operation_id=f"{_task}/delete_settings",
+            )(delete_settings)
 
     for cfg in all_tasks:
         if cfg.settings_class and cfg.settings_validator:
