@@ -5,7 +5,7 @@
     href="#"
     :data-title="!activeView.includes(id) ? tooltip : null"
     @click="$emit('button-action', id)"
-    ><span class="--active"></span>
+  >
     <svgicon :name="icon"></svgicon>
   </a>
 </template>
@@ -65,18 +65,6 @@ $color: #333346;
       }
     }
   }
-  &.metrics {
-    .--active {
-      height: 38px;
-      width: 2px;
-      background: transparent;
-      border-radius: 2px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      transition: background-color 0.1s ease-in-out 0.4s;
-    }
-  }
   &.active {
     &.mode {
       .svg-icon {
@@ -90,9 +78,15 @@ $color: #333346;
         animation: move-horizontal 0.2s ease-in-out 0.2s;
         animation-fill-mode: backwards;
       }
-      .--active {
+      &.active:before {
+        content: "";
+        height: 38px;
+        width: 2px;
+        border-radius: 2px;
+        position: absolute;
+        left: 0;
+        top: 0;
         background: $color;
-        transition: background-color 0.2s ease-in-out;
       }
     }
   }
