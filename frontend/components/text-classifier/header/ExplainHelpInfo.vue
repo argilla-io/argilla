@@ -29,26 +29,24 @@
       <div class="help__panel__button" @click="showHelpPanel = false">
         Close
       </div>
-      <p class="help__panel__title">What do highlight colours mean?</p>
-      <p>
-        We use model interpretability methods such as Integrated Gradients to
-        compute the attribution of tokens to the model prediction with the goal
-        of providing hints about the model interpretation of data.
+      <p class="help__panel__title">
+        This dataset contains token attributions. What do highlight colors mean?
       </p>
       <p>
-        Model predictions can be correct or incorrect, as indicated by the green
-        or red labels assigned to the predictions together with their score.
-        Given this attributions work as follows:
+        Rubrix enables you to register token attributions as part of the dataset
+        records. For getting token attributions, you can use methods such as
+        Integrated Gradients or SHAP. These methods try to provide a mechanism
+        to interpret model predictions.
+      </p>
+      <p>The attributions work as follows:</p>
+      <p>
+        [0,1] <strong>Positive attributions</strong> (in blue) reflect those
+        tokens that are making the model predict the specific predicted label.
       </p>
       <p>
-        [0,+1] <strong>Positive attributions</strong> will have the same colour
-        as the label assigned to the prediction (red for wrong, green for
-        correct). Tokens with positive attributions have the most impacto on the
-        model predicting a specific label.
-      </p>
-      <p>
-        [1-, 0] <strong>Negative attributions</strong> will always be blue and
-        highlight those tokens that diverge the model from its final prediction.
+        [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
+        tokens that can influence the model to predict a label other than the
+        specific predicted label.
       </p>
     </div>
   </div>

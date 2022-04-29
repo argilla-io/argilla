@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
-import rubrix as rb
 from rubrix import TokenClassificationRecord
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
@@ -45,22 +44,27 @@ class SpacyNERMonitor(BaseMonitor):
             event_timestamp=datetime.utcnow(),
         )
 
-    def _log2rubrix(self, doc: Doc, metadata: Optional[Dict[str, Any]] = None):
-        record = self.doc2token_classification(
-            doc, agent=self.__wrapped__.path.name, metadata=metadata
-        )
-        rb.log(
-            record,
+    def _prepare_log_data(
+        self, docs_info: Tuple[Doc, Optional[Dict[str, Any]]]
+    ) -> Dict[str, Any]:
+
+        return dict(
+            records=[
+                self.doc2token_classification(
+                    doc, agent=self.__wrapped__.path.name, metadata=metadata
+                )
+                for doc, metadata in docs_info
+            ],
             name=self.dataset,
-            tags={k: v for k, v in self.__wrapped__.meta.items() if isinstance(v, str)},
+            tags={k: v for k, v in self.__model__.meta.items() if isinstance(v, str)},
             metadata=self.__model__.meta,
-            verbose=False,
         )
 
     def pipe(self, *args, **kwargs):
         as_tuples = kwargs.get("as_tuples")
         results = self.__model__.pipe(*args, **kwargs)
 
+        log_info = []
         for r in results:
             metadata = {}
             if as_tuples:
@@ -68,15 +72,17 @@ class SpacyNERMonitor(BaseMonitor):
             else:
                 doc = r
             if self.is_record_accepted():
-                self.log_async(doc, metadata)
+                log_info.append((doc, metadata))
             yield r
+
+        self.log_async(log_info)
 
     def __call__(self, *args, **kwargs):
         metadata = kwargs.pop("metadata", None)
         doc = self.__wrapped__(*args, **kwargs)
         try:
             if self.is_record_accepted():
-                self.log_async(doc, metadata)
+                self.log_async([(doc, metadata)])
         finally:
             return doc
 

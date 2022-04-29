@@ -28,10 +28,10 @@ from rubrix.client.sdk.token_classification.models import (
 from rubrix.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
-from rubrix.server.tasks.token_classification.api.model import (
+from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationBulkData as ServerTokenClassificationBulkData,
 )
-from rubrix.server.tasks.token_classification.api.model import (
+from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationQuery as ServerTokenClassificationQuery,
 )
 

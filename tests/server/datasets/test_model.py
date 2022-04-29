@@ -15,7 +15,8 @@
 
 import pytest
 from pydantic import ValidationError
-from rubrix.server.datasets.model import CreationDatasetRequest
+
+from rubrix.server.apis.v0.models.datasets import CreationDatasetRequest
 
 
 @pytest.mark.parametrize(

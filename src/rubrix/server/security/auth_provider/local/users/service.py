@@ -18,7 +18,7 @@ from typing import List, Optional
 from fastapi import Depends
 from passlib.context import CryptContext
 
-from rubrix.server.datasets.dao import NO_WORKSPACE
+from rubrix.server.daos.datasets import NO_WORKSPACE
 
 from .dao import UsersDAO, create_users_dao
 from .model import User

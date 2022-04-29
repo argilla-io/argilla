@@ -14,7 +14,9 @@
 #  limitations under the License.
 import sys
 
+import cleanlab
 import pytest
+from pkg_resources import parse_version
 
 import rubrix as rb
 from rubrix.labeling.text_classification import find_label_errors
@@ -77,7 +79,10 @@ def test_no_records():
 
 def test_multi_label_warning(caplog):
     record = rb.TextClassificationRecord(
-        text="test", prediction=[("mock", 0.0)], annotation="mock"
+        text="test",
+        prediction=[("mock", 0.0), ("mock2", 0.0)],
+        annotation=["mock", "mock2"],
+        multi_label=True,
     )
     find_label_errors([record], multi_label="True")
     assert (
@@ -89,20 +94,32 @@ def test_multi_label_warning(caplog):
 @pytest.mark.parametrize(
     "sort_by,expected",
     [
-        ("likelihood", "normalized_margin"),
-        ("prediction", "prob_given_label"),
-        ("none", None),
+        ("likelihood", ("normalized_margin", "normalized_margin")),
+        ("prediction", ("prob_given_label", "self_confidence")),
+        ("none", (None, None)),
     ],
 )
 def test_sort_by(monkeypatch, sort_by, expected):
-    def mock_get_noise_indices(*args, **kwargs):
-        assert kwargs["sorted_index_method"] == expected
-        return []
+    if parse_version(cleanlab.__version__) < parse_version("2.0"):
 
-    monkeypatch.setattr(
-        "cleanlab.pruning.get_noise_indices",
-        mock_get_noise_indices,
-    )
+        def mock_get_noise_indices(*args, **kwargs):
+            assert kwargs["sorted_index_method"] == expected[0]
+            return []
+
+        monkeypatch.setattr(
+            "cleanlab.pruning.get_noise_indices",
+            mock_get_noise_indices,
+        )
+    else:
+
+        def mock_find_label_issues(*args, **kwargs):
+            assert kwargs["return_indices_ranked_by"] == expected[1]
+            return []
+
+        monkeypatch.setattr(
+            "cleanlab.filter.find_label_issues",
+            mock_find_label_issues,
+        )
 
     record = rb.TextClassificationRecord(
         inputs="mock", prediction=[("mock", 0.1)], annotation="mock"
@@ -113,25 +130,50 @@ def test_sort_by(monkeypatch, sort_by, expected):
 def test_kwargs(monkeypatch, records):
     is_multi_label = records[0].multi_label
 
-    def mock_get_noise_indices(s, psx, n_jobs, **kwargs):
-        assert kwargs == {
-            "multi_label": is_multi_label,
-            "sorted_index_method": "normalized_margin",
-            "mock": "mock",
-        }
-        return []
+    if parse_version(cleanlab.__version__) < parse_version("2.0"):
 
-    monkeypatch.setattr(
-        "cleanlab.pruning.get_noise_indices",
-        mock_get_noise_indices,
-    )
+        def mock_get_noise_indices(s, psx, n_jobs, **kwargs):
+            assert kwargs == {
+                "mock": "mock",
+                "multi_label": is_multi_label,
+                "sorted_index_method": "normalized_margin",
+            }
+            return []
 
-    with pytest.raises(
-        ValueError, match="'sorted_index_method' kwarg is not supported"
-    ):
-        find_label_errors(records=records, sorted_index_method="mock")
+        monkeypatch.setattr(
+            "cleanlab.pruning.get_noise_indices",
+            mock_get_noise_indices,
+        )
 
-    find_label_errors(records=records, mock="mock")
+        with pytest.raises(
+            ValueError, match="'sorted_index_method' kwarg is not supported"
+        ):
+            find_label_errors(records=records, sorted_index_method="mock")
+
+        find_label_errors(records=records, mock="mock")
+    else:
+
+        def mock_find_label_issues(s, psx, n_jobs, **kwargs):
+            assert kwargs == {
+                "mock": "mock",
+                "multi_label": is_multi_label,
+                "return_indices_ranked_by": "normalized_margin"
+                if not is_multi_label
+                else "self_confidence",
+            }
+            return []
+
+        monkeypatch.setattr(
+            "cleanlab.filter.find_label_issues",
+            mock_find_label_issues,
+        )
+
+        with pytest.raises(
+            ValueError, match="'return_indices_ranked_by' kwarg is not supported"
+        ):
+            find_label_errors(records=records, return_indices_ranked_by="mock")
+
+        find_label_errors(records=records, mock="mock")
 
 
 def test_construct_s_and_psx(records):

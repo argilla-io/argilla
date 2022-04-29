@@ -72,7 +72,14 @@ export default {
   computed: {
     normalizedMetadataItems() {
       return Object.keys(this.metadataItems).reduce(
-        (r, k) => ((r[k] = String(this.metadataItems[k])), r),
+        (r, k) => (
+          (r[k] =
+            Array.isArray(this.metadataItems[k]) &&
+            this.metadataItems[k].length > 1
+              ? this.metadataItems[k]
+              : String(this.metadataItems[k])),
+          r
+        ),
         {}
       );
     },
@@ -88,8 +95,17 @@ export default {
   mounted() {
     if (this.appliedFilters) {
       Object.keys(this.appliedFilters).map((key) => {
+        const equalLength =
+          this.appliedFilters[key].length ===
+          this.normalizedMetadataItems[key].length;
         if (
-          this.appliedFilters[key].includes(this.normalizedMetadataItems[key])
+          Array.isArray(this.normalizedMetadataItems[key]) && equalLength
+            ? this.appliedFilters[key].every((f) =>
+                this.normalizedMetadataItems[key].includes(f)
+              )
+            : this.appliedFilters[key].includes(
+                this.normalizedMetadataItems[key]
+              )
         ) {
           this.selectedMetadata.push(key);
         }
@@ -101,9 +117,13 @@ export default {
       const filters = Object.keys(this.appliedFilters || {}).reduce(
         (r, k) => (
           (r[k] = Array.isArray(this.appliedFilters[k])
-            ? this.appliedFilters[k].filter(
-                (v) => v !== this.normalizedMetadataItems[k]
+            ? this.appliedFilters[k].length ===
+                this.normalizedMetadataItems[k].length &&
+              this.appliedFilters[k].every((f) =>
+                this.normalizedMetadataItems[k].includes(f)
               )
+              ? []
+              : this.appliedFilters[k]
             : []),
           r
         ),
@@ -115,11 +135,6 @@ export default {
       });
 
       this.$emit("metafilterApply", filters);
-    },
-    isApplied(item) {
-      if (this.appliedFilters) {
-        return Object.keys(this.appliedFilters).includes(item[0]);
-      }
     },
   },
 };

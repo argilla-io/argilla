@@ -228,9 +228,16 @@ button {
   outline: none;
   background: transparent;
   padding-left: 0;
+  padding-right: 0;
   color: $font-secondary;
   @include font-size(14px);
   font-family: $sff;
+  @include media("<=desktop") {
+    ::v-deep svg {
+      margin-right: 0 !important;
+      display: block;
+    }
+  }
   &:hover,
   &.active {
     background: $bg;

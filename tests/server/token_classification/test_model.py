@@ -17,13 +17,13 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.tasks.search.query_builder import EsQueryBuilder
-from rubrix.server.tasks.token_classification.api.model import (
+from rubrix.server.apis.v0.models.token_classification import (
     EntitySpan,
     TokenClassificationAnnotation,
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
+from rubrix.server.services.search.query_builder import EsQueryBuilder
 
 
 def test_char_position():
@@ -204,3 +204,19 @@ def test_custom_tokens_splitting():
             ],
         ),
     )
+
+
+def test_record_scores():
+    record = TokenClassificationRecord(
+        text="\nvs 9.91 billion\n    Note\n REUTER\n",
+        tokens=["\n", "vs", "9.91", "billion", "\n    ", "Note", "\n ", "REUTER", "\n"],
+        prediction=TokenClassificationAnnotation(
+            agent="heuristics",
+            entities=[
+                EntitySpan(start=4, end=21, label="MONEY", score=0.8),
+                EntitySpan(start=4, end=21, label="ORG", score=0.1),
+                EntitySpan(start=4, end=21, label="PERSON", score=0.2),
+            ],
+        ),
+    )
+    assert record.scores == [0.8, 0.1, 0.2]

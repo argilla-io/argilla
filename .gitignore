@@ -135,6 +135,3 @@ package-lock.json
 
 # App generated files
 src/**/server/static/
-
-# setuptools_scm generated file
-src/rubrix/_version.py

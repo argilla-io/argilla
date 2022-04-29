@@ -18,44 +18,17 @@ import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.api import (
-    build_bulk_response,
     build_data_response,
     build_list_response,
     build_typed_response,
 )
-from rubrix.client.sdk.commons.models import (
-    BulkResponse,
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,
-    TextClassificationBulkData,
     TextClassificationQuery,
     TextClassificationRecord,
 )
-
-
-def bulk(
-    client: AuthenticatedClient,
-    name: str,
-    json_body: TextClassificationBulkData,
-) -> Response[BulkResponse]:
-    url = "{}/api/datasets/{name}/TextClassification:bulk".format(
-        client.base_url, name=name
-    )
-
-    response = httpx.post(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-        json=json_body.dict(by_alias=True),
-    )
-
-    return build_bulk_response(response, name=name, body=json_body)
 
 
 def data(

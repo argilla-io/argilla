@@ -23,7 +23,7 @@ from rubrix.client.sdk.text_classification.models import (
 )
 from rubrix.labeling.text_classification import Rule, load_rules
 from rubrix.labeling.text_classification.rule import RuleNotAppliedError
-from rubrix.server.commons.errors import EntityNotFoundError
+from rubrix.server.errors import EntityNotFoundError
 
 
 @pytest.fixture

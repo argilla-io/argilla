@@ -78,12 +78,7 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
-    [
-      "nuxt-highlightjs",
-      {
-        style: "dracula",
-      },
-    ],
+    "nuxt-highlightjs",
     [
       "nuxt-mq",
       {
@@ -125,7 +120,7 @@ export default {
     scss: "./assets/scss/abstract.scss",
   },
 
-  loading: { color: "#0508D9", throttle: 100 },
+  loading: { color: "#0D26C5", throttle: 100 },
 
   auth: {
     strategies: {
