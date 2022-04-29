@@ -107,10 +107,10 @@ export default {
   computed: {
     tooltip() {
       return {
-        coverage: "Percentage of records labeled by the rules",
+        coverage: "Percentage of records labeled by all rules",
         annotatedCoverage:
-          "Percentage of annotated records labeled by the rules",
-        precision: "Percentage of correct labels given by the rules",
+          "Percentage of annotated records labeled by all rules",
+        precision: "Percentage of correct labels given by all rules",
         correctAndIncorrect:
           "Number of labels the rule predicted correctly/incorrectly with respect to the annotations",
       };
