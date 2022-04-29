@@ -1,7 +1,7 @@
 .. _python_metrics:
 
-Metrics (Experimental)
-======================
+Metrics
+=======
 
 Here we describe the available metrics in Rubrix:
 

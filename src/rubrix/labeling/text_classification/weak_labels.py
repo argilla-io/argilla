@@ -37,7 +37,7 @@ class WeakLabelsBase:
             If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             to filter the dataset before applying the rules.
 
     Raises:
@@ -244,7 +244,7 @@ class WeakLabels(WeakLabelsBase):
             If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Remember that the return type ``None`` means
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
@@ -652,11 +652,11 @@ class WeakMultiLabels(WeakLabelsBase):
 
     Args:
         dataset: Name of the dataset to which the rules will be applied.
-        rules: A list of rules (labeling functions). They must return a string, or ``None`` in case of abstention.
-            If None, we will use the rules of the dataset (Default).
+        rules: A list of rules (labeling functions). They must return a string, list of strings, or ``None`` in case of
+            abstention. If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://rubrix.readthedocs.io/en/stable/reference/webapp/search_records.html>`_
+            `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             to filter the dataset before applying the rules.
 
     Raises:

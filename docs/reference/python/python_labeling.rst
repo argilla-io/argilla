@@ -1,7 +1,7 @@
 .. _python_labeling:
 
-Labeling (Experimental)
-=======================
+Labeling
+========
 
 The ``rubrix.labeling`` module aims at providing tools to enhance your labeling workflow.
 

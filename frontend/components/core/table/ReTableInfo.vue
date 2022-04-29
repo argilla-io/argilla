@@ -139,11 +139,6 @@
                     <!-- TODO: remove references to task -->
                     <span v-else-if="column.type === 'task'">
                       {{ itemValue(item, column) }}
-                      <span
-                        v-if="itemValue(item, column) === 'Text2Text'"
-                        class="table-info__tag"
-                        >Experimental</span
-                      >
                     </span>
                     <span v-else>{{ itemValue(item, column) }}</span>
                   </span>
