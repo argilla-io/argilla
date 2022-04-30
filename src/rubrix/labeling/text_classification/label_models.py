@@ -117,7 +117,7 @@ class MajorityVoter(LabelModel):
             include_annotated_records: Whether to include annotated records.
             include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
-            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL!). You can choose among two policies:
+            tie_break_policy: IGNORED FOR MULTI-LABEL! Policy to break ties. You can choose among two policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -330,7 +330,7 @@ class MajorityVoter(LabelModel):
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
-            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among two policies:
+            tie_break_policy: IGNORED FOR MULTI-LABEL! Policy to break ties. You can choose among two policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -539,7 +539,7 @@ class Snorkel(LabelModel):
             include_annotated_records: Whether to include annotated records.
             include_abstentions: Whether to include records in the output, for which the label model abstained.
             prediction_agent: String used for the ``prediction_agent`` in the returned records.
-            tie_break_policy: Policy to break ties (IGNORED FOR MULTI_LABEL!). You can choose among three policies:
+            tie_break_policy: IGNORED FOR MULTI_LABEL! Policy to break ties. You can choose among three policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -576,6 +576,7 @@ class Snorkel(LabelModel):
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
+        threshold: float = 0.5,
         output_str: bool = False,
     ) -> Union[Dict[str, float], str]:
         """Returns some scores/metrics of the label model with respect to the annotated records.
@@ -590,7 +591,7 @@ class Snorkel(LabelModel):
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
         Args:
-            tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among three policies:
+            tie_break_policy: IGNORED FOR MULTI-LABEL. Policy to break ties. You can choose among three policies:
 
                 - `abstain`: Do not provide any prediction
                 - `random`: randomly choose among tied option using deterministic hash
@@ -598,6 +599,7 @@ class Snorkel(LabelModel):
 
                 The last two policies can introduce quite a bit of noise, especially when the tie is among many labels,
                 as is the case when all the labeling functions (rules) abstained.
+            threshold: IGNORED FOR SINGLE-LABEL! The probability threshold (excluded) of a label to be accepted.
             output_str: If True, return output as nicely formatted string.
 
         Returns:
@@ -618,7 +620,10 @@ class Snorkel(LabelModel):
         l_pred = self._weak_labels.matrix(has_annotation=True)
 
         annotation, prediction, target_names = self._model.score(
-            self._weak_labels.annotation(), l_pred, tie_break_policy=tie_break_policy
+            self._weak_labels.annotation(),
+            l_pred,
+            tie_break_policy=tie_break_policy,
+            threshold=threshold,
         )
 
         return classification_report(
@@ -762,6 +767,7 @@ class _SnorkelSingleLabel:
         annotation: np.ndarray,
         l_pred: np.ndarray,
         tie_break_policy: Union[str, TieBreakPolicy],
+        **kwargs,
     ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
         """Computes the annotation and prediction array
 
@@ -769,6 +775,7 @@ class _SnorkelSingleLabel:
             annotation: The annotation array
             l_pred: The weak label matrix
             tie_break_policy: Policy to break the ties, see ``Snorkel.score()``.
+            **kwargs: We need this to absorb the threshold argument.
 
         Returns:
             The masked annotation and prediction array, and a list of target names.
@@ -863,14 +870,15 @@ class _SnorkelMultiLabel:
         return predictions
 
     def score(
-        self, annotation: np.ndarray, l_pred: np.ndarray, **kwargs
+        self, annotation: np.ndarray, l_pred: np.ndarray, threshold: float, **kwargs
     ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
         """Computes the annotation and prediction array.
 
         Args:
-            annotation: The annotation array
-            l_pred: The weak label matrix
-            **kwargs: We need to absorb the tie_break_policy argument
+            annotation: The annotation array.
+            l_pred: The weak label matrix.
+            threshold: The probability threshold (excluded) to accept a label as prediction.
+            **kwargs: We need this to absorb the tie_break_policy argument.
 
         Returns:
             The masked annotation and prediction array, and a list of target names.
@@ -881,7 +889,7 @@ class _SnorkelMultiLabel:
             if pred is None:
                 continue
             pred.sort(key=lambda x: self._weak_labels.labels.index(x[0]))
-            prediction[i] = np.array([1 if p[1] > 0.5 else 0 for p in pred])
+            prediction[i] = np.array([1 if p[1] > threshold else 0 for p in pred])
 
         abstention_mask = prediction.sum(axis=1) > -1
 
