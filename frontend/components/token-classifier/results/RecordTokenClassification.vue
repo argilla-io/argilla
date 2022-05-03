@@ -20,7 +20,7 @@
     <div class="content">
       <div class="origins">
         <text-spans-static
-          v-if="record.prediction"
+          :v-once="dataset.query.score ? false : true"
           key="prediction"
           origin="prediction"
           class="prediction"
@@ -178,8 +178,6 @@ export default {
   white-space: pre-line;
   &__input {
     padding-right: 200px;
-    // display: flex;
-    // flex-wrap: wrap;
   }
   &__actions-buttons {
     margin-right: 0;
