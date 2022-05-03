@@ -18,24 +18,49 @@
 <template>
   <div class="record">
     <div class="content">
-      <record-token-classification-annotation
-        :dataset="dataset"
-        :record="record"
-        :visualTokens="visualTokens"
-        v-if="annotationEnabled"
-      />
-      <record-token-classification-exploration
-        :dataset="dataset"
-        :record="record"
-        :visualTokens="visualTokens"
-        v-else
-      />
+      <div class="origins">
+        <text-spans-static
+          v-if="record.prediction"
+          :v-once="dataset.query.score ? false : true"
+          key="prediction"
+          origin="prediction"
+          class="prediction"
+          :dataset="dataset"
+          :record="record"
+          :visualTokens="visualTokens"
+          :entities="getEntitiesByOrigin('prediction')"
+        />
+        <text-spans
+          key="annotation"
+          origin="annotation"
+          class="annotation"
+          :dataset="dataset"
+          :record="record"
+          :visualTokens="visualTokens"
+          :entities="getEntitiesByOrigin('annotation')"
+        />
+      </div>
+      <div
+        class="content__actions-buttons"
+        v-if="annotationEnabled && record.status !== 'Validated'"
+      >
+        <re-button class="button-primary" @click="onValidate(record)">{{
+          record.status === "Edited" ? "Save" : "Validate"
+        }}</re-button>
+        <re-button
+          :disabled="!record.annotatedEntities.length"
+          class="button-primary--outline"
+          @click="onClearAnnotations()"
+          >Clear annotations</re-button
+        >
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { indexOf, length } from "stringz";
+import { mapActions } from "vuex";
 
 export default {
   props: {
@@ -93,6 +118,56 @@ export default {
       return visualTokens;
     },
   },
+  methods: {
+    ...mapActions({
+      validate: "entities/datasets/validateAnnotations",
+      updateRecords: "entities/datasets/updateDatasetRecords",
+    }),
+    getEntitiesByOrigin(origin) {
+      if (this.annotationEnabled) {
+        return origin === "annotation"
+          ? this.record.annotatedEntities
+          : (this.record.prediction && this.record.prediction.entities) || [];
+      } else {
+        return this.record[origin]
+          ? this.record[origin].entities.map((obj) => ({
+              ...obj,
+              origin: origin,
+            }))
+          : [];
+      }
+    },
+    async onValidate(record) {
+      await this.validate({
+        // TODO: Move this as part of token classification dataset logic
+        dataset: this.dataset,
+        agent: this.$auth.user.username,
+        records: [
+          {
+            ...record,
+            annotatedEntities: undefined,
+            annotation: {
+              entities: record.annotatedEntities,
+              origin: "annotation",
+            },
+          },
+        ],
+      });
+    },
+    onClearAnnotations() {
+      this.updateRecords({
+        dataset: this.dataset,
+        records: [
+          {
+            ...this.record,
+            selected: true,
+            status: "Edited",
+            annotatedEntities: [],
+          },
+        ],
+      });
+    },
+  },
 };
 </script>
 
@@ -107,6 +182,7 @@ export default {
     padding-left: 65px;
   }
 }
+
 .content {
   position: relative;
   white-space: pre-line;
@@ -119,14 +195,36 @@ export default {
     display: flex;
     min-width: 20%;
     .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin: 1.5em auto 0 0;
+      min-width: 137px;
+      min-height: 34px;
+      line-height: 34px;
+      display: inline-block;
+      margin: 1.5em 0 0 0;
       & + .re-button {
         margin-left: 1em;
       }
     }
+  }
+}
+.origins > .prediction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  ::v-deep {
+    .span__text {
+      color: transparent;
+      & > * {
+        color: palette(grey, dark);
+      }
+    }
+    .highlight__content {
+      color: transparent;
+    }
+  }
+  ::v-deep .highlight-text {
+    opacity: 1;
   }
 }
 </style>

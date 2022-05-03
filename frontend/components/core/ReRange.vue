@@ -1400,7 +1400,7 @@ export default {
 
 .vue-slider-process {
   .filter & {
-    background: $line-smooth-color;
+    background: $secondary-color;
     border-radius: 3px;
   }
 }

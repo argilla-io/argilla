@@ -5,7 +5,14 @@
         <span class="highlight__tooltip__origin" v-if="span.origin">{{
           span.origin === "prediction" ? "pred." : "annot."
         }}</span>
-        <span>{{ span.entity.label }} </span>
+        <span
+          >{{ span.entity.label }}
+          <span
+            class="highlight__tooltip__score"
+            v-if="score && span.origin === 'prediction'"
+            >{{ score | percent(0, 0) }}</span
+          ></span
+        >
       </span>
     </span>
   </span>
@@ -17,6 +24,11 @@ export default {
     span: {
       type: Object,
       required: true,
+    },
+  },
+  computed: {
+    score() {
+      return this.span.entity.score;
     },
   },
 };
@@ -45,7 +57,8 @@ export default {
       margin-top: 0.5em;
     }
     & > span {
-      display: block;
+      display: flex;
+      align-items: center;
     }
     &__container {
       position: absolute;
@@ -64,6 +77,11 @@ export default {
     &__origin {
       @include font-size(12px);
       font-weight: normal;
+    }
+    &__score {
+      @include font-size(14px);
+      font-weight: 400;
+      margin-left: 0.5em;
     }
   }
   &__tooltip:after {
