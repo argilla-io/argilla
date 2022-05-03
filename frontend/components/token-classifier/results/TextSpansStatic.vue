@@ -18,7 +18,6 @@
 <template>
   <div v-if="textSpans.length" ref="list" class="content__input">
     <text-span-static
-      v-once
       v-for="(token, i) in textSpans"
       :key="i"
       :record="record"

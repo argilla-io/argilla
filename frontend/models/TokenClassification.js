@@ -51,10 +51,12 @@ class TokenClassificationRecord extends BaseRecord {
 }
 
 class TokenClassificationSearchQuery extends BaseSearchQuery {
+  score;
   query_text;
 
-  constructor({ query_text, ...superData }) {
+  constructor({ score, query_text, ...superData }) {
     super(superData);
+    this.score = score;
     this.query_text = query_text;
   }
 }
