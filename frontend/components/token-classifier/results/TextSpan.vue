@@ -223,6 +223,9 @@ $hue: 360;
       padding-bottom: 3px;
       border-bottom: 5px solid $rcolor;
     }
+    & ::v-deep .highlight__tooltip {
+      background: $rcolor;
+    }
     &.annotation ::v-deep .highlight__tooltip:after {
       border-color: $rcolor transparent transparent transparent;
     }
@@ -247,9 +250,6 @@ $hue: 360;
     &:hover {
       border: 2px solid mix(black, $rcolor, 20%);
     }
-  }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip {
-    background: $rcolor;
   }
 }
 </style>
