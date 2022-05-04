@@ -69,6 +69,9 @@ class ElasticsearchWrapper(LoggingMixin):
             es_client = OpenSearch(
                 hosts=settings.elasticsearch,
                 verify_certs=settings.elasticsearch_ssl_verify,
+                # Extra args to es configuration -> TODO: extensible by settings
+                retry_on_timeout=True,
+                max_retries=5,
             )
             cls._INSTANCE = cls(es_client)
 
@@ -198,6 +201,7 @@ class ElasticsearchWrapper(LoggingMixin):
             self.__client__.indices.create(
                 index=index,
                 body={"settings": settings or {}, "mappings": mappings or {}},
+                ignore=400,
             )
 
     def create_index_template(
@@ -418,7 +422,11 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         if partial_update:
             self.__client__.update(
-                index=index, id=doc_id, body={"doc": document}, refresh=True
+                index=index,
+                id=doc_id,
+                body={"doc": document},
+                refresh=True,
+                retry_on_conflict=500,  # TODO: configurable
             )
         else:
             self.__client__.index(index=index, id=doc_id, body=document, refresh=True)

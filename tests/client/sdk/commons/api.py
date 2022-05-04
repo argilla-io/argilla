@@ -12,10 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import httpx
 import pytest
 from httpx import Response as HttpxResponse
 
-from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response
+from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response, bulk
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
     ErrorMessage,
@@ -24,6 +25,39 @@ from rubrix.client.sdk.commons.models import (
     ValidationError,
 )
 from rubrix.client.sdk.text_classification.models import TextClassificationRecord
+
+
+def test_text2text_bulk(sdk_client, mocked_client, bulk_text2text_data, monkeypatch):
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
+
+    dataset_name = "test_dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    response = bulk(sdk_client, name=dataset_name, json_body=bulk_text2text_data)
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, BulkResponse)
+
+
+def test_textclass_bulk(sdk_client, mocked_client, bulk_textclass_data, monkeypatch):
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
+
+    dataset_name = "test_dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    response = bulk(sdk_client, name=dataset_name, json_body=bulk_textclass_data)
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, BulkResponse)
+
+
+def test_tokenclass_bulk(sdk_client, mocked_client, bulk_tokenclass_data, monkeypatch):
+    monkeypatch.setattr(httpx, "post", mocked_client.post)
+
+    dataset_name = "test_dataset"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+    response = bulk(sdk_client, name=dataset_name, json_body=bulk_tokenclass_data)
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, BulkResponse)
 
 
 @pytest.mark.parametrize(

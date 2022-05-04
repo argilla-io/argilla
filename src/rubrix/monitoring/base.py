@@ -1,19 +1,11 @@
 import asyncio
 import random
-from typing import Dict, Optional
+import threading
+from typing import Any, Dict, Optional
 
 import wrapt
 
-from rubrix.monitoring.helpers import start_loop_in_thread
-
-_LOGGING_LOOP = None
-
-
-def _get_current_loop():
-    global _LOGGING_LOOP
-    if not _LOGGING_LOOP:
-        _LOGGING_LOOP = start_loop_in_thread()
-    return _LOGGING_LOOP
+import rubrix
 
 
 class ModelNotSupportedError(Exception):
@@ -26,13 +18,10 @@ class BaseMonitor(wrapt.ObjectProxy):
 
     Attributes:
     -----------
-
     dataset:
         Rubrix dataset name
-
     sample_rate:
         The portion of the data to store in Rubrix. Default = 0.2
-
     """
 
     def __init__(
@@ -65,14 +54,21 @@ class BaseMonitor(wrapt.ObjectProxy):
         """Return True if a record should be logged to rubrix"""
         return random.uniform(0.0, 1.0) <= self.sample_rate
 
-    def _log2rubrix(self, *args, **kwargs):
+    def _prepare_log_data(self, *args, **kwargs) -> Dict[str, Any]:
         raise NotImplementedError()
 
     def log_async(self, *args, **kwargs):
-        wrapped_func = self._log2rubrix
-        loop = _get_current_loop()
+        log_args = self._prepare_log_data(*args, **kwargs)
+        log_args.pop("verbose", None)
+        log_args.pop("background", None)
+        return rubrix.log(**log_args, verbose=False, background=True)
 
-        async def f():
-            return wrapped_func(*args, **kwargs)
-
-        asyncio.run_coroutine_threadsafe(f(), loop)
+    def _start_event_loop_if_needed(self):
+        """Recreate loop/thread if needed"""
+        if self._event_loop is None:
+            self._event_loop = asyncio.new_event_loop()
+        if self._event_loop_thread is None or not self._event_loop_thread.is_alive():
+            self._thread = threading.Thread(
+                target=self._event_loop.run_forever, daemon=True
+            )
+            self._thread.start()

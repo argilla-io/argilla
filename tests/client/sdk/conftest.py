@@ -12,11 +12,25 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from datetime import datetime
 
 import pytest
 
+import rubrix as rb
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.text2text.models import (
+    CreationText2TextRecord,
+    Text2TextBulkData,
+)
+from rubrix.client.sdk.text_classification.models import (
+    CreationTextClassificationRecord,
+    TextClassificationBulkData,
+)
+from rubrix.client.sdk.token_classification.models import (
+    CreationTokenClassificationRecord,
+    TokenClassificationBulkData,
+)
 
 
 class Helpers:
@@ -45,3 +59,81 @@ def helpers():
 @pytest.fixture(scope="session")
 def sdk_client():
     return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
+
+
+@pytest.fixture
+def bulk_textclass_data():
+    explanation = {
+        "text": [rb.TokenAttributions(token="test", attributions={"test": 0.5})]
+    }
+    records = [
+        rb.TextClassificationRecord(
+            text="test",
+            prediction=[("test", 0.5)],
+            prediction_agent="agent",
+            annotation="test1",
+            annotation_agent="agent",
+            multi_label=False,
+            explanation=explanation,
+            id=i,
+            metadata={"mymetadata": "str"},
+            event_timestamp=datetime(2020, 1, 1),
+            status="Validated",
+        )
+        for i in range(3)
+    ]
+
+    return TextClassificationBulkData(
+        records=[CreationTextClassificationRecord.from_client(rec) for rec in records],
+        tags={"Mytag": "tag"},
+        metadata={"MyMetadata": 5},
+    )
+
+
+@pytest.fixture
+def bulk_text2text_data():
+    records = [
+        rb.Text2TextRecord(
+            text="test",
+            prediction=[("prueba", 0.5), ("intento", 0.5)],
+            prediction_agent="agent",
+            annotation="prueba",
+            annotation_agent="agent",
+            id=i,
+            metadata={"mymetadata": "str"},
+            event_timestamp=datetime(2020, 1, 1),
+            status="Validated",
+        )
+        for i in range(3)
+    ]
+
+    return Text2TextBulkData(
+        records=[CreationText2TextRecord.from_client(rec) for rec in records],
+        tags={"Mytag": "tag"},
+        metadata={"MyMetadata": 5},
+    )
+
+
+@pytest.fixture
+def bulk_tokenclass_data():
+    records = [
+        rb.TokenClassificationRecord(
+            text="a raw text",
+            tokens=["a", "raw", "text"],
+            prediction=[("test", 2, 5, 0.9)],
+            prediction_agent="agent",
+            annotation=[("test", 2, 5)],
+            annotation_agent="agent",
+            id=i,
+            metadata={"mymetadata": "str"},
+            event_timestamp=datetime(2020, 1, 1),
+            status="Validated",
+        )
+        for i in range(3)
+    ]
+
+    return TokenClassificationBulkData(
+        records=[CreationTokenClassificationRecord.from_client(rec) for rec in records],
+        tags={"Mytag": "tag"},
+        metadata={"MyMetadata": 5},
+    )

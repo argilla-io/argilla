@@ -30,6 +30,7 @@ from typing import Any, Dict, List, Type, TypeVar, Union
 
 import httpx
 
+from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.errors_handler import handle_response_error
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
@@ -37,6 +38,56 @@ from rubrix.client.sdk.commons.models import (
     HTTPValidationError,
     Response,
 )
+from rubrix.client.sdk.text2text.models import Text2TextBulkData
+from rubrix.client.sdk.text_classification.models import TextClassificationBulkData
+from rubrix.client.sdk.token_classification.models import TokenClassificationBulkData
+
+_TASK_TO_ENDPOINT = {
+    TextClassificationBulkData: "TextClassification",
+    TokenClassificationBulkData: "TokenClassification",
+    Text2TextBulkData: "Text2Text",
+}
+
+
+def bulk(
+    client: AuthenticatedClient,
+    name: str,
+    json_body: Union[
+        TextClassificationBulkData, TokenClassificationBulkData, Text2TextBulkData
+    ],
+) -> Response[BulkResponse]:
+    url = f"{client.base_url}/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
+
+    response = httpx.post(
+        url=url,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+        json=json_body.dict(by_alias=True),
+    )
+
+    return build_bulk_response(response, name=name, body=json_body)
+
+
+async def async_bulk(
+    client: AuthenticatedClient,
+    name: str,
+    json_body: Union[
+        TextClassificationBulkData, TokenClassificationBulkData, Text2TextBulkData
+    ],
+) -> Response[BulkResponse]:
+    url = f"{client.base_url}/api/datasets/{name}/{_TASK_TO_ENDPOINT[type(json_body)]}:bulk"
+
+    async with httpx.AsyncClient() as async_client:
+        response = await async_client.post(
+            url=url,
+            headers=client.get_headers(),
+            cookies=client.get_cookies(),
+            timeout=client.get_timeout(),
+            json=json_body.dict(by_alias=True),
+        )
+
+    return build_bulk_response(response, name=name, body=json_body)
 
 
 def build_bulk_response(

@@ -17,36 +17,9 @@ from typing import List, Optional, Union
 import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response
-from rubrix.client.sdk.commons.models import (
-    BulkResponse,
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
-from rubrix.client.sdk.text2text.models import (
-    Text2TextBulkData,
-    Text2TextQuery,
-    Text2TextRecord,
-)
-
-
-def bulk(
-    client: AuthenticatedClient,
-    name: str,
-    json_body: Text2TextBulkData,
-) -> Response[Union[BulkResponse, ErrorMessage, HTTPValidationError]]:
-    url = "{}/api/datasets/{name}/Text2Text:bulk".format(client.base_url, name=name)
-
-    response = httpx.post(
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=client.get_timeout(),
-        json=json_body.dict(by_alias=True),
-    )
-
-    return build_bulk_response(response, name=name, body=json_body)
+from rubrix.client.sdk.commons.api import build_data_response
+from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from rubrix.client.sdk.text2text.models import Text2TextQuery, Text2TextRecord
 
 
 def data(

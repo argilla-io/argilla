@@ -36,6 +36,7 @@ if _TYPE_CHECKING:
         init,
         load,
         log,
+        log_async,
         set_workspace,
     )
     from rubrix.client.datasets import (
@@ -62,6 +63,7 @@ _import_structure = {
         "init",
         "load",
         "log",
+        "log_async",
         "set_workspace",
     ],
     "client.models": [

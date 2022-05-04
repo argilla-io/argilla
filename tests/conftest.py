@@ -10,15 +10,17 @@ from tests.helpers import SecuredClient
 
 @pytest.fixture
 def mocked_client(monkeypatch):
-    client = SecuredClient(TestClient(app, raise_server_exceptions=False))
+    with TestClient(app, raise_server_exceptions=False) as _client:
+        client = SecuredClient(_client)
 
-    monkeypatch.setattr(httpx, "post", client.post)
-    monkeypatch.setattr(httpx, "get", client.get)
-    monkeypatch.setattr(httpx, "delete", client.delete)
-    monkeypatch.setattr(httpx, "put", client.put)
-    monkeypatch.setattr(httpx, "stream", client.stream)
+        monkeypatch.setattr(httpx, "post", client.post)
+        monkeypatch.setattr(httpx.AsyncClient, "post", client.post_async)
+        monkeypatch.setattr(httpx, "get", client.get)
+        monkeypatch.setattr(httpx, "delete", client.delete)
+        monkeypatch.setattr(httpx, "put", client.put)
+        monkeypatch.setattr(httpx, "stream", client.stream)
 
-    return client
+        yield client
 
 
 @pytest.fixture

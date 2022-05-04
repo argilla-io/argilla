@@ -3,13 +3,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
-import rubrix
+import rubrix as rb
 from rubrix import TextClassificationRecord
+from rubrix.client.models import BulkResponse
 from rubrix.monitoring.base import BaseMonitor
 from rubrix.monitoring.types import MissingType
 
 try:
-
     from transformers import (
         Pipeline,
         TextClassificationPipeline,
@@ -34,16 +34,19 @@ class HuggingFaceMonitor(BaseMonitor):
         config_dict = config.to_dict()
         return config_dict.get("transformers_version", _transformers_version)
 
-    def _log2rubrix(
+    @property
+    def model_config(self):
+        return self.__model__.model.config
+
+    def _prepare_log_data(
         self,
         data: List[Tuple[str, Dict[str, Any], List[LabelPrediction]]],
         multi_label: bool = False,
-    ):
-        """Register a list of tuples including inputs and its predictions for text classification task"""
-        records = []
-        config = self.__model__.model.config
-        agent = config.name_or_path
+    ) -> Dict[str, Any]:
 
+        agent = self.model_config.name_or_path
+
+        records = []
         for input_, metadata, predictions in data:
             record = TextClassificationRecord(
                 text=input_ if isinstance(input_, str) else None,
@@ -62,19 +65,20 @@ class HuggingFaceMonitor(BaseMonitor):
         if multi_label:
             dataset_name += "_multi"
 
-        rubrix.log(
-            records,
+        return dict(
+            records=records,
             name=dataset_name,
             tags={
-                "name": config.name_or_path,
-                "transformers_version": self.fetch_transformers_version(config),
-                "model_type": config.model_type,
+                "name": self.model_config.name_or_path,
+                "transformers_version": self.fetch_transformers_version(
+                    self.model_config
+                ),
+                "model_type": self.model_config.model_type,
                 "task": self.__model__.task,
             },
-            metadata=config.to_dict(),
+            metadata=self.model_config.to_dict(),
             verbose=False,
         )
-        pass
 
 
 class ZeroShotMonitor(HuggingFaceMonitor):
