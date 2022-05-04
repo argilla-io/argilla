@@ -20,6 +20,7 @@
     <div class="content">
       <div class="origins">
         <text-spans-static
+          v-if="record.prediction"
           :v-once="dataset.query.score ? false : true"
           key="prediction"
           origin="prediction"
@@ -123,9 +124,18 @@ export default {
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
     getEntitiesByOrigin(origin) {
-      return origin === "annotation"
-        ? this.record.annotatedEntities
-        : (this.record.prediction && this.record.prediction.entities) || [];
+      if (this.annotationEnabled) {
+        return origin === "annotation"
+          ? this.record.annotatedEntities
+          : (this.record.prediction && this.record.prediction.entities) || [];
+      } else {
+        return this.record[origin]
+          ? this.record[origin].entities.map((obj) => ({
+              ...obj,
+              origin: origin,
+            }))
+          : [];
+      }
     },
     async onValidate(record) {
       await this.validate({
