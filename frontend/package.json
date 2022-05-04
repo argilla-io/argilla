@@ -1,6 +1,6 @@
 {
   "name": "rubrix",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "private": true,
   "eslintIgnore": [
     "node_modules/**/*",
