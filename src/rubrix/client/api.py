@@ -12,12 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import logging
 import os
 import re
+from asyncio import Future
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas
 from tqdm.auto import tqdm
@@ -42,8 +44,8 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.api import async_bulk, bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
-from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets import api as datasets_api
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics import api as metrics_api
@@ -70,15 +72,45 @@ from rubrix.client.sdk.token_classification.models import (
 )
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
+from rubrix.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
 _WARNED_ABOUT_AS_PANDAS = False
 
-# Larger sizes will trigger a warning
-_MAX_CHUNK_SIZE = 5000
+
+class _RubrixLogAgent:
+    def __init__(self, api: "Api"):
+        self.__api__ = api
+        self.__loop__, self.__thread__ = setup_loop_in_thread()
+
+    @staticmethod
+    async def __log_internal__(api: "Api", *args, **kwargs):
+
+        try:
+            return await api.log_async(*args, **kwargs)
+        except Exception as ex:
+            _LOGGER.error(
+                f"Cannot log data {args, kwargs}\n"
+                f"Error of type {type(ex)}\n: {ex}. ({ex.args})"
+            )
+            raise ex
+
+    def log(self, *args, **kwargs) -> Future:
+        return asyncio.run_coroutine_threadsafe(
+            self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__
+        )
+
+    def __del__(self):
+        self.__loop__.stop()
+
+        del self.__loop__
+        del self.__thread__
 
 
 class Api:
+    # Larger sizes will trigger a warning
+    _MAX_CHUNK_SIZE = 5000
+
     def __init__(
         self,
         api_url: Optional[str] = None,
@@ -117,6 +149,13 @@ class Api:
 
         if workspace is not None:
             self.set_workspace(workspace)
+
+        self._agent = _RubrixLogAgent(self)
+
+    @property
+    def client(self):
+        """The underlying authenticated client"""
+        return self._client
 
     def set_workspace(self, workspace: str):
         """Sets the active workspace.
@@ -179,8 +218,7 @@ class Api:
             >>> import rubrix as rb
             >>> rb.delete(name="example-dataset")
         """
-        response = datasets_api.delete_dataset(client=self._client, name=name)
-        self.check_response_errors(response)
+        datasets_api.delete_dataset(client=self._client, name=name)
 
     def log(
         self,
@@ -190,8 +228,62 @@ class Api:
         metadata: Optional[Dict[str, Any]] = None,
         chunk_size: int = 500,
         verbose: bool = True,
-    ) -> BulkResponse:
+        background: bool = False,
+    ) -> Union[BulkResponse, Future]:
         """Logs Records to Rubrix.
+
+        The logging happens asynchronously in a background thread.
+
+        Args:
+            records: The record, an iterable of records, or a dataset to log.
+            name: The dataset name.
+            tags: A dictionary of tags related to the dataset.
+            metadata: A dictionary of extra info for the dataset.
+            chunk_size: The chunk size for a data bulk.
+            verbose: If True, shows a progress bar and prints out a quick summary at the end.
+            background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
+                object. You probably want to set ``verbose`` to False in that case.
+
+        Returns:
+            Summary of the response from the REST API.
+            If the ``background`` argument is set to True, an ``asyncio.Future`` will be returned instead.
+
+        Examples:
+            >>> import rubrix as rb
+            >>> record = rb.TextClassificationRecord(
+            ...     text="my first rubrix example",
+            ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+            ... )
+            >>> rb.log(record, name="example-dataset")
+            1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
+            BulkResponse(dataset='example-dataset', processed=1, failed=0)
+            >>>
+            >>> # Logging records in the background
+            >>> rb.log(record, name="example-dataset", background=True, verbose=False)
+            <Future at 0x7f675a1fffa0 state=pending>
+        """
+        future = self._agent.log(
+            records=records,
+            name=name,
+            tags=tags,
+            metadata=metadata,
+            chunk_size=chunk_size,
+            verbose=verbose,
+        )
+        if background:
+            return future
+        return future.result()
+
+    async def log_async(
+        self,
+        records: Union[Record, Iterable[Record], Dataset],
+        name: str,
+        tags: Optional[Dict[str, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        chunk_size: int = 500,
+        verbose: bool = True,
+    ) -> BulkResponse:
+        """Logs Records to Rubrix with asyncio.
 
         Args:
             records: The record, an iterable of records, or a dataset to log.
@@ -205,15 +297,18 @@ class Api:
             Summary of the response from the REST API
 
         Examples:
+            >>> # Log asynchronously from your notebook
+            >>> import asyncio
             >>> import rubrix as rb
-            >>> record = rb.TextClassificationRecord(
-            ...     text="my first rubrix example",
-            ...     prediction=[('spam', 0.8), ('ham', 0.2)]
+            >>> from rubrix.utils import setup_loop_in_thread
+            >>> loop, _ = setup_loop_in_thread()
+            >>> future_response = asyncio.run_coroutine_threadsafe(
+            ...     rb.log_async(my_records, dataset_name), loop
             ... )
-            >>> rb.log(record, name="example-dataset")
-            1 records logged to http://localhost:6900/datasets/rubrix/example-dataset
-            BulkResponse(dataset='example-dataset', processed=1, failed=0)
         """
+        tags = tags or {}
+        metadata = metadata or {}
+
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
 
@@ -223,65 +318,51 @@ class Api:
                 "Please, use a valid name for your dataset"
             )
 
+        if chunk_size > self._MAX_CHUNK_SIZE:
+            _LOGGER.warning(
+                """The introduced chunk size is noticeably large, timeout errors may occur.
+                Consider a chunk size smaller than %s""",
+                self._MAX_CHUNK_SIZE,
+            )
+
         if isinstance(records, Record.__args__):
             records = [records]
-        # this transforms a Dataset* to a list of *Record
         records = list(records)
-
-        tags = tags or {}
-        metadata = metadata or {}
 
         try:
             record_type = type(records[0])
         except IndexError:
             raise InputValueError("Empty record list has been passed as argument.")
 
-        if chunk_size > _MAX_CHUNK_SIZE:
-            _LOGGER.warning(
-                """The introduced chunk size is noticeably large, timeout errors may occur.
-                Consider a chunk size smaller than %s""",
-                _MAX_CHUNK_SIZE,
-            )
-
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
-            bulk_records_function = text_classification_api.bulk
-            to_sdk_model = CreationTextClassificationRecord.from_client
-
+            creation_class = CreationTextClassificationRecord
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
-            bulk_records_function = token_classification_api.bulk
-            to_sdk_model = CreationTokenClassificationRecord.from_client
-
+            creation_class = CreationTokenClassificationRecord
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
-            bulk_records_function = text2text_api.bulk
-            to_sdk_model = CreationText2TextRecord.from_client
-
-        # Record type is not recognised
+            creation_class = CreationText2TextRecord
         else:
             raise InputValueError(
-                f"Unknown record type passed as argument for [{','.join(map(str, records[0:5]))}...] "
-                f"Available values are {Record.__args__}"
+                f"Unknown record type {record_type}. Available values are {Record.__args__}"
             )
 
-        processed = 0
-        failed = 0
+        processed, failed = 0, 0
         progress_bar = tqdm(total=len(records), disable=not verbose)
         for i in range(0, len(records), chunk_size):
             chunk = records[i : i + chunk_size]
 
-            response = bulk_records_function(
+            response = await async_bulk(
                 client=self._client,
                 name=name,
                 json_body=bulk_class(
                     tags=tags,
                     metadata=metadata,
-                    records=[to_sdk_model(r) for r in chunk],
+                    records=[creation_class.from_client(r) for r in chunk],
                 ),
             )
 
-            self.check_response_errors(response)
             processed += response.parsed.processed
             failed += response.parsed.failed
 
@@ -290,13 +371,16 @@ class Api:
 
         # TODO: improve logging policy in library
         if verbose:
+            _LOGGER.info(
+                f"Processed {processed} records in dataset {name}. Failed: {failed}"
+            )
             workspace = self.get_workspace()
             if (
                 not workspace
             ):  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
             print(
-                f"{processed} records logged to {self._client.base_url + '/datasets/' + workspace + '/' + name}"
+                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}"
             )
 
         # Creating a composite BulkResponse with the total processed and failed
@@ -329,7 +413,6 @@ class Api:
             >>> dataset = rb.load(name="example-dataset")
         """
         response = datasets_api.get_dataset(client=self._client, name=name)
-        self.check_response_errors(response)
         task = response.parsed.task
 
         task_config = {
@@ -364,8 +447,6 @@ class Api:
             limit=limit,
         )
 
-        self.check_response_errors(response)
-
         records = [sdk_record.to_client() for sdk_record in response.parsed]
         try:
             records_sorted_by_id = sorted(records, key=lambda x: x.id)
@@ -389,12 +470,9 @@ class Api:
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
-        self.check_response_errors(response)
-
         response = metrics_api.get_dataset_metrics(
             self._client, name=name, task=response.parsed.task
         )
-        self.check_response_errors(response)
 
         return response.parsed
 
@@ -413,7 +491,6 @@ class Api:
         size: Optional[int] = None,
     ) -> MetricResults:
         response = datasets_api.get_dataset(self._client, name)
-        self.check_response_errors(response)
 
         metric_ = self.get_metric(name, metric=metric)
         assert metric_ is not None, f"Metric {metric} not found !!!"
@@ -427,14 +504,13 @@ class Api:
             interval=interval,
             size=size,
         )
-        self.check_response_errors(response)
+
         return MetricResults(**metric_.dict(), results=response.parsed)
 
     def fetch_dataset_labeling_rules(self, dataset: str) -> List[LabelingRule]:
         response = text_classification_api.fetch_dataset_labeling_rules(
             self._client, name=dataset
         )
-        self.check_response_errors(response)
 
         return [LabelingRule.parse_obj(data) for data in response.parsed]
 
@@ -444,54 +520,8 @@ class Api:
         response = text_classification_api.dataset_rule_metrics(
             self._client, name=dataset, query=rule.query, label=rule.label
         )
-        self.check_response_errors(response)
 
         return LabelingRuleMetricsSummary.parse_obj(response.parsed)
-
-    @staticmethod
-    def check_response_errors(response: Response) -> None:
-        """Checks response status codes and raise corresponding error if found"""
-
-        http_status = response.status_code
-        response_data = response.parsed
-
-        if http_status == 401:
-            raise Exception(
-                "Unauthorized error: invalid credentials. The API answered with a {} code: {}".format(
-                    http_status, response_data
-                )
-            )
-
-        elif http_status == 403:
-            raise Exception(
-                "Forbidden error: you have not been authorised to access this dataset. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif http_status == 404:
-            raise Exception(
-                "Not found error. The API answered with a {} code: {}".format(
-                    http_status, response_data
-                )
-            )
-
-        elif http_status == 422:
-            raise Exception(
-                "Unprocessable entity error: Something is wrong in your records. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif 400 <= http_status < 500:
-            raise Exception(
-                "Request error: API cannot answer. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
-
-        elif http_status >= 500:
-            raise Exception(
-                "Connection error: API is not responding. "
-                "The API answered with a {} code: {}".format(http_status, response_data)
-            )
 
 
 __ACTIVE_API__: Optional[Api] = None
@@ -515,9 +545,17 @@ def api_wrapper(api_method: Callable):
     """
 
     def decorator(func):
-        @wraps(api_method)
-        def wrapped_func(*args, **kwargs):
-            return func(*args, **kwargs)
+        if asyncio.iscoroutinefunction(api_method):
+
+            @wraps(api_method)
+            async def wrapped_func(*args, **kwargs):
+                return await func(*args, **kwargs)
+
+        else:
+
+            @wraps(api_method)
+            def wrapped_func(*args, **kwargs):
+                return func(*args, **kwargs)
 
         sign = signature(api_method)
         wrapped_func.__signature__ = sign.replace(
@@ -557,6 +595,11 @@ def delete(*args, **kwargs):
 @api_wrapper(Api.log)
 def log(*args, **kwargs):
     return active_api().log(*args, **kwargs)
+
+
+@api_wrapper(Api.log_async)
+def log_async(*args, **kwargs):
+    return active_api().log_async(*args, **kwargs)
 
 
 @api_wrapper(Api.load)

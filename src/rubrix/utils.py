@@ -12,12 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import importlib
 import os
+import threading
 import warnings
 from itertools import chain
 from types import ModuleType
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 
 class _LazyRubrixModule(ModuleType):
@@ -115,3 +117,16 @@ class _LazyRubrixModule(ModuleType):
 
     def __reduce__(self):
         return self.__class__, (self._name, self.__file__, self._import_structure)
+
+
+def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]:
+    """Sets up a new asyncio event loop in a new thread, and runs it forever.
+
+    Returns:
+        A tuple containing the event loop and the thread.
+    """
+    loop = asyncio.new_event_loop()
+    thread = threading.Thread(target=loop.run_forever, daemon=True)
+    thread.start()
+
+    return loop, thread

@@ -41,20 +41,19 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.api import bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.commons.models import Response
 from rubrix.client.sdk.datasets.api import copy_dataset, delete_dataset, get_dataset
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from rubrix.client.sdk.metrics.api import compute_metric, get_dataset_metrics
 from rubrix.client.sdk.metrics.models import MetricInfo
-from rubrix.client.sdk.text2text.api import bulk as text2text_bulk
 from rubrix.client.sdk.text2text.api import data as text2text_data
 from rubrix.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
     Text2TextQuery,
 )
-from rubrix.client.sdk.text_classification.api import bulk as text_classification_bulk
 from rubrix.client.sdk.text_classification.api import data as text_classification_data
 from rubrix.client.sdk.text_classification.api import (
     dataset_rule_metrics,
@@ -67,7 +66,6 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.api import bulk as token_classification_bulk
 from rubrix.client.sdk.token_classification.api import data as token_classification_data
 from rubrix.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
@@ -194,17 +192,17 @@ class RubrixClient:
         # Check record type
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
-            bulk_records_function = text_classification_bulk
+            bulk_records_function = bulk
             to_sdk_model = CreationTextClassificationRecord.from_client
 
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
-            bulk_records_function = token_classification_bulk
+            bulk_records_function = bulk
             to_sdk_model = CreationTokenClassificationRecord.from_client
 
         elif record_type is Text2TextRecord:
             bulk_class = Text2TextBulkData
-            bulk_records_function = text2text_bulk
+            bulk_records_function = bulk
             to_sdk_model = CreationText2TextRecord.from_client
 
         # Record type is not recognised
