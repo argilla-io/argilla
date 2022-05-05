@@ -75,7 +75,7 @@ export default {
       return this.dataset.viewSettings.viewMode === "annotate";
     },
     charsBetweenTokens() {
-      return this.span.tokens.at(-1).charsBetweenTokens;
+      return this.span.tokens[this.span.tokens.length - 1].charsBetweenTokens;
     },
   },
   methods: {
