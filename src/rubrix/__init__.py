@@ -52,7 +52,11 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
-    from rubrix.datasets import create_dataset
+    from rubrix.datasets import (
+        TextClassificationSettings,
+        TokenClassificationSettings,
+        create_dataset,
+    )
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
 
