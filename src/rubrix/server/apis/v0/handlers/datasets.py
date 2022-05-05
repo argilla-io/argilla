@@ -87,7 +87,6 @@ async def create_dataset(
     task_mappings = TaskFactory.get_task_mappings(request.task)
 
     dataset = dataset_class.parse_obj({**request.dict()})
-    dataset.created_by = user.username
     dataset.owner = owner
 
     response = datasets.create_dataset(
