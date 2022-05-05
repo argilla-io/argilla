@@ -180,6 +180,7 @@ export default {
     left: auto;
     right: 0;
     background: #a1a2cc;
+    transition: all 1s ease-in-out 2s;
   }
 }
 
