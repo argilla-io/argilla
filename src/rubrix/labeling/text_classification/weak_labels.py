@@ -460,7 +460,7 @@ class WeakLabels(WeakLabelsBase):
         return dists, nearest
 
     def extend_matrix(
-        self, thresholds, embeddings: Optional[np.ndarray] = None, gpu=False
+        self, thresholds, embeddings: Optional[np.ndarray] = None, gpu=False, mix=False
     ):
         """Returns the extended weak label matrix, or optionally just a part of it.
            Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
@@ -508,6 +508,11 @@ class WeakLabels(WeakLabelsBase):
 
         self._extended_matrix = extended_matrix
         self._extension_queries = (dists, nearest)
+
+        if not mix:
+            for idx, row in enumerate(self._matrix):
+                if not all([x == none_label_int for x in row]):
+                    self._extended_matrix[idx] = self._matrix[idx]
 
     def annotation(
         self,
