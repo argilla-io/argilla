@@ -85,7 +85,11 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
-    "datasets": ["create_dataset"],
+    "datasets": [
+        "create_dataset",
+        "TextClassificationSettings",
+        "TokenClassificationSettings",
+    ],
     "server.app": ["app"],
 }
 
