@@ -4,13 +4,14 @@ name: CI
 on:
   push:
     branches:
+      - 'main'
       - 'master'
       - 'releases/**'
-    tags:
-      - 'v*'
   pull_request:
     branches:
+      - 'main'
       - 'master'
+      - 'releases/**'
   release:
     types: [published]
 
