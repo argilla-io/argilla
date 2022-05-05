@@ -15,12 +15,14 @@
 
 from typing import List
 
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Body, Depends, Security
 
+from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.datasets import (
     CopyDatasetRequest,
     Dataset,
+    DatasetCreate,
     UpdateDatasetRequest,
 )
 from rubrix.server.errors import EntityNotFoundError
@@ -62,6 +64,37 @@ def list_datasets(
         user=current_user,
         workspaces=[ds_params.workspace] if ds_params.workspace is not None else None,
     )
+
+
+@router.post(
+    "/",
+    response_model=Dataset,
+    response_model_exclude_none=True,
+    operation_id="create_dataset",
+    name="create_dataset",
+    description="Create a new dataset",
+)
+async def create_dataset(
+    request: DatasetCreate = Body(..., description=f"The request dataset info"),
+    ws_params: CommonTaskQueryParams = Depends(),
+    datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    user: User = Security(auth.get_user, scopes=["create:datasets"]),
+) -> Dataset:
+
+    owner = user.check_workspace(ws_params.workspace)
+
+    dataset_class = TaskFactory.get_task_dataset(request.task)
+    task_mappings = TaskFactory.get_task_mappings(request.task)
+
+    dataset = dataset_class.parse_obj({**request.dict()})
+    dataset.created_by = user.username
+    dataset.owner = owner
+
+    response = datasets.create_dataset(
+        user=user, dataset=dataset, mappings=task_mappings
+    )
+
+    return Dataset.parse_obj(response)
 
 
 @router.get(
