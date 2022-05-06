@@ -14,7 +14,7 @@ from rubrix.server.services.datasets import DatasetsService, SVCDatasetSettings
 def configure_router(router: APIRouter):
 
     task = TaskType.text_classification
-    base_endpoint = f"/{{name}}/{task}/settings"
+    base_endpoint = f"/{task}/{{name}}/settings"
     svc_settings_class: Type[SVCDatasetSettings] = type(
         f"{task}_DatasetSettings", (SVCDatasetSettings, TextClassificationSettings), {}
     )
