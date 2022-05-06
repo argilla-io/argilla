@@ -65,9 +65,9 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
-![Sidebar](../../_static/reference/webapp/sidebar_view.png)
+![Sidebar](../../_static/reference/webapp/sidebar_blured.png)
 
-The sidebar is divided into three sections.
+The right sidebar is divided into three sections.
 
 ### Modes
 
@@ -83,10 +83,12 @@ Not all modes are available for all [tasks](../../guides/task_examples.ipynb).
 
 ### Metrics
 
-In this section you find several "metrics" that can provide valuable insights to your dataset, or support you while annotating your records.
-They are grouped into two submenus:
+In this section you find several "metrics" that can provide valuable insights to your dataset.
+They also provide some support while annotating your records, or defining heuristic rules.
+There are three different kind of _metrics_:
 
-- **Progress**: see metrics of your annotation process, like its progress and the label distribution
+- **Progress**: see metrics of your annotation process, like its progress and the label distribution (only visible in the _Explore_ and _Annotate_ mode)
+- **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
 - **Stats**: check the keywords of your dataset and the error distribution of the predictions
 
 You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
@@ -94,4 +96,4 @@ You can find more information about each metric in our dedicated [metrics guide]
 ### Refresh
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
-For example, if you are annotating and use the [Status filter](#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+For example, if you are annotating and use the [Status filter](filter_records.md#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
