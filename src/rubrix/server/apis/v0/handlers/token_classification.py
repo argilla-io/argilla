@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
+from rubrix.server.apis.v0.handlers import token_classification_dataset_settings
 from rubrix.server.apis.v0.helpers import takeuntil
 from rubrix.server.apis.v0.models.commons.model import (
     BulkResponse,
@@ -289,3 +290,6 @@ async def stream_data(
         data_stream=data_stream,
         limit=limit,
     )
+
+
+token_classification_dataset_settings.configure_router(router)
