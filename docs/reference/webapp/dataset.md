@@ -26,55 +26,6 @@ You can find more information about how to use the search bar in our detailed [s
 The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
 You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
 
-```{note}
-Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
-```
-
-### Predictions filter
-
-![Predictions filter](../../_static/reference/webapp/prediction_filter.png)
-
-This filter allows you to filter records with respect of their predictions:
-
-- **Predicted as**: filter records by their predicted labels
-- **Predicted ok**: filter records whose predictions do, or do not, match the annotations
-- **Score**: filter records with respect to the score of their prediction
-- **Predicted by**: filter records by the [prediction agent](../python/python_client.rst#module-rubrix.client.models)
-
-### Annotations filter
-
-![Annotation filters](../../_static/reference/webapp/annotation_filters.png)
-
-This filter allows you to filter records with respect to their annotations:
-
-- **Annotated as**: filter records with respect to their annotated labels
-- **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-rubrix.client.models)
-
-### Status filter
-
-![Status filters](../../_static/reference/webapp/status_filters.png)
-
-This filter allows you to filter records with respect to their status:
-
-- **Default**: records without any annotation or edition
-- **Validated**: records with validated annotations
-- **Edited**: records with annotations but still not validated
-
-### Metadata filter
-
-![Metadata filters](../../_static/reference/webapp/metadata_filter.png)
-
-This filter allows you to filter records with respect to their metadata.
-
-```{hint}
-Nested metadata will be flattened and the keys will be joint by a dot.
-```
-
-### Sort records
-
-![Sort filter](../../_static/reference/webapp/sort_filter.png)
-
-With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 ## Record cards
 

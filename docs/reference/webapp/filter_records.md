@@ -1,25 +1,75 @@
 # Filter Records
 
-With this component, users are able to sort the information on a dataset by using different parameters. Filters are different for each task, and they can be used in both **Annotation** and **Exploration** modes.
+The Rubrix web app provides a set of filters that help you to quickly and conveniently navigate your records.
+For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
+The filters are available in all [modes](dataset.md#mode) of the web app.
 
-## How filters work
+```{hint}
+You can also filter the records through the search bar by means of [queries](../../guides/queries.md).
+```
 
-_To see a description of their components, click [here](dataset.md)._
+```{note}
+Not all filters listed below are available for all [tasks](../../guides/task_examples.ipynb).
+```
 
-In both modes, filters work in a very similar way:
+## Predictions filter
 
-### Filtering records in the Annotation Mode
+![Predictions filter](../../_static/reference/webapp/prediction_filter.png)
 
-Filtering records can be useful in big datasets, when users need to see and annotate a very specific part of the dataset.
+This filter allows you to filter records with respect of their predictions:
 
-For example, if users are annotating a dataset in a **token classification task** and they need to see how many records are annotated with one or more labels, they can use the **Annotation filter** and choose the desired combination.
+- **Predicted as**: filter records by their predicted labels
+- **Predicted ok**: filter records whose predictions do, or do not, match the annotations
+- **Score**: filter records with respect to the score of their prediction
+- **Predicted by**: filter records by the [prediction agent](../python/python_client.rst#module-rubrix.client.models)
 
-<video width="100%" controls><source src="../../_static/reference/webapp/filter_records.mp4" type="video/mp4"></video>
+## Annotations filter
 
-### Filtering records in the Explore Mode
+![Annotation filters](../../_static/reference/webapp/annotation_filters.png)
 
-In this case, the use is basically the same, but just for analysis purposes.
+This filter allows you to filter records with respect to their annotations:
 
-Another example would be the following: if in a **text classification task** with available [**score**](../../tutorials/08-error_analysis_using_loss.ipynb), users want to sort records to see the highest or lowest loss, the **Sort filter** can be used choosing the **Score** field.
+- **Annotated as**: filter records with respect to their annotated labels
+- **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-rubrix.client.models)
 
-**NOTE**: There are no filters in the **Define label rules**, as this mode works with queries.
+## Status filter
+
+![Status filters](../../_static/reference/webapp/status_filters.png)
+
+This filter allows you to filter records with respect to their status:
+
+- **Default**: records without any annotation or edition
+- **Validated**: records with validated annotations
+- **Edited**: records with annotations but still not validated
+
+## Metadata filter
+
+![Metadata filters](../../_static/reference/webapp/metadata_filter.png)
+
+This filter allows you to filter records with respect to their metadata.
+
+```{hint}
+Nested metadata will be flattened and the keys will be joint by a dot.
+```
+
+## Sort records
+
+![Sort filter](../../_static/reference/webapp/sort_filter.png)
+
+With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
+
+## Examples
+
+Here we will provide a few examples how you can take advantage of the filters for different use cases.
+
+### Missing annotations
+
+If you are annotating records and want to display only records that do not have an annotation yet, you can set the [status filter](#status-filter) to **Default**.
+
+### Low scores
+
+If you uploaded model predictions and want to check for which records the model still struggles, you can use the [score filter](#predictions-filter) to filter records with a low score.
+
+### High loss
+
+If you logged the *model loss* as a metadata for each record, you can [sort the records](#sort-records) by this loss in descending order to see records for which the model disagrees with the annotations (see this [tutorial](../../tutorials/08-error_analysis_using_loss.ipynb) for an example).
