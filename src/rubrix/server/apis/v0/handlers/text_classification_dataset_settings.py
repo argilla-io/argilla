@@ -6,18 +6,22 @@ from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.commons.params import DATASET_NAME_PATH_PARAM
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.dataset_settings import TextClassificationSettings
+from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService, SVCDatasetSettings
+
+__svc_settings_class__: Type[SVCDatasetSettings] = type(
+    f"{TaskType.text_classification}_DatasetSettings",
+    (SVCDatasetSettings, TextClassificationSettings),
+    {},
+)
 
 
 def configure_router(router: APIRouter):
 
     task = TaskType.text_classification
-    base_endpoint = f"/{task}/{{name}}/settings"
-    svc_settings_class: Type[SVCDatasetSettings] = type(
-        f"{task}_DatasetSettings", (SVCDatasetSettings, TextClassificationSettings), {}
-    )
+    base_endpoint = f"/{{name}}/{task}/settings"
 
     @router.get(
         path=base_endpoint,
@@ -42,7 +46,7 @@ def configure_router(router: APIRouter):
         )
 
         settings = await datasets.get_settings(
-            user=user, dataset=found_ds, class_type=svc_settings_class
+            user=user, dataset=found_ds, class_type=__svc_settings_class__
         )
         return TextClassificationSettings.parse_obj(settings)
 
@@ -61,6 +65,7 @@ def configure_router(router: APIRouter):
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskQueryParams = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
     ) -> TextClassificationSettings:
 
@@ -70,11 +75,13 @@ def configure_router(router: APIRouter):
             task=task,
             workspace=ws_params.workspace,
         )
-        # TODO(frascuchon): validate settings...
+        await validator.validate_dataset_settings(
+            user=user, dataset=found_ds, settings=request
+        )
         settings = await datasets.save_settings(
             user=user,
             dataset=found_ds,
-            settings=svc_settings_class.parse_obj(request.dict()),
+            settings=__svc_settings_class__.parse_obj(request.dict()),
         )
         return TextClassificationSettings.parse_obj(settings)
 
