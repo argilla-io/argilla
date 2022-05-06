@@ -1,6 +1,6 @@
 # Dataset
 
-![Dataset view](../../_static/reference/webapp/dataset_view1.png)
+![Dataset view](../../_static/reference/webapp/annotation_ner.png)
 
 The _Dataset_ page is the main page of the Rubrix web app.
 From here you can access most of Rubrix's features, like **exploring and annotating** the records of your dataset.
@@ -26,55 +26,6 @@ You can find more information about how to use the search bar in our detailed [s
 The _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters.
 You can find more information about how to use the filters in our detailed [filter guide](filter_records.md).
 
-```{note}
-Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
-```
-
-### Predictions filter
-
-![Predictions filter](../../_static/reference/webapp/prediction_filter.png)
-
-This filter allows you to filter records with respect of their predictions:
-
-- **Predicted as**: filter records by their predicted labels
-- **Predicted ok**: filter records whose predictions do, or do not, match the annotations
-- **Score**: filter records with respect to the score of their prediction
-- **Predicted by**: filter records by the [prediction agent](../python/python_client.rst#module-rubrix.client.models)
-
-### Annotations filter
-
-![Annotation filters](../../_static/reference/webapp/annotation_filters.png)
-
-This filter allows you to filter records with respect to their annotations:
-
-- **Annotated as**: filter records with respect to their annotated labels
-- **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-rubrix.client.models)
-
-### Status filter
-
-![Status filters](../../_static/reference/webapp/status_filters.png)
-
-This filter allows you to filter records with respect to their status:
-
-- **Default**: records without any annotation or edition
-- **Validated**: records with validated annotations
-- **Edited**: records with annotations but still not validated
-
-### Metadata filter
-
-![Metadata filters](../../_static/reference/webapp/metadata_filter.png)
-
-This filter allows you to filter records with respect to their metadata.
-
-```{hint}
-Nested metadata will be flattened and the keys will be joint by a dot.
-```
-
-### Sort records
-
-![Sort filter](../../_static/reference/webapp/sort_filter.png)
-
-With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 ## Record cards
 
@@ -100,8 +51,13 @@ A text classification dataset can support either single-label or multi-label cla
 
 ![Token classification view](../../_static/reference/webapp/token_classification.png)
 
-In this task predictions and annotation are given as highlights in the input text.
-Work in progress ...
+In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
+At the top of the record list you will find a legend that connects the colors to the respective labels.
+When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
+
+```{hint}
+When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will be missing the solid thin line.
+```
 
 ### Text2Text
 
@@ -114,9 +70,9 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
-![Sidebar](../../_static/reference/webapp/sidebar_view.png)
+![Sidebar](../../_static/reference/webapp/sidebar_blured.png)
 
-The sidebar is divided into three sections.
+The right sidebar is divided into three sections.
 
 ### Modes
 
@@ -132,15 +88,17 @@ Not all modes are available for all [tasks](../../guides/task_examples.ipynb).
 
 ### Metrics
 
-In this section you find several "metrics" that can provide valuable insights to your dataset, or support you while annotating your records.
-They are grouped into two submenus:
+In this section you find several "metrics" that can provide valuable insights to your dataset.
+They also provide some support while annotating your records, or defining heuristic rules.
+There are three different kind of _metrics_:
 
-- **Progress**: see metrics of your annotation process, like its progress and the label distribution
-- **Stats**: check the keywords of your dataset and the error distribution of the predictions
+- **Progress**: see metrics of your annotation process, like its progress and the label distribution (only visible in the _Explore_ and _Annotate_ mode)
+- **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
+- **Stats**: check the keywords of your dataset (text classification, text2text) or the mentions of your annotations and predictions (token classification)
 
 You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
 
 ### Refresh
 
 This button allows you to refresh the list of the record cards with respect to the activated filters.
-For example, if you are annotating and use the [Status filter](#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
+For example, if you are annotating and use the [Status filter](filter_records.md#status-filter) to filter out annotated records, you can press the _Refresh_ button to hide the latest annotated records.
