@@ -51,8 +51,13 @@ A text classification dataset can support either single-label or multi-label cla
 
 ![Token classification view](../../_static/reference/webapp/token_classification.png)
 
-In this task predictions and annotation are given as highlights in the input text.
-Work in progress ...
+In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
+At the top of the record list you will find a legend that connects the colors to the respective labels.
+When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
+
+```hint
+When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will miss the solid thin line.
+```
 
 ### Text2Text
 
