@@ -1,6 +1,6 @@
 # Define rules
 
-![Define Rules view](../../_static/reference/webapp/define_rules_1.png)
+![Define Rules view](../../_static/reference/webapp/define_rules.png)
 
 The Rubrix web app has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
 As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/weak-supervision-with-rubrix.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
@@ -56,7 +56,7 @@ You can also find an overview about how many rules you saved and how they are di
 
 ## Manage rules
 
-![Manage rules](../../_static/reference/webapp/define_rules_5.png)
+![Manage rules](../../_static/reference/webapp/manage_rules.png)
 
 Here you will see a list of your saved rules.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.

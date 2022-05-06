@@ -34,7 +34,7 @@ This submenu allows users to know more about the keywords of the dataset.
 
 In both modes, the **Keywords** list displays a list of relevant words and the number of occurrences.
 
-<video width="100%" controls><source src="../../_static/reference/webapp/stats.mp4" type="video/mp4"></video>
+![Progress menu 2](../../_static/reference/webapp/stats_exploredefine.png)
 
 #### Annotation mode
 
@@ -42,7 +42,8 @@ In the **annotation mode**, the stats show the **mentions** (this is, the entiti
 
 This submenu has the **Predicted as** (for predictions) and the **Annotated as** (for annotation) sections, and here users can see the number of entities predicted or annotated with a specific label. The number of occurrences is ordered from highest to lowest, and the labels are also ordered in that way.
 
-![stats](../../_static/reference/webapp/annotation_stats.png)
+<video width="100%" controls><source src="../../_static/reference/webapp/stats.mp4" type="video/mp4"></video>
+
 
 ### Refresh button
 
