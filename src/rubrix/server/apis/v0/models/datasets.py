@@ -43,14 +43,11 @@ class UpdateDatasetRequest(BaseModel):
 
 
 class CreationDatasetRequest(UpdateDatasetRequest):
-    """
-    Fields for dataset creation
+    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
 
-    name: str
-        the  dataset name
-    """
 
-    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
+class DatasetCreate(CreationDatasetRequest):
+    task: TaskType = Field(description="The dataset task")
 
 
 class CopyDatasetRequest(CreationDatasetRequest):
@@ -80,6 +77,9 @@ class BaseDatasetDB(CreationDatasetRequest):
     task: TaskType
     owner: Optional[str] = None
     created_at: datetime = None
+    created_by: str = Field(
+        None, description="The Rubrix user that created the dataset"
+    )
     last_updated: datetime = None
 
     @classmethod
@@ -95,6 +95,7 @@ class BaseDatasetDB(CreationDatasetRequest):
         return self.build_dataset_id(self.name, self.owner)
 
 
+# TODO: Move this class to the services layer
 class DatasetDB(BaseDatasetDB):
     pass
 
