@@ -1,6 +1,6 @@
 # Dataset
 
-![Dataset view](../../_static/reference/webapp/dataset_view1.png)
+![Dataset view](../../_static/reference/webapp/annotation_ner.png)
 
 The _Dataset_ page is the main page of the Rubrix web app.
 From here you can access most of Rubrix's features, like **exploring and annotating** the records of your dataset.
@@ -55,8 +55,8 @@ In this task annotations are given as colored highlights in the input text, whil
 At the top of the record list you will find a legend that connects the colors to the respective labels.
 When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
 
-```hint
-When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will miss the solid thin line.
+```{hint}
+When using the [score filter](filter_records.md#predictions-filter), the predictions that do **not** fall in the selected range will be missing the solid thin line.
 ```
 
 ### Text2Text
@@ -94,7 +94,7 @@ There are three different kind of _metrics_:
 
 - **Progress**: see metrics of your annotation process, like its progress and the label distribution (only visible in the _Explore_ and _Annotate_ mode)
 - **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
-- **Stats**: check the keywords of your dataset and the error distribution of the predictions
+- **Stats**: check the keywords of your dataset (text classification, text2text) or the mentions of your annotations and predictions (token classification)
 
 You can find more information about each metric in our dedicated [metrics guide](view_dataset_metrics.md).
 

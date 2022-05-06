@@ -54,6 +54,10 @@ From the [right sidebar](dataset.md#sidebar) you can access the **Overall rule m
 Here you will find the aggregated metrics, such as the coverages, the average precision and the total number of correctly/incorrectly predicted labels.
 You can also find an overview about how many rules you saved and how they are distributed with respect to their labels.
 
+```{hint}
+If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](filter_records.md#annotations-filter).
+```
+
 ## Manage rules
 
 ![Manage rules](../../_static/reference/webapp/manage_rules.png)

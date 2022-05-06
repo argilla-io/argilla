@@ -31,6 +31,8 @@ This filter allows you to filter records with respect to their annotations:
 
 - **Annotated as**: filter records with respect to their annotated labels
 - **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-rubrix.client.models)
+- **Only records not covered by rules**: this option only appears if you [defined rules](define_rules.md) for your dataset.
+  It allows you to show only records that are **not** covered by your rules.
 
 ## Status filter
 
