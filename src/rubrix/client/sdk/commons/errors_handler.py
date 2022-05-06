@@ -7,6 +7,7 @@ from rubrix.client.sdk.commons.errors import (
     BadRequestApiError,
     ForbiddenApiError,
     GenericApiError,
+    MethodNotAllowedApiError,
     NotFoundApiError,
     UnauthorizedApiError,
     ValidationApiError,
@@ -29,18 +30,18 @@ def handle_response_error(
 
     if response.status_code == BadRequestApiError.HTTP_STATUS:
         error_type = BadRequestApiError
-    if response.status_code == UnauthorizedApiError.HTTP_STATUS:
+    elif response.status_code == UnauthorizedApiError.HTTP_STATUS:
         error_type = UnauthorizedApiError
-    if response.status_code == AlreadyExistsApiError.HTTP_STATUS:
+    elif response.status_code == AlreadyExistsApiError.HTTP_STATUS:
         error_type = AlreadyExistsApiError
-    if response.status_code == ForbiddenApiError.HTTP_STATUS:
+    elif response.status_code == ForbiddenApiError.HTTP_STATUS:
         error_type = ForbiddenApiError
-    if response.status_code == NotFoundApiError.HTTP_STATUS:
+    elif response.status_code == NotFoundApiError.HTTP_STATUS:
         error_type = NotFoundApiError
-    if response.status_code == ValidationApiError.HTTP_STATUS:
+    elif response.status_code == ValidationApiError.HTTP_STATUS:
         error_type = ValidationApiError
-
-    if error_type == ValidationApiError:
         error_args["client_ctx"] = client_ctx
+    elif response.status_code == MethodNotAllowedApiError.HTTP_STATUS:
+        error_type = MethodNotAllowedApiError
 
     raise error_type(**error_args)

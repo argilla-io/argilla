@@ -79,6 +79,7 @@ class TokenClassificationDataset extends ObservationDataset {
   static fields() {
     return {
       ...super.fields(),
+      settings: this.attr({}),
       query: this.attr({}, (data) => {
         return new TokenClassificationSearchQuery(data);
       }),
@@ -92,7 +93,35 @@ class TokenClassificationDataset extends ObservationDataset {
     };
   }
 
+  async initialize() {
+    const settings = await this._getDatasetSettings();
+    const entity = this.getTaskDatasetClass();
+    await entity.insertOrUpdate({
+      where: this.id,
+      data: [
+        {
+          owner: this.owner,
+          name: this.name,
+          settings,
+        },
+      ],
+    });
+    return entity.find(this.id);
+  }
+
   get entities() {
+    const formatEntities = (entities = []) =>
+      entities.map((name, index) => {
+        return {
+          colorId: index,
+          text: name,
+        };
+      });
+    const predefinedEntities =
+      this.settings.label_schema && this.settings.label_schema.labels;
+    if (predefinedEntities) {
+      return formatEntities(predefinedEntities.map((l) => l.id));
+    }
     const { entities } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
     const aggregations = this.globalResults.aggregations;
     const names = [
@@ -103,12 +132,7 @@ class TokenClassificationDataset extends ObservationDataset {
           .concat(Object.keys(aggregations.predicted_as))
       ),
     ];
-    return names.map((name, index) => {
-      return {
-        colorId: index,
-        text: name,
-      };
-    });
+    return formatEntities(names);
   }
 }
 

@@ -120,8 +120,8 @@ class SearchRecordsService:
     def scan_records(
         self,
         dataset: Dataset,
-        query: BaseSearchQuery,
         record_type: Type[BaseRecord],
+        query: Optional[BaseSearchQuery] = None,
     ) -> Iterable[Record]:
         """Scan records for a queried"""
         for doc in self.__dao__.scan_dataset(

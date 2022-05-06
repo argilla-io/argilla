@@ -1,15 +1,15 @@
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Callable, Optional, Type, TypeVar, Union
 
 from fastapi import Depends
 
 from rubrix.server.apis.v0.models.commons.model import BaseRecord
 from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.models.metrics.base import (
-    BaseMetric,
     ElasticsearchMetric,
     NestedPathElasticsearchMetric,
     PythonMetric,
 )
+from rubrix.server.apis.v0.models.metrics.commons import *
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.errors import WrongInputParamError
@@ -62,8 +62,8 @@ class MetricsService:
         self,
         dataset: BaseDatasetDB,
         metric: BaseMetric,
-        record_class: Type[BaseRecord],
-        query: Optional[GenericQuery],
+        record_class: Optional[Type[BaseRecord]] = None,
+        query: Optional[GenericQuery] = None,
         **metric_params,
     ) -> Dict[str, Any]:
         """
@@ -92,11 +92,7 @@ class MetricsService:
         elif isinstance(metric, PythonMetric):
             records = self.__dao__.scan_dataset(
                 dataset,
-                search=RecordSearch(
-                    query=self.__query_builder__(dataset, query=query)
-                    if query
-                    else None
-                ),
+                search=RecordSearch(query=self.__query_builder__(dataset, query=query)),
             )
             return metric.apply(map(record_class.parse_obj, records))
 
@@ -175,9 +171,7 @@ class MetricsService:
                 dataset,
                 size=0,  # No records at all
                 search=RecordSearch(
-                    query=self.__query_builder__(dataset, query=query)
-                    if query
-                    else None,
+                    query=self.__query_builder__(dataset, query=query),
                     aggregations=agg,
                     include_default_aggregations=False,
                 ),

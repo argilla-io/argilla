@@ -21,6 +21,7 @@ from opensearchpy.helpers import bulk as es_bulk
 from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
+from rubrix.server.elasticseach import query_helpers
 from rubrix.server.errors import InvalidTextSearchError
 
 try:
@@ -224,11 +225,15 @@ class ElasticsearchWrapper(LoggingMixin):
 
     def delete_index_template(self, index_template: str):
         """Deletes an index template"""
-        self.__client__.indices.delete_template(name=index_template, ignore=[400, 404])
+        if self.__client__.indices.exists_index_template(index_template):
+            self.__client__.indices.delete_template(
+                name=index_template, ignore=[400, 404]
+            )
 
     def delete_index(self, index: str):
         """Deletes an elasticsearch index"""
-        self.__client__.indices.delete(index, ignore=[400, 404])
+        if self.index_exists(index):
+            self.__client__.indices.delete(index, ignore=[400, 404])
 
     def add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
@@ -265,8 +270,10 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
             The elasticsearch document if found, None otherwise
         """
+
         try:
-            return self.__client__.get(index=index, id=doc_id)
+            if self.__client__.exists(index=index, id=doc_id):
+                return self.__client__.get(index=index, id=doc_id)
         except NotFoundError:
             return None
 
@@ -287,7 +294,8 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
-        self.__client__.delete(index=index, id=doc_id, refresh=True)
+        if self.__client__.exists(index=index, id=doc_id):
+            self.__client__.delete(index=index, id=doc_id, refresh=True)
 
     def add_documents(
         self,
@@ -396,7 +404,8 @@ class ElasticsearchWrapper(LoggingMixin):
         self,
         index: str,
         doc_id: str,
-        document: Dict[str, Any],
+        document: Optional[Dict[str, Any]] = None,
+        script: Optional[str] = None,
         partial_update: bool = False,
     ):
         """
@@ -419,11 +428,14 @@ class ElasticsearchWrapper(LoggingMixin):
         -------
 
         """
+        # TODO: validate either doc or script are provided
         if partial_update:
+            body = {"script": script} if script else {"doc": document}
+
             self.__client__.update(
                 index=index,
                 id=doc_id,
-                body={"doc": document},
+                body=body,
                 refresh=True,
                 retry_on_conflict=500,  # TODO: configurable
             )
@@ -564,7 +576,7 @@ class ElasticsearchWrapper(LoggingMixin):
             index=index, size=0, query={"aggs": {aggregation_name: aggregation}}
         )
 
-        return es_helpers.parse_aggregations(results["aggregations"]).get(
+        return query_helpers.parse_aggregations(results["aggregations"]).get(
             aggregation_name
         )
 

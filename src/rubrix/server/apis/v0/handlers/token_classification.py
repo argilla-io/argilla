@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
+from rubrix.server.apis.v0.handlers import token_classification_dataset_settings
 from rubrix.server.apis.v0.helpers import takeuntil
 from rubrix.server.apis.v0.models.commons.model import (
     BulkResponse,
@@ -34,6 +35,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -55,12 +57,13 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
     response_model=BulkResponse,
     response_model_exclude_none=True,
 )
-def bulk_records(
+async def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
     common_params: CommonTaskQueryParams = Depends(),
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -110,6 +113,12 @@ def bulk_records(
         datasets.create_dataset(
             user=current_user, dataset=dataset, mappings=task_mappings
         )
+
+    await validator.validate_dataset_records(
+        user=current_user,
+        dataset=dataset,
+        records=bulk.records,
+    )
 
     result = service.add_records(
         dataset=dataset,
@@ -289,3 +298,6 @@ async def stream_data(
         data_stream=data_stream,
         limit=limit,
     )
+
+
+token_classification_dataset_settings.configure_router(router)
