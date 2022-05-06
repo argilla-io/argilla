@@ -181,8 +181,8 @@ $color: #333346;
 label {
   display: block;
   width: calc(100% - 40px);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  hyphens: auto;
+  word-break: break-word;
 }
 .labels {
   margin-top: 3em;
