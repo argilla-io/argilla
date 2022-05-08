@@ -467,11 +467,10 @@ class WeakLabels(WeakLabelsBase):
 
         Args:
             embeddings: sentence embeddings for each row of the weak labels matrix.
-            thresholds: thresholds for the minimum cosine similarity between sentences for a rule to be expanded.
+            thresholds: thresholds for the minimum cosine similarity between sentences for a rule to be extended.
             gpu: Perform FAISS similarity queries on GPU.
-            has_annotation: If True, return only the part of the matrix that has a corresponding annotation.
-                If False, return only the part of the matrix that has NOT a corresponding annotation.
-                By default, we return the whole weak label matrix.
+            mix: If True, allow rules to be extended into rows that have already been labelled by other rules
+                in the original weak labels matrix.
         """
 
         matrix_length = self._matrix.shape[1]
