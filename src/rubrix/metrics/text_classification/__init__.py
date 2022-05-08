@@ -1,1 +1,1 @@
-from .metrics import cautious_classification_report, f1, f1_multilabel
+from .metrics import f1, f1_multilabel
