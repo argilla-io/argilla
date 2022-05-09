@@ -121,7 +121,7 @@ async def bulk_records(
             user=current_user, dataset=dataset, mappings=task_mappings
         )
 
-    await validator.validate_dataset(
+    await validator.validate_dataset_records(
         user=current_user, dataset=dataset, records=bulk.records
     )
 

@@ -21,7 +21,7 @@ __svc_settings_class__: Type[SVCDatasetSettings] = type(
 def configure_router(router: APIRouter):
 
     task = TaskType.text_classification
-    base_endpoint = f"/{{name}}/{task}/settings"
+    base_endpoint = f"/{task}/{{name}}/settings"
 
     @router.get(
         path=base_endpoint,
