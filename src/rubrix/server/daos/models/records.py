@@ -33,7 +33,7 @@ class RecordSearch(BaseModel):
         The elasticsearch search aggregations
     """
 
-    query: Optional[Dict[str, Any]]
+    query: Optional[Dict[str, Any]] = None
     sort: List[Dict[str, Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
     include_default_aggregations: bool = True
