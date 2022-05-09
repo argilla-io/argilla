@@ -16,7 +16,9 @@ This submenu is useful when users need to know how many records have been annota
 
 When clicking on this menu, not only the progress is shown. The number of records is also displayed, as well as the number of labeled records or entities that are **validated** or **discarded**.
 
-![Progress menu 1](../../_static/reference/webapp/progress_bar.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/progress_bar.png" alt="Progress menu" width="50%"/>
+</div>
 
 #### Define rules mode
 
@@ -34,7 +36,9 @@ This submenu allows users to know more about the keywords of the dataset.
 
 In both modes, the **Keywords** list displays a list of relevant words and the number of occurrences.
 
-![Progress menu 2](../../_static/reference/webapp/stats_exploredefine.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/stats_exploredefine.png" alt="Stats menu" width="50%"/>
+</div>
 
 #### Annotation mode
 
