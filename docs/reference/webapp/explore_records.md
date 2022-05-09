@@ -54,6 +54,8 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Metrics
 
-![Metrics for Explore Mode](../../_static/reference/webapp/metrics_explore.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/metrics_explore.png" alt="Metrics for Explore Mode" width="50%"/>
+</div>
 
 From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.
