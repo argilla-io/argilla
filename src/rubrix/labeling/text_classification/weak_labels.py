@@ -18,7 +18,6 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from this import d
 from tqdm.auto import tqdm
 
 from rubrix import load
@@ -445,7 +444,7 @@ class WeakLabels(WeakLabelsBase):
             label_fn_indexes[i].add(embeddings[support[i]])
 
         dists_and_nearest = []
-        for i in range(matrix_length):
+        for i in tqdm(range(matrix_length), total=matrix_length):
             embs_query = np.copy(embeddings[mat_abstains[i]])
             faiss.normalize_L2(embs_query)
             dists_and_nearest.append(label_fn_indexes[i].search(embs_query, 1))
