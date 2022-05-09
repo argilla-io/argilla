@@ -70,7 +70,9 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Sidebar
 
-![Sidebar](../../_static/reference/webapp/sidebar_blured.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/sidebar.png" alt="Sidebar" width="50%"/>
+</div>
 
 The right sidebar is divided into three sections.
 
