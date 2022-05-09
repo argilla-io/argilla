@@ -2,7 +2,7 @@
 
 The Rubrix web app provides a set of filters that help you to quickly and conveniently navigate your records.
 For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
-The filters are available in all [modes](dataset.md#mode) of the web app.
+The filters are available in all [modes](dataset.md#modes) of the web app.
 
 ```{hint}
 You can also filter the records through the search bar by means of [queries](../../guides/queries.md).
