@@ -2,6 +2,17 @@ class RubrixClientError(Exception):
     pass
 
 
+class ApiCompatibilityError(RubrixClientError):
+    def __init__(self, min_version: str):
+        self.min_version = min_version
+
+    def __str__(self):
+        return (
+            "\nThe rubrix server does not support this functionality."
+            f"\nPlease, use the client with a {self.min_version} version server instance."
+        )
+
+
 class RubrixApiResponseError(RubrixClientError):
 
     HTTP_STATUS: int
