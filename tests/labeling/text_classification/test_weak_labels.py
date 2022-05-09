@@ -537,6 +537,32 @@ class TestWeakLabels:
 
         assert (weak_labels.matrix() == old_wlm).all()
 
+    def test_extend_matrix(self, monkeypatch, rules):
+        def mock_load(*args, **kwargs):
+            return [TextClassificationRecord(inputs="test", id=i) for i in range(3)]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+
+        def mock_apply(self, *args, **kwargs):
+            weak_label_matrix = np.array(
+                [[0, -1, -1], [-1, 1, -1], [-1, -1, -1]],
+                dtype=np.short,
+            )
+            annotation_array = np.array([0, 1, -1], dtype=np.short)
+            label2int = {None: -1, "negative": 0, "positive": 1}
+            return weak_label_matrix, annotation_array, label2int
+
+        monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+        weak_labels = WeakLabels(rules=rules, dataset="mock")
+
+        weak_labels.extend_matrix(
+            [1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]])
+        )
+        print(weak_labels.matrix())
+
 
 class TestWeakMultiLabels:
     def test_apply(
