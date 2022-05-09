@@ -17,6 +17,7 @@ import json
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from fastapi import Depends
+from pydantic import BaseModel
 
 from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
@@ -32,6 +33,10 @@ from rubrix.server.errors import WrongTaskError
 BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
 
 NO_WORKSPACE = ""
+
+
+class SettingsDB(BaseModel):
+    pass
 
 
 class DatasetsDAO:
@@ -126,9 +131,11 @@ class DatasetsDAO:
 
         task2dataset_map = task2dataset_map or {}
         return [
-            self._es_doc_to_dataset(doc, ds_class=task2dataset_map.get(task, DatasetDB))
+            self._es_doc_to_instance(
+                doc, ds_class=task2dataset_map.get(task, DatasetDB)
+            )
             for doc in docs
-            for task in [TaskType(doc["_source"]["task"])]
+            for task in [TaskType(self.__get_doc_field__(doc, "task"))]
         ]
 
     def create_dataset(
@@ -247,16 +254,16 @@ class DatasetsDAO:
         if document is None:
             return None
 
-        base_ds = self._es_doc_to_dataset(document)
+        base_ds = self._es_doc_to_instance(document)
         if task and task != base_ds.task:
             raise WrongTaskError(
                 detail=f"Provided task {task} cannot be applied to dataset"
             )
         dataset_type = as_dataset_class or DatasetDB
-        return self._es_doc_to_dataset(document, ds_class=dataset_type)
+        return self._es_doc_to_instance(document, ds_class=dataset_type)
 
     @staticmethod
-    def _es_doc_to_dataset(
+    def _es_doc_to_instance(
         doc: Dict[str, Any], ds_class: Type[BaseDatasetDB] = DatasetDB
     ) -> BaseDatasetDB:
         """Transforms a stored elasticsearch document into a `DatasetDB`"""
@@ -332,3 +339,31 @@ class DatasetsDAO:
         )
 
         return [k for k in workspaces_dict]
+
+    def save_settings(self, dataset: DatasetDB, settings: SettingsDB) -> SettingsDB:
+        self._es.update_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=dataset.id,
+            document={"settings": settings.dict(exclude_none=True)},
+            partial_update=True,
+        )
+        return settings
+
+    def load_settings(
+        self, dataset: DatasetDB, as_class: Type[SettingsDB]
+    ) -> Optional[SettingsDB]:
+        doc = self._es.get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+        if doc:
+            settings = self.__get_doc_field__(doc, field="settings")
+            return as_class.parse_obj(settings) if settings else None
+
+    def delete_settings(self, dataset: DatasetDB):
+        self._es.update_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=dataset.id,
+            script='ctx._source.remove("settings")',
+            partial_update=True,
+        )
+
+    def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
+        return doc["_source"].get(field)

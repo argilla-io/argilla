@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
+from rubrix.server.apis.v0.handlers import text_classification_dataset_settings
 from rubrix.server.apis.v0.helpers import takeuntil
 from rubrix.server.apis.v0.models.commons.model import (
     BulkResponse,
@@ -515,3 +516,6 @@ async def update_rule(
         description=update.description,
     )
     return rule
+
+
+text_classification_dataset_settings.configure_router(router)

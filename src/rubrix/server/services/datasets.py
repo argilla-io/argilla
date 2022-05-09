@@ -20,7 +20,7 @@ from fastapi import Depends
 
 from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
-from rubrix.server.daos.datasets import BaseDatasetDB, DatasetsDAO
+from rubrix.server.daos.datasets import BaseDatasetDB, DatasetsDAO, SettingsDB
 from rubrix.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -30,6 +30,10 @@ from rubrix.server.errors import (
 from rubrix.server.security.model import User
 
 Dataset = TypeVar("Dataset", bound=DatasetDB)
+
+
+class SVCDatasetSettings(SettingsDB):
+    pass
 
 
 class DatasetsService:
@@ -218,3 +222,52 @@ class DatasetsService:
         workspaces = self.__dao__.get_all_workspaces()
         # include the non-workspace workspace?
         return workspaces
+
+    async def get_settings(
+        self, user: User, dataset: Dataset, class_type: Type[SVCDatasetSettings]
+    ) -> SVCDatasetSettings:
+        """
+        Get the configured settings for dataset
+
+        Args:
+            user: the connected user
+            dataset: the target dataset
+            class_type: the settings class
+
+        Returns:
+            An instance of class_type settings configured for provided dataset
+
+        """
+        settings = self.__dao__.load_settings(dataset=dataset, as_class=class_type)
+        if not settings:
+            raise EntityNotFoundError(name=dataset.name, type=class_type)
+        return class_type.parse_obj(settings.dict())
+
+    async def save_settings(
+        self, user: User, dataset: Dataset, settings: SVCDatasetSettings
+    ) -> SVCDatasetSettings:
+        """
+        Save a set of settings for a dataset
+
+        Args:
+            user: The user executing the command
+            dataset: The dataset
+            settings: The dataset settings
+
+        Returns:
+            Stored dataset settings
+
+        """
+        self.__dao__.save_settings(dataset=dataset, settings=settings)
+        return settings
+
+    async def delete_settings(self, user: User, dataset: Dataset) -> None:
+        """
+        Deletes the dataset settings
+
+        Args:
+            user: The user executing the command
+            dataset:  The dataset
+
+        """
+        self.__dao__.delete_settings(dataset=dataset)
