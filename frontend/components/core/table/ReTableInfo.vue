@@ -39,8 +39,8 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                <span>{{ column.name }}</span>
                 <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
+                <span>{{ column.name }}</span>
               </button>
             </div>
           </div>
@@ -481,9 +481,6 @@ export default {
       span {
         white-space: nowrap;
       }
-      .svg-icon {
-        margin-left: 5px;
-      }
     }
   }
   &__body {
@@ -515,7 +512,7 @@ export default {
       }
     }
     .svg-icon {
-      margin-right: 1em;
+      margin-right: 0.5em;
       fill: $font-medium-color;
     }
   }

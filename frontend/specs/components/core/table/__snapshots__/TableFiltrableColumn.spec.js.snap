@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TableFiltrableColumn renders properly 1`] = `
-<div class="filter__container"><button class="">
-    Workspace
-    <svg version="1.1" viewBox="0 0 15 11" class="svg-icon svg-fill">
+<div class="filter__container"><button class=""><svg version="1.1" viewBox="0 0 15 11" class="svg-icon svg-fill">
       <path fill="#4C4EA3" stroke="none" pid="0" d="M.008.008v1.769h14.15V.008H.008zm2.527 6.064h9.096V4.304H2.535v1.768zm2.527 4.296h4.042V8.599H5.062v1.769z" _fill="#0508D9" fill-rule="nonzero"></path>
-    </svg></button>
+    </svg>
+    Workspace
+  </button>
   <!---->
 </div>
 `;
