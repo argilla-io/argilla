@@ -67,7 +67,7 @@ def list_datasets(
 
 
 @router.post(
-    "/",
+    "",
     response_model=Dataset,
     response_model_exclude_none=True,
     operation_id="create_dataset",
