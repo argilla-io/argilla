@@ -244,31 +244,13 @@ class filters:
         if text_query is None:
             return filters.match_all()
         return filters.boolean_filter(
-            should_filters=[
-                {
-                    "query_string": {
-                        "default_field": EsRecordDataFieldNames.words,
-                        "default_operator": "AND",
-                        "query": text_query,
-                        "boost": "2.0",
-                    }
-                },
-                {
-                    "query_string": {
-                        "default_field": f"{EsRecordDataFieldNames.words}.extended",
-                        "default_operator": "AND",
-                        "query": text_query,
-                    }
-                },
-                {
-                    "query_string": {
-                        "default_field": "text",
-                        "default_operator": "AND",
-                        "query": text_query,
-                    }
-                },
-            ],
-            minimum_should_match="30%",
+            must_query={
+                "query_string": {
+                    "default_field": "text",
+                    "default_operator": "AND",
+                    "query": text_query,
+                }
+            },
         )
 
     @staticmethod
@@ -437,7 +419,7 @@ class aggregations:
         return {
             "words": {
                 "terms": {
-                    "field": EsRecordDataFieldNames.words,
+                    "field": "text.wordcloud",
                     "size": size,
                     "order": {"_count": "desc"},
                 }
