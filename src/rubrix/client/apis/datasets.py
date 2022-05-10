@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Set, Union
 
 from pydantic import BaseModel, Field
 
-from rubrix.client.apis.base import AbstractApi, api_compatibility_check
+from rubrix.client.apis.base import AbstractApi, api_compatibility
 from rubrix.client.sdk.commons.errors import NotFoundApiError
 from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.client.sdk.datasets.models import TaskType
@@ -80,7 +80,7 @@ class Datasets(AbstractApi):
 
     _API_PREFIX = "/api/datasets"
 
-    __SETTINGS_MIN_API_VERSION__ = "0.15.0"
+    __SETTINGS_MIN_API_VERSION__ = (0, 15, 0)
 
     class _DatasetApiModel(BaseModel):
         name: str
@@ -99,7 +99,6 @@ class Datasets(AbstractApi):
         dataset = get_dataset(self.__client__, name=name).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
-    @api_compatibility_check(min_version=__SETTINGS_MIN_API_VERSION__)
     def create(self, name: str, settings: Settings):
         task = (
             TaskType.text_classification
@@ -107,23 +106,22 @@ class Datasets(AbstractApi):
             else TaskType.token_classification
         )
 
-        dataset = self._DatasetApiModel(name=name, task=task)
-        self.__client__.post(f"{self._API_PREFIX}/", json=dataset.dict())
-        self.save_settings(dataset, settings=settings)
+        with api_compatibility(min_version=self.__SETTINGS_MIN_API_VERSION__):
+            dataset = self._DatasetApiModel(name=name, task=task)
+            self.__client__.post(f"{self._API_PREFIX}", json=dataset.dict())
+            self.save_settings(dataset, settings=settings)
 
-    @api_compatibility_check(min_version=__SETTINGS_MIN_API_VERSION__)
     def save_settings(self, dataset: _DatasetApiModel, settings: Settings):
         settings_ = self._SettingsApiModel(
             labels_schema={"labels": [label for label in settings.labels_schema]}
         )
 
-        # TODO: use the api compatiblity check as a with block (passing the abstract api and the minimal version
-        self.__client__.put(
-            f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
-            json=settings_.dict(),
-        )
+        with api_compatibility(min_version=self.__SETTINGS_MIN_API_VERSION__):
+            self.__client__.put(
+                f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
+                json=settings_.dict(),
+            )
 
-    @api_compatibility_check(min_version=__SETTINGS_MIN_API_VERSION__)
     def load_settings(self, name: str) -> Optional[Settings]:
         """
         Load the dataset settings
