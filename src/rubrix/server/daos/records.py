@@ -308,7 +308,7 @@ class DatasetRecordsDAO:
         """
         search = search or RecordSearch()
         es_query = {
-            "query": search.query,
+            "query": search.query or {"match_all": {}},
             "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
         docs = self._es.list_documents(

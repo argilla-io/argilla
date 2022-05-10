@@ -40,6 +40,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
     UpdateLabelingRule,
 )
+from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -59,7 +60,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
     response_model=BulkResponse,
     response_model_exclude_none=True,
 )
-def bulk_records(
+async def bulk_records(
     name: str,
     bulk: TextClassificationBulkData,
     common_params: CommonTaskQueryParams = Depends(),
@@ -67,6 +68,7 @@ def bulk_records(
         TextClassificationService.get_instance
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
+    validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
     """
@@ -84,6 +86,8 @@ def bulk_records(
         the Service
     datasets:
         The dataset service
+    validator:
+        The dataset validator component
     current_user:
         Current request user
 
@@ -116,6 +120,10 @@ def bulk_records(
         datasets.create_dataset(
             user=current_user, dataset=dataset, mappings=task_mappings
         )
+
+    await validator.validate_dataset_records(
+        user=current_user, dataset=dataset, records=bulk.records
+    )
 
     result = service.add_records(
         dataset=dataset,
