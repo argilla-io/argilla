@@ -4,7 +4,7 @@ from rubrix.server.apis.v0.models.commons.model import TaskType
 
 def create_dataset(client, name: str):
     response = client.post(
-        "/api/datasets/", json={"name": name, "task": TaskType.text_classification}
+        "/api/datasets", json={"name": name, "task": TaskType.text_classification}
     )
     assert response.status_code == 200
 
