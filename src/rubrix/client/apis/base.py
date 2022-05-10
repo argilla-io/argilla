@@ -2,7 +2,10 @@ from types import TracebackType
 from typing import Optional, Tuple, Type
 
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.errors import ApiCompatibilityError, GenericApiError
+from rubrix.client.sdk.commons.errors import (
+    ApiCompatibilityError,
+    MethodNotAllowedApiError,
+)
 
 
 class AbstractApi:
@@ -27,13 +30,12 @@ class _ApiCompatibilityContextManager:
         if not exc_val:
             return
 
-        if isinstance(exc_val, GenericApiError):
-            response = exc_val.ctx.get("response")
-            if "Method Not Allowed" == response:
-                raise ApiCompatibilityError(
-                    ".".join(map(str, self._min_version))
-                ) from exc_val
-            raise exc_val
+        if exc_type == MethodNotAllowedApiError:
+            raise ApiCompatibilityError(
+                ".".join(map(str, self._min_version))
+            ) from exc_val
+
+        raise exc_val
 
 
 def api_compatibility(

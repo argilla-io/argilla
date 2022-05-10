@@ -71,5 +71,9 @@ class AlreadyExistsApiError(RubrixApiResponseError):
     HTTP_STATUS = 409
 
 
+class MethodNotAllowedApiError(RubrixApiResponseError):
+    HTTP_STATUS = 405
+
+
 class GenericApiError(RubrixApiResponseError):
     HTTP_STATUS = 500
