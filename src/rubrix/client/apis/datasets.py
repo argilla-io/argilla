@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Set, Union
 
 from pydantic import BaseModel, Field
 
-from rubrix.client.apis.base import AbstractApi, api_compatibility
+from rubrix.client.apis import AbstractApi, api_compatibility
 from rubrix.client.sdk.commons.errors import NotFoundApiError
 from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.client.sdk.datasets.models import TaskType
@@ -80,7 +80,7 @@ class Datasets(AbstractApi):
 
     _API_PREFIX = "/api/datasets"
 
-    __SETTINGS_MIN_API_VERSION__ = (0, 15, 0)
+    __SETTINGS_MIN_API_VERSION__ = "0.15"
 
     class _DatasetApiModel(BaseModel):
         name: str
@@ -106,7 +106,7 @@ class Datasets(AbstractApi):
             else TaskType.token_classification
         )
 
-        with api_compatibility(min_version=self.__SETTINGS_MIN_API_VERSION__):
+        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
             dataset = self._DatasetApiModel(name=name, task=task)
             self.__client__.post(f"{self._API_PREFIX}", json=dataset.dict())
             self.save_settings(dataset, settings=settings)
@@ -116,7 +116,7 @@ class Datasets(AbstractApi):
             labels_schema={"labels": [label for label in settings.labels_schema]}
         )
 
-        with api_compatibility(min_version=self.__SETTINGS_MIN_API_VERSION__):
+        with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
             self.__client__.put(
                 f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings",
                 json=settings_.dict(),
@@ -134,9 +134,10 @@ class Datasets(AbstractApi):
         """
         dataset = self.find_by_name(name)
         try:
-            response = self.__client__.get(
-                f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings"
-            )
-            return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
+            with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
+                response = self.__client__.get(
+                    f"{self._API_PREFIX}/{dataset.task}/{dataset.name}/settings"
+                )
+                return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None

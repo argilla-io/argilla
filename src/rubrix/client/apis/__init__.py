@@ -1,1 +1,2 @@
-from .base import AbstractApi, api_compatibility
+from .base import AbstractApi
+from .status import api_compatibility
