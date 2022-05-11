@@ -32,17 +32,17 @@ class LabelsSchemaSettings(_AbstractSettings):
     A base dataset settings class for labels schema management
 
     Args:
-        labels_schema: The label's schema for the dataset
+        label_schema: The label's schema for the dataset
 
     """
 
-    labels_schema: Set[str]
+    label_schema: Set[str]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
-        labels_schema = data.get("labels_schema", {})
-        labels = {label["name"] for label in labels_schema.get("labels", [])}
-        return cls(labels_schema=labels)
+        label_schema = data.get("label_schema", {})
+        labels = {label["name"] for label in label_schema.get("labels", [])}
+        return cls(label_schema=labels)
 
 
 @dataclass
@@ -51,7 +51,7 @@ class TextClassificationSettings(LabelsSchemaSettings):
     The settings for text classification datasets
 
     Args:
-        labels_schema: The label's schema for the dataset
+        label_schema: The label's schema for the dataset
 
     """
 
@@ -62,7 +62,7 @@ class TokenClassificationSettings(LabelsSchemaSettings):
     The settings for token classification datasets
 
     Args:
-        labels_schema: The label's schema for the dataset
+        label_schema: The label's schema for the dataset
 
     """
 
@@ -93,7 +93,7 @@ class Datasets(AbstractApi):
         metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class _SettingsApiModel(BaseModel):
-        labels_schema: Dict[str, Any]
+        label_schema: Dict[str, Any]
 
     def find_by_name(self, name: str) -> _DatasetApiModel:
         dataset = get_dataset(self.__client__, name=name).parsed
@@ -135,7 +135,7 @@ class Datasets(AbstractApi):
             )
 
         settings_ = self._SettingsApiModel(
-            labels_schema={"labels": [label for label in settings.labels_schema]}
+            label_schema={"labels": [label for label in settings.label_schema]}
         )
 
         with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):

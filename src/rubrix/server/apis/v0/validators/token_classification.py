@@ -44,7 +44,7 @@ class DatasetValidator:
     async def validate_dataset_settings(
         self, user: User, dataset: Dataset, settings: TokenClassificationSettings
     ):
-        if settings and settings.labels_schema:
+        if settings and settings.label_schema:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
                 metric=DatasetLabels(),
@@ -53,11 +53,11 @@ class DatasetValidator:
             )
             if results:
                 labels = results.get("labels", [])
-                labels_schema = set(
-                    [label.name for label in settings.labels_schema.labels]
+                label_schema = set(
+                    [label.name for label in settings.label_schema.labels]
                 )
                 for label in labels:
-                    if label not in labels_schema:
+                    if label not in label_schema:
                         raise BadRequestError(
                             f"The label {label} was found in the dataset but not in provided labels schema. "
                             "\nPlease, provide a valid labels schema according to stored records in the dataset"
@@ -75,27 +75,27 @@ class DatasetValidator:
                     user=user, dataset=dataset, class_type=__svc_settings_class__
                 )
             )
-            if settings and settings.labels_schema:
-                labels_schema = set(
-                    [label.name for label in settings.labels_schema.labels]
+            if settings and settings.label_schema:
+                label_schema = set(
+                    [label.name for label in settings.label_schema.labels]
                 )
 
                 for r in records:
                     if r.prediction:
-                        self.__check_label_entities__(labels_schema, r.prediction)
+                        self.__check_label_entities__(label_schema, r.prediction)
                     if r.annotation:
-                        self.__check_label_entities__(labels_schema, r.annotation)
+                        self.__check_label_entities__(label_schema, r.annotation)
         except EntityNotFoundError:
             pass
 
     @staticmethod
     def __check_label_entities__(
-        labels_schema: Set[str], annotation: TokenClassificationAnnotation
+        label_schema: Set[str], annotation: TokenClassificationAnnotation
     ):
         if not annotation:
             return
         for entity in annotation.entities:
-            if entity.label not in labels_schema:
+            if entity.label not in label_schema:
                 raise BadRequestError(
                     detail=f"Provided records contain the {entity.label} label,"
                     " that is not included in the labels schema."

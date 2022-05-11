@@ -25,7 +25,7 @@ def test_create_dataset_settings(mocked_client):
 def create_settings(mocked_client, name):
     response = mocked_client.put(
         f"/api/datasets/{TaskType.token_classification}/{name}/settings",
-        json={"labels_schema": {"labels": ["Label1", "Label2"]}},
+        json={"label_schema": {"labels": ["Label1", "Label2"]}},
     )
     return response
 
