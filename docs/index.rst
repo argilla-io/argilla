@@ -178,6 +178,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/monitoring
    guides/metrics
    guides/datasets
+   guides/dataset_settings
    guides/queries
 
 .. toctree::
