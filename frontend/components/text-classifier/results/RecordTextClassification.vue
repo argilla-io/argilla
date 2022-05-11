@@ -90,7 +90,9 @@ export default {
         this.dataset.labels.length === 2 && !this.dataset.isMultiLabel;
       return (
         this.record.status !== "Validated" &&
-        !isBinary &&
+        (!isBinary ||
+          (isBinary && this.record.annotation) ||
+          this.record.prediction) &&
         (this.record.annotation ||
           this.record.prediction ||
           this.dataset.isMultiLabel)
