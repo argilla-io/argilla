@@ -25,7 +25,7 @@
     >
       <slot />
     </label>
-    <div class="checkbox-container" tabindex="0" @click.stop="toggleCheck">
+    <div class="checkbox-container" tabindex="0" @click="toggleCheck">
       <input
         :id="id"
         type="checkbox"
