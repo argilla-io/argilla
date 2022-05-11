@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Set, Union
 from pydantic import BaseModel, Field
 
 from rubrix.client.apis import AbstractApi, api_compatibility
-from rubrix.client.sdk.commons.errors import NotFoundApiError
+from rubrix.client.sdk.commons.errors import AlreadyExistsApiError, NotFoundApiError
 from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.client.sdk.datasets.models import TaskType
 
@@ -109,9 +109,31 @@ class Datasets(AbstractApi):
         with api_compatibility(self, min_version=self.__SETTINGS_MIN_API_VERSION__):
             dataset = self._DatasetApiModel(name=name, task=task)
             self.__client__.post(f"{self._API_PREFIX}", json=dataset.dict())
-            self.save_settings(dataset, settings=settings)
+            self.__save_settings__(dataset, settings=settings)
 
-    def save_settings(self, dataset: _DatasetApiModel, settings: Settings):
+    def configure(self, name: str, settings: Settings):
+        """
+        Configures dataset settings. If dataset does not exist, a new one will be created.
+        Pass only settings that want to configure
+
+        Args:
+            name: The dataset name
+            settings: The dataset settings
+        """
+        try:
+            self.create(name=name, settings=settings)
+        except AlreadyExistsApiError:
+            ds = self.find_by_name(name)
+            self.__save_settings__(dataset=ds, settings=settings)
+
+    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
+
+        if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
+            raise ValueError(
+                f"The provided settings type {type(settings)} cannot be applied to dataset."
+                " Task type mismatch"
+            )
+
         settings_ = self._SettingsApiModel(
             labels_schema={"labels": [label for label in settings.labels_schema]}
         )

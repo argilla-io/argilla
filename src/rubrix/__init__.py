@@ -55,7 +55,7 @@ if _TYPE_CHECKING:
     from rubrix.datasets import (
         TextClassificationSettings,
         TokenClassificationSettings,
-        create_dataset,
+        configure_dataset,
     )
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
@@ -86,7 +86,7 @@ _import_structure = {
     ],
     "monitoring.model_monitor": ["monitor"],
     "datasets": [
-        "create_dataset",
+        "configure_dataset",
         "TextClassificationSettings",
         "TokenClassificationSettings",
     ],

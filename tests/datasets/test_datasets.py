@@ -22,7 +22,7 @@ from rubrix.client.sdk.commons.errors import AlreadyExistsApiError
 def test_settings_workflow(mocked_client, settings_, wrong_settings):
     dataset = "test-dataset"
     rb.delete(dataset)
-    rb.create_dataset(dataset, settings=settings_)
+    rb.configure_dataset(dataset, settings=settings_)
 
     current_api = api.active_api()
     datasets_api = current_api.datasets
@@ -30,8 +30,11 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
     found_settings = datasets_api.load_settings(dataset)
     assert found_settings == settings_
 
-    with pytest.raises(AlreadyExistsApiError):
-        rb.create_dataset(dataset, settings_)
+    settings_.labels_schema = {"LALALA"}
+    rb.configure_dataset(dataset, settings_)
 
-    with pytest.raises(AlreadyExistsApiError):
-        rb.create_dataset(dataset, wrong_settings)
+    found_settings = datasets_api.load_settings(dataset)
+    assert found_settings == settings_
+
+    with pytest.raises(ValueError, match="Task type mismatch"):
+        rb.configure_dataset(dataset, wrong_settings)

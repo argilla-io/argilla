@@ -8,9 +8,12 @@ from rubrix.client.apis.datasets import (
 __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 
 
-def create_dataset(name: str, settings: Settings) -> None:
+def configure_dataset(name: str, settings: Settings) -> None:
     """
-    Creates a new with a set of configured labels
+    Configures a dataset with a set of configured labels. If dataset does not
+    exist yet, an empty dataset will be created.
+
+    A subset of settings can be provided.
 
     Args:
         name: The dataset name
@@ -18,4 +21,4 @@ def create_dataset(name: str, settings: Settings) -> None:
     """
     active_api = api.active_api()
     datasets = active_api.datasets
-    datasets.create(name, settings=settings)
+    datasets.configure(name, settings=settings)
