@@ -10,12 +10,12 @@ from rubrix.client.sdk.commons.errors import AlreadyExistsApiError
     ("settings_", "wrong_settings"),
     [
         (
-            TextClassificationSettings(labels_schema={"A", "B"}),
-            TokenClassificationSettings(labels_schema={"PER", "ORG"}),
+            TextClassificationSettings(label_schema={"A", "B"}),
+            TokenClassificationSettings(label_schema={"PER", "ORG"}),
         ),
         (
-            TokenClassificationSettings(labels_schema={"PER", "ORG"}),
-            TextClassificationSettings(labels_schema={"A", "B"}),
+            TokenClassificationSettings(label_schema={"PER", "ORG"}),
+            TextClassificationSettings(label_schema={"A", "B"}),
         ),
     ],
 )
@@ -30,7 +30,7 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
     found_settings = datasets_api.load_settings(dataset)
     assert found_settings == settings_
 
-    settings_.labels_schema = {"LALALA"}
+    settings_.label_schema = {"LALALA"}
     rb.configure_dataset(dataset, settings_)
 
     found_settings = datasets_api.load_settings(dataset)
