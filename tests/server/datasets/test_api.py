@@ -43,7 +43,7 @@ def test_create_dataset(mocked_client):
         metadata={"config": {"the": "config"}},
     )
     response = mocked_client.post(
-        "/api/datasets/",
+        "/api/datasets",
         json=request,
     )
     assert response.status_code == 200
@@ -56,7 +56,7 @@ def test_create_dataset(mocked_client):
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
-        "/api/datasets/",
+        "/api/datasets",
         json=request,
     )
     assert response.status_code == 409

@@ -52,6 +52,11 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from rubrix.datasets import (
+        TextClassificationSettings,
+        TokenClassificationSettings,
+        configure_dataset,
+    )
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
 
@@ -80,6 +85,11 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
+    "datasets": [
+        "configure_dataset",
+        "TextClassificationSettings",
+        "TokenClassificationSettings",
+    ],
     "server.app": ["app"],
 }
 

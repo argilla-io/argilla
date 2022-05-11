@@ -29,7 +29,7 @@ class LabelsSchema(BaseModel):
 
 
 class WithLabelsSchemaSettings(AbstractDatasetSettings):
-    labels_schema: Optional[LabelsSchema] = Field(
+    label_schema: Optional[LabelsSchema] = Field(
         None, description="The dataset labels schema"
     )
 

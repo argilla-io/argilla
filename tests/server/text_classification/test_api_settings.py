@@ -4,7 +4,7 @@ from rubrix.server.apis.v0.models.commons.model import TaskType
 
 def create_dataset(client, name: str):
     response = client.post(
-        "/api/datasets/", json={"name": name, "task": TaskType.text_classification}
+        "/api/datasets", json={"name": name, "task": TaskType.text_classification}
     )
     assert response.status_code == 200
 
@@ -25,7 +25,7 @@ def test_create_dataset_settings(mocked_client):
 def create_settings(mocked_client, name):
     response = mocked_client.put(
         f"/api/datasets/{TaskType.text_classification}/{name}/settings",
-        json={"labels_schema": {"labels": ["Label1", "Label2"]}},
+        json={"label_schema": {"labels": ["Label1", "Label2"]}},
     )
     return response
 

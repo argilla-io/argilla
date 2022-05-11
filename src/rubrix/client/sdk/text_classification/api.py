@@ -16,12 +16,9 @@ from typing import List, Optional, Union
 
 import httpx
 
+from rubrix.client.sdk._helpers import build_typed_response
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import (
-    build_data_response,
-    build_list_response,
-    build_typed_response,
-)
+from rubrix.client.sdk.commons.api import build_data_response, build_list_response
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.text_classification.models import (
     LabelingRule,
