@@ -527,10 +527,9 @@ class WeakLabels(WeakLabelsBase):
         self._extended_matrix = extended_matrix
         self._extension_queries = (dists, nearest)
 
-        if not mix:
-            for idx, row in enumerate(self._matrix):
-                if not all([x == none_label_int for x in row]):
-                    self._extended_matrix[idx] = self._matrix[idx]
+        for idx, row in enumerate(self._matrix):
+            if not all([x == none_label_int for x in row]):
+                self._extended_matrix[idx] = self._matrix[idx]
 
     def annotation(
         self,
