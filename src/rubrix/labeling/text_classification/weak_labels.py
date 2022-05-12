@@ -459,7 +459,7 @@ class WeakLabels(WeakLabelsBase):
         return dists, nearest
 
     def extend_matrix(
-        self, thresholds, embeddings: Optional[np.ndarray] = None, gpu=False, mix=False
+        self, thresholds: np.ndarray, embeddings: Optional[np.ndarray] = None, gpu: bool= False
     ):
         """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
            Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
