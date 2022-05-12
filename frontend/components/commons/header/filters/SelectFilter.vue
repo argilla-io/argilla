@@ -159,11 +159,14 @@ export default {
       this.selectedOptions = this.appliedFilters;
     },
     filterOptions(options, text) {
+      const sortedOptions = Object.fromEntries(
+        Object.entries(options).sort(([, a], [, b]) => b - a)
+      );
       if (text === undefined) {
-        return options;
+        return sortedOptions;
       }
       let filtered = Object.fromEntries(
-        Object.entries(options).filter(([id]) =>
+        Object.entries(sortedOptions).filter(([id]) =>
           id.toLowerCase().match(text.toLowerCase())
         )
       );
