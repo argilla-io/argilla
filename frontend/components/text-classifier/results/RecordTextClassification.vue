@@ -86,11 +86,8 @@ export default {
       return this.dataset.viewSettings.viewMode === "labelling-rules";
     },
     allowValidate() {
-      const isBinary =
-        this.dataset.labels.length === 2 && !this.dataset.isMultiLabel;
       return (
         this.record.status !== "Validated" &&
-        !isBinary &&
         (this.record.annotation ||
           this.record.prediction ||
           this.dataset.isMultiLabel)
