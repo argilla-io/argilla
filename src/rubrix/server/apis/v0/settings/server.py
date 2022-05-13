@@ -120,7 +120,7 @@ class ApiSettings(BaseSettings):
         fields = {
             "elasticsearch_ca_path": {
                 "env": "RUBRIX_ELASTICSEARCH_CA_PATH",
-            }
+            },
             "elasticsearch_ssl_verify": {
                 "env": "RUBRIX_ELASTICSEARCH_SSL_VERIFY",
             },
