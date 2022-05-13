@@ -68,6 +68,7 @@ class ElasticsearchWrapper(LoggingMixin):
             es_client = OpenSearch(
                 hosts=settings.elasticsearch,
                 verify_certs=settings.elasticsearch_ssl_verify,
+                ca_certs=settings.elasticsearch_ca_path,
                 # Extra args to es configuration -> TODO: extensible by settings
                 retry_on_timeout=True,
                 max_retries=5,
