@@ -131,6 +131,7 @@ label {
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
+  @extend %hide-scrollbar;
 }
 .records-number {
   margin-right: 0;

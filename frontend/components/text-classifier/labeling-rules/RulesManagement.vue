@@ -238,6 +238,7 @@ export default {
   margin-bottom: 2em;
   overflow: auto;
   height: 100vh;
+  @extend %hide-scrollbar;
   &__container {
     padding: 20px 20px 50px 20px;
     background: rgba($lighter-color, 0.4);
