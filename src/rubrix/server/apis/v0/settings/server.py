@@ -60,7 +60,7 @@ class ApiSettings(BaseSettings):
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
-    elasticsearch_ca_path: str
+    elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
