@@ -17,7 +17,7 @@
 Common environment vars / settings
 """
 import logging
-from typing import List
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseSettings, Field, validator
