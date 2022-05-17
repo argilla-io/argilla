@@ -459,7 +459,10 @@ class WeakLabels(WeakLabelsBase):
         return dists, nearest
 
     def extend_matrix(
-        self, thresholds: np.ndarray, embeddings: Optional[np.ndarray] = None, gpu: bool = False
+        self,
+        thresholds: np.ndarray,
+        embeddings: Optional[np.ndarray] = None,
+        gpu: bool = False,
     ):
         """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
            Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
@@ -467,14 +470,14 @@ class WeakLabels(WeakLabelsBase):
         Args:
             embeddings: Embeddings for each row of the weak labels matrix.
             thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
-                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended. 
+                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
             gpu: If True, perform FAISS similarity queries on GPU.
-        
+
         Examples:
             >>> # Choose any model to generate the embeddings.
             >>> from sentence_transformers import SentenceTransformer
             >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
-            >>> 
+            >>>
             >>> # Generate the embeddings and set the thresholds.
             >>> weak_labels = WeakLabels(dataset="my_dataset")
             >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
@@ -482,7 +485,7 @@ class WeakLabels(WeakLabelsBase):
             >>>
             >>> # Extend the weak labels matrix.
             >>> weak_labels.extend_matrix(thresholds, embeddings)
-            >>> 
+            >>>
             >>> # Calling the method below will now retrieve the extended matrix.
             >>> weak_labels.matrix()
             >>>
@@ -514,7 +517,7 @@ class WeakLabels(WeakLabelsBase):
             nearest = self._extension_queries[1]
         else:
             raise NotImplementedError(
-                "Embeddings are not optional on the first time a matrix is extended."
+                "Embeddings are not optional the first time a matrix is extended."
             )
 
         extended_matrix = np.copy(self._matrix)
