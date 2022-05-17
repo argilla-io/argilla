@@ -58,19 +58,19 @@
         />
         <ul>
           <li
-            v-for="(recordsCounter, optionName) in filterOptions(
+            v-for="[option, counter] in filterOptions(
               filter.options,
               searchText
             )"
-            :key="optionName.index"
+            :key="option"
           >
             <ReCheckbox
-              :id="optionName"
+              :id="option"
               v-model="selectedOptions"
               class="re-checkbox--dark"
-              :value="optionName"
+              :value="option"
             >
-              {{ optionName }} ({{ recordsCounter | formatNumber }})
+              {{ option }} ({{ counter | formatNumber }})
             </ReCheckbox>
           </li>
           <li
@@ -159,16 +159,12 @@ export default {
       this.selectedOptions = this.appliedFilters;
     },
     filterOptions(options, text) {
-      const sortedOptions = Object.fromEntries(
-        Object.entries(options).sort(([, a], [, b]) => b - a)
-      );
+      const sortedOptions = Object.entries(options).sort((a, b) => b[1] - a[1]);
       if (text === undefined) {
         return sortedOptions;
       }
-      let filtered = Object.fromEntries(
-        Object.entries(sortedOptions).filter(([id]) =>
-          id.toLowerCase().match(text.toLowerCase())
-        )
+      let filtered = sortedOptions.filter(([id]) =>
+        id.toLowerCase().match(text.toLowerCase())
       );
       return filtered;
     },
