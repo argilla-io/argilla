@@ -128,21 +128,6 @@ class TextClassificationDataset extends ObservationDataset {
     return entity.find(this.id);
   }
 
-  async _getDatasetSettings() {
-    const { response } = await TextClassificationDataset.api().get(
-      `/datasets/${this.task}/${this.name}/settings`,
-      {
-        validateStatus: function (status) {
-          return status === 404 || (status >= 200 && status < 300);
-        },
-      }
-    );
-    if (response.status === 404) {
-      return undefined;
-    }
-    return response.data;
-  }
-
   async _getRule({ query }) {
     const { response } = await TextClassificationDataset.api().get(
       `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
@@ -294,6 +279,10 @@ class TextClassificationDataset extends ObservationDataset {
   get labels() {
     const predefinedLabels =
       this.settings.label_schema && this.settings.label_schema.labels;
+
+    if (predefinedLabels) {
+      return predefinedLabels.map((l) => l.id).sort();
+    }
     const { labels } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
     const aggregations = this.globalResults.aggregations;
     const label2str = (label) => label.class;
@@ -318,9 +307,7 @@ class TextClassificationDataset extends ObservationDataset {
       ),
     ];
     uniqueLabels.sort();
-    const sortedPredefinedLabels =
-      predefinedLabels && predefinedLabels.map((l) => l.id).sort();
-    return sortedPredefinedLabels || uniqueLabels;
+    return uniqueLabels;
   }
 
   get labelingRulesMetrics() {
