@@ -124,7 +124,7 @@ export default {
     labels() {
       const labelsInRules =
         this.dataset.rules.flatMap((rule) => rule.labels) || [];
-      const availableLabels = this.dataset._labels.map((label) => {
+      const availableLabels = this.dataset.labels.map((label) => {
         return {
           label: label,
           counter: labelsInRules.filter((l) => l === label).length || 0,

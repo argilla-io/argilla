@@ -78,6 +78,7 @@ class TextClassificationDataset extends ObservationDataset {
   static fields() {
     return {
       ...super.fields(),
+      settings: this.attr({}),
       _labels: this.attr([]),
       // Search fields
       query: this.attr({}, (data) => {
@@ -105,6 +106,7 @@ class TextClassificationDataset extends ObservationDataset {
   };
 
   async initialize() {
+    const settings = await this._getDatasetSettings();
     const { labels } = await this.fetchMetricSummary("dataset_labels");
     const entity = this.getTaskDatasetClass();
     const isMultiLabel = this.results.records.some((r) => r.multi_label);
@@ -115,6 +117,7 @@ class TextClassificationDataset extends ObservationDataset {
           owner: this.owner,
           name: this.name,
           _labels: labels,
+          settings,
           isMultiLabel,
         },
       ],
@@ -123,6 +126,21 @@ class TextClassificationDataset extends ObservationDataset {
       await this.refreshRules();
     }
     return entity.find(this.id);
+  }
+
+  async _getDatasetSettings() {
+    const { response } = await TextClassificationDataset.api().get(
+      `/datasets/${this.task}/${this.name}/settings`,
+      {
+        validateStatus: function (status) {
+          return status === 404 || (status >= 200 && status < 300);
+        },
+      }
+    );
+    if (response.status === 404) {
+      return undefined;
+    }
+    return response.data;
   }
 
   async _getRule({ query }) {
@@ -274,6 +292,8 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   get labels() {
+    const predefinedLabels =
+      this.settings.label_schema && this.settings.label_schema.labels;
     const { labels } = (this.metadata || {})[USER_DATA_METADATA_KEY] || {};
     const aggregations = this.globalResults.aggregations;
     const label2str = (label) => label.class;
@@ -297,9 +317,10 @@ class TextClassificationDataset extends ObservationDataset {
           .concat(Object.keys(aggregations.predicted_as))
       ),
     ];
-
     uniqueLabels.sort();
-    return uniqueLabels;
+    const sortedPredefinedLabels =
+      predefinedLabels && predefinedLabels.map((l) => l.id).sort();
+    return sortedPredefinedLabels || uniqueLabels;
   }
 
   get labelingRulesMetrics() {
