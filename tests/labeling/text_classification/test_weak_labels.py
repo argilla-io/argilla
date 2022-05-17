@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import sys
 from typing import Callable, List, Optional, Union
 
 import numpy as np
@@ -536,6 +537,54 @@ class TestWeakLabels:
         weak_labels.change_mapping(old_mapping)
 
         assert (weak_labels.matrix() == old_wlm).all()
+
+    @pytest.fixture
+    def weak_labels(self, monkeypatch, rules):
+        def mock_load(*args, **kwargs):
+            return [TextClassificationRecord(inputs="test", id=i) for i in range(3)]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+
+        def mock_apply(self, *args, **kwargs):
+            weak_label_matrix = np.array(
+                [[0, -1, -1], [-1, 1, -1], [-1, -1, -1]],
+                dtype=np.short,
+            )
+            annotation_array = np.array([0, 1, -1], dtype=np.short)
+            label2int = {None: -1, "negative": 0, "positive": 1}
+            return weak_label_matrix, annotation_array, label2int
+
+        monkeypatch.setattr(WeakLabels, "_apply_rules", mock_apply)
+
+        return WeakLabels(rules=rules, dataset="mock")
+
+    def test_faiss_not_installed(self, monkeypatch, weak_labels):
+        monkeypatch.setitem(sys.modules, "faiss", None)
+        with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
+            weak_labels._find_dists_and_nearest(None, None, None, None)
+
+    def test_extend_matrix(self, weak_labels):
+        with pytest.raises(
+            NotImplementedError,
+            match="Embeddings are not optional the first time a matrix is extended.",
+        ):
+            weak_labels.extend_matrix([1.0, 0.5, 0.5])
+
+        weak_labels.extend_matrix(
+            [1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]])
+        )
+
+        np.testing.assert_equal(
+            weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, 1, -1]])
+        )
+
+        weak_labels.extend_matrix([1.0, 1.0, 1.0])
+
+        np.testing.assert_equal(
+            weak_labels.matrix(), np.array([[0, -1, -1], [-1, 1, -1], [-1, -1, -1]])
+        )
 
 
 class TestWeakMultiLabels:
