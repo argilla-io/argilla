@@ -2,18 +2,33 @@
 requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+license = "Apache-2.0"
+authors = [
+    "recognai <contact@recogn.ai",
+]
+maintainers = [
+    "recognai <contact@recogn.ai>",
+]
+
+
 [project]
 name = "rubrix"
-dynamic = [
-    "keywords",
-    "authors",
-    "maintainers",
-    "license",
-    "requires-python",
-    "version",
-    "description",
-    "readme",
+description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = [
+    "data-science",
+    "natural-language-processing",
+    "text-labeling",
+    "data-annotation",
+    "artificial-intelligence",
+    "knowledged-graph",
+    "developers-tools",
+    "human-in-the-loop",
+    "mlops"
 ]
+
+dynamic = [ "version"]
 dependencies = [
     # Client
     "httpx ~= 0.15.0",
