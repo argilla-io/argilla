@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,7 +14,6 @@ dynamic = [
     "description",
     "readme",
 ]
-
 dependencies = [
     # Client
     "httpx ~= 0.15.0",
