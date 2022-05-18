@@ -108,7 +108,7 @@ async function _loadTaskDataset(dataset) {
   if (total === undefined || aggregations === undefined) {
     const globalResults = await _querySearch({
       dataset: _dataset,
-      query: {},
+      query: _dataset.query,
       size: 0,
     });
 
