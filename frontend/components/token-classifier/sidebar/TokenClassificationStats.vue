@@ -188,6 +188,7 @@ export default {
     padding-right: 1em;
     margin-right: -1em;
     overflow: auto;
+    @extend %hide-scrollbar;
   }
 }
 $colors: 50;

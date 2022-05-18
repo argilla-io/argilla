@@ -313,6 +313,7 @@ $number-size: 18px;
         // width: 910px;
         max-height: 80vh;
         overflow: auto;
+        @extend %hide-scrollbar;
       }
     }
     &__item {

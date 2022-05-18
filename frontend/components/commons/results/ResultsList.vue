@@ -179,9 +179,7 @@ export default {
     padding-left: 4em;
     padding-bottom: 260px;
     transition: padding 0s ease-in-out 0.1s;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @extend %hide-scrollbar;
   }
   &__li {
     position: relative;

@@ -182,6 +182,7 @@ export default {
       margin: 0;
       overscroll-behavior: contain;
       position: relative;
+      @extend %hide-scrollbar;
     }
     &__option {
       display: flex;

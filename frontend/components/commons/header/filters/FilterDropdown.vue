@@ -144,6 +144,7 @@ export default {
       overflow-y: auto;
       margin: 0 -1em 0 -1em;
       padding: 0 1em 1em 1em;
+      @extend %hide-scrollbar;
     }
     li {
       padding: 0.4em 0;

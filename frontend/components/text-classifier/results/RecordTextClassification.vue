@@ -169,6 +169,7 @@ export default {
     overflow: auto;
     text-align: right;
     padding: 4em 1.4em 1em 1em;
+    @extend %hide-scrollbar;
   }
 }
 
