@@ -490,6 +490,7 @@ export default {
     overflow: auto;
     height: calc(100vh - 203px);
     padding-bottom: 0.5em;
+    @extend %hide-scrollbar;
   }
   &__item {
     position: relative;

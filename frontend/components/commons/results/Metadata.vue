@@ -151,6 +151,7 @@ export default {
     overflow-y: auto;
     margin-right: -1em;
     padding-right: 1em;
+    @extend %hide-scrollbar;
   }
   &__blocks {
     display: flex;

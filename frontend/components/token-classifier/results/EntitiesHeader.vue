@@ -132,6 +132,7 @@ export default {
     min-height: 48px;
     max-height: 189px;
     overflow: auto;
+    @extend %hide-scrollbar;
     &__button {
       margin-top: 0.3em;
       margin-left: 0.3em;
