@@ -77,7 +77,9 @@ On the right side of the bulk validation bar, you will find a _"+ Create new lab
 
 ## Progress metric
 
-![Progress bar](../../_static/reference/webapp/progress_bar.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/progress_bar.png" alt="Progress metric" width="50%"/>
+</div>
 
 From the sidebar you can access the _Progress metrics_.
 There you will find the progress of your annotation session, the distribution of validated and discarded records, and the label distribution of your annotations.

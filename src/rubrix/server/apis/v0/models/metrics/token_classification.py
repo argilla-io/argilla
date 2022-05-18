@@ -269,6 +269,32 @@ class F1Metric(PythonMetric[TokenClassificationRecord]):
             return 0
 
 
+class DatasetLabels(PythonMetric):
+    id: str = Field("dataset_labels", const=True)
+    name: str = Field("The dataset entity labels", const=True)
+    max_processed_records: int = 10000
+
+    def apply(self, records: Iterable[TokenClassificationRecord]) -> Dict[str, Any]:
+        ds_labels = set()
+
+        for _ in range(
+            0, self.max_processed_records
+        ):  # Only a few of records will be parsed
+            record: TokenClassificationRecord = next(records, None)
+            if record is None:
+                break
+
+            if record.annotation:
+                ds_labels.update(
+                    [entity.label for entity in record.annotation.entities]
+                )
+            if record.prediction:
+                ds_labels.update(
+                    [entity.label for entity in record.prediction.entities]
+                )
+        return {"labels": ds_labels or []}
+
+
 class MentionMetrics(BaseModel):
     """Mention metrics model"""
 
@@ -607,6 +633,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         *_TOKENS_METRICS,
         *_PREDICTED_METRICS,
         *_ANNOTATED_METRICS,
+        DatasetLabels(),
         F1Metric(
             id="F1",
             name="F1 Metric based on entity-level",

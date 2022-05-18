@@ -2,6 +2,17 @@ class RubrixClientError(Exception):
     pass
 
 
+class ApiCompatibilityError(RubrixClientError):
+    def __init__(self, min_version: str):
+        self.min_version = min_version
+
+    def __str__(self):
+        return (
+            "\nThe rubrix server does not support this functionality."
+            f"\nPlease, use the client with a {self.min_version} version server instance."
+        )
+
+
 class RubrixApiResponseError(RubrixClientError):
 
     HTTP_STATUS: int
@@ -58,6 +69,10 @@ class ForbiddenApiError(RubrixApiResponseError):
 
 class AlreadyExistsApiError(RubrixApiResponseError):
     HTTP_STATUS = 409
+
+
+class MethodNotAllowedApiError(RubrixApiResponseError):
+    HTTP_STATUS = 405
 
 
 class GenericApiError(RubrixApiResponseError):

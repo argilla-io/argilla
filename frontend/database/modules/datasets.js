@@ -492,8 +492,8 @@ const actions = {
     const newRecords = records.map((record) => ({
       ...record,
       annotation: {
-        agent,
         ...record.annotation,
+        agent,
       },
       selected: false,
       status: "Validated",

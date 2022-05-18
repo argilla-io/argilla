@@ -178,6 +178,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/monitoring
    guides/metrics
    guides/datasets
+   guides/dataset_settings
    guides/queries
 
 .. toctree::
@@ -195,6 +196,7 @@ You can join the conversation on our Github page and our Github forum.
    tutorials/09-automatic_fastapi_log
    tutorials/skweak
    tutorials/weak-supervision-multi-label
+   tutorials/extend_weak_labels_with_embeddings
 
 .. toctree::
    :maxdepth: 4

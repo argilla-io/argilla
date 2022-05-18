@@ -35,12 +35,13 @@ dependencies:
       - huggingface_hub != 0.5.0 # some backward comp. problems introduced in 0.5.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
       - flair==0.10
+      - faiss-cpu
       - flyingsquid
       - pgmpy
       - plotly>=4.1.0
       - snorkel>=0.9.7
       - spacy==3.1.0
-      - transformers[torch]
+      - transformers[torch]~=4.18.0
       - loguru
       # install Rubrix in editable mode
       - -e .[server]

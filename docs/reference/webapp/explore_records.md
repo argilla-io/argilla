@@ -39,8 +39,9 @@ Annotations are shown as tags on the right together with a symbol indicating if 
 
 ![Token classification view](../../_static/reference/webapp/token_classification.png)
 
-In this task predictions and annotation are given as highlights in the input text.
-Work in progress ...
+In this task, predictions and annotations are displayed as highlights in the input text. To easily identify them at a glance, **annotations** are highlighted with the color of their corresponding label, while **predictions** are underlined with a solid line (see picture).
+
+For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
 ### Text2Text
 
@@ -53,6 +54,8 @@ If you have multiple predictions you can toggle between them using the arrows on
 
 ## Metrics
 
-![Metrics for Explore Mode](../../_static/reference/webapp/metrics_explore.png)
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/metrics_explore.png" alt="Metrics for Explore Mode" width="50%"/>
+</div>
 
 From the side bar you can access the [_Stats_ metrics](view_dataset_metrics.md#stats) that provide support for your analysis of the dataset.

@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.text_classification import TextClassificationBulkData
 
@@ -31,6 +31,35 @@ def test_delete_dataset(mocked_client):
             "params": {"name": "test_delete_dataset", "type": "Dataset"},
         }
     }
+
+
+def test_create_dataset(mocked_client):
+    dataset_name = "test_create_dataset"
+    delete_dataset(mocked_client, dataset_name)
+    request = dict(
+        name=dataset_name,
+        task=TaskType.text_classification,
+        tags={"env": "test", "class": "text classification"},
+        metadata={"config": {"the": "config"}},
+    )
+    response = mocked_client.post(
+        "/api/datasets",
+        json=request,
+    )
+    assert response.status_code == 200
+    dataset = Dataset.parse_obj(response.json())
+    assert dataset.created_by == "rubrix"
+    assert dataset.metadata == request["metadata"]
+    assert dataset.tags == request["tags"]
+    assert dataset.name == dataset_name
+    assert dataset.owner == "rubrix"
+    assert dataset.task == TaskType.text_classification
+
+    response = mocked_client.post(
+        "/api/datasets",
+        json=request,
+    )
+    assert response.status_code == 409
 
 
 def test_dataset_naming_validation(mocked_client):

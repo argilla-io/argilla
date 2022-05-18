@@ -2,33 +2,53 @@
 
 The **Dataset Metrics** are part of the **Sidebar** placed on the right side of **Rubrix datasets**. To know more about this component, click [here](dataset.md).
 
-Rubrix metrics are very convenient in terms of assesing the status of the dataset, and to extract more valuable information.
+Rubrix metrics are very convenient in terms of assesing the status of the dataset, and to extract valuable information.
 
 ## How to use Metrics
 
-Metrics are composed of two submenus: **Progress** and **Stats**. They work similarly in **Annotation**, **Explore** and **Define rules** mode.
+Metrics are composed of two submenus: **Progress** and **Stats**. These submenus might be different for **Token** and **Text Classification** tasks, as well as for the different modes (especially the **Define rules mode**).
 
 ### Progress
 
-This submenu is useful when users need to know how many records are annotated, validated and/or discarded.
+This submenu is useful when users need to know how many records have been annotated, validated and/or discarded.
 
-When clicking on this menu, not only the progress is shown, but also the number of labels and records.
+#### Annotation and Explore modes
 
-![Progress menu](../../_static/reference/webapp/progress_bar.png)
+When clicking on this menu, not only the progress is shown. The number of records is also displayed, as well as the number of labeled records or entities that are **validated** or **discarded**.
+
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/progress_bar.png" alt="Progress menu" width="50%"/>
+</div>
+
+#### Define rules mode
+
+In this mode, **progress** is related to the coverage of the rules. It shows the **model coverage** and the **annotated coverage**, and also the **precision average** and the number of correct and incorrect results.
+
+In the **total rules** section, users can find the number of rules related to the different categories.
+
+![Progress menu 2](../../_static/reference/webapp/progress_definerules.png)
 
 ### Stats
 
-This submenu allows users to know more about the keywords and the error distribution of the dataset.
+This submenu allows users to know more about the keywords of the dataset.
 
-It is composed of a dropdown with two dropdowns:
+#### Explore and Define Rules mode
 
-- The **Keywords** dropdown displays a list of annotated words and the number of occurrences.
-- The **Error Distribution** dropdown displays a pie chart with the number of records, correct and incorrect predictions.
+In both modes, the **Keywords** list displays a list of relevant words and the number of occurrences.
 
-Please, note that this section might vary, depending on the task carried out.
+<div style="text-align: center;">
+<img src="../../_static/reference/webapp/stats_exploredefine.png" alt="Stats menu" width="50%"/>
+</div>
+
+#### Annotation mode
+
+In the **annotation mode**, the stats show the **mentions** (this is, the entities) which are present in the records.
+
+This submenu has the **Predicted as** (for predictions) and the **Annotated as** (for annotation) sections, and here users can see the number of entities predicted or annotated with a specific label. The number of occurrences is ordered from highest to lowest, and the labels are also ordered in that way.
 
 <video width="100%" controls><source src="../../_static/reference/webapp/stats.mp4" type="video/mp4"></video>
 
+
 ### Refresh button
 
-Users should click this button whenever they would like to see the page updated. If changes are made, this button displays the page updated.
+Users should click this button whenever they wanted to see the page updated. If any change is made, this button displays the updated page.
