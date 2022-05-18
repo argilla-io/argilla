@@ -5,8 +5,8 @@
       @click="openFilter(column)"
       :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
     >
-      {{ column.name }}
       <svgicon color="#4C4EA3" name="filtrable-column" />
+      {{ column.name }}
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
       <input
@@ -248,15 +248,13 @@ button {
     border-radius: $border-radius;
     color: $primary-color;
     ::v-deep svg {
-      margin-right: 0;
       & > * {
         fill: $primary-color !important;
       }
     }
   }
   .svg-icon {
-    margin-left: 5px;
-    margin-right: 1em;
+    margin-right: 0.5em;
   }
 }
 </style>
