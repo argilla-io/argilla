@@ -1,3 +1,2 @@
-prune docs/tutorials
-prune docs/_static/tutorials
-prune docs/_static/reference
+graft src/rubrix/server/static
+prune docs
