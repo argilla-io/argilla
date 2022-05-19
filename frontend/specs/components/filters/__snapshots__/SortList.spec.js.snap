@@ -2,7 +2,9 @@
 
 exports[`SortList renders properly 1`] = `
 <div>
-  <sortfilter sort-options="[object Object]" class="sort"></sortfilter>
+  <div class="filters--scrollable">
+    <sortfilter sort-options="[object Object]" class="sort"></sortfilter>
+  </div>
   <!---->
   <div class="sort__buttons">
     <re-button class="button-tertiary--small button-tertiary--outline">Cancel</re-button>

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="sort">
+  <div :class="[selectedField ? 'selected' : '', 'sort']">
     <svgicon
       v-if="selectedField"
       title="remove field"
@@ -149,10 +149,10 @@ export default {
   display: flex;
   align-items: center;
   &__remove-button {
-    position: absolute;
-    left: 20px;
+    position: relative;
     margin-right: 1em;
     cursor: pointer;
+    flex-shrink: 0;
   }
   &__direction {
     position: relative;
@@ -166,9 +166,12 @@ export default {
     text-align: center;
     cursor: pointer;
   }
+  &:not(.selected) {
+    margin-left: 2em;
+  }
   .dropdown {
     width: 100%;
-    max-width: 280px;
+    max-width: 270px;
     a {
       word-break: break-all;
       text-decoration: none;
