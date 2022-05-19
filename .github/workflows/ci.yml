@@ -56,11 +56,11 @@ jobs:
         uses: actions/cache@v2
         if: steps.filter.outputs.python_code == 'true'
         env:
-          # Increase this value to reset cache if setup.cfg has not changed
+          # Increase this value to reset cache if pyproject.toml has not changed
           CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
@@ -95,11 +95,11 @@ jobs:
       - name: Cache pip 👜
         uses: actions/cache@v2
         env:
-          # Increase this value to reset cache if setup.cfg has not changed
+          # Increase this value to reset cache if pyproject.toml has not changed
           CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
