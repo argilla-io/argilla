@@ -1,21 +1,13 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=61.0.0"]
 build-backend = "setuptools.build_meta"
-
-license = "Apache-2.0"
-authors = [
-    "recognai <contact@recogn.ai",
-]
-maintainers = [
-    "recognai <contact@recogn.ai>",
-]
-
 
 [project]
 name = "rubrix"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
 readme = "README.md"
 requires-python = ">=3.7"
+license = {text = "Apache-2.0"}
 keywords = [
     "data-science",
     "natural-language-processing",
@@ -27,8 +19,12 @@ keywords = [
     "human-in-the-loop",
     "mlops"
 ]
-
-dynamic = [ "version"]
+authors = [
+    {name = "recognai", email = "contact@recogn.ai"}
+]
+maintainers = [
+    {name = "recognai", email = "contact@recogn.ai"}
+]
 dependencies = [
     # Client
     "httpx ~= 0.15.0",
@@ -42,6 +38,7 @@ dependencies = [
     "numpy",
     "tqdm >= 4.27.0"
 ]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 server = [
@@ -69,6 +66,14 @@ server = [
     "hurry.filesize", # TODO: remove
     "psutil ~= 5.8.0",
 ]
+
+[project.urls]
+homepage = "https://www.rubrix.ml"
+documentation = "https://docs.rubrix.ml"
+repository = "https://github.com/recognai/rubrix"
+
+[tool.setuptools.dynamic]
+version = {attr = "rubrix.__version__"}
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
