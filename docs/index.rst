@@ -186,17 +186,12 @@ You can join the conversation on our Github page and our Github forum.
    :caption: Tutorials
    :hidden:
 
-   tutorials/01-labeling-finetuning
-   tutorials/weak-supervision-with-rubrix
-   tutorials/02-spacy
-   tutorials/05-active_learning
-   tutorials/find_label_errors
-   tutorials/07-zeroshot_ner
-   tutorials/08-error_analysis_using_loss
-   tutorials/09-automatic_fastapi_log
-   tutorials/skweak
-   tutorials/weak-supervision-multi-label
-   tutorials/extend_weak_labels_with_embeddings
+   tutorials/introductory.md
+   tutorials/pre-annotate.md
+   tutorials/weak-supervision.md
+   tutorials/active-learning.md
+   tutorials/label-errors.md
+   tutorials/monitoring.md
 
 .. toctree::
    :maxdepth: 4
