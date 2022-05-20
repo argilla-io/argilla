@@ -45,6 +45,7 @@ export default {
     return {
       dropdownContentPosition: undefined,
       scrollContainerName: ".filters--scrollable",
+      position: {},
     };
   },
   props: {
@@ -62,6 +63,9 @@ export default {
         };
       }
     },
+    dropdownHeight() {
+      return this.$refs.dropdownMenu.getBoundingClientRect().height;
+    },
   },
   methods: {
     onClickOutside() {
@@ -69,19 +73,9 @@ export default {
     },
     getPosition() {
       if (document.querySelector(this.scrollContainerName)) {
-        const position = this.$refs.dropdownMenu.getBoundingClientRect();
-        const scrollContainerHeight = document.querySelector(
-          this.scrollContainerName
-        ).offsetHeight;
-        const dropdownHeight =
-          this.$refs.dropdownMenu.getBoundingClientRect().height;
+        this.position = this.$refs.dropdownMenu.getBoundingClientRect();
         this.dropdownContentPosition = {
-          top:
-            position.top < 0
-              ? 0
-              : position.top > scrollContainerHeight + dropdownHeight
-              ? scrollContainerHeight
-              : position.top - dropdownHeight - 20,
+          top: this.position.top - this.dropdownHeight - 20,
           left: this.$refs.dropdownMenu.offsetLeft,
         };
       }
@@ -96,7 +90,17 @@ export default {
       }
     },
     handleScroll() {
-      this.getPosition();
+      const scrollContainerHeight = document.querySelector(
+        this.scrollContainerName
+      ).offsetHeight;
+      if (
+        this.position.top - this.dropdownHeight - 20 > 0 &&
+        this.position.top < scrollContainerHeight + this.dropdownHeight + 20
+      ) {
+        this.getPosition();
+      } else {
+        this.$emit("visibility", false);
+      }
     },
   },
   beforeDestroy() {
