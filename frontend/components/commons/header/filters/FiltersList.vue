@@ -72,15 +72,6 @@
                 @apply="onApply"
               />
             </span>
-            <a
-              v-if="
-                initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
-              "
-              class="filters__list__button"
-              href="#"
-              @click.prevent="removeFiltersByGroup(group)"
-              >Remove all filters</a
-            >
             <lazy-sort-list
               v-if="initialVisibleGroup === 'Sort'"
               :sort-options="filterList"
@@ -89,6 +80,15 @@
               @sortBy="onSortBy"
             />
           </div>
+          <a
+            v-if="
+              initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
+            "
+            class="filters__list__button"
+            href="#"
+            @click.prevent="removeFiltersByGroup(group)"
+            >Remove all filters</a
+          >
         </div>
       </div>
     </div>
@@ -328,9 +328,12 @@ $number-size: 18px;
       color: $font-secondary;
       @include font-size(13px);
       text-decoration: none;
-      margin-bottom: 10px;
       display: block;
       font-weight: 600;
+      background: palette(white);
+      position: relative;
+      margin-left: 2em;
+      padding-top: 1em;
     }
     p {
       cursor: pointer;
