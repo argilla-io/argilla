@@ -182,7 +182,7 @@ You can join the conversation on our Github page and our Github forum.
    guides/queries
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Tutorials
    :hidden:
 

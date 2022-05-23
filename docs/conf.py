@@ -42,16 +42,11 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
-    "sphinx_gallery.load_style",
+    "sphinx_design",
 ]
 
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
-
-# thumbnails for the tutorials gallery
-# nbsphinx_thumbnails = {
-#     "tutorials/01-labeling-finetuning": "_static/tutorials/01-labeling-finetuning/predict_log.svg"
-# }
 
 # Hide input/output prompts (cell counts)
 nbsphinx_prolog = """

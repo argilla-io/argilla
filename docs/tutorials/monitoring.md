@@ -2,6 +2,19 @@
 
 See how Rubrix can help you to monitor your model predictions.
 
-```{nbgallery}
+````{grid} 1 1 2 3
+```{grid-item-card} 💾 Monitor predictions in HTTP API endpoints
+:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:link: 09-automatic_fastapi_log.ipynb
+
+Short introduction/summary
+```
+````
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+
 09-automatic_fastapi_log.ipynb
 ```
+
