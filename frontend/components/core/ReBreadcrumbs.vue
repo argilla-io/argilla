@@ -23,8 +23,7 @@
           class="breadcrumbs__item"
           v-if="breadcrumb.link"
           :to="breadcrumb.link"
-        >
-          {{ breadcrumb.name }}
+          >{{ breadcrumb.name }}
         </NuxtLink>
         <span
           class="breadcrumbs__item --action"
