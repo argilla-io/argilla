@@ -21,11 +21,10 @@ export default {
   padding: 0.3em 1em;
   margin: 3.5px;
   max-width: 175px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   vertical-align: top;
   background: palette(grey, bg);
+  word-break: break-word;
+  hyphens: auto;
   @include media(">desktopLarge") {
     max-width: 200px;
   }

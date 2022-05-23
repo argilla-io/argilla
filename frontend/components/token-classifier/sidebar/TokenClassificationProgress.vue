@@ -69,7 +69,9 @@ export default {
   margin-bottom: 0.7em;
   font-weight: 600;
   label {
-    margin: 0; // for tagger
+    margin: 0;
+    word-break: break-word;
+    hyphens: auto;
     &[class^="color_"] {
       padding: 0.3em;
     }
