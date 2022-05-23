@@ -92,23 +92,12 @@ export default {
   computed: {
     filteredSortOptions() {
       if (this.searchText === undefined) {
-        return this.formatSortOptions;
+        return this.sortOptions;
       }
-      let filtered = this.formatSortOptions.filter((opt) =>
+      let filtered = this.sortOptions.filter((opt) =>
         opt.name.toLowerCase().match(this.searchText.toLowerCase())
       );
       return filtered;
-    },
-    formatSortOptions() {
-      return this.sortOptions.map((opt) => {
-        if (opt.group.toLowerCase() === "metadata") {
-          return {
-            ...opt,
-            name: `Metadata.${opt.name}`,
-          };
-        }
-        return opt;
-      });
     },
   },
   mounted() {

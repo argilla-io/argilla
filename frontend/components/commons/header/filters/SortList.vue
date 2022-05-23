@@ -63,7 +63,17 @@ export default {
   },
   computed: {
     filteredSortOptions() {
-      return this.sortOptions.filter(
+      const formatOptions = this.sortOptions.map((opt) => {
+        if (opt.group.toLowerCase() === "metadata") {
+          return {
+            ...opt,
+            id: `metadata.${opt.name}`,
+            name: `Metadata.${opt.name}`,
+          };
+        }
+        return opt;
+      });
+      return formatOptions.filter(
         (opt) =>
           !this.selectedFields.some((field) => opt.id.toString() === field.id)
       );
