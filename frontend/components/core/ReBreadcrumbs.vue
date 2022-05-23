@@ -96,11 +96,14 @@ export default {
   }
   li {
     margin: auto 0.5em auto auto;
+    white-space: nowrap;
     &:not(:last-child):after {
       content: "/";
       margin-left: 0.5em;
     }
     &:last-child {
+      word-break: break-all;
+      white-space: pre-line;
       font-weight: 600;
       a {
         cursor: default;
