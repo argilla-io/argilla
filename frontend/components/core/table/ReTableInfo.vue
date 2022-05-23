@@ -550,6 +550,7 @@ export default {
   &__title {
     display: block;
     @include font-size(15px);
+    hyphens: auto;
     word-break: break-word;
     span {
       display: flex;
@@ -593,14 +594,16 @@ export default {
     display: inline-block;
     max-width: 280px;
     font-weight: 600;
+    hyphens: auto;
     word-break: break-word;
   }
   .array {
     p {
       margin-top: 0;
       margin-bottom: 0;
-      display: block;
-      word-break: break-all;
+      display: inline;
+      hyphens: auto;
+      word-break: break-word;
     }
   }
   .text {
@@ -612,7 +615,8 @@ export default {
       border-radius: 10px;
       margin-right: 0.5em;
       margin-top: 0;
-      word-break: break-all;
+      hyphens: auto;
+      word-break: break-word;
       &:last-child {
         margin-bottom: 0;
       }

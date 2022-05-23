@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div>
+  <div lang="en">
     <Nuxt v-if="!$slots.default" />
     <slot />
   </div>

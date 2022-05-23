@@ -172,7 +172,6 @@ export default {
     color: $font-dark-color;
     font-weight: 600;
     &__item {
-      word-break: break-word;
       min-width: 200px;
       max-width: 300px;
       text-align: left;
@@ -180,6 +179,8 @@ export default {
       color: palette(grey, medium);
       font-weight: normal;
       line-height: 1em;
+      word-break: break-word;
+      hyphens: auto;
     }
   }
   &__key {

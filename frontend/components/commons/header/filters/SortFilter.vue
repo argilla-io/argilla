@@ -159,10 +159,11 @@ export default {
     width: 100%;
     max-width: 280px;
     a {
-      word-break: break-all;
       text-decoration: none;
       max-width: 250px;
       display: block;
+      word-break: break-word;
+      hyphens: auto;
     }
   }
 }

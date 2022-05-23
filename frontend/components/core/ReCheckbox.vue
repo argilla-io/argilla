@@ -150,9 +150,10 @@ $checkbox-color-dark: $primary-color;
     }
   }
   .checkbox-label {
-    word-break: break-all;
     line-height: $checkbox-size;
     margin-right: 0.5em;
+    word-break: break-word;
+    hyphens: auto;
   }
   &--dark {
     &.checked {
@@ -174,7 +175,8 @@ $checkbox-color-dark: $primary-color;
     height: auto;
     white-space: normal;
     text-transform: none;
-    word-break: break-all;
+    word-break: break-word;
+    hyphens: auto;
   }
 }
 

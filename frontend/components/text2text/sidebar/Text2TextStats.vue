@@ -80,8 +80,8 @@ export default {
 label {
   display: block;
   width: calc(100% - 40px);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  hyphens: auto;
 }
 .labels {
   margin-top: 3em;

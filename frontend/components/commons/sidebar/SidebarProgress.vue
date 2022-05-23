@@ -100,8 +100,8 @@ label {
   margin-bottom: 0.5em;
   display: block;
   width: calc(100% - 40px);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  hyphens: auto;
+  word-break: break-word;
 }
 .total {
   font-weight: 600;
