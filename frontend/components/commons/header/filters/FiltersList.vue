@@ -333,7 +333,8 @@ $number-size: 18px;
       background: palette(white);
       position: relative;
       margin-left: 2em;
-      padding-top: 1em;
+      margin-bottom: 1em;
+      padding-top: 2em;
     }
     p {
       cursor: pointer;
