@@ -55,10 +55,10 @@ class RBDatasetListener:
     def __post_init__(self):
         self.metrics = self.metrics or []
 
-    def start(self):
+    def start(self, *action_args, **action_kwargs):
         """
-        Start listen to changes in the dataset
-
+        Start listen to changes in the dataset. Additionally, args and kwargs can be passed to action
+        by using the `action_*` arguments
 
         If the listener is already started, a ``ValueError`` will be raised
 
@@ -68,7 +68,7 @@ class RBDatasetListener:
 
         self.__listener_job__ = self.__scheduler__.every(
             self.interval_in_seconds
-        ).seconds.do(self.__listener_iteration_job__)
+        ).seconds.do(self.__listener_iteration_job__, *action_args, **action_kwargs)
 
         class _ScheduleThread(threading.Thread):
             _WAIT_EVENT = threading.Event()
@@ -102,7 +102,7 @@ class RBDatasetListener:
             self.__current_thread__.stop()
             self.__current_thread__.join()  # TODO: improve it!
 
-    def __listener_iteration_job__(self):
+    def __listener_iteration_job__(self, *args, **kwargs):
         """
         Execute a complete listener iteration. The iteration consists on:
 
@@ -118,10 +118,26 @@ class RBDatasetListener:
             self._LOGGER.warning(f"Not found dataset <{self.dataset}>")
             return
 
+        ctx = RBListenerContext(
+            listener=self,
+            metrics=self.__compute_metrics__(current_api, dataset),
+        )
         if self.condition is None:
-            return self.__run_action__()
+            return self.__run_action__(ctx, *args, **kwargs)
 
-        metrics = Metrics()
+        search_results = current_api.searches.search_records(
+            name=self.dataset, task=dataset.task, query=self.query, size=0
+        )
+
+        ctx.search = Search(total=search_results.total)
+        condition_args = [ctx.search]
+        if self.metrics:
+            condition_args.append(ctx.metrics)
+        if self.condition(*condition_args):
+            return self.__run_action__(ctx, *args, **kwargs)
+
+    def __compute_metrics__(self, current_api, dataset) -> Metrics:
+        metrics = {}
         for metric in self.metrics:
             metrics.update(
                 {
@@ -130,28 +146,21 @@ class RBDatasetListener:
                     )
                 }
             )
-        search_results = current_api.searches.search_records(
-            name=self.dataset, task=dataset.task, query=self.query, size=0
-        )
+        return Metrics.from_dict(metrics)
 
-        ctx = RBListenerContext(
-            listener=self,
-            search=Search(total=search_results.total),
-            metrics=metrics,
-        )
-        condition_args = dict(query=ctx.search)
-        if metrics:
-            condition_args["metrics"] = ctx.metrics
-        if self.condition(**condition_args):
-            return self.__run_action__(ctx)
+    def __run_action__(self, ctx: Optional[RBListenerContext] = None, *args, **kwargs):
+        try:
+            action_args = [ctx] if ctx else []
+            if self.query_records:
+                action_args.insert(
+                    0, rubrix.load(name=self.dataset, query=self.query, as_pandas=False)
+                )
+            return self.action(*args, *action_args, **kwargs)
+        except:
+            import traceback
 
-    def __run_action__(self, ctx: Optional[RBListenerContext] = None):
-        args = [ctx] if ctx else []
-        if self.query_records:
-            args.insert(
-                0, rubrix.load(name=self.dataset, query=self.query, as_pandas=False)
-            )
-        return self.action(*args)
+            print(traceback.format_exc())
+            return schedule.CancelJob
 
 
 def listener(
