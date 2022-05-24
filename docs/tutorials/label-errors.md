@@ -7,14 +7,14 @@ Want to find label errors in your data? Check how Rubrix can help you.
 :img-top: https://via.placeholder.com/700.png?text=Thumbnail
 :link: 08-error_analysis_using_loss.ipynb
 
-Short introduction/summary
+Learn a simple technique for error analysis, using model loss to find potential training data errors.
 ```
 
 ```{grid-item-card} 🧐 Find label errors with cleanlab
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: _static/tutorials/find_label_errors/sort.png
 :link: find_label_errors.ipynb
 
-Short introduction/summary
+Leverage Rubrix and cleanlab to find, uncover and correct potential label errors.
 ```
 ````
 

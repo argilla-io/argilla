@@ -4,17 +4,17 @@ These are tutorials with an introductory character to various topics covered by 
 
 ````{grid} 1 1 2 3
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
 :link: 01-labeling-finetuning.ipynb
 
-Short introduction/summary
+Build a sentiment classifier for user requests in the banking domain.
 ```
 
 ```{grid-item-card} 📰 Building a news classifier with weak supervision
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: ../_static/guides/weak_supervision/weak_supervision.svg
 :link: weak-supervision-with-rubrix.ipynb
 
-Short introduction/summary
+Build a news classifier using rules and weak supervision.
 ```
 ````
 

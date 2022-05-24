@@ -7,7 +7,7 @@ See how Rubrix can help you to monitor your model predictions.
 :img-top: https://via.placeholder.com/700.png?text=Thumbnail
 :link: 09-automatic_fastapi_log.ipynb
 
-Short introduction/summary
+Learn to monitor the predictions of a FastAPI inference endpoint and log model predictions in a Rubrix dataset.
 ```
 ````
 
