@@ -1,10 +1,10 @@
 from typing import Optional
 
-from rubrix.client.apis import AbstractAPI
+from rubrix.client.apis import AbstractApi
 from rubrix.client.sdk.datasets.models import TaskType
 
 
-class MetricsAPI(AbstractAPI):
+class MetricsAPI(AbstractApi):
 
     _API_URL_PATTERN = "/api/datasets/{task}/{name}/metrics/{metric}:summary"
 

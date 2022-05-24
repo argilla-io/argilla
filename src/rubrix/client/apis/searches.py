@@ -1,7 +1,7 @@
 import dataclasses
 from typing import List, Optional
 
-from rubrix.client.apis import AbstractAPI
+from rubrix.client.apis import AbstractApi
 from rubrix.client.models import Record
 from rubrix.client.sdk.datasets.models import TaskType
 from rubrix.client.sdk.text2text.models import Text2TextRecord
@@ -16,7 +16,7 @@ class SearchResults:
     records: List[Record]
 
 
-class Searches(AbstractAPI):
+class Searches(AbstractApi):
 
     _API_URL_PATTERN = "/api/datasets/{name}/{task}:search"
 
