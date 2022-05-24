@@ -30,7 +30,7 @@
         aria-hidden="true"
       />
     </div>
-    <div v-show="visible" class="dropdown__content">
+    <div v-show="visible" class="dropdown__content" :style="positionStyle">
       <slot name="dropdown-content" />
     </div>
   </div>
@@ -41,19 +41,74 @@ export default {
   directives: {
     clickOutside: ClickOutside.directive,
   },
+  data: () => {
+    return {
+      dropdownContentPosition: undefined,
+      scrollContainerName: ".filters--scrollable",
+      position: {},
+    };
+  },
   props: {
     visible: {
       default: false,
       type: Boolean,
     },
   },
+  computed: {
+    positionStyle() {
+      if (this.dropdownContentPosition) {
+        return {
+          top: `${this.dropdownContentPosition.top}px`,
+          left: `${this.dropdownContentPosition.left}px`,
+        };
+      }
+    },
+    dropdownHeight() {
+      return this.$refs.dropdownMenu.getBoundingClientRect().height;
+    },
+  },
   methods: {
     onClickOutside() {
       this.$emit("visibility", false);
     },
+    getPosition() {
+      if (document.querySelector(this.scrollContainerName)) {
+        this.position = this.$refs.dropdownMenu.getBoundingClientRect();
+        this.dropdownContentPosition = {
+          top: this.position.top - this.dropdownHeight - 20,
+          left: this.$refs.dropdownMenu.offsetLeft,
+        };
+      }
+    },
     onClick() {
       this.$emit("visibility", !this.visible);
+      if (document.querySelector(this.scrollContainerName)) {
+        this.getPosition();
+        document
+          .querySelector(this.scrollContainerName)
+          .addEventListener("scroll", this.handleScroll);
+      }
     },
+    handleScroll() {
+      const scrollContainerHeight = document.querySelector(
+        this.scrollContainerName
+      ).offsetHeight;
+      if (
+        this.position.top - this.dropdownHeight - 20 > 0 &&
+        this.position.top < scrollContainerHeight + this.dropdownHeight + 20
+      ) {
+        this.getPosition();
+      } else {
+        this.$emit("visibility", false);
+      }
+    },
+  },
+  beforeDestroy() {
+    if (document.querySelector(this.scrollContainerName)) {
+      document
+        .querySelector(this.scrollContainerName)
+        .removeEventListener("scroll", this.handleScroll);
+    }
   },
 };
 </script>
@@ -140,7 +195,7 @@ export default {
       height: 40px;
     }
     ul {
-      max-height: 240px;
+      max-height: 188px;
       overflow-y: auto;
       margin: 0 -1em 0 -1em;
       padding: 0 1em 1em 1em;
@@ -154,7 +209,7 @@ export default {
   &--open {
     pointer-events: all;
     .dropdown__content {
-      min-width: 270px;
+      width: 270px;
     }
   }
   input {
