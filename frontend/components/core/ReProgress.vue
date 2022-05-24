@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <transition name="re-progress" appear>
+  <transition name="re-progress" :duration="2500" appear>
     <div class="re-progress__container">
       <p v-if="tooltip" class="re-progress__tooltip" :style="tooltipStyles">
         <span class="triangle" :style="tooltipTriangleStyles"></span
@@ -25,7 +25,7 @@
       <div class="re-progress" :style="backgroundStyles">
         <div class="re-progress-track" :style="styles"></div>
         <div
-          v-if="multiple && progressSecondary"
+          v-if="multiple"
           class="re-progress-track--secondary"
           :style="stylesSecondary"
         />
@@ -117,7 +117,7 @@ export default {
       .re-progress__tooltip {
         clip-path: none;
         opacity: 1;
-        transition: opacity 0.5s ease-in-out 0.3s;
+        transition: opacity 0.5s linear 0.3s;
       }
     }
   }
@@ -136,7 +136,7 @@ export default {
     z-index: 1;
     clip-path: circle(0);
     opacity: 0;
-    transition: opacity 0.5s ease-in-out 0.3s;
+    transition: opacity 0.5s linear 0.3s;
     border-color: lime !important;
     .triangle {
       @include triangle(left, 6px, 6px, $secondary-color);
@@ -166,51 +166,34 @@ export default {
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   background: $secondary-color;
-  transition: all 2s ease-in-out;
-  max-width: 100%;
+  transition: width 1s linear, left 1s linear;
   &:last-of-type {
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
   }
   .re-progress-enter-active & {
-    max-width: 0;
+    animation: progress 1s 0.5s;
+    transform-origin: 0 50%;
+    animation-fill-mode: backwards;
   }
   &--secondary {
     @extend .re-progress-track;
     left: auto;
     right: 0;
     background: #a1a2cc;
-    transition: all 1s ease-in-out 2s;
+    transition: width 1s linear, left 1s linear;
+    .re-progress-enter-active & {
+      animation: progress 1s 1.5s;
+      animation-fill-mode: backwards;
+    }
   }
 }
-
-@keyframes progress-indeterminate {
+@keyframes progress {
   0% {
-    right: 100%;
-    left: -35%;
-  }
-  60% {
-    right: -100%;
-    left: 100%;
+    transform: scaleX(0);
   }
   100% {
-    right: -100%;
-    left: 100%;
-  }
-}
-
-@keyframes progress-indeterminate-short {
-  0% {
-    right: 100%;
-    left: -200%;
-  }
-  60% {
-    right: -8%;
-    left: 107%;
-  }
-  100% {
-    right: -8%;
-    left: 107%;
+    transform: scaleX(1);
   }
 }
 </style>
