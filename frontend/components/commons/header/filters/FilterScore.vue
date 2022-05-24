@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="filter__row">
+  <div :class="[filter.selected ? 'selected' : '', 'filter__row']">
     <svgicon
       v-if="filter.selected"
       title="remove field"
@@ -259,9 +259,8 @@ export default {
     border: 1px solid $primary-color;
   }
   &.expanded {
-    margin-top: 10px;
     position: absolute;
-    top: 40px;
+    top: calc(100% + 10px);
     right: 0;
     background: $bg;
     padding: 20px 20px 10px 20px;
@@ -307,10 +306,10 @@ export default {
 }
 .filter {
   &__remove-button {
-    position: absolute;
-    left: 20px;
+    position: relative;
     margin-right: 1em;
     cursor: pointer;
+    flex-shrink: 0;
   }
   &__item {
     &--open {
@@ -321,6 +320,9 @@ export default {
   &__row {
     display: flex;
     align-items: center;
+    &:not(.selected) {
+      margin-left: 2em;
+    }
     &__content {
       position: relative;
       display: flex;

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="filter__row">
+  <div :class="[appliedFilters.length ? 'selected' : '', 'filter__row']">
     <svgicon
       v-if="appliedFilters.length"
       title="remove field"
@@ -184,6 +184,9 @@ export default {
   &__row {
     display: flex;
     align-items: center;
+    &:not(.selected) {
+      margin-left: 2em;
+    }
     .dropdown {
       margin-right: 0;
       margin-left: auto;
@@ -213,10 +216,10 @@ export default {
     }
   }
   &__remove-button {
-    position: absolute;
-    left: 20px;
+    position: relative;
     margin-right: 1em;
     cursor: pointer;
+    flex-shrink: 0;
   }
 }
 
