@@ -272,7 +272,11 @@ class Api:
         )
         if background:
             return future
-        return future.result()
+
+        try:
+            return future.result()
+        finally:
+            future.cancel()
 
     async def log_async(
         self,
