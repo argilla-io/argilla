@@ -1,8 +1,9 @@
-# Pre-annotate
+# <span class="tuto-section-2"></span>Pre-annotate
 
 See how you can leverage model predictions to pre-annotate your data in Rubrix.
 
 ````{grid} 1 1 2 3
+:class-container: tuto-section-2
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
 :img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
 :link: 01-labeling-finetuning.ipynb

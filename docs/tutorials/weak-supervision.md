@@ -1,8 +1,9 @@
-# Weak supervision
+# <span class="tuto-section-3"></span>Weak supervision
 
 Here we showcase Rubrix's strong support for weak supervision.
 
 ````{grid} 1 1 2 3
+:class-container: tuto-section-3
 ```{grid-item-card} 📰 Building a news classifier with weak supervision
 :img-top: ../_static/guides/weak_supervision/weak_supervision.svg
 :link: weak-supervision-with-rubrix.ipynb
@@ -26,6 +27,7 @@ Extend your weak supervision workflows in Rubrix with sentence embeddings.
 ````
 
 ````{grid} 1 1 2 3
+:class-container: tuto-section-3
 ```{grid-item-card} 🐭 Weakly supervised NER with skweak
 :img-top: ../_static/tutorials/skweak/skweak_2.png
 :link: skweak.ipynb

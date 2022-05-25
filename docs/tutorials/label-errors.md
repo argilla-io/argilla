@@ -1,8 +1,9 @@
-# Label errors
+# <span class="tuto-section-5"></span>Label errors
 
 Want to find label errors in your data? Check how Rubrix can help you.
 
 ````{grid} 1 1 2 3
+:class-container: tuto-section-5
 ```{grid-item-card} 🧼 Clean labels using your model loss
 :img-top: https://via.placeholder.com/700.png?text=Thumbnail
 :link: 08-error_analysis_using_loss.ipynb

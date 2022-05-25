@@ -1,8 +1,9 @@
-# Introductory
+# <span class="tuto-section-1"></span>Introductory
 
 These are tutorials with an introductory character to various topics covered by Rubrix.
 
 ````{grid} 1 1 2 3
+:class-container: tuto-section-1
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
 :img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
 :link: 01-labeling-finetuning.ipynb
