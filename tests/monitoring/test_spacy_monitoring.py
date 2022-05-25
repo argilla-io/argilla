@@ -37,6 +37,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
     df = rb.load(dataset)
+    df = df.to_pandas()
     assert len(df) == 14
     for metadata in df.metadata.values.tolist():
         assert metadata == {"meta": "data"}
