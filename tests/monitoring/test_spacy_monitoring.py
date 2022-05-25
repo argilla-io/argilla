@@ -20,6 +20,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
         nlp("Paris is my favourite city")
 
     df = rb.load(dataset)
+    df = df.to_pandas()
     assert len(df) == 11
     # assert 10 - std < len(df) < 10 + std
     assert df.text.unique().tolist() == ["Paris is my favourite city"]
@@ -28,6 +29,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     list(nlp.pipe(["This is a text"] * 20))
 
     df = rb.load(dataset)
+    df = df.to_pandas()
     assert len(df) == 6
     assert df.text.unique().tolist() == ["This is a text"]
 
