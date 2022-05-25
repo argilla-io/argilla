@@ -373,20 +373,20 @@ def test_dataset_copy(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={other_workspace}")
 
-    api.log(
-        rb.TextClassificationRecord(
-            id=0,
-            inputs="This is the record input",
-            annotation_agent="test",
-            annotation=["T"],
-        ),
-        name=dataset,
+    record = rb.TextClassificationRecord(
+        id=0,
+        inputs="This is the record input",
+        annotation_agent="test",
+        annotation=["T"],
     )
+    api.log(record, name=dataset)
     api.copy(dataset, name_of_copy=dataset_copy)
     df = api.load(name=dataset)
     df_copy = api.load(name=dataset_copy)
 
     assert df.equals(df_copy)
+
+    api.log(record, name=dataset_copy)
 
     with pytest.raises(AlreadyExistsApiError):
         api.copy(dataset, name_of_copy=dataset_copy)

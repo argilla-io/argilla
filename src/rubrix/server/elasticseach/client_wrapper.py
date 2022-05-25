@@ -503,6 +503,7 @@ class ElasticsearchWrapper(LoggingMixin):
             )
         finally:
             self.index_read_only(index, read_only=index_read_only)
+            self.index_read_only(clone_to, read_only=index_read_only)
 
     def is_index_read_only(self, index: str) -> bool:
         """
@@ -544,7 +545,9 @@ class ElasticsearchWrapper(LoggingMixin):
 
         """
         self.__client__.indices.put_settings(
-            index=index, body={"settings": {"index.blocks.write": read_only}}
+            index=index,
+            body={"settings": {"index.blocks.write": read_only}},
+            ignore=404,
         )
 
     def create_field_mapping(
