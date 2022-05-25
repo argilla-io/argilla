@@ -84,7 +84,6 @@ class RubrixClient:
     """DEPRECATED. Class definition for Rubrix Client"""
 
     _LOGGER = logging.getLogger(__name__)
-    _WARNED_ABOUT_AS_PANDAS = False
 
     # Larger sizes will trigger a warning
     MAX_CHUNK_SIZE = 5000
@@ -250,7 +249,6 @@ class RubrixClient:
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
-        as_pandas: bool = True,
     ) -> Union[pandas.DataFrame, Dataset]:
         """Loads a dataset as a pandas DataFrame or a Dataset.
 
@@ -260,7 +258,6 @@ class RubrixClient:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
-            as_pandas: If True, return a pandas DataFrame. If False, return a Dataset.
 
         Returns:
             The dataset as a pandas Dataframe or a Dataset.
@@ -312,15 +309,6 @@ class RubrixClient:
 
         dataset = dataset_class(records_sorted_by_id)
 
-        if not self._WARNED_ABOUT_AS_PANDAS:
-            self._LOGGER.warning(
-                "The argument 'as_pandas' in `rb.load` will be deprecated in the future, and we will always return a `Dataset`. "
-                "To emulate the future behavior set `as_pandas=False`. To get a pandas DataFrame, call `Dataset.to_pandas()`"
-            )
-            self._WARNED_ABOUT_AS_PANDAS = True
-
-        if as_pandas:
-            return dataset.to_pandas()
         return dataset
 
     def copy(self, source: str, target: str, target_workspace: Optional[str] = None):
