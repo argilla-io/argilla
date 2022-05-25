@@ -552,10 +552,6 @@ export default {
     @include font-size(15px);
     hyphens: auto;
     word-break: break-word;
-    span {
-      display: flex;
-      align-items: center;
-    }
     .button-icon {
       margin-left: 5px;
       padding: 0;
