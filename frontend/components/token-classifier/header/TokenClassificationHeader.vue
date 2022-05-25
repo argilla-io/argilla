@@ -28,7 +28,8 @@
         @validate-records="onValidate"
       >
       </validate-discard-action>
-      <create-new-action @new-label="onNewLabel" />
+      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
+      {{ dataset.labels }}
     </global-actions>
   </div>
 </template>
@@ -39,6 +40,11 @@ export default {
     dataset: {
       required: true,
       type: Object,
+    },
+  },
+  computed: {
+    allowLabelCreation() {
+      return !this.dataset.settings.label_schema;
     },
   },
   methods: {
