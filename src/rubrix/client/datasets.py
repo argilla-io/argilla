@@ -849,7 +849,7 @@ class DatasetForTokenClassification(DatasetBase):
         return [
             (ent["label"], ent["start"], ent["end"])
             if len(ent) == 3
-            else (ent["label"], ent["start"], ent["end"], ent["score"] or 1.0)
+            else (ent["label"], ent["start"], ent["end"], ent["score"] or 0.0)
             for ent in entities
         ]
 

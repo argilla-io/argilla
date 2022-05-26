@@ -183,11 +183,12 @@ def test_token_classification_with_mutation():
     "prediction,expected",
     [
         (None, None),
-        ([("mock", 0, 4)], [("mock", 0, 4, 1.0)]),
+        ([("mock", 0, 4)], [("mock", 0, 4, 0.0)]),
         ([("mock", 0, 4, 0.5)], [("mock", 0, 4, 0.5)]),
+        ([("mock", 0, 4, None)], [("mock", 0, 4, 0.0)]),
         (
-            [("mock", 0, 4), ("mock", 0, 4, 0.5)],
-            [("mock", 0, 4, 1.0), ("mock", 0, 4, 0.5)],
+            [("mock", 0, 4), ("mock", 0, 4, None), ("mock", 0, 4, 0.5)],
+            [("mock", 0, 4, 0.0), ("mock", 0, 4, 0.0), ("mock", 0, 4, 0.5)],
         ),
     ],
 )

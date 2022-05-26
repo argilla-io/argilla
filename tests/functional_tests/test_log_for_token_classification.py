@@ -107,7 +107,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
                     "chars_length": 6,
                     "density": 0.03225806451612903,
                     "label": "ENG",
-                    "score": 1.0,
+                    "score": 0.0,
                     "tokens_length": 1,
                     "value": "access",
                 }
