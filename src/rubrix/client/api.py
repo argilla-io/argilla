@@ -16,12 +16,12 @@ import asyncio
 import logging
 import os
 import re
+import warnings
 from asyncio import Future
 from functools import wraps
 from inspect import signature
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas
 from tqdm.auto import tqdm
 
 from rubrix._constants import (
@@ -76,7 +76,6 @@ from rubrix.client.sdk.users.models import User
 from rubrix.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
-_WARNED_ABOUT_AS_PANDAS = False
 
 
 class _RubrixLogAgent:
@@ -401,8 +400,9 @@ class Api:
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        as_pandas=None,
     ) -> Dataset:
-        """Loads a dataset as a Dataset.
+        """Loads a Rubrix dataset.
 
         Args:
             name: The dataset name.
@@ -410,14 +410,22 @@ class Api:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
+            as_pandas: DEPRECATED! To get a pandas DataFrame do ``rb.load(...).to_pandas()``.
 
         Returns:
-            The dataset as a Dataset.
+            A Rubrix dataset.
 
         Examples:
             >>> import rubrix as rb
             >>> dataset = rb.load(name="example-dataset")
         """
+        if as_pandas is not None:
+            warnings.warn(
+                "The argument `as_pandas` is deprecated and will be removed in a future version. "
+                "Please adapt your code accordingly. "
+                "If you want a pandas DataFrame do `rb.load(...).to_pandas()`."
+            )
+
         response = datasets_api.get_dataset(client=self._client, name=name)
         task = response.parsed.task
 
@@ -460,9 +468,7 @@ class Api:
         except TypeError:
             records_sorted_by_id = sorted(records, key=lambda x: str(x.id))
 
-        dataset = dataset_class(records_sorted_by_id)
-
-        return dataset
+        return dataset_class(records_sorted_by_id)
 
     def dataset_metrics(self, name: str) -> List[MetricInfo]:
         response = datasets_api.get_dataset(self._client, name)
