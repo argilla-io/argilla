@@ -8,7 +8,7 @@ See how you can create Active Learning workflows with Rubrix.
 :img-top: ../_static/tutorials/05-active_learning/default_validated.png
 :link: 05-active_learning.ipynb
 
-Build an active learning prototype with Rubrix, ModAL and scikit-learn.
+Build an active learning prototype with Rubrix, ModAL and scikit-learn to filter spam from the YouTube Spam Collection dataset.
 ```
 ````
 

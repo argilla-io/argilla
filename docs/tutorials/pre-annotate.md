@@ -8,21 +8,21 @@ See how you can leverage model predictions to pre-annotate your data in Rubrix.
 :img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
 :link: 01-labeling-finetuning.ipynb
 
-Build a sentiment classifier for user requests in the banking domain.
+Build a sentiment classifier for user requests in the banking domain by levarging a pre-trained model from the Hugging Face Hub.
 ```
 
 ```{grid-item-card} 💫 Explore and analyze spaCy NER pipelines
 :img-top: ../_static/tutorials/02-spacy/spacy_ner2.png
 :link: 02-spacy.ipynb
 
-Learn to log and analyze spaCy Name Entity Recognition (NER) predictions.
+Learn to log and analyze spaCy Name Entity Recognition (NER) predictions by exploring two well known datasets from the Hugging Face Hub.
 ```
 
 ```{grid-item-card} 🔫 Zero-shot Named Entity Recognition with Flair
 :img-top: ../_static/tutorials/07-zeroshot_ner/gallery_thumbnail.png
 :link: 07-zeroshot_ner.ipynb
 
-Learn how to analyze and validate NER predictions from Flair's zero-shot model.
+Learn how to analyze and validate NER predictions from Flair's zero-shot model using the WNUT 17 dataset from the Hugging Face Hub.
 ```
 ````
 

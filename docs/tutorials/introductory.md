@@ -8,14 +8,14 @@ These are tutorials with an introductory character to various topics covered by 
 :img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
 :link: 01-labeling-finetuning.ipynb
 
-Build a sentiment classifier for user requests in the banking domain.
+Build a sentiment classifier for user requests in the banking domain by levarging a pre-trained model from the Hugging Face Hub.
 ```
 
 ```{grid-item-card} 📰 Building a news classifier with weak supervision
 :img-top: ../_static/guides/weak_supervision/weak_supervision.svg
 :link: weak-supervision-with-rubrix.ipynb
 
-Build a news classifier using rules and weak supervision.
+Build a news classifier using rules and weak supervision, and how Rubrix makes this process very interactive.
 ```
 ````
 
