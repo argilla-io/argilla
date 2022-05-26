@@ -55,7 +55,12 @@ def test_query_schema(helpers):
 
 
 @pytest.mark.parametrize(
-    "prediction,expected", [([("label", 0, 4)], 1.0), ([("label", 0, 4, 0.5)], 0.5)]
+    "prediction,expected",
+    [
+        ([("label", 0, 4)], 0.0),
+        ([("label", 0, 4, None)], 0.0),
+        ([("label", 0, 4, 0.5)], 0.5),
+    ],
 )
 def test_from_client_prediction(prediction, expected):
     record = TokenClassificationRecord(

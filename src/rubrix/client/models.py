@@ -281,7 +281,7 @@ class TokenClassificationRecord(_Validators):
     tokens: Optional[Union[List[str], Tuple[str, ...]]] = None
 
     prediction: Optional[
-        List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+        List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]
     ] = None
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
@@ -378,14 +378,16 @@ class TokenClassificationRecord(_Validators):
     def add_default_score(
         cls,
         prediction: Optional[
-            List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]
+            List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]
         ],
     ):
         """Adds the default score to the predictions if it is missing"""
         if prediction is None:
             return prediction
         return [
-            (pred[0], pred[1], pred[2], 1.0) if len(pred) == 3 else pred
+            (pred[0], pred[1], pred[2], 0.0)
+            if len(pred) == 3
+            else (pred[0], pred[1], pred[2], pred[3] or 0.0)
             for pred in prediction
         ]
 
