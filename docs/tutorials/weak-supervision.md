@@ -12,14 +12,14 @@ Build a news classifier using rules and weak supervision.
 ```
 
 ```{grid-item-card} 🗂 Weak supervision in multi-label text classification tasks
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: ../_static/tutorials/weak-supervision-multi-label/gallery_thumbnail.png
 :link: weak-supervision-multi-label.ipynb
 
 Tackle two multi-label classification datasets with weak supervision.
 ```
 
 ```{grid-item-card} 🧱 Extending weak supervision workflows with sentence embeddings
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: ../_static/tutorials/extend_weak_labels_with_embeddings/extend_weak_labels.png
 :link: extend_weak_labels_with_embeddings.ipynb
 
 Extend your weak supervision workflows in Rubrix with sentence embeddings.

@@ -19,7 +19,7 @@ Learn to log and analyze spaCy Name Entity Recognition (NER) predictions.
 ```
 
 ```{grid-item-card} 🔫 Zero-shot Named Entity Recognition with Flair
-:img-top: https://via.placeholder.com/700.png?text=Thumbnail
+:img-top: ../_static/tutorials/07-zeroshot_ner/gallery_thumbnail.png
 :link: 07-zeroshot_ner.ipynb
 
 Learn how to analyze and validate NER predictions from Flair's zero-shot model.
