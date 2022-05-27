@@ -419,10 +419,13 @@ class Api:
             >>> import rubrix as rb
             >>> dataset = rb.load(name="example-dataset")
         """
-        if as_pandas is not None:
+        if as_pandas is False:
             warnings.warn(
                 "The argument `as_pandas` is deprecated and will be removed in a future version. "
                 "Please adapt your code accordingly. "
+            )
+        elif as_pandas is True:
+           raise ValueError(
                 "If you want a pandas DataFrame do `rb.load(...).to_pandas()`."
             )
 
