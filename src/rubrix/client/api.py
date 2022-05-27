@@ -410,7 +410,7 @@ class Api:
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
-            as_pandas: DEPRECATED! To get a pandas DataFrame do ``rb.load(...).to_pandas()``.
+            as_pandas: DEPRECATED! To get a pandas DataFrame do ``rb.load('my_dataset').to_pandas()``.
 
         Returns:
             A Rubrix dataset.
@@ -422,11 +422,14 @@ class Api:
         if as_pandas is False:
             warnings.warn(
                 "The argument `as_pandas` is deprecated and will be removed in a future version. "
-                "Please adapt your code accordingly. "
+                "Please adapt your code accordingly. ",
+                FutureWarning,
             )
         elif as_pandas is True:
-           raise ValueError(
-                "If you want a pandas DataFrame do `rb.load(...).to_pandas()`."
+            raise ValueError(
+                "The argument `as_pandas` is deprecated and will be removed in a future version. "
+                "Please adapt your code accordingly. ",
+                "If you want a pandas DataFrame do `rb.load('my_dataset').to_pandas()`.",
             )
 
         response = datasets_api.get_dataset(client=self._client, name=name)
