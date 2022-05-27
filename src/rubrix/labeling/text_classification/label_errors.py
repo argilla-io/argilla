@@ -73,7 +73,7 @@ def find_label_errors(
 
     Examples:
         >>> import rubrix as rb
-        >>> records = rb.load("my_dataset", as_pandas=False)
+        >>> records = rb.load("my_dataset")
         >>> records_with_label_errors = find_label_errors(records)
     """
     try:

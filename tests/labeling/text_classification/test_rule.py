@@ -105,7 +105,7 @@ def test_call(monkeypatch, mocked_client, log_dataset):
     rule = Rule(query="inputs.text:(NOT positive)", label="negative")
     rule.apply(log_dataset)
 
-    records = load(log_dataset, as_pandas=False)
+    records = load(log_dataset)
     assert rule(records[0]) == "negative"
     assert rule(records[1]) is None
 

@@ -188,11 +188,9 @@ def test_load_limits(mocked_client):
 
     limit_data_to = 10
     ds = api.load(name=dataset, limit=limit_data_to)
-    assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
     ds = api.load(name=dataset, limit=limit_data_to)
-    assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
 
@@ -280,13 +278,13 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
 
     # log single records
     api.log(records[0], name=dataset_names[0])
-    dataset = api.load(dataset_names[0], as_pandas=False)
+    dataset = api.load(dataset_names[0])
     records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
 
     # log list of records
     api.log(records, name=dataset_names[1])
-    dataset = api.load(dataset_names[1], as_pandas=False)
+    dataset = api.load(dataset_names[1])
     # check if returned records can be converted to other formats
     assert isinstance(dataset.to_datasets(), datasets.Dataset)
     assert isinstance(dataset.to_pandas(), pd.DataFrame)
@@ -297,7 +295,7 @@ def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_
 
     # log dataset
     api.log(dataset_class(records), name=dataset_names[2])
-    dataset = api.load(dataset_names[2], as_pandas=False)
+    dataset = api.load(dataset_names[2])
     assert len(dataset) == len(records)
     for record, expected in zip(dataset, records):
         record.metrics = expected.metrics
@@ -364,12 +362,12 @@ def test_log_with_wrong_name(mocked_client):
 
 def test_dataset_copy(mocked_client):
     dataset = "test_dataset_copy"
-    dataset_copy = "new_dataset"
+    dataset_copy = "test_dataset_copy_new"
     other_workspace = "test_dataset_copy_ws"
 
-    mocked_client.delete(f"/api/datasets/{dataset}")
-    mocked_client.delete(f"/api/datasets/{dataset_copy}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={other_workspace}")
+    mocked_client.delete(f"/api/datasets/{dataset_copy}")
+    mocked_client.delete(f"/api/datasets/{dataset}")
 
     record = rb.TextClassificationRecord(
         id=0,
@@ -378,9 +376,10 @@ def test_dataset_copy(mocked_client):
         annotation=["T"],
     )
     api.log(record, name=dataset)
+
     api.copy(dataset, name_of_copy=dataset_copy)
-    df = api.load(name=dataset)
-    df_copy = api.load(name=dataset_copy)
+    ds, ds_copy = api.load(name=dataset), api.load(name=dataset_copy)
+    df, df_copy = ds.to_pandas(), ds_copy.to_pandas()
 
     assert df.equals(df_copy)
 
@@ -414,10 +413,11 @@ def test_dataset_copy_to_another_workspace(mocked_client):
             ),
             name=dataset,
         )
-        df = api.load(dataset)
+        ds = api.load(dataset)
+        df = ds.to_pandas()
         api.copy(dataset, name_of_copy=dataset_copy, workspace=new_workspace)
         api.set_workspace(new_workspace)
-        df_copy = api.load(dataset_copy)
+        df_copy = api.load(dataset_copy).to_pandas()
         assert df.equals(df_copy)
 
         with pytest.raises(AlreadyExistsApiError):
@@ -444,6 +444,7 @@ def test_update_record(mocked_client):
     )
 
     df = api.load(name=dataset)
+    df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
@@ -459,6 +460,7 @@ def test_update_record(mocked_client):
     )
 
     df = api.load(name=dataset)
+    df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["annotation"] is None
@@ -481,6 +483,7 @@ def test_text_classifier_with_inputs_list(mocked_client):
     )
 
     df = api.load(name=dataset)
+    df = df.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["inputs"]["text"] == expected_inputs
@@ -504,12 +507,12 @@ def test_load_with_query(mocked_client):
     expected_data = 4
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
     ds = api.load(name=dataset, query="id:1")
+    ds = ds.to_pandas()
     assert len(ds) == 1
     assert ds.id.iloc[0] == 1
 
 
-@pytest.mark.parametrize("as_pandas", [True, False])
-def test_load_as_pandas(mocked_client, as_pandas):
+def test_load_as_pandas(mocked_client):
     dataset = "test_sorted_load"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -517,16 +520,10 @@ def test_load_as_pandas(mocked_client, as_pandas):
     expected_data = 3
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
 
-    # Check that the default value is True
-    if as_pandas:
-        records = api.load(name=dataset)
-        assert isinstance(records, pandas.DataFrame)
-        assert list(records.id) == [0, 1, 2, 3]
-    else:
-        records = api.load(name=dataset, as_pandas=False)
-        assert isinstance(records, rb.DatasetForTextClassification)
-        assert isinstance(records[0], rb.TextClassificationRecord)
-        assert [record.id for record in records] == [0, 1, 2, 3]
+    records = api.load(name=dataset)
+    assert isinstance(records, rb.DatasetForTextClassification)
+    assert isinstance(records[0], rb.TextClassificationRecord)
+    assert [record.id for record in records] == [0, 1, 2, 3]
 
 
 def test_token_classification_spans(mocked_client):
@@ -614,11 +611,14 @@ def test_load_sort(mocked_client):
     api.log(records, name=dataset)
 
     # check sorting policies
-    df = api.load(name=dataset)
+    ds = api.load(name=dataset)
+    df = ds.to_pandas()
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
-    df = api.load(name=dataset, ids=[1, 2, 11])
+    ds = api.load(name=dataset, ids=[1, 2, 11])
+    df = ds.to_pandas()
     assert list(df.id) == [1, 2, 11]
-    df = api.load(name=dataset, ids=["1str", "2str", "11str"])
+    ds = api.load(name=dataset, ids=["1str", "2str", "11str"])
+    df = ds.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
 
 
@@ -639,11 +639,13 @@ def test_load_workspace_from_different_workspace(mocked_client):
         api.log(records, name=dataset)
 
         # check sorting policies
-        df = api.load(name=dataset)
+        ds = api.load(name=dataset)
+        df = ds.to_pandas()
         assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
 
         api.set_workspace(workspace)
         df = api.load(name=dataset)
+        df = df.to_pandas()
         assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     finally:
         api.set_workspace(workspace)

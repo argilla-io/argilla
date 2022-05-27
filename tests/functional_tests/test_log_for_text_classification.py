@@ -60,7 +60,8 @@ def test_search_keywords(mocked_client):
     rb.delete(dataset)
     rb.log(name=dataset, records=dataset_rb)
 
-    df = rb.load(dataset, query="lim*")
+    ds = rb.load(dataset, query="lim*")
+    df = ds.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
     top_keywords = set(
@@ -88,6 +89,7 @@ def test_log_records_with_empty_metadata_list(mocked_client):
     rb.log(expected_records, name=dataset)
 
     df = rb.load(dataset)
+    df = df.to_pandas()
     assert len(df) == len(expected_records)
 
     for meta in df.metadata.values.tolist():

@@ -85,11 +85,9 @@ def test_load_limits(mocked_client, rb_client):
 
     limit_data_to = 10
     ds = rb_client.load(name=dataset, limit=limit_data_to)
-    assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
     ds = rb_client.load(name=dataset, limit=limit_data_to)
-    assert isinstance(ds, pandas.DataFrame)
     assert len(ds) == limit_data_to
 
 
@@ -181,13 +179,13 @@ def test_general_log_load(
 
     # log single records
     rb_client.log(records[0], name=dataset_names[0])
-    dataset = rb_client.load(dataset_names[0], as_pandas=False)
+    dataset = rb_client.load(dataset_names[0])
     records[0].metrics = dataset[0].metrics
     assert dataset[0] == records[0]
 
     # log list of records
     rb_client.log(records, name=dataset_names[1])
-    dataset = rb_client.load(dataset_names[1], as_pandas=False)
+    dataset = rb_client.load(dataset_names[1])
     # check if returned records can be converted to other formats
     assert isinstance(dataset.to_datasets(), datasets.Dataset)
     assert isinstance(dataset.to_pandas(), pd.DataFrame)
@@ -198,7 +196,7 @@ def test_general_log_load(
 
     # log dataset
     rb_client.log(dataset_class(records), name=dataset_names[2])
-    dataset = rb_client.load(dataset_names[2], as_pandas=False)
+    dataset = rb_client.load(dataset_names[2])
     assert len(dataset) == len(records)
     for record, expected in zip(dataset, records):
         record.metrics = expected.metrics
@@ -269,7 +267,8 @@ def test_copy_dataset_to_another_workspace(mocked_client, rb_client):
         ),
         name=dataset,
     )
-    df = rb_client.load(name=dataset)
+    ds = rb_client.load(name=dataset)
+    df = ds.to_pandas()
 
     try:
         mocked_client.add_workspaces_to_rubrix_user([workspace])
@@ -278,7 +277,8 @@ def test_copy_dataset_to_another_workspace(mocked_client, rb_client):
         new_rb_client = RubrixClient(API_URL, api_key=DEFAULT_API_KEY)
         new_rb_client.copy(dataset, target=copy, target_workspace=workspace)
         new_rb_client.set_workspace(workspace)
-        df_copy = new_rb_client.load(copy)
+        ds_copy = new_rb_client.load(copy)
+        df_copy = df_copy = ds.to_pandas()
         assert df.equals(df_copy)
 
         with pytest.raises(AlreadyExistsApiError):
@@ -289,7 +289,7 @@ def test_copy_dataset_to_another_workspace(mocked_client, rb_client):
 
 def test_dataset_copy(mocked_client, rb_client):
     dataset = "test_dataset_copy"
-    dataset_copy = "new_dataset"
+    dataset_copy = "test_dataset_copy_new"
 
     mocked_client.delete(f"/api/datasets/{dataset}")
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
@@ -304,8 +304,8 @@ def test_dataset_copy(mocked_client, rb_client):
         name=dataset,
     )
     rb_client.copy(dataset, target=dataset_copy)
-    df = rb_client.load(name=dataset)
-    df_copy = rb_client.load(name=dataset_copy)
+    df, df_copy = rb_client.load(name=dataset), rb_client.load(name=dataset_copy)
+    df, df_copy = df.to_pandas(), df_copy.to_pandas()
 
     assert df.equals(df_copy)
 
@@ -329,7 +329,8 @@ def test_update_record(mocked_client, rb_client):
         name=dataset,
     )
 
-    df = rb_client.load(name=dataset)
+    ds = rb_client.load(name=dataset)
+    df = ds.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
@@ -344,7 +345,8 @@ def test_update_record(mocked_client, rb_client):
         name=dataset,
     )
 
-    df = rb_client.load(name=dataset)
+    ds = rb_client.load(name=dataset)
+    df = ds.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["annotation"] is None
@@ -366,7 +368,8 @@ def test_text_classifier_with_inputs_list(mocked_client, rb_client):
         name=dataset,
     )
 
-    df = rb_client.load(name=dataset)
+    ds = rb_client.load(name=dataset)
+    df = ds.to_pandas()
     records = df.to_dict(orient="records")
     assert len(records) == 1
     assert records[0]["inputs"]["text"] == expected_inputs
@@ -389,13 +392,13 @@ def test_load_with_query(mocked_client, rb_client):
 
     expected_data = 4
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
-    ds = rb_client.load(name=dataset, query="id:1")
-    assert len(ds) == 1
-    assert ds.id.iloc[0] == 1
+    df = rb_client.load(name=dataset, query="id:1")
+    df = df.to_pandas()
+    assert len(df) == 1
+    assert df.id.iloc[0] == 1
 
 
-@pytest.mark.parametrize("as_pandas", [True, False])
-def test_load_as_pandas(mocked_client, as_pandas, rb_client):
+def test_load_as_pandas(mocked_client, rb_client):
     dataset = "test_sorted_load"
     mocked_client.delete(f"/api/datasets/{dataset}")
     sleep(1)
@@ -403,16 +406,10 @@ def test_load_as_pandas(mocked_client, as_pandas, rb_client):
     expected_data = 3
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
 
-    # Check that the default value is True
-    if as_pandas:
-        records = rb_client.load(name=dataset)
-        assert isinstance(records, pandas.DataFrame)
-        assert list(records.id) == [0, 1, 2, 3]
-    else:
-        records = rb_client.load(name=dataset, as_pandas=False)
-        assert isinstance(records, DatasetForTextClassification)
-        assert isinstance(records[0], TextClassificationRecord)
-        assert [record.id for record in records] == [0, 1, 2, 3]
+    records = rb_client.load(name=dataset)
+    assert isinstance(records, DatasetForTextClassification)
+    assert isinstance(records[0], TextClassificationRecord)
+    assert [record.id for record in records] == [0, 1, 2, 3]
 
 
 def test_token_classification_spans(rb_client):
@@ -500,8 +497,11 @@ def test_load_sort(rb_client):
 
     # check sorting policies
     df = rb_client.load(name=dataset)
+    df = df.to_pandas()
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     df = rb_client.load(name=dataset, ids=[1, 2, 11])
+    df = df.to_pandas()
     assert list(df.id) == [1, 2, 11]
     df = rb_client.load(name=dataset, ids=["1str", "2str", "11str"])
+    df = df.to_pandas()
     assert list(df.id) == ["11str", "1str", "2str"]
