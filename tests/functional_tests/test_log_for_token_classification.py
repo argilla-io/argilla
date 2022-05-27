@@ -94,7 +94,7 @@ def test_log_record_that_makes_me_cry(mocked_client):
     rubrix.delete(dataset)
     rubrix.log(record, name=dataset)
 
-    records = rubrix.load(dataset, as_pandas=False)
+    records = rubrix.load(dataset)
     assert len(records) == 1
     assert records[0].text == record.text
     assert records[0].tokens == record.tokens
@@ -505,6 +505,7 @@ def test_search_keywords(mocked_client):
     rubrix.log(name=dataset, records=dataset_rb)
 
     df = rubrix.load(dataset, query="lis*")
+    df = df.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
     top_keywords = set(

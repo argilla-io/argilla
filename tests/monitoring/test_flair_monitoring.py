@@ -30,7 +30,7 @@ def test_flair_monitoring(mocked_client, monkeypatch):
     tagger.predict(sentence)
 
     detected_labels = sentence.get_labels("ner")
-    records = rb.load(dataset, as_pandas=False)
+    records = rb.load(dataset)
     assert len(records) == 1
 
     record = records[0]

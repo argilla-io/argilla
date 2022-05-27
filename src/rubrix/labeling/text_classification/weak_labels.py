@@ -92,7 +92,7 @@ class WeakLabelsBase:
 
         # load records and check compatibility
         self._records: DatasetForTextClassification = load(
-            dataset, query=query, ids=ids, as_pandas=False
+            dataset, query=query, ids=ids
         )
         if not self._records:
             raise NoRecordsFoundError(
