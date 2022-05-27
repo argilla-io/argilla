@@ -39,7 +39,7 @@
           />
         </template>
       </validate-discard-action>
-      <create-new-action @new-label="onNewLabel" />
+      <create-new-action @new-label="onNewLabel" v-if="allowLabelCreation" />
     </global-actions>
   </div>
 </template>
@@ -70,6 +70,9 @@ export default {
     },
     viewMode() {
       return this.dataset.viewSettings.viewMode;
+    },
+    allowLabelCreation() {
+      return !this.dataset.settings.label_schema;
     },
   },
   methods: {

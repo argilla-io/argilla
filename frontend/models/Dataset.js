@@ -41,6 +41,22 @@ class ObservationDataset extends Model {
   getTaskDatasetClass() {
     return ObservationDataset.getClassDatasetForTask(this.task);
   }
+
+  async _getDatasetSettings() {
+    const { response } = await ObservationDataset.api().get(
+      `/datasets/${this.task}/${this.name}/settings`,
+      {
+        validateStatus: function (status) {
+          return status === 404 || (status >= 200 && status < 300);
+        },
+      }
+    );
+    if (response.status === 404) {
+      return undefined;
+    }
+    return response.data;
+  }
+
   async initialize() {}
 
   async fetchMetricSummary(metricId) {
