@@ -22,7 +22,7 @@ Let's take a look at Rubrix's components and methods:
 Dataset
 ^^^^^^^
 
-A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``Pandas.Dataframe`` from a Python app, script, or a Jupyter/Colab notebook.
+A dataset is a collection of records stored in Rubrix. The main things you can do with a ``Dataset`` are to ``log`` records and to ``load`` the records of a ``Dataset`` into a ``HuggingFace.Dataset`` from a Python app, script, or a Jupyter/Colab notebook.
 
 
 Record
@@ -105,6 +105,26 @@ Token classification kind-of-tasks are NLP tasks aimed to divide the input text 
             },
         )
 
+Text-to-text record
+"""""""""""""""""""
+
+Text2text tasks, like text generation, are tasks where the model receives and outputs a sequence of tokens. Examples of such tasks are machine translation, text summarization, paraphrase generation, etc.
+
+.. code-block:: python
+
+    record = rb.Text2Text(
+        text = "Michael is a professor at Harvard",
+
+        # Predictions are a list of tuples with all your token labels and its starting and ending positions
+        prediction = ["Michael es profesor en Harvard", "Michael es un profesor de Harvard"],
+        prediction_agent = "link or reference to agent",
+
+        # Annotations a strings representing the expected output text for the given input text
+        annotation = "Michael es profesor en Harvard"
+    )
+
+
+
 
 Task
 ^^^^
@@ -144,7 +164,7 @@ Register a set of logs into Rubrix: :meth:`rubrix.log`
 rb.load
 ^^^^^^^
 
-Load a dataset as a pandas DataFrame: :meth:`rubrix.load`
+Load a Rubrix dataset ready for training operations, or data manipulation through ``HuggingFace.Dataset`` : :meth:`rubrix.load`
 
 rb.delete
 ^^^^^^^^^
