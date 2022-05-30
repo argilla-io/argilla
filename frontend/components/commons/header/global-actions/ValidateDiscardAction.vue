@@ -22,7 +22,7 @@
       selectedRecords.length ? '' : 'validate-discard-actions--disabled',
     ]"
   >
-    <ReCheckbox v-model="allSelected" class="list__item__checkbox"></ReCheckbox>
+    <ReCheckbox v-model="allSelected" :disabled="!visibleRecords.length" class="list__item__checkbox"></ReCheckbox>
     <slot name="first" :selectedRecords="selectedRecords" />
     <ReButton
       :disabled="!allowValidation"
@@ -75,7 +75,7 @@ export default {
   },
   watch: {
     visibleRecords(newValue) {
-      this.allSelected = newValue.every((record) => record.selected);
+      this.allSelected = newValue.length ? newValue.every((record) => record.selected) : false;
     },
     allSelected(allSelected) {
       if (
