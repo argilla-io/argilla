@@ -131,6 +131,13 @@ Task
 
 A task defines the objective and shape of the predictions and annotations inside a record. You can see our supported tasks at :ref:`tasks`
 
+
+Settings
+^^^^^^^^
+
+The dataset settings. For now, only a set of the predefined labels (labels schema) is configurable. Still, other settings like annotators, and metadata schema, are planned to be supported as part of dataset settings.
+
+
 Annotation
 ^^^^^^^^^^
 
