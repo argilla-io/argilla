@@ -44,4 +44,4 @@ dependencies:
       - transformers[torch]~=4.18.0
       - loguru
       # install Rubrix in editable mode
-      - -e .[server]
+      - -e .[server,listeners]
