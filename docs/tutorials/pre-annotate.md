@@ -5,7 +5,7 @@ See how you can leverage model predictions to pre-annotate your data in Rubrix.
 ````{grid} 1 1 2 3
 :class-container: tuto-section-2
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
-:img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
+:img-top: ../_static/tutorials/01-labeling-finetuning/label.png
 :link: 01-labeling-finetuning.ipynb
 
 Build a sentiment classifier for user requests in the banking domain by levarging a pre-trained model from the Hugging Face Hub.

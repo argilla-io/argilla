@@ -5,7 +5,7 @@ These are tutorials with an introductory character to various topics covered by 
 ````{grid} 1 1 2 3
 :class-container: tuto-section-1
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
-:img-top: ../_static/tutorials/01-labeling-finetuning/label.svg
+:img-top: ../_static/tutorials/01-labeling-finetuning/label.png
 :link: 01-labeling-finetuning.ipynb
 
 Build a sentiment classifier for user requests in the banking domain by levarging a pre-trained model from the Hugging Face Hub.
