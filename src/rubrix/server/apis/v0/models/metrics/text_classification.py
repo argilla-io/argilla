@@ -75,10 +75,10 @@ class F1Metric(PythonMetric):
         ):
             per_label.update(
                 {
-                    f"{label}_precision": p,
-                    f"{label}_recall": r,
-                    f"{label}_f1": f,
-                    f"{label}_support": s,
+                    f"{label}_precision": p.tolist(),
+                    f"{label}_recall": r.tolist(),
+                    f"{label}_f1": f.tolist(),
+                    f"{label}_support": s.tolist(),
                 }
             )
 
