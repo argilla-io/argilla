@@ -392,14 +392,13 @@ a:active {
   }
   .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
   .wy-menu-vertical li.toctree-l3.current>a {
-    padding-left: 5em;
     padding-right: 2em;
   }
   .wy-menu-vertical li.current a {
     padding: 0.4045em 4em;
   }
 }
-@media screen and (min-width: 1350px) {
+@media screen and (min-width: 1460px) {
   .wy-nav-content {
     max-width: 1200px;
   }
@@ -426,8 +425,8 @@ a [class^="tuto-section-"] {
   margin-right: 1em;
   border-radius: 50%;
 }
-div[class^="tuto-section-"] ~ p {
-  font-size: 20px
+div[class*="tuto-section-"] {
+  padding: 0;
 }
 a .tuto-section-1 {
   background: var(--tuto-section-1);  
@@ -463,6 +462,10 @@ a .tuto-section-6 {
 .sd-card:hover {
   transform: none;
 }
+.sd-card:hover .sd-card-title {
+  transition: color 0.2s ease-in-out;
+  color: #111;
+}
 .sd-card img {
   width: auto;
   margin: 1.5rem auto auto auto;
@@ -476,7 +479,7 @@ a .tuto-section-6 {
     width: 84%;
   }
 }
-@media (min-width: 1360px) {
+@media (min-width: 1460px) {
   .sd-card img {
     height: 130px;
   }
@@ -524,6 +527,6 @@ a .tuto-section-6 {
 }
 .sd-card-body .sd-card-text {
   font-size: 14px;
-  line-height: 1.4em;
+  line-height: 1.8em;
 }
 
