@@ -64,7 +64,7 @@ class F1Metric(PythonMetric):
         )
 
         per_label = {}
-        for label, p, r, f, _ in zip(
+        for label, p, r, f, s in zip(
             labels_mapping.keys(),
             *precision_recall_fscore_support(
                 y_true=y_true,
@@ -74,7 +74,12 @@ class F1Metric(PythonMetric):
             ),
         ):
             per_label.update(
-                {f"{label}_precision": p, f"{label}_recall": r, f"{label}_f1": f}
+                {
+                    f"{label}_precision": p,
+                    f"{label}_recall": r,
+                    f"{label}_f1": f,
+                    f"{label}_support": s,
+                }
             )
 
         return {
