@@ -365,6 +365,9 @@ a:active {
     background: #ffffff;
     max-width: 100%;
   }
+  .wy-side-nav-search {
+    width: var(--sidebarWidth);
+  }
   .wy-nav-content-wrap {
     margin-left: var(--sidebarWidth);
   }
@@ -380,7 +383,6 @@ a:active {
   .wy-side-scroll {
     width: var(--sidebarWidth);
   }
-  .wy-side-nav-search,
   .wy-menu-vertical li.toctree-l1.current>a,
   .wy-menu-vertical a {
     padding-left: 3em;
@@ -388,6 +390,10 @@ a:active {
   }
   .wy-menu-vertical li.toctree-l2.current>a {
     padding-left: 4em;
+    padding-right: 2em;
+  }
+  .wy-side-nav-search {
+    padding-left: 2em;
     padding-right: 2em;
   }
   .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
