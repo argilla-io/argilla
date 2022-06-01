@@ -45,6 +45,7 @@ def test_metrics_for_text_classification(mocked_client):
         "ham_f1": 1.0,
         "ham_precision": 1.0,
         "ham_recall": 1.0,
+        "ham_support": 1,
         "precision_macro": 1.0,
         "precision_micro": 1.0,
         "recall_macro": 1.0,
@@ -52,6 +53,7 @@ def test_metrics_for_text_classification(mocked_client):
         "spam_f1": 1.0,
         "spam_precision": 1.0,
         "spam_recall": 1.0,
+        "spam_support": 1,
     }
     results.visualize()
 
@@ -63,6 +65,7 @@ def test_metrics_for_text_classification(mocked_client):
         "ham_f1": 1.0,
         "ham_precision": 1.0,
         "ham_recall": 1.0,
+        "ham_support": 1,
         "precision_macro": 1.0,
         "precision_micro": 1.0,
         "recall_macro": 1.0,
@@ -70,6 +73,7 @@ def test_metrics_for_text_classification(mocked_client):
         "spam_f1": 1.0,
         "spam_precision": 1.0,
         "spam_recall": 1.0,
+        "spam_support": 1,
     }
     results.visualize()
 

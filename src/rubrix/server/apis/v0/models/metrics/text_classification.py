@@ -37,7 +37,6 @@ class F1Metric(PythonMetric):
         if not len(ds_labels):
             return {}
 
-        labels_mapping = {label: i for i, label in enumerate(ds_labels)}
         y_true, y_pred = ([], [])
         for record in filtered_records:
             annotations = record.annotated_as
@@ -65,7 +64,7 @@ class F1Metric(PythonMetric):
 
         per_label = {}
         for label, p, r, f, s in zip(
-            labels_mapping.keys(),
+            ds_labels,
             *precision_recall_fscore_support(
                 y_true=y_true,
                 y_pred=y_pred,
