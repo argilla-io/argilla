@@ -44,15 +44,15 @@ class F1Metric(PythonMetric):
             predictions = record.predicted_as
 
             if not self.multi_label:
-                y_true.append(labels_mapping[annotations[0]])
-                y_pred.append(labels_mapping[predictions[0]])
+                y_true.append(annotations[0])
+                y_pred.append(predictions[0])
 
             else:
-                y_true.append([labels_mapping[label] for label in annotations])
-                y_pred.append([labels_mapping[label] for label in predictions])
+                y_true.append(annotations)
+                y_pred.append(predictions)
 
         if self.multi_label:
-            mlb = MultiLabelBinarizer(classes=list(labels_mapping.values()))
+            mlb = MultiLabelBinarizer(classes=[label for label in ds_labels])
             y_true = mlb.fit_transform(y_true)
             y_pred = mlb.fit_transform(y_pred)
 
