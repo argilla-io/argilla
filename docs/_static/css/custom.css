@@ -1,7 +1,7 @@
 /** css/custom.css **/
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 :root {
-  --sidebarWidth: 360px;
+  --sidebarWidth: 280px;
   --primaryColor: #0508D9;
   --link: #0709ae;
   --linkActive: #4C4EA3;
@@ -19,12 +19,18 @@
   --warningBackground: #ffba281C;
   --white: #ffffff;
   --line: #e9eaed;
-  --tuto-section-1: #F8C146;
-  --tuto-section-2: #5FD295;
-  --tuto-section-3: #F5AB58;
-  --tuto-section-4: #7E8AF7;
-  --tuto-section-5: #59A1F7;
-  --tuto-section-6: #F1FB18;
+  --tuto-section-1: #7B8CDE;
+  --tuto-section-2: #797596;
+  --tuto-section-3: #E7A9B5;
+  --tuto-section-4: #6494AA;
+  --tuto-section-5: #FFBF46;
+  --tuto-section-6: #8DA1B9;
+  --tuto-section-7: #68D8D6;
+  --tuto-section-8: #E086D3;
+  --tuto-section-9: #E88D67;
+  --tuto-section-10: #7EB77F;
+  --tuto-section-11: #A1869E;
+  --tuto-section-12: #466362;
 }
 
 body {
@@ -353,11 +359,11 @@ a:active {
   font-weight: normal;
   src: local('Futura Light'), url('fonts/futura-light.woff2') format('woff2');
 }
-
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 900px) {
   .wy-nav-content {
     padding: 2em 4.5em;
-    background: #ffffff
+    background: #ffffff;
+    max-width: 100%;
   }
   .wy-nav-content-wrap {
     margin-left: var(--sidebarWidth);
@@ -377,17 +383,25 @@ a:active {
   .wy-side-nav-search,
   .wy-menu-vertical li.toctree-l1.current>a,
   .wy-menu-vertical a {
-    padding-left: 2em;
+    padding-left: 3em;
     padding-right: 2em;
   }
   .wy-menu-vertical li.toctree-l2.current>a {
-    padding-left: 34px;
-    padding-right: 2em;
-  };
-  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
-  .wy-menu-vertical li.toctree-l3.current>a {
     padding-left: 4em;
     padding-right: 2em;
+  }
+  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+  .wy-menu-vertical li.toctree-l3.current>a {
+    padding-left: 5em;
+    padding-right: 2em;
+  }
+  .wy-menu-vertical li.current a {
+    padding: 0.4045em 4em;
+  }
+}
+@media screen and (min-width: 1350px) {
+  .wy-nav-content {
+    max-width: 1200px;
   }
 }
 /* Change the white to any color */
@@ -406,12 +420,14 @@ input:-webkit-autofill:active
 
 /* Tutorials sections */
 a [class^="tuto-section-"] {
-  height: 10px;
-  width: 10px;
+  height: 14px;
+  width: 14px;
   display: inline-block;
   margin-right: 1em;
-  transform: rotate(45deg);
-  border-radius: 2px;
+  border-radius: 50%;
+}
+div[class^="tuto-section-"] ~ p {
+  font-size: 20px
 }
 a .tuto-section-1 {
   background: var(--tuto-section-1);  
@@ -457,12 +473,12 @@ a .tuto-section-6 {
 }
 @supports (object-fit: cover) {
   .sd-card img {
-    width: 80%;
+    width: 84%;
   }
 }
 @media (min-width: 1360px) {
   .sd-card img {
-    height: 100px;
+    height: 130px;
   }
 }
 @media (max-width: 576px) {
@@ -507,7 +523,7 @@ a .tuto-section-6 {
   margin-bottom: 20px;
 }
 .sd-card-body .sd-card-text {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4em;
 }
 
