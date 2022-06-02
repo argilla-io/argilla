@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, Iterable, List
+from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set
 
 from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
@@ -29,7 +29,9 @@ class F1Metric(PythonMetric):
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {
-            label for record in filtered_records for label in record.annotated_as
+            label
+            for record in filtered_records
+            for label in record.annotated_as + record.predicted_as
         }
 
         if not len(ds_labels):
@@ -38,8 +40,8 @@ class F1Metric(PythonMetric):
         labels_mapping = {label: i for i, label in enumerate(ds_labels)}
         y_true, y_pred = ([], [])
         for record in filtered_records:
-            annotations = record.predicted_as
-            predictions = record.annotated_as
+            annotations = record.annotated_as
+            predictions = record.predicted_as
 
             if not self.multi_label:
                 y_true.append(labels_mapping[annotations[0]])
@@ -62,17 +64,21 @@ class F1Metric(PythonMetric):
         )
 
         per_label = {}
-        for label, p, r, f, _ in zip(
+        for label, p, r, f, s in zip(
             labels_mapping.keys(),
             *precision_recall_fscore_support(
                 y_true=y_true,
                 y_pred=y_pred,
-                labels=list(labels_mapping.values()),
                 average=None,
             ),
         ):
             per_label.update(
-                {f"{label}_precision": p, f"{label}_recall": r, f"{label}_f1": f}
+                {
+                    f"{label}_precision": p.tolist(),
+                    f"{label}_recall": r.tolist(),
+                    f"{label}_f1": f.tolist(),
+                    f"{label}_support": s.tolist(),
+                }
             )
 
         return {
