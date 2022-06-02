@@ -103,7 +103,13 @@ def f1(data: Dict[str, float], title: str):
     from plotly.subplots import make_subplots
 
     fig = make_subplots(
-        rows=1, cols=3, subplot_titles=["macro average", "micro average", "per label"]
+        rows=1,
+        cols=3,
+        subplot_titles=[
+            "macro average",
+            "micro average",
+            "per label",
+        ],
     )
 
     fig.add_bar(
@@ -118,9 +124,15 @@ def f1(data: Dict[str, float], title: str):
         row=1,
         col=2,
     )
+    per_label = {
+        k: v
+        for k, v in data.items()
+        if all(key not in k for key in ["macro", "micro", "support"])
+    }
+
     fig.add_bar(
-        x=[k for k, v in data.items() if "macro" not in k and "micro" not in k],
-        y=[v for k, v in data.items() if "macro" not in k and "micro" not in k],
+        x=[k for k, v in per_label.items()],
+        y=[v for k, v in per_label.items()],
         row=1,
         col=3,
     )
