@@ -187,7 +187,7 @@ You can join the conversation on our Github page and our Github forum.
    :hidden:
 
    tutorials/introductory.md
-   tutorials/pre-annotate.md
+   tutorials/model_predictions.md
    tutorials/weak-supervision.md
    tutorials/active-learning.md
    tutorials/label-errors.md
