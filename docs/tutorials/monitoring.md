@@ -2,7 +2,7 @@
 
 See how Rubrix can help you to monitor your model predictions.
 
-````{grid} 1 1 2 3
+````{grid} 1 1 2 2
 :class-container: tuto-section-6
 ```{grid-item-card} 💾 Monitor predictions in HTTP API endpoints
 :img-top: ../_static/tutorials/09-automatic_fastapi/gallery_thumbnail.png

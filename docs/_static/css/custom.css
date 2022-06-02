@@ -474,7 +474,7 @@ a .tuto-section-6 {
 }
 .sd-card img {
   width: auto;
-  margin: 1.5rem auto auto auto;
+  margin: 2rem auto auto auto;
   border-radius: 5px;
   object-fit: cover;
   object-position: 100% 0;
@@ -482,12 +482,17 @@ a .tuto-section-6 {
 }
 @supports (object-fit: cover) {
   .sd-card img {
-    width: 84%;
+    width: 80%;
   }
 }
-@media (min-width: 1460px) {
+@media (min-width: 576px) {
   .sd-card img {
-    height: 130px;
+    height: 12vw;
+  }
+}
+@media (min-width: 1440px) {
+  .sd-card img {
+    height: 190px;
   }
 }
 @media (max-width: 576px) {

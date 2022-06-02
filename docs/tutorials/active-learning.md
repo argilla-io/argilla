@@ -2,7 +2,7 @@
 
 See how you can create Active Learning workflows with Rubrix.
 
-````{grid} 1 1 2 3
+````{grid} 1 1 2 2
 :class-container: tuto-section-4
 ```{grid-item-card} 🤔 Active learning with ModAL and scikit-learn
 :img-top: ../_static/tutorials/05-active_learning/default_validated.png

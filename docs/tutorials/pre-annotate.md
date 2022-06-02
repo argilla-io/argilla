@@ -2,7 +2,7 @@
 
 See how you can leverage model predictions to pre-annotate your data in Rubrix.
 
-````{grid} 1 1 2 3
+````{grid} 1 1 2 2
 :class-container: tuto-section-2
 ```{grid-item-card} 🏷️ Label your data to fine-tune a classifier with Hugging Face
 :img-top: ../_static/tutorials/01-labeling-finetuning/label.png

@@ -2,7 +2,7 @@
 
 Want to find label errors in your data? Check how Rubrix can help you.
 
-````{grid} 1 1 2 3
+````{grid} 1 1 2 2
 :class-container: tuto-section-5
 ```{grid-item-card} 🧼 Clean labels using your model loss
 :img-top: ../_static/tutorials/08-error_analysis_using_loss/gallery_thumbnail.png
