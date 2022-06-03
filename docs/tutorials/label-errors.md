@@ -1,6 +1,6 @@
 # <span class="tuto-section-5"></span>Label errors
 
-Want to find label errors in your data? Check how Rubrix can help you.
+These tutorials show you how to find label errors in your data using Rubrix.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-5

@@ -1,6 +1,6 @@
 # <span class="tuto-section-1"></span>Introductory
 
-These are tutorials with an introductory character to various topics covered by Rubrix.
+These tutorials are a good starting point and introduce you to various topics covered by Rubrix.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-1

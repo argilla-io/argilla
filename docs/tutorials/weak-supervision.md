@@ -1,6 +1,6 @@
 # <span class="tuto-section-3"></span>Weak supervision
 
-Here we showcase Rubrix's strong support for weak supervision.
+These tutorials get you started with weak supervision using Rubrix.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-3

@@ -1,6 +1,6 @@
 # <span class="tuto-section-6"></span>Monitoring
 
-See how Rubrix can help you to monitor your model predictions.
+These tutorials show you how Rubrix can help you to monitor your model predictions.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-6

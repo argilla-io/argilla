@@ -1,6 +1,6 @@
 # <span class="tuto-section-4"></span>Active Learning
 
-See how you can create Active Learning workflows with Rubrix.
+These tutorials show you how to create Active Learning workflows with Rubrix.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-4

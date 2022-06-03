@@ -1,6 +1,6 @@
 # <span class="tuto-section-2"></span>Model predictions
 
-See how you can leverage model predictions to analyze and evaluate your model, or to pre-annotate your data in Rubrix.
+These tutorials show you how you can leverage model predictions to analyze and evaluate your model, or to pre-annotate your data in Rubrix.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
