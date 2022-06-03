@@ -17,8 +17,8 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.tasks.search.query_builder import EsQueryBuilder
-from rubrix.server.tasks.token_classification.api.model import (
+from rubrix.server.apis.v0.models.commons.model import PredictionStatus
+from rubrix.server.apis.v0.models.token_classification import (
     EntitySpan,
     TokenClassificationAnnotation,
     TokenClassificationQuery,
@@ -220,3 +220,19 @@ def test_record_scores():
         ),
     )
     assert record.scores == [0.8, 0.1, 0.2]
+
+
+def test_annotated_without_entities():
+    text = "The text that i wrote"
+    record = TokenClassificationRecord(
+        text=text,
+        tokens=text.split(),
+        prediction=TokenClassificationAnnotation(
+            agent="pred.test", entities=[EntitySpan(start=0, end=3, label="DET")]
+        ),
+        annotation=TokenClassificationAnnotation(agent="test", entities=[]),
+    )
+
+    assert record.annotated_by == [record.annotation.agent]
+    assert record.predicted_by == [record.prediction.agent]
+    assert record.predicted == PredictionStatus.KO

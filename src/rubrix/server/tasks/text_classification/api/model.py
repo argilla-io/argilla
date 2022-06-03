@@ -299,7 +299,7 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
 
     @property
     def predicted(self) -> Optional[PredictionStatus]:
-        if self.predicted_as and self.annotated_as:
+        if self.predicted_by and self.annotated_by:
             return (
                 PredictionStatus.OK
                 if set(self.predicted_as) == set(self.annotated_as)

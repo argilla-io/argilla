@@ -352,3 +352,34 @@ def test_query_with_uncovered_by_rules():
             },
         }
     }
+
+
+def test_empty_labels_for_no_multilabel():
+    with pytest.raises(
+        ValidationError,
+        match="Single label record must include only one annotation label",
+    ):
+        TextClassificationRecord(
+            inputs={"text": "The input text"},
+            annotation=TextClassificationAnnotation(agent="ann.", labels=[]),
+        )
+
+    record = TextClassificationRecord(
+        inputs={"text": "The input text"},
+        prediction=TextClassificationAnnotation(agent="ann.", labels=[]),
+        annotation=TextClassificationAnnotation(
+            agent="ann.", labels=[ClassPrediction(class_label="B")]
+        ),
+    )
+    assert record.predicted == PredictionStatus.KO
+
+
+def test_annotated_without_labels_for_multilabel():
+    record = TextClassificationRecord(
+        inputs={"text": "The input text"},
+        multi_label=True,
+        prediction=TextClassificationAnnotation(agent="pred.", labels=[]),
+        annotation=TextClassificationAnnotation(agent="ann.", labels=[]),
+    )
+
+    assert record.predicted == PredictionStatus.OK
