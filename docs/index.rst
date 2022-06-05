@@ -164,6 +164,7 @@ You can join the conversation on our Github page and our Github forum.
 
    getting_started/setup&installation
    getting_started/concepts
+   getting_started/basics
    getting_started/user-management
    getting_started/advanced_setup_guides
 
