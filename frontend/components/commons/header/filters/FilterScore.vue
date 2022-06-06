@@ -135,7 +135,7 @@ export default {
     },
     encoding: {
       x: {
-        scale: { zero: true },
+        scale: { nice: 1 },
         bin: { maxbins: 100, extent: [0.0, 1.0] },
         field: "key",
         type: "quantitative",
