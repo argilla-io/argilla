@@ -1,7 +1,7 @@
 /** css/custom.css **/
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 :root {
-  --sidebarWidth: 360px;
+  --sidebarWidth: 280px;
   --primaryColor: #0508D9;
   --link: #0709ae;
   --linkActive: #4C4EA3;
@@ -19,6 +19,18 @@
   --warningBackground: #ffba281C;
   --white: #ffffff;
   --line: #e9eaed;
+  --tuto-section-1: #7B8CDE;
+  --tuto-section-2: #797596;
+  --tuto-section-3: #68D8D6;
+  --tuto-section-4: #6494AA;
+  --tuto-section-5: #FFBF46;
+  --tuto-section-6: #8DA1B9;
+  --tuto-section-7: #E086D3;
+  --tuto-section-8: #E88D67;
+  --tuto-section-9: #7EB77F;
+  --tuto-section-10: #A1869E;
+  --tuto-section-11: #466362;
+  --tuto-section-11: #E7A9B5;
 }
 
 body {
@@ -42,6 +54,9 @@ h2 {
 }
 .document .section h1 {
   margin-top: 2em;
+}
+.document .section h1 span {
+  display: none;
 }
 .document .section h2 {
   margin-top: 1.5em;
@@ -344,11 +359,14 @@ a:active {
   font-weight: normal;
   src: local('Futura Light'), url('fonts/futura-light.woff2') format('woff2');
 }
-
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 900px) {
   .wy-nav-content {
     padding: 2em 4.5em;
-    background: #ffffff
+    background: #ffffff;
+    max-width: 100%;
+  }
+  .wy-side-nav-search {
+    width: var(--sidebarWidth);
   }
   .wy-nav-content-wrap {
     margin-left: var(--sidebarWidth);
@@ -365,20 +383,30 @@ a:active {
   .wy-side-scroll {
     width: var(--sidebarWidth);
   }
-  .wy-side-nav-search,
   .wy-menu-vertical li.toctree-l1.current>a,
   .wy-menu-vertical a {
-    padding-left: 2em;
+    padding-left: 3em;
     padding-right: 2em;
   }
   .wy-menu-vertical li.toctree-l2.current>a {
-    padding-left: 34px;
-    padding-right: 2em;
-  };
-  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
-  .wy-menu-vertical li.toctree-l3.current>a {
     padding-left: 4em;
     padding-right: 2em;
+  }
+  .wy-side-nav-search {
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+  .wy-menu-vertical li.toctree-l3.current>a {
+    padding-right: 2em;
+  }
+  .wy-menu-vertical li.current a {
+    padding: 0.4045em 4em;
+  }
+}
+@media screen and (min-width: 1460px) {
+  .wy-nav-content {
+    max-width: 1200px;
   }
 }
 /* Change the white to any color */
@@ -394,3 +422,122 @@ input:-webkit-autofill:active
   background: #c5c6e0;
   box-shadow: 0 0 0 2px #c5c6e0;
 }
+
+/* Tutorials sections */
+a [class^="tuto-section-"] {
+  height: 14px;
+  width: 14px;
+  display: inline-block;
+  margin-right: 1em;
+  border-radius: 50%;
+}
+div[class*="tuto-section-"] {
+  padding: 0;
+}
+a .tuto-section-1 {
+  background: var(--tuto-section-1);  
+}
+a .tuto-section-2 {
+  background: var(--tuto-section-2);  
+}
+a .tuto-section-3 {
+  background: var(--tuto-section-3);  
+}
+a .tuto-section-4 {
+  background: var(--tuto-section-4);  
+}
+a .tuto-section-5 {
+  background: var(--tuto-section-5);  
+}
+a .tuto-section-6 {
+  background: var(--tuto-section-6);  
+}
+
+/* Cards */
+.sd-card {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  box-shadow: none !important;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 2em;
+}
+.sd-card:hover {
+  transform: none;
+}
+.sd-card:hover .sd-card-title {
+  transition: color 0.2s ease-in-out;
+  color: #111;
+}
+.sd-card img {
+  width: auto;
+  margin: 2rem auto auto auto;
+  border-radius: 5px;
+  object-fit: cover;
+  object-position: 100% 0;
+  height: 100px;
+}
+@supports (object-fit: cover) {
+  .sd-card img {
+    width: 80%;
+  }
+}
+@media (min-width: 576px) {
+  .sd-card img {
+    height: 12vw;
+  }
+}
+@media (min-width: 1440px) {
+  .sd-card img {
+    height: 190px;
+  }
+}
+@media (max-width: 576px) {
+  .sd-card img {
+    height: 30vw;
+  }
+}
+.tuto-section-1 .sd-card {
+  border-color:  var(--tuto-section-1);
+  background:  var(--tuto-section-1);
+}
+.tuto-section-2 .sd-card {
+  border-color:  var(--tuto-section-2);
+  background:  var(--tuto-section-2);
+}
+.tuto-section-3 .sd-card {
+  border-color:  var(--tuto-section-3);
+  background:  var(--tuto-section-3);
+}
+.tuto-section-4 .sd-card {
+  border-color:  var(--tuto-section-4);
+  background:  var(--tuto-section-4);
+}
+.tuto-section-5 .sd-card {
+  border-color:  var(--tuto-section-5);
+  background:  var(--tuto-section-5);
+}
+.tuto-section-6 .sd-card {
+  border-color:  var(--tuto-section-6);
+  background:  var(--tuto-section-6);
+}
+.sd-card-body {
+  padding-left: 0;
+  padding-right: 0;
+  background:  white;
+  margin-top: -1em;
+
+}
+.sd-card-body .sd-card-title {
+  font-weight: normal !important;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+.sd-card-body .sd-card-text {
+  font-size: 14px;
+  line-height: 1.8em;
+}
+
