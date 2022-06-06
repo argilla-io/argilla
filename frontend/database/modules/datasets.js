@@ -108,14 +108,14 @@ async function _loadTaskDataset(dataset) {
   if (total === undefined || aggregations === undefined) {
     const globalResults = await _querySearch({
       dataset: _dataset,
-      query: _dataset.query,
+      query: {},
       size: 0,
     });
-
     _dataset = await _updateTaskDataset({
       dataset: _dataset,
       data: { globalResults },
     });
+    await _refreshDatasetAggregations({ dataset: _dataset });
   }
 
   if (pagination && pagination.page > 1) {
