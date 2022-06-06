@@ -87,6 +87,9 @@ class SearchRecordsService:
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
+            highligth_results=query is not None
+            and query.query_text is not None
+            and len(query.query_text) > 0,
         )
         metrics_results = {}
         for metric_id in metrics or []:

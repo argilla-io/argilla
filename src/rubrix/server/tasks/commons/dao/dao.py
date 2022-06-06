@@ -180,6 +180,7 @@ class DatasetRecordsDAO:
         size: int = 100,
         record_from: int = 0,
         exclude_fields: List[str] = None,
+        highligth_results: bool = True,
     ) -> RecordSearchResults:
         """
         SearchRequest records under a dataset given a search parameters.
@@ -216,8 +217,11 @@ class DatasetRecordsDAO:
             "query": search.query or {"match_all": {}},
             "sort": sort_config,
             "aggs": aggregation_requests,
-            "highlight": self.__configure_query_highlight__(task=dataset.task),
         }
+        if highligth_results:
+            es_query["highlight"] = self.__configure_query_highlight__(
+                task=dataset.task
+            )
 
         try:
             results = self._es.search(index=records_index, query=es_query, size=size)
