@@ -15,9 +15,9 @@
 
 from datetime import datetime
 
-from rubrix.server.datasets.model import Dataset
-from rubrix.server.tasks.commons import BulkResponse, PredictionStatus
-from rubrix.server.tasks.text_classification.api import (
+from rubrix.server.apis.v0.models.commons.model import BulkResponse, PredictionStatus
+from rubrix.server.apis.v0.models.datasets import Dataset
+from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
     TextClassificationBulkData,
     TextClassificationQuery,

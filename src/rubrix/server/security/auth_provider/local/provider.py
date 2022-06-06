@@ -24,14 +24,10 @@ from fastapi.security import (
 )
 from jose import JWTError, jwt
 
-from rubrix.server.commons.errors import InactiveUserError, UnauthorizedError
-from rubrix.server.commons.es_wrapper import create_es_wrapper
-from rubrix.server.datasets.dao import DatasetsDAO
-from rubrix.server.datasets.service import DatasetsService
+from rubrix.server.errors import InactiveUserError, UnauthorizedError
 from rubrix.server.security.auth_provider.base import AuthProvider, api_key_header
 from rubrix.server.security.auth_provider.local.users.service import UsersService
 from rubrix.server.security.model import Token, User
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
 
 from .settings import Settings, settings
 

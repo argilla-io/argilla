@@ -1,19 +1,20 @@
 import pytest
 
 import rubrix
-from rubrix.server.commons.es_wrapper import ElasticsearchWrapper
-from rubrix.server.datasets.model import Dataset
-from rubrix.server.tasks.commons import ScoreRange, TaskType
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
-from rubrix.server.tasks.commons.metrics.service import MetricsService
-from rubrix.server.tasks.search.model import SortConfig
-from rubrix.server.tasks.search.query_builder import EsQueryBuilder
-from rubrix.server.tasks.search.service import SearchRecordsService
-from rubrix.server.tasks.text_classification import (
+from rubrix.server.apis.v0.models.commons.model import ScoreRange, TaskType
+from rubrix.server.apis.v0.models.datasets import Dataset
+from rubrix.server.apis.v0.models.metrics.base import BaseMetric
+from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.tasks.token_classification import TokenClassificationQuery
+from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
+from rubrix.server.daos.records import DatasetRecordsDAO
+from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
+from rubrix.server.services.metrics import MetricsService
+from rubrix.server.services.search.model import SortConfig
+from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.services.search.service import SearchRecordsService
 
 
 @pytest.fixture
@@ -135,7 +136,7 @@ def test_failing_metrics(service, mocked_client):
         dataset=dataset,
         query=TextClassificationQuery(),
         sort_config=SortConfig(),
-        metrics=["missing-metric"],
+        metrics=[BaseMetric(id="missing-metric", name="Missing metric")],
         size=0,
         record_type=TextClassificationRecord,
     )

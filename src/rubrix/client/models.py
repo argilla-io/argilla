@@ -27,7 +27,7 @@ import pandas as pd
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.helpers import limit_value_length
+from rubrix.utils import limit_value_length
 
 _LOGGER = logging.getLogger(__name__)
 

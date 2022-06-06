@@ -30,16 +30,16 @@ from rubrix.client.sdk.text_classification.models import (
 from rubrix.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
 )
-from rubrix.server.tasks.text_classification.api.model import (
+from rubrix.server.apis.v0.models.text_classification import (
     LabelingRule as ServerLabelingRule,
 )
-from rubrix.server.tasks.text_classification.api.model import (
+from rubrix.server.apis.v0.models.text_classification import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
 )
-from rubrix.server.tasks.text_classification.api.model import (
+from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationBulkData as ServerTextClassificationBulkData,
 )
-from rubrix.server.tasks.text_classification.api.model import (
+from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery as ServerTextClassificationQuery,
 )
 

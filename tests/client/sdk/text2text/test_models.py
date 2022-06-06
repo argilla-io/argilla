@@ -26,10 +26,10 @@ from rubrix.client.sdk.text2text.models import (
     Text2TextQuery,
 )
 from rubrix.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
-from rubrix.server.tasks.text2text.api.model import (
+from rubrix.server.apis.v0.models.text2text import (
     Text2TextBulkData as ServerText2TextBulkData,
 )
-from rubrix.server.tasks.text2text.api.model import (
+from rubrix.server.apis.v0.models.text2text import (
     Text2TextQuery as ServerText2TextQuery,
 )
 

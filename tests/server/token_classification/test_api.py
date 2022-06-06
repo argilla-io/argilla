@@ -16,15 +16,13 @@ from typing import Callable
 
 import pytest
 
-from rubrix.server.tasks.commons import BulkResponse, SortableField
-from rubrix.server.tasks.token_classification import (
+from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
+from rubrix.server.apis.v0.models.token_classification import (
+    TokenClassificationBulkData,
     TokenClassificationQuery,
+    TokenClassificationRecord,
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
-)
-from rubrix.server.tasks.token_classification.api import (
-    TokenClassificationBulkData,
-    TokenClassificationRecord,
 )
 
 

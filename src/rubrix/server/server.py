@@ -26,17 +26,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.commons.es_wrapper import create_es_wrapper
-from rubrix.server.commons.static_rewrite import RewriteStaticFiles
-from rubrix.server.datasets.dao import DatasetsDAO
+from rubrix.logging import configure_logging
+from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.apis.v0.settings.server import settings as api_settings
+from rubrix.server.daos.datasets import DatasetsDAO
+from rubrix.server.daos.records import DatasetRecordsDAO
+from rubrix.server.elasticseach.client_wrapper import create_es_wrapper
+from rubrix.server.errors import APIErrorHandler
+from rubrix.server.routes import api_router
 from rubrix.server.security import auth
-from rubrix.server.tasks.commons.dao.dao import DatasetRecordsDAO
-
-from ..logging import configure_logging
-from .commons.errors import APIErrorHandler
-from .commons.settings import settings
-from .commons.settings import settings as api_settings
-from .routes import api_router
+from rubrix.server.static_rewrite import RewriteStaticFiles
 
 
 def configure_middleware(app: FastAPI):

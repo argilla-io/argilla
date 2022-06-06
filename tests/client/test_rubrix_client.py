@@ -41,7 +41,9 @@ from rubrix.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
-from rubrix.server.tasks.text_classification import TextClassificationSearchResults
+from rubrix.server.apis.v0.models.text_classification import (
+    TextClassificationSearchResults,
+)
 from tests.server.test_api import create_some_data_for_text_classification
 
 API_URL = api_url = "http://localhost:6900"
