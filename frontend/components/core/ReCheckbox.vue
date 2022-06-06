@@ -56,8 +56,9 @@ export default {
     classes() {
       return {
         checked: Array.isArray(this.areChecked)
-          ? this.areChecked.includes(this.value) ||
-            _.find(this.areChecked, this.value)
+          ? Array.isArray(this.areChecked)
+            ? this.areChecked.includes(this.value)
+            : _.find(this.areChecked, this.value)
           : this.checked,
         disabled: this.disabled,
       };
