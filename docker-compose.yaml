@@ -2,7 +2,7 @@ version: "3"
 
 services:
   rubrix:
-    image: recognai/rubrix:v0.14.2
+    image: recognai/rubrix:v0.15.0
     restart: unless-stopped
     ports:
       - "6900:80"
