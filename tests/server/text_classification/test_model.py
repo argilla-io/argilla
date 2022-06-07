@@ -286,16 +286,18 @@ def test_query_with_uncovered_by_rules():
             "must": {"match_all": {}},
             "must_not": {
                 "bool": {
+                    "minimum_should_match": 1,
                     "should": [
                         {
                             "bool": {
+                                "minimum_should_match": "30%",
                                 "should": [
                                     {
                                         "query_string": {
+                                            "boost": "2.0",
                                             "default_field": "words",
                                             "default_operator": "AND",
                                             "query": "query",
-                                            "boost": "2.0",
                                         }
                                     },
                                     {
@@ -305,19 +307,26 @@ def test_query_with_uncovered_by_rules():
                                             "query": "query",
                                         }
                                     },
+                                    {
+                                        "query_string": {
+                                            "default_field": "text",
+                                            "default_operator": "AND",
+                                            "query": "query",
+                                        }
+                                    },
                                 ],
-                                "minimum_should_match": "50%",
                             }
                         },
                         {
                             "bool": {
+                                "minimum_should_match": "30%",
                                 "should": [
                                     {
                                         "query_string": {
+                                            "boost": "2.0",
                                             "default_field": "words",
                                             "default_operator": "AND",
                                             "query": "other*",
-                                            "boost": "2.0",
                                         }
                                     },
                                     {
@@ -327,12 +336,17 @@ def test_query_with_uncovered_by_rules():
                                             "query": "other*",
                                         }
                                     },
+                                    {
+                                        "query_string": {
+                                            "default_field": "text",
+                                            "default_operator": "AND",
+                                            "query": "other*",
+                                        }
+                                    },
                                 ],
-                                "minimum_should_match": "50%",
                             }
                         },
                     ],
-                    "minimum_should_match": 1,
                 }
             },
         }

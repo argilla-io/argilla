@@ -260,8 +260,15 @@ class filters:
                         "query": text_query,
                     }
                 },
+                {
+                    "query_string": {
+                        "default_field": "text",
+                        "default_operator": "AND",
+                        "query": text_query,
+                    }
+                },
             ],
-            minimum_should_match="50%",
+            minimum_should_match="30%",
         )
 
     @staticmethod
