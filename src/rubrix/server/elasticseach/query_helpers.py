@@ -406,14 +406,8 @@ class aggregations:
             field_type: str, field_name: str
         ) -> Optional[Dict[str, Any]]:
             if field_type in ["keyword", "long", "integer", "boolean"]:
-                return {
-                    "terms": {
-                        "field": field_name,
-                        "size": size or aggregations.DEFAULT_AGGREGATION_SIZE,
-                        "order": {"_count": "desc"},
-                    }
-                }
-            if field_type in ["float", "long"]:
+                return aggregations.terms_aggregation(field_name=field_name, size=size)
+            if field_type in ["float", "date"]:
                 # TODO: Revise boxplot (since elasticsearch version 7.11 and not sure for opensearch)
                 return {"extended_stats": {"field": field_name}}
             return None  # TODO: revise elasticsearch aggregations for API match
