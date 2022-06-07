@@ -84,7 +84,7 @@ Server
 
 - ``RUBRIX_ELASTICSEARCH_SSL_VERIFY``: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.
 
-- ``RUBRIX_ELASTICSEARCH_CA_PATH``: Path to CA cert for ES host. For example: '/full/path/to/root-ca.pem' (Optional)
+- ``RUBRIX_ELASTICSEARCH_CA_PATH``: Path to CA cert for ES host. For example: ``/full/path/to/root-ca.pem`` (Optional)
 
 - ``RUBRIX_NAMESPACE``: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Rubrix instances.
 
