@@ -73,7 +73,7 @@ def test_search_keywords(mocked_client):
             for keyword in keywords
         ]
     )
-    assert {"limit", "limits", "limit?"} == top_keywords, top_keywords
+    assert top_keywords == {"limits", "limited", "limit"}, top_keywords
 
 
 def test_log_records_with_empty_metadata_list(mocked_client):
