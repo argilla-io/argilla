@@ -436,11 +436,11 @@ class DatasetRecordsDAO:
         return {
             "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
             "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
-            "require_field_match": False,
+            "require_field_match": True,
             "fields": {
                 "text": {},
-                # TODO: `words` will be removed once the migration will be completed.
-                #  This configuration is included just for old datasets records
+                "text.*": {},
+                # TODO(@frascuchon): `words` will be removed in version 0.16.0
                 "words": {},
                 **({"inputs.*": {}} if task == TaskType.text_classification else {}),
             },
