@@ -28,6 +28,7 @@ maintainers = [
 dependencies = [
     # Client
     "httpx ~= 0.15.0",
+    "packaging >= 20.0",
     # pandas -> For data loading
     "pandas >=1.0.0,<2.0.0",
     # Aligned pydantic version with server fastAPI
@@ -37,6 +38,7 @@ dependencies = [
     # weaksupervision
     "numpy",
     "tqdm >= 4.27.0"
+
 ]
 dynamic = ["version"]
 
