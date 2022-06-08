@@ -150,6 +150,7 @@ You can join the conversation on Slack! We are a very friendly and inclusive com
 
    getting_started/setup&installation
    getting_started/concepts
+   getting_started/basics
    getting_started/user-management
    getting_started/advanced_setup_guides
 
@@ -164,23 +165,20 @@ You can join the conversation on Slack! We are a very friendly and inclusive com
    guides/monitoring
    guides/metrics
    guides/datasets
+   guides/dataset_settings
    guides/queries
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Tutorials
    :hidden:
 
-   tutorials/01-labeling-finetuning
-   tutorials/weak-supervision-with-rubrix
-   tutorials/02-spacy
-   tutorials/05-active_learning
-   tutorials/find_label_errors
-   tutorials/07-zeroshot_ner
-   tutorials/08-error_analysis_using_loss
-   tutorials/09-automatic_fastapi_log
-   tutorials/skweak
-   tutorials/weak-supervision-multi-label
+   tutorials/introductory.md
+   tutorials/model_predictions.md
+   tutorials/weak-supervision.md
+   tutorials/active-learning.md
+   tutorials/label-errors.md
+   tutorials/monitoring.md
 
 .. toctree::
    :maxdepth: 4
