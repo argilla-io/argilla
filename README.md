@@ -220,8 +220,8 @@ Now let's access our Rubrix dataset and start annotating data. Let's filter the 
 After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
 ```python
-# load the Rubrix dataset as a pandas DataFrame
-rb_df = rb.load(name='news_zeroshot')
+# load the Rubrix dataset and put it into a pandas DataFrame
+rb_df = rb.load(name='news_zeroshot').to_pandas()
 
 # filter annotated records
 rb_df = rb_df[rb_df.status == "Validated"]

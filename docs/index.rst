@@ -4,20 +4,19 @@
    contain the root `toctree` directive.
 
 
-Welcome to Rubrix
-=================
+Rubrix documentation
+====================
+
+`Rubrix <https://rubrix.ml>`_ is a **production-ready framework for building and improving datasets** for NLP projects.
+
 
 .. raw:: html
 
    <video width="100%" controls><source src="_static/tutorials/weak-supervision-with-rubrix/ws_news.mp4" type="video/mp4"></video>
 
 
-What's Rubrix?
---------------
-
-`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects.
-
-Key features:
+Features
+--------
 
 - **Open**: Rubrix is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -27,8 +26,6 @@ Key features:
 
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
-
-Rubrix currently supports several ``natural language processing`` and ``knowledge graph`` use cases but we'll be adding support for speech recognition and computer vision soon.
 
 Quickstart
 ----------
@@ -117,8 +114,8 @@ After a few iterations of data annotation, we can load the Rubrix dataset and cr
 
 .. code-block:: python
 
-   # load the Rubrix dataset as a pandas DataFrame
-   rb_df = rb.load(name='news_zeroshot')
+   # load the Rubrix dataset and put it into a pandas DataFrame
+   rb_df = rb.load(name='news_zeroshot').to_pandas()
 
    # filter annotated records
    rb_df = rb_df[rb_df.status == "Validated"]
@@ -132,29 +129,18 @@ After a few iterations of data annotation, we can load the Rubrix dataset and cr
 Use cases
 ---------
 
+
+* **Data labelling and review**: collect labels to start a project from scratch or from existing live models.
 * **Model monitoring and observability:** log and observe predictions of live models.
-* **Ground-truth data collection**: collect labels to start a project from scratch or from existing live models.
 * **Evaluation**: easily compute "live" metrics from models in production, and slice evaluation datasets to test your system under specific conditions.
 * **Model debugging**: log predictions during the development process to visually spot issues.
-* **Explainability:** log things like token attributions to understand your model predictions.
-
-Next steps
-----------
-
-The documentation is divided into different sections, which explore different aspects of Rubrix:
-
-* :ref:`setup-and-installation`
-* :ref:`concepts`
-* **Tutorials**
-* **Guides**
-* **Reference**
+* **Explainability:** log token attributions to help you interpret model predictions.
 
 Community
 ---------
-You can join the conversation on our Github page and our Github forum.
+You can join the conversation on Slack! We are a very friendly and inclusive community:
 
-* `Github page <https://github.com/recognai/rubrix>`_
-* `Github forum <https://github.com/recognai/rubrix/discussions>`_
+* `Slack community <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>`_
 
 
 .. toctree::
