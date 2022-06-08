@@ -34,7 +34,7 @@ Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``
 
 .. code-block:: bash
 
-   pip install "rubrix[server]==0.14.0" "transformers[torch]" datasets
+   pip install "rubrix[server]" "transformers[torch]" datasets
 
 If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ running, make sure you have `Docker` installed and run:
 
