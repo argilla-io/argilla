@@ -7,7 +7,7 @@
 Rubrix documentation
 ====================
 
-`Rubrix <https://rubrix.ml>`_ is a **production-ready Python framework for exploring, annotating, and managing data** in NLP projects.
+`Rubrix <https://rubrix.ml>`_ is a **production-ready framework for building and improving datasets** for NLP projects.
 
 
 .. raw:: html
