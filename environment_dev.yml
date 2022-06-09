@@ -28,6 +28,7 @@ dependencies:
       - nbsphinx==0.8.7
       - nbformat<5.2.0 # Installs ipython-genutils, with a new version (>0.8.8) of nbsphinx this can probably go away.
       - sphinxext.opengraph==0.4.2
+      - Sphinx-Substitution-Extensions==2022.2.16
       # code formatting
       - pre-commit==2.15.0
       # extra test dependencies

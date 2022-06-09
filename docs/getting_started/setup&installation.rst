@@ -20,14 +20,16 @@ Then you can install Rubrix with ``pip`` or ``conda``\.
 **with pip**
 
 .. code-block:: bash
+   :substitutions:
 
-   pip install "rubrix[server]"
+   pip install "rubrix[server]|pipversion|
 
 **with conda**
 
 .. code-block:: bash
+   :substitutions:
 
-   conda install -c conda-forge rubrix-server
+   conda install -c conda-forge "rubrix-server|pipversion|
 
 
 2. Launch the web app

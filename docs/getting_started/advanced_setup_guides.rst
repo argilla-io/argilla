@@ -274,13 +274,14 @@ Define a docker-compose.yaml
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
+   :substitutions:
 
    # docker-compose.yaml
    version: "3"
 
    services:
      rubrix:
-       image: recognai/rubrix
+       image: recognai/rubrix:|dockertag|
        ports:
          - "80:80"
        environment:
