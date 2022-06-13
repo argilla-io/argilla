@@ -139,6 +139,7 @@ export default {
     &:hover {
       ::v-deep .button-primary--outline {
         opacity: 1 !important;
+        pointer-events: all;
         transition: opacity 0.5s ease-in-out 0.2s !important;
       }
     }
