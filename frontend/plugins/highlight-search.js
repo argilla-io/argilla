@@ -53,7 +53,7 @@ export default (context, inject) => {
     );
     text = htmlText(text);
     sortedKeywords.forEach((keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
+      const regex = new RegExp(`([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${keyword}`, "gmi");
       text = text.replace(regex, (match) => htmlHighlightText(match));
     });
 
@@ -62,7 +62,7 @@ export default (context, inject) => {
 
   const keywordsSpans = function (text, keywords) {
     return (keywords || []).flatMap((keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, "gmi");
+      const regex = new RegExp(`([^a-zA-ZÀ-ÿ\u00f1\u00d1]|^)${keyword}`, "gmi");
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
