@@ -105,5 +105,4 @@ dependencies:
     - webencodings==0.5.1
     - wrapt==1.13.3
     - zipp==3.7.0
-    - Sphinx-Substitution-Extensions==2022.2.16
     - -e .
