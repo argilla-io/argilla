@@ -43,14 +43,23 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
     "sphinx_design",
-    "sphinx_substitution_extensions",
 ]
+
+myst_enable_extensions = [
+    "colon_fence",
+    "substitution",
+]
+
+myst_substitutions = {
+    "pipversion": "" if "dev" in release else "==" + release,
+    "dockertag": "master" if "dev" in release else "v" + release,
+}
 
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
 # Plotly + Hide input/output prompts (cell counts)
-nbsphinx_prolog_plotly_cell = """
+nbsphinx_prolog = """
 .. raw:: html
 
     <script>require=requirejs;</script>
@@ -74,11 +83,6 @@ nbsphinx_prolog_plotly_cell = """
             display: none;
         }
     </style>
-"""
-
-nbsphinx_prolog = f"""
-.. |dockertag| replace:: {"master" if "dev" in release else "v" + release}
-{nbsphinx_prolog_plotly_cell}
 """
 
 autodoc_typehints = "description"
@@ -121,8 +125,3 @@ ogp_image = (
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',
 ]
-
-rst_prolog = f"""
-.. |pipversion| replace:: {'"' if "dev" in release else "==" + release + '"'}
-.. |dockertag| replace:: {"master" if "dev" in release else "v" + release}
-"""
