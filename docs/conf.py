@@ -54,6 +54,43 @@ myst_substitutions = {
     "pipversion": "" if "dev" in release else "==" + release,
     "dockertag": "master" if "dev" in release else "v" + release,
 }
+myst_substitutions[
+    "dockercomposeyaml"
+] = """
+# docker-compose.yaml
+version: "3"
+
+services:
+ rubrix:
+   image: recognai/rubrix:{}
+   ports:
+     - "80:80"
+   environment:
+     ELASTICSEARCH: <elasticsearch-host_and_port>
+   restart: unless-stopped
+""".format(
+    myst_substitutions["dockertag"]
+)
+myst_substitutions[
+    "dockercomposeuseryaml"
+] = """
+# docker-compose.yaml
+services:
+  rubrix:
+    image: recognai/rubrix:{}
+    ports:
+      - "6900:80"
+    environment:
+      ELASTICSEARCH: http://elasticsearch:9200
+      RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
+
+    volumes:
+      # We mount the local file .users.yaml in remote container in path /config/.users.yaml
+      - ${}/.users.yaml:/config/.users.yaml
+  ...
+""".format(
+    myst_substitutions["dockertag"], "PWD"
+)
 
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
