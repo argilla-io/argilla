@@ -124,7 +124,7 @@ Make sure you create the yaml file above in the same folder as your `docker-comp
 
 Then open the provided ``docker-compose.yaml`` and configure your Rubrix instance as follows:
 
-{{ '```yaml\n{}\n```'.format(dockercomposeuseryaml) }}
+{{ dockercomposeuseryaml }}
 
 You can reload the *Rubrix* service to refresh the container:
 

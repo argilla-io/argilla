@@ -56,7 +56,7 @@ myst_substitutions = {
 }
 myst_substitutions[
     "dockercomposeyaml"
-] = """
+] = """```yaml
 # docker-compose.yaml
 version: "3"
 
@@ -68,12 +68,12 @@ services:
    environment:
      ELASTICSEARCH: <elasticsearch-host_and_port>
    restart: unless-stopped
-""".format(
+```""".format(
     myst_substitutions["dockertag"]
 )
 myst_substitutions[
     "dockercomposeuseryaml"
-] = """
+] = """```yaml
 # docker-compose.yaml
 services:
   rubrix:
@@ -88,7 +88,7 @@ services:
       # We mount the local file .users.yaml in remote container in path /config/.users.yaml
       - ${}/.users.yaml:/config/.users.yaml
   ...
-""".format(
+```""".format(
     myst_substitutions["dockertag"], "PWD"
 )
 

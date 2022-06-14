@@ -261,7 +261,7 @@ eval $(docker-machine env rubrix-aws)
 
 ### Define a docker-compose.yaml
 
-{{ '```yaml\n{}\n```'.format(dockercomposeyaml) }}
+{{ dockercomposeyaml }}
 
 ### Pull image
 
