@@ -21,7 +21,7 @@ import os
 import rubrix as rb
 
 project = "Rubrix"
-copyright = "2021, Recognai"
+copyright = "2022, Recognai"
 author = "Recognai"
 
 # Normally the full version, including alpha/beta/rc tags.
@@ -138,7 +138,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -152,7 +152,7 @@ html_favicon = "_static/images/favicon.ico"
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = ["css/custom.css"]
-html_theme_options = {"logo_only": True}
+
 
 # Open graph meta
 ogp_image = (
