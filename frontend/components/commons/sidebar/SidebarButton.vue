@@ -11,12 +11,12 @@
 </template>
 
 <script>
-import "assets/icons/refresh";
-import "assets/icons/explore-view";
-import "assets/icons/annotate-view";
-import "assets/icons/labelling-rules-view";
-import "assets/icons/progress";
-import "assets/icons/metrics";
+import "assets/icons/sync";
+import "assets/icons/eye";
+import "assets/icons/edit-markup";
+import "assets/icons/tag";
+import "assets/icons/timelapse";
+import "assets/icons/loadbar-sound";
 export default {
   props: {
     activeView: {
@@ -95,8 +95,8 @@ $color: #333346;
   display: block;
   text-align: center;
   margin: auto;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   fill: $color;
   padding: 0.5em;
   box-sizing: content-box;

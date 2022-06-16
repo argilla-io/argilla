@@ -22,7 +22,7 @@
       class="help__button"
       @click="showHelpPanel = true"
     >
-      <svgicon name="help" width="22" height="22" color="#F38959"></svgicon>
+      <svgicon name="support" width="22" height="22" color="#F38959"></svgicon>
       Help
     </div>
     <div v-if="showHelpPanel" class="help__panel">
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import "assets/icons/help";
+import "assets/icons/support";
 export default {
   data: () => ({
     showHelpPanel: false,

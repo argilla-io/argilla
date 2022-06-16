@@ -35,7 +35,7 @@
         <svgicon
           v-if="searchText != undefined"
           class="clean-search"
-          name="cross"
+          name="close"
           width="10"
           height="10"
           color="#9b9b9b"
@@ -92,8 +92,6 @@
   </div>
 </template>
 <script>
-import "assets/icons/ignore";
-
 export default {
   filters: {
     truncate(string, value) {

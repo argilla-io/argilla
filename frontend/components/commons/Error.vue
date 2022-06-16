@@ -25,14 +25,14 @@
       </p>
     </div>
     <NuxtLink v-if="link" class="re-button" :to="link">
-      <svgicon name="chev-left" width="8" height="8" color="#4A4A4A" />
+      <svgicon name="chevron-left" width="8" height="8" color="#4A4A4A" />
       Back
     </NuxtLink>
   </div>
 </template>
 
 <script>
-import "assets/icons/chev-left";
+import "assets/icons/chevron-left";
 
 export default {
   props: {

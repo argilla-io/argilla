@@ -43,7 +43,7 @@ export default {
         {
           id: "explore",
           tooltip: "Explore",
-          icon: "explore-view",
+          icon: "eye",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],
@@ -51,7 +51,7 @@ export default {
         {
           id: "annotate",
           tooltip: "Annotate",
-          icon: "annotate-view",
+          icon: "edit-markup",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],
@@ -59,21 +59,21 @@ export default {
         {
           id: "progress",
           tooltip: "Progress",
-          icon: "progress",
+          icon: "timelapse",
           action: "show-metrics",
           group: "Metrics",
         },
         {
           id: "stats",
           tooltip: "Stats",
-          icon: "metrics",
+          icon: "loadbar-sound",
           action: "show-metrics",
           group: "Metrics",
         },
         {
           id: "refresh",
           tooltip: "Refresh",
-          icon: "refresh",
+          icon: "sync",
           group: "Refresh",
           action: "refresh",
         },
