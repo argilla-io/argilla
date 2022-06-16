@@ -65,6 +65,8 @@ class DatasetBase:
     """
 
     _RECORD_TYPE = None
+    # record arguments that can get multiple input columns from datasets.Dataset or pandas.DataFrame
+    _ARGS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
 
     @classmethod
     def _record_init_args(cls) -> List[str]:
@@ -121,6 +123,34 @@ class DatasetBase:
 
     def __len__(self) -> int:
         return len(self._records)
+
+    @classmethod
+    def _prepare_columns(
+        cls, dataset: "datasets.Dataset", **kwargs
+    ) -> Tuple["datasets.Dataset", Dict[str, List[str]]]:
+        """Helper function to rename the columns of Dataset/DataFrame and keep track of the columns that will be joined.
+
+        TODO: from_pandas should also use these shortcuts
+        Args:
+            dataset: The dataset
+            **kwargs: Mappings from record arguments to column names
+
+        Returns:
+            The dataset with renamed columns and a dict keeping track of the columns to be joined.
+        """
+        kwargs = {key: val for key, val in kwargs.items() if val is not None}
+
+        columns_to_be_joined = {}
+        for arg in cls._ARGS_WITH_MULTIPLE_INPUT_COLUMNS:
+            columns = kwargs.pop(arg, None)
+            if columns is not None:
+                columns_to_be_joined[arg] = (
+                    [columns] if isinstance(columns, str) else columns
+                )
+
+        dataset = dataset.rename_columns({old: new for new, old in kwargs.items()})
+
+        return dataset, columns_to_be_joined
 
     @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
@@ -418,15 +448,37 @@ class DatasetForTextClassification(DatasetBase):
             ... })
             >>> DatasetForTextClassification.from_datasets(ds)
         """
+        import datasets
 
-        return super().from_datasets(
+        assert not isinstance(dataset, datasets.DatasetDict), (
+            "ERROR: `datasets.DatasetDict` are not supported. "
+            "Please, select the dataset split before"
+        )
+
+        dataset, columns_to_be_joined = cls._prepare_columns(
             dataset,
             text=text,
-            id=id,
-            annotation=annotation,
-            metadata=metadata,
             inputs=inputs,
+            annotation=annotation,
+            id=id,
+            metadata=metadata,
         )
+
+        not_supported_columns = [
+            col
+            for col in dataset.column_names
+            if (
+                col not in cls._record_init_args()
+                and col not in [c for cs in columns_to_be_joined.values() for c in cs]
+            )
+        ]
+        if not_supported_columns:
+            _LOGGER.warning(
+                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__}"
+                f" model and are ignored: {not_supported_columns}"
+            )
+            dataset = dataset.remove_columns(not_supported_columns)
+        return cls._from_datasets(dataset, columns_to_be_joined)
 
     @classmethod
     def from_pandas(
@@ -469,55 +521,24 @@ class DatasetForTextClassification(DatasetBase):
         return ds_dict
 
     @classmethod
-    def _parse_annotation_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        import datasets
-
-        labels = dataset.features[field]
-        if isinstance(labels, datasets.Sequence):
-            labels = labels.feature
-
-        dataset = dataset.rename_column(field, "annotation")
-
-        if not isinstance(labels, datasets.ClassLabel):
-            return dataset
-
-        def int2str_for_annotation(example):
-            try:
-                return {"annotation": labels.int2str(example["annotation"])}
-            # integers don't have to map to the names ...
-            # it seems that sometimes -1 is used to denote "no label"
-            except ValueError:
-                return {"annotation": None}
-
-        return dataset.map(int2str_for_annotation, desc="Parsing annotation")
-
-    @classmethod
-    def _prepare_hf_dataset(
-        cls,
-        dataset: "dataset.Dataset",
-        inputs: Optional[Union[str, List[str]]] = None,
-        **kwargs,
-    ) -> "dataclasses.Dataset":
-        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
-        if inputs:
-            dataset = cls._parse_inputs_field(dataset, fields=inputs)
-        return dataset
-
-    @classmethod
     def _from_datasets(
-        cls, dataset: "datasets.Dataset"
+        cls, dataset: "datasets.Dataset", columns_to_be_joined: Dict[str, List[str]]
     ) -> "DatasetForTextClassification":
+        import datasets
 
         records = []
         for row in dataset:
-            if row.get("inputs") and isinstance(row["inputs"], dict):
-                row["inputs"] = {
-                    key: val for key, val in row["inputs"].items() if val is not None
-                }
+
+            row["inputs"] = cls._parse_inputs_field(
+                row, columns_to_be_joined.get("inputs")
+            )
+
+            row["metadata"] = cls._parse_metadata_field(
+                row, columns_to_be_joined.get("metadata")
+            )
+
             if row.get("annotation") is not None:
-                row["annotation"] = cls._parse_annotation_field2(
+                row["annotation"] = cls._parse_annotation_field(
                     row["annotation"], dataset.features["annotation"]
                 )
 
@@ -533,6 +554,7 @@ class DatasetForTextClassification(DatasetBase):
                     if row["prediction"] is not None
                     else None
                 )
+
             if row.get("explanation"):
                 row["explanation"] = (
                     {
@@ -550,7 +572,57 @@ class DatasetForTextClassification(DatasetBase):
         return cls(records)
 
     @staticmethod
-    def _parse_annotation_field2(
+    def _parse_inputs_field(
+        row: Dict[str, Any],
+        columns: Optional[List[str]],
+    ) -> Optional[Union[Dict[str, str], str]]:
+        """Helper function to parse the inputs field.
+
+        Args:
+            row: A row of the dataset.Datasets
+            columns: A list of columns to be joined for the inputs field, optional.
+
+        Returns:
+            None, a dictionary or a string as input for the inputs field.
+        """
+        inputs = row.get("inputs")
+
+        if columns is not None:
+            inputs = {}
+            for col in columns:
+                inputs[col] = row[col]
+                del row[col]
+
+        if isinstance(inputs, dict):
+            inputs = {key: val for key, val in inputs.items() if val is not None}
+
+        return inputs
+
+    @staticmethod
+    def _parse_metadata_field(
+        row: Dict[str, Any], columns: Optional[List[str]]
+    ) -> Optional[Any]:
+        """Helper function to parse the metadata field.
+
+        Args:
+            row: A row of the datasets.Dataset
+            columns: A list of columns to be joined for the metadata field, optional.
+
+        Returns:
+            None or Any as input for the metadata field.
+        """
+        metadata = row.get("metadata")
+
+        if columns is not None:
+            metadata = {}
+            for col in columns:
+                metadata[col] = row[col]
+                del row[col]
+
+        return metadata
+
+    @staticmethod
+    def _parse_annotation_field(
         annotation: Union[str, List[str], int, List[int]],
         feature: Optional[Any],
     ) -> Optional[Union[str, List[str], int, List[int]]]:
@@ -582,18 +654,6 @@ class DatasetForTextClassification(DatasetBase):
         # it seems that sometimes -1 is used to denote "no label"
         except ValueError:
             return None
-
-    @classmethod
-    def _parse_inputs_field(
-        cls, dataset: "datasets.Dataset", fields: Optional[Union[str, List[str]]]
-    ) -> "datasets.Dataset":
-        if isinstance(fields, str):
-            fields = [fields]
-
-        return dataset.map(
-            lambda example: {"inputs": {k: example[k] for k in fields}},
-            desc="Parsing inputs",
-        )
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
