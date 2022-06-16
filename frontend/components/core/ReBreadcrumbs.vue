@@ -44,7 +44,7 @@
           )
         "
       >
-        <svgicon name="copy" width="12" height="13" />
+        <svgicon name="copy" width="16" height="16" />
       </a>
     </re-action-tooltip>
   </div>

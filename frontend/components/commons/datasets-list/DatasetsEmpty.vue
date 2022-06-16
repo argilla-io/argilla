@@ -4,7 +4,7 @@
       class="datasets-empty__icon"
       width="44"
       height="46"
-      name="datasets-empty"
+      name="unavailable"
     />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
     <p class="datasets-empty__subtitle">
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import "assets/icons/datasets-empty";
+import "assets/icons/unavailable";
 export default {
   props: {
     workspace: {

@@ -62,7 +62,7 @@
 
 <script>
 import "assets/icons/check";
-import "assets/icons/cross";
+import "assets/icons/close";
 const MAX_ENTITIES_SHOWN = 10;
 
 export default {

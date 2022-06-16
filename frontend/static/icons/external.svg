@@ -1,16 +1,4 @@
-
-<svg width="10px" height="10px" viewBox="0 0 10 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 48.1 (47250) - http://www.bohemiancoding.com/sketch -->
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="*-Documentation" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="error-message-explore" transform="translate(-294.000000, -353.000000)" fill="#4A4A4A" fill-rule="nonzero">
-            <g id="Group" transform="translate(261.000000, 349.000000)">
-                <g id="noun_External-Link_2834309" transform="translate(33.000000, 4.000000)">
-                    <polygon id="Shape" points="9.4 0 5.85 0 5.85 0.6 8.976 0.6 4.788 4.788 5.212 5.212 9.4 1.024 9.4 4.15 10 4.15 10 0.6 10 0"></polygon>
-                    <path d="M9.4,7.95 C9.39889834,8.75035612 8.75035612,9.39889834 7.95,9.4 L2.05,9.4 C1.24964388,9.39889834 0.601101662,8.75035612 0.6,7.95 L0.6,2.05 C0.600551557,1.24941569 1.24941569,0.600551557 2.05,0.6 L4.2,0.6 L4.2,0 L2.05,0 C0.918501345,0.0016522275 0.0016522275,0.918501345 0,2.05 L0,7.95 C0.0016522275,9.08149866 0.918501345,9.99834777 2.05,10 L7.95,10 C9.08149866,9.99834777 9.99834777,9.08149866 10,7.95 L10,5.8 L9.4,5.8 L9.4,7.95 Z" id="Shape"></path>
-                </g>
-            </g>
-        </g>
-    </g>
+<svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.9178 7.72803H16.5319V4.20142H28.875V16.5446H25.3484V10.2848L16.6837 18.9496L14.19 16.4559L22.9178 7.72803Z" fill="black"/>
+<path d="M14.7048 7.63892H4.125V28.7986H25.2847V18.2188H21.7581V25.272H7.65161V11.1655H14.7048V7.63892Z" fill="black"/>
 </svg>

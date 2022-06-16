@@ -45,7 +45,7 @@
         </li>
       </ul>
       <div v-else class="entities__selector--empty">
-        <svgicon name="error" width="17" height="17" />
+        <svgicon name="danger" width="17" height="17" />
         <p>No labels available</p>
       </div>
     </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import "assets/icons/error";
+import "assets/icons/danger";
 import { mapActions } from "vuex";
 export default {
   data: () => ({

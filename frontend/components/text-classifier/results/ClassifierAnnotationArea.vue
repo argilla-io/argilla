@@ -61,7 +61,6 @@
   </div>
 </template>
 <script>
-import "assets/icons/ignore";
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
 

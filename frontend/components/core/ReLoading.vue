@@ -53,8 +53,6 @@
 </template>
 
 <script>
-import "assets/icons/hipo";
-
 export default {
   methods: {},
 };
