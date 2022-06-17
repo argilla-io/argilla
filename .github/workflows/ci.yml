@@ -49,8 +49,31 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         if: steps.filter.outputs.python_code == 'true'
         with:
-          environment-file: environment_dev.yml
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
           activate-environment: rubrix
+
+      - name: Set date for conda cache
+        if: steps.filter.outputs.python_code == 'true'
+        id: set-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        if: steps.filter.outputs.python_code == 'true'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.set-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n rubrix -f environment_dev.yml
 
       - name: Cache pip 👜
         uses: actions/cache@v2
