@@ -207,7 +207,6 @@ class LabelingService:
             dataset,
             size=0,
             search=RecordSearch(
-                include_default_aggregations=False,
                 aggregations=self.__rule_metrics__.aggregation_request(
                     rule_query=rule_query, labels=labels
                 ),
@@ -227,7 +226,6 @@ class LabelingService:
             size=0,
             search=RecordSearch(
                 query=filters.exists_field(EsRecordDataFieldNames.annotated_as),
-                include_default_aggregations=False,
             ),
         )
         return results.total
@@ -240,7 +238,6 @@ class LabelingService:
             dataset,
             size=0,
             search=RecordSearch(
-                include_default_aggregations=False,
                 aggregations=self.__dataset_rules_metrics__.aggregation_request(
                     all_rules=dataset.rules
                 ),
