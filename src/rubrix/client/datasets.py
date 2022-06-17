@@ -65,7 +65,7 @@ class DatasetBase:
     """
 
     _RECORD_TYPE = None
-    # record arguments that can get multiple input columns from datasets.Dataset or pandas.DataFrame
+    # record arguments that can get multiple input columns from a datasets.Dataset or a pandas.DataFrame
     _ARGS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
 
     @classmethod
@@ -124,34 +124,6 @@ class DatasetBase:
     def __len__(self) -> int:
         return len(self._records)
 
-    @classmethod
-    def _prepare_columns(
-        cls, dataset: "datasets.Dataset", **kwargs
-    ) -> Tuple["datasets.Dataset", Dict[str, List[str]]]:
-        """Helper function to rename the columns of Dataset/DataFrame and keep track of the columns that will be joined.
-
-        TODO: from_pandas should also use these shortcuts
-        Args:
-            dataset: The dataset
-            **kwargs: Mappings from record arguments to column names
-
-        Returns:
-            The dataset with renamed columns and a dict keeping track of the columns to be joined.
-        """
-        kwargs = {key: val for key, val in kwargs.items() if val is not None}
-
-        columns_to_be_joined = {}
-        for arg in cls._ARGS_WITH_MULTIPLE_INPUT_COLUMNS:
-            columns = kwargs.pop(arg, None)
-            if columns is not None:
-                columns_to_be_joined[arg] = (
-                    [columns] if isinstance(columns, str) else columns
-                )
-
-        dataset = dataset.rename_columns({old: new for new, old in kwargs.items()})
-
-        return dataset, columns_to_be_joined
-
     @_requires_datasets
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
@@ -183,25 +155,15 @@ class DatasetBase:
         raise NotImplementedError
 
     @classmethod
-    def from_datasets(
-        cls,
-        dataset: "datasets.Dataset",
-        id: Optional[str] = None,
-        text: Optional[str] = None,
-        annotation: Optional[str] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
-        **kwargs,
-    ) -> "Dataset":
+    def from_datasets(cls, dataset: "datasets.Dataset", **kwargs) -> "Dataset":
         """Imports records from a `datasets.Dataset`.
 
         Columns that are not supported are ignored.
+        THE CONCRETE SIGNATURE AND DOC STRING SHOULD BE IMPLEMENTED BY THE CHILD CLASS.
 
         Args:
             dataset: A datasets Dataset from which to import the records.
-            id: The field name used as record id. Default: `None`
-            text: The field name used as record text. Default: `None`
-            annotation: The field name used as record annotation. Default: `None`
-            metadata: The field name used as record metadata. Default: `None`
+            **kwargs: Mappings from record arguments to column names
 
         Returns:
             The imported records in a Rubrix Dataset.
@@ -213,14 +175,35 @@ class DatasetBase:
             "Please, select the dataset split before"
         )
 
-        dataset = cls._prepare_hf_dataset(
-            dataset,
-            id=id,
-            text=text,
-            annotation=annotation,
-            metadata=metadata,
-            **kwargs,
-        )
+        dataset, columns_to_be_joined = cls._prepare_columns(dataset, **kwargs)
+
+        return cls._from_datasets(dataset, columns_to_be_joined)
+
+    @classmethod
+    def _prepare_columns(
+        cls, dataset: "datasets.Dataset", **kwargs
+    ) -> Tuple["datasets.Dataset", Dict[str, List[str]]]:
+        """Helper function to rename the columns of Dataset/DataFrame and keep track of the columns that will be joined.
+
+        TODO: from_pandas should also use these shortcuts
+        Args:
+            dataset: The dataset
+            **kwargs: Mappings from record arguments to column names
+
+        Returns:
+            The dataset with renamed columns and a dict keeping track of the columns to be joined.
+        """
+        kwargs = {key: val for key, val in kwargs.items() if val is not None}
+
+        columns_to_be_joined = {}
+        for arg in cls._ARGS_WITH_MULTIPLE_INPUT_COLUMNS:
+            columns = kwargs.pop(arg, None)
+            if columns is not None:
+                columns_to_be_joined[arg] = (
+                    [columns] if isinstance(columns, str) else columns
+                )
+
+        dataset = dataset.rename_columns({old: new for new, old in kwargs.items()})
 
         not_supported_columns = [
             col for col in dataset.column_names if col not in cls._record_init_args()
@@ -231,7 +214,8 @@ class DatasetBase:
                 f" model and are ignored: {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
-        return cls._from_datasets(dataset)
+
+        return dataset, columns_to_be_joined
 
     @classmethod
     def _prepare_hf_dataset(
@@ -253,13 +237,16 @@ class DatasetBase:
         return dataset
 
     @classmethod
-    def _from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
+    def _from_datasets(
+        cls, dataset: "datasets.Dataset", columns_to_be_joined: Dict[str, List[str]]
+    ) -> "Dataset":
         """Helper method to create a Rubrix Dataset from a datasets Dataset.
 
         Must be implemented by the child class.
 
         Args:
-            dataset: A datasets Dataset
+            dataset: A datasets Dataset.
+            columns_to_be_joined: A dict that indicates for which record argument we need to join columns.
 
         Returns:
             A Rubrix Dataset
@@ -524,8 +511,6 @@ class DatasetForTextClassification(DatasetBase):
     def _from_datasets(
         cls, dataset: "datasets.Dataset", columns_to_be_joined: Dict[str, List[str]]
     ) -> "DatasetForTextClassification":
-        import datasets
-
         records = []
         for row in dataset:
 
