@@ -95,10 +95,10 @@ class User(BaseModel):
             The original workspace name if user belongs to it
 
         """
-        if workspace is None or workspace == self.default_workspace:
-            return self.default_workspace
         if not workspace and self.is_superuser():
             return workspace
+        if workspace is None or workspace == self.default_workspace:
+            return self.default_workspace
         if workspace not in (self.workspaces or []):
             raise EntityNotFoundError(name=workspace, type="Workspace")
         return workspace
