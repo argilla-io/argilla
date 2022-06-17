@@ -14,7 +14,7 @@
 #  limitations under the License.
 import functools
 import logging
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
@@ -516,6 +516,11 @@ class DatasetForTextClassification(DatasetBase):
                 row["inputs"] = {
                     key: val for key, val in row["inputs"].items() if val is not None
                 }
+            if row.get("annotation") is not None:
+                row["annotation"] = cls._parse_annotation_field2(
+                    row["annotation"], dataset.features["annotation"]
+                )
+
             if row.get("prediction"):
                 row["prediction"] = (
                     [
@@ -543,6 +548,40 @@ class DatasetForTextClassification(DatasetBase):
 
             records.append(TextClassificationRecord.parse_obj(row))
         return cls(records)
+
+    @staticmethod
+    def _parse_annotation_field2(
+        annotation: Union[str, List[str], int, List[int]],
+        feature: Optional[Any],
+    ) -> Optional[Union[str, List[str], int, List[int]]]:
+        """Helper function to parse the annotation field.
+
+        Args:
+            annotation: The value from the annotation column.
+            feature: The feature of the annotation column to optionally convert ints to strs.
+
+        Returns:
+            The input value for the annotation field.
+        """
+        import datasets
+
+        # extract ClassLabel feature
+        if isinstance(feature, list):
+            feature = feature[0]
+        if isinstance(feature, datasets.Sequence):
+            feature = feature.feature
+        if not isinstance(feature, datasets.ClassLabel):
+            feature = None
+
+        if feature is None:
+            return annotation
+
+        try:
+            return feature.int2str(annotation)
+        # integers don't have to map to the names ...
+        # it seems that sometimes -1 is used to denote "no label"
+        except ValueError:
+            return None
 
     @classmethod
     def _parse_inputs_field(
