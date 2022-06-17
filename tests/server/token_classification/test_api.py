@@ -95,6 +95,16 @@ def test_search_special_characters(mocked_client):
     )
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
+    assert results.total == 0
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/TokenClassification:search",
+        json=TokenClassificationSearchRequest(
+            query=TokenClassificationQuery(query_text="text.exact:\!")
+        ).dict(),
+    )
+    assert response.status_code == 200, response.json()
+    results = TokenClassificationSearchResults.parse_obj(response.json())
     assert results.total == 1
 
 

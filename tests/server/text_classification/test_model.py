@@ -290,60 +290,24 @@ def test_query_with_uncovered_by_rules():
                     "should": [
                         {
                             "bool": {
-                                "minimum_should_match": "30%",
-                                "should": [
-                                    {
-                                        "query_string": {
-                                            "boost": "2.0",
-                                            "default_field": "words",
-                                            "default_operator": "AND",
-                                            "query": "query",
-                                        }
-                                    },
-                                    {
-                                        "query_string": {
-                                            "default_field": "words.extended",
-                                            "default_operator": "AND",
-                                            "query": "query",
-                                        }
-                                    },
-                                    {
-                                        "query_string": {
-                                            "default_field": "text",
-                                            "default_operator": "AND",
-                                            "query": "query",
-                                        }
-                                    },
-                                ],
+                                "must": {
+                                    "query_string": {
+                                        "default_field": "text",
+                                        "default_operator": "AND",
+                                        "query": "query",
+                                    }
+                                }
                             }
                         },
                         {
                             "bool": {
-                                "minimum_should_match": "30%",
-                                "should": [
-                                    {
-                                        "query_string": {
-                                            "boost": "2.0",
-                                            "default_field": "words",
-                                            "default_operator": "AND",
-                                            "query": "other*",
-                                        }
-                                    },
-                                    {
-                                        "query_string": {
-                                            "default_field": "words.extended",
-                                            "default_operator": "AND",
-                                            "query": "other*",
-                                        }
-                                    },
-                                    {
-                                        "query_string": {
-                                            "default_field": "text",
-                                            "default_operator": "AND",
-                                            "query": "other*",
-                                        }
-                                    },
-                                ],
+                                "must": {
+                                    "query_string": {
+                                        "default_field": "text",
+                                        "default_operator": "AND",
+                                        "query": "other*",
+                                    }
+                                }
                             }
                         },
                     ],
