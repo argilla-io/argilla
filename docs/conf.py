@@ -152,6 +152,55 @@ html_favicon = "_static/images/favicon.ico"
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = ["css/custom.css"]
+html_theme_options = {
+    "top_of_page_button": None,
+    "sidebar_hide_name": True,
+    "light_css_variables": {
+        "color-sidebar-background": "#FFFFFF",
+        "color-sidebar-background-border": "#e9eaed",
+        "color-sidebar-caption-text": "#4C4EA3",
+        "color-sidebar-link-text": "#484848",
+        "color-sidebar-link-text--top-level": "#484848",
+        "color-sidebar-item-background--current": "#F2F3F7",
+        "color-sidebar-item-background--hover": "#F2F3F7",
+        "color-sidebar-item-expander-background": "transparent",
+        "color-sidebar-item-expander-background--hover": "transparent",
+        "color-sidebar-search-text": "#484848",
+        "color-sidebar-search-background": "#FFFFFF",
+        "color-sidebar-search-background--focus": "#FFFFFF",
+        "color-sidebar-search-border": "#e9eaed",
+        "color-content-foreground": "#484848",
+        "color-toc-item-text--hover": "#0709ae",
+        "color-toc-item-text--active": "#0709ae",
+        "color-link": "#0709ae",
+        "color-link--hover": "#0508D9",
+        "content-padding": "5em",
+        "content-padding--small": "2em"
+    },
+    "dark_css_variables": {
+        "color-sidebar-background": "#000000",
+        "color-sidebar-background-border": "#000000",
+        "color-sidebar-caption-text": "#4C4EA3",
+        "color-sidebar-link-text": "#FFFFFF",
+        "color-sidebar-link-text--top-level": "#FFFFFF",
+        "color-sidebar-item-background--current": "#484848",
+        "color-sidebar-item-background--hover": "#484848",
+        "color-sidebar-item-expander-background": "transparent",
+        "color-sidebar-item-expander-background--hover": "transparent",
+        "color-sidebar-search-text": "#FFFFFF",
+        "color-sidebar-search-background": "#000000",
+        "color-sidebar-search-background--focus": "#000000",
+        "color-sidebar-search-border": "#FFFFFF",
+        "color-sidebar-search-foreground": "#FFFFFF",
+        "color-content-foreground": "#FFFFFF",
+        "color-toc-item-text--hover": "#FFFFFF",
+        "color-toc-item-text--active": "#FFFFFF",
+        "color-link": "#7e8ee7",
+        "color-link--hover": "#0508D9",
+    },
+}
+pygments_style = "monokai"
+pygments_dark_style = "monokai"
 
 
 # Open graph meta

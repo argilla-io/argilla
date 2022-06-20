@@ -32,7 +32,6 @@
   --tuto-section-11: #466362;
   --tuto-section-11: #E7A9B5;
 }
-
 body {
   font-family: "Open Sans" ,"Helvetica Neue", "Arial", "sans-serif";
   color: #484848;
@@ -46,289 +45,170 @@ h1 {
 h2 {
   font-size: 28px;
 }
-#search-results {
-  margin-top: 4em;
+.article {
+  color: #484848;
 }
-.document {
-  margin-top: -2em;
-}
-.document .section h1 {
+.content .section h1 {
   margin-top: 2em;
 }
-.document .section h1 span {
+.content .section h1 span {
   display: none;
 }
-.document .section h2 {
+.content .section h2 {
   margin-top: 1.5em;
 }
-.document .section h3 {
+.content .section h3 {
   margin-top: 2em;
-}
-.rst-footer-buttons {
-  margin-top: 4em;
-}
-.wy-menu-vertical, .wy-menu-vertical p, .wy-menu-vertical a {
-  font-size: 14px;
 }
 p {
   font-size: 16px;
   line-height: 1.8em;
 }
-.wy-breadcrumbs li:firt-child {
-  color: var(--line);
-}
-.wy-breadcrumbs li:not(.wy-breadcrumbs-aside) a {
-  color: var(--sidebarColor);
-}
-.wy-nav-side {
-  background: var(--sidebarBackground);
-  border-right: 1px solid var(--line);
-}
-.wy-menu-vertical a {
-  padding-top: 0.65em !important;
-  padding-bottom: 0.65em !important;
-}
-.wy-side-nav-search {
-  background: none
-}
-.wy-nav-content {
-  max-width: 1000px;
-}
-.wy-breadcrumbs + hr {
-  display: none;
-}
-.rst-content strong {
+.content strong {
   font-weight: 600;
 }
-.rst-content a strong {
+.content a strong {
   font-weight: 500;
 }
-/* remove icons */
-.icon-home:before {
-  content: "Home";
-  font-family: "Open Sans" ,"Helvetica Neue", "Arial", "sans-serif";
-  -webkit-font-smoothing: auto;
+
+p.admonition-title {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 16px;
 }
-.fa-plus-square-o:before, .wy-menu-vertical li span.toctree-expand:before,
-.fa-minus-square-o:before, .wy-menu-vertical li.current>a span.toctree-expand:before, .wy-menu-vertical li.on a span.toctree-expand:before {
-  content: none;
+p.admonition-title::before {
+  background-color: var(--white) !important;
 }
-/* menu */
-.wy-nav-content-wrap {
-  background: #ffffff
+.admonition {
+  border-left: none;
+  box-shadow: none;
 }
-.rst-content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
+.content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
   font-family: 'Futura Medium';
   font-weight: normal;
 }
-.wy-menu-vertical li.toctree-l1.current>a {
-  border: none;
-}
-.wy-menu-vertical li.current>a, .wy-menu-vertical li.on a {
-  color: var(--sidebarColor);
-}
-.wy-menu-vertical a:hover {
-  background: var(--sidebarBackgroundDark);
-  color: var(--sidebarColor);
-}
-.wy-menu-vertical a:visited {
-  color: var(--sidebarColor);
-}
-.wy-menu-vertical li.current {
-  background: var(--sidebarBackgroundDark)
-}
-.wy-menu-vertical li.current a {
-  border: none;
-}
-.wy-menu-vertical li.toctree-l3.current>a, .wy-menu-vertical li.toctree-l3.current li.toctree-l4>a {
-  background: var(--sidebarBackgroundDarker);
-}
-.wy-menu-vertical li.toctree-l2.current>a, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a {
-  background: #d3d3d4
-}
-.wy-menu-vertical li.toctree-l2 a, .wy-menu-vertical li.toctree-l3 a, .wy-menu-vertical li.toctree-l4 a, .wy-menu-vertical li.toctree-l5 a, .wy-menu-vertical li.toctree-l6 a, .wy-menu-vertical li.toctree-l7 a, .wy-menu-vertical li.toctree-l8 a, .wy-menu-vertical li.toctree-l9 a, .wy-menu-vertical li.toctree-l10 a {
-  color: var(--sidebarColor);
-}
-.wy-menu-vertical a, .wy-menu-vertical li.current>a span.toctree-expand, .wy-menu-vertical li.on a span.toctree-expand {
-  color: var(--sidebarColor);
-  font-size: 14px;
-  line-height: 1.8em;
-}
-.rst-content .note, .rst-content .seealso, .rst-content .wy-alert-info.admonition, .rst-content .wy-alert-info.admonition-todo, .rst-content .wy-alert-info.attention, .rst-content .wy-alert-info.caution, .rst-content .wy-alert-info.danger, .rst-content .wy-alert-info.error, .rst-content .wy-alert-info.hint, .rst-content .wy-alert-info.important, .rst-content .wy-alert-info.tip, .rst-content .wy-alert-info.warning, .wy-alert.wy-alert-info {
+.content .note, .content .seealso, .content .wy-alert-info.admonition, .content .wy-alert-info.admonition-todo, .content .wy-alert-info.attention, .content .wy-alert-info.caution, .content .wy-alert-info.danger, .content .wy-alert-info.error, .content .wy-alert-info.hint, .content .wy-alert-info.important, .content .wy-alert-info.tip, .content .wy-alert-info.warning, .wy-alert.wy-alert-info {
   background: var(--noteBackground);
 }
-.rst-content .note .admonition-title, .rst-content .note .wy-alert-title, .rst-content .seealso .admonition-title, .rst-content .seealso .wy-alert-title, .rst-content .wy-alert-info.admonition-todo .admonition-title, .rst-content .wy-alert-info.admonition-todo .wy-alert-title, .rst-content .wy-alert-info.admonition .admonition-title, .rst-content .wy-alert-info.admonition .wy-alert-title, .rst-content .wy-alert-info.attention .admonition-title, .rst-content .wy-alert-info.attention .wy-alert-title, .rst-content .wy-alert-info.caution .admonition-title, .rst-content .wy-alert-info.caution .wy-alert-title, .rst-content .wy-alert-info.danger .admonition-title, .rst-content .wy-alert-info.danger .wy-alert-title, .rst-content .wy-alert-info.error .admonition-title, .rst-content .wy-alert-info.error .wy-alert-title, .rst-content .wy-alert-info.hint .admonition-title, .rst-content .wy-alert-info.hint .wy-alert-title, .rst-content .wy-alert-info.important .admonition-title, .rst-content .wy-alert-info.important .wy-alert-title, .rst-content .wy-alert-info.tip .admonition-title, .rst-content .wy-alert-info.tip .wy-alert-title, .rst-content .wy-alert-info.warning .admonition-title, .rst-content .wy-alert-info.warning .wy-alert-title, .rst-content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .rst-content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
+.content .note .admonition-title, .content .note .wy-alert-title, .content .seealso .admonition-title, .content .seealso .wy-alert-title, .content .wy-alert-info.admonition-todo .admonition-title, .content .wy-alert-info.admonition-todo .wy-alert-title, .content .wy-alert-info.admonition .admonition-title, .content .wy-alert-info.admonition .wy-alert-title, .content .wy-alert-info.attention .admonition-title, .content .wy-alert-info.attention .wy-alert-title, .content .wy-alert-info.caution .admonition-title, .content .wy-alert-info.caution .wy-alert-title, .content .wy-alert-info.danger .admonition-title, .content .wy-alert-info.danger .wy-alert-title, .content .wy-alert-info.error .admonition-title, .content .wy-alert-info.error .wy-alert-title, .content .wy-alert-info.hint .admonition-title, .content .wy-alert-info.hint .wy-alert-title, .content .wy-alert-info.important .admonition-title, .content .wy-alert-info.important .wy-alert-title, .content .wy-alert-info.tip .admonition-title, .content .wy-alert-info.tip .wy-alert-title, .content .wy-alert-info.warning .admonition-title, .content .wy-alert-info.warning .wy-alert-title, .content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
   background: var(--noteHeader);
 }
-.rst-content .hint, .rst-content .seealso, .rst-content .wy-alert-info.admonition, .rst-content .wy-alert-info.admonition-todo, .rst-content .wy-alert-info.attention, .rst-content .wy-alert-info.caution, .rst-content .wy-alert-info.danger, .rst-content .wy-alert-info.error, .rst-content .wy-alert-info.hint, .rst-content .wy-alert-info.important, .rst-content .wy-alert-info.tip, .rst-content .wy-alert-info.warning, .wy-alert.wy-alert-info {
+.content .hint, .content .seealso, .content .wy-alert-info.admonition, .content .wy-alert-info.admonition-todo, .content .wy-alert-info.attention, .content .wy-alert-info.caution, .content .wy-alert-info.danger, .content .wy-alert-info.error, .content .wy-alert-info.hint, .content .wy-alert-info.important, .content .wy-alert-info.tip, .content .wy-alert-info.warning, .wy-alert.wy-alert-info {
   background: var(--hintBackground);
 }
-.rst-content .hint .admonition-title, .rst-content .hint .wy-alert-title, .rst-content .seealso .admonition-title, .rst-content .seealso .wy-alert-title, .rst-content .wy-alert-info.admonition-todo .admonition-title, .rst-content .wy-alert-info.admonition-todo .wy-alert-title, .rst-content .wy-alert-info.admonition .admonition-title, .rst-content .wy-alert-info.admonition .wy-alert-title, .rst-content .wy-alert-info.attention .admonition-title, .rst-content .wy-alert-info.attention .wy-alert-title, .rst-content .wy-alert-info.caution .admonition-title, .rst-content .wy-alert-info.caution .wy-alert-title, .rst-content .wy-alert-info.danger .admonition-title, .rst-content .wy-alert-info.danger .wy-alert-title, .rst-content .wy-alert-info.error .admonition-title, .rst-content .wy-alert-info.error .wy-alert-title, .rst-content .wy-alert-info.hint .admonition-title, .rst-content .wy-alert-info.hint .wy-alert-title, .rst-content .wy-alert-info.important .admonition-title, .rst-content .wy-alert-info.important .wy-alert-title, .rst-content .wy-alert-info.tip .admonition-title, .rst-content .wy-alert-info.tip .wy-alert-title, .rst-content .wy-alert-info.warning .admonition-title, .rst-content .wy-alert-info.warning .wy-alert-title, .rst-content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .rst-content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
+.content .hint .admonition-title, .content .hint .wy-alert-title, .content .seealso .admonition-title, .content .seealso .wy-alert-title, .content .wy-alert-info.admonition-todo .admonition-title, .content .wy-alert-info.admonition-todo .wy-alert-title, .content .wy-alert-info.admonition .admonition-title, .content .wy-alert-info.admonition .wy-alert-title, .content .wy-alert-info.attention .admonition-title, .content .wy-alert-info.attention .wy-alert-title, .content .wy-alert-info.caution .admonition-title, .content .wy-alert-info.caution .wy-alert-title, .content .wy-alert-info.danger .admonition-title, .content .wy-alert-info.danger .wy-alert-title, .content .wy-alert-info.error .admonition-title, .content .wy-alert-info.error .wy-alert-title, .content .wy-alert-info.hint .admonition-title, .content .wy-alert-info.hint .wy-alert-title, .content .wy-alert-info.important .admonition-title, .content .wy-alert-info.important .wy-alert-title, .content .wy-alert-info.tip .admonition-title, .content .wy-alert-info.tip .wy-alert-title, .content .wy-alert-info.warning .admonition-title, .content .wy-alert-info.warning .wy-alert-title, .content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
   background: var(--hintHeader);
 }
-.rst-content .warning, .rst-content .seealso, .rst-content .wy-alert-info.admonition, .rst-content .wy-alert-info.admonition-todo, .rst-content .wy-alert-info.attention, .rst-content .wy-alert-info.caution, .rst-content .wy-alert-info.danger, .rst-content .wy-alert-info.error, .rst-content .wy-alert-info.hint, .rst-content .wy-alert-info.important, .rst-content .wy-alert-info.tip, .rst-content .wy-alert-info.warning, .wy-alert.wy-alert-info {
+.content .warning, .content .seealso, .content .wy-alert-info.admonition, .content .wy-alert-info.admonition-todo, .content .wy-alert-info.attention, .content .wy-alert-info.caution, .content .wy-alert-info.danger, .content .wy-alert-info.error, .content .wy-alert-info.hint, .content .wy-alert-info.important, .content .wy-alert-info.tip, .content .wy-alert-info.warning, .wy-alert.wy-alert-info {
   background: var(--warningBackground);
 }
-.rst-content .warning .admonition-title, .rst-content .warning .wy-alert-title, .rst-content .seealso .admonition-title, .rst-content .seealso .wy-alert-title, .rst-content .wy-alert-info.admonition-todo .admonition-title, .rst-content .wy-alert-info.admonition-todo .wy-alert-title, .rst-content .wy-alert-info.admonition .admonition-title, .rst-content .wy-alert-info.admonition .wy-alert-title, .rst-content .wy-alert-info.attention .admonition-title, .rst-content .wy-alert-info.attention .wy-alert-title, .rst-content .wy-alert-info.caution .admonition-title, .rst-content .wy-alert-info.caution .wy-alert-title, .rst-content .wy-alert-info.danger .admonition-title, .rst-content .wy-alert-info.danger .wy-alert-title, .rst-content .wy-alert-info.error .admonition-title, .rst-content .wy-alert-info.error .wy-alert-title, .rst-content .wy-alert-info.hint .admonition-title, .rst-content .wy-alert-info.hint .wy-alert-title, .rst-content .wy-alert-info.important .admonition-title, .rst-content .wy-alert-info.important .wy-alert-title, .rst-content .wy-alert-info.tip .admonition-title, .rst-content .wy-alert-info.tip .wy-alert-title, .rst-content .wy-alert-info.warning .admonition-title, .rst-content .wy-alert-info.warning .wy-alert-title, .rst-content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .rst-content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
+.content .warning .admonition-title, .content .warning .wy-alert-title, .content .seealso .admonition-title, .content .seealso .wy-alert-title, .content .wy-alert-info.admonition-todo .admonition-title, .content .wy-alert-info.admonition-todo .wy-alert-title, .content .wy-alert-info.admonition .admonition-title, .content .wy-alert-info.admonition .wy-alert-title, .content .wy-alert-info.attention .admonition-title, .content .wy-alert-info.attention .wy-alert-title, .content .wy-alert-info.caution .admonition-title, .content .wy-alert-info.caution .wy-alert-title, .content .wy-alert-info.danger .admonition-title, .content .wy-alert-info.danger .wy-alert-title, .content .wy-alert-info.error .admonition-title, .content .wy-alert-info.error .wy-alert-title, .content .wy-alert-info.hint .admonition-title, .content .wy-alert-info.hint .wy-alert-title, .content .wy-alert-info.important .admonition-title, .content .wy-alert-info.important .wy-alert-title, .content .wy-alert-info.tip .admonition-title, .content .wy-alert-info.tip .wy-alert-title, .content .wy-alert-info.warning .admonition-title, .content .wy-alert-info.warning .wy-alert-title, .content .wy-alert.wy-alert-info .admonition-title, .wy-alert.wy-alert-info .content .admonition-title, .wy-alert.wy-alert-info .wy-alert-title {
   background: var(--warningHeader);
 }
-html.writer-html4 .rst-content dl:not(.docutils)>dt, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple)>dt {
-  background: var(--noteBackground);
-  color: #484848;
-  border-top: 3px solid var(--noteHeader);
-  font-weight: 600;
-}
-.rst-content code.literal, .rst-content tt.literal {
+.content code.literal, .content tt.literal {
   color: #F2067A;
 }
-.wy-menu-vertical li.toctree-l2.current>a, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a {
-  background: var(--sidebarBackgroundDarker)
+.content div[class^=highlight], .content pre.literal-block {
+  border: none;
+  border-radius: 5px;
 }
-.wy-menu-vertical li.current a:hover {
-  background: var(--sidebarBackgroundDarker)
+/* mobile header */
+[data-theme=light] .mobile-header .icon, [data-theme=light] .mobile-header svg {
+  color: var(--primaryColor) !important;
 }
-.wy-menu-vertical li.toctree-l1.current>a {
-  background: var(--sidebarBackgroundDarker)
+[data-theme=auto] .mobile-header .icon, [data-theme=auto] .mobile-header svg {
+  color: var(--primaryColor) !important;
 }
-.wy-menu-vertical header, .wy-menu-vertical p.caption {
-  color: #4C4EA3;
+.mobile-header .icon, .mobile-header svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+.mobile-header .theme-toggle-header {
+  padding: 0.75rem 0.5rem;
+}
+.header-logo {
+  max-width: 120px;
+}
+/* sidebar */
+.sidebar-drawer {
+  width: 300px;
+}
+.sidebar-container {
+  width: 100%;
+}
+.sidebar-tree li>ul {
+  margin-left: 0;
+}
+.sidebar-tree li>ul a {
+  padding-left: 1em;
+}
+.sidebar-tree .caption, .sidebar-tree :not(.caption)>.caption-text {
   font-size: 22px;
   font-family: 'Futura Medium';
   font-weight: normal;
-  padding: 0 20px;
   text-transform: none;
 }
-
-.wy-side-nav-search input[type=text] {
+.sidebar-tree .reference {
+  line-height: 1.8em;
+}
+.sidebar-tree .toctree-l2 a {
+  padding-left: 32px;
+}
+.sidebar-logo {
+  margin: 0 0 2em 0;
+  max-width: 120px;
+}
+.sidebar-search-container {
+  margin: 0 16px;
+  padding-bottom: 16px;
+}
+.sidebar-search {
+  border: 1px solid var(--line);
+  padding-left: 2.5em;
   border-radius: 3px;
-  border: 1px solid #e9eaed;
-  padding: 0 1em 0 3em;
-  outline: none;
-  background: transparent;
   min-height: 40px;
-  min-width: 200px;
-  box-shadow: none;
-  background: url('../images/search.svg') no-repeat 10px 12px;
-  font-size: 14px;
+}
+.sidebar-search-container:before {
+  background-color: var(--primaryColor);
+}
+@media (max-width: 67em) {
+  .sidebar-drawer {
+    left: -300px;
+  }
+}
+/* typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+h1 {
+  margin-top: 2rem
+}
+h2 {
+  margin-top: 2rem 
+}
+p {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.rst-content div[class^=highlight], .rst-content pre.literal-block {
-  border: none;
-  border-radius: 5px;
-}
-.wy-side-nav-search {
-  text-align: left;
-}
-.wy-side-nav-search .wy-dropdown>a, .wy-side-nav-search>a {
-  padding-left: 0;
-}
-.wy-side-nav-search img {
-  max-width: 120px !important;
-  padding-left: 0;
-}
-.wy-nav-top {
-  background: var(--primaryColor)
-}
 /* links and buttons */
 a {
-  color: var(--link)
-}
-a:visited {
-  color: var(--link)
-}
-a:hover {
-  color: var(--linkHover)
-}
-a:active {
-  color: var(--linkActive)
-}
-.btn-neutral {
-  background: none !important;
-  box-shadow: none !important;
-}
-.btn-neutral:hover {
-  border: 1px solid rgba(0,0,0,.2);
-  background: none !important;
-}
-.btn-neutral span {
-  display: none !important;
-}
-/* add border */
-.rst-content img {
-  border-radius: 5px;
-}
-.rst-content video {
-  border-radius: 5px;
-}
-/* remove border from highlight sections */
-.rst-content .input_area.highlight-ipython3 {
-  border: none !important;
-  background: none !important;
+  text-decoration: none;
 }
 
-/* highlight section */
-.highlight { background-color: #333346; color: white; padding: 1em !important; }
-.highlight .c { color: #82d6eb; font-style: italic } /* Comment */
-.highlight .err { border: 1px solid #FF0000 } /* Error */
-.highlight .k { color: #3ef070; font-weight: bold } /* Keyword */
-.highlight .o { color: #dddcdc } /* Operator */
-.highlight .cm { color: #82d6eb; font-style: italic } /* Comment.Multiline */
-.highlight .cp { color: #3ef070 } /* Comment.Preproc */
-.highlight .c1 { color: #82d6eb; font-style: italic } /* Comment.Single */
-.highlight .cs { color: #82d6eb; background-color: #fff0f0 } /* Comment.Special */
-.highlight .gd { color: rgb(242, 243, 167) } /* Generic.Deleted */
-.highlight .ge { font-style: italic } /* Generic.Emph */
-.highlight .gr { color: rgb(255, 222, 130) } /* Generic.Error */
-.highlight .gh { color: #c1c1e2; font-weight: bold } /* Generic.Heading */
-.highlight .gi { color: #3ef070 } /* Generic.Inserted */
-.highlight .go { color: #808080 } /* Generic.Output */
-.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
-.highlight .gs { font-weight: bold } /* Generic.Strong */
-.highlight .gu { color: #e2a1e2; font-weight: bold } /* Generic.Subheading */
-.highlight .gt { color: rgb(153, 181, 245) } /* Generic.Traceback */
-.highlight .kc { color: #3ef070; font-weight: bold } /* Keyword.Constant */
-.highlight .kd { color: #3ef070; font-weight: bold } /* Keyword.Declaration */
-.highlight .kn { color: #3ef070; font-weight: bold } /* Keyword.Namespace */
-.highlight .kp { color: #3ef070 } /* Keyword.Pseudo */
-.highlight .kr { color: #3ef070; font-weight: bold } /* Keyword.Reserved */
-.highlight .kt { color: #f79cc2 } /* Keyword.Type */
-.highlight .m { color: #fbffc2 } /* Literal.Number */
-.highlight .s { color: #a0c7ee } /* Literal.String */
-.highlight .na { color: #a0c7ee } /* Name.Attribute */
-.highlight .nb { color: #f089d5; } /* Name.Builtin */
-.highlight .nc { color: #48c1f5; font-weight: bold } /* Name.Class */
-.highlight .no { color: #60add5 } /* Name.Constant */
-.highlight .nd { color: white; font-weight: bold } /* Name.Decorator */
-.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
-.highlight .ne { color: #3ef070 } /* Name.Exception */
-.highlight .nf { color: #8aa7f0 } /* Name.Function */
-.highlight .fm { color: rgb(193, 193, 247) }
-.highlight .nl { color: #8aa7f0; font-weight: bold } /* Name.Label */
-.highlight .nn { color: #48c1f5; font-weight: bold } /* Name.Namespace */
-.highlight .nt { color: #8ba2d3; font-weight: bold } /* Name.Tag */
-.highlight .nv { color: #d5abe0 } /* Name.Variable */
-.highlight .ow { color: #3ef070; font-weight: bold } /* Operator.Word */
-.highlight .w { color: #bbbbbb } /* Text.Whitespace */
-.highlight .mf { color: #fbffc2 } /* Literal.Number.Float */
-.highlight .mh { color: #fbffc2 } /* Literal.Number.Hex */
-.highlight .mi { color: #fbffc2 } /* Literal.Number.Integer */
-.highlight .mo { color: #fbffc2 } /* Literal.Number.Oct */
-.highlight .sb { color: #a0c7ee } /* Literal.String.Backtick */
-.highlight .sc { color: #a0c7ee } /* Literal.String.Char */
-.highlight .sd { color: #a0c7ee; font-style: italic } /* Literal.String.Doc */
-.highlight .s2 { color: #a0c7ee } /* Literal.String.Double */
-.highlight .se { color: #a0c7ee; font-weight: bold } /* Literal.String.Escape */
-.highlight .sh { color: #a0c7ee } /* Literal.String.Heredoc */
-.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
-.highlight .sx { color: #f8b884 } /* Literal.String.Other */
-.highlight .sr { color: #4f9ff3 } /* Literal.String.Regex */
-.highlight .s1 { color: #a0c7ee } /* Literal.String.Single */
-.highlight .ss { color: #aff849 } /* Literal.String.Symbol */
-.highlight .bp { color: #3ef070 } /* Name.Builtin.Pseudo */
-.highlight .vc { color: #d5abe0 } /* Name.Variable.Class */
-.highlight .vg { color: #d5abe0 } /* Name.Variable.Global */
-.highlight .vi { color: #d5abe0 } /* Name.Variable.Instance */
-.highlight .il { color: #fbffc2 }
+/* add border-radius */
+.content img {
+  border-radius: 5px;
+}
+.content video {
+  border-radius: 5px;
+}
 
 @font-face {
   font-family: 'Futura Medium';
@@ -359,56 +239,7 @@ a:active {
   font-weight: normal;
   src: local('Futura Light'), url('fonts/futura-light.woff2') format('woff2');
 }
-@media screen and (min-width: 900px) {
-  .wy-nav-content {
-    padding: 2em 4.5em;
-    background: #ffffff;
-    max-width: 100%;
-  }
-  .wy-side-nav-search {
-    width: var(--sidebarWidth);
-  }
-  .wy-nav-content-wrap {
-    margin-left: var(--sidebarWidth);
-  }
-  .wy-menu-vertical p.caption {
-    padding-left: 26px;
-  }
-  .wy-menu-vertical {
-    width: var(--sidebarWidth);
-  }
-  .wy-nav-side {
-    width: var(--sidebarWidth);
-  }
-  .wy-side-scroll {
-    width: var(--sidebarWidth);
-  }
-  .wy-menu-vertical li.toctree-l1.current>a,
-  .wy-menu-vertical a {
-    padding-left: 3em;
-    padding-right: 2em;
-  }
-  .wy-menu-vertical li.toctree-l2.current>a {
-    padding-left: 4em;
-    padding-right: 2em;
-  }
-  .wy-side-nav-search {
-    padding-left: 2em;
-    padding-right: 2em;
-  }
-  .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
-  .wy-menu-vertical li.toctree-l3.current>a {
-    padding-right: 2em;
-  }
-  .wy-menu-vertical li.current a {
-    padding: 0.4045em 4em;
-  }
-}
-@media screen and (min-width: 1460px) {
-  .wy-nav-content {
-    max-width: 1200px;
-  }
-}
+
 /* Change the white to any color */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -416,11 +247,6 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active
 {
  -webkit-box-shadow: 0 0 0 30px white inset !important;
-}
-
-.rst-content .highlighted {
-  background: #c5c6e0;
-  box-shadow: 0 0 0 2px #c5c6e0;
 }
 
 /* Tutorials sections */
@@ -529,7 +355,9 @@ a .tuto-section-6 {
   padding-right: 0;
   background:  white;
   margin-top: -1em;
-
+}
+[data-theme=dark] .sd-card-body {
+  background:  #131416
 }
 .sd-card-body .sd-card-title {
   font-weight: normal !important;
@@ -539,5 +367,12 @@ a .tuto-section-6 {
 .sd-card-body .sd-card-text {
   font-size: 14px;
   line-height: 1.8em;
+}
+/* pager */
+.related-pages .title [class*="tuto-section-"] {
+  display: none;
+}
+.related-pages a:hover .page-info .title {
+  text-decoration: none;
 }
 
