@@ -32,7 +32,7 @@ dependencies:
       - pre-commit==2.15.0
       # extra test dependencies
       - cleanlab
-      - datasets>1.17.0,<2.3.0 # TODO: Remove this when 2.3.0 compatibility is resolved
+      - datasets>1.17.0,<2.3.0  # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
       - huggingface_hub != 0.5.0 # some backward comp. problems introduced in 0.5.0
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
       - flair==0.10
