@@ -32,7 +32,7 @@ from rubrix.server.apis.v0.settings.server import settings as api_settings
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.client_wrapper import create_es_wrapper
-from rubrix.server.errors import APIErrorHandler
+from rubrix.server.errors import APIErrorHandler, EntityNotFoundError
 from rubrix.server.routes import api_router
 from rubrix.server.security import auth
 from rubrix.server.static_rewrite import RewriteStaticFiles
@@ -54,6 +54,7 @@ def configure_middleware(app: FastAPI):
 
 def configure_api_exceptions(api: FastAPI):
     """Configures fastapi exception handlers"""
+    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(
         APIErrorHandler.common_exception_handler
