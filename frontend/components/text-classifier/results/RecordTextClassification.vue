@@ -178,11 +178,10 @@ export default {
     margin-left: auto;
     margin-bottom: 1em;
     &.ko {
-      transform: scaleX(-1);
-      fill: $error;
+      color: $error;
     }
     &.ok {
-      fill: $success;
+      color: $success;
     }
   }
 }
