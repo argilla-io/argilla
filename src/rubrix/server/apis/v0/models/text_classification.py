@@ -25,6 +25,7 @@ from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
+    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -444,7 +445,7 @@ class TextClassificationRecordDB(CreationTextClassificationRecord):
         words = self.all_text()
         return {
             **super().extended_fields(),
-            "words": words,
+            EsRecordDataFieldNames.words: words,
             # This allow query by text:.... or text.exact:....
             # Once words is remove we can normalize at record level
             "text": words,
