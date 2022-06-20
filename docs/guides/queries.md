@@ -13,12 +13,17 @@ An important concept when searching with Elasticsearch is the *field* concept.
 Every search term in Rubrix is directed to a specific field of the record's underlying data model.
 For example, writing `text:fox` in the search bar will search for records with the word `fox` in the field `text`.
 
-If you do not provide any fields in your query string, by default Rubrix will search in the fields `word` and `word.extended`.
+If you do not provide any fields in your query string, by default Rubrix will search in the `text` field.
 For a complete list of available fields and their content, have a look at the field glossary below.
 
 ```{note}
-The default behavior when not specifying any fields in the search, will likely change in the near future.
-We recommend emulating the future behavior by using the `text` field for your default searches, that is change `brown fox` to `text:(brown fox)`, for example.
+The default behavior when not specifying any fields in the query string changed in version `>=0.16.0`.
+
+Before this version, Rubrix searched in a mixture of the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
+If you want to search for special characters now, you have to spcify the `text.exact` field.
+For example, this is the query if you want to search for words with an exclamation mark in the end: `text.exact:*\!`
+
+If you do not retrieve any results after a version update, you should use the `words` and `words.extended` fields in your search query for old datasets instead of the `text` and `text.exact` ones.
 ```
 
 ## `text` and `text.exact`
@@ -40,7 +45,7 @@ Now consider these queries:
 - `text:dog.` or `text:fox`: matches both of the records.
 - `text.exact:dog` or `text.exact:FOX`: matches none of the records.
 - `text.exact:dog.` or `text.exact:fox`: matches only the first record.
-- `text.exact:DOG` or `text.exact:FOX!`: matches only the second record.
+- `text.exact:DOG` or `text.exact:FOX\!`: matches only the second record.
 
 You can see how the `text.exact` field can be used to search in a more fine-grained manner.
 
