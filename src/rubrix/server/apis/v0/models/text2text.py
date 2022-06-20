@@ -148,7 +148,7 @@ class Text2TextRecordDB(Text2TextRecord):
             EsRecordDataFieldNames.annotated_by: self.annotated_by,
             EsRecordDataFieldNames.predicted_by: self.predicted_by,
             EsRecordDataFieldNames.score: self.scores,
-            "words": self.all_text(),
+            EsRecordDataFieldNames.words: self.all_text(),
         }
 
 

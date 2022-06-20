@@ -173,7 +173,6 @@ class MetricsService:
                 search=RecordSearch(
                     query=self.__query_builder__(dataset, query=query),
                     aggregations=agg,
-                    include_default_aggregations=False,
                 ),
             )
             results.update(results_.aggregations)
