@@ -522,7 +522,6 @@ export default {
     .svg-icon {
       margin-right: 8px;
       fill: $font-medium-color;
-      min-width: 18px;
     }
   }
   &__tag {
