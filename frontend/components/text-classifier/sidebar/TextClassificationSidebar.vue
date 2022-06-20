@@ -42,7 +42,7 @@ export default {
       sidebarItems: [
         {
           id: "explore",
-          tooltip: "Explore",
+          tooltip: "Exploration",
           icon: "eye",
           group: "Mode",
           action: "change-view-mode",
@@ -50,7 +50,7 @@ export default {
         },
         {
           id: "annotate",
-          tooltip: "Annotate",
+          tooltip: "Hand labeling",
           icon: "edit-markup",
           group: "Mode",
           action: "change-view-mode",
@@ -58,7 +58,7 @@ export default {
         },
         {
           id: "labelling-rules",
-          tooltip: "Define rules",
+          tooltip: "Weak labeling",
           icon: "tag",
           group: "Mode",
           action: "change-view-mode",
@@ -74,7 +74,7 @@ export default {
         {
           id: "rules",
           tooltip: "Overall rule metrics",
-          icon: "progress",
+          icon: "timelapse",
           action: "show-metrics",
           group: "Metrics",
         },

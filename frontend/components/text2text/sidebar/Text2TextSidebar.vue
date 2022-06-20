@@ -42,7 +42,7 @@ export default {
       sidebarItems: [
         {
           id: "explore",
-          tooltip: "Explore",
+          tooltip: "Exploration",
           icon: "eye",
           group: "Mode",
           action: "change-view-mode",
@@ -50,7 +50,7 @@ export default {
         },
         {
           id: "annotate",
-          tooltip: "Annotate",
+          tooltip: "Hand labeling",
           icon: "edit-markup",
           group: "Mode",
           action: "change-view-mode",
