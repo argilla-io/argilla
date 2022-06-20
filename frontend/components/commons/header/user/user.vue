@@ -11,10 +11,10 @@
         href="https://docs.rubrix.ml/en/stable/"
         target="_blank"
       >
-        <svgicon width="24" height="12" name="external"></svgicon> View docs
+        <svgicon width="16" height="16" name="mail-forward"></svgicon> View docs
       </a>
       <a class="user__link" href="#" @click.prevent="logout">
-        <svgicon width="24" heigth="24" name="log-in"></svgicon> Log out
+        <svgicon width="16" heigth="16" name="log-in"></svgicon> Log out
       </a>
       <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
@@ -23,7 +23,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import "assets/icons/external";
+import "assets/icons/mail-forward";
 import "assets/icons/log-in";
 export default {
   data: () => {
