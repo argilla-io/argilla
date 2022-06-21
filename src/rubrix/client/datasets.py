@@ -247,6 +247,13 @@ class DatasetBase:
     ) -> Dict[str, Any]:
         """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
         UPDATES TE ROW!
+
+        Args:
+            row: A row of a `datasets.Dataset`
+            columns: Name of the columns to be joined and deleted from the row.
+
+        Returns:
+            A dict containing the columns and its values.
         """
         joined_cols = {}
         for col in columns:
@@ -267,7 +274,7 @@ class DatasetBase:
             feature: The feature of the annotation column to optionally convert ints to strs.
 
         Returns:
-            The input value for the annotation field.
+            The column value optionally converted to str, or None if the conversion fails.
         """
         import datasets
 
@@ -453,6 +460,8 @@ class DatasetForTextClassification(DatasetBase):
             row["inputs"] = cls._parse_inputs_field(
                 row, cols_to_be_joined.get("inputs")
             )
+            if row.get("inputs") is not None and row.get("text") is not None:
+                del row["text"]
 
             if row.get("annotation") is not None:
                 row["annotation"] = cls._parse_datasets_column_with_classlabel(
@@ -512,7 +521,7 @@ class DatasetForTextClassification(DatasetBase):
         inputs = row.get("inputs")
 
         if columns is not None:
-            row["inputs"] = cls._join_datasets_columns_and_delete(row, columns)
+            inputs = cls._join_datasets_columns_and_delete(row, columns)
 
         if isinstance(inputs, dict):
             inputs = {key: val for key, val in inputs.items() if val is not None}
@@ -736,7 +745,7 @@ class DatasetForTokenClassification(DatasetBase):
                 row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
 
             if cols_to_be_joined.get("metadata"):
-                row["metadata"] = cls._join_datasets_columns(
+                row["metadata"] = cls._join_datasets_columns_and_delete(
                     row, cols_to_be_joined["metadata"]
                 )
 
@@ -938,6 +947,7 @@ class DatasetForText2Text(DatasetBase):
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
+        id: Optional[str] = None,
     ) -> "DatasetForText2Text":
         """Imports records from a `datasets.Dataset`.
 
@@ -965,11 +975,40 @@ class DatasetForText2Text(DatasetBase):
             ... })
             >>> DatasetForText2Text.from_datasets(ds)
         """
-
-        # we implement this to have more specific type hints
-        return super().from_datasets(
-            dataset, text=text, annotation=annotation, metadata=metadata
+        dataset, cols_to_be_joined = cls._prepare_dataset_and_column_mapping(
+            dataset,
+            dict(
+                text=text,
+                annotation=annotation,
+                id=id,
+                metadata=metadata,
+            ),
         )
+
+        records = []
+        for row in dataset:
+            if row.get("prediction"):
+                row["prediction"] = cls._parse_prediction_field(row["prediction"])
+
+            if cols_to_be_joined.get("metadata"):
+                row["metadata"] = cls._join_datasets_columns_and_delete(
+                    row, cols_to_be_joined["metadata"]
+                )
+
+            records.append(Text2TextRecord.parse_obj(row))
+
+        return cls(records)
+
+    @staticmethod
+    def _parse_prediction_field(predictions: List[Union[str, Dict[str, str]]]):
+        def extract_prediction(prediction: Union[str, Dict]):
+            if isinstance(prediction, str):
+                return prediction
+            if prediction["score"] is None:
+                return prediction["text"]
+            return prediction["text"], prediction["score"]
+
+        return [extract_prediction(pred) for pred in predictions]
 
     @classmethod
     def from_pandas(
@@ -1005,26 +1044,6 @@ class DatasetForText2Text(DatasetBase):
                 ds_dict[key] = [getattr(rec, key) for rec in self._records]
 
         return ds_dict
-
-    @classmethod
-    def _from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
-        def extract_prediction(prediction: Union[str, Dict]):
-            if isinstance(prediction, str):
-                return prediction
-            if prediction["score"] is None:
-                return prediction["text"]
-            return prediction["text"], prediction["score"]
-
-        records = []
-        for row in dataset:
-            if row.get("prediction"):
-                row["prediction"] = [
-                    extract_prediction(pred) for pred in row["prediction"]
-                ]
-
-            records.append(Text2TextRecord(**row))
-
-        return cls(records)
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":

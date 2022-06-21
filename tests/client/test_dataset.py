@@ -31,165 +31,183 @@ from rubrix.client.models import TextClassificationRecord
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
 
-def test_init_NotImplementedError():
-    with pytest.raises(NotImplementedError, match="has to define a `_RECORD_TYPE`"):
-        DatasetBase()
+class TestDatasetBase:
+    def test_init_NotImplementedError(self):
+        with pytest.raises(NotImplementedError, match="has to define a `_RECORD_TYPE`"):
+            DatasetBase()
 
-
-def test_init(monkeypatch, singlelabel_textclassification_records):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-
-    ds = DatasetBase(
-        records=singlelabel_textclassification_records,
-    )
-    assert ds._records == singlelabel_textclassification_records
-
-    ds = DatasetBase()
-    assert ds._records == []
-
-    with pytest.raises(WrongRecordTypeError, match="but you provided Text2TextRecord"):
-        DatasetBase(
-            records=[rb.Text2TextRecord(text="test")],
+    def test_init(self, monkeypatch, singlelabel_textclassification_records):
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
 
-    with pytest.raises(
-        WrongRecordTypeError,
-        match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
-    ):
-        DatasetBase(
-            records=[
-                rb.TextClassificationRecord(text="test"),
-                rb.Text2TextRecord(text="test"),
-            ],
+        ds = DatasetBase(
+            records=singlelabel_textclassification_records,
+        )
+        assert ds._records == singlelabel_textclassification_records
+
+        ds = DatasetBase()
+        assert ds._records == []
+
+        with pytest.raises(
+            WrongRecordTypeError, match="but you provided Text2TextRecord"
+        ):
+            DatasetBase(
+                records=[rb.Text2TextRecord(text="test")],
+            )
+
+        with pytest.raises(
+            WrongRecordTypeError,
+            match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
+        ):
+            DatasetBase(
+                records=[
+                    rb.TextClassificationRecord(text="test"),
+                    rb.Text2TextRecord(text="test"),
+                ],
+            )
+
+        with pytest.raises(NotImplementedError):
+            ds.to_datasets()
+
+        with pytest.raises(NotImplementedError):
+            ds.from_datasets("mock")
+
+        with pytest.raises(NotImplementedError):
+            ds._from_pandas("mock")
+
+    def test_to_dataframe(self, monkeypatch, singlelabel_textclassification_records):
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
 
-    with pytest.raises(NotImplementedError):
-        ds.to_datasets()
+        df = DatasetBase(singlelabel_textclassification_records).to_pandas()
 
-    with pytest.raises(NotImplementedError):
-        ds._from_datasets("mock")
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 5
+        assert list(df.columns) == list(TextClassificationRecord.__fields__)
 
-    with pytest.raises(NotImplementedError):
-        ds._from_pandas("mock")
+    def test_prepare_dataset_and_column_mapping(self, monkeypatch, caplog):
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
 
+        ds = datasets.Dataset.from_dict(
+            {
+                "unsupported_column": [None],
+                "ID": [1],
+                "inputs_a": ["a"],
+                "inputs_b": ["b"],
+                "metadata": ["mock"],
+            }
+        )
 
-def test_to_dataframe(monkeypatch, singlelabel_textclassification_records):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
+        ds_dict = datasets.DatasetDict(train=ds)
+        with pytest.raises(ValueError, match="datasets.DatasetDict` are not supported"):
+            DatasetBase._prepare_dataset_and_column_mapping(ds_dict, None)
 
-    df = DatasetBase(singlelabel_textclassification_records).to_pandas()
+        col_mapping = dict(
+            id="ID", inputs=["inputs_a", "inputs_b"], metadata="metadata"
+        )
+        prepared_ds, col_to_be_joined = DatasetBase._prepare_dataset_and_column_mapping(
+            ds, col_mapping
+        )
 
-    assert isinstance(df, pd.DataFrame)
-    assert len(df) == 5
-    assert list(df.columns) == list(TextClassificationRecord.__fields__)
+        assert prepared_ds.column_names == ["id", "inputs_a", "inputs_b", "metadata"]
+        assert col_to_be_joined == {
+            "inputs": ["inputs_a", "inputs_b"],
+            "metadata": ["metadata"],
+        }
 
+        assert (
+            "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
+            == caplog.record_tuples[0][2]
+        )
 
-def test_from_datasets(monkeypatch, caplog):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._from_datasets", lambda x: x
-    )
+    def test_from_pandas(self, monkeypatch, caplog):
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._from_pandas", lambda x: x
+        )
 
-    ds = datasets.Dataset.from_dict({"unsupported_column": [None]})
-    empty_ds = DatasetBase.from_datasets(ds)
+        df = pd.DataFrame({"unsupported_column": [None]})
+        empty_df = DatasetBase.from_pandas(df)
 
-    assert empty_ds.features == {}
-    assert len(caplog.record_tuples) == 1
-    assert caplog.record_tuples[0][1] == 30
-    assert (
-        "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
-        == caplog.record_tuples[0][2]
-    )
+        assert len(empty_df.columns) == 0
+        assert len(caplog.record_tuples) == 1
+        assert caplog.record_tuples[0][1] == 30
+        assert (
+            "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
+            == caplog.record_tuples[0][2]
+        )
 
+    def test_to_datasets(self, monkeypatch, caplog):
+        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._to_datasets_dict",
+            lambda x: {"metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]},
+        )
 
-def test_from_pandas(monkeypatch, caplog):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-    monkeypatch.setattr("rubrix.client.datasets.DatasetBase._from_pandas", lambda x: x)
+        ds = DatasetBase()
+        datasets_ds = ds.to_datasets()
+        assert datasets_ds.features == {}
+        assert len(datasets_ds) == 0
+        assert len(caplog.record_tuples) == 1
+        assert caplog.record_tuples[0][1] == 30
+        assert (
+            "The 'metadata' of the records were removed" in caplog.record_tuples[0][2]
+        )
 
-    df = pd.DataFrame({"unsupported_column": [None]})
-    empty_df = DatasetBase.from_pandas(df)
+    def test_datasets_not_installed(self, monkeypatch):
+        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setitem(sys.modules, "datasets", None)
+        with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
+            DatasetBase().to_datasets()
 
-    assert len(empty_df.columns) == 0
-    assert len(caplog.record_tuples) == 1
-    assert caplog.record_tuples[0][1] == 30
-    assert (
-        "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
-        == caplog.record_tuples[0][2]
-    )
+    def test_datasets_wrong_version(self, monkeypatch):
+        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("datasets.__version__", "1.16.0")
+        with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
+            DatasetBase().to_datasets()
 
-
-def test_to_datasets(monkeypatch, caplog):
-    monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._to_datasets_dict",
-        lambda x: {"metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]},
-    )
-
-    ds = DatasetBase()
-    datasets_ds = ds.to_datasets()
-    assert datasets_ds.features == {}
-    assert len(datasets_ds) == 0
-    assert len(caplog.record_tuples) == 1
-    assert caplog.record_tuples[0][1] == 30
-    assert "The 'metadata' of the records were removed" in caplog.record_tuples[0][2]
-
-
-def test_datasets_not_installed(monkeypatch):
-    monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
-    monkeypatch.setitem(sys.modules, "datasets", None)
-    with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
-        DatasetBase().to_datasets()
-
-
-def test_datasets_wrong_version(monkeypatch):
-    monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
-    monkeypatch.setattr("datasets.__version__", "1.16.0")
-    with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
-        DatasetBase().to_datasets()
-
-
-def test_iter_len_getitem(monkeypatch, singlelabel_textclassification_records):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-    dataset = DatasetBase(singlelabel_textclassification_records)
-
-    for record, expected in zip(dataset, singlelabel_textclassification_records):
-        assert record == expected
-
-    assert len(dataset) == 5
-    assert dataset[1] is singlelabel_textclassification_records[1]
-
-
-def test_setitem_delitem(monkeypatch, singlelabel_textclassification_records):
-    monkeypatch.setattr(
-        "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
-    )
-    dataset = DatasetBase(
-        [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
-    )
-
-    record = rb.TextClassificationRecord(inputs="mock")
-    dataset[0] = record
-
-    assert dataset._records[0] is record
-
-    assert len(dataset) == 5
-    del dataset[1]
-    assert len(dataset) == 4
-
-    with pytest.raises(
-        WrongRecordTypeError,
-        match="You are only allowed to set a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
+    def test_iter_len_getitem(
+        self, monkeypatch, singlelabel_textclassification_records
     ):
-        dataset[0] = rb.Text2TextRecord(text="mock")
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
+        dataset = DatasetBase(singlelabel_textclassification_records)
+
+        for record, expected in zip(dataset, singlelabel_textclassification_records):
+            assert record == expected
+
+        assert len(dataset) == 5
+        assert dataset[1] is singlelabel_textclassification_records[1]
+
+    def test_setitem_delitem(self, monkeypatch, singlelabel_textclassification_records):
+        monkeypatch.setattr(
+            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+        )
+        dataset = DatasetBase(
+            [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
+        )
+
+        record = rb.TextClassificationRecord(inputs="mock")
+        dataset[0] = record
+
+        assert dataset._records[0] is record
+
+        assert len(dataset) == 5
+        del dataset[1]
+        assert len(dataset) == 4
+
+        with pytest.raises(
+            WrongRecordTypeError,
+            match="You are only allowed to set a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
+        ):
+            dataset[0] = rb.Text2TextRecord(text="mock")
 
 
 class TestDatasetForTextClassification:
@@ -338,6 +356,13 @@ class TestDatasetForTextClassification:
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
+
+        rb_ds = rb.DatasetForTextClassification.from_datasets(
+            ds,
+            inputs="id",
+            annotation="labels",
+        )
+        assert rb_ds[0].inputs == {"id": "eecwqtt"}
 
         rb_ds = rb.DatasetForTextClassification.from_datasets(
             ds,
