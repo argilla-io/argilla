@@ -111,6 +111,11 @@ export default {
     }
   }
   &__copy {
+    &:hover {
+      .svg-icon {
+        fill: darken($lighter-color, 10%);
+      }
+    }
     .svg-icon {
       fill: $lighter-color;
     }

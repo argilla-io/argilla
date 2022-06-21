@@ -517,6 +517,9 @@ export default {
     .svg-icon {
       margin-right: 8px;
       fill: $font-medium-color;
+      &:hover {
+        fill: darken($font-medium-color, 10%);
+      }
     }
   }
   &__tag {
@@ -541,7 +544,6 @@ export default {
       margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
-        fill: palette(grey, dark);
         margin-right: 0;
       }
       & + #{$this} {
@@ -558,9 +560,6 @@ export default {
       margin-left: 5px;
       padding: 0;
       margin-bottom: 2px;
-      .svg-icon {
-        fill: $font-medium-color;
-      }
     }
     a {
       text-decoration: none;

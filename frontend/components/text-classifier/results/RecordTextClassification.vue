@@ -44,8 +44,8 @@
         <svgicon
           v-if="record.predicted && !labellingRulesView"
           :class="['icon__predicted', record.predicted]"
-          width="20"
-          height="20"
+          width="40"
+          height="40"
           :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
         ></svgicon>
         <re-tag
@@ -172,11 +172,9 @@ export default {
 
 .icon {
   &__predicted {
-    display: block;
-    text-align: right;
-    margin-right: 0;
-    margin-left: auto;
-    margin-bottom: 1em;
+    position: absolute;
+    right: 3em;
+    top: 1em;
     &.ko {
       color: $error;
     }
