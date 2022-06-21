@@ -3,6 +3,7 @@ import pytest
 import rubrix as rb
 from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
 from rubrix.server.apis.v0.settings.server import settings
+from tests.helpers import SecuredClient
 
 
 def test_log_records_with_multi_and_single_label_task(mocked_client):
@@ -48,6 +49,32 @@ def test_delete_and_create_for_different_task(mocked_client):
         name=dataset,
     )
     rb.load(dataset)
+
+
+def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
+
+    workspace = "test-ws"
+    dataset = "test_log_data_in_several_workspaces"
+    text = "This is a text"
+
+    mocked_client.add_workspaces_to_rubrix_user([workspace])
+
+    curr_ws = rb.get_workspace()
+    for ws in [curr_ws, workspace]:
+        rb.set_workspace(ws)
+        rb.delete(dataset)
+
+    rb.set_workspace(curr_ws)
+    rb.log(rb.TextClassificationRecord(id=0, inputs=text), name=dataset)
+
+    rb.set_workspace(workspace)
+    rb.log(rb.TextClassificationRecord(id=1, inputs=text), name=dataset)
+    ds = rb.load(dataset)
+    assert len(ds) == 1
+
+    rb.set_workspace(curr_ws)
+    ds = rb.load(dataset)
+    assert len(ds) == 1
 
 
 def test_search_keywords(mocked_client):
