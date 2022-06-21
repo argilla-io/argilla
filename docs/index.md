@@ -1,22 +1,12 @@
-.. rubrix documentation master file, created by
-   sphinx-quickstart on Fri Mar 26 17:19:26 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+# Rubrix documentation
+
+[Rubrix](https://rubrix.ml) is a **production-ready framework for building and improving datasets** for NLP projects.
 
 
-Rubrix documentation
-====================
-
-`Rubrix <https://rubrix.ml>`_ is a **production-ready framework for building and improving datasets** for NLP projects.
+<video width="100%" controls><source src="_static/tutorials/weak-supervision-with-rubrix/ws_news.mp4" type="video/mp4"></video>
 
 
-.. raw:: html
-
-   <video width="100%" controls><source src="_static/tutorials/weak-supervision-with-rubrix/ws_news.mp4" type="video/mp4"></video>
-
-
-Features
---------
+## Features
 
 - **Open**: Rubrix is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -27,39 +17,36 @@ Features
 - **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 
-Quickstart
-----------
+## Quickstart
 
-Getting started with Rubrix is easy, let's see a quick example using the 🤗 ``transformers`` and ``datasets`` libraries:
+Getting started with Rubrix is easy, let's see a quick example using the 🤗 `transformers` and `datasets` libraries:
 
-.. code-block:: bash
+{{ '```bash\npip install "rubrix[server]{}" "transformers[torch]" datasets\n```'.format(pipversion) }}
 
-   pip install "rubrix[server]" "transformers[torch]" datasets
+If you don't have [Elasticsearch (ES)](https://www.elastic.co/elasticsearch) running, make sure you have `docker` installed and run:
 
-If you don't have `Elasticsearch (ES) <https://www.elastic.co/elasticsearch>`__ running, make sure you have `Docker` installed and run:
+:::{note}
+Check the [setup and installation section](setup-and-installation) for further options and configurations regarding Elasticsearch.
+:::
 
-.. note::
-   Check the :ref:`setup and installation section <setup-and-installation>` for further options and configurations regarding Elasticsearch.
-
-.. code-block:: bash
-
-   docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
-
+```bash
+docker run -d --name elasticsearch-for-rubrix -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+```
 
 Then simply run:
 
-.. code-block:: bash
+```bash
+python -m rubrix
+```
 
-   python -m rubrix
-
-Afterward, you should be able to access the web app at `http://localhost:6900/ <http://localhost:6900/>`__.
-**The default username and password are** ``rubrix`` **and** ``1234``.
+Afterward, you should be able to access the web app at <http://localhost:6900/>.
+**The default username and password are** `rubrix` **and** `1234`.
 
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
 
 **Why**:
 
-- The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zeroshot model.
+- The availability of pre-trained language models with zero-shot capabilities means you can, sometimes, accelerate your data annotation tasks by pre-annotating your corpus with a pre-trained zero-shot model.
 - The same workflow can be applied if there is a pre-trained "supervised" model that fits your categories but needs fine-tuning for your own use case. For example, fine-tuning a sentiment classifier for a very specific type of message.
 
 **Ingredients**:
@@ -77,58 +64,56 @@ Now, let's see an example: **Bootstraping data annotation with a zero-shot class
 
 Use your favourite editor or a Jupyter notebook to run the following:
 
-.. code-block:: python
+```python
+ from transformers import pipeline
+ from datasets import load_dataset
+ import rubrix as rb
 
-   from transformers import pipeline
-   from datasets import load_dataset
-   import rubrix as rb
+ model = pipeline('zero-shot-classification', model="typeform/squeezebert-mnli")
 
-   model = pipeline('zero-shot-classification', model="typeform/squeezebert-mnli")
+ dataset = load_dataset("ag_news", split='test[0:100]')
 
-   dataset = load_dataset("ag_news", split='test[0:100]')
+ labels = ['World', 'Sports', 'Business', 'Sci/Tech']
 
-   labels = ['World', 'Sports', 'Business', 'Sci/Tech']
+ records = []
+ for record in dataset:
+     prediction = model(record['text'], labels)
 
-   records = []
-   for record in dataset:
-       prediction = model(record['text'], labels)
+     records.append(
+         rb.TextClassificationRecord(
+             text=record["text"],
+             prediction=list(zip(prediction['labels'], prediction['scores'])),
+         )
+     )
 
-       records.append(
-           rb.TextClassificationRecord(
-               text=record["text"],
-               prediction=list(zip(prediction['labels'], prediction['scores'])),
-           )
-       )
-
-   rb.log(records, name="news_zeroshot")
+ rb.log(records, name="news_zeroshot")
+```
 
 
-Now you can explore the records in the Rubrix UI at `http://localhost:6900/ <http://localhost:6900/>`_.
-**The default username and password are** ``rubrix`` **and** ``1234``.
+Now you can explore the records in the Rubrix UI at <http://localhost:6900/>.
+**The default username and password are** `rubrix` **and** `1234`.
 
 Let's filter the records predicted as `Sports` with high probability and use the bulk-labeling feature for labeling 5 records as `Sports`:
 
-.. image:: images/zero_shot_example.png
+![zero-shot example](images/zero_shot_example.png)
 
 After a few iterations of data annotation, we can load the Rubrix dataset and create a training set to train or fine-tune a supervised model.
 
-.. code-block:: python
+```python
+# load the Rubrix dataset and put it into a pandas DataFrame
+rb_df = rb.load(name='news_zeroshot').to_pandas()
 
-   # load the Rubrix dataset and put it into a pandas DataFrame
-   rb_df = rb.load(name='news_zeroshot').to_pandas()
+# filter annotated records
+rb_df = rb_df[rb_df.status == "Validated"]
 
-   # filter annotated records
-   rb_df = rb_df[rb_df.status == "Validated"]
+# select text input and the annotated label
+train_df = pd.DataFrame({
+   "text": rb_df.text,
+   "label": rb_df.annotation,
+})
+```
 
-   # select text input and the annotated label
-   train_df = pd.DataFrame({
-      "text": rb_df.text,
-      "label": rb_df.annotation,
-   })
-
-Use cases
----------
-
+## Use cases
 
 * **Data labelling and review**: collect labels to start a project from scratch or from existing live models.
 * **Model monitoring and observability:** log and observe predictions of live models.
@@ -136,13 +121,13 @@ Use cases
 * **Model debugging**: log predictions during the development process to visually spot issues.
 * **Explainability:** log token attributions to help you interpret model predictions.
 
-Community
----------
+## Community
+
 You can join the conversation on Slack! We are a very friendly and inclusive community:
 
-* `Slack community <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>`_
+* [Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
 
-
+:::{eval-rst}
 .. toctree::
    :maxdepth: 3
    :caption: Getting Started
@@ -193,6 +178,9 @@ You can join the conversation on Slack! We are a very friendly and inclusive com
    :caption: Community
    :hidden:
 
-   community/developer_docs
-   Github page <https://github.com/recognai/rubrix>
+   Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
+   Github <https://github.com/recognai/rubrix>
    Discussion forum <https://github.com/recognai/rubrix/discussions>
+   community/developer_docs
+
+:::
