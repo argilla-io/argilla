@@ -2,14 +2,7 @@
 
 # Advanced setup guides
 
-Here we provide some advanced setup guides:
-
-:::{contents}
----
-:local:
-:depth: 1
----
-:::
+Here we provide some setup guides for an advanced usage of Rubrix.
 
 (setting-up-elasticsearch-via-docker)=
 ## Setting up Elasticsearch via docker
