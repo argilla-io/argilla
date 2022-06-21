@@ -12,9 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Optional
+
 from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.text_classification import TextClassificationBulkData
+from tests.helpers import SecuredClient
 
 
 def test_delete_dataset(mocked_client):
@@ -60,6 +63,48 @@ def test_create_dataset(mocked_client):
         json=request,
     )
     assert response.status_code == 409
+
+
+def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
+    ws = "mock-ws"
+    dataset_name = "test_fetch_dataset_using_workspaces"
+    mocked_client.add_workspaces_to_rubrix_user([ws])
+
+    delete_dataset(mocked_client, dataset_name, workspace=ws)
+    delete_dataset(mocked_client, dataset_name)
+    request = dict(
+        name=dataset_name,
+        task=TaskType.text_classification,
+    )
+    response = mocked_client.post(
+        f"/api/datasets?workspace={ws}",
+        json=request,
+    )
+
+    assert response.status_code == 200, response.json()
+    dataset = Dataset.parse_obj(response.json())
+    assert dataset.created_by == "rubrix"
+    assert dataset.name == dataset_name
+    assert dataset.owner == ws
+    assert dataset.task == TaskType.text_classification
+
+    response = mocked_client.post(
+        f"/api/datasets?workspace={ws}",
+        json=request,
+    )
+    assert response.status_code == 409, response.json()
+
+    response = mocked_client.post(
+        f"/api/datasets",
+        json=request,
+    )
+
+    assert response.status_code == 200, response.json()
+    dataset = Dataset.parse_obj(response.json())
+    assert dataset.created_by == "rubrix"
+    assert dataset.name == dataset_name
+    assert dataset.owner == "rubrix"
+    assert dataset.task == TaskType.text_classification
 
 
 def test_dataset_naming_validation(mocked_client):
@@ -166,8 +211,11 @@ def test_open_and_close_dataset(mocked_client):
     )
 
 
-def delete_dataset(client, dataset):
-    assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+def delete_dataset(client, dataset, workspace: Optional[str] = None):
+    url = f"/api/datasets/{dataset}"
+    if workspace:
+        url += f"?workspace={workspace}"
+    assert client.delete(url).status_code == 200
 
 
 def create_mock_dataset(client, dataset):
