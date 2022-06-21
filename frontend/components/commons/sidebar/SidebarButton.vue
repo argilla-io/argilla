@@ -11,12 +11,12 @@
 </template>
 
 <script>
-import "assets/icons/sync";
-import "assets/icons/eye";
-import "assets/icons/edit-markup";
-import "assets/icons/tag";
-import "assets/icons/timelapse";
-import "assets/icons/loadbar-sound";
+import "assets/icons/refresh";
+import "assets/icons/exploration";
+import "assets/icons/hand-labeling";
+import "assets/icons/weak-labeling";
+import "assets/icons/progress";
+import "assets/icons/stats";
 export default {
   props: {
     activeView: {

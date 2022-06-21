@@ -5,7 +5,7 @@
       @click="openFilter(column)"
       :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
     >
-      <svgicon color="#4C4EA3" name="sort-az" width="16" />
+      <svgicon color="#4C4EA3" name="filter" width="16" />
       {{ column.name }}
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import "assets/icons/sort-az";
+import "assets/icons/filter";
 export default {
   props: {
     column: {

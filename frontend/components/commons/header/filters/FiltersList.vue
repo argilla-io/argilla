@@ -25,12 +25,7 @@
           }"
           @click="selectGroup(group)"
         >
-          <svgicon
-            v-if="group === 'Sort'"
-            name="swap-vertical"
-            width="18"
-            height="18"
-          />
+          <svgicon v-if="group === 'Sort'" name="sort" width="18" height="18" />
           {{ group }}
           <span v-if="itemsAppliedOnGroup(group)"
             >({{ itemsAppliedOnGroup(group) }})</span
@@ -101,7 +96,7 @@
 </template>
 
 <script>
-import "assets/icons/swap-vertical";
+import "assets/icons/sort";
 export default {
   props: {
     dataset: {

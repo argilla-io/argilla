@@ -46,7 +46,7 @@
           :class="['icon__predicted', record.predicted]"
           width="20"
           height="20"
-          :name="record.predicted === 'ko' ? 'close-o' : 'check-o'"
+          :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
         ></svgicon>
         <re-tag
           v-for="label in record.annotation.labels"
@@ -59,8 +59,8 @@
 </template>
 
 <script>
-import "assets/icons/check-o";
-import "assets/icons/close-o";
+import "assets/icons/matching";
+import "assets/icons/no-matching";
 import { mapActions } from "vuex";
 import {
   TextClassificationRecord,

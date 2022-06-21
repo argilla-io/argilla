@@ -145,7 +145,7 @@ export default {
         {
           id: "refresh",
           tooltip: "Refresh",
-          icon: "sync",
+          icon: "refresh",
           group: "Refresh",
           action: "refresh",
         },
