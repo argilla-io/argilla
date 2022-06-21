@@ -9,7 +9,7 @@ from tests.helpers import SecuredClient
 
 
 @pytest.fixture
-def mocked_client(monkeypatch):
+def mocked_client(monkeypatch) -> SecuredClient:
     with TestClient(app, raise_server_exceptions=False) as _client:
         client = SecuredClient(_client)
 
