@@ -126,6 +126,12 @@ $buttonSize: 34px;
     align-items: center;
     color: palette(grey, medium);
     margin: 0.5em 1.5em 1.5em 1.5em;
+    &:hover {
+      color: darken(palette(grey, medium), 10%);
+      .svg-icon {
+        fill: darken(palette(grey, medium), 10%);
+      }
+    }
     .svg-icon {
       margin-right: 0.5em;
     }
