@@ -39,12 +39,7 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                <svgicon
-                  width="18"
-                  height="18"
-                  color="#4C4EA3"
-                  name="swap-vertical"
-                />
+                <svgicon width="18" height="18" color="#4C4EA3" name="sort" />
                 <span>{{ column.name }}</span>
               </button>
             </div>
@@ -207,10 +202,10 @@
 
 <script>
 import "assets/icons/trash-empty";
-import "assets/icons/sync";
+import "assets/icons/refresh";
 import "assets/icons/copy";
 import "assets/icons/link";
-import "assets/icons/swap-vertical";
+import "assets/icons/sort";
 export default {
   props: {
     data: {

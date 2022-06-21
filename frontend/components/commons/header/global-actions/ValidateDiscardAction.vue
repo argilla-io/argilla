@@ -47,7 +47,7 @@
 <script>
 import { mapActions } from "vuex";
 import "assets/icons/math-plus";
-import "assets/icons/sync";
+import "assets/icons/refresh";
 
 export default {
   props: {

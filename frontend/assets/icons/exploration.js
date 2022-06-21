@@ -18,7 +18,7 @@
 /* eslint-disable */
 var icon = require('vue-svgicon')
 icon.register({
-  'eye': {
+  'exploration': {
     width: 40,
     height: 40,
     viewBox: '0 0 40 40',
