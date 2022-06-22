@@ -248,7 +248,6 @@ class DatasetBase:
         """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
 
         Updates the ``row`` dictionary!
-        
 
         Args:
             row: A row of a `datasets.Dataset`
