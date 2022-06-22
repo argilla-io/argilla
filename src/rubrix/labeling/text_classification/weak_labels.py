@@ -417,8 +417,9 @@ class WeakLabels(WeakLabelsBase):
 
         return matrix
 
+    @staticmethod
     def _find_dists_and_nearest(
-        self, matrix_length, embeddings, mat_abstains, support, gpu=False
+        matrix_length, embeddings, mat_abstains, support, gpu=False
     ):
         try:
             import faiss
@@ -498,9 +499,10 @@ class WeakLabels(WeakLabelsBase):
         matrix_length = self._matrix.shape[1]
         none_label_int = self._label2int[None]
 
-        support = []
-        for i in range(matrix_length):
-            support.append(np.argwhere(self._matrix[:, i] != none_label_int).flatten())
+        support = [
+            np.argwhere(self._matrix[:, i] != none_label_int).flatten()
+            for i in range(matrix_length)
+        ]
 
         mat_abstains = [
             np.argwhere(self._matrix[:, i] == none_label_int).flatten()
@@ -516,7 +518,7 @@ class WeakLabels(WeakLabelsBase):
             dists = self._extension_queries[0]
             nearest = self._extension_queries[1]
         else:
-            raise NotImplementedError(
+            raise ValueError(
                 "Embeddings are not optional the first time a matrix is extended."
             )
 
