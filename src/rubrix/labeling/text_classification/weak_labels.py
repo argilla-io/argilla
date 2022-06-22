@@ -102,6 +102,8 @@ class WeakLabelsBase:
                 + (f" with ids {ids}." if ids else ".")
             )
 
+        self._matrix = self._extended_matrix = self._extension_queries = None
+
     @property
     def rules(self) -> List[Callable]:
         """The rules (labeling functions) that were used to produce the weak labels."""
@@ -234,6 +236,100 @@ class WeakLabelsBase:
 
         return overlaps_or_conflicts
 
+    def extend_matrix(
+        self,
+        thresholds: Union[List[float], np.ndarray],
+        embeddings: Optional[np.ndarray] = None,
+        gpu: bool = False,
+    ):
+        raise NotImplementedError
+
+    def _extend_matrix(
+        self,
+        thresholds: Union[List[float], np.ndarray],
+        embeddings: Optional[np.ndarray],
+        abstains: List[np.ndarray],
+        support: List[np.ndarray],
+        gpu: bool,
+    ) -> np.ndarray:
+        """Helper method to extend the weak label matrix.
+
+        Args:
+            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
+                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
+            embeddings: Embeddings for each row of the weak label matrix.
+            abstains: List of record indices per rule for which the rule abstained.
+            support: List of record indices per rule for which the rule voted.
+            gpu: If True, perform FAISS similarity queries on GPU.
+
+        Returns:
+            The extended weak label matrix.
+        """
+        if embeddings is not None:
+            self._extension_queries = self._find_dists_and_nearest(
+                np.copy(embeddings).astype(np.float32), abstains, support, gpu=gpu
+            )
+        elif self._extension_queries is None:
+            raise ValueError(
+                "Embeddings are not optional the first time a matrix is extended."
+            )
+        dists, nearest = self._extension_queries
+
+        extended_matrix = np.copy(self._matrix)
+        new_points = [(dists[i] > thresholds[i]) for i in range(self._matrix.shape[1])]
+        for i in range(self._matrix.shape[1]):
+            extended_matrix[abstains[i][new_points[i]], i] = self._matrix[
+                support[i], i
+            ][nearest[i][new_points[i]]]
+
+        return extended_matrix
+
+    def _find_dists_and_nearest(
+        self,
+        embeddings: np.ndarray,
+        abstains: List[np.ndarray],
+        support: List[np.ndarray],
+        gpu: bool,
+    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Helper method to extend the weak labels."""
+        try:
+            import faiss
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "'faiss' must be installed to extend a weak label matrix! "
+                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
+            )
+        faiss.normalize_L2(embeddings)
+        embeddings_length = embeddings.shape[1]
+
+        label_fn_indexes = [
+            faiss.IndexFlatIP(embeddings_length) for i in range(self._matrix.shape[1])
+        ]
+
+        if gpu:
+            res = faiss.StandardGpuResources()
+            label_fn_indexes = [
+                faiss.index_cpu_to_gpu(res, 0, x) for x in label_fn_indexes
+            ]
+
+        for i in range(self._matrix.shape[1]):
+            label_fn_indexes[i].add(embeddings[support[i]])
+
+        dists_and_nearest = []
+        for i in tqdm(range(self._matrix.shape[1]), total=self._matrix.shape[1]):
+            embs_query = np.copy(embeddings[abstains[i]])
+            faiss.normalize_L2(embs_query)
+            dists_and_nearest.append(label_fn_indexes[i].search(embs_query, 1))
+
+        dists = [
+            dist_and_nearest[0].flatten() for dist_and_nearest in dists_and_nearest
+        ]
+        nearest = [
+            dist_and_nearest[1].flatten() for dist_and_nearest in dists_and_nearest
+        ]
+
+        return dists, nearest
+
 
 class WeakLabels(WeakLabelsBase):
     """Computes the weak labels of a single-label text classification dataset by applying a given list of rules.
@@ -299,9 +395,6 @@ class WeakLabels(WeakLabelsBase):
         # apply rules -> create the weak label matrix, annotation array, final label2int mapping
         self._matrix, self._annotation, self._label2int = self._apply_rules(label2int)
         self._int2label = {v: k for k, v in self._label2int.items()}
-
-        # matrix extension objects
-        self._extended_matrix = self._extension_queries = None
 
     def _apply_rules(
         self, label2int: Optional[Dict[str, int]]
@@ -416,125 +509,6 @@ class WeakLabels(WeakLabelsBase):
             return matrix[self._annotation == self._label2int[None]]
 
         return matrix
-
-    @staticmethod
-    def _find_dists_and_nearest(
-        matrix_length, embeddings, mat_abstains, support, gpu=False
-    ):
-        try:
-            import faiss
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "'faiss' must be installed to extend a weak label matrix! "
-                "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
-            )
-        faiss.normalize_L2(embeddings)
-        embeddings_length = embeddings.shape[1]
-
-        label_fn_indexes = [
-            faiss.IndexFlatIP(embeddings_length) for i in range(matrix_length)
-        ]
-
-        if gpu:
-            res = faiss.StandardGpuResources()
-            label_fn_indexes = [
-                faiss.index_cpu_to_gpu(res, 0, x) for x in label_fn_indexes
-            ]
-
-        for i in range(matrix_length):
-            label_fn_indexes[i].add(embeddings[support[i]])
-
-        dists_and_nearest = []
-        for i in tqdm(range(matrix_length), total=matrix_length):
-            embs_query = np.copy(embeddings[mat_abstains[i]])
-            faiss.normalize_L2(embs_query)
-            dists_and_nearest.append(label_fn_indexes[i].search(embs_query, 1))
-
-        dists = [
-            dist_and_nearest[0].flatten() for dist_and_nearest in dists_and_nearest
-        ]
-        nearest = [
-            dist_and_nearest[1].flatten() for dist_and_nearest in dists_and_nearest
-        ]
-
-        return dists, nearest
-
-    def extend_matrix(
-        self,
-        thresholds: np.ndarray,
-        embeddings: Optional[np.ndarray] = None,
-        gpu: bool = False,
-    ):
-        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
-           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
-
-        Args:
-            embeddings: Embeddings for each row of the weak labels matrix.
-            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
-                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
-            gpu: If True, perform FAISS similarity queries on GPU.
-
-        Examples:
-            >>> # Choose any model to generate the embeddings.
-            >>> from sentence_transformers import SentenceTransformer
-            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
-            >>>
-            >>> # Generate the embeddings and set the thresholds.
-            >>> weak_labels = WeakLabels(dataset="my_dataset")
-            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
-            >>> thresholds = [0.6] * len(weak_labels.rules)
-            >>>
-            >>> # Extend the weak labels matrix.
-            >>> weak_labels.extend_matrix(thresholds, embeddings)
-            >>>
-            >>> # Calling the method below will now retrieve the extended matrix.
-            >>> weak_labels.matrix()
-            >>>
-            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
-            >>> thresholds = [0.75] * len(weak_labels.rules)
-            >>> weak_labels.extend_matrix(thresholds)
-            >>> weak_labels.matrix()
-        """
-
-        matrix_length = self._matrix.shape[1]
-        none_label_int = self._label2int[None]
-
-        support = [
-            np.argwhere(self._matrix[:, i] != none_label_int).flatten()
-            for i in range(matrix_length)
-        ]
-
-        mat_abstains = [
-            np.argwhere(self._matrix[:, i] == none_label_int).flatten()
-            for i in range(matrix_length)
-        ]
-
-        if embeddings is not None:
-            embeddings_copy = np.copy(embeddings).astype(np.float32)
-            dists, nearest = self._find_dists_and_nearest(
-                matrix_length, embeddings_copy, mat_abstains, support, gpu=gpu
-            )
-        elif self._extension_queries:
-            dists = self._extension_queries[0]
-            nearest = self._extension_queries[1]
-        else:
-            raise ValueError(
-                "Embeddings are not optional the first time a matrix is extended."
-            )
-
-        extended_matrix = np.copy(self._matrix)
-        new_points = [(dists[i] > thresholds[i]) for i in range(matrix_length)]
-        for i in range(matrix_length):
-            extended_matrix[mat_abstains[i][new_points[i]], i] = self._matrix[
-                support[i], i
-            ][nearest[i][new_points[i]]]
-
-        self._extended_matrix = extended_matrix
-        self._extension_queries = (dists, nearest)
-
-        for idx, row in enumerate(self._matrix):
-            if not all([x == none_label_int for x in row]):
-                self._extended_matrix[idx] = self._matrix[idx]
 
     def annotation(
         self,
@@ -772,6 +746,63 @@ class WeakLabels(WeakLabelsBase):
         self._label2int = label2int.copy()
         self._int2label = {val: key for key, val in self._label2int.items()}
 
+    def extend_matrix(
+        self,
+        thresholds: Union[List[float], np.ndarray],
+        embeddings: Optional[np.ndarray] = None,
+        gpu: bool = False,
+    ):
+        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
+           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
+
+        Args:
+            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
+                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
+            embeddings: Embeddings for each row of the weak label matrix.
+                If not provided, we will use the ones from the last ``WeakLabels.extend_matrix()`` call.
+            gpu: If True, perform FAISS similarity queries on GPU.
+
+        Examples:
+            >>> # Choose any model to generate the embeddings.
+            >>> from sentence_transformers import SentenceTransformer
+            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
+            >>>
+            >>> # Generate the embeddings and set the thresholds.
+            >>> weak_labels = WeakLabels(dataset="my_dataset")
+            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
+            >>> thresholds = [0.6] * len(weak_labels.rules)
+            >>>
+            >>> # Extend the weak labels matrix.
+            >>> weak_labels.extend_matrix(thresholds, embeddings)
+            >>>
+            >>> # Calling the method below will now retrieve the extended matrix.
+            >>> weak_labels.matrix()
+            >>>
+            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
+            >>> thresholds = [0.75] * len(weak_labels.rules)
+            >>> weak_labels.extend_matrix(thresholds)
+            >>> weak_labels.matrix()
+        """
+        support = [
+            np.argwhere(self._matrix[:, i] != self._label2int[None]).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
+
+        abstains = [
+            np.argwhere(self._matrix[:, i] == self._label2int[None]).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
+
+        self._extended_matrix = self._extend_matrix(
+            thresholds, embeddings, abstains, support, gpu
+        )
+
+        # keep the original weak label row, for which at least on rule did not abstain
+        recs_with_votes = np.argwhere(
+            (self._matrix != self._label2int[None]).sum(-1) > 0
+        ).flatten()
+        self._extended_matrix[recs_with_votes] = self._matrix[recs_with_votes]
+
 
 class WeakMultiLabels(WeakLabelsBase):
     """Computes the weak labels of a multi-label text classification dataset by applying a given list of rules.
@@ -899,12 +930,16 @@ class WeakMultiLabels(WeakLabelsBase):
         Returns:
             The 3 dimensional weak label matrix, or optionally just a part of it.
         """
-        if has_annotation is True:
-            return self._matrix[self._annotation.sum(1) >= 0]
-        if has_annotation is False:
-            return self._matrix[self._annotation.sum(1) < 0]
+        matrix = (
+            self._matrix if self._extended_matrix is None else self._extended_matrix
+        )
 
-        return self._matrix
+        if has_annotation is True:
+            return matrix[self._annotation.sum(1) >= 0]
+        if has_annotation is False:
+            return matrix[self._annotation.sum(1) < 0]
+
+        return matrix
 
     def annotation(
         self,
@@ -1089,6 +1124,57 @@ class WeakMultiLabels(WeakLabelsBase):
         filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
 
         return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
+
+    def extend_matrix(
+        self,
+        thresholds: Union[List[float], np.ndarray],
+        embeddings: Optional[np.ndarray] = None,
+        gpu: bool = False,
+    ):
+        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
+           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
+
+        Args:
+            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
+                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
+            embeddings: Embeddings for each row of the weak label matrix.
+                If not provided, we will use the ones from the last ``WeakMultiLabels.extend_matrix()`` call.
+            gpu: If True, perform FAISS similarity queries on GPU.
+
+        Examples:
+            >>> # Choose any model to generate the embeddings.
+            >>> from sentence_transformers import SentenceTransformer
+            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
+            >>>
+            >>> # Generate the embeddings and set the thresholds.
+            >>> weak_labels = WeakMultiLabels(dataset="my_dataset")
+            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
+            >>> thresholds = [0.6] * len(weak_labels.rules)
+            >>>
+            >>> # Extend the weak labels matrix.
+            >>> weak_labels.extend_matrix(thresholds, embeddings)
+            >>>
+            >>> # Calling the method below will now retrieve the extended matrix.
+            >>> weak_labels.matrix()
+            >>>
+            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
+            >>> thresholds = [0.75] * len(weak_labels.rules)
+            >>> weak_labels.extend_matrix(thresholds)
+            >>> weak_labels.matrix()
+        """
+        support = [
+            np.argwhere(self._matrix[:, i].sum(-1) >= 0).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
+
+        abstains = [
+            np.argwhere(self._matrix[:, i].sum(-1) < 0).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
+
+        self._extended_matrix = self._extend_matrix(
+            thresholds, embeddings, abstains, support, gpu
+        )
 
 
 class WeakLabelsError(Exception):
