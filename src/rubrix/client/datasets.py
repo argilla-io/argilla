@@ -246,7 +246,9 @@ class DatasetBase:
         row: Dict[str, Any], columns: List[str]
     ) -> Dict[str, Any]:
         """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
-        UPDATES TE ROW!
+
+        Updates the ``row`` dictionary!
+        
 
         Args:
             row: A row of a `datasets.Dataset`
