@@ -65,6 +65,8 @@ class DatasetBase:
     """
 
     _RECORD_TYPE = None
+    # record fields that can hold multiple input columns from a datasets.Dataset or a pandas.DataFrame
+    _RECORD_FIELDS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
 
     @classmethod
     def _record_init_args(cls) -> List[str]:
@@ -153,88 +155,147 @@ class DatasetBase:
         raise NotImplementedError
 
     @classmethod
-    def from_datasets(
-        cls,
-        dataset: "datasets.Dataset",
-        id: Optional[str] = None,
-        text: Optional[str] = None,
-        annotation: Optional[str] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
-        **kwargs,
-    ) -> "Dataset":
+    def from_datasets(cls, dataset: "datasets.Dataset", **kwargs) -> "Dataset":
         """Imports records from a `datasets.Dataset`.
 
         Columns that are not supported are ignored.
 
         Args:
             dataset: A datasets Dataset from which to import the records.
-            id: The field name used as record id. Default: `None`
-            text: The field name used as record text. Default: `None`
-            annotation: The field name used as record annotation. Default: `None`
-            metadata: The field name used as record metadata. Default: `None`
 
         Returns:
             The imported records in a Rubrix Dataset.
         """
+        raise NotImplementedError
+
+    @classmethod
+    def _prepare_dataset_and_column_mapping(
+        cls,
+        dataset: "datasets.Dataset",
+        column_mapping: Dict[str, Union[str, List[str]]],
+    ) -> Tuple["datasets.Dataset", Dict[str, List[str]]]:
+        """Renames and removes columns, and extracts the mapping of the columns to be joined.
+
+        Args:
+            dataset: A datasets Dataset from which to import the records.
+            column_mapping: Mappings from record fields to column names.
+
+        Returns:
+            The prepared dataset and a mapping for the columns to be joined
+        """
         import datasets
 
-        assert not isinstance(dataset, datasets.DatasetDict), (
-            "ERROR: `datasets.DatasetDict` are not supported. "
-            "Please, select the dataset split before"
-        )
+        if isinstance(dataset, datasets.DatasetDict):
+            raise ValueError(
+                "`datasets.DatasetDict` are not supported. Please, select the dataset split before."
+            )
 
-        dataset = cls._prepare_hf_dataset(
+        # clean column mappings
+        column_mapping = {
+            key: val for key, val in column_mapping.items() if val is not None
+        }
+
+        cols_to_be_renamed, cols_to_be_joined = {}, {}
+        for field, col in column_mapping.items():
+            if field in cls._RECORD_FIELDS_WITH_MULTIPLE_INPUT_COLUMNS:
+                cols_to_be_joined[field] = [col] if isinstance(col, str) else col
+            else:
+                cols_to_be_renamed[col] = field
+
+        dataset = dataset.rename_columns(cols_to_be_renamed)
+
+        dataset = cls._remove_unsupported_columns(
             dataset,
-            id=id,
-            text=text,
-            annotation=annotation,
-            metadata=metadata,
-            **kwargs,
+            extra_columns=[col for cols in cols_to_be_joined.values() for col in cols],
         )
 
+        return dataset, cols_to_be_joined
+
+    @classmethod
+    def _remove_unsupported_columns(
+        cls,
+        dataset: "datasets.Dataset",
+        extra_columns: List[str],
+    ) -> "datasets.Dataset":
+        """Helper function to remove unsupported columns from the `datasets.Dataset` following the record type.
+
+        Args:
+            dataset: The dataset.
+            extra_columns: Extra columns to be kept.
+
+        Returns:
+            The dataset with unsupported columns removed.
+        """
         not_supported_columns = [
-            col for col in dataset.column_names if col not in cls._record_init_args()
+            col
+            for col in dataset.column_names
+            if col not in cls._record_init_args() + extra_columns
         ]
+
         if not_supported_columns:
             _LOGGER.warning(
                 f"Following columns are not supported by the {cls._RECORD_TYPE.__name__}"
                 f" model and are ignored: {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
-        return cls._from_datasets(dataset)
 
-    @classmethod
-    def _prepare_hf_dataset(
-        cls,
-        dataset: "dataset.Dataset",
-        id: Optional[str] = None,
-        text: Optional[str] = None,
-        annotation: Optional[str] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
-    ) -> "dataclasses.Dataset":
-        for field, parser in [
-            (id, cls._parse_id_field),
-            (text, cls._parse_text_field),
-            (metadata, cls._parse_metadata_field),
-            (annotation, cls._parse_annotation_field),
-        ]:
-            if field:
-                dataset = parser(dataset, field)
         return dataset
 
-    @classmethod
-    def _from_datasets(cls, dataset: "datasets.Dataset") -> "Dataset":
-        """Helper method to create a Rubrix Dataset from a datasets Dataset.
+    @staticmethod
+    def _join_datasets_columns_and_delete(
+        row: Dict[str, Any], columns: List[str]
+    ) -> Dict[str, Any]:
+        """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
 
-        Must be implemented by the child class.
+        Updates the ``row`` dictionary!
 
         Args:
-            dataset: A datasets Dataset
+            row: A row of a `datasets.Dataset`
+            columns: Name of the columns to be joined and deleted from the row.
 
         Returns:
-            A Rubrix Dataset
+            A dict containing the columns and its values.
         """
-        raise NotImplementedError
+        joined_cols = {}
+        for col in columns:
+            joined_cols[col] = row[col]
+            del row[col]
+
+        return joined_cols
+
+    @staticmethod
+    def _parse_datasets_column_with_classlabel(
+        column_value: Union[str, List[str], int, List[int]],
+        feature: Optional[Any],
+    ) -> Optional[Union[str, List[str], int, List[int]]]:
+        """Helper function to parse a datasets.Dataset column with a potential ClassLabel feature.
+
+        Args:
+            column_value: The value from the datasets Dataset column.
+            feature: The feature of the annotation column to optionally convert ints to strs.
+
+        Returns:
+            The column value optionally converted to str, or None if the conversion fails.
+        """
+        import datasets
+
+        # extract ClassLabel feature
+        if isinstance(feature, list):
+            feature = feature[0]
+        if isinstance(feature, datasets.Sequence):
+            feature = feature.feature
+        if not isinstance(feature, datasets.ClassLabel):
+            feature = None
+
+        if feature is None:
+            return column_value
+
+        try:
+            return feature.int2str(column_value)
+        # integers don't have to map to the names ...
+        # it seems that sometimes -1 is used to denote "no label"
+        except ValueError:
+            return None
 
     def to_pandas(self) -> pd.DataFrame:
         """Exports your records to a `pandas.DataFrame`.
@@ -294,39 +355,6 @@ class DatasetBase:
         """
         raise NotImplementedError
 
-    @classmethod
-    def _parse_id_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "id")
-
-    @classmethod
-    def _parse_text_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "text")
-
-    @classmethod
-    def _parse_metadata_field(
-        cls, dataset: "datasets.Dataset", fields: Union[str, List[str]]
-    ) -> "datasets.Dataset":
-
-        if isinstance(fields, str):
-            fields = [fields]
-
-        def parse_metadata_from_dataset(example):
-            return {"metadata": {k: example[k] for k in fields}}
-
-        return dataset.map(
-            parse_metadata_from_dataset, desc="Parsing metadata"
-        ).remove_columns(fields)
-
-    @classmethod
-    def _parse_annotation_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        return dataset.rename_column(field, "annotation")
-
 
 def _prepend_docstring(record_type: Type[Record]):
     docstring = f"""This Dataset contains {record_type.__name__} records.
@@ -384,7 +412,6 @@ class DatasetForTextClassification(DatasetBase):
 
     @classmethod
     def from_datasets(
-        # we implement this to have more specific type hints
         cls,
         dataset: "datasets.Dataset",
         text: Optional[str] = None,
@@ -418,15 +445,89 @@ class DatasetForTextClassification(DatasetBase):
             ... })
             >>> DatasetForTextClassification.from_datasets(ds)
         """
-
-        return super().from_datasets(
+        dataset, cols_to_be_joined = cls._prepare_dataset_and_column_mapping(
             dataset,
-            text=text,
-            id=id,
-            annotation=annotation,
-            metadata=metadata,
-            inputs=inputs,
+            dict(
+                text=text,
+                id=id,
+                inputs=inputs,
+                annotation=annotation,
+                metadata=metadata,
+            ),
         )
+
+        records = []
+        for row in dataset:
+            row["inputs"] = cls._parse_inputs_field(
+                row, cols_to_be_joined.get("inputs")
+            )
+            if row.get("inputs") is not None and row.get("text") is not None:
+                del row["text"]
+
+            if row.get("annotation") is not None:
+                row["annotation"] = cls._parse_datasets_column_with_classlabel(
+                    row["annotation"], dataset.features["annotation"]
+                )
+
+            if row.get("prediction"):
+                row["prediction"] = (
+                    [
+                        (
+                            pred["label"],
+                            pred["score"],
+                        )
+                        for pred in row["prediction"]
+                    ]
+                    if row["prediction"] is not None
+                    else None
+                )
+
+            if row.get("explanation"):
+                row["explanation"] = (
+                    {
+                        key: [
+                            TokenAttributions(**tokattr_kwargs)
+                            for tokattr_kwargs in val
+                        ]
+                        for key, val in row["explanation"].items()
+                    }
+                    if row["explanation"] is not None
+                    else None
+                )
+
+            if cols_to_be_joined.get("metadata"):
+                row["metadata"] = cls._join_datasets_columns_and_delete(
+                    row, cols_to_be_joined["metadata"]
+                )
+
+            records.append(TextClassificationRecord.parse_obj(row))
+
+        return cls(records)
+
+    @classmethod
+    def _parse_inputs_field(
+        cls,
+        row: Dict[str, Any],
+        columns: Optional[List[str]],
+    ) -> Optional[Union[Dict[str, str], str]]:
+        """Helper function to parse the inputs field.
+
+        Args:
+            row: A row of the dataset.Datasets
+            columns: A list of columns to be joined for the inputs field, optional.
+
+        Returns:
+            None, a dictionary or a string as input for the inputs field.
+        """
+        inputs = row.get("inputs")
+
+        if columns is not None:
+            inputs = cls._join_datasets_columns_and_delete(row, columns)
+
+        if isinstance(inputs, dict):
+            inputs = {key: val for key, val in inputs.items() if val is not None}
+
+        return inputs
 
     @classmethod
     def from_pandas(
@@ -467,133 +568,6 @@ class DatasetForTextClassification(DatasetBase):
                 ds_dict[key] = [getattr(rec, key) for rec in self._records]
 
         return ds_dict
-
-    @classmethod
-    def _parse_annotation_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        import datasets
-
-        labels = dataset.features[field]
-        if isinstance(labels, datasets.Sequence):
-            labels = labels.feature
-
-        dataset = dataset.rename_column(field, "annotation")
-
-        if not isinstance(labels, datasets.ClassLabel):
-            return dataset
-
-        def int2str_for_annotation(example):
-            try:
-                return {"annotation": labels.int2str(example["annotation"])}
-            # integers don't have to map to the names ...
-            # it seems that sometimes -1 is used to denote "no label"
-            except ValueError:
-                return {"annotation": None}
-
-        return dataset.map(int2str_for_annotation, desc="Parsing annotation")
-
-    @classmethod
-    def _prepare_hf_dataset(
-        cls,
-        dataset: "dataset.Dataset",
-        inputs: Optional[Union[str, List[str]]] = None,
-        **kwargs,
-    ) -> "dataclasses.Dataset":
-        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
-        if inputs:
-            dataset = cls._parse_inputs_field(dataset, fields=inputs)
-        return dataset
-
-    @classmethod
-    def _from_datasets(
-        cls, dataset: "datasets.Dataset"
-    ) -> "DatasetForTextClassification":
-
-        records = []
-        for row in dataset:
-            if row.get("inputs") and isinstance(row["inputs"], dict):
-                row["inputs"] = {
-                    key: val for key, val in row["inputs"].items() if val is not None
-                }
-            if row.get("annotation") is not None:
-                row["annotation"] = cls._parse_annotation_field2(
-                    row["annotation"], dataset.features["annotation"]
-                )
-
-            if row.get("prediction"):
-                row["prediction"] = (
-                    [
-                        (
-                            pred["label"],
-                            pred["score"],
-                        )
-                        for pred in row["prediction"]
-                    ]
-                    if row["prediction"] is not None
-                    else None
-                )
-            if row.get("explanation"):
-                row["explanation"] = (
-                    {
-                        key: [
-                            TokenAttributions(**tokattr_kwargs)
-                            for tokattr_kwargs in val
-                        ]
-                        for key, val in row["explanation"].items()
-                    }
-                    if row["explanation"] is not None
-                    else None
-                )
-
-            records.append(TextClassificationRecord.parse_obj(row))
-        return cls(records)
-
-    @staticmethod
-    def _parse_annotation_field2(
-        annotation: Union[str, List[str], int, List[int]],
-        feature: Optional[Any],
-    ) -> Optional[Union[str, List[str], int, List[int]]]:
-        """Helper function to parse the annotation field.
-
-        Args:
-            annotation: The value from the annotation column.
-            feature: The feature of the annotation column to optionally convert ints to strs.
-
-        Returns:
-            The input value for the annotation field.
-        """
-        import datasets
-
-        # extract ClassLabel feature
-        if isinstance(feature, list):
-            feature = feature[0]
-        if isinstance(feature, datasets.Sequence):
-            feature = feature.feature
-        if not isinstance(feature, datasets.ClassLabel):
-            feature = None
-
-        if feature is None:
-            return annotation
-
-        try:
-            return feature.int2str(annotation)
-        # integers don't have to map to the names ...
-        # it seems that sometimes -1 is used to denote "no label"
-        except ValueError:
-            return None
-
-    @classmethod
-    def _parse_inputs_field(
-        cls, dataset: "datasets.Dataset", fields: Optional[Union[str, List[str]]]
-    ) -> "datasets.Dataset":
-        if isinstance(fields, str):
-            fields = [fields]
-
-        return dataset.map(
-            lambda example: {"inputs": {k: example[k] for k in fields}},
-            desc="Parsing inputs",
-        )
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
@@ -696,21 +670,22 @@ class DatasetForTokenClassification(DatasetBase):
 
     _RECORD_TYPE = TokenClassificationRecord
 
+    def __init__(self, records: Optional[List[TokenClassificationRecord]] = None):
+        # we implement this to have more specific type hints
+        super().__init__(records=records)
+
     @classmethod
     def _record_init_args(cls) -> List[str]:
         """Adds the `tags` argument to default record init arguments"""
         parent_fields = super(DatasetForTokenClassification, cls)._record_init_args()
         return parent_fields + ["tags"]  # compute annotation from tags
 
-    def __init__(self, records: Optional[List[TokenClassificationRecord]] = None):
-        # we implement this to have more specific type hints
-        super().__init__(records=records)
-
     @classmethod
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
         text: Optional[str] = None,
+        id: Optional[str] = None,
         tokens: Optional[str] = None,
         tags: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -722,6 +697,7 @@ class DatasetForTokenClassification(DatasetBase):
         Args:
             dataset: A datasets Dataset from which to import the records.
             text: The field name used as record text. Default: `None`
+            id: The field name used as record id. Default: `None`
             tokens: The field name used as record tokens. Default: `None`
             tags: The field name used as record tags. Default: `None`
             metadata: The field name used as record metadata. Default: `None`
@@ -740,10 +716,43 @@ class DatasetForTokenClassification(DatasetBase):
             ... })
             >>> DatasetForTokenClassification.from_datasets(ds)
         """
-        # we implement this to have more specific type hints
-        return super().from_datasets(
-            dataset, text=text, tokens=tokens, tags=tags, metadata=metadata
+        dataset, cols_to_be_joined = cls._prepare_dataset_and_column_mapping(
+            dataset,
+            dict(
+                text=text,
+                tokens=tokens,
+                tags=tags,
+                id=id,
+                metadata=metadata,
+            ),
         )
+
+        records = []
+        for row in dataset:
+            # TODO: fails with a KeyError if no tokens column is present and no mapping is indicated
+            if not row["tokens"]:
+                _LOGGER.warning(f"Ignoring row with no tokens.")
+                continue
+
+            if row.get("tags"):
+                row["tags"] = cls._parse_datasets_column_with_classlabel(
+                    row["tags"], dataset.features["tags"]
+                )
+
+            if row.get("prediction"):
+                row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
+
+            if row.get("annotation"):
+                row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
+
+            if cols_to_be_joined.get("metadata"):
+                row["metadata"] = cls._join_datasets_columns_and_delete(
+                    row, cols_to_be_joined["metadata"]
+                )
+
+            records.append(TokenClassificationRecord.parse_obj(row))
+
+        return cls(records)
 
     @classmethod
     def from_pandas(
@@ -893,71 +902,6 @@ class DatasetForTokenClassification(DatasetBase):
         ]
 
     @classmethod
-    def _prepare_hf_dataset(
-        cls,
-        dataset: "dataset.Dataset",
-        tokens: Optional[str] = None,
-        tags: Optional[str] = None,
-        **kwargs,
-    ) -> "dataclasses.Dataset":
-        dataset = super()._prepare_hf_dataset(dataset, **kwargs)
-        if tokens:
-            dataset = cls._parse_tokens_field(dataset, field=tokens)
-        if tags:
-            dataset = cls._parse_tags_field(dataset, field=tags)
-        return dataset
-
-    @classmethod
-    def _from_datasets(
-        cls,
-        dataset: "datasets.Dataset",
-    ) -> "DatasetForTokenClassification":
-
-        records = []
-        for row in dataset:
-            if row.get("prediction"):
-                row["prediction"] = cls.__entities_to_tuple__(row["prediction"])
-            if row.get("annotation"):
-                row["annotation"] = cls.__entities_to_tuple__(row["annotation"])
-            if not row["tokens"]:
-                _LOGGER.warning(f"Ignoring row with no tokens.")
-                continue
-            records.append(TokenClassificationRecord.parse_obj(row))
-        return cls(records)
-
-    @classmethod
-    def _parse_tokens_field(
-        cls, dataset: "datasets.Dataset", field: str
-    ) -> "datasets.Dataset":
-        def parse_tokens_from_example(example):
-            tokens: List[str] = example[field]
-            data = {"tokens": tokens}
-
-            if "text" not in example:
-                data["text"] = " ".join(tokens)
-            return data
-
-        return dataset.map(parse_tokens_from_example, desc="Parsing tokens")
-
-    @classmethod
-    def _parse_tags_field(
-        cls, dataset: "datasets.Dataset", field: str = str
-    ) -> "datasets.Dataset":
-        import datasets
-
-        labels = dataset.features[field]
-        if isinstance(labels, datasets.Sequence):
-            labels = labels.feature
-        int2str = (
-            labels.int2str if isinstance(labels, datasets.ClassLabel) else lambda x: x
-        )
-
-        def parse_tags_from_example(example):
-            return {"tags": [int2str(t) for t in example[field] or []]}
-
-        return dataset.map(parse_tags_from_example, desc="Parsing tags")
-
-    @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTokenClassification":
         return cls(
             [TokenClassificationRecord(**row) for row in dataframe.to_dict("records")]
@@ -1004,6 +948,7 @@ class DatasetForText2Text(DatasetBase):
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
+        id: Optional[str] = None,
     ) -> "DatasetForText2Text":
         """Imports records from a `datasets.Dataset`.
 
@@ -1031,11 +976,40 @@ class DatasetForText2Text(DatasetBase):
             ... })
             >>> DatasetForText2Text.from_datasets(ds)
         """
-
-        # we implement this to have more specific type hints
-        return super().from_datasets(
-            dataset, text=text, annotation=annotation, metadata=metadata
+        dataset, cols_to_be_joined = cls._prepare_dataset_and_column_mapping(
+            dataset,
+            dict(
+                text=text,
+                annotation=annotation,
+                id=id,
+                metadata=metadata,
+            ),
         )
+
+        records = []
+        for row in dataset:
+            if row.get("prediction"):
+                row["prediction"] = cls._parse_prediction_field(row["prediction"])
+
+            if cols_to_be_joined.get("metadata"):
+                row["metadata"] = cls._join_datasets_columns_and_delete(
+                    row, cols_to_be_joined["metadata"]
+                )
+
+            records.append(Text2TextRecord.parse_obj(row))
+
+        return cls(records)
+
+    @staticmethod
+    def _parse_prediction_field(predictions: List[Union[str, Dict[str, str]]]):
+        def extract_prediction(prediction: Union[str, Dict]):
+            if isinstance(prediction, str):
+                return prediction
+            if prediction["score"] is None:
+                return prediction["text"]
+            return prediction["text"], prediction["score"]
+
+        return [extract_prediction(pred) for pred in predictions]
 
     @classmethod
     def from_pandas(
@@ -1071,26 +1045,6 @@ class DatasetForText2Text(DatasetBase):
                 ds_dict[key] = [getattr(rec, key) for rec in self._records]
 
         return ds_dict
-
-    @classmethod
-    def _from_datasets(cls, dataset: "datasets.Dataset") -> "DatasetForText2Text":
-        def extract_prediction(prediction: Union[str, Dict]):
-            if isinstance(prediction, str):
-                return prediction
-            if prediction["score"] is None:
-                return prediction["text"]
-            return prediction["text"], prediction["score"]
-
-        records = []
-        for row in dataset:
-            if row.get("prediction"):
-                row["prediction"] = [
-                    extract_prediction(pred) for pred in row["prediction"]
-                ]
-
-            records.append(Text2TextRecord(**row))
-
-        return cls(records)
 
     @classmethod
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
