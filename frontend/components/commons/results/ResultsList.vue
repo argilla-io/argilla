@@ -95,7 +95,7 @@
   </span>
 </template>
 <script>
-import "assets/icons/empty-results";
+import "assets/icons/unavailable";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -110,7 +110,7 @@ export default {
       selectedRecord: undefined,
       emptySearchInfo: {
         // message: "There is no result. <br />Try another query.",
-        icon: "empty-results",
+        icon: "unavailable",
       },
     };
   },
@@ -191,7 +191,6 @@ export default {
 <style lang="scss">
 .vue-recycle-scroller__item-wrapper {
   box-sizing: content-box;
-  padding-bottom: 260px;
 }
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;

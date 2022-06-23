@@ -7,7 +7,7 @@
           class="rules-management__close button-tertiary--outline"
           @click="hideList"
         >
-          <svgicon name="chev-left" width="12" height="12"></svgicon>Back to
+          <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to
           query view</re-button
         >
         <p class="rules-management__title">
@@ -44,7 +44,7 @@
   </div>
 </template>
 <script>
-import "assets/icons/empty-rules";
+import "assets/icons/unavailable";
 import { mapActions } from "vuex";
 import { TextClassificationDataset } from "@/models/TextClassification";
 export default {
@@ -61,11 +61,11 @@ export default {
       isLoading: undefined,
       sortedOrder: "desc",
       sortedByField: "created_at",
-      actions: [{ name: "delete", icon: "delete", title: "Delete rule" }],
+      actions: [{ name: "delete", icon: "trash-empty", title: "Delete rule" }],
       noDataInfo: {
         title: "0 rules defined",
         message: `You have not defined any rules for this dataset yet.`,
-        icon: "empty-rules",
+        icon: "unavailable",
       },
       emptySearchInfo: {
         title: "0 rules found",

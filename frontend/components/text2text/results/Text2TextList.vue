@@ -106,7 +106,7 @@
                     @click.prevent="showitemNumber(--itemNumber)"
                   >
                     <svgicon
-                      name="chev-left"
+                      name="chevron-left"
                       width="8"
                       height="8"
                       color="#4C4EA3"
@@ -121,7 +121,7 @@
                     @click.prevent="showitemNumber(++itemNumber)"
                   >
                     <svgicon
-                      name="chev-right"
+                      name="chevron-right"
                       width="8"
                       height="8"
                       color="#4C4EA3"
@@ -157,7 +157,6 @@
 </template>
 
 <script>
-import "assets/icons/pencil";
 import { IdState } from "vue-virtual-scroller";
 import { mapActions } from "vuex";
 

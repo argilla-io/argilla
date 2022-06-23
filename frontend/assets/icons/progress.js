@@ -19,9 +19,9 @@
 var icon = require('vue-svgicon')
 icon.register({
   'progress': {
-    width: 25,
-    height: 25,
-    viewBox: '0 0 25 25',
-    data: '<g _fill="#333346" fill-rule="nonzero"><circle pid="0" cx="1.563" cy="12.5" r="1.563"/><circle pid="1" transform="rotate(-60 3.124 7.033)" cx="3.124" cy="7.033" r="1.563"/><circle pid="2" transform="rotate(-30 7.03 3.128)" cx="7.03" cy="3.128" r="1.563"/><circle pid="3" transform="rotate(-60 7.03 21.872)" cx="7.03" cy="21.872" r="1.563"/><circle pid="4" transform="rotate(-30 3.128 17.967)" cx="3.128" cy="17.967" r="1.563"/><path pid="5" d="M12.5 0v3.125a9.375 9.375 0 010 18.75V25C19.404 25 25 19.404 25 12.5S19.404 0 12.5 0z"/></g>'
+    width: 40,
+    height: 40,
+    viewBox: '0 0 40 40',
+    data: '<path pid="0" d="M20 29.546a9.515 9.515 0 006.75-2.796L20 20v-9.546a9.546 9.546 0 000 19.091z" _fill="#000"/><path pid="1" fill-rule="evenodd" clip-rule="evenodd" d="M5 20c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15 0-8.284-6.716-15-15-15-8.284 0-15 6.716-15 15zm2.727 0c0 6.778 5.495 12.273 12.273 12.273S32.273 26.778 32.273 20 26.778 7.727 20 7.727 7.727 13.222 7.727 20z" _fill="#000"/>'
   }
 })

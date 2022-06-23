@@ -22,7 +22,7 @@
       <div class="pagination__selector__content">
         <a href="#" @click="showOptions = !showOptions">
           {{ paginationSize }}
-          <svgicon name="drop-up" width="12" height="12" />
+          <svgicon name="chevron-up" width="12" height="12" />
         </a>
         <ul v-if="showOptions">
           <li v-for="item in availableItemsPerPage" :key="item">
@@ -38,7 +38,7 @@
         :class="currentPage <= 1 ? 'is-disabled' : null"
         @click.prevent="prevPage"
       >
-        <svgicon name="chev-left" width="8" height="8" /> Prev
+        <svgicon name="chevron-left" width="8" height="8" /> Prev
       </a>
       <ul class="pagination__numbers">
         <li v-if="totalPages > 1 && !pages.includes(1)">
@@ -84,7 +84,7 @@
         :class="currentPage >= totalPages ? 'is-disabled' : null"
         @click.prevent="nextPage"
       >
-        Next <svgicon name="chev-right" width="8" height="8" />
+        Next <svgicon name="chevron-right" width="8" height="8" />
       </a>
     </div>
     <div class="pagination__info">
@@ -100,9 +100,9 @@
   </div>
 </template>
 <script>
-import "assets/icons/chev-left";
-import "assets/icons/chev-right";
-import "assets/icons/drop-up";
+import "assets/icons/chevron-left";
+import "assets/icons/chevron-right";
+import "assets/icons/chevron-up";
 export default {
   props: {
     totalItems: {
