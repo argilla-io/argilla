@@ -206,6 +206,9 @@ p.admonition-title::before {
   opacity: 1;
   width: 100%;
 }
+#searchbox .highlight-link {
+  display: none;
+}
 .search-overlay {
   z-index: 20;
 }
