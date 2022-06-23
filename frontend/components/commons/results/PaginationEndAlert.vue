@@ -1,6 +1,6 @@
 <template>
   <div class="results-pagination-end">
-    <svgicon width="40" height="40" name="pagination-end" />
+    <svgicon width="40" height="40" name="row-last" />
     <p>
       You have reached the current record limit ({{ limit | formatNumber }}). To
       view more records please refine your query
@@ -8,7 +8,7 @@
   </div>
 </template>
 <script>
-import "assets/icons/pagination-end";
+import "assets/icons/row-last";
 export default {
   props: {
     limit: {

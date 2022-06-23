@@ -39,7 +39,7 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                <svgicon color="#4C4EA3" width="15" height="15" name="sort" />
+                <svgicon width="18" height="18" color="#4C4EA3" name="sort" />
                 <span>{{ column.name }}</span>
               </button>
             </div>
@@ -95,7 +95,7 @@
                           class="table-info__actions__button button-icon"
                           @click.prevent="onActionClicked('copy-name', item)"
                         >
-                          <svgicon name="copy" width="12" height="13" />
+                          <svgicon name="copy" width="16" height="16" />
                         </ReButton>
                       </re-action-tooltip>
                     </span>
@@ -157,8 +157,8 @@
                       <svgicon
                         v-if="action.icon !== undefined"
                         :name="action.icon"
-                        width="12"
-                        height="13"
+                        width="16"
+                        height="16"
                       />
                     </ReButton>
                   </re-action-tooltip>
@@ -201,11 +201,10 @@
 </template>
 
 <script>
-import "assets/icons/delete";
+import "assets/icons/trash-empty";
 import "assets/icons/refresh";
 import "assets/icons/copy";
-import "assets/icons/copy-url";
-import "assets/icons/datasource";
+import "assets/icons/link";
 import "assets/icons/sort";
 export default {
   props: {
@@ -473,7 +472,10 @@ export default {
       @include font-size(14px);
       font-family: $sff;
       text-align: left;
+      display: flex;
+      align-items: center;
       @include media("<=desktop") {
+        display: block;
         .svg-icon {
           display: block;
         }
@@ -513,8 +515,11 @@ export default {
       }
     }
     .svg-icon {
-      margin-right: 0.5em;
+      margin-right: 8px;
       fill: $font-medium-color;
+      &:hover {
+        fill: darken($font-medium-color, 10%);
+      }
     }
   }
   &__tag {
@@ -539,7 +544,6 @@ export default {
       margin-left: 2em;
       padding: 0 !important;
       .svg-icon {
-        fill: palette(grey, dark);
         margin-right: 0;
       }
       & + #{$this} {
@@ -556,18 +560,12 @@ export default {
       margin-left: 5px;
       padding: 0;
       margin-bottom: 2px;
-      .svg-icon {
-        fill: $font-medium-color;
-      }
     }
     a {
       text-decoration: none;
       &:hover {
         color: $primary-color;
       }
-    }
-    .svg-icon {
-      max-width: 13px;
     }
   }
   &__group {

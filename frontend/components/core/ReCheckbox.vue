@@ -33,13 +33,13 @@
         :value="value"
         :checked="checked"
       />
-      <svgicon color="#fffff" width="12" name="check2" />
+      <svgicon color="#fffff" width="12" name="check" />
     </div>
   </div>
 </template>
 
 <script>
-import "assets/icons/check2";
+import "assets/icons/check";
 import _ from "lodash";
 export default {
   model: {

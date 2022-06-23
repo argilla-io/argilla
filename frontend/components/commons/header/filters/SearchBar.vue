@@ -28,7 +28,7 @@
         <svgicon
           v-else
           class="searchbar__button"
-          name="cross"
+          name="close"
           width="20"
           height="20"
           @click="removeFilter()"
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import "assets/icons/cross";
+import "assets/icons/close";
 import "assets/icons/search";
 
 export default {

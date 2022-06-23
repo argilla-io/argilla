@@ -110,10 +110,10 @@ export default {
       },
     ],
     actions: [
-      { name: "delete", icon: "delete", title: "Delete dataset" },
+      { name: "delete", icon: "trash-empty", title: "Delete dataset" },
       {
         name: "copy",
-        icon: "copy-url",
+        icon: "link",
         title: "Copy url to clipboard",
         tooltip: "Copied",
       },

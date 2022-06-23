@@ -42,16 +42,16 @@ export default {
       sidebarItems: [
         {
           id: "explore",
-          tooltip: "Explore",
-          icon: "explore-view",
+          tooltip: "Exploration",
+          icon: "exploration",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],
         },
         {
           id: "annotate",
-          tooltip: "Annotate",
-          icon: "annotate-view",
+          tooltip: "Hand labeling",
+          icon: "hand-labeling",
           group: "Mode",
           action: "change-view-mode",
           relatedMetrics: ["progress", "stats"],
@@ -66,7 +66,7 @@ export default {
         {
           id: "stats",
           tooltip: "Stats",
-          icon: "metrics",
+          icon: "stats",
           action: "show-metrics",
           group: "Metrics",
         },

@@ -43,7 +43,6 @@
 </template>
 
 <script>
-import "assets/icons/config";
 import { mapActions } from "vuex";
 export default {
   props: {

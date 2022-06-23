@@ -11,10 +11,10 @@
         href="https://docs.rubrix.ml/en/stable/"
         target="_blank"
       >
-        <svgicon name="docs"></svgicon> View docs
+        <svgicon width="16" height="16" name="external"></svgicon> View docs
       </a>
       <a class="user__link" href="#" @click.prevent="logout">
-        <svgicon name="logout"></svgicon> Log out
+        <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
       </a>
       <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
     </div>
@@ -23,8 +23,8 @@
 
 <script>
 import { mapActions } from "vuex";
-import "assets/icons/docs";
-import "assets/icons/logout";
+import "assets/icons/external";
+import "assets/icons/log-out";
 export default {
   data: () => {
     return {
@@ -126,6 +126,12 @@ $buttonSize: 34px;
     align-items: center;
     color: palette(grey, medium);
     margin: 0.5em 1.5em 1.5em 1.5em;
+    &:hover {
+      color: darken(palette(grey, medium), 10%);
+      .svg-icon {
+        fill: darken(palette(grey, medium), 10%);
+      }
+    }
     .svg-icon {
       margin-right: 0.5em;
     }

@@ -29,8 +29,6 @@
 </template>
 
 <script>
-import "assets/icons/drop-down";
-
 export default {
   props: {
     itemsNumber: {
