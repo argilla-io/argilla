@@ -21,7 +21,7 @@
       v-if="selectedField"
       title="remove field"
       class="sort__remove-button"
-      name="cross"
+      name="close"
       width="14"
       height="14"
       @click="removeField()"
@@ -60,18 +60,18 @@
       @click="selectSortDirection()"
     >
       <svgicon
-        width="17"
+        width="24"
         height="24"
-        :name="defaultSortedByDir === 'asc' ? 'arrow-top' : 'arrow-bottom'"
+        :name="defaultSortedByDir === 'asc' ? 'arrow-up' : 'arrow-down'"
       />
     </p>
   </div>
 </template>
 
 <script>
-import "assets/icons/cross";
-import "assets/icons/arrow-top";
-import "assets/icons/arrow-bottom";
+import "assets/icons/close";
+import "assets/icons/arrow-up";
+import "assets/icons/arrow-down";
 export default {
   props: {
     sortOptions: {

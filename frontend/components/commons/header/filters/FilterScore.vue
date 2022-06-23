@@ -21,7 +21,7 @@
       v-if="filter.selected"
       title="remove field"
       class="filter__remove-button"
-      name="cross"
+      name="close"
       width="14"
       height="14"
       @click="onRemovescoreRange()"

@@ -33,7 +33,7 @@
         placeholder="New label"
         @keyup.enter="createNewLabel(label)"
       />
-      <svgicon class="new-label__close" name="cross" @click="reset()" />
+      <svgicon class="new-label__close" name="close" @click="reset()" />
       <reButton
         class="new-label__button button-primary--small"
         :disabled="!label"

@@ -4,8 +4,8 @@ exports[`TaskSidebar Show sidebar panel 1`] = `
 <div class="sidebar__container">
   <aside class="sidebar TextClassification">
     <div class="sidebar__wrapper">
-      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 6 9" class="svg-icon svg-fill" style="width: 6px; height: 8px;">
-            <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 41 40" class="svg-icon svg-fill" style="width: 12px; height: 12px;">
+            <path pid="0" d="M11.5 8l3-3 15 15-15 15-3-3 12-12-12-12z" _fill="#000"></path>
           </svg></a>
         <transition-stub name="fade" appear="true" duration="500">
           <!---->
@@ -21,8 +21,8 @@ exports[`TaskSidebar renders properly 1`] = `
 <div class="sidebar__container">
   <aside class="sidebar TextClassification">
     <div class="sidebar__wrapper">
-      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 6 9" class="svg-icon svg-fill" style="width: 6px; height: 8px;">
-            <path pid="0" d="M2.885 4.276L0 1.475 1.518 0l2.885 2.802L5.92 4.276 4.403 5.751 1.518 8.553 0 7.078z" _fill="#0508D9" fill-rule="evenodd"></path>
+      <div class="sidebar__content"><a href="#" class="sidebar__close-button"><svg version="1.1" viewBox="0 0 41 40" class="svg-icon svg-fill" style="width: 12px; height: 12px;">
+            <path pid="0" d="M11.5 8l3-3 15 15-15 15-3-3 12-12-12-12z" _fill="#000"></path>
           </svg></a>
         <transition-stub name="fade" appear="true" duration="500">
           <!---->

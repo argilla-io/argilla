@@ -1,29 +1,4 @@
-
-<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g id="right-menu" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="OK" transform="translate(-1224.000000, -248.000000)" fill="#333346" fill-rule="nonzero">
-            <g id="Group-23" transform="translate(1196.000000, 73.000000)">
-                <g id="Group-38" transform="translate(20.000000, 145.000000)">
-                    <g id="Group-28" transform="translate(8.000000, 30.000000)">
-                        <g id="Group-26">
-                            <g id="Group-32">
-                                <g id="Group-37">
-                                    <g id="noun_loading-progress_3557914">
-                                        <g id="Group">
-                                            <circle id="Oval" cx="1.5625" cy="12.5" r="1.5625"></circle>
-                                            <circle id="Oval" transform="translate(3.123795, 7.032554) rotate(-60.000000) translate(-3.123795, -7.032554) " cx="3.12379474" cy="7.03255449" r="1.5625"></circle>
-                                            <circle id="Oval" transform="translate(7.030045, 3.127602) rotate(-30.000000) translate(-7.030045, -3.127602) " cx="7.03004474" cy="3.12760176" r="1.5625"></circle>
-                                            <circle id="Oval" transform="translate(7.029641, 21.872299) rotate(-60.000000) translate(-7.029641, -21.872299) " cx="7.02964058" cy="21.872299" r="1.5625"></circle>
-                                            <circle id="Oval" transform="translate(3.127602, 17.967041) rotate(-30.000000) translate(-3.127602, -17.967041) " cx="3.12760176" cy="17.9670413" r="1.5625"></circle>
-                                            <path d="M12.5,0 L12.5,3.125 C17.6776695,3.12500008 21.8749999,7.32233052 21.8749999,12.5 C21.8749999,17.6776695 17.6776695,21.8749999 12.5,21.875 L12.5,25 C19.4035594,25 25,19.4035594 25,12.5 C25,5.59644063 19.4035594,0 12.5,0 Z" id="Shape"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </g>
-                    </g>
-                </g>
-            </g>
-        </g>
-    </g>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 29.5455C22.6359 29.5455 25.0222 28.4771 26.7496 26.7497L19.9999 20L20 10.4545C14.7282 10.4545 10.4545 14.7282 10.4545 20C10.4545 25.2718 14.7282 29.5455 20 29.5455Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5 20C5 28.2843 11.7157 35 20 35C28.2843 35 35 28.2843 35 20C35 11.7157 28.2843 5 20 5C11.7157 5 5 11.7157 5 20ZM7.72727 20C7.72727 26.778 13.222 32.2727 20 32.2727C26.778 32.2727 32.2727 26.778 32.2727 20C32.2727 13.222 26.778 7.72727 20 7.72727C13.222 7.72727 7.72727 13.222 7.72727 20Z" fill="black"/>
 </svg>

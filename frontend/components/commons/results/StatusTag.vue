@@ -5,13 +5,13 @@
         title === 'Validated'
           ? 'check'
           : null || title === 'Edited'
-          ? 'clock'
+          ? 'time'
           : null || title === 'Discarded'
-          ? 'forbidden'
+          ? 'unavailable'
           : null
       "
-      width="12"
-      height="12"
+      width="16"
+      height="16"
       color="#ffffff"
     ></svgicon>
     {{ title === "Edited" ? "Pending" : title }}
@@ -20,8 +20,8 @@
 
 <script>
 import "assets/icons/check";
-import "assets/icons/clock";
-import "assets/icons/forbidden";
+import "assets/icons/time";
+import "assets/icons/unavailable";
 export default {
   props: {
     title: {
