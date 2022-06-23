@@ -36,7 +36,6 @@ class RecordSearch(BaseModel):
     query: Optional[Dict[str, Any]] = None
     sort: List[Dict[str, Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
-    include_default_aggregations: bool = True
 
 
 class RecordSearchResults(BaseModel):

@@ -20,17 +20,14 @@ class BaseRecord {
   metadata;
   prediction;
   annotation;
-  predicted;
   status;
   selected;
   event_timestamp;
-
   constructor({
     id,
     metadata,
     prediction,
     annotation,
-    predicted,
     status,
     selected,
     event_timestamp,
@@ -40,7 +37,6 @@ class BaseRecord {
     this.metadata = metadata;
     this.prediction = prediction;
     this.annotation = annotation;
-    this.predicted = predicted;
     this.status = status;
     this.selected = selected || false;
     this.event_timestamp = event_timestamp;

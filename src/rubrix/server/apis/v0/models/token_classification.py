@@ -24,6 +24,7 @@ from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
+    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -342,7 +343,7 @@ class TokenClassificationRecordDB(CreationTokenClassificationRecord):
                 {"mention": mention, "entity": entity.label}
                 for mention, entity in self.annotated_mentions()
             ],
-            "words": self.all_text(),
+            EsRecordDataFieldNames.words: self.all_text(),
         }
 
 

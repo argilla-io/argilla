@@ -86,7 +86,6 @@ class SearchRecordsService:
                         EsRecordDataFieldNames.event_timestamp,
                     ],
                 ),
-                include_default_aggregations=False,
             ),
             size=size,
             record_from=record_from,

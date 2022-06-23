@@ -43,6 +43,24 @@ class TextClassificationRecord extends BaseRecord {
     }
     return [this.prediction.labels[0].class];
   }
+
+  get annotated_as() {
+    if (this.annotation === undefined) {
+      return [];
+    }
+    let labels = this.annotation.labels;
+    if (this.multi_label) {
+      return labels.map((l) => l.class);
+    }
+    return [this.annotation.labels[0].class];
+  }
+
+  get predicted() {
+    if (!this.multi_label && this.predicted_as && this.annotated_as) {
+      return this.predicted_as[0] === this.annotated_as[0] ? "ok" : "ko";
+    }
+    return undefined;
+  }
 }
 
 class TextClassificationSearchQuery extends BaseSearchQuery {

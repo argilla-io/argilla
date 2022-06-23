@@ -233,25 +233,6 @@ class DatasetRecordsDAO:
                 f"No records index found for dataset {dataset.name}"
             )
 
-        if compute_aggregations and search.include_default_aggregations:
-            current_aggrs = results.get("aggregations", {})
-            for aggr in [
-                aggregations.predicted_by(),
-                aggregations.annotated_by(),
-                aggregations.status(),
-                aggregations.predicted(),
-                aggregations.words_cloud(),
-                aggregations.score(),
-                aggregations.custom_fields(self.get_metadata_schema(dataset)),
-            ]:
-                if aggr:
-                    aggr_results = self._es.search(
-                        index=records_index,
-                        query={"query": es_query["query"], "aggs": aggr},
-                    )
-                    current_aggrs.update(aggr_results["aggregations"])
-            results["aggregations"] = current_aggrs
-
         hits = results["hits"]
         total = hits["total"]
         docs = hits["hits"]
@@ -263,13 +244,6 @@ class DatasetRecordsDAO:
         )
         if search_aggregations:
             parsed_aggregations = parse_aggregations(search_aggregations)
-
-            if search.include_default_aggregations:
-                parsed_aggregations = unflatten_dict(
-                    parsed_aggregations, stop_keys=["metadata"]
-                )
-                result.words = parsed_aggregations.pop("words", {})
-                result.metadata = parsed_aggregations.pop("metadata", {})
             result.aggregations = parsed_aggregations
 
         return result
@@ -441,7 +415,6 @@ class DatasetRecordsDAO:
                 "text": {},
                 "text.*": {},
                 # TODO(@frascuchon): `words` will be removed in version 0.16.0
-                "words": {},
                 **({"inputs.*": {}} if task == TaskType.text_classification else {}),
             },
         }
