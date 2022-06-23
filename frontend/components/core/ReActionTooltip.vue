@@ -43,7 +43,7 @@ export default {
   padding: 0.1em 0.5em;
   white-space: nowrap;
   left: 0;
-  top: calc(100% + 10px);
+  top: 100%;
   &__container {
     position: relative;
     &.active {

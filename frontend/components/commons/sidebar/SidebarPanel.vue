@@ -25,7 +25,7 @@
           :class="{ 'zoom-out': animated }"
           @animationend="animated = false"
           class="sidebar__close-button"
-          ><svgicon name="chev-right" width="6" height="8"></svgicon
+          ><svgicon name="chevron-right" width="12" height="12"></svgicon
         ></a>
         <slot></slot>
       </div>
@@ -33,7 +33,7 @@
   </aside>
 </template>
 <script>
-import "assets/icons/chev-right";
+import "assets/icons/chevron-right";
 export default {
   data: () => {
     return {
