@@ -26,6 +26,14 @@ from rubrix.client.models import TextClassificationRecord
 from rubrix.labeling.text_classification.rule import Rule, load_rules
 
 
+def _add_docstr(string: str):
+    def docstring_decorator(fn):
+        fn.__doc__ = string
+        return fn
+
+    return docstring_decorator
+
+
 class WeakLabelsBase:
     """Base class for the weak label classes.
 
@@ -242,32 +250,43 @@ class WeakLabelsBase:
         embeddings: Optional[np.ndarray] = None,
         gpu: bool = False,
     ):
-        raise NotImplementedError
+        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
 
-    def _extend_matrix(
-        self,
-        thresholds: Union[List[float], np.ndarray],
-        embeddings: Optional[np.ndarray],
-        abstains: List[np.ndarray],
-        support: List[np.ndarray],
-        gpu: bool,
-    ) -> np.ndarray:
-        """Helper method to extend the weak label matrix.
+        Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
 
         Args:
             thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
                 Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
             embeddings: Embeddings for each row of the weak label matrix.
-            abstains: List of record indices per rule for which the rule abstained.
-            support: List of record indices per rule for which the rule voted.
+                If not provided, we will use the ones from the last ``WeakLabels.extend_matrix()`` call.
             gpu: If True, perform FAISS similarity queries on GPU.
 
-        Returns:
-            The extended weak label matrix.
+        Examples:
+            >>> # Choose any model to generate the embeddings.
+            >>> from sentence_transformers import SentenceTransformer
+            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
+            >>>
+            >>> # Generate the embeddings and set the thresholds.
+            >>> weak_labels = {class_name}(dataset="my_dataset")
+            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
+            >>> thresholds = [0.6] * len(weak_labels.rules)
+            >>>
+            >>> # Extend the weak labels matrix.
+            >>> weak_labels.extend_matrix(thresholds, embeddings)
+            >>>
+            >>> # Calling the method below will now retrieve the extended matrix.
+            >>> weak_labels.matrix()
+            >>>
+            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
+            >>> thresholds = [0.75] * len(weak_labels.rules)
+            >>> weak_labels.extend_matrix(thresholds)
+            >>> weak_labels.matrix()
         """
+        abstains, supports = self._extend_matrix_preprocess()
+
         if embeddings is not None:
             self._extension_queries = self._find_dists_and_nearest(
-                np.copy(embeddings).astype(np.float32), abstains, support, gpu=gpu
+                np.copy(embeddings).astype(np.float32), abstains, supports, gpu=gpu
             )
         elif self._extension_queries is None:
             raise ValueError(
@@ -275,14 +294,14 @@ class WeakLabelsBase:
             )
         dists, nearest = self._extension_queries
 
-        extended_matrix = np.copy(self._matrix)
+        self._extended_matrix = np.copy(self._matrix)
         new_points = [(dists[i] > thresholds[i]) for i in range(self._matrix.shape[1])]
         for i in range(self._matrix.shape[1]):
-            extended_matrix[abstains[i][new_points[i]], i] = self._matrix[
-                support[i], i
+            self._extended_matrix[abstains[i][new_points[i]], i] = self._matrix[
+                supports[i], i
             ][nearest[i][new_points[i]]]
 
-        return extended_matrix
+        self._extend_matrix_postprocess()
 
     def _find_dists_and_nearest(
         self,
@@ -329,6 +348,21 @@ class WeakLabelsBase:
         ]
 
         return dists, nearest
+
+    def _extend_matrix_preprocess(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Helper method to compute the abstains and supports.
+
+        abstains: List of record indices per rule for which the rule abstained.
+        supports: List of record indices per rule for which the rule voted.
+
+        Returns:
+            A tuple containing the abstains and supports
+        """
+        raise NotImplementedError
+
+    def _extend_matrix_postprocess(self):
+        """Helper method to optionally modify the extended matrix after calling ``self.extend_matrix``."""
+        pass
 
 
 class WeakLabels(WeakLabelsBase):
@@ -746,58 +780,30 @@ class WeakLabels(WeakLabelsBase):
         self._label2int = label2int.copy()
         self._int2label = {val: key for key, val in self._label2int.items()}
 
+    @_add_docstr(WeakLabelsBase.extend_matrix.__doc__.format(class_name="WeakLabels"))
     def extend_matrix(
         self,
         thresholds: Union[List[float], np.ndarray],
         embeddings: Optional[np.ndarray] = None,
         gpu: bool = False,
     ):
-        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
-           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
+        super().extend_matrix(thresholds=thresholds, embeddings=embeddings, gpu=gpu)
 
-        Args:
-            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
-                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
-            embeddings: Embeddings for each row of the weak label matrix.
-                If not provided, we will use the ones from the last ``WeakLabels.extend_matrix()`` call.
-            gpu: If True, perform FAISS similarity queries on GPU.
-
-        Examples:
-            >>> # Choose any model to generate the embeddings.
-            >>> from sentence_transformers import SentenceTransformer
-            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
-            >>>
-            >>> # Generate the embeddings and set the thresholds.
-            >>> weak_labels = WeakLabels(dataset="my_dataset")
-            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
-            >>> thresholds = [0.6] * len(weak_labels.rules)
-            >>>
-            >>> # Extend the weak labels matrix.
-            >>> weak_labels.extend_matrix(thresholds, embeddings)
-            >>>
-            >>> # Calling the method below will now retrieve the extended matrix.
-            >>> weak_labels.matrix()
-            >>>
-            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
-            >>> thresholds = [0.75] * len(weak_labels.rules)
-            >>> weak_labels.extend_matrix(thresholds)
-            >>> weak_labels.matrix()
-        """
-        support = [
-            np.argwhere(self._matrix[:, i] != self._label2int[None]).flatten()
-            for i in range(self._matrix.shape[1])
-        ]
-
+    def _extend_matrix_preprocess(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         abstains = [
             np.argwhere(self._matrix[:, i] == self._label2int[None]).flatten()
             for i in range(self._matrix.shape[1])
         ]
 
-        self._extended_matrix = self._extend_matrix(
-            thresholds, embeddings, abstains, support, gpu
-        )
+        supports = [
+            np.argwhere(self._matrix[:, i] != self._label2int[None]).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
 
-        # keep the original weak label row, for which at least on rule did not abstain
+        return abstains, supports
+
+    def _extend_matrix_postprocess(self):
+        """Keeps the rows of the original weak label matrix, for which at least on rule did not abstain."""
         recs_with_votes = np.argwhere(
             (self._matrix != self._label2int[None]).sum(-1) > 0
         ).flatten()
@@ -1125,56 +1131,29 @@ class WeakMultiLabels(WeakLabelsBase):
 
         return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
 
+    @_add_docstr(
+        WeakLabelsBase.extend_matrix.__doc__.format(class_name="WeakMultiLabels")
+    )
     def extend_matrix(
         self,
         thresholds: Union[List[float], np.ndarray],
         embeddings: Optional[np.ndarray] = None,
         gpu: bool = False,
     ):
-        """Extends the weak label matrix through embeddings according to the similarity thresholds for each rule.
-           Implementation based on `Epoxy <https://github.com/HazyResearch/epoxy>`__.
+        super().extend_matrix(thresholds=thresholds, embeddings=embeddings, gpu=gpu)
 
-        Args:
-            thresholds: An array of thresholds between 0.0 and 1.0, one for each column of the weak labels matrix.
-                Each one stands for the minimum cosine similarity between two sentences for a rule to be extended.
-            embeddings: Embeddings for each row of the weak label matrix.
-                If not provided, we will use the ones from the last ``WeakMultiLabels.extend_matrix()`` call.
-            gpu: If True, perform FAISS similarity queries on GPU.
-
-        Examples:
-            >>> # Choose any model to generate the embeddings.
-            >>> from sentence_transformers import SentenceTransformer
-            >>> model = SentenceTransformer('all-mpnet-base-v2', device='cuda')
-            >>>
-            >>> # Generate the embeddings and set the thresholds.
-            >>> weak_labels = WeakMultiLabels(dataset="my_dataset")
-            >>> embeddings = np.array([ model.encode(rec.text) for rec in weak_labels.records() ])
-            >>> thresholds = [0.6] * len(weak_labels.rules)
-            >>>
-            >>> # Extend the weak labels matrix.
-            >>> weak_labels.extend_matrix(thresholds, embeddings)
-            >>>
-            >>> # Calling the method below will now retrieve the extended matrix.
-            >>> weak_labels.matrix()
-            >>>
-            >>> # Subsequent calls without the embeddings parameter will reutilize the faiss index built on the first call.
-            >>> thresholds = [0.75] * len(weak_labels.rules)
-            >>> weak_labels.extend_matrix(thresholds)
-            >>> weak_labels.matrix()
-        """
-        support = [
-            np.argwhere(self._matrix[:, i].sum(-1) >= 0).flatten()
-            for i in range(self._matrix.shape[1])
-        ]
-
+    def _extend_matrix_preprocess(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         abstains = [
             np.argwhere(self._matrix[:, i].sum(-1) < 0).flatten()
             for i in range(self._matrix.shape[1])
         ]
 
-        self._extended_matrix = self._extend_matrix(
-            thresholds, embeddings, abstains, support, gpu
-        )
+        supports = [
+            np.argwhere(self._matrix[:, i].sum(-1) >= 0).flatten()
+            for i in range(self._matrix.shape[1])
+        ]
+
+        return abstains, supports
 
 
 class WeakLabelsError(Exception):
