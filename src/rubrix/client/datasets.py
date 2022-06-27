@@ -17,7 +17,9 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
+import spacy
 from pkg_resources import parse_version
+from spacy.tokens import DocBin
 
 from rubrix.client.models import (
     Record,
@@ -763,7 +765,9 @@ class DatasetForTokenClassification(DatasetBase):
         return super().from_pandas(dataframe)
 
     @_requires_datasets
-    def prepare_for_training(self) -> "datasets.Dataset":
+    def prepare_for_training(
+        self, framework: None
+    ) -> Union["datasets.Dataset", spacy.tokens.DocBin]:
         """Prepares the dataset for training.
 
         This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
@@ -771,6 +775,9 @@ class DatasetForTokenClassification(DatasetBase):
             - Records without an annotation are removed.
             - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
             - The iob tags are transformed to integers.
+
+        Args:
+            framework: A string specifying the framework of use. Default: `None`
 
         Returns:
             A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
@@ -802,44 +809,65 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
-        import datasets
+        if framework is None:
 
-        has_annotations = False
-        for rec in self._records:
-            if rec.annotation is not None:
-                has_annotations = True
-                break
+            import datasets
 
-        if not has_annotations:
-            return datasets.Dataset.from_dict({})
+            has_annotations = False
+            for rec in self._records:
+                if rec.annotation is not None:
+                    has_annotations = True
+                    break
 
-        class_tags = ["O"]
-        class_tags.extend(
-            [
-                f"{pre}-{label}"
-                for label in sorted(self.__all_labels__())
-                for pre in ["B", "I"]
-            ]
-        )
-        class_tags = datasets.ClassLabel(names=class_tags)
+            if not has_annotations:
+                return datasets.Dataset.from_dict({})
 
-        def spans2iob(example):
-            r = TokenClassificationRecord(
-                text=example["text"],
-                tokens=example["tokens"],
-                annotation=self.__entities_to_tuple__(example["annotation"]),
+            class_tags = ["O"]
+            class_tags.extend(
+                [
+                    f"{pre}-{label}"
+                    for label in sorted(self.__all_labels__())
+                    for pre in ["B", "I"]
+                ]
             )
-            return class_tags.str2int(r.spans2iob(r.annotation))
+            class_tags = datasets.ClassLabel(names=class_tags)
 
-        ds = (
-            self.to_datasets()
-            .filter(self.__only_annotations__)
-            .map(lambda example: {"ner_tags": spans2iob(example)})
-        )
-        new_features = ds.features.copy()
-        new_features["ner_tags"] = [class_tags]
+            def spans2iob(example):
+                r = TokenClassificationRecord(
+                    text=example["text"],
+                    tokens=example["tokens"],
+                    annotation=self.__entities_to_tuple__(example["annotation"]),
+                )
+                return class_tags.str2int(r.spans2iob(r.annotation))
 
-        return ds.cast(new_features)
+            ds = (
+                self.to_datasets()
+                .filter(self.__only_annotations__)
+                .map(lambda example: {"ner_tags": spans2iob(example)})
+            )
+            new_features = ds.features.copy()
+            new_features["ner_tags"] = [class_tags]
+
+            return ds.cast(new_features)
+
+        elif framework == "spacy":
+
+            nlp = spacy.blank("en")
+
+            db = DocBin()
+
+            # Creating the docbin object as in https://spacy.io/usage/training#training-data
+            for record in self._records:
+                doc = nlp(record.text)
+                ents = []
+                for anno in record.annotation:
+                    span = doc.char_span(anno[1], anno[2], label=anno[0])
+                    ents.append(span)
+
+                doc.ents = ents
+                db.add(doc)
+
+            return db
 
     def __all_labels__(self):
         all_labels = set()
