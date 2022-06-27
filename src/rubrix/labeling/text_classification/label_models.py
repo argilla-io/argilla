@@ -20,8 +20,8 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 
 from rubrix import DatasetForTextClassification, TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 from rubrix.client.datasets import Dataset
+from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,8 +92,8 @@ class LabelModel:
 class MajorityVoter(LabelModel):
     """A basic label model that computes the majority vote across all rules.
 
-    For multi-label classification, it will simply vote for all labels with a non-zero probability,
-    that is labels that got at least one vote by the rules.
+    For single-label classification, it will predict the label with the most votes.
+    For multi-label classification, it will predict all labels that got at least one vote by the rules.
 
     Args:
         weak_labels: The weak labels object.
@@ -467,6 +467,8 @@ class MajorityVoter(LabelModel):
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
+    It is not suited for multi-label classification and does not support it!
+
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
         verbose: Whether to show print statements
@@ -729,6 +731,8 @@ class Snorkel(LabelModel):
 
 class FlyingSquid(LabelModel):
     """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
+
+    It is not suited for multi-label classification and does not support it!
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
