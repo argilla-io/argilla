@@ -9,17 +9,20 @@ from rubrix.client.models import Record
 
 
 @pytest.mark.parametrize(
-    argnames=["dataset", "query", "metrics", "condition"],
+    argnames=["dataset", "query", "metrics", "condition", "query_params"],
     argvalues=[
-        ("dataset", None, ["F1"], None),
-        ("dataset", "val", None, lambda s: True),
-        ("dataset", None, ["F1"], lambda s, m: True),
-        ("dataset", "val", None, None),
-        ("dataset", None, ["F1"], lambda search, metrics: False),
-        ("dataset", "val", None, lambda q: False),
+        ("dataset", None, ["F1"], None, None),
+        ("dataset", "val", None, lambda s: True, None),
+        ("dataset", None, ["F1"], lambda s, m: True, None),
+        ("dataset", "val", None, None, None),
+        ("dataset", None, ["F1"], lambda search, metrics: False, None),
+        ("dataset", "val", None, lambda q: False, None),
+        ("dataset", "val + {param}", None, lambda q: True, {"param": 100}),
     ],
 )
-def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition):
+def test_listener_with_parameters(
+    mocked_client, dataset, query, metrics, condition, query_params
+):
     rb.delete(dataset)
 
     class TestListener:
@@ -32,13 +35,17 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
             metrics=metrics,
             condition=condition,
             execution_interval_in_seconds=1,
+            **(query_params or {}),
         )
         def action(self, records: List[Record], ctx: RBListenerContext):
             try:
                 self.executed = True
 
                 assert ctx.dataset == dataset
-                assert ctx.query == query
+                if ctx.query_params:
+                    assert ctx.query == query.format(**ctx.query_params)
+                else:
+                    assert ctx.query == query
                 if metrics:
                     for metric in metrics:
                         assert metric in ctx.metrics
@@ -49,6 +56,7 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
     test.action.start(test)
 
     time.sleep(1.5)
+    assert test.action.is_running()
     rb.log(rb.TextClassificationRecord(text="This is a text"), name=dataset)
 
     with pytest.raises(ValueError):
@@ -56,6 +64,7 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
 
     time.sleep(1.5)
     test.action.stop()
+    assert not test.action.is_running()
 
     with pytest.raises(ValueError):
         test.action.stop()

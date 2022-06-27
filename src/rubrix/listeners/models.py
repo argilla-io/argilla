@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from prodict import Prodict
 
@@ -36,11 +36,13 @@ class RBListenerContext:
         listener: The rubrix listener instance
         search: Search results for current execution
         metrics: Metrics results for current execution
+        query_params: Dynamic parameters used in the listener query
     """
 
     listener: "RBDatasetListener" = dataclasses.field(repr=False, hash=False)
     search: Optional[Search] = None
     metrics: Optional[Metrics] = None
+    query_params: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         self.__listener__ = self.listener
@@ -54,7 +56,7 @@ class RBListenerContext:
     @property
     def query(self) -> Optional[str]:
         """Computed property that returns the configured listener query string"""
-        return self.__listener__.query
+        return self.__listener__.formatted_query
 
 
 ListenerCondition = Callable[[Search, Metrics], bool]

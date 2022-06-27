@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import threading
 import time
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import schedule
 
@@ -29,6 +29,7 @@ class RBDatasetListener:
         action: The action to execute when condition is satisfied
         metrics: A list of metrics ids that will be required in condition
         query: The query string to apply
+        query_params: Defined parameters used dynamically in the provided query
         condition: The condition to satisfy to execute the action
         query_records: If ``False``, the records won't be passed as argument to the action.
             Default: ``True``
@@ -41,9 +42,17 @@ class RBDatasetListener:
     action: ListenerAction
     metrics: Optional[List[str]] = None
     query: Optional[str] = None
+    query_params: Optional[Dict[str, Any]] = None
     condition: Optional[ListenerCondition] = None
     query_records: bool = True
     interval_in_seconds: int = 30
+
+    @property
+    def formatted_query(self) -> Optional[str]:
+        """Formatted query using defined query params, if any"""
+        if self.query is None:
+            return None
+        return self.query.format(**(self.query_params or {}))
 
     __listener_job__: Optional[schedule.Job] = dataclasses.field(
         init=False, default=None
@@ -54,6 +63,19 @@ class RBDatasetListener:
 
     def __post_init__(self):
         self.metrics = self.metrics or []
+        self._validate()
+
+    def _validate(self):
+        try:
+            query = self.formatted_query
+            if query:
+                self._LOGGER.debug(f"Initial listener query {query}")
+        except KeyError as kex:
+            raise KeyError("Missing query parameter:", kex)
+
+    def is_running(self):
+        """True if listener is running"""
+        return self.__listener_job__ is not None
 
     def start(self, *action_args, **action_kwargs):
         """
@@ -63,7 +85,7 @@ class RBDatasetListener:
         If the listener is already started, a ``ValueError`` will be raised
 
         """
-        if self.__listener_job__:
+        if self.is_running():
             raise ValueError("Listener is already running")
 
         self.__listener_job__ = self.__scheduler__.every(
@@ -93,14 +115,13 @@ class RBDatasetListener:
         If listener is already stopped, a ``ValueError`` will be raised
 
         """
-        if not self.__listener_job__:
+        if not self.is_running():
             raise ValueError("Listener is not running")
 
-        if self.__listener_job__:
-            self.__scheduler__.cancel_job(self.__listener_job__)
-            self.__listener_job__ = None
-            self.__current_thread__.stop()
-            self.__current_thread__.join()  # TODO: improve it!
+        self.__scheduler__.cancel_job(self.__listener_job__)
+        self.__listener_job__ = None
+        self.__current_thread__.stop()
+        self.__current_thread__.join()  # TODO: improve it!
 
     def __listener_iteration_job__(self, *args, **kwargs):
         """
@@ -120,13 +141,16 @@ class RBDatasetListener:
 
         ctx = RBListenerContext(
             listener=self,
-            metrics=self.__compute_metrics__(current_api, dataset),
+            query_params=self.query_params,
+            metrics=self.__compute_metrics__(
+                current_api, dataset, query=self.formatted_query
+            ),
         )
         if self.condition is None:
             return self.__run_action__(ctx, *args, **kwargs)
 
         search_results = current_api.searches.search_records(
-            name=self.dataset, task=dataset.task, query=self.query, size=0
+            name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
         )
 
         ctx.search = Search(total=search_results.total)
@@ -136,13 +160,16 @@ class RBDatasetListener:
         if self.condition(*condition_args):
             return self.__run_action__(ctx, *args, **kwargs)
 
-    def __compute_metrics__(self, current_api, dataset) -> Metrics:
+    def __compute_metrics__(self, current_api, dataset, query: str) -> Metrics:
         metrics = {}
         for metric in self.metrics:
             metrics.update(
                 {
                     metric: current_api.metrics.metric_summary(
-                        name=self.dataset, task=dataset.task, metric=metric
+                        name=self.dataset,
+                        task=dataset.task,
+                        metric=metric,
+                        query=query,
                     )
                 }
             )
@@ -153,7 +180,10 @@ class RBDatasetListener:
             action_args = [ctx] if ctx else []
             if self.query_records:
                 action_args.insert(
-                    0, rubrix.load(name=self.dataset, query=self.query, as_pandas=False)
+                    0,
+                    rubrix.load(
+                        name=self.dataset, query=self.formatted_query, as_pandas=False
+                    ),
                 )
             return self.action(*args, *action_args, **kwargs)
         except:
@@ -170,6 +200,7 @@ def listener(
     condition: Optional[Callable[[Union[Search, MetricSummary]], bool]] = None,
     with_records: bool = True,
     execution_interval_in_seconds: int = 30,
+    **query_params,
 ):
     """
     Configures the decorated function as a Rubrix listener.
@@ -183,6 +214,8 @@ def listener(
             only the listener context ``RBListenerContext`` will be passed. Default: ``True``
         execution_interval_in_seconds: Define the execution interval in seconds when listener
             iteration will be executed.
+        query_params: Dynamic query parameters used in query. These parameters will be available
+            inside the rubrix context for an action, and could be updated there.
 
     """
 
@@ -192,6 +225,7 @@ def listener(
             action=func,
             condition=condition,
             query=query,
+            query_params=query_params,
             metrics=metrics,
             query_records=with_records,
             interval_in_seconds=execution_interval_in_seconds,
