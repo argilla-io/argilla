@@ -190,8 +190,8 @@ class RBDatasetListener:
                 action_args.insert(
                     0,
                     rubrix.load(
-                        name=self.dataset, query=self.formatted_query, as_pandas=False
-                    ),
+                        name=self.dataset, query=self.formatted_query
+                    )
                 )
             self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
