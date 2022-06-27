@@ -14,6 +14,7 @@
 #  limitations under the License.
 import functools
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -640,6 +641,17 @@ class DatasetForTextClassification(DatasetBase):
         )
 
 
+class Framework(Enum):
+    TRANSFORMERS = "transformers"
+    SPACY = "spacy"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
+
+
 @_prepend_docstring(TokenClassificationRecord)
 class DatasetForTokenClassification(DatasetBase):
     """
@@ -763,7 +775,9 @@ class DatasetForTokenClassification(DatasetBase):
         return super().from_pandas(dataframe)
 
     @_requires_datasets
-    def prepare_for_training(self) -> "datasets.Dataset":
+    def prepare_for_training(
+        self, framework: Union[Framework, str] = "transformers"
+    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
         This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
@@ -771,6 +785,10 @@ class DatasetForTokenClassification(DatasetBase):
             - Records without an annotation are removed.
             - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
             - The iob tags are transformed to integers.
+
+        Args:
+            framework: A string specifying the framework for the training.
+                "transformers" and "spacy" are currently supported. Default: `transformers`
 
         Returns:
             A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
@@ -802,44 +820,89 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
-        import datasets
 
-        has_annotations = False
-        for rec in self._records:
-            if rec.annotation is not None:
-                has_annotations = True
-                break
+        # turn the string into a Framework instance and trigger error if str is not valid
+        if isinstance(framework, str):
+            framework = Framework(framework)
 
-        if not has_annotations:
-            return datasets.Dataset.from_dict({})
+        if framework is Framework.TRANSFORMERS:
 
-        class_tags = ["O"]
-        class_tags.extend(
-            [
-                f"{pre}-{label}"
-                for label in sorted(self.__all_labels__())
-                for pre in ["B", "I"]
-            ]
-        )
-        class_tags = datasets.ClassLabel(names=class_tags)
+            import datasets
 
-        def spans2iob(example):
-            r = TokenClassificationRecord(
-                text=example["text"],
-                tokens=example["tokens"],
-                annotation=self.__entities_to_tuple__(example["annotation"]),
+            has_annotations = False
+            for rec in self._records:
+                if rec.annotation is not None:
+                    has_annotations = True
+                    break
+
+            if not has_annotations:
+                return datasets.Dataset.from_dict({})
+
+            class_tags = ["O"]
+            class_tags.extend(
+                [
+                    f"{pre}-{label}"
+                    for label in sorted(self.__all_labels__())
+                    for pre in ["B", "I"]
+                ]
             )
-            return class_tags.str2int(r.spans2iob(r.annotation))
+            class_tags = datasets.ClassLabel(names=class_tags)
 
-        ds = (
-            self.to_datasets()
-            .filter(self.__only_annotations__)
-            .map(lambda example: {"ner_tags": spans2iob(example)})
-        )
-        new_features = ds.features.copy()
-        new_features["ner_tags"] = [class_tags]
+            def spans2iob(example):
+                r = TokenClassificationRecord(
+                    text=example["text"],
+                    tokens=example["tokens"],
+                    annotation=self.__entities_to_tuple__(example["annotation"]),
+                )
+                return class_tags.str2int(r.spans2iob(r.annotation))
 
-        return ds.cast(new_features)
+            ds = (
+                self.to_datasets()
+                .filter(self.__only_annotations__)
+                .map(lambda example: {"ner_tags": spans2iob(example)})
+            )
+            new_features = ds.features.copy()
+            new_features["ner_tags"] = [class_tags]
+
+            return ds.cast(new_features)
+
+        elif framework is Framework.SPACY:
+
+            import spacy
+            from spacy.tokens import DocBin
+
+            nlp = spacy.blank("es")
+
+            db = DocBin()
+
+            # Creating the docbin object as in https://spacy.io/usage/training#training-data
+            for record in self._records:
+                if record.annotation is None:
+                    continue
+                doc = nlp(record.text)
+                ents = []
+
+                for anno in record.annotation:
+                    span = doc.char_span(anno[1], anno[2], label=anno[0])
+
+                    # There is a misalignment between record tokenization and spaCy tokenization
+                    if span is None:
+                        print(
+                            "Error between the record span and spaCy tokenization: there is a misalignment between the record and spaCy's tokenization."
+                        )
+
+                    else:
+                        ents.append(span)
+
+                doc.ents = ents
+                db.add(doc)
+
+            return db
+
+        else:
+            print(
+                "The introduced framework does not exist or is not supported. Please, use one of the existing frameworks detailed on the documentation."
+            )
 
     def __all_labels__(self):
         all_labels = set()
