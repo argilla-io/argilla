@@ -17,7 +17,6 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
-import spacy
 from pkg_resources import parse_version
 from spacy.tokens import DocBin
 
@@ -851,6 +850,9 @@ class DatasetForTokenClassification(DatasetBase):
             return ds.cast(new_features)
 
         elif framework == "spacy":
+
+            # Importing locally, handling errors when the modules are not found.
+            import spacy
 
             nlp = spacy.blank("en")
 
