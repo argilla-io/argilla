@@ -20,7 +20,7 @@ Labeling tools for the text classification task.
    :members: WeakLabels, WeakMultiLabels
 
 .. automodule:: rubrix.labeling.text_classification.label_models
-   :members: Snorkel, FlyingSquid
+   :members: MajorityVoter, Snorkel, FlyingSquid
 
 .. automodule:: rubrix.labeling.text_classification.label_errors
    :members: find_label_errors
