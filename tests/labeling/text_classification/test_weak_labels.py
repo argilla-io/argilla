@@ -251,6 +251,20 @@ class TestWeakLabelsBase:
             _ = weak_labels.labels
         with pytest.raises(NotImplementedError):
             _ = weak_labels.cardinality
+        with pytest.raises(NotImplementedError):
+            weak_labels.extend_matrix([0.1])
+
+    def test_faiss_not_installed(self, monkeypatch):
+        def mock_load(*args, **kwargs):
+            return ["mock"]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+        monkeypatch.setitem(sys.modules, "faiss", None)
+        with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
+            weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
+            weak_labels._find_dists_and_nearest(None, None, None, None)
 
 
 class TestWeakLabels:
@@ -560,14 +574,9 @@ class TestWeakLabels:
 
         return WeakLabels(rules=rules, dataset="mock")
 
-    def test_faiss_not_installed(self, monkeypatch, weak_labels):
-        monkeypatch.setitem(sys.modules, "faiss", None)
-        with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
-            weak_labels._find_dists_and_nearest(None, None, None, None)
-
     def test_extend_matrix(self, weak_labels):
         with pytest.raises(
-            NotImplementedError,
+            ValueError,
             match="Embeddings are not optional the first time a matrix is extended.",
         ):
             weak_labels.extend_matrix([1.0, 0.5, 0.5])
@@ -813,3 +822,66 @@ class TestWeakMultiLabels:
         assert weak_labels.show_records(
             labels=["positive"], rules=["rubrix_rule"]
         ).empty
+
+    @pytest.fixture
+    def weak_multi_labels(self, monkeypatch, rules):
+        def mock_load(*args, **kwargs):
+            return [
+                TextClassificationRecord(inputs="test", id=i, multi_label=True)
+                for i in range(3)
+            ]
+
+        monkeypatch.setattr(
+            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        )
+
+        def mock_apply(self, *args, **kwargs):
+            weak_label_matrix = np.array(
+                [
+                    [[0, 1], [-1, -1], [-1, -1]],
+                    [[-1, -1], [1, 1], [-1, -1]],
+                    [[-1, -1], [-1, -1], [-1, -1]],
+                ],
+                dtype=np.short,
+            )
+            annotation_array = np.array([[0, 0], [1, 1], [-1, -1]], dtype=np.short)
+            return weak_label_matrix, annotation_array, ["mock1", "mock2"]
+
+        monkeypatch.setattr(WeakMultiLabels, "_apply_rules", mock_apply)
+
+        return WeakMultiLabels(rules=rules, dataset="mock")
+
+    def test_extend_matrix(self, weak_multi_labels):
+        with pytest.raises(
+            ValueError,
+            match="Embeddings are not optional the first time a matrix is extended.",
+        ):
+            weak_multi_labels.extend_matrix([1.0, 0.5, 0.5])
+
+        weak_multi_labels.extend_matrix(
+            [1.0, 0.5, 0.5], np.array([[0.1, 0.1], [0.1, 0.11], [0.11, 0.1]])
+        )
+
+        np.testing.assert_equal(
+            weak_multi_labels.matrix(),
+            np.array(
+                [
+                    [[0, 1], [1, 1], [-1, -1]],
+                    [[-1, -1], [1, 1], [-1, -1]],
+                    [[-1, -1], [1, 1], [-1, -1]],
+                ]
+            ),
+        )
+
+        weak_multi_labels.extend_matrix([1.0, 1.0, 1.0])
+
+        np.testing.assert_equal(
+            weak_multi_labels.matrix(),
+            np.array(
+                [
+                    [[0, 1], [-1, -1], [-1, -1]],
+                    [[-1, -1], [1, 1], [-1, -1]],
+                    [[-1, -1], [-1, -1], [-1, -1]],
+                ]
+            ),
+        )
