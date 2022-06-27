@@ -118,7 +118,7 @@ class RBDatasetListener:
         current_api = api.active_api()
         try:
             dataset = current_api.datasets.find_by_name(self.dataset)
-            self._LOGGER.debug(f"Fount listener dataset {dataset.name}")
+            self._LOGGER.debug(f"Found listener dataset {dataset.name}")
         except NotFoundApiError:
             self._LOGGER.warning(f"Not found dataset <{self.dataset}>")
             return
