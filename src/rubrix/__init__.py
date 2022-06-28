@@ -57,6 +57,7 @@ if _TYPE_CHECKING:
         TokenClassificationSettings,
         configure_dataset,
     )
+    from rubrix.listeners import Metrics, RBListenerContext, Search, listener
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
 
@@ -85,6 +86,7 @@ _import_structure = {
         "read_pandas",
     ],
     "monitoring.model_monitor": ["monitor"],
+    "listeners.listener": ["listener", "RBListenerContext", "Search", "Metrics"],
     "datasets": [
         "configure_dataset",
         "TextClassificationSettings",
