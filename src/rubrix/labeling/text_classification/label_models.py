@@ -20,8 +20,8 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 
 from rubrix import DatasetForTextClassification, TextClassificationRecord
-from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 from rubrix.client.datasets import Dataset
+from rubrix.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class LabelModel:
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
         """
         raise NotImplementedError
 
@@ -92,8 +92,8 @@ class LabelModel:
 class MajorityVoter(LabelModel):
     """A basic label model that computes the majority vote across all rules.
 
-    For multi-label classification, it will simply vote for all labels with a non-zero probability,
-    that is labels that got at least one vote by the rules.
+    For single-label classification, it will predict the label with the most votes.
+    For multi-label classification, it will predict all labels that got at least one vote by the rules.
 
     Args:
         weak_labels: The weak labels object.
@@ -103,6 +103,10 @@ class MajorityVoter(LabelModel):
         super().__init__(weak_labels=weak_labels)
 
     def fit(self, *args, **kwargs):
+        """Raises a NotImplementedError.
+
+        No need to call fit on the ``MajorityVoter``!
+        """
         raise NotImplementedError("No need to call fit on the 'MajorityVoter'!")
 
     def predict(
@@ -338,6 +342,8 @@ class MajorityVoter(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among two policies:
 
@@ -350,8 +356,6 @@ class MajorityVoter(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
@@ -467,6 +471,8 @@ class MajorityVoter(LabelModel):
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
+    .. note:: It is not suited for multi-label classification and does not support it!
+
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
         verbose: Whether to show print statements
@@ -527,7 +533,7 @@ class Snorkel(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
@@ -672,6 +678,8 @@ class Snorkel(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties. You can choose among three policies:
 
@@ -685,8 +693,6 @@ class Snorkel(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
@@ -729,6 +735,8 @@ class Snorkel(LabelModel):
 
 class FlyingSquid(LabelModel):
     """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
+
+    .. note:: It is not suited for multi-label classification and does not support it!
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
@@ -776,7 +784,7 @@ class FlyingSquid(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
             **kwargs: Passed on to the FlyingSquid's
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
@@ -981,6 +989,8 @@ class FlyingSquid(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties. You can choose among two policies:
 
@@ -994,8 +1004,6 @@ class FlyingSquid(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             NotFittedError: If the label model was still not fitted.
