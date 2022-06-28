@@ -30,6 +30,8 @@ from rubrix._constants import (
     RUBRIX_WORKSPACE_HEADER_NAME,
 )
 from rubrix.client.apis.datasets import Datasets
+from rubrix.client.apis.metrics import MetricsAPI
+from rubrix.client.apis.searches import Searches
 from rubrix.client.datasets import (
     Dataset,
     DatasetForText2Text,
@@ -160,6 +162,14 @@ class Api:
     @property
     def datasets(self) -> Datasets:
         return Datasets(client=self._client)
+
+    @property
+    def searches(self):
+        return Searches(client=self._client)
+
+    @property
+    def metrics(self):
+        return MetricsAPI(client=self.client)
 
     def set_workspace(self, workspace: str):
         """Sets the active workspace.
