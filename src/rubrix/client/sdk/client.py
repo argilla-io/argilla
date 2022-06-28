@@ -85,7 +85,7 @@ class Client(_ClientCommonDefaults, _Client):
             *args,
             **kwargs,
         )
-        return build_raw_response(response)
+        return build_raw_response(response).parsed
 
     def put(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
@@ -99,7 +99,7 @@ class Client(_ClientCommonDefaults, _Client):
             *args,
             **kwargs,
         )
-        return build_raw_response(response)
+        return build_raw_response(response).parsed
 
     @staticmethod
     def _normalize_path(path: str) -> str:
