@@ -18,7 +18,6 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
 from pkg_resources import parse_version
-from spacy.tokens import DocBin
 
 from rubrix.client.models import (
     Record,
@@ -766,7 +765,7 @@ class DatasetForTokenClassification(DatasetBase):
     @_requires_datasets
     def prepare_for_training(
         self, framework: None
-    ) -> Union["datasets.Dataset", spacy.tokens.DocBin]:
+    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
         This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
@@ -851,10 +850,10 @@ class DatasetForTokenClassification(DatasetBase):
 
         elif framework == "spacy":
 
-            # Importing locally, handling errors when the modules are not found.
             import spacy
+            from spacy.tokens import DocBin
 
-            nlp = spacy.blank("en")
+            nlp = spacy.blank()
 
             db = DocBin()
 
