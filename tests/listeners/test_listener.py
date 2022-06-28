@@ -39,13 +39,19 @@ def test_listener_with_parameters(
         )
         def action(self, records: List[Record], ctx: RBListenerContext):
             try:
-                self.executed = True
-
                 assert ctx.dataset == dataset
                 if ctx.query_params:
                     assert ctx.query == query.format(**ctx.query_params)
+                    if self.executed:
+                        assert ctx.query_params != query_params
+                    else:
+                        assert ctx.query_params == query_params
+                    ctx.query_params["params"] += 1
                 else:
                     assert ctx.query == query
+
+                self.executed = True
+
                 if metrics:
                     for metric in metrics:
                         assert metric in ctx.metrics
