@@ -853,7 +853,13 @@ class DatasetForTokenClassification(DatasetBase):
             import spacy
             from spacy.tokens import DocBin
 
-            nlp = spacy.blank()
+            has_annotations = False
+            for rec in self._records:
+                if rec.annotation is not None:
+                    has_annotations = True
+                    break
+
+            nlp = spacy.blank("es")
 
             db = DocBin()
 
