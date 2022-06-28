@@ -342,6 +342,8 @@ class MajorityVoter(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties (IGNORED FOR MULTI-LABEL). You can choose among two policies:
 
@@ -354,8 +356,6 @@ class MajorityVoter(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
@@ -678,6 +678,8 @@ class Snorkel(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties. You can choose among three policies:
 
@@ -691,8 +693,6 @@ class Snorkel(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             MissingAnnotationError: If the ``weak_labels`` do not contain annotated records.
@@ -989,6 +989,8 @@ class FlyingSquid(LabelModel):
         For more details about the metrics, check out the
         `sklearn docs <https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn-metrics-precision-recall-fscore-support>`__.
 
+        .. note:: Metrics are only calculated over non-abstained predictions!
+
         Args:
             tie_break_policy: Policy to break ties. You can choose among two policies:
 
@@ -1002,8 +1004,6 @@ class FlyingSquid(LabelModel):
 
         Returns:
             The scores/metrics in a dictionary or as a nicely formatted str.
-
-        .. note:: Metrics are only calculated over non-abstained predictions!
 
         Raises:
             NotFittedError: If the label model was still not fitted.
