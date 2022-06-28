@@ -471,7 +471,7 @@ class MajorityVoter(LabelModel):
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
-    It is not suited for multi-label classification and does not support it!
+    .. note:: It is not suited for multi-label classification and does not support it!
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
@@ -736,7 +736,7 @@ class Snorkel(LabelModel):
 class FlyingSquid(LabelModel):
     """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
 
-    It is not suited for multi-label classification and does not support it!
+    .. note:: It is not suited for multi-label classification and does not support it!
 
     Args:
         weak_labels: A `WeakLabels` object containing the weak labels and records.
