@@ -206,17 +206,16 @@ def listener(
     Configures the decorated function as a Rubrix listener.
 
     Args:
-        dataset: The dataset name
-        query: The query string
-        metrics: Required metrics for listener condition
-        condition: Defines condition over search and metrics that launch action when is satisfied
+        dataset: The dataset name.
+        query: The query string.
+        metrics: Required metrics for listener condition.
+        condition: Defines condition over search and metrics that launch action when is satisfied.
         with_records: Include records as part or action arguments. If ``False``,
-            only the listener context ``RBListenerContext`` will be passed. Default: ``True``
+            only the listener context ``RBListenerContext`` will be passed. Default: ``True``.
         execution_interval_in_seconds: Define the execution interval in seconds when listener
             iteration will be executed.
-        query_params: Dynamic query parameters used in query. These parameters will be available
-            inside the rubrix context for an action, and could be updated there.
-
+        **query_params: Dynamic parameters used in the query. These parameters will be available
+            via the listener context and can be updated for subsequent queries.
     """
 
     def inner_decorator(func):
