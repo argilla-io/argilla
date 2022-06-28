@@ -62,7 +62,7 @@ class LabelModel:
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
         """
         raise NotImplementedError
 
@@ -103,6 +103,10 @@ class MajorityVoter(LabelModel):
         super().__init__(weak_labels=weak_labels)
 
     def fit(self, *args, **kwargs):
+        """Raises a NotImplementedError.
+
+        No need to call fit on the ``MajorityVoter``!
+        """
         raise NotImplementedError("No need to call fit on the 'MajorityVoter'!")
 
     def predict(
@@ -529,7 +533,7 @@ class Snorkel(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
             **kwargs: Additional kwargs are passed on to Snorkel's
                 `fit method <https://snorkel.readthedocs.io/en/latest/packages/_autosummary/labeling/snorkel.labeling.model.label_model.LabelModel.html#snorkel.labeling.model.label_model.LabelModel.fit>`__.
                 They must not contain ``L_train``, the label matrix is provided automatically.
@@ -780,7 +784,7 @@ class FlyingSquid(LabelModel):
         """Fits the label model.
 
         Args:
-            include_annotated_records: Whether to include annotated records in the training.
+            include_annotated_records: Whether to include annotated records in the fitting.
             **kwargs: Passed on to the FlyingSquid's
                 `LabelModel.fit() <https://github.com/HazyResearch/flyingsquid/blob/master/flyingsquid/label_model.py#L320>`__
                 method.
