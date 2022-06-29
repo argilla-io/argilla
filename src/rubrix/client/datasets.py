@@ -853,7 +853,6 @@ class DatasetForTokenClassification(DatasetBase):
             import spacy
             from spacy.tokens import DocBin
 
-
             nlp = spacy.blank("es")
 
             db = DocBin()
@@ -861,9 +860,10 @@ class DatasetForTokenClassification(DatasetBase):
             # Creating the docbin object as in https://spacy.io/usage/training#training-data
             for record in self._records:
                 if record.annotation is None:
-                   continue
+                    continue
                 doc = nlp(record.text)
                 ents = []
+
                 for anno in record.annotation:
                     span = doc.char_span(anno[1], anno[2], label=anno[0])
 
