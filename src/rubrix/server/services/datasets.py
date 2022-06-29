@@ -18,9 +18,8 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.apis.v0.models.datasets import DatasetDB
 from rubrix.server.daos.datasets import BaseDatasetDB, DatasetsDAO, SettingsDB
+from rubrix.server.daos.models.datasets import DatasetDB
 from rubrix.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -80,7 +79,7 @@ class DatasetsService:
         user: User,
         name: str,
         as_dataset_class: Type[BaseDatasetDB] = DatasetDB,
-        task: Optional[TaskType] = None,
+        task: Optional[str] = None,
         workspace: Optional[str] = None,
     ) -> Dataset:
         owner = user.check_workspace(workspace)
@@ -154,7 +153,7 @@ class DatasetsService:
         self,
         user: User,
         workspaces: Optional[List[str]],
-        task2dataset_map: Dict[TaskType, Type[BaseDatasetDB]] = None,
+        task2dataset_map: Dict[str, Type[BaseDatasetDB]] = None,
     ) -> List[Dataset]:
         owners = user.check_workspaces(workspaces)
         return self.__dao__.list_datasets(
