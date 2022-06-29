@@ -212,6 +212,15 @@ p.admonition-title::before {
 .search-overlay {
   z-index: 20;
 }
+/* table */
+.jp-RenderedHTMLCommon table, div.rendered_html table {
+  margin-top: 1em;
+  background: var(--color-background-primary) !important;
+  color: var(--color-foreground-primary) !important;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd), div.rendered_html tbody tr:nth-child(odd) {
+  background:  var(--color-background-item) !important;
+}
 /* sidebar */
 .sidebar-drawer {
   width: 300px;
@@ -427,6 +436,11 @@ a .tuto-section-6 {
 @media (min-width: 1440px) {
   .sd-card img {
     height: 190px;
+  }
+}
+@media (min-width: 1640px) {
+  .content {
+    width: 65%;
   }
 }
 @media (max-width: 576px) {
