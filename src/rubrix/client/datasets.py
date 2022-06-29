@@ -869,7 +869,11 @@ class DatasetForTokenClassification(DatasetBase):
                 ents = []
                 for anno in record.annotation:
                     span = doc.char_span(anno[1], anno[2], label=anno[0])
-                    ents.append(span)
+                    # There is a misalignment between record tokenization and spaCy tokenization
+                    if span is None: 
+                       print("Something wrong with record span and spaCy tokenization")
+                    else:
+                       ents.append(span)
 
                 doc.ents = ents
                 db.add(doc)
