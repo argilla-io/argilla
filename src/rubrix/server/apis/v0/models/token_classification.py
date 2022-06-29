@@ -136,7 +136,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     @validator("tokens")
     def remove_empty_tokens(cls, tokens: List[str]):
         # TODO: maybe launch a warning about changing provided tokens
-        return [t for t in tokens if t.strip()]
+        return [t for t in tokens if t.replace(" ", "")]
 
     @validator("text")
     def check_text_content(cls, text: str):
