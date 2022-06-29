@@ -860,6 +860,8 @@ class DatasetForTokenClassification(DatasetBase):
 
             # Creating the docbin object as in https://spacy.io/usage/training#training-data
             for record in self._records:
+                if record.annotation is None:
+                   continue
                 doc = nlp(record.text)
                 ents = []
                 for anno in record.annotation:
