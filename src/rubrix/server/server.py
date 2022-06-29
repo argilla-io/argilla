@@ -27,14 +27,13 @@ from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
 from rubrix.logging import configure_logging
-from rubrix.server.apis.v0.settings.server import settings
-from rubrix.server.apis.v0.settings.server import settings as api_settings
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.client_wrapper import create_es_wrapper
 from rubrix.server.errors import APIErrorHandler, EntityNotFoundError
 from rubrix.server.routes import api_router
 from rubrix.server.security import auth
+from rubrix.server.settings import settings
 from rubrix.server.static_rewrite import RewriteStaticFiles
 
 
@@ -43,7 +42,7 @@ def configure_middleware(app: FastAPI):
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=api_settings.cors_origins,
+        allow_origins=settings.cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -123,7 +122,7 @@ app = FastAPI(
     description="Rubrix API",
     # Disable default openapi configuration
     openapi_url="/api/docs/spec.json",
-    docs_url="/api/docs" if api_settings.docs_enabled else None,
+    docs_url="/api/docs" if settings.docs_enabled else None,
     redoc_url=None,
     version=str(rubrix_version),
 )

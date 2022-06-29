@@ -2,7 +2,7 @@ import pytest
 
 import rubrix as rb
 from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
-from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.settings import settings
 
 
 def test_log_records_with_multi_and_single_label_task(mocked_client):

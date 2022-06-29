@@ -3,7 +3,7 @@ import os
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.apis.v0.settings.server import ApiSettings
+from rubrix.server.settings import ApiSettings
 
 
 @pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])
