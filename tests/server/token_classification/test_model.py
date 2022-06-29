@@ -103,7 +103,7 @@ def test_model_dict():
         "raw_text": "This is  a  great  space",
         "status": "Default",
         "text": "This is  a  great  space",
-        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
+        "tokens": ["This", "is", "a", "great", "space"],
     }
 
 
