@@ -20,7 +20,11 @@ class Search:
 
 class Metrics(Prodict):
     """
-    Metrics results for a single listener execution. The metric
+    Metrics results for a single listener execution.
+
+    The metrics object exposes the metrics configured for the listener as property values.
+    For example, if you define a listener including the metric "F1", the results will be
+    accessible as ``metrics.F1``
     """
 
     pass

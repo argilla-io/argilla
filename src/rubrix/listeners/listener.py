@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import schedule
 
@@ -16,7 +16,6 @@ from rubrix.listeners.models import (
     RBListenerContext,
     Search,
 )
-from rubrix.metrics.models import MetricSummary
 
 
 @dataclasses.dataclass
@@ -207,7 +206,7 @@ def listener(
     dataset: str,
     query: Optional[str] = None,
     metrics: Optional[List[str]] = None,
-    condition: Optional[Callable[[Union[Search, MetricSummary]], bool]] = None,
+    condition: Optional[ListenerCondition] = None,
     with_records: bool = True,
     execution_interval_in_seconds: int = 30,
     **query_params,
