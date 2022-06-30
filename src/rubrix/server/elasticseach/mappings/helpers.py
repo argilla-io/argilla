@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.settings import settings
 
 EXTENDED_ANALYZER_REF = "extended_analyzer"
 

@@ -29,7 +29,7 @@ try:
 except ModuleNotFoundError:
     import json
 
-from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.settings import settings
 
 
 class ClosedIndexError(Exception):
