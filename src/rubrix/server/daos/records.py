@@ -21,10 +21,9 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
-from rubrix.server._helpers import unflatten_dict
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
 from rubrix.server.elasticseach.client_wrapper import (
     ClosedIndexError,
@@ -38,7 +37,7 @@ from rubrix.server.elasticseach.mappings.helpers import (
     tasks_common_mappings,
     tasks_common_settings,
 )
-from rubrix.server.elasticseach.query_helpers import aggregations, parse_aggregations
+from rubrix.server.elasticseach.query_helpers import parse_aggregations
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.errors.task_errors import MetadataLimitExceededError
 
