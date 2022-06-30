@@ -226,6 +226,9 @@ p.admonition-title::before {
   background: var(--color-background-primary) !important;
   color: var(--color-foreground-primary) !important;
 }
+div.rendered_html table th, div.rendered_html table td {
+  text-align: left !important;
+}
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd), div.rendered_html tbody tr:nth-child(odd) {
   background:  var(--color-background-item) !important;
 }
