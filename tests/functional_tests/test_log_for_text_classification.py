@@ -2,7 +2,7 @@ import pytest
 
 import rubrix as rb
 from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
-from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.settings import settings
 from tests.helpers import SecuredClient
 
 

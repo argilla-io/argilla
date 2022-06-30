@@ -1,4 +1,4 @@
-from rubrix.server.apis.v0.settings.server import settings
+from rubrix.server.settings import settings
 
 DATASETS_INDEX_NAME = settings.dataset_index_name
 DATASETS_RECORDS_INDEX_NAME = settings.dataset_records_index_name
