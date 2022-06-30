@@ -14,13 +14,11 @@
 #  limitations under the License.
 
 import json
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
-from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.apis.v0.models.datasets import DatasetDB
+from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
 from rubrix.server.elasticseach import query_helpers
 from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
@@ -30,14 +28,8 @@ from rubrix.server.elasticseach.mappings.datasets import (
 )
 from rubrix.server.errors import WrongTaskError
 
-BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
-
 NO_WORKSPACE = ""
 MAX_NUMBER_OF_LISTED_DATASETS = 2500
-
-
-class SettingsDB(BaseModel):
-    pass
 
 
 class DatasetsDAO:
@@ -88,7 +80,7 @@ class DatasetsDAO:
     def list_datasets(
         self,
         owner_list: List[str] = None,
-        task2dataset_map: Dict[TaskType, Type[BaseDatasetDB]] = None,
+        task2dataset_map: Dict[str, Type[BaseDatasetDB]] = None,
     ) -> List[BaseDatasetDB]:
         filters = []
         if owner_list:
@@ -139,7 +131,7 @@ class DatasetsDAO:
                 doc, ds_class=task2dataset_map.get(task, DatasetDB)
             )
             for doc in docs
-            for task in [TaskType(self.__get_doc_field__(doc, "task"))]
+            for task in [self.__get_doc_field__(doc, "task")]
         ]
 
     def create_dataset(
@@ -215,17 +207,17 @@ class DatasetsDAO:
         name: str,
         owner: Optional[str],
         as_dataset_class: Type[BaseDatasetDB] = DatasetDB,
-        task: Optional[TaskType] = None,
+        task: Optional[str] = None,
     ) -> Optional[BaseDatasetDB]:
         """
         Finds a dataset by name
 
         Parameters
         ----------
-        name:
-            The dataset name
-        owner:
-            The dataset owner
+        name: The dataset name
+        owner: The dataset owner
+        as_dataset_class: The dataset class used to return data
+        task: The dataset task string definition
 
         Returns
         -------
