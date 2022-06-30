@@ -18,12 +18,13 @@ Dataset models definition
 """
 
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 from rubrix.server.apis.v0.models.commons.model import TaskType
+from rubrix.server.services.datasets import DatasetDB as SVCDataset
 
 
 class UpdateDatasetRequest(BaseModel):
@@ -58,7 +59,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     target_workspace: Optional[str] = None
 
 
-class BaseDatasetDB(CreationDatasetRequest):
+class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
     """
     Low level dataset data model
 
@@ -75,27 +76,8 @@ class BaseDatasetDB(CreationDatasetRequest):
     """
 
     task: TaskType
-    owner: Optional[str] = None
-    created_at: datetime = None
-    created_by: str = Field(
-        None, description="The Rubrix user that created the dataset"
-    )
-    last_updated: datetime = None
-
-    @classmethod
-    def build_dataset_id(cls, name: str, owner: Optional[str] = None) -> str:
-        """Build a dataset id for a given name and owner"""
-        if owner:
-            return f"{owner}.{name}"
-        return name
-
-    @property
-    def id(self) -> str:
-        """The dataset id. Compounded by owner and name"""
-        return self.build_dataset_id(self.name, self.owner)
 
 
-# TODO: Move this class to the services layer
 class DatasetDB(BaseDatasetDB):
     pass
 

@@ -95,11 +95,15 @@ class RBDatasetListener:
         class _ScheduleThread(threading.Thread):
             _WAIT_EVENT = threading.Event()
 
+            _THREAD_LOGGER = logging.getLogger(__name__)
+
             @classmethod
             def run(cls):
+                cls._THREAD_LOGGER.debug("Running listener thread...")
                 while not cls._WAIT_EVENT.is_set():
                     self.__scheduler__.run_pending()
                     time.sleep(self.interval_in_seconds - 1)
+                cls._THREAD_LOGGER.debug("Stopping listener thread...")
 
             @classmethod
             def stop(cls):
@@ -135,6 +139,7 @@ class RBDatasetListener:
         current_api = api.active_api()
         try:
             dataset = current_api.datasets.find_by_name(self.dataset)
+            self._LOGGER.debug(f"Found listener dataset {dataset.name}")
         except NotFoundApiError:
             self._LOGGER.warning(f"Not found dataset <{self.dataset}>")
             return
@@ -147,6 +152,7 @@ class RBDatasetListener:
             ),
         )
         if self.condition is None:
+            self._LOGGER.debug("No condition found! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
         search_results = current_api.searches.search_records(
@@ -157,7 +163,10 @@ class RBDatasetListener:
         condition_args = [ctx.search]
         if self.metrics:
             condition_args.append(ctx.metrics)
+
+        self._LOGGER.debug(f"Evaluate condition with arguments: {condition_args}")
         if self.condition(*condition_args):
+            self._LOGGER.debug(f"Condition passed! Running action...")
             return self.__run_action__(ctx, *args, **kwargs)
 
     def __compute_metrics__(self, current_api, dataset, query: str) -> Metrics:
@@ -185,6 +194,7 @@ class RBDatasetListener:
                         name=self.dataset, query=self.formatted_query, as_pandas=False
                     ),
                 )
+            self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
         except:
             import traceback

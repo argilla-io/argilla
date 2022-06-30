@@ -22,7 +22,7 @@ import deprecated
 from fastapi import Depends
 
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
+from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
 from rubrix.server.elasticseach.client_wrapper import (
     ClosedIndexError,
