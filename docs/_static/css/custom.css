@@ -85,6 +85,7 @@ p.admonition-title::before {
   border-left: none;
   box-shadow: none;
 }
+
 .content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
   font-family: 'Futura Medium';
   font-weight: normal;
@@ -113,6 +114,13 @@ p.admonition-title::before {
 .content div[class^=highlight], .content pre.literal-block {
   border: none;
   border-radius: 5px;
+  padding: 1em;
+}
+.highlight pre {
+  padding: 2em;
+}
+:target>h1:first-of-type, :target>h2:first-of-type, :target>h3:first-of-type, :target>h4:first-of-type, :target>h5:first-of-type, :target>h6:first-of-type, span:target~h1:first-of-type, span:target~h2:first-of-type, span:target~h3:first-of-type, span:target~h4:first-of-type, span:target~h5:first-of-type, span:target~h6:first-of-type {
+  background: var(--color-sidebar-item-background--current);
 }
 /* mobile header */
 .mobile-header .icon, .mobile-header svg {
@@ -221,12 +229,13 @@ p.admonition-title::before {
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd), div.rendered_html tbody tr:nth-child(odd) {
   background:  var(--color-background-item) !important;
 }
-/* sidebar */
-.sidebar-drawer {
-  width: 300px;
+/* back-to-top */
+a.back-to-top.muted-link {
+  color: var(--color-foreground-primary);
 }
+/* sidebar */
 .sidebar-container {
-  width: 100%;
+  width: 19em;
 }
 .sidebar-tree li>ul {
   margin-left: 0;
@@ -242,9 +251,10 @@ p.admonition-title::before {
 }
 .sidebar-tree .reference {
   line-height: 1.8em;
+  padding-left: 2em;
 }
 .sidebar-tree .toctree-l2 a {
-  padding-left: 32px;
+  padding-left: 4em;
 }
 .sidebar-logo {
   max-width: 120px;
@@ -265,14 +275,12 @@ p.admonition-title::before {
 }
 .sidebar-search-container:before {
   z-index: 12;
+  background: var(--color-search-icon)
 }
 .sidebar__theme-toggle {
   display: none;
 }
 @media (max-width: 67em) {
-  .sidebar-drawer {
-    left: -300px;
-  }
   .sidebar__theme-toggle {
     display: block;
     position: absolute;
@@ -284,6 +292,18 @@ p.admonition-title::before {
     display: none;
   }
 }
+
+
+/* toc */
+.toc-title {
+  color: var(--color-toc-title);
+  text-transform: none;
+  font-size: 14px;
+}
+.toc-tree .reference {
+  font-size: 14px;
+}
+
 /* typography */
 h1,
 h2,
@@ -436,11 +456,6 @@ a .tuto-section-6 {
 @media (min-width: 1440px) {
   .sd-card img {
     height: 190px;
-  }
-}
-@media (min-width: 1640px) {
-  .content {
-    width: 65%;
   }
 }
 @media (max-width: 576px) {

@@ -170,17 +170,19 @@ html_theme_options = {
         "color-sidebar-search-background--focus": "#FFFFFF",
         "color-sidebar-search-border": "#e9eaed",
         "color-content-foreground": "#484848",
-        "color-toc-item-text--hover": "#0709ae",
-        "color-toc-item-text--active": "#0709ae",
+        "color-toc-title": "#4C4EA3",
+        "color-toc-item-text--hover": "#484848",
+        "color-toc-item-text--active": "#484848",
         "color-link": "#0709ae",
         "color-link--hover": "#0508D9",
         "content-padding": "5em",
-        "content-padding--small": "2em"
+        "content-padding--small": "2em",
+        "color-search-icon": "#0508D9"
     },
     "dark_css_variables": {
         "color-sidebar-background": "#000000",
         "color-sidebar-background-border": "#000000",
-        "color-sidebar-caption-text": "#4C4EA3",
+        "color-sidebar-caption-text": "#FFFFFF",
         "color-sidebar-link-text": "#FFFFFF",
         "color-sidebar-link-text--top-level": "#FFFFFF",
         "color-sidebar-item-background--current": "#484848",
@@ -193,14 +195,16 @@ html_theme_options = {
         "color-sidebar-search-border": "#FFFFFF",
         "color-sidebar-search-foreground": "#FFFFFF",
         "color-content-foreground": "#FFFFFF",
+        "color-toc-title": "#7e8ee7",
         "color-toc-item-text--hover": "#FFFFFF",
         "color-toc-item-text--active": "#FFFFFF",
         "color-link": "#7e8ee7",
-        "color-link--hover": "#0508D9",
+        "color-link--hover": "#98a4e4",
+        "color-search-icon": "#FFFFFF"
     },
 }
-pygments_style = "monokai"
-pygments_dark_style = "monokai"
+pygments_style = "material"
+pygments_dark_style = "material"
 
 
 # Open graph meta
