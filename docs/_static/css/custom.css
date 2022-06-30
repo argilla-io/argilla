@@ -50,6 +50,9 @@ h2 {
 .article {
   color: #484848;
 }
+.content {
+  width: 50em;
+}
 .content .section h1 {
   margin-top: 2em;
 }
@@ -117,7 +120,7 @@ p.admonition-title::before {
   padding: 1em;
 }
 .highlight pre {
-  padding: 2em;
+  padding: 2em !important;
 }
 :target>h1:first-of-type, :target>h2:first-of-type, :target>h3:first-of-type, :target>h4:first-of-type, :target>h5:first-of-type, :target>h6:first-of-type, span:target~h1:first-of-type, span:target~h2:first-of-type, span:target~h3:first-of-type, span:target~h4:first-of-type, span:target~h5:first-of-type, span:target~h6:first-of-type {
   background: var(--color-sidebar-item-background--current);
