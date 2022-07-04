@@ -1,12 +1,8 @@
 import logging
-from typing import Iterable, List, Optional, Set, Type
+from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import (
-    BaseRecord,
-    EsRecordDataFieldNames,
-)
 from rubrix.server.apis.v0.models.metrics.base import BaseMetric
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
@@ -20,6 +16,10 @@ from rubrix.server.services.search.model import (
     SortConfig,
 )
 from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.services.tasks.commons.record import (
+    BaseRecordDB,
+    EsRecordDataFieldNames,
+)
 
 
 class SearchRecordsService:
@@ -53,7 +53,7 @@ class SearchRecordsService:
     def search(
         self,
         dataset: Dataset,
-        record_type: Type[BaseRecord],
+        record_type: Type[BaseRecordDB],
         query: Optional[BaseSearchQuery] = None,
         sort_config: Optional[SortConfig] = None,
         record_from: int = 0,
@@ -119,7 +119,7 @@ class SearchRecordsService:
     def scan_records(
         self,
         dataset: Dataset,
-        record_type: Type[BaseRecord],
+        record_type: Type[BaseRecordDB],
         query: Optional[BaseSearchQuery] = None,
         id_from: Optional[str] = None,
         limit: int = 1000

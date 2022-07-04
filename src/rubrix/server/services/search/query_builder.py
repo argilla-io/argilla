@@ -6,11 +6,10 @@ from fastapi import Depends
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
-from rubrix.server.apis.v0.models.commons.model import QueryRange
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
+from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import filters
-from rubrix.server.services.search.model import BaseSearchQuery
+from rubrix.server.services.search.model import BaseSearchQuery, QueryRange
 
 SearchQuery = TypeVar("SearchQuery", bound=BaseSearchQuery)
 
