@@ -134,11 +134,6 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             raise IndexError(f"Token id {token_idx} out of bounds")
         return self.__tokens2chars__[token_idx]
 
-    @validator("tokens")
-    def remove_empty_tokens(cls, tokens: List[str]):
-        # TODO: maybe launch a warning about changing provided tokens
-        return [t for t in tokens if t.replace(" ", "")]
-
     @validator("text")
     def check_text_content(cls, text: str):
         assert text and text.strip(), "No text or empty text provided"
@@ -160,10 +155,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         """
 
         def chars2tokens_index():
+            def is_space_after_token(char, idx: int, chars_map) -> str:
+                return char == " " and idx - 1 in chars_map
+
             chars_map = {}
             current_token = 0
             current_token_char_start = 0
             for idx, char in enumerate(self.text):
+                if is_space_after_token(char, idx, chars_map):
+                    continue
                 relative_idx = idx - current_token_char_start
                 if (
                     relative_idx < len(self.tokens[current_token])

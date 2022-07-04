@@ -81,10 +81,12 @@ def test_entities_with_spaces():
 
 
 def test_model_dict():
+    text = "This is  a  great  space"
+    tokens = ["This", "is", " ", "a", " ", "great", " ", "space"]
     record = TokenClassificationRecord(
         id="1",
-        text="This is  a  great  space",
-        tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
+        text=text,
+        tokens=tokens,
         prediction=TokenClassificationAnnotation(
             agent="test",
             entities=[
@@ -100,10 +102,10 @@ def test_model_dict():
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
         },
-        "raw_text": "This is  a  great  space",
+        "raw_text": text,
+        "text": text,
+        "tokens": tokens,
         "status": "Default",
-        "text": "This is  a  great  space",
-        "tokens": ["This", "is", "a", "great", "space"],
     }
 
 
@@ -244,7 +246,7 @@ def test_whitespace_in_tokens():
     from spacy import load
 
     nlp = load("en_core_web_sm")
-    text = "every four  (4)"
+    text = "every four (4)  "
     doc = nlp(text)
 
     record = {
@@ -258,4 +260,4 @@ def test_whitespace_in_tokens():
 
     record = CreationTokenClassificationRecord.parse_obj(record)
     assert record
-    print(record.dict())
+    assert record.tokens == ["every", "four", "(", "4", ")", " "]
