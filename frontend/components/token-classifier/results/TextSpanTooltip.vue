@@ -11,8 +11,8 @@
             class="highlight__tooltip__score"
             v-if="score && span.origin === 'prediction'"
             >{{ score | percent(0, 0) }}</span
-          ></span
-        >
+          >
+        </span>
       </span>
     </span>
   </span>
