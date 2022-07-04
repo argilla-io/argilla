@@ -764,7 +764,7 @@ class DatasetForTokenClassification(DatasetBase):
 
     @_requires_datasets
     def prepare_for_training(
-        self, framework: None
+        self, framework="transformers"
     ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
@@ -775,7 +775,8 @@ class DatasetForTokenClassification(DatasetBase):
             - The iob tags are transformed to integers.
 
         Args:
-            framework: A string specifying the framework of use. Default: `None`
+            framework: A string specifying the framework of use.
+                "transformers" and "spacy" are currently supported. Default: `transformers`
 
         Returns:
             A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
@@ -807,7 +808,7 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
-        if framework is None:
+        if framework is "transformers":
 
             import datasets
 
@@ -880,6 +881,11 @@ class DatasetForTokenClassification(DatasetBase):
                 db.add(doc)
 
             return db
+
+        else:
+            print(
+                "The introduced framework does not exist or is not supported. Please, use one of the existing frameworks detailed on the documentation."
+            )
 
     def __all_labels__(self):
         all_labels = set()
