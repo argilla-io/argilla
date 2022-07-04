@@ -2,8 +2,6 @@ from typing import Callable, Optional, Type, TypeVar, Union
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import BaseRecord
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.models.metrics.base import (
     ElasticsearchMetric,
     NestedPathElasticsearchMetric,
@@ -13,7 +11,9 @@ from rubrix.server.apis.v0.models.metrics.commons import *
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_dao
 from rubrix.server.errors import WrongInputParamError
+from rubrix.server.services.datasets import Dataset
 from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.services.tasks.commons.record import BaseRecordDB
 
 GenericQuery = TypeVar("GenericQuery")
 
@@ -60,9 +60,9 @@ class MetricsService:
 
     def summarize_metric(
         self,
-        dataset: BaseDatasetDB,
+        dataset: Dataset,
         metric: BaseMetric,
-        record_class: Optional[Type[BaseRecord]] = None,
+        record_class: Optional[Type[BaseRecordDB]] = None,
         query: Optional[GenericQuery] = None,
         **metric_params,
     ) -> Dict[str, Any]:
@@ -102,7 +102,7 @@ class MetricsService:
         self,
         metric: ElasticsearchMetric,
         metric_params: Dict[str, Any],
-        dataset: BaseDatasetDB,
+        dataset: Dataset,
         query: GenericQuery,
     ) -> Dict[str, Any]:
         """
@@ -136,7 +136,7 @@ class MetricsService:
 
     def __compute_metric_params__(
         self,
-        dataset: BaseDatasetDB,
+        dataset: Dataset,
         metric: ElasticsearchMetric,
         query: Optional[GenericQuery],
         provided_params: Dict[str, Any],
@@ -154,7 +154,7 @@ class MetricsService:
 
     def __metric_results__(
         self,
-        dataset: BaseDatasetDB,
+        dataset: Dataset,
         query: Optional[GenericQuery],
         metric_aggregation: Union[Dict[str, Any], List[Dict[str, Any]]],
     ) -> Dict[str, Any]:

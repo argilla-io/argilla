@@ -28,7 +28,7 @@ from rubrix.server.errors import (
 )
 from rubrix.server.security.model import User
 
-Dataset = TypeVar("Dataset", bound=DatasetDB)
+Dataset = TypeVar("Dataset", bound=BaseDatasetDB)
 
 
 class SVCDatasetSettings(SettingsDB):
