@@ -589,6 +589,9 @@ a .tuto-section-6 {
 .related-pages .title [class*="tuto-section-"] {
   display: none;
 }
+.page-info {
+  color: var(--color-page-info);
+}
 .related-pages a:hover .page-info .title {
   text-decoration: none;
 }

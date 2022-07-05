@@ -181,7 +181,8 @@ html_theme_options = {
         "color-search-icon": "#0508D9",
         "color-search-placeholder": "#0508D9",
         "color-literal": "#F2067A",
-        "toc-spacing-vertical": "3em"
+        "toc-spacing-vertical": "3em",
+        "color-page-info": "#646776"
     },
     "dark_css_variables": {
         "color-sidebar-background": "#131416",
@@ -207,6 +208,7 @@ html_theme_options = {
         "color-search-icon": "#FFFFFF",
         "color-search-placeholder": "#FFFFFF",
         "color-literal": "#f77eb9",
+        "color-page-info": "#FFFFFF"
     },
 }
 pygments_style = "material"
