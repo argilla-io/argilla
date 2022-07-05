@@ -37,14 +37,6 @@
       <a href="{{ pathto(master_doc) }}"><div class="brand">    <img class="header-logo" src="{{ logo_url }}" alt="Logo"/></div></a>
     </div>
     <div class="header-right">
-      <!-- <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
-          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
-          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
-          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
-        </button>
-      </div> -->
       <label class="search-icon" for="__search">
         <div class="visually-hidden">Toggle search</div>
       </label>
@@ -85,7 +77,7 @@
     </div>
   </aside>
   <div class="main">
-    <div class="content">
+    <div class="content{% if furo_hide_toc %} content--no-toc{% endif %}">
       <div class="article-container">
         <a href="#" class="back-to-top muted-link">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -114,7 +106,7 @@
           </label>
         </div>
         <article role="main">
-            <div style="margin-top: 1em">
+            <div style="margin-top: 1em; display: flex; justify-content: right">
                 <iframe src="https://ghbtns.com/github-btn.html?user=recognai&repo=rubrix&type=star&count=true&size=large" allowtransparency="true" style="color-scheme: none" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
             </div>
           {% block content %}{{ body }}{% endblock %}
