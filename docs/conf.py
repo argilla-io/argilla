@@ -159,7 +159,7 @@ html_theme_options = {
     "light_css_variables": {
         "color-sidebar-background": "#FFFFFF",
         "color-sidebar-background-border": "#e9eaed",
-        "color-sidebar-caption-text": "#4C4EA3",
+        "color-sidebar-caption-text": "#484848",
         "color-sidebar-link-text": "#484848",
         "color-sidebar-link-text--top-level": "#484848",
         "color-sidebar-item-background--current": "transparent",
