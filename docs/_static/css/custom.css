@@ -284,7 +284,11 @@ a.back-to-top.muted-link {
   padding-left: 2em;
 }
 .sidebar-tree .reference:hover {
-  font-weight: bold;
+  font-weight: 600;
+}
+.sidebar-tree .current-page>.reference {
+  font-weight: 600;
+  color: var(--color-sidebar-current-text);
 }
 .sidebar-tree .toctree-l2 a {
   padding-left: 4em;
@@ -595,4 +599,16 @@ a .tuto-section-6 {
 .related-pages a:hover .page-info .title {
   text-decoration: none;
 }
+
+/* selection */
+::-moz-selection { /* Code for Firefox */
+  color: white;
+  background: #0508D9;
+}
+
+::selection {
+  color: white;
+  background: #0508D9;
+}
+
 
