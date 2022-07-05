@@ -177,7 +177,8 @@ html_theme_options = {
         "color-link--hover": "#0508D9",
         "content-padding": "5em",
         "content-padding--small": "2em",
-        "color-search-icon": "#0508D9"
+        "color-search-icon": "#0508D9",
+        "color-search-placeholder": "#0508D9",
     },
     "dark_css_variables": {
         "color-sidebar-background": "#000000",
@@ -195,12 +196,13 @@ html_theme_options = {
         "color-sidebar-search-border": "#FFFFFF",
         "color-sidebar-search-foreground": "#FFFFFF",
         "color-content-foreground": "#FFFFFF",
-        "color-toc-title": "#7e8ee7",
+        "color-toc-title": "#FFFFFF",
         "color-toc-item-text--hover": "#FFFFFF",
         "color-toc-item-text--active": "#FFFFFF",
         "color-link": "#7e8ee7",
         "color-link--hover": "#98a4e4",
-        "color-search-icon": "#FFFFFF"
+        "color-search-icon": "#FFFFFF",
+        "color-search-placeholder": "#FFFFFF",
     },
 }
 pygments_style = "material"
