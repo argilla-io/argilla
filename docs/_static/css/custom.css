@@ -128,6 +128,9 @@ p.admonition-title::before {
 .highlight pre {
   padding: 2em !important;
 }
+.highlight button.copybtn {
+  color: #ccc;
+}
 div.nbinput.container, div.nboutput.container {
   margin: 2em 0 !important;
 }
@@ -255,6 +258,7 @@ div.rendered_html table th, div.rendered_html table td {
 /* back-to-top */
 a.back-to-top.muted-link {
   color: var(--color-foreground-primary);
+  text-decoration: none !important;
 }
 /* sidebar */
 .sidebar-container {
