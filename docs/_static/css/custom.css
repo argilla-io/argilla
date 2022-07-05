@@ -131,6 +131,9 @@ p.admonition-title::before {
 .highlight button.copybtn {
   color: #ccc;
 }
+.highlight button.copybtn:hover {
+  color: #ffffff;
+}
 div.nbinput.container, div.nboutput.container {
   margin: 2em 0 !important;
 }
