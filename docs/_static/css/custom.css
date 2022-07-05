@@ -373,12 +373,12 @@ p {
 }
 
 /* anchors */
-.headerlink:not(:focus):not(:active) {
+.headerlink {
   height: 1px;
   overflow: hidden;
   white-space: nowrap; 
   width: 1px;
-  visibility: hidden;
+  visibility: hidden !important;
 }
 .code-block-caption:hover>.headerlink:before, dl dt:hover>.headerlink:before, figcaption p:hover>.headerlink:before, h1:hover>.headerlink:before, h2:hover>.headerlink:before, h3:hover>.headerlink:before, h4:hover>.headerlink:before, h5:hover>.headerlink:before, h6:hover>.headerlink:before, p.caption:hover>.headerlink:before, table>caption:hover>.headerlink:before {
   content: "\f0c1";
