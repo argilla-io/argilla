@@ -43,6 +43,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
     "sphinx_design",
+    "sphinx_copybutton",
 ]
 
 myst_enable_extensions = [

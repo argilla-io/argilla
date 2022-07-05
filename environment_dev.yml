@@ -27,6 +27,7 @@ dependencies:
       - myst-parser==0.16.1
       - nbsphinx==0.8.9
       - sphinxext.opengraph==0.6.3
+      - sphinx-copybutton==0.5.0
       # code formatting
       - pre-commit==2.15.0
       # extra test dependencies
