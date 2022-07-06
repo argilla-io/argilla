@@ -201,8 +201,21 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         annotation: Optional[TokenClassificationAnnotation],
     ):
         """Validates entities in terms of offset spans"""
+
+        def adjust_span_bounds(start, end):
+            if start < 0:
+                start = 0
+            if entity.end > len(self.text):
+                end = len(self.text)
+            while start <= len(self.text) and not self.text[start].strip():
+                start += 1
+            while not self.text[end - 1].strip():
+                end -= 1
+            return start, end
+
         if annotation:
             for entity in annotation.entities:
+                entity.start, entity.end = adjust_span_bounds(entity.start, entity.end)
                 mention = self.text[entity.start : entity.end]
                 assert len(mention) > 0, f"Empty offset defined for entity {entity}"
 
