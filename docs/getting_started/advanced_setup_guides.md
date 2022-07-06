@@ -1,5 +1,4 @@
 (advanced-setup-guides)=
-
 # Advanced setup guides
 
 Here we provide some setup guides for an advanced usage of Rubrix.
