@@ -336,6 +336,12 @@ a.back-to-top.muted-link {
     right: 1em;
     top: 0.4em;
   }
+  .stars {
+    display: block !important;
+    text-align: center;
+    width: 140px;
+    margin: auto;
+  }
   .sidebar-search-container {
     display: none;
   }
