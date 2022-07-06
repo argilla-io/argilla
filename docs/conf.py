@@ -172,7 +172,7 @@ html_theme_options = {
         "color-sidebar-search-border": "#dcdcdc",
         "color-sidebar-current-text": "#0508D9",
         "color-content-foreground": "#484848",
-        "color-toc-title": "#484848",
+        "color-toc-title": "#212529",
         "color-toc-item-text--hover": "#484848",
         "color-toc-item-text--active": "#484848",
         "color-link": "#0709ae",

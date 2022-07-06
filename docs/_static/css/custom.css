@@ -346,7 +346,8 @@ a.back-to-top.muted-link {
 .toc-title {
   color: var(--color-toc-title);
   text-transform: none;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 600;
 }
 .toc-tree .reference {
   font-size: 14px;
