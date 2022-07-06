@@ -93,8 +93,12 @@ p.admonition-title::before {
   box-shadow: none;
 }
 
-.content .toctree-wrapper>p.caption, h1, h2, h3, h4, h5, h6, legend {
+.content .toctree-wrapper>p.caption, h2, h3, h4, h5, h6, legend {
   font-family: 'Futura Medium';
+  font-weight: normal;
+}
+h1 {
+  font-family: 'Futura Bold';
   font-weight: normal;
 }
 .content .note, .content .seealso, .content .wy-alert-info.admonition, .content .wy-alert-info.admonition-todo, .content .wy-alert-info.attention, .content .wy-alert-info.caution, .content .wy-alert-info.danger, .content .wy-alert-info.error, .content .wy-alert-info.hint, .content .wy-alert-info.important, .content .wy-alert-info.tip, .content .wy-alert-info.warning, .wy-alert.wy-alert-info {
@@ -305,7 +309,7 @@ a.back-to-top.muted-link {
   padding-bottom: 16px;
 }
 .sidebar-search {
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-sidebar-search-border);
   padding-left: 2.5em;
   border-radius: 3px;
   min-height: 40px;
