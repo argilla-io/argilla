@@ -1,7 +1,7 @@
 # Web App UI
 
 Here we provide a comprehensible overview of the Rubrix web app's User Interface (UI).
-To launch the web app, please have a look at our [setup and installation guide](../../getting_started/setup&installation.rst#launch-the-web-app).
+To launch the web app, please have a look at our [setup and installation guide](launch-the-web-app).
 
 ## Pages
 
