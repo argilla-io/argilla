@@ -13,9 +13,11 @@ class Search:
 
     Args:
         total: The total number of records affected by the listener query
+        params: The query parameters applied to the executed search
     """
 
     total: int
+    params: Optional[Dict[str, Any]] = None
 
 
 class Metrics(Prodict):
@@ -63,7 +65,7 @@ class RBListenerContext:
         return self.__listener__.formatted_query
 
 
-ListenerCondition = Callable[[Search, Metrics], bool]
+ListenerCondition = Callable[[Search, Optional[RBListenerContext]], bool]
 ListenerAction = Union[
     Callable[[List[Record], RBListenerContext], bool],
     Callable[[RBListenerContext], bool],

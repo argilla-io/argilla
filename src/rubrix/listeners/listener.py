@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 import logging
 import threading
@@ -158,7 +159,9 @@ class RBDatasetListener:
             name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
         )
 
-        ctx.search = Search(total=search_results.total)
+        ctx.search = Search(
+            total=search_results.total, params=copy.deepcopy(ctx.query_params)
+        )
         condition_args = [ctx.search]
         if self.metrics:
             condition_args.append(ctx.metrics)
