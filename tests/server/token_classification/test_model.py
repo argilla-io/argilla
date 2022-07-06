@@ -19,6 +19,7 @@ from pydantic import ValidationError
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.apis.v0.models.commons.model import PredictionStatus
 from rubrix.server.apis.v0.models.token_classification import (
+    CreationTokenClassificationRecord,
     EntitySpan,
     TokenClassificationAnnotation,
     TokenClassificationQuery,
@@ -80,10 +81,12 @@ def test_entities_with_spaces():
 
 
 def test_model_dict():
+    text = "This is  a  great  space"
+    tokens = ["This", "is", " ", "a", " ", "great", " ", "space"]
     record = TokenClassificationRecord(
         id="1",
-        text="This is  a  great  space",
-        tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
+        text=text,
+        tokens=tokens,
         prediction=TokenClassificationAnnotation(
             agent="test",
             entities=[
@@ -99,10 +102,10 @@ def test_model_dict():
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
         },
-        "raw_text": "This is  a  great  space",
+        "raw_text": text,
+        "text": text,
+        "tokens": tokens,
         "status": "Default",
-        "text": "This is  a  great  space",
-        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
     }
 
 
@@ -237,3 +240,24 @@ def test_annotated_without_entities():
     assert record.annotated_by == [record.annotation.agent]
     assert record.predicted_by == [record.prediction.agent]
     assert record.predicted == PredictionStatus.KO
+
+
+def test_whitespace_in_tokens():
+    from spacy import load
+
+    nlp = load("en_core_web_sm")
+    text = "every four (4)  "
+    doc = nlp(text)
+
+    record = {
+        "text": text,
+        "tokens": list(map(str, doc)),
+        "prediction": {
+            "agent": "mock",
+            "entities": [{"start": 0, "end": len(text), "label": "mock"}],
+        },
+    }
+
+    record = CreationTokenClassificationRecord.parse_obj(record)
+    assert record
+    assert record.tokens == ["every", "four", "(", "4", ")", " "]

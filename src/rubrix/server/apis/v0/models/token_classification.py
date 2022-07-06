@@ -155,10 +155,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         """
 
         def chars2tokens_index():
+            def is_space_after_token(char, idx: int, chars_map) -> str:
+                return char == " " and idx - 1 in chars_map
+
             chars_map = {}
             current_token = 0
             current_token_char_start = 0
             for idx, char in enumerate(self.text):
+                if is_space_after_token(char, idx, chars_map):
+                    continue
                 relative_idx = idx - current_token_char_start
                 if (
                     relative_idx < len(self.tokens[current_token])
