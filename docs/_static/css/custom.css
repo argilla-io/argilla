@@ -311,7 +311,8 @@ a.back-to-top.muted-link {
   min-height: 40px;
 }
 .sidebar-search::placeholder {
-  color: var(--color-search-placeholder)
+  color: var(--color-search-placeholder);
+  font-weight: 600;
 }
 .sidebar-scroll, .toc-scroll  {
   -ms-overflow-style: none;  /* IE and Edge */
