@@ -97,7 +97,7 @@ p.admonition-title::before {
   font-family: 'Futura Medium';
   font-weight: normal;
 }
-h1 {
+h1, h2 {
   font-family: 'Futura Bold';
   font-weight: normal;
 }
