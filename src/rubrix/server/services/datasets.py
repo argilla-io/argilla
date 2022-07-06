@@ -98,7 +98,9 @@ class DatasetsService:
         if found_ds is None:
             raise EntityNotFoundError(name=name, type=Dataset)
         if found_ds.owner and owner and found_ds.owner != owner:
-            raise ForbiddenOperationError()
+            raise EntityNotFoundError(
+                name=name, type=Dataset
+            ) if user.is_superuser() else ForbiddenOperationError()
 
         return cast(Dataset, found_ds)
 

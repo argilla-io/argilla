@@ -3,7 +3,6 @@ import pytest
 import rubrix as rb
 from rubrix import TextClassificationSettings, TokenClassificationSettings
 from rubrix.client import api
-from rubrix.client.sdk.commons.errors import AlreadyExistsApiError
 
 
 @pytest.mark.parametrize(
