@@ -242,6 +242,39 @@ def test_annotated_without_entities():
     assert record.predicted == PredictionStatus.KO
 
 
+def test_adjust_spans():
+
+    text = "A text with  some empty     spaces  that could    bring  not cleany   annotated spans"
+
+    record = TokenClassificationRecord(
+        text=text,
+        tokens=text.split(),
+        prediction=TokenClassificationAnnotation(
+            agent="pred.test",
+            entities=[
+                EntitySpan(start=-3, end=2, label="DET"),
+                EntitySpan(start=24, end=36, label="NAME"),
+            ],
+        ),
+        annotation=TokenClassificationAnnotation(
+            agent="test",
+            entities=[
+                EntitySpan(start=48, end=61, label="VERB"),
+                EntitySpan(start=68, end=100, label="DET"),
+            ],
+        ),
+    )
+
+    assert record.prediction.entities == [
+        EntitySpan(start=0, end=1, label="DET"),
+        EntitySpan(start=28, end=34, label="NAME"),
+    ]
+
+    assert record.annotation.entities == [
+        EntitySpan(start=50, end=60, label="VERB"),
+        EntitySpan(start=70, end=85, label="DET"),
+    ]
+
 def test_whitespace_in_tokens():
     from spacy import load
 
@@ -261,3 +294,4 @@ def test_whitespace_in_tokens():
     record = CreationTokenClassificationRecord.parse_obj(record)
     assert record
     assert record.tokens == ["every", "four", "(", "4", ")", " "]
+
