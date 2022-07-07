@@ -7,10 +7,6 @@ From here you can access most of Rubrix's features, like **exploring and annotat
 
 The page is composed of 4 major components:
 
-```{contents}
-:local:
-```
-
 ## Search bar
 
 ![Search bar](../../_static/reference/webapp/search_bar.png)
