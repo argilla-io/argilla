@@ -10,6 +10,13 @@ These tutorials show you how to create Active Learning workflows with Rubrix.
 
 Build an active learning prototype with Rubrix, ModAL and scikit-learn to filter spam from the YouTube Spam Collection dataset.
 ```
+
+```{grid-item-card} 👂 Learn actively, and listen carefully to small-text
+:img-top: ../_static/tutorials/active_learning_with_small_text/screenshot.png
+:link: active_learning_with_small_text.ipynb
+
+Set up a complete active learning loop in the Rubrix UI with small-text and a Hugging Face transformer using a Rubrix listener.
+```
 ````
 
 ```{toctree}
@@ -17,5 +24,6 @@ Build an active learning prototype with Rubrix, ModAL and scikit-learn to filter
 :hidden:
 
 05-active_learning.ipynb
+active_learning_with_small_text.ipynb
 ```
 
