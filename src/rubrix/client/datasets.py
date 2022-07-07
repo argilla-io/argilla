@@ -775,7 +775,7 @@ class DatasetForTokenClassification(DatasetBase):
             - The iob tags are transformed to integers.
 
         Args:
-            framework: A string specifying the framework of use.
+            framework: A string specifying the framework for the training.
                 "transformers" and "spacy" are currently supported. Default: `transformers`
 
         Returns:
