@@ -21,13 +21,13 @@ dependencies:
   - nodejs~=14.17.0
   - pip:
       # docs
-      - sphinx==4.1.2
-      - sphinx-design==0.1.0
-      - sphinx_rtd_theme==0.5.2
+      - sphinx==4.5.0
+      - sphinx-design==0.2.0
+      - furo==2022.6.4.1
       - myst-parser==0.16.1
-      - nbsphinx==0.8.7
-      - nbformat<5.2.0 # Installs ipython-genutils, with a new version (>0.8.8) of nbsphinx this can probably go away.
-      - sphinxext.opengraph==0.4.2
+      - nbsphinx==0.8.9
+      - sphinxext.opengraph==0.6.3
+      - sphinx-copybutton==0.5.0
       # code formatting
       - pre-commit==2.15.0
       # extra test dependencies
