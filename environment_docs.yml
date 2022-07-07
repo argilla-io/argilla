@@ -1,108 +1,116 @@
 name: rubrix_doc
 channels:
-  - conda-forge
   - defaults
 dependencies:
-  # - appnope==0.1.2 -> Only for macOs
-  - backcall=0.2.0=pyh9f0ad1d_0
-  - backports=1.0=py_2
-  - backports.functools_lru_cache=1.6.4=pyhd8ed1ab_0
-  - bzip2==1.0.8
-  - ca-certificates==2021.10.8
-  - decorator=5.1.1=pyhd8ed1ab_0
-  - ipython==7.32.0
-  - jedi==0.18.1
-  - libffi==3.4.2
-  - libzlib==1.2.11
-  - matplotlib-inline=0.1.3=pyhd8ed1ab_0
-  - ncurses==6.3
-  - openssl==3.0.2
-  - pandoc==2.12
-  - parso=0.8.3=pyhd8ed1ab_0
-  - pexpect=4.8.0=pyh9f0ad1d_2
-  - pickleshare=0.7.5=py_1003
-  - pip=22.0.4=pyhd8ed1ab_0
-  - prompt-toolkit=3.0.27=pyha770c72_0
-  - ptyprocess=0.7.0=pyhd3deb0d_0
-  - pygments=2.11.2=pyhd8ed1ab_0
-  - pyparsing=3.0.7=pyhd8ed1ab_0
-  - python==3.8.13
-  - python_abi=3.8=2_cp38
-  - readline==8.1
-  - setuptools==61.1.1
-  - sqlite==3.37.1
-  - tk==8.6.12
-  - traitlets=5.1.1=pyhd8ed1ab_0
-  - wcwidth=0.2.5=pyh9f0ad1d_2
-  - wheel=0.37.1=pyhd8ed1ab_0
-  - xz==5.2.5
-  - zlib==1.2.11
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=5.1
+  - asttokens=2.0.5
+  - backcall=0.2.0
+  - ca-certificates=2022.4.26
+  - certifi=2022.6.15
+  - decorator=5.1.1
+  - executing=0.8.3
+  - ipython=8.3.0
+  - jedi=0.18.1
+  - ld_impl_linux-64=2.38
+  - libffi=3.3
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libstdcxx-ng=11.2.0
+  - matplotlib-inline=0.1.2
+  - ncurses=6.3
+  - openssl=1.1.1p
+  - pandoc=2.12
+  - parso=0.8.3
+  - pexpect=4.8.0
+  - pickleshare=0.7.5
+  - pip=21.2.4
+  - prompt-toolkit=3.0.20
+  - ptyprocess=0.7.0
+  - pure_eval=0.2.2
+  - pygments=2.11.2
+  - python=3.8.13
+  - readline=8.1.2
+  - setuptools=61.2.0
+  - six=1.16.0
+  - sqlite=3.38.5
+  - stack_data=0.2.0
+  - tk=8.6.12
+  - wcwidth=0.2.5
+  - wheel=0.37.1
+  - xz=5.2.5
+  - zlib=1.2.12
   - pip:
     - alabaster==0.7.12
     - attrs==21.4.0
-    - babel==2.9.1
-    - beautifulsoup4==4.10.0
-    - bleach==4.1.0
-    - certifi==2021.10.8
-    - charset-normalizer==2.0.12
+    - babel==2.10.3
+    - beautifulsoup4==4.11.1
+    - bleach==5.0.1
+    - charset-normalizer==2.1.0
     - defusedxml==0.7.1
-    - docutils==0.16
+    - docutils==0.17.1
     - entrypoints==0.4
+    - fastjsonschema==2.15.3
+    - furo==2022.6.4.1
     - h11==0.9.0
     - httpcore==0.11.1
     - httpx==0.15.5
     - idna==3.3
-    - imagesize==1.3.0
-    - importlib-resources==5.6.0
-    - ipython-genutils==0.2.0
-    - jinja2==3.1.1
-    - jsonschema==4.4.0
-    - jupyter-client==7.1.2
-    - jupyter-core==4.9.2
-    - jupyterlab-pygments==0.1.2
-    - markdown-it-py==2.0.1
+    - imagesize==1.4.1
+    - importlib-metadata==4.12.0
+    - importlib-resources==5.8.0
+    - jinja2==3.1.2
+    - jsonschema==4.6.1
+    - jupyter-client==7.3.4
+    - jupyter-core==4.10.0
+    - jupyterlab-pygments==0.2.2
+    - markdown-it-py==2.1.0
     - markupsafe==2.1.1
     - mdit-py-plugins==0.3.0
-    - mdurl==0.1.0
+    - mdurl==0.1.1
     - mistune==0.8.4
     - myst-parser==0.16.1
-    - nbclient==0.5.13
-    - nbconvert==6.4.5
-    - nbformat==5.1.3
-    - nbsphinx==0.8.7
-    - nest-asyncio==1.5.4
-    - numpy==1.22.3
+    - nbclient==0.6.6
+    - nbconvert==6.5.0
+    - nbformat==5.4.0
+    - nbsphinx==0.8.9
+    - nest-asyncio==1.5.5
+    - numpy==1.23.0
     - packaging==21.3
-    - pandas==1.4.1
+    - pandas==1.4.3
     - pandocfilters==1.5.0
-    - pydantic==1.9.0
+    - prodict==0.8.18
+    - pydantic==1.9.1
+    - pyparsing==3.0.9
     - pyrsistent==0.18.1
     - python-dateutil==2.8.2
     - pytz==2022.1
     - pyyaml==6.0
-    - pyzmq==22.3.0
-    - requests==2.27.1
+    - pyzmq==23.2.0
+    - requests==2.28.1
     - rfc3986==1.5.0
-    - six==1.16.0
+    - schedule==1.1.0
     - sniffio==1.2.0
     - snowballstemmer==2.2.0
-    - soupsieve==2.3.1
-    - sphinx==4.1.2
-    - sphinx-design==0.1.0
-    - sphinx-rtd-theme==0.5.2
+    - soupsieve==2.3.2.post1
+    - sphinx==4.5.0
+    - sphinx-basic-ng==0.0.1a12
+    - sphinx-copybutton==0.5.0
+    - sphinx-design==0.2.0
     - sphinxcontrib-applehelp==1.0.2
     - sphinxcontrib-devhelp==1.0.2
     - sphinxcontrib-htmlhelp==2.0.0
     - sphinxcontrib-jsmath==1.0.1
     - sphinxcontrib-qthelp==1.0.3
     - sphinxcontrib-serializinghtml==1.1.5
-    - sphinxext-opengraph==0.4.2
-    - testpath==0.6.0
-    - tornado==6.1
-    - tqdm==4.63.1
-    - typing-extensions==4.1.1
+    - sphinxext-opengraph==0.6.3
+    - tinycss2==1.1.1
+    - tornado==6.2
+    - tqdm==4.64.0
+    - traitlets==5.3.0
+    - typing-extensions==4.3.0
     - urllib3==1.26.9
     - webencodings==0.5.1
     - wrapt==1.13.3
-    - zipp==3.7.0
+    - zipp==3.8.0
     - -e ".[listeners]"

@@ -21,7 +21,7 @@ import os
 import rubrix as rb
 
 project = "Rubrix"
-copyright = "2021, Recognai"
+copyright = "2022, Recognai"
 author = "Recognai"
 
 # Normally the full version, including alpha/beta/rc tags.
@@ -43,6 +43,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
     "sphinx_design",
+    "sphinx_copybutton",
 ]
 
 myst_enable_extensions = [
@@ -138,7 +139,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -152,7 +153,70 @@ html_favicon = "_static/images/favicon.ico"
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = ["css/custom.css"]
-html_theme_options = {"logo_only": True}
+html_theme_options = {
+    "top_of_page_button": None,
+    "sidebar_hide_name": True,
+    "light_css_variables": {
+        "color-sidebar-background": "#FFFFFF",
+        "color-sidebar-background-border": "#e9eaed",
+        "color-sidebar-caption-text": "#484848",
+        "color-sidebar-link-text": "#484848",
+        "color-sidebar-link-text--top-level": "#484848",
+        "color-sidebar-item-background--current": "transparent",
+        "color-sidebar-item-background--hover": "transparent",
+        "color-sidebar-item-expander-background": "transparent",
+        "color-sidebar-item-expander-background--hover": "transparent",
+        "color-sidebar-search-text": "#484848",
+        "color-sidebar-search-background": "#FFFFFF",
+        "color-sidebar-search-background--focus": "#FFFFFF",
+        "color-sidebar-search-border": "#484848",
+        "color-sidebar-current-text": "#0508D9",
+        "color-content-foreground": "#484848",
+        "color-toc-title": "#212529",
+        "color-toc-item-text--hover": "#484848",
+        "color-toc-item-text--active": "#484848",
+        "color-link": "#0709ae",
+        "color-link--hover": "#0508D9",
+        "content-padding": "5em",
+        "content-padding--small": "2em",
+        "color-search-icon": "#484848",
+        "color-search-placeholder": "#484848",
+        "color-literal": "#F2067A",
+        "toc-spacing-vertical": "3em",
+        "color-page-info": "#646776",
+        "toc-item-spacing-vertical": "1em",
+    },
+    "dark_css_variables": {
+        "color-sidebar-background": "#131416",
+        "color-sidebar-background-border": "#303335",
+        "color-sidebar-caption-text": "#FFFFFF",
+        "color-sidebar-link-text": "#FFFFFF",
+        "color-sidebar-link-text--top-level": "#FFFFFF",
+        "color-sidebar-item-background--current": "none",
+        "color-sidebar-item-background--hover": "none",
+        "color-sidebar-item-expander-background": "transparent",
+        "color-sidebar-item-expander-background--hover": "transparent",
+        "color-sidebar-search-text": "#FFFFFF",
+        "color-sidebar-search-background": "#131416",
+        "color-sidebar-search-background--focus": "#131416",
+        "color-sidebar-search-border": "#FFFFFF",
+        "color-sidebar-search-foreground": "#FFFFFF",
+        "color-sidebar-current-text": "#98a4e4",
+        "color-content-foreground": "#FFFFFF",
+        "color-toc-title": "#FFFFFF",
+        "color-toc-item-text--hover": "#FFFFFF",
+        "color-toc-item-text--active": "#FFFFFF",
+        "color-link": "#7e8ee7",
+        "color-link--hover": "#98a4e4",
+        "color-search-icon": "#FFFFFF",
+        "color-search-placeholder": "#FFFFFF",
+        "color-literal": "#f77eb9",
+        "color-page-info": "#FFFFFF",
+    },
+}
+pygments_style = "material"
+pygments_dark_style = "material"
+
 
 # Open graph meta
 ogp_image = (
