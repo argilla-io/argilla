@@ -19,7 +19,7 @@ import threading
 import warnings
 from itertools import chain
 from types import ModuleType
-from typing import Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 
 class _LazyRubrixModule(ModuleType):
@@ -173,3 +173,82 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
         thread.start()
         __LOOP__, __THREAD__ = loop, thread
     return __LOOP__, __THREAD__
+
+
+class SpanUtils:
+    """Holds utility methods to work with a tokenized text and text spans.
+
+    Args:
+        text: The text the spans refer to.
+        tokens: The tokens of the text.
+    """
+
+    def __init__(self, text: str, tokens: List[str]):
+        self._text, self._tokens = text, tokens
+
+        self._start_idx_to_token_idx = {}
+        self._end_idx_to_token_idx = {}
+
+        end_idx = 0
+        for idx, token in enumerate(tokens):
+            start_idx = text.find(token, end_idx)
+            if start_idx == -1:
+                raise ValueError(f"Token '{token}' not found in text: {text}")
+            end_idx = start_idx + len(token)
+
+            self._start_idx_to_token_idx[start_idx] = idx
+            self._end_idx_to_token_idx[end_idx] = idx
+
+            # convention: skip first white space after a token
+            if text[end_idx] == " ":
+                end_idx += 1
+
+    @property
+    def text(self) -> str:
+        """The text the spans refer to."""
+        return self._text
+
+    @property
+    def tokens(self) -> List[str]:
+        """The tokens of the text."""
+        return self._tokens
+
+    def validate(self, spans: List[Tuple[str, int, int]]):
+        misaligned_spans = []
+        for span in spans:
+            if None in (
+                self._start_idx_to_token_idx.get(span[1]),
+                self._end_idx_to_token_idx.get(span[2]),
+            ):
+                misaligned_spans.append(self.text[span[1] : span[2]])
+
+        if misaligned_spans:
+            raise ValueError(
+                f"The text spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
+            )
+
+    def correct(self, spans: List[Tuple[str, int, int]]):
+        raise NotImplementedError
+
+    def to_tags(self, spans: List[Tuple[str, int, int]]) -> List[str]:
+        """Convert spans to IOB tags"""
+        # check for overlapping spans
+        sorted_spans = sorted(spans, key=lambda x: x[1])
+        for i in range(1, len(spans)):
+            if sorted_spans[i - 1][2] > sorted_spans[i][1]:
+                raise ValueError("IOB tags cannot handle overlapping spans!")
+
+        tags = ["O"] * len(self.tokens)
+        for span in spans:
+            start_token_idx = self._start_idx_to_token_idx[span[1]]
+            end_token_idx = self._end_idx_to_token_idx[span[2]]
+
+            tags[start_token_idx] = f"B-{span[2]}"
+            for token_idx in range(start_token_idx + 1, end_token_idx + 1):
+                tags[token_idx] = f"I-{span[2]}"
+
+        return tags
+
+    def from_tags(self, tags: List[str]) -> List[Tuple[str, int, int]]:
+        """Convert IOB or BILOU tags to spans"""
+        raise NotImplementedError
