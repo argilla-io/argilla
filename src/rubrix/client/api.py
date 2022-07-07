@@ -20,7 +20,7 @@ import warnings
 from asyncio import Future
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from tqdm.auto import tqdm
 
@@ -47,7 +47,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import async_bulk, bulk
+from rubrix.client.sdk.commons.api import async_bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.datasets import api as datasets_api
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
@@ -201,7 +201,7 @@ class Api:
         )
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
-        """Creates a copy of a dataset including its tags and metadata
+        """Creates a copy of a dataset including its tags.
 
         Args:
             dataset: Name of the source dataset
@@ -239,7 +239,7 @@ class Api:
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
         tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata=None,
         chunk_size: int = 500,
         verbose: bool = True,
         background: bool = False,
@@ -252,7 +252,7 @@ class Api:
             records: The record, an iterable of records, or a dataset to log.
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
-            metadata: A dictionary of extra info for the dataset.
+            metadata: DEPRECATED! Use the ``tags`` argument instead.
             chunk_size: The chunk size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
             background: If True, we will NOT wait for the logging process to finish and return an ``asyncio.Future``
@@ -276,6 +276,12 @@ class Api:
             >>> rb.log(record, name="example-dataset", background=True, verbose=False)
             <Future at 0x7f675a1fffa0 state=pending>
         """
+        if metadata is not None:
+            warnings.warn(
+                "The argument `metadata` is deprecated. Please use the `tags` argument instead.",
+                DeprecationWarning,
+            )
+
         future = self._agent.log(
             records=records,
             name=name,
@@ -297,7 +303,7 @@ class Api:
         records: Union[Record, Iterable[Record], Dataset],
         name: str,
         tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata=None,
         chunk_size: int = 500,
         verbose: bool = True,
     ) -> BulkResponse:
@@ -307,7 +313,7 @@ class Api:
             records: The record, an iterable of records, or a dataset to log.
             name: The dataset name.
             tags: A dictionary of tags related to the dataset.
-            metadata: A dictionary of extra info for the dataset.
+            metadata: DEPRECATED! Use the ``tags`` argument instead.
             chunk_size: The chunk size for a data bulk.
             verbose: If True, shows a progress bar and prints out a quick summary at the end.
 
@@ -325,6 +331,11 @@ class Api:
             ... )
         """
         tags = tags or {}
+        if metadata is not None:
+            warnings.warn(
+                "The argument `metadata` is deprecated. Please use the `tags` argument instead.",
+                DeprecationWarning,
+            )
         metadata = metadata or {}
 
         if not name:
