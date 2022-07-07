@@ -17,9 +17,10 @@ import importlib
 import os
 import threading
 import warnings
+from collections import defaultdict
 from itertools import chain
 from types import ModuleType
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class _LazyRubrixModule(ModuleType):
@@ -188,8 +189,9 @@ class SpanUtils:
     def __init__(self, text: str, tokens: List[str]):
         self._text, self._tokens = text, tokens
 
-        self._start_idx_to_token_idx = {}
-        self._end_idx_to_token_idx = {}
+        self._token_to_char_idx: Dict[int, Tuple[int, int]] = {}
+        self._start_to_token_idx: Dict[int, int] = {}
+        self._end_to_token_idx: Dict[int, int] = {}
 
         end_idx = 0
         for idx, token in enumerate(tokens):
@@ -198,12 +200,17 @@ class SpanUtils:
                 raise ValueError(f"Token '{token}' not found in text: {text}")
             end_idx = start_idx + len(token)
 
-            self._start_idx_to_token_idx[start_idx] = idx
-            self._end_idx_to_token_idx[end_idx] = idx
+            self._token_to_char_idx[idx] = (start_idx, end_idx)
+            self._start_to_token_idx[start_idx] = idx
+            self._end_to_token_idx[end_idx] = idx
 
             # convention: skip first white space after a token
-            if text[end_idx] == " ":
-                end_idx += 1
+            try:
+                if text[end_idx] == " ":
+                    end_idx += 1
+            # reached end of text
+            except IndexError:
+                pass
 
     @property
     def text(self) -> str:
@@ -227,8 +234,8 @@ class SpanUtils:
         misaligned_spans = []
         for span in spans:
             if None in (
-                self._start_idx_to_token_idx.get(span[1]),
-                self._end_idx_to_token_idx.get(span[2]),
+                self._start_to_token_idx.get(span[1]),
+                self._end_to_token_idx.get(span[2]),
             ):
                 misaligned_spans.append(self.text[span[1] : span[2]])
 
@@ -237,11 +244,45 @@ class SpanUtils:
                 f"The text spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
             )
 
-    def correct(self, spans: List[Tuple[str, int, int]]):
-        raise NotImplementedError
+    def correct(self, spans: List[Tuple[str, int, int]]) -> List[Tuple[str, int, int]]:
+        """Correct span boundaries for leading/trailing white spaces, new lines and tabs.
+
+        Args:
+            spans: Spans to be corrected.
+
+        Returns:
+            The corrected spans.
+        """
+        corrected_spans = []
+        for span in spans:
+            start, end = span[1], span[2]
+
+            if start < 0:
+                start = 0
+            if end > len(self.text):
+                end = len(self.text)
+
+            while start <= len(self.text) and not self.text[start].strip():
+                start += 1
+            while not self.text[end - 1].strip():
+                end -= 1
+
+            corrected_spans.append((span[0], start, end))
+
+        return corrected_spans
 
     def to_tags(self, spans: List[Tuple[str, int, int]]) -> List[str]:
-        """Convert spans to IOB tags"""
+        """Convert spans to IOB tags.
+
+        Args:
+            spans: Spans to transform into IOB tags.
+
+        Returns:
+            The IOB tags.
+
+        Raises:
+            ValueError: If spans overlap, the IOB format does not support overlapping spans.
+        """
         # check for overlapping spans
         sorted_spans = sorted(spans, key=lambda x: x[1])
         for i in range(1, len(spans)):
@@ -250,15 +291,70 @@ class SpanUtils:
 
         tags = ["O"] * len(self.tokens)
         for span in spans:
-            start_token_idx = self._start_idx_to_token_idx[span[1]]
-            end_token_idx = self._end_idx_to_token_idx[span[2]]
+            start_token_idx = self._start_to_token_idx[span[1]]
+            end_token_idx = self._end_to_token_idx[span[2]]
 
-            tags[start_token_idx] = f"B-{span[2]}"
+            tags[start_token_idx] = f"B-{span[0]}"
             for token_idx in range(start_token_idx + 1, end_token_idx + 1):
-                tags[token_idx] = f"I-{span[2]}"
+                tags[token_idx] = f"I-{span[0]}"
 
         return tags
 
     def from_tags(self, tags: List[str]) -> List[Tuple[str, int, int]]:
-        """Convert IOB or BILOU tags to spans"""
-        raise NotImplementedError
+        """Convert IOB tags to spans.
+
+        Args:
+            tags: The IOB tags.
+
+        Returns:
+            A list of spans.
+
+        Raises:
+            ValueError: If the list of tags has not the same length as the list of tokens.
+            TypeError: If tags are not in the IOB format.
+        """
+
+        def get_prefix_and_entity(tag_str: str) -> Tuple[str, Optional[str]]:
+            if tag_str == "O":
+                return tag_str, None
+            splits = tag_str.split("-")
+            return splits[0], "-".join(splits[1:])
+
+        if len(tags) != len(self.tokens):
+            raise ValueError(
+                "The list of tags must have the same length as the list of tokens!"
+            )
+
+        spans, start_idx = [], None
+        for idx, tag in enumerate(tags):
+            prefix, entity = get_prefix_and_entity(tag)
+
+            if prefix == "O":
+                continue
+
+            if prefix == "B":
+                start_idx, end_idx = self._token_to_char_idx[idx]
+            elif prefix == "I":
+                # If B is missing we just assume I starts the span
+                if start_idx is None:
+                    start_idx = self._token_to_char_idx[idx][0]
+                end_idx = self._token_to_char_idx[idx][1]
+            else:
+                raise TypeError("Tags are not in the IOB format!")
+
+            try:
+                next_tag = tags[idx + 1]
+            # Reached last tag, add span
+            except IndexError:
+                spans.append((entity, start_idx, end_idx))
+                break
+
+            next_prefix, next_entity = get_prefix_and_entity(next_tag)
+            # span continues
+            if next_prefix == "I" and next_entity == entity:
+                continue
+            # span ends
+            spans.append((entity, start_idx, end_idx))
+            start_idx = None
+
+        return spans
