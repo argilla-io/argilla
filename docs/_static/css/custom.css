@@ -361,6 +361,10 @@ a.back-to-top.muted-link {
 }
 .toc-tree .reference {
   font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
 }
 .toc-tree .reference:hover {
   font-weight: 700;
