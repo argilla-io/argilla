@@ -164,6 +164,8 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
 class SpanUtils:
     """Holds utility methods to work with a tokenized text and text spans.
 
+    Spans must be tuples containing the label (str), start char idx (int), and end char idx (int).
+
     Args:
         text: The text the spans refer to.
         tokens: The tokens of the text.
@@ -200,6 +202,14 @@ class SpanUtils:
         return self._tokens
 
     def validate(self, spans: List[Tuple[str, int, int]]):
+        """Validates the alignment of span boundaries and tokens.
+
+        Args:
+            spans: A list of spans.
+
+        Raises:
+            ValueError: If one or more spans are not aligned with the tokens.
+        """
         misaligned_spans = []
         for span in spans:
             if None in (
