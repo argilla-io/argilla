@@ -808,7 +808,7 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
-        if framework is "transformers":
+        if framework == "transformers":
 
             import datasets
 
