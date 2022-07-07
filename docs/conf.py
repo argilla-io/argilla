@@ -183,7 +183,8 @@ html_theme_options = {
         "color-search-placeholder": "#484848",
         "color-literal": "#F2067A",
         "toc-spacing-vertical": "3em",
-        "color-page-info": "#646776"
+        "color-page-info": "#646776",
+        "toc-item-spacing-vertical": "1em",
     },
     "dark_css_variables": {
         "color-sidebar-background": "#131416",
