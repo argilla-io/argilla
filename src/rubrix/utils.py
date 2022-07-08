@@ -163,7 +163,7 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
 
 
 class SpanUtils:
-    """Holds utility methods to work with a tokenized text and text spans.
+    """Holds utility methods to work with a tokenized text and entity spans.
 
     Spans must be tuples containing the label (str), start char idx (int), and end char idx (int).
 
@@ -178,6 +178,7 @@ class SpanUtils:
         self._token_to_char_idx: Dict[int, Tuple[int, int]] = {}
         self._start_to_token_idx: Dict[int, int] = {}
         self._end_to_token_idx: Dict[int, int] = {}
+        self._char_to_token_idx: Dict[int, int] = {}
 
         end_idx = 0
         for idx, token in enumerate(tokens):
@@ -189,6 +190,8 @@ class SpanUtils:
             self._token_to_char_idx[idx] = (start_idx, end_idx)
             self._start_to_token_idx[start_idx] = idx
             self._end_to_token_idx[end_idx] = idx
+            for i in range(start_idx, end_idx):
+                self._char_to_token_idx[i] = idx
 
             # convention: skip first white space after a token
             try:
@@ -207,6 +210,16 @@ class SpanUtils:
     def tokens(self) -> List[str]:
         """The tokens of the text."""
         return self._tokens
+
+    @property
+    def token_to_char_idx(self) -> Dict[int, Tuple[int, int]]:
+        """The token index to start/end char index mapping."""
+        return self._token_to_char_idx
+
+    @property
+    def char_to_token_idx(self) -> Dict[int, int]:
+        """The char index to token index mapping."""
+        return self._char_to_token_idx
 
     def validate(self, spans: List[Tuple[str, int, int]]):
         """Validates the alignment of span boundaries and tokens.
@@ -227,7 +240,7 @@ class SpanUtils:
 
         if misaligned_spans:
             raise ValueError(
-                f"The text spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
+                f"The entity spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
             )
 
     def correct(self, spans: List[Tuple[str, int, int]]) -> List[Tuple[str, int, int]]:
