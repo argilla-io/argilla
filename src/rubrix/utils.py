@@ -228,20 +228,25 @@ class SpanUtils:
             spans: A list of spans.
 
         Raises:
-            ValueError: If one or more spans are not aligned with the tokens.
+            ValueError: If a span is invalid, or if a span is not aligned with the tokens.
         """
-        misaligned_spans = []
+        not_valid_spans, misaligned_spans = [], []
         for span in spans:
+            if span[2] - span[1] < 1:
+                not_valid_spans.append(span)
             if None in (
                 self._start_to_token_idx.get(span[1]),
                 self._end_to_token_idx.get(span[2]),
             ):
                 misaligned_spans.append(self.text[span[1] : span[2]])
 
-        if misaligned_spans:
-            raise ValueError(
-                f"The entity spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
-            )
+        if not_valid_spans or misaligned_spans:
+            message = ""
+            if not_valid_spans:
+                message += f"Following entity spans are not valid: {not_valid_spans}\n"
+            if misaligned_spans:
+                message += f"The entity spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
+            raise ValueError(message)
 
     def correct(self, spans: List[Tuple[str, int, int]]) -> List[Tuple[str, int, int]]:
         """Correct span boundaries for leading/trailing white spaces, new lines and tabs.
