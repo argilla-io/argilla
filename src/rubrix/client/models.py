@@ -320,23 +320,14 @@ class TokenClassificationRecord(_Validators):
 
         super().__init__(text=text, tokens=tokens, **data)
 
-        # validate predictions and annotations
         span_utils = SpanUtils(text=text, tokens=tokens)
-        if self.prediction:
-            try:
-                span_utils.validate(self.prediction)
-            except ValueError:
-                self.prediction = span_utils.correct(self.prediction)
-                span_utils.validate(self.prediction)
-        if self.annotation:
-            try:
-                span_utils.validate(self.annotation)
-            except ValueError:
-                self.annotation = span_utils.correct(self.annotation)
-                span_utils.validate(self.annotation)
-
         self.__chars2tokens__ = span_utils.char_to_token_idx
         self.__tokens2chars__ = span_utils.token_to_char_idx
+
+        if self.annotation:
+            self.annotation = self._validate_spans(span_utils, self.annotation)
+        if self.prediction:
+            self.prediction = self._validate_spans(span_utils, self.prediction)
 
         if self.annotation and tags:
             _LOGGER.warning("Annotation already provided, `tags` won't be used")
@@ -348,6 +339,32 @@ class TokenClassificationRecord(_Validators):
         if name in ["text", "tokens"]:
             raise AttributeError(f"You cannot assign a new value to `{name}`")
         super().__setattr__(name, value)
+
+    @staticmethod
+    def _validate_spans(
+        span_utils: SpanUtils, spans: List[Tuple[str, int, int]]
+    ) -> List[Tuple[str, int, int]]:
+        """Validates the entity spans with respect to the tokens.
+
+        If necessary, also performs an automatic correction of the spans.
+
+        Args:
+            span_utils: Helper class to perform the checks.
+            spans: The entity spans to validate.
+
+        Returns:
+            The optionally corrected spans.
+
+        Raises:
+            ValidationError: If spans are not valid or misaligned.
+        """
+        try:
+            span_utils.validate(spans)
+        except ValueError:
+            spans = span_utils.correct(spans)
+            span_utils.validate(spans)
+
+        return spans
 
     @validator("tokens", pre=True)
     def _normalize_tokens(cls, value):
