@@ -393,23 +393,15 @@ class TokenClassificationRecord(_Validators):
     def spans2iob(
         self, spans: Optional[List[Tuple[str, int, int]]] = None
     ) -> Optional[List[str]]:
-        """Build the iob tags sequence for a list of spans annoations"""
+        """DEPRECATED, please use the ``rubrix.utils.SpanUtils.to_tags()`` method."""
+        warnings.warn(
+            "'spans2iob' is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.SpanUtils.to_tags()` method instead, and adapt your code accordingly.",
+            FutureWarning,
+        )
 
-        if spans is None:
-            return None
-
-        tags = ["O"] * len(self.tokens)
-        for label, start, end in spans:
-            token_start = self.char_id2token_id(start)
-            token_end = self.char_id2token_id(end - 1)
-            assert (
-                token_start is not None and token_end is not None
-            ), "Provided spans are missaligned at token level"
-            tags[token_start] = f"B-{label}"
-            for idx in range(token_start + 1, token_end + 1):
-                tags[idx] = f"I-{label}"
-
-        return tags
+        span_utils = SpanUtils(self.text, self.tokens)
+        return span_utils.to_tags(spans)
 
 
 class Text2TextRecord(_Validators):
