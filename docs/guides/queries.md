@@ -18,9 +18,12 @@ For a complete list of available fields and their content, have a look at the fi
 
 ```{note}
 The default behavior when not specifying any fields in the query string changed in version `>=0.16.0`.
+
 Before this version, Rubrix searched in a mixture of the the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
 If you want to search for special characters now, you have to spcify the `text.exact` field.
 For example, this is the query if you want to search for words with an exclamation mark in the end: `text.exact:*\!`
+
+If you do not retrieve any results after the version update, you should use the `words` and `words.extended` fields in your search query for old datasets instead of the `text` and `text.exact` ones.
 ```
 
 ## `text` and `text.exact`
