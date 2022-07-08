@@ -15,9 +15,11 @@ from rubrix.server.apis.v0.models.metrics.base import (
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
 from rubrix.server.apis.v0.models.token_classification import (
     EntitySpan,
+    TokenClassificationAnnotation,
     TokenClassificationRecord,
 )
 from rubrix.server.elasticseach.query_helpers import aggregations
+from rubrix.utils import SpanUtils
 
 
 class TokensLength(ElasticsearchMetric):
@@ -431,8 +433,9 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
-        annotated_tags = record.annotated_iob_tags() or []
-        predicted_tags = record.predicted_iob_tags() or []
+        span_utils = SpanUtils(record.text, record.tokens)
+        annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
+        predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
 
         tokens_metrics = cls.build_tokens_metrics(
             record, predicted_tags or annotated_tags
@@ -456,6 +459,25 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
                 ],
             },
         }
+
+    @staticmethod
+    def _compute_iob_tags(
+        span_utils: SpanUtils, annotation: Optional[TokenClassificationAnnotation]
+    ) -> Optional[List[str]]:
+        """Helper method to compute IOB tags from entity spans
+
+        Args:
+            span_utils: Helper class to perform the computation.
+            annotation: Contains the spans from which to compute the IOB tags.
+
+        Returns:
+            The IOB tags or None if ``annotation`` is None.
+        """
+        if annotation is None:
+            return None
+
+        spans = [(ent.label, ent.start, ent.end) for ent in annotation.entities]
+        return span_utils.to_tags(spans)
 
     _TOKENS_METRICS = [
         TokensLength(
