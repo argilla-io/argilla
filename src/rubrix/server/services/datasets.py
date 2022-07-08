@@ -117,9 +117,13 @@ class DatasetsService:
             name=name, owner=owner, task=task, as_dataset_class=as_dataset_class
         )
         if not found_ds and user.is_superuser():
-            found_ds = self.__dao__.find_by_name(
-                name=name, owner=None, task=task, as_dataset_class=as_dataset_class
-            )
+            try:
+                found_ds = self.__dao__.find_by_name(
+                    name=name, owner=None, task=task, as_dataset_class=as_dataset_class
+                )
+            except WrongTaskError:
+                # A dataset exists in a different workspace and with a different task
+                pass
         return found_ds
 
     def delete(self, user: User, dataset: Dataset):
