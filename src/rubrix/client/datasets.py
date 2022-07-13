@@ -14,6 +14,7 @@
 #  limitations under the License.
 import functools
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -639,6 +640,19 @@ class DatasetForTextClassification(DatasetBase):
             ds_dict, features=datasets.Features(feature_dict)
         )
 
+    # create a Enum-type Framework class like the `SortBy` one
+
+
+class Framework(Enum):
+    TRANSFORMERS = "transformers"
+    SPACY = "spacy"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
+
 
 @_prepend_docstring(TokenClassificationRecord)
 class DatasetForTokenClassification(DatasetBase):
@@ -764,7 +778,7 @@ class DatasetForTokenClassification(DatasetBase):
 
     @_requires_datasets
     def prepare_for_training(
-        self, framework="transformers"
+        self, framework: Union[Framework, str] = "transformers"
     ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
@@ -808,7 +822,12 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
-        if framework == "transformers":
+
+        # turn the string into a Framework instance and trigger error if str is not valid
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        if framework is Framework.TRANSFORMERS:
 
             import datasets
 
@@ -849,7 +868,7 @@ class DatasetForTokenClassification(DatasetBase):
 
             return ds.cast(new_features)
 
-        elif framework == "spacy":
+        elif framework is Framework.SPACY:
 
             import spacy
             from spacy.tokens import DocBin
