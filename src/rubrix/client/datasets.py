@@ -640,8 +640,6 @@ class DatasetForTextClassification(DatasetBase):
             ds_dict, features=datasets.Features(feature_dict)
         )
 
-    # create a Enum-type Framework class like the `SortBy` one
-
 
 class Framework(Enum):
     TRANSFORMERS = "transformers"
