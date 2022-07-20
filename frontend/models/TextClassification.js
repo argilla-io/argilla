@@ -56,7 +56,12 @@ class TextClassificationRecord extends BaseRecord {
   }
 
   get predicted() {
-    if (!this.multi_label && this.predicted_as && this.annotated_as) {
+    if (
+      !this.multi_label &&
+      this.prediction &&
+      this.predicted_as &&
+      this.annotated_as
+    ) {
       return this.predicted_as[0] === this.annotated_as[0] ? "ok" : "ko";
     }
     return undefined;
