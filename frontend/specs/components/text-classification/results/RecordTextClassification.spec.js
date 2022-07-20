@@ -7,34 +7,43 @@ const $route = {
   query: {},
 };
 
+const props = {
+  record: new TextClassificationRecord({
+    annotation: {
+      agent: "recognai",
+      labels:[
+        {class:"Test", score:1}
+      ]
+    },
+    inputs: {
+      text: "My text",
+    },
+    multi_label: false,
+    prediction: {
+      agent: "test",
+      labels: [
+        { class: "Test", score: 0.6 },
+        { class: "A", score: 0.4 },
+        { class: "B", score: 0.2 },
+      ],
+    },
+  }),
+  dataset: {
+    task: "TextClassification",
+    query: {
+      text: "mock test",
+    },
+    isMultiLabel: false,
+    viewSettings: {
+      viewMode: "explore",
+    },
+    labels: ["Test", "A", "B"],
+  },
+}
+
 function mountComponent() {
   return mount(Component, {
-    propsData: {
-      record: new TextClassificationRecord({
-        inputs: {
-          text: "My text",
-          multi_label: true,
-          prediction: {
-            agent: "test",
-            labels: [
-              { class: "Test", score: 0.6 },
-              { class: "A", score: 0.4 },
-              { class: "B", score: 0.2 },
-            ],
-          },
-        },
-      }),
-      dataset: {
-        task: "TextClassification",
-        query: {
-          text: "mock test",
-        },
-        viewSettings: {
-          annotationEnabled: false,
-        },
-        labels: ["Test", "A", "B"],
-      },
-    },
+    propsData: props,
     mocks: {
       $route,
     },
@@ -58,4 +67,16 @@ describe("RecordTextClassification", () => {
     const wrapper = mountComponent();
     expect(wrapper).toMatchSnapshot();
   });
+
+  test('renders with empty prediction correctly', () => {
+    const wrapper = mount(Component, {
+      propsData: {
+        ...props,
+        record: {
+          prediction: {}
+        }
+      }
+    })
+    expect(wrapper).toMatchSnapshot()
+  })
 });
