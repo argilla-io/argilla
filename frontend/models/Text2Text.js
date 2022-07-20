@@ -28,6 +28,10 @@ class Text2TextRecord extends BaseRecord {
     this.lastEditedSentence = lastEditedSentence;
   }
 
+  recordTitle() {
+    return this.text;
+  }
+
   get modified() {
     if (
       !(this.lastEditedSentence || this.annotation || this.annotation.sentences)
@@ -51,10 +55,6 @@ class Text2TextRecord extends BaseRecord {
       return this.prediction.sentences[0].text;
     }
     return undefined;
-  }
-
-  get recordTitle() {
-    return this.text;
   }
 }
 
