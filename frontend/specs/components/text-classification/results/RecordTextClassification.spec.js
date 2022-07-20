@@ -11,9 +11,7 @@ const props = {
   record: new TextClassificationRecord({
     annotation: {
       agent: "recognai",
-      labels:[
-        {class:"Test", score:1}
-      ]
+      labels: [{ class: "Test", score: 1 }],
     },
     inputs: {
       text: "My text",
@@ -39,7 +37,7 @@ const props = {
     },
     labels: ["Test", "A", "B"],
   },
-}
+};
 
 function mountComponent() {
   return mount(Component, {
@@ -68,15 +66,15 @@ describe("RecordTextClassification", () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('renders with empty prediction correctly', () => {
+  test("renders with empty prediction correctly", () => {
     const wrapper = mount(Component, {
       propsData: {
         ...props,
         record: {
-          prediction: {}
-        }
-      }
-    })
-    expect(wrapper).toMatchSnapshot()
-  })
+          prediction: {},
+        },
+      },
+    });
+    expect(wrapper).toMatchSnapshot();
+  });
 });
