@@ -17,29 +17,25 @@
 
 <template>
   <div v-click-outside="close" :key="open" class="record__extra-actions">
-    <a
-      v-if="hasMetadata || allowChangeStatus"
-      class="extra-actions__button"
-      href="#"
-      @click.prevent="open = !open"
+    <a class="extra-actions__button" href="#" @click.prevent="open = !open"
       ><svgicon name="kebab-menu" width="20" height="20" color="#4A4A4A"
     /></a>
     <div v-if="open" class="extra-actions__content">
       <div v-if="hasMetadata" @click="showMetadata()">
         <span>View metadata</span>
       </div>
-      <template v-if="allowChangeStatus">
-        <div
-          v-for="status in allowedStatusActions"
-          :key="status.key"
-          :class="record.status === 'Discarded' ? 'disabled' : null"
-          @click="onChangeRecordStatus(status.key)"
-        >
-          <span>{{
-            record.status === "Discarded" ? "Discarded" : status.name
-          }}</span>
+      <re-action-tooltip tooltip="Copied">
+        <div @click="copyToClipboard()">
+          <span>Copy text</span>
         </div>
-      </template>
+      </re-action-tooltip>
+      <div
+        v-if="allowChangeStatus"
+        :class="record.status === 'Discarded' ? 'disabled' : null"
+        @click="onChangeRecordStatus('Discarded')"
+      >
+        <span>Discard record</span>
+      </div>
     </div>
   </div>
 </template>
@@ -48,6 +44,7 @@
 import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
+import { isObject } from "util";
 
 export default {
   mixins: [
@@ -78,16 +75,6 @@ export default {
       open: false,
     };
   },
-  data: () => ({
-    statusActions: [
-      // TODO: Do we need this? Just the discard action should be allowed here
-      {
-        name: "Discard",
-        key: "Discarded",
-        class: "discard",
-      },
-    ],
-  }),
   computed: {
     open: {
       get: function () {
@@ -126,6 +113,16 @@ export default {
     close() {
       this.open = false;
     },
+    copyToClipboard() {
+      if (isObject(this.record.inputs)) {
+        const text = Object.keys(this.record.inputs).map((key) => {
+          return `${key}\r\n${this.record.inputs[key]}`;
+        });
+        return this.$copyToClipboard(text);
+      } else {
+        return this.$copyToClipboard(this.record.text);
+      }
+    },
   },
 };
 </script>
@@ -157,6 +154,7 @@ export default {
     z-index: 1;
     .disabled {
       pointer-events: none;
+      opacity: 0.7;
     }
     div {
       padding: 0.5em;

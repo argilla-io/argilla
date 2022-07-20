@@ -22,12 +22,7 @@ export default {
   },
   methods: {
     copy(code) {
-      const myTemporaryInputElement = document.createElement("textarea");
-      myTemporaryInputElement.className = "hidden-input";
-      myTemporaryInputElement.value = code;
-      document.body.appendChild(myTemporaryInputElement);
-      myTemporaryInputElement.select();
-      document.execCommand("Copy");
+      this.$copyToClipboard(code);
     },
   },
 };
