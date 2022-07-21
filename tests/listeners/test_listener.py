@@ -73,6 +73,7 @@ def test_listener_with_parameters(
         test.action.start()
 
     time.sleep(1.5)
+    assert test.action.is_running()
     test.action.stop()
     assert not test.action.is_running()
 
