@@ -18,6 +18,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.util.testing import assert_frame_equal
 
 from rubrix import TextClassificationRecord
 from rubrix.client.sdk.text_classification.models import (
@@ -871,6 +872,27 @@ class TestWeakMultiLabels:
                     [[-1, -1], [1, 1], [-1, -1]],
                 ]
             ),
+        )
+
+        expected_summary = pd.DataFrame(
+            {
+                "label": [{"mock2"}, {"mock2", "mock1"}, set(), {"mock2", "mock1"}],
+                "coverage": [1 / 3.0, 1.0, 0.0, 1.0],
+                "annotated_coverage": [0.5, 1.0, 0.0, 1.0],
+                "overlaps": [1 / 3.0, 1 / 3.0, 0.0, 1 / 3.0],
+                "correct": [0, 2, 0, 2],
+                "incorrect": [1, 2, 0, 3],
+                "precision": [0, 0.5, np.nan, 2 / 5.0],
+            },
+            index=list(weak_multi_labels._rules_name2index.keys()) + ["total"],
+        )
+        assert_frame_equal(weak_multi_labels.summary(), expected_summary)
+
+        expected_show_records = pd.DataFrame(
+            map(lambda x: x.dict(), weak_multi_labels.records())
+        )
+        assert_frame_equal(
+            weak_multi_labels.show_records(rules=["rule_1"]), expected_show_records
         )
 
         weak_multi_labels.extend_matrix([1.0, 1.0, 1.0])
