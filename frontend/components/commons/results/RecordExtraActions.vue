@@ -25,7 +25,7 @@
         <span>View metadata</span>
       </div>
       <re-action-tooltip tooltip="Copied">
-        <div @click="copyToClipboard()">
+        <div @click="$copyToClipboard(record.clipboardText)">
           <span>Copy text</span>
         </div>
       </re-action-tooltip>
@@ -44,7 +44,6 @@
 import { BaseRecord } from "@/models/Common";
 import "assets/icons/kebab-menu";
 import { IdState } from "vue-virtual-scroller";
-import { isObject } from "util";
 
 export default {
   mixins: [
@@ -112,16 +111,6 @@ export default {
     },
     close() {
       this.open = false;
-    },
-    copyToClipboard() {
-      if (isObject(this.record.inputs)) {
-        const text = Object.keys(this.record.inputs).map((key) => {
-          return `${key}\r\n${this.record.inputs[key]}`;
-        });
-        return this.$copyToClipboard(text);
-      } else {
-        return this.$copyToClipboard(this.record.text);
-      }
     },
   },
 };
