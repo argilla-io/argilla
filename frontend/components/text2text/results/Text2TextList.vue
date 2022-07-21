@@ -66,7 +66,10 @@
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
               <p v-if="!editionMode" class="content__sentences__title">
-                {{ sentencesOrigin }}
+                {{ sentencesOrigin
+                }}<span v-if="showScore" class="content__score"
+                  >: {{ sentence.score | percent }}
+                </span>
               </p>
               <re-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
@@ -96,8 +99,24 @@
             />
             <div v-if="!editionMode" class="content__footer">
               <template v-if="sentencesOrigin === 'Prediction'">
-                <div v-if="showScore" class="content__score">
-                  Score: {{ sentence.score | percent }}
+                <div v-if="annotationEnabled" class="content__actions-buttons">
+                  <re-button
+                    v-if="allowValidation"
+                    class="button-primary"
+                    @click="onAnnotate(visibleSentence)"
+                    >Validate</re-button
+                  >
+                  <re-button
+                    v-if="sentences.length"
+                    :class="[
+                      'edit',
+                      allowValidation
+                        ? 'button-primary--outline'
+                        : 'button-primary',
+                    ]"
+                    @click="edit"
+                    >Edit</re-button
+                  >
                 </div>
                 <div v-if="sentences.length" class="content__nav-buttons">
                   <a
@@ -129,25 +148,6 @@
                   </a>
                 </div>
               </template>
-              <div v-if="annotationEnabled" class="content__actions-buttons">
-                <re-button
-                  v-if="sentences.length"
-                  :class="[
-                    'edit',
-                    allowValidation
-                      ? 'button-primary--outline'
-                      : 'button-primary',
-                  ]"
-                  @click="edit"
-                  >Edit</re-button
-                >
-                <re-button
-                  v-if="allowValidation"
-                  class="button-primary"
-                  @click="onAnnotate(visibleSentence)"
-                  >Validate</re-button
-                >
-              </div>
             </div>
           </div>
         </span>
@@ -441,7 +441,7 @@ export default {
     }
   }
   &__score {
-    @include font-size(13px);
+    @include font-size(15px);
     margin-right: 0;
     min-width: 33%;
     color: palette(grey, medium);
@@ -461,16 +461,11 @@ export default {
     .button-clear {
       @include font-size(13px);
       margin: auto 0 auto auto;
-      color: palette(grey, dark);
-      transition: opacity 0.3s ease-in-out 0.2s;
-      &:hover {
-        color: darken(palette(grey, dark), 10%);
-      }
     }
   }
   &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
+    margin-right: auto;
+    margin-left: 0;
     display: flex;
     .edit {
       opacity: 0;
@@ -494,8 +489,8 @@ export default {
     align-items: center;
     justify-content: center;
     min-width: 33%;
-    margin-right: auto;
-    margin-left: 0;
+    margin-right: 33%;
+    margin-left: auto;
     color: palette(grey, medium);
     a {
       height: 20px;
