@@ -13,11 +13,11 @@ class Search:
 
     Args:
         total: The total number of records affected by the listener query
-        params: The query parameters applied to the executed search
+        query_params: The query parameters applied to the executed search
     """
 
     total: int
-    params: Optional[Dict[str, Any]] = None
+    query_params: Optional[Dict[str, Any]] = None
 
 
 class Metrics(Prodict):

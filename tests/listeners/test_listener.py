@@ -10,7 +10,7 @@ from rubrix.client.models import Record
 
 def condition_check_params(search):
     if search:
-        assert "param" in search.params and search.params["param"] == 100
+        assert "param" in search.query_params and search.query_params["param"] == 100
     return True
 
 
