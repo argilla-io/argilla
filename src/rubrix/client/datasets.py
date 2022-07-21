@@ -52,6 +52,21 @@ def _requires_datasets(func):
     return check_if_datasets_installed
 
 
+def _requires_spacy(func):
+    @functools.wraps(func)
+    def check_if_datasets_installed(*args, **kwargs):
+        try:
+            import spacy
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                f"'spacy' must be installed to use `{func.__name__}`"
+                "You can install 'spacy' with the command: `pip install spacy`"
+            )
+        return func(*args, **kwargs)
+
+    return check_if_datasets_installed
+
+
 class DatasetBase:
     """The Dataset classes are containers for Rubrix records.
 
@@ -774,9 +789,10 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
-    @_requires_datasets
     def prepare_for_training(
-        self, framework: Union[Framework, str] = "transformers"
+        self,
+        framework: Union[Framework, str] = "transformers",
+        lang: Optional["spacy.Language"] = None,
     ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
@@ -787,11 +803,14 @@ class DatasetForTokenClassification(DatasetBase):
             - The iob tags are transformed to integers.
 
         Args:
-            framework: A string specifying the framework for the training.
+            framework: A string|enum specifying the framework for the training.
                 "transformers" and "spacy" are currently supported. Default: `transformers`
+            lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
 
         Returns:
-            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
+            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets`` for "transformers"
+            framework.
+            A spacy DocBin ready to use for training a spacy NER model for "spacy" framework.
 
         Examples:
             >>> import rubrix as rb
@@ -826,83 +845,88 @@ class DatasetForTokenClassification(DatasetBase):
             framework = Framework(framework)
 
         if framework is Framework.TRANSFORMERS:
+            return self._prepare_for_training_with_transformers()
+        # else: must be spacy for sure
+        if lang is None:
+            raise ValueError(
+                "You must provided a valid spacy language pipeline"
+            )  # TODO(@dcfidalgo): review text inplace
+        return self._prepare_for_training_with_spacy(nlp=lang)
 
-            import datasets
+    @_requires_datasets
+    def _prepare_for_training_with_transformers(self):
+        import datasets
 
-            has_annotations = False
-            for rec in self._records:
-                if rec.annotation is not None:
-                    has_annotations = True
-                    break
+        has_annotations = False
+        for rec in self._records:
+            if rec.annotation is not None:
+                has_annotations = True
+                break
 
-            if not has_annotations:
-                return datasets.Dataset.from_dict({})
+        if not has_annotations:
+            return datasets.Dataset.from_dict({})
 
-            class_tags = ["O"]
-            class_tags.extend(
-                [
-                    f"{pre}-{label}"
-                    for label in sorted(self.__all_labels__())
-                    for pre in ["B", "I"]
-                ]
+        class_tags = ["O"]
+        class_tags.extend(
+            [
+                f"{pre}-{label}"
+                for label in sorted(self.__all_labels__())
+                for pre in ["B", "I"]
+            ]
+        )
+        class_tags = datasets.ClassLabel(names=class_tags)
+
+        def spans2iob(example):
+            r = TokenClassificationRecord(
+                text=example["text"],
+                tokens=example["tokens"],
+                annotation=self.__entities_to_tuple__(example["annotation"]),
             )
-            class_tags = datasets.ClassLabel(names=class_tags)
+            return class_tags.str2int(r.spans2iob(r.annotation))
 
-            def spans2iob(example):
-                r = TokenClassificationRecord(
-                    text=example["text"],
-                    tokens=example["tokens"],
-                    annotation=self.__entities_to_tuple__(example["annotation"]),
-                )
-                return class_tags.str2int(r.spans2iob(r.annotation))
+        ds = (
+            self.to_datasets()
+            .filter(self.__only_annotations__)
+            .map(lambda example: {"ner_tags": spans2iob(example)})
+        )
+        new_features = ds.features.copy()
+        new_features["ner_tags"] = [class_tags]
 
-            ds = (
-                self.to_datasets()
-                .filter(self.__only_annotations__)
-                .map(lambda example: {"ner_tags": spans2iob(example)})
-            )
-            new_features = ds.features.copy()
-            new_features["ner_tags"] = [class_tags]
+        return ds.cast(new_features)
 
-            return ds.cast(new_features)
+    @_requires_spacy
+    def _prepare_for_training_with_spacy(
+        self, nlp: "spacy.Language"
+    ) -> "spacy.tokens.DocBin":
 
-        elif framework is Framework.SPACY:
+        from spacy.tokens import DocBin
 
-            import spacy
-            from spacy.tokens import DocBin
+        db = DocBin()
 
-            nlp = spacy.blank("es")
+        # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+        for record in self._records:
+            if record.annotation is None:
+                continue
 
-            db = DocBin()
+            doc = nlp(record.text)
+            entities = []
 
-            # Creating the docbin object as in https://spacy.io/usage/training#training-data
-            for record in self._records:
-                if record.annotation is None:
-                    continue
-                doc = nlp(record.text)
-                ents = []
+            for anno in record.annotation:
+                span = doc.char_span(anno[1], anno[2], label=anno[0])
+                # There is a misalignment between record tokenization and spaCy tokenization
+                if span is None:
+                    # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
+                    print(
+                        "Error between the record span and spaCy tokenization: "
+                        "there is a misalignment between the record and spaCy's tokenization."
+                    )
+                else:
+                    entities.append(span)
 
-                for anno in record.annotation:
-                    span = doc.char_span(anno[1], anno[2], label=anno[0])
+            doc.ents = entities
+            db.add(doc)
 
-                    # There is a misalignment between record tokenization and spaCy tokenization
-                    if span is None:
-                        print(
-                            "Error between the record span and spaCy tokenization: there is a misalignment between the record and spaCy's tokenization."
-                        )
-
-                    else:
-                        ents.append(span)
-
-                doc.ents = ents
-                db.add(doc)
-
-            return db
-
-        else:
-            print(
-                "The introduced framework does not exist or is not supported. Please, use one of the existing frameworks detailed on the documentation."
-            )
+        return db
 
     def __all_labels__(self):
         all_labels = set()
