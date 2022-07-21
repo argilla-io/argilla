@@ -993,7 +993,7 @@ class WeakMultiLabels(WeakLabelsBase):
             The summary statistics for each rule in a pandas DataFrame.
         """
         annotation = annotation if annotation is not None else self._annotation
-        has_weak_label = self._matrix.sum(2) >= 0
+        has_weak_label = self.matrix().sum(2) >= 0
 
         # polarity (label)
         polarity = [
@@ -1003,7 +1003,7 @@ class WeakMultiLabels(WeakLabelsBase):
                     # get indices of votes
                     for i in np.nonzero(
                         # remove abstentions
-                        self._matrix[:, m, :][self._matrix[:, m, :].sum(1) >= 0]
+                        self.matrix()[:, m, :][self.matrix()[:, m, :].sum(1) >= 0]
                     )[1]
                 ]
             )
@@ -1074,15 +1074,15 @@ class WeakMultiLabels(WeakLabelsBase):
         """Helper method to compute the correctly and incorrectly predicted annotations by the rules"""
         # transform annotation to tensor
         annotation = np.repeat(annotation, len(self._rules), axis=0).reshape(
-            self._matrix.shape
+            self.matrix().shape
         )
 
         # correct, we don't want to count the "correct non predictions"
-        correct = ((annotation == self._matrix) & (self._matrix == 1)).sum(2).sum(0)
+        correct = ((annotation == self.matrix()) & (self.matrix() == 1)).sum(2).sum(0)
 
         # incorrect, we don't want to count the "misses", since we focus on precision, not recall
         incorrect = (
-            ((annotation != self._matrix) & (self._matrix == 1) & (annotation != -1))
+            ((annotation != self.matrix()) & (self.matrix() == 1) & (annotation != -1))
             .sum(2)
             .sum(0)
         )
@@ -1110,7 +1110,7 @@ class WeakMultiLabels(WeakLabelsBase):
         # get labels mask
         if labels is not None:
             labels = [self._labels.index(label) for label in labels]
-            idx_by_labels = np.all(((self._matrix == 1).sum(1) > 0)[:, labels], axis=1)
+            idx_by_labels = np.all(((self.matrix() == 1).sum(1) > 0)[:, labels], axis=1)
         else:
             idx_by_labels = np.ones_like(self._records).astype(bool)
 
@@ -1120,7 +1120,7 @@ class WeakMultiLabels(WeakLabelsBase):
                 self._rules_name2index[rule] if isinstance(rule, str) else rule
                 for rule in rules
             ]
-            idx_by_rules = (self._matrix[:, rules, :].sum(axis=2) >= 0).sum(
+            idx_by_rules = (self.matrix()[:, rules, :].sum(axis=2) >= 0).sum(
                 axis=1
             ) == len(rules)
         else:
