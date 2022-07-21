@@ -39,7 +39,7 @@ def _requires_datasets(func):
             import datasets
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                "'datasets' must be installed to use `to_datasets`! "
+                f"'datasets' must be installed to use `{func.__name__}`! "
                 "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
             )
         if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
