@@ -126,8 +126,8 @@
                   >
                     <svgicon
                       name="chevron-left"
-                      width="8"
-                      height="8"
+                      width="12"
+                      height="12"
                       color="#4C4EA3"
                     />
                   </a>
@@ -141,8 +141,8 @@
                   >
                     <svgicon
                       name="chevron-right"
-                      width="8"
-                      height="8"
+                      width="12"
+                      height="12"
                       color="#4C4EA3"
                     />
                   </a>
@@ -435,7 +435,7 @@ export default {
     flex-direction: column;
     min-height: 140px;
     &__title {
-      @include font-size(13px);
+      @include font-size(14px);
       color: palette(grey, medium);
       margin: 0;
     }
