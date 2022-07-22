@@ -483,7 +483,7 @@ export default {
     }
   }
   &__nav-buttons {
-    @include font-size(13px);
+    @include font-size(14px);
     display: flex;
     align-items: center;
     justify-content: center;
