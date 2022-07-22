@@ -54,7 +54,7 @@ def _requires_datasets(func):
 
 def _requires_spacy(func):
     @functools.wraps(func)
-    def check_if_datasets_installed(*args, **kwargs):
+    def check_if_spacy_installed(*args, **kwargs):
         try:
             import spacy
         except ModuleNotFoundError:
@@ -64,7 +64,7 @@ def _requires_spacy(func):
             )
         return func(*args, **kwargs)
 
-    return check_if_datasets_installed
+    return check_if_spacy_installed
 
 
 class DatasetBase:
@@ -849,8 +849,8 @@ class DatasetForTokenClassification(DatasetBase):
         # else: must be spacy for sure
         if lang is None:
             raise ValueError(
-                "You must provided a valid spacy language pipeline"
-            )  # TODO(@dcfidalgo): review text inplace
+                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
+            )
         return self._prepare_for_training_with_spacy(nlp=lang)
 
     @_requires_datasets
@@ -916,9 +916,9 @@ class DatasetForTokenClassification(DatasetBase):
                 # There is a misalignment between record tokenization and spaCy tokenization
                 if span is None:
                     # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
-                    print(
-                        "Error between the record span and spaCy tokenization: "
-                        "there is a misalignment between the record and spaCy's tokenization."
+                    raise ValueError(
+                        "The following annotation does not align with the tokens produced "
+                        f"by the provided spacy language model: {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
                     )
                 else:
                     entities.append(span)
