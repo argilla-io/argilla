@@ -8,6 +8,12 @@ from rubrix import RBListenerContext, listener
 from rubrix.client.models import Record
 
 
+def condition_check_params(search):
+    if search:
+        assert "param" in search.query_params and search.query_params["param"] == 100
+    return True
+
+
 @pytest.mark.parametrize(
     argnames=["dataset", "query", "metrics", "condition", "query_params"],
     argvalues=[
@@ -17,7 +23,7 @@ from rubrix.client.models import Record
         ("dataset", "val", None, None, None),
         ("dataset", None, ["F1"], lambda search, metrics: False, None),
         ("dataset", "val", None, lambda q: False, None),
-        ("dataset", "val + {param}", None, lambda q: True, {"param": 100}),
+        ("dataset", "val + {param}", None, condition_check_params, {"param": 100}),
     ],
 )
 def test_listener_with_parameters(
@@ -67,6 +73,7 @@ def test_listener_with_parameters(
         test.action.start()
 
     time.sleep(1.5)
+    assert test.action.is_running()
     test.action.stop()
     assert not test.action.is_running()
 
