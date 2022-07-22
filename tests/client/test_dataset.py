@@ -19,6 +19,7 @@ from time import sleep
 import datasets
 import pandas as pd
 import pytest
+import spacy
 
 import rubrix as rb
 from rubrix.client.datasets import (
@@ -556,6 +557,33 @@ class TestDatasetForTokenClassification:
         )
 
         assert isinstance(dataset_ds, datasets.Dataset)
+
+    @pytest.mark.skipif(
+        _HF_HUB_ACCESS_TOKEN is None,
+        reason="You need a HF Hub access token to test the push_to_hub feature",
+    )
+    def test_prepare_for_training_with_spacy(self):
+        ner_dataset = datasets.load_dataset(
+            "rubrix/gutenberg_spacy-ner",
+            use_auth_token=_HF_HUB_ACCESS_TOKEN,
+            split="train",
+        )
+        rb_dataset: DatasetForTokenClassification = rb.read_datasets(
+            ner_dataset, task="TokenClassification"
+        )
+        for r in rb_dataset:
+            r.annotation = [
+                (label, start, end) for label, start, end, _ in r.prediction
+            ]
+
+        with pytest.raises(ValueError):
+            train = rb_dataset.prepare_for_training(framework="spacy")
+
+        train = rb_dataset.prepare_for_training(
+            framework="spacy", lang=spacy.blank("en")
+        )
+        assert isinstance(train, spacy.tokens.DocBin)
+        assert len(train) == 100
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,

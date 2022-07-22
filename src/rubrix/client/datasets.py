@@ -14,6 +14,7 @@
 #  limitations under the License.
 import functools
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -38,7 +39,7 @@ def _requires_datasets(func):
             import datasets
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                "'datasets' must be installed to use `to_datasets`! "
+                f"'datasets' must be installed to use `{func.__name__}`! "
                 "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
             )
         if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
@@ -49,6 +50,21 @@ def _requires_datasets(func):
         return func(*args, **kwargs)
 
     return check_if_datasets_installed
+
+
+def _requires_spacy(func):
+    @functools.wraps(func)
+    def check_if_spacy_installed(*args, **kwargs):
+        try:
+            import spacy
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                f"'spacy' must be installed to use `{func.__name__}`"
+                "You can install 'spacy' with the command: `pip install spacy`"
+            )
+        return func(*args, **kwargs)
+
+    return check_if_spacy_installed
 
 
 class DatasetBase:
@@ -640,6 +656,17 @@ class DatasetForTextClassification(DatasetBase):
         )
 
 
+class Framework(Enum):
+    TRANSFORMERS = "transformers"
+    SPACY = "spacy"
+
+    @classmethod
+    def _missing_(cls, value):
+        raise ValueError(
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+        )
+
+
 @_prepend_docstring(TokenClassificationRecord)
 class DatasetForTokenClassification(DatasetBase):
     """
@@ -762,8 +789,11 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
-    @_requires_datasets
-    def prepare_for_training(self) -> "datasets.Dataset":
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str] = "transformers",
+        lang: Optional["spacy.Language"] = None,
+    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
         This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
@@ -772,8 +802,15 @@ class DatasetForTokenClassification(DatasetBase):
             - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
             - The iob tags are transformed to integers.
 
+        Args:
+            framework: A string|enum specifying the framework for the training.
+                "transformers" and "spacy" are currently supported. Default: `transformers`
+            lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
+
         Returns:
-            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets``.
+            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets`` for "transformers"
+            framework.
+            A spacy DocBin ready to use for training a spacy NER model for "spacy" framework.
 
         Examples:
             >>> import rubrix as rb
@@ -802,6 +839,22 @@ class DatasetForTokenClassification(DatasetBase):
 
 
         """
+
+        # turn the string into a Framework instance and trigger error if str is not valid
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        if framework is Framework.TRANSFORMERS:
+            return self._prepare_for_training_with_transformers()
+        # else: must be spacy for sure
+        if lang is None:
+            raise ValueError(
+                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
+            )
+        return self._prepare_for_training_with_spacy(nlp=lang)
+
+    @_requires_datasets
+    def _prepare_for_training_with_transformers(self):
         import datasets
 
         has_annotations = False
@@ -840,6 +893,40 @@ class DatasetForTokenClassification(DatasetBase):
         new_features["ner_tags"] = [class_tags]
 
         return ds.cast(new_features)
+
+    @_requires_spacy
+    def _prepare_for_training_with_spacy(
+        self, nlp: "spacy.Language"
+    ) -> "spacy.tokens.DocBin":
+
+        from spacy.tokens import DocBin
+
+        db = DocBin()
+
+        # Creating the DocBin object as in https://spacy.io/usage/training#training-data
+        for record in self._records:
+            if record.annotation is None:
+                continue
+
+            doc = nlp(record.text)
+            entities = []
+
+            for anno in record.annotation:
+                span = doc.char_span(anno[1], anno[2], label=anno[0])
+                # There is a misalignment between record tokenization and spaCy tokenization
+                if span is None:
+                    # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
+                    raise ValueError(
+                        "The following annotation does not align with the tokens produced "
+                        f"by the provided spacy language model: {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
+                    )
+                else:
+                    entities.append(span)
+
+            doc.ents = entities
+            db.add(doc)
+
+        return db
 
     def __all_labels__(self):
         all_labels = set()
