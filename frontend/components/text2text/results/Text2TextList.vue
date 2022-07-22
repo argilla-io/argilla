@@ -459,7 +459,6 @@ export default {
     align-items: center;
     margin-bottom: 0.5em;
     .button-clear {
-      @include font-size(13px);
       margin: auto 0 auto auto;
     }
   }
