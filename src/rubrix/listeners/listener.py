@@ -1,4 +1,6 @@
+import copy
 import dataclasses
+import functools
 import logging
 import threading
 import time
@@ -76,6 +78,23 @@ class RBDatasetListener:
         """True if listener is running"""
         return self.__listener_job__ is not None
 
+    def __catch_exceptions__(self, cancel_on_failure=False):
+        def catch_exceptions_decorator(job_func):
+            @functools.wraps(job_func)
+            def wrapper(*args, **kwargs):
+                try:
+                    return job_func(*args, **kwargs)
+                except:
+                    import traceback
+
+                    print(traceback.format_exc())
+                    if cancel_on_failure:
+                        self.stop()  # We stop the scheduler
+
+            return wrapper
+
+        return catch_exceptions_decorator
+
     def start(self, *action_args, **action_kwargs):
         """
         Start listen to changes in the dataset. Additionally, args and kwargs can be passed to action
@@ -87,9 +106,13 @@ class RBDatasetListener:
         if self.is_running():
             raise ValueError("Listener is already running")
 
+        job_step = self.__catch_exceptions__(cancel_on_failure=True)(
+            self.__listener_iteration_job__
+        )
+
         self.__listener_job__ = self.__scheduler__.every(
             self.interval_in_seconds
-        ).seconds.do(self.__listener_iteration_job__, *action_args, **action_kwargs)
+        ).seconds.do(job_step, *action_args, **action_kwargs)
 
         class _ScheduleThread(threading.Thread):
             _WAIT_EVENT = threading.Event()
@@ -158,7 +181,9 @@ class RBDatasetListener:
             name=self.dataset, task=dataset.task, query=self.formatted_query, size=0
         )
 
-        ctx.search = Search(total=search_results.total)
+        ctx.search = Search(
+            total=search_results.total, query_params=copy.deepcopy(ctx.query_params)
+        )
         condition_args = [ctx.search]
         if self.metrics:
             condition_args.append(ctx.metrics)
