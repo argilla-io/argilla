@@ -42,7 +42,7 @@ from rubrix.server.services.tasks.commons import (
     TaskStatus,
     TaskType,
 )
-from rubrix.utils import limit_value_length
+from rubrix.utils.utils import limit_value_length
 
 
 @dataclass
