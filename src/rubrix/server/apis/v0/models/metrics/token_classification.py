@@ -385,7 +385,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
                     [
                         token_idx
                         for i in range(entity.start, entity.end)
-                        for token_idx in [record.char_id2token_id(i)]
+                        for token_idx in [record.span_utils.char_to_token_idx.get(i)]
                         if token_idx is not None
                     ]
                 )
@@ -425,7 +425,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
                 tag=tags[token_idx] if tags else None,
             )
             for token_idx, token_value in enumerate(record.tokens)
-            for char_start, char_end in [record.token_span(token_idx)]
+            for char_start, char_end in [record.span_utils.token_to_char_idx[token_idx]]
         ]
 
     @classmethod
@@ -433,9 +433,12 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
-        span_utils = SpanUtils(record.text, record.tokens)
-        annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
-        predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
+        annotated_tags = (
+            cls._compute_iob_tags(record.span_utils, record.annotation) or []
+        )
+        predicted_tags = (
+            cls._compute_iob_tags(record.span_utils, record.prediction) or []
+        )
 
         tokens_metrics = cls.build_tokens_metrics(
             record, predicted_tags or annotated_tags
