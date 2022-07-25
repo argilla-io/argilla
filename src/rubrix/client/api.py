@@ -316,7 +316,7 @@ class Api:
             >>> # Log asynchronously from your notebook
             >>> import asyncio
             >>> import rubrix as rb
-            >>> from rubrix.utils import setup_loop_in_thread
+            >>> from rubrix.utils.utils import setup_loop_in_thread
             >>> loop, _ = setup_loop_in_thread()
             >>> future_response = asyncio.run_coroutine_threadsafe(
             ...     rb.log_async(my_records, dataset_name), loop
