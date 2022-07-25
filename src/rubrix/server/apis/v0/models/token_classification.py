@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -32,7 +31,7 @@ from rubrix.server.apis.v0.models.commons.model import (
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
 from rubrix.server.services.search.model import BaseSearchQuery
-from rubrix.utils import SpanUtils
+from rubrix.utils.span_utils import SpanUtils
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -107,9 +106,7 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     tokens: List[str] = Field(min_items=1)
     text: str = Field()
     _raw_text: Optional[str] = Field(alias="raw_text")
-
-    __chars2tokens__: Dict[int, int] = None
-    __tokens2chars__: Dict[int, Tuple[int, int]] = None
+    _span_utils: SpanUtils
 
     @root_validator(pre=True)
     def accept_old_fashion_text_field(cls, values):
@@ -122,14 +119,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def __init__(self, **data):
         super().__init__(**data)
 
-        span_utils = SpanUtils(self.text, self.tokens)
-        self.__chars2tokens__ = span_utils.char_to_token_idx
-        self.__tokens2chars__ = span_utils.token_to_char_idx
-
         if self.annotation:
-            self._validate_spans(span_utils, self.annotation)
+            self._validate_spans(self.annotation)
         if self.prediction:
-            self._validate_spans(span_utils, self.prediction)
+            self._validate_spans(self.prediction)
+
+    @root_validator()
+    def _init_span_utils(cls, values):
+        values["_span_utils"] = SpanUtils(values["text"], values["tokens"])
+        return values
 
     @staticmethod
     def _validate_spans(
@@ -155,14 +153,6 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
             for ent, span in zip(annotation.entities, corrected_spans):
                 ent.start, ent.end = span[1], span[2]
 
-    def char_id2token_id(self, char_idx: int) -> Optional[int]:
-        return self.__chars2tokens__.get(char_idx)
-
-    def token_span(self, token_idx: int) -> Tuple[int, int]:
-        if token_idx not in self.__tokens2chars__:
-            raise IndexError(f"Token id {token_idx} out of bounds")
-        return self.__tokens2chars__[token_idx]
-
     @validator("text")
     def check_text_content(cls, text: str):
         assert text and text.strip(), "No text or empty text provided"
@@ -171,6 +161,11 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def task(cls) -> TaskType:
         """The record task type"""
         return TaskType.token_classification
+
+    @property
+    def span_utils(self) -> SpanUtils:
+        """Utility class for span operations."""
+        return self._span_utils
 
     @property
     def predicted(self) -> Optional[PredictionStatus]:
@@ -200,43 +195,6 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
 
     def all_text(self) -> str:
         return self.text
-
-    def predicted_iob_tags(self) -> Optional[List[str]]:
-        """DEPRECATED, please use the ``rubrix.utils.SpanUtils.to_tags()`` method to compute the tags."""
-        warnings.warn(
-            "'predicted_iob_tags' is deprecated and will be removed in a future version. "
-            "Please use the `rubrix.utils.SpanUtils.to_tags()` method to compute the iob tags.",
-            FutureWarning,
-        )
-        if self.prediction is None:
-            return None
-        return self.spans2iob(self.prediction.entities)
-
-    def annotated_iob_tags(self) -> Optional[List[str]]:
-        """DEPRECATED, please use the ``rubrix.utils.SpanUtils.to_tags()`` method to compute the tags."""
-        warnings.warn(
-            "'annotated_iob_tags' is deprecated and will be removed in a future version. "
-            "Please use the `rubrix.utils.SpanUtils.to_tags()` method to compute the iob tags.",
-            FutureWarning,
-        )
-        if self.annotation is None:
-            return None
-        return self.spans2iob(self.annotation.entities)
-
-    def spans2iob(self, spans: List[EntitySpan]) -> Optional[List[str]]:
-        """DEPRECATED, please use the ``rubrix.utils.SpanUtils.to_tags()`` method."""
-        warnings.warn(
-            "'spans2iob' is deprecated and will be removed in a future version. "
-            "Please use the `rubrix.utils.SpanUtils.to_tags()` method instead, and adapt your code accordingly.",
-            FutureWarning,
-        )
-        if spans is None:
-            return None
-
-        span_utils = SpanUtils(self.text, self.tokens)
-        spans = [(ent.label, ent.start, ent.end) for ent in spans]
-
-        return span_utils.to_tags(spans)
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
