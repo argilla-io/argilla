@@ -295,8 +295,7 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
-    __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+    _span_utils: SpanUtils
 
     def __init__(
         self,
@@ -321,19 +320,15 @@ class TokenClassificationRecord(_Validators):
 
         super().__init__(text=text, tokens=tokens, **data)
 
-        span_utils = SpanUtils(text=text, tokens=tokens)
-        self.__chars2tokens__ = span_utils.char_to_token_idx
-        self.__tokens2chars__ = span_utils.token_to_char_idx
-
         if self.annotation:
-            self.annotation = self._validate_spans(span_utils, self.annotation)
+            self.annotation = self._validate_spans(self.annotation)
         if self.prediction:
-            self.prediction = self._validate_spans(span_utils, self.prediction)
+            self.prediction = self._validate_spans(self.prediction)
 
         if self.annotation and tags:
             _LOGGER.warning("Annotation already provided, `tags` won't be used")
         elif tags:
-            self.annotation = span_utils.from_tags(tags)
+            self.annotation = self._span_utils.from_tags(tags)
 
     def __setattr__(self, name: str, value: Any):
         """Make text and tokens immutable"""
@@ -341,16 +336,14 @@ class TokenClassificationRecord(_Validators):
             raise AttributeError(f"You cannot assign a new value to `{name}`")
         super().__setattr__(name, value)
 
-    @staticmethod
     def _validate_spans(
-        span_utils: SpanUtils, spans: List[Tuple[str, int, int]]
+        self, spans: List[Tuple[str, int, int]]
     ) -> List[Tuple[str, int, int]]:
         """Validates the entity spans with respect to the tokens.
 
         If necessary, also performs an automatic correction of the spans.
 
         Args:
-            span_utils: Helper class to perform the checks.
             spans: The entity spans to validate.
 
         Returns:
@@ -360,10 +353,10 @@ class TokenClassificationRecord(_Validators):
             ValidationError: If spans are not valid or misaligned.
         """
         try:
-            span_utils.validate(spans)
+            self._span_utils.validate(spans)
         except ValueError:
-            spans = span_utils.correct(spans)
-            span_utils.validate(spans)
+            spans = self._span_utils.correct(spans)
+            self._span_utils.validate(spans)
 
         return spans
 
@@ -392,21 +385,50 @@ class TokenClassificationRecord(_Validators):
             for pred in prediction
         ]
 
+    @root_validator()
+    def _init_span_utils(cls, values):
+        values["_span_utils"] = SpanUtils(values["text"], values["tokens"])
+        return values
+
+    @property
+    def __chars2tokens__(self) -> Dict[int, int]:
+        """DEPRECATED, please use the ``rubrix.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
+        warnings.warn(
+            "The `__chars2tokens__` attribute is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.char_to_token_idx` attribute instead.",
+            FutureWarning,
+        )
+        return self._span_utils.char_to_token_idx
+
+    @property
+    def __tokens2chars__(self) -> Dict[int, Tuple[int, int]]:
+        """DEPRECATED, please use the ``rubrix.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
+        warnings.warn(
+            "The `__tokens2chars__` attribute is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.token_to_char_idx` attribute instead.",
+            FutureWarning,
+        )
+        return self._span_utils.token_to_char_idx
+
     def char_id2token_id(self, char_idx: int) -> Optional[int]:
-        """
-        Given a character id, returns the token id it belongs to.
-        ``None`` otherwise
-        """
-        return self.__chars2tokens__.get(char_idx)
+        """DEPRECATED, please use the ``rubrix.utisl.span_utils.SpanUtils.char_to_token_idx`` dict instead."""
+        warnings.warn(
+            "The `char_id2token_id` method is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.char_to_token_idx` dict instead.",
+            FutureWarning,
+        )
+        return self._span_utils.char_to_token_idx.get(char_idx)
 
     def token_span(self, token_idx: int) -> Tuple[int, int]:
-        """
-        Given a token id, returns the start and end characters.
-        Raises an ``IndexError`` if token id is out of tokens list indices
-        """
-        if token_idx not in self.__tokens2chars__:
+        """DEPRECATED, please use the ``rubrix.utisl.span_utils.SpanUtils.token_to_char_idx`` dict instead."""
+        warnings.warn(
+            "The `token_span` method is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.token_to_char_idx` dict instead.",
+            FutureWarning,
+        )
+        if token_idx not in self._span_utils.token_to_char_idx:
             raise IndexError(f"Token id {token_idx} out of bounds")
-        return self.__tokens2chars__[token_idx]
+        return self._span_utils.token_to_char_idx[token_idx]
 
     def spans2iob(
         self, spans: Optional[List[Tuple[str, int, int]]] = None
@@ -418,8 +440,7 @@ class TokenClassificationRecord(_Validators):
             FutureWarning,
         )
 
-        span_utils = SpanUtils(self.text, self.tokens)
-        return span_utils.to_tags(spans)
+        return self._span_utils.to_tags(spans)
 
 
 class Text2TextRecord(_Validators):
