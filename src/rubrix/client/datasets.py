@@ -28,7 +28,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.datasets.models import TaskType
-from rubrix.utils import SpanUtils
+from rubrix.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
 
