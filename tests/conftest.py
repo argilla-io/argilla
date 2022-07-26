@@ -1,7 +1,13 @@
 import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
-from loguru import logger
+
+from rubrix.client.sdk.users import api as users_api
+
+try:
+    from loguru import logger
+except ModuleNotFoundError:
+    logger = None
 from starlette.testclient import TestClient
 
 from rubrix import app
@@ -13,23 +19,34 @@ from tests.helpers import SecuredClient
 def mocked_client(monkeypatch) -> SecuredClient:
 
     with TestClient(app, raise_server_exceptions=False) as _client:
-        client = SecuredClient(_client)
+        client_ = SecuredClient(_client)
 
-        monkeypatch.setattr(httpx, "post", client.post)
-        monkeypatch.setattr(httpx.AsyncClient, "post", client.post_async)
-        monkeypatch.setattr(httpx, "get", client.get)
-        monkeypatch.setattr(httpx, "delete", client.delete)
-        monkeypatch.setattr(httpx, "put", client.put)
-        monkeypatch.setattr(httpx, "stream", client.stream)
+        real_whoami = users_api.whoami
+
+        def whoami_mocked(client):
+            monkeypatch.setattr(client, "__httpx__", client_)
+            return real_whoami(client)
+
+        monkeypatch.setattr(users_api, "whoami", whoami_mocked)
+
+        monkeypatch.setattr(httpx, "post", client_.post)
+        monkeypatch.setattr(httpx.AsyncClient, "post", client_.post_async)
+        monkeypatch.setattr(httpx, "get", client_.get)
+        monkeypatch.setattr(httpx, "delete", client_.delete)
+        monkeypatch.setattr(httpx, "put", client_.put)
+        monkeypatch.setattr(httpx, "stream", client_.stream)
 
         rb_api = active_api()
-        monkeypatch.setattr(rb_api._client, "__httpx__", client)
+        monkeypatch.setattr(rb_api._client, "__httpx__", client_)
 
-        yield client
+        yield client_
 
 
 @pytest.fixture
 def caplog(caplog: LogCaptureFixture):
-    handler_id = logger.add(caplog.handler, format="{message}")
-    yield caplog
-    logger.remove(handler_id)
+    if not logger:
+        yield caplog
+    else:
+        handler_id = logger.add(caplog.handler, format="{message}")
+        yield caplog
+        logger.remove(handler_id)
