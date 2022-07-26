@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING as _TYPE_CHECKING
 from rubrix.logging import configure_logging as _configure_logging
 
 from . import _version
-from .utils.utils import _LazyRubrixModule
+from .utils import LazyRubrixModule as _LazyRubrixModule
 
 __version__ = _version.version
 
