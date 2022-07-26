@@ -136,7 +136,7 @@ export default {
     align-items: center;
   }
   &__content {
-    padding: 0.5em 0 0.5em 0;
+    padding: 32px 0;
     position: relative;
     width: 100%;
   }

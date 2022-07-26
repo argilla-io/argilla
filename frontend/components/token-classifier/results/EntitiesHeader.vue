@@ -116,7 +116,7 @@ export default {
 .container {
   @extend %container;
   padding-top: 0;
-  padding-bottom: 0.7em;
+  padding-bottom: 0;
   margin-left: 0;
   @extend %collapsable-if-metrics !optional;
 }

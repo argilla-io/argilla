@@ -123,7 +123,7 @@ export default {
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid palette(grey, smooth);
-    border-bottom: 0;
+    margin-bottom: 8px;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
