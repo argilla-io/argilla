@@ -149,6 +149,13 @@ and launch the docker-contained web app with the following command:
 ```bash
 wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/rubrix/master/docker-compose.yaml && docker-compose up -d
 ```
+:::{warning}
+Latest versions of docker should be executed without the dash '-', e.g:
+
+```bash
+docker compose up -d
+```
+:::
 
 This is a convenient way because it automatically includes an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Rubrix's main persistent layer.
 
@@ -157,8 +164,59 @@ Keep in mind, if you execute
 ```bash
 docker-compose down
 ```
-you will loose all your datasets in Rubrix!
+you will lose all your datasets in Rubrix!
 :::
+
+### Persisting ElasticSearch data
+To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a local
+volume in docker compose and granting the required permissions. 
+
+To this end, **modify the elasticsearch service and create a new volume** in the docker-compse.yml file:
+
+```yaml
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-rubrix-local
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - rubrix
+    # Add the volume to the elasticsearch service
+    volumes:
+      - ./elasticdata:/usr/share/elasticsearch/data
+  rubrix:
+    # ... here goes the rest of the docker-compose.yaml
+  
+# ...
+
+# At the end of the file create a volume for ElasticSearch
+volumes:
+  elasticdata:
+
+
+```
+
+Then create the elasticdata/ directory and add the required permissions:
+```bash
+mkdir elasticdata && sudo chown -R 1000:1000 elasticdata/
+```
+
+Then, even if the ElasticSearch service goes down the data will be persisted in the elasticdata/ directory.
+
+Note that if you want to apply these changes, and you already have a previous docker-compose instance running, you need 
+to execute the **up** command again:
+
+```bash
+docker-compose up -d 
+```
 
 
 (configure-elasticsearch-role-users)=
