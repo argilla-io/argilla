@@ -118,7 +118,7 @@ export default {
   &__item {
     position: relative;
     background: $lighter-color;
-    border-radius: 1px;
+    border-radius: $border-radius-m;
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
