@@ -75,7 +75,7 @@ from rubrix.client.sdk.token_classification.models import (
 )
 from rubrix.client.sdk.users import api as users_api
 from rubrix.client.sdk.users.models import User
-from rubrix.utils.utils import setup_loop_in_thread
+from rubrix.utils import setup_loop_in_thread
 
 _LOGGER = logging.getLogger(__name__)
 
