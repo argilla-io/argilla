@@ -19,7 +19,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
 )
 from rubrix.server.elasticseach.query_helpers import aggregations
-from rubrix.utils import SpanUtils
+from rubrix.utils.span_utils import SpanUtils
 
 
 class TokensLength(ElasticsearchMetric):
