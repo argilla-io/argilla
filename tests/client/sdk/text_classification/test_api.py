@@ -23,9 +23,6 @@ from rubrix.client.sdk.text_classification.models import TextClassificationRecor
 def test_data(
     mocked_client, limit, expected, bulk_textclass_data, sdk_client, monkeypatch
 ):
-    # TODO: Not sure how to test the streaming part of the response here
-    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
-
     dataset_name = "test_dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
     mocked_client.post(

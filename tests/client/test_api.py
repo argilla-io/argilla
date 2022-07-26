@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import datetime
+from dataclasses import asdict
 from time import sleep
 from typing import Iterable
 
@@ -98,6 +99,7 @@ def test_init_correct(mock_response_200):
     assert api.__ACTIVE_API__._client == AuthenticatedClient(
         base_url="http://localhost:6900", token="rubrix.apikey", timeout=60.0
     )
+
     assert api.__ACTIVE_API__._user == api.User(username="booohh")
 
     api.init(api_url="mock_url", api_key="mock_key", workspace="mock_ws", timeout=42)

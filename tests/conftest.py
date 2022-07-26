@@ -5,11 +5,13 @@ from loguru import logger
 from starlette.testclient import TestClient
 
 from rubrix import app
+from rubrix.client.api import active_api
 from tests.helpers import SecuredClient
 
 
 @pytest.fixture
 def mocked_client(monkeypatch) -> SecuredClient:
+
     with TestClient(app, raise_server_exceptions=False) as _client:
         client = SecuredClient(_client)
 
@@ -19,6 +21,9 @@ def mocked_client(monkeypatch) -> SecuredClient:
         monkeypatch.setattr(httpx, "delete", client.delete)
         monkeypatch.setattr(httpx, "put", client.put)
         monkeypatch.setattr(httpx, "stream", client.stream)
+
+        rb_api = active_api()
+        monkeypatch.setattr(rb_api._client, "__httpx__", client)
 
         yield client
 
