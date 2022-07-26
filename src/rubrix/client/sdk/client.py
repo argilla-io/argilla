@@ -66,6 +66,9 @@ class Client(_ClientCommonDefaults, _Client):
             timeout=self.get_timeout(),
         )
 
+    def __del__(self):
+        del self.__httpx__
+
     def __hash__(self):
         return hash(self.base_url)
 
