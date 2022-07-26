@@ -148,14 +148,28 @@ def limit_value_length(data: Any, max_length: int) -> Any:
     return data
 
 
+__LOOP__, __THREAD__ = None, None
+
+
 def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]:
     """Sets up a new asyncio event loop in a new thread, and runs it forever.
 
     Returns:
         A tuple containing the event loop and the thread.
     """
-    loop = asyncio.new_event_loop()
-    thread = threading.Thread(target=loop.run_forever, daemon=True)
-    thread.start()
 
-    return loop, thread
+    def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
+        asyncio.set_event_loop(loop)
+        loop.run_forever()
+
+    global __LOOP__
+    global __THREAD__
+
+    if not (__LOOP__ and __THREAD__):
+        loop = asyncio.new_event_loop()
+        thread = threading.Thread(
+            target=start_background_loop, args=(loop,), daemon=True
+        )
+        thread.start()
+        __LOOP__, __THREAD__ = loop, thread
+    return __LOOP__, __THREAD__
