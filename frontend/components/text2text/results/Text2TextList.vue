@@ -20,7 +20,7 @@
     <div
       :class="[
         'content',
-        hasAnnotationAndPredictions ? 'content--separator' : null,
+        'content--separator',
         !annotationEnabled
           ? 'content--exploration-mode'
           : 'content--annotation-mode',
