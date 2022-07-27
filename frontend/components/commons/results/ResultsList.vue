@@ -195,7 +195,17 @@ export default {
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }
-
+.vue-recycle-scroller__item-view  .list__item {
+  margin-bottom: 8px;
+}
+.vue-recycle-scroller__item-view  .list__item--annotation-mode {
+  margin-bottom: 8px;
+}
+.--annotation {
+  .vue-recycle-scroller__item-view:nth-child(1) .list__item--annotation-mode {
+    margin-top: 16px;
+  }
+}
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {

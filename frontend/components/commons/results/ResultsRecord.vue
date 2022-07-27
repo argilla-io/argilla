@@ -123,13 +123,11 @@ export default {
     width: 100%;
     transition: 0.3s ease-in-out;
     border: 1px solid palette(grey, smooth);
-    margin-bottom: 8px;
     &__asterisk {
       @include font-size(24px);
       color: $secondary-color;
     }
     &--annotation-mode {
-      margin-top: 16px;
       @extend .list__item !optional;
       &.discarded {
         opacity: 0.5;
@@ -148,7 +146,14 @@ export default {
     }
   }
 }
-
+.vue-recycle-scroller__item-view {
+  margin-bottom: 8px;
+}
+.--annotation {
+  .vue-recycle-scroller__item-view:first-child() {
+    margin-top: 16px;
+  }
+}
 .list-enter-active,
 .list-leave-active {
   transition: all 0.5s ease;
