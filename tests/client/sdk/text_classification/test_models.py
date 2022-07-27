@@ -57,9 +57,7 @@ def test_query_schema(helpers):
     client_schema = TextClassificationQuery.schema()
     server_schema = ServerTextClassificationQuery.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_labeling_rule_schema(helpers):
