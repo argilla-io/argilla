@@ -24,9 +24,9 @@ from fastapi import Depends
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
 from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
-from rubrix.server.elasticseach.client_wrapper import (
+from rubrix.server.elasticseach.backend import (
     ClosedIndexError,
-    ElasticsearchWrapper,
+    ElasticsearchBackend,
     IndexNotFoundError,
     create_es_wrapper,
 )
@@ -97,7 +97,7 @@ class DatasetRecordsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+        es: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
     ) -> "DatasetRecordsDAO":
         """
         Creates a dataset records dao instance
@@ -112,7 +112,7 @@ class DatasetRecordsDAO:
             cls._INSTANCE = cls(es)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchWrapper):
+    def __init__(self, es: ElasticsearchBackend):
         self._es = es
         self.init()
 
@@ -424,7 +424,7 @@ _instance: Optional[DatasetRecordsDAO] = None
 
 @deprecated.deprecated(reason="Use `DatasetRecordsDAO.get_instance` instead")
 def dataset_records_dao(
-    es: ElasticsearchWrapper = Depends(create_es_wrapper),
+    es: ElasticsearchBackend = Depends(create_es_wrapper),
 ) -> DatasetRecordsDAO:
     """
     Creates a dataset records dao instance

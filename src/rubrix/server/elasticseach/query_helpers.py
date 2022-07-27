@@ -26,6 +26,7 @@ from rubrix.server.apis.v0.models.commons.model import (
 from rubrix.server.elasticseach.mappings.helpers import mappings
 
 
+# TODO(@frascuchon): this should be move to the ElasticsearchBackend context
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
     def resolve_mapping(info) -> Dict[str, Any]:
         the_type = info.get("type")
