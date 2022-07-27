@@ -7,6 +7,7 @@ from rubrix.server.apis.v0.models.metrics.base import BaseMetric
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import sort_by2elasticsearch
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 from rubrix.server.services.datasets import Dataset
 from rubrix.server.services.metrics import MetricsService
 from rubrix.server.services.search.model import (
@@ -15,7 +16,6 @@ from rubrix.server.services.search.model import (
     SearchResults,
     SortConfig,
 )
-from rubrix.server.services.search.query_builder import EsQueryBuilder
 from rubrix.server.services.tasks.commons.record import (
     BaseRecordDB,
     EsRecordDataFieldNames,

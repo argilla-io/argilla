@@ -25,7 +25,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
-from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 
 
 def test_char_position():
@@ -275,6 +275,7 @@ def test_adjust_spans():
         EntitySpan(start=70, end=85, label="DET"),
     ]
 
+
 def test_whitespace_in_tokens():
     from spacy import load
 
@@ -294,4 +295,3 @@ def test_whitespace_in_tokens():
     record = CreationTokenClassificationRecord.parse_obj(record)
     assert record
     assert record.tokens == ["every", "four", "(", "4", ")", " "]
-
