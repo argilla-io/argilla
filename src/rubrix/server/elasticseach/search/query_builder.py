@@ -61,11 +61,10 @@ class EsQueryBuilder:
 
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
-
         if query.has_annotation:
-            all_filters.append(filters.exists_field("annotated_as"))
+            all_filters.append(filters.exists_field("annotated_by"))
         if query.has_prediction:
-            all_filters.append(filters.exists_field("predicted_as"))
+            all_filters.append(filters.exists_field("predicted_by"))
 
         query_data = query.dict(
             exclude={
