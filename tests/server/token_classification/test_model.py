@@ -145,7 +145,7 @@ def test_entity_label_too_long():
 
 def test_to_es_query():
     query = TokenClassificationQuery(ids=[1, 2, 3])
-    assert EsQueryBuilder.to_es_query(query) == {"ids": {"values": query.ids}}
+    assert EsQueryBuilder._to_es_query(query) == {"ids": {"values": query.ids}}
 
 
 def test_misaligned_entity_mentions_with_spaces_left():

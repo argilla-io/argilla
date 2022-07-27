@@ -2,12 +2,10 @@ import logging
 from enum import Enum
 from typing import Any, Dict, Optional, TypeVar
 
-from fastapi import Depends
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
 from rubrix.server.daos.models.datasets import BaseDatasetDB
-from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import filters
 from rubrix.server.services.search.model import BaseSearchQuery, QueryRange
 
@@ -19,30 +17,27 @@ class EsQueryBuilder:
     _LOGGER = logging.getLogger(__name__)
 
     @classmethod
-    def get_instance(
-        cls, dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance)
-    ):
+    def get_instance(cls):
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao=dao)
+            cls._INSTANCE = cls()
         return cls._INSTANCE
 
-    def __init__(self, dao: DatasetRecordsDAO):
-        self.__dao__ = dao
-
     def __call__(
-        self, dataset: BaseDatasetDB, query: Optional[SearchQuery] = None
+        self,
+        dataset: BaseDatasetDB,
+        schema: Dict[str, Any],
+        query: Optional[SearchQuery] = None,
     ) -> Dict[str, Any]:
 
         if not query:
             return filters.match_all()
 
         if not query.advanced_query_dsl or not query.query_text:
-            return self.to_es_query(query)
+            return self._to_es_query(query)
 
         text_search = query.query_text
         new_query = query.copy(update={"query_text": None})
 
-        schema = self.__dao__.get_dataset_schema(dataset)
         schema = SchemaAnalyzer(schema)
         es_query_builder = ElasticsearchQueryBuilder(
             **{
@@ -55,11 +50,11 @@ class EsQueryBuilder:
         query_text = es_query_builder(query_tree)
 
         return filters.boolean_filter(
-            filter_query=self.to_es_query(new_query), must_query=query_text
+            filter_query=self._to_es_query(new_query), must_query=query_text
         )
 
     @classmethod
-    def to_es_query(cls, query: BaseSearchQuery) -> Dict[str, Any]:
+    def _to_es_query(cls, query: BaseSearchQuery) -> Dict[str, Any]:
         if query.ids:
             return filters.ids_filter(query.ids)
 

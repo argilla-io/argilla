@@ -26,8 +26,7 @@ class MetricsService:
     @classmethod
     def get_instance(
         cls,
-        dao: DatasetRecordsDAO = Depends(dataset_records_dao),
-        query_builder: EsQueryBuilder = Depends(EsQueryBuilder.get_instance),
+        dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "MetricsService":
         """
         Creates the service instance.
@@ -43,10 +42,10 @@ class MetricsService:
 
         """
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao, query_builder=query_builder)
+            cls._INSTANCE = cls(dao)
         return cls._INSTANCE
 
-    def __init__(self, dao: DatasetRecordsDAO, query_builder: EsQueryBuilder):
+    def __init__(self, dao: DatasetRecordsDAO):
         """
         Creates a service instance
 
@@ -56,7 +55,6 @@ class MetricsService:
             The dataset records dao
         """
         self.__dao__ = dao
-        self.__query_builder__ = query_builder
 
     def summarize_metric(
         self,
@@ -91,8 +89,7 @@ class MetricsService:
             )
         elif isinstance(metric, PythonMetric):
             records = self.__dao__.scan_dataset(
-                dataset,
-                search=RecordSearch(query=self.__query_builder__(dataset, query=query)),
+                dataset, search=RecordSearch(query=query)
             )
             return metric.apply(map(record_class.parse_obj, records))
 
@@ -171,7 +168,7 @@ class MetricsService:
                 dataset,
                 size=0,  # No records at all
                 search=RecordSearch(
-                    query=self.__query_builder__(dataset, query=query),
+                    query=query,
                     aggregations=agg,
                 ),
             )

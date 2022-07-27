@@ -11,7 +11,6 @@ from rubrix.server.apis.v0.models.text_classification import (
 from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.backend import ElasticsearchBackend
-from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 from rubrix.server.services.metrics import MetricsService
 from rubrix.server.services.search.model import SortConfig
 from rubrix.server.services.search.service import SearchRecordsService
@@ -28,26 +27,17 @@ def dao(es_wrapper: ElasticsearchBackend):
 
 
 @pytest.fixture
-def query_builder(dao: DatasetRecordsDAO):
-    return EsQueryBuilder.get_instance(dao=dao)
+def metrics(dao: DatasetRecordsDAO):
+    return MetricsService.get_instance(dao=dao)
 
 
 @pytest.fixture
-def metrics(dao: DatasetRecordsDAO, query_builder: EsQueryBuilder):
-    return MetricsService.get_instance(dao=dao, query_builder=query_builder)
+def service(dao: DatasetRecordsDAO, metrics: MetricsService):
+    return SearchRecordsService.get_instance(dao=dao, metrics=metrics)
 
 
-@pytest.fixture
-def service(
-    dao: DatasetRecordsDAO, metrics: MetricsService, query_builder: EsQueryBuilder
-):
-    return SearchRecordsService.get_instance(
-        dao=dao, metrics=metrics, query_builder=query_builder
-    )
-
-
-def test_query_builder_with_query_range(query_builder):
-    es_query = query_builder(
+def test_query_builder_with_query_range(backend: ElasticsearchBackend):
+    es_query = backend.query_builder(
         "ds", query=TextClassificationQuery(score=ScoreRange(range_from=10))
     )
     assert es_query == {
@@ -63,7 +53,7 @@ def test_query_builder_with_query_range(query_builder):
     }
 
 
-def test_query_builder_with_nested(query_builder, mocked_client):
+def test_query_builder_with_nested(mocked_client, backend: ElasticsearchBackend):
     dataset = Dataset(
         name="test_query_builder_with_nested",
         owner=rubrix.get_workspace(),
@@ -79,7 +69,7 @@ def test_query_builder_with_nested(query_builder, mocked_client):
         ),
     )
 
-    es_query = query_builder(
+    es_query = backend.query_builder(
         dataset=dataset,
         query=TokenClassificationQuery(
             advanced_query_dsl=True,

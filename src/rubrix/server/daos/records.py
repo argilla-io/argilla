@@ -43,15 +43,7 @@ from rubrix.server.settings import settings
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
 
-
-@dataclasses.dataclass
-class _IndexTemplateExtensions:
-
-    analyzers: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
-    properties: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
-    dynamic_templates: List[Dict[str, Any]] = dataclasses.field(default_factory=list)
-
-
+# TODO(@frascuchon): this should be defined in the dataset class, wat!?
 def dataset_records_index(dataset_id: str) -> str:
     """
     Returns dataset records index for a given dataset id
@@ -114,7 +106,6 @@ class DatasetRecordsDAO:
 
     def __init__(self, es: ElasticsearchBackend):
         self._es = es
-        self.init()
 
     def init(self):
         """Initializes dataset records dao. Used on app startup"""
@@ -214,7 +205,11 @@ class DatasetRecordsDAO:
         es_query = {
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
-            "query": search.query or {"match_all": {}},
+            "query": self._es.query_builder(
+                dataset=dataset,
+                schema=self.get_dataset_schema(dataset),
+                query=search.query,
+            ),
             "sort": sort_config,
             "aggs": aggregation_requests,
         }

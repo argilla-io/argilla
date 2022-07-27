@@ -57,4 +57,4 @@ def test_model_dict():
 
 def test_query_as_elasticsearch():
     query = Text2TextQuery(ids=[1, 2, 3])
-    assert EsQueryBuilder.to_es_query(query) == {"ids": {"values": query.ids}}
+    assert EsQueryBuilder._to_es_query(query) == {"ids": {"values": query.ids}}
