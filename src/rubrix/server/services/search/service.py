@@ -34,21 +34,18 @@ class SearchRecordsService:
         cls,
         dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
-        query_builder: EsQueryBuilder = Depends(EsQueryBuilder.get_instance),
     ):
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(dao=dao, metrics=metrics, query_builder=query_builder)
+            cls._INSTANCE = cls(dao=dao, metrics=metrics)
         return cls._INSTANCE
 
     def __init__(
         self,
         dao: DatasetRecordsDAO,
         metrics: MetricsService,
-        query_builder: EsQueryBuilder,
     ):
         self.__dao__ = dao
         self.__metrics__ = metrics
-        self.__query_builder__ = query_builder
 
     def search(
         self,
@@ -70,7 +67,8 @@ class SearchRecordsService:
         results = self.__dao__.search_records(
             dataset,
             search=RecordSearch(
-                query=self.__query_builder__(dataset, query),
+                query=query,
+                # TODO(@frascuchon): sort must be parsed inside de dao
                 sort=sort_by2elasticsearch(
                     sort_config.sort_by,
                     valid_fields=[
@@ -125,7 +123,6 @@ class SearchRecordsService:
         limit: int = 1000
     ) -> Iterable[Record]:
         """Scan records for a queried"""
-        for doc in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=self.__query_builder__(dataset, query)), id_from=id_from, limit=limit
-        ):
+        search = RecordSearch(query=query)
+        for doc in self.__dao__.scan_dataset(dataset, id_from=id_from, limit=limit, search=search):
             yield record_type.parse_obj(doc)

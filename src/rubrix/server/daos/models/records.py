@@ -26,12 +26,11 @@ class RecordSearch(BaseModel):
     -----------
 
     query:
-        The elasticsearch search query portion
+        The search query portion
     sort:
-        The elasticsearch sort order
+        The sort order
     aggregations:
-        The elasticsearch search aggregations
-
+        The search aggregations/facets
     """
 
     query: Optional[Dict[str, Any]] = None

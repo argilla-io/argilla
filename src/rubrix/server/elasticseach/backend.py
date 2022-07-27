@@ -22,6 +22,7 @@ from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.elasticseach import query_helpers
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 from rubrix.server.errors import InvalidTextSearchError
 
 try:
@@ -46,7 +47,10 @@ class GenericSearchError(Exception):
 
 
 class ElasticsearchBackend(LoggingMixin):
-    """A simple elasticsearch client wrapper for atomize some repetitive operations"""
+    """
+    Encapsulates logic about the communication, queries and index mapping
+    transformations between DAOs layer and the elasticsearch backend.
+    """
 
     _INSTANCE = None
 
@@ -73,17 +77,23 @@ class ElasticsearchBackend(LoggingMixin):
                 retry_on_timeout=True,
                 max_retries=5,
             )
-            cls._INSTANCE = cls(es_client)
+            cls._INSTANCE = cls(es_client, query_builder=EsQueryBuilder())
 
         return cls._INSTANCE
 
-    def __init__(self, es_client: OpenSearch):
+    def __init__(self, es_client: OpenSearch, query_builder: EsQueryBuilder):
         self.__client__ = es_client
+        self.__query_builder__ = query_builder
 
     @property
     def client(self):
         """The elasticsearch client"""
         return self.__client__
+
+    @property
+    def query_builder(self):
+        """The query builder"""
+        return self.__query_builder__
 
     def list_documents(
         self,

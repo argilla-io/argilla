@@ -281,7 +281,7 @@ def test_query_with_uncovered_by_rules():
 
     query = TextClassificationQuery(uncovered_by_rules=["query", "other*"])
 
-    assert EsQueryBuilder.to_es_query(query) == {
+    assert EsQueryBuilder._to_es_query(query) == {
         "bool": {
             "must": {"match_all": {}},
             "must_not": {
