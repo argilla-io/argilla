@@ -237,7 +237,7 @@ def test_rule_metrics_without_annotated(
     )
 
     metrics = rule.metrics(log_dataset_without_annotations)
-    assert metrics == expected_metrics
+    assert expected_metrics == metrics
 
 
 def delete_rule_silently(client, dataset: str, rule: Rule):

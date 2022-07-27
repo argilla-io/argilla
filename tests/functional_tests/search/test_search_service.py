@@ -17,13 +17,13 @@ from rubrix.server.services.search.service import SearchRecordsService
 
 
 @pytest.fixture
-def es_wrapper():
+def backend():
     return ElasticsearchBackend.get_instance()
 
 
 @pytest.fixture
-def dao(es_wrapper: ElasticsearchBackend):
-    return DatasetRecordsDAO.get_instance(es=es_wrapper)
+def dao(backend: ElasticsearchBackend):
+    return DatasetRecordsDAO.get_instance(es=backend)
 
 
 @pytest.fixture
@@ -38,7 +38,9 @@ def service(dao: DatasetRecordsDAO, metrics: MetricsService):
 
 def test_query_builder_with_query_range(backend: ElasticsearchBackend):
     es_query = backend.query_builder(
-        "ds", query=TextClassificationQuery(score=ScoreRange(range_from=10))
+        "ds",
+        schema=None,
+        query=TextClassificationQuery(score=ScoreRange(range_from=10)),
     )
     assert es_query == {
         "bool": {
@@ -53,7 +55,7 @@ def test_query_builder_with_query_range(backend: ElasticsearchBackend):
     }
 
 
-def test_query_builder_with_nested(mocked_client, backend: ElasticsearchBackend):
+def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBackend):
     dataset = Dataset(
         name="test_query_builder_with_nested",
         owner=rubrix.get_workspace(),
@@ -71,6 +73,7 @@ def test_query_builder_with_nested(mocked_client, backend: ElasticsearchBackend)
 
     es_query = backend.query_builder(
         dataset=dataset,
+        schema=dao.get_dataset_schema(dataset),
         query=TokenClassificationQuery(
             advanced_query_dsl=True,
             query_text="metrics.predicted.mentions:(label:NAME AND score:[* TO 0.1])",

@@ -16,7 +16,6 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.models.commons.model import TaskStatus
 from rubrix.server.apis.v0.models.text_classification import (
     ClassPrediction,
     PredictionStatus,
@@ -24,6 +23,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
+from rubrix.server.commons.models import TaskStatus
 from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 
 

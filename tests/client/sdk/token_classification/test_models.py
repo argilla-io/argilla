@@ -49,9 +49,7 @@ def test_query_schema(helpers):
     client_schema = TokenClassificationQuery.schema()
     server_schema = ServerTokenClassificationQuery.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 @pytest.mark.parametrize(
