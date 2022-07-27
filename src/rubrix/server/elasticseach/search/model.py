@@ -2,6 +2,8 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from rubrix.server.commons.models import TaskStatus
+
 
 class BaseSearchQuery(BaseModel):
 
@@ -13,7 +15,7 @@ class BaseSearchQuery(BaseModel):
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)
 
-    status: List[str] = Field(default_factory=list)
+    status: List[TaskStatus] = Field(default_factory=list)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
     has_annotation: Optional[bool] = None

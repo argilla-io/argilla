@@ -21,8 +21,8 @@ from pydantic import BaseModel
 from rubrix.server.apis.v0.models.commons.model import (
     EsRecordDataFieldNames,
     SortableField,
-    TaskStatus,
 )
+from rubrix.server.commons.models import TaskStatus
 from rubrix.server.elasticseach.mappings.helpers import mappings
 
 

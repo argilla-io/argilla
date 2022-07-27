@@ -26,6 +26,7 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.apis.v0.helpers import flatten_dict
+from rubrix.server.commons.models import TaskStatus
 from rubrix.server.services.search.model import (
     BaseSearchResults,
     BaseSearchResultsAggregations,
@@ -39,7 +40,6 @@ from rubrix.server.services.tasks.commons import (
     BulkResponse,
     EsRecordDataFieldNames,
     PredictionStatus,
-    TaskStatus,
     TaskType,
 )
 from rubrix.utils import limit_value_length
