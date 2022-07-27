@@ -29,9 +29,6 @@ services:
     networks:
       - rubrix
 
-    volumes:
-      - ./elasticdata:/usr/share/elasticsearch/data
-
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
     container_name: kibana
@@ -46,7 +43,3 @@ services:
 networks:
   rubrix:
     driver: bridge
-
-
-volumes:
-  elasticdata:

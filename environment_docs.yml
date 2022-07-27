@@ -3,7 +3,7 @@ channels:
   - defaults
 dependencies:
   - _libgcc_mutex=0.1
-  #- _openmp_mutex=5.1
+  - _openmp_mutex=5.1
   - asttokens=2.0.5
   - backcall=0.2.0
   - ca-certificates=2022.4.26
@@ -12,11 +12,11 @@ dependencies:
   - executing=0.8.3
   - ipython=8.3.0
   - jedi=0.18.1
-  #- ld_impl_linux-64=2.38
+  - ld_impl_linux-64=2.38
   - libffi=3.3
-  #- libgcc-ng=11.2.0
-  #- libgomp=11.2.0
-  #- libstdcxx-ng=11.2.0
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libstdcxx-ng=11.2.0
   - matplotlib-inline=0.1.2
   - ncurses=6.3
   - openssl=1.1.1p
