@@ -21,7 +21,7 @@ from fastapi import Depends
 from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
 from rubrix.server.elasticseach import query_helpers
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
+from rubrix.server.elasticseach.backend import ElasticsearchBackend
 from rubrix.server.elasticseach.mappings.datasets import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
@@ -40,7 +40,7 @@ class DatasetsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+        es: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
         records_dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "DatasetsDAO":
         """
@@ -63,7 +63,7 @@ class DatasetsDAO:
             cls._INSTANCE = cls(es, records_dao)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchWrapper, records_dao: DatasetRecordsDAO):
+    def __init__(self, es: ElasticsearchBackend, records_dao: DatasetRecordsDAO):
         self._es = es
         self.__records_dao__ = records_dao
         self.init()

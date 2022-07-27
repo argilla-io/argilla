@@ -45,15 +45,15 @@ class GenericSearchError(Exception):
         self.origin_error = origin_error
 
 
-class ElasticsearchWrapper(LoggingMixin):
+class ElasticsearchBackend(LoggingMixin):
     """A simple elasticsearch client wrapper for atomize some repetitive operations"""
 
     _INSTANCE = None
 
     @classmethod
-    def get_instance(cls) -> "ElasticsearchWrapper":
+    def get_instance(cls) -> "ElasticsearchBackend":
         """
-        Creates an instance of ElasticsearchWrapper.
+        Creates an instance of ElasticsearchBackend.
 
         This function is used in fastapi for resolve component dependencies.
 
@@ -610,10 +610,10 @@ class ElasticsearchWrapper(LoggingMixin):
 _instance = None  # The singleton instance
 
 
-@deprecated.deprecated(reason="Use `ElasticsearchWrapper.get_instance` instead")
-def create_es_wrapper() -> ElasticsearchWrapper:
+@deprecated.deprecated(reason="Use `ElasticsearchBackend.get_instance` instead")
+def create_es_wrapper() -> ElasticsearchBackend:
     """
-        Creates an instance of ElasticsearchWrapper.
+        Creates an instance of ElasticsearchBackend.
 
     This function is used in fastapi for resolve component dependencies.
 
@@ -626,6 +626,6 @@ def create_es_wrapper() -> ElasticsearchWrapper:
 
     global _instance
     if _instance is None:
-        _instance = ElasticsearchWrapper.get_instance()
+        _instance = ElasticsearchBackend.get_instance()
 
     return _instance

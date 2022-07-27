@@ -22,7 +22,7 @@ from hurry.filesize import size
 
 from rubrix import __version__ as rubrix_version
 from rubrix.server.apis.v0.models.info import ApiStatus
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
+from rubrix.server.elasticseach.backend import ElasticsearchBackend
 
 
 class ApiInfoService:
@@ -30,7 +30,7 @@ class ApiInfoService:
     The api info service
     """
 
-    def __init__(self, es: ElasticsearchWrapper):
+    def __init__(self, es: ElasticsearchBackend):
         self.__es__ = es
 
     def api_status(self) -> ApiStatus:
@@ -56,7 +56,7 @@ _instance: Optional[ApiInfoService] = None
 
 
 def create_info_service(
-    es_wrapper: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+    es_wrapper: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
 ) -> ApiInfoService:
     """
     Creates an api info service

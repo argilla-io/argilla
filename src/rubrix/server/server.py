@@ -29,7 +29,7 @@ from rubrix import __version__ as rubrix_version
 from rubrix.logging import configure_logging
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.client_wrapper import create_es_wrapper
+from rubrix.server.elasticseach.backend import create_es_wrapper
 from rubrix.server.errors import APIErrorHandler, EntityNotFoundError
 from rubrix.server.routes import api_router
 from rubrix.server.security import auth

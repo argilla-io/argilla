@@ -10,7 +10,7 @@ from rubrix.server.apis.v0.models.text_classification import (
 )
 from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
+from rubrix.server.elasticseach.backend import ElasticsearchBackend
 from rubrix.server.services.metrics import MetricsService
 from rubrix.server.services.search.model import SortConfig
 from rubrix.server.services.search.query_builder import EsQueryBuilder
@@ -19,11 +19,11 @@ from rubrix.server.services.search.service import SearchRecordsService
 
 @pytest.fixture
 def es_wrapper():
-    return ElasticsearchWrapper.get_instance()
+    return ElasticsearchBackend.get_instance()
 
 
 @pytest.fixture
-def dao(es_wrapper: ElasticsearchWrapper):
+def dao(es_wrapper: ElasticsearchBackend):
     return DatasetRecordsDAO.get_instance(es=es_wrapper)
 
 
