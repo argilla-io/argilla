@@ -146,14 +146,6 @@ export default {
     }
   }
 }
-.vue-recycle-scroller__item-view {
-  margin-bottom: 8px;
-}
-.--annotation {
-  .vue-recycle-scroller__item-view:first-child() {
-    margin-top: 16px;
-  }
-}
 .list-enter-active,
 .list-leave-active {
   transition: all 0.5s ease;
