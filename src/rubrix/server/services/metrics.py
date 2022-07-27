@@ -10,9 +10,9 @@ from rubrix.server.apis.v0.models.metrics.base import (
 from rubrix.server.apis.v0.models.metrics.commons import *
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_dao
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 from rubrix.server.errors import WrongInputParamError
 from rubrix.server.services.datasets import Dataset
-from rubrix.server.services.search.query_builder import EsQueryBuilder
 from rubrix.server.services.tasks.commons.record import BaseRecordDB
 
 GenericQuery = TypeVar("GenericQuery")

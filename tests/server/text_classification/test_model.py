@@ -24,7 +24,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 
 
 def test_flatten_metadata():
