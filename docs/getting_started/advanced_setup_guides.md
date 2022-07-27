@@ -191,7 +191,7 @@ services:
       - rubrix
     # Add the volume to the elasticsearch service
     volumes:
-      - ./elasticdata:/usr/share/elasticsearch/data
+      - elasticdata:/usr/share/elasticsearch/data
   rubrix:
     # ... here goes the rest of the docker-compose.yaml
   
@@ -204,12 +204,12 @@ volumes:
 
 ```
 
-Then create the elasticdata/ directory and add the required permissions:
-```bash
-mkdir elasticdata && sudo chown -R 1000:1000 elasticdata/
-```
+Then, even if the ElasticSearch service goes down the data will be persisted in the elasticdata volume. To check it
+you can execute the command:
 
-Then, even if the ElasticSearch service goes down the data will be persisted in the elasticdata/ directory.
+```bash
+docker volume ls
+```
 
 Note that if you want to apply these changes, and you already have a previous docker-compose instance running, you need 
 to execute the **up** command again:
