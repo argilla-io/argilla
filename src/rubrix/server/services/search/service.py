@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Type, TypeVar
 
 from fastapi import Depends
 
@@ -7,11 +7,10 @@ from rubrix.server.apis.v0.models.metrics.base import BaseMetric
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import sort_by2elasticsearch
-from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
 from rubrix.server.services.datasets import Dataset
 from rubrix.server.services.metrics import MetricsService
 from rubrix.server.services.search.model import (
-    BaseSearchQuery,
+    BaseSVCSearchQuery,
     Record,
     SearchResults,
     SortConfig,
@@ -20,6 +19,8 @@ from rubrix.server.services.tasks.commons.record import (
     BaseRecordDB,
     EsRecordDataFieldNames,
 )
+
+SvcSearchQuery = TypeVar("SvcSearchQuery", bound=BaseSVCSearchQuery)
 
 
 class SearchRecordsService:
@@ -51,7 +52,7 @@ class SearchRecordsService:
         self,
         dataset: Dataset,
         record_type: Type[BaseRecordDB],
-        query: Optional[BaseSearchQuery] = None,
+        query: Optional[SvcSearchQuery] = None,
         sort_config: Optional[SortConfig] = None,
         record_from: int = 0,
         size: int = 100,
@@ -118,7 +119,7 @@ class SearchRecordsService:
         self,
         dataset: Dataset,
         record_type: Type[BaseRecordDB],
-        query: Optional[BaseSearchQuery] = None,
+        query: Optional[SvcSearchQuery] = None,
     ) -> Iterable[Record]:
         """Scan records for a queried"""
         for doc in self.__dao__.scan_dataset(dataset, search=RecordSearch(query=query)):

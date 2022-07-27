@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from rubrix.server.elasticseach.search.query_builder import BaseSearchQuery, SearchQuery
+
 
 class RecordSearch(BaseModel):
     """
@@ -33,7 +35,7 @@ class RecordSearch(BaseModel):
         The search aggregations/facets
     """
 
-    query: Optional[Dict[str, Any]] = None
+    query: Optional[SearchQuery] = None
     sort: List[Dict[str, Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
 

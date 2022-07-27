@@ -1,10 +1,15 @@
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, TypeVar
 
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
-from rubrix.server.services.tasks.commons.record import Record, TaskStatus
+from rubrix.server.elasticseach.search.model import BaseSearchQuery as _BaseSearchQuery
+from rubrix.server.services.tasks.commons.record import Record
+
+
+class BaseSVCSearchQuery(_BaseSearchQuery):
+    pass
 
 
 class SortOrder(str, Enum):
@@ -17,20 +22,6 @@ class SortableField(BaseModel):
 
     id: str
     order: SortOrder = SortOrder.asc
-
-
-class BaseSearchQuery(BaseModel):
-
-    query_text: Optional[str] = None
-    advanced_query_dsl: bool = False
-
-    ids: Optional[List[Union[str, int]]]
-
-    annotated_by: List[str] = Field(default_factory=list)
-    predicted_by: List[str] = Field(default_factory=list)
-
-    status: List[TaskStatus] = Field(default_factory=list)
-    metadata: Optional[Dict[str, Union[str, List[str]]]] = None
 
 
 class QueryRange(BaseModel):

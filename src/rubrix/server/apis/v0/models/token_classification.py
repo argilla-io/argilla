@@ -31,7 +31,7 @@ from rubrix.server.apis.v0.models.commons.model import (
     TaskType,
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
-from rubrix.server.services.search.model import BaseSearchQuery
+from rubrix.server.services.search.model import BaseSVCSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -387,7 +387,7 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseSearchQuery):
+class TokenClassificationQuery(BaseSVCSearchQuery):
     """
     API Filters for text classification
 

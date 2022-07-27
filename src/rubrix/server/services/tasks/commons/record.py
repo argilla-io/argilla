@@ -36,6 +36,7 @@ class TaskType(str, Enum):
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 
+# TODO(@frascuchon): move to rubrix.server.commons.models (or something)
 class TaskStatus(str, Enum):
     default = "Default"
     edited = "Edited"  # TODO: DEPRECATE

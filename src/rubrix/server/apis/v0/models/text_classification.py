@@ -33,7 +33,7 @@ from rubrix.server.apis.v0.models.commons.model import (
     TaskType,
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
-from rubrix.server.services.search.model import BaseSearchQuery
+from rubrix.server.services.search.model import BaseSVCSearchQuery
 
 
 class UpdateLabelingRule(BaseModel):
@@ -483,7 +483,7 @@ class TextClassificationBulkData(UpdateDatasetRequest):
         return records
 
 
-class TextClassificationQuery(BaseSearchQuery):
+class TextClassificationQuery(BaseSVCSearchQuery):
     """
     API Filters for text classification
 
