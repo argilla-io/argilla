@@ -1,9 +1,6 @@
 from typing import Any, ClassVar, Dict, Generic, List
 
-from rubrix.server.apis.v0.models.commons.model import (
-    EsRecordDataFieldNames,
-    TaskStatus,
-)
+from rubrix.server.apis.v0.models.commons.model import EsRecordDataFieldNames
 from rubrix.server.apis.v0.models.metrics.base import (
     BaseMetric,
     BaseTaskMetrics,
@@ -13,6 +10,7 @@ from rubrix.server.apis.v0.models.metrics.base import (
     TermsAggregation,
     WordCloudAggregation,
 )
+from rubrix.server.commons.models import TaskStatus
 
 
 class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
