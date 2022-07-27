@@ -29,10 +29,10 @@ from rubrix.server.apis.v0.models.commons.model import (
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskStatus,
     TaskType,
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
+from rubrix.server.commons.models import TaskStatus
 from rubrix.server.services.search.model import BaseSVCSearchQuery
 
 
