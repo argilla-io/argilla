@@ -129,7 +129,7 @@ export default {
       color: $secondary-color;
     }
     &--annotation-mode {
-      // padding-left: 4em;
+      margin-top: 16px;
       @extend .list__item !optional;
       &.discarded {
         opacity: 0.5;
