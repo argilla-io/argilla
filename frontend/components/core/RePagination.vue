@@ -228,7 +228,7 @@ $pagination-size: 30px;
     border-top: 1px solid palette(grey, smooth);
     min-height: 63px;
     z-index: 99;
-    padding-right: 1em;
+    padding-right: 56px;
     padding-left: 4em;
     .--metrics & {
       @include media(">desktop") {
