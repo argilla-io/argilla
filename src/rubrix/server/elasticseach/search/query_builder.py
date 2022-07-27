@@ -7,7 +7,8 @@ from luqum.parser import parser
 
 from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.elasticseach.query_helpers import filters
-from rubrix.server.services.search.model import BaseSearchQuery, QueryRange
+from rubrix.server.elasticseach.search.model import BaseSearchQuery
+from rubrix.server.services.search.model import QueryRange
 
 SearchQuery = TypeVar("SearchQuery", bound=BaseSearchQuery)
 
@@ -54,18 +55,26 @@ class EsQueryBuilder:
         )
 
     @classmethod
-    def _to_es_query(cls, query: BaseSearchQuery) -> Dict[str, Any]:
+    def _to_es_query(cls, query: SearchQuery) -> Dict[str, Any]:
         if query.ids:
             return filters.ids_filter(query.ids)
 
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
+
+        if query.has_annotation:
+            all_filters.append(filters.exists_field("annotated_as"))
+        if query.has_prediction:
+            all_filters.append(filters.exists_field("predicted_as"))
+
         query_data = query.dict(
             exclude={
                 "advanced_query_dsl",
                 "query_text",
                 "metadata",
                 "uncovered_by_rules",
+                "has_annotation",
+                "has_prediction",
             }
         )
         for key, value in query_data.items():
@@ -82,9 +91,9 @@ class EsQueryBuilder:
                 key_filter = filters.range_filter(
                     field=key, value_from=value.range_from, value_to=value.range_to
                 )
+
             else:
                 cls._LOGGER.warning(f"Cannot parse query value {value} for key {key}")
-
             if key_filter:
                 all_filters.append(key_filter)
 

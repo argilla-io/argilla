@@ -291,7 +291,11 @@ class DatasetRecordsDAO:
             index=index, sort=[{"id": {"order": "asc"}}]
         )
         es_query = {
-            "query": search.query or {"match_all": {}},
+            "query": self._es.query_builder(
+                dataset=dataset,
+                schema=self.get_dataset_schema(dataset),
+                query=search.query,
+            ),
             "highlight": self.__configure_query_highlight__(task=dataset.task),
             "sort": sort_cfg,  # Sort the search so the consistency is maintained in every search
         }

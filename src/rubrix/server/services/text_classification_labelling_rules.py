@@ -11,7 +11,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationDatasetDB,
 )
 from rubrix.server.daos.datasets import DatasetsDAO
-from rubrix.server.daos.models.records import RecordSearch
+from rubrix.server.daos.models.records import BaseSearchQuery, RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import filters
 from rubrix.server.errors import EntityAlreadyExistsError, EntityNotFoundError
@@ -224,9 +224,7 @@ class LabelingService:
         results = self.__records__.search_records(
             dataset,
             size=0,
-            search=RecordSearch(
-                query=filters.exists_field(EsRecordDataFieldNames.annotated_as),
-            ),
+            search=RecordSearch(query=BaseSearchQuery(has_annotation=True)),
         )
         return results.total
 
@@ -238,6 +236,7 @@ class LabelingService:
             dataset,
             size=0,
             search=RecordSearch(
+                # TODO(@frascuchon): elasticsearch metrics should be managed by the backend component
                 aggregations=self.__dataset_rules_metrics__.aggregation_request(
                     all_rules=dataset.rules
                 ),

@@ -32,7 +32,7 @@ from rubrix.server.apis.v0.models.commons.model import (
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.services.search.model import BaseSearchQuery
+from rubrix.server.services.search.model import BaseSVCSearchQuery
 
 
 class ExtendedEsRecordDataFieldNames(str, Enum):
@@ -167,7 +167,7 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(BaseSearchQuery):
+class Text2TextQuery(BaseSVCSearchQuery):
     """
     API Filters for text2text
 
