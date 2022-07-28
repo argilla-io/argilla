@@ -51,7 +51,7 @@ export default {
   width: 100%;
   background: white;
   border: 1px solid palette(grey, smooth);
-  margin-bottom: -1px;
+  margin-bottom: 8px;
 }
 @keyframes load {
   0% {
