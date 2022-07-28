@@ -153,7 +153,9 @@ class TextClassificationDataset extends ObservationDataset {
 
   async _getRule({ query }) {
     const { response } = await TextClassificationDataset.api().get(
-      `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
+      `/datasets/${this.task}/${this.name}/labeling/rules/${encodeURIComponent(
+        query
+      )}`,
       {
         // Ignore errors related to rule not found
         validateStatus: function (status) {
@@ -169,7 +171,9 @@ class TextClassificationDataset extends ObservationDataset {
 
   async _deleteRule({ query }) {
     const { response } = await TextClassificationDataset.api().delete(
-      `/datasets/${this.task}/${this.name}/labeling/rules/${query}`
+      `/datasets/${this.task}/${this.name}/labeling/rules/${encodeURIComponent(
+        query
+      )}`
     );
     return response.data;
   }
@@ -234,7 +238,9 @@ class TextClassificationDataset extends ObservationDataset {
     );
     if (response.status === 409) {
       const apiResult = await TextClassificationDataset.api().patch(
-        `/datasets/${this.task}/${this.name}/labeling/rules/${query}`,
+        `/datasets/${this.task}/${
+          this.name
+        }/labeling/rules/${encodeURIComponent(query)}`,
         { labels, description }
       );
       response = apiResult.response;
@@ -244,7 +250,9 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   async _fetchRuleMetrics({ query, labels }) {
-    var url = `/datasets/${this.task}/${this.name}/labeling/rules/${query}/metrics`;
+    var url = `/datasets/${this.task}/${
+      this.name
+    }/labeling/rules/${encodeURIComponent(query)}/metrics`;
     if (labels !== undefined) {
       const urlLabels = labels.map((label) => `label=${label}`);
       url += `?${urlLabels.join("&")}`;
