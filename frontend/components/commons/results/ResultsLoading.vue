@@ -41,7 +41,8 @@ export default {
   height: 2px;
   position: absolute;
   top: 0;
-  left: 0;
+  left: 10px;
+  right: 10px;
   background: $primary-color;
   animation: load 0.8s ease-in-out infinite;
 }
@@ -52,6 +53,7 @@ export default {
   background: white;
   border: 1px solid palette(grey, smooth);
   margin-bottom: 8px;
+  border-radius: $border-radius-m;
 }
 @keyframes load {
   0% {
