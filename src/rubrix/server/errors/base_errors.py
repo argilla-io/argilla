@@ -57,7 +57,9 @@ class ValidationError(RubrixServerError):
 
 class GenericRubrixServerError(RubrixServerError):
     def __init__(self, error: Exception):
-        self.error = error
+        self.type = f"{type(error).__module__}.{type(error).__name__}"
+        self.message = str(error)
+        self.args = error.args
 
     @classmethod
     def api_documentation(cls):
@@ -68,20 +70,6 @@ class GenericRubrixServerError(RubrixServerError):
                 }
             },
         }
-
-    @classmethod
-    def get_error_code(cls):
-        raise NotImplementedError(
-            "This class method is not supported for generic server error"
-        )
-
-    @property
-    def code(self) -> str:
-        return f"{type(self.error).__module__}.{type(self.error).__name__}"
-
-    @property
-    def arguments(self):
-        return {}
 
 
 class ForbiddenOperationError(RubrixServerError):
