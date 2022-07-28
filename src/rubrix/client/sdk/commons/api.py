@@ -112,13 +112,16 @@ def build_data_response(
     response: httpx.Response, data_type: Type[T]
 ) -> Response[List[T]]:
     if 200 <= response.status_code < 400:
-        parsed_response = [data_type(**json.loads(r)) for r in response.iter_lines()]
-        return Response(
-            status_code=response.status_code,
-            content=b"",
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        try:
+            parsed_response = [data_type(**json.loads(r)) for r in response.iter_lines()]
+            return Response(
+                status_code=response.status_code,
+                content=b"",
+                headers=response.headers,
+                parsed=parsed_response,
+            )
+        except httpx.RemoteProtocolError as err:
+            raise Exception(f"Malformed query!") from None
 
     content = next(response.iter_lines())
     data = json.loads(content)
