@@ -22,7 +22,7 @@ from rubrix.server.apis.v0.models.commons.model import (
     EsRecordDataFieldNames,
     SortableField,
 )
-from rubrix.server.apis.v0.models.metrics.base import BaseMetric, BaseTaskMetrics
+from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
 from rubrix.server.apis.v0.models.text2text import (
     CreationText2TextRecord,
     Text2TextDatasetDB,
@@ -32,6 +32,7 @@ from rubrix.server.apis.v0.models.text2text import (
     Text2TextSearchAggregations,
     Text2TextSearchResults,
 )
+from rubrix.server.services.metrics import BaseMetric
 from rubrix.server.services.search.model import SortConfig
 from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService

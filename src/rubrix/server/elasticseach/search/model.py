@@ -1,8 +1,21 @@
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 from rubrix.server.commons.models import TaskStatus
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class SortableField(BaseModel):
+    """Sortable field structure"""
+
+    id: str
+    order: SortOrder = SortOrder.asc
 
 
 class BaseSearchQuery(BaseModel):

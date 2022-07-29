@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
 from rubrix.server.elasticseach.search.model import BaseSearchQuery as _BaseSearchQuery
+from rubrix.server.elasticseach.search.model import SortableField as _SortableField
+from rubrix.server.elasticseach.search.model import SortOrder
 from rubrix.server.services.tasks.commons.record import Record
 
 
@@ -12,16 +14,10 @@ class BaseSVCSearchQuery(_BaseSearchQuery):
     pass
 
 
-class SortOrder(str, Enum):
-    asc = "asc"
-    desc = "desc"
-
-
-class SortableField(BaseModel):
+class SortableField(_SortableField):
     """Sortable field structure"""
 
-    id: str
-    order: SortOrder = SortOrder.asc
+    pass
 
 
 class QueryRange(BaseModel):

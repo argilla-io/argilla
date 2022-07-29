@@ -3,12 +3,11 @@ from typing import Iterable, List, Optional, Type, TypeVar
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.metrics.base import BaseMetric
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.elasticseach.query_helpers import sort_by2elasticsearch
 from rubrix.server.services.datasets import Dataset
-from rubrix.server.services.metrics import MetricsService
+from rubrix.server.services.metrics import BaseMetric, MetricsService
 from rubrix.server.services.search.model import (
     BaseSVCSearchQuery,
     Record,

@@ -146,7 +146,7 @@ def test_dataset_for_token_classification(mocked_client):
             json={},
         )
 
-        assert response.status_code == 200, response.json()
+        assert response.status_code == 200, f"{metric} :: {response.json()}"
         summary = response.json()
 
         if not ("predicted" in metric_id or "annotated" in metric_id):
@@ -199,7 +199,7 @@ def test_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "rubrix.api.errors::EntityNotFoundError",
-            "params": {"name": "missing_metric", "type": "BaseMetric"},
+            "params": {"name": "missing_metric", "type": "Metric"},
         }
     }
 

@@ -326,16 +326,11 @@ class DatasetsDAO:
     def get_all_workspaces(self) -> List[str]:
         """Get all datasets (Only for super users)"""
 
-        workspaces_dict = self._es.aggregate(
-            index=DATASETS_INDEX_NAME,
-            aggregation=query_helpers.aggregations.terms_aggregation(
-                "owner.keyword",
-                missing=NO_WORKSPACE,
-                size=500,  # TODO: A max number of workspaces env var could be leveraged by this.
-            ),
+        metric_data = self._es.compute_metric(
+            DATASETS_INDEX_NAME,
+            metric_id="all_rubrix_workspaces",
         )
-
-        return [k for k in workspaces_dict]
+        return [k for k in metric_data]
 
     def save_settings(self, dataset: DatasetDB, settings: SettingsDB) -> SettingsDB:
         self._es.update_document(

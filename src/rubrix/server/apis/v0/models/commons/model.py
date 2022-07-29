@@ -55,6 +55,7 @@ class PaginationParams:
     )
 
 
+# TODO(@frascuchon):  Move this shit to the server.commons.models module
 class BaseRecord(BaseRecordDB, GenericModel, Generic[Annotation]):
     """
     Minimal dataset record information

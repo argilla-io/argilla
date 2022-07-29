@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import dataclasses
 import datetime
 import re
 from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
@@ -37,13 +36,14 @@ from rubrix.server.elasticseach.mappings.helpers import (
     tasks_common_settings,
 )
 from rubrix.server.elasticseach.query_helpers import parse_aggregations
+from rubrix.server.elasticseach.search.query_builder import SearchQuery
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.errors.task_errors import MetadataLimitExceededError
 from rubrix.server.settings import settings
 
 DBRecord = TypeVar("DBRecord", bound=BaseRecord)
 
-# TODO(@frascuchon): this should be defined in the dataset class, wat!?
+# TODO(@frascuchon): Move to the backend and accept the dataset id as parameter
 def dataset_records_index(dataset_id: str) -> str:
     """
     Returns dataset records index for a given dataset id
@@ -164,6 +164,37 @@ class DatasetRecordsDAO:
         records_index = dataset_records_index(dataset.id)
         return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
 
+    def compute_metric(
+        self,
+        dataset: BaseDatasetDB,
+        metric_id: str,
+        metric_params: Dict[str, Any] = None,
+        query: Optional[SearchQuery] = None,
+    ):
+        """
+        Parameters
+        ----------
+        metric_id:
+            The backend metric id
+        metric_params:
+            The summary params
+        dataset:
+            The records dataset
+        query:
+            The filter to apply to dataset
+
+        Returns
+        -------
+            The metric summary result
+
+        """
+        return self._es.compute_metric(
+            index=dataset_records_index(dataset.id),
+            metric_id=metric_id,
+            query=query,
+            params=metric_params,
+        )
+
     def search_records(
         self,
         dataset: BaseDatasetDB,
@@ -193,6 +224,7 @@ class DatasetRecordsDAO:
             The search result
 
         """
+        # TODO(@frascuchon): Move this logic to the backend class
         search = search or RecordSearch()
         records_index = dataset_records_index(dataset.id)
         compute_aggregations = record_from == 0
@@ -206,8 +238,7 @@ class DatasetRecordsDAO:
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
             "query": self._es.query_builder(
-                dataset=dataset,
-                schema=self.get_dataset_schema(dataset),
+                schema=self._es.get_index_mapping(records_index),
                 query=search.query,
             ),
             "sort": sort_config,
@@ -284,6 +315,7 @@ class DatasetRecordsDAO:
         -------
             An iterable over found dataset records
         """
+        # TODO(@frascuchon): Move this logic inside the backend component
         index = dataset_records_index(dataset.id)
         search = search or RecordSearch()
 
@@ -292,8 +324,7 @@ class DatasetRecordsDAO:
         )
         es_query = {
             "query": self._es.query_builder(
-                dataset=dataset,
-                schema=self.get_dataset_schema(dataset),
+                schema=self._es.get_index_mapping(index),
                 query=search.query,
             ),
             "highlight": self.__configure_query_highlight__(task=dataset.task),
@@ -417,13 +448,8 @@ class DatasetRecordsDAO:
 
     def get_dataset_schema(self, dataset: BaseDatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
-        index_name = dataset_records_index(dataset.id)
-        response = self._es.__client__.indices.get_mapping(index=index_name)
-
-        if index_name in response:
-            response = response.get(index_name)
-
-        return response
+        schema = self._es.get_index_mapping(dataset_records_index(dataset.id))
+        return schema
 
     @classmethod
     def __configure_query_highlight__(cls, task: TaskType):

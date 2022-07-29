@@ -22,8 +22,10 @@ from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.elasticseach import query_helpers
+from rubrix.server.elasticseach.metrics import ALL_METRICS
+from rubrix.server.elasticseach.metrics.base import ElasticsearchMetric
 from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
-from rubrix.server.errors import InvalidTextSearchError
+from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
 
 try:
     import ujson as json
@@ -77,13 +79,21 @@ class ElasticsearchBackend(LoggingMixin):
                 retry_on_timeout=True,
                 max_retries=5,
             )
-            cls._INSTANCE = cls(es_client, query_builder=EsQueryBuilder())
+            cls._INSTANCE = cls(
+                es_client, query_builder=EsQueryBuilder(), metrics={**ALL_METRICS}
+            )
 
         return cls._INSTANCE
 
-    def __init__(self, es_client: OpenSearch, query_builder: EsQueryBuilder):
+    def __init__(
+        self,
+        es_client: OpenSearch,
+        query_builder: EsQueryBuilder,
+        metrics: Dict[str, ElasticsearchMetric] = None,
+    ):
         self.__client__ = es_client
         self.__query_builder__ = query_builder
+        self.__defined_metrics__ = metrics or {}
 
     @property
     def client(self):
@@ -615,6 +625,62 @@ class ElasticsearchBackend(LoggingMixin):
         return query_helpers.parse_aggregations(results["aggregations"]).get(
             aggregation_name
         )
+
+    def find_metric_by_id(self, metric_id: str) -> Optional[ElasticsearchMetric]:
+        metric = self.__defined_metrics__.get(metric_id)
+        if not metric:
+            raise EntityNotFoundError(name=metric_id, type="Metric")
+        return metric
+
+    def compute_metric(
+        self,
+        index: str,
+        metric_id: str,
+        query: Optional[Any] = None,
+        params: Optional[Dict[str, Any]] = None,
+    ):
+        metric = self.find_metric_by_id(metric_id)
+        # Only for metadata aggregation. In a future could be nice to provide the whole index schema
+        params.update(
+            {"schema": self.get_field_mapping(index=index, field_name="metadata.*")}
+        )
+
+        filtered_params = {
+            argument: params[argument]
+            for argument in metric.metric_arg_names
+            if argument in params
+        }
+
+        aggs = metric.aggregation_request(**filtered_params)
+        if not aggs:
+            return {}
+        if not isinstance(aggs, list):
+            aggs = [aggs]
+        results = {}
+        for agg in aggs:
+            es_query = {
+                "query": self.query_builder(
+                    schema=self.get_index_mapping(index),
+                    query=query,
+                ),
+                "aggs": agg,
+            }
+            search_result = self.search(index=index, query=es_query, size=0)
+            search_aggregations = search_result.get("aggregations", {})
+
+            if search_aggregations:
+                parsed_aggregations = query_helpers.parse_aggregations(
+                    search_aggregations
+                )
+                results.update(parsed_aggregations)
+
+        return metric.aggregation_result(results.get(metric_id, results))
+
+    def get_index_mapping(self, index: str) -> Dict[str, Any]:
+        response = self.__client__.indices.get_mapping(index=index)
+        if index in response:
+            response = response.get(index)
+        return response
 
 
 _instance = None  # The singleton instance
