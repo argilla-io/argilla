@@ -17,9 +17,9 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.elasticseach.search.model import BaseSearchQuery as _BaseSearchQuery
-from rubrix.server.elasticseach.search.model import SortConfig
-from rubrix.server.elasticseach.search.query_builder import SearchQuery
+from rubrix.server.backend.search.model import BaseSearchQuery as _BaseSearchQuery
+from rubrix.server.backend.search.model import SortConfig
+from rubrix.server.backend.search.query_builder import SearchQuery
 
 
 class BaseSearchQuery(_BaseSearchQuery):

@@ -15,15 +15,11 @@
 
 import pytest
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
+from rubrix.server.backend.elasticsearch import create_es_wrapper
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import dataset_records_dao
-from rubrix.server.elasticseach.backend import create_es_wrapper
-from rubrix.server.elasticseach.mappings.text_classification import (
-    text_classification_mappings,
-)
 from rubrix.server.errors import ClosedDatasetError
 
 es_wrapper = create_es_wrapper()

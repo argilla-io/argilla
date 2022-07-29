@@ -17,14 +17,14 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
-from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
-from rubrix.server.elasticseach.backend import ElasticsearchBackend
-from rubrix.server.elasticseach.mappings.datasets import (
+from rubrix.server.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.backend.mappings.datasets import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
 )
-from rubrix.server.elasticseach.search.model import DatasetsQuery
+from rubrix.server.backend.search.model import DatasetsQuery
+from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
+from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""

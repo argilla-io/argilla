@@ -2,8 +2,8 @@ import pytest
 
 from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
+from rubrix.server.backend.elasticsearch import ElasticsearchBackend
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.backend import ElasticsearchBackend
 from rubrix.server.errors import MissingDatasetRecordsError
 
 

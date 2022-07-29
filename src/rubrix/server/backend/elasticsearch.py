@@ -21,19 +21,19 @@ from opensearchpy.helpers import bulk as es_bulk
 from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
-from rubrix.server.commons.models import TaskType
-from rubrix.server.elasticseach import query_helpers
-from rubrix.server.elasticseach.mappings.text2text import text2text_mappings
-from rubrix.server.elasticseach.mappings.text_classification import (
+from rubrix.server.backend import query_helpers
+from rubrix.server.backend.mappings.text2text import text2text_mappings
+from rubrix.server.backend.mappings.text_classification import (
     text_classification_mappings,
 )
-from rubrix.server.elasticseach.mappings.token_classification import (
+from rubrix.server.backend.mappings.token_classification import (
     token_classification_mappings,
 )
-from rubrix.server.elasticseach.metrics import ALL_METRICS
-from rubrix.server.elasticseach.metrics.base import ElasticsearchMetric
-from rubrix.server.elasticseach.search.model import SortConfig
-from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder, SearchQuery
+from rubrix.server.backend.metrics import ALL_METRICS
+from rubrix.server.backend.metrics.base import ElasticsearchMetric
+from rubrix.server.backend.search.model import SortConfig
+from rubrix.server.backend.search.query_builder import EsQueryBuilder, SearchQuery
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
 
 try:

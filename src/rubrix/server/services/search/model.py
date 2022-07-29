@@ -3,9 +3,9 @@ from typing import Any, Dict, Generic, List, TypeVar
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
-from rubrix.server.elasticseach.search.model import BaseSearchQuery as _BaseSearchQuery
-from rubrix.server.elasticseach.search.model import SortableField as _SortableField
-from rubrix.server.elasticseach.search.model import SortConfig as _SortConfig
+from rubrix.server.backend.search.model import BaseSearchQuery as _BaseSearchQuery
+from rubrix.server.backend.search.model import SortableField as _SortableField
+from rubrix.server.backend.search.model import SortConfig as _SortConfig
 from rubrix.server.services.tasks.commons.record import Record
 
 

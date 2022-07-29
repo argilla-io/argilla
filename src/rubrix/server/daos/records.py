@@ -20,23 +20,23 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
-from rubrix.server.commons.models import TaskType
-from rubrix.server.daos.models.datasets import BaseDatasetDB
-from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
-from rubrix.server.elasticseach.backend import (
+from rubrix.server.backend.elasticsearch import (
     ClosedIndexError,
     ElasticsearchBackend,
     IndexNotFoundError,
     create_es_wrapper,
 )
-from rubrix.server.elasticseach.mappings.datasets import DATASETS_RECORDS_INDEX_NAME
-from rubrix.server.elasticseach.mappings.helpers import (
+from rubrix.server.backend.mappings.datasets import DATASETS_RECORDS_INDEX_NAME
+from rubrix.server.backend.mappings.helpers import (
     mappings,
     tasks_common_mappings,
     tasks_common_settings,
 )
-from rubrix.server.elasticseach.query_helpers import parse_aggregations
-from rubrix.server.elasticseach.search.query_builder import SearchQuery
+from rubrix.server.backend.query_helpers import parse_aggregations
+from rubrix.server.backend.search.query_builder import SearchQuery
+from rubrix.server.commons.models import TaskType
+from rubrix.server.daos.models.datasets import BaseDatasetDB
+from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.errors.task_errors import MetadataLimitExceededError
 
