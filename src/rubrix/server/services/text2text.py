@@ -67,13 +67,11 @@ class Text2TextService:
     def add_records(
         self,
         dataset: Text2TextDatasetDB,
-        mappings: Dict[str, Any],
         records: List[CreationText2TextRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_type=Text2TextRecordDB,
             metrics=metrics,

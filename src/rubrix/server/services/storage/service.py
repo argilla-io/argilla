@@ -27,7 +27,6 @@ class RecordsStorageService:
     def store_records(
         self,
         dataset: BaseDatasetDB,
-        mappings: Dict[str, Any],
         records: List[Record],
         record_type: Type[Record],
         metrics: Optional[Type[BaseTaskMetrics]] = None,
@@ -39,7 +38,6 @@ class RecordsStorageService:
 
         return self.__dao__.add_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_class=record_type,
         )

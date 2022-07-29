@@ -84,14 +84,11 @@ async def create_dataset(
     owner = user.check_workspace(ws_params.workspace)
 
     dataset_class = TaskFactory.get_task_dataset(request.task)
-    task_mappings = TaskFactory.get_task_mappings(request.task)
 
     dataset = dataset_class.parse_obj({**request.dict()})
     dataset.owner = owner
 
-    response = datasets.create_dataset(
-        user=user, dataset=dataset, mappings=task_mappings
-    )
+    response = datasets.create_dataset(user=user, dataset=dataset)
 
     return Dataset.parse_obj(response)
 

@@ -1,14 +1,10 @@
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, List, Optional, Set, Type
 
 from pydantic import BaseModel
 
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
-from rubrix.server.apis.v0.models.metrics.base import (
-    BaseTaskMetrics,
-    Metric,
-    PythonMetric,
-)
+from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics, Metric
 from rubrix.server.apis.v0.models.metrics.text_classification import (
     TextClassificationMetrics,
 )
@@ -31,13 +27,6 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
-from rubrix.server.elasticseach.mappings.text2text import text2text_mappings
-from rubrix.server.elasticseach.mappings.text_classification import (
-    text_classification_mappings,
-)
-from rubrix.server.elasticseach.mappings.token_classification import (
-    token_classification_mappings,
-)
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
 
 
@@ -47,7 +36,6 @@ class TaskConfig(BaseModel):
     dataset: Type[DatasetDB]
     record: Type[BaseRecord]
     metrics: Optional[Type[BaseTaskMetrics]]
-    es_mappings: Dict[str, Any]
 
 
 class TaskFactory:
@@ -60,14 +48,12 @@ class TaskFactory:
         task_type: TaskType,
         dataset_class: Type[DatasetDB],
         query_request: Type[Any],
-        es_mappings: Dict[str, Any],
         record_class: Type[BaseRecord],
         metrics: Optional[Type[BaseTaskMetrics]] = None,
     ):
         cls._REGISTERED_TASKS[task_type] = TaskConfig(
             task=task_type,
             dataset=dataset_class,
-            es_mappings=es_mappings,
             query=query_request,
             record=record_class,
             metrics=metrics,
@@ -96,11 +82,6 @@ class TaskFactory:
     def get_task_record(cls, task: TaskType) -> Type[BaseRecord]:
         config = cls.__get_task_config__(task)
         return config.record
-
-    @classmethod
-    def get_task_mappings(cls, task: TaskType) -> Dict[str, Any]:
-        config = cls.__get_task_config__(task)
-        return config.es_mappings
 
     @classmethod
     def __get_task_config__(cls, task):
@@ -135,7 +116,6 @@ TaskFactory.register_task(
     query_request=TokenClassificationQuery,
     record_class=TokenClassificationRecord,
     metrics=TokenClassificationMetrics,
-    es_mappings=token_classification_mappings(),
 )
 
 TaskFactory.register_task(
@@ -144,7 +124,6 @@ TaskFactory.register_task(
     query_request=TextClassificationQuery,
     record_class=TextClassificationRecord,
     metrics=TextClassificationMetrics,
-    es_mappings=text_classification_mappings(),
 )
 
 TaskFactory.register_task(
@@ -153,5 +132,4 @@ TaskFactory.register_task(
     query_request=Text2TextQuery,
     record_class=Text2TextRecord,
     metrics=Text2TextMetrics,
-    es_mappings=text2text_mappings(),
 )
