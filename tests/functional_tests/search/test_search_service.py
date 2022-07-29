@@ -3,7 +3,7 @@ import pytest
 import rubrix
 from rubrix.server.apis.v0.models.commons.model import ScoreRange, TaskType
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.base import BaseMetric
+from rubrix.server.apis.v0.models.metrics.base import PythonMetric
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
@@ -38,7 +38,6 @@ def service(dao: DatasetRecordsDAO, metrics: MetricsService):
 
 def test_query_builder_with_query_range(backend: ElasticsearchBackend):
     es_query = backend.query_builder(
-        "ds",
         schema=None,
         query=TextClassificationQuery(score=ScoreRange(range_from=10)),
     )
@@ -72,7 +71,6 @@ def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBac
     )
 
     es_query = backend.query_builder(
-        dataset=dataset,
         schema=dao.get_dataset_schema(dataset),
         query=TokenClassificationQuery(
             advanced_query_dsl=True,
@@ -129,7 +127,7 @@ def test_failing_metrics(service, mocked_client):
         dataset=dataset,
         query=TextClassificationQuery(),
         sort_config=SortConfig(),
-        metrics=[BaseMetric(id="missing-metric", name="Missing metric")],
+        metrics=[PythonMetric(id="missing-metric", name="Missing metric")],
         size=0,
         record_type=TextClassificationRecord,
     )

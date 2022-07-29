@@ -1,16 +1,10 @@
 from typing import Any, ClassVar, Dict, Generic, List
 
-from rubrix.server.apis.v0.models.commons.model import EsRecordDataFieldNames
 from rubrix.server.apis.v0.models.metrics.base import (
-    BaseMetric,
     BaseTaskMetrics,
     GenericRecord,
-    HistogramAggregation,
-    MetadataAggregations,
-    TermsAggregation,
-    WordCloudAggregation,
+    Metric,
 )
-from rubrix.server.commons.models import TaskStatus
 
 
 class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
@@ -21,53 +15,40 @@ class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
         """Record metrics will persist the text_length"""
         return {"text_length": len(record.all_text())}
 
-    metrics: ClassVar[List[BaseMetric]] = [
-        HistogramAggregation(
+    metrics: ClassVar[List[Metric]] = [
+        Metric(
             id="text_length",
             name="Text length distribution",
             description="Computes the input text length distribution",
-            field="metrics.text_length",
-            script="params._source.text.length()",
-            fixed_interval=1,
         ),
-        TermsAggregation(
+        Metric(
             id="error_distribution",
             name="Error distribution",
             description="Computes the dataset error distribution. It's mean, records "
             "with correct predictions vs records with incorrect prediction "
             "vs records with unknown prediction result",
-            field=EsRecordDataFieldNames.predicted,
-            missing="unknown",
-            fixed_size=3,
         ),
-        TermsAggregation(
+        Metric(
             id="status_distribution",
             name="Record status distribution",
             description="The dataset record status distribution",
-            field=EsRecordDataFieldNames.status,
-            fixed_size=len(TaskStatus),
         ),
-        WordCloudAggregation(
+        Metric(
             id="words_cloud",
             name="Inputs words cloud",
             description="The words cloud for dataset inputs",
-            default_field="text.wordcloud",
         ),
-        MetadataAggregations(id="metadata", name="Metadata fields stats"),
-        TermsAggregation(
+        Metric(id="metadata", name="Metadata fields stats"),
+        Metric(
             id="predicted_by",
             name="Predicted by distribution",
-            field="predicted_by",
         ),
-        TermsAggregation(
+        Metric(
             id="annotated_by",
             name="Annotated by distribution",
-            field="annotated_by",
         ),
-        HistogramAggregation(
+        Metric(
             id="score",
             name="Score record distribution",
-            field="score",
-            fixed_interval=0.001,
         ),
     ]

@@ -1,10 +1,14 @@
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any, Dict, List, Optional, Set, Type, Union
 
 from pydantic import BaseModel
 
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
-from rubrix.server.apis.v0.models.metrics.base import BaseMetric, BaseTaskMetrics
+from rubrix.server.apis.v0.models.metrics.base import (
+    BaseTaskMetrics,
+    Metric,
+    PythonMetric,
+)
 from rubrix.server.apis.v0.models.metrics.text_classification import (
     TextClassificationMetrics,
 )
@@ -106,16 +110,14 @@ class TaskFactory:
         return config
 
     @classmethod
-    def find_task_metric(cls, task: TaskType, metric_id: str) -> Optional[BaseMetric]:
+    def find_task_metric(cls, task: TaskType, metric_id: str) -> Optional[Metric]:
         metrics = cls.find_task_metrics(task, {metric_id})
         if metrics:
             return metrics[0]
-        raise EntityNotFoundError(name=metric_id, type=BaseMetric)
+        raise EntityNotFoundError(name=metric_id, type=Metric)
 
     @classmethod
-    def find_task_metrics(
-        cls, task: TaskType, metric_ids: Set[str]
-    ) -> List[BaseMetric]:
+    def find_task_metrics(cls, task: TaskType, metric_ids: Set[str]) -> List[Metric]:
 
         if not metric_ids:
             return []

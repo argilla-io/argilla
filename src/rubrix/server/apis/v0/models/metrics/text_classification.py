@@ -1,14 +1,10 @@
-from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set
+from typing import Any, ClassVar, Dict, Iterable, List, Union
 
 from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from rubrix.server.apis.v0.models.metrics.base import (
-    BaseMetric,
-    PythonMetric,
-    TermsAggregation,
-)
+from rubrix.server.apis.v0.models.metrics.base import Metric, PythonMetric
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
 from rubrix.server.apis.v0.models.text_classification import TextClassificationRecord
 
@@ -120,27 +116,30 @@ class DatasetLabels(PythonMetric):
 class TextClassificationMetrics(CommonTasksMetrics[TextClassificationRecord]):
     """Configured metrics for text classification task"""
 
-    metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
-        TermsAggregation(
-            id="predicted_as",
-            name="Predicted labels distribution",
-            field="predicted_as",
-        ),
-        TermsAggregation(
-            id="annotated_as",
-            name="Annotated labels distribution",
-            field="annotated_as",
-        ),
-        F1Metric(
-            id="F1",
-            name="F1 Metrics for single-label",
-            description="F1 Metrics for single-label (averaged and per label)",
-        ),
-        F1Metric(
-            id="MultiLabelF1",
-            name="F1 Metrics for multi-label",
-            description="F1 Metrics for multi-label (averaged and per label)",
-            multi_label=True,
-        ),
-        DatasetLabels(),
-    ]
+    metrics: ClassVar[List[Union[PythonMetric, str]]] = (
+        CommonTasksMetrics.metrics
+        + [
+            F1Metric(
+                id="F1",
+                name="F1 Metrics for single-label",
+                description="F1 Metrics for single-label (averaged and per label)",
+            ),
+            F1Metric(
+                id="MultiLabelF1",
+                name="F1 Metrics for multi-label",
+                description="F1 Metrics for multi-label (averaged and per label)",
+                multi_label=True,
+            ),
+            DatasetLabels(),
+        ]
+        + [
+            Metric(
+                id="predicted_as",
+                name="Predicted labels distribution",
+            ),
+            Metric(
+                id="annotated_as",
+                name="Annotated labels distribution",
+            ),
+        ]
+    )
