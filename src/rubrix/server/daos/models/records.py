@@ -37,13 +37,10 @@ class RecordSearch(BaseModel):
         The search query portion
     sort:
         The sort order
-    aggregations:
-        The search aggregations/facets
     """
 
     query: Optional[SearchQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
-    aggregations: Optional[Dict[str, Any]]
 
 
 class RecordSearchResults(BaseModel):
@@ -57,18 +54,7 @@ class RecordSearchResults(BaseModel):
         The total of query results
     records: List[T]
         List of records retrieved for the pagination configuration
-    aggregations: Optional[Dict[str, Dict[str, Any]]]
-        The query aggregations grouped by task. Optional
-    words: Optional[Dict[str, int]]
-        The words cloud aggregations
-    metadata: Optional[Dict[str, int]]
-        Metadata fields aggregations
-    metrics: Optional[List[DatasetMetricResults]]
-        Calculated metrics for search
     """
 
     total: int
     records: List[Dict[str, Any]]
-    aggregations: Optional[Dict[str, Dict[str, Any]]] = Field(default_factory=dict)
-    words: Optional[Dict[str, int]] = None
-    metadata: Optional[Dict[str, int]] = None
