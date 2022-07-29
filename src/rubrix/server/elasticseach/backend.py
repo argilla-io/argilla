@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from typing import Any, Callable, Dict, Iterable, List, Optional
+import re
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import deprecated
 from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
@@ -32,7 +32,8 @@ from rubrix.server.elasticseach.mappings.token_classification import (
 )
 from rubrix.server.elasticseach.metrics import ALL_METRICS
 from rubrix.server.elasticseach.metrics.base import ElasticsearchMetric
-from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
+from rubrix.server.elasticseach.search.model import SortConfig
+from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder, SearchQuery
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
 
 try:
@@ -92,6 +93,16 @@ class ElasticsearchBackend(LoggingMixin):
     """
 
     _INSTANCE = None
+
+    __HIGHLIGHT_PRE_TAG__ = "<@@-rb-key>"
+    __HIGHLIGHT_POST_TAG__ = "</@@-rb-key>"
+    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
+    )
+
+    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
+        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
+    )
 
     @classmethod
     def get_instance(cls) -> "ElasticsearchBackend":
@@ -741,6 +752,103 @@ class ElasticsearchBackend(LoggingMixin):
             if index in response:
                 response = response.get(index)
             return response
+
+    def search_records(
+        self,
+        records_index: str,
+        query: SearchQuery,
+        sort: SortConfig,
+        record_from: int = 0,
+        size: int = 100,
+        exclude_fields: List[str] = None,
+        enable_highlight: bool = True,
+    ) -> Tuple[int, List[Dict[str, Any]]]:
+        with backend_error_handler(index=records_index):
+            es_query = {
+                **self.query_builder.map_2_es_query(
+                    schema=self.get_index_mapping(records_index),
+                    query=query,
+                    sort=sort,
+                ),
+                "_source": {"excludes": exclude_fields or []},
+                "from": record_from,
+            }
+            if enable_highlight:
+                es_query["highlight"] = self.__configure_query_highlight__()
+
+            results = self.search(index=records_index, query=es_query, size=size)
+            hits = results["hits"]
+            total = hits["total"]
+            docs = hits["hits"]
+
+            return total, list(map(self.__esdoc2record__, docs))
+
+    def __esdoc2record__(
+        self,
+        doc: Dict[str, Any],
+        is_phrase_query: bool = True,
+    ):
+        return {
+            **doc["_source"],
+            "id": doc["_id"],
+            "search_keywords": self.__parse_highlight_results__(
+                doc, is_phrase_query=is_phrase_query
+            ),
+        }
+
+    @classmethod
+    def __parse_highlight_results__(
+        cls,
+        doc: Dict[str, Any],
+        is_phrase_query: bool = False,
+    ) -> Optional[List[str]]:
+        highlight_info = doc.get("highlight")
+        if not highlight_info:
+            return None
+
+        search_keywords = []
+        for content in highlight_info.values():
+            if not isinstance(content, list):
+                content = [content]
+            text = " ".join(content)
+
+            if is_phrase_query:
+                text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
+            search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
+        return list(set(search_keywords))
+
+    @classmethod
+    def __configure_query_highlight__(cls, task: TaskType = None):
+
+        return {
+            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
+            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
+            "require_field_match": True,
+            "fields": {
+                "text": {},
+                "text.*": {},
+                "inputs.*": {},
+                # **({"inputs.*": {}} if task == TaskType.text_classification else {}),
+            },
+        }
+
+    # TODO(@frascuchon): Include sort parameter
+    def scan_records(
+        self,
+        index: str,
+        query: Optional[SearchQuery] = None,
+    ) -> Iterable[Dict[str, Any]]:
+        with backend_error_handler(index):
+            es_query = {
+                **self.query_builder.map_2_es_query(
+                    schema=self.get_index_mapping(index),
+                    query=query,
+                ),
+                "highlight": self.__configure_query_highlight__(),
+            }
+            docs = self.list_documents(index, query=es_query)
+            for doc in docs:
+                yield self.__esdoc2record__(doc)
 
 
 _instance = None  # The singleton instance

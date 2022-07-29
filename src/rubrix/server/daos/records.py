@@ -79,16 +79,6 @@ class DatasetRecordsDAO:
     # This info must be provided by each task using dao.register_task_mappings method
     _MAPPINGS_BY_TASKS = {}
 
-    __HIGHLIGHT_PRE_TAG__ = "<@@-rb-key>"
-    __HIGHLIGHT_POST_TAG__ = "</@@-rb-key>"
-    __HIGHLIGHT_VALUES_REGEX__ = re.compile(
-        rf"{__HIGHLIGHT_PRE_TAG__}(.+?){__HIGHLIGHT_POST_TAG__}"
-    )
-
-    __HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__ = re.compile(
-        rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
-    )
-
     @classmethod
     def get_instance(
         cls,
@@ -230,48 +220,23 @@ class DatasetRecordsDAO:
         try:
             search = search or RecordSearch()
             records_index = dataset_records_index(dataset.id)
-            compute_aggregations = record_from == 0
-            aggregation_requests = (
-                {**(search.aggregations or {})} if compute_aggregations else {}
+
+            total, records = self._es.search_records(
+                records_index=records_index,
+                query=search.query,
+                sort=search.sort,
+                record_from=record_from,
+                size=size,
+                exclude_fields=exclude_fields,
+                enable_highlight=highligth_results,
             )
-
-            es_query = {
-                **self._es.query_builder.map_2_es_query(
-                    schema=self._es.get_index_mapping(records_index),
-                    query=search.query,
-                    sort=search.sort,
-                ),
-                "_source": {"excludes": exclude_fields or []},
-                "from": record_from,
-                "aggs": aggregation_requests,
-            }
-            if highligth_results:
-                es_query["highlight"] = self.__configure_query_highlight__(
-                    task=dataset.task
-                )
-
-            results = self._es.search(index=records_index, query=es_query, size=size)
+            return RecordSearchResults(total=total, records=records)
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
         except IndexNotFoundError:
             raise MissingDatasetRecordsError(
                 f"No records index found for dataset {dataset.name}"
             )
-
-        hits = results["hits"]
-        total = hits["total"]
-        docs = hits["hits"]
-        search_aggregations = results.get("aggregations", {})
-
-        result = RecordSearchResults(
-            total=total,
-            records=list(map(self.__esdoc2record__, docs)),
-        )
-        if search_aggregations:
-            parsed_aggregations = parse_aggregations(search_aggregations)
-            result.aggregations = parsed_aggregations
-
-        return result
 
     def scan_dataset(
         self,
@@ -298,74 +263,10 @@ class DatasetRecordsDAO:
         -------
             An iterable over found dataset records
         """
-        # TODO(@frascuchon): Move this logic inside the backend component
-        index = dataset_records_index(dataset.id)
         search = search or RecordSearch()
-        # TODO(@frascuchon): Include sort parameter
-
-        sort_cfg = self.__normalize_sort_config__(
-            index=index, sort=[{"id": {"order": "asc"}}]
+        return self._es.scan_records(
+            index=dataset_records_index(dataset.id), query=search.query
         )
-        es_query = {
-            **self._es.query_builder.map_2_es_query(
-                schema=self._es.get_index_mapping(index),
-                query=search.query,
-            ),
-            "highlight": self.__configure_query_highlight__(task=dataset.task),
-            "sort": sort_cfg,  # Sort the search so the consistency is maintained in every search
-        }
-
-        if id_from:
-            # Scroll method does not accept read_after, thus, this case is handled as a search
-            es_query["search_after"] = [id_from]
-            results = self._es.search(index=index, query=es_query, size=limit)
-            hits = results["hits"]
-            docs = hits["hits"]
-
-        else:
-            docs = self._es.list_documents(
-                index,
-                query=es_query,
-                sort_cfg=sort_cfg,
-            )
-        for doc in docs:
-            yield self.__esdoc2record__(doc)
-
-    def __esdoc2record__(
-        self,
-        doc: Dict[str, Any],
-        query: Optional[str] = None,
-        is_phrase_query: bool = True,
-    ):
-        return {
-            **doc["_source"],
-            "id": doc["_id"],
-            "search_keywords": self.__parse_highlight_results__(
-                doc, query=query, is_phrase_query=is_phrase_query
-            ),
-        }
-
-    @classmethod
-    def __parse_highlight_results__(
-        cls,
-        doc: Dict[str, Any],
-        query: Optional[str] = None,
-        is_phrase_query: bool = False,
-    ) -> Optional[List[str]]:
-        highlight_info = doc.get("highlight")
-        if not highlight_info:
-            return None
-
-        search_keywords = []
-        for content in highlight_info.values():
-            if not isinstance(content, list):
-                content = [content]
-            text = " ".join(content)
-
-            if is_phrase_query:
-                text = re.sub(cls.__HIGHLIGHT_PHRASE_PRE_PARSER_REGEX__, " ", text)
-            search_keywords.extend(re.findall(cls.__HIGHLIGHT_VALUES_REGEX__, text))
-        return list(set(search_keywords))
 
     def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
@@ -433,21 +334,6 @@ class DatasetRecordsDAO:
         """Return inner elasticsearch index configuration"""
         schema = self._es.get_index_mapping(dataset_records_index(dataset.id))
         return schema
-
-    @classmethod
-    def __configure_query_highlight__(cls, task: TaskType):
-
-        return {
-            "pre_tags": [cls.__HIGHLIGHT_PRE_TAG__],
-            "post_tags": [cls.__HIGHLIGHT_POST_TAG__],
-            "require_field_match": True,
-            "fields": {
-                "text": {},
-                "text.*": {},
-                # TODO(@frascuchon): `words` will be removed in version 0.16.0
-                **({"inputs.*": {}} if task == TaskType.text_classification else {}),
-            },
-        }
 
 
 _instance: Optional[DatasetRecordsDAO] = None
