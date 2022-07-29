@@ -164,6 +164,8 @@ def tasks_common_mappings():
             "id": mappings.keyword_field(),
             "words": mappings.words_text_field(),
             "text": mappings.text_field(),
+            # TODO(@frascuchon): Enable prediction and annotation
+            #  so we can build extra metrics based on these fields
             "prediction": {"type": "object", "enabled": False},
             "annotation": {"type": "object", "enabled": False},
             "status": mappings.keyword_field(),
