@@ -671,7 +671,7 @@ class ElasticsearchBackend(LoggingMixin):
         results = {}
         for agg in aggs:
             es_query = {
-                "query": self.query_builder(
+                **self.query_builder.map_2_es_query(
                     schema=self.get_index_mapping(index),
                     query=query,
                 ),

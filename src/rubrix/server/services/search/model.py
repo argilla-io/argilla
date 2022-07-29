@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Any, Dict, Generic, List, TypeVar
 
 from pydantic import BaseModel, Field
@@ -6,11 +5,15 @@ from pydantic.generics import GenericModel
 
 from rubrix.server.elasticseach.search.model import BaseSearchQuery as _BaseSearchQuery
 from rubrix.server.elasticseach.search.model import SortableField as _SortableField
-from rubrix.server.elasticseach.search.model import SortOrder
+from rubrix.server.elasticseach.search.model import SortConfig as _SortConfig
 from rubrix.server.services.tasks.commons.record import Record
 
 
 class BaseSVCSearchQuery(_BaseSearchQuery):
+    pass
+
+
+class SortConfig(_SortConfig):
     pass
 
 
@@ -27,13 +30,6 @@ class QueryRange(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-
-
-class SortConfig(BaseModel):
-    shuffle: bool = False
-
-    sort_by: List[SortableField] = Field(default_factory=list)
-    valid_fields: List[str] = Field(default_factory=list)
 
 
 class BaseSearchResultsAggregations(BaseModel):
