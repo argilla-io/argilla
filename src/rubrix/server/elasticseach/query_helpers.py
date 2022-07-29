@@ -20,9 +20,6 @@ from pydantic import BaseModel
 from rubrix.server.commons.models import TaskStatus
 from rubrix.server.elasticseach.mappings.helpers import mappings
 
-# TODO(@frascuchon): this should be move to the ElasticsearchBackend context
-from rubrix.server.elasticseach.search.model import SortableField
-
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
     def resolve_mapping(info) -> Dict[str, Any]:
@@ -41,21 +38,6 @@ def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, A
             for key, info in model_class.schema()["properties"].items()
         },
     }
-
-
-def sort_by2elasticsearch(
-    sort: List[SortableField], valid_fields: Optional[List[str]] = None
-) -> List[Dict[str, Any]]:
-    valid_fields = valid_fields or []
-    result = []
-    for sortable_field in sort:
-        if valid_fields:
-            assert sortable_field.id.split(".")[0] in valid_fields, (
-                f"Wrong sort id {sortable_field.id}. Valid values are: "
-                f"{[str(v) for v in valid_fields]}"
-            )
-        result.append({sortable_field.id: {"order": sortable_field.order}})
-    return result
 
 
 def parse_aggregations(

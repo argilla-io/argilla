@@ -87,10 +87,8 @@ class DatasetsDAO:
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
         )
 
-        es_query = self._es.query_builder.__call__(schema=None, query=query)
-        docs = self._es.list_documents(
-            index=DATASETS_INDEX_NAME, query={"query": es_query}
-        )
+        es_query = self._es.query_builder.map_2_es_query(schema=None, query=query)
+        docs = self._es.list_documents(index=DATASETS_INDEX_NAME, query=es_query)
 
         task2dataset_map = task2dataset_map or {}
         return [

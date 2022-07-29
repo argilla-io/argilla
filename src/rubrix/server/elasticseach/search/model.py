@@ -18,6 +18,13 @@ class SortableField(BaseModel):
     order: SortOrder = SortOrder.asc
 
 
+class SortConfig(BaseModel):
+    shuffle: bool = False
+
+    sort_by: List[SortableField] = Field(default_factory=list)
+    valid_fields: List[str] = Field(default_factory=list)
+
+
 class AbstractQuery(BaseModel):
     pass
 

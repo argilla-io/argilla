@@ -31,8 +31,8 @@ from rubrix.server.services.search.model import (
     BaseSearchResults,
     BaseSearchResultsAggregations,
     QueryRange,
-    SortableField,
 )
+from rubrix.server.services.search.model import SortableField as _SortableField
 from rubrix.server.services.tasks.commons import (
     Annotation,
     BaseAnnotation,
@@ -43,6 +43,10 @@ from rubrix.server.services.tasks.commons import (
     TaskType,
 )
 from rubrix.utils import limit_value_length
+
+
+class SortableField(_SortableField):
+    pass
 
 
 @dataclass
@@ -102,7 +106,6 @@ class ScoreRange(QueryRange):
 
 __ALL__ = [
     QueryRange,
-    SortableField,
     BaseSearchResults,
     BaseSearchResultsAggregations,
     Annotation,

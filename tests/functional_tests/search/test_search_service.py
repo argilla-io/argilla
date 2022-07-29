@@ -37,19 +37,21 @@ def service(dao: DatasetRecordsDAO, metrics: MetricsService):
 
 
 def test_query_builder_with_query_range(backend: ElasticsearchBackend):
-    es_query = backend.query_builder(
+    es_query = backend.query_builder.map_2_es_query(
         schema=None,
         query=TextClassificationQuery(score=ScoreRange(range_from=10)),
     )
     assert es_query == {
-        "bool": {
-            "filter": {
-                "bool": {
-                    "minimum_should_match": 1,
-                    "should": [{"range": {"score": {"gte": 10.0}}}],
-                }
-            },
-            "must": {"match_all": {}},
+        "query": {
+            "bool": {
+                "filter": {
+                    "bool": {
+                        "minimum_should_match": 1,
+                        "should": [{"range": {"score": {"gte": 10.0}}}],
+                    }
+                },
+                "must": {"match_all": {}},
+            }
         }
     }
 
@@ -70,7 +72,7 @@ def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBac
         ),
     )
 
-    es_query = backend.query_builder(
+    es_query = backend.query_builder.map_2_es_query(
         schema=dao.get_dataset_schema(dataset),
         query=TokenClassificationQuery(
             advanced_query_dsl=True,
@@ -79,33 +81,35 @@ def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBac
     )
 
     assert es_query == {
-        "bool": {
-            "filter": {"bool": {"must": {"match_all": {}}}},
-            "must": {
-                "nested": {
-                    "path": "metrics.predicted.mentions",
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {
-                                    "term": {
-                                        "metrics.predicted.mentions.label": {
-                                            "value": "NAME"
+        "query": {
+            "bool": {
+                "filter": {"bool": {"must": {"match_all": {}}}},
+                "must": {
+                    "nested": {
+                        "path": "metrics.predicted.mentions",
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "term": {
+                                            "metrics.predicted.mentions.label": {
+                                                "value": "NAME"
+                                            }
                                         }
-                                    }
-                                },
-                                {
-                                    "range": {
-                                        "metrics.predicted.mentions.score": {
-                                            "lte": "0.1"
+                                    },
+                                    {
+                                        "range": {
+                                            "metrics.predicted.mentions.score": {
+                                                "lte": "0.1"
+                                            }
                                         }
-                                    }
-                                },
-                            ]
-                        }
-                    },
-                }
-            },
+                                    },
+                                ]
+                            }
+                        },
+                    }
+                },
+            }
         }
     }
 

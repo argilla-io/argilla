@@ -5,7 +5,6 @@ from fastapi import Depends
 
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.query_helpers import sort_by2elasticsearch
 from rubrix.server.services.datasets import Dataset
 from rubrix.server.services.metrics import BaseMetric, MetricsService
 from rubrix.server.services.search.model import (
@@ -14,10 +13,7 @@ from rubrix.server.services.search.model import (
     SearchResults,
     SortConfig,
 )
-from rubrix.server.services.tasks.commons.record import (
-    BaseRecordDB,
-    EsRecordDataFieldNames,
-)
+from rubrix.server.services.tasks.commons.record import BaseRecordDB
 
 SvcSearchQuery = TypeVar("SvcSearchQuery", bound=BaseSVCSearchQuery)
 
@@ -66,25 +62,7 @@ class SearchRecordsService:
         exclude_fields = ["metrics.*"] if exclude_metrics else None
         results = self.__dao__.search_records(
             dataset,
-            search=RecordSearch(
-                query=query,
-                # TODO(@frascuchon): sort must be parsed inside de dao
-                sort=sort_by2elasticsearch(
-                    sort_config.sort_by,
-                    valid_fields=[
-                        "metadata",
-                        EsRecordDataFieldNames.last_updated,
-                        EsRecordDataFieldNames.score,
-                        EsRecordDataFieldNames.predicted,
-                        EsRecordDataFieldNames.predicted_as,
-                        EsRecordDataFieldNames.predicted_by,
-                        EsRecordDataFieldNames.annotated_as,
-                        EsRecordDataFieldNames.annotated_by,
-                        EsRecordDataFieldNames.status,
-                        EsRecordDataFieldNames.event_timestamp,
-                    ],
-                ),
-            ),
+            search=RecordSearch(query=query, sort=sort_config),
             size=size,
             record_from=record_from,
             exclude_fields=exclude_fields,
