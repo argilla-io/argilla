@@ -1,10 +1,39 @@
-from rubrix.server.apis.v0.models.metrics.token_classification import (
-    MentionMetrics,
-    TokenMetrics,
-    TokenTagMetrics,
-)
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
+
 from rubrix.server.elasticseach.mappings.helpers import mappings
 from rubrix.server.elasticseach.query_helpers import nested_mappings_from_base_model
+
+
+class MentionMetrics(BaseModel):
+    """Mention metrics model"""
+
+    value: str
+    label: str
+    score: float = Field(ge=0.0)
+    capitalness: Optional[str] = Field(None)
+    density: float = Field(ge=0.0)
+    tokens_length: int = Field(g=0)
+    chars_length: int = Field(g=0)
+
+
+class TokenTagMetrics(BaseModel):
+    value: str
+    tag: str
+
+
+class TokenMetrics(BaseModel):
+
+    idx: int
+    value: str
+    char_start: int
+    char_end: int
+    length: int
+    capitalness: Optional[str] = None
+    score: Optional[float] = None
+    tag: Optional[str] = None  # TODO: remove!
+    custom: Dict[str, Any] = None
 
 
 def mentions_mappings():

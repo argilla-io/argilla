@@ -50,9 +50,7 @@ class DatasetsService:
     def __init__(self, dao: DatasetsDAO):
         self.__dao__ = dao
 
-    def create_dataset(
-        self, user: User, dataset: Dataset, mappings: Dict[str, Any]
-    ) -> Dataset:
+    def create_dataset(self, user: User, dataset: Dataset) -> Dataset:
         user.check_workspace(dataset.owner)
 
         try:
@@ -72,7 +70,7 @@ class DatasetsService:
             dataset.created_by = user.username
             dataset.created_at = date_now
             dataset.last_updated = date_now
-            return self.__dao__.create_dataset(dataset, mappings=mappings)
+            return self.__dao__.create_dataset(dataset)
 
     def find_by_name(
         self,
