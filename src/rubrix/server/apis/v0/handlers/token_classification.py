@@ -91,7 +91,6 @@ async def bulk_records(
     """
 
     task = TASK_TYPE
-    task_mappings = TaskFactory.get_task_mappings(TASK_TYPE)
     owner = current_user.check_workspace(common_params.workspace)
     try:
         dataset = datasets.find_by_name(
@@ -111,9 +110,7 @@ async def bulk_records(
         dataset_class = TaskFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
-        datasets.create_dataset(
-            user=current_user, dataset=dataset, mappings=task_mappings
-        )
+        datasets.create_dataset(user=current_user, dataset=dataset)
 
     await validator.validate_dataset_records(
         user=current_user,
@@ -123,7 +120,6 @@ async def bulk_records(
 
     result = service.add_records(
         dataset=dataset,
-        mappings=task_mappings,
         records=bulk.records,
         metrics=TaskFactory.get_task_metrics(TASK_TYPE),
     )

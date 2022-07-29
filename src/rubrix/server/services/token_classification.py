@@ -67,13 +67,11 @@ class TokenClassificationService:
     def add_records(
         self,
         dataset: TokenClassificationDatasetDB,
-        mappings: Dict[str, Any],
         records: List[CreationTokenClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_type=TokenClassificationRecordDB,
             metrics=metrics,

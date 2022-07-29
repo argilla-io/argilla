@@ -6,7 +6,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
-from rubrix.server.commons.models import TaskStatus
+from rubrix.server.commons.models import TaskStatus, TaskType
 
 
 class EsRecordDataFieldNames(str, Enum):
@@ -28,14 +28,6 @@ class EsRecordDataFieldNames(str, Enum):
 
 class BaseAnnotation(BaseModel):
     agent: str = Field(max_length=64)
-
-
-class TaskType(str, Enum):
-
-    text_classification = "TextClassification"
-    token_classification = "TokenClassification"
-    text2text = "Text2Text"
-    multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
 
 class PredictionStatus(str, Enum):

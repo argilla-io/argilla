@@ -75,7 +75,6 @@ class TextClassificationService:
     def add_records(
         self,
         dataset: TextClassificationDatasetDB,
-        mappings: Dict[str, Any],
         records: List[CreationTextClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
@@ -84,7 +83,6 @@ class TextClassificationService:
 
         failed = self.__storage__.store_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_type=TextClassificationRecordDB,
             metrics=metrics,

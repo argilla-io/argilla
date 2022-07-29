@@ -21,7 +21,15 @@ from opensearchpy.helpers import bulk as es_bulk
 from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
+from rubrix.server.commons.models import TaskType
 from rubrix.server.elasticseach import query_helpers
+from rubrix.server.elasticseach.mappings.text2text import text2text_mappings
+from rubrix.server.elasticseach.mappings.text_classification import (
+    text_classification_mappings,
+)
+from rubrix.server.elasticseach.mappings.token_classification import (
+    token_classification_mappings,
+)
 from rubrix.server.elasticseach.metrics import ALL_METRICS
 from rubrix.server.elasticseach.metrics.base import ElasticsearchMetric
 from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
@@ -109,7 +117,14 @@ class ElasticsearchBackend(LoggingMixin):
                 max_retries=5,
             )
             cls._INSTANCE = cls(
-                es_client, query_builder=EsQueryBuilder(), metrics={**ALL_METRICS}
+                es_client,
+                query_builder=EsQueryBuilder(),
+                metrics={**ALL_METRICS},
+                mappings={
+                    TaskType.text_classification: text_classification_mappings(),
+                    TaskType.token_classification: token_classification_mappings(),
+                    TaskType.text2text: text2text_mappings(),
+                },
             )
 
         return cls._INSTANCE
@@ -119,10 +134,12 @@ class ElasticsearchBackend(LoggingMixin):
         es_client: OpenSearch,
         query_builder: EsQueryBuilder,
         metrics: Dict[str, ElasticsearchMetric] = None,
+        mappings: Dict[str, Dict[str, Any]] = None,
     ):
         self.__client__ = es_client
         self.__query_builder__ = query_builder
         self.__defined_metrics__ = metrics or {}
+        self.__tasks_mappings__ = mappings
 
     @property
     def client(self):
@@ -668,8 +685,11 @@ class ElasticsearchBackend(LoggingMixin):
     def find_metric_by_id(self, metric_id: str) -> Optional[ElasticsearchMetric]:
         metric = self.__defined_metrics__.get(metric_id)
         if not metric:
-            raise EntityNotFoundError(name=metric_id, type="Metric")
+            raise EntityNotFoundError(name=metric_id, type=ElasticsearchMetric)
         return metric
+
+    def get_task_mapping(self, task: TaskType) -> Dict[str, Any]:
+        return self.__tasks_mappings__[task]
 
     def compute_metric(
         self,

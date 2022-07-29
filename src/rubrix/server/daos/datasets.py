@@ -105,9 +105,7 @@ class DatasetsDAO:
             for task in [self.__get_doc_field__(doc, "task")]
         ]
 
-    def create_dataset(
-        self, dataset: BaseDatasetDB, mappings: Dict[str, Any]
-    ) -> BaseDatasetDB:
+    def create_dataset(self, dataset: BaseDatasetDB) -> BaseDatasetDB:
         """
         Stores a dataset in elasticsearch and creates corresponding dataset records index
 
@@ -126,9 +124,7 @@ class DatasetsDAO:
             doc_id=dataset.id,
             document=self._dataset_to_es_doc(dataset),
         )
-        self.__records_dao__.create_dataset_index(
-            dataset, mappings=mappings, force_recreate=True
-        )
+        self.__records_dao__.create_dataset_index(dataset, force_recreate=True)
         return dataset
 
     def update_dataset(

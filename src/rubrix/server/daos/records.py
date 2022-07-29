@@ -20,7 +20,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 import deprecated
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
+from rubrix.server.commons.models import TaskType
 from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
 from rubrix.server.elasticseach.backend import (
@@ -39,9 +39,12 @@ from rubrix.server.elasticseach.query_helpers import parse_aggregations
 from rubrix.server.elasticseach.search.query_builder import SearchQuery
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.errors.task_errors import MetadataLimitExceededError
+
+# TODO(@frascuchon): Don't use server.services modules here
+from rubrix.server.services.tasks.commons import BaseRecordDB
 from rubrix.server.settings import settings
 
-DBRecord = TypeVar("DBRecord", bound=BaseRecord)
+DBRecord = TypeVar("DBRecord", bound=BaseRecordDB)
 
 # TODO(@frascuchon): Move to the backend and accept the dataset id as parameter
 def dataset_records_index(dataset_id: str) -> str:
@@ -114,7 +117,6 @@ class DatasetRecordsDAO:
     def add_records(
         self,
         dataset: BaseDatasetDB,
-        mappings: Dict[str, Any],
         records: List[DBRecord],
         record_class: Type[DBRecord],
     ) -> int:
@@ -151,7 +153,7 @@ class DatasetRecordsDAO:
                 db_record.dict(exclude_none=False, exclude={"search_keywords"})
             )
 
-        index_name = self.create_dataset_index(dataset, mappings=mappings)
+        index_name = self.create_dataset_index(dataset)
         self._configure_metadata_fields(index_name, metadata_values)
         return self._es.add_documents(
             index=index_name,
@@ -396,7 +398,6 @@ class DatasetRecordsDAO:
     def create_dataset_index(
         self,
         dataset: BaseDatasetDB,
-        mappings: Dict[str, Any],
         force_recreate: bool = False,
     ) -> str:
         """
@@ -412,7 +413,7 @@ class DatasetRecordsDAO:
             The generated index name.
         """
         _mappings = tasks_common_mappings()
-        task_mappings = mappings.copy()
+        task_mappings = self._es.get_task_mapping(dataset.task).copy()
         for k in task_mappings:
             if isinstance(task_mappings[k], list):
                 _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
