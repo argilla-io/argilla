@@ -233,18 +233,14 @@ class DatasetRecordsDAO:
                 {**(search.aggregations or {})} if compute_aggregations else {}
             )
 
-            sort_config = self.__normalize_sort_config__(
-                records_index, sort=search.sort
-            )
-
             es_query = {
-                "_source": {"excludes": exclude_fields or []},
-                "from": record_from,
-                "query": self._es.query_builder(
+                **self._es.query_builder.map_2_es_query(
                     schema=self._es.get_index_mapping(records_index),
                     query=search.query,
+                    sort=search.sort,
                 ),
-                "sort": sort_config,
+                "_source": {"excludes": exclude_fields or []},
+                "from": record_from,
                 "aggs": aggregation_requests,
             }
             if highligth_results:
@@ -275,23 +271,6 @@ class DatasetRecordsDAO:
 
         return result
 
-    def __normalize_sort_config__(
-        self, index: str, sort: Optional[List[Dict[str, Any]]] = None
-    ) -> List[Dict[str, Any]]:
-        id_field = "id"
-        id_keyword_field = "id.keyword"
-        sort_config = []
-
-        for sort_field in sort or [{id_field: {"order": "asc"}}]:
-            for field in sort_field:
-                if field == id_field and self._es.get_field_mapping(
-                    index=index, field_name=id_keyword_field
-                ):
-                    sort_config.append({id_keyword_field: sort_field[field]})
-                else:
-                    sort_config.append(sort_field)
-        return sort_config
-
     def scan_dataset(
         self,
         dataset: BaseDatasetDB,
@@ -320,12 +299,13 @@ class DatasetRecordsDAO:
         # TODO(@frascuchon): Move this logic inside the backend component
         index = dataset_records_index(dataset.id)
         search = search or RecordSearch()
+        # TODO(@frascuchon): Include sort parameter
 
         sort_cfg = self.__normalize_sort_config__(
             index=index, sort=[{"id": {"order": "asc"}}]
         )
         es_query = {
-            "query": self._es.query_builder(
+            **self._es.query_builder.map_2_es_query(
                 schema=self._es.get_index_mapping(index),
                 query=search.query,
             ),

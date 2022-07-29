@@ -1,4 +1,3 @@
-import dataclasses
 from typing import List, Optional, Tuple
 
 from fastapi import Depends

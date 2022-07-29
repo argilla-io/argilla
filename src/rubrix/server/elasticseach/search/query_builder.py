@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
@@ -10,6 +10,7 @@ from rubrix.server.elasticseach.search.model import (
     AbstractQuery,
     BaseSearchQuery,
     DatasetsQuery,
+    SortConfig,
 )
 from rubrix.server.services.search.model import QueryRange
 
@@ -66,6 +67,7 @@ class EsQueryBuilder:
         self,
         schema: Optional[Dict[str, Any]] = None,
         query: Optional[SearchQuery] = None,
+        sort: Optional[SortConfig] = None,
     ):
         if not query:
             return filters.match_all()
@@ -91,15 +93,64 @@ class EsQueryBuilder:
             filter_query=self._to_es_query(new_query), must_query=query_text
         )
 
-    def __call__(
+    def map_2_es_query(
         self,
         schema: Optional[Dict[str, Any]] = None,
         query: Optional[Query] = None,
+        sort: Optional[SortConfig] = None,
     ) -> Dict[str, Any]:
+        es_query: Dict[str, Any] = (
+            {"query": self._datasets_to_es_query(query)}
+            if isinstance(query, DatasetsQuery)
+            else {"query": self._search_to_es_query(schema, query)}
+        )
+        es_sort = self.map_2_es_sort_configuration(sort, schema=schema)
+        if es_sort:
+            es_query["sort"] = es_sort
+        return es_query
 
-        if isinstance(query, DatasetsQuery):
-            return self._datasets_to_es_query(query)
-        return self._search_to_es_query(schema, query)
+    def map_2_es_sort_configuration(
+        self, sort: Optional[SortConfig] = None, schema: Dict[str, Any] = None
+    ) -> Optional[List[Dict[str, Any]]]:
+
+        if not sort:
+            return None
+
+        valid_fields = sort.valid_fields or [
+            "metadata",
+            "score",
+            "predicted",
+            "predicted_as",
+            "predicted_by",
+            "annotated_as",
+            "annotated_by",
+            "status",
+            "last_updated",
+            "event_timestamp",
+        ]
+        result = []
+        id_field = "id"
+        id_keyword_field = "id.keyword"
+        sort_config = []
+
+        for sortable_field in sort.sort_by:
+            if valid_fields:
+                if not sortable_field.id.split(".")[0] in valid_fields:
+                    raise AssertionError(
+                        f"Wrong sort id {sortable_field.id}. Valid values are: "
+                        f"{[str(v) for v in valid_fields]}"
+                    )
+            result.append({sortable_field.id: {"order": sortable_field.order}})
+
+        mappings = self._clean_mappings(schema["mappings"])
+        for sort_field in result or [{id_field: {"order": "asc"}}]:
+            for field in sort_field:
+                if field == id_field and mappings.get(id_keyword_field):
+                    sort_config.append({id_keyword_field: sort_field[field]})
+                else:
+                    sort_config.append(sort_field)
+
+        return sort_config
 
     @classmethod
     def _to_es_query(cls, query: SearchQuery) -> Dict[str, Any]:
@@ -156,3 +207,12 @@ class EsQueryBuilder:
             if hasattr(query, "uncovered_by_rules") and query.uncovered_by_rules
             else None,
         )
+
+    def _clean_mappings(self, mappings: Dict[str, Any]):
+        if not mappings:
+            return {}
+
+        return {
+            key: definition.get("type") or self._clean_mappings(definition)
+            for key, definition in mappings["properties"].items()
+        }
