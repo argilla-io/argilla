@@ -13,20 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import math
 from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.commons.model import (
-    EsRecordDataFieldNames,
-    SortableField,
-)
 from rubrix.server.commons.models import TaskStatus
 from rubrix.server.elasticseach.mappings.helpers import mappings
 
-
 # TODO(@frascuchon): this should be move to the ElasticsearchBackend context
+from rubrix.server.elasticseach.search.model import SortableField
+
+
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
     def resolve_mapping(info) -> Dict[str, Any]:
         the_type = info.get("type")
@@ -127,10 +124,6 @@ def parse_aggregations(
     return result
 
 
-def decode_field_name(field: EsRecordDataFieldNames) -> str:
-    return field.value
-
-
 class filters:
     """Group of functions related to elasticsearch filters"""
 
@@ -173,29 +166,21 @@ class filters:
 
         if not predicted_by:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.predicted_by): predicted_by
-            }
-        }
+        return {"terms": {"predicted_by": predicted_by}}
 
     @staticmethod
     def annotated_by(annotated_by: List[str] = None) -> Optional[Dict[str, Any]]:
         """Filter records with given predicted by terms"""
         if not annotated_by:
             return None
-        return {
-            "terms": {
-                decode_field_name(EsRecordDataFieldNames.annotated_by): annotated_by
-            }
-        }
+        return {"terms": {"annotated_by": annotated_by}}
 
     @staticmethod
     def status(status: List[TaskStatus] = None) -> Optional[Dict[str, Any]]:
         """Filter records by status"""
         if not status:
             return None
-        return {"terms": {decode_field_name(EsRecordDataFieldNames.status): status}}
+        return {"terms": {"status": status}}
 
     @staticmethod
     def metadata(metadata: Dict[str, Union[str, List[str]]]) -> List[Dict[str, Any]]:
@@ -270,7 +255,9 @@ class aggregations:
     MAX_AGGREGATION_SIZE = 5000  # TODO: improve by setting env var
 
     @staticmethod
-    def nested_aggregation(nested_path: str, inner_aggregation: Dict[str, Any]):
+    def nested_aggregation(
+        nested_path: str, inner_aggregation: Dict[str, Any]
+    ) -> Dict[str, Any]:
         inner_meta = list(inner_aggregation.values())[0].get("meta", {})
         return {
             "meta": {

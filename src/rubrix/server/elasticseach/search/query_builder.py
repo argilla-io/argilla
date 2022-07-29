@@ -25,7 +25,6 @@ class EsQueryBuilder:
 
     def __call__(
         self,
-        dataset: BaseDatasetDB,
         schema: Dict[str, Any],
         query: Optional[SearchQuery] = None,
     ) -> Dict[str, Any]:

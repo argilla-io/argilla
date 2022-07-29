@@ -94,7 +94,6 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         teams_query: CommonTaskQueryParams = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
-        metrics: MetricsService = Depends(MetricsService.get_instance),
     ) -> List[MetricInfo]:
         """
         List available metrics info for a given dataset

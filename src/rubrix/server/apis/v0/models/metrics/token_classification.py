@@ -2,178 +2,12 @@ from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.apis.v0.models.metrics.base import (
-    BaseMetric,
-    ElasticsearchMetric,
-    HistogramAggregation,
-    NestedHistogramAggregation,
-    NestedPathElasticsearchMetric,
-    NestedTermsAggregation,
-    PythonMetric,
-    TermsAggregation,
-)
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
+from rubrix.server.apis.v0.models.metrics.base import PythonMetric
+from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics, Metric
 from rubrix.server.apis.v0.models.token_classification import (
     EntitySpan,
     TokenClassificationRecord,
 )
-from rubrix.server.elasticseach.query_helpers import aggregations
-
-
-class TokensLength(ElasticsearchMetric):
-    """
-    Summarizes the tokens length metric into an histogram
-
-    Attributes:
-    -----------
-    length_field:
-        The elasticsearch field where tokens length is stored
-    """
-
-    length_field: str
-
-    def aggregation_request(self, interval: int) -> Dict[str, Any]:
-        return {
-            self.id: aggregations.histogram_aggregation(
-                self.length_field, interval=interval or 1
-            )
-        }
-
-
-_DEFAULT_MAX_ENTITY_BUCKET = 1000
-
-
-class EntityLabels(NestedPathElasticsearchMetric):
-    """
-    Computes the entity labels distribution
-
-    Attributes:
-    -----------
-    labels_field:
-        The elasticsearch field where tags are stored
-    """
-
-    labels_field: str
-
-    def inner_aggregation(self, size: int) -> Dict[str, Any]:
-        return {
-            "labels": aggregations.terms_aggregation(
-                self.compound_nested_field(self.labels_field),
-                size=size or _DEFAULT_MAX_ENTITY_BUCKET,
-            )
-        }
-
-
-class EntityDensity(NestedPathElasticsearchMetric):
-    """Summarizes the entity density metric into an histogram"""
-
-    density_field: str
-
-    def inner_aggregation(self, interval: float) -> Dict[str, Any]:
-        return {
-            "density": aggregations.histogram_aggregation(
-                field_name=self.compound_nested_field(self.density_field),
-                interval=interval or 0.01,
-            )
-        }
-
-
-class MentionLength(NestedPathElasticsearchMetric):
-    """Summarizes the mention length into an histogram"""
-
-    length_field: str
-
-    def inner_aggregation(self, interval: int) -> Dict[str, Any]:
-        return {
-            "mention_length": aggregations.histogram_aggregation(
-                self.compound_nested_field(self.length_field), interval=interval or 1
-            )
-        }
-
-
-class EntityCapitalness(NestedPathElasticsearchMetric):
-    """Computes the mention capitalness distribution"""
-
-    capitalness_field: str
-
-    def inner_aggregation(self) -> Dict[str, Any]:
-        return {
-            "capitalness": aggregations.terms_aggregation(
-                self.compound_nested_field(self.capitalness_field),
-                size=4,  # The number of capitalness choices
-            )
-        }
-
-
-class MentionsByEntityDistribution(NestedPathElasticsearchMetric):
-    def inner_aggregation(self):
-        return {
-            self.id: aggregations.bidimentional_terms_aggregations(
-                field_name_x=f"{self.nested_path}.label",
-                field_name_y=f"{self.nested_path}.value",
-            )
-        }
-
-
-class EntityConsistency(NestedPathElasticsearchMetric):
-    """Computes the entity consistency distribution"""
-
-    mention_field: str
-    labels_field: str
-
-    def inner_aggregation(
-        self,
-        size: int,
-        interval: int = 2,
-        entity_size: int = _DEFAULT_MAX_ENTITY_BUCKET,
-    ) -> Dict[str, Any]:
-        size = size or 50
-        interval = int(max(interval or 2, 2))
-        return {
-            "consistency": {
-                **aggregations.terms_aggregation(
-                    self.compound_nested_field(self.mention_field), size=size
-                ),
-                "aggs": {
-                    "entities": aggregations.terms_aggregation(
-                        self.compound_nested_field(self.labels_field), size=entity_size
-                    ),
-                    "count": {
-                        "cardinality": {
-                            "field": self.compound_nested_field(self.labels_field)
-                        }
-                    },
-                    "entities_variability_filter": {
-                        "bucket_selector": {
-                            "buckets_path": {"numLabels": "count"},
-                            "script": f"params.numLabels >= {interval}",
-                        }
-                    },
-                    "sortby_entities_count": {
-                        "bucket_sort": {
-                            "sort": [{"count": {"order": "desc"}}],
-                            "size": size,
-                        }
-                    },
-                },
-            }
-        }
-
-    def aggregation_result(self, aggregation_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Simplifies the aggregation result sorting by worst mention consistency"""
-        result = [
-            {
-                "mention": mention,
-                "entities": [
-                    {"label": entity, "count": count}
-                    for entity, count in mention_aggs["entities"].items()
-                ],
-            }
-            for mention, mention_aggs in aggregation_result.items()
-        ]
-        # TODO: filter by entities threshold
-        result.sort(key=lambda m: len(m["entities"]), reverse=True)
-        return {"mentions": result}
 
 
 class F1Metric(PythonMetric[TokenClassificationRecord]):
@@ -340,17 +174,6 @@ class TokenMetrics(BaseModel):
 class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
     """Configured metrics for token classification"""
 
-    _PREDICTED_NAMESPACE = "metrics.predicted"
-    _ANNOTATED_NAMESPACE = "metrics.annotated"
-
-    _PREDICTED_MENTIONS_NAMESPACE = f"{_PREDICTED_NAMESPACE}.mentions"
-    _ANNOTATED_MENTIONS_NAMESPACE = f"{_ANNOTATED_NAMESPACE}.mentions"
-
-    _PREDICTED_TAGS_NAMESPACE = f"{_PREDICTED_NAMESPACE}.tags"
-    _ANNOTATED_TAGS_NAMESPACE = f"{_ANNOTATED_NAMESPACE}.tags"
-
-    _TOKENS_NAMESPACE = "metrics.tokens"
-
     @staticmethod
     def density(value: int, sentence_length: int) -> float:
         """Compute the string density over a sentence"""
@@ -457,187 +280,124 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
             },
         }
 
-    _TOKENS_METRICS = [
-        TokensLength(
-            id="tokens_length",
-            name="Tokens length",
-            description="Computes the text length distribution measured in number of tokens",
-            length_field="metrics.tokens_length",
-        ),
-        NestedTermsAggregation(
-            id="token_frequency",
-            name="Tokens frequency distribution",
-            nested_path=_TOKENS_NAMESPACE,
-            terms=TermsAggregation(
-                id="frequency",
-                field="value",
-                name="",
+    metrics: ClassVar[List[Metric]] = (
+        CommonTasksMetrics.metrics
+        + [
+            DatasetLabels(),
+            F1Metric(
+                id="F1",
+                name="F1 Metric based on entity-level",
+                description="F1 metrics based on entity-level (averaged and per label), "
+                "where only exact matches count (CoNNL 2003).",
             ),
-        ),
-        NestedHistogramAggregation(
-            id="token_length",
-            name="Token length distribution",
-            nested_path=_TOKENS_NAMESPACE,
-            description="Computes token length distribution in number of characters",
-            histogram=HistogramAggregation(
-                id="length",
-                field="length",
-                name="",
-                fixed_interval=1,
+        ]
+        + [
+            Metric(
+                id="predicted_as",
+                name="Predicted labels distribution",
             ),
-        ),
-        NestedTermsAggregation(
-            id="token_capitalness",
-            name="Token capitalness distribution",
-            description="Computes capitalization information of tokens",
-            nested_path=_TOKENS_NAMESPACE,
-            terms=TermsAggregation(
-                id="capitalness",
-                field="capitalness",
-                name="",
-                # missing="OTHER",
+            Metric(
+                id="annotated_as",
+                name="Annotated labels distribution",
             ),
-        ),
-    ]
-    _PREDICTED_METRICS = [
-        EntityDensity(
-            id="predicted_entity_density",
-            name="Mention entity density for predictions",
-            description="Computes the ratio between the number of all entity tokens and tokens in the text",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            density_field="density",
-        ),
-        EntityLabels(
-            id="predicted_entity_labels",
-            name="Predicted entity labels",
-            description="Predicted entity labels distribution",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            labels_field="label",
-        ),
-        EntityCapitalness(
-            id="predicted_entity_capitalness",
-            name="Mention entity capitalness for predictions",
-            description="Computes capitalization information of predicted entity mentions",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            capitalness_field="capitalness",
-        ),
-        MentionLength(
-            id="predicted_mention_token_length",
-            name="Predicted mention tokens length",
-            description="Computes the length of the predicted entity mention measured in number of tokens",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            length_field="tokens_length",
-        ),
-        MentionLength(
-            id="predicted_mention_char_length",
-            name="Predicted mention characters length",
-            description="Computes the length of the predicted entity mention measured in number of tokens",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            length_field="chars_length",
-        ),
-        MentionsByEntityDistribution(
-            id="predicted_mentions_distribution",
-            name="Predicted mentions distribution by entity",
-            description="Computes predicted mentions distribution against its labels",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-        ),
-        EntityConsistency(
-            id="predicted_entity_consistency",
-            name="Entity label consistency for predictions",
-            description="Computes entity label variability for top-k predicted entity mentions",
-            nested_path=_PREDICTED_MENTIONS_NAMESPACE,
-            mention_field="value",
-            labels_field="label",
-        ),
-        EntityConsistency(
-            id="predicted_tag_consistency",
-            name="Token tag consistency for predictions",
-            description="Computes token tag variability for top-k predicted tags",
-            nested_path=_PREDICTED_TAGS_NAMESPACE,
-            mention_field="value",
-            labels_field="tag",
-        ),
-    ]
-
-    _ANNOTATED_METRICS = [
-        EntityDensity(
-            id="annotated_entity_density",
-            name="Mention entity density for annotations",
-            description="Computes the ratio between the number of all entity tokens and tokens in the text",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            density_field="density",
-        ),
-        EntityLabels(
-            id="annotated_entity_labels",
-            name="Annotated entity labels",
-            description="Annotated Entity labels distribution",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            labels_field="label",
-        ),
-        EntityCapitalness(
-            id="annotated_entity_capitalness",
-            name="Mention entity capitalness for annotations",
-            description="Compute capitalization information of annotated entity mentions",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            capitalness_field="capitalness",
-        ),
-        MentionLength(
-            id="annotated_mention_token_length",
-            name="Annotated mention tokens length",
-            description="Computes the length of the entity mention measured in number of tokens",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            length_field="tokens_length",
-        ),
-        MentionLength(
-            id="annotated_mention_char_length",
-            name="Annotated mention characters length",
-            description="Computes the length of the entity mention measured in number of tokens",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            length_field="chars_length",
-        ),
-        MentionsByEntityDistribution(
-            id="annotated_mentions_distribution",
-            name="Annotated mentions distribution by entity",
-            description="Computes annotated mentions distribution against its labels",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-        ),
-        EntityConsistency(
-            id="annotated_entity_consistency",
-            name="Entity label consistency for annotations",
-            description="Computes entity label variability for top-k annotated entity mentions",
-            nested_path=_ANNOTATED_MENTIONS_NAMESPACE,
-            mention_field="value",
-            labels_field="label",
-        ),
-        EntityConsistency(
-            id="annotated_tag_consistency",
-            name="Token tag consistency for annotations",
-            description="Computes token tag variability for top-k annotated tags",
-            nested_path=_ANNOTATED_TAGS_NAMESPACE,
-            mention_field="value",
-            labels_field="tag",
-        ),
-    ]
-
-    metrics: ClassVar[List[BaseMetric]] = CommonTasksMetrics.metrics + [
-        TermsAggregation(
-            id="predicted_as",
-            name="Predicted labels distribution",
-            field="predicted_as",
-        ),
-        TermsAggregation(
-            id="annotated_as",
-            name="Annotated labels distribution",
-            field="annotated_as",
-        ),
-        *_TOKENS_METRICS,
-        *_PREDICTED_METRICS,
-        *_ANNOTATED_METRICS,
-        DatasetLabels(),
-        F1Metric(
-            id="F1",
-            name="F1 Metric based on entity-level",
-            description="F1 metrics based on entity-level (averaged and per label), "
-            "where only exact matches count (CoNNL 2003).",
-        ),
-    ]
+            Metric(
+                id="tokens_length",
+                name="Tokens length",
+                description="Computes the text length distribution measured in number of tokens",
+            ),
+            Metric(
+                id="token_frequency",
+                name="Tokens frequency distribution",
+            ),
+            Metric(
+                id="token_length",
+                name="Token length distribution",
+                description="Computes token length distribution in number of characters",
+            ),
+            Metric(
+                id="token_capitalness",
+                name="Token capitalness distribution",
+                description="Computes capitalization information of tokens",
+            ),
+            Metric(
+                id="predicted_entity_density",
+                name="Mention entity density for predictions",
+                description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            ),
+            Metric(
+                id="predicted_entity_labels",
+                name="Predicted entity labels",
+                description="Predicted entity labels distribution",
+            ),
+            Metric(
+                id="predicted_entity_capitalness",
+                name="Mention entity capitalness for predictions",
+                description="Computes capitalization information of predicted entity mentions",
+            ),
+            Metric(
+                id="predicted_mention_token_length",
+                name="Predicted mention tokens length",
+                description="Computes the length of the predicted entity mention measured in number of tokens",
+            ),
+            Metric(
+                id="predicted_mention_char_length",
+                name="Predicted mention characters length",
+                description="Computes the length of the predicted entity mention measured in number of tokens",
+            ),
+            Metric(
+                id="predicted_mentions_distribution",
+                name="Predicted mentions distribution by entity",
+                description="Computes predicted mentions distribution against its labels",
+            ),
+            Metric(
+                id="predicted_entity_consistency",
+                name="Entity label consistency for predictions",
+                description="Computes entity label variability for top-k predicted entity mentions",
+            ),
+            Metric(
+                id="predicted_tag_consistency",
+                name="Token tag consistency for predictions",
+                description="Computes token tag variability for top-k predicted tags",
+            ),
+            Metric(
+                id="annotated_entity_density",
+                name="Mention entity density for annotations",
+                description="Computes the ratio between the number of all entity tokens and tokens in the text",
+            ),
+            Metric(
+                id="annotated_entity_labels",
+                name="Annotated entity labels",
+                description="Annotated Entity labels distribution",
+            ),
+            Metric(
+                id="annotated_entity_capitalness",
+                name="Mention entity capitalness for annotations",
+                description="Compute capitalization information of annotated entity mentions",
+            ),
+            Metric(
+                id="annotated_mention_token_length",
+                name="Annotated mention tokens length",
+                description="Computes the length of the entity mention measured in number of tokens",
+            ),
+            Metric(
+                id="annotated_mention_char_length",
+                name="Annotated mention characters length",
+                description="Computes the length of the entity mention measured in number of tokens",
+            ),
+            Metric(
+                id="annotated_mentions_distribution",
+                name="Annotated mentions distribution by entity",
+                description="Computes annotated mentions distribution against its labels",
+            ),
+            Metric(
+                id="annotated_entity_consistency",
+                name="Entity label consistency for annotations",
+                description="Computes entity label variability for top-k annotated entity mentions",
+            ),
+            Metric(
+                id="annotated_tag_consistency",
+                name="Token tag consistency for annotations",
+                description="Computes token tag variability for top-k annotated tags",
+            ),
+        ]
+    )
