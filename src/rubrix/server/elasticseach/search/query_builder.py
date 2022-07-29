@@ -5,12 +5,16 @@ from typing import Any, Dict, Optional, TypeVar
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
-from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.elasticseach.query_helpers import filters
-from rubrix.server.elasticseach.search.model import BaseSearchQuery
+from rubrix.server.elasticseach.search.model import (
+    AbstractQuery,
+    BaseSearchQuery,
+    DatasetsQuery,
+)
 from rubrix.server.services.search.model import QueryRange
 
 SearchQuery = TypeVar("SearchQuery", bound=BaseSearchQuery)
+Query = TypeVar("Query", bound=AbstractQuery)
 
 
 class EsQueryBuilder:
@@ -23,12 +27,46 @@ class EsQueryBuilder:
             cls._INSTANCE = cls()
         return cls._INSTANCE
 
-    def __call__(
-        self,
-        schema: Dict[str, Any],
-        query: Optional[SearchQuery] = None,
+    def _datasets_to_es_query(
+        self, query: Optional[DatasetsQuery] = None
     ) -> Dict[str, Any]:
+        if not query:
+            return filters.match_all()
 
+        query_filters = []
+        if query.owners:
+            owners_filter = filters.terms_filter("owner.keyword", query.owners)
+            if query.include_no_owner:
+                query_filters.append(
+                    filters.boolean_filter(
+                        minimum_should_match=1,  # OR Condition
+                        should_filters=[
+                            owners_filter,
+                            filters.boolean_filter(
+                                must_not_query=filters.exists_field("owner")
+                            ),
+                        ],
+                    )
+                )
+            else:
+                query_filters.append(owners_filter)
+
+        if query.tasks:
+            query_filters.append(
+                filters.terms_filter(field="task.keyword", values=query.tasks)
+            )
+
+        if not query_filters:
+            return filters.match_all()
+        return filters.boolean_filter(
+            should_filters=query_filters, minimum_should_match=len(query_filters)
+        )
+
+    def _search_to_es_query(
+        self,
+        schema: Optional[Dict[str, Any]] = None,
+        query: Optional[SearchQuery] = None,
+    ):
         if not query:
             return filters.match_all()
 
@@ -52,6 +90,16 @@ class EsQueryBuilder:
         return filters.boolean_filter(
             filter_query=self._to_es_query(new_query), must_query=query_text
         )
+
+    def __call__(
+        self,
+        schema: Optional[Dict[str, Any]] = None,
+        query: Optional[Query] = None,
+    ) -> Dict[str, Any]:
+
+        if isinstance(query, DatasetsQuery):
+            return self._datasets_to_es_query(query)
+        return self._search_to_es_query(schema, query)
 
     @classmethod
     def _to_es_query(cls, query: SearchQuery) -> Dict[str, Any]:

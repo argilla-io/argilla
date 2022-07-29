@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import json
 from typing import Any, Dict, List, Optional, Type
 
@@ -20,12 +19,12 @@ from fastapi import Depends
 
 from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
-from rubrix.server.elasticseach import query_helpers
 from rubrix.server.elasticseach.backend import ElasticsearchBackend
 from rubrix.server.elasticseach.mappings.datasets import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
 )
+from rubrix.server.elasticseach.search.model import DatasetsQuery
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""
@@ -82,47 +81,19 @@ class DatasetsDAO:
         owner_list: List[str] = None,
         task2dataset_map: Dict[str, Type[BaseDatasetDB]] = None,
     ) -> List[BaseDatasetDB]:
-        filters = []
-        if owner_list:
-            owners_filter = query_helpers.filters.terms_filter(
-                "owner.keyword", owner_list
-            )
-            if NO_WORKSPACE in owner_list:
-                filters.append(
-                    query_helpers.filters.boolean_filter(
-                        minimum_should_match=1,  # OR Condition
-                        should_filters=[
-                            query_helpers.filters.boolean_filter(
-                                must_not_query=query_helpers.filters.exists_field(
-                                    "owner"
-                                )
-                            ),
-                            owners_filter,
-                        ],
-                    )
-                )
-            else:
-                filters.append(owners_filter)
 
-        if task2dataset_map:
-            filters.append(
-                query_helpers.filters.terms_filter(
-                    field="task.keyword", values=[task for task in task2dataset_map]
-                )
-            )
+        query = DatasetsQuery(
+            owners=owner_list,
+            include_no_owner=NO_WORKSPACE in owner_list,
+            tasks=[task for task in task2dataset_map] if task2dataset_map else None,
+        )
 
+        es_query = self._es.query_builder.__call__(schema=None, query=query)
         docs = self._es.list_documents(
             index=DATASETS_INDEX_NAME,
-            fetch_once=True,
             # TODO(@frascuchon): include id as part of the document as keyword to enable sorting by id
             size=MAX_NUMBER_OF_LISTED_DATASETS,
-            query={
-                "query": query_helpers.filters.boolean_filter(
-                    should_filters=filters, minimum_should_match=len(filters)
-                )
-            }
-            if filters
-            else None,
+            query={"query": es_query}
         )
 
         task2dataset_map = task2dataset_map or {}

@@ -18,7 +18,17 @@ class SortableField(BaseModel):
     order: SortOrder = SortOrder.asc
 
 
-class BaseSearchQuery(BaseModel):
+class AbstractQuery(BaseModel):
+    pass
+
+
+class DatasetsQuery(AbstractQuery):
+    tasks: Optional[List[str]] = None
+    owners: Optional[List[str]] = None
+    include_no_owner: bool = None
+
+
+class BaseSearchQuery(AbstractQuery):
 
     query_text: Optional[str] = None
     advanced_query_dsl: bool = False
