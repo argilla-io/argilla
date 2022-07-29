@@ -225,31 +225,33 @@ class DatasetRecordsDAO:
 
         """
         # TODO(@frascuchon): Move this logic to the backend class
-        search = search or RecordSearch()
-        records_index = dataset_records_index(dataset.id)
-        compute_aggregations = record_from == 0
-        aggregation_requests = (
-            {**(search.aggregations or {})} if compute_aggregations else {}
-        )
-
-        sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
-
-        es_query = {
-            "_source": {"excludes": exclude_fields or []},
-            "from": record_from,
-            "query": self._es.query_builder(
-                schema=self._es.get_index_mapping(records_index),
-                query=search.query,
-            ),
-            "sort": sort_config,
-            "aggs": aggregation_requests,
-        }
-        if highligth_results:
-            es_query["highlight"] = self.__configure_query_highlight__(
-                task=dataset.task
+        try:
+            search = search or RecordSearch()
+            records_index = dataset_records_index(dataset.id)
+            compute_aggregations = record_from == 0
+            aggregation_requests = (
+                {**(search.aggregations or {})} if compute_aggregations else {}
             )
 
-        try:
+            sort_config = self.__normalize_sort_config__(
+                records_index, sort=search.sort
+            )
+
+            es_query = {
+                "_source": {"excludes": exclude_fields or []},
+                "from": record_from,
+                "query": self._es.query_builder(
+                    schema=self._es.get_index_mapping(records_index),
+                    query=search.query,
+                ),
+                "sort": sort_config,
+                "aggs": aggregation_requests,
+            }
+            if highligth_results:
+                es_query["highlight"] = self.__configure_query_highlight__(
+                    task=dataset.task
+                )
+
             results = self._es.search(index=records_index, query=es_query, size=size)
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
