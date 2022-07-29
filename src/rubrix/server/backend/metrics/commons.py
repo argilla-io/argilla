@@ -1,10 +1,10 @@
-from rubrix.server.commons.models import TaskStatus
-from rubrix.server.elasticseach.metrics.base import (
+from rubrix.server.backend.metrics.base import (
     HistogramAggregation,
     MetadataAggregations,
     TermsAggregation,
     WordCloudAggregation,
 )
+from rubrix.server.commons.models import TaskStatus
 
 METRICS = {
     "text_length": HistogramAggregation(

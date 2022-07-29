@@ -25,7 +25,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
-from rubrix.server.elasticseach.search.query_builder import EsQueryBuilder
+from rubrix.server.backend.search.query_builder import EsQueryBuilder
 
 
 def test_char_position():

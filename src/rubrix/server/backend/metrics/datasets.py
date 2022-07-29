@@ -1,5 +1,5 @@
 # All metrics related to the datasets index
-from rubrix.server.elasticseach.metrics.base import TermsAggregation
+from rubrix.server.backend.metrics.base import TermsAggregation
 
 METRICS = {
     "all_rubrix_workspaces": TermsAggregation(

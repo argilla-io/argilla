@@ -22,7 +22,7 @@ from hurry.filesize import size
 
 from rubrix import __version__ as rubrix_version
 from rubrix.server.apis.v0.models.info import ApiStatus
-from rubrix.server.elasticseach.backend import ElasticsearchBackend
+from rubrix.server.backend.elasticsearch import ElasticsearchBackend
 
 
 class ApiInfoService:

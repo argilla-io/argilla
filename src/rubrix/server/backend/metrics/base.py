@@ -2,7 +2,7 @@ import dataclasses
 from typing import Any, Dict, List, Optional, Union
 
 from rubrix.server._helpers import unflatten_dict
-from rubrix.server.elasticseach.query_helpers import aggregations
+from rubrix.server.backend.query_helpers import aggregations
 
 
 @dataclasses.dataclass

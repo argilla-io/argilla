@@ -17,8 +17,8 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
+from rubrix.server.backend.mappings.helpers import mappings
 from rubrix.server.commons.models import TaskStatus
-from rubrix.server.elasticseach.mappings.helpers import mappings
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
