@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, TypeVar
 from pydantic import BaseModel, Field
 
 
-class DatasetDB(BaseModel):
+class BaseDatasetDB(BaseModel):
     name: str
     task: str
     owner: Optional[str] = None
@@ -29,8 +29,9 @@ class DatasetDB(BaseModel):
         return self.build_dataset_id(self.name, self.owner)
 
 
-class SettingsDB(BaseModel):
+class BaseSettingsDB(BaseModel):
     pass
 
 
-BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
+DAODatasetDB = TypeVar("DAODatasetDB", bound=BaseDatasetDB)
+DAODatasetSettingsDB = TypeVar("DAODatasetSettingsDB", bound=BaseSettingsDB)

@@ -1,22 +1,20 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
 from rubrix.server.backend.query_helpers import filters
 from rubrix.server.backend.search.model import (
-    AbstractQuery,
-    BaseSearchQuery,
-    DatasetsQuery,
+    BackendDatasetsQuery,
+    BackendQuery,
+    BackendRecordsQuery,
+    BaseDatasetsQuery,
+    QueryRange,
     SortableField,
     SortConfig,
 )
-from rubrix.server.services.search.model import QueryRange
-
-SearchQuery = TypeVar("SearchQuery", bound=BaseSearchQuery)
-Query = TypeVar("Query", bound=AbstractQuery)
 
 
 class EsQueryBuilder:
@@ -30,7 +28,7 @@ class EsQueryBuilder:
         return cls._INSTANCE
 
     def _datasets_to_es_query(
-        self, query: Optional[DatasetsQuery] = None
+        self, query: Optional[BackendDatasetsQuery] = None
     ) -> Dict[str, Any]:
         if not query:
             return filters.match_all()
@@ -67,7 +65,7 @@ class EsQueryBuilder:
     def _search_to_es_query(
         self,
         schema: Optional[Dict[str, Any]] = None,
-        query: Optional[SearchQuery] = None,
+        query: Optional[BackendRecordsQuery] = None,
         sort: Optional[SortConfig] = None,
     ):
         if not query:
@@ -97,12 +95,12 @@ class EsQueryBuilder:
     def map_2_es_query(
         self,
         schema: Optional[Dict[str, Any]] = None,
-        query: Optional[Query] = None,
+        query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
     ) -> Dict[str, Any]:
         es_query: Dict[str, Any] = (
             {"query": self._datasets_to_es_query(query)}
-            if isinstance(query, DatasetsQuery)
+            if isinstance(query, BaseDatasetsQuery)
             else {"query": self._search_to_es_query(schema, query)}
         )
         es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
@@ -154,7 +152,7 @@ class EsQueryBuilder:
         return es_sort
 
     @classmethod
-    def _to_es_query(cls, query: SearchQuery) -> Dict[str, Any]:
+    def _to_es_query(cls, query: BackendRecordsQuery) -> Dict[str, Any]:
         if query.ids:
             return filters.ids_filter(query.ids)
 

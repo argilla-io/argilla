@@ -1,21 +1,19 @@
 import logging
-from typing import Iterable, List, Optional, Type, TypeVar
+from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.services.datasets import Dataset
+from rubrix.server.services.datasets import ServiceDataset
 from rubrix.server.services.metrics import BaseMetric, MetricsService
 from rubrix.server.services.search.model import (
-    BaseSVCSearchQuery,
-    Record,
     SearchResults,
+    ServiceRecord,
+    ServiceSearchQuery,
     SortConfig,
 )
-from rubrix.server.services.tasks.commons.record import BaseRecordDB
-
-SvcSearchQuery = TypeVar("SvcSearchQuery", bound=BaseSVCSearchQuery)
+from rubrix.server.services.tasks.commons.record import ServiceBaseRecord
 
 
 class SearchRecordsService:
@@ -45,9 +43,9 @@ class SearchRecordsService:
 
     def search(
         self,
-        dataset: Dataset,
-        record_type: Type[BaseRecordDB],
-        query: Optional[SvcSearchQuery] = None,
+        dataset: ServiceDataset,
+        record_type: Type[ServiceBaseRecord],
+        query: Optional[ServiceSearchQuery] = None,
         sort_config: Optional[SortConfig] = None,
         record_from: int = 0,
         size: int = 100,
@@ -94,12 +92,12 @@ class SearchRecordsService:
 
     def scan_records(
         self,
-        dataset: Dataset,
-        record_type: Type[BaseRecordDB],
-        query: Optional[SvcSearchQuery] = None,
+        dataset: ServiceDataset,
+        record_type: Type[ServiceBaseRecord],
+        query: Optional[ServiceSearchQuery] = None,
         id_from: Optional[str] = None,
         limit: int = 1000
-    ) -> Iterable[Record]:
+    ) -> Iterable[ServiceRecord]:
         """Scan records for a queried"""
         search = RecordSearch(query=query)
         for doc in self.__dao__.scan_dataset(dataset, id_from=id_from, limit=limit, search=search):

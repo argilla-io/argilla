@@ -24,14 +24,13 @@ from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
-    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
     TaskType,
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
-from rubrix.server.services.search.model import BaseSVCSearchQuery
+from rubrix.server.services.search.model import BaseSearchQuery
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -91,7 +90,7 @@ class TokenClassificationAnnotation(BaseAnnotation):
 
 class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
     """
-    Dataset record for token classification task
+    ServiceDataset record for token classification task
 
     Attributes:
     -----------
@@ -361,7 +360,7 @@ class TokenClassificationRecordDB(CreationTokenClassificationRecord):
                 {"mention": mention, "entity": entity.label}
                 for mention, entity in self.annotated_mentions()
             ],
-            EsRecordDataFieldNames.words: self.all_text(),
+            "words": self.all_text(),
         }
 
 
@@ -387,7 +386,7 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(BaseSVCSearchQuery):
+class TokenClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 

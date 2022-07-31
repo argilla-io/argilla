@@ -15,15 +15,15 @@
 
 import pytest
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import DatasetDB
 from rubrix.server.backend.elasticsearch import create_es_wrapper
+from rubrix.server.commons.models import TaskType
 from rubrix.server.daos.datasets import DatasetsDAO
-from rubrix.server.daos.records import dataset_records_dao
+from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import ClosedDatasetError
 
 es_wrapper = create_es_wrapper()
-records = dataset_records_dao(es_wrapper)
+records = DatasetRecordsDAO.get_instance(es_wrapper)
 dao = DatasetsDAO.get_instance(es_wrapper, records)
 
 

@@ -9,11 +9,11 @@ from rubrix.server.apis.v0.models.dataset_settings import TokenClassificationSet
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
-from rubrix.server.services.datasets import DatasetsService, SVCDatasetSettings
+from rubrix.server.services.datasets import DatasetsService, ServiceDatasetSettings
 
-__svc_settings_class__: Type[SVCDatasetSettings] = type(
+__svc_settings_class__: Type[ServiceDatasetSettings] = type(
     f"{TaskType.token_classification}_DatasetSettings",
-    (SVCDatasetSettings, TokenClassificationSettings),
+    (ServiceDatasetSettings, TokenClassificationSettings),
     {},
 )
 

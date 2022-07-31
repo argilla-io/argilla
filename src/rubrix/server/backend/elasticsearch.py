@@ -31,8 +31,12 @@ from rubrix.server.backend.mappings.token_classification import (
 )
 from rubrix.server.backend.metrics import ALL_METRICS
 from rubrix.server.backend.metrics.base import ElasticsearchMetric
-from rubrix.server.backend.search.model import SortableField, SortConfig
-from rubrix.server.backend.search.query_builder import EsQueryBuilder, SearchQuery
+from rubrix.server.backend.search.model import (
+    BackendRecordsQuery,
+    SortableField,
+    SortConfig,
+)
+from rubrix.server.backend.search.query_builder import EsQueryBuilder
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
 
@@ -756,7 +760,7 @@ class ElasticsearchBackend(LoggingMixin):
     def search_records(
         self,
         index: str,
-        query: SearchQuery,
+        query: BackendRecordsQuery,
         sort: SortConfig,
         record_from: int = 0,
         size: int = 100,
@@ -838,7 +842,7 @@ class ElasticsearchBackend(LoggingMixin):
     def scan_records(
         self,
         index: str,
-        query: Optional[SearchQuery] = None,
+        query: Optional[BackendRecordsQuery] = None,
     ) -> Iterable[Dict[str, Any]]:
         with backend_error_handler(index):
             es_query = {

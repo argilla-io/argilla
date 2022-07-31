@@ -25,7 +25,6 @@ from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
-    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -33,7 +32,7 @@ from rubrix.server.apis.v0.models.commons.model import (
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
 from rubrix.server.commons.models import TaskStatus
-from rubrix.server.services.search.model import BaseSVCSearchQuery
+from rubrix.server.services.search.model import BaseSearchQuery
 
 
 class UpdateLabelingRule(BaseModel):
@@ -445,7 +444,7 @@ class TextClassificationRecordDB(CreationTextClassificationRecord):
         words = self.all_text()
         return {
             **super().extended_fields(),
-            EsRecordDataFieldNames.words: words,
+            "words": words,
             # This allow query by text:.... or text.exact:....
             # Once words is remove we can normalize at record level
             "text": words,
@@ -483,7 +482,7 @@ class TextClassificationBulkData(UpdateDatasetRequest):
         return records
 
 
-class TextClassificationQuery(BaseSVCSearchQuery):
+class TextClassificationQuery(BaseSearchQuery):
     """
     API Filters for text classification
 
