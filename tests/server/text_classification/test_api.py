@@ -366,10 +366,10 @@ def test_some_sort_by(mocked_client):
             "code": "rubrix.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
-                "are: ['metadata', 'last_updated', 'score', "
+                "are: ['id', 'metadata', 'score', "
                 "'predicted', 'predicted_as', "
                 "'predicted_by', 'annotated_as', "
-                "'annotated_by', 'status', "
+                "'annotated_by', 'status', 'last_updated', "
                 "'event_timestamp']"
             },
         }

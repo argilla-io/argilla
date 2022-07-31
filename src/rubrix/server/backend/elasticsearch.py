@@ -31,7 +31,7 @@ from rubrix.server.backend.mappings.token_classification import (
 )
 from rubrix.server.backend.metrics import ALL_METRICS
 from rubrix.server.backend.metrics.base import ElasticsearchMetric
-from rubrix.server.backend.search.model import SortConfig
+from rubrix.server.backend.search.model import SortableField, SortConfig
 from rubrix.server.backend.search.query_builder import EsQueryBuilder, SearchQuery
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
@@ -728,7 +728,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def search_records(
         self,
-        records_index: str,
+        index: str,
         query: SearchQuery,
         sort: SortConfig,
         record_from: int = 0,
@@ -736,10 +736,12 @@ class ElasticsearchBackend(LoggingMixin):
         exclude_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
-        with backend_error_handler(index=records_index):
+        with backend_error_handler(index=index):
+            if not sort.sort_by and sort.shuffle is False:
+                sort.sort_by = [SortableField(id="id")]  # Default sort by id
             es_query = {
                 **self.query_builder.map_2_es_query(
-                    schema=self.get_index_mapping(records_index),
+                    schema=self.get_index_mapping(index),
                     query=query,
                     sort=sort,
                 ),
@@ -749,7 +751,7 @@ class ElasticsearchBackend(LoggingMixin):
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
 
-            results = self.search(index=records_index, query=es_query, size=size)
+            results = self.search(index=index, query=es_query, size=size)
             hits = results["hits"]
             total = hits["total"]
             docs = hits["hits"]

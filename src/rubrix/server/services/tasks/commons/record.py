@@ -9,6 +9,7 @@ from pydantic.generics import GenericModel
 from rubrix.server.commons.models import TaskStatus, TaskType
 
 
+# TODO(@frascuchon): this section should not be here!
 class EsRecordDataFieldNames(str, Enum):
 
     predicted_as = "predicted_as"

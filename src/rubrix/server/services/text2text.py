@@ -118,16 +118,6 @@ class Text2TextService:
             record_type=Text2TextRecord,
             sort_config=SortConfig(
                 sort_by=sort_by,
-                valid_fields=[
-                    "metadata",
-                    EsRecordDataFieldNames.predicted_as,
-                    EsRecordDataFieldNames.annotated_as,
-                    EsRecordDataFieldNames.predicted_by,
-                    EsRecordDataFieldNames.annotated_by,
-                    EsRecordDataFieldNames.status,
-                    EsRecordDataFieldNames.last_updated,
-                    EsRecordDataFieldNames.event_timestamp,
-                ],
             ),
             exclude_metrics=exclude_metrics,
             metrics=metrics,
