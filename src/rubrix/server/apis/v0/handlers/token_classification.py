@@ -40,10 +40,7 @@ from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.token_classification import (
-    TokenClassificationService,
-    token_classification_service,
-)
+from rubrix.server.services.tasks.token_classification import TokenClassificationService
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -61,7 +58,9 @@ async def bulk_records(
     name: str,
     bulk: TokenClassificationBulkData,
     common_params: CommonTaskQueryParams = Depends(),
-    service: TokenClassificationService = Depends(token_classification_service),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -143,7 +142,9 @@ def search_records(
         False, description="If enabled, return related record metrics"
     ),
     pagination: PaginationParams = Depends(),
-    service: TokenClassificationService = Depends(token_classification_service),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TokenClassificationSearchResults:
@@ -255,7 +256,9 @@ async def stream_data(
     query: Optional[TokenClassificationQuery] = None,
     common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: TokenClassificationService = Depends(token_classification_service),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:

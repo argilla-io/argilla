@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, Iterable
+from typing import Any, Dict, Generic, Iterable, TypeVar
 
 from pydantic import BaseModel
 
@@ -34,3 +34,6 @@ class PythonMetric(BaseMetric, Generic[ServiceRecord]):
             The metric result
         """
         raise NotImplementedError()
+
+
+ServiceMetric = TypeVar("ServiceMetric", bound=BaseMetric)

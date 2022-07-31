@@ -29,15 +29,18 @@ from rubrix.server.errors import (
 from rubrix.server.security.model import User
 
 
-class BaseDataset(BaseDatasetDB):
+class ServiceBaseDataset(BaseDatasetDB):
     pass
 
 
-ServiceDataset = TypeVar("ServiceDataset", bound=BaseDataset)
-
-
-class ServiceDatasetSettings(BaseSettingsDB):
+class ServiceBaseDatasetSettings(BaseSettingsDB):
     pass
+
+
+ServiceDataset = TypeVar("ServiceDataset", bound=ServiceBaseDataset)
+ServiceDatasetSettings = TypeVar(
+    "ServiceDatasetSettings", bound=ServiceBaseDatasetSettings
+)
 
 
 class DatasetsService:
@@ -81,7 +84,7 @@ class DatasetsService:
         self,
         user: User,
         name: str,
-        as_dataset_class: Type[ServiceDataset] = BaseDataset,
+        as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
         task: Optional[str] = None,
         workspace: Optional[str] = None,
     ) -> ServiceDataset:

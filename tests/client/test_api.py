@@ -18,7 +18,6 @@ from typing import Iterable
 
 import datasets
 import httpx
-import pandas
 import pandas as pd
 import pytest
 
@@ -37,7 +36,6 @@ from rubrix.client.sdk.commons.errors import (
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
-from rubrix.server.security import auth
 from tests.server.test_api import create_some_data_for_text_classification
 
 

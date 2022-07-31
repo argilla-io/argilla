@@ -5,7 +5,7 @@ from fastapi import Depends
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics.models import BaseMetric, PythonMetric
+from rubrix.server.services.metrics.models import PythonMetric, ServiceMetric
 from rubrix.server.services.search.model import ServiceSearchQuery
 from rubrix.server.services.tasks.commons.record import ServiceRecord
 
@@ -51,7 +51,7 @@ class MetricsService:
     def summarize_metric(
         self,
         dataset: ServiceDataset,
-        metric: BaseMetric,
+        metric: ServiceMetric,
         record_class: Optional[Type[ServiceRecord]] = None,
         query: Optional[ServiceSearchQuery] = None,
         **metric_params,

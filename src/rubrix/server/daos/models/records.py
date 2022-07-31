@@ -20,10 +20,13 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
+from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.backend.search.model import BackendRecordsQuery
 from rubrix.server.backend.search.model import BaseRecordsQuery as _BaseSearchQuery
 from rubrix.server.backend.search.model import SortConfig
 from rubrix.server.commons.models import TaskStatus, TaskType
+from rubrix.server.helpers import flatten_dict
+from rubrix.utils import limit_value_length
 
 
 class BaseSearchQuery(_BaseSearchQuery):
@@ -121,6 +124,26 @@ class BaseRecordDB(GenericModel, Generic[DAOAnnotation]):
         """Remove duplicated keywords"""
         if value:
             return list(set(value))
+
+    @validator("metadata", pre=True)
+    def flatten_metadata(cls, metadata: Dict[str, Any]):
+        """
+        A fastapi validator for flatten metadata dictionary
+
+        Parameters
+        ----------
+        metadata:
+            The metadata dictionary
+
+        Returns
+        -------
+            A flatten version of metadata dictionary
+
+        """
+        if metadata:
+            metadata = flatten_dict(metadata, drop_empty=True)
+            metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
+        return metadata
 
     @classmethod
     def task(cls) -> TaskType:

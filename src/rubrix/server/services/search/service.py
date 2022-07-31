@@ -6,7 +6,8 @@ from fastapi import Depends
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics import BaseMetric, MetricsService
+from rubrix.server.services.metrics import MetricsService
+from rubrix.server.services.metrics.models import ServiceMetric
 from rubrix.server.services.search.model import (
     SearchResults,
     ServiceRecord,
@@ -50,7 +51,7 @@ class SearchRecordsService:
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
-        metrics: Optional[List[BaseMetric]] = None,
+        metrics: Optional[List[ServiceMetric]] = None,
     ) -> SearchResults:
 
         if record_from > 0:

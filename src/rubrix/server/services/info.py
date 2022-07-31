@@ -18,11 +18,26 @@ from typing import Any, Dict, Optional
 
 import psutil
 from fastapi import Depends
+
+# TODO(@frascuchon): Remove this dep
 from hurry.filesize import size
+from pydantic import BaseModel
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.apis.v0.models.info import ApiStatus
 from rubrix.server.backend.elasticsearch import ElasticsearchBackend
+
+
+class ApiInfo(BaseModel):
+    """Basic api info"""
+
+    rubrix_version: str
+
+
+class ApiStatus(ApiInfo):
+    """The Rubrix api status model"""
+
+    elasticsearch: Dict[str, Any]
+    mem_info: Dict[str, Any]
 
 
 class ApiInfoService:
@@ -54,7 +69,7 @@ class ApiInfoService:
 
 _instance: Optional[ApiInfoService] = None
 
-
+# TODO(@frascuchon): Use .get_instance instead
 def create_info_service(
     es_wrapper: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
 ) -> ApiInfoService:

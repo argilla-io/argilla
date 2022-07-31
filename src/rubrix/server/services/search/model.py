@@ -31,6 +31,10 @@ class QueryRange(_QueryRange):
     pass
 
 
+class ScoreRange(QueryRange):
+    pass
+
+
 class BaseSearchResultsAggregations(BaseModel):
 
     predicted_as: Dict[str, int] = Field(default_factory=dict)

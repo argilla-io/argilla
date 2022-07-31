@@ -17,7 +17,6 @@
 Dataset models definition
 """
 
-from datetime import datetime
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
@@ -76,10 +75,6 @@ class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
     """
 
     task: TaskType
-
-
-class DatasetDB(BaseDatasetDB):
-    pass
 
 
 class Dataset(BaseDatasetDB):
