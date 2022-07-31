@@ -17,9 +17,15 @@ from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
-from rubrix.server.apis.v0.models.text_classification import (
+from rubrix.server.errors.base_errors import MissingDatasetRecordsError
+from rubrix.server.services.metrics import BaseMetric
+from rubrix.server.services.search.model import SortableField, SortConfig
+from rubrix.server.services.search.service import SearchRecordsService
+from rubrix.server.services.storage.service import RecordsStorageService
+from rubrix.server.services.tasks.commons import BulkResponse
+from rubrix.server.services.tasks.text_classification import LabelingService
+from rubrix.server.services.tasks.text_classification.model import (
     CreationTextClassificationRecord,
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
@@ -31,12 +37,6 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
-from rubrix.server.errors.base_errors import MissingDatasetRecordsError
-from rubrix.server.services.metrics import BaseMetric
-from rubrix.server.services.search.model import SortConfig
-from rubrix.server.services.search.service import SearchRecordsService
-from rubrix.server.services.storage.service import RecordsStorageService
-from rubrix.server.services.text_classification_labelling_rules import LabelingService
 
 
 class TextClassificationService:

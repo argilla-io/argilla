@@ -15,9 +15,13 @@
 
 from fastapi import APIRouter, Depends, Security
 
-from rubrix.server.apis.v0.models.info import ApiInfo, ApiStatus
 from rubrix.server.security import auth
-from rubrix.server.services.info import ApiInfoService, create_info_service
+from rubrix.server.services.info import (
+    ApiInfo,
+    ApiInfoService,
+    ApiStatus,
+    create_info_service,
+)
 
 router = APIRouter(tags=["status"])
 

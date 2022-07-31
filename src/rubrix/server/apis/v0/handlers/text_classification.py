@@ -46,7 +46,7 @@ from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.text_classification import TextClassificationService
+from rubrix.server.services.tasks.text_classification import TextClassificationService
 
 TASK_TYPE = TaskType.text_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE

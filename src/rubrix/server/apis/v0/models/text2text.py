@@ -14,29 +14,32 @@
 #  limitations under the License.
 
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
+from rubrix.client.sdk.commons.models import BaseAnnotation
 from rubrix.server.apis.v0.models.commons.model import (
-    BaseAnnotation,
     BaseRecord,
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
     PredictionStatus,
     ScoreRange,
     SortableField,
-    TaskType,
 )
-from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
+from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.services.search.model import BaseSearchQuery
-
-
-class ExtendedEsRecordDataFieldNames(str, Enum):
-    text_predicted = "text_predicted"
-    text_annotated = "text_annotated"
+from rubrix.server.commons.models import TaskType
+from rubrix.server.services.tasks.text2text.models import (
+    Text2TextDatasetDB as _Text2TextDatasetDB,
+)
+from rubrix.server.services.tasks.text2text.models import (
+    Text2TextQuery as _Text2TextQuery,
+)
+from rubrix.server.services.tasks.text2text.models import (
+    Text2TextSearchAggregations as _Text2TextSearchAggregations,
+)
+from rubrix.server.services.tasks.text2text.models import (
+    Text2TextSearchResults as _Text2TextSearchResults,
+)
 
 
 class Text2TextPrediction(BaseModel):
@@ -166,7 +169,7 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(BaseSearchQuery):
+class Text2TextQuery(_Text2TextQuery):
     """
     API Filters for text2text
 
@@ -216,30 +219,15 @@ class Text2TextSearchRequest(BaseModel):
     sort: List[SortableField] = Field(default_factory=list)
 
 
-class Text2TextSearchAggregations(BaseSearchResultsAggregations):
-    """
-    Extends base aggregation with predicted and annotated text
-
-    Attributes:
-    -----------
-    predicted_text: Dict[str, int]
-        The word cloud aggregations for predicted text
-    annotated_text: Dict[str, int]
-        The word cloud aggregations for annotated text
-    """
-
-    predicted_text: Dict[str, int] = Field(default_factory=dict)
-    annotated_text: Dict[str, int] = Field(default_factory=dict)
-
-
-class Text2TextSearchResults(
-    BaseSearchResults[Text2TextRecord, Text2TextSearchAggregations]
-):
+class Text2TextSearchAggregations(_Text2TextSearchAggregations):
     pass
 
 
-class Text2TextDatasetDB(DatasetDB):
-    task: TaskType = Field(default=TaskType.text2text, const=True)
+class Text2TextSearchResults(_Text2TextSearchResults):
+    pass
+
+
+class Text2TextDatasetDB(_Text2TextDatasetDB):
     pass
 
 

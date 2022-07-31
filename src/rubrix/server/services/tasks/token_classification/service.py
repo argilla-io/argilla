@@ -17,30 +17,31 @@ from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
-from rubrix.server.apis.v0.models.text2text import (
-    CreationText2TextRecord,
-    Text2TextDatasetDB,
-    Text2TextQuery,
-    Text2TextRecord,
-    Text2TextRecordDB,
-    Text2TextSearchAggregations,
-    Text2TextSearchResults,
-)
+from rubrix.server.backend.search.model import SortableField
 from rubrix.server.services.metrics import BaseMetric
 from rubrix.server.services.search.model import SortConfig
 from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
+from rubrix.server.services.tasks.commons import BulkResponse
+from rubrix.server.services.tasks.token_classification.model import (
+    CreationTokenClassificationRecord,
+    TokenClassificationAggregations,
+    TokenClassificationDatasetDB,
+    TokenClassificationQuery,
+    TokenClassificationRecord,
+    TokenClassificationRecordDB,
+    TokenClassificationSearchResults,
+)
 
 
-class Text2TextService:
+class TokenClassificationService:
     """
-    Text2text service
+    Token classification service
 
     """
 
-    _INSTANCE: "Text2TextService" = None
+    _INSTANCE: "TokenClassificationService" = None
 
     @classmethod
     def get_instance(
@@ -62,28 +63,28 @@ class Text2TextService:
 
     def add_records(
         self,
-        dataset: Text2TextDatasetDB,
-        records: List[CreationText2TextRecord],
+        dataset: TokenClassificationDatasetDB,
+        records: List[CreationTokenClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_type=Text2TextRecordDB,
+            record_type=TokenClassificationRecordDB,
             metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
     def search(
         self,
-        dataset: Text2TextDatasetDB,
-        query: Text2TextQuery,
+        dataset: TokenClassificationDatasetDB,
+        query: TokenClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
-    ) -> Text2TextSearchResults:
+    ) -> TokenClassificationSearchResults:
         """
         Run a search in a dataset
 
@@ -94,7 +95,7 @@ class Text2TextService:
         query:
             The search parameters
         sort_by:
-            The sort by list
+            The sort by order list
         record_from:
             The record from return results
         size:
@@ -105,46 +106,53 @@ class Text2TextService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-
         results = self.__search__.search(
             dataset,
             query=query,
+            record_type=TokenClassificationRecord,
             size=size,
             record_from=record_from,
-            record_type=Text2TextRecord,
-            sort_config=SortConfig(
-                sort_by=sort_by,
-            ),
             exclude_metrics=exclude_metrics,
             metrics=metrics,
+            sort_config=SortConfig(sort_by=sort_by),
         )
 
         if results.metrics:
             results.metrics["words"] = results.metrics["words_cloud"]
             results.metrics["status"] = results.metrics["status_distribution"]
+            results.metrics["predicted"] = results.metrics["error_distribution"]
+            results.metrics["predicted"].pop("unknown", None)
+            results.metrics["mentions"] = results.metrics[
+                "annotated_mentions_distribution"
+            ]
+            results.metrics["predicted_mentions"] = results.metrics[
+                "predicted_mentions_distribution"
+            ]
 
-        return Text2TextSearchResults(
+        return TokenClassificationSearchResults(
             total=results.total,
             records=results.records,
-            aggregations=Text2TextSearchAggregations.parse_obj(results.metrics)
+            aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
             if results.metrics
             else None,
         )
 
     def read_dataset(
         self,
-        dataset: Text2TextDatasetDB,
-        query: Optional[Text2TextQuery] = None,
+        dataset: TokenClassificationDatasetDB,
+        query: TokenClassificationQuery,
         id_from: Optional[str] = None,
         limit: int = 1000
-    ) -> Iterable[Text2TextRecord]:
+    ) -> Iterable[TokenClassificationRecord]:
         """
         Scan a dataset records
 
         Parameters
         ----------
         dataset:
-            The records dataset
+            The dataset name
+        owner:
+            The dataset owner
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
@@ -155,8 +163,5 @@ class Text2TextService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=Text2TextRecord, id_from=id_from, limit=limit,
+            dataset, query=query, record_type=TokenClassificationRecord, id_from=id_from, limit=limit
         )
-
-
-text2text_service = Text2TextService.get_instance

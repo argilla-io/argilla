@@ -4,10 +4,8 @@ from pydantic import BaseModel, Field
 
 from rubrix.server.apis.v0.models.metrics.base import PythonMetric
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics, Metric
-from rubrix.server.apis.v0.models.token_classification import (
-    EntitySpan,
-    TokenClassificationRecord,
-)
+from rubrix.server.apis.v0.models.token_classification import TokenClassificationRecord
+from rubrix.server.services.tasks.token_classification.model import EntitySpan
 
 
 class F1Metric(PythonMetric[TokenClassificationRecord]):

@@ -9,11 +9,11 @@ from rubrix.server.apis.v0.models.dataset_settings import TextClassificationSett
 from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
-from rubrix.server.services.datasets import DatasetsService, ServiceDatasetSettings
+from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
 
-__svc_settings_class__: Type[ServiceDatasetSettings] = type(
+__svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
     f"{TaskType.text_classification}_DatasetSettings",
-    (ServiceDatasetSettings, TextClassificationSettings),
+    (ServiceBaseDatasetSettings, TextClassificationSettings),
     {},
 )
 
