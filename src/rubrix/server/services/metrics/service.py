@@ -1,14 +1,13 @@
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, Optional, Type
 
 from fastapi import Depends
 
 from rubrix.server.daos.models.records import RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.services.datasets import Dataset
+from rubrix.server.services.datasets import ServiceDataset
 from rubrix.server.services.metrics.models import BaseMetric, PythonMetric
-from rubrix.server.services.tasks.commons.record import BaseRecordDB
-
-GenericQuery = TypeVar("GenericQuery")
+from rubrix.server.services.search.model import ServiceSearchQuery
+from rubrix.server.services.tasks.commons.record import ServiceRecord
 
 
 class MetricsService:
@@ -51,10 +50,10 @@ class MetricsService:
 
     def summarize_metric(
         self,
-        dataset: Dataset,
+        dataset: ServiceDataset,
         metric: BaseMetric,
-        record_class: Optional[Type[BaseRecordDB]] = None,
-        query: Optional[GenericQuery] = None,
+        record_class: Optional[Type[ServiceRecord]] = None,
+        query: Optional[ServiceSearchQuery] = None,
         **metric_params,
     ) -> Dict[str, Any]:
         """

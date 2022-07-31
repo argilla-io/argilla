@@ -36,10 +36,10 @@ from rubrix.server.services.search.model import SortableField as _SortableField
 from rubrix.server.services.tasks.commons import (
     Annotation,
     BaseAnnotation,
-    BaseRecordDB,
     BulkResponse,
     EsRecordDataFieldNames,
     PredictionStatus,
+    ServiceBaseRecord,
     TaskType,
 )
 from rubrix.utils import limit_value_length
@@ -51,16 +51,16 @@ class SortableField(_SortableField):
 
 @dataclass
 class PaginationParams:
-    """Query pagination params"""
+    """BackendQuery pagination params"""
 
     limit: int = Query(50, gte=0, le=1000, description="Response records limit")
     from_: int = Query(
-        0, ge=0, le=10000, alias="from", description="Record sequence from"
+        0, ge=0, le=10000, alias="from", description="ServiceRecord sequence from"
     )
 
 
 # TODO(@frascuchon):  Move this shit to the server.commons.models module
-class BaseRecord(BaseRecordDB, GenericModel, Generic[Annotation]):
+class BaseRecord(ServiceBaseRecord, GenericModel, Generic[Annotation]):
     """
     Minimal dataset record information
 
@@ -97,7 +97,7 @@ class BaseRecord(BaseRecordDB, GenericModel, Generic[Annotation]):
         return metadata
 
 
-Record = TypeVar("Record", bound=BaseRecord)
+Record = TypeVar("ServiceRecord", bound=BaseRecord)
 
 
 class ScoreRange(QueryRange):

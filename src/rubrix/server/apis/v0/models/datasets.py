@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 """
-Dataset models definition
+ServiceDataset models definition
 """
 
 from datetime import datetime
@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.services.datasets import DatasetDB as SVCDataset
+from rubrix.server.services.datasets import BaseDatasetDB as SVCDataset
 
 
 class UpdateDatasetRequest(BaseModel):
@@ -34,7 +34,7 @@ class UpdateDatasetRequest(BaseModel):
     Attributes:
     -----------
     tags:
-        Dataset tags used for better organize or classify information
+        ServiceDataset tags used for better organize or classify information
     metadata:
         Extra information that could be interested to include
     """
@@ -83,6 +83,6 @@ class DatasetDB(BaseDatasetDB):
 
 
 class Dataset(BaseDatasetDB):
-    """Dataset used for response output"""
+    """ServiceDataset used for response output"""
 
     pass

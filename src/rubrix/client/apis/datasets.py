@@ -76,7 +76,7 @@ __TASK_TO_SETTINGS__ = {
 
 
 class Datasets(AbstractApi):
-    """Dataset client api class"""
+    """ServiceDataset client api class"""
 
     _API_PREFIX = "/api/datasets"
 
