@@ -222,7 +222,7 @@ class DatasetRecordsDAO:
             records_index = dataset_records_index(dataset.id)
 
             total, records = self._es.search_records(
-                records_index=records_index,
+                index=records_index,
                 query=search.query,
                 sort=search.sort,
                 record_from=record_from,

@@ -117,21 +117,7 @@ class TokenClassificationService:
             record_from=record_from,
             exclude_metrics=exclude_metrics,
             metrics=metrics,
-            sort_config=SortConfig(
-                sort_by=sort_by,
-                valid_fields=[
-                    "metadata",
-                    EsRecordDataFieldNames.last_updated,
-                    EsRecordDataFieldNames.score,
-                    EsRecordDataFieldNames.predicted,
-                    EsRecordDataFieldNames.predicted_as,
-                    EsRecordDataFieldNames.predicted_by,
-                    EsRecordDataFieldNames.annotated_as,
-                    EsRecordDataFieldNames.annotated_by,
-                    EsRecordDataFieldNames.status,
-                    EsRecordDataFieldNames.event_timestamp,
-                ],
-            ),
+            sort_config=SortConfig(sort_by=sort_by),
         )
 
         if results.metrics:

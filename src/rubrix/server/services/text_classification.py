@@ -130,18 +130,6 @@ class TextClassificationService:
             metrics=metrics,
             sort_config=SortConfig(
                 sort_by=sort_by,
-                valid_fields=[
-                    "metadata",
-                    EsRecordDataFieldNames.last_updated,
-                    EsRecordDataFieldNames.score,
-                    EsRecordDataFieldNames.predicted,
-                    EsRecordDataFieldNames.predicted_as,
-                    EsRecordDataFieldNames.predicted_by,
-                    EsRecordDataFieldNames.annotated_as,
-                    EsRecordDataFieldNames.annotated_by,
-                    EsRecordDataFieldNames.status,
-                    EsRecordDataFieldNames.event_timestamp,
-                ],
             ),
         )
 

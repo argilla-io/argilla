@@ -10,6 +10,7 @@ from rubrix.server.backend.search.model import (
     AbstractQuery,
     BaseSearchQuery,
     DatasetsQuery,
+    SortableField,
     SortConfig,
 )
 from rubrix.server.services.search.model import QueryRange
@@ -104,19 +105,21 @@ class EsQueryBuilder:
             if isinstance(query, DatasetsQuery)
             else {"query": self._search_to_es_query(schema, query)}
         )
-        es_sort = self.map_2_es_sort_configuration(sort, schema=schema)
+        es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
         if es_sort:
             es_query["sort"] = es_sort
         return es_query
 
     def map_2_es_sort_configuration(
-        self, sort: Optional[SortConfig] = None, schema: Dict[str, Any] = None
+        self, schema: Optional[Dict[str, Any]] = None, sort: Optional[SortConfig] = None
     ) -> Optional[List[Dict[str, Any]]]:
 
         if not sort:
             return None
 
+        # TODO(@frascuchon): compute valid list from the schema
         valid_fields = sort.valid_fields or [
+            "id",
             "metadata",
             "score",
             "predicted",
@@ -128,29 +131,27 @@ class EsQueryBuilder:
             "last_updated",
             "event_timestamp",
         ]
-        result = []
+
         id_field = "id"
         id_keyword_field = "id.keyword"
-        sort_config = []
+        schema = schema or {}
+        mappings = self._clean_mappings(schema.get("mappings", {}))
+        use_id_keyword = "text" == mappings.get("id")
 
-        for sortable_field in sort.sort_by:
+        es_sort = []
+        for sortable_field in sort.sort_by or [SortableField(id="id")]:
             if valid_fields:
                 if not sortable_field.id.split(".")[0] in valid_fields:
                     raise AssertionError(
                         f"Wrong sort id {sortable_field.id}. Valid values are: "
                         f"{[str(v) for v in valid_fields]}"
                     )
-            result.append({sortable_field.id: {"order": sortable_field.order}})
+            field = sortable_field.id
+            if field == id_field and use_id_keyword:
+                field = id_keyword_field
+            es_sort.append({field: {"order": sortable_field.order}})
 
-        mappings = self._clean_mappings(schema["mappings"])
-        for sort_field in result or [{id_field: {"order": "asc"}}]:
-            for field in sort_field:
-                if field == id_field and mappings.get(id_keyword_field):
-                    sort_config.append({id_keyword_field: sort_field[field]})
-                else:
-                    sort_config.append(sort_field)
-
-        return sort_config
+        return es_sort
 
     @classmethod
     def _to_es_query(cls, query: SearchQuery) -> Dict[str, Any]:

@@ -88,7 +88,7 @@ class DatasetsDAO:
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
         )
 
-        es_query = self._es.query_builder.map_2_es_query(schema=None, query=query)
+        es_query = self._es.query_builder.map_2_es_query(query=query)
         docs = self._es.list_documents(
             index=DATASETS_INDEX_NAME,
             # TODO(@frascuchon): include id as part of the document as keyword to enable sorting by id
