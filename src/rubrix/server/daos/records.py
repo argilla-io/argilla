@@ -119,7 +119,7 @@ class DatasetRecordsDAO:
         records:
             The list of records
         record_class:
-            ServiceRecord class used to convert records to
+            Record class used to convert records to
         Returns
         -------
             The number of failed records
@@ -207,7 +207,7 @@ class DatasetRecordsDAO:
         size:
             Number of records to retrieve (for pagination)
         record_from:
-            ServiceRecord from which to retrieve the records (for pagination)
+            Record from which to retrieve the records (for pagination)
         exclude_fields:
             a list of fields to exclude from the result source. Wildcards are accepted
         Returns

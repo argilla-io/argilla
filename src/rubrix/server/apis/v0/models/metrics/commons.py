@@ -12,7 +12,7 @@ class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
 
     @classmethod
     def record_metrics(cls, record: GenericRecord) -> Dict[str, Any]:
-        """ServiceRecord metrics will persist the text_length"""
+        """Record metrics will persist the text_length"""
         return {"text_length": len(record.all_text())}
 
     metrics: ClassVar[List[Metric]] = [
@@ -30,7 +30,7 @@ class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
         ),
         Metric(
             id="status_distribution",
-            name="ServiceRecord status distribution",
+            name="Record status distribution",
             description="The dataset record status distribution",
         ),
         Metric(

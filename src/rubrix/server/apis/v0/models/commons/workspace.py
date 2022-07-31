@@ -20,7 +20,7 @@ class CommonTaskQueryParams:
 
     @property
     def workspace(self) -> str:
-        """Return read workspace. BackendQuery param prior to header param"""
+        """Return read workspace. Query param prior to header param"""
         workspace = self.__workspace_param__ or self.__workspace_header__
         if workspace:
             assert WORKSPACE_NAME_PATTERN.match(workspace), (

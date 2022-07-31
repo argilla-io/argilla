@@ -173,7 +173,7 @@ class Text2TextQuery(BaseSearchQuery):
     Attributes:
     -----------
     ids: Optional[List[Union[str, int]]]
-        ServiceRecord ids list
+        Record ids list
 
     query_text: str
         Text query over input text

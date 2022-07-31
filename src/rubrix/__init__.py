@@ -98,7 +98,7 @@ _import_structure = {
 # can be removed in a future version
 _deprecated_import_structure = {
     "client.models": ["Record", "BulkResponse"],
-    "client.datasets": ["ServiceDataset"],
+    "client.datasets": ["Dataset"],
     "client.rubrix_client": ["RubrixClient"],
     "_constants": ["DEFAULT_API_KEY"],
 }

@@ -153,7 +153,7 @@ class RBDatasetListener:
         """
         Execute a complete listener iteration. The iteration consists on:
 
-        1. BackendQuery data and fetch configured metrics
+        1. Query data and fetch configured metrics
         2. Check search results and metrics with provided condition
         3. Execute the action if condition is satisfied
 

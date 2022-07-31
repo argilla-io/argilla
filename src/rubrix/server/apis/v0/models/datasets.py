@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 """
-ServiceDataset models definition
+Dataset models definition
 """
 
 from datetime import datetime
@@ -34,7 +34,7 @@ class UpdateDatasetRequest(BaseModel):
     Attributes:
     -----------
     tags:
-        ServiceDataset tags used for better organize or classify information
+        Dataset tags used for better organize or classify information
     metadata:
         Extra information that could be interested to include
     """
@@ -83,6 +83,6 @@ class DatasetDB(BaseDatasetDB):
 
 
 class Dataset(BaseDatasetDB):
-    """ServiceDataset used for response output"""
+    """Dataset used for response output"""
 
     pass
