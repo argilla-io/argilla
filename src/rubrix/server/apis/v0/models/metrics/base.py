@@ -3,8 +3,8 @@ from typing import Any, ClassVar, Dict, Generic, List, Optional, Union
 from pydantic import BaseModel
 
 from rubrix.server.services.metrics import BaseMetric as _BaseMetric
-from rubrix.server.services.metrics import GenericRecord
 from rubrix.server.services.metrics import PythonMetric as _PythonMetric
+from rubrix.server.services.tasks.commons import ServiceRecord as GenericRecord
 
 
 class Metric(_BaseMetric):

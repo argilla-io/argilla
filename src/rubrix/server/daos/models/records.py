@@ -90,17 +90,17 @@ class PredictionStatus(str, Enum):
     KO = "ko"
 
 
-Annotation = TypeVar("Annotation", bound=BaseAnnotation)
+DAOAnnotation = TypeVar("DAOAnnotation", bound=BaseAnnotation)
 
 
-class BaseRecordDB(GenericModel, Generic[Annotation]):
+class BaseRecordDB(GenericModel, Generic[DAOAnnotation]):
 
     id: Optional[Union[int, str]] = Field(default=None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[Annotation] = None
-    annotation: Optional[Annotation] = None
+    prediction: Optional[DAOAnnotation] = None
+    annotation: Optional[DAOAnnotation] = None
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None
 

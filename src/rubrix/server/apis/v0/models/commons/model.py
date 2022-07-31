@@ -26,7 +26,7 @@ from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.apis.v0.helpers import flatten_dict
-from rubrix.server.commons.models import TaskStatus
+from rubrix.server.commons.models import TaskType
 from rubrix.server.services.search.model import (
     BaseSearchResults,
     BaseSearchResultsAggregations,
@@ -34,13 +34,10 @@ from rubrix.server.services.search.model import (
 )
 from rubrix.server.services.search.model import SortableField as _SortableField
 from rubrix.server.services.tasks.commons import (
-    Annotation,
-    BaseAnnotation,
     BulkResponse,
-    EsRecordDataFieldNames,
-    PredictionStatus,
+    ServiceBaseAnnotation,
     ServiceBaseRecord,
-    TaskType,
+    ServicePredictionStatus,
 )
 from rubrix.utils import limit_value_length
 
@@ -59,8 +56,15 @@ class PaginationParams:
     )
 
 
-# TODO(@frascuchon):  Move this shit to the server.commons.models module
-class BaseRecord(ServiceBaseRecord, GenericModel, Generic[Annotation]):
+class BaseAnnotation(ServiceBaseAnnotation):
+    pass
+
+
+PredictionStatus = ServicePredictionStatus
+Annotation = TypeVar("Annotation", bound=BaseAnnotation)
+
+
+class BaseRecord(ServiceBaseRecord[Annotation], Generic[Annotation]):
     """
     Minimal dataset record information
 
@@ -97,6 +101,7 @@ class BaseRecord(ServiceBaseRecord, GenericModel, Generic[Annotation]):
         return metadata
 
 
+## TODO(@frascuchon): Review use
 Record = TypeVar("ServiceRecord", bound=BaseRecord)
 
 
@@ -108,11 +113,6 @@ __ALL__ = [
     QueryRange,
     BaseSearchResults,
     BaseSearchResultsAggregations,
-    Annotation,
-    TaskStatus,
-    TaskType,
-    EsRecordDataFieldNames,
-    BaseAnnotation,
-    PredictionStatus,
     BulkResponse,
+    TaskType,
 ]
