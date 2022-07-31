@@ -24,7 +24,6 @@ from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseSearchResults,
     BaseSearchResultsAggregations,
-    EsRecordDataFieldNames,
     PredictionStatus,
     ScoreRange,
     SortableField,
@@ -32,7 +31,7 @@ from rubrix.server.apis.v0.models.commons.model import (
 )
 from rubrix.server.apis.v0.models.datasets import DatasetDB, UpdateDatasetRequest
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.services.search.model import BaseSVCSearchQuery
+from rubrix.server.services.search.model import BaseSearchQuery
 
 
 class ExtendedEsRecordDataFieldNames(str, Enum):
@@ -143,12 +142,12 @@ class Text2TextRecordDB(Text2TextRecord):
 
     def extended_fields(self) -> Dict[str, Any]:
         return {
-            EsRecordDataFieldNames.annotated_as: self.annotated_as,
-            EsRecordDataFieldNames.predicted_as: self.predicted_as,
-            EsRecordDataFieldNames.annotated_by: self.annotated_by,
-            EsRecordDataFieldNames.predicted_by: self.predicted_by,
-            EsRecordDataFieldNames.score: self.scores,
-            EsRecordDataFieldNames.words: self.all_text(),
+            "annotated_as": self.annotated_as,
+            "predicted_as": self.predicted_as,
+            "annotated_by": self.annotated_by,
+            "predicted_by": self.predicted_by,
+            "score": self.scores,
+            "words": self.all_text(),
         }
 
 
@@ -167,7 +166,7 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(BaseSVCSearchQuery):
+class Text2TextQuery(BaseSearchQuery):
     """
     API Filters for text2text
 

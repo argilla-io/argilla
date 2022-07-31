@@ -31,7 +31,7 @@ def test_delete_dataset(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "rubrix.api.errors::EntityNotFoundError",
-            "params": {"name": "test_delete_dataset", "type": "Dataset"},
+            "params": {"name": "test_delete_dataset", "type": "ServiceDataset"},
         }
     }
 

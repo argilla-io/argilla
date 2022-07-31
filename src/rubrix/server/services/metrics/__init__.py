@@ -1,2 +1,2 @@
-from .models import BaseMetric, GenericRecord, PythonMetric
-from .service import GenericQuery, MetricsService
+from .models import BaseMetric, PythonMetric
+from .service import MetricsService

@@ -3,14 +3,18 @@ from typing import Any, Dict, Generic, List, TypeVar
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
-from rubrix.server.backend.search.model import BaseSearchQuery as _BaseSearchQuery
+from rubrix.server.backend.search.model import BaseRecordsQuery as _BaseSearchQuery
+from rubrix.server.backend.search.model import QueryRange as _QueryRange
 from rubrix.server.backend.search.model import SortableField as _SortableField
 from rubrix.server.backend.search.model import SortConfig as _SortConfig
-from rubrix.server.services.tasks.commons.record import Record
+from rubrix.server.services.tasks.commons.record import ServiceRecord
 
 
-class BaseSVCSearchQuery(_BaseSearchQuery):
+class BaseSearchQuery(_BaseSearchQuery):
     pass
+
+
+ServiceSearchQuery = TypeVar("ServiceSearchQuery", bound=BaseSearchQuery)
 
 
 class SortConfig(_SortConfig):
@@ -23,13 +27,8 @@ class SortableField(_SortableField):
     pass
 
 
-class QueryRange(BaseModel):
-
-    range_from: float = Field(default=0.0, alias="from")
-    range_to: float = Field(default=None, alias="to")
-
-    class Config:
-        allow_population_by_field_name = True
+class QueryRange(_QueryRange):
+    pass
 
 
 class BaseSearchResultsAggregations(BaseModel):
@@ -48,7 +47,7 @@ class BaseSearchResultsAggregations(BaseModel):
 Aggregations = TypeVar("Aggregations", bound=BaseSearchResultsAggregations)
 
 
-class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
+class BaseSearchResults(GenericModel, Generic[ServiceRecord, Aggregations]):
     """
     API search results
 
@@ -64,11 +63,11 @@ class BaseSearchResults(GenericModel, Generic[Record, Aggregations]):
     """
 
     total: int = 0
-    records: List[Record] = Field(default_factory=list)
+    records: List[ServiceRecord] = Field(default_factory=list)
     aggregations: Aggregations = None
 
 
 class SearchResults(BaseModel):
     total: int
-    records: List[Record]
+    records: List[ServiceRecord]
     metrics: Dict[str, Any] = Field(default_factory=dict)

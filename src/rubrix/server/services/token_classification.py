@@ -13,15 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Iterable, List, Optional, Type
+from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import (
-    BulkResponse,
-    EsRecordDataFieldNames,
-    SortableField,
-)
+from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
 from rubrix.server.apis.v0.models.token_classification import (
     CreationTokenClassificationRecord,

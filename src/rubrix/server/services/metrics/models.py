@@ -1,10 +1,8 @@
-from typing import Any, Dict, Generic, Iterable, TypeVar
+from typing import Any, Dict, Generic, Iterable
 
 from pydantic import BaseModel
 
-from rubrix.server.services.tasks.commons import BaseRecordDB
-
-GenericRecord = TypeVar("GenericRecord", bound=BaseRecordDB)
+from rubrix.server.services.tasks.commons import ServiceRecord
 
 
 class BaseMetric(BaseModel):
@@ -17,12 +15,12 @@ class BaseMetric(BaseModel):
     description: str = None
 
 
-class PythonMetric(BaseMetric, Generic[GenericRecord]):
+class PythonMetric(BaseMetric, Generic[ServiceRecord]):
     """
     A metric definition which will be calculated using raw queried data
     """
 
-    def apply(self, records: Iterable[GenericRecord]) -> Dict[str, Any]:
+    def apply(self, records: Iterable[ServiceRecord]) -> Dict[str, Any]:
         """
         Metric calculation method.
 

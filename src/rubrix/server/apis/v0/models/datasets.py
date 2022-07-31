@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.services.datasets import DatasetDB as SVCDataset
+from rubrix.server.services.datasets import BaseDatasetDB as SVCDataset
 
 
 class UpdateDatasetRequest(BaseModel):

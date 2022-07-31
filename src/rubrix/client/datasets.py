@@ -68,7 +68,7 @@ def _requires_spacy(func):
 
 
 class DatasetBase:
-    """The Dataset classes are containers for Rubrix records.
+    """The ServiceDataset classes are containers for Rubrix records.
 
     This is the base class to facilitate the implementation for each record type.
 
@@ -81,7 +81,7 @@ class DatasetBase:
     """
 
     _RECORD_TYPE = None
-    # record fields that can hold multiple input columns from a datasets.Dataset or a pandas.DataFrame
+    # record fields that can hold multiple input columns from a datasets.ServiceDataset or a pandas.DataFrame
     _RECORD_FIELDS_WITH_MULTIPLE_INPUT_COLUMNS = ["inputs", "metadata"]
 
     @classmethod
@@ -95,7 +95,7 @@ class DatasetBase:
     def __init__(self, records: Optional[List[Record]] = None):
         if self._RECORD_TYPE is None:
             raise NotImplementedError(
-                "A Dataset implementation has to define a `_RECORD_TYPE`!"
+                "A ServiceDataset implementation has to define a `_RECORD_TYPE`!"
             )
 
         self._records = records or []
@@ -141,11 +141,11 @@ class DatasetBase:
         return len(self._records)
 
     @_requires_datasets
-    def to_datasets(self) -> "datasets.Dataset":
-        """Exports your records to a `datasets.Dataset`.
+    def to_datasets(self) -> "datasets.ServiceDataset":
+        """Exports your records to a `datasets.ServiceDataset`.
 
         Returns:
-            A `datasets.Dataset` containing your records.
+            A `datasets.ServiceDataset` containing your records.
         """
         import datasets
 
@@ -167,33 +167,35 @@ class DatasetBase:
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.Dataset`"""
+        """Helper method to transform a Rubrix dataset into a dict that is compatible with `datasets.ServiceDataset`"""
         raise NotImplementedError
 
     @classmethod
-    def from_datasets(cls, dataset: "datasets.Dataset", **kwargs) -> "Dataset":
-        """Imports records from a `datasets.Dataset`.
+    def from_datasets(
+        cls, dataset: "datasets.ServiceDataset", **kwargs
+    ) -> "ServiceDataset":
+        """Imports records from a `datasets.ServiceDataset`.
 
         Columns that are not supported are ignored.
 
         Args:
-            dataset: A datasets Dataset from which to import the records.
+            dataset: A datasets ServiceDataset from which to import the records.
 
         Returns:
-            The imported records in a Rubrix Dataset.
+            The imported records in a Rubrix ServiceDataset.
         """
         raise NotImplementedError
 
     @classmethod
     def _prepare_dataset_and_column_mapping(
         cls,
-        dataset: "datasets.Dataset",
+        dataset: "datasets.ServiceDataset",
         column_mapping: Dict[str, Union[str, List[str]]],
-    ) -> Tuple["datasets.Dataset", Dict[str, List[str]]]:
+    ) -> Tuple["datasets.ServiceDataset", Dict[str, List[str]]]:
         """Renames and removes columns, and extracts the mapping of the columns to be joined.
 
         Args:
-            dataset: A datasets Dataset from which to import the records.
+            dataset: A datasets ServiceDataset from which to import the records.
             column_mapping: Mappings from record fields to column names.
 
         Returns:
@@ -230,10 +232,10 @@ class DatasetBase:
     @classmethod
     def _remove_unsupported_columns(
         cls,
-        dataset: "datasets.Dataset",
+        dataset: "datasets.ServiceDataset",
         extra_columns: List[str],
-    ) -> "datasets.Dataset":
-        """Helper function to remove unsupported columns from the `datasets.Dataset` following the record type.
+    ) -> "datasets.ServiceDataset":
+        """Helper function to remove unsupported columns from the `datasets.ServiceDataset` following the record type.
 
         Args:
             dataset: The dataset.
@@ -261,12 +263,12 @@ class DatasetBase:
     def _join_datasets_columns_and_delete(
         row: Dict[str, Any], columns: List[str]
     ) -> Dict[str, Any]:
-        """Joins columns of a `datasets.Dataset` row into a dict, and deletes the single columns.
+        """Joins columns of a `datasets.ServiceDataset` row into a dict, and deletes the single columns.
 
         Updates the ``row`` dictionary!
 
         Args:
-            row: A row of a `datasets.Dataset`
+            row: A row of a `datasets.ServiceDataset`
             columns: Name of the columns to be joined and deleted from the row.
 
         Returns:
@@ -284,10 +286,10 @@ class DatasetBase:
         column_value: Union[str, List[str], int, List[int]],
         feature: Optional[Any],
     ) -> Optional[Union[str, List[str], int, List[int]]]:
-        """Helper function to parse a datasets.Dataset column with a potential ClassLabel feature.
+        """Helper function to parse a datasets.ServiceDataset column with a potential ClassLabel feature.
 
         Args:
-            column_value: The value from the datasets Dataset column.
+            column_value: The value from the datasets ServiceDataset column.
             feature: The feature of the annotation column to optionally convert ints to strs.
 
         Returns:
@@ -317,12 +319,12 @@ class DatasetBase:
         """Exports your records to a `pandas.DataFrame`.
 
         Returns:
-            A `datasets.Dataset` containing your records.
+            A `datasets.ServiceDataset` containing your records.
         """
         return pd.DataFrame(map(dict, self._records))
 
     @classmethod
-    def from_pandas(cls, dataframe: pd.DataFrame) -> "Dataset":
+    def from_pandas(cls, dataframe: pd.DataFrame) -> "ServiceDataset":
         """Imports records from a `pandas.DataFrame`.
 
         Columns that are not supported are ignored.
@@ -331,7 +333,7 @@ class DatasetBase:
             dataframe: A pandas DataFrame from which to import the records.
 
         Returns:
-            The imported records in a Rubrix Dataset.
+            The imported records in a Rubrix ServiceDataset.
         """
         not_supported_columns = [
             col for col in dataframe.columns if col not in cls._record_init_args()
@@ -346,8 +348,8 @@ class DatasetBase:
         return cls._from_pandas(dataframe)
 
     @classmethod
-    def _from_pandas(cls, dataframe: pd.DataFrame) -> "Dataset":
-        """Helper method to create a Rubrix Dataset from a pandas DataFrame.
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "ServiceDataset":
+        """Helper method to create a Rubrix ServiceDataset from a pandas DataFrame.
 
         Must be implemented by the child class.
 
@@ -355,25 +357,25 @@ class DatasetBase:
             dataframe: A pandas DataFrame
 
         Returns:
-            A Rubrix Dataset
+            A Rubrix ServiceDataset
         """
         raise NotImplementedError
 
     @_requires_datasets
-    def prepare_for_training(self, **kwargs) -> "datasets.Dataset":
+    def prepare_for_training(self, **kwargs) -> "datasets.ServiceDataset":
         """Prepares the dataset for training.
 
         Args:
             **kwargs: Specific to the task of the dataset.
 
         Returns:
-            A datasets Dataset.
+            A datasets ServiceDataset.
         """
         raise NotImplementedError
 
 
 def _prepend_docstring(record_type: Type[Record]):
-    docstring = f"""This Dataset contains {record_type.__name__} records.
+    docstring = f"""This ServiceDataset contains {record_type.__name__} records.
 
     It allows you to export/import records into/from different formats,
     loop over the records, and access them by index.
@@ -429,7 +431,7 @@ class DatasetForTextClassification(DatasetBase):
     @classmethod
     def from_datasets(
         cls,
-        dataset: "datasets.Dataset",
+        dataset: "datasets.ServiceDataset",
         text: Optional[str] = None,
         id: Optional[str] = None,
         inputs: Optional[Union[str, List[str]]] = None,
@@ -453,7 +455,7 @@ class DatasetForTextClassification(DatasetBase):
 
         Examples:
             >>> import datasets
-            >>> ds = datasets.Dataset.from_dict({
+            >>> ds = datasets.ServiceDataset.from_dict({
             ...     "inputs": ["example"],
             ...     "prediction": [
             ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
@@ -592,17 +594,17 @@ class DatasetForTextClassification(DatasetBase):
         )
 
     @_requires_datasets
-    def prepare_for_training(self) -> "datasets.Dataset":
+    def prepare_for_training(self) -> "datasets.ServiceDataset":
         """Prepares the dataset for training.
 
-        This will return a ``datasets.Dataset`` with a *label* column,
+        This will return a ``datasets.ServiceDataset`` with a *label* column,
         and one column for each key in the *inputs* dictionary of the records:
             - Records without an annotation are removed.
             - The *label* column corresponds to the annotations of the records.
             - Labels are transformed to integers.
 
         Returns:
-            A datasets Dataset with a *label* column and several *inputs* columns.
+            A datasets ServiceDataset with a *label* column and several *inputs* columns.
 
         Examples:
             >>> import rubrix as rb
@@ -643,7 +645,7 @@ class DatasetForTextClassification(DatasetBase):
         class_label = (
             datasets.ClassLabel(names=sorted(labels.keys()))
             if ds_dict["label"]
-            # in case we don't have any labels, ClassLabel fails with Dataset.from_dict({"labels": []})
+            # in case we don't have any labels, ClassLabel fails with ServiceDataset.from_dict({"labels": []})
             else datasets.Value("string")
         )
         feature_dict = {
@@ -710,7 +712,7 @@ class DatasetForTokenClassification(DatasetBase):
     @classmethod
     def from_datasets(
         cls,
-        dataset: "datasets.Dataset",
+        dataset: "datasets.ServiceDataset",
         text: Optional[str] = None,
         id: Optional[str] = None,
         tokens: Optional[str] = None,
@@ -734,7 +736,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         Examples:
             >>> import datasets
-            >>> ds = datasets.Dataset.from_dict({
+            >>> ds = datasets.ServiceDataset.from_dict({
             ...     "text": ["my example"],
             ...     "tokens": [["my", "example"]],
             ...     "prediction": [
@@ -793,10 +795,10 @@ class DatasetForTokenClassification(DatasetBase):
         self,
         framework: Union[Framework, str] = "transformers",
         lang: Optional["spacy.Language"] = None,
-    ) -> Union["datasets.Dataset", "spacy.tokens.DocBin"]:
+    ) -> Union["datasets.ServiceDataset", "spacy.tokens.DocBin"]:
         """Prepares the dataset for training.
 
-        This will return a ``datasets.Dataset`` with all columns returned by ``to_datasets`` method
+        This will return a ``datasets.ServiceDataset`` with all columns returned by ``to_datasets`` method
         and an additional  *ner_tags* column:
             - Records without an annotation are removed.
             - The *ner_tags* column corresponds to the iob tags sequences for annotations of the records
@@ -808,7 +810,7 @@ class DatasetForTokenClassification(DatasetBase):
             lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
 
         Returns:
-            A datasets Dataset with a *ner_tags* column and all columns returned by ``to_datasets`` for "transformers"
+            A datasets ServiceDataset with a *ner_tags* column and all columns returned by ``to_datasets`` for "transformers"
             framework.
             A spacy DocBin ready to use for training a spacy NER model for "spacy" framework.
 
@@ -940,7 +942,7 @@ class DatasetForTokenClassification(DatasetBase):
         return data["annotation"] is not None
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to put token classification records in a `datasets.Dataset`"""
+        """Helper method to put token classification records in a `datasets.ServiceDataset`"""
         # create a dict first, where we make the necessary transformations
         def entities_to_dict(
             entities: Optional[
@@ -1031,7 +1033,7 @@ class DatasetForText2Text(DatasetBase):
     @classmethod
     def from_datasets(
         cls,
-        dataset: "datasets.Dataset",
+        dataset: "datasets.ServiceDataset",
         text: Optional[str] = None,
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -1052,12 +1054,12 @@ class DatasetForText2Text(DatasetBase):
 
         Examples:
             >>> import datasets
-            >>> ds = datasets.Dataset.from_dict({
+            >>> ds = datasets.ServiceDataset.from_dict({
             ...     "text": ["my example"],
             ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
             ... })
             >>> # or
-            >>> ds = datasets.Dataset.from_dict({
+            >>> ds = datasets.ServiceDataset.from_dict({
             ...     "text": ["my example"],
             ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
             ... })
@@ -1144,7 +1146,7 @@ Dataset = Union[
 
 
 def read_datasets(
-    dataset: "datasets.Dataset", task: Union[str, TaskType], **kwargs
+    dataset: "datasets.ServiceDataset", task: Union[str, TaskType], **kwargs
 ) -> Dataset:
     """Reads a datasets Dataset and returns a Rubrix Dataset
 
@@ -1157,9 +1159,9 @@ def read_datasets(
         A Rubrix dataset for the given task.
 
     Examples:
-        >>> # Read text classification records from a datasets Dataset
+        >>> # Read text classification records from a datasets ServiceDataset
         >>> import datasets
-        >>> ds = datasets.Dataset.from_dict({
+        >>> ds = datasets.ServiceDataset.from_dict({
         ...     "inputs": ["example"],
         ...     "prediction": [
         ...         [{"label": "LABEL1", "score": 0.9}, {"label": "LABEL2", "score": 0.1}]
@@ -1167,8 +1169,8 @@ def read_datasets(
         ... })
         >>> read_datasets(ds, task="TextClassification")
         >>>
-        >>> # Read token classification records from a datasets Dataset
-        >>> ds = datasets.Dataset.from_dict({
+        >>> # Read token classification records from a datasets ServiceDataset
+        >>> ds = datasets.ServiceDataset.from_dict({
         ...     "text": ["my example"],
         ...     "tokens": [["my", "example"]],
         ...     "prediction": [
@@ -1177,13 +1179,13 @@ def read_datasets(
         ... })
         >>> read_datasets(ds, task="TokenClassification")
         >>>
-        >>> # Read text2text records from a datasets Dataset
-        >>> ds = datasets.Dataset.from_dict({
+        >>> # Read text2text records from a datasets ServiceDataset
+        >>> ds = datasets.ServiceDataset.from_dict({
         ...     "text": ["my example"],
         ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
         ... })
         >>> # or
-        >>> ds = datasets.Dataset.from_dict({
+        >>> ds = datasets.ServiceDataset.from_dict({
         ...     "text": ["my example"],
         ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
         ... })
@@ -1199,12 +1201,12 @@ def read_datasets(
     if task is TaskType.text2text:
         return DatasetForText2Text.from_datasets(dataset, **kwargs)
     raise NotImplementedError(
-        "Reading a datasets Dataset is not implemented for the given task!"
+        "Reading a datasets ServiceDataset is not implemented for the given task!"
     )
 
 
 def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
-    """Reads a pandas DataFrame and returns a Rubrix Dataset
+    """Reads a pandas DataFrame and returns a Rubrix ServiceDataset
 
     Args:
         dataframe: Dataframe to be read in.
@@ -1224,7 +1226,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         ... })
         >>> read_pandas(df, task="TextClassification")
         >>>
-        >>> # Read token classification records from a datasets Dataset
+        >>> # Read token classification records from a datasets ServiceDataset
         >>> df = pd.DataFrame({
         ...     "text": ["my example"],
         ...     "tokens": [["my", "example"]],
@@ -1234,7 +1236,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         ... })
         >>> read_pandas(df, task="TokenClassification")
         >>>
-        >>> # Read text2text records from a datasets Dataset
+        >>> # Read text2text records from a datasets ServiceDataset
         >>> df = pd.DataFrame({
         ...     "text": ["my example"],
         ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
