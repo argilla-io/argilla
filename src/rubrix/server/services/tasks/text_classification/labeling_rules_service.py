@@ -3,14 +3,14 @@ from typing import List, Optional, Tuple
 from fastapi import Depends
 from pydantic import BaseModel, Field
 
-from rubrix.server.apis.v0.models.text_classification import (
-    LabelingRule,
-    TextClassificationDatasetDB,
-)
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.models.records import BaseSearchQuery, RecordSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import EntityAlreadyExistsError, EntityNotFoundError
+from rubrix.server.services.tasks.text_classification.model import (
+    LabelingRule,
+    TextClassificationDatasetDB,
+)
 
 
 class DatasetLabelingRulesSummary(BaseModel):

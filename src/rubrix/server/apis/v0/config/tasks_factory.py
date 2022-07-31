@@ -2,8 +2,8 @@ from typing import Any, List, Optional, Set, Type
 
 from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
-from rubrix.server.apis.v0.models.datasets import DatasetDB
+from rubrix.server.apis.v0.models.commons.model import TaskType
+from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics, Metric
 from rubrix.server.apis.v0.models.metrics.text_classification import (
     TextClassificationMetrics,
@@ -28,13 +28,15 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
 )
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
+from rubrix.server.services.datasets import ServiceDataset
+from rubrix.server.services.tasks.commons import ServiceBaseRecord
 
 
 class TaskConfig(BaseModel):
     task: TaskType
     query: Any
-    dataset: Type[DatasetDB]
-    record: Type[BaseRecord]
+    dataset: Type[ServiceDataset]
+    record: Type[ServiceBaseRecord]
     metrics: Optional[Type[BaseTaskMetrics]]
 
 
@@ -46,9 +48,9 @@ class TaskFactory:
     def register_task(
         cls,
         task_type: TaskType,
-        dataset_class: Type[DatasetDB],
+        dataset_class: Type[ServiceDataset],
         query_request: Type[Any],
-        record_class: Type[BaseRecord],
+        record_class: Type[ServiceBaseRecord],
         metrics: Optional[Type[BaseTaskMetrics]] = None,
     ):
         cls._REGISTERED_TASKS[task_type] = TaskConfig(
@@ -74,12 +76,12 @@ class TaskFactory:
             return config.metrics
 
     @classmethod
-    def get_task_dataset(cls, task: TaskType) -> Type[DatasetDB]:
+    def get_task_dataset(cls, task: TaskType) -> Type[BaseDatasetDB]:
         config = cls.__get_task_config__(task)
         return config.dataset
 
     @classmethod
-    def get_task_record(cls, task: TaskType) -> Type[BaseRecord]:
+    def get_task_record(cls, task: TaskType) -> Type[ServiceBaseRecord]:
         config = cls.__get_task_config__(task)
         return config.record
 

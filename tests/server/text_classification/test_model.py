@@ -17,14 +17,14 @@ from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.apis.v0.models.text_classification import (
-    ClassPrediction,
-    PredictionStatus,
     TextClassificationAnnotation,
     TextClassificationQuery,
     TextClassificationRecord,
 )
 from rubrix.server.backend.search.query_builder import EsQueryBuilder
 from rubrix.server.commons.models import TaskStatus
+from rubrix.server.services.tasks.commons import ServicePredictionStatus
+from rubrix.server.services.tasks.text_classification.model import ClassPrediction
 
 
 def test_flatten_metadata():
@@ -185,7 +185,7 @@ def test_prediction_ok_cases():
             ],
         },
     )
-    assert record.predicted == PredictionStatus.KO
+    assert record.predicted == ServicePredictionStatus.KO
 
     record.prediction = TextClassificationAnnotation(
         **{
@@ -196,7 +196,7 @@ def test_prediction_ok_cases():
             ],
         },
     )
-    assert record.predicted == PredictionStatus.OK
+    assert record.predicted == ServicePredictionStatus.OK
 
     record.prediction = None
     assert record.predicted is None
@@ -246,7 +246,7 @@ def test_predicted_ok_for_multilabel_unordered():
         multi_label=True,
     )
 
-    assert record.predicted == PredictionStatus.OK
+    assert record.predicted == ServicePredictionStatus.OK
 
 
 @pytest.mark.parametrize(
@@ -334,7 +334,7 @@ def test_empty_labels_for_no_multilabel():
             agent="ann.", labels=[ClassPrediction(class_label="B")]
         ),
     )
-    assert record.predicted == PredictionStatus.KO
+    assert record.predicted == ServicePredictionStatus.KO
 
 
 def test_annotated_without_labels_for_multilabel():
@@ -345,4 +345,4 @@ def test_annotated_without_labels_for_multilabel():
         annotation=TextClassificationAnnotation(agent="ann.", labels=[]),
     )
 
-    assert record.predicted == PredictionStatus.OK
+    assert record.predicted == ServicePredictionStatus.OK

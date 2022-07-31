@@ -7,6 +7,7 @@ from rubrix.server.apis.v0.models.metrics.base import (
 )
 
 
+# TODO(@frascuchon): Not here !!
 class CommonTasksMetrics(BaseTaskMetrics, Generic[GenericRecord]):
     """Common task metrics"""
 

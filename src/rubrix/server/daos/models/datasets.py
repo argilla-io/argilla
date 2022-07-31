@@ -3,9 +3,11 @@ from typing import Any, Dict, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
+from rubrix._constants import DATASET_NAME_REGEX_PATTERN
+
 
 class BaseDatasetDB(BaseModel):
-    name: str
+    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
     task: str
     owner: Optional[str] = None
     tags: Dict[str, str] = Field(default_factory=dict)

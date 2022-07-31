@@ -22,11 +22,10 @@ from typing import Any, Dict, Generic, TypeVar
 
 from fastapi import Query
 from pydantic import validator
-from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.helpers import flatten_dict
 from rubrix.server.commons.models import TaskType
+from rubrix.server.helpers import flatten_dict
 from rubrix.server.services.search.model import (
     BaseSearchResults,
     BaseSearchResultsAggregations,

@@ -38,7 +38,7 @@ from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.text2text import Text2TextService, text2text_service
+from rubrix.server.services.tasks.text2text import Text2TextService
 
 TASK_TYPE = TaskType.text2text
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -56,7 +56,7 @@ def bulk_records(
     name: str,
     bulk: Text2TextBulkData,
     common_params: CommonTaskQueryParams = Depends(),
-    service: Text2TextService = Depends(text2text_service),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
@@ -131,7 +131,7 @@ def search_records(
         False, description="If enabled, return related record metrics"
     ),
     pagination: PaginationParams = Depends(),
-    service: Text2TextService = Depends(text2text_service),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Text2TextSearchResults:
@@ -237,7 +237,7 @@ async def stream_data(
     query: Optional[Text2TextQuery] = None,
     common_params: CommonTaskQueryParams = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: Text2TextService = Depends(text2text_service),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
