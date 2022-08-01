@@ -110,16 +110,17 @@ async def bulk_records(
         dataset.owner = owner
         datasets.create_dataset(user=current_user, dataset=dataset)
 
+    records = [ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records]
+    # TODO(@frascuchon): validator can be applied in service layer
     await validator.validate_dataset_records(
         user=current_user,
         dataset=dataset,
-        records=bulk.records,
+        records=records,
     )
 
     result = service.add_records(
         dataset=dataset,
-        records=[ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records],
-        metrics=TasksFactory.get_task_metrics(TASK_TYPE),
+        records=records,
     )
     return BulkResponse(
         dataset=name,

@@ -1,10 +1,10 @@
-from typing import List, Optional, Type
+from typing import List, Type
 
 from fastapi import Depends
 
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics, ServiceMetric
 from rubrix.server.services.tasks.commons import ServiceRecord
 
 
@@ -29,9 +29,9 @@ class RecordsStorageService:
         dataset: ServiceDataset,
         records: List[ServiceRecord],
         record_type: Type[ServiceRecord],
-        metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ) -> int:
         """Store a set of records"""
+        metrics = TasksFactory.get_task_metrics(dataset.task)
         if metrics:
             for record in records:
                 record.metrics = metrics.record_metrics(record)

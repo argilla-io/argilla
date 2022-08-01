@@ -42,6 +42,7 @@ class BaseDatasetsQuery(BaseQuery):
     tasks: Optional[List[str]] = None
     owners: Optional[List[str]] = None
     include_no_owner: bool = None
+    name: Optional[str] = None
 
 
 class BaseRecordsQuery(BaseQuery):

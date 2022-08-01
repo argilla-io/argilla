@@ -344,6 +344,10 @@ class aggregations:
             if aggregation
         }
 
+    @staticmethod
+    def filters_aggregation(filters: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        return {"filters": {"filters": filters}}
+
 
 def find_nested_field_path(
     field_name: str, mapping_definition: Dict[str, Any]

@@ -12,7 +12,6 @@ from rubrix.server.daos.backend.metrics.base import (
 )
 from rubrix.server.daos.backend.query_helpers import aggregations
 
-# TODO(@frascuchon): Use as default value for defined metrics
 _DEFAULT_MAX_ENTITY_BUCKET = 1000
 
 
@@ -129,12 +128,20 @@ METRICS = {
     "predicted_entity_labels": NestedTermsAggregation(
         id="predicted_entity_labels",
         nested_path="metrics.predicted.mentions",
-        terms=TermsAggregation(id="terms", field="label"),
+        terms=TermsAggregation(
+            id="terms",
+            field="label",
+            default_size=_DEFAULT_MAX_ENTITY_BUCKET,
+        ),
     ),
     "annotated_entity_labels": NestedTermsAggregation(
         id="annotated_entity_labels",
         nested_path="metrics.annotated.mentions",
-        terms=TermsAggregation(id="terms", field="label"),
+        terms=TermsAggregation(
+            id="terms",
+            field="label",
+            default_size=_DEFAULT_MAX_ENTITY_BUCKET,
+        ),
     ),
     "predicted_entity_density": NestedHistogramAggregation(
         id="predicted_entity_density",

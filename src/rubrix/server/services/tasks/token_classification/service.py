@@ -61,13 +61,11 @@ class TokenClassificationService:
         self,
         dataset: ServiceTokenClassificationDataset,
         records: List[ServiceTokenClassificationRecord],
-        metrics: Type[ServiceBaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
             record_type=ServiceTokenClassificationRecord,
-            metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 

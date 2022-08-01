@@ -72,7 +72,6 @@ class TextClassificationService:
         self,
         dataset: ServiceTextClassificationDataset,
         records: List[ServiceTextClassificationRecord],
-        metrics: Type[ServiceBaseTaskMetrics],
     ):
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
@@ -81,7 +80,6 @@ class TextClassificationService:
             dataset=dataset,
             records=records,
             record_type=ServiceTextClassificationRecord,
-            metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 

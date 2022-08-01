@@ -85,12 +85,14 @@ class DatasetsDAO:
         self,
         owner_list: List[str] = None,
         task2dataset_map: Dict[str, Type[DatasetDB]] = None,
+        name: Optional[str] = None,
     ) -> List[DatasetDB]:
-
+        owner_list = owner_list or []
         query = BaseDatasetsQuery(
             owners=owner_list,
             include_no_owner=NO_WORKSPACE in owner_list,
             tasks=[task for task in task2dataset_map] if task2dataset_map else None,
+            name=name,
         )
 
         es_query = self._es.query_builder.map_2_es_query(query=query)
@@ -111,18 +113,6 @@ class DatasetsDAO:
         ]
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
-        """
-        Stores a dataset in elasticsearch and creates corresponding dataset records index
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        Returns
-        -------
-            Created dataset
-        """
 
         self._es.add_document(
             index=DATASETS_INDEX_NAME,
@@ -136,21 +126,8 @@ class DatasetsDAO:
         self,
         dataset: DatasetDB,
     ) -> DatasetDB:
-        """
-        Updates an stored dataset
 
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        Returns
-        -------
-            The updated dataset
-
-        """
         dataset_id = dataset.id
-
         self._es.update_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset_id,
@@ -160,15 +137,6 @@ class DatasetsDAO:
         return dataset
 
     def delete_dataset(self, dataset: DatasetDB):
-        """
-        Deletes indices related to provided dataset
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        """
         try:
             self._es.delete_index(dataset_records_index(dataset.id))
         finally:
@@ -181,20 +149,7 @@ class DatasetsDAO:
         as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
         task: Optional[str] = None,
     ) -> Optional[DatasetDB]:
-        """
-        Finds a dataset by name
 
-        Parameters
-        ----------
-        name: The dataset name
-        owner: The dataset owner
-        as_dataset_class: The dataset class used to return data
-        task: The dataset task string definition
-
-        Returns
-        -------
-            The found dataset if any. None otherwise
-        """
         dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
             owner=owner,
@@ -204,26 +159,25 @@ class DatasetsDAO:
         )
         if not document and owner is None:
             # We must search by name since we have no owner
-            results = self._es.list_documents(
+            es_query = self._es.query_builder.map_2_es_query(
+                query=BaseDatasetsQuery(name=name)
+            )
+            docs = self._es.list_documents(
                 index=DATASETS_INDEX_NAME,
-                # TODO(@frascuchon): Move to the backend!
-                query={"query": {"term": {"name.keyword": name}}},
+                query=es_query,
                 fetch_once=True,
             )
-            results = list(results)
-            if len(results) == 0:
+            docs = list(docs)
+            if len(docs) == 0:
                 return None
 
-            if len(results) > 1:
+            if len(docs) > 1:
                 raise ValueError(
                     f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
                 )
-
-            document = results[0]
-
+            document = docs[0]
         if document is None:
             return None
-
         base_ds = self._es_doc_to_instance(document)
         if task and task != base_ds.task:
             raise WrongTaskError(

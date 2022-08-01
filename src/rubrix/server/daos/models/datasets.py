@@ -4,11 +4,12 @@ from typing import Any, Dict, Optional, TypeVar
 from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
+from rubrix.server.commons.models import TaskType
 
 
 class BaseDatasetDB(BaseModel):
     name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
-    task: str
+    task: TaskType
     owner: Optional[str] = None
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)

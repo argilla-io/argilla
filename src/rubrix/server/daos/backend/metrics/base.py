@@ -111,34 +111,21 @@ class HistogramAggregation(ElasticsearchMetric):
 
 @dataclasses.dataclass
 class TermsAggregation(ElasticsearchMetric):
-    """
-    The base elasticsearch terms aggregation metric
-
-    Attributes
-    ----------
-
-    field:
-        The term field
-    script:
-        If provided, it will be used as scripted field
-        for aggregation
-    fixed_size:
-        If provided, the size will use for terms aggregation
-    missing:
-        If provided, will use the value for docs results with missing value for field
-
-    """
 
     field: str = None
     script: Union[str, Dict[str, Any]] = None
     fixed_size: Optional[int] = None
+    default_size: Optional[int] = None
     missing: Optional[str] = None
 
     def _build_aggregation(self, size: int = None) -> Dict[str, Any]:
         if self.fixed_size:
             size = self.fixed_size
         return aggregations.terms_aggregation(
-            self.field, script=self.script, size=size, missing=self.missing
+            self.field,
+            script=self.script,
+            size=size or self.default_size,
+            missing=self.missing,
         )
 
 

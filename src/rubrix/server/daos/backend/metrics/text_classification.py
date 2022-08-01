@@ -6,28 +6,25 @@ from rubrix.server.daos.backend.metrics.base import (
     ElasticsearchMetric,
     TermsAggregation,
 )
-from rubrix.server.daos.backend.query_helpers import filters
+from rubrix.server.daos.backend.query_helpers import aggregations, filters
 
 
 @dataclasses.dataclass
 class DatasetLabelingRulesMetric(ElasticsearchMetric):
     def _build_aggregation(self, queries: List[str]) -> Dict[str, Any]:
         rules_filters = [filters.text_query(rule_query) for rule_query in queries]
-        # TODO(@frascuchon): use query helpers
-        return {
-            "filters": {
-                "filters": {
-                    "covered_records": filters.boolean_filter(
-                        should_filters=rules_filters, minimum_should_match=1
-                    ),
-                    "annotated_covered_records": filters.boolean_filter(
-                        filter_query=filters.exists_field("annotated_as"),
-                        should_filters=rules_filters,
-                        minimum_should_match=1,
-                    ),
-                }
+        return aggregations.filters_aggregation(
+            filters={
+                "covered_records": filters.boolean_filter(
+                    should_filters=rules_filters, minimum_should_match=1
+                ),
+                "annotated_covered_records": filters.boolean_filter(
+                    filter_query=filters.exists_field("annotated_as"),
+                    should_filters=rules_filters,
+                    minimum_should_match=1,
+                ),
             }
-        }
+        )
 
 
 @dataclasses.dataclass
@@ -72,8 +69,7 @@ class LabelingRulesMetric(ElasticsearchMetric):
                     }
                 )
 
-        # TODO(@frascuchon): User query helpers
-        return {"filters": {"filters": aggr_filters}}
+        return aggregations.filters_aggregation(aggr_filters)
 
     @staticmethod
     def _encode_label_name(label: str) -> str:

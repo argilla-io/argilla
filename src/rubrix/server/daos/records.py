@@ -25,7 +25,6 @@ from rubrix.server.daos.backend.elasticsearch import (
 )
 
 # TODO(@frascuchon): Move this to the backend
-from rubrix.server.daos.backend.mappings.datasets import DATASETS_RECORDS_INDEX_NAME
 from rubrix.server.daos.backend.mappings.helpers import (
     mappings,
     tasks_common_mappings,
@@ -64,7 +63,8 @@ def dataset_records_index(dataset_id: str) -> str:
         The dataset records index name
 
     """
-    return DATASETS_RECORDS_INDEX_NAME.format(dataset_id)
+    index_mame_template = settings.dataset_records_index_name
+    return index_mame_template.format(dataset_id)
 
 
 class DatasetRecordsDAO:
@@ -193,27 +193,7 @@ class DatasetRecordsDAO:
         exclude_fields: List[str] = None,
         highligth_results: bool = True,
     ) -> DaoRecordsSearchResults:
-        """
-        SearchRequest records under a dataset given a search parameters.
 
-        Parameters
-        ----------
-        dataset:
-            The dataset
-        search:
-            The search params
-        size:
-            Number of records to retrieve (for pagination)
-        record_from:
-            Record from which to retrieve the records (for pagination)
-        exclude_fields:
-            a list of fields to exclude from the result source. Wildcards are accepted
-        Returns
-        -------
-            The search result
-
-        """
-        # TODO(@frascuchon): Move this logic to the backend class
         try:
             search = search or DaoRecordsSearch()
             records_index = dataset_records_index(dataset.id)
@@ -301,18 +281,7 @@ class DatasetRecordsDAO:
         dataset: DatasetDB,
         force_recreate: bool = False,
     ) -> str:
-        """
-        Creates a dataset records elasticsearch index based on dataset task type
 
-        Args:
-            dataset:
-                The dataset
-            force_recreate:
-                If True, the index will be deleted and recreated
-
-        Returns:
-            The generated index name.
-        """
         _mappings = tasks_common_mappings()
         task_mappings = self._es.get_task_mapping(dataset.task).copy()
         for k in task_mappings:

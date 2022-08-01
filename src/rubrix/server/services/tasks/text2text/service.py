@@ -64,15 +64,11 @@ class Text2TextService:
         self,
         dataset: ServiceText2TextDataset,
         records: List[ServiceText2TextRecord],
-        metrics: Type[
-            ServiceBaseTaskMetrics
-        ],  # TODO(@frascuchon): Remove this argument and resolve in backend
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
             record_type=ServiceText2TextRecord,
-            metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 

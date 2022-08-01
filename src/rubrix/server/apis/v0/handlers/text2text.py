@@ -100,7 +100,6 @@ def bulk_records(
     result = service.add_records(
         dataset=dataset,
         records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
-        metrics=TasksFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
         dataset=name,

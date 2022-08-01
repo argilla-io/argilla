@@ -55,7 +55,10 @@ class EsQueryBuilder:
             query_filters.append(
                 filters.terms_filter(field="task.keyword", values=query.tasks)
             )
-
+        if query.name:
+            query_filters.append(
+                filters.term_filter(field="name.keyword", value=query.name)
+            )
         if not query_filters:
             return filters.match_all()
         return filters.boolean_filter(
@@ -82,7 +85,7 @@ class EsQueryBuilder:
             **{
                 **schema.query_builder_options(),
                 "default_field": "text",
-            }  # TODO: This will change
+            }
         )
 
         query_tree = parser.parse(text_search)

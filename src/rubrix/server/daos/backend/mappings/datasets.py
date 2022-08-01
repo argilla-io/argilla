@@ -1,8 +1,6 @@
 from rubrix.server.settings import settings
 
 DATASETS_INDEX_NAME = settings.dataset_index_name
-DATASETS_RECORDS_INDEX_NAME = settings.dataset_records_index_name
-
 
 # TODO(@frascuchon): Define an mapping definition instead and
 #  use it when datasets index is created
