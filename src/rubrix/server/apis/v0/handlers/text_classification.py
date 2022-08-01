@@ -21,7 +21,6 @@ from fastapi.responses import StreamingResponse
 
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import text_classification_dataset_settings
-from rubrix.server.apis.v0.helpers import takeuntil
 from rubrix.server.apis.v0.models.commons.model import (
     BulkResponse,
     PaginationParams,
@@ -42,6 +41,7 @@ from rubrix.server.apis.v0.models.text_classification import (
 )
 from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
 from rubrix.server.errors import EntityNotFoundError
+from rubrix.server.helpers import takeuntil
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService

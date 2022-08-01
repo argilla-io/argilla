@@ -54,30 +54,6 @@ def unflatten_dict(
     return resultDict
 
 
-def takeuntil(iterable, limit: int):
-    """
-    Iterate over inner iterable until a count limit
-
-    Parameters
-    ----------
-    iterable:
-        The inner iterable
-    limit:
-        The limit
-
-    Returns
-    -------
-
-    """
-    count = 0
-    for e in iterable:
-        if count < limit:
-            yield e
-            count += 1
-        else:
-            break
-
-
 def flatten_dict(
     data: Dict[str, Any], sep: str = ".", drop_empty: bool = False
 ) -> Dict[str, Any]:
@@ -120,3 +96,27 @@ def flatten_dict(
         return dict(items)
 
     return _flatten_internal_(data, _sep=sep)
+
+
+def takeuntil(iterable, limit: int):
+    """
+    Iterate over inner iterable until a count limit
+
+    Parameters
+    ----------
+    iterable:
+        The inner iterable
+    limit:
+        The limit
+
+    Returns
+    -------
+
+    """
+    count = 0
+    for e in iterable:
+        if count < limit:
+            yield e
+            count += 1
+        else:
+            break

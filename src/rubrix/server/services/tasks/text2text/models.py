@@ -8,10 +8,10 @@ from rubrix.server.commons.models import TaskType
 from rubrix.server.daos.models.records import BaseAnnotation
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchQuery,
     BaseSearchResults,
     BaseSearchResultsAggregations,
     ScoreRange,
+    ServiceBaseSearchQuery,
     SortableField,
 )
 from rubrix.server.services.tasks.commons import (
@@ -75,7 +75,7 @@ class Text2TextRecordDB(ServiceBaseRecord[Text2TextAnnotation]):
         }
 
 
-class Text2TextQuery(BaseSearchQuery):
+class Text2TextQuery(ServiceBaseSearchQuery):
     score: Optional[ScoreRange] = Field(default=None)
     predicted: Optional[ServicePredictionStatus] = Field(default=None, nullable=True)
 

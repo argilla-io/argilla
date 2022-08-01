@@ -10,11 +10,11 @@ from rubrix.server.backend.search.model import SortConfig as _SortConfig
 from rubrix.server.services.tasks.commons.record import ServiceRecord
 
 
-class BaseSearchQuery(_BaseSearchQuery):
+class ServiceBaseSearchQuery(_BaseSearchQuery):
     pass
 
 
-ServiceSearchQuery = TypeVar("ServiceSearchQuery", bound=BaseSearchQuery)
+ServiceSearchQuery = TypeVar("ServiceSearchQuery", bound=ServiceBaseSearchQuery)
 
 
 class SortConfig(_SortConfig):

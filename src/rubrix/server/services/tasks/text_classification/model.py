@@ -23,10 +23,10 @@ from rubrix.server.commons.models import TaskStatus, TaskType
 from rubrix.server.helpers import flatten_dict
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchQuery,
     BaseSearchResults,
     BaseSearchResultsAggregations,
     ScoreRange,
+    ServiceBaseSearchQuery,
 )
 from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
@@ -456,7 +456,7 @@ class TextClassificationRecord(TextClassificationRecordDB):
         return {}
 
 
-class TextClassificationQuery(BaseSearchQuery):
+class TextClassificationQuery(ServiceBaseSearchQuery):
     """
     API Filters for text classification
 
