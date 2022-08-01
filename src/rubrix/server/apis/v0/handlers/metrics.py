@@ -19,13 +19,13 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from pydantic import BaseModel, Field
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskConfig, TaskFactory
 from rubrix.server.apis.v0.handlers import (
     text2text,
     text_classification,
     token_classification,
 )
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.commons.config import TaskConfig, TasksFactory
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
@@ -121,10 +121,10 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
             name=name,
             task=cfg.task,
             workspace=teams_query.workspace,
-            as_dataset_class=TaskFactory.get_task_dataset(cfg.task),
+            as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
-        metrics = TaskFactory.get_task_metrics(dataset.task)
+        metrics = TasksFactory.get_task_metrics(dataset.task)
         metrics = metrics.metrics if metrics else []
 
         return [MetricInfo.parse_obj(metric) for metric in metrics]
@@ -149,11 +149,11 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
             name=name,
             task=cfg.task,
             workspace=teams_query.workspace,
-            as_dataset_class=TaskFactory.get_task_dataset(cfg.task),
+            as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
-        metric_ = TaskFactory.find_task_metric(task=cfg.task, metric_id=metric)
-        record_class = TaskFactory.get_task_record(cfg.task)
+        metric_ = TasksFactory.find_task_metric(task=cfg.task, metric_id=metric)
+        record_class = TasksFactory.get_task_record(cfg.task)
 
         return metrics.summarize_metric(
             dataset=dataset,
@@ -168,7 +168,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 router = APIRouter()
 
 for task_api in [text_classification, token_classification, text2text]:
-    cfg = TaskFactory.get_task_by_task_type(task_api.TASK_TYPE)
+    cfg = TasksFactory.get_task_by_task_type(task_api.TASK_TYPE)
     if cfg:
         configure_metrics_endpoints(task_api.router, cfg)
 

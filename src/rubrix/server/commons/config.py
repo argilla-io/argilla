@@ -2,41 +2,13 @@ from typing import List, Optional, Set, Type
 
 from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.metrics.text_classification import (
-    TextClassificationMetrics,
-)
-from rubrix.server.apis.v0.models.metrics.token_classification import (
-    TokenClassificationMetrics,
-)
-from rubrix.server.apis.v0.models.text2text import (
-    Text2TextDataset,
-    Text2TextMetrics,
-    Text2TextQuery,
-)
-from rubrix.server.apis.v0.models.text_classification import (
-    TextClassificationDataset,
-    TextClassificationQuery,
-)
-from rubrix.server.apis.v0.models.token_classification import (
-    TokenClassificationDataset,
-    TokenClassificationQuery,
-)
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics.models import (
-    ServiceBaseMetric,
-    ServiceBaseTaskMetrics,
-)
+from rubrix.server.services.metrics import ServiceBaseMetric
+from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics
 from rubrix.server.services.search.model import ServiceRecordsQuery
 from rubrix.server.services.tasks.commons import ServiceRecord
-from rubrix.server.services.tasks.text2text.models import ServiceText2TextRecord
-from rubrix.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationRecord,
-)
-from rubrix.server.services.tasks.token_classification.model import (
-    ServiceTokenClassificationRecord,
-)
 
 
 class TaskConfig(BaseModel):
@@ -47,9 +19,9 @@ class TaskConfig(BaseModel):
     metrics: Optional[Type[ServiceBaseTaskMetrics]]
 
 
-class TaskFactory:
+class TasksFactory:
 
-    _REGISTERED_TASKS = dict()
+    __REGISTERED_TASKS__ = dict()
 
     @classmethod
     def register_task(
@@ -61,7 +33,7 @@ class TaskFactory:
         metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ):
 
-        cls._REGISTERED_TASKS[task_type] = TaskConfig(
+        cls.__REGISTERED_TASKS__[task_type] = TaskConfig(
             task=task_type,
             dataset=dataset_class,
             query=query_request,
@@ -71,11 +43,11 @@ class TaskFactory:
 
     @classmethod
     def get_all_configs(cls) -> List[TaskConfig]:
-        return [cfg for cfg in cls._REGISTERED_TASKS.values()]
+        return [cfg for cfg in cls.__REGISTERED_TASKS__.values()]
 
     @classmethod
     def get_task_by_task_type(cls, task_type: TaskType) -> Optional[TaskConfig]:
-        return cls._REGISTERED_TASKS.get(task_type)
+        return cls.__REGISTERED_TASKS__.get(task_type)
 
     @classmethod
     def get_task_metrics(cls, task: TaskType) -> Optional[Type[ServiceBaseTaskMetrics]]:
@@ -122,28 +94,3 @@ class TaskFactory:
             if metric.id in metric_ids:
                 metrics.append(metric)
         return metrics
-
-
-TaskFactory.register_task(
-    task_type=TaskType.token_classification,
-    dataset_class=TokenClassificationDataset,
-    query_request=TokenClassificationQuery,
-    record_class=ServiceTokenClassificationRecord,
-    metrics=TokenClassificationMetrics,
-)
-
-TaskFactory.register_task(
-    task_type=TaskType.text_classification,
-    dataset_class=TextClassificationDataset,
-    query_request=TextClassificationQuery,
-    record_class=ServiceTextClassificationRecord,
-    metrics=TextClassificationMetrics,
-)
-
-TaskFactory.register_task(
-    task_type=TaskType.text2text,
-    dataset_class=Text2TextDataset,
-    query_request=Text2TextQuery,
-    record_class=ServiceText2TextRecord,
-    metrics=Text2TextMetrics,
-)

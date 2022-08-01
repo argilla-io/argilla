@@ -19,10 +19,12 @@ from typing import Iterable, List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import text_classification_dataset_settings
 from rubrix.server.apis.v0.models.commons.model import BulkResponse, PaginationParams
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.metrics.token_classification import (
+    TokenClassificationMetrics,
+)
 from rubrix.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
@@ -36,7 +38,12 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
     UpdateLabelingRule,
 )
+from rubrix.server.apis.v0.models.token_classification import (
+    TokenClassificationDataset,
+    TokenClassificationQuery,
+)
 from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.helpers import takeuntil
@@ -50,10 +57,22 @@ from rubrix.server.services.tasks.text_classification.model import (
     ServiceTextClassificationQuery,
     ServiceTextClassificationRecord,
 )
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
 
 TASK_TYPE = TaskType.text_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
 NEW_BASE_ENDPOINT = f"/{TASK_TYPE}/{{name}}"
+
+TasksFactory.register_task(
+    task_type=TaskType.token_classification,
+    dataset_class=TokenClassificationDataset,
+    query_request=TokenClassificationQuery,
+    record_class=ServiceTokenClassificationRecord,
+    metrics=TokenClassificationMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -84,7 +103,7 @@ async def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -93,7 +112,7 @@ async def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
         datasets.create_dataset(user=current_user, dataset=dataset)
@@ -105,7 +124,7 @@ async def bulk_records(
     result = service.add_records(
         dataset=dataset,
         records=[ServiceTextClassificationRecord.parse_obj(r) for r in bulk.records],
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        metrics=TasksFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
         dataset=name,
@@ -170,7 +189,7 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     result = service.search(
         dataset=dataset,
@@ -179,21 +198,6 @@ def search_records(
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            # TODO(@frascuchon): Compute metrics outer than searches
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "predicted_as",
-                "annotated_by",
-                "annotated_as",
-                "error_distribution",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
     return TextClassificationSearchResults(
@@ -284,7 +288,7 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     data_stream = map(
@@ -321,7 +325,7 @@ async def list_labeling_rules(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     return [
@@ -352,7 +356,7 @@ async def create_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     rule = ServiceLabelingRule(
@@ -392,7 +396,7 @@ async def compute_rule_metrics(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     return service.compute_rule_metrics(dataset, rule_query=query, labels=labels)
@@ -419,7 +423,7 @@ async def compute_dataset_rules_metrics(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     metrics = service.compute_overall_rules_metrics(dataset)
     return DatasetLabelingRulesMetricsSummary.parse_obj(metrics)
@@ -446,7 +450,7 @@ async def delete_labeling_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     service.delete_labeling_rule(dataset, rule_query=query)
@@ -475,7 +479,7 @@ async def get_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     rule = service.find_labeling_rule(
         dataset,
@@ -508,7 +512,7 @@ async def update_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     rule = service.update_labeling_rule(

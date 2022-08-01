@@ -17,8 +17,8 @@ from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.daos.backend.search.model import SortableField
-from rubrix.server.services.metrics import ServiceBaseMetric
 from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics
 from rubrix.server.services.search.model import ServiceSearchResults, ServiceSortConfig
 from rubrix.server.services.search.service import SearchRecordsService
@@ -79,7 +79,6 @@ class TokenClassificationService:
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
-        metrics: Optional[List[ServiceBaseMetric]] = None,
     ) -> ServiceSearchResults:
 
         """
@@ -103,14 +102,31 @@ class TokenClassificationService:
                     The matched records with aggregation info for specified task_meta.py
 
                 """
+        metrics = TasksFactory.find_task_metrics(
+            dataset.task,
+            metric_ids={
+                "words_cloud",
+                "predicted_by",
+                "predicted_as",
+                "annotated_by",
+                "annotated_as",
+                "error_distribution",
+                "predicted_mentions_distribution",
+                "annotated_mentions_distribution",
+                "status_distribution",
+                "metadata",
+                "score",
+            },
+        )
+
         results = self.__search__.search(
             dataset,
             query=query,
             record_type=ServiceTokenClassificationRecord,
             size=size,
+            metrics=metrics,
             record_from=record_from,
             exclude_metrics=exclude_metrics,
-            metrics=metrics,
             sort_config=ServiceSortConfig(sort_by=sort_by),
         )
 

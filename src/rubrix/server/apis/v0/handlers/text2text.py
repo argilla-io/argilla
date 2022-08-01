@@ -19,17 +19,19 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.models.commons.model import BulkResponse, PaginationParams
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.text2text import (
     Text2TextBulkData,
+    Text2TextDataset,
+    Text2TextMetrics,
     Text2TextQuery,
     Text2TextRecord,
     Text2TextSearchAggregations,
     Text2TextSearchRequest,
     Text2TextSearchResults,
 )
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.helpers import takeuntil
@@ -45,6 +47,15 @@ from rubrix.server.services.tasks.text2text.models import (
 
 TASK_TYPE = TaskType.text2text
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+
+TasksFactory.register_task(
+    task_type=TaskType.text2text,
+    dataset_class=Text2TextDataset,
+    query_request=Text2TextQuery,
+    record_class=ServiceText2TextRecord,
+    metrics=Text2TextMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -72,7 +83,7 @@ def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -81,7 +92,7 @@ def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
         datasets.create_dataset(user=current_user, dataset=dataset)
@@ -89,7 +100,7 @@ def bulk_records(
     result = service.add_records(
         dataset=dataset,
         records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        metrics=TasksFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
         dataset=name,
@@ -124,7 +135,7 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     result = service.search(
         dataset=dataset,
@@ -133,18 +144,6 @@ def search_records(
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            # TODO(@frascuchon): Compute metrics outer than searches
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "annotated_by",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
     return Text2TextSearchResults(
@@ -232,7 +231,7 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     data_stream = map(
         Text2TextRecord.parse_obj,

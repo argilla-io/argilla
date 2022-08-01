@@ -17,7 +17,6 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.datasets import (
     CopyDatasetRequest,
@@ -25,6 +24,7 @@ from rubrix.server.apis.v0.models.datasets import (
     DatasetCreate,
     UpdateDatasetRequest,
 )
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -83,7 +83,7 @@ async def create_dataset(
 
     owner = user.check_workspace(ws_params.workspace)
 
-    dataset_class = TaskFactory.get_task_dataset(request.task)
+    dataset_class = TasksFactory.get_task_dataset(request.task)
     dataset = dataset_class.parse_obj({**request.dict()})
     dataset.owner = owner
 

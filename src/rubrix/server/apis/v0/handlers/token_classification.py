@@ -19,10 +19,16 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import token_classification_dataset_settings
 from rubrix.server.apis.v0.models.commons.model import BulkResponse, PaginationParams
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.metrics.text_classification import (
+    TextClassificationMetrics,
+)
+from rubrix.server.apis.v0.models.text_classification import (
+    TextClassificationDataset,
+    TextClassificationQuery,
+)
 from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationAggregations,
     TokenClassificationBulkData,
@@ -32,6 +38,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationSearchResults,
 )
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.helpers import takeuntil
@@ -39,6 +46,9 @@ from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
 from rubrix.server.services.tasks.token_classification import TokenClassificationService
 from rubrix.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationQuery,
@@ -47,6 +57,15 @@ from rubrix.server.services.tasks.token_classification.model import (
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+
+TasksFactory.register_task(
+    task_type=TaskType.text_classification,
+    dataset_class=TextClassificationDataset,
+    query_request=TextClassificationQuery,
+    record_class=ServiceTextClassificationRecord,
+    metrics=TextClassificationMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -77,7 +96,7 @@ async def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -86,7 +105,7 @@ async def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
         datasets.create_dataset(user=current_user, dataset=dataset)
@@ -100,7 +119,7 @@ async def bulk_records(
     result = service.add_records(
         dataset=dataset,
         records=[ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records],
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        metrics=TasksFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
         dataset=name,
@@ -138,7 +157,7 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     results = service.search(
         dataset=dataset,
@@ -147,23 +166,6 @@ def search_records(
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            # TODO(@frascuchon): Move out from HERE!
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "predicted_as",
-                "annotated_by",
-                "annotated_as",
-                "error_distribution",
-                "predicted_mentions_distribution",
-                "annotated_mentions_distribution",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
     return TokenClassificationSearchResults(
@@ -253,7 +255,7 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     data_stream = map(
         TokenClassificationRecord.parse_obj,
