@@ -17,10 +17,14 @@ from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
 from rubrix.server.errors.base_errors import MissingDatasetRecordsError
-from rubrix.server.services.metrics import BaseMetric
-from rubrix.server.services.search.model import SortableField, SortConfig
+from rubrix.server.services.metrics import ServiceBaseMetric
+from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics
+from rubrix.server.services.search.model import (
+    ServiceSearchResults,
+    ServiceSortableField,
+    ServiceSortConfig,
+)
 from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
@@ -30,10 +34,8 @@ from rubrix.server.services.tasks.text_classification.model import (
     LabelingRuleMetricsSummary,
     ServiceLabelingRule,
     ServiceTextClassificationDataset,
+    ServiceTextClassificationQuery,
     ServiceTextClassificationRecord,
-    TextClassificationQuery,
-    TextClassificationSearchAggregations,
-    TextClassificationSearchResults,
 )
 
 
@@ -70,7 +72,7 @@ class TextClassificationService:
         self,
         dataset: ServiceTextClassificationDataset,
         records: List[ServiceTextClassificationRecord],
-        metrics: Type[BaseTaskMetrics],
+        metrics: Type[ServiceBaseTaskMetrics],
     ):
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
@@ -86,13 +88,13 @@ class TextClassificationService:
     def search(
         self,
         dataset: ServiceTextClassificationDataset,
-        query: TextClassificationQuery,
-        sort_by: List[SortableField],
+        query: ServiceTextClassificationQuery,
+        sort_by: List[ServiceSortableField],
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
-        metrics: Optional[List[BaseMetric]] = None,
-    ) -> TextClassificationSearchResults:
+        metrics: Optional[List[ServiceBaseMetric]] = None,
+    ) -> ServiceSearchResults:
         """
         Run a search in a dataset
 
@@ -122,7 +124,7 @@ class TextClassificationService:
             size=size,
             exclude_metrics=exclude_metrics,
             metrics=metrics,
-            sort_config=SortConfig(
+            sort_config=ServiceSortConfig(
                 sort_by=sort_by,
             ),
         )
@@ -133,18 +135,12 @@ class TextClassificationService:
             results.metrics["predicted"] = results.metrics["error_distribution"]
             results.metrics["predicted"].pop("unknown", None)
 
-        return TextClassificationSearchResults(
-            total=results.total,
-            records=results.records,
-            aggregations=TextClassificationSearchAggregations.parse_obj(results.metrics)
-            if results.metrics
-            else None,
-        )
+        return results
 
     def read_dataset(
         self,
         dataset: ServiceTextClassificationDataset,
-        query: Optional[TextClassificationQuery] = None,
+        query: Optional[ServiceTextClassificationQuery] = None,
         id_from: Optional[str] = None,
         limit: int = 1000
     ) -> Iterable[ServiceTextClassificationRecord]:

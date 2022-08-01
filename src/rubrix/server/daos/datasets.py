@@ -17,17 +17,17 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.backend.elasticsearch import ElasticsearchBackend
-from rubrix.server.backend.mappings.datasets import (
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.daos.backend.mappings.datasets import (
     DATASETS_INDEX_NAME,
     DATASETS_INDEX_TEMPLATE,
 )
-from rubrix.server.backend.search.model import BaseDatasetsQuery
+from rubrix.server.daos.backend.search.model import BaseDatasetsQuery
 from rubrix.server.daos.models.datasets import (
-    BaseSettingsDB,
-    DAODatasetDB,
-    DAODatasetSettingsDB,
-    ServiceBaseDataset,
+    BaseDatasetDB,
+    BaseDatasetSettingsDB,
+    DatasetDB,
+    DatasetSettingsDB,
 )
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
 from rubrix.server.errors import WrongTaskError
@@ -84,8 +84,8 @@ class DatasetsDAO:
     def list_datasets(
         self,
         owner_list: List[str] = None,
-        task2dataset_map: Dict[str, Type[DAODatasetDB]] = None,
-    ) -> List[DAODatasetDB]:
+        task2dataset_map: Dict[str, Type[DatasetDB]] = None,
+    ) -> List[DatasetDB]:
 
         query = BaseDatasetsQuery(
             owners=owner_list,
@@ -104,13 +104,13 @@ class DatasetsDAO:
         task2dataset_map = task2dataset_map or {}
         return [
             self._es_doc_to_instance(
-                doc, ds_class=task2dataset_map.get(task, ServiceBaseDataset)
+                doc, ds_class=task2dataset_map.get(task, BaseDatasetDB)
             )
             for doc in docs
             for task in [self.__get_doc_field__(doc, "task")]
         ]
 
-    def create_dataset(self, dataset: DAODatasetDB) -> DAODatasetDB:
+    def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
         """
         Stores a dataset in elasticsearch and creates corresponding dataset records index
 
@@ -134,8 +134,8 @@ class DatasetsDAO:
 
     def update_dataset(
         self,
-        dataset: DAODatasetDB,
-    ) -> DAODatasetDB:
+        dataset: DatasetDB,
+    ) -> DatasetDB:
         """
         Updates an stored dataset
 
@@ -159,7 +159,7 @@ class DatasetsDAO:
         )
         return dataset
 
-    def delete_dataset(self, dataset: DAODatasetDB):
+    def delete_dataset(self, dataset: DatasetDB):
         """
         Deletes indices related to provided dataset
 
@@ -178,9 +178,9 @@ class DatasetsDAO:
         self,
         name: str,
         owner: Optional[str],
-        as_dataset_class: Type[DAODatasetDB] = ServiceBaseDataset,
+        as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
         task: Optional[str] = None,
-    ) -> Optional[DAODatasetDB]:
+    ) -> Optional[DatasetDB]:
         """
         Finds a dataset by name
 
@@ -195,7 +195,7 @@ class DatasetsDAO:
         -------
             The found dataset if any. None otherwise
         """
-        dataset_id = ServiceBaseDataset.build_dataset_id(
+        dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
             owner=owner,
         )
@@ -229,14 +229,14 @@ class DatasetsDAO:
             raise WrongTaskError(
                 detail=f"Provided task {task} cannot be applied to dataset"
             )
-        dataset_type = as_dataset_class or ServiceBaseDataset
+        dataset_type = as_dataset_class or BaseDatasetDB
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
     @staticmethod
     def _es_doc_to_instance(
-        doc: Dict[str, Any], ds_class: Type[DAODatasetDB] = ServiceBaseDataset
-    ) -> DAODatasetDB:
-        """Transforms a stored elasticsearch document into a `ServiceBaseDataset`"""
+        doc: Dict[str, Any], ds_class: Type[DatasetDB] = BaseDatasetDB
+    ) -> DatasetDB:
+        """Transforms a stored elasticsearch document into a `BaseDatasetDB`"""
 
         def __key_value_list_to_dict__(
             key_value_list: List[Dict[str, Any]]
@@ -256,7 +256,7 @@ class DatasetsDAO:
         return ds_class.parse_obj(data)
 
     @staticmethod
-    def _dataset_to_es_doc(dataset: DAODatasetDB) -> Dict[str, Any]:
+    def _dataset_to_es_doc(dataset: DatasetDB) -> Dict[str, Any]:
         def __dict_to_key_value_list__(data: Dict[str, Any]) -> List[Dict[str, Any]]:
             return [
                 {"key": key, "value": json.dumps(value)} for key, value in data.items()
@@ -272,7 +272,7 @@ class DatasetsDAO:
             "metadata": __dict_to_key_value_list__(metadata),
         }
 
-    def copy(self, source: DAODatasetDB, target: DAODatasetDB):
+    def copy(self, source: DatasetDB, target: DatasetDB):
         source_doc = self._es.get_document_by_id(
             index=DATASETS_INDEX_NAME, doc_id=source.id
         )
@@ -288,11 +288,11 @@ class DatasetsDAO:
         index_to = dataset_records_index(target.id)
         self._es.clone_index(index=index_from, clone_to=index_to)
 
-    def close(self, dataset: DAODatasetDB):
+    def close(self, dataset: DatasetDB):
         """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
         self._es.close_index(dataset_records_index(dataset.id))
 
-    def open(self, dataset: DAODatasetDB):
+    def open(self, dataset: DatasetDB):
         """Make available a dataset"""
         self._es.open_index(dataset_records_index(dataset.id))
 
@@ -306,8 +306,8 @@ class DatasetsDAO:
         return [k for k in metric_data]
 
     def save_settings(
-        self, dataset: DAODatasetDB, settings: DAODatasetSettingsDB
-    ) -> BaseSettingsDB:
+        self, dataset: DatasetDB, settings: DatasetSettingsDB
+    ) -> BaseDatasetSettingsDB:
         self._es.update_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset.id,
@@ -317,14 +317,14 @@ class DatasetsDAO:
         return settings
 
     def load_settings(
-        self, dataset: DAODatasetDB, as_class: Type[DAODatasetSettingsDB]
-    ) -> Optional[DAODatasetSettingsDB]:
+        self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
+    ) -> Optional[DatasetSettingsDB]:
         doc = self._es.get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
         if doc:
             settings = self.__get_doc_field__(doc, field="settings")
             return as_class.parse_obj(settings) if settings else None
 
-    def delete_settings(self, dataset: DAODatasetDB):
+    def delete_settings(self, dataset: DatasetDB):
         self._es.update_document(
             index=DATASETS_INDEX_NAME,
             doc_id=dataset.id,

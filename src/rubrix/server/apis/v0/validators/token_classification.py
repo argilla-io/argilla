@@ -2,15 +2,10 @@ from typing import List, Set, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.metrics.token_classification import DatasetLabels
-from rubrix.server.apis.v0.models.token_classification import (
-    CreationTokenClassificationRecord,
-    TokenClassificationAnnotation,
-    TokenClassificationRecord,
-)
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import BadRequestError, EntityNotFoundError
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
@@ -22,6 +17,10 @@ __svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
 )
 
 from rubrix.server.services.metrics import MetricsService
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationAnnotation,
+    ServiceTokenClassificationRecord,
+)
 
 
 class DatasetValidator:
@@ -48,7 +47,7 @@ class DatasetValidator:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
                 metric=DatasetLabels(),
-                record_class=TokenClassificationRecord,
+                record_class=ServiceTokenClassificationRecord,
                 query=None,
             )
             if results:
@@ -67,7 +66,7 @@ class DatasetValidator:
         self,
         user: User,
         dataset: Dataset,
-        records: List[CreationTokenClassificationRecord],
+        records: List[ServiceTokenClassificationRecord],
     ):
         try:
             settings: TokenClassificationSettings = (
@@ -90,7 +89,7 @@ class DatasetValidator:
 
     @staticmethod
     def __check_label_entities__(
-        label_schema: Set[str], annotation: TokenClassificationAnnotation
+        label_schema: Set[str], annotation: ServiceTokenClassificationAnnotation
     ):
         if not annotation:
             return

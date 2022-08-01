@@ -2,12 +2,12 @@ from typing import Any, Dict, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.daos.models.records import RecordSearch
+from rubrix.server.daos.models.records import DaoRecordsSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics.models import PythonMetric, ServiceMetric
-from rubrix.server.services.search.model import ServiceSearchQuery
-from rubrix.server.services.tasks.commons.record import ServiceRecord
+from rubrix.server.services.metrics.models import ServiceMetric, ServicePythonMetric
+from rubrix.server.services.search.model import ServiceRecordsQuery
+from rubrix.server.services.tasks.commons import ServiceRecord
 
 
 class MetricsService:
@@ -53,7 +53,7 @@ class MetricsService:
         dataset: ServiceDataset,
         metric: ServiceMetric,
         record_class: Optional[Type[ServiceRecord]] = None,
-        query: Optional[ServiceSearchQuery] = None,
+        query: Optional[ServiceRecordsQuery] = None,
         **metric_params,
     ) -> Dict[str, Any]:
         """
@@ -77,9 +77,9 @@ class MetricsService:
             The metric summarization info
         """
 
-        if isinstance(metric, PythonMetric):
+        if isinstance(metric, ServicePythonMetric):
             records = self.__dao__.scan_dataset(
-                dataset, search=RecordSearch(query=query)
+                dataset, search=DaoRecordsSearch(query=query)
             )
             return metric.apply(map(record_class.parse_obj, records))
 

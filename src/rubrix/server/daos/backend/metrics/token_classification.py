@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Any, Dict
 
-from rubrix.server.backend.metrics.base import (
+from rubrix.server.daos.backend.metrics.base import (
     BidimensionalTermsAggregation,
     HistogramAggregation,
     NestedBidimensionalTermsAggregation,
@@ -10,7 +10,7 @@ from rubrix.server.backend.metrics.base import (
     NestedTermsAggregation,
     TermsAggregation,
 )
-from rubrix.server.backend.query_helpers import aggregations
+from rubrix.server.daos.backend.query_helpers import aggregations
 
 # TODO(@frascuchon): Use as default value for defined metrics
 _DEFAULT_MAX_ENTITY_BUCKET = 1000

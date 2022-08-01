@@ -16,21 +16,23 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, root_validator, validator
 
-from rubrix.server.apis.v0.models.commons.model import BaseRecord
+from rubrix.server.apis.v0.models.commons.model import (
+    BaseRecord,
+    BaseSearchResults,
+    ScoreRange,
+)
 from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
-from rubrix.server.backend.search.model import SortableField
-from rubrix.server.services.search.model import BaseSearchResults
-from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationAggregations as _TokenClassificationAggregations,
+from rubrix.server.commons.models import PredictionStatus
+from rubrix.server.daos.backend.search.model import SortableField
+from rubrix.server.services.search.model import (
+    ServiceBaseRecordsQuery,
+    ServiceBaseSearchResultsAggregations,
 )
 from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationAnnotation as _TokenClassificationAnnotation,
+    ServiceTokenClassificationAnnotation as _TokenClassificationAnnotation,
 )
 from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationDatasetDB as _TokenClassificationDatasetDB,
-)
-from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationQuery as _TokenClassificationQuery,
+    ServiceTokenClassificationDataset,
 )
 
 
@@ -71,8 +73,12 @@ class TokenClassificationBulkData(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 
-class TokenClassificationQuery(_TokenClassificationQuery):
-    pass
+class TokenClassificationQuery(ServiceBaseRecordsQuery):
+
+    predicted_as: List[str] = Field(default_factory=list)
+    annotated_as: List[str] = Field(default_factory=list)
+    score: Optional[ScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
 
 class TokenClassificationSearchRequest(BaseModel):
@@ -80,8 +86,9 @@ class TokenClassificationSearchRequest(BaseModel):
     sort: List[SortableField] = Field(default_factory=list)
 
 
-class TokenClassificationAggregations(_TokenClassificationAggregations):
-    pass
+class TokenClassificationAggregations(ServiceBaseSearchResultsAggregations):
+    predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
+    mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
 
 
 class TokenClassificationSearchResults(
@@ -90,5 +97,5 @@ class TokenClassificationSearchResults(
     pass
 
 
-class TokenClassificationDatasetDB(_TokenClassificationDatasetDB):
+class TokenClassificationDataset(ServiceTokenClassificationDataset):
     pass

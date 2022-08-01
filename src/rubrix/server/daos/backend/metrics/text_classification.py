@@ -2,8 +2,11 @@ import dataclasses
 from typing import Any, Dict, List, Optional
 
 from rubrix.server._helpers import unflatten_dict
-from rubrix.server.backend.metrics.base import ElasticsearchMetric, TermsAggregation
-from rubrix.server.backend.query_helpers import filters
+from rubrix.server.daos.backend.metrics.base import (
+    ElasticsearchMetric,
+    TermsAggregation,
+)
+from rubrix.server.daos.backend.query_helpers import filters
 
 
 @dataclasses.dataclass

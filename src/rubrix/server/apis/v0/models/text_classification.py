@@ -20,11 +20,16 @@ from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
-    PredictionStatus,
+    BaseSearchResults,
+    ScoreRange,
     SortableField,
 )
 from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
-from rubrix.server.services.search.model import BaseSearchResults
+from rubrix.server.commons.models import PredictionStatus
+from rubrix.server.services.search.model import (
+    ServiceBaseRecordsQuery,
+    ServiceBaseSearchResultsAggregations,
+)
 from rubrix.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary as _DatasetLabelingRulesMetricsSummary,
 )
@@ -32,16 +37,13 @@ from rubrix.server.services.tasks.text_classification.model import (
     LabelingRuleMetricsSummary as _LabelingRuleMetricsSummary,
 )
 from rubrix.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationDataset as _TextClassificationDatasetDB,
+    ServiceTextClassificationDataset,
+)
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationQuery as _TextClassificationQuery,
 )
 from rubrix.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
-)
-from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationQuery as _TextClassificationQuery,
-)
-from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationSearchAggregations as _TextClassificationSearchAggregations,
 )
 from rubrix.server.services.tasks.text_classification.model import TokenAttributions
 
@@ -97,7 +99,7 @@ class DatasetLabelingRulesMetricsSummary(_DatasetLabelingRulesMetricsSummary):
     pass
 
 
-class TextClassificationDataset(_TextClassificationDatasetDB):
+class TextClassificationDataset(ServiceTextClassificationDataset):
     pass
 
 
@@ -137,11 +139,20 @@ class TextClassificationBulkData(UpdateDatasetRequest):
         return records
 
 
-class TextClassificationQuery(_TextClassificationQuery):
-    pass
+class TextClassificationQuery(ServiceBaseRecordsQuery):
+
+    predicted_as: List[str] = Field(default_factory=list)
+    annotated_as: List[str] = Field(default_factory=list)
+    score: Optional[ScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+
+    uncovered_by_rules: List[str] = Field(
+        default_factory=list,
+        description="List of rule queries that WILL NOT cover the resulting records",
+    )
 
 
-class TextClassificationSearchAggregations(_TextClassificationSearchAggregations):
+class TextClassificationSearchAggregations(ServiceBaseSearchResultsAggregations):
     pass
 
 

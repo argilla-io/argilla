@@ -16,29 +16,27 @@
 import datetime
 from typing import Any, Dict, Iterable, List, Optional, Type
 
-import deprecated
 from fastapi import Depends
 
-from rubrix.server.backend.elasticsearch import (
+from rubrix.server.daos.backend.elasticsearch import (
     ClosedIndexError,
     ElasticsearchBackend,
     IndexNotFoundError,
-    create_es_wrapper,
 )
 
 # TODO(@frascuchon): Move this to the backend
-from rubrix.server.backend.mappings.datasets import DATASETS_RECORDS_INDEX_NAME
-from rubrix.server.backend.mappings.helpers import (
+from rubrix.server.daos.backend.mappings.datasets import DATASETS_RECORDS_INDEX_NAME
+from rubrix.server.daos.backend.mappings.helpers import (
     mappings,
     tasks_common_mappings,
     tasks_common_settings,
 )
-from rubrix.server.backend.search.model import BackendRecordsQuery
-from rubrix.server.daos.models.datasets import DAODatasetDB
+from rubrix.server.daos.backend.search.model import BackendRecordsQuery
+from rubrix.server.daos.models.datasets import DatasetDB
 from rubrix.server.daos.models.records import (
-    DAORecordDB,
-    RecordSearch,
-    RecordSearchResults,
+    DaoRecordsSearch,
+    DaoRecordsSearchResults,
+    RecordDB,
 )
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 from rubrix.server.errors.task_errors import MetadataLimitExceededError
@@ -105,9 +103,9 @@ class DatasetRecordsDAO:
 
     def add_records(
         self,
-        dataset: DAODatasetDB,
-        records: List[DAORecordDB],
-        record_class: Type[DAORecordDB],
+        dataset: DatasetDB,
+        records: List[RecordDB],
+        record_class: Type[RecordDB],
     ) -> int:
         """
         Add records to dataset
@@ -150,14 +148,14 @@ class DatasetRecordsDAO:
             doc_id=lambda _record: _record.get("id"),
         )
 
-    def get_metadata_schema(self, dataset: DAODatasetDB) -> Dict[str, str]:
+    def get_metadata_schema(self, dataset: DatasetDB) -> Dict[str, str]:
         """Get metadata fields schema for provided dataset"""
         records_index = dataset_records_index(dataset.id)
         return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
 
     def compute_metric(
         self,
-        dataset: DAODatasetDB,
+        dataset: DatasetDB,
         metric_id: str,
         metric_params: Dict[str, Any] = None,
         query: Optional[BackendRecordsQuery] = None,
@@ -188,13 +186,13 @@ class DatasetRecordsDAO:
 
     def search_records(
         self,
-        dataset: DAODatasetDB,
-        search: Optional[RecordSearch] = None,
+        dataset: DatasetDB,
+        search: Optional[DaoRecordsSearch] = None,
         size: int = 100,
         record_from: int = 0,
         exclude_fields: List[str] = None,
         highligth_results: bool = True,
-    ) -> RecordSearchResults:
+    ) -> DaoRecordsSearchResults:
         """
         SearchRequest records under a dataset given a search parameters.
 
@@ -217,7 +215,7 @@ class DatasetRecordsDAO:
         """
         # TODO(@frascuchon): Move this logic to the backend class
         try:
-            search = search or RecordSearch()
+            search = search or DaoRecordsSearch()
             records_index = dataset_records_index(dataset.id)
 
             total, records = self._es.search_records(
@@ -229,7 +227,7 @@ class DatasetRecordsDAO:
                 exclude_fields=exclude_fields,
                 enable_highlight=highligth_results,
             )
-            return RecordSearchResults(total=total, records=records)
+            return DaoRecordsSearchResults(total=total, records=records)
         except ClosedIndexError:
             raise ClosedDatasetError(dataset.name)
         except IndexNotFoundError:
@@ -239,9 +237,9 @@ class DatasetRecordsDAO:
 
     def scan_dataset(
         self,
-        dataset: DAODatasetDB,
+        dataset: DatasetDB,
+        search: Optional[DaoRecordsSearch] = None,
         limit: int = 1000,
-        search: Optional[RecordSearch] = None,
         id_from: Optional[str] = None,
     ) -> Iterable[Dict[str, Any]]:
         """
@@ -262,7 +260,7 @@ class DatasetRecordsDAO:
         -------
             An iterable over found dataset records
         """
-        search = search or RecordSearch()
+        search = search or DaoRecordsSearch()
         return self._es.scan_records(
             index=dataset_records_index(dataset.id),
             query=search.query,
@@ -300,7 +298,7 @@ class DatasetRecordsDAO:
 
     def create_dataset_index(
         self,
-        dataset: DAODatasetDB,
+        dataset: DatasetDB,
         force_recreate: bool = False,
     ) -> str:
         """
@@ -332,7 +330,7 @@ class DatasetRecordsDAO:
         )
         return index_name
 
-    def get_dataset_schema(self, dataset: DAODatasetDB) -> Dict[str, Any]:
+    def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
         schema = self._es.get_index_mapping(dataset_records_index(dataset.id))
         return schema

@@ -21,23 +21,23 @@ from opensearchpy.helpers import bulk as es_bulk
 from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
-from rubrix.server.backend import query_helpers
-from rubrix.server.backend.mappings.text2text import text2text_mappings
-from rubrix.server.backend.mappings.text_classification import (
+from rubrix.server.commons.models import TaskType
+from rubrix.server.daos.backend import query_helpers
+from rubrix.server.daos.backend.mappings.text2text import text2text_mappings
+from rubrix.server.daos.backend.mappings.text_classification import (
     text_classification_mappings,
 )
-from rubrix.server.backend.mappings.token_classification import (
+from rubrix.server.daos.backend.mappings.token_classification import (
     token_classification_mappings,
 )
-from rubrix.server.backend.metrics import ALL_METRICS
-from rubrix.server.backend.metrics.base import ElasticsearchMetric
-from rubrix.server.backend.search.model import (
+from rubrix.server.daos.backend.metrics import ALL_METRICS
+from rubrix.server.daos.backend.metrics.base import ElasticsearchMetric
+from rubrix.server.daos.backend.search.model import (
     BackendRecordsQuery,
     SortableField,
     SortConfig,
 )
-from rubrix.server.backend.search.query_builder import EsQueryBuilder
-from rubrix.server.commons.models import TaskType
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
 
 try:
@@ -855,27 +855,3 @@ class ElasticsearchBackend(LoggingMixin):
             docs = self.list_documents(index, query=es_query)
             for doc in docs:
                 yield self.__esdoc2record__(doc)
-
-
-_instance = None  # The singleton instance
-
-
-@deprecated.deprecated(reason="Use `ElasticsearchBackend.get_instance` instead")
-def create_es_wrapper() -> ElasticsearchBackend:
-    """
-        Creates an instance of ElasticsearchBackend.
-
-    This function is used in fastapi for resolve component dependencies.
-
-    See <https://fastapi.tiangolo.com/tutorial/dependencies/>
-
-    Returns
-    -------
-
-    """
-
-    global _instance
-    if _instance is None:
-        _instance = ElasticsearchBackend.get_instance()
-
-    return _instance

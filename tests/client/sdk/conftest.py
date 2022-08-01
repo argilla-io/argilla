@@ -51,9 +51,12 @@ class Helpers:
         return self.remove_key(schema, key="pattern")
 
     def are_compatible_api_schemas(self, client_schema: dict, server_schema: dict):
-        return (
-            client_schema["properties"].items() <= server_schema["properties"].items()
-        )
+        if (
+            not client_schema["properties"].items()
+            <= server_schema["properties"].items()
+        ):
+            assert client_schema["properties"] == server_schema["properties"]
+        return True
 
 
 @pytest.fixture(scope="session")

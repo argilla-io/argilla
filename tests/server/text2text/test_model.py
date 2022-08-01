@@ -4,7 +4,7 @@ from rubrix.server.apis.v0.models.text2text import (
     Text2TextQuery,
     Text2TextRecord,
 )
-from rubrix.server.backend.search.query_builder import EsQueryBuilder
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 def test_sentences_sorted_by_score():

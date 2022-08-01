@@ -21,9 +21,8 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.backend.search.query_builder import EsQueryBuilder
-from rubrix.server.commons.models import TaskStatus
-from rubrix.server.services.tasks.commons import ServicePredictionStatus
+from rubrix.server.commons.models import PredictionStatus, TaskStatus
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 from rubrix.server.services.tasks.text_classification.model import (
     ClassPrediction,
     ServiceTextClassificationRecord,
@@ -188,7 +187,7 @@ def test_prediction_ok_cases():
             ],
         },
     )
-    assert record.predicted == ServicePredictionStatus.KO
+    assert record.predicted == PredictionStatus.KO
 
     record.prediction = TextClassificationAnnotation(
         **{
@@ -199,7 +198,7 @@ def test_prediction_ok_cases():
             ],
         },
     )
-    assert record.predicted == ServicePredictionStatus.OK
+    assert record.predicted == PredictionStatus.OK
 
     record.prediction = None
     assert record.predicted is None
@@ -249,7 +248,7 @@ def test_predicted_ok_for_multilabel_unordered():
         multi_label=True,
     )
 
-    assert record.predicted == ServicePredictionStatus.OK
+    assert record.predicted == PredictionStatus.OK
 
 
 @pytest.mark.parametrize(
@@ -337,7 +336,7 @@ def test_empty_labels_for_no_multilabel():
             agent="ann.", labels=[ClassPrediction(class_label="B")]
         ),
     )
-    assert record.predicted == ServicePredictionStatus.KO
+    assert record.predicted == PredictionStatus.KO
 
 
 def test_annotated_without_labels_for_multilabel():
@@ -348,4 +347,4 @@ def test_annotated_without_labels_for_multilabel():
         annotation=TextClassificationAnnotation(agent="ann.", labels=[]),
     )
 
-    assert record.predicted == ServicePredictionStatus.OK
+    assert record.predicted == PredictionStatus.OK

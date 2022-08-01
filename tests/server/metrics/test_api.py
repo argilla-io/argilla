@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
 from rubrix.server.apis.v0.models.metrics.token_classification import (
     TokenClassificationMetrics,
 )
@@ -26,6 +25,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationBulkData,
     TokenClassificationRecord,
 )
+from rubrix.server.services.metrics.models import CommonTasksMetrics
 
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 
@@ -199,7 +199,7 @@ def test_dataset_metrics(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "rubrix.api.errors::EntityNotFoundError",
-            "params": {"name": "missing_metric", "type": "Metric"},
+            "params": {"name": "missing_metric", "type": "ServiceBaseMetric"},
         }
     }
 

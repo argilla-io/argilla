@@ -21,13 +21,10 @@ from fastapi.responses import StreamingResponse
 
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import token_classification_dataset_settings
-from rubrix.server.apis.v0.models.commons.model import (
-    BulkResponse,
-    PaginationParams,
-    TaskType,
-)
+from rubrix.server.apis.v0.models.commons.model import BulkResponse, PaginationParams
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.token_classification import (
+    TokenClassificationAggregations,
     TokenClassificationBulkData,
     TokenClassificationQuery,
     TokenClassificationRecord,
@@ -35,6 +32,7 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationSearchResults,
 )
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.helpers import takeuntil
 from rubrix.server.responses import StreamingResponseWithErrorHandling
@@ -43,6 +41,7 @@ from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
 from rubrix.server.services.tasks.token_classification import TokenClassificationService
 from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,
 )
 
@@ -141,9 +140,9 @@ def search_records(
         workspace=common_params.workspace,
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
-    result = service.search(
+    results = service.search(
         dataset=dataset,
-        query=query,
+        query=ServiceTokenClassificationQuery.parse_obj(query),
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
@@ -168,9 +167,11 @@ def search_records(
     )
 
     return TokenClassificationSearchResults(
-        total=result.total,
-        records=[TokenClassificationRecord.parse_obj(r) for r in result.records],
-        aggregations=result.aggregations,
+        total=results.total,
+        records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
+        aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
+        if results.metrics
+        else None,
     )
 
 
@@ -256,7 +257,9 @@ async def stream_data(
     )
     data_stream = map(
         TokenClassificationRecord.parse_obj,
-        service.read_dataset(dataset=dataset, query=query, id_from=id_from, limit=limit),
+        service.read_dataset(
+            dataset=dataset, query=ServiceTokenClassificationQuery.parse_obj(query), id_from=id_from, limit=limit
+        ),
     )
 
     return scan_data_response(

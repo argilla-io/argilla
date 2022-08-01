@@ -1,2 +1,2 @@
-from .models import BaseMetric, PythonMetric
+from .models import ServiceBaseMetric, ServicePythonMetric
 from .service import MetricsService

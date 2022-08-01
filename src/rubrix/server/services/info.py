@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import psutil
 from fastapi import Depends
@@ -24,7 +24,7 @@ from hurry.filesize import size
 from pydantic import BaseModel
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
 
 
 class ApiInfo(BaseModel):

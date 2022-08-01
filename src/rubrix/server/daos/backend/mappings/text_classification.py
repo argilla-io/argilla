@@ -1,4 +1,4 @@
-from rubrix.server.backend.mappings.helpers import mappings
+from rubrix.server.daos.backend.mappings.helpers import mappings
 
 
 def text_classification_mappings():

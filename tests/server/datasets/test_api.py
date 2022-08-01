@@ -14,9 +14,9 @@
 #  limitations under the License.
 from typing import Optional
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.text_classification import TextClassificationBulkData
+from rubrix.server.commons.models import TaskType
 from tests.helpers import SecuredClient
 
 
@@ -150,7 +150,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "TokenClassificationDatasetDB",
+                "model": "TokenClassificationDataset",
             },
         }
     }

@@ -4,12 +4,17 @@ from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from rubrix.server.apis.v0.models.metrics.base import Metric, PythonMetric
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.apis.v0.models.text_classification import TextClassificationRecord
+from rubrix.server.services.metrics.models import (
+    CommonTasksMetrics,
+    ServiceBaseMetric,
+    ServicePythonMetric,
+)
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
 
 
-class F1Metric(PythonMetric):
+class F1Metric(ServicePythonMetric):
     """
     A basic f1 computation for text classification
 
@@ -21,7 +26,7 @@ class F1Metric(PythonMetric):
 
     multi_label: bool = False
 
-    def apply(self, records: Iterable[TextClassificationRecord]) -> Any:
+    def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
         filtered_records = list(filter(lambda r: r.predicted is not None, records))
         # TODO: This must be precomputed with using a global dataset metric
         ds_labels = {
@@ -88,12 +93,14 @@ class F1Metric(PythonMetric):
         }
 
 
-class DatasetLabels(PythonMetric):
+class DatasetLabels(ServicePythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset labels", const=True)
     max_processed_records: int = 10000
 
-    def apply(self, records: Iterable[TextClassificationRecord]) -> Dict[str, Any]:
+    def apply(
+        self, records: Iterable[ServiceTextClassificationRecord]
+    ) -> Dict[str, Any]:
         ds_labels = set()
         for _ in range(
             0, self.max_processed_records
@@ -113,10 +120,10 @@ class DatasetLabels(PythonMetric):
         return {"labels": ds_labels or []}
 
 
-class TextClassificationMetrics(CommonTasksMetrics[TextClassificationRecord]):
+class TextClassificationMetrics(CommonTasksMetrics[ServiceTextClassificationRecord]):
     """Configured metrics for text classification task"""
 
-    metrics: ClassVar[List[Union[PythonMetric, str]]] = (
+    metrics: ClassVar[List[ServiceBaseMetric]] = (
         CommonTasksMetrics.metrics
         + [
             F1Metric(
@@ -133,11 +140,11 @@ class TextClassificationMetrics(CommonTasksMetrics[TextClassificationRecord]):
             DatasetLabels(),
         ]
         + [
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_as",
                 name="Predicted labels distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_as",
                 name="Annotated labels distribution",
             ),

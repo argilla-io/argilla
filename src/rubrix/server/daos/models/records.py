@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 from uuid import uuid4
 
@@ -21,89 +20,38 @@ from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.backend.search.model import BackendRecordsQuery
-from rubrix.server.backend.search.model import BaseRecordsQuery as _BaseSearchQuery
-from rubrix.server.backend.search.model import SortConfig
-from rubrix.server.commons.models import TaskStatus, TaskType
+from rubrix.server.commons.models import PredictionStatus, TaskStatus, TaskType
+from rubrix.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
 from rubrix.server.helpers import flatten_dict
 from rubrix.utils import limit_value_length
 
 
-class BaseSearchQuery(_BaseSearchQuery):
-    pass
-
-
-class RecordSearch(BaseModel):
-    """
-    Dao search
-
-    Attributes:
-    -----------
-
-    query:
-        The search query portion
-    sort:
-        The sort order
-    """
+class DaoRecordsSearch(BaseModel):
 
     query: Optional[BackendRecordsQuery] = None
     sort: SortConfig = Field(default_factory=SortConfig)
 
 
-class RecordSearchResults(BaseModel):
-    """
-    Dao search results
-
-    Attributes:
-    -----------
-
-    total: int
-        The total of query results
-    records: List[T]
-        List of records retrieved for the pagination configuration
-    """
-
+class DaoRecordsSearchResults(BaseModel):
     total: int
     records: List[Dict[str, Any]]
 
 
-class EsRecordDataFieldNames(str, Enum):
-
-    predicted_as = "predicted_as"
-    annotated_as = "annotated_as"
-    annotated_by = "annotated_by"
-    predicted_by = "predicted_by"
-    status = "status"
-    predicted = "predicted"
-    score = "score"
-    words = "words"
-    event_timestamp = "event_timestamp"
-    last_updated = "last_updated"
-
-    def __str__(self):
-        return self.value
-
-
-class BaseAnnotation(BaseModel):
+class BaseAnnotationDB(BaseModel):
     agent: str = Field(max_length=64)
 
 
-class PredictionStatus(str, Enum):
-    OK = "ok"
-    KO = "ko"
+AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
 
 
-DAOAnnotation = TypeVar("DAOAnnotation", bound=BaseAnnotation)
-
-
-class BaseRecordDB(GenericModel, Generic[DAOAnnotation]):
+class BaseRecordDB(GenericModel, Generic[AnnotationDB]):
 
     id: Optional[Union[int, str]] = Field(default=None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[DAOAnnotation] = None
-    annotation: Optional[DAOAnnotation] = None
+    prediction: Optional[AnnotationDB] = None
+    annotation: Optional[AnnotationDB] = None
     metrics: Dict[str, Any] = Field(default_factory=dict)
     search_keywords: Optional[List[str]] = None
 
@@ -195,12 +143,12 @@ class BaseRecordDB(GenericModel, Generic[DAOAnnotation]):
         this method.
         """
         return {
-            EsRecordDataFieldNames.predicted: self.predicted,
-            EsRecordDataFieldNames.annotated_as: self.annotated_as,
-            EsRecordDataFieldNames.predicted_as: self.predicted_as,
-            EsRecordDataFieldNames.annotated_by: self.annotated_by,
-            EsRecordDataFieldNames.predicted_by: self.predicted_by,
-            EsRecordDataFieldNames.score: self.scores,
+            "predicted": self.predicted,
+            "annotated_as": self.annotated_as,
+            "predicted_as": self.predicted_as,
+            "annotated_by": self.annotated_by,
+            "predicted_by": self.predicted_by,
+            "score": self.scores,
         }
 
     def dict(self, *args, **kwargs) -> "DictStrAny":
@@ -214,4 +162,4 @@ class BaseRecordDB(GenericModel, Generic[DAOAnnotation]):
         }
 
 
-DAORecordDB = TypeVar("DAORecordDB", bound=BaseRecordDB)
+RecordDB = TypeVar("RecordDB", bound=BaseRecordDB)

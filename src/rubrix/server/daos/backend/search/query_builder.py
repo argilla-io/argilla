@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
-from rubrix.server.backend.query_helpers import filters
-from rubrix.server.backend.search.model import (
+from rubrix.server.daos.backend.query_helpers import filters
+from rubrix.server.daos.backend.search.model import (
     BackendDatasetsQuery,
     BackendQuery,
     BackendRecordsQuery,

@@ -17,19 +17,20 @@ from typing import Iterable, List, Optional, Type
 
 from fastapi import Depends
 
-# TODO(@frascuchon): ESTO NO!!!
-from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
-from rubrix.server.services.metrics import BaseMetric
-from rubrix.server.services.search.model import SortableField, SortConfig
+from rubrix.server.services.metrics import ServiceBaseMetric
+from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics
+from rubrix.server.services.search.model import (
+    ServiceSearchResults,
+    ServiceSortableField,
+    ServiceSortConfig,
+)
 from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
 from rubrix.server.services.tasks.text2text.models import (
+    ServiceText2TextDataset,
+    ServiceText2TextQuery,
     ServiceText2TextRecord,
-    Text2TextDatasetDB,
-    Text2TextQuery,
-    Text2TextSearchAggregations,
-    Text2TextSearchResults,
 )
 
 
@@ -61,11 +62,11 @@ class Text2TextService:
 
     def add_records(
         self,
-        dataset: Text2TextDatasetDB,
+        dataset: ServiceText2TextDataset,
         records: List[ServiceText2TextRecord],
         metrics: Type[
-            BaseTaskMetrics
-        ],  # TODO(@frascuchon): Remove this method and resolve in backend
+            ServiceBaseTaskMetrics
+        ],  # TODO(@frascuchon): Remove this argument and resolve in backend
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
@@ -77,14 +78,14 @@ class Text2TextService:
 
     def search(
         self,
-        dataset: Text2TextDatasetDB,
-        query: Text2TextQuery,
-        sort_by: List[SortableField],
+        dataset: ServiceText2TextDataset,
+        query: ServiceText2TextQuery,
+        sort_by: List[ServiceSortableField],
         record_from: int = 0,
         size: int = 100,
         exclude_metrics: bool = True,
-        metrics: Optional[List[BaseMetric]] = None,
-    ) -> Text2TextSearchResults:
+        metrics: Optional[List[ServiceBaseMetric]] = None,
+    ) -> ServiceSearchResults:
         """
         Run a search in a dataset
 
@@ -113,7 +114,7 @@ class Text2TextService:
             size=size,
             record_from=record_from,
             record_type=ServiceText2TextRecord,
-            sort_config=SortConfig(
+            sort_config=ServiceSortConfig(
                 sort_by=sort_by,
             ),
             exclude_metrics=exclude_metrics,
@@ -124,18 +125,12 @@ class Text2TextService:
             results.metrics["words"] = results.metrics["words_cloud"]
             results.metrics["status"] = results.metrics["status_distribution"]
 
-        return Text2TextSearchResults(
-            total=results.total,
-            records=results.records,
-            aggregations=Text2TextSearchAggregations.parse_obj(results.metrics)
-            if results.metrics
-            else None,
-        )
+        return results
 
     def read_dataset(
         self,
-        dataset: Text2TextDatasetDB,
-        query: Optional[Text2TextQuery] = None,
+        dataset: ServiceText2TextDataset,
+        query: Optional[ServiceText2TextQuery] = None,
         id_from: Optional[str] = None,
         limit: int = 1000
     ) -> Iterable[ServiceText2TextRecord]:

@@ -2,8 +2,8 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.backend.mappings.helpers import mappings
-from rubrix.server.backend.query_helpers import nested_mappings_from_base_model
+from rubrix.server.daos.backend.mappings.helpers import mappings
+from rubrix.server.daos.backend.query_helpers import nested_mappings_from_base_model
 
 
 class MentionMetrics(BaseModel):

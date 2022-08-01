@@ -1,18 +1,18 @@
 import pytest
 
 import rubrix
-from rubrix.server.apis.v0.models.commons.model import ScoreRange, TaskType
+from rubrix.server.apis.v0.models.commons.model import ScoreRange
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.base import PythonMetric
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
 from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
-from rubrix.server.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.commons.models import TaskType
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.services.metrics import MetricsService
-from rubrix.server.services.search.model import SortConfig
+from rubrix.server.services.metrics import MetricsService, ServicePythonMetric
+from rubrix.server.services.search.model import ServiceSortConfig
 from rubrix.server.services.search.service import SearchRecordsService
 
 
@@ -130,8 +130,8 @@ def test_failing_metrics(service, mocked_client):
     results = service.search(
         dataset=dataset,
         query=TextClassificationQuery(),
-        sort_config=SortConfig(),
-        metrics=[PythonMetric(id="missing-metric", name="Missing metric")],
+        sort_config=ServiceSortConfig(),
+        metrics=[ServicePythonMetric(id="missing-metric", name="Missing metric")],
         size=0,
         record_type=TextClassificationRecord,
     )

@@ -2,11 +2,11 @@ from typing import Type
 
 from fastapi import APIRouter, Body, Depends, Security
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.commons.params import DATASET_NAME_PATH_PARAM
 from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
+from rubrix.server.commons.models import TaskType
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings

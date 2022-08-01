@@ -18,30 +18,28 @@ Common model for task definitions
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar
 
 from fastapi import Query
-from pydantic import validator
+from pydantic import BaseModel, Field, validator
+from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.models import TaskType
 from rubrix.server.helpers import flatten_dict
 from rubrix.server.services.search.model import (
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    QueryRange,
+    ServiceQueryRange,
+    ServiceSearchResultsAggregations,
+    ServiceSortableField,
 )
-from rubrix.server.services.search.model import SortableField as _SortableField
 from rubrix.server.services.tasks.commons import (
-    BulkResponse,
     ServiceBaseAnnotation,
     ServiceBaseRecord,
-    ServicePredictionStatus,
+    ServiceRecord,
 )
 from rubrix.utils import limit_value_length
 
 
-class SortableField(_SortableField):
+class SortableField(ServiceSortableField):
     pass
 
 
@@ -59,7 +57,6 @@ class BaseAnnotation(ServiceBaseAnnotation):
     pass
 
 
-PredictionStatus = ServicePredictionStatus
 Annotation = TypeVar("Annotation", bound=BaseAnnotation)
 
 
@@ -100,18 +97,22 @@ class BaseRecord(ServiceBaseRecord[Annotation], Generic[Annotation]):
         return metadata
 
 
-## TODO(@frascuchon): Review use
-Record = TypeVar("ServiceRecord", bound=BaseRecord)
-
-
-class ScoreRange(QueryRange):
+class ScoreRange(ServiceQueryRange):
     pass
 
 
-__ALL__ = [
-    QueryRange,
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    BulkResponse,
-    TaskType,
-]
+_Record = TypeVar("_Record", bound=BaseRecord)
+
+
+class BulkResponse(BaseModel):
+    dataset: str
+    processed: int
+    failed: int = 0
+
+
+class BaseSearchResults(
+    GenericModel, Generic[_Record, ServiceSearchResultsAggregations]
+):
+    total: int = 0
+    records: List[_Record] = Field(default_factory=list)
+    aggregations: ServiceSearchResultsAggregations = None

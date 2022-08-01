@@ -16,22 +16,18 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.models import TaskType
+from rubrix.server.commons.models import PredictionStatus, TaskType
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    ScoreRange,
-    ServiceBaseSearchQuery,
-    SortableField,
+    ServiceBaseRecordsQuery,
+    ServiceScoreRange,
 )
 from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
     ServiceBaseRecord,
-    ServicePredictionStatus,
 )
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
@@ -74,24 +70,13 @@ class EntitySpan(BaseModel):
         return hash(type(self)) + hash(self.__dict__.values())
 
 
-class TokenClassificationAnnotation(ServiceBaseAnnotation):
-    """Annotation class for the Token classification task.
-
-    Attributes:
-    -----------
-    entities: List[EntitiesSpan]
-        a list of detected entities spans in tokenized text, if any.
-    score: float
-        score related to annotated entities. The higher is score value, the
-        more likely is that entities were properly annotated.
-    """
-
+class ServiceTokenClassificationAnnotation(ServiceBaseAnnotation):
     entities: List[EntitySpan] = Field(default_factory=list)
     score: Optional[float] = None
 
 
 class ServiceTokenClassificationRecord(
-    ServiceBaseRecord[TokenClassificationAnnotation]
+    ServiceBaseRecord[ServiceTokenClassificationAnnotation]
 ):
 
     tokens: List[str] = Field(min_items=1)
@@ -102,7 +87,7 @@ class ServiceTokenClassificationRecord(
     __tokens2chars__: Dict[int, Tuple[int, int]] = None
 
     last_updated: datetime = None
-    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
+    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
 
@@ -195,7 +180,7 @@ class ServiceTokenClassificationRecord(
 
     def check_annotation(
         self,
-        annotation: Optional[TokenClassificationAnnotation],
+        annotation: Optional[ServiceTokenClassificationAnnotation],
     ):
         """Validates entities in terms of offset spans"""
 
@@ -236,12 +221,12 @@ class ServiceTokenClassificationRecord(
         return TaskType.token_classification
 
     @property
-    def predicted(self) -> Optional[ServicePredictionStatus]:
+    def predicted(self) -> Optional[PredictionStatus]:
         if self.annotation and self.prediction:
             return (
-                ServicePredictionStatus.OK
+                PredictionStatus.OK
                 if self.annotation.entities == self.prediction.entities
-                else ServicePredictionStatus.KO
+                else PredictionStatus.KO
             )
         return None
 
@@ -329,54 +314,14 @@ class ServiceTokenClassificationRecord(
         underscore_attrs_are_private = True
 
 
-class TokenClassificationQuery(ServiceBaseSearchQuery):
+class ServiceTokenClassificationQuery(ServiceBaseRecordsQuery):
 
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    score: Optional[ScoreRange] = Field(default=None)
-    predicted: Optional[ServicePredictionStatus] = Field(default=None, nullable=True)
+    score: Optional[ServiceScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
 
-class TokenClassificationSearchRequest(BaseModel):
-
-    """
-    API SearchRequest request
-
-    Attributes:
-    -----------
-
-    query: TokenClassificationQuery
-        The search query configuration
-    sort:
-        The sort by order in search results
-    """
-
-    query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
-    sort: List[SortableField] = Field(default_factory=list)
-
-
-class TokenClassificationAggregations(BaseSearchResultsAggregations):
-    """
-    Extends base aggregation with mentions
-
-    Attributes:
-    -----------
-    mentions: Dict[str,Dict[str,int]]
-        The annotated entity spans
-    predicted_mentions: Dict[str,Dict[str,int]]
-        The prediction entity spans
-    """
-
-    predicted_mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
-    mentions: Dict[str, Dict[str, int]] = Field(default_factory=dict)
-
-
-class TokenClassificationSearchResults(
-    BaseSearchResults[ServiceTokenClassificationRecord, TokenClassificationAggregations]
-):
-    pass
-
-
-class TokenClassificationDatasetDB(ServiceBaseDataset):
+class ServiceTokenClassificationDataset(ServiceBaseDataset):
     task: TaskType = Field(default=TaskType.token_classification, const=True)
     pass

@@ -3,33 +3,30 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.commons.models import TaskType
-from rubrix.server.daos.models.records import BaseAnnotation
+from rubrix.server.commons.models import PredictionStatus, TaskType
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    ScoreRange,
-    ServiceBaseSearchQuery,
-    SortableField,
+    ServiceBaseRecordsQuery,
+    ServiceBaseSearchResultsAggregations,
+    ServiceScoreRange,
+    ServiceSearchResults,
 )
 from rubrix.server.services.tasks.commons import (
+    ServiceBaseAnnotation,
     ServiceBaseRecord,
-    ServicePredictionStatus,
 )
 
 
-class Text2TextPrediction(BaseModel):
+class ServiceText2TextPrediction(BaseModel):
     text: str
     score: float
 
 
-class Text2TextAnnotation(BaseAnnotation):
-    sentences: List[Text2TextPrediction]
+class ServiceText2TextAnnotation(ServiceBaseAnnotation):
+    sentences: List[ServiceText2TextPrediction]
 
 
-class ServiceText2TextRecord(ServiceBaseRecord[Text2TextAnnotation]):
+class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
     text: str
     last_updated: datetime = None
 
@@ -75,26 +72,11 @@ class ServiceText2TextRecord(ServiceBaseRecord[Text2TextAnnotation]):
         }
 
 
-class Text2TextQuery(ServiceBaseSearchQuery):
-    score: Optional[ScoreRange] = Field(default=None)
-    predicted: Optional[ServicePredictionStatus] = Field(default=None, nullable=True)
+class ServiceText2TextQuery(ServiceBaseRecordsQuery):
+    score: Optional[ServiceScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
 
-class Text2TextSearchAggregations(BaseSearchResultsAggregations):
-    predicted_text: Dict[str, int] = Field(default_factory=dict)
-    annotated_text: Dict[str, int] = Field(default_factory=dict)
-
-
-class Text2TextSearchResults(
-    BaseSearchResults[ServiceText2TextRecord, Text2TextSearchAggregations]
-):
-    pass
-
-
-class Text2TextDatasetDB(ServiceBaseDataset):
+class ServiceText2TextDataset(ServiceBaseDataset):
     task: TaskType = Field(default=TaskType.text2text, const=True)
-    pass
-
-
-class Text2TextMetrics(CommonTasksMetrics[ServiceText2TextRecord]):
     pass

@@ -2,7 +2,6 @@ from typing import List, Optional, Set, Type
 
 from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics, Metric
 from rubrix.server.apis.v0.models.metrics.text_classification import (
     TextClassificationMetrics,
 )
@@ -10,7 +9,7 @@ from rubrix.server.apis.v0.models.metrics.token_classification import (
     TokenClassificationMetrics,
 )
 from rubrix.server.apis.v0.models.text2text import (
-    Text2TextDatasetDB,
+    Text2TextDataset,
     Text2TextMetrics,
     Text2TextQuery,
 )
@@ -19,13 +18,17 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
 )
 from rubrix.server.apis.v0.models.token_classification import (
-    TokenClassificationDatasetDB,
+    TokenClassificationDataset,
     TokenClassificationQuery,
 )
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.search.model import ServiceSearchQuery
+from rubrix.server.services.metrics.models import (
+    ServiceBaseMetric,
+    ServiceBaseTaskMetrics,
+)
+from rubrix.server.services.search.model import ServiceRecordsQuery
 from rubrix.server.services.tasks.commons import ServiceRecord
 from rubrix.server.services.tasks.text2text.models import ServiceText2TextRecord
 from rubrix.server.services.tasks.text_classification.model import (
@@ -38,10 +41,10 @@ from rubrix.server.services.tasks.token_classification.model import (
 
 class TaskConfig(BaseModel):
     task: TaskType
-    query: Type[ServiceSearchQuery]
+    query: Type[ServiceRecordsQuery]
     dataset: Type[ServiceDataset]
     record: Type[ServiceRecord]
-    metrics: Optional[Type[BaseTaskMetrics]]
+    metrics: Optional[Type[ServiceBaseTaskMetrics]]
 
 
 class TaskFactory:
@@ -53,9 +56,9 @@ class TaskFactory:
         cls,
         task_type: TaskType,
         dataset_class: Type[ServiceDataset],
-        query_request: Type[ServiceSearchQuery],
+        query_request: Type[ServiceRecordsQuery],
         record_class: Type[ServiceRecord],
-        metrics: Optional[Type[BaseTaskMetrics]] = None,
+        metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ):
 
         cls._REGISTERED_TASKS[task_type] = TaskConfig(
@@ -75,7 +78,7 @@ class TaskFactory:
         return cls._REGISTERED_TASKS.get(task_type)
 
     @classmethod
-    def get_task_metrics(cls, task: TaskType) -> Optional[Type[BaseTaskMetrics]]:
+    def get_task_metrics(cls, task: TaskType) -> Optional[Type[ServiceBaseTaskMetrics]]:
         config = cls.get_task_by_task_type(task)
         if config:
             return config.metrics
@@ -98,14 +101,18 @@ class TaskFactory:
         return config
 
     @classmethod
-    def find_task_metric(cls, task: TaskType, metric_id: str) -> Optional[Metric]:
+    def find_task_metric(
+        cls, task: TaskType, metric_id: str
+    ) -> Optional[ServiceBaseMetric]:
         metrics = cls.find_task_metrics(task, {metric_id})
         if metrics:
             return metrics[0]
-        raise EntityNotFoundError(name=metric_id, type=Metric)
+        raise EntityNotFoundError(name=metric_id, type=ServiceBaseMetric)
 
     @classmethod
-    def find_task_metrics(cls, task: TaskType, metric_ids: Set[str]) -> List[Metric]:
+    def find_task_metrics(
+        cls, task: TaskType, metric_ids: Set[str]
+    ) -> List[ServiceBaseMetric]:
 
         if not metric_ids:
             return []
@@ -119,7 +126,7 @@ class TaskFactory:
 
 TaskFactory.register_task(
     task_type=TaskType.token_classification,
-    dataset_class=TokenClassificationDatasetDB,
+    dataset_class=TokenClassificationDataset,
     query_request=TokenClassificationQuery,
     record_class=ServiceTokenClassificationRecord,
     metrics=TokenClassificationMetrics,
@@ -135,7 +142,7 @@ TaskFactory.register_task(
 
 TaskFactory.register_task(
     task_type=TaskType.text2text,
-    dataset_class=Text2TextDatasetDB,
+    dataset_class=Text2TextDataset,
     query_request=Text2TextQuery,
     record_class=ServiceText2TextRecord,
     metrics=Text2TextMetrics,

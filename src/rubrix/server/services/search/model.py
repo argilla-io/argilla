@@ -1,41 +1,39 @@
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
 
-from rubrix.server.backend.search.model import BaseRecordsQuery as _BaseSearchQuery
-from rubrix.server.backend.search.model import QueryRange as _QueryRange
-from rubrix.server.backend.search.model import SortableField as _SortableField
-from rubrix.server.backend.search.model import SortConfig as _SortConfig
-from rubrix.server.services.tasks.commons.record import ServiceRecord
+from rubrix.server.daos.backend.search.model import (
+    BaseRecordsQuery,
+    QueryRange,
+    SortableField,
+    SortConfig,
+)
+from rubrix.server.services.tasks.commons import ServiceRecord
 
 
-class ServiceBaseSearchQuery(_BaseSearchQuery):
+class ServiceBaseRecordsQuery(BaseRecordsQuery):
     pass
 
 
-ServiceSearchQuery = TypeVar("ServiceSearchQuery", bound=ServiceBaseSearchQuery)
-
-
-class SortConfig(_SortConfig):
+class ServiceSortConfig(SortConfig):
     pass
 
 
-class SortableField(_SortableField):
+class ServiceSortableField(SortableField):
     """Sortable field structure"""
 
     pass
 
 
-class QueryRange(_QueryRange):
+class ServiceQueryRange(QueryRange):
     pass
 
 
-class ScoreRange(QueryRange):
+class ServiceScoreRange(ServiceQueryRange):
     pass
 
 
-class BaseSearchResultsAggregations(BaseModel):
+class ServiceBaseSearchResultsAggregations(BaseModel):
 
     predicted_as: Dict[str, int] = Field(default_factory=dict)
     annotated_as: Dict[str, int] = Field(default_factory=dict)
@@ -48,30 +46,15 @@ class BaseSearchResultsAggregations(BaseModel):
     metadata: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
 
-Aggregations = TypeVar("Aggregations", bound=BaseSearchResultsAggregations)
+ServiceSearchResultsAggregations = TypeVar(
+    "ServiceSearchResultsAggregations", bound=ServiceBaseSearchResultsAggregations
+)
 
 
-class BaseSearchResults(GenericModel, Generic[ServiceRecord, Aggregations]):
-    """
-    API search results
-
-    Attributes:
-    -----------
-
-    total:
-        The total number of records
-    records:
-        The selected records to return
-    aggregations:
-        Requested aggregations
-    """
-
-    total: int = 0
-    records: List[ServiceRecord] = Field(default_factory=list)
-    aggregations: Aggregations = None
-
-
-class SearchResults(BaseModel):
+class ServiceSearchResults(BaseModel):
     total: int
     records: List[ServiceRecord]
     metrics: Dict[str, Any] = Field(default_factory=dict)
+
+
+ServiceRecordsQuery = TypeVar("ServiceRecordsQuery", bound=ServiceBaseRecordsQuery)

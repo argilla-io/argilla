@@ -15,7 +15,7 @@
 
 from datetime import datetime
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse, PredictionStatus
+from rubrix.server.apis.v0.models.commons.model import BulkResponse
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
@@ -25,6 +25,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
 )
+from rubrix.server.commons.models import PredictionStatus
 
 
 def test_create_records_for_text_classification_with_multi_label(mocked_client):

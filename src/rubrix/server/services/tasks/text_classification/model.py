@@ -19,19 +19,16 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.commons.models import TaskStatus, TaskType
+from rubrix.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from rubrix.server.helpers import flatten_dict
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    ScoreRange,
-    ServiceBaseSearchQuery,
+    ServiceBaseRecordsQuery,
+    ServiceScoreRange,
 )
 from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
     ServiceBaseRecord,
-    ServicePredictionStatus,
 )
 
 
@@ -175,7 +172,7 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
     last_updated: datetime = None
-    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
+    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     class Config:
         allow_population_by_field_name = True
@@ -238,12 +235,12 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
         return TaskType.text_classification
 
     @property
-    def predicted(self) -> Optional[ServicePredictionStatus]:
+    def predicted(self) -> Optional[PredictionStatus]:
         if self.predicted_by and self.annotated_by:
             return (
-                ServicePredictionStatus.OK
+                PredictionStatus.OK
                 if set(self.predicted_as) == set(self.annotated_as)
-                else ServicePredictionStatus.KO
+                else PredictionStatus.KO
             )
         return None
 
@@ -338,26 +335,11 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
         }
 
 
-class TextClassificationQuery(ServiceBaseSearchQuery):
+class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
 
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
-    score: Optional[ScoreRange] = Field(default=None)
-    predicted: Optional[ServicePredictionStatus] = Field(default=None, nullable=True)
+    score: Optional[ServiceScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
-    uncovered_by_rules: List[str] = Field(
-        default_factory=list,
-        description="List of rule queries that WILL NOT cover the resulting records",
-    )
-
-
-class TextClassificationSearchAggregations(BaseSearchResultsAggregations):
-    pass
-
-
-class TextClassificationSearchResults(
-    BaseSearchResults[
-        ServiceTextClassificationRecord, TextClassificationSearchAggregations
-    ]
-):
-    pass
+    uncovered_by_rules: List[str] = Field(default_factory=list)

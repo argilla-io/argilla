@@ -14,29 +14,25 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
 from rubrix.server.apis.v0.models.commons.model import (
     BaseAnnotation,
     BaseRecord,
-    PredictionStatus,
+    BaseSearchResults,
+    ScoreRange,
     SortableField,
 )
 from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics
-from rubrix.server.commons.models import TaskType
-from rubrix.server.services.search.model import BaseSearchResults
-from rubrix.server.services.tasks.text2text.models import (
-    Text2TextDatasetDB as _Text2TextDatasetDB,
+from rubrix.server.commons.models import PredictionStatus, TaskType
+from rubrix.server.services.metrics.models import CommonTasksMetrics
+from rubrix.server.services.search.model import (
+    ServiceBaseRecordsQuery,
+    ServiceBaseSearchResultsAggregations,
 )
-from rubrix.server.services.tasks.text2text.models import (
-    Text2TextQuery as _Text2TextQuery,
-)
-from rubrix.server.services.tasks.text2text.models import (
-    Text2TextSearchAggregations as _Text2TextSearchAggregations,
-)
+from rubrix.server.services.tasks.text2text.models import ServiceText2TextDataset
 
 
 class Text2TextPrediction(BaseModel):
@@ -78,12 +74,14 @@ class Text2TextBulkData(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 
-class Text2TextQuery(_Text2TextQuery):
-    pass
+class Text2TextQuery(ServiceBaseRecordsQuery):
+    score: Optional[ScoreRange] = Field(default=None)
+    predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
 
-class Text2TextSearchAggregations(_Text2TextSearchAggregations):
-    pass
+class Text2TextSearchAggregations(ServiceBaseSearchResultsAggregations):
+    predicted_text: Dict[str, int] = Field(default_factory=dict)
+    annotated_text: Dict[str, int] = Field(default_factory=dict)
 
 
 class Text2TextSearchResults(
@@ -92,7 +90,7 @@ class Text2TextSearchResults(
     pass
 
 
-class Text2TextDatasetDB(_Text2TextDatasetDB):
+class Text2TextDataset(ServiceText2TextDataset):
     pass
 
 

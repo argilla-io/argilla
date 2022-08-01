@@ -4,9 +4,10 @@ from fastapi import Depends
 from pydantic import BaseModel, Field
 
 from rubrix.server.daos.datasets import DatasetsDAO
-from rubrix.server.daos.models.records import BaseSearchQuery, RecordSearch
+from rubrix.server.daos.models.records import DaoRecordsSearch
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import EntityAlreadyExistsError, EntityNotFoundError
+from rubrix.server.services.search.model import ServiceBaseRecordsQuery
 from rubrix.server.services.tasks.text_classification.model import (
     ServiceLabelingRule,
     ServiceTextClassificationDataset,
@@ -96,7 +97,7 @@ class LabelingService:
         results = self.__records__.search_records(
             dataset,
             size=0,
-            search=RecordSearch(query=BaseSearchQuery(has_annotation=True)),
+            search=DaoRecordsSearch(query=ServiceBaseRecordsQuery(has_annotation=True)),
         )
         return results.total
 

@@ -2,15 +2,18 @@ from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.apis.v0.models.metrics.base import PythonMetric
-from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics, Metric
+from rubrix.server.services.metrics.models import (
+    CommonTasksMetrics,
+    ServiceBaseMetric,
+    ServicePythonMetric,
+)
 from rubrix.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )
 
 
-class F1Metric(PythonMetric[ServiceTokenClassificationRecord]):
+class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
     """The F1 metric based on entity-level.
 
     We follow the convention of `CoNLL 2003 <https://aclanthology.org/W03-0419/>`_, where:
@@ -105,7 +108,7 @@ class F1Metric(PythonMetric[ServiceTokenClassificationRecord]):
             return 0
 
 
-class DatasetLabels(PythonMetric):
+class DatasetLabels(ServicePythonMetric):
     id: str = Field("dataset_labels", const=True)
     name: str = Field("The dataset entity labels", const=True)
     max_processed_records: int = 10000
@@ -284,121 +287,121 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
             },
         }
 
-    metrics: ClassVar[List[Metric]] = (
+    metrics: ClassVar[List[ServiceBaseMetric]] = (
         CommonTasksMetrics.metrics
         + [
             DatasetLabels(),
             F1Metric(
                 id="F1",
-                name="F1 Metric based on entity-level",
+                name="F1 ServiceBaseMetric based on entity-level",
                 description="F1 metrics based on entity-level (averaged and per label), "
                 "where only exact matches count (CoNNL 2003).",
             ),
         ]
         + [
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_as",
                 name="Predicted labels distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_as",
                 name="Annotated labels distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="tokens_length",
                 name="Tokens length",
                 description="Computes the text length distribution measured in number of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="token_frequency",
                 name="Tokens frequency distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="token_length",
                 name="Token length distribution",
                 description="Computes token length distribution in number of characters",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="token_capitalness",
                 name="Token capitalness distribution",
                 description="Computes capitalization information of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_entity_density",
                 name="Mention entity density for predictions",
                 description="Computes the ratio between the number of all entity tokens and tokens in the text",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_entity_labels",
                 name="Predicted entity labels",
                 description="Predicted entity labels distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_entity_capitalness",
                 name="Mention entity capitalness for predictions",
                 description="Computes capitalization information of predicted entity mentions",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_mention_token_length",
                 name="Predicted mention tokens length",
                 description="Computes the length of the predicted entity mention measured in number of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_mention_char_length",
                 name="Predicted mention characters length",
                 description="Computes the length of the predicted entity mention measured in number of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_mentions_distribution",
                 name="Predicted mentions distribution by entity",
                 description="Computes predicted mentions distribution against its labels",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_entity_consistency",
                 name="Entity label consistency for predictions",
                 description="Computes entity label variability for top-k predicted entity mentions",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="predicted_tag_consistency",
                 name="Token tag consistency for predictions",
                 description="Computes token tag variability for top-k predicted tags",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_entity_density",
                 name="Mention entity density for annotations",
                 description="Computes the ratio between the number of all entity tokens and tokens in the text",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_entity_labels",
                 name="Annotated entity labels",
                 description="Annotated Entity labels distribution",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_entity_capitalness",
                 name="Mention entity capitalness for annotations",
                 description="Compute capitalization information of annotated entity mentions",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_mention_token_length",
                 name="Annotated mention tokens length",
                 description="Computes the length of the entity mention measured in number of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_mention_char_length",
                 name="Annotated mention characters length",
                 description="Computes the length of the entity mention measured in number of tokens",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_mentions_distribution",
                 name="Annotated mentions distribution by entity",
                 description="Computes annotated mentions distribution against its labels",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_entity_consistency",
                 name="Entity label consistency for annotations",
                 description="Computes entity label variability for top-k annotated entity mentions",
             ),
-            Metric(
+            ServiceBaseMetric(
                 id="annotated_tag_consistency",
                 name="Token tag consistency for annotations",
                 description="Computes token tag variability for top-k annotated tags",

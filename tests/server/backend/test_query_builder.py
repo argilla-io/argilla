@@ -1,7 +1,7 @@
 import pytest
 
-from rubrix.server.backend.search.model import SortableField, SortConfig, SortOrder
-from rubrix.server.backend.search.query_builder import EsQueryBuilder
+from rubrix.server.daos.backend.search.model import SortableField, SortConfig, SortOrder
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 @pytest.mark.parametrize(

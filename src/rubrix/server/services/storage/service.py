@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.metrics.models import ServiceMetric
+from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics, ServiceMetric
 from rubrix.server.services.tasks.commons import ServiceRecord
 
 
@@ -29,7 +29,7 @@ class RecordsStorageService:
         dataset: ServiceDataset,
         records: List[ServiceRecord],
         record_type: Type[ServiceRecord],
-        metrics: Optional[Type[ServiceMetric]] = None,
+        metrics: Optional[Type[ServiceBaseTaskMetrics]] = None,
     ) -> int:
         """Store a set of records"""
         if metrics:
