@@ -22,10 +22,10 @@ from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.models import TaskType
 from rubrix.server.services.datasets import ServiceBaseDataset
 from rubrix.server.services.search.model import (
-    BaseSearchQuery,
     BaseSearchResults,
     BaseSearchResultsAggregations,
     ScoreRange,
+    ServiceBaseSearchQuery,
     SortableField,
 )
 from rubrix.server.services.tasks.commons import (
@@ -375,7 +375,7 @@ class TokenClassificationRecord(TokenClassificationRecordDB):
         }
 
 
-class TokenClassificationQuery(BaseSearchQuery):
+class TokenClassificationQuery(ServiceBaseSearchQuery):
     """
     API Filters for text classification
 

@@ -1,9 +1,7 @@
-from typing import Any, List, Optional, Set, Type
+from typing import List, Optional, Set, Type
 
 from pydantic import BaseModel
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
 from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics, Metric
 from rubrix.server.apis.v0.models.metrics.text_classification import (
     TextClassificationMetrics,
@@ -27,16 +25,18 @@ from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
 from rubrix.server.services.datasets import ServiceDataset
-from rubrix.server.services.tasks.commons import ServiceBaseRecord
+from rubrix.server.services.search.model import ServiceSearchQuery
+from rubrix.server.services.tasks.commons import ServiceRecord
 
 
 class TaskConfig(BaseModel):
     task: TaskType
-    query: Any
+    query: Type[ServiceSearchQuery]
     dataset: Type[ServiceDataset]
-    record: Type[ServiceBaseRecord]
+    record: Type[ServiceRecord]
     metrics: Optional[Type[BaseTaskMetrics]]
 
 
@@ -49,10 +49,11 @@ class TaskFactory:
         cls,
         task_type: TaskType,
         dataset_class: Type[ServiceDataset],
-        query_request: Type[Any],
-        record_class: Type[ServiceBaseRecord],
+        query_request: Type[ServiceSearchQuery],
+        record_class: Type[ServiceRecord],
         metrics: Optional[Type[BaseTaskMetrics]] = None,
     ):
+
         cls._REGISTERED_TASKS[task_type] = TaskConfig(
             task=task_type,
             dataset=dataset_class,
@@ -76,12 +77,12 @@ class TaskFactory:
             return config.metrics
 
     @classmethod
-    def get_task_dataset(cls, task: TaskType) -> Type[BaseDatasetDB]:
+    def get_task_dataset(cls, task: TaskType) -> Type[ServiceDataset]:
         config = cls.__get_task_config__(task)
         return config.dataset
 
     @classmethod
-    def get_task_record(cls, task: TaskType) -> Type[ServiceBaseRecord]:
+    def get_task_record(cls, task: TaskType) -> Type[ServiceRecord]:
         config = cls.__get_task_config__(task)
         return config.record
 
