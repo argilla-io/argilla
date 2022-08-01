@@ -14,39 +14,36 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
-from rubrix.server.apis.v0.models.commons.model import SortableField
-from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
-from rubrix.server.services.tasks.text_classification.model import (
-    CreationTextClassificationRecord as _CreationTextClassificationRecord,
+from rubrix.server.apis.v0.models.commons.model import (
+    BaseRecord,
+    PredictionStatus,
+    SortableField,
 )
+from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
+from rubrix.server.services.search.model import BaseSearchResults
 from rubrix.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary as _DatasetLabelingRulesMetricsSummary,
+)
+from rubrix.server.services.tasks.text_classification.model import (
+    LabelingRuleMetricsSummary as _LabelingRuleMetricsSummary,
+)
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationDataset as _TextClassificationDatasetDB,
 )
 from rubrix.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
 from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationDatasetDB as _TextClassificationDatasetDB,
-)
-from rubrix.server.services.tasks.text_classification.model import (
     TextClassificationQuery as _TextClassificationQuery,
-)
-from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationRecord as _TextClassificationRecord,
-)
-from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationRecordDB as _TextClassificationRecordDB,
 )
 from rubrix.server.services.tasks.text_classification.model import (
     TextClassificationSearchAggregations as _TextClassificationSearchAggregations,
 )
-from rubrix.server.services.tasks.text_classification.model import (
-    TextClassificationSearchResults as _TextClassificationSearchResults,
-)
+from rubrix.server.services.tasks.text_classification.model import TokenAttributions
 
 
 class UpdateLabelingRule(BaseModel):
@@ -76,22 +73,6 @@ class UpdateLabelingRule(BaseModel):
 
 
 class CreateLabelingRule(UpdateLabelingRule):
-    """
-    Data model for labeling rules creation
-
-    Attributes:
-    -----------
-
-    query:
-        The ES query of the rule
-
-    label: str
-        The label associated with the rule
-
-    description:
-        A brief description of the rule
-
-    """
 
     query: str = Field(description="The es rule query")
 
@@ -102,44 +83,21 @@ class CreateLabelingRule(UpdateLabelingRule):
 
 
 class LabelingRule(CreateLabelingRule):
-    """
-    Adds read-only attributes to the labeling rule
-
-    Attributes:
-    -----------
-
-    author:
-        Who created the rule
-
-    created_at:
-        When was the rule created
-
-    """
-
     author: str = Field(description="User who created the rule")
     created_at: Optional[datetime] = Field(
         default_factory=datetime.utcnow, description="Rule creation timestamp"
     )
 
 
-class LabelingRuleMetricsSummary(BaseModel):
-    """Metrics generated for a labeling rule"""
-
-    coverage: Optional[float] = None
-    coverage_annotated: Optional[float] = None
-    correct: Optional[float] = None
-    incorrect: Optional[float] = None
-    precision: Optional[float] = None
-
-    total_records: int
-    annotated_records: int
+class LabelingRuleMetricsSummary(_LabelingRuleMetricsSummary):
+    pass
 
 
 class DatasetLabelingRulesMetricsSummary(_DatasetLabelingRulesMetricsSummary):
     pass
 
 
-class TextClassificationDatasetDB(_TextClassificationDatasetDB):
+class TextClassificationDataset(_TextClassificationDatasetDB):
     pass
 
 
@@ -147,29 +105,23 @@ class TextClassificationAnnotation(_TextClassificationAnnotation):
     pass
 
 
-class CreationTextClassificationRecord(_CreationTextClassificationRecord):
-    pass
+class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation]):
+
+    inputs: Dict[str, Union[str, List[str]]]
+    multi_label: bool = False
+    explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
 
-class TextClassificationRecordDB(_TextClassificationRecordDB):
-    pass
+class TextClassificationRecord(CreationTextClassificationRecord):
 
+    last_updated: datetime = None
+    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
-class TextClassificationRecord(_TextClassificationRecord):
-    pass
+    def extended_fields(self) -> Dict[str, Any]:
+        return {}
 
 
 class TextClassificationBulkData(UpdateDatasetRequest):
-    """
-    API bulk data for text classification
-
-    Attributes:
-    -----------
-
-    records: List[CreationTextClassificationRecord]
-        The text classification record list
-
-    """
 
     records: List[CreationTextClassificationRecord]
 
@@ -189,27 +141,17 @@ class TextClassificationQuery(_TextClassificationQuery):
     pass
 
 
-class TextClassificationSearchRequest(BaseModel):
-    """
-    API SearchRequest request
-
-    Attributes:
-    -----------
-
-    query: TextClassificationQuery
-        The search query configuration
-
-    sort:
-        The sort order list
-    """
-
-    query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
-    sort: List[SortableField] = Field(default_factory=list)
-
-
 class TextClassificationSearchAggregations(_TextClassificationSearchAggregations):
     pass
 
 
-class TextClassificationSearchResults(_TextClassificationSearchResults):
+class TextClassificationSearchResults(
+    BaseSearchResults[TextClassificationRecord, TextClassificationSearchAggregations]
+):
     pass
+
+
+class TextClassificationSearchRequest(BaseModel):
+
+    query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
+    sort: List[SortableField] = Field(default_factory=list)

@@ -19,13 +19,15 @@ from pydantic import ValidationError
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.apis.v0.models.commons.model import PredictionStatus
 from rubrix.server.apis.v0.models.token_classification import (
-    CreationTokenClassificationRecord,
     TokenClassificationAnnotation,
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
 from rubrix.server.backend.search.query_builder import EsQueryBuilder
-from rubrix.server.services.tasks.token_classification.model import EntitySpan
+from rubrix.server.services.tasks.token_classification.model import (
+    EntitySpan,
+    ServiceTokenClassificationRecord,
+)
 
 
 def test_char_position():
@@ -38,7 +40,7 @@ def test_char_position():
         EntitySpan(start=1, end=1, label="label")
 
     text = "I am Maxi"
-    TokenClassificationRecord(
+    ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
         prediction=TokenClassificationAnnotation(
@@ -53,7 +55,7 @@ def test_char_position():
 
 def test_fix_substrings():
     text = "On one ones o no"
-    TokenClassificationRecord(
+    ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
         prediction=TokenClassificationAnnotation(
@@ -68,7 +70,7 @@ def test_fix_substrings():
 def test_entities_with_spaces():
 
     text = "This is  a  great  space"
-    TokenClassificationRecord(
+    ServiceTokenClassificationRecord(
         text=text,
         tokens=["This", "is", " ", "a", " ", "great", " ", "space"],
         prediction=TokenClassificationAnnotation(
@@ -111,7 +113,7 @@ def test_model_dict():
 
 def test_too_long_metadata():
     text = "On one ones o no"
-    record = TokenClassificationRecord.parse_obj(
+    record = ServiceTokenClassificationRecord.parse_obj(
         {
             "text": text,
             "tokens": text.split(),
@@ -127,7 +129,7 @@ def test_entity_label_too_long():
     with pytest.raises(
         ValidationError, match="ensure this value has at most 128 character"
     ):
-        TokenClassificationRecord(
+        ServiceTokenClassificationRecord(
             text=text,
             tokens=text.split(),
             prediction=TokenClassificationAnnotation(
@@ -149,7 +151,7 @@ def test_to_es_query():
 
 
 def test_misaligned_entity_mentions_with_spaces_left():
-    assert TokenClassificationRecord(
+    assert ServiceTokenClassificationRecord(
         text="according to analysts.\n     Dart Group Corp was not",
         tokens=[
             "according",
@@ -172,7 +174,7 @@ def test_misaligned_entity_mentions_with_spaces_left():
 
 
 def test_misaligned_entity_mentions_with_spaces_right():
-    assert TokenClassificationRecord(
+    assert ServiceTokenClassificationRecord(
         text="\nvs 9.91 billion\n    Note\n REUTER\n",
         tokens=["\n", "vs", "9.91", "billion", "\n    ", "Note", "\n ", "REUTER", "\n"],
         annotation=TokenClassificationAnnotation(
@@ -184,7 +186,7 @@ def test_misaligned_entity_mentions_with_spaces_right():
 
 
 def test_custom_tokens_splitting():
-    TokenClassificationRecord(
+    ServiceTokenClassificationRecord(
         text="ThisisMr.Bean, a character  playedby actor RowanAtkinson",
         tokens=[
             "This",
@@ -211,7 +213,7 @@ def test_custom_tokens_splitting():
 
 
 def test_record_scores():
-    record = TokenClassificationRecord(
+    record = ServiceTokenClassificationRecord(
         text="\nvs 9.91 billion\n    Note\n REUTER\n",
         tokens=["\n", "vs", "9.91", "billion", "\n    ", "Note", "\n ", "REUTER", "\n"],
         prediction=TokenClassificationAnnotation(
@@ -228,7 +230,7 @@ def test_record_scores():
 
 def test_annotated_without_entities():
     text = "The text that i wrote"
-    record = TokenClassificationRecord(
+    record = ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
         prediction=TokenClassificationAnnotation(
@@ -245,8 +247,7 @@ def test_annotated_without_entities():
 def test_adjust_spans():
 
     text = "A text with  some empty     spaces  that could    bring  not cleany   annotated spans"
-
-    record = TokenClassificationRecord(
+    record = ServiceTokenClassificationRecord(
         text=text,
         tokens=text.split(),
         prediction=TokenClassificationAnnotation(
@@ -292,6 +293,6 @@ def test_whitespace_in_tokens():
         },
     }
 
-    record = CreationTokenClassificationRecord.parse_obj(record)
+    record = ServiceTokenClassificationRecord.parse_obj(record)
     assert record
     assert record.tokens == ["every", "four", "(", "4", ")", " "]

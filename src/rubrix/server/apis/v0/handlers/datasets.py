@@ -84,7 +84,6 @@ async def create_dataset(
     owner = user.check_workspace(ws_params.workspace)
 
     dataset_class = TaskFactory.get_task_dataset(request.task)
-
     dataset = dataset_class.parse_obj({**request.dict()})
     dataset.owner = owner
 

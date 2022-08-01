@@ -144,33 +144,6 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
     ):
-        """
-        Summarizes a given metric for a given dataset.
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        metric:
-            The metric id
-        query:
-            A query for records filtering. Optional
-        metric_params:
-            Metric parameters for result calculation
-        teams_query:
-            Team query param where dataset belongs to. Optional
-        current_user:
-            The current user
-        datasets:
-            The datasets service
-        metrics:
-            The metrics service
-
-        Returns
-        -------
-            The metric summary for a given dataset
-
-        """
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,

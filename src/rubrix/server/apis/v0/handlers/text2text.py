@@ -40,6 +40,7 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
 from rubrix.server.services.tasks.text2text import Text2TextService
+from rubrix.server.services.tasks.text2text.models import ServiceText2TextRecord
 
 TASK_TYPE = TaskType.text2text
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -61,28 +62,6 @@ def bulk_records(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
-    """
-    Includes a chunk of record data with provided dataset bulk information
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    bulk:
-        The bulk data
-    common_params:
-        Common task query params
-    service:
-        the Service
-    datasets:
-        The dataset service
-    current_user:
-        Current request user
-
-    Returns
-    -------
-        Bulk response data
-    """
 
     task = TASK_TYPE
     owner = current_user.check_workspace(common_params.workspace)
@@ -108,7 +87,7 @@ def bulk_records(
 
     result = service.add_records(
         dataset=dataset,
-        records=bulk.records,
+        records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
         metrics=TaskFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
@@ -136,33 +115,6 @@ def search_records(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Text2TextSearchResults:
-    """
-    Searches data from dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    common_params:
-        The task common query params
-    include_metrics:
-        Flag to include metrics in results
-    search:
-        THe search query request
-    pagination:
-        The pagination params
-    service:
-        The dataset records service
-    datasets:
-        The dataset service
-    current_user:
-        The current request user
-
-    Returns
-    -------
-        The search results data
-
-    """
 
     search = search or Text2TextSearchRequest()
     query = search.query or Text2TextQuery()
@@ -182,6 +134,7 @@ def search_records(
         exclude_metrics=not include_metrics,
         metrics=TaskFactory.find_task_metrics(
             TASK_TYPE,
+            # TODO(@frascuchon): Compute metrics outer than searches
             metric_ids={
                 "words_cloud",
                 "predicted_by",
@@ -193,7 +146,11 @@ def search_records(
         ),
     )
 
-    return result
+    return Text2TextSearchResults(
+        total=result.total,
+        records=[Text2TextRecord.parse_obj(r) for r in result.records],
+        aggregations=result.aggregations,
+    )
 
 
 def scan_data_response(
@@ -244,7 +201,7 @@ async def stream_data(
     id_from: Optional[str] = None
 ) -> StreamingResponse:
     """
-    Creates a data stream over dataset records
+        Creates a data stream over dataset records
 
     Parameters
     ----------
@@ -274,8 +231,10 @@ async def stream_data(
         workspace=common_params.workspace,
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
-
+    data_stream = map(
+        Text2TextRecord.parse_obj,
+        service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
+    )
     return scan_data_response(
         data_stream=data_stream,
         limit=limit,

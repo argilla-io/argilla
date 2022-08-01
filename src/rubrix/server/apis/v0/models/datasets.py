@@ -22,8 +22,8 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
-from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.services.datasets import BaseDatasetDB as SVCDataset
+from rubrix.server.commons.models import TaskType
+from rubrix.server.services.datasets import ServiceBaseDataset
 
 
 class UpdateDatasetRequest(BaseModel):
@@ -58,7 +58,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     target_workspace: Optional[str] = None
 
 
-class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
+class BaseDataset(CreationDatasetRequest, ServiceBaseDataset):
     """
     Low level dataset data model
 
@@ -77,7 +77,7 @@ class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
     task: TaskType
 
 
-class Dataset(BaseDatasetDB):
+class Dataset(BaseDataset):
     """Dataset used for response output"""
 
     pass

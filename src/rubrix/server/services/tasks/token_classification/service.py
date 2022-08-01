@@ -25,12 +25,10 @@ from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
 from rubrix.server.services.tasks.token_classification.model import (
-    CreationTokenClassificationRecord,
+    ServiceTokenClassificationRecord,
     TokenClassificationAggregations,
     TokenClassificationDatasetDB,
     TokenClassificationQuery,
-    TokenClassificationRecord,
-    TokenClassificationRecordDB,
     TokenClassificationSearchResults,
 )
 
@@ -64,13 +62,13 @@ class TokenClassificationService:
     def add_records(
         self,
         dataset: TokenClassificationDatasetDB,
-        records: List[CreationTokenClassificationRecord],
+        records: List[ServiceTokenClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_type=TokenClassificationRecordDB,
+            record_type=ServiceTokenClassificationRecord,
             metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
@@ -109,7 +107,7 @@ class TokenClassificationService:
         results = self.__search__.search(
             dataset,
             query=query,
-            record_type=TokenClassificationRecord,
+            record_type=ServiceTokenClassificationRecord,
             size=size,
             record_from=record_from,
             exclude_metrics=exclude_metrics,
@@ -143,7 +141,7 @@ class TokenClassificationService:
         query: TokenClassificationQuery,
         id_from: Optional[str] = None,
         limit: int = 1000
-    ) -> Iterable[TokenClassificationRecord]:
+    ) -> Iterable[ServiceTokenClassificationRecord]:
         """
         Scan a dataset records
 
@@ -163,5 +161,5 @@ class TokenClassificationService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TokenClassificationRecord, id_from=id_from, limit=limit
+            dataset, query=query, record_type=ServiceTokenClassificationRecord,id_from=id_from, limit=limit
         )

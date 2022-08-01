@@ -202,7 +202,7 @@ def test_duplicated_dataset_rules(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "rubrix.api.errors::EntityAlreadyExistsError",
-            "params": {"name": "a query", "type": "LabelingRule"},
+            "params": {"name": "a query", "type": "ServiceLabelingRule"},
         }
     }
 

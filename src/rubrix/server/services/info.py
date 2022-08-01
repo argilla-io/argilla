@@ -45,6 +45,21 @@ class ApiInfoService:
     The api info service
     """
 
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        es_wrapper: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+    ) -> "ApiInfoService":
+        """
+        Creates an api info service
+        """
+
+        if not cls._INSTANCE:
+            cls._INSTANCE = ApiInfoService(es_wrapper)
+        return cls._INSTANCE
+
     def __init__(self, es: ElasticsearchBackend):
         self.__es__ = es
 
@@ -65,19 +80,3 @@ class ApiInfoService:
         """Fetch the api process memory usage"""
         process = psutil.Process(os.getpid())
         return {k: size(v) for k, v in process.memory_info()._asdict().items()}
-
-
-_instance: Optional[ApiInfoService] = None
-
-# TODO(@frascuchon): Use .get_instance instead
-def create_info_service(
-    es_wrapper: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
-) -> ApiInfoService:
-    """
-    Creates an api info service
-    """
-
-    global _instance
-    if not _instance:
-        _instance = ApiInfoService(es_wrapper)
-    return _instance

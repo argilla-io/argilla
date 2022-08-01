@@ -13,23 +13,27 @@ from rubrix.server.apis.v0.models.text2text import (
     Text2TextDatasetDB,
     Text2TextMetrics,
     Text2TextQuery,
-    Text2TextRecord,
 )
 from rubrix.server.apis.v0.models.text_classification import (
-    TextClassificationDatasetDB,
+    TextClassificationDataset,
     TextClassificationQuery,
-    TextClassificationRecord,
 )
 from rubrix.server.apis.v0.models.token_classification import (
     TokenClassificationDatasetDB,
     TokenClassificationQuery,
-    TokenClassificationRecord,
 )
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError, WrongTaskError
 from rubrix.server.services.datasets import ServiceDataset
 from rubrix.server.services.search.model import ServiceSearchQuery
 from rubrix.server.services.tasks.commons import ServiceRecord
+from rubrix.server.services.tasks.text2text.models import ServiceText2TextRecord
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
 
 
 class TaskConfig(BaseModel):
@@ -117,15 +121,15 @@ TaskFactory.register_task(
     task_type=TaskType.token_classification,
     dataset_class=TokenClassificationDatasetDB,
     query_request=TokenClassificationQuery,
-    record_class=TokenClassificationRecord,
+    record_class=ServiceTokenClassificationRecord,
     metrics=TokenClassificationMetrics,
 )
 
 TaskFactory.register_task(
     task_type=TaskType.text_classification,
-    dataset_class=TextClassificationDatasetDB,
+    dataset_class=TextClassificationDataset,
     query_request=TextClassificationQuery,
-    record_class=TextClassificationRecord,
+    record_class=ServiceTextClassificationRecord,
     metrics=TextClassificationMetrics,
 )
 
@@ -133,6 +137,6 @@ TaskFactory.register_task(
     task_type=TaskType.text2text,
     dataset_class=Text2TextDatasetDB,
     query_request=Text2TextQuery,
-    record_class=Text2TextRecord,
+    record_class=ServiceText2TextRecord,
     metrics=Text2TextMetrics,
 )

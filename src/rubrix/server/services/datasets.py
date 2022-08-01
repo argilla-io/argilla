@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 from fastapi import Depends
 
 from rubrix.server.daos.datasets import BaseSettingsDB, DatasetsDAO
-from rubrix.server.daos.models.datasets import BaseDatasetDB
+from rubrix.server.daos.models.datasets import ServiceBaseDataset
 from rubrix.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -29,7 +29,7 @@ from rubrix.server.errors import (
 from rubrix.server.security.model import User
 
 
-class ServiceBaseDataset(BaseDatasetDB):
+class ServiceBaseDataset(ServiceBaseDataset):
     pass
 
 

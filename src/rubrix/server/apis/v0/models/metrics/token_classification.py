@@ -4,11 +4,13 @@ from pydantic import BaseModel, Field
 
 from rubrix.server.apis.v0.models.metrics.base import PythonMetric
 from rubrix.server.apis.v0.models.metrics.commons import CommonTasksMetrics, Metric
-from rubrix.server.apis.v0.models.token_classification import TokenClassificationRecord
-from rubrix.server.services.tasks.token_classification.model import EntitySpan
+from rubrix.server.services.tasks.token_classification.model import (
+    EntitySpan,
+    ServiceTokenClassificationRecord,
+)
 
 
-class F1Metric(PythonMetric[TokenClassificationRecord]):
+class F1Metric(PythonMetric[ServiceTokenClassificationRecord]):
     """The F1 metric based on entity-level.
 
     We follow the convention of `CoNLL 2003 <https://aclanthology.org/W03-0419/>`_, where:
@@ -17,7 +19,9 @@ class F1Metric(PythonMetric[TokenClassificationRecord]):
     A named entity is correct only if it is an exact match (...).”`
     """
 
-    def apply(self, records: Iterable[TokenClassificationRecord]) -> Dict[str, Any]:
+    def apply(
+        self, records: Iterable[ServiceTokenClassificationRecord]
+    ) -> Dict[str, Any]:
         # store entities per label in dicts
         predicted_entities = {}
         annotated_entities = {}
@@ -106,13 +110,15 @@ class DatasetLabels(PythonMetric):
     name: str = Field("The dataset entity labels", const=True)
     max_processed_records: int = 10000
 
-    def apply(self, records: Iterable[TokenClassificationRecord]) -> Dict[str, Any]:
+    def apply(
+        self, records: Iterable[ServiceTokenClassificationRecord]
+    ) -> Dict[str, Any]:
         ds_labels = set()
 
         for _ in range(
             0, self.max_processed_records
         ):  # Only a few of records will be parsed
-            record: TokenClassificationRecord = next(records, None)
+            record: ServiceTokenClassificationRecord = next(records, None)
             if record is None:
                 break
 
@@ -169,7 +175,7 @@ class TokenMetrics(BaseModel):
     custom: Dict[str, Any] = None
 
 
-class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
+class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRecord]):
     """Configured metrics for token classification"""
 
     @staticmethod
@@ -195,7 +201,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
 
     @staticmethod
     def mentions_metrics(
-        record: TokenClassificationRecord, mentions: List[Tuple[str, EntitySpan]]
+        record: ServiceTokenClassificationRecord, mentions: List[Tuple[str, EntitySpan]]
     ):
         def mention_tokens_length(entity: EntitySpan) -> int:
             """Compute mention tokens length"""
@@ -230,7 +236,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
 
     @classmethod
     def build_tokens_metrics(
-        cls, record: TokenClassificationRecord, tags: Optional[List[str]] = None
+        cls, record: ServiceTokenClassificationRecord, tags: Optional[List[str]] = None
     ) -> List[TokenMetrics]:
 
         return [
@@ -248,7 +254,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
         ]
 
     @classmethod
-    def record_metrics(cls, record: TokenClassificationRecord) -> Dict[str, Any]:
+    def record_metrics(cls, record: ServiceTokenClassificationRecord) -> Dict[str, Any]:
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 

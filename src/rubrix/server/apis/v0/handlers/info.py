@@ -16,12 +16,7 @@
 from fastapi import APIRouter, Depends, Security
 
 from rubrix.server.security import auth
-from rubrix.server.services.info import (
-    ApiInfo,
-    ApiInfoService,
-    ApiStatus,
-    create_info_service,
-)
+from rubrix.server.services.info import ApiInfo, ApiInfoService, ApiStatus
 
 router = APIRouter(tags=["status"])
 
@@ -33,7 +28,7 @@ router = APIRouter(tags=["status"])
     dependencies=[Security(auth.get_user, scopes=[])],
 )
 def api_status(
-    service: ApiInfoService = Depends(create_info_service),
+    service: ApiInfoService = Depends(ApiInfoService.get_instance),
 ) -> ApiStatus:
     """
 
@@ -53,6 +48,6 @@ def api_status(
 
 @router.get("/_info", operation_id="api_info", response_model=ApiInfo)
 def api_info(
-    service: ApiInfoService = Depends(create_info_service),
+    service: ApiInfoService = Depends(ApiInfoService.get_instance),
 ) -> ApiInfo:
     return ApiInfo.parse_obj(service.api_status())

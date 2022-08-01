@@ -90,21 +90,9 @@ class TokenClassificationAnnotation(ServiceBaseAnnotation):
     score: Optional[float] = None
 
 
-class CreationTokenClassificationRecord(
+class ServiceTokenClassificationRecord(
     ServiceBaseRecord[TokenClassificationAnnotation]
 ):
-    """
-    ServiceDataset record for token classification task
-
-    Attributes:
-    -----------
-
-    tokens: List[str]
-        The input tokens
-    text: str
-        Textual representation of token list
-
-    """
 
     tokens: List[str] = Field(min_items=1)
     text: str = Field()
@@ -113,13 +101,24 @@ class CreationTokenClassificationRecord(
     __chars2tokens__: Dict[int, int] = None
     __tokens2chars__: Dict[int, Tuple[int, int]] = None
 
-    @root_validator(pre=True)
-    def accept_old_fashion_text_field(cls, values):
-        text, raw_text = values.get("text"), values.get("raw_text")
-        text = text or raw_text
-        values["text"] = cls.check_text_content(text)
+    last_updated: datetime = None
+    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
 
-        return values
+    def extended_fields(self) -> Dict[str, Any]:
+
+        return {
+            **super().extended_fields(),
+            # See ../service/service.py
+            PREDICTED_MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label, "score": entity.score}
+                for mention, entity in self.predicted_mentions()
+            ],
+            MENTIONS_ES_FIELD_NAME: [
+                {"mention": mention, "entity": entity.label}
+                for mention, entity in self.annotated_mentions()
+            ],
+            "words": self.all_text(),
+        }
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -136,11 +135,6 @@ class CreationTokenClassificationRecord(
         if token_idx not in self.__tokens2chars__:
             raise IndexError(f"Token id {token_idx} out of bounds")
         return self.__tokens2chars__[token_idx]
-
-    @validator("text")
-    def check_text_content(cls, text: str):
-        assert text and text.strip(), "No text or empty text provided"
-        return text
 
     def __build_indices_map__(
         self,
@@ -335,61 +329,7 @@ class CreationTokenClassificationRecord(
         underscore_attrs_are_private = True
 
 
-class TokenClassificationRecordDB(CreationTokenClassificationRecord):
-    """
-    The main token classification task record
-
-    Attributes:
-    -----------
-
-    last_updated: datetime
-        Last record update (read only)
-    predicted: Optional[PredictionStatus]
-        The record prediction status. Optional
-    """
-
-    last_updated: datetime = None
-    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
-
-    def extended_fields(self) -> Dict[str, Any]:
-
-        return {
-            **super().extended_fields(),
-            # See ../service/service.py
-            PREDICTED_MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label, "score": entity.score}
-                for mention, entity in self.predicted_mentions()
-            ],
-            MENTIONS_ES_FIELD_NAME: [
-                {"mention": mention, "entity": entity.label}
-                for mention, entity in self.annotated_mentions()
-            ],
-            "words": self.all_text(),
-        }
-
-
-class TokenClassificationRecord(TokenClassificationRecordDB):
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            "raw_text": self.text,  # Maintain results compatibility
-        }
-
-
 class TokenClassificationQuery(ServiceBaseSearchQuery):
-    """
-    API Filters for text classification
-
-    Attributes:
-    -----------
-
-    predicted_as: List[str]
-        List of predicted terms
-    annotated_as: List[str]
-        List of annotated terms
-    predicted: Optional[PredictionStatus]
-        The task prediction status
-
-    """
 
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
@@ -432,7 +372,7 @@ class TokenClassificationAggregations(BaseSearchResultsAggregations):
 
 
 class TokenClassificationSearchResults(
-    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
+    BaseSearchResults[ServiceTokenClassificationRecord, TokenClassificationAggregations]
 ):
     pass
 
