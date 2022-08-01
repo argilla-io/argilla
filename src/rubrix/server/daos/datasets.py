@@ -24,10 +24,10 @@ from rubrix.server.backend.mappings.datasets import (
 )
 from rubrix.server.backend.search.model import BaseDatasetsQuery
 from rubrix.server.daos.models.datasets import (
-    BaseDatasetDB,
     BaseSettingsDB,
     DAODatasetDB,
     DAODatasetSettingsDB,
+    ServiceBaseDataset,
 )
 from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
 from rubrix.server.errors import WrongTaskError
@@ -98,7 +98,7 @@ class DatasetsDAO:
         task2dataset_map = task2dataset_map or {}
         return [
             self._es_doc_to_instance(
-                doc, ds_class=task2dataset_map.get(task, BaseDatasetDB)
+                doc, ds_class=task2dataset_map.get(task, ServiceBaseDataset)
             )
             for doc in docs
             for task in [self.__get_doc_field__(doc, "task")]
@@ -172,7 +172,7 @@ class DatasetsDAO:
         self,
         name: str,
         owner: Optional[str],
-        as_dataset_class: Type[DAODatasetDB] = BaseDatasetDB,
+        as_dataset_class: Type[DAODatasetDB] = ServiceBaseDataset,
         task: Optional[str] = None,
     ) -> Optional[DAODatasetDB]:
         """
@@ -189,7 +189,7 @@ class DatasetsDAO:
         -------
             The found dataset if any. None otherwise
         """
-        dataset_id = BaseDatasetDB.build_dataset_id(
+        dataset_id = ServiceBaseDataset.build_dataset_id(
             name=name,
             owner=owner,
         )
@@ -222,14 +222,14 @@ class DatasetsDAO:
             raise WrongTaskError(
                 detail=f"Provided task {task} cannot be applied to dataset"
             )
-        dataset_type = as_dataset_class or BaseDatasetDB
+        dataset_type = as_dataset_class or ServiceBaseDataset
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
     @staticmethod
     def _es_doc_to_instance(
-        doc: Dict[str, Any], ds_class: Type[DAODatasetDB] = BaseDatasetDB
+        doc: Dict[str, Any], ds_class: Type[DAODatasetDB] = ServiceBaseDataset
     ) -> DAODatasetDB:
-        """Transforms a stored elasticsearch document into a `BaseDatasetDB`"""
+        """Transforms a stored elasticsearch document into a `ServiceBaseDataset`"""
 
         def __key_value_list_to_dict__(
             key_value_list: List[Dict[str, Any]]

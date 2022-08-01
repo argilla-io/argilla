@@ -12,15 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator, validator
 
+from rubrix.server.apis.v0.models.commons.model import BaseRecord
 from rubrix.server.apis.v0.models.datasets import UpdateDatasetRequest
 from rubrix.server.backend.search.model import SortableField
-from rubrix.server.services.tasks.token_classification.model import (
-    CreationTokenClassificationRecord as _CreationTokenClassificationRecord,
-)
+from rubrix.server.services.search.model import BaseSearchResults
 from rubrix.server.services.tasks.token_classification.model import (
     TokenClassificationAggregations as _TokenClassificationAggregations,
 )
@@ -33,48 +32,42 @@ from rubrix.server.services.tasks.token_classification.model import (
 from rubrix.server.services.tasks.token_classification.model import (
     TokenClassificationQuery as _TokenClassificationQuery,
 )
-from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationRecord as _TokenClassificationRecord,
-)
-from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationRecordDB as _TokenClassificationRecordDB,
-)
-from rubrix.server.services.tasks.token_classification.model import (
-    TokenClassificationSearchResults as _TokenClassificationSearchResults,
-)
 
 
 class TokenClassificationAnnotation(_TokenClassificationAnnotation):
     pass
 
 
-class CreationTokenClassificationRecord(_CreationTokenClassificationRecord):
-    pass
+class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
 
+    tokens: List[str] = Field(min_items=1)
+    text: str = Field()
+    _raw_text: Optional[str] = Field(alias="raw_text")
 
-class TokenClassificationRecordDB(_TokenClassificationRecordDB):
-    pass
+    @root_validator(pre=True)
+    def accept_old_fashion_text_field(cls, values):
+        text, raw_text = values.get("text"), values.get("raw_text")
+        text = text or raw_text
+        values["text"] = cls.check_text_content(text)
 
+        return values
 
-class TokenClassificationRecord(_TokenClassificationRecord):
+    @validator("text")
+    def check_text_content(cls, text: str):
+        assert text and text.strip(), "No text or empty text provided"
+        return text
+
     def extended_fields(self) -> Dict[str, Any]:
         return {
             "raw_text": self.text,  # Maintain results compatibility
         }
 
 
+class TokenClassificationRecord(CreationTokenClassificationRecord):
+    pass
+
+
 class TokenClassificationBulkData(UpdateDatasetRequest):
-    """
-    API bulk data for text classification
-
-    Attributes:
-    -----------
-
-    records: List[TextClassificationRecord]
-        The text classification record list
-
-    """
-
     records: List[CreationTokenClassificationRecord]
 
 
@@ -83,19 +76,6 @@ class TokenClassificationQuery(_TokenClassificationQuery):
 
 
 class TokenClassificationSearchRequest(BaseModel):
-
-    """
-    API SearchRequest request
-
-    Attributes:
-    -----------
-
-    query: TokenClassificationQuery
-        The search query configuration
-    sort:
-        The sort by order in search results
-    """
-
     query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
     sort: List[SortableField] = Field(default_factory=list)
 
@@ -104,7 +84,9 @@ class TokenClassificationAggregations(_TokenClassificationAggregations):
     pass
 
 
-class TokenClassificationSearchResults(_TokenClassificationSearchResults):
+class TokenClassificationSearchResults(
+    BaseSearchResults[TokenClassificationRecord, TokenClassificationAggregations]
+):
     pass
 
 

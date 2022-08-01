@@ -29,7 +29,7 @@ class Text2TextAnnotation(BaseAnnotation):
     sentences: List[Text2TextPrediction]
 
 
-class Text2TextRecordDB(ServiceBaseRecord[Text2TextAnnotation]):
+class ServiceText2TextRecord(ServiceBaseRecord[Text2TextAnnotation]):
     text: str
     last_updated: datetime = None
 
@@ -80,18 +80,13 @@ class Text2TextQuery(ServiceBaseSearchQuery):
     predicted: Optional[ServicePredictionStatus] = Field(default=None, nullable=True)
 
 
-class Text2TextSearchRequest(BaseModel):
-    query: Text2TextQuery = Field(default_factory=Text2TextQuery)
-    sort: List[SortableField] = Field(default_factory=list)
-
-
 class Text2TextSearchAggregations(BaseSearchResultsAggregations):
     predicted_text: Dict[str, int] = Field(default_factory=dict)
     annotated_text: Dict[str, int] = Field(default_factory=dict)
 
 
 class Text2TextSearchResults(
-    BaseSearchResults[Text2TextRecordDB, Text2TextSearchAggregations]
+    BaseSearchResults[ServiceText2TextRecord, Text2TextSearchAggregations]
 ):
     pass
 
@@ -101,5 +96,5 @@ class Text2TextDatasetDB(ServiceBaseDataset):
     pass
 
 
-class Text2TextMetrics(CommonTasksMetrics[Text2TextRecordDB]):
+class Text2TextMetrics(CommonTasksMetrics[ServiceText2TextRecord]):
     pass

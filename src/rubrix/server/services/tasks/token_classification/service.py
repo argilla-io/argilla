@@ -25,12 +25,10 @@ from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
 from rubrix.server.services.tasks.token_classification.model import (
-    CreationTokenClassificationRecord,
+    ServiceTokenClassificationRecord,
     TokenClassificationAggregations,
     TokenClassificationDatasetDB,
     TokenClassificationQuery,
-    TokenClassificationRecord,
-    TokenClassificationRecordDB,
     TokenClassificationSearchResults,
 )
 
@@ -64,13 +62,13 @@ class TokenClassificationService:
     def add_records(
         self,
         dataset: TokenClassificationDatasetDB,
-        records: List[CreationTokenClassificationRecord],
+        records: List[ServiceTokenClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_type=TokenClassificationRecordDB,
+            record_type=ServiceTokenClassificationRecord,
             metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
@@ -85,32 +83,11 @@ class TokenClassificationService:
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
     ) -> TokenClassificationSearchResults:
-        """
-        Run a search in a dataset
-
-        Parameters
-        ----------
-        dataset:
-            The records dataset
-        query:
-            The search parameters
-        sort_by:
-            The sort by order list
-        record_from:
-            The record from return results
-        size:
-            The max number of records to return
-
-        Returns
-        -------
-            The matched records with aggregation info for specified task_meta.py
-
-        """
 
         results = self.__search__.search(
             dataset,
             query=query,
-            record_type=TokenClassificationRecord,
+            record_type=ServiceTokenClassificationRecord,
             size=size,
             record_from=record_from,
             exclude_metrics=exclude_metrics,
@@ -142,7 +119,7 @@ class TokenClassificationService:
         self,
         dataset: TokenClassificationDatasetDB,
         query: TokenClassificationQuery,
-    ) -> Iterable[TokenClassificationRecord]:
+    ) -> Iterable[ServiceTokenClassificationRecord]:
         """
         Scan a dataset records
 
@@ -158,5 +135,5 @@ class TokenClassificationService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TokenClassificationRecord
+            dataset, query=query, record_type=ServiceTokenClassificationRecord
         )

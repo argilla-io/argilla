@@ -26,14 +26,12 @@ from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
 from rubrix.server.services.tasks.text_classification import LabelingService
 from rubrix.server.services.tasks.text_classification.model import (
-    CreationTextClassificationRecord,
     DatasetLabelingRulesMetricsSummary,
-    LabelingRule,
     LabelingRuleMetricsSummary,
-    TextClassificationDatasetDB,
+    ServiceLabelingRule,
+    ServiceTextClassificationDataset,
+    ServiceTextClassificationRecord,
     TextClassificationQuery,
-    TextClassificationRecord,
-    TextClassificationRecordDB,
     TextClassificationSearchAggregations,
     TextClassificationSearchResults,
 )
@@ -70,8 +68,8 @@ class TextClassificationService:
 
     def add_records(
         self,
-        dataset: TextClassificationDatasetDB,
-        records: List[CreationTextClassificationRecord],
+        dataset: ServiceTextClassificationDataset,
+        records: List[ServiceTextClassificationRecord],
         metrics: Type[BaseTaskMetrics],
     ):
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
@@ -80,14 +78,14 @@ class TextClassificationService:
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_type=TextClassificationRecordDB,
+            record_type=ServiceTextClassificationRecord,
             metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
 
     def search(
         self,
-        dataset: TextClassificationDatasetDB,
+        dataset: ServiceTextClassificationDataset,
         query: TextClassificationQuery,
         sort_by: List[SortableField],
         record_from: int = 0,
@@ -120,7 +118,7 @@ class TextClassificationService:
         results = self.__search__.search(
             dataset,
             query=query,
-            record_type=TextClassificationRecord,
+            record_type=ServiceTextClassificationRecord,
             record_from=record_from,
             size=size,
             exclude_metrics=exclude_metrics,
@@ -146,9 +144,9 @@ class TextClassificationService:
 
     def read_dataset(
         self,
-        dataset: TextClassificationDatasetDB,
+        dataset: ServiceTextClassificationDataset,
         query: Optional[TextClassificationQuery] = None,
-    ) -> Iterable[TextClassificationRecord]:
+    ) -> Iterable[ServiceTextClassificationRecord]:
         """
         Scan a dataset records
 
@@ -162,13 +160,13 @@ class TextClassificationService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TextClassificationRecord
+            dataset, query=query, record_type=ServiceTextClassificationRecord
         )
 
     def _check_multi_label_integrity(
         self,
-        dataset: TextClassificationDatasetDB,
-        records: List[CreationTextClassificationRecord],
+        dataset: ServiceTextClassificationDataset,
+        records: List[ServiceTextClassificationRecord],
     ):
         is_multi_label_dataset = self._is_dataset_multi_label(dataset)
         if is_multi_label_dataset is not None:
@@ -181,12 +179,12 @@ class TextClassificationService:
             )
 
     def _is_dataset_multi_label(
-        self, dataset: TextClassificationDatasetDB
+        self, dataset: ServiceTextClassificationDataset
     ) -> Optional[bool]:
         try:
             results = self.__search__.search(
                 dataset,
-                record_type=TextClassificationRecord,
+                record_type=ServiceTextClassificationRecord,
                 size=1,
             )
         except MissingDatasetRecordsError:  # No records index yet
@@ -195,25 +193,13 @@ class TextClassificationService:
             return results.records[0].multi_label
 
     def get_labeling_rules(
-        self, dataset: TextClassificationDatasetDB
-    ) -> Iterable[LabelingRule]:
-        """
-        Gets rules for a given dataset
+        self, dataset: ServiceTextClassificationDataset
+    ) -> Iterable[ServiceLabelingRule]:
 
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        Returns
-        -------
-            A list of labeling rules for a given dataset
-
-        """
         return self.__labeling__.list_rules(dataset)
 
     def add_labeling_rule(
-        self, dataset: TextClassificationDatasetDB, rule: LabelingRule
+        self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule
     ) -> None:
         """
         Adds a labeling rule
@@ -231,24 +217,11 @@ class TextClassificationService:
 
     def update_labeling_rule(
         self,
-        dataset: TextClassificationDatasetDB,
+        dataset: ServiceTextClassificationDataset,
         rule_query: str,
         labels: List[str],
         description: Optional[str] = None,
-    ) -> LabelingRule:
-        """
-        Update a labeling rule. Updatable fields are label and/or description
-
-        Args:
-            dataset: The dataset
-            rule_query: The labeling rule
-            label: The new rule label
-            description: If provided, the new rule description
-
-        Returns:
-            Updated labeling rule
-
-        """
+    ) -> ServiceLabelingRule:
         found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
 
         found_rule.labels = labels
@@ -260,44 +233,20 @@ class TextClassificationService:
         self.__labeling__.replace_rule(dataset, found_rule)
         return found_rule
 
-    def find_labeling_rule(self, dataset: TextClassificationDatasetDB, rule_query: str):
-        """
-        Find a labeling rule given a rule query string
-
-        Args:
-            dataset: The dataset
-            rule_query:  The query string
-
-        Returns:
-            Found labeling rule.
-            If rule was not found EntityNotFoundError is raised
-        """
+    def find_labeling_rule(
+        self, dataset: ServiceTextClassificationDataset, rule_query: str
+    ) -> ServiceLabelingRule:
         return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
 
     def delete_labeling_rule(
-        self, dataset: TextClassificationDatasetDB, rule_query: str
+        self, dataset: ServiceTextClassificationDataset, rule_query: str
     ):
-        """
-        Deletes a rule from a dataset.
-
-        Nothing happens if the rule does not exist in dataset.
-
-        Parameters
-        ----------
-
-        dataset:
-            The dataset
-
-        rule_query:
-            The rule query
-
-        """
         if rule_query.strip():
             return self.__labeling__.delete_rule(dataset, rule_query)
 
     def compute_rule_metrics(
         self,
-        dataset: TextClassificationDatasetDB,
+        dataset: ServiceTextClassificationDataset,
         rule_query: str,
         labels: Optional[List[str]] = None,
     ) -> LabelingRuleMetricsSummary:
@@ -354,7 +303,7 @@ class TextClassificationService:
             precision=metrics.precision if annotated > 0 else None,
         )
 
-    def compute_overall_rules_metrics(self, dataset: TextClassificationDatasetDB):
+    def compute_overall_rules_metrics(self, dataset: ServiceTextClassificationDataset):
         total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
         coverage = metrics.covered_records / total if total else None
         coverage_annotated = (
@@ -368,7 +317,7 @@ class TextClassificationService:
         )
 
     @staticmethod
-    def __normalized_rule__(rule: LabelingRule) -> LabelingRule:
+    def __normalized_rule__(rule: ServiceLabelingRule) -> ServiceLabelingRule:
         if rule.labels and len(rule.labels) == 1:
             rule.label = rule.labels[0]
         elif rule.label and not rule.labels:

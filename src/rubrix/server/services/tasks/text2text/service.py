@@ -25,9 +25,9 @@ from rubrix.server.services.search.service import SearchRecordsService
 from rubrix.server.services.storage.service import RecordsStorageService
 from rubrix.server.services.tasks.commons import BulkResponse
 from rubrix.server.services.tasks.text2text.models import (
+    ServiceText2TextRecord,
     Text2TextDatasetDB,
     Text2TextQuery,
-    Text2TextRecordDB,
     Text2TextSearchAggregations,
     Text2TextSearchResults,
 )
@@ -62,7 +62,7 @@ class Text2TextService:
     def add_records(
         self,
         dataset: Text2TextDatasetDB,
-        records: List[Text2TextRecordDB],
+        records: List[ServiceText2TextRecord],
         metrics: Type[
             BaseTaskMetrics
         ],  # TODO(@frascuchon): Remove this method and resolve in backend
@@ -70,7 +70,7 @@ class Text2TextService:
         failed = self.__storage__.store_records(
             dataset=dataset,
             records=records,
-            record_type=Text2TextRecordDB,
+            record_type=ServiceText2TextRecord,
             metrics=metrics,
         )
         return BulkResponse(dataset=dataset.name, processed=len(records), failed=failed)
@@ -112,7 +112,7 @@ class Text2TextService:
             query=query,
             size=size,
             record_from=record_from,
-            record_type=Text2TextRecordDB,
+            record_type=ServiceText2TextRecord,
             sort_config=SortConfig(
                 sort_by=sort_by,
             ),
@@ -136,7 +136,7 @@ class Text2TextService:
         self,
         dataset: Text2TextDatasetDB,
         query: Optional[Text2TextQuery] = None,
-    ) -> Iterable[Text2TextRecordDB]:
+    ) -> Iterable[ServiceText2TextRecord]:
         """
         Scan a dataset records
 
@@ -150,5 +150,5 @@ class Text2TextService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=Text2TextRecordDB
+            dataset, query=query, record_type=ServiceText2TextRecord
         )

@@ -35,7 +35,14 @@ from rubrix.server.services.tasks.commons import (
 )
 
 
-class UpdateLabelingRule(BaseModel):
+class ServiceLabelingRule(BaseModel):
+    query: str = Field(description="The es rule query")
+
+    author: str = Field(description="User who created the rule")
+    created_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow, description="Rule creation timestamp"
+    )
+
     label: Optional[str] = Field(
         default=None, description="@Deprecated::The label associated with the rule."
     )
@@ -60,68 +67,16 @@ class UpdateLabelingRule(BaseModel):
         assert len(labels) >= 1, f"No labels was provided in rule {values}"
         return values
 
-
-class CreateLabelingRule(UpdateLabelingRule):
-    """
-    Data model for labeling rules creation
-
-    Attributes:
-    -----------
-
-    query:
-        The ES query of the rule
-
-    label: str
-        The label associated with the rule
-
-    description:
-        A brief description of the rule
-
-    """
-
-    query: str = Field(description="The es rule query")
-
     @validator("query")
     def strip_query(cls, query: str) -> str:
         """Remove blank spaces for query"""
         return query.strip()
 
 
-class LabelingRule(CreateLabelingRule):
-    """
-    Adds read-only attributes to the labeling rule
-
-    Attributes:
-    -----------
-
-    author:
-        Who created the rule
-
-    created_at:
-        When was the rule created
-
-    """
-
-    author: str = Field(description="User who created the rule")
-    created_at: Optional[datetime] = Field(
-        default_factory=datetime.utcnow, description="Rule creation timestamp"
-    )
-
-
-class TextClassificationDatasetDB(ServiceBaseDataset):
-    """
-    A dataset class specialized for text classification task
-
-    Attributes:
-    -----------
-
-        rules:
-            A list of dataset labeling rules
-    """
+class ServiceTextClassificationDataset(ServiceBaseDataset):
 
     task: TaskType = Field(default=TaskType.text_classification, const=True)
-
-    rules: List[LabelingRule] = Field(default_factory=list)
+    rules: List[ServiceLabelingRule] = Field(default_factory=list)
 
 
 class ClassPrediction(BaseModel):
@@ -215,28 +170,15 @@ class TokenAttributions(BaseModel):
     attributions: Dict[str, float] = Field(default_factory=dict)
 
 
-class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnotation]):
-    """
-    Text classification record
-
-    Attributes:
-    -----------
-
-    inputs: Dict[str, Union[str, List[str]]]
-        The input data text
-
-    multi_label: bool
-        Enable text classification with multiple predicted/annotated labels.
-        Default=False
-
-    explanation: Dict[str, List[TokenAttributions]]
-        Token attribution list explaining predicted classes per token input.
-        The dictionary key must be aligned with provided record text. Optional
-    """
-
+class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnotation]):
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
+    last_updated: datetime = None
+    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
+
+    class Config:
+        allow_population_by_field_name = True
 
     _SCORE_DEVIATION_ERROR: ClassVar[float] = 0.001
 
@@ -319,7 +261,6 @@ class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnot
 
     @property
     def scores(self) -> List[float]:
-        """Values of prediction scores"""
         if not self.prediction:
             return []
         return (
@@ -347,7 +288,6 @@ class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnot
 
     @validator("inputs")
     def validate_inputs(cls, text: Dict[str, Any]):
-        """Applies validation over input text"""
         assert len(text) > 0, "No inputs provided"
 
         for t in text.values():
@@ -357,7 +297,6 @@ class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnot
 
     @validator("inputs")
     def flatten_text(cls, text: Dict[str, Any]):
-        """Normalizes input text to dict of strings"""
         flat_dict = flatten_dict(text)
         return flat_dict
 
@@ -365,21 +304,7 @@ class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnot
     def _labels_from_annotation(
         cls, annotation: TextClassificationAnnotation, multi_label: bool
     ) -> Union[List[str], List[int]]:
-        """
-        Extracts labels values from annotation
 
-        Parameters
-        ----------
-        annotation:
-            The annotation
-        multi_label
-            Enable/Disable multi label model
-
-        Returns
-        -------
-            Label values for a given annotation
-
-        """
         if not annotation:
             return []
 
@@ -400,82 +325,20 @@ class CreationTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnot
     def _max_class_prediction(
         p: TextClassificationAnnotation, multi_label: bool
     ) -> Optional[ClassPrediction]:
-        """
-        Gets the max class prediction for annotation
-
-        Parameters
-        ----------
-        p:
-            The annotation
-        multi_label:
-            Enable/Disable multi_label mode
-
-        Returns
-        -------
-
-            The max class prediction in terms of prediction score if
-            prediction has labels and no multi label is enabled. None, otherwise
-        """
         if multi_label or p is None or not p.labels:
             return None
         return p.labels[0]
-
-    class Config:
-        allow_population_by_field_name = True
-
-
-class TextClassificationRecordDB(CreationTextClassificationRecord):
-    """
-    The main text classification task record
-
-    Attributes:
-    -----------
-
-    last_updated: datetime
-        Last record update (read only)
-    predicted: Optional[PredictionStatus]
-        The record prediction status. Optional
-    """
-
-    last_updated: datetime = None
-    _predicted: Optional[ServicePredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:
         words = self.all_text()
         return {
             **super().extended_fields(),
             "words": words,
-            # This allow query by text:.... or text.exact:....
-            # Once words is remove we can normalize at record level
             "text": words,
         }
 
 
-class TextClassificationRecord(TextClassificationRecordDB):
-    def extended_fields(self) -> Dict[str, Any]:
-        return {}
-
-
 class TextClassificationQuery(ServiceBaseSearchQuery):
-    """
-    API Filters for text classification
-
-    Attributes:
-    -----------
-
-    predicted_as: List[str]
-        List of predicted terms
-
-    annotated_as: List[str]
-        List of annotated terms
-
-    predicted: Optional[PredictionStatus]
-        The task prediction status
-
-    uncovered_by_rules:
-        Only return records that are NOT covered by these rules.
-
-    """
 
     predicted_as: List[str] = Field(default_factory=list)
     annotated_as: List[str] = Field(default_factory=list)
@@ -493,6 +356,8 @@ class TextClassificationSearchAggregations(BaseSearchResultsAggregations):
 
 
 class TextClassificationSearchResults(
-    BaseSearchResults[TextClassificationRecord, TextClassificationSearchAggregations]
+    BaseSearchResults[
+        ServiceTextClassificationRecord, TextClassificationSearchAggregations
+    ]
 ):
     pass

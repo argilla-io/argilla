@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
 
 
-class BaseDatasetDB(BaseModel):
+class ServiceBaseDataset(BaseModel):
     name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
     task: str
     owner: Optional[str] = None
@@ -35,5 +35,5 @@ class BaseSettingsDB(BaseModel):
     pass
 
 
-DAODatasetDB = TypeVar("DAODatasetDB", bound=BaseDatasetDB)
+DAODatasetDB = TypeVar("DAODatasetDB", bound=ServiceBaseDataset)
 DAODatasetSettingsDB = TypeVar("DAODatasetSettingsDB", bound=BaseSettingsDB)

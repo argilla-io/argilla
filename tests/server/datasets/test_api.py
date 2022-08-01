@@ -128,7 +128,7 @@ def test_dataset_naming_validation(mocked_client):
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "TextClassificationDatasetDB",
+                "model": "TextClassificationDataset",
             },
         }
     }

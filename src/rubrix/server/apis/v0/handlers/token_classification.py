@@ -41,6 +41,9 @@ from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
 from rubrix.server.services.tasks.token_classification import TokenClassificationService
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
@@ -65,28 +68,6 @@ async def bulk_records(
     validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
-    """
-    Includes a chunk of record data with provided dataset bulk information
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    bulk:
-        The bulk data
-    common_params:
-        Common query params
-    service:
-        the Service
-    datasets:
-        The dataset service
-    current_user:
-        Current request user
-
-    Returns
-    -------
-        Bulk response data
-    """
 
     task = TASK_TYPE
     owner = current_user.check_workspace(common_params.workspace)
@@ -118,7 +99,7 @@ async def bulk_records(
 
     result = service.add_records(
         dataset=dataset,
-        records=bulk.records,
+        records=[ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records],
         metrics=TaskFactory.get_task_metrics(TASK_TYPE),
     )
     return BulkResponse(
@@ -148,33 +129,6 @@ def search_records(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TokenClassificationSearchResults:
-    """
-    Searches data from dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    search:
-        THe search query request
-    common_params:
-        Common query params
-    include_metrics:
-        include metrics flag
-    pagination:
-        The pagination params
-    service:
-        The dataset records service
-    datasets:
-        The dataset service
-    current_user:
-        The current request user
-
-    Returns
-    -------
-        The search results data
-
-    """
 
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
@@ -195,6 +149,7 @@ def search_records(
         exclude_metrics=not include_metrics,
         metrics=TaskFactory.find_task_metrics(
             TASK_TYPE,
+            # TODO(@frascuchon): Move out from HERE!
             metric_ids={
                 "words_cloud",
                 "predicted_by",
@@ -211,7 +166,11 @@ def search_records(
         ),
     )
 
-    return result
+    return TokenClassificationSearchResults(
+        total=result.total,
+        records=[TokenClassificationRecord.parse_obj(r) for r in result.records],
+        aggregations=result.aggregations,
+    )
 
 
 def scan_data_response(
@@ -219,8 +178,6 @@ def scan_data_response(
     chunk_size: int = 1000,
     limit: Optional[int] = None,
 ) -> StreamingResponse:
-    """Generate an textual stream data response for a dataset scan"""
-
     async def stream_generator(stream):
         """Converts dataset scan into a text stream"""
 
@@ -262,27 +219,7 @@ async def stream_data(
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
-    """
-    Creates a data stream over dataset records
 
-    Parameters
-    ----------
-    name
-        The dataset name
-    query:
-        The stream data query
-    common_params:
-        Common query params
-    limit:
-        The load number of records limit. Optional
-    service:
-        The dataset records service
-    datasets:
-        The datasets service
-    current_user:
-        Request user
-
-    """
     query = query or TokenClassificationQuery()
     dataset = datasets.find_by_name(
         user=current_user,
@@ -291,7 +228,10 @@ async def stream_data(
         workspace=common_params.workspace,
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset=dataset, query=query)
+    data_stream = map(
+        TokenClassificationRecord.parse_obj,
+        service.read_dataset(dataset=dataset, query=query),
+    )
 
     return scan_data_response(
         data_stream=data_stream,
