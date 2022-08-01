@@ -116,7 +116,7 @@ export default {
 .container {
   @extend %container;
   padding-top: 0;
-  padding-bottom: 0.7em;
+  padding-bottom: 0;
   margin-left: 0;
   @extend %collapsable-if-metrics !optional;
 }
@@ -126,8 +126,9 @@ export default {
   }
   &__container {
     padding: 0.4em 0.5em;
+    margin-bottom: 16px;
     background: palette(white);
-    border-radius: $border-radius;
+    border-radius: $border-radius-m;
     box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
     min-height: 48px;
     max-height: 189px;

@@ -22,12 +22,15 @@ services:
       - cluster.name=es-rubrix-local
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
     ulimits:
       memlock:
         soft: -1
         hard: -1
     networks:
       - rubrix
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.11.1
@@ -43,3 +46,6 @@ services:
 networks:
   rubrix:
     driver: bridge
+
+volumes:
+  elasticdata:
