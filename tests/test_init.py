@@ -17,11 +17,11 @@ import logging
 import sys
 
 from rubrix.logging import LoguruLoggerHandler
-from rubrix.utils import _LazyRubrixModule
+from rubrix.utils import LazyRubrixModule
 
 
 def test_lazy_module():
-    assert isinstance(sys.modules["rubrix"], _LazyRubrixModule)
+    assert isinstance(sys.modules["rubrix"], LazyRubrixModule)
 
 
 def test_configure_logging_call():
