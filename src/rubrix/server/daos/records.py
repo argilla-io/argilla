@@ -23,7 +23,7 @@ from fastapi import Depends
 
 from rubrix.server.apis.v0.models.commons.model import BaseRecord, TaskType
 from rubrix.server.daos.models.datasets import BaseDatasetDB
-from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults
+from rubrix.server.daos.models.records import RecordSearch, RecordSearchResults, PaginatedRecordSearch
 from rubrix.server.elasticseach.client_wrapper import (
     ClosedIndexError,
     ElasticsearchWrapper,
@@ -209,7 +209,12 @@ class DatasetRecordsDAO:
             {**(search.aggregations or {})} if compute_aggregations else {}
         )
 
-        sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
+        if not search.last_record_identifier:
+            sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
+            search_after = []
+        else:
+            sort_config = [{"id": {"order": "asc"}}]
+            search_after = [search.last_record_identifier]
 
         es_query = {
             "_source": {"excludes": exclude_fields or []},
@@ -217,6 +222,84 @@ class DatasetRecordsDAO:
             "query": search.query or {"match_all": {}},
             "sort": sort_config,
             "aggs": aggregation_requests,
+            "search_after": search_after
+        }
+        if highligth_results:
+            es_query["highlight"] = self.__configure_query_highlight__(
+                task=dataset.task
+            )
+
+        try:
+            results = self._es.search(index=records_index, query=es_query, size=size)
+        except ClosedIndexError:
+            raise ClosedDatasetError(dataset.name)
+        except IndexNotFoundError:
+            raise MissingDatasetRecordsError(
+                f"No records index found for dataset {dataset.name}"
+            )
+
+        hits = results["hits"]
+        total = hits["total"]
+        docs = hits["hits"]
+        search_aggregations = results.get("aggregations", {})
+
+        result = RecordSearchResults(
+            total=total,
+            records=list(map(self.__esdoc2record__, docs)),
+        )
+        if search_aggregations:
+            parsed_aggregations = parse_aggregations(search_aggregations)
+            result.aggregations = parsed_aggregations
+
+        return result
+
+    def search_paginated_records(
+            self,
+            dataset: BaseDatasetDB,
+            search: Optional[RecordSearch] = None,
+            size: int = 100,
+            record_from: int = 0,
+            exclude_fields: List[str] = None,
+            highligth_results: bool = True,
+    ) -> RecordSearchResults:
+        """
+        TODO - Documentation
+        SearchRequest records under a dataset given a search parameters.
+
+        Parameters
+        ----------
+        dataset:
+            The dataset
+        search:
+            The search params
+        size:
+            Number of records to retrieve (for pagination)
+        record_from:
+            Record from which to retrieve the records (for pagination)
+        exclude_fields:
+            a list of fields to exclude from the result source. Wildcards are accepted
+        Returns
+        -------
+            The search result
+
+        """
+        search = search or PaginatedRecordSearch()
+        records_index = dataset_records_index(dataset.id)
+        compute_aggregations = record_from == 0
+        aggregation_requests = (
+            {**(search.aggregations or {})} if compute_aggregations else {}
+        )
+
+        sort_config = [{"id": {"order": "asc"}}]
+        search_after = [search.last_record_identifier]
+
+        es_query = {
+            "_source": {"excludes": exclude_fields or []},
+            "from": record_from,
+            "query": search.query or {"match_all": {}},
+            "sort": sort_config,
+            "aggs": aggregation_requests,
+
         }
         if highligth_results:
             es_query["highlight"] = self.__configure_query_highlight__(

@@ -237,7 +237,7 @@ class ElasticsearchWrapper(LoggingMixin):
 
     def add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
-        Creates/updates a document in a index
+        Creates/updates a document in an index
 
         See <http://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html>
 
@@ -587,7 +587,7 @@ _instance = None  # The singleton instance
 @deprecated.deprecated(reason="Use `ElasticsearchWrapper.get_instance` instead")
 def create_es_wrapper() -> ElasticsearchWrapper:
     """
-        Creates a instance of ElasticsearchWrapper.
+        Creates an instance of ElasticsearchWrapper.
 
     This function is used in fastapi for resolve component dependencies.
 
