@@ -525,7 +525,6 @@ class ElasticsearchWrapper(LoggingMixin):
             allow_no_indices=True,
             flat_settings=True,
         )
-        print(response)
         return (
             response[index]["settings"]["index.blocks.write"] == "true"
             if response
