@@ -18,10 +18,6 @@ from typing import Any, Dict, List, Optional, Type
 from fastapi import Depends
 
 from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
-from rubrix.server.daos.backend.mappings.datasets import (
-    DATASETS_INDEX_NAME,
-    DATASETS_INDEX_TEMPLATE,
-)
 from rubrix.server.daos.backend.search.model import BaseDatasetsQuery
 from rubrix.server.daos.models.datasets import (
     BaseDatasetDB,
@@ -29,7 +25,7 @@ from rubrix.server.daos.models.datasets import (
     DatasetDB,
     DatasetSettingsDB,
 )
-from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
+from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""
@@ -74,12 +70,7 @@ class DatasetsDAO:
 
     def init(self):
         """Initializes dataset dao. Used on app startup"""
-        self._es.create_index_template(
-            name=DATASETS_INDEX_NAME,
-            template=DATASETS_INDEX_TEMPLATE,
-            force_recreate=True,
-        )
-        self._es.create_index(DATASETS_INDEX_NAME)
+        self._es.create_datasets_index(force_recreate=True)
 
     def list_datasets(
         self,
@@ -95,14 +86,7 @@ class DatasetsDAO:
             name=name,
         )
 
-        es_query = self._es.query_builder.map_2_es_query(query=query)
-        docs = self._es.list_documents(
-            index=DATASETS_INDEX_NAME,
-            # TODO(@frascuchon): include id as part of the document as keyword to enable sorting by id
-            size=MAX_NUMBER_OF_LISTED_DATASETS,
-            query=es_query
-        )
-
+        docs = self._es.list_datasets(query)
         task2dataset_map = task2dataset_map or {}
         return [
             self._es_doc_to_instance(
@@ -113,13 +97,14 @@ class DatasetsDAO:
         ]
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
-
-        self._es.add_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            document=self._dataset_to_es_doc(dataset),
+        self._es.add_dataset_document(
+            id=dataset.id, document=self._dataset_to_es_doc(dataset)
         )
-        self.__records_dao__.create_dataset_index(dataset, force_recreate=True)
+        self._es.create_dataset_index(
+            id=dataset.id,
+            task=dataset.task,
+            force_recreate=True,
+        )
         return dataset
 
     def update_dataset(
@@ -127,20 +112,13 @@ class DatasetsDAO:
         dataset: DatasetDB,
     ) -> DatasetDB:
 
-        dataset_id = dataset.id
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset_id,
-            document=self._dataset_to_es_doc(dataset),
-            partial_update=True,
+        self._es.update_dataset_document(
+            id=dataset.id, document=self._dataset_to_es_doc(dataset)
         )
         return dataset
 
     def delete_dataset(self, dataset: DatasetDB):
-        try:
-            self._es.delete_index(dataset_records_index(dataset.id))
-        finally:
-            self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+        self._es.delete(dataset.id)
 
     def find_by_name(
         self,
@@ -154,28 +132,7 @@ class DatasetsDAO:
             name=name,
             owner=owner,
         )
-        document = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=dataset_id
-        )
-        if not document and owner is None:
-            # We must search by name since we have no owner
-            es_query = self._es.query_builder.map_2_es_query(
-                query=BaseDatasetsQuery(name=name)
-            )
-            docs = self._es.list_documents(
-                index=DATASETS_INDEX_NAME,
-                query=es_query,
-                fetch_once=True,
-            )
-            docs = list(docs)
-            if len(docs) == 0:
-                return None
-
-            if len(docs) > 1:
-                raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
-                )
-            document = docs[0]
+        document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
         if document is None:
             return None
         base_ds = self._es_doc_to_instance(document)
@@ -227,64 +184,47 @@ class DatasetsDAO:
         }
 
     def copy(self, source: DatasetDB, target: DatasetDB):
-        source_doc = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=source.id
-        )
-        self._es.add_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=target.id,
+        source_doc = self._es.find_dataset(id=source.id)
+        self._es.add_dataset_document(
+            id=target.id,
             document={
                 **source_doc["_source"],  # we copy extended fields from source document
                 **self._dataset_to_es_doc(target),
             },
         )
-        index_from = dataset_records_index(source.id)
-        index_to = dataset_records_index(target.id)
-        self._es.clone_index(index=index_from, clone_to=index_to)
+        self._es.copy(id_from=source.id, id_to=target.id)
 
     def close(self, dataset: DatasetDB):
         """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
-        self._es.close_index(dataset_records_index(dataset.id))
+        self._es.close(dataset.id)
 
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
-        self._es.open_index(dataset_records_index(dataset.id))
+        self._es.open(dataset.id)
 
     def get_all_workspaces(self) -> List[str]:
         """Get all datasets (Only for super users)"""
-
-        metric_data = self._es.compute_metric(
-            DATASETS_INDEX_NAME,
-            metric_id="all_rubrix_workspaces",
-        )
+        metric_data = self._es.compute_rubrix_metric(metric_id="all_rubrix_workspaces")
         return [k for k in metric_data]
 
     def save_settings(
         self, dataset: DatasetDB, settings: DatasetSettingsDB
     ) -> BaseDatasetSettingsDB:
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            document={"settings": settings.dict(exclude_none=True)},
-            partial_update=True,
+        self._es.update_dataset_document(
+            id=dataset.id, document={"settings": settings.dict(exclude_none=True)}
         )
         return settings
 
     def load_settings(
         self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
     ) -> Optional[DatasetSettingsDB]:
-        doc = self._es.get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+        doc = self._es.find_dataset(id=dataset.id)
         if doc:
             settings = self.__get_doc_field__(doc, field="settings")
             return as_class.parse_obj(settings) if settings else None
 
     def delete_settings(self, dataset: DatasetDB):
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            script='ctx._source.remove("settings")',
-            partial_update=True,
-        )
+        self._es.remove_dataset_field(dataset.id, field="settings")
 
     def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
         return doc["_source"].get(field)

@@ -23,13 +23,6 @@ from rubrix.server.daos.backend.elasticsearch import (
     ElasticsearchBackend,
     IndexNotFoundError,
 )
-
-# TODO(@frascuchon): Move this to the backend
-from rubrix.server.daos.backend.mappings.helpers import (
-    mappings,
-    tasks_common_mappings,
-    tasks_common_settings,
-)
 from rubrix.server.daos.backend.search.model import BackendRecordsQuery
 from rubrix.server.daos.models.datasets import DatasetDB
 from rubrix.server.daos.models.records import (
@@ -38,43 +31,12 @@ from rubrix.server.daos.models.records import (
     RecordDB,
 )
 from rubrix.server.errors import ClosedDatasetError, MissingDatasetRecordsError
-from rubrix.server.errors.task_errors import MetadataLimitExceededError
-from rubrix.server.settings import settings
-
-
-# TODO(@frascuchon): Move to the backend and accept the dataset id as parameter
-def dataset_records_index(dataset_id: str) -> str:
-    """
-    Returns dataset records index for a given dataset id
-
-    The dataset info is stored in two elasticsearch indices. The main
-    index where all datasets definition are stored and
-    an specific dataset index for data records.
-
-    This function calculates the corresponding dataset records index
-    for a given dataset id.
-
-    Parameters
-    ----------
-    dataset_id
-
-    Returns
-    -------
-        The dataset records index name
-
-    """
-    index_mame_template = settings.dataset_records_index_name
-    return index_mame_template.format(dataset_id)
 
 
 class DatasetRecordsDAO:
     """Datasets records DAO"""
 
     _INSTANCE = None
-
-    # Keep info about elasticsearch mappings per task
-    # This info must be provided by each task using dao.register_task_mappings method
-    _MAPPINGS_BY_TASKS = {}
 
     @classmethod
     def get_instance(
@@ -140,18 +102,21 @@ class DatasetRecordsDAO:
                 db_record.dict(exclude_none=False, exclude={"search_keywords"})
             )
 
-        index_name = self.create_dataset_index(dataset)
-        self._configure_metadata_fields(index_name, metadata_values)
+        self._es.create_dataset_index(
+            dataset.id,
+            task=dataset.task,
+            metadata_values=metadata_values,
+        )
+
         return self._es.add_documents(
-            index=index_name,
+            id=dataset.id,
             documents=documents,
-            doc_id=lambda _record: _record.get("id"),
         )
 
     def get_metadata_schema(self, dataset: DatasetDB) -> Dict[str, str]:
         """Get metadata fields schema for provided dataset"""
-        records_index = dataset_records_index(dataset.id)
-        return self._es.get_field_mapping(index=records_index, field_name="metadata.*")
+
+        return self._es.get_metadata_mappings(id=dataset.id)
 
     def compute_metric(
         self,
@@ -160,25 +125,9 @@ class DatasetRecordsDAO:
         metric_params: Dict[str, Any] = None,
         query: Optional[BackendRecordsQuery] = None,
     ):
-        """
-        Parameters
-        ----------
-        metric_id:
-            The backend metric id
-        metric_params:
-            The summary params
-        dataset:
-            The records dataset
-        query:
-            The filter to apply to dataset
 
-        Returns
-        -------
-            The metric summary result
-
-        """
         return self._es.compute_metric(
-            index=dataset_records_index(dataset.id),
+            id=dataset.id,
             metric_id=metric_id,
             query=query,
             params=metric_params,
@@ -196,10 +145,9 @@ class DatasetRecordsDAO:
 
         try:
             search = search or DaoRecordsSearch()
-            records_index = dataset_records_index(dataset.id)
 
             total, records = self._es.search_records(
-                index=records_index,
+                id=dataset.id,
                 query=search.query,
                 sort=search.sort,
                 record_from=record_from,
@@ -241,65 +189,9 @@ class DatasetRecordsDAO:
             An iterable over found dataset records
         """
         search = search or DaoRecordsSearch()
-        return self._es.scan_records(
-            index=dataset_records_index(dataset.id),
-            query=search.query,
-            limit=limit,
-            id_from_=id_from
-        )
-
-    def _configure_metadata_fields(self, index: str, metadata_values: Dict[str, Any]):
-        def check_metadata_length(metadata_length: int = 0):
-            if metadata_length > settings.metadata_fields_limit:
-                raise MetadataLimitExceededError(
-                    length=metadata_length, limit=settings.metadata_fields_limit
-                )
-
-        def detect_nested_type(v: Any) -> bool:
-            """Returns True if value match as nested value"""
-            return isinstance(v, list) and isinstance(v[0], dict)
-
-        check_metadata_length(len(metadata_values))
-        check_metadata_length(
-            len(
-                {
-                    *self._es.get_field_mapping(index, "metadata.*"),
-                    *[k for k in metadata_values.keys()],
-                }
-            )
-        )
-        for field, value in metadata_values.items():
-            if detect_nested_type(value):
-                self._es.create_field_mapping(
-                    index,
-                    field_name=f"metadata.{field}",
-                    mapping=mappings.nested_field(),
-                )
-
-    def create_dataset_index(
-        self,
-        dataset: DatasetDB,
-        force_recreate: bool = False,
-    ) -> str:
-
-        _mappings = tasks_common_mappings()
-        task_mappings = self._es.get_task_mapping(dataset.task).copy()
-        for k in task_mappings:
-            if isinstance(task_mappings[k], list):
-                _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
-            else:
-                _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
-
-        index_name = dataset_records_index(dataset.id)
-        self._es.create_index(
-            index=index_name,
-            settings=tasks_common_settings(),
-            mappings={**tasks_common_mappings(), **_mappings},
-            force_recreate=force_recreate,
-        )
-        return index_name
+        return self._es.scan_records(id=dataset.id, query=search.query, limit=limit, id_from_=id_from)
 
     def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
-        schema = self._es.get_index_mapping(dataset_records_index(dataset.id))
+        schema = self._es.get_mappings(id=dataset.id)
         return schema

@@ -15,7 +15,6 @@
 import re
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
-import deprecated
 from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
 from opensearchpy.helpers import bulk as es_bulk
 from opensearchpy.helpers import scan as es_scan
@@ -23,6 +22,15 @@ from opensearchpy.helpers import scan as es_scan
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.models import TaskType
 from rubrix.server.daos.backend import query_helpers
+from rubrix.server.daos.backend.mappings.datasets import (
+    DATASETS_INDEX_NAME,
+    DATASETS_INDEX_TEMPLATE,
+)
+from rubrix.server.daos.backend.mappings.helpers import (
+    mappings,
+    tasks_common_mappings,
+    tasks_common_settings,
+)
 from rubrix.server.daos.backend.mappings.text2text import text2text_mappings
 from rubrix.server.daos.backend.mappings.text_classification import (
     text_classification_mappings,
@@ -34,11 +42,13 @@ from rubrix.server.daos.backend.metrics import ALL_METRICS
 from rubrix.server.daos.backend.metrics.base import ElasticsearchMetric
 from rubrix.server.daos.backend.search.model import (
     BackendRecordsQuery,
+    BaseDatasetsQuery,
     SortableField,
     SortConfig,
 )
 from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 from rubrix.server.errors import EntityNotFoundError, InvalidTextSearchError
+from rubrix.server.errors.task_errors import MetadataLimitExceededError
 
 try:
     import ujson as json
@@ -166,10 +176,8 @@ class ElasticsearchBackend(LoggingMixin):
         """The query builder"""
         return self.__query_builder__
 
-    def list_documents(
-        self,
-        index: str,
-        query: Dict[str, Any] = None,
+    def _list_documents(
+        self, index: str, query: Dict[str, Any] = None,
         sort_cfg: Optional[List[Dict[str, Any]]] = None,
         size: Optional[int] = None,
         fetch_once: bool = False,
@@ -227,7 +235,7 @@ class ElasticsearchBackend(LoggingMixin):
         """
         return self.__client__.indices.exists(index)
 
-    def search(
+    def _search(
         self,
         index: str,
         routing: str = None,
@@ -263,9 +271,9 @@ class ElasticsearchBackend(LoggingMixin):
                 size=size,
             )
 
-    def create_index(
+    def _create_index(
         self,
-        index: str,
+        id: str,
         force_recreate: bool = False,
         settings: Dict[str, Any] = None,
         mappings: Dict[str, Any] = None,
@@ -277,8 +285,6 @@ class ElasticsearchBackend(LoggingMixin):
 
         Parameters
         ----------
-        index:
-            The index name
         force_recreate:
             If True, the index will be recreated (if exists). Default=False
         settings:
@@ -287,9 +293,10 @@ class ElasticsearchBackend(LoggingMixin):
             The mapping configuration. Optional.
 
         """
+        index = dataset_records_index(id)
         with backend_error_handler(index):
             if force_recreate:
-                self.delete_index(index)
+                self._delete_index(index)
             if not self.index_exists(index):
                 self.__client__.indices.create(
                     index=index,
@@ -297,7 +304,7 @@ class ElasticsearchBackend(LoggingMixin):
                     ignore=400,
                 )
 
-    def create_index_template(
+    def _create_index_template(
         self, name: str, template: Dict[str, Any], force_recreate: bool = False
     ):
         """
@@ -326,13 +333,13 @@ class ElasticsearchBackend(LoggingMixin):
                     name=index_template, ignore=[400, 404]
                 )
 
-    def delete_index(self, index: str):
+    def _delete_index(self, index: str):
         """Deletes an elasticsearch index"""
         with backend_error_handler(index=index):
             if self.index_exists(index):
                 self.__client__.indices.delete(index, ignore=[400, 404])
 
-    def add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
+    def _add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
         Creates/updates a document in an index
 
@@ -353,7 +360,7 @@ class ElasticsearchBackend(LoggingMixin):
                 index=index, body=document, id=doc_id, refresh="wait_for"
             )
 
-    def get_document_by_id(self, index: str, doc_id: str) -> Optional[Dict[str, Any]]:
+    def _get_document_by_id(self, index: str, doc_id: str) -> Optional[Dict[str, Any]]:
         """
         Get a document by its id
 
@@ -380,7 +387,7 @@ class ElasticsearchBackend(LoggingMixin):
             with backend_error_handler(index=index):
                 raise ex
 
-    def delete_document(self, index: str, doc_id: str):
+    def _delete_document(self, index: str, doc_id: str):
         """
         Deletes a document from an index.
 
@@ -403,44 +410,26 @@ class ElasticsearchBackend(LoggingMixin):
 
     def add_documents(
         self,
-        index: str,
+        id: str,
         documents: List[Dict[str, Any]],
-        routing: Callable[[Dict[str, Any]], str] = None,
-        doc_id: Callable[[Dict[str, Any]], str] = None,
     ) -> int:
-        """
-        Adds or updated a set of documents to an index. Documents can contains
-        partial information of document.
+        index = dataset_records_index(id)
 
-        See <https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html>
-
-        Parameters
-        ----------
-        index:
-            The index name
-        documents:
-            The set of documents
-        routing:
-            The routing key
-        doc_id
-
-        Returns
-        -------
-            The number of failed documents
-        """
+        def doc_id(r):
+            return r.get("id")
 
         def map_doc_2_action(doc: Dict[str, Any]) -> Dict[str, Any]:
             """Configures bulk action"""
             data = {
                 "_op_type": "index",
                 "_index": index,
-                "_routing": routing(doc) if routing else None,
+                "_routing": None,  # TODO(@frascuchon): Use a sharding routing
                 **doc,
             }
 
-            _id = doc_id(doc) if doc_id else None
-            if _id is not None:
-                data["_id"] = _id
+            id_ = doc_id(doc)
+            if id_ is not None:
+                data["_id"] = id_
 
             return data
 
@@ -454,27 +443,7 @@ class ElasticsearchBackend(LoggingMixin):
             )
             return len(failed)
 
-    def get_mapping(self, index: str) -> Dict[str, Any]:
-        """
-        Return the configured index mapping
-
-        See `<https://www.elastic.co/guide/en/elasticsearch/reference/7.13/indices-get-mapping.html>`
-
-        """
-        try:
-            response = self.__client__.indices.get_mapping(
-                index=index,
-                ignore_unavailable=False,
-                include_type_name=True,
-            )
-            return list(response[index]["mappings"].values())[0]["properties"]
-        except NotFoundError:
-            return {}
-        except Exception as ex:
-            with backend_error_handler(index=index):
-                raise ex
-
-    def get_field_mapping(
+    def _get_field_mapping(
         self, index: str, field_name: Optional[str] = None
     ) -> Dict[str, str]:
         """
@@ -511,7 +480,7 @@ class ElasticsearchBackend(LoggingMixin):
             with backend_error_handler(index=index):
                 raise ex
 
-    def update_document(
+    def _update_document(
         self,
         index: str,
         doc_id: str,
@@ -571,7 +540,7 @@ class ElasticsearchBackend(LoggingMixin):
                 index=index, wait_for_active_shards=settings.es_records_index_shards
             )
 
-    def close_index(self, index: str):
+    def _close_index(self, index: str):
         """
         Closes an elasticsearch index. If index is already closed, this operation will do nothing.
 
@@ -589,7 +558,7 @@ class ElasticsearchBackend(LoggingMixin):
                 wait_for_active_shards=settings.es_records_index_shards,
             )
 
-    def clone_index(self, index: str, clone_to: str, override: bool = True):
+    def _clone_index(self, index: str, clone_to: str, override: bool = True):
         """
         Clone an existing index. During index clone, source must be setup as read-only index. Then, changes can be
         applied
@@ -611,7 +580,7 @@ class ElasticsearchBackend(LoggingMixin):
                 if not index_read_only:
                     self.index_read_only(index, read_only=True)
                 if override:
-                    self.delete_index(clone_to)
+                    self._delete_index(clone_to)
                 self.__client__.indices.clone(
                     index=index,
                     target=clone_to,
@@ -667,7 +636,7 @@ class ElasticsearchBackend(LoggingMixin):
                 ignore=404,
             )
 
-    def create_field_mapping(
+    def _create_field_mapping(
         self,
         index: str,
         field_name: str,
@@ -693,7 +662,7 @@ class ElasticsearchBackend(LoggingMixin):
             aggregation_name = "aggregation"
             es_query = {"aggs": {aggregation_name: aggregation}}
 
-            results = self.search(index=index, size=0, query=es_query)
+            results = self._search(index=index, size=0, query=es_query)
             aggs_results = results["aggregations"]
             return query_helpers.parse_aggregations(aggs_results).get(aggregation_name)
 
@@ -708,49 +677,22 @@ class ElasticsearchBackend(LoggingMixin):
 
     def compute_metric(
         self,
-        index: str,
+        id: str,
         metric_id: str,
         query: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
     ):
-        metric = self.find_metric_by_id(metric_id)
-        # Only for metadata aggregation. In a future could be nice to provide the whole index schema
-        params.update(
-            {"schema": self.get_field_mapping(index=index, field_name="metadata.*")}
+        index = dataset_records_index(id)
+        return self._compute_metric(
+            index=index,
+            metric_id=metric_id,
+            query=query,
+            schema=self.get_mappings(id),
+            params=params,
         )
 
-        filtered_params = {
-            argument: params[argument]
-            for argument in metric.metric_arg_names
-            if argument in params
-        }
-
-        aggs = metric.aggregation_request(**filtered_params)
-        if not aggs:
-            return {}
-        if not isinstance(aggs, list):
-            aggs = [aggs]
-        results = {}
-        for agg in aggs:
-            es_query = {
-                **self.query_builder.map_2_es_query(
-                    schema=self.get_index_mapping(index),
-                    query=query,
-                ),
-                "aggs": agg,
-            }
-            search_result = self.search(index=index, query=es_query, size=0)
-            search_aggregations = search_result.get("aggregations", {})
-
-            if search_aggregations:
-                parsed_aggregations = query_helpers.parse_aggregations(
-                    search_aggregations
-                )
-                results.update(parsed_aggregations)
-
-        return metric.aggregation_result(results.get(metric_id, results))
-
-    def get_index_mapping(self, index: str) -> Dict[str, Any]:
+    def get_mappings(self, id: str) -> Dict[str, Any]:
+        index = dataset_records_index(id)
         with backend_error_handler(index=index):
             response = self.__client__.indices.get_mapping(index=index)
             if index in response:
@@ -759,7 +701,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def search_records(
         self,
-        index: str,
+        id: str,
         query: BackendRecordsQuery,
         sort: SortConfig,
         record_from: int = 0,
@@ -767,12 +709,14 @@ class ElasticsearchBackend(LoggingMixin):
         exclude_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
+        index = dataset_records_index(id)
+
         with backend_error_handler(index=index):
             if not sort.sort_by and sort.shuffle is False:
                 sort.sort_by = [SortableField(id="id")]  # Default sort by id
             es_query = {
                 **self.query_builder.map_2_es_query(
-                    schema=self.get_index_mapping(index),
+                    schema=self.get_mappings(id),
                     query=query,
                     sort=sort,
                 ),
@@ -782,7 +726,7 @@ class ElasticsearchBackend(LoggingMixin):
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
 
-            results = self.search(index=index, query=es_query, size=size)
+            results = self._search(index=index, query=es_query, size=size)
             hits = results["hits"]
             total = hits["total"]
             docs = hits["hits"]
@@ -841,17 +785,200 @@ class ElasticsearchBackend(LoggingMixin):
     # TODO(@frascuchon): Include sort parameter
     def scan_records(
         self,
-        index: str,
+        id: str,
         query: Optional[BackendRecordsQuery] = None,
     ) -> Iterable[Dict[str, Any]]:
+        index = dataset_records_index(id)
         with backend_error_handler(index):
             es_query = {
                 **self.query_builder.map_2_es_query(
-                    schema=self.get_index_mapping(index),
+                    schema=self.get_mappings(id),
                     query=query,
                 ),
                 "highlight": self.__configure_query_highlight__(),
             }
-            docs = self.list_documents(index, query=es_query)
+            docs = self._list_documents(index, query=es_query)
             for doc in docs:
                 yield self.__esdoc2record__(doc)
+
+    def open(self, id: str):
+        self.open_index(dataset_records_index(id))
+
+    def get_metadata_mappings(self, id: str):
+        records_index = dataset_records_index(id)
+        return self._get_field_mapping(index=records_index, field_name="metadata.*")
+
+    def create_dataset_index(
+        self,
+        id: str,
+        task: TaskType,
+        metadata_values: Optional[Dict[str, Any]] = None,
+        force_recreate: bool = False,
+    ) -> None:
+
+        _mappings = tasks_common_mappings()
+        task_mappings = self.get_task_mapping(task).copy()
+        for k in task_mappings:
+            if isinstance(task_mappings[k], list):
+                _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
+            else:
+                _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
+
+        self._create_index(
+            id=id,
+            settings=tasks_common_settings(),
+            mappings={**tasks_common_mappings(), **_mappings},
+            force_recreate=force_recreate,
+        )
+        if metadata_values:
+            self._configure_metadata_fields(id, metadata_values)
+
+    def _configure_metadata_fields(self, id: str, metadata_values: Dict[str, Any]):
+        def check_metadata_length(metadata_length: int = 0):
+            if metadata_length > settings.metadata_fields_limit:
+                raise MetadataLimitExceededError(
+                    length=metadata_length, limit=settings.metadata_fields_limit
+                )
+
+        def detect_nested_type(v: Any) -> bool:
+            """Returns True if value match as nested value"""
+            return isinstance(v, list) and isinstance(v[0], dict)
+
+        check_metadata_length(len(metadata_values))
+        check_metadata_length(
+            len(
+                {
+                    *self.get_metadata_mappings(id=id),
+                    *[k for k in metadata_values.keys()],
+                }
+            )
+        )
+        index = dataset_records_index(id)
+        for field, value in metadata_values.items():
+            if detect_nested_type(value):
+                self._create_field_mapping(
+                    index,
+                    field_name=f"metadata.{field}",
+                    mapping=mappings.nested_field(),
+                )
+
+    def delete(self, id: str):
+        try:
+            return self._delete_index(dataset_records_index(id))
+        finally:
+            self._delete_document(index=DATASETS_INDEX_NAME, doc_id=id)
+
+    def copy(self, id_from: str, id_to: str):
+        index_from = dataset_records_index(id_from)
+        index_to = dataset_records_index(id_to)
+
+        self._clone_index(index=index_from, clone_to=index_to)
+
+    def close(self, id: str):
+        return self._close_index(dataset_records_index(id))
+
+    def create_datasets_index(self, force_recreate: bool = False):
+        self._create_index_template(
+            name=DATASETS_INDEX_NAME,
+            template=DATASETS_INDEX_TEMPLATE,
+            force_recreate=force_recreate,
+        )
+        self._create_index(DATASETS_INDEX_NAME)
+
+    def list_datasets(self, query: BaseDatasetsQuery):
+        es_query = self.query_builder.map_2_es_query(query=query)
+        return self._list_documents(index=DATASETS_INDEX_NAME, query=es_query)
+
+    def add_dataset_document(self, id: str, document: Dict[str, Any]):
+        self._add_document(index=DATASETS_INDEX_NAME, doc_id=id, document=document)
+
+    def update_dataset_document(self, id: str, document: Dict[str, Any]):
+        self._update_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=id,
+            document=document,
+            partial_update=True,
+        )
+
+    def find_dataset(
+        self, id: str, name: Optional[str] = None, owner: Optional[str] = None
+    ):
+        document = self._get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=id)
+        if not document and owner is None and name:
+
+            # We must search by name since we have no owner
+            es_query = self.query_builder.map_2_es_query(
+                query=BaseDatasetsQuery(name=name)
+            )
+            docs = self._list_documents(index=DATASETS_INDEX_NAME, query=es_query)
+            docs = list(docs)
+            if len(docs) == 0:
+                return None
+
+            if len(docs) > 1:
+                raise ValueError(
+                    f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
+                )
+            document = docs[0]
+        return document
+
+    def compute_rubrix_metric(self, metric_id):
+        return self._compute_metric(index=DATASETS_INDEX_NAME, metric_id=metric_id)
+
+    def _compute_metric(
+        self,
+        index: str,
+        metric_id: str,
+        query: Optional[Any] = None,
+        schema: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+    ):
+        metric = self.find_metric_by_id(metric_id)
+        # Only for metadata aggregation. In a future could be nice to provide the whole index schema
+        params.update(
+            {"schema": self._get_field_mapping(index=index, field_name="metadata.*")}
+        )
+
+        filtered_params = {
+            argument: params[argument]
+            for argument in metric.metric_arg_names
+            if argument in params
+        }
+
+        aggs = metric.aggregation_request(**filtered_params)
+        if not aggs:
+            return {}
+        if not isinstance(aggs, list):
+            aggs = [aggs]
+        results = {}
+        for agg in aggs:
+            es_query = {
+                **self.query_builder.map_2_es_query(
+                    schema=schema,
+                    query=query,
+                ),
+                "aggs": agg,
+            }
+            search_result = self._search(index=index, query=es_query, size=0)
+            search_aggregations = search_result.get("aggregations", {})
+
+            if search_aggregations:
+                parsed_aggregations = query_helpers.parse_aggregations(
+                    search_aggregations
+                )
+                results.update(parsed_aggregations)
+
+        return metric.aggregation_result(results.get(metric_id, results))
+
+    def remove_dataset_field(self, id: str, field: str):
+        self._update_document(
+            index=DATASETS_INDEX_NAME,
+            doc_id=id,
+            script=f'ctx._source.remove("{field}")',
+            partial_update=True,
+        )
+
+
+def dataset_records_index(dataset_id: str) -> str:
+    index_mame_template = settings.dataset_records_index_name
+    return index_mame_template.format(dataset_id)
