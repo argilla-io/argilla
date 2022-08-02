@@ -208,22 +208,22 @@ class DatasetRecordsDAO:
         aggregation_requests = (
             {**(search.aggregations or {})} if compute_aggregations else {}
         )
-
-        if not search.last_record_identifier:
-            sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
-            search_after = []
-        else:
-            sort_config = [{"id": {"order": "asc"}}]
-            search_after = [search.last_record_identifier]
-
         es_query = {
             "_source": {"excludes": exclude_fields or []},
             "from": record_from,
             "query": search.query or {"match_all": {}},
-            "sort": sort_config,
             "aggs": aggregation_requests,
-            "search_after": search_after
         }
+
+        if not search.last_record_identifier:
+            sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
+        else:
+            sort_config = [{"id": {"order": "asc"}}]
+            search_after = [search.last_record_identifier]
+            es_query["search_after"] = search_after
+        es_query["sort"] = sort_config
+
+
         if highligth_results:
             es_query["highlight"] = self.__configure_query_highlight__(
                 task=dataset.task
