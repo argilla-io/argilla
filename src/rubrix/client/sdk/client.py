@@ -23,6 +23,7 @@ from rubrix.client.sdk._helpers import build_raw_response
 
 @dataclasses.dataclass
 class _ClientCommonDefaults:
+    __httpx__: httpx.Client = dataclasses.field(default=None, init=False, compare=False)
 
     cookies: Dict[str, str] = dataclasses.field(default_factory=dict)
     headers: Dict[str, str] = dataclasses.field(default_factory=dict)
@@ -43,11 +44,6 @@ class _ClientCommonDefaults:
 class _Client:
     base_url: str
 
-
-@dataclasses.dataclass
-class _AuthenticatedClient(_Client):
-    token: str
-
     def __post_init__(self):
         self.base_url = self.base_url.strip()
         if self.base_url.endswith("/"):
@@ -55,33 +51,43 @@ class _AuthenticatedClient(_Client):
 
 
 @dataclasses.dataclass
+class _AuthenticatedClient(_Client):
+    token: str
+
+
+@dataclasses.dataclass
 class Client(_ClientCommonDefaults, _Client):
+    def __post_init__(self):
+        super().__post_init__()
+        self.__httpx__ = httpx.Client(
+            base_url=self.base_url,
+            headers=self.get_headers(),
+            cookies=self.get_cookies(),
+            timeout=self.get_timeout(),
+        )
+
+    def __del__(self):
+        del self.__httpx__
+
     def __hash__(self):
         return hash(self.base_url)
 
     def get(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
-        url = f"{self.base_url}/{path}"
-        response = httpx.get(
-            url=url,
+        response = self.__httpx__.get(
+            url=path,
             headers=self.get_headers(),
-            cookies=self.get_cookies(),
-            timeout=self.get_timeout(),
             *args,
             **kwargs,
         )
-
         return build_raw_response(response).parsed
 
     def post(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
-        url = f"{self.base_url}/{path}"
 
-        response = httpx.post(
-            url=url,
+        response = self.__httpx__.post(
+            url=path,
             headers=self.get_headers(),
-            cookies=self.get_cookies(),
-            timeout=self.get_timeout(),
             *args,
             **kwargs,
         )
@@ -89,17 +95,22 @@ class Client(_ClientCommonDefaults, _Client):
 
     def put(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
-        url = f"{self.base_url}/{path}"
-
-        response = httpx.put(
-            url=url,
+        response = self.__httpx__.put(
+            url=path,
             headers=self.get_headers(),
-            cookies=self.get_cookies(),
-            timeout=self.get_timeout(),
             *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
+
+    def stream(self, path: str, *args, **kwargs):
+        return self.__httpx__.stream(
+            url=path,
+            headers=self.get_headers(),
+            timeout=None,  # Avoid timeouts. TODO: Improve the logic
+            *args,
+            **kwargs,
+        )
 
     @staticmethod
     def _normalize_path(path: str) -> str:

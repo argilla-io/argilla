@@ -23,8 +23,6 @@ from rubrix.client.sdk.token_classification.models import TokenClassificationRec
 def test_data(
     mocked_client, limit, expected, sdk_client, bulk_tokenclass_data, monkeypatch
 ):
-    # TODO: Not sure how to test the streaming part of the response here
-    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
 
     dataset_name = "test_dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")

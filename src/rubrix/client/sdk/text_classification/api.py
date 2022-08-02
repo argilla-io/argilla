@@ -34,16 +34,12 @@ def data(
     request: Optional[TextClassificationQuery] = None,
     limit: Optional[int] = None,
 ) -> Response[Union[List[TextClassificationRecord], HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/{name}/TextClassification/data".format(
-        client.base_url, name=name
-    )
 
-    with httpx.stream(
+    path = f"/api/datasets/{name}/TextClassification/data"
+
+    with client.stream(
         method="POST",
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=None,
+        path=path,
         params={"limit": limit} if limit else None,
         json=request.dict() if request else {},
     ) as response:

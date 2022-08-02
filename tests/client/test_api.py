@@ -18,7 +18,6 @@ from typing import Iterable
 
 import datasets
 import httpx
-import pandas
 import pandas as pd
 import pytest
 
@@ -34,10 +33,11 @@ from rubrix.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
+from rubrix.client.sdk.users import api as users_api
+from rubrix.client.sdk.users.models import User
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
-from rubrix.server.security import auth
 from tests.server.test_api import create_some_data_for_text_classification
 
 
@@ -48,12 +48,10 @@ def mock_response_200(monkeypatch):
     It will return a 200 status code, emulating the correct login.
     """
 
-    def mock_get(url, *args, **kwargs):
-        if "/api/me" in url:
-            return httpx.Response(status_code=200, json={"username": "booohh"})
-        return httpx.Response(status_code=200)
+    def mock_get(*args, **kwargs):
+        return User(username="booohh")
 
-    monkeypatch.setattr(httpx, "get", mock_get)
+    monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
 @pytest.fixture
@@ -64,9 +62,9 @@ def mock_response_500(monkeypatch):
     """
 
     def mock_get(*args, **kwargs):
-        return httpx.Response(status_code=500)
+        raise GenericApiError("Mock error")
 
-    monkeypatch.setattr(httpx, "get", mock_get)
+    monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
 @pytest.fixture
@@ -76,16 +74,14 @@ def mock_response_token_401(monkeypatch):
     It will return a 401 status code, emulating an invalid credentials error when using tokens to log in.
     Iterable structure to be able to pass the first 200 status code check
     """
-    response_200 = httpx.Response(status_code=200)
-    response_401 = httpx.Response(status_code=401)
 
     def mock_get(*args, **kwargs):
         if kwargs["url"] == "fake_url/api/me":
-            return response_401
+            raise UnauthorizedApiError()
         elif kwargs["url"] == "fake_url/api/docs/spec.json":
-            return response_200
+            return User(username="booohh")
 
-    monkeypatch.setattr(httpx, "get", mock_get)
+    monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
 def test_init_correct(mock_response_200):
@@ -94,10 +90,10 @@ def test_init_correct(mock_response_200):
     It checks if the _client created is a RubrixClient object.
     """
 
-    api.init()
-    assert api.__ACTIVE_API__._client == AuthenticatedClient(
+    assert api.active_api()._client == AuthenticatedClient(
         base_url="http://localhost:6900", token="rubrix.apikey", timeout=60.0
     )
+
     assert api.__ACTIVE_API__._user == api.User(username="booohh")
 
     api.init(api_url="mock_url", api_key="mock_key", workspace="mock_ws", timeout=42)
@@ -107,28 +103,6 @@ def test_init_correct(mock_response_200):
         timeout=42,
         headers={"X-Rubrix-Workspace": "mock_ws"},
     )
-
-
-def test_init_incorrect(mock_response_500):
-    """Testing incorrect default initalization
-
-    It checks an Exception is raised with the correct message.
-    """
-
-    with pytest.raises(
-        Exception,
-        match="Rubrix server returned an error with http status: 500\nError details: \[\{'response': None\}\]",
-    ):
-        api.init()
-
-
-def test_init_token_auth_fail(mock_response_token_401):
-    """Testing initalization with failed authentication
-
-    It checks an Exception is raised with the correct message.
-    """
-    with pytest.raises(UnauthorizedApiError):
-        api.init(api_url="fake_url", api_key="422")
 
 
 def test_init_evironment_url(mock_response_200, monkeypatch):
