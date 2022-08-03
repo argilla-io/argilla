@@ -17,10 +17,8 @@
 Common model for task definitions
 """
 
-from dataclasses import dataclass
 from typing import Any, Dict, Generic, List, TypeVar
 
-from fastapi import Query
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
@@ -34,23 +32,12 @@ from rubrix.server.services.search.model import (
 from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
     ServiceBaseRecord,
-    ServiceRecord,
 )
 from rubrix.utils import limit_value_length
 
 
 class SortableField(ServiceSortableField):
     pass
-
-
-@dataclass
-class PaginationParams:
-    """Query pagination params"""
-
-    limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(
-        0, ge=0, le=10000, alias="from", description="Record sequence from"
-    )
 
 
 class BaseAnnotation(ServiceBaseAnnotation):

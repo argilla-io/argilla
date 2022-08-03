@@ -65,7 +65,6 @@ server = [
     "python-jose[cryptography]~=3.2.0",
     "passlib[bcrypt]~=1.7.4",
     # Info status
-    "hurry.filesize", # TODO: remove
     "psutil ~= 5.8.0",
 ]
 listeners = [

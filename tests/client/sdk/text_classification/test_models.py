@@ -37,7 +37,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
 )
 from rubrix.server.apis.v0.models.text_classification import (
-    TextClassificationBulkData as ServerTextClassificationBulkData,
+    TextClassificationBulkRequest as ServerTextClassificationBulkData,
 )
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery as ServerTextClassificationQuery,

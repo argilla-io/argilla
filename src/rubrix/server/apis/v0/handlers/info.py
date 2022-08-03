@@ -13,9 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends
 
-from rubrix.server.security import auth
 from rubrix.server.services.info import ApiInfo, ApiInfoService, ApiStatus
 
 router = APIRouter(tags=["status"])
@@ -25,29 +24,13 @@ router = APIRouter(tags=["status"])
     "/_status",
     operation_id="api_status",
     response_model=ApiStatus,
-    dependencies=[Security(auth.get_user, scopes=[])],
 )
 def api_status(
     service: ApiInfoService = Depends(ApiInfoService.get_instance),
 ) -> ApiStatus:
-    """
-
-    Parameters
-    ----------
-    service:
-        The Api info service
-
-    Returns
-    -------
-
-    The detailed api status
-
-    """
     return service.api_status()
 
 
 @router.get("/_info", operation_id="api_info", response_model=ApiInfo)
-def api_info(
-    service: ApiInfoService = Depends(ApiInfoService.get_instance),
-) -> ApiInfo:
+def api_info(service: ApiInfoService = Depends(ApiInfoService.get_instance)) -> ApiInfo:
     return ApiInfo.parse_obj(service.api_status())

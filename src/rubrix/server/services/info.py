@@ -18,13 +18,35 @@ from typing import Any, Dict
 
 import psutil
 from fastapi import Depends
-
-# TODO(@frascuchon): Remove this dep
-from hurry.filesize import size
 from pydantic import BaseModel
 
 from rubrix import __version__ as rubrix_version
 from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
+
+
+def size(bytes):
+    system = [
+        (1024 ** 5, "P"),
+        (1024 ** 4, "T"),
+        (1024 ** 3, "G"),
+        (1024 ** 2, "M"),
+        (1024 ** 1, "K"),
+        (1024 ** 0, "B"),
+    ]
+
+    factor, suffix = None, None
+    for factor, suffix in system:
+        if bytes >= factor:
+            break
+
+    amount = int(bytes / factor)
+    if isinstance(suffix, tuple):
+        singular, multiple = suffix
+        if amount == 1:
+            suffix = singular
+        else:
+            suffix = multiple
+    return str(amount) + suffix
 
 
 class ApiInfo(BaseModel):
@@ -50,14 +72,14 @@ class ApiInfoService:
     @classmethod
     def get_instance(
         cls,
-        es_wrapper: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+        backend: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
     ) -> "ApiInfoService":
         """
         Creates an api info service
         """
 
         if not cls._INSTANCE:
-            cls._INSTANCE = ApiInfoService(es_wrapper)
+            cls._INSTANCE = ApiInfoService(backend)
         return cls._INSTANCE
 
     def __init__(self, es: ElasticsearchBackend):

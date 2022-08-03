@@ -13,19 +13,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.apis.v0.models.metrics.token_classification import (
-    TokenClassificationMetrics,
-)
-from rubrix.server.apis.v0.models.text2text import Text2TextBulkData, Text2TextRecord
+from rubrix.server.apis.v0.models.text2text import Text2TextBulkRequest, Text2TextRecord
 from rubrix.server.apis.v0.models.text_classification import (
-    TextClassificationBulkData,
+    TextClassificationBulkRequest,
     TextClassificationRecord,
 )
 from rubrix.server.apis.v0.models.token_classification import (
-    TokenClassificationBulkData,
+    TokenClassificationBulkRequest,
     TokenClassificationRecord,
 )
 from rubrix.server.services.metrics.models import CommonTasksMetrics
+from rubrix.server.services.tasks.token_classification.metrics import (
+    TokenClassificationMetrics,
+)
 
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 
@@ -41,7 +41,7 @@ def test_wrong_dataset_metrics(mocked_client):
             {"text": text},
         ]
     ]
-    request = Text2TextBulkData(records=records)
+    request = Text2TextBulkRequest(records=records)
     dataset = "test_wrong_dataset_metrics"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -91,7 +91,7 @@ def test_dataset_for_text2text(mocked_client):
             {"text": text},
         ]
     ]
-    request = Text2TextBulkData(records=records)
+    request = Text2TextBulkRequest(records=records)
     dataset = "test_dataset_for_text2text"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -121,7 +121,7 @@ def test_dataset_for_token_classification(mocked_client):
         ]
     ]
 
-    request = TokenClassificationBulkData(records=records)
+    request = TokenClassificationBulkRequest(records=records)
     dataset = "test_dataset_for_token_classification"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -171,7 +171,7 @@ def test_dataset_metrics(mocked_client):
             },
         ]
     ]
-    request = TextClassificationBulkData(records=records)
+    request = TextClassificationBulkRequest(records=records)
     dataset = "test_get_dataset_metrics"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
@@ -242,7 +242,7 @@ def test_dataset_labels_for_text_classification(mocked_client):
             },
         ]
     ]
-    request = TextClassificationBulkData(records=records)
+    request = TextClassificationBulkRequest(records=records)
     dataset = "test_dataset_labels_for_text_classification"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200

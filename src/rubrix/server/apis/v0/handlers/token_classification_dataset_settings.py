@@ -2,8 +2,10 @@ from typing import Type
 
 from fastapi import APIRouter, Body, Depends, Security
 
-from rubrix.server.apis.v0.models.commons.params import DATASET_NAME_PATH_PARAM
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.commons.params import (
+    DATASET_NAME_PATH_PARAM,
+    CommonTaskHandlerDependencies,
+)
 from rubrix.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
 from rubrix.server.commons.models import TaskType
@@ -32,7 +34,7 @@ def configure_router(router: APIRouter):
     )
     async def get_dataset_settings(
         name: str = DATASET_NAME_PATH_PARAM,
-        ws_params: CommonTaskQueryParams = Depends(),
+        ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["read:dataset.settings"]),
     ) -> TokenClassificationSettings:
@@ -62,7 +64,7 @@ def configure_router(router: APIRouter):
             ..., description=f"The {task} dataset settings"
         ),
         name: str = DATASET_NAME_PATH_PARAM,
-        ws_params: CommonTaskQueryParams = Depends(),
+        ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         user: User = Security(auth.get_user, scopes=["write:dataset.settings"]),
@@ -92,7 +94,7 @@ def configure_router(router: APIRouter):
     )
     async def delete_settings(
         name: str = DATASET_NAME_PATH_PARAM,
-        ws_params: CommonTaskQueryParams = Depends(),
+        ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         user: User = Security(auth.get_user, scopes=["delete:dataset.settings"]),
     ) -> None:

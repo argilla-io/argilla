@@ -1,8 +1,8 @@
 import dataclasses
 from typing import Any, Dict, List, Optional, Union
 
-from rubrix.server._helpers import unflatten_dict
 from rubrix.server.daos.backend.query_helpers import aggregations
+from rubrix.server.helpers import unflatten_dict
 
 
 @dataclasses.dataclass

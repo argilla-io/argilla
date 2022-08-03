@@ -2,11 +2,8 @@ from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field
 
-from rubrix.server.services.metrics.models import (
-    CommonTasksMetrics,
-    ServiceBaseMetric,
-    ServicePythonMetric,
-)
+from rubrix.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
+from rubrix.server.services.metrics.models import CommonTasksMetrics
 from rubrix.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,

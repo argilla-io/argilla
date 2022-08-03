@@ -45,6 +45,7 @@ class LabelingService:
         self.__datasets__ = datasets
         self.__records__ = records
 
+    # TODO(@frascuchon): Move all rules management methods to the common datasets service like settings
     def list_rules(
         self, dataset: ServiceTextClassificationDataset
     ) -> List[ServiceLabelingRule]:

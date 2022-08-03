@@ -64,13 +64,14 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
 
 class Text2TextRecord(CreationText2TextRecord):
     last_updated: datetime = None
+    # TODO(@frascuchon): Review why this????
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self):
         return {}
 
 
-class Text2TextBulkData(UpdateDatasetRequest):
+class Text2TextBulkRequest(UpdateDatasetRequest):
     records: List[CreationText2TextRecord]
 
 

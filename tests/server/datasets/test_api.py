@@ -15,7 +15,9 @@
 from typing import Optional
 
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.text_classification import TextClassificationBulkData
+from rubrix.server.apis.v0.models.text_classification import (
+    TextClassificationBulkRequest,
+)
 from rubrix.server.commons.models import TaskType
 from tests.helpers import SecuredClient
 
@@ -108,7 +110,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
 
 
 def test_dataset_naming_validation(mocked_client):
-    request = TextClassificationBulkData(records=[])
+    request = TextClassificationBulkRequest(records=[])
     dataset = "Wrong dataset name"
 
     response = mocked_client.post(
@@ -221,7 +223,7 @@ def delete_dataset(client, dataset, workspace: Optional[str] = None):
 def create_mock_dataset(client, dataset):
     client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=[],

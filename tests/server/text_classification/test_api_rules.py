@@ -4,7 +4,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     LabelingRule,
     LabelingRuleMetricsSummary,
-    TextClassificationBulkData,
+    TextClassificationBulkRequest,
     TextClassificationRecord,
 )
 
@@ -31,7 +31,7 @@ def log_some_records(
 
     response = client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(**record),
             ],

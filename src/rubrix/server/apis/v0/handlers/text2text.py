@@ -19,10 +19,13 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse, PaginationParams
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.commons.model import BulkResponse
+from rubrix.server.apis.v0.models.commons.params import (
+    CommonTaskHandlerDependencies,
+    RequestPagination,
+)
 from rubrix.server.apis.v0.models.text2text import (
-    Text2TextBulkData,
+    Text2TextBulkRequest,
     Text2TextDataset,
     Text2TextMetrics,
     Text2TextQuery,
@@ -68,8 +71,8 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 )
 def bulk_records(
     name: str,
-    bulk: Text2TextBulkData,
-    common_params: CommonTaskQueryParams = Depends(),
+    bulk: Text2TextBulkRequest,
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -117,11 +120,11 @@ def bulk_records(
 def search_records(
     name: str,
     search: Text2TextSearchRequest = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     include_metrics: bool = Query(
         False, description="If enabled, return related record metrics"
     ),
-    pagination: PaginationParams = Depends(),
+    pagination: RequestPagination = Depends(),
     service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
@@ -194,7 +197,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[Text2TextQuery] = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),

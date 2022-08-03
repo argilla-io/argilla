@@ -1,14 +1,11 @@
-from typing import Any, ClassVar, Dict, Iterable, List, Union
+from typing import Any, ClassVar, Dict, Iterable, List
 
 from pydantic import Field
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from rubrix.server.services.metrics.models import (
-    CommonTasksMetrics,
-    ServiceBaseMetric,
-    ServicePythonMetric,
-)
+from rubrix.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
+from rubrix.server.services.metrics.models import CommonTasksMetrics
 from rubrix.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )

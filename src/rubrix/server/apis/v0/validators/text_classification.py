@@ -4,11 +4,11 @@ from fastapi import Depends
 
 from rubrix.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.text_classification import DatasetLabels
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import BadRequestError, EntityNotFoundError
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
+from rubrix.server.services.tasks.text_classification.metrics import DatasetLabels
 
 __svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
     f"{TaskType.text_classification}_DatasetSettings",

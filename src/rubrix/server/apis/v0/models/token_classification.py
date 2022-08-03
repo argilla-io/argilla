@@ -69,7 +69,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
     pass
 
 
-class TokenClassificationBulkData(UpdateDatasetRequest):
+class TokenClassificationBulkRequest(UpdateDatasetRequest):
     records: List[CreationTokenClassificationRecord]
 
 

@@ -18,7 +18,7 @@ import pytest
 
 from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from rubrix.server.apis.v0.models.token_classification import (
-    TokenClassificationBulkData,
+    TokenClassificationBulkRequest,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchRequest,
@@ -41,7 +41,7 @@ def test_load_as_different_task(mocked_client):
     ]
     mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -80,7 +80,7 @@ def test_search_special_characters(mocked_client):
     ]
     mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -123,7 +123,7 @@ def test_some_sort(mocked_client):
     ]
     mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -184,7 +184,7 @@ def test_create_records_for_token_classification(
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -266,7 +266,7 @@ def test_multiple_mentions_in_same_record(mocked_client):
     ]
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -294,7 +294,7 @@ def test_show_not_aggregable_metadata_fields(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
-        json=TokenClassificationBulkData(
+        json=TokenClassificationBulkRequest(
             records=[
                 TokenClassificationRecord.parse_obj(
                     {

@@ -24,7 +24,7 @@ from rubrix.server.apis.v0.handlers import (
     text_classification,
     token_classification,
 )
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from rubrix.server.commons.config import TaskConfig, TasksFactory
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -33,7 +33,6 @@ from rubrix.server.services.metrics import MetricsService
 
 
 class MetricInfo(BaseModel):
-    """Metric info data model for retrieve dataset metrics information"""
 
     id: str = Field(description="The metric id")
     name: str = Field(description="The metric name")
@@ -44,19 +43,6 @@ class MetricInfo(BaseModel):
 
 @dataclass
 class MetricSummaryParams:
-    """
-    For metrics summary calculation, common summary parameters.
-
-    Attributes:
-    -----------
-
-    interval:
-        For histogram summaries, the bucket interval
-
-    size:
-        For terminological metrics, the number of terms to retrieve
-
-    """
 
     interval: Optional[float] = Query(
         default=None,
@@ -71,17 +57,8 @@ class MetricSummaryParams:
 
 
 def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
-    """
-    Configures an api router with the dataset task metrics endpoints.
 
-    Parameters
-    ----------
-    router:
-        The api router
-    cfg:
-        The task configuration model
-
-    """
+    # TODO(@frascuchon): Use new api endpoint (/datasets/{name}/{task}/...
     base_metrics_endpoint = f"/{cfg.task}/{{name}}/metrics"
 
     @router.get(
@@ -91,36 +68,15 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
     )
     def get_dataset_metrics(
         name: str,
-        teams_query: CommonTaskQueryParams = Depends(),
+        request_deps: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
     ) -> List[MetricInfo]:
-        """
-        List available metrics info for a given dataset
-
-        Parameters
-        ----------
-        name:
-            The dataset name
-        teams_query:
-            Team query param where dataset belongs to. Optional
-        current_user:
-            The current user
-        datasets:
-            The datasets service
-        metrics:
-            The metrics service
-
-        Returns
-        -------
-            A list of metric info availables for given dataset
-
-        """
         dataset = datasets.find_by_name(
             user=current_user,
             name=name,
             task=cfg.task,
-            workspace=teams_query.workspace,
+            workspace=request_deps.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
@@ -139,7 +95,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         metric: str,
         query: cfg.query,
         metric_params: MetricSummaryParams = Depends(),
-        teams_query: CommonTaskQueryParams = Depends(),
+        request_deps: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
@@ -148,7 +104,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
             user=current_user,
             name=name,
             task=cfg.task,
-            workspace=teams_query.workspace,
+            workspace=request_deps.workspace,
             as_dataset_class=TasksFactory.get_task_dataset(cfg.task),
         )
 
@@ -157,7 +113,7 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         return metrics.summarize_metric(
             dataset=dataset,
-            owner=current_user.check_workspace(teams_query.workspace),
+            owner=current_user.check_workspace(request_deps.workspace),
             metric=metric_,
             record_class=record_class,
             query=query,
@@ -171,5 +127,4 @@ for task_api in [text_classification, token_classification, text2text]:
     cfg = TasksFactory.get_task_by_task_type(task_api.TASK_TYPE)
     if cfg:
         configure_metrics_endpoints(task_api.router, cfg)
-
     router.include_router(task_api.router)

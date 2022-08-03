@@ -19,7 +19,7 @@ from rubrix.server.apis.v0.models.commons.model import BulkResponse
 from rubrix.server.apis.v0.models.datasets import Dataset
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
-    TextClassificationBulkData,
+    TextClassificationBulkRequest,
     TextClassificationQuery,
     TextClassificationRecord,
     TextClassificationSearchRequest,
@@ -71,7 +71,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     ]
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,
@@ -86,7 +86,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             tags={"new": "tag"},
             metadata={"new": {"metadata": "value"}},
             records=records,
@@ -124,7 +124,7 @@ def test_create_records_for_text_classification(mocked_client):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
     metadata = {"config": {"the": "config"}}
-    classification_bulk = TextClassificationBulkData(
+    classification_bulk = TextClassificationBulkRequest(
         tags=tags,
         metadata=metadata,
         records=[
@@ -198,7 +198,7 @@ def test_partial_record_update(mocked_client):
         }
     )
 
-    bulk = TextClassificationBulkData(
+    bulk = TextClassificationBulkRequest(
         records=[record],
     )
 
@@ -269,7 +269,7 @@ def test_sort_by_last_updated(mocked_client):
     for i in range(0, 10):
         mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
-            json=TextClassificationBulkData(
+            json=TextClassificationBulkRequest(
                 records=[
                     TextClassificationRecord(
                         **{
@@ -295,7 +295,7 @@ def test_sort_by_id_as_default(mocked_client):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -336,7 +336,7 @@ def test_some_sort_by(mocked_client):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -408,7 +408,7 @@ def test_disable_aggregations_when_scroll(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=[
@@ -448,7 +448,7 @@ def test_include_event_timestamp(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=[
@@ -489,7 +489,7 @@ def test_words_cloud(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -529,7 +529,7 @@ def test_metadata_with_point_in_field_name(mocked_client):
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -566,7 +566,7 @@ def test_wrong_text_query(mocked_client):
 
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{
@@ -600,7 +600,7 @@ def test_search_using_text(mocked_client):
 
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
-        data=TextClassificationBulkData(
+        data=TextClassificationBulkRequest(
             records=[
                 TextClassificationRecord(
                     **{

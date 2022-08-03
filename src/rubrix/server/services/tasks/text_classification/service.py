@@ -13,13 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Iterable, List, Optional, Type
+from typing import Iterable, List, Optional
 
 from fastapi import Depends
 
 from rubrix.server.commons.config import TasksFactory
 from rubrix.server.errors.base_errors import MissingDatasetRecordsError
-from rubrix.server.services.metrics.models import ServiceBaseTaskMetrics
 from rubrix.server.services.search.model import (
     ServiceSearchResults,
     ServiceSortableField,
@@ -306,6 +305,7 @@ class TextClassificationService:
         coverage_annotated = (
             metrics.annotated_covered_records / annotated if annotated > 0 else None
         )
+
         return LabelingRuleMetricsSummary(
             total_records=total,
             annotated_records=annotated,

@@ -42,15 +42,15 @@ class UpdateDatasetRequest(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-class CreationDatasetRequest(UpdateDatasetRequest):
+class _BaseDatasetRequest(UpdateDatasetRequest):
     name: str = Field(regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
 
 
-class DatasetCreate(CreationDatasetRequest):
+class CreateDatasetRequest(_BaseDatasetRequest):
     task: TaskType = Field(description="The dataset task")
 
 
-class CopyDatasetRequest(CreationDatasetRequest):
+class CopyDatasetRequest(_BaseDatasetRequest):
     """
     Request body for copy dataset operation
     """
@@ -58,7 +58,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     target_workspace: Optional[str] = None
 
 
-class BaseDataset(CreationDatasetRequest, ServiceBaseDataset):
+class Dataset(_BaseDatasetRequest, ServiceBaseDataset):
     """
     Low level dataset data model
 
@@ -75,9 +75,3 @@ class BaseDataset(CreationDatasetRequest, ServiceBaseDataset):
     """
 
     task: TaskType
-
-
-class Dataset(BaseDataset):
-    """Dataset used for response output"""
-
-    pass

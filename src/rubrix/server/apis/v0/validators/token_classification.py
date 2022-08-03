@@ -4,11 +4,11 @@ from fastapi import Depends
 
 from rubrix.server.apis.v0.models.dataset_settings import TokenClassificationSettings
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.token_classification import DatasetLabels
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import BadRequestError, EntityNotFoundError
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
+from rubrix.server.services.tasks.token_classification.metrics import DatasetLabels
 
 __svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
     f"{TaskType.token_classification}_DatasetSettings",

@@ -227,31 +227,12 @@ class DatasetsService:
 
         return copy_dataset
 
-    def all_workspaces(self) -> List[str]:
-        """Retrieve all dataset workspaces"""
-
-        workspaces = self.__dao__.get_all_workspaces()
-        # include the non-workspace workspace?
-        return workspaces
-
     async def get_settings(
         self,
         user: User,
         dataset: ServiceDataset,
         class_type: Type[ServiceDatasetSettings],
     ) -> ServiceDatasetSettings:
-        """
-        Get the configured settings for dataset
-
-        Args:
-            user: the connected user
-            dataset: the target dataset
-            class_type: the settings class
-
-        Returns:
-            An instance of class_type settings configured for provided dataset
-
-        """
         settings = self.__dao__.load_settings(dataset=dataset, as_class=class_type)
         if not settings:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
@@ -260,28 +241,9 @@ class DatasetsService:
     async def save_settings(
         self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
     ) -> ServiceDatasetSettings:
-        """
-        Save a set of settings for a dataset
 
-        Args:
-            user: The user executing the command
-            dataset: The dataset
-            settings: The dataset settings
-
-        Returns:
-            Stored dataset settings
-
-        """
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 
     async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
-        """
-        Deletes the dataset settings
-
-        Args:
-            user: The user executing the command
-            dataset:  The dataset
-
-        """
         self.__dao__.delete_settings(dataset=dataset)

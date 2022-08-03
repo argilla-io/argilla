@@ -123,7 +123,7 @@ class TextClassificationRecord(CreationTextClassificationRecord):
         return {}
 
 
-class TextClassificationBulkData(UpdateDatasetRequest):
+class TextClassificationBulkRequest(UpdateDatasetRequest):
 
     records: List[CreationTextClassificationRecord]
 
@@ -163,6 +163,5 @@ class TextClassificationSearchResults(
 
 
 class TextClassificationSearchRequest(BaseModel):
-
     query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
     sort: List[SortableField] = Field(default_factory=list)
