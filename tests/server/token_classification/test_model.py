@@ -104,9 +104,49 @@ def test_model_dict():
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
         },
-        "text": text,
-        "tokens": tokens,
+        "predictions": {
+            "test": {
+                "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
+            }
+        },
         "status": "Default",
+        "text": "This is  a  great  space",
+        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
+    }
+
+
+def test_model_with_predictions():
+    record = TokenClassificationRecord.parse_obj(
+        {
+            "id": 1,
+            "metrics": {},
+            "predictions": {
+                "test": {
+                    "entities": [
+                        {"end": 24, "label": "test", "score": 1.0, "start": 9}
+                    ],
+                }
+            },
+            "status": "Default",
+            "text": "This is  a  great  space",
+            "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
+        }
+    )
+    assert record.dict(exclude_none=True) == {
+        "id": 1,
+        "metrics": {},
+        "prediction": {
+            "agent": "test",
+            "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
+        },
+        "predictions": {
+            "test": {
+                "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
+            }
+        },
+        "status": "Default",
+        "text": "This is  a  great  space",
+        "tokens": ["This", "is", " ", "a", " ", "great", " ", "space"],
     }
 
 
