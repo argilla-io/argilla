@@ -17,10 +17,9 @@ import importlib
 import os
 import threading
 import warnings
-from collections import defaultdict
 from itertools import chain
 from types import ModuleType
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 
 class LazyRubrixModule(ModuleType):
