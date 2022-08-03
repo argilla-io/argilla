@@ -37,10 +37,7 @@ from rubrix.server.apis.v0.models.text2text import (
 def test_bulk_data_schema(helpers):
     client_schema = Text2TextBulkData.schema()
     server_schema = ServerText2TextBulkData.schema()
-
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_query_schema(helpers):
