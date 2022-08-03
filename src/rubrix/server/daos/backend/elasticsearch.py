@@ -273,7 +273,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def _create_index(
         self,
-        id: str,
+        index: str,
         force_recreate: bool = False,
         settings: Dict[str, Any] = None,
         mappings: Dict[str, Any] = None,
@@ -293,7 +293,6 @@ class ElasticsearchBackend(LoggingMixin):
             The mapping configuration. Optional.
 
         """
-        index = dataset_records_index(id)
         with backend_error_handler(index):
             if force_recreate:
                 self._delete_index(index)
@@ -823,9 +822,9 @@ class ElasticsearchBackend(LoggingMixin):
                 _mappings[k] = [*_mappings.get(k, []), *task_mappings[k]]
             else:
                 _mappings[k] = {**_mappings.get(k, {}), **task_mappings[k]}
-
+        index = dataset_records_index(id)
         self._create_index(
-            id=id,
+            index=index,
             settings=tasks_common_settings(),
             mappings={**tasks_common_mappings(), **_mappings},
             force_recreate=force_recreate,

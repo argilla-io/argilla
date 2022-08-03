@@ -141,6 +141,7 @@ class TextClassificationAnnotation(ServiceBaseAnnotation):
         list of annotated labels with score
     """
 
+    # TODO(@frascuchon): labels must be a dict (to avoid repeat labels)
     labels: List[ClassPrediction]
 
     @validator("labels")
