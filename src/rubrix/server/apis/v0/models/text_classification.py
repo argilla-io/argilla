@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
+    BaseRecordInputs,
     BaseSearchResults,
     ScoreRange,
     SortableField,
@@ -107,25 +108,22 @@ class TextClassificationAnnotation(_TextClassificationAnnotation):
     pass
 
 
-class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation]):
+class TextClassificationRecordInputs(BaseRecordInputs[TextClassificationAnnotation]):
 
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
 
-class TextClassificationRecord(CreationTextClassificationRecord):
-
-    last_updated: datetime = None
-    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
-
-    def extended_fields(self) -> Dict[str, Any]:
-        return {}
+class TextClassificationRecord(
+    TextClassificationRecordInputs, BaseRecord[TextClassificationAnnotation]
+):
+    pass
 
 
 class TextClassificationBulkRequest(UpdateDatasetRequest):
 
-    records: List[CreationTextClassificationRecord]
+    records: List[TextClassificationRecordInputs]
 
     @validator("records")
     def check_multi_label_integrity(cls, records: List[TextClassificationRecord]):

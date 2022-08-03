@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field, root_validator, validator
 
 from rubrix.server.apis.v0.models.commons.model import (
     BaseRecord,
+    BaseRecordInputs,
     BaseSearchResults,
     ScoreRange,
 )
@@ -40,10 +41,11 @@ class TokenClassificationAnnotation(_TokenClassificationAnnotation):
     pass
 
 
-class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation]):
+class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnotation]):
 
-    tokens: List[str] = Field(min_items=1)
     text: str = Field()
+    tokens: List[str] = Field(min_items=1)
+    # TODO(@frascuchon): Delete this field and all related logic
     _raw_text: Optional[str] = Field(alias="raw_text")
 
     @root_validator(pre=True)
@@ -59,18 +61,15 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         assert text and text.strip(), "No text or empty text provided"
         return text
 
-    def extended_fields(self) -> Dict[str, Any]:
-        return {
-            "raw_text": self.text,  # Maintain results compatibility
-        }
 
-
-class TokenClassificationRecord(CreationTokenClassificationRecord):
+class TokenClassificationRecord(
+    TokenClassificationRecordInputs, BaseRecord[TokenClassificationAnnotation]
+):
     pass
 
 
 class TokenClassificationBulkRequest(UpdateDatasetRequest):
-    records: List[CreationTokenClassificationRecord]
+    records: List[TokenClassificationRecordInputs]
 
 
 class TokenClassificationQuery(ServiceBaseRecordsQuery):

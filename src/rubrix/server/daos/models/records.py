@@ -44,16 +44,13 @@ class BaseAnnotationDB(BaseModel):
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
 
 
-class BaseRecordDB(GenericModel, Generic[AnnotationDB]):
-
+class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     id: Optional[Union[int, str]] = Field(default=None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
     prediction: Optional[AnnotationDB] = None
     annotation: Optional[AnnotationDB] = None
-    metrics: Dict[str, Any] = Field(default_factory=dict)
-    search_keywords: Optional[List[str]] = None
 
     @validator("id", always=True, pre=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
@@ -66,12 +63,6 @@ class BaseRecordDB(GenericModel, Generic[AnnotationDB]):
     def fill_default_value(cls, status: TaskStatus):
         """Fastapi validator for set default task status"""
         return TaskStatus.default if status is None else status
-
-    @validator("search_keywords")
-    def remove_duplicated_keywords(cls, value) -> List[str]:
-        """Remove duplicated keywords"""
-        if value:
-            return list(set(value))
 
     @validator("metadata", pre=True)
     def flatten_metadata(cls, metadata: Dict[str, Any]):
@@ -160,6 +151,20 @@ class BaseRecordDB(GenericModel, Generic[AnnotationDB]):
             **super().dict(*args, **kwargs),
             **self.extended_fields(),
         }
+
+
+class BaseRecordDB(BaseRecordInDB, Generic[AnnotationDB]):
+
+    # Read only ones
+    metrics: Dict[str, Any] = Field(default_factory=dict)
+    search_keywords: Optional[List[str]] = None
+    last_updated: datetime = None
+
+    @validator("search_keywords")
+    def remove_duplicated_keywords(cls, value) -> List[str]:
+        """Remove duplicated keywords"""
+        if value:
+            return list(set(value))
 
 
 RecordDB = TypeVar("RecordDB", bound=BaseRecordDB)

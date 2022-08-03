@@ -172,8 +172,6 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
     inputs: Dict[str, Union[str, List[str]]]
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
-    last_updated: datetime = None
-    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     class Config:
         allow_population_by_field_name = True

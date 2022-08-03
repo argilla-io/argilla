@@ -19,11 +19,9 @@ Common model for task definitions
 
 from typing import Any, Dict, Generic, List, TypeVar
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.helpers import flatten_dict
 from rubrix.server.services.search.model import (
     ServiceQueryRange,
     ServiceSearchResultsAggregations,
@@ -32,8 +30,8 @@ from rubrix.server.services.search.model import (
 from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
     ServiceBaseRecord,
+    ServiceBaseRecordInputs,
 )
-from rubrix.utils import limit_value_length
 
 
 class SortableField(ServiceSortableField):
@@ -47,41 +45,13 @@ class BaseAnnotation(ServiceBaseAnnotation):
 Annotation = TypeVar("Annotation", bound=BaseAnnotation)
 
 
+class BaseRecordInputs(ServiceBaseRecordInputs[Annotation], Generic[Annotation]):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {}
+
+
 class BaseRecord(ServiceBaseRecord[Annotation], Generic[Annotation]):
-    """
-    Minimal dataset record information
-
-    Attributes:
-    -----------
-
-    id:
-        The record id
-    metadata:
-        The metadata related to record
-    event_timestamp:
-        The timestamp when record event was triggered
-
-    """
-
-    @validator("metadata", pre=True)
-    def flatten_metadata(cls, metadata: Dict[str, Any]):
-        """
-        A fastapi validator for flatten metadata dictionary
-
-        Parameters
-        ----------
-        metadata:
-            The metadata dictionary
-
-        Returns
-        -------
-            A flatten version of metadata dictionary
-
-        """
-        if metadata:
-            metadata = flatten_dict(metadata, drop_empty=True)
-            metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
-        return metadata
+    pass
 
 
 class ScoreRange(ServiceQueryRange):

@@ -86,7 +86,7 @@ class ServiceTokenClassificationRecord(
     __chars2tokens__: Dict[int, int] = None
     __tokens2chars__: Dict[int, Tuple[int, int]] = None
 
-    last_updated: datetime = None
+    # TODO: review this.
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
 
     def extended_fields(self) -> Dict[str, Any]:

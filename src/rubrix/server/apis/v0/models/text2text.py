@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, validator
 from rubrix.server.apis.v0.models.commons.model import (
     BaseAnnotation,
     BaseRecord,
+    BaseRecordInputs,
     BaseSearchResults,
     ScoreRange,
     SortableField,
@@ -49,30 +50,17 @@ class Text2TextAnnotation(BaseAnnotation):
     sentences: List[Text2TextPrediction]
 
 
-class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
+class Text2TextRecordInputs(BaseRecordInputs[Text2TextAnnotation]):
 
     text: str
 
-    @classmethod
-    def task(cls) -> TaskType:
-        """The task type"""
-        return TaskType.text2text
 
-    def all_text(self) -> str:
-        return self.text
-
-
-class Text2TextRecord(CreationText2TextRecord):
-    last_updated: datetime = None
-    # TODO(@frascuchon): Review why this????
-    _predicted: Optional[PredictionStatus] = Field(alias="predicted")
-
-    def extended_fields(self):
-        return {}
+class Text2TextRecord(Text2TextRecordInputs, BaseRecord[Text2TextAnnotation]):
+    pass
 
 
 class Text2TextBulkRequest(UpdateDatasetRequest):
-    records: List[CreationText2TextRecord]
+    records: List[Text2TextRecordInputs]
 
 
 class Text2TextQuery(ServiceBaseRecordsQuery):

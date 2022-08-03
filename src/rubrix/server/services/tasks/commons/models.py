@@ -2,7 +2,11 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
-from rubrix.server.daos.models.records import BaseAnnotationDB, BaseRecordDB
+from rubrix.server.daos.models.records import (
+    BaseAnnotationDB,
+    BaseRecordDB,
+    BaseRecordInDB,
+)
 
 
 class ServiceBaseAnnotation(BaseAnnotationDB):
@@ -16,6 +20,12 @@ class BulkResponse(BaseModel):
 
 
 ServiceAnnotation = TypeVar("ServiceAnnotation", bound=ServiceBaseAnnotation)
+
+
+class ServiceBaseRecordInputs(
+    BaseRecordInDB[ServiceAnnotation], Generic[ServiceAnnotation]
+):
+    pass
 
 
 class ServiceBaseRecord(BaseRecordDB[ServiceAnnotation], Generic[ServiceAnnotation]):

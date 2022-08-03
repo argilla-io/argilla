@@ -28,7 +28,6 @@ class ServiceText2TextAnnotation(ServiceBaseAnnotation):
 
 class ServiceText2TextRecord(ServiceBaseRecord[ServiceText2TextAnnotation]):
     text: str
-    last_updated: datetime = None
 
     @classmethod
     def task(cls) -> TaskType:

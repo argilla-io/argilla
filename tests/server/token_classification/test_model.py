@@ -104,7 +104,6 @@ def test_model_dict():
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
         },
-        "raw_text": text,
         "text": text,
         "tokens": tokens,
         "status": "Default",
