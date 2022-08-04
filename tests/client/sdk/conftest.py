@@ -56,9 +56,13 @@ def helpers():
     return Helpers()
 
 
-@pytest.fixture(scope="session")
-def sdk_client():
-    return AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
+@pytest.fixture
+def sdk_client(mocked_client, monkeypatch):
+    client = AuthenticatedClient(
+        base_url="http://localhost:6900", token=DEFAULT_API_KEY
+    )
+    monkeypatch.setattr(client, "__httpx__", mocked_client)
+    return client
 
 
 @pytest.fixture
