@@ -86,6 +86,7 @@ class Text2TextService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
+        id_from: Optional[str] = None,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
     ) -> Text2TextSearchResults:
@@ -104,6 +105,8 @@ class Text2TextService:
             The record from return results
         size:
             The max number of records to return
+        id_from:
+            Search after the given record ID
 
         Returns
         -------
@@ -115,6 +118,7 @@ class Text2TextService:
             dataset,
             query=query,
             size=size,
+            id_from=id_from,
             record_from=record_from,
             record_type=Text2TextRecord,
             sort_config=SortConfig(
@@ -150,6 +154,8 @@ class Text2TextService:
         self,
         dataset: Text2TextDatasetDB,
         query: Optional[Text2TextQuery] = None,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[Text2TextRecord]:
         """
         Scan a dataset records
@@ -161,10 +167,14 @@ class Text2TextService:
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
+        id_from:
+            If provided, read the samples after this record ID
+        limit:
+            Batch size to scan, only used if `id_from` is specified
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=Text2TextRecord
+            dataset, query=query, record_type=Text2TextRecord, id_from=id_from, limit=limit,
         )
 
 

@@ -102,7 +102,8 @@ class ElasticsearchWrapper(LoggingMixin):
         A sequence of documents resulting from applying the query on the index
 
         """
-        return es_scan(self.__client__, query=query or {}, index=index)
+        # Preserve order is used to ensure that the samples are sorted by identifier
+        return es_scan(self.__client__, query=query or {}, index=index, preserve_order=True)
 
     def index_exists(self, index: str) -> bool:
         """
@@ -127,7 +128,7 @@ class ElasticsearchWrapper(LoggingMixin):
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
-        Apply a search over a index.
+        Apply a search over an index.
         See <https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html>
 
         Parameters

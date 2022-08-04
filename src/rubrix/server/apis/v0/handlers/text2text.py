@@ -130,6 +130,7 @@ def bulk_records(
 )
 def search_records(
     name: str,
+    id_from: Optional[str] = None,
     search: Text2TextSearchRequest = None,
     common_params: CommonTaskQueryParams = Depends(),
     include_metrics: bool = Query(
@@ -161,6 +162,8 @@ def search_records(
         The dataset service
     current_user:
         The current request user
+    id_from:
+        From which record id start to search for records
 
     Returns
     -------
@@ -184,6 +187,7 @@ def search_records(
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
+        id_from=id_from,
         metrics=TaskFactory.find_task_metrics(
             TASK_TYPE,
             metric_ids={
@@ -245,6 +249,7 @@ async def stream_data(
     service: Text2TextService = Depends(text2text_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
+    id_from: Optional[str] = None
 ) -> StreamingResponse:
     """
     Creates a data stream over dataset records
@@ -265,6 +270,8 @@ async def stream_data(
         The datasets service
     current_user:
         Request user
+    id_from:
+        If provided, read the samples after this record ID
 
     """
     query = query or Text2TextQuery()
@@ -275,7 +282,7 @@ async def stream_data(
         workspace=common_params.workspace,
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset, query=query)
+    data_stream = service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
 
     return scan_data_response(
         data_stream=data_stream,

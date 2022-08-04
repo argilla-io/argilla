@@ -531,6 +531,7 @@ class TextClassificationSearchRequest(BaseModel):
 
     query: TextClassificationQuery = Field(default_factory=TextClassificationQuery)
     sort: List[SortableField] = Field(default_factory=list)
+    id_from: Optional[str] = None
 
 
 class TextClassificationSearchAggregations(BaseSearchResultsAggregations):

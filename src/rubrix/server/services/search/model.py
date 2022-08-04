@@ -31,7 +31,6 @@ class BaseSearchQuery(BaseModel):
 
     status: List[TaskStatus] = Field(default_factory=list)
     metadata: Optional[Dict[str, Union[str, List[str]]]] = None
-    last_record_identifier: Optional[str] = None
 
 
 class QueryRange(BaseModel):

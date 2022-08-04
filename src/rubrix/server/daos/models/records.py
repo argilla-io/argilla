@@ -32,14 +32,11 @@ class RecordSearch(BaseModel):
     aggregations:
         The elasticsearch search aggregations
 
-    last_record_identifier:
-        Identifier of the last record for pagination with `search_after´. If None, no pagination is used.
     """
 
     query: Optional[Dict[str, Any]] = None
     sort: List[Dict[str, Any]] = Field(default_factory=list)
     aggregations: Optional[Dict[str, Any]]
-    last_record_identifier: Optional[str] = None
 
 
 class RecordSearchResults(BaseModel):

@@ -181,6 +181,7 @@ class DatasetRecordsDAO:
         record_from: int = 0,
         exclude_fields: List[str] = None,
         highligth_results: bool = True,
+        id_from: Optional[str] = None,
     ) -> RecordSearchResults:
         """
         SearchRequest records under a dataset given a search parameters.
@@ -197,6 +198,10 @@ class DatasetRecordsDAO:
             Record from which to retrieve the records (for pagination)
         exclude_fields:
             a list of fields to exclude from the result source. Wildcards are accepted
+
+        id_from:
+            String identifying the last record to iterate from. Used for a more efficient pagination.
+
         Returns
         -------
             The search result
@@ -215,92 +220,14 @@ class DatasetRecordsDAO:
             "aggs": aggregation_requests,
         }
 
-        if not search.last_record_identifier:
+        if not id_from:
             sort_config = self.__normalize_sort_config__(records_index, sort=search.sort)
         else:
             sort_config = [{"id": {"order": "asc"}}]
-            search_after = [search.last_record_identifier]
+            search_after = [id_from]
             es_query["search_after"] = search_after
         es_query["sort"] = sort_config
 
-
-        if highligth_results:
-            es_query["highlight"] = self.__configure_query_highlight__(
-                task=dataset.task
-            )
-
-        try:
-            results = self._es.search(index=records_index, query=es_query, size=size)
-        except ClosedIndexError:
-            raise ClosedDatasetError(dataset.name)
-        except IndexNotFoundError:
-            raise MissingDatasetRecordsError(
-                f"No records index found for dataset {dataset.name}"
-            )
-
-        hits = results["hits"]
-        total = hits["total"]
-        docs = hits["hits"]
-        search_aggregations = results.get("aggregations", {})
-
-        result = RecordSearchResults(
-            total=total,
-            records=list(map(self.__esdoc2record__, docs)),
-        )
-        if search_aggregations:
-            parsed_aggregations = parse_aggregations(search_aggregations)
-            result.aggregations = parsed_aggregations
-
-        return result
-
-    def search_paginated_records(
-            self,
-            dataset: BaseDatasetDB,
-            search: Optional[RecordSearch] = None,
-            size: int = 100,
-            record_from: int = 0,
-            exclude_fields: List[str] = None,
-            highligth_results: bool = True,
-    ) -> RecordSearchResults:
-        """
-        TODO - Documentation
-        SearchRequest records under a dataset given a search parameters.
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-        search:
-            The search params
-        size:
-            Number of records to retrieve (for pagination)
-        record_from:
-            Record from which to retrieve the records (for pagination)
-        exclude_fields:
-            a list of fields to exclude from the result source. Wildcards are accepted
-        Returns
-        -------
-            The search result
-
-        """
-        search = search or PaginatedRecordSearch()
-        records_index = dataset_records_index(dataset.id)
-        compute_aggregations = record_from == 0
-        aggregation_requests = (
-            {**(search.aggregations or {})} if compute_aggregations else {}
-        )
-
-        sort_config = [{"id": {"order": "asc"}}]
-        search_after = [search.last_record_identifier]
-
-        es_query = {
-            "_source": {"excludes": exclude_fields or []},
-            "from": record_from,
-            "query": search.query or {"match_all": {}},
-            "sort": sort_config,
-            "aggs": aggregation_requests,
-
-        }
         if highligth_results:
             es_query["highlight"] = self.__configure_query_highlight__(
                 task=dataset.task
@@ -350,7 +277,9 @@ class DatasetRecordsDAO:
     def scan_dataset(
         self,
         dataset: BaseDatasetDB,
+        limit: int = 1000,
         search: Optional[RecordSearch] = None,
+        id_from: Optional[str] = None,
     ) -> Iterable[Dict[str, Any]]:
         """
         Iterates over a dataset records
@@ -361,6 +290,10 @@ class DatasetRecordsDAO:
             The dataset
         search:
             The search parameters. Optional
+        limit:
+            Batch size to extract, only works if an `id_from` is provided
+        id_from:
+            From which ID should we start iterating
 
         Returns
         -------
@@ -370,10 +303,19 @@ class DatasetRecordsDAO:
         es_query = {
             "query": search.query or {"match_all": {}},
             "highlight": self.__configure_query_highlight__(task=dataset.task),
+            "sort": [{"id": {"order": "asc"}}]  # Sort the search so the consistency is maintained in every search
         }
-        docs = self._es.list_documents(
-            dataset_records_index(dataset.id), query=es_query
-        )
+        if id_from:
+            # Scroll method does not accept read_after, thus, this case is handled as a search
+            es_query["search_after"] = [id_from]
+            results = self._es.search(index=dataset_records_index(dataset.id), query=es_query, size=limit)
+            hits = results["hits"]
+            docs = hits["hits"]
+
+        else:
+            docs = self._es.list_documents(
+                dataset_records_index(dataset.id), query=es_query,
+            )
         for doc in docs:
             yield self.__esdoc2record__(doc)
 

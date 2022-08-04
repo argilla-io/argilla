@@ -425,6 +425,7 @@ class TokenClassificationSearchRequest(BaseModel):
 
     query: TokenClassificationQuery = Field(default_factory=TokenClassificationQuery)
     sort: List[SortableField] = Field(default_factory=list)
+    id_from: Optional[str] = None
 
 
 class TokenClassificationAggregations(BaseSearchResultsAggregations):

@@ -97,6 +97,7 @@ class TextClassificationService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
+        id_from: Optional[str] = None,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
     ) -> TextClassificationSearchResults:
@@ -115,6 +116,8 @@ class TextClassificationService:
             The record from return results
         size:
             The max number of records to return
+        id_from:
+            If provided, read the samples after this record ID
 
         Returns
         -------
@@ -130,6 +133,7 @@ class TextClassificationService:
             size=size,
             exclude_metrics=exclude_metrics,
             metrics=metrics,
+            id_from=id_from,
             sort_config=SortConfig(
                 sort_by=sort_by,
                 valid_fields=[
@@ -165,6 +169,8 @@ class TextClassificationService:
         self,
         dataset: TextClassificationDatasetDB,
         query: Optional[TextClassificationQuery] = None,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[TextClassificationRecord]:
         """
         Scan a dataset records
@@ -176,10 +182,14 @@ class TextClassificationService:
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
+        id_from:
+            If provided, read the samples after this record ID
+        limit:
+            Batch size to scan, only used if `id_from` is specified
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TextClassificationRecord
+            dataset, query=query, record_type=TextClassificationRecord, id_from=id_from, limit=limit
         )
 
     def _check_multi_label_integrity(

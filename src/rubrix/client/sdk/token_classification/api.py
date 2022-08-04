@@ -25,26 +25,29 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationRecord,
 )
 
+from src.rubrix.client.sdk.commons.api import build_param_dict
+
 
 def data(
     client: AuthenticatedClient,
     name: str,
     request: Optional[TokenClassificationQuery] = None,
     limit: Optional[int] = None,
+    id_from: Optional[str] = None,
 ) -> Response[
     Union[List[TokenClassificationRecord], HTTPValidationError, ErrorMessage]
 ]:
     url = "{}/api/datasets/{name}/TokenClassification/data".format(
         client.base_url, name=name
     )
-
+    params = build_param_dict(id_from, limit)
     with httpx.stream(
         method="POST",
         url=url,
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=None,
-        params={"limit": limit} if limit else None,
+        params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
         return build_data_response(

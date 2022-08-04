@@ -60,6 +60,7 @@ class SearchRecordsService:
         size: int = 100,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
+        id_from: Optional[str] = None
     ) -> SearchResults:
 
         if record_from > 0:
@@ -93,6 +94,7 @@ class SearchRecordsService:
             highligth_results=query is not None
             and query.query_text is not None
             and len(query.query_text) > 0,
+            id_from=id_from
         )
         metrics_results = {}
         for metric in metrics or []:
@@ -121,9 +123,11 @@ class SearchRecordsService:
         dataset: Dataset,
         record_type: Type[BaseRecordDB],
         query: Optional[BaseSearchQuery] = None,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[Record]:
         """Scan records for a queried"""
         for doc in self.__dao__.scan_dataset(
-            dataset, search=RecordSearch(query=self.__query_builder__(dataset, query))
+            dataset, search=RecordSearch(query=self.__query_builder__(dataset, query)), id_from=id_from, limit=limit
         ):
             yield record_type.parse_obj(doc)

@@ -410,24 +410,50 @@ class Api:
         query: Optional[str] = None,
         ids: Optional[List[Union[str, int]]] = None,
         limit: Optional[int] = None,
+        id_from: Optional[str] = None,
         as_pandas=None,
     ) -> Dataset:
         """Loads a Rubrix dataset.
 
-        Args:
-            name: The dataset name.
-            query: An ElasticSearch query with the
+        Parameters:
+        -----------
+            name:
+                The dataset name.
+            query:
+                An ElasticSearch query with the
                 `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
-            ids: If provided, load dataset records with given ids.
-            limit: The number of records to retrieve.
-            as_pandas: DEPRECATED! To get a pandas DataFrame do ``rb.load('my_dataset').to_pandas()``.
+            ids:
+                If provided, load dataset records with given ids.
+            limit:
+                The number of records to retrieve.
+
+            id_from:
+                If provided, starts gathering the records starting from that Record. As the Records returned with the
+                load method are sorted by ID, ´id_from´ can be used to load using batches.
+
+            as_pandas:
+                DEPRECATED! To get a pandas DataFrame do ``rb.load('my_dataset').to_pandas()``.
 
         Returns:
+        --------
             A Rubrix dataset.
 
         Examples:
+            **Basic Loading**: load the samples sorted by their ID
             >>> import rubrix as rb
             >>> dataset = rb.load(name="example-dataset")
+
+            **Iterate over a large dataset:**
+                When dealing with a large dataset you might want to load it in batches to optimize memory consumption
+                and avoid network timeouts. To that end, a simple batch-iteration over the whole database can be done
+                employing the `from_id` parameter. This parameter will act as a delimiter, retrieving the N items after
+                the given id, where N is determined by the `limit` parameter. **NOTE** If
+                no `limit` is given the whole dataset after that ID will be retrieved.
+
+            >>> import rubrix as rb
+            >>> dataset_batch_1 = rb.load(name="example-dataset", limit=1000)
+            >>> dataset_batch_2 = rb.load(name="example-dataset", limit=1000, id_from=dataset_batch_1[-1].id)
+
         """
         if as_pandas is False:
             warnings.warn(
@@ -475,6 +501,7 @@ class Api:
             name=name,
             request=request_class(ids=ids, query_text=query),
             limit=limit,
+            id_from=id_from,
         )
 
         records = [sdk_record.to_client() for sdk_record in response.parsed]

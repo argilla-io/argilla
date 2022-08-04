@@ -215,6 +215,7 @@ class Text2TextSearchRequest(BaseModel):
 
     query: Text2TextQuery = Field(default_factory=Text2TextQuery)
     sort: List[SortableField] = Field(default_factory=list)
+    id_from: Optional[str] = None
 
 
 class Text2TextSearchAggregations(BaseSearchResultsAggregations):
