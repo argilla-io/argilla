@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional, Type, Union
 
 import pydantic
@@ -70,6 +71,9 @@ class GenericRubrixServerError(RubrixServerError):
                 }
             },
         }
+
+    def encode(self, charset="utf-8"):
+        return bytes(json.dumps({"type": self.type, "message":self.message, "args": self.args}), charset)
 
 
 class ForbiddenOperationError(RubrixServerError):

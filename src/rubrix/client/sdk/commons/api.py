@@ -31,6 +31,7 @@ from typing import Any, List, Type, TypeVar, Union
 import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
+from rubrix.client.sdk.commons.errors import GenericApiError
 from rubrix.client.sdk.commons.errors_handler import handle_response_error
 from rubrix.client.sdk.commons.models import (
     BulkResponse,
@@ -112,16 +113,20 @@ def build_data_response(
     response: httpx.Response, data_type: Type[T]
 ) -> Response[List[T]]:
     if 200 <= response.status_code < 400:
-        try:
-            parsed_response = [data_type(**json.loads(r)) for r in response.iter_lines()]
-            return Response(
-                status_code=response.status_code,
-                content=b"",
-                headers=response.headers,
-                parsed=parsed_response,
-            )
-        except httpx.RemoteProtocolError as err:
-            raise Exception(f"Malformed query!") from None
+        parsed_responses = []
+        for r in response.iter_lines():
+            parsed_record = json.loads(r)
+            try:
+                parsed_response = data_type(**parsed_record)
+            except Exception as err:
+                raise GenericApiError(message=parsed_record.get("message", "Cannot process response!"), error=parsed_record.get("type","ServerError")) from None
+            parsed_responses.append(parsed_response)
+        return Response(
+            status_code=response.status_code,
+            content=b"",
+            headers=response.headers,
+            parsed=parsed_responses,
+        )
 
     content = next(response.iter_lines())
     data = json.loads(content)

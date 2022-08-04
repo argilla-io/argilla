@@ -19,6 +19,7 @@ from typing import Iterable, List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
+from rubrix.server import errors
 from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import text_classification_dataset_settings
 from rubrix.server.apis.v0.helpers import takeuntil
@@ -238,17 +239,20 @@ def scan_data_response(
         if limit:
             stream = takeuntil(stream, limit=limit)
 
-        for batch in grouper(
-            n=chunk_size,
-            iterable=stream,
-        ):
-            filtered_records = filter(lambda r: r is not None, batch)
-            yield "\n".join(
-                map(
-                    lambda r: r.json(by_alias=True, exclude_none=True), filtered_records
-                )
-            ) + "\n"
-
+        try:
+            for batch in grouper(
+                    n=chunk_size,
+                    iterable=stream,
+            ):
+                filtered_records = filter(lambda r: r is not None, batch)
+                yield "\n".join(
+                    map(
+                        lambda r: r.json(by_alias=True, exclude_none=True), filtered_records
+                    )
+                ) + "\n"
+        except Exception as error:
+            yield errors.exception_to_rubrix_error(error)
+            return
     return StreamingResponse(
         stream_generator(data_stream), media_type="application/json"
     )
