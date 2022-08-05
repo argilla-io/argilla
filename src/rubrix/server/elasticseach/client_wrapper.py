@@ -86,7 +86,7 @@ class ElasticsearchWrapper(LoggingMixin):
         return self.__client__
 
     def list_documents(
-        self, index: str, query: Dict[str, Any] = None
+        self, index: str, query: Dict[str, Any] = None, size: Optional[int] = None
     ) -> Iterable[Dict[str, Any]]:
         """
         List ALL documents of an elasticsearch index
@@ -96,6 +96,8 @@ class ElasticsearchWrapper(LoggingMixin):
             The index name
         query:
             The es query for filter results. Default: None
+        size:
+            Amount of samples to retrieve per iteration, 1000 by default
 
         Returns
         -------
@@ -104,7 +106,7 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         size = size or 1000
         query = query.copy() or {}
-        query["sort"] = [{"_id": {"order": "asc"}}] # Force sorting by id
+        query["sort"] = [{"_id": {"order": "asc"}}]  # Force sorting by id
         response = self.__client__.search(index=index, body=query, size=size)
         while response["hits"]["hits"]:
             for hit in response["hits"]["hits"]:
