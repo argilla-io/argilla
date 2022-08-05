@@ -21,7 +21,7 @@ from rubrix.client.sdk.commons.api import build_data_response
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.text2text.models import Text2TextQuery, Text2TextRecord
 
-from src.rubrix.client.sdk.commons.api import build_param_dict
+from rubrix.client.sdk.commons.api import build_param_dict
 
 
 def data(
