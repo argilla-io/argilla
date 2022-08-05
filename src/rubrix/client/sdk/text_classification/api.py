@@ -27,7 +27,7 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationRecord,
 )
 
-from src.rubrix.client.sdk.commons.api import build_param_dict
+from rubrix.client.sdk.commons.api import build_param_dict
 
 
 def data(

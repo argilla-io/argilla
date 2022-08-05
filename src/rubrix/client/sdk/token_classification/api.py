@@ -25,7 +25,7 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationRecord,
 )
 
-from src.rubrix.client.sdk.commons.api import build_param_dict
+from rubrix.client.sdk.commons.api import build_param_dict
 
 
 def data(
