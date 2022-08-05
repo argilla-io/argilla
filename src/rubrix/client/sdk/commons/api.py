@@ -26,7 +26,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
-from typing import Any, List, Type, TypeVar, Union
+from typing import Any, List, Type, TypeVar, Union, Optional, Dict
 
 import httpx
 
@@ -47,6 +47,15 @@ _TASK_TO_ENDPOINT = {
     TokenClassificationBulkData: "TokenClassification",
     Text2TextBulkData: "Text2Text",
 }
+
+
+def build_param_dict(id_from: Optional[str], limit: Optional[int]) -> Optional[Dict[str, Union[str, int]]]:
+    params = {}
+    if id_from:
+        params['id_from'] = id_from
+    if limit:
+        params['limit'] = limit
+    return params
 
 
 def bulk(

@@ -21,19 +21,24 @@ from rubrix.client.sdk.commons.api import build_data_response
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.text2text.models import Text2TextQuery, Text2TextRecord
 
+from rubrix.client.sdk.commons.api import build_param_dict
+
 
 def data(
     client: AuthenticatedClient,
     name: str,
     request: Optional[Text2TextQuery] = None,
     limit: Optional[int] = None,
+    id_from: Optional[str] = None,
 ) -> Response[Union[List[Text2TextRecord], HTTPValidationError, ErrorMessage]]:
+
     path = f"/api/datasets/{name}/Text2Text/data"
+    params = build_param_dict(id_from, limit)
 
     with client.stream(
         method="POST",
         path=path,
-        params={"limit": limit} if limit else None,
+        params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
         return build_data_response(response=response, data_type=Text2TextRecord)

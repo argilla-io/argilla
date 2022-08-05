@@ -262,6 +262,7 @@ async def stream_data(
     service: TokenClassificationService = Depends(token_classification_service),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
+    id_from: Optional[str] = None,
 ) -> StreamingResponse:
     """
     Creates a data stream over dataset records
@@ -282,6 +283,8 @@ async def stream_data(
         The datasets service
     current_user:
         Request user
+    id_from:
+        If provided, read the samples after this record ID
 
     """
     query = query or TokenClassificationQuery()
@@ -292,7 +295,7 @@ async def stream_data(
         workspace=common_params.workspace,
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset=dataset, query=query)
+    data_stream = service.read_dataset(dataset=dataset, query=query, id_from=id_from, limit=limit)
 
     return scan_data_response(
         data_stream=data_stream,

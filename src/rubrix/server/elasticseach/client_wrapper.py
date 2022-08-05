@@ -86,7 +86,12 @@ class ElasticsearchWrapper(LoggingMixin):
         return self.__client__
 
     def list_documents(
-        self, index: str, query: Dict[str, Any] = None
+        self,
+        index: str,
+        query: Dict[str, Any] = None,
+        sort_cfg: Optional[List[Dict[str, Any]]] = None,
+        size: Optional[int] = None,
+        fetch_once: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         """
         List ALL documents of an elasticsearch index
@@ -94,15 +99,37 @@ class ElasticsearchWrapper(LoggingMixin):
         ----------
         index:
             The index name
+        sor_id:
+            The sort id configuration
         query:
             The es query for filter results. Default: None
+        sort_cfg:
+            Customized configuration for sort-by id
+        size:
+            Amount of samples to retrieve per iteration, 1000 by default
+        fetch_once:
+            If enabled, will return only the `size` first records found. Default to: ``False``
 
         Returns
         -------
         A sequence of documents resulting from applying the query on the index
 
         """
-        return es_scan(self.__client__, query=query or {}, index=index)
+        size = size or 1000
+        query = query.copy() or {}
+        if sort_cfg:
+            query["sort"] = sort_cfg
+        query["track_total_hits"] = False  # Speedup pagination
+        response = self.__client__.search(index=index, body=query, size=size)
+        while response["hits"]["hits"]:
+            for hit in response["hits"]["hits"]:
+                yield hit
+            if fetch_once:
+                break
+
+            last_id = hit["_id"]
+            query["search_after"] = [last_id]
+            response = self.__client__.search(index=index, body=query, size=size)
 
     def index_exists(self, index: str) -> bool:
         """
@@ -127,7 +154,7 @@ class ElasticsearchWrapper(LoggingMixin):
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
-        Apply a search over a index.
+        Apply a search over an index.
         See <https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html>
 
         Parameters
@@ -237,7 +264,7 @@ class ElasticsearchWrapper(LoggingMixin):
 
     def add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
-        Creates/updates a document in a index
+        Creates/updates a document in an index
 
         See <http://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html>
 
@@ -525,7 +552,6 @@ class ElasticsearchWrapper(LoggingMixin):
             allow_no_indices=True,
             flat_settings=True,
         )
-        print(response)
         return (
             response[index]["settings"]["index.blocks.write"] == "true"
             if response
@@ -587,7 +613,7 @@ _instance = None  # The singleton instance
 @deprecated.deprecated(reason="Use `ElasticsearchWrapper.get_instance` instead")
 def create_es_wrapper() -> ElasticsearchWrapper:
     """
-        Creates a instance of ElasticsearchWrapper.
+        Creates an instance of ElasticsearchWrapper.
 
     This function is used in fastapi for resolve component dependencies.
 

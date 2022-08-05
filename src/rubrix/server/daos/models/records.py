@@ -31,6 +31,7 @@ class RecordSearch(BaseModel):
         The elasticsearch sort order
     aggregations:
         The elasticsearch search aggregations
+
     """
 
     query: Optional[Dict[str, Any]] = None

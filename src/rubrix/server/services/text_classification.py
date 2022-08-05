@@ -115,7 +115,6 @@ class TextClassificationService:
             The record from return results
         size:
             The max number of records to return
-
         Returns
         -------
             The matched records with aggregation info for specified task_meta.py
@@ -165,6 +164,8 @@ class TextClassificationService:
         self,
         dataset: TextClassificationDatasetDB,
         query: Optional[TextClassificationQuery] = None,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[TextClassificationRecord]:
         """
         Scan a dataset records
@@ -176,10 +177,14 @@ class TextClassificationService:
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
+        id_from:
+            If provided, read the samples after this record ID
+        limit:
+            Batch size to scan, only used if `id_from` is specified
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TextClassificationRecord
+            dataset, query=query, record_type=TextClassificationRecord, id_from=id_from, limit=limit
         )
 
     def _check_multi_label_integrity(

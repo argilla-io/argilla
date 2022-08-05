@@ -150,6 +150,8 @@ class Text2TextService:
         self,
         dataset: Text2TextDatasetDB,
         query: Optional[Text2TextQuery] = None,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[Text2TextRecord]:
         """
         Scan a dataset records
@@ -161,10 +163,14 @@ class Text2TextService:
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
+        id_from:
+            If provided, read the samples after this record ID
+        limit:
+            Batch size to scan, only used if `id_from` is specified
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=Text2TextRecord
+            dataset, query=query, record_type=Text2TextRecord, id_from=id_from, limit=limit,
         )
 
 

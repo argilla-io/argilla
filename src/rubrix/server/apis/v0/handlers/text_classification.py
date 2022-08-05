@@ -180,6 +180,7 @@ def search_records(
     current_user:
         The current request user
 
+
     Returns
     -------
         The search results data
@@ -262,6 +263,7 @@ async def stream_data(
     name: str,
     query: Optional[TextClassificationQuery] = None,
     common_params: CommonTaskQueryParams = Depends(),
+    id_from: Optional[str] = None,
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
@@ -289,6 +291,9 @@ async def stream_data(
     current_user:
         Request user
 
+    id_from:
+        Search after the given record ID
+
     """
     query = query or TextClassificationQuery()
     dataset = datasets.find_by_name(
@@ -299,7 +304,7 @@ async def stream_data(
         as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
     )
 
-    data_stream = service.read_dataset(dataset, query=query)
+    data_stream = service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
     return scan_data_response(
         data_stream=data_stream,
         limit=limit,
