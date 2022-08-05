@@ -289,22 +289,30 @@ class DatasetRecordsDAO:
         -------
             An iterable over found dataset records
         """
+        index = dataset_records_index(dataset.id)
         search = search or RecordSearch()
+
+        sort_cfg = self.__normalize_sort_config__(
+            index=index, sort=[{"id": {"order": "asc"}}]
+        )
         es_query = {
             "query": search.query or {"match_all": {}},
             "highlight": self.__configure_query_highlight__(task=dataset.task),
-            "sort": [{"id": {"order": "asc"}}]  # Sort the search so the consistency is maintained in every search
+            "sort": sort_cfg,  # Sort the search so the consistency is maintained in every search
         }
+
         if id_from:
             # Scroll method does not accept read_after, thus, this case is handled as a search
             es_query["search_after"] = [id_from]
-            results = self._es.search(index=dataset_records_index(dataset.id), query=es_query, size=limit)
+            results = self._es.search(index=index, query=es_query, size=limit)
             hits = results["hits"]
             docs = hits["hits"]
 
         else:
             docs = self._es.list_documents(
-                dataset_records_index(dataset.id), query=es_query,
+                index,
+                query=es_query,
+                sort_cfg=sort_cfg,
             )
         for doc in docs:
             yield self.__esdoc2record__(doc)

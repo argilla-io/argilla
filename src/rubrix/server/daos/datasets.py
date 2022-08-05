@@ -29,6 +29,7 @@ from rubrix.server.elasticseach.mappings.datasets import (
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""
+MAX_NUMBER_OF_LISTED_DATASETS = 2500
 
 
 class DatasetsDAO:
@@ -112,6 +113,9 @@ class DatasetsDAO:
 
         docs = self._es.list_documents(
             index=DATASETS_INDEX_NAME,
+            fetch_once=True,
+            # TODO(@frascuchon): include id as part of the document as keyword to enable sorting by id
+            size=MAX_NUMBER_OF_LISTED_DATASETS,
             query={
                 "query": query_helpers.filters.boolean_filter(
                     should_filters=filters, minimum_should_match=len(filters)
@@ -231,6 +235,7 @@ class DatasetsDAO:
             results = self._es.list_documents(
                 index=DATASETS_INDEX_NAME,
                 query={"query": {"term": {"name.keyword": name}}},
+                fetch_once=True,
             )
             results = list(results)
             if len(results) == 0:
