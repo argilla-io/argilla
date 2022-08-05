@@ -102,8 +102,17 @@ class ElasticsearchWrapper(LoggingMixin):
         A sequence of documents resulting from applying the query on the index
 
         """
-        # Preserve order is used to ensure that the samples are sorted by identifier
-        return es_scan(self.__client__, query=query or {}, index=index, preserve_order=True)
+        size = size or 1000
+        query = query.copy() or {}
+        query["sort"] = [{"_id": {"order": "asc"}}] # Force sorting by id
+        response = self.__client__.search(index=index, body=query, size=size)
+        while response["hits"]["hits"]:
+            for hit in response["hits"]["hits"]:
+                yield hit
+
+            last_id = hit["_id"]
+            query["search_after"] = [last_id]
+            response = self.__client__.search(index=index, body=query, size=size)
 
     def index_exists(self, index: str) -> bool:
         """
