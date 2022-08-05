@@ -72,9 +72,6 @@ class GenericRubrixServerError(RubrixServerError):
             },
         }
 
-    def encode(self, charset="utf-8"):
-        return bytes(json.dumps({"type": self.type, "message":self.message, "args": self.args}), charset)
-
 
 class ForbiddenOperationError(RubrixServerError):
     """Forbidden operation"""

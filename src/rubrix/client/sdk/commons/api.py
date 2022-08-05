@@ -119,7 +119,7 @@ def build_data_response(
             try:
                 parsed_response = data_type(**parsed_record)
             except Exception as err:
-                raise GenericApiError(message=parsed_record.get("message", "Cannot process response!"), error=parsed_record.get("type","ServerError")) from None
+                raise GenericApiError(**parsed_record) from None
             parsed_responses.append(parsed_response)
         return Response(
             status_code=response.status_code,
