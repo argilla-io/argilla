@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import httpx
 
@@ -27,20 +27,24 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationRecord,
 )
 
+from rubrix.client.sdk.commons.api import build_param_dict
+
 
 def data(
     client: AuthenticatedClient,
     name: str,
     request: Optional[TextClassificationQuery] = None,
     limit: Optional[int] = None,
+    id_from: Optional[str] = None,
 ) -> Response[Union[List[TextClassificationRecord], HTTPValidationError, ErrorMessage]]:
 
     path = f"/api/datasets/{name}/TextClassification/data"
-
+    params = build_param_dict(id_from, limit)
+    
     with client.stream(
         method="POST",
         path=path,
-        params={"limit": limit} if limit else None,
+        params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
         return build_data_response(

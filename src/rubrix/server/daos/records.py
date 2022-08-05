@@ -267,7 +267,9 @@ class DatasetRecordsDAO:
     def scan_dataset(
         self,
         dataset: BaseDatasetDB,
+        limit: int = 1000,
         search: Optional[RecordSearch] = None,
+        id_from: Optional[str] = None,
     ) -> Iterable[Dict[str, Any]]:
         """
         Iterates over a dataset records
@@ -278,6 +280,10 @@ class DatasetRecordsDAO:
             The dataset
         search:
             The search parameters. Optional
+        limit:
+            Batch size to extract, only works if an `id_from` is provided
+        id_from:
+            From which ID should we start iterating
 
         Returns
         -------
@@ -287,10 +293,19 @@ class DatasetRecordsDAO:
         es_query = {
             "query": search.query or {"match_all": {}},
             "highlight": self.__configure_query_highlight__(task=dataset.task),
+            "sort": [{"id": {"order": "asc"}}]  # Sort the search so the consistency is maintained in every search
         }
-        docs = self._es.list_documents(
-            dataset_records_index(dataset.id), query=es_query
-        )
+        if id_from:
+            # Scroll method does not accept read_after, thus, this case is handled as a search
+            es_query["search_after"] = [id_from]
+            results = self._es.search(index=dataset_records_index(dataset.id), query=es_query, size=limit)
+            hits = results["hits"]
+            docs = hits["hits"]
+
+        else:
+            docs = self._es.list_documents(
+                dataset_records_index(dataset.id), query=es_query,
+            )
         for doc in docs:
             yield self.__esdoc2record__(doc)
 

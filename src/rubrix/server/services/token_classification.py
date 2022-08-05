@@ -110,7 +110,6 @@ class TokenClassificationService:
             The matched records with aggregation info for specified task_meta.py
 
         """
-
         results = self.__search__.search(
             dataset,
             query=query,
@@ -160,6 +159,8 @@ class TokenClassificationService:
         self,
         dataset: TokenClassificationDatasetDB,
         query: TokenClassificationQuery,
+        id_from: Optional[str] = None,
+        limit: int = 1000
     ) -> Iterable[TokenClassificationRecord]:
         """
         Scan a dataset records
@@ -173,10 +174,14 @@ class TokenClassificationService:
         query:
             If provided, scan will retrieve only records matching
             the provided query filters. Optional
+        id_from:
+            If provided, read the samples after this record ID
+        limit:
+            Batch size to scan, only used if `id_from` is specified
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=TokenClassificationRecord
+            dataset, query=query, record_type=TokenClassificationRecord, id_from=id_from, limit=limit
         )
 
 
