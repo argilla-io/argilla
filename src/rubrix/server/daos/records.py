@@ -312,6 +312,7 @@ class DatasetRecordsDAO:
             docs = self._es.list_documents(
                 index,
                 query=es_query,
+                sort_cfg=sort_cfg,
             )
         for doc in docs:
             yield self.__esdoc2record__(doc)

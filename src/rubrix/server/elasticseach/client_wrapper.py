@@ -86,7 +86,12 @@ class ElasticsearchWrapper(LoggingMixin):
         return self.__client__
 
     def list_documents(
-        self, index: str, query: Dict[str, Any] = None, size: Optional[int] = None
+        self,
+        index: str,
+        query: Dict[str, Any] = None,
+        sort_cfg: Optional[List[Dict[str, Any]]] = None,
+        size: Optional[int] = None,
+        fetch_once: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         """
         List ALL documents of an elasticsearch index
@@ -94,10 +99,16 @@ class ElasticsearchWrapper(LoggingMixin):
         ----------
         index:
             The index name
+        sor_id:
+            The sort id configuration
         query:
             The es query for filter results. Default: None
+        sort_cfg:
+            Customized configuration for sort-by id
         size:
             Amount of samples to retrieve per iteration, 1000 by default
+        fetch_once:
+            If enabled, will return only the `size` first records found. Default to: ``False``
 
         Returns
         -------
@@ -106,11 +117,15 @@ class ElasticsearchWrapper(LoggingMixin):
         """
         size = size or 1000
         query = query.copy() or {}
-        query["sort"] = [{"_id": {"order": "asc"}}]  # Force sorting by id
+        if sort_cfg:
+            query["sort"] = sort_cfg
+        query["track_total_hits"] = False  # Speedup pagination
         response = self.__client__.search(index=index, body=query, size=size)
         while response["hits"]["hits"]:
             for hit in response["hits"]["hits"]:
                 yield hit
+            if fetch_once:
+                break
 
             last_id = hit["_id"]
             query["search_after"] = [last_id]
