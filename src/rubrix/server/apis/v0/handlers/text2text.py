@@ -130,7 +130,6 @@ def bulk_records(
 )
 def search_records(
     name: str,
-    id_from: Optional[str] = None,
     search: Text2TextSearchRequest = None,
     common_params: CommonTaskQueryParams = Depends(),
     include_metrics: bool = Query(
@@ -162,8 +161,6 @@ def search_records(
         The dataset service
     current_user:
         The current request user
-    id_from:
-        From which record id start to search for records
 
     Returns
     -------
@@ -187,7 +184,6 @@ def search_records(
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        id_from=id_from,
         metrics=TaskFactory.find_task_metrics(
             TASK_TYPE,
             metric_ids={

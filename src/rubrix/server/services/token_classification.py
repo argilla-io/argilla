@@ -86,7 +86,6 @@ class TokenClassificationService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
-        id_from: Optional[str] = None,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
     ) -> TokenClassificationSearchResults:
@@ -105,15 +104,12 @@ class TokenClassificationService:
             The record from return results
         size:
             The max number of records to return
-        id_from:
-            Search after the given record ID
 
         Returns
         -------
             The matched records with aggregation info for specified task_meta.py
 
         """
-
         results = self.__search__.search(
             dataset,
             query=query,
@@ -122,7 +118,6 @@ class TokenClassificationService:
             record_from=record_from,
             exclude_metrics=exclude_metrics,
             metrics=metrics,
-            id_from=id_from,
             sort_config=SortConfig(
                 sort_by=sort_by,
                 valid_fields=[

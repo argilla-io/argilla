@@ -60,7 +60,6 @@ class SearchRecordsService:
         size: int = 100,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
-        id_from: Optional[str] = None
     ) -> SearchResults:
 
         if record_from > 0:
@@ -94,7 +93,6 @@ class SearchRecordsService:
             highligth_results=query is not None
             and query.query_text is not None
             and len(query.query_text) > 0,
-            id_from=id_from
         )
         metrics_results = {}
         for metric in metrics or []:

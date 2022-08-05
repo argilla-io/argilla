@@ -86,7 +86,6 @@ class Text2TextService:
         sort_by: List[SortableField],
         record_from: int = 0,
         size: int = 100,
-        id_from: Optional[str] = None,
         exclude_metrics: bool = True,
         metrics: Optional[List[BaseMetric]] = None,
     ) -> Text2TextSearchResults:
@@ -105,8 +104,6 @@ class Text2TextService:
             The record from return results
         size:
             The max number of records to return
-        id_from:
-            Search after the given record ID
 
         Returns
         -------
@@ -118,7 +115,6 @@ class Text2TextService:
             dataset,
             query=query,
             size=size,
-            id_from=id_from,
             record_from=record_from,
             record_type=Text2TextRecord,
             sort_config=SortConfig(
