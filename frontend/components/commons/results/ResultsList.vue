@@ -195,7 +195,6 @@ export default {
 .vue-recycle-scroller__item-view {
   box-sizing: border-box;
 }
-
 $maxItemsperPage: 20;
 @for $i from 0 through $maxItemsperPage {
   .vue-recycle-scroller__item-view:nth-of-type(#{$i}) {

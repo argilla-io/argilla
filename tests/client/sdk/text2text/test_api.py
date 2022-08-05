@@ -20,12 +20,7 @@ from rubrix.client.sdk.text2text.models import Text2TextRecord
 
 
 @pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])
-def test_data(
-    limit, mocked_client, expected, sdk_client, bulk_text2text_data, monkeypatch
-):
-    # TODO: Not sure how to test the streaming part of the response here
-    monkeypatch.setattr(httpx, "stream", mocked_client.stream)
-
+def test_data(limit, mocked_client, expected, sdk_client, bulk_text2text_data):
     dataset_name = "test_dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
     mocked_client.post(

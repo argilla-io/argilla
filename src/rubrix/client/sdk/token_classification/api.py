@@ -37,16 +37,13 @@ def data(
 ) -> Response[
     Union[List[TokenClassificationRecord], HTTPValidationError, ErrorMessage]
 ]:
-    url = "{}/api/datasets/{name}/TokenClassification/data".format(
-        client.base_url, name=name
-    )
+
+    path = f"/api/datasets/{name}/TokenClassification/data"
     params = build_param_dict(id_from, limit)
-    with httpx.stream(
+
+    with client.stream(
+        path=path,
         method="POST",
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=None,
         params=params if params else None,
         json=request.dict() if request else {},
     ) as response:

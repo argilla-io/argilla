@@ -20,7 +20,7 @@ import warnings
 from asyncio import Future
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from tqdm.auto import tqdm
 
@@ -47,7 +47,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import async_bulk, bulk
+from rubrix.client.sdk.commons.api import async_bulk
 from rubrix.client.sdk.commons.errors import RubrixClientError
 from rubrix.client.sdk.datasets import api as datasets_api
 from rubrix.client.sdk.datasets.models import CopyDatasetRequest, TaskType
@@ -73,7 +73,7 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationBulkData,
     TokenClassificationQuery,
 )
-from rubrix.client.sdk.users.api import whoami
+from rubrix.client.sdk.users import api as users_api
 from rubrix.client.sdk.users.models import User
 from rubrix.utils import setup_loop_in_thread
 
@@ -101,12 +101,6 @@ class _RubrixLogAgent:
         return asyncio.run_coroutine_threadsafe(
             self.__log_internal__(self.__api__, *args, **kwargs), self.__loop__
         )
-
-    def __del__(self):
-        self.__loop__.stop()
-
-        del self.__loop__
-        del self.__thread__
 
 
 class Api:
@@ -147,12 +141,16 @@ class Api:
         self._client: AuthenticatedClient = AuthenticatedClient(
             base_url=api_url, token=api_key, timeout=timeout
         )
-        self._user: User = whoami(client=self._client)
+        self._user: User = users_api.whoami(client=self._client)
 
         if workspace is not None:
             self.set_workspace(workspace)
 
         self._agent = _RubrixLogAgent(self)
+
+    def __del__(self):
+        del self._client
+        del self._agent
 
     @property
     def client(self):

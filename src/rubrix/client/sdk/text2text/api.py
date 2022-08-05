@@ -31,14 +31,13 @@ def data(
     limit: Optional[int] = None,
     id_from: Optional[str] = None,
 ) -> Response[Union[List[Text2TextRecord], HTTPValidationError, ErrorMessage]]:
-    url = "{}/api/datasets/{name}/Text2Text/data".format(client.base_url, name=name)
+
+    path = f"/api/datasets/{name}/Text2Text/data"
     params = build_param_dict(id_from, limit)
-    with httpx.stream(
+
+    with client.stream(
         method="POST",
-        url=url,
-        headers=client.get_headers(),
-        cookies=client.get_cookies(),
-        timeout=None,
+        path=path,
         params=params if params else None,
         json=request.dict() if request else {},
     ) as response:
