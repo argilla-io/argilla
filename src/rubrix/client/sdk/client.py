@@ -19,6 +19,7 @@ import httpx
 
 from rubrix._constants import API_KEY_HEADER_NAME
 from rubrix.client.sdk._helpers import build_raw_response
+from rubrix.client.sdk.commons.errors import RubrixClientError
 
 
 @dataclasses.dataclass
@@ -74,13 +75,17 @@ class Client(_ClientCommonDefaults, _Client):
 
     def get(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
-        response = self.__httpx__.get(
-            url=path,
-            headers=self.get_headers(),
-            *args,
-            **kwargs,
-        )
-        return build_raw_response(response).parsed
+        try:
+            response = self.__httpx__.get(
+                url=path,
+                headers=self.get_headers(),
+                *args,
+                **kwargs,
+            )
+            return build_raw_response(response).parsed
+        except httpx.ConnectError as err:
+            err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
+            raise RubrixClientError(err_str) from None
 
     def post(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
