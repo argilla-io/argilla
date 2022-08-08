@@ -79,16 +79,6 @@
 
     {#- Custom front matter #}
     {%- block extrahead -%}
-    <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script> 
-    {%- endblock -%}
-  </head>
-  <body>
-    {% block body %}
-    <script>
-      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
-    </script>
-    {% endblock %}
-
     {%- block scripts -%}
 
     {# Custom JS #}
@@ -103,5 +93,13 @@
     {%- endblock -%}
 
     {%- endblock scripts -%}
+    {%- endblock -%}
+  </head>
+  <body>
+    {% block body %}
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    {% endblock %}
   </body>
 </html>
