@@ -25,7 +25,7 @@ class Pagination extends Model {
       id: this.string(null),
       size: this.number(5),
       page: this.number(1),
-      pageSizeOptions: this.attr([1, 5, 10, 20, 50, 100]),
+      pageSizeOptions: this.attr([1, 10, 20, 50, 100]),
       maxRecordsLimit: this.number(10000),
       disabledShortCutPagination: this.boolean(false),
     };
