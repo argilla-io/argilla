@@ -630,6 +630,11 @@ const actions = {
       page: pagination.page,
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
+    await _updateAnnotationProgress({
+      id: dataset.name,
+      total: dataset.globalResults.total,
+      aggregations: dataset.globalResults.aggregations,
+    });
   },
 };
 
