@@ -14,7 +14,7 @@
 #  limitations under the License.
 import pytest
 
-from rubrix.utils.utils import LazyRubrixModule
+from rubrix.utils import LazyRubrixModule
 
 
 def test_lazy_rubrix_module(monkeypatch):
