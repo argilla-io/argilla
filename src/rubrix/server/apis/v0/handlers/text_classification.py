@@ -42,6 +42,7 @@ from rubrix.server.apis.v0.models.text_classification import (
 )
 from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
 from rubrix.server.errors import EntityNotFoundError
+from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
@@ -226,7 +227,7 @@ def scan_data_response(
     data_stream: Iterable[TextClassificationRecord],
     chunk_size: int = 1000,
     limit: Optional[int] = None,
-) -> StreamingResponse:
+) -> StreamingResponseWithErrorHandling:
     """Generate an textual stream data response for a dataset scan"""
 
     async def stream_generator(stream):
@@ -240,8 +241,8 @@ def scan_data_response(
             stream = takeuntil(stream, limit=limit)
 
         for batch in grouper(
-            n=chunk_size,
-            iterable=stream,
+                n=chunk_size,
+                iterable=stream,
         ):
             filtered_records = filter(lambda r: r is not None, batch)
             yield "\n".join(
@@ -250,7 +251,7 @@ def scan_data_response(
                 )
             ) + "\n"
 
-    return StreamingResponse(
+    return StreamingResponseWithErrorHandling(
         stream_generator(data_stream), media_type="application/json"
     )
 
