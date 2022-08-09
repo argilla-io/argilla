@@ -78,7 +78,8 @@ class Client(_ClientCommonDefaults, _Client):
         @functools.wraps(func)
         def inner(self, *args, **kwargs):
             try:
-                func(self, *args, **kwargs)
+                result = func(self, *args, **kwargs)
+                return result
             except httpx.ConnectError as err:
                 err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
                 raise RubrixClientError(err_str) from None
