@@ -164,11 +164,11 @@ export default {
 
 ::v-deep .modal-buttons {
   display: flex;
-  .re-button {
+  .button {
     width: 100%;
-    margin-bottom: 0;
+    justify-content: center;
     &:last-child {
-      margin-left: 1em;
+      margin-left: $base-space * 2;
     }
   }
 }

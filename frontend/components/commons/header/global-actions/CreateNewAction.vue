@@ -19,7 +19,7 @@
   <div class="new-label__container">
     <reButton
       v-if="!showLabelCreation"
-      class="new-label__main-button button-secondary"
+      class="new-label__main-button primary small"
       @click="openLabelCreation()"
       >{{ text }}</reButton
     >
@@ -35,7 +35,7 @@
       />
       <svgicon class="new-label__close" name="close" @click="reset()" />
       <reButton
-        class="new-label__button button-primary--small"
+        class="new-label__button primary small"
         :disabled="!label"
         @click="createNewLabel(label)"
         >Create</reButton

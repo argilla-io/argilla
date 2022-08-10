@@ -185,10 +185,11 @@ export default {
     box-shadow: $shadow;
     background: palette(white);
     border: 1px solid $primary-color;
-    padding: 10px 20px 10px 20px;
+    padding: 10px 20px 20px 20px;
     z-index: 3;
     transform: translate(0);
     right: auto;
+    border-radius: $border-radius;
     .filter-options {
       border: none;
       outline: none;

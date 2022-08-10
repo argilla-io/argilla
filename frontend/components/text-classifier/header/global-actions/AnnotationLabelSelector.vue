@@ -74,18 +74,12 @@
           v-if="multiLabel && filterSearch(options, searchText).length"
           class="selector__buttons"
         >
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
-            @click="onVisibility(false)"
-          >
+          <re-button class="primary outline small" @click="onVisibility(false)">
             Cancel
-          </ReButton>
-          <ReButton
-            class="button-primary--small"
-            @click="selected(selectedOptions)"
-          >
+          </re-button>
+          <re-button class="primary small" @click="selected(selectedOptions)">
             Annotate
-          </ReButton>
+          </re-button>
         </div>
       </template>
     </FilterDropdown>
@@ -180,13 +174,10 @@ export default {
     margin-top: 2em;
     display: flex;
     & > * {
-      display: block;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
       justify-content: center;
       &:last-child {
-        margin-right: 0;
+        margin-left: $base-space;
       }
     }
   }

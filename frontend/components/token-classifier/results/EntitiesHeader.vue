@@ -43,18 +43,18 @@
             >[{{ entity.shortcut }}]</span
           >
         </span>
-        <ReButton
+        <re-button
           v-if="!showEntitySelector && dataset.entities.length > entitiesNumber"
-          class="entities__container__button"
+          class="entities__container__button primary clear small"
           @click="toggleEntitiesNumber"
-          >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</ReButton
+          >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</re-button
         >
       </div>
-      <ReButton
+      <re-button
         v-if="showEntitySelector && dataset.entities.length > entitiesNumber"
-        class="entities__container__button fixed"
+        class="entities__container__button primary clear small fixed"
         @click="toggleEntitiesNumber"
-        >{{ "Show less" }}</ReButton
+        >{{ "Show less" }}</re-button
       >
     </div>
   </div>
@@ -135,14 +135,9 @@ export default {
     overflow: auto;
     @extend %hide-scrollbar;
     &__button {
-      margin-top: 0.3em;
+      margin-top: -1px;
       margin-left: 0.3em;
-      padding: 0.5em;
-      transition: background 0.2s ease-in-out;
-      padding: 5px;
-      border-radius: $border-radius;
-      border: 0;
-      background: none;
+      display: inline-block;
       cursor: pointer;
       &:hover {
         background: $bg !important;

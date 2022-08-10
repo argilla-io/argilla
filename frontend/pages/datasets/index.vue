@@ -343,10 +343,6 @@ export default {
   display: flex;
   align-items: flex-end;
   margin: 2em 0 1em 0;
-  .re-button {
-    margin-left: auto;
-    margin-bottom: 0;
-  }
 }
 
 .title {

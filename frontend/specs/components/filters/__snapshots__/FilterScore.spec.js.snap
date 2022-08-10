@@ -21,8 +21,8 @@ exports[`FilterScore Expand filter 1`] = `
         </div>
       </div>
       <div class="filter__buttons">
-        <rebutton class="button-tertiary--small button-tertiary--outline">Cancel</rebutton>
-        <rebutton class="button-primary--small">Apply</rebutton>
+        <rebutton class="primary outline">Cancel</rebutton>
+        <rebutton class="primary">Apply</rebutton>
       </div>
     </div>
   </div>

@@ -44,12 +44,12 @@
         class="content__actions-buttons"
         v-if="annotationEnabled && record.status !== 'Validated'"
       >
-        <re-button class="button-primary" @click="onValidate(record)">{{
+        <re-button class="primary" @click="onValidate(record)">{{
           record.status === "Edited" ? "Save" : "Validate"
         }}</re-button>
         <re-button
           :disabled="!record.annotatedEntities.length"
-          class="button-primary--outline"
+          class="primary outline"
           @click="onClearAnnotations()"
           >Clear annotations</re-button
         >
@@ -194,14 +194,10 @@ export default {
     margin-left: auto;
     display: flex;
     min-width: 20%;
-    .re-button {
-      min-width: 137px;
-      min-height: 34px;
-      line-height: 34px;
-      display: inline-block;
+    .button {
       margin: 1.5em 0 0 0;
-      & + .re-button {
-        margin-left: 1em;
+      & + .button {
+        margin-left: $base-space * 2;
       }
     }
   }

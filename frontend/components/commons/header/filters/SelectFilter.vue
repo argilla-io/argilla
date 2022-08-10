@@ -82,15 +82,10 @@
           </li>
         </ul>
         <div class="filter__buttons">
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
-            @click="onCancel"
-          >
+          <ReButton class="primary outline" @click="onCancel">
             Cancel
           </ReButton>
-          <ReButton class="button-primary--small" @click="onApply">
-            Filter
-          </ReButton>
+          <ReButton class="primary" @click="onApply"> Filter </ReButton>
         </div>
       </div>
     </FilterDropdown>
@@ -206,12 +201,10 @@ export default {
     text-align: right;
     display: flex;
     & > * {
-      display: block !important;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
+      justify-content: center;
       &:last-child {
-        margin-right: 0;
+        margin-left: $base-space;
       }
     }
   }

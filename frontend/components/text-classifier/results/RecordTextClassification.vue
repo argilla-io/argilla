@@ -32,7 +32,7 @@
       <div v-if="annotationEnabled" class="content__actions-buttons">
         <re-button
           v-if="allowValidate"
-          class="button-primary"
+          class="primary"
           @click="onValidate(record)"
           >Validate</re-button
         >
@@ -190,13 +190,10 @@ export default {
     margin-left: auto;
     display: flex;
     min-width: 20%;
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
+    .button {
       margin: 1.5em auto 0 0;
-      & + .re-button {
-        margin-left: 1em;
+      & + .button {
+        margin-left: $base-space * 2;
       }
     }
   }

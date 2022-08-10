@@ -75,14 +75,8 @@
           </div>
         </div>
         <div class="filter__buttons">
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
-            @click="onClose()"
-            >Cancel</ReButton
-          >
-          <ReButton class="button-primary--small" @click="onApplyscoreRange"
-            >Apply</ReButton
-          >
+          <ReButton class="primary outline" @click="onClose()">Cancel</ReButton>
+          <ReButton class="primary" @click="onApplyscoreRange">Apply</ReButton>
         </div>
       </div>
     </div>
@@ -263,7 +257,7 @@ export default {
     top: calc(100% + 10px);
     right: 0;
     background: $bg;
-    padding: 20px 20px 10px 20px;
+    padding: 20px;
     width: 270px;
     overflow: visible;
     border-radius: $border-radius;
@@ -284,12 +278,10 @@ export default {
       margin-top: 2em;
       display: flex;
       & > * {
-        display: block;
         width: 100%;
-        margin-right: 0.5em;
-        min-height: 38px;
+        justify-content: center;
         &:last-child {
-          margin-right: 0;
+          margin-left: $base-space;
         }
       }
     }

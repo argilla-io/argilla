@@ -37,15 +37,12 @@
       </div>
     </div>
     <div class="metadata__buttons">
-      <ReButton
-        class="button-tertiary--small button-tertiary--outline"
-        @click="$emit('cancel')"
-      >
+      <re-button class="primary outline" @click="$emit('cancel')">
         Cancel
-      </ReButton>
-      <ReButton class="button-primary--small" @click="applySelectedFilters()">
+      </re-button>
+      <re-button class="primary" @click="applySelectedFilters()">
         Filter
-      </ReButton>
+      </re-button>
     </div>
   </div>
 </template>
@@ -196,14 +193,11 @@ export default {
     text-align: right;
     margin-top: 2em;
     display: flex;
-    .re-button {
-      margin-right: 0.5em;
-      margin-bottom: 0;
-      display: inline-block;
+    .button {
       width: 100%;
-      min-height: 38px;
-      &:last-child() {
-        margin-right: 0;
+      justify-content: center;
+      &:last-of-type {
+        margin-left: $base-space;
       }
     }
   }

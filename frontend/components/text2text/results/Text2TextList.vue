@@ -70,7 +70,7 @@
               </p>
               <re-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
-                class="button-clear"
+                class="primary clear small content__group__view-annotations"
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
@@ -134,16 +134,16 @@
                   v-if="sentences.length"
                   :class="[
                     'edit',
-                    allowValidation
-                      ? 'button-primary--outline'
-                      : 'button-primary',
+                    'primary',
+                    'small',
+                    { outline: allowValidation },
                   ]"
                   @click="edit"
                   >Edit</re-button
                 >
                 <re-button
                   v-if="allowValidation"
-                  class="button-primary"
+                  class="primary small"
                   @click="onAnnotate(visibleSentence)"
                   >Validate</re-button
                 >
@@ -413,7 +413,7 @@ export default {
       margin: 0;
       outline: none;
     }
-    ::v-deep .re-button {
+    ::v-deep .button {
       opacity: 1 !important;
     }
   }
@@ -458,14 +458,8 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 0.5em;
-    .button-clear {
-      @include font-size(13px);
+    &__view-annotations {
       margin: auto 0 auto auto;
-      color: $font-dark;
-      transition: opacity 0.3s ease-in-out 0.2s;
-      &:hover {
-        color: darken($font-dark, 10%);
-      }
     }
   }
   &__actions-buttons {
@@ -476,15 +470,10 @@ export default {
       opacity: 0;
       pointer-events: none;
     }
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin-bottom: 0;
-      margin-right: 0;
+    .button {
       margin-left: auto;
-      & + .re-button {
-        margin-left: 6px;
+      & + .button {
+        margin-left: $base-space;
       }
     }
   }

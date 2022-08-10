@@ -22,10 +22,10 @@ exports[`ReTableInfo renders properly 1`] = `
                 <p class="modal__title">Delete confirmation</p>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <rebutton class="button-tertiary--small button-tertiary--outline">
+                  <rebutton class="primary outline">
                     Cancel
                   </rebutton>
-                  <rebutton class="button-secondary--small">
+                  <rebutton class="primary">
                     Yes, delete
                   </rebutton>
                 </div>
@@ -42,10 +42,10 @@ exports[`ReTableInfo renders properly 1`] = `
                 <p class="modal__title">Delete confirmation</p>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <rebutton class="button-tertiary--small button-tertiary--outline">
+                  <rebutton class="primary outline">
                     Cancel
                   </rebutton>
-                  <rebutton class="button-secondary--small">
+                  <rebutton class="primary">
                     Yes, delete
                   </rebutton>
                 </div>

@@ -36,12 +36,8 @@
       >+ Add another field</a
     >
     <div class="sort__buttons" v-if="sort.length || selectedFields.length">
-      <re-button
-        class="button-tertiary--small button-tertiary--outline"
-        @click="cancel"
-        >Cancel</re-button
-      >
-      <re-button class="button-primary--small" @click="apply">Sort</re-button>
+      <re-button class="primary outline" @click="cancel">Cancel</re-button>
+      <re-button class="primary" @click="apply">Sort</re-button>
     </div>
   </div>
 </template>
@@ -130,10 +126,8 @@ export default {
     & > * {
       display: block;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
       &:last-child {
-        margin-right: 0;
+        margin-left: $base-space;
       }
     }
   }
