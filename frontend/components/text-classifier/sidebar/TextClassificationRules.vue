@@ -195,7 +195,7 @@ label {
   position: relative;
   display: flex;
   margin-bottom: 0.7em;
-  color: $font-secondary-dark;
+  color: $font-secondary-medium-dark;
 }
 .scroll {
   max-height: calc(100vh - 400px);
@@ -220,7 +220,7 @@ label {
     display: flex;
     @include font-size(15px);
     align-items: center;
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     font-weight: 600;
     margin-bottom: 0.5em;
     margin-top: 1em;
@@ -234,7 +234,7 @@ label {
     }
   }
   &__numbers {
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     margin-bottom: 1.5em;
     @include font-size(18px);
     span {

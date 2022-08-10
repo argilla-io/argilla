@@ -133,7 +133,7 @@ export default {
   max-width: 460px;
   margin: 0px auto;
   padding: 1.5em;
-  background-color: $lighter-color;
+  background-color: palette(white);
   border-radius: $border-radius;
   box-shadow: $shadow;
   transition: $swift-ease-in-out;
@@ -174,7 +174,7 @@ export default {
 }
 ::v-deep .modal__title {
   @include font-size(14px);
-  color: $font-dark-color;
+  color: $font-dark;
   font-weight: 600;
   margin-top: 0;
   margin-right: 2em;
@@ -215,8 +215,8 @@ export default {
 
 // .modal-close {
 //   border: 0;
-//   background: $lighter-color;
-//   color: $font-medium-color;
+//   background: palette(white);
+//   color: $font-medium;
 //   position: absolute;
 //   top: 0.5em;
 //   right: 0.5em;

@@ -118,7 +118,7 @@ export default {
     position: relative;
     left: 0;
     top: 0;
-    margin: 0 8px 0 0;
+    margin: 0 $base-space 0 0;
   }
   &__export {
     margin: auto 0 auto auto;
@@ -127,9 +127,9 @@ export default {
     margin-left: 0.8em;
     ::v-deep .dropdown__header {
       max-height: 33px;
-      background: $lighter-color;
+      background: palette(white);
       border-width: 1px;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       font-family: $sff;
       font-weight: 500;
       min-width: 170px;
@@ -149,9 +149,9 @@ export default {
     margin-right: 1em;
     outline: none;
     font-weight: 500;
-    color: $font-secondary;
-    background: $lighter-color;
-    border: 1px solid $line-smooth-color;
+    color: $font-secondary-medium;
+    background: palette(white);
+    border: 1px solid palette(grey, 600);
     cursor: pointer;
     &[disabled] {
       opacity: 0.5;
@@ -167,7 +167,7 @@ export default {
   }
   &__text {
     margin: 0;
-    color: palette(grey, medium);
+    color: $font-medium;
     span {
       font-weight: bold;
       color: $primary-color;

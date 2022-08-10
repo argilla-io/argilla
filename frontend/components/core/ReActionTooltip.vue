@@ -34,10 +34,10 @@ export default {
 <style scoped lang="scss">
 .tooltip {
   position: absolute;
-  background: palette(grey, dark);
+  background: $font-dark;
   display: inline-block;
   border-radius: 3px;
-  color: $lighter-color;
+  color: palette(white);
   @include font-size(12px);
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
   padding: 0.1em 0.5em;

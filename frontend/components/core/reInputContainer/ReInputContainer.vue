@@ -111,7 +111,7 @@ export default {
 
 <style lang="scss" scoped>
 input:-webkit-autofill {
-  box-shadow: 0 0 0px 1000px $lighter-color inset;
+  box-shadow: 0 0 0px 1000px palette(white) inset;
 }
 
 .re-input-container {
@@ -126,10 +126,10 @@ input:-webkit-autofill {
     background: none;
     transition: $swift-ease-out;
     transition-property: font-size;
-    color: $font-secondary;
+    color: $font-secondary-medium;
     line-height: normal;
     @include input-placeholder {
-      color: $font-secondary;
+      color: $font-secondary-medium;
       font-family: $sff;
       font-weight: 500;
     }

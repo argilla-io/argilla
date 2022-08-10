@@ -61,8 +61,8 @@ export default {
   $this: &;
   position: relative;
   max-width: 700px;
-  border: 1px solid $line-smooth-color;
-  color: $neutral-color;
+  border: 1px solid palette(grey, 600);
+  color: palette(grey, 300);
   border-radius: 3px;
   padding: 1.2em 5em 1.2em 1.2em;
   @include font-size(14px);
@@ -95,7 +95,7 @@ export default {
   }
   &--warning {
     margin-top: 5em;
-    background: $lighter-color;
+    background: palette(white);
     border: 1px solid $error;
     max-width: calc(100% - 320px);
     #{$this}__title {
@@ -114,21 +114,21 @@ export default {
   min-width: auto;
   background: transparent;
   text-align: center;
-  border: 1px solid $font-medium-color;
+  border: 1px solid $font-medium;
   padding: 0 1em 0 1.5em;
   position: relative;
   font-weight: 600;
-  color: $font-medium-color;
+  color: $font-medium;
   border-radius: 3px;
   margin-bottom: 20vh;
   text-transform: none;
   text-decoration: none;
   &:hover {
-    color: darken($font-medium-color, 10%);
+    color: darken($font-medium, 10%);
   }
   .svg-icon {
     position: absolute;
-    left: 8px;
+    left: $base-space;
     top: 12px;
   }
 }

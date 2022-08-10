@@ -400,7 +400,7 @@ export default {
     padding-top: 1em;
     &:before {
       content: "";
-      border-top: 1px solid palette(grey, light);
+      border-top: 1px solid palette(grey, 700);
       width: calc(100% - 200px);
       position: absolute;
       top: 0;
@@ -436,7 +436,7 @@ export default {
     min-height: 140px;
     &__title {
       @include font-size(13px);
-      color: palette(grey, medium);
+      color: $font-medium;
       margin: 0;
     }
   }
@@ -444,7 +444,7 @@ export default {
     @include font-size(13px);
     margin-right: 0;
     min-width: 33%;
-    color: palette(grey, medium);
+    color: $font-medium;
   }
   &__footer {
     padding-top: 2em;
@@ -461,10 +461,10 @@ export default {
     .button-clear {
       @include font-size(13px);
       margin: auto 0 auto auto;
-      color: palette(grey, dark);
+      color: $font-dark;
       transition: opacity 0.3s ease-in-out 0.2s;
       &:hover {
-        color: darken(palette(grey, dark), 10%);
+        color: darken($font-dark, 10%);
       }
     }
   }
@@ -496,7 +496,7 @@ export default {
     min-width: 33%;
     margin-right: auto;
     margin-left: 0;
-    color: palette(grey, medium);
+    color: $font-medium;
     a {
       height: 20px;
       width: 20px;
@@ -513,7 +513,7 @@ export default {
       background: transparent;
       transition: all 0.2s ease-in-out;
       &:hover {
-        background: palette(grey, bg);
+        background: palette(grey, 800);
         transition: all 0.2s ease-in-out;
       }
       &.disabled {

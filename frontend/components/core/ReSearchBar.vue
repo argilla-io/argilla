@@ -65,7 +65,7 @@ export default {
   border-radius: $border-radius;
   @include font-size(14px);
   .svg-icon {
-    fill: $font-secondary;
+    fill: $font-secondary-medium;
     margin: auto 1em auto 1em;
   }
   &__button {

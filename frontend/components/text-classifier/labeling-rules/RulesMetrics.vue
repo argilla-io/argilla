@@ -160,14 +160,14 @@ $color: #333346;
     max-height: 410px;
     background: $primary-color;
     margin-left: 1em;
-    color: $lighter-color;
+    color: palette(white);
     border-radius: $border-radius;
     margin-bottom: 2em;
     padding: 30px;
   }
   &__title {
     padding-bottom: 0;
-    color: $lighter-color;
+    color: palette(white);
     @include font-size(22px);
     font-weight: bold;
     margin-top: 0;

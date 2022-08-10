@@ -190,15 +190,15 @@ export default {
 .selected {
   cursor: pointer;
   position: relative;
-  background: palette(grey, smooth);
+  background: palette(grey, 600);
   .prediction ::v-deep .highlight__content {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
   .span__text {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
   .span__whitespace {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
 }
 .last-selected {

@@ -118,7 +118,7 @@ export default {
   @extend %container;
 }
 .navbar {
-  border-bottom: 1px solid $line-light-color;
+  border-bottom: 1px solid palette(grey, 700);
   display: block;
   svg {
     max-width: 120px;
@@ -130,7 +130,7 @@ export default {
   position: relative;
   min-height: calc(100vh - 8em);
   background-size: 100%;
-  background: $lighter-color;
+  background: palette(white);
   &__content {
     max-width: 700px;
     margin: auto;
@@ -168,7 +168,7 @@ export default {
     font-weight: lighter;
     margin-top: 0 !important;
     margin-bottom: 1em;
-    color: $darker-color;
+    color: $font-dark;
     @include font-size(32px);
     line-height: 1.2em;
   }

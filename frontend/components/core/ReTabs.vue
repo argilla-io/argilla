@@ -97,7 +97,6 @@ export default {
 }
 
 .button-bordered {
-  @extend %button;
   text-transform: none;
   color: $primary-color;
   border: 1px solid $primary-color;
@@ -134,7 +133,7 @@ export default {
     background: $primary-color;
     transition: $swift-ease-in-out;
     .svg-icon {
-      fill: $lighter-color;
+      fill: palette(white);
     }
   }
 }

@@ -198,7 +198,7 @@ export default {
   position: relative;
   text-align: left;
   transition: border 0.2s ease;
-  background: $lighter-color;
+  background: palette(white);
   width: auto;
   height: 45px;
   align-items: center;
@@ -206,7 +206,7 @@ export default {
   transition: all 0.2s ease;
   border-radius: $border-radius;
   &:not(.expanded) {
-    border: 1px solid $line-smooth-color;
+    border: 1px solid palette(grey, 600);
   }
   &:not(.expanded):hover,
   &:not(.expanded):focus {
@@ -215,7 +215,7 @@ export default {
   }
   &:after {
     content: "";
-    border-color: $line-medium-color;
+    border-color: palette(grey, 300);
     border-style: solid;
     border-width: 1px 1px 0 0;
     display: inline-block;
@@ -246,7 +246,7 @@ export default {
     display: none;
     &__panel {
       display: inline-block;
-      border: 1px solid $line-smooth-color;
+      border: 1px solid palette(grey, 600);
       padding: 0.5em 1em;
     }
   }

@@ -60,7 +60,7 @@ $color: #333346;
   &.mode {
     &:hover {
       .svg-icon {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
         border-radius: $border-radius;
       }
     }
@@ -68,7 +68,7 @@ $color: #333346;
   &.active {
     &.mode {
       .svg-icon {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
         border-radius: $border-radius;
       }
     }

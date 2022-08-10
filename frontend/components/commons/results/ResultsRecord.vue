@@ -117,16 +117,16 @@ export default {
   }
   &__item {
     position: relative;
-    background: $lighter-color;
+    background: palette(white);
     border-radius: $border-radius-m;
     display: inline-block;
     width: 100%;
     transition: 0.3s ease-in-out;
-    border: 1px solid palette(grey, smooth);
-    margin-bottom: 8px;
+    border: 1px solid palette(grey, 600);
+    margin-bottom: $base-space-between-records;
     &__asterisk {
       @include font-size(24px);
-      color: $secondary-color;
+      color: palette(blue, 300);
     }
     &--annotation-mode {
       @extend .list__item !optional;

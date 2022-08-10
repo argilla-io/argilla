@@ -64,8 +64,8 @@ export default {
   background: transparent;
   height: 40px;
   line-height: 40px;
-  color: $lighter-color;
-  border-radius: 8px;
+  color: palette(white);
+  border-radius: $border-radius-m;
   padding: 0.2em 0.5em;
   @include font-size(14px);
   border: 1px solid transparent;
@@ -75,8 +75,8 @@ export default {
 
 .pill {
   @extend %pill;
-  border: 1px solid palette(grey, smooth);
-  color: $font-medium-color;
+  border: 1px solid palette(grey, 600);
+  color: $font-medium;
   line-height: 1.4em;
   &__container {
     display: flex;

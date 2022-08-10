@@ -329,7 +329,7 @@ export default {
     padding-top: 2em;
     margin-bottom: 1.5em;
     &:after {
-      border-bottom: 1px solid $line-light-color;
+      border-bottom: 1px solid palette(grey, 700);
       content: "";
       margin-bottom: 1.5em;
       position: absolute;
@@ -362,7 +362,7 @@ export default {
     position: fixed;
     top: 56px;
     right: 0;
-    border-left: 1px solid palette(grey, smooth);
+    border-left: 1px solid palette(grey, 600);
   }
 }
 </style>

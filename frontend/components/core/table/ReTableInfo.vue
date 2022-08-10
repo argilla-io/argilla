@@ -426,7 +426,7 @@ export default {
   list-style: none;
   margin-bottom: 5em;
   ul {
-    background: $lighter-color;
+    background: palette(white);
     list-style: none;
     padding: 0;
     margin: 0;
@@ -438,7 +438,7 @@ export default {
     }
   }
   &__header {
-    background: $lighter-color;
+    background: palette(white);
     min-height: 50px;
     position: relative;
     margin-top: 1em;
@@ -468,7 +468,7 @@ export default {
       background: transparent;
       padding-left: 0;
       padding-right: 0;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       @include font-size(14px);
       font-family: $sff;
       text-align: left;
@@ -497,7 +497,7 @@ export default {
     padding: 2em 5em 2em 2em;
     display: flex;
     width: 100%;
-    border-bottom: 1px solid $line-light-color;
+    border-bottom: 1px solid palette(grey, 700);
     align-items: flex-start;
     text-decoration: none;
     outline: none;
@@ -515,18 +515,18 @@ export default {
       }
     }
     .svg-icon {
-      margin-right: 8px;
-      fill: $font-medium-color;
+      margin-right: $base-space;
+      fill: $font-medium;
       &:hover {
-        fill: darken($font-medium-color, 10%);
+        fill: darken($font-medium, 10%);
       }
     }
   }
   &__tag {
-    background: palette(grey, dark);
+    background: $font-dark;
     display: inline-block;
     border-radius: 3px;
-    color: $lighter-color;
+    color: palette(white);
     @include font-size(12px);
     box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
     padding: 0.1em 0.5em;
@@ -570,7 +570,7 @@ export default {
   }
   &__group {
     padding-bottom: 2em;
-    border-bottom: 1px solid $line-smooth-color;
+    border-bottom: 1px solid palette(grey, 600);
     display: block;
     &__title {
       margin: 3em 0 0 0;
@@ -581,8 +581,8 @@ export default {
     }
   }
   .model {
-    color: $font-dark-color;
-    border: 1px solid $line-smooth-color;
+    color: $font-dark;
+    border: 1px solid palette(grey, 600);
     border-radius: 3px;
     padding: 0.1em 2em;
     display: inline-block;
@@ -601,10 +601,10 @@ export default {
     }
   }
   .text {
-    color: $font-medium-color;
+    color: $font-medium;
     p {
       display: inline-block;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
       padding: 0.5em;
       border-radius: 10px;
       margin-right: 0.5em;
@@ -617,7 +617,7 @@ export default {
     }
   }
   .dataSource {
-    color: $font-medium-color;
+    color: $font-medium;
     font-weight: 600;
     white-space: nowrap;
   }
@@ -631,7 +631,7 @@ export default {
       display: inline-block;
       padding: 0.2em 0.5em;
       margin-top: 1em;
-      background: lighten($secondary-color, 44%);
+      background: lighten(palette(blue, 300), 44%);
       margin-right: 3px;
       border-radius: 2px;
     }

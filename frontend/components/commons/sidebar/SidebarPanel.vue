@@ -68,7 +68,7 @@ $sidebarMenuWidth: 70px;
   padding: 1em 1.5em;
   transition: right 0.25s linear 0.2s;
   z-index: -1;
-  border-left: 1px solid palette(grey, smooth);
+  border-left: 1px solid palette(grey, 600);
   &:hover {
     #{$this}__close-button:not(.zoom-out) {
       opacity: 1;
@@ -81,7 +81,7 @@ $sidebarMenuWidth: 70px;
     left: -2.5em;
     top: 1px;
     border-radius: 3px;
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,7 +96,7 @@ $sidebarMenuWidth: 70px;
       animation: zoom-out 0.3s ease-out forwards;
     }
     .svg-icon {
-      color: $secondary-color;
+      color: palette(blue, 300);
     }
   }
   &__content {
@@ -131,14 +131,14 @@ $sidebarMenuWidth: 70px;
   ::v-deep {
     .sidebar__title {
       margin-bottom: 2em;
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       margin-top: 0.2em;
       @include font-size(20px);
       font-weight: 700;
     }
     .sidebar__subtitle {
       @include font-size(15px);
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       font-weight: 600;
     }
   }

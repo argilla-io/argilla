@@ -118,7 +118,7 @@ label {
   position: relative;
   display: flex;
   margin-bottom: 0.7em;
-  color: $font-secondary-dark;
+  color: $font-secondary-medium-dark;
   label {
     margin: 0; // for tagger
     &[class^="color_"] {
@@ -178,7 +178,7 @@ label {
     display: flex;
     @include font-size(15px);
     align-items: center;
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     font-weight: 600;
     margin-bottom: 1.5em;
     &__text {
@@ -191,7 +191,7 @@ label {
     }
   }
   &__numbers {
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     margin-bottom: 1.5em;
     @include font-size(18px);
     span {

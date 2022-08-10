@@ -62,7 +62,7 @@ export default {
 <style scoped lang="scss">
 .sidebar {
   &__view-more {
-    color: $font-secondary;
+    color: $font-secondary-medium;
     text-decoration: none;
     outline: none;
     margin-bottom: 1.5em;
@@ -70,7 +70,7 @@ export default {
   }
 }
 .info {
-  color: $font-secondary-dark;
+  color: $font-secondary-medium-dark;
   position: relative;
   display: flex;
   margin-bottom: 0.7em;

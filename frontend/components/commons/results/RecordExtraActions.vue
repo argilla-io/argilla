@@ -160,7 +160,7 @@ export default {
     }
     div {
       padding: 0.5em;
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       cursor: pointer;
       display: block;
       background: white;
@@ -175,7 +175,7 @@ export default {
       }
       &:hover {
         transition: background 0.3s ease-in-out;
-        background: palette(grey, bg);
+        background: palette(grey, 800);
       }
     }
   }

@@ -86,12 +86,6 @@ export default {
   right: 0;
   left: 0;
   z-index: 9999;
-  .icon {
-    display: block;
-    margin: auto;
-    z-index: 1;
-    fill: $secondary-lighter-color !important;
-  }
 }
 
 .loading--content {
@@ -103,9 +97,6 @@ export default {
 .loading--inverse {
   &.spinner:after {
     background-color: #9ce4e1;
-  }
-  .icon {
-    fill: $secondary-color;
   }
 }
 

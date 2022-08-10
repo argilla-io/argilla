@@ -104,7 +104,7 @@ $annotation-button-touch-size: 48px;
   }
   &.label-button {
     margin: 3.5px;
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
@@ -122,7 +122,7 @@ $annotation-button-touch-size: 48px;
       font-family: $sff;
       font-weight: 500;
       overflow: hidden;
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       box-shadow: 0;
       transition: all 0.2s ease-in-out;
     }
@@ -136,7 +136,7 @@ $annotation-button-touch-size: 48px;
       box-shadow: none;
       .button {
         transition: all 0.2s ease-in-out;
-        background: $secondary-color;
+        background: palette(blue, 200);
         box-shadow: none;
       }
       &:hover {
@@ -151,10 +151,10 @@ $annotation-button-touch-size: 48px;
       }
       .annotation-button-data__text,
       .annotation-button-data__score {
-        color: $lighter-color;
+        color: palette(white);
       }
       .annotation-button-data__info {
-        color: $lighter-color;
+        color: palette(white);
       }
     }
     .annotation-button-data {
@@ -201,9 +201,9 @@ $annotation-button-touch-size: 48px;
     //   display: inline-block;
     // }
     .button {
-      background: $lighter-color !important;
-      color: $lighter-color;
-      border: 1px solid palette(grey, light);
+      background: palette(white) !important;
+      color: palette(white);
+      border: 1px solid palette(grey, 700);
     }
   }
   &:not(.disabled) {
@@ -214,7 +214,7 @@ $annotation-button-touch-size: 48px;
   }
   .annotation-button {
     height: $annotation-button-size;
-    padding-left: 8px;
+    padding-left: $base-space;
     line-height: $annotation-button-size;
   }
 }

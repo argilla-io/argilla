@@ -148,7 +148,7 @@ export default {
     padding: 0.5em;
     @include font-size(20px);
     margin: 0 0 0 0.5em;
-    background: palette(grey, light);
+    background: palette(grey, 700);
     border-radius: $border-radius;
     min-width: 50px;
     min-height: 45px;

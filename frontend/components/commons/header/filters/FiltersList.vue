@@ -303,7 +303,7 @@ $number-size: 18px;
       position: absolute;
       top: calc(100% + 10px);
       box-shadow: $shadow;
-      background: $lighter-color;
+      background: palette(white);
       padding: 20px 20px 10px 20px;
       border-radius: $border-radius;
       z-index: 2;
@@ -325,7 +325,7 @@ $number-size: 18px;
       }
     }
     &__button {
-      color: $font-secondary;
+      color: $font-secondary-medium;
       @include font-size(13px);
       text-decoration: none;
       display: block;
@@ -344,7 +344,7 @@ $number-size: 18px;
       padding: 0.8em;
       border-radius: $border-radius;
       margin-right: 10px;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       @include font-size(15px);
       font-family: $sff;
       white-space: nowrap;
@@ -353,10 +353,10 @@ $number-size: 18px;
         margin-right: 15px;
       }
       &:hover {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
       &.active {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
         color: $primary-color;
       }
     }

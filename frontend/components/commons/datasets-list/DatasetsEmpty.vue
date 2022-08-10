@@ -44,7 +44,7 @@ rb.log(
   text-align: center;
   margin: auto;
   margin-top: 12%;
-  color: palette(grey, medium);
+  color: $font-medium;
   max-width: 610px;
   line-height: 20px;
   &__icon {

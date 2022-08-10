@@ -241,14 +241,14 @@ export default {
   @extend %hide-scrollbar;
   &__container {
     padding: 20px 20px 50px 20px;
-    background: rgba($lighter-color, 0.4);
-    border: 1px solid $lighter-color;
+    background: rgba(palette(white), 0.4);
+    border: 1px solid palette(white);
     width: 100%;
     border-radius: $border-radius;
     position: relative;
   }
   &__title {
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     @include font-size(22px);
     font-weight: 600;
     margin-top: 0;

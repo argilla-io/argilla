@@ -159,9 +159,9 @@ export default {
     a {
       font-family: $sff;
       width: 100%;
-      border-radius: $radius;
+      border-radius: $border-radius;
       text-align: center;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       text-decoration: none;
       margin: 0 5px;
       outline: none;
@@ -169,10 +169,10 @@ export default {
       padding: 0.5em;
       &.active {
         color: $primary-color;
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
       &:hover {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
     }
   }

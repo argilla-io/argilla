@@ -151,7 +151,7 @@ export default {
 }
 .empty-query {
   @include font-size(18px);
-  color: palette(grey, medium);
+  color: $font-medium;
   text-align: center;
   margin-bottom: 2em;
   margin-top: 0;
@@ -173,7 +173,7 @@ export default {
   }
   &__text {
     width: 100%;
-    color: palette(grey, medium);
+    color: $font-medium;
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;

@@ -129,7 +129,7 @@ export default {
     outline: none;
     &:hover {
       transition: all 0.2s ease;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
   &--email {

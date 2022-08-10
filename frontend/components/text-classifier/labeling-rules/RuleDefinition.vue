@@ -125,8 +125,8 @@ export default {
   }
   &__container {
     padding: 20px;
-    background: rgba($lighter-color, 0.4);
-    border: 1px solid $lighter-color;
+    background: rgba(palette(white), 0.4);
+    border: 1px solid palette(white);
     width: 100%;
     border-radius: $border-radius;
     &.active {

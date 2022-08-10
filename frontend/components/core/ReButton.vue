@@ -19,7 +19,7 @@
   <a
     v-if="href"
     class="re-button"
-    :class="{ loading: loading, centered: centered }"
+    :class="buttonClasses"
     :href="href"
     :loading="loading"
     :disabled="disabled"
@@ -31,10 +31,23 @@
     <slot />
   </a>
 
+  <nuxt-link
+    v-else-if="to"
+    class="re-button"
+    :class="buttonClasses"
+    :to="to"
+    :loading="loading"
+    :disabled="disabled"
+    @click="$emit('click', $event)"
+  >
+    <!-- <re-spinner v-if="loading"></re-spinner> -->
+    <slot />
+  </nuxt-link>
+
   <button
     v-else
     class="re-button"
-    :class="{ loading: loading, centered: centered }"
+    :class="buttonClasses"
     tabindex="0"
     :loading="loading"
     :type="type"
@@ -71,19 +84,65 @@ export default {
 
       return this.rel;
     },
+    buttonClasses() {
+      return {
+        loading: this.loading,
+        centered: this.centered,
+      };
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+// buttons
+%button {
+  position: relative;
+  min-width: auto;
+  min-height: $button-height;
+  padding: 0 1.2em 0 1.2em;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  outline: 0;
+  background: none;
+  border: 0;
+  border-radius: $button-radius;
+  font-family: $sff;
+  @include font-size(13px);
+  font-style: inherit;
+  font-variant: inherit;
+  letter-spacing: inherit;
+  font-weight: 500;
+  line-height: $button-height;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin-bottom: 10px;
+  transition: all 0.4s $cb-fast;
+  &:focus {
+    outline: 0;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
+  &[disabled] {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+}
 .button-primary {
   @extend %button;
   background-color: $primary-color;
-  color: $lighter-color;
+  color: palette(white);
   display: flex;
   .svg-icon {
     margin: auto 0.5em auto -0.3em;
-    fill: $lighter-color;
+    fill: palette(white);
   }
   &:hover,
   &:focus,
@@ -136,10 +195,10 @@ export default {
 .button-secondary {
   @extend %button;
   background: $primary-color;
-  color: $lighter-color;
+  color: palette(white);
   .svg-icon {
     margin: auto 0.5em auto -0.3em;
-    fill: $secondary-color;
+    fill: palette(blue, 300);
   }
   &:hover,
   &:focus,
@@ -160,15 +219,15 @@ export default {
   &--outline {
     @extend .button-secondary;
     background: transparent;
-    border: 1px solid $line-smooth-color;
-    color: $secondary-color;
+    border: 1px solid palette(grey, 600);
+    color: palette(blue, 300);
     text-transform: none;
     display: flex;
     &:hover,
     &:focus {
       background: transparent;
-      border-color: darken($line-smooth-color, 10%);
-      color: darken($secondary-color, 10%);
+      border-color: darken(palette(grey, 600), 10%);
+      color: darken(palette(blue, 300), 10%);
     }
     &[disabled] {
       background-color: transparent;
@@ -179,21 +238,21 @@ export default {
 
 .button-tertiary {
   @extend %button;
-  background: $font-medium-color;
-  color: $lighter-color;
+  background: $font-medium;
+  color: palette(white);
   .svg-icon {
     margin-right: 1em;
     vertical-align: middle;
-    fill: $lighter-color;
+    fill: palette(white);
   }
   &:hover,
   &:focus,
   &:active,
   &.active {
-    background-color: darken($font-medium-color, 10%);
+    background-color: darken($font-medium, 10%);
   }
   &[disabled] {
-    background-color: lighten($font-medium-color, 20%);
+    background-color: lighten($font-medium, 20%);
   }
   &--outline {
     @extend .button-tertiary;
@@ -229,24 +288,24 @@ export default {
 
 .button-quaternary {
   @extend %button;
-  background: $lighter-color;
-  color: palette(grey, dark);
-  border: 1px solid palette(grey, smooth);
+  background: palette(white);
+  color: $font-dark;
+  border: 1px solid palette(grey, 600);
   box-shadow: inset 0 -2px 6px 0 rgba(223, 223, 223, 0.5);
   .svg-icon {
     margin: auto 1em auto auto;
     vertical-align: middle;
-    fill: palette(grey, dark);
+    fill: $font-dark;
   }
   &:hover,
   &:focus,
   &:active,
   &.active {
-    background-color: $lighter-color;
-    border: 1px solid darken(palette(grey, smooth), 10%);
+    background-color: palette(white);
+    border: 1px solid darken(palette(grey, 600), 10%);
   }
   &[disabled] {
-    background-color: $lighter-color;
+    background-color: palette(white);
   }
   &--small {
     @extend .button-quaternary;
@@ -258,16 +317,16 @@ export default {
   &--outline {
     @extend .button-quaternary;
     background: transparent;
-    border: 1px solid $lighter-color;
-    color: $lighter-color;
+    border: 1px solid palette(white);
+    color: palette(white);
     text-transform: none;
     display: flex;
     box-shadow: none;
     &:hover,
     &:focus {
       background: transparent;
-      border-color: darken($lighter-color, 10%);
-      color: darken($lighter-color, 10%);
+      border-color: darken(palette(white), 10%);
+      color: darken(palette(white), 10%);
     }
     &[disabled] {
       background-color: transparent;
@@ -282,7 +341,7 @@ export default {
   &:hover,
   &:focus {
     text-decoration: none;
-    color: $font-dark-color;
+    color: $font-dark;
   }
   &--small {
     @extend %button;
@@ -292,7 +351,7 @@ export default {
     min-width: auto;
     background: none;
     text-transform: none;
-    color: $font-medium-color;
+    color: $font-medium;
   }
   &[disabled] {
     opacity: 0.4;
@@ -355,7 +414,7 @@ export default {
 }
 .button-action {
   position: relative;
-  color: $font-secondary;
+  color: $font-secondary-medium;
   display: inline-block;
   height: 30px;
   line-height: 30px;

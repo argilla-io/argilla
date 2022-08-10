@@ -129,13 +129,13 @@ $switch-ripple-size: 44px;
       display: none;
     }
     .re-switch-thumb {
-      background-color: $lighter-color !important;
+      background-color: palette(white) !important;
     }
   }
   &.disable-action {
     opacity: 0.5;
     .re-switch-thumb {
-      background-color: $lighter-color !important;
+      background-color: palette(white) !important;
       transform: translate3d(-1px, -50%, 0px) !important;
     }
     &:active {
@@ -151,7 +151,7 @@ $switch-ripple-size: 44px;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;
-    background-color: palette(grey, smooth);
+    background-color: palette(grey, 600);
     .re-switch-thumb {
       box-shadow: $shadow;
       width: $switch-thumb-size;

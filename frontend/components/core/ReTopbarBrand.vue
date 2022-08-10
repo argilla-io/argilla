@@ -51,8 +51,8 @@ export default {
   min-height: 56px;
   position: relative;
   background: $primary-color;
-  border-bottom: 1px solid $line-light-color;
-  color: $lighter-color;
+  border-bottom: 1px solid palette(grey, 700);
+  color: palette(white);
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1.2em;
@@ -61,7 +61,7 @@ export default {
     text-decoration: none;
   }
   .title {
-    color: $lighter-color;
+    color: palette(white);
     @include font-size(18px);
     font-weight: 900;
     font-family: $ff;

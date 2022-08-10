@@ -75,7 +75,7 @@ export default {
     top: 1em;
     min-width: 220px;
     z-index: 9;
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
     font-weight: 600;
     padding: 0.8em;
     border-radius: 1px;
@@ -136,15 +136,15 @@ export default {
 .selected {
   cursor: pointer;
   position: relative;
-  background: palette(grey, smooth);
+  background: palette(grey, 600);
   .prediction ::v-deep .highlight__content {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
   .span__text {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
   .span__whitespace {
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
   }
 }
 .last-selected {

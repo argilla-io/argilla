@@ -276,7 +276,7 @@ $color: #333346;
     display: inline-block;
     &:hover {
       transition: all 0.2s ease-in-out;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
   &__button {
@@ -309,14 +309,14 @@ $color: #333346;
     @include font-size(18px);
     width: 100%;
     height: 20px;
-    color: $font-secondary;
+    color: $font-secondary-medium;
     font-weight: 600;
     margin-top: 0;
     padding: 0;
   }
   &__text {
     width: 100%;
-    color: palette(grey, medium);
+    color: $font-medium;
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;
@@ -326,7 +326,7 @@ $color: #333346;
     margin-top: auto;
   }
   &__records {
-    color: palette(grey, dark);
+    color: $font-dark;
     margin-left: auto;
     margin-top: 0;
     white-space: nowrap;

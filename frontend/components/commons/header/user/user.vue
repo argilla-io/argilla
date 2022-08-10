@@ -80,7 +80,7 @@ $buttonSize: 34px;
   z-index: 3;
   &__button {
     @extend %circle;
-    background: $lighter-color;
+    background: palette(white);
     transform: scale3d(1, 1, 1) translateZ(0);
     transition: all 0.2s ease-in-out;
     color: $primary-color;
@@ -95,11 +95,11 @@ $buttonSize: 34px;
     top: 3.5em;
     right: -0.5em;
     padding-top: 1.5em;
-    background: $lighter-color;
+    background: palette(white);
     border-radius: 5px;
     @include font-size(14px);
     font-weight: 400;
-    color: palette(grey, medium);
+    color: $font-medium;
     box-shadow: $shadow;
     min-width: 300px;
     &:after {
@@ -113,7 +113,7 @@ $buttonSize: 34px;
     }
   }
   &__name {
-    color: palette(grey, dark);
+    color: $font-dark;
     @include font-size(16px);
     margin: 0 1.5em 0.3em 1.5em;
     font-weight: 600;
@@ -124,12 +124,12 @@ $buttonSize: 34px;
   &__link {
     display: flex;
     align-items: center;
-    color: palette(grey, medium);
+    color: $font-medium;
     margin: 0.5em 1.5em 1.5em 1.5em;
     &:hover {
-      color: darken(palette(grey, medium), 10%);
+      color: darken($font-medium, 10%);
       .svg-icon {
-        fill: darken(palette(grey, medium), 10%);
+        fill: darken($font-medium, 10%);
       }
     }
     .svg-icon {
@@ -141,7 +141,7 @@ $buttonSize: 34px;
   display: block;
   @include font-size(11px);
   font-weight: 400;
-  color: palette(grey, dark);
+  color: $font-dark;
   line-height: 1em;
   margin-top: 1.5em;
   padding: 1em;
