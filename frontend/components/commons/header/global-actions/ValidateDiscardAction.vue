@@ -30,11 +30,13 @@
     <slot name="first" :selectedRecords="selectedRecords" />
     <ReButton
       :disabled="!allowValidation"
-      class="validate-discard-actions__button"
+      class="secondary outline small validate-discard-actions__button"
       @click="onValidate"
       >Validate</ReButton
     >
-    <ReButton class="validate-discard-actions__button" @click="onDiscard"
+    <ReButton
+      class="secondary outline small validate-discard-actions__button"
+      @click="onDiscard"
       >Discard</ReButton
     >
     <slot name="last" :selectedRecords="selectedRecords" />
@@ -141,23 +143,10 @@ export default {
     }
   }
   &__button {
-    border-radius: $border-radius;
-    height: 33px;
-    border: none;
-    min-width: 80px;
     margin-left: 1em;
     margin-right: 1em;
-    outline: none;
-    font-weight: 500;
     color: $font-secondary-medium;
-    background: palette(white);
-    border: 1px solid palette(grey, 600);
     cursor: pointer;
-    &[disabled] {
-      opacity: 0.5;
-      pointer-events: none;
-      cursor: pointer;
-    }
     &:hover {
       border-color: $primary-color;
     }

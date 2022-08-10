@@ -33,13 +33,12 @@
         </span>
       </span>
     </div>
-    <a
-      href="#"
-      v-if="scrollHeight >= visibleRecordHeight && !explanation"
-      class="record__button"
+    <re-button
+      v-if="scrollHeight >= visibleRecordHeight"
+      class="primary clear small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </a>
+    </re-button>
   </div>
 </template>
 
@@ -114,23 +113,8 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
   }
-  &__button {
-    display: inline-block;
-    border-radius: $border-radius;
-    padding: 0.5em;
-    transition: all 0.2s ease;
-    @include font-size(14px);
-    font-weight: 400;
-    background: none;
+  &__show-more {
     margin-top: 1em;
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1;
-    outline: none;
-    &:hover {
-      transition: all 0.2s ease;
-      background: palette(grey, 800);
-    }
   }
   &--email {
     display: block;

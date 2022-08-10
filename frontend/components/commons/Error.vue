@@ -24,10 +24,10 @@
         following error: <strong>{{ error.message }}</strong>
       </p>
     </div>
-    <NuxtLink v-if="link" class="re-button" :to="link">
-      <svgicon name="chevron-left" width="8" height="8" color="#4A4A4A" />
+    <re-button v-if="link" class="tertiary outline" :to="link">
+      <svgicon name="chevron-left" width="14" height="14" color="#4A4A4A" />
       Back
-    </NuxtLink>
+    </re-button>
   </div>
 </template>
 
@@ -106,30 +106,7 @@ export default {
     }
   }
 }
-
-.re-button {
-  display: inline-block;
-  min-height: 30px;
-  line-height: 30px;
-  min-width: auto;
-  background: transparent;
-  text-align: center;
-  border: 1px solid $font-medium;
-  padding: 0 1em 0 1.5em;
-  position: relative;
-  font-weight: 600;
-  color: $font-medium;
-  border-radius: 3px;
-  margin-bottom: 20vh;
-  text-transform: none;
-  text-decoration: none;
-  &:hover {
-    color: darken($font-medium, 10%);
-  }
-  .svg-icon {
-    position: absolute;
-    left: $base-space;
-    top: 12px;
-  }
+.button {
+  display: inline-flex !important;
 }
 </style>

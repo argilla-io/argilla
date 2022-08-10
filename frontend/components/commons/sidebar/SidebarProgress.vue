@@ -157,18 +157,6 @@ label {
       pointer-events: none;
     }
   }
-  .button-icon {
-    color: $primary-color;
-    padding: 0;
-    display: flex;
-    margin-left: auto;
-    margin-right: 0;
-    margin-top: 2em;
-    .svg-icon {
-      fill: $primary-color;
-      margin-left: 1em;
-    }
-  }
 }
 .progress {
   float: right;

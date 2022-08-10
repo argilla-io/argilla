@@ -30,9 +30,7 @@
           placeholder="Password"
         />
       </div>
-      <ReButton type="submit" class="form__button button-primary"
-        >Enter</ReButton
-      >
+      <re-button type="submit" class="form__button primary">Enter</re-button>
       <p v-if="error">{{ error }}</p>
     </form>
   </div>
@@ -101,17 +99,16 @@ export default {
   &__title {
     text-align: center;
     @include font-size(26px);
-    font-family: "Futura Medium";
     line-height: 1.2em;
     margin: 0 auto 2em auto;
     color: #010250;
+    font-weight: 600;
+    letter-spacing: 0.03em;
   }
   &__button {
     margin: 2em auto 0 auto;
-    text-align: center !important;
-    display: block !important;
+    justify-content: center;
     width: 100%;
-    min-height: 36px !important;
   }
   &__input {
     position: relative;

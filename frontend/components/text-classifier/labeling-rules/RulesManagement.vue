@@ -4,7 +4,7 @@
     <div v-else-if="!$fetchState.error">
       <div class="rules-management__container">
         <re-button
-          class="rules-management__close button-tertiary--outline"
+          class="rules-management__close primary outline small"
           @click="hideList"
         >
           <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to

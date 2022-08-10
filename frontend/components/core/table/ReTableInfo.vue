@@ -90,13 +90,13 @@
                       </NuxtLink>
                       <span v-else>{{ itemValue(item, column) }}</span>
                       <re-action-tooltip tooltip="Copied">
-                        <ReButton
+                        <re-button
                           title="Copy to clipboard"
                           class="table-info__actions__button button-icon"
                           @click.prevent="onActionClicked('copy-name', item)"
                         >
                           <svgicon name="copy" width="16" height="16" />
-                        </ReButton>
+                        </re-button>
                       </re-action-tooltip>
                     </span>
                     <ReDate
@@ -149,7 +149,7 @@
                     :key="action.index"
                     :tooltip="action.tooltip"
                   >
-                    <ReButton
+                    <re-button
                       :title="action.title"
                       class="table-info__actions__button button-icon"
                       @click="onActionClicked(action.name, item)"
@@ -160,7 +160,7 @@
                         width="16"
                         height="16"
                       />
-                    </ReButton>
+                    </re-button>
                   </re-action-tooltip>
                 </div>
                 <ReModal
@@ -176,13 +176,13 @@
                     <p v-html="deleteModalContent.text"></p>
                     <div class="modal-buttons">
                       <ReButton
-                        class="button-tertiary--small button-tertiary--outline"
+                        class="primary outline"
                         @click="$emit('close-modal')"
                       >
                         Cancel
                       </ReButton>
                       <ReButton
-                        class="button-secondary--small"
+                        class="primary"
                         @click="onActionClicked('confirm-delete', item)"
                       >
                         Yes, delete
@@ -461,7 +461,7 @@ export default {
       display: flex;
       align-items: center;
     }
-    button:not(.re-button) {
+    button:not(.button) {
       cursor: pointer;
       border: 0;
       outline: none;
@@ -543,8 +543,9 @@ export default {
       position: relative;
       margin-left: 2em;
       padding: 0 !important;
+      display: inline-block;
       .svg-icon {
-        margin-right: 0;
+        margin: 0;
       }
       & + #{$this} {
         margin-left: auto;
@@ -557,9 +558,12 @@ export default {
     hyphens: auto;
     word-break: break-word;
     .button-icon {
-      margin-left: 5px;
-      padding: 0;
-      margin-bottom: 2px;
+      padding: $base-space;
+      margin-left: $base-space;
+      display: inline-block;
+      .svg-icon {
+        margin: 0;
+      }
     }
     a {
       text-decoration: none;

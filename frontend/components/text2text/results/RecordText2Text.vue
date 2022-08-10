@@ -137,7 +137,7 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
     &:hover {
-      ::v-deep .button-primary--outline {
+      ::v-deep .edit {
         opacity: 1 !important;
         pointer-events: all;
         transition: opacity 0.5s ease-in-out 0.2s !important;

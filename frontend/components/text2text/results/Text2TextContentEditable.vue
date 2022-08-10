@@ -16,10 +16,10 @@
       v-if="editionMode && annotationEnabled && editableText"
       class="content__edit__buttons"
     >
-      <re-button class="button-primary--outline" @click="$emit('back')"
+      <re-button class="primary outline small" @click="$emit('back')"
         >Back</re-button
       >
-      <re-button class="button-primary" @click="annotate">Save</re-button>
+      <re-button class="primary small" @click="annotate">Save</re-button>
     </div>
   </span>
 </template>
@@ -135,11 +135,9 @@ $marginRight: 200px;
       margin: 2.5em 200px 0 auto;
       display: flex;
       justify-content: flex-end;
-      .re-button {
-        margin-bottom: 0;
+      .button {
         &:last-child {
-          transition: margin 0s ease;
-          margin-left: 6px;
+          margin-left: $base-space;
         }
       }
     }

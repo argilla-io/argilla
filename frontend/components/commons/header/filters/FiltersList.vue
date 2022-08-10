@@ -313,6 +313,7 @@ $number-size: 18px;
       }
       &--sort {
         max-width: 410px;
+        padding: 20px;
       }
     }
     &__item {

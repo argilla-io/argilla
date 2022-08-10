@@ -16,7 +16,7 @@
         <rules-metrics title="Rule Metrics" :dataset="dataset">
           <template #button-bottom>
             <re-button
-              class="rule__button button-quaternary--outline"
+              class="rule__button quaternary outline"
               :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</re-button
@@ -136,7 +136,6 @@ export default {
   &__button {
     float: left;
     align-self: flex-start;
-    margin-bottom: 0 !important;
     margin-top: auto;
     clear: both;
   }

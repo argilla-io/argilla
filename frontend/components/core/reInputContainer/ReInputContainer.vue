@@ -22,15 +22,6 @@
     <span v-if="enableCounter" class="re-count"
       >{{ inputLength }} / {{ counterLength }}</span
     >
-
-    <button
-      v-if="reClearable && hasValue"
-      tabindex="-1"
-      class="button-icon"
-      @click="clearInput"
-    >
-      <re-icon>clear</re-icon>
-    </button>
   </div>
 </template>
 

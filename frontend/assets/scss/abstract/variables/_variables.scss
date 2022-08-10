@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- 
+
 // Color map
 //-----------
 $palettes: (
@@ -66,9 +66,9 @@ $palettes: (
 $primary-color: palette(blue, 500);
 $primary-lighten-color: lighten($primary-color, 10%);
 $primary-darken-color: darken($primary-color, 10%);
-$secondary-color: palette(grey, 800);
-$secondary-lighten-color: lighten(palette(blue, 300), 10%);
-$secondary-darken-color: darken(palette(blue, 300), 10%);
+$secondary-color: palette(grey, 700);
+$secondary-lighten-color: lighten(palette(grey, 700), 5%);
+$secondary-darken-color: darken(palette(grey, 700), 5%);
 $highlight: palette(pink);
 $bg: palette(grey, 700);
 
@@ -132,7 +132,7 @@ $input-size: 40px;
 // Buttons
 //-----------
 $button-height: 30px;
-$button-radius: 3px;
+$button-radius: 6px;
 
 // Transitions
 //-----------
