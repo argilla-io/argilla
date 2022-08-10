@@ -84,7 +84,7 @@
     <re-button
       v-else
       :disabled="!selectedLabelsVModel.length"
-      class="feedback-interactions__button button-primary"
+      class="feedback-interactions__button primary"
       @click="saveRule"
     >
       Save rule</re-button

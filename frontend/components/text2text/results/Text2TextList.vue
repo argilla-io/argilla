@@ -50,7 +50,7 @@
             <div class="content__actions-buttons">
               <re-button
                 v-if="visibleSentence && annotationEnabled"
-                class="button-primary"
+                class="primary"
                 @click="onAnnotate(visibleSentence)"
                 >Validate</re-button
               >
