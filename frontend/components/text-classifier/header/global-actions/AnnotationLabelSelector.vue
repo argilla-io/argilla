@@ -173,7 +173,7 @@ export default {
     }
     cursor: pointer;
     &:hover {
-      color: $secondary-color;
+      color: palette(blue, 300);
     }
   }
   &__buttons {

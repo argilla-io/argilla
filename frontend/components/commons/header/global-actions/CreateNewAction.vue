@@ -87,7 +87,7 @@ export default {
   padding: 1em;
   position: absolute;
   top: -1em;
-  background: $lighter-color;
+  background: palette(white);
   text-align: left;
   &__close {
     position: absolute;
@@ -96,7 +96,7 @@ export default {
     cursor: pointer;
     height: 12px;
     width: 12px;
-    stroke: $font-secondary;
+    stroke: $font-secondary-medium;
     stroke-width: 1;
   }
   &__input {

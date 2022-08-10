@@ -120,7 +120,7 @@ export default {
     height: 100%;
     width: auto;
     height: 45px;
-    border: 1px solid $line-smooth-color;
+    border: 1px solid palette(grey, 600);
     display: flex;
     align-items: center;
     padding: 0 20px;
@@ -128,7 +128,7 @@ export default {
     border-radius: $border-radius;
     &:after {
       content: "";
-      border-color: $darker-color;
+      border-color: $font-dark;
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
@@ -145,7 +145,7 @@ export default {
     &:hover,
     &:focus {
       border-color: $primary-color;
-      background: $lighter-color;
+      background: palette(white);
       transition: all 0.3s ease;
       &:after {
         border-color: $primary-color;
@@ -183,7 +183,7 @@ export default {
     left: 0;
     margin-top: 0;
     box-shadow: $shadow;
-    background: $lighter-color;
+    background: palette(white);
     border: 1px solid $primary-color;
     padding: 10px 20px 10px 20px;
     z-index: 3;
@@ -240,8 +240,8 @@ export default {
       display: block;
     }
     .dropdown__header {
-      border: 1px solid palette(grey, light);
-      background: palette(grey, light);
+      border: 1px solid palette(grey, 700);
+      background: palette(grey, 700);
       &:after {
         visibility: hidden;
       }
@@ -250,11 +250,11 @@ export default {
       }
     }
     .dropdown__content {
-      border: 1px solid palette(grey, light);
-      background: palette(grey, light);
+      border: 1px solid palette(grey, 700);
+      background: palette(grey, 700);
     }
     .filter-options {
-      background: palette(grey, light);
+      background: palette(grey, 700);
     }
   }
   .re-checkbox {

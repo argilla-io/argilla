@@ -284,15 +284,15 @@ $toast-colors: map-merge(
   box-shadow: $shadow;
   border-radius: 0.25em;
   pointer-events: auto;
-  color: $darker-color;
-  background: $lighter-color !important;
+  color: $font-dark;
+  background: palette(white) !important;
   min-height: 3em;
   .toast-text {
     margin: 0;
     padding: 1.5em;
   }
   &__button {
-    color: $secondary-color;
+    color: palette(blue, 300);
     margin: 0 3em;
     cursor: pointer;
   }
@@ -301,7 +301,7 @@ $toast-colors: map-merge(
     cursor: pointer;
     &:after {
       content: "\2573";
-      color: $darker-color;
+      color: $font-dark;
       font-size: 10px;
     }
   }

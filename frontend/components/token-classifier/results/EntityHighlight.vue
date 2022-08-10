@@ -163,7 +163,7 @@ export default {
   right: -3px;
   border-radius: 3px;
   min-width: 10px;
-  background: palette(grey, dark);
+  background: $font-dark;
   fill: palette(white);
   padding: 2px;
 }

@@ -216,7 +216,7 @@ export default {
     .span__text {
       color: transparent;
       & > * {
-        color: palette(grey, dark);
+        color: $font-dark;
       }
     }
     .highlight__content {

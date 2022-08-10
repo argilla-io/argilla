@@ -113,15 +113,15 @@ export default {
   &__copy {
     &:hover {
       .svg-icon {
-        fill: darken($lighter-color, 10%);
+        fill: darken(palette(white), 10%);
       }
     }
     .svg-icon {
-      fill: $lighter-color;
+      fill: palette(white);
     }
   }
   &__item {
-    color: $lighter-color;
+    color: palette(white);
     text-decoration: none;
     outline: none;
     &.--action {

@@ -17,12 +17,12 @@ export default {
   text-align: left;
   border: none;
   display: inline-block;
-  border-radius: 8px;
+  border-radius: $border-radius-m;
   padding: 0.3em 1em;
   margin: 3.5px;
   max-width: 175px;
   vertical-align: top;
-  background: palette(grey, bg);
+  background: palette(grey, 800);
   word-break: break-word;
   hyphens: auto;
   @include media(">desktopLarge") {

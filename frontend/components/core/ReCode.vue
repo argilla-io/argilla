@@ -41,7 +41,7 @@ export default {
     bottom: 4em;
     right: 1em;
     svg {
-      fill: $lighter-color;
+      fill: palette(white);
     }
   }
 }

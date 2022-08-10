@@ -224,8 +224,8 @@ $pagination-size: 30px;
     right: $sidebarMenuWidth;
     display: flex;
     align-items: center;
-    background: palette(grey, light);
-    border-top: 1px solid palette(grey, smooth);
+    background: palette(grey, 700);
+    border-top: 1px solid palette(grey, 600);
     min-height: 63px;
     z-index: 99;
     padding-right: 56px;
@@ -239,7 +239,7 @@ $pagination-size: 30px;
   }
   &__arrow {
     transition: all 0.3s ease-in-out;
-    color: $font-secondary;
+    color: $font-secondary-medium;
     background: transparent;
     text-decoration: none;
     display: flex;
@@ -255,7 +255,7 @@ $pagination-size: 30px;
     }
     &:hover {
       transition: all 0.3s ease-in-out;
-      background: palette(grey, smooth);
+      background: palette(grey, 600);
     }
     &--next {
       margin-left: 1em;
@@ -282,7 +282,7 @@ $pagination-size: 30px;
     @include font-size(14px);
     #{$self}__number {
       transition: all 0.3s ease-in-out;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -295,13 +295,13 @@ $pagination-size: 30px;
       padding: 5px;
       &:hover {
         transition: all 0.3s ease-in-out;
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
       &.is-current {
         pointer-events: none;
-        color: $font-secondary-dark;
+        color: $font-secondary-medium-dark;
         font-weight: 700;
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
     }
   }
@@ -313,19 +313,19 @@ $pagination-size: 30px;
     &__content {
       position: relative;
       & > a {
-        color: $secondary-color;
-        border: 1px solid palette(grey, smooth);
+        color: palette(blue, 300);
+        border: 1px solid palette(grey, 600);
       }
     }
     &__title {
       display: block;
       margin-bottom: 0.5em;
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       margin-right: 1em;
     }
     ul {
       list-style: none;
-      background: $lighter-color;
+      background: palette(white);
       padding: 0;
       display: block;
       position: absolute;
@@ -346,7 +346,7 @@ $pagination-size: 30px;
       }
       a {
         display: block;
-        color: $font-secondary-dark;
+        color: $font-secondary-medium-dark;
         border-radius: 1px;
         margin: 2px;
         &:hover {
@@ -358,7 +358,7 @@ $pagination-size: 30px;
       display: block;
       outline: none;
       text-decoration: none;
-      background: $lighter-color;
+      background: palette(white);
       padding: 0.5em 1em;
       border-radius: $border-radius;
       .svg-icon {
@@ -371,7 +371,7 @@ $pagination-size: 30px;
   &__info {
     margin-left: auto;
     margin-right: 0;
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
   }
 }
 </style>

@@ -161,7 +161,7 @@ export default {
 .entities {
   &__selector {
     min-width: 220px;
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
     font-weight: 600;
     padding: 0.8em;
     border-radius: $border-radius;

@@ -17,7 +17,7 @@ export default {
 
 <style lang="scss" scoped>
 .records-counter {
-  color: palette(grey, medium);
+  color: $font-medium;
   margin-left: auto;
   margin-right: 0;
   display: block;

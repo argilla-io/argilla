@@ -1163,7 +1163,7 @@ export default {
   padding: 0 !important;
   &.vue-slider-disabled {
     .vue-slider-dot {
-      background: $line-light-color;
+      background: palette(grey, 700);
       border: 0;
       box-shadow: none;
     }
@@ -1187,7 +1187,7 @@ export default {
   position: relative;
   display: block;
   border-radius: 15px;
-  background-color: $line-smooth-color;
+  background-color: palette(grey, 600);
   border-radius: 3px;
 }
 
@@ -1247,7 +1247,7 @@ export default {
 .vue-slider-component .vue-slider-dot {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid $secondary-color;
+  border: 1px solid palette(blue, 300);
   background-color: #fff;
   transition: all 0s;
   will-change: transform;
@@ -1371,7 +1371,7 @@ export default {
 
 .vue-slider {
   .filter & {
-    background: $line-smooth-color;
+    background: palette(grey, 600);
     border-radius: 3px;
     margin-top: -12px;
   }
@@ -1379,28 +1379,28 @@ export default {
 
 .vue-slider-dot {
   .filter & {
-    border: 1px solid $secondary-color;
+    border: 1px solid palette(blue, 300);
     &:before {
       content: "";
       @include absoluteCenter;
       height: 7px;
       width: 7px;
-      border-left: 1px solid $secondary-color;
-      border-right: 1px solid $secondary-color;
+      border-left: 1px solid palette(blue, 300);
+      border-right: 1px solid palette(blue, 300);
     }
     &:after {
       content: "";
       @include absoluteCenter;
       height: 7px;
       width: 1px;
-      background: $secondary-color;
+      background: palette(blue, 300);
     }
   }
 }
 
 .vue-slider-process {
   .filter & {
-    background: $secondary-color;
+    background: palette(blue, 300);
     border-radius: 3px;
   }
 }

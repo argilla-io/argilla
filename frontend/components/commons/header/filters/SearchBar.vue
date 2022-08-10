@@ -88,7 +88,7 @@ export default {
 
 <style lang="scss" scoped>
 .searchbar {
-  background: $lighter-color;
+  background: palette(white);
   width: 285px;
   min-height: 43px;
   border: none;
@@ -112,11 +112,11 @@ export default {
     cursor: pointer;
     padding: 5px;
     border-radius: 3px;
-    background: $lighter-color;
+    background: palette(white);
     transition: background 0.2s ease-in-out;
     &:hover {
       transition: background 0.2s ease-in-out;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
   .svg-icon {

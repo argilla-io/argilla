@@ -264,7 +264,7 @@ export default {
     display: inline-block;
     &:hover {
       transition: all 0.2s ease-in-out;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
 }

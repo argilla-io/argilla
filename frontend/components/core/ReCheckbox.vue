@@ -104,7 +104,7 @@ export default {
 <style lang="scss" scoped>
 $checkbox-size: 20px;
 $checkbox-touch-size: 20px;
-$checkbox-color: $line-smooth-color;
+$checkbox-color: palette(grey, 600);
 $checkbox-color-dark: $primary-color;
 .re-checkbox {
   width: auto;
@@ -134,7 +134,7 @@ $checkbox-color-dark: $primary-color;
     margin-right: 0;
     margin-left: auto;
     .svg-icon {
-      fill: $lighter-color;
+      fill: palette(white);
       transform: scale(0);
       transition: all 0.2s ease-in-out;
       display: block;

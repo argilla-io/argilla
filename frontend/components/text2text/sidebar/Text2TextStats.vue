@@ -94,7 +94,7 @@ label {
   position: relative;
   display: flex;
   margin-bottom: 0.7em;
-  color: $font-secondary-dark;
+  color: $font-secondary-medium-dark;
 }
 .scroll {
   max-height: calc(100vh - 200px);

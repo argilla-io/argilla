@@ -86,7 +86,7 @@ export default {
     white-space: pre-line;
 
     display: block;
-    color: palette(grey, medium);
+    color: $font-medium;
     width: calc(100% - 200px);
   }
   &__button {
@@ -104,7 +104,7 @@ export default {
     outline: none;
     &:hover {
       transition: all 0.2s ease;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
 }

@@ -125,7 +125,7 @@ export default {
     padding: 0.5em 1em;
     top: -5px;
     transform: none;
-    background: $secondary-color;
+    background: palette(blue, 200);
     color: white;
     border: none;
     border-radius: 3px;
@@ -139,7 +139,7 @@ export default {
     transition: opacity 0.5s linear 0.3s;
     border-color: lime !important;
     .triangle {
-      @include triangle(left, 6px, 6px, $secondary-color);
+      @include triangle(left, 6px, 6px, palette(blue, 200));
       position: absolute;
       left: -6px;
       top: calc(50% - 6px);
@@ -149,7 +149,7 @@ export default {
     @extend .re-progress;
     height: 2px;
     .re-progress-track {
-      background: $line-medium-color;
+      background: palette(grey, 300);
     }
   }
   &--multiple {
@@ -165,7 +165,7 @@ export default {
   left: 0;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
-  background: $secondary-color;
+  background: palette(blue, 200);
   transition: width 1s linear, left 1s linear;
   &:last-of-type {
     border-bottom-left-radius: 0;

@@ -89,7 +89,7 @@ export default {
     height: 100%;
     width: auto;
     height: 45px;
-    border: 1px solid $line-smooth-color;
+    border: 1px solid palette(grey, 600);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;

@@ -64,7 +64,7 @@ export default {
   .re-progress {
     width: 300px;
     margin: 1.5em auto;
-    background: $line-smooth-color;
+    background: palette(grey, 600);
   }
   .re-button {
     margin-bottom: 0;

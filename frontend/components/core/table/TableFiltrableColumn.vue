@@ -230,7 +230,7 @@ button {
   background: transparent;
   padding-left: 0;
   padding-right: 0;
-  color: $font-secondary;
+  color: $font-secondary-medium;
   display: flex;
   align-items: center;
   @include font-size(14px);
@@ -257,7 +257,7 @@ button {
     }
   }
   .svg-icon {
-    margin-right: 8px;
+    margin-right: $base-space;
   }
 }
 </style>
