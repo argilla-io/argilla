@@ -395,7 +395,6 @@ class TestMajorityVoter:
 
         assert np.allclose(annotation, np.array([[0, 0, 1], [1, 0, 1]]))
         assert np.allclose(prediction, np.array([[0, 0, 1], [1, 1, 1]]))
-        mj.score()
 
 
 class TestSnorkel:
