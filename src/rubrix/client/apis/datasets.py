@@ -85,9 +85,9 @@ class Datasets(AbstractApi):
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
-        owner: str = None
-        created_at: datetime = None
-        last_updated: datetime = None
+        owner: Optional[str] = None
+        created_at: Optional[datetime] = None
+        last_updated: Optional[datetime] = None
 
         tags: Dict[str, str] = Field(default_factory=dict)
         metadata: Dict[str, Any] = Field(default_factory=dict)
