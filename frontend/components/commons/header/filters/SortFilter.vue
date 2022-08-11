@@ -27,7 +27,7 @@
       @click="removeField()"
     />
     <FilterDropdown
-      class="dropdown--filter"
+      color-type="grey"
       :class="{ highlighted: visible }"
       :visible="visible"
       @visibility="onVisibility"
@@ -44,13 +44,13 @@
           autofocus
           placeholder="Search..."
         />
-        <ul>
-          <li v-for="option in filteredSortOptions" :key="option.text">
-            <a href="#" @click.prevent="addField(option)">
-              {{ option.name }}
-            </a>
-          </li>
-        </ul>
+        <select-options
+          ref="options"
+          type="single"
+          optionName="name"
+          :options="filteredSortOptions"
+          @selected="addField"
+        />
       </div>
     </FilterDropdown>
     <p
@@ -87,17 +87,13 @@ export default {
     visible: false,
     defaultSortedBy: undefined,
     defaultSortedByDir: "asc",
-    searchText: undefined,
+    searchText: "",
   }),
   computed: {
     filteredSortOptions() {
-      if (this.searchText === undefined) {
-        return this.sortOptions;
-      }
-      let filtered = this.sortOptions.filter((opt) =>
+      return this.sortOptions.filter((opt) =>
         opt.name.toLowerCase().match(this.searchText.toLowerCase())
       );
-      return filtered;
     },
   },
   mounted() {
@@ -161,13 +157,6 @@ export default {
   .dropdown {
     width: 100%;
     max-width: 270px;
-    a {
-      text-decoration: none;
-      max-width: 250px;
-      display: block;
-      word-break: break-word;
-      hyphens: auto;
-    }
   }
 }
 </style>

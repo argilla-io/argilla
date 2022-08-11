@@ -170,16 +170,6 @@ $checkbox-color-dark: $primary-color;
   }
 }
 
-.checkbox-label {
-  .dropdown--filter & {
-    height: auto;
-    white-space: normal;
-    text-transform: none;
-    word-break: break-word;
-    hyphens: auto;
-  }
-}
-
 .re-checkbox.checked {
   .checkbox-container {
     background: $primary-color;

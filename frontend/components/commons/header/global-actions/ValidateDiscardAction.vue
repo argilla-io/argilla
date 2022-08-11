@@ -129,22 +129,16 @@ export default {
     margin-left: 0.8em;
     ::v-deep .dropdown__header {
       max-height: 33px;
-      background: palette(white);
-      border-width: 1px;
       color: $font-secondary-medium;
       font-family: $sff;
       font-weight: 500;
       min-width: 170px;
-    }
-    ::v-deep .dropdown__content {
-      box-shadow: $shadow;
-      border-radius: $border-radius;
-      border: none;
+      @include font-size(13px);
     }
   }
   &__button {
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: $base-space;
+    margin-right: $base-space;
     color: $font-secondary-medium;
     cursor: pointer;
     &:hover {

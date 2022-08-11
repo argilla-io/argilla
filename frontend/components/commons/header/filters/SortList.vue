@@ -123,6 +123,7 @@ export default {
   &__buttons {
     display: flex;
     margin-top: 1.5em;
+    margin-bottom: 10px;
     & > * {
       display: block;
       width: 100%;
