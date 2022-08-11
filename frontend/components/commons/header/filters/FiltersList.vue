@@ -234,6 +234,7 @@ export default {
         id: "uncovered_by_rules",
         key: "uncovered_by_rules",
         group: "Annotations",
+        name: "Uncovered by rules",
         options: [true, false],
         selected:
           this.dataset.query.uncovered_by_rules &&
@@ -313,7 +314,6 @@ $number-size: 18px;
       }
       &--sort {
         max-width: 410px;
-        padding: 20px;
       }
     }
     &__item {

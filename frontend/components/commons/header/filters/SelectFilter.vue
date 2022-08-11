@@ -28,8 +28,8 @@
     />
     <p class="filter__label" :title="filter.name">{{ filter.name }}:</p>
     <FilterDropdown
+      color-type="grey"
       :class="{ highlighted: visible || appliedFilters.length }"
-      class="dropdown--filter"
       :visible="visible"
       @visibility="onVisibility"
     >
@@ -56,31 +56,12 @@
           autofocus
           :placeholder="placeholder"
         />
-        <ul>
-          <li
-            v-for="[option, counter] in filterOptions(
-              filter.options,
-              searchText
-            )"
-            :key="option"
-          >
-            <ReCheckbox
-              :id="option"
-              v-model="selectedOptions"
-              class="re-checkbox--dark"
-              :value="option"
-            >
-              {{ option }} ({{ counter | formatNumber }})
-            </ReCheckbox>
-          </li>
-          <li
-            v-if="
-              !Object.entries(filterOptions(filter.options, searchText)).length
-            "
-          >
-            0 results
-          </li>
-        </ul>
+        <select-options
+          ref="options"
+          type="multiple"
+          v-model="selectedOptions"
+          :options="filterOptions(filter.options, searchText)"
+        />
         <div class="filter__buttons">
           <ReButton class="primary outline" @click="onCancel">
             Cancel
@@ -213,93 +194,6 @@ export default {
     margin-right: 1em;
     cursor: pointer;
     flex-shrink: 0;
-  }
-}
-
-.dropdown {
-  &__placeholder {
-    display: none;
-    .dropdown--open & {
-      display: block;
-    }
-  }
-  &__selectables {
-    vertical-align: middle;
-    .dropdown--open & {
-      visibility: hidden;
-    }
-    & + .dropdown__selectables {
-      &:before {
-        content: ",  ";
-        margin-right: 2px;
-      }
-      &:after {
-        content: "...";
-        margin-left: -2px;
-      }
-    }
-  }
-}
-.filter-options {
-  &__back {
-    color: $primary-color;
-    margin-top: 1em;
-    display: flex;
-    align-items: center;
-    &__chev {
-      cursor: pointer;
-      margin-right: 1em;
-      padding: 0.5em;
-      &:after {
-        content: "";
-        border-color: $primary-color;
-        border-style: solid;
-        border-width: 1px 1px 0 0;
-        display: inline-block;
-        height: 8px;
-        width: 8px;
-        transform: rotate(-135deg);
-        transition: all 1.5s ease;
-        margin-bottom: 2px;
-        margin-left: auto;
-        margin-right: 0;
-      }
-    }
-  }
-  &__button {
-    display: flex;
-    cursor: pointer;
-    min-width: 135px;
-    transition: min-width 0.2s ease;
-    &.active {
-      min-width: 270px;
-      transition: min-width 0.2s ease;
-    }
-    &.hidden {
-      opacity: 0;
-    }
-  }
-  &__chev {
-    padding-left: 2em;
-    margin-right: 0;
-    margin-left: auto;
-    background: none;
-    border: none;
-    outline: none;
-    &:after {
-      content: "";
-      border-color: #4a4a4a;
-      border-style: solid;
-      border-width: 1px 1px 0 0;
-      display: inline-block;
-      height: 8px;
-      width: 8px;
-      transform: rotate(43deg);
-      transition: all 1.5s ease;
-      margin-bottom: 2px;
-      margin-left: auto;
-      margin-right: 0;
-    }
   }
 }
 </style>
