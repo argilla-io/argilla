@@ -320,9 +320,10 @@ class TestMajorityVoter:
             assert probabilities is None
             if wls == "weak_labels":
                 assert tie_break_policy == TieBreakPolicy.ABSTAIN
-            else:
-                assert tie_break_policy is None
-            return np.array([[1, 1], [0, 0]]), np.array([[1, 1], [1, 0]])
+                return np.array([1, 0]), np.array([1, 1])
+
+            assert tie_break_policy is None
+            return np.array([[1, 1, 1], [0, 0, 0]]), np.array([[1, 1, 1], [1, 0, 0]])
 
         single_or_multi = "multi" if wls == "weak_multi_labels" else "single"
         monkeypatch.setattr(
@@ -394,6 +395,7 @@ class TestMajorityVoter:
 
         assert np.allclose(annotation, np.array([[0, 0, 1], [1, 0, 1]]))
         assert np.allclose(prediction, np.array([[0, 0, 1], [1, 1, 1]]))
+        mj.score()
 
 
 class TestSnorkel:
