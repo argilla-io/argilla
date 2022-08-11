@@ -375,6 +375,7 @@ class MajorityVoter(LabelModel):
             probabilities = self._compute_multi_label_probs(wl_matrix)
 
             annotation, prediction = self._score_multi_label(probabilities)
+            target_names = self._weak_labels.labels
         else:
             if isinstance(tie_break_policy, str):
                 tie_break_policy = TieBreakPolicy(tie_break_policy)
@@ -384,11 +385,12 @@ class MajorityVoter(LabelModel):
             annotation, prediction = self._score_single_label(
                 probabilities, tie_break_policy
             )
+            target_names = self._weak_labels.labels[: annotation.max() + 1]
 
         return classification_report(
             annotation,
             prediction,
-            target_names=self._weak_labels.labels[: annotation.max() + 1],
+            target_names=target_names,
             output_dict=not output_str,
         )
 
