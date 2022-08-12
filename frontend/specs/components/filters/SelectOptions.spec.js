@@ -4,7 +4,7 @@ import SelectOptions from "@/components/commons/header/filters/SelectOptions";
 function mountSelectOptions() {
   return mount(SelectOptions, {
     propsData: {
-      options: ['NEGATIVE', 'POSITIVE', 'OTHER']
+      options: ["NEGATIVE", "POSITIVE", "OTHER"],
     },
   });
 }

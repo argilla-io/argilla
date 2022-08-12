@@ -49,18 +49,15 @@
         </span>
       </span>
       <div slot="dropdown-content" v-if="visible">
-        <input
-          v-model="searchText"
-          class="filter-options"
-          type="text"
-          autofocus
-          :placeholder="placeholder"
-        />
+        <select-options-search v-model="searchText" />
         <select-options
           ref="options"
           type="multiple"
           v-model="selectedOptions"
           :options="filterOptions(filter.options, searchText)"
+          :option-name="optionName"
+          :option-counter="optionCounter"
+          :option-value="optionName"
         />
         <div class="filter__buttons">
           <ReButton class="primary outline" @click="onCancel">
@@ -143,6 +140,12 @@ export default {
         id.toLowerCase().match(text.toLowerCase())
       );
       return filtered;
+    },
+    optionName(option) {
+      return option[0];
+    },
+    optionCounter(option) {
+      return option[1];
     },
   },
 };

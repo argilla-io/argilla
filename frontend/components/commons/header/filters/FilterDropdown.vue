@@ -189,12 +189,6 @@ export default {
     box-shadow: $shadow;
     border-radius: $border-radius;
     background: palette(white);
-    .filter-options {
-      border: none;
-      outline: none;
-      height: 40px;
-      background: transparent;
-    }
   }
   &--open {
     pointer-events: all;

@@ -5,16 +5,19 @@ exports[`SelectOptions renders properly 1`] = `
   <li>
     <recheckbox id="NEGATIVE" value="NEGATIVE" class="re-checkbox--dark">
       NEGATIVE
+      <!---->
     </recheckbox>
   </li>
   <li>
     <recheckbox id="POSITIVE" value="POSITIVE" class="re-checkbox--dark">
       POSITIVE
+      <!---->
     </recheckbox>
   </li>
   <li>
     <recheckbox id="OTHER" value="OTHER" class="re-checkbox--dark">
       OTHER
+      <!---->
     </recheckbox>
   </li>
   <!---->
