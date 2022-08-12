@@ -17,11 +17,11 @@
 
 <template>
   <div class="new-label__container">
-    <reButton
+    <base-button
       v-if="!showLabelCreation"
       class="new-label__main-button primary small"
       @click="openLabelCreation()"
-      >{{ text }}</reButton
+      >{{ text }}</base-button
     >
     <div v-else class="new-label">
       <input
@@ -34,11 +34,11 @@
         @keyup.enter="createNewLabel(label)"
       />
       <svgicon class="new-label__close" name="close" @click="reset()" />
-      <reButton
+      <base-button
         class="new-label__button primary small"
         :disabled="!label"
         @click="createNewLabel(label)"
-        >Create</reButton
+        >Create</base-button
       >
     </div>
   </div>
@@ -82,9 +82,9 @@ export default {
 <style lang="scss" scoped>
 .new-label {
   width: 180px;
-  border-radius: 3px;
-  border: 2px solid $primary-color;
-  padding: 1em;
+  border-radius: $border-radius-m;
+  box-shadow: $shadow;
+  padding: $base-space * 2;
   position: absolute;
   top: -1em;
   background: palette(white);

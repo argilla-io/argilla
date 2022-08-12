@@ -13,7 +13,7 @@
       <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
       more information.
     </p>
-    <re-code :code="generateCodeSnippet()"></re-code>
+    <base-code :code="generateCodeSnippet()"></base-code>
   </div>
 </template>
 

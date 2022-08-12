@@ -46,7 +46,7 @@
           </div>
         </slot>
       </div>
-      <ResultsEmpty
+      <results-empty
         v-if="!data.length"
         :title="noDataInfo.title"
         :message="noDataInfo.message"
@@ -65,7 +65,7 @@
               :key="String(item.id)"
             >
               <div class="table-info__item">
-                <re-checkbox
+                <base-checkbox
                   v-if="globalActions"
                   v-model="item.selectedRecord"
                   class="list__item__checkbox"
@@ -89,17 +89,17 @@
                         >{{ itemValue(item, column) }}
                       </NuxtLink>
                       <span v-else>{{ itemValue(item, column) }}</span>
-                      <re-action-tooltip tooltip="Copied">
-                        <re-button
+                      <base-action-tooltip tooltip="Copied">
+                        <base-button
                           title="Copy to clipboard"
                           class="table-info__actions__button button-icon"
                           @click.prevent="onActionClicked('copy-name', item)"
                         >
                           <svgicon name="copy" width="16" height="16" />
-                        </re-button>
-                      </re-action-tooltip>
+                        </base-button>
+                      </base-action-tooltip>
                     </span>
-                    <ReDate
+                    <base-date
                       v-else-if="column.type === 'date'"
                       :date="itemValue(item, column)"
                     />
@@ -144,12 +144,12 @@
                   </span>
                 </span>
                 <div v-if="visibleActions" class="table-info__actions">
-                  <re-action-tooltip
+                  <base-action-tooltip
                     v-for="action in filterActions"
                     :key="action.index"
                     :tooltip="action.tooltip"
                   >
-                    <re-button
+                    <base-button
                       :title="action.title"
                       class="table-info__actions__button button-icon"
                       @click="onActionClicked(action.name, item)"
@@ -160,10 +160,10 @@
                         width="16"
                         height="16"
                       />
-                    </re-button>
-                  </re-action-tooltip>
+                    </base-button>
+                  </base-action-tooltip>
                 </div>
-                <ReModal
+                <base-modal
                   :modal-custom="true"
                   :prevent-body-scroll="true"
                   modal-class="modal-secondary"
@@ -175,27 +175,27 @@
                     <p class="modal__title">{{ deleteModalContent.title }}</p>
                     <p v-html="deleteModalContent.text"></p>
                     <div class="modal-buttons">
-                      <ReButton
+                      <base-button
                         class="primary outline"
                         @click="$emit('close-modal')"
                       >
                         Cancel
-                      </ReButton>
-                      <ReButton
+                      </base-button>
+                      <base-button
                         class="primary"
                         @click="onActionClicked('confirm-delete', item)"
                       >
                         Yes, delete
-                      </ReButton>
+                      </base-button>
                     </div>
                   </div>
-                </ReModal>
+                </base-modal>
               </div>
             </li>
           </ul>
         </div>
       </template>
-      <ResultsEmpty v-else :title="emptySearchInfo.title" />
+      <results-empty v-else :title="emptySearchInfo.title" />
     </div>
   </transition>
 </template>

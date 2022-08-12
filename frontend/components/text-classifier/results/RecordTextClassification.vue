@@ -20,21 +20,21 @@
     <!-- annotation labels and prediction status -->
     <div class="record--left">
       <!-- record text -->
-      <RecordInputs :record="record" />
-      <ClassifierAnnotationArea
+      <record-inputs :record="record" />
+      <classifier-annotation-area
         v-if="annotationEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <ClassifierExplorationArea v-else :dataset="dataset" :record="record" />
+      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
-        <re-button
+        <base-button
           v-if="allowValidate"
           class="primary"
           @click="onValidate(record)"
-          >Validate</re-button
+          >Validate</base-button
         >
       </div>
     </div>
@@ -48,7 +48,7 @@
           height="40"
           :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
         ></svgicon>
-        <re-tag
+        <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
           :name="label.class"

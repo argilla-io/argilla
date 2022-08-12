@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <SidebarMenu
+  <sidebar-menu
     :current-metric="currentMetric"
     :dataset="dataset"
     :sidebar-items="sidebarItems"

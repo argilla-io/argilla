@@ -1,12 +1,12 @@
 import { mount } from "@vue/test-utils";
-import ReTableInfo from "@/components/core/table/ReTableInfo";
+import BaseTableInfo from "@/components/core/table/BaseTableInfo";
 
 const $route = {
   query: {},
 };
 
-function mountReTableInfo() {
-  return mount(ReTableInfo, {
+function mountBaseTableInfo() {
+  return mount(BaseTableInfo, {
     propsData: {
       actions: [],
       columns: [
@@ -54,12 +54,12 @@ function mountReTableInfo() {
   });
 }
 
-describe("ReTableInfo", () => {
+describe("BaseTableInfo", () => {
   let spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
   test("renders properly", () => {
-    const wrapper = mountReTableInfo();
+    const wrapper = mountBaseTableInfo();
     expect(wrapper.html()).toMatchSnapshot();
   });
 });

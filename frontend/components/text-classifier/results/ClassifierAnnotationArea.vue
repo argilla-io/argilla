@@ -22,10 +22,8 @@
       :searchText="searchText"
       @input="onSearchLabel"
     />
-    <div
-      :class="[UXtest === 'fixed' ? 'fixed' : null, 'feedback-interactions']"
-    >
-      <ClassifierAnnotationButton
+    <div class="feedback-interactions">
+      <classifier-annotation-button
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
@@ -35,27 +33,24 @@
         :class="[
           'label-button',
           predictedAs.includes(label.class) ? 'predicted-label' : null,
-          UXtest === 'fixed' ? 'fixed' : null,
         ]"
         :data-title="label.class"
         :value="label.class"
         @change="updateLabels"
       >
-      </ClassifierAnnotationButton>
+      </classifier-annotation-button>
 
-      <a
+      <base-button
         v-if="visibleLabels.length < filteredLabels.length"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</a
+        class="feedback-interactions__more primary clear"
+        @click="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
       >
-      <a
+      <base-button
         v-else-if="visibleLabels.length > maxVisibleLabels"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="collapseLabels()"
-        >Show less</a
+        class="feedback-interactions__more primary clear"
+        @click="collapseLabels()"
+        >Show less</base-button
       >
     </div>
   </div>
@@ -199,9 +194,6 @@ export default {
     predictedAs() {
       return this.record.predicted_as;
     },
-    UXtest() {
-      return this.$route.query.UXtest;
-    },
   },
   mounted() {
     this.selectedLabels = this.appliedLabels;
@@ -252,20 +244,8 @@ export default {
     padding-right: 200px;
   }
   &__more {
-    align-self: center;
     margin: 3.5px;
-    text-decoration: none;
-    font-weight: 500;
-    font-family: $sff;
-    outline: none;
-    padding: 0.5em;
-    border-radius: $border-radius;
-    transition: all 0.2s ease-in-out;
     display: inline-block;
-    &:hover {
-      transition: all 0.2s ease-in-out;
-      background: palette(grey, 800);
-    }
   }
 }
 .label-button {

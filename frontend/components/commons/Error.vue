@@ -24,10 +24,10 @@
         following error: <strong>{{ error.message }}</strong>
       </p>
     </div>
-    <re-button v-if="link" class="tertiary outline" :to="link">
+    <base-button v-if="link" class="tertiary outline" :to="link">
       <svgicon name="chevron-left" width="14" height="14" color="#4A4A4A" />
       Back
-    </re-button>
+    </base-button>
   </div>
 </template>
 

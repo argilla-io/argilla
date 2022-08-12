@@ -44,14 +44,14 @@
         class="content__actions-buttons"
         v-if="annotationEnabled && record.status !== 'Validated'"
       >
-        <re-button class="primary" @click="onValidate(record)">{{
+        <base-button class="primary" @click="onValidate(record)">{{
           record.status === "Edited" ? "Save" : "Validate"
-        }}</re-button>
-        <re-button
+        }}</base-button>
+        <base-button
           :disabled="!record.annotatedEntities.length"
           class="primary outline"
           @click="onClearAnnotations()"
-          >Clear annotations</re-button
+          >Clear annotations</base-button
         >
       </div>
     </div>

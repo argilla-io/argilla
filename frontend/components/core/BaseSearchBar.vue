@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <ReInputContainer class="searchbar">
+  <base-input-container class="searchbar">
     <svgicon v-if="!filter" name="search" width="20" height="40" />
     <svgicon
       v-else
@@ -26,8 +26,8 @@
       height="14"
       @click="filter = undefined"
     />
-    <ReInput v-model="filter" :placeholder="placeholder" />
-  </ReInputContainer>
+    <base-input v-model="filter" :placeholder="placeholder" />
+  </base-input-container>
 </template>
 <script>
 import "assets/icons/search";

@@ -26,12 +26,12 @@
       <span>{{ totalAnnotated | formatNumber }}</span
       >/{{ total | formatNumber }}
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       :multiple="true"
       :progress="(totalValidated * 100) / total"
       :progress-secondary="(totalDiscarded * 100) / total"
-    ></ReProgress>
+    ></base-progress>
     <div class="scroll">
       <div>
         <div class="info">
@@ -109,11 +109,6 @@ label {
   width: 100%;
   margin-bottom: 1em;
 }
-.subtitle {
-  display: inline-block;
-  margin-top: 3em;
-  margin-bottom: 0.5em;
-}
 .info {
   position: relative;
   display: flex;
@@ -136,27 +131,6 @@ label {
 .records-number {
   margin-right: 0;
   margin-left: auto;
-}
-.progress__block {
-  margin-bottom: 2.5em;
-  position: relative;
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-  &.loading-skeleton {
-    opacity: 0;
-  }
-  .re-progress {
-    margin-bottom: 0.5em;
-  }
-  p {
-    @include font-size(18px);
-    margin-top: 0;
-    font-weight: 600;
-    &:not(.button) {
-      pointer-events: none;
-    }
-  }
 }
 .progress {
   float: right;

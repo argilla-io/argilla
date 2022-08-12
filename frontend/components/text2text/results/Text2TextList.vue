@@ -48,11 +48,11 @@
           />
           <div class="content__footer">
             <div class="content__actions-buttons">
-              <re-button
+              <base-button
                 v-if="visibleSentence && annotationEnabled"
                 class="primary"
                 @click="onAnnotate(visibleSentence)"
-                >Validate</re-button
+                >Validate</base-button
               >
             </div>
           </div>
@@ -68,7 +68,7 @@
               <p v-if="!editionMode" class="content__sentences__title">
                 {{ sentencesOrigin }}
               </p>
-              <re-button
+              <base-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
                 class="primary clear small content__group__view-annotations"
                 @click="changeVisibleSentences"
@@ -80,7 +80,7 @@
                     : annotationEnabled
                     ? "Back to annotation"
                     : "View annotation"
-                }}</re-button
+                }}</base-button
               >
             </div>
             <text-2-text-content-editable
@@ -130,7 +130,7 @@
                 </div>
               </template>
               <div v-if="annotationEnabled" class="content__actions-buttons">
-                <re-button
+                <base-button
                   v-if="sentences.length"
                   :class="[
                     'edit',
@@ -139,13 +139,13 @@
                     { outline: allowValidation },
                   ]"
                   @click="edit"
-                  >Edit</re-button
+                  >Edit</base-button
                 >
-                <re-button
+                <base-button
                   v-if="allowValidation"
                   class="primary small"
                   @click="onAnnotate(visibleSentence)"
-                  >Validate</re-button
+                  >Validate</base-button
                 >
               </div>
             </div>

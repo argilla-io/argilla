@@ -15,11 +15,11 @@
       <div class="rule__metrics">
         <rules-metrics title="Rule Metrics" :dataset="dataset">
           <template #button-bottom>
-            <re-button
+            <base-button
               class="rule__button quaternary outline"
               :disabled="isLoading"
               @click="showRulesList"
-              >Manage rules</re-button
+              >Manage rules</base-button
             >
           </template>
         </rules-metrics>

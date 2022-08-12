@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <FilterDropdown
+    <filter-dropdown
       class="selector"
       :visible="visible"
       @visibility="onVisibility"
@@ -50,18 +50,21 @@
           v-if="multiLabel && filterSearch(options, searchText).length"
           class="selector__buttons"
         >
-          <re-button class="primary outline small" @click="onVisibility(false)">
+          <base-button
+            class="primary outline small"
+            @click="onVisibility(false)"
+          >
             Cancel
-          </re-button>
-          <re-button
+          </base-button>
+          <base-button
             class="primary small"
             @click="selectedOption(selectedOptions)"
           >
             Annotate
-          </re-button>
+          </base-button>
         </div>
       </template>
-    </FilterDropdown>
+    </filter-dropdown>
   </div>
 </template>
 <script>

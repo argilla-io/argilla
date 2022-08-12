@@ -18,7 +18,7 @@
 <template>
   <div>
     <p class="sidebar__title">Stats</p>
-    <StatsSelector
+    <stats-selector
       :selected-option="selectedOption"
       :options="options"
       @selectOption="onSelectOption"
@@ -62,7 +62,7 @@
             ]"
             >{{ key }}</span
           >
-          <SidebarCollapsableMentions
+          <sidebar-collapsable-mentions
             :limit="
               expandedMentionsGroup && expandedMentionsGroup !== key
                 ? 0

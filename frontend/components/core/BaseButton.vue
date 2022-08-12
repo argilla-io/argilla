@@ -151,7 +151,6 @@ export default {
     fill: palette(white);
   }
   &:hover,
-  &:focus,
   &:active,
   &.active {
     background-color: $primary-darken-color;
@@ -164,7 +163,6 @@ export default {
       fill: $primary-color;
     }
     &:hover,
-    &:focus,
     &:active,
     &.active {
       color: $primary-darken-color;
@@ -175,7 +173,6 @@ export default {
     background: transparent;
     color: $font-dark;
     &:hover,
-    &:focus,
     &:active,
     &.active {
       background: palette(grey, 700);
@@ -190,7 +187,6 @@ export default {
     fill: palette(blue, 200);
   }
   &:hover,
-  &:focus,
   &:active,
   &.active {
     background-color: $secondary-darken-color;
@@ -198,6 +194,14 @@ export default {
   &.outline {
     background: none;
     border: 1px solid palette(grey, 600);
+  }
+  &.clear {
+    background: transparent;
+    &:hover,
+    &:active,
+    &.active {
+      background: palette(grey, 700);
+    }
   }
 }
 
@@ -208,7 +212,6 @@ export default {
     fill: $font-medium;
   }
   &:hover,
-  &:focus,
   &:active,
   &.active {
     background-color: $font-dark;
@@ -217,7 +220,6 @@ export default {
     background: none;
     border: 1px solid $font-medium;
     &:hover,
-    &:focus,
     &:active,
     &.active {
       border-color: $font-dark;
@@ -232,7 +234,6 @@ export default {
     fill: $font-medium;
   }
   &:hover,
-  &:focus,
   &:active,
   &.active {
     background-color: $font-dark;
@@ -242,5 +243,9 @@ export default {
     border: 1px solid palette(white);
     color: palette(white);
   }
+}
+.link {
+  padding: 0;
+  color: $primary-color;
 }
 </style>

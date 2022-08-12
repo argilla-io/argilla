@@ -20,7 +20,7 @@
     <div class="metadata__container">
       <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
         <div class="metadata__blocks">
-          <ReCheckbox
+          <base-checkbox
             :id="item[0]"
             v-model="selectedMetadata"
             class="re-checkbox--dark"
@@ -32,17 +32,17 @@
                 {{ item[1] }}
               </div>
             </div>
-          </ReCheckbox>
+          </base-checkbox>
         </div>
       </div>
     </div>
     <div class="metadata__buttons">
-      <re-button class="primary outline" @click="$emit('cancel')">
+      <base-button class="primary outline" @click="$emit('cancel')">
         Cancel
-      </re-button>
-      <re-button class="primary" @click="applySelectedFilters()">
+      </base-button>
+      <base-button class="primary" @click="applySelectedFilters()">
         Filter
-      </re-button>
+      </base-button>
     </div>
   </div>
 </template>

@@ -17,12 +17,12 @@
 
 <template>
   <div class="topbar">
-    <RubrixIsotipo v-if="!title" />
-    <NuxtLink v-else :to="{ name: 'datasets' }">
+    <rubrix-isotipo v-if="!title" />
+    <nuxt-link v-else :to="{ name: 'datasets' }">
       <p class="title">
         {{ title }}
       </p>
-    </NuxtLink>
+    </nuxt-link>
     <slot />
   </div>
 </template>

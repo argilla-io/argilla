@@ -30,7 +30,9 @@
           placeholder="Password"
         />
       </div>
-      <re-button type="submit" class="form__button primary">Enter</re-button>
+      <base-button type="submit" class="form__button primary"
+        >Enter</base-button
+      >
       <p v-if="error">{{ error }}</p>
     </form>
   </div>

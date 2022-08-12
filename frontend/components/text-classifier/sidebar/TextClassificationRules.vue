@@ -26,12 +26,12 @@
         coverage.percent || 0 | percent
       }}</span>
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       color="#4C4EA3"
       :progress="coverage.percent * 100"
       :tooltip="`${coverage.records}/${totalRecords}`"
-    ></ReProgress>
+    ></base-progress>
     <div class="progress__info">
       <p class="progress__info__text" :data-title="tooltip.annotatedCoverage">
         Annotated Coverage
@@ -40,12 +40,12 @@
         annotatedCoverage.percent || 0 | percent
       }}</span>
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       color="#A1A2CC"
       :progress="annotatedCoverage.percent * 100"
       :tooltip="`${annotatedCoverage.records}/${metricsTotal.annotated_records}`"
-    ></ReProgress>
+    ></base-progress>
     <div class="progress__info">
       <p class="progress__info__text" :data-title="tooltip.precision">
         Precision average

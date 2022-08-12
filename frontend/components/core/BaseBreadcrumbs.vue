@@ -33,7 +33,7 @@
         >
       </li>
     </ul>
-    <re-action-tooltip tooltip="Copied">
+    <base-action-tooltip tooltip="Copied">
       <a
         v-if="copyButton"
         class="breadcrumbs__copy"
@@ -46,7 +46,7 @@
       >
         <svgicon name="copy" width="16" height="16" />
       </a>
-    </re-action-tooltip>
+    </base-action-tooltip>
   </div>
 </template>
 

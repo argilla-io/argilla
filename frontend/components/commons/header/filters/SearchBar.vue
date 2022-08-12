@@ -18,7 +18,7 @@
 <template>
   <form @submit.prevent="submit(query)">
     <div :class="['searchbar__container', { active: query }]">
-      <ReInputContainer class="searchbar">
+      <base-input-container class="searchbar">
         <svgicon
           v-if="!query && !dataset.query.text"
           name="search"
@@ -33,13 +33,13 @@
           height="20"
           @click="removeFilter()"
         />
-        <ReInput
+        <base-input
           ref="input"
           v-model="query"
           class="searchbar__input"
           placeholder="Introduce a query"
         />
-      </ReInputContainer>
+      </base-input-container>
     </div>
   </form>
 </template>

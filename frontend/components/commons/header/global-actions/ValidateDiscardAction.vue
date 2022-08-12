@@ -22,22 +22,22 @@
       selectedRecords.length ? '' : 'validate-discard-actions--disabled',
     ]"
   >
-    <ReCheckbox
+    <base-checkbox
       v-model="allSelected"
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
-    ></ReCheckbox>
+    ></base-checkbox>
     <slot name="first" :selectedRecords="selectedRecords" />
-    <ReButton
+    <base-button
       :disabled="!allowValidation"
       class="secondary outline small validate-discard-actions__button"
       @click="onValidate"
-      >Validate</ReButton
+      >Validate</base-button
     >
-    <ReButton
+    <base-button
       class="secondary outline small validate-discard-actions__button"
       @click="onDiscard"
-      >Discard</ReButton
+      >Discard</base-button
     >
     <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
@@ -121,9 +121,6 @@ export default {
     left: 0;
     top: 0;
     margin: 0 $base-space 0 0;
-  }
-  &__export {
-    margin: auto 0 auto auto;
   }
   &__select {
     margin-left: 0.8em;

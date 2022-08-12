@@ -17,12 +17,12 @@ exports[`FilterScore Expand filter 1`] = `
         </p>
         <vega-lite data="[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]" autosize="[object Object]" config="[object Object]" mark="area" encoding="[object Object]" class="score"></vega-lite>
         <div class="range__container">
-          <rerange height="4" dotsize="20" min="0" max="100" interval="1" show="true"></rerange>
+          <base-range height="4" dotsize="20" min="0" max="100" interval="1" show="true"></base-range>
         </div>
       </div>
       <div class="filter__buttons">
-        <rebutton class="primary outline">Cancel</rebutton>
-        <rebutton class="primary">Apply</rebutton>
+        <base-button class="primary outline">Cancel</base-button>
+        <base-button class="primary">Apply</base-button>
       </div>
     </div>
   </div>

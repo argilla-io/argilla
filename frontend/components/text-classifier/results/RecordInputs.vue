@@ -24,21 +24,21 @@
       <span v-for="(text, index) in data" :key="index" class="record">
         <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
           <span class="record__key">{{ index }}:</span>
-          <LazyRecordExplain
+          <lazy-record-explain
             v-if="explanation"
             :record="record"
             :explain="explanation[index]"
           />
-          <LazyRecordString v-else :record="record" :text="text" />
+          <lazy-record-string v-else :record="record" :text="text" />
         </span>
       </span>
     </div>
-    <re-button
+    <base-button
       v-if="scrollHeight >= visibleRecordHeight"
       class="primary clear small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </re-button>
+    </base-button>
   </div>
 </template>
 

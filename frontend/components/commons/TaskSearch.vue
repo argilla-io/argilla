@@ -18,7 +18,7 @@
 <template>
   <div class="app__content">
     <div class="grid">
-      <Results :dataset="dataset" />
+      <results :dataset="dataset" />
     </div>
   </div>
 </template>

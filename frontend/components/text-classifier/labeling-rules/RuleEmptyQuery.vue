@@ -21,7 +21,7 @@
       <p class="rule__text">New query</p>
     </div>
     <div class="rule__labels" v-if="labels.length">
-      <ClassifierAnnotationButton
+      <classifier-annotation-button
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
@@ -30,7 +30,7 @@
         :data-title="label.class"
         :value="label.class"
       >
-      </ClassifierAnnotationButton>
+      </classifier-annotation-button>
     </div>
     <div v-else class="empty-labels">
       <p>This doesn't have any labels yet.</p>

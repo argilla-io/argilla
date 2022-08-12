@@ -22,12 +22,12 @@
   >
     <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
-    <re-button
+    <base-button
       v-if="scrollHeight >= visibleRecordHeight"
       class="primary clear small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </re-button>
+    </base-button>
   </div>
 </template>
 <script>

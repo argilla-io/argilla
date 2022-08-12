@@ -3,11 +3,11 @@
     <pre>
       <code v-highlight class="python">{{code}}</code>
     </pre>
-    <re-action-tooltip class="code__button" tooltip="Copied">
+    <base-action-tooltip class="code__button" tooltip="Copied">
       <a class="breadcrumbs__copy" href="#" @click.prevent="copy(code)">
         <svgicon name="copy" width="16" height="16" />
       </a>
-    </re-action-tooltip>
+    </base-action-tooltip>
   </div>
 </template>
 

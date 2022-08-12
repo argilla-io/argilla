@@ -41,7 +41,7 @@
         :search-text="searchText"
         @input="onSearchLabel"
       />
-      <ClassifierAnnotationButton
+      <classifier-annotation-button
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
@@ -52,21 +52,19 @@
         :data-title="label.class"
         :value="label.class"
       >
-      </ClassifierAnnotationButton>
+      </classifier-annotation-button>
 
-      <a
+      <base-button
         v-if="visibleLabels.length < filteredLabels.length"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="expandLabels"
-        >+{{ filteredLabels.length - visibleLabels.length }}</a
+        class="feedback-interactions__more primary clear"
+        @click="expandLabels"
+        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
       >
-      <a
+      <base-button
         v-else-if="visibleLabels.length > maxVisibleLabels"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="collapseLabels"
-        >Show less</a
+        class="feedback-interactions__more primary clear"
+        @click="collapseLabels"
+        >Show less</base-button
       >
     </div>
     <div v-else class="empty-labels">
@@ -81,13 +79,13 @@
       </p>
     </div>
     <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
-    <re-button
+    <base-button
       v-else
       :disabled="!selectedLabelsVModel.length"
       class="feedback-interactions__button primary"
       @click="saveRule"
     >
-      Save rule</re-button
+      Save rule</base-button
     >
   </div>
 </template>
@@ -264,20 +262,8 @@ $color: #333346;
     padding-right: 200px;
   }
   &__more {
-    align-self: center;
     margin: 3.5px;
-    text-decoration: none;
-    font-weight: 500;
-    font-family: $sff;
-    outline: none;
-    padding: 0.5em;
-    border-radius: $border-radius;
-    transition: all 0.2s ease-in-out;
     display: inline-block;
-    &:hover {
-      transition: all 0.2s ease-in-out;
-      background: palette(grey, 800);
-    }
   }
   &__button {
     margin-top: auto;

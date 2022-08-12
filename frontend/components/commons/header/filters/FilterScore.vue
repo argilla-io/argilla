@@ -66,17 +66,21 @@
             :encoding="encoding"
           />
           <div class="range__container">
-            <ReRange
+            <base-range
               v-if="scoreExpanded"
               ref="slider"
               v-bind="rangeOptions"
               v-model="scoreRanges"
-            ></ReRange>
+            ></base-range>
           </div>
         </div>
         <div class="filter__buttons">
-          <ReButton class="primary outline" @click="onClose()">Cancel</ReButton>
-          <ReButton class="primary" @click="onApplyscoreRange">Apply</ReButton>
+          <base-button class="primary outline" @click="onClose()"
+            >Cancel</base-button
+          >
+          <base-button class="primary" @click="onApplyscoreRange"
+            >Apply</base-button
+          >
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@
 <template>
   <ul v-if="type === 'multiple'">
     <li v-for="(option, index) in options" :key="index">
-      <ReCheckbox
+      <base-checkbox
         :id="optionValue(option)"
         v-model="selectedOptions"
         class="re-checkbox--dark"
@@ -28,7 +28,7 @@
         <template v-if="optionCounter(option) !== undefined"
           >({{ optionCounter(option) | formatNumber }})</template
         >
-      </ReCheckbox>
+      </base-checkbox>
     </li>
     <li v-if="!Object.entries(options).length">0 results</li>
   </ul>

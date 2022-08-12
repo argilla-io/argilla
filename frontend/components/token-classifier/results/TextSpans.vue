@@ -23,7 +23,7 @@
     @mouseup="reset($event)"
     v-click-outside="onReset"
   >
-    <TextSpan
+    <text-span
       v-for="(token, i) in textSpans"
       :key="i"
       :record="record"

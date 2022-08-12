@@ -17,7 +17,7 @@
 
 <template>
   <span class="span__text">
-    <EntityHighlight
+    <entity-highlight
       v-if="token.entity"
       :class="[
         'color_' + (tag_color % this.$entitiesMaxColors),

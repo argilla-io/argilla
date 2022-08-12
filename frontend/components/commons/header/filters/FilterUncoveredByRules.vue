@@ -1,11 +1,11 @@
 <template>
-  <ReCheckbox
+  <base-checkbox
     @change="changeUncoveredByRules"
     class="re-checkbox--dark"
     :value="filter.selected"
   >
     Only records not covered by rules
-  </ReCheckbox>
+  </base-checkbox>
 </template>
 
 <script>

@@ -1,14 +1,14 @@
 <template>
   <div v-if="isVisible" class="rules-management">
-    <ReLoading v-if="$fetchState.pending" />
+    <base-loading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error">
       <div class="rules-management__container">
-        <re-button
+        <base-button
           class="rules-management__close primary outline small"
           @click="hideList"
         >
           <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to
-          query view</re-button
+          query view</base-button
         >
         <p class="rules-management__title">
           Rules
@@ -16,12 +16,12 @@
             >({{ formattedRules.length }})</span
           >
         </p>
-        <ReSearchBar
+        <base-search-bar
           v-if="formattedRules.length"
           placeholder="Search rule by name"
           @input="onSearch"
         />
-        <ReTableInfo
+        <base-table-info
           class="rules-management__table"
           :data="formattedRules"
           :sorted-order="sortedOrder"

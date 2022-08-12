@@ -80,14 +80,13 @@
               @sortBy="onSortBy"
             />
           </div>
-          <a
+          <base-button
             v-if="
               initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
             "
-            class="filters__list__button"
-            href="#"
-            @click.prevent="removeFiltersByGroup(group)"
-            >Remove all filters</a
+            class="filters__list__button link"
+            @click="removeFiltersByGroup(group)"
+            >Remove all filters</base-button
           >
         </div>
       </div>
@@ -320,22 +319,8 @@ $number-size: 18px;
       position: relative;
       flex-shrink: 0;
     }
-    &__sort {
-      svg {
-        margin-right: 0.3em;
-      }
-    }
     &__button {
-      color: $font-secondary-medium;
-      @include font-size(13px);
-      text-decoration: none;
-      display: block;
-      font-weight: 600;
-      background: palette(white);
-      position: relative;
-      margin-left: 2em;
-      margin-bottom: 1em;
-      padding-top: 2em;
+      margin: 2em auto 1em 2em;
     }
     p {
       cursor: pointer;
@@ -344,14 +329,14 @@ $number-size: 18px;
       margin-top: 0;
       padding: 0.8em;
       border-radius: $border-radius;
-      margin-right: 10px;
+      margin-right: $base-space;
       color: $font-secondary-medium;
       @include font-size(15px);
       font-family: $sff;
       white-space: nowrap;
       @include media(">desktop") {
         padding: 0.8em 1em;
-        margin-right: 15px;
+        margin-right: $base-space * 2;
       }
       &:hover {
         background: palette(grey, 600);

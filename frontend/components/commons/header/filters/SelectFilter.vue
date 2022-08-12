@@ -27,7 +27,7 @@
       @click="onRemove()"
     />
     <p class="filter__label" :title="filter.name">{{ filter.name }}:</p>
-    <FilterDropdown
+    <filter-dropdown
       color-type="grey"
       :class="{ highlighted: visible || appliedFilters.length }"
       :visible="visible"
@@ -60,13 +60,13 @@
           :option-value="optionName"
         />
         <div class="filter__buttons">
-          <ReButton class="primary outline" @click="onCancel">
+          <base-button class="primary outline" @click="onCancel">
             Cancel
-          </ReButton>
-          <ReButton class="primary" @click="onApply"> Filter </ReButton>
+          </base-button>
+          <base-button class="primary" @click="onApply"> Filter </base-button>
         </div>
       </div>
-    </FilterDropdown>
+    </filter-dropdown>
   </div>
 </template>
 
@@ -152,13 +152,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.highlight-text {
-  display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
-  line-height: 16px;
-}
-
 .filter {
   &__row {
     display: flex;

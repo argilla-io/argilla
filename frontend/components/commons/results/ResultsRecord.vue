@@ -23,14 +23,14 @@
         item.status === 'Discarded' ? 'discarded' : null,
       ]"
     >
-      <ReCheckbox
+      <base-checkbox
         v-if="annotationEnabled"
         class="list__checkbox"
         :value="item.selected"
         @change="onCheckboxChanged($event, item.id)"
-      ></ReCheckbox>
+      ></base-checkbox>
       <slot :record="item" />
-      <RecordExtraActions
+      <record-extra-actions
         :key="item.id"
         :allow-change-status="annotationEnabled"
         :record="item"
@@ -124,10 +124,6 @@ export default {
     transition: 0.3s ease-in-out;
     border: 1px solid palette(grey, 600);
     margin-bottom: $base-space-between-records;
-    &__asterisk {
-      @include font-size(24px);
-      color: palette(blue, 300);
-    }
     &--annotation-mode {
       @extend .list__item !optional;
       &.discarded {
@@ -138,12 +134,6 @@ export default {
           transition: 0.3s ease-in-out;
         }
       }
-    }
-    &__checkbox.re-checkbox {
-      position: absolute;
-      left: 1.2em;
-      top: 1.2em;
-      width: auto;
     }
   }
 }

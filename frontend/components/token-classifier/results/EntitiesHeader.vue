@@ -18,13 +18,7 @@
 <template>
   <div class="container">
     <div class="entities__wrapper">
-      <div
-        v-if="visibleEntities.length"
-        :class="[
-          'entities__container',
-          activeEntity ? 'entities__container--multiple' : '',
-        ]"
-      >
+      <div v-if="visibleEntities.length" class="entities__container">
         <span
           v-for="(entity, index) in visibleEntities"
           :key="index"
@@ -32,29 +26,25 @@
           :class="[
             `color_${entity.colorId % $entitiesMaxColors}`,
             activeEntity === entity.text ? 'active' : '',
-            annotationEnabled
-              ? 'non-selectable--show-sort-code'
-              : 'non-selectable',
           ]"
-          @click="onActiveEntity(entity)"
         >
           {{ entity.text }}
           <span v-if="entity.shortcut" class="shortcut"
             >[{{ entity.shortcut }}]</span
           >
         </span>
-        <re-button
+        <base-button
           v-if="!showEntitySelector && dataset.entities.length > entitiesNumber"
           class="entities__container__button primary clear small"
           @click="toggleEntitiesNumber"
-          >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</re-button
+          >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</base-button
         >
       </div>
-      <re-button
+      <base-button
         v-if="showEntitySelector && dataset.entities.length > entitiesNumber"
         class="entities__container__button primary clear small fixed"
         @click="toggleEntitiesNumber"
-        >{{ "Show less" }}</re-button
+        >{{ "Show less" }}</base-button
       >
     </div>
   </div>
@@ -91,22 +81,10 @@ export default {
         ? entities
         : entities.slice(0, this.entitiesNumber);
     },
-    annotationEnabled() {
-      return this.dataset.viewSettings.viewMode === "annotate";
-    },
   },
   methods: {
     toggleEntitiesNumber() {
       this.showEntitySelector = !this.showEntitySelector;
-    },
-    onActiveEntity(entity) {
-      if (this.annotationEnabled) {
-        if (this.activeEntity === entity.text) {
-          this.activeEntity = undefined;
-        } else {
-          this.activeEntity = entity.text;
-        }
-      }
     },
   },
 };
@@ -129,7 +107,7 @@ export default {
     margin-bottom: 16px;
     background: palette(white);
     border-radius: $border-radius-m;
-    box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
+    box-shadow: $shadow-300;
     min-height: 48px;
     max-height: 189px;
     overflow: auto;
@@ -138,21 +116,11 @@ export default {
       margin-top: -1px;
       margin-left: 0.3em;
       display: inline-block;
-      cursor: pointer;
-      &:hover {
-        background: $bg !important;
-        transition: background 0.2s ease-in-out;
-      }
       &.fixed {
         position: absolute;
         right: 8px;
         bottom: 8px;
         background: rgba(255, 255, 255, 80%);
-      }
-    }
-    &--multiple {
-      .entity:not(.active) {
-        // opacity: 0.7;
       }
     }
   }
@@ -163,26 +131,14 @@ export default {
   position: relative;
   display: inline-flex;
   align-items: center;
-  cursor: pointer;
   max-height: 28px;
   border: 2px solid transparent;
   transition: all 0.2s ease-in-out;
   font-weight: 600;
-  // &:not(.active):hover {
-  //   filter: brightness(90%);
-  // }
-  &.non-selectable,
-  &.non-selectable--show-sort-code {
-    cursor: default;
-    pointer-events: none;
-  }
   .shortcut {
     @include font-size(14px);
     font-weight: lighter;
     margin-left: 1em;
-    .non-selectable & {
-      display: none;
-    }
   }
 }
 // ner colors
@@ -193,10 +149,6 @@ $hue: 360;
   $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
     background: $rcolor;
-    &.active,
-    &.entity:hover {
-      border: 2px solid darken($rcolor, 50%);
-    }
   }
   .entity.color_#{$i - 1} span {
     background: $rcolor;

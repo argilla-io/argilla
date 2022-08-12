@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ReTableInfo renders properly 1`] = `
+exports[`BaseTableInfo renders properly 1`] = `
 <transition-stub name="fade" appear="true" filterfromroute="owner">
   <div class="table-info">
     <div class="table-info__header">
@@ -17,40 +17,40 @@ exports[`ReTableInfo renders properly 1`] = `
           <div class="table-info__item">
             <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
-            <remodal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-visible="true" modal-position="modal-center">
+            <base-modal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-visible="true" modal-position="modal-center">
               <div>
                 <p class="modal__title">Delete confirmation</p>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <rebutton class="primary outline">
+                  <base-button class="primary outline">
                     Cancel
-                  </rebutton>
-                  <rebutton class="primary">
+                  </base-button>
+                  <base-button class="primary">
                     Yes, delete
-                  </rebutton>
+                  </base-button>
                 </div>
               </div>
-            </remodal>
+            </base-modal>
           </div>
         </li>
         <li>
           <div class="table-info__item">
             <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
-            <remodal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-visible="true" modal-position="modal-center">
+            <base-modal modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-visible="true" modal-position="modal-center">
               <div>
                 <p class="modal__title">Delete confirmation</p>
                 <p>You are about to delete: <strong>undefined</strong>. This action cannot be undone</p>
                 <div class="modal-buttons">
-                  <rebutton class="primary outline">
+                  <base-button class="primary outline">
                     Cancel
-                  </rebutton>
-                  <rebutton class="primary">
+                  </base-button>
+                  <base-button class="primary">
                     Yes, delete
-                  </rebutton>
+                  </base-button>
                 </div>
               </div>
-            </remodal>
+            </base-modal>
           </div>
         </li>
       </ul>

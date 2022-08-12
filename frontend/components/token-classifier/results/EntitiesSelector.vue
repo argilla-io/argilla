@@ -214,18 +214,4 @@ export default {
     }
   }
 }
-.entity {
-  &.non-selectable,
-  &.non-selectable--show-sort-code {
-    cursor: default;
-    pointer-events: none;
-  }
-  &__sort-code {
-    margin-left: auto;
-    margin-right: 0;
-    .non-selectable & {
-      display: none;
-    }
-  }
-}
 </style>

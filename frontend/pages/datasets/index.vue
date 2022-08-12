@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <ReLoading v-if="$fetchState.pending" />
+    <base-loading v-if="$fetchState.pending" />
     <div v-else class="wrapper">
       <div class="main">
         <app-header
@@ -26,7 +26,7 @@
           :sticky="false"
           @breadcrumb-action="onBreadcrumbAction($event)"
         />
-        <Error
+        <error
           v-if="$fetchState.error"
           where="workspace datasets"
           :error="$fetchState.error"
@@ -34,10 +34,10 @@
         <datasets-empty v-else-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
-            <ReSearchBar @input="onSearch" placeholder="Search datasets" />
+            <base-search-bar @input="onSearch" placeholder="Search datasets" />
           </div>
           <div>
-            <ReTableInfo
+            <base-table-info
               ref="table"
               :data="datasets"
               :sorted-order="sortedOrder"

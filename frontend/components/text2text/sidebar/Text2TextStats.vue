@@ -18,7 +18,7 @@
 <template>
   <div>
     <p class="sidebar__title">Stats</p>
-    <StatsSelector
+    <stats-selector
       :selected-option="selectedOption"
       :options="options"
       @selectOption="onSelectOption"

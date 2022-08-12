@@ -96,7 +96,7 @@ $buttonSize: 34px;
     right: -0.5em;
     padding-top: 1.5em;
     background: palette(white);
-    border-radius: 5px;
+    border-radius: $border-radius;
     @include font-size(14px);
     font-weight: 400;
     color: $font-medium;
@@ -145,9 +145,9 @@ $buttonSize: 34px;
   line-height: 1em;
   margin-top: 1.5em;
   padding: 1em;
-  background: #fcfcfc;
+  background: palette(grey, 800);
   text-align: right;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
 }
 </style>
