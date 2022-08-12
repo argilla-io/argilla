@@ -26,21 +26,12 @@
         <span class="dropdown__text">Annotate as...</span>
       </template>
       <template #dropdown-content>
-        <input
+        <select-options-search
+          allow-clear
+          @clear="clearSearchText"
           v-model="searchText"
-          type="text"
-          autofocus
           placeholder="Search label..."
         />
-        <svgicon
-          v-if="searchText != undefined"
-          class="clean-search"
-          name="close"
-          width="10"
-          height="10"
-          color="#9b9b9b"
-          @click="cleanSearchText"
-        ></svgicon>
         <select-options
           v-if="multiLabel"
           ref="options"
@@ -98,7 +89,7 @@ export default {
       this.selectedOptions = [];
     },
 
-    cleanSearchText() {
+    clearSearchText() {
       this.searchText = undefined;
     },
     filterSearch(options, text) {

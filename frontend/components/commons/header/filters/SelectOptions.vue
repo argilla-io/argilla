@@ -19,35 +19,26 @@
   <ul v-if="type === 'multiple'">
     <li v-for="(option, index) in options" :key="index">
       <ReCheckbox
-        v-if="optionIsAString(option)"
-        :id="option"
+        :id="optionValue(option)"
         v-model="selectedOptions"
         class="re-checkbox--dark"
-        :value="option"
+        :value="optionValue(option)"
       >
-        {{ option }}
-      </ReCheckbox>
-      <ReCheckbox
-        v-else
-        :id="option[0]"
-        v-model="selectedOptions"
-        class="re-checkbox--dark"
-        :value="option[0]"
-      >
-        {{ option[0] }} ({{ option[1] | formatNumber }})
+        {{ optionName(option) }}
+        <template v-if="optionCounter(option) !== undefined"
+          >({{ optionCounter(option) | formatNumber }})</template
+        >
       </ReCheckbox>
     </li>
     <li v-if="!Object.entries(options).length">0 results</li>
   </ul>
-  <ul v-else-if="type === 'single'">
-    <li
-      v-for="option in options"
-      :key="optionName ? option[optionName] : option"
-    >
+  <ul v-else-if="type === 'single'" class="--single">
+    <li v-for="option in options" :key="optionName(option)">
       <a href="#" @click.prevent="select(option)">
-        {{ optionName ? option[optionName] : option }}
+        {{ optionName(option) }}
       </a>
     </li>
+    <li v-if="!options.length">0 results</li>
   </ul>
 </template>
 
@@ -63,7 +54,16 @@ export default {
       default: () => [],
     },
     optionName: {
-      type: String,
+      type: Function,
+      default: (option) => option,
+    },
+    optionValue: {
+      type: Function,
+      default: (option) => option,
+    },
+    optionCounter: {
+      type: Function,
+      default: () => undefined,
     },
     type: {
       type: String,
@@ -86,7 +86,6 @@ export default {
   },
   methods: {
     select(option) {
-      console.log(option);
       this.$emit("selected", option);
     },
     optionIsAString(option) {
@@ -115,6 +114,10 @@ ul {
   margin: 0 -1em 0 -1em;
   padding: 0 1em 1em 1em;
   @extend %hide-scrollbar;
+  &.--single {
+    padding-bottom: 0;
+    margin-bottom: -0.5em;
+  }
 }
 li {
   padding: 0.4em 0;

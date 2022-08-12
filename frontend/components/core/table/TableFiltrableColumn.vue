@@ -9,34 +9,15 @@
       {{ column.name }}
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
-      <input
-        v-model="searchText"
-        class="filter-options"
-        type="text"
-        autofocus
-        placeholder="Search"
+      <select-options-search v-model="searchText" />
+      <select-options
+        ref="options"
+        type="multiple"
+        v-model="selectedOptions"
+        :options="filterOptions(this.options, searchText)"
+        :option-name="optionName"
+        :option-counter="optionCounter"
       />
-      <ul>
-        <li
-          v-for="option in filterOptions(this.options, searchText)"
-          :key="option.index"
-        >
-          <ReCheckbox
-            :id="option"
-            v-model="selectedOptions"
-            class="re-checkbox--dark"
-            :value="option"
-          >
-            {{ isObject(option) ? `${option.key}: ${option.value}` : option }}
-            ({{ tableItemsCounter(option) | formatNumber }})
-          </ReCheckbox>
-        </li>
-        <li
-          v-if="!Object.entries(filterOptions(this.options, searchText)).length"
-        >
-          0 results
-        </li>
-      </ul>
     </div>
   </div>
 </template>
@@ -154,6 +135,12 @@ export default {
         ).length;
       }
     },
+    optionName(option) {
+      return this.isObject(option) ? `${option.key}: ${option.value}` : option;
+    },
+    optionCounter(option) {
+      return this.tableItemsCounter(option);
+    },
   },
 };
 </script>
@@ -171,31 +158,6 @@ export default {
   min-width: 270px;
   border-radius: $border-radius;
   box-shadow: $shadow;
-  ul {
-    list-style: none;
-    max-height: 220px;
-    overflow-y: auto;
-    margin: 0 -1em;
-    padding: 0 1em 1em;
-    @extend %hide-scrollbar;
-  }
-  li {
-    padding: 0.4em 0;
-  }
-  .re-checkbox {
-    margin: 0;
-    width: 100% !important;
-    cursor: default;
-  }
-  ::v-deep .checkbox-label {
-    line-height: 13px;
-  }
-}
-.highlight-text {
-  display: inline-block;
-  // font-weight: 600;
-  background: #ffbf00;
-  line-height: 16px;
 }
 
 .filter {
@@ -209,8 +171,7 @@ export default {
     & > * {
       display: block !important;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
+      margin-right: $base-space;
       &:last-child {
         margin-right: 0;
       }

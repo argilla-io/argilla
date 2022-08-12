@@ -37,17 +37,11 @@
         <span v-else>Sort by</span>
       </span>
       <div slot="dropdown-content">
-        <input
-          v-model="searchText"
-          class="filter-options"
-          type="text"
-          autofocus
-          placeholder="Search..."
-        />
+        <select-options-search v-model="searchText" />
         <select-options
           ref="options"
           type="single"
-          optionName="name"
+          :option-name="optionName"
           :options="filteredSortOptions"
           @selected="addField"
         />
@@ -124,6 +118,9 @@ export default {
       this.visible = false;
       this.defaultSortedBy = currentSort;
       this.$emit("addSortField", currentSort, this.defaultSortedByDir);
+    },
+    optionName(option) {
+      return option.name;
     },
   },
 };
