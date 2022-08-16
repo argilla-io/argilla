@@ -26,8 +26,8 @@
           class="rule__records__info"
           v-if="areFiltersApplied.length"
           name="info"
-          width="12"
-          height="12"
+          width="18"
+          height="18"
         />
         <span
           class="rule__records__tooltip"
@@ -328,9 +328,9 @@ $color: #333346;
       margin-left: 0.2em;
     }
     &__info {
-      min-width: 12px;
+      min-width: 18px;
       margin-left: 0.3em;
-      fill: $color;
+      fill: palette(grey, 100);
       cursor: pointer;
       &:hover {
         & + .rule__records__tooltip:after,
@@ -346,32 +346,9 @@ $color: #333346;
     }
     &__tooltip {
       position: absolute;
-      right: 6px;
-      @extend %hastooltip;
-      &:after {
-        padding: 0.5em 1em;
-        top: calc(100% + 20px);
-        right: 50%;
-        transform: translateX(50%);
-        background: $color;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        @include font-size(14px);
-        font-weight: 600;
-        margin-bottom: 0.5em;
-        min-width: 240px;
-        white-space: break-spaces;
-        text-align: left;
-        line-height: 1.4em;
-      }
-      &:before {
-        right: calc(50% - 7px);
-        top: 13px;
-        border-bottom: 7px solid $color;
-        border-right: 7px solid transparent;
-        border-left: 7px solid transparent;
-      }
+      right: 7px;
+      @extend %has-tooltip--bottom;
+      @extend %tooltip-large-text;
     }
   }
   &__labels {
