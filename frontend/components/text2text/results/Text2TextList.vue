@@ -58,11 +58,7 @@
           </div>
         </div>
 
-        <span
-          v-for="(sentence, index) in sentences"
-          v-else
-          :key="sentence.text"
-        >
+        <span v-for="(sentence, index) in sentences" v-else :key="index">
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
               <p v-if="!editionMode" class="content__sentences__title">
@@ -99,35 +95,13 @@
                 <div v-if="showScore" class="content__score">
                   Score: {{ sentence.score | percent }}
                 </div>
-                <div v-if="sentences.length" class="content__nav-buttons">
-                  <a
-                    :class="itemNumber <= 0 ? 'disabled' : null"
-                    href="#"
-                    @click.prevent="showitemNumber(--itemNumber)"
-                  >
-                    <svgicon
-                      name="chevron-left"
-                      width="8"
-                      height="8"
-                      color="#4C4EA3"
-                    />
-                  </a>
-                  {{ itemNumber + 1 }} of {{ sentences.length }} predictions
-                  <a
-                    :class="
-                      sentences.length <= itemNumber + 1 ? 'disabled' : null
-                    "
-                    href="#"
-                    @click.prevent="showitemNumber(++itemNumber)"
-                  >
-                    <svgicon
-                      name="chevron-right"
-                      width="8"
-                      height="8"
-                      color="#4C4EA3"
-                    />
-                  </a>
-                </div>
+                <base-slider
+                  v-if="sentences.length"
+                  :slides-origin="sentences"
+                  :item-number="itemNumber"
+                  slides-name="predictions"
+                  @go-to="showItemNumber"
+                />
               </template>
               <div v-if="annotationEnabled" class="content__actions-buttons">
                 <base-button
@@ -315,7 +289,7 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
-    async showitemNumber(index) {
+    async showItemNumber(index) {
       this.itemNumber = index;
       await (this.visibleSentence = this.selectedSentence);
     },
@@ -474,40 +448,6 @@ export default {
       margin-left: auto;
       & + .button {
         margin-left: $base-space;
-      }
-    }
-  }
-  &__nav-buttons {
-    @include font-size(13px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 33%;
-    margin-right: auto;
-    margin-left: 0;
-    color: $font-medium;
-    a {
-      height: 20px;
-      width: 20px;
-      line-height: 19px;
-      text-align: center;
-      border-radius: 3px;
-      text-align: center;
-      margin-left: 1.5em;
-      margin-right: 1.5em;
-      display: inline-block;
-      text-decoration: none;
-      outline: none;
-      @include font-size(13px);
-      background: transparent;
-      transition: all 0.2s ease-in-out;
-      &:hover {
-        background: palette(grey, 800);
-        transition: all 0.2s ease-in-out;
-      }
-      &.disabled {
-        opacity: 0;
-        pointer-events: none;
       }
     }
   }
