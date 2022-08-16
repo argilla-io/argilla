@@ -159,7 +159,7 @@ export default {
       align-items: center;
       margin-right: 0;
     }
-    ::v-deep .checkbox-label {
+    :deep(.checkbox-label) {
       height: auto !important;
     }
   }

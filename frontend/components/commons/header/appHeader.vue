@@ -116,7 +116,7 @@ export default {
   position: sticky;
   background: $bg;
   z-index: 3;
-  ::v-deep .header__filters {
+  :deep(.header__filters) {
     position: relative;
   }
   &:not(.sticky) {

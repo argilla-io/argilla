@@ -125,7 +125,7 @@ export default {
       padding-top: 0;
     }
   }
-  ::v-deep {
+  :deep() {
     .sidebar__title {
       margin-bottom: 2em;
       color: $font-secondary-medium-dark;

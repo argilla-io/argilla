@@ -114,7 +114,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .whitespace {
+:deep(.whitespace) {
   background: palette(white);
   padding-bottom: 3px;
   border-bottom: 5px solid palette(white);

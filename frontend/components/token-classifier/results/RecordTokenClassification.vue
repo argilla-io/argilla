@@ -208,7 +208,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  ::v-deep {
+  :deep() {
     .span__text {
       color: transparent;
       & > * {
@@ -219,7 +219,7 @@ export default {
       color: transparent;
     }
   }
-  ::v-deep .highlight-text {
+  :deep(.highlight-text) {
     opacity: 1;
   }
 }

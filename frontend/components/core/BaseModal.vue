@@ -145,11 +145,11 @@ export default {
   box-shadow: $shadow;
   border-radius: $border-radius;
   max-width: 520px;
-  ::v-deep .modal__title {
+  :deep(.modal__title) {
     font-weight: normal;
     @include font-size(16px);
   }
-  ::v-deep .modal__text {
+  :deep(.modal__text) {
     margin-bottom: 2em;
   }
 }
@@ -157,12 +157,12 @@ export default {
   box-shadow: $shadow;
   border-radius: $border-radius;
   max-width: 400px;
-  ::v-deep .modal__text {
+  :deep(.modal__text) {
     margin-bottom: 2em;
   }
 }
 
-::v-deep .modal-buttons {
+:deep(.modal-buttons) {
   display: flex;
   .button {
     width: 100%;
@@ -172,7 +172,7 @@ export default {
     }
   }
 }
-::v-deep .modal__title {
+:deep(.modal__title) {
   @include font-size(14px);
   color: $font-dark;
   font-weight: 600;

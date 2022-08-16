@@ -259,7 +259,7 @@ export default {
   }
   &__table {
     margin-bottom: 2em !important;
-    ::v-deep {
+    :deep() {
       .table-info__item__col {
         width: 130px;
       }
