@@ -56,7 +56,7 @@ export default {
   font-weight: 600;
   @include font-size(12px);
 }
-::v-deep {
+:deep() {
   .hljs-keyword,
   .hljs-selector-tag,
   .hljs-literal,

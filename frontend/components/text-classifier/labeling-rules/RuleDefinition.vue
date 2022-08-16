@@ -144,7 +144,7 @@ export default {
     @include media(">desktopLarge") {
       min-width: 33%;
     }
-    &::v-deep {
+    &:deep() {
       .rule-metrics__container {
         flex-wrap: wrap;
         height: 100%;

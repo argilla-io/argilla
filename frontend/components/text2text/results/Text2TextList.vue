@@ -382,12 +382,12 @@ export default {
   }
   &--editable {
     width: 100%;
-    ::v-deep p {
+    :deep(p) {
       padding: 0.6em;
       margin: 0;
       outline: none;
     }
-    ::v-deep .button {
+    :deep(.button) {
       opacity: 1 !important;
     }
   }

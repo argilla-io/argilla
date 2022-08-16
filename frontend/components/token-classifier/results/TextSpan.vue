@@ -191,7 +191,7 @@ export default {
   cursor: pointer;
   position: relative;
   background: palette(grey, 600);
-  .prediction ::v-deep .highlight__content {
+  .prediction :deep(.highlight__content) {
     background: palette(grey, 600);
   }
   .span__text {
@@ -216,20 +216,20 @@ $hue: 360;
 @for $i from 1 through $colors {
   $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
   .color_#{$i - 1} {
-    &.annotation ::v-deep .highlight__content {
+    &.annotation :deep(.highlight__content) {
       background: $rcolor;
     }
-    &.prediction ::v-deep .highlight__content {
+    &.prediction :deep(.highlight__content) {
       padding-bottom: 3px;
       border-bottom: 5px solid $rcolor;
     }
-    & ::v-deep .highlight__tooltip {
+    & :deep(.highlight__tooltip) {
       background: $rcolor;
     }
-    &.annotation ::v-deep .highlight__tooltip:after {
+    &.annotation :deep(.highlight__tooltip:after) {
       border-color: $rcolor transparent transparent transparent;
     }
-    &.prediction ::v-deep .highlight__tooltip:after {
+    &.prediction :deep(.highlight__tooltip:after) {
       border-color: transparent transparent $rcolor transparent;
     }
     &.active,
@@ -240,11 +240,11 @@ $hue: 360;
   .tag.color_#{$i - 1} span {
     background: $rcolor;
   }
-  ::v-deep .entities__selector__option.color_#{$i - 1} {
+  :deep(.entities__selector__option.color_#{$i - 1}) {
     background: $rcolor;
     border: 2px solid $rcolor;
   }
-  ::v-deep .entities__selector__option.color_#{$i - 1} {
+  :deep(.entities__selector__option.color_#{$i - 1}) {
     &:active,
     &.active,
     &:hover {

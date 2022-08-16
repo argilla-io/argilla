@@ -252,7 +252,7 @@ export default {
   @extend %item;
   &.fixed {
     width: 24%;
-    ::v-deep .annotation-button-data__info {
+    :deep(.annotation-button-data__info) {
       margin-right: 0 !important;
       margin-left: auto !important;
     }

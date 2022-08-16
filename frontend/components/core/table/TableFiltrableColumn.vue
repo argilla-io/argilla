@@ -198,7 +198,7 @@ button {
   font-family: $sff;
   @include media("<=desktop") {
     display: block;
-    ::v-deep svg {
+    :deep(svg) {
       display: block;
       margin-right: 0 !important;
     }
@@ -211,7 +211,7 @@ button {
     margin: 0 -1em;
     border-radius: $border-radius;
     color: $primary-color;
-    ::v-deep svg {
+    :deep(svg) {
       & > * {
         fill: $primary-color !important;
       }

@@ -118,7 +118,7 @@ export default {
   }
   &--email {
     display: block;
-    ::v-deep table {
+    :deep(table) {
       width: calc(100% - 3em) !important;
       max-width: 700px !important;
       display: inline-block;
@@ -130,13 +130,13 @@ export default {
         max-width: 1140px !important;
       }
     }
-    ::v-deep img {
+    :deep(img) {
       display: none;
     }
-    ::v-deep pre {
+    :deep(pre) {
       white-space: pre-wrap !important;
     }
-    ::v-deep .record__content {
+    :deep(.record__content) {
       display: block;
       max-width: 748px !important;
       margin-left: 0 !important;
@@ -145,7 +145,7 @@ export default {
         max-width: 1140px !important;
       }
     }
-    ::v-deep div.WordSection1 {
+    :deep(div.WordSection1) {
       word-break: break-all !important;
       p {
         font-family: initial !important;

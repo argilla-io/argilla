@@ -196,7 +196,7 @@ export default {
       margin-left: 0.5em;
     }
   }
-  ::v-deep .footer {
+  :deep(.footer) {
     position: absolute;
     bottom: 0;
     left: 0;

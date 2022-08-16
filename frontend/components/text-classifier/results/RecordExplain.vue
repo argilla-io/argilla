@@ -182,7 +182,7 @@ export default {
     border-radius: 3px;
     word-break: normal;
   }
-  ::v-deep .highlight-text {
+  :deep(.highlight-text) {
     line-height: 16px;
   }
 }

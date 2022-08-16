@@ -34,7 +34,7 @@ export default {
 .re-checkbox {
   flex-direction: row-reverse;
   margin-left: 2em;
-  ::v-deep .checkbox-label {
+  :deep(.checkbox-label) {
     margin-left: 1em;
   }
 }

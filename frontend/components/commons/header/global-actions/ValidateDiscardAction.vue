@@ -124,7 +124,7 @@ export default {
   }
   &__select {
     margin-left: 0.8em;
-    ::v-deep .dropdown__header {
+    :deep(.dropdown__header) {
       max-height: 33px;
       color: $font-secondary-medium;
       font-family: $sff;

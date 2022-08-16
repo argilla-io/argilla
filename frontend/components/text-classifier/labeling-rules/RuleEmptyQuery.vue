@@ -159,10 +159,10 @@ export default {
 .label-button {
   margin: 5px;
 }
-.label-button ::v-deep .button {
+.label-button :deep(.button) {
   justify-content: center;
 }
-.label-button:not(.active) ::v-deep .button {
+.label-button:not(.active) :deep(.button) {
   background: #e0e1ff !important;
 }
 .rule {

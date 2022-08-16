@@ -248,7 +248,7 @@ export default {
       padding: 0.5em 1em;
     }
   }
-  ::v-deep svg {
+  :deep(svg) {
     margin-top: 5px;
     height: 30px !important;
     max-width: 90%;
@@ -273,7 +273,7 @@ export default {
       content: none;
     }
     .score {
-      ::v-deep svg {
+      :deep(svg) {
         max-width: 100%;
         height: 100px !important;
       }
@@ -332,7 +332,7 @@ export default {
   }
 }
 
-::v-deep .marks {
+:deep(.marks) {
   .background {
     stroke: none !important;
   }

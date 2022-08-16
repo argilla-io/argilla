@@ -156,10 +156,10 @@ $hue: 360;
   .entities__selector__option.color_#{$i - 1} span {
     background: $rcolor;
   }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip {
+  .color_#{$i - 1} :deep(.highlight__tooltip) {
     background: $rcolor;
   }
-  .color_#{$i - 1} ::v-deep .highlight__tooltip:after {
+  .color_#{$i - 1} :deep(.highlight__tooltip:after) {
     border-color: $rcolor transparent transparent transparent;
   }
 }

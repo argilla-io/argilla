@@ -47,7 +47,7 @@ export default {
   &__container {
     position: relative;
     &.active {
-      ::v-deep svg {
+      :deep(svg) {
         fill: $primary-color !important;
         .breadcrumbs &,
         .code & {

@@ -347,7 +347,7 @@ $number-size: 18px;
       }
     }
   }
-  ::v-deep .filters--scrollable {
+  :deep(.filters--scrollable) {
     max-height: 312px;
     overflow: auto;
     @extend %hide-scrollbar;
