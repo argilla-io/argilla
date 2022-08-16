@@ -245,28 +245,7 @@ label {
 }
 p[data-title] {
   position: relative;
-  @extend %hastooltip;
-  &:after {
-    padding: 0.5em 1em;
-    bottom: 100%;
-    right: 50%;
-    transform: translateX(50%);
-    background: $color;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    @include font-size(14px);
-    font-weight: 600;
-    margin-bottom: 0.5em;
-    min-width: 220px;
-    white-space: break-spaces;
-  }
-  &:before {
-    right: calc(50% - 7px);
-    top: -0.5em;
-    border-top: 7px solid $color;
-    border-right: 7px solid transparent;
-    border-left: 7px solid transparent;
-  }
+  @extend %has-tooltip--top;
+  @extend %tooltip-large-text;
 }
 </style>
