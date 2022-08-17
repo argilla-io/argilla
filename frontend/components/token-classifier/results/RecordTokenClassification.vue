@@ -173,14 +173,11 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 56px 20px 50px 50px;
+  padding: 56px 200px 50px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(18px);
   line-height: 34px;
-  .list__item--annotation-mode & {
-    padding-left: 65px;
-  }
 }
 
 .content {

@@ -373,9 +373,9 @@ export default {
   &--separator {
     padding-top: 1em;
     &:before {
+      width: 100%;
       content: "";
       border-top: 1px solid palette(grey, 700);
-      width: calc(100% - 200px);
       position: absolute;
       top: 0;
     }
@@ -428,7 +428,6 @@ export default {
     align-items: center;
   }
   &__group {
-    width: calc(100% - 200px);
     display: flex;
     align-items: center;
     margin-bottom: 0.5em;

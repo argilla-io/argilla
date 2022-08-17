@@ -130,9 +130,6 @@ export default {
   }
 }
 .feedback-interactions {
-  .list__item--annotation-mode & {
-    padding-right: 200px;
-  }
   &__button {
     margin-top: auto;
     margin-bottom: 0 !important;

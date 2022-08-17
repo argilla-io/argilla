@@ -93,10 +93,9 @@ export default {
 
 <style lang="scss" scoped>
 $annotation-button-size: 20px;
-$annotation-button-touch-size: 48px;
 .re-annotation-button {
   width: auto;
-  margin: 16px 8px 16px 0;
+  margin: $base-space * 2 $base-space $base-space * 2 0;
   display: inline-flex;
   position: relative;
   .annotation-button-container {
@@ -112,7 +111,7 @@ $annotation-button-touch-size: 48px;
       outline: none;
       cursor: pointer;
       background: #f0f0fe;
-      border-radius: 8px;
+      border-radius: $base-space;
       height: 40px;
       line-height: 40px;
       padding-left: 0.5em;

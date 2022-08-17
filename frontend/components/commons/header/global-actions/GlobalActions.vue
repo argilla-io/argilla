@@ -52,7 +52,7 @@ export default {
   align-items: center;
   width: 100%;
   text-align: left;
-  padding: 1em 1.4em;
+  padding: 1em $base-space * 2;
   background: palette(white);
   border-radius: $border-radius-m;
   position: relative;

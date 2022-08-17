@@ -17,9 +17,7 @@
 
 <template>
   <div class="record">
-    <!-- annotation labels and prediction status -->
     <div class="record--left">
-      <!-- record text -->
       <record-inputs :record="record" />
       <classifier-annotation-area
         v-if="annotationEnabled"
@@ -154,7 +152,7 @@ export default {
     width: 100%;
     padding: 50px 20px 50px 50px;
     .list__item--annotation-mode & {
-      padding-left: 65px;
+      padding-right: 200px;
     }
   }
   &__labels {

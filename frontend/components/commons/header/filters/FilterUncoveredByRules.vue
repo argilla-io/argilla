@@ -35,7 +35,7 @@ export default {
   flex-direction: row-reverse;
   margin-left: 2em;
   :deep(.checkbox-label) {
-    margin-left: 1em;
+    margin-left: $base-space * 2;
   }
 }
 </style>

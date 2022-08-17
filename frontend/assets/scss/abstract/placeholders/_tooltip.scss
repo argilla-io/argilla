@@ -13,7 +13,7 @@ $tooltip-border-radius: 3px;
   pointer-events: none;
   z-index: 2;
   white-space: nowrap;
-  padding: 0.5em 1em;
+  padding: $base-space $base-space*2;
   transform: none;
   background: $tooltip-bg;
   color: $tooltip-color;

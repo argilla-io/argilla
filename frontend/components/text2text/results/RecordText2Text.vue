@@ -17,21 +17,19 @@
 
 <template>
   <div class="record">
-    <div class="record--left record__item">
-      <record-string-text-2-text :record="record" />
-      <div>
-        <text-2-text-list
-          ref="list"
-          :dataset="dataset"
-          :record="record"
-          :predictions="predictionSentences"
-          :annotations="initialAnnotations"
-          :annotation-enabled="annotationEnabled"
-          @update-initial-record="initializeInitialRecord"
-          @reset-initial-record="onResetInitialRecord"
-          @annotate="onAnnotate"
-        />
-      </div>
+    <record-string-text-2-text :record="record" />
+    <div>
+      <text-2-text-list
+        ref="list"
+        :dataset="dataset"
+        :record="record"
+        :predictions="predictionSentences"
+        :annotations="initialAnnotations"
+        :annotation-enabled="annotationEnabled"
+        @update-initial-record="initializeInitialRecord"
+        @reset-initial-record="onResetInitialRecord"
+        @annotate="onAnnotate"
+      />
     </div>
   </div>
 </template>
@@ -131,24 +129,16 @@ export default {
 
 <style scoped lang="scss">
 .record {
-  display: flex;
-  &__item {
-    display: block;
-    @include font-size(16px);
-    line-height: 1.6em;
-    &:hover {
-      :deep(.edit) {
-        opacity: 1 !important;
-        pointer-events: all;
-        transition: opacity 0.5s ease-in-out 0.2s !important;
-      }
-    }
-  }
-  &--left {
-    width: 100%;
-    padding: 50px 50px 20px 50px;
-    .list__item--annotation-mode & {
-      padding-left: 65px;
+  display: block;
+  @include font-size(16px);
+  line-height: 1.6em;
+  width: 100%;
+  padding: 50px 200px 20px 50px;
+  &:hover {
+    :deep(.edit) {
+      opacity: 1 !important;
+      pointer-events: all;
+      transition: opacity 0.5s ease-in-out 0.2s !important;
     }
   }
 }

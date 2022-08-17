@@ -104,7 +104,7 @@ export default {
   }
   &__container {
     padding: 0.4em 0.5em;
-    margin-bottom: 16px;
+    margin-bottom: $base-space * 2;
     background: palette(white);
     border-radius: $border-radius-m;
     box-shadow: $shadow-300;
@@ -118,8 +118,8 @@ export default {
       display: inline-block;
       &.fixed {
         position: absolute;
-        right: 8px;
-        bottom: 8px;
+        right: $base-space;
+        bottom: $base-space;
         background: rgba(255, 255, 255, 80%);
       }
     }
@@ -138,7 +138,7 @@ export default {
   .shortcut {
     @include font-size(14px);
     font-weight: lighter;
-    margin-left: 1em;
+    margin-left: $base-space * 2;
   }
 }
 // ner colors

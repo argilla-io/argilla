@@ -89,9 +89,6 @@ export default {
 .record {
   white-space: pre-line;
   display: block;
-  .list__item--annotation-mode & {
-    padding-right: 200px;
-  }
   &__collapsed {
     .record__content {
       max-height: 174px;

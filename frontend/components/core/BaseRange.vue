@@ -1310,8 +1310,8 @@ export default {
 
 .vue-slider-component .vue-slider-piecewise-item {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: $base-space;
+  height: $base-space;
 }
 
 .vue-slider-component .vue-slider-piecewise-dot {
