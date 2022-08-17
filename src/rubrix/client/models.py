@@ -387,10 +387,10 @@ class TokenClassificationRecord(_Validators):
             for pred in prediction
         ]
 
-    @root_validator()
-    def _init_span_utils(cls, values):
-        values["_span_utils"] = SpanUtils(values["text"], values["tokens"])
-        return values
+    @validator("text")
+    def _check_if_empty_after_strip(cls, text: str):
+        assert text.strip(), "The provided `text` contains only whitespaces."
+        return text
 
     @property
     def __chars2tokens__(self) -> Dict[int, int]:
