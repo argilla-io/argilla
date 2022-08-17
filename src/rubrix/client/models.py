@@ -23,7 +23,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.utils import limit_value_length
@@ -295,7 +295,7 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    _span_utils: SpanUtils
+    _span_utils: SpanUtils = PrivateAttr()
 
     def __init__(
         self,
@@ -319,6 +319,8 @@ class TokenClassificationRecord(_Validators):
             text = " ".join(tokens)
 
         super().__init__(text=text, tokens=tokens, **data)
+
+        self._span_utils = SpanUtils(self.text, self.tokens)
 
         if self.annotation:
             self.annotation = self._validate_spans(self.annotation)
