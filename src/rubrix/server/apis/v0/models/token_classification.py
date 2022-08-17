@@ -119,20 +119,14 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
     def __init__(self, **data):
         super().__init__(**data)
 
+        self._span_utils = SpanUtils(self.text, self.tokens)
+
         if self.annotation:
             self._validate_spans(self.annotation)
         if self.prediction:
             self._validate_spans(self.prediction)
 
-    @root_validator()
-    def _init_span_utils(cls, values):
-        values["_span_utils"] = SpanUtils(values["text"], values["tokens"])
-        return values
-
-    @staticmethod
-    def _validate_spans(
-        span_utils: SpanUtils, annotation: TokenClassificationAnnotation
-    ):
+    def _validate_spans(self, annotation: TokenClassificationAnnotation):
         """Validates the spans with respect to the tokens.
 
         If necessary, also performs an automatic correction of the spans.
@@ -146,10 +140,10 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         """
         spans = [(ent.label, ent.start, ent.end) for ent in annotation.entities]
         try:
-            span_utils.validate(spans)
+            self._span_utils.validate(spans)
         except ValueError:
-            corrected_spans = span_utils.correct(spans)
-            span_utils.validate(corrected_spans)
+            corrected_spans = self._span_utils.correct(spans)
+            self._span_utils.validate(corrected_spans)
             for ent, span in zip(annotation.entities, corrected_spans):
                 ent.start, ent.end = span[1], span[2]
 
