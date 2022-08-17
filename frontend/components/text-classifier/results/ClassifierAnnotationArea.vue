@@ -234,14 +234,9 @@ export default {
 .feedback-interactions {
   margin: 0 auto 0 auto;
   padding-right: 0;
-  &:not(.fixed) {
-    @include media(">desktopLarge") {
-      max-width: calc(60% + 200px);
-      margin-left: 0;
-    }
-  }
-  .list__item--annotation-mode & {
-    padding-right: 200px;
+  @include media(">desktopLarge") {
+    max-width: calc(60% + 200px);
+    margin-left: 0;
   }
   &__more {
     margin: 3.5px;
@@ -250,12 +245,5 @@ export default {
 }
 .label-button {
   @extend %item;
-  &.fixed {
-    width: 24%;
-    :deep(.annotation-button-data__info) {
-      margin-right: 0 !important;
-      margin-left: auto !important;
-    }
-  }
 }
 </style>

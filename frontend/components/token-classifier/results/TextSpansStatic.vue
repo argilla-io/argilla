@@ -115,7 +115,6 @@ export default {
 <style lang="scss" scoped>
 .content {
   &__input {
-    padding-right: 200px;
     ::selection {
       background: none !important;
     }

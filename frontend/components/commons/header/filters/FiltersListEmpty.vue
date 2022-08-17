@@ -106,8 +106,8 @@ export default {
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
-      height: 8px;
-      width: 8px;
+      height: $base-space;
+      width: $base-space;
       -webkit-transform: rotate(133deg);
       transform: rotate(133deg);
       -webkit-transition: all 1.5s ease;
@@ -123,8 +123,8 @@ export default {
     border-style: solid;
     border-width: 1px 1px 0 0;
     display: inline-block;
-    height: 8px;
-    width: 8px;
+    height: $base-space;
+    width: $base-space;
     -webkit-transform: rotate(133deg);
     transform: rotate(133deg);
     -webkit-transition: all 1.5s ease;

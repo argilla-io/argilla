@@ -243,7 +243,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color: #333346;
 %item {
   // width: calc(25% - 5px);
   min-width: 80px;
@@ -299,13 +298,6 @@ $color: #333346;
     font-weight: 600;
     margin-top: 0;
     padding: 0;
-  }
-  &__text {
-    width: 100%;
-    color: $font-medium;
-    @include font-size(18px);
-    font-weight: 600;
-    margin-top: 0;
   }
   &__info {
     margin-bottom: 0;

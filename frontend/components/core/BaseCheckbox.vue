@@ -108,7 +108,7 @@ $checkbox-color: palette(grey, 600);
 $checkbox-color-dark: $primary-color;
 .re-checkbox {
   width: auto;
-  margin: 16px 8px 16px 0;
+  margin: $base-space * 2 $base-space $base-space * 2 0;
   display: inline-flex;
   position: relative;
   border-radius: 1px;
@@ -151,7 +151,7 @@ $checkbox-color-dark: $primary-color;
   }
   .checkbox-label {
     line-height: $checkbox-size;
-    margin-right: 0.5em;
+    margin-right: $base-space;
     word-break: break-word;
     hyphens: auto;
   }

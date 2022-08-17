@@ -146,7 +146,7 @@ export default {
     }
   }
   &__text {
-    margin: 0;
+    margin: 0 $base-space;
     color: $font-medium;
     span {
       font-weight: bold;

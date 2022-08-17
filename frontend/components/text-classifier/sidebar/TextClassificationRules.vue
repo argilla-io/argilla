@@ -233,15 +233,6 @@ label {
       margin-left: auto;
     }
   }
-  &__numbers {
-    color: $font-secondary-medium-dark;
-    margin-bottom: 1.5em;
-    @include font-size(18px);
-    span {
-      @include font-size(40px);
-      font-weight: 700;
-    }
-  }
 }
 p[data-title] {
   position: relative;

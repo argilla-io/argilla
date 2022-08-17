@@ -202,13 +202,3 @@ p[data-title] {
   @extend %tooltip-large-text;
 }
 </style>
-
-<style lang="scss">
-.records-number {
-  @include font-size(16px);
-  font-weight: normal;
-  .all & {
-    display: none;
-  }
-}
-</style>

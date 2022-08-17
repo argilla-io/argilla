@@ -111,8 +111,9 @@ export default {
 .list {
   &__checkbox.re-checkbox {
     position: absolute;
-    left: 1.4em;
-    top: 0.2em;
+    left: $base-space * 2;
+    top: $base-space * 2;
+    margin: 0;
     width: auto;
   }
   &__item {
@@ -121,11 +122,12 @@ export default {
     border-radius: $border-radius-m;
     display: inline-block;
     width: 100%;
-    transition: 0.3s ease-in-out;
+    transition: 0.2s ease-in-out;
     border: 1px solid palette(grey, 600);
     margin-bottom: $base-space-between-records;
     &--annotation-mode {
       @extend .list__item !optional;
+      padding-left: $base-space;
       &.discarded {
         opacity: 0.5;
         transition: 0.3s ease-in-out;

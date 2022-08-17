@@ -96,8 +96,8 @@ export default {
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
-      height: 8px;
-      width: 8px;
+      height: $base-space;
+      width: $base-space;
       transform: rotate(133deg);
       transition: all 1.5s ease;
       margin-bottom: 2px;
