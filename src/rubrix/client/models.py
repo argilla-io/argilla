@@ -440,6 +440,8 @@ class TokenClassificationRecord(_Validators):
             FutureWarning,
         )
 
+        if spans is None:
+            return None
         return self._span_utils.to_tags(spans)
 
 
