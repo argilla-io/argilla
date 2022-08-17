@@ -49,6 +49,7 @@ class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnota
     tokens: List[str] = Field(min_items=1)
     # TODO(@frascuchon): Delete this field and all related logic
     _raw_text: Optional[str] = Field(alias="raw_text")
+    _span_utils: SpanUtils
 
     @root_validator(pre=True)
     def accept_old_fashion_text_field(cls, values):
@@ -57,6 +58,37 @@ class TokenClassificationRecordInputs(BaseRecordInputs[TokenClassificationAnnota
         values["text"] = cls.check_text_content(text)
 
         return values
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        self._span_utils = SpanUtils(self.text, self.tokens)
+
+        if self.annotation:
+            self._validate_spans(self.annotation)
+        if self.prediction:
+            self._validate_spans(self.prediction)
+
+    def _validate_spans(self, annotation: TokenClassificationAnnotation):
+        """Validates the spans with respect to the tokens.
+
+        If necessary, also performs an automatic correction of the spans.
+
+        Args:
+            span_utils: Helper class to perform the checks.
+            annotation: Contains the spans to validate.
+
+        Raises:
+            ValidationError: If spans are not valid or misaligned.
+        """
+        spans = [(ent.label, ent.start, ent.end) for ent in annotation.entities]
+        try:
+            self._span_utils.validate(spans)
+        except ValueError:
+            corrected_spans = self._span_utils.correct(spans)
+            self._span_utils.validate(corrected_spans)
+            for ent, span in zip(annotation.entities, corrected_spans):
+                ent.start, ent.end = span[1], span[2]
 
     @validator("text")
     def check_text_content(cls, text: str):
