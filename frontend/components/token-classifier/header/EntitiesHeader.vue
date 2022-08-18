@@ -19,20 +19,13 @@
   <div class="container">
     <div class="entities__wrapper">
       <div v-if="visibleEntities.length" class="entities__container">
-        <span
+        <entity-label
           v-for="(entity, index) in visibleEntities"
+          :label="entity.text"
+          :shortcut="entity.shortcut"
           :key="index"
-          class="entity"
-          :class="[
-            `color_${entity.colorId % $entitiesMaxColors}`,
-            activeEntity === entity.text ? 'active' : '',
-          ]"
-        >
-          {{ entity.text }}
-          <span v-if="entity.shortcut" class="shortcut"
-            >[{{ entity.shortcut }}]</span
-          >
-        </span>
+          :color="`color_${entity.colorId % $entitiesMaxColors}`"
+        />
         <base-button
           v-if="!showEntitySelector && dataset.entities.length > entitiesNumber"
           class="entities__container__button primary clear small"
@@ -51,8 +44,6 @@
 </template>
 
 <script>
-import "assets/icons/check";
-import "assets/icons/close";
 const MAX_ENTITIES_SHOWN = 10;
 
 export default {
@@ -63,7 +54,6 @@ export default {
     },
   },
   data: () => ({
-    activeEntity: undefined,
     showEntitySelector: false,
     entitiesNumber: MAX_ENTITIES_SHOWN,
   }),
@@ -125,42 +115,7 @@ export default {
     }
   }
 }
-.entity {
-  padding: 0.3em;
+.entity-label {
   margin: 4px;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  max-height: 28px;
-  border: 2px solid transparent;
-  transition: all 0.2s ease-in-out;
-  font-weight: 600;
-  .shortcut {
-    @include font-size(14px);
-    font-weight: lighter;
-    margin-left: $base-space * 2;
-  }
-}
-// ner colors
-
-$colors: 50;
-$hue: 360;
-@for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
-  .color_#{$i - 1} {
-    background: $rcolor;
-  }
-  .entity.color_#{$i - 1} span {
-    background: $rcolor;
-  }
-  .entities__selector__option.color_#{$i - 1} span {
-    background: $rcolor;
-  }
-  .color_#{$i - 1} :deep(.highlight__tooltip) {
-    background: $rcolor;
-  }
-  .color_#{$i - 1} :deep(.highlight__tooltip:after) {
-    border-color: $rcolor transparent transparent transparent;
-  }
 }
 </style>
