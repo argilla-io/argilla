@@ -51,17 +51,14 @@
           :key="key"
           :class="expandedMentionsGroup === key ? 'expanded' : ''"
         >
-          <span
-            :class="[
-              `color_${
-                entities.filter((e) => e.text === key)[0].colorId %
-                $entitiesMaxColors
-              }`,
-              'entity',
-              activeTab,
-            ]"
-            >{{ key }}</span
-          >
+          <entity-label
+            :is-prediction="activeTab === 'predicted_mentions'"
+            :label="key"
+            :color="`color_${
+              entities.filter((e) => e.text === key)[0].colorId %
+              $entitiesMaxColors
+            }`"
+          />
           <sidebar-collapsable-mentions
             :limit="
               expandedMentionsGroup && expandedMentionsGroup !== key
@@ -176,31 +173,12 @@ export default {
       }
     }
   }
-  .entity {
-    margin-top: 0;
-    padding: 0.5em;
-    display: inline-flex;
-    font-weight: 600;
-  }
   .scroll {
     max-height: calc(100vh - 250px);
     padding-right: 1em;
     margin-right: -1em;
     overflow: auto;
     @extend %hide-scrollbar;
-  }
-}
-$colors: 50;
-$hue: 360;
-@for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
-  .color_#{$i - 1} {
-    background: $rcolor;
-    &.predicted_mentions {
-      padding: 0.4em 0;
-      background: none;
-      border-bottom: 5px solid $rcolor;
-    }
   }
 }
 </style>
