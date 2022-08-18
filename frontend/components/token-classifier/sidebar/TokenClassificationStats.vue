@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <p class="sidebar__title">Stats</p>
+    <p class="metrics__title">Stats</p>
     <stats-selector
       :selected-option="selectedOption"
       :options="options"
@@ -177,8 +177,7 @@ export default {
     }
   }
   .entity {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+    margin-top: 0;
     padding: 0.5em;
     display: inline-flex;
     font-weight: 600;

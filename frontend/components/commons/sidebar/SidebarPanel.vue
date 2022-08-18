@@ -119,24 +119,56 @@ export default {
     right: -$sidebarPanelWidth + 1px;
   }
   &__content {
-    border-radius: 2px;
+    color: $font-secondary-medium-dark;
     @include font-size(13px);
     &:first-child {
       padding-top: 0;
     }
   }
   :deep() {
-    .sidebar__title {
-      margin-bottom: 2em;
-      color: $font-secondary-medium-dark;
-      margin-top: 0.2em;
+    .metrics__title {
+      margin-top: 0;
+      margin-bottom: $base-space * 4;
       @include font-size(20px);
       font-weight: 700;
     }
-    .sidebar__subtitle {
+    .metrics__info {
+      margin-top: 0;
+      margin-bottom: $base-space * 2;
       @include font-size(15px);
-      color: $font-secondary-medium-dark;
       font-weight: 600;
+      display: flex;
+      &__name {
+        margin: 0;
+      }
+      &__counter {
+        margin: 0 0 0 auto;
+      }
+      & + .re-progress__container {
+        margin-top: -$base-space;
+      }
+    }
+    .metrics__list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: $base-space * 3;
+      li {
+        display: flex;
+        align-items: center;
+        margin-bottom: $base-space;
+      }
+      &__name {
+        display: block;
+        width: calc(100% - 40px);
+        hyphens: auto;
+        word-break: break-word;
+        @include font-size(13px);
+      }
+      &__counter {
+        margin-right: 0;
+        margin-left: auto;
+        @include font-size(14px);
+      }
     }
   }
 }

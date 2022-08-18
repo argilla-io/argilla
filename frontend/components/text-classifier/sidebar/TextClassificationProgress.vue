@@ -17,14 +17,16 @@
 
 <template>
   <sidebar-progress :dataset="dataset">
-    <div v-if="annotationsProgress" class="labels">
-      <div v-for="(counter, label) in getInfo" :key="label">
-        <div v-if="counter > 0" class="info">
-          <label>{{ label }}</label>
-          <span class="records-number">{{ counter | formatNumber }}</span>
-        </div>
-      </div>
-    </div>
+    <ul v-if="annotationsProgress" class="metrics__list">
+      <li v-for="(counter, label) in getInfo" :key="label">
+        <template v-if="counter > 0">
+          <label class="metrics__list__name">{{ label }}</label>
+          <span class="metrics__list__counter">{{
+            counter | formatNumber
+          }}</span>
+        </template>
+      </li>
+    </ul>
   </sidebar-progress>
 </template>
 
@@ -47,19 +49,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.labels {
-  margin-top: 2em;
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  label {
-    margin: 0; // for tagger
-    &[class^="color_"] {
-      padding: 0.3em;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>
