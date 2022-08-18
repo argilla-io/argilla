@@ -419,9 +419,9 @@ class TokenClassificationMetrics(CommonTasksMetrics[TokenClassificationRecord]):
                 idx=token_idx,
                 value=token_value,
                 char_start=char_start,
-                char_end=char_end,
+                char_end=char_end - 1,
                 capitalness=cls.capitalness(token_value),
-                length=1 + (char_end - char_start),
+                length=char_end - char_start,
                 tag=tags[token_idx] if tags else None,
             )
             for token_idx, token_value in enumerate(record.tokens)
