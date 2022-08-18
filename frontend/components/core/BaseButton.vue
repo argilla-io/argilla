@@ -247,5 +247,6 @@ export default {
 .link {
   padding: 0;
   color: $primary-color;
+  font-weight: 400;
 }
 </style>

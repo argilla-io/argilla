@@ -17,9 +17,9 @@
 
 <template>
   <sidebar-progress :dataset="dataset">
-    <div v-if="annotationsProgress" class="labels">
-      <div v-for="(counter, label) in getInfo" :key="label">
-        <div v-if="counter > 0" class="info">
+    <ul v-if="annotationsProgress" class="metrics__list">
+      <li v-for="(counter, label) in getInfo" :key="label">
+        <template v-if="counter > 0">
           <label
             :class="[
               `color_${
@@ -27,13 +27,16 @@
                 $entitiesMaxColors
               }`,
               'entity',
+              'metrics__list__name',
             ]"
             >{{ label }}</label
           >
-          <span class="records-number">{{ counter | formatNumber }}</span>
-        </div>
-      </div>
-    </div>
+          <span class="metrics__list__counter">{{
+            counter | formatNumber
+          }}</span>
+        </template>
+      </li>
+    </ul>
   </sidebar-progress>
 </template>
 
@@ -60,22 +63,8 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.labels {
-  margin-top: 2em;
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  font-weight: 600;
-  label {
-    margin: 0;
-    word-break: break-word;
-    hyphens: auto;
-    &[class^="color_"] {
-      padding: 0.3em;
-    }
-  }
+[class^="color_"] {
+  padding: 0.3em;
 }
 $colors: 50;
 $hue: 360;
