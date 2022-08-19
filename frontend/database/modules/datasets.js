@@ -282,9 +282,15 @@ async function _refreshDatasetAggregations({ dataset }) {
     size: 0,
   });
 
+  const globalResults = await _querySearch({
+    dataset,
+    query: {},
+    size: 0,
+  });
+
   return await _updateTaskDataset({
     dataset,
-    data: { results: { aggregations } },
+    data: { globalResults, results: { aggregations } },
   });
 }
 
@@ -630,11 +636,6 @@ const actions = {
       page: pagination.page,
     });
     await _refreshDatasetAggregations({ dataset: paginatedDataset });
-    await _updateAnnotationProgress({
-      id: dataset.name,
-      total: dataset.globalResults.total,
-      aggregations: dataset.globalResults.aggregations,
-    });
   },
 };
 
