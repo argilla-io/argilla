@@ -42,6 +42,8 @@ python -m rubrix
 Afterward, you should be able to access the web app at <http://localhost:6900/>.
 **The default username and password are** `rubrix` **and** `1234`.
 
+> 🚒  **If you have problems launching Rubrix, you can get direct support from the maintainers and other community member by joining [Rubrix's Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+
 Now, let's see an example: **Bootstraping data annotation with a zero-shot classifier**
 
 **Why**:
