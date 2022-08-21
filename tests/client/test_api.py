@@ -506,7 +506,6 @@ def test_load_as_pandas(mocked_client):
     "span,valid",
     [
         ((1, 2), False),
-        ((0, 6), False),
         ((0, 4), True),
         ((0, 5), True),  # automatic correction
     ],
@@ -520,7 +519,9 @@ def test_token_classification_spans(span, valid):
             prediction=[("test", *span)],
         )
     else:
-        with pytest.raises(ValueError):  # , match="The entity spans"):
+        with pytest.raises(
+            ValueError, match="The entity spans \['s'\] are not aligned"
+        ):
             rb.TokenClassificationRecord(
                 text=texto,
                 tokens=texto.split(),
