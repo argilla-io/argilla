@@ -87,7 +87,7 @@ class SpanUtils:
         for span in spans:
             if span[2] - span[1] < 1:
                 not_valid_spans.append(span)
-            if None in (
+            elif None in (
                 self._start_to_token_idx.get(span[1]),
                 self._end_to_token_idx.get(span[2]),
             ):
