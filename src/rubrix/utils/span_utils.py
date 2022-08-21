@@ -194,6 +194,7 @@ class SpanUtils:
             if prefix == "U":
                 start_idx, end_idx = self._token_to_char_idx[idx]
                 spans.append((entity, start_idx, end_idx))
+                start_idx = None
                 continue
 
             if prefix == "L":
@@ -203,8 +204,10 @@ class SpanUtils:
                 else:
                     _, end_idx = self._token_to_char_idx[idx]
                 spans.append((entity, start_idx, end_idx))
+                start_idx = None
                 continue
-            elif prefix == "B":
+
+            if prefix == "B":
                 start_idx, end_idx = self._token_to_char_idx[idx]
             elif prefix == "I":
                 # If "B" is missing, we just assume "I" starts the span
