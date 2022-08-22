@@ -123,7 +123,9 @@ python -m rubrix
 Afterward, you should be able to access the web app at http://localhost:6900/.
 **The default username and password are** `rubrix` **and** `1234`.
 
-> 🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
+
+> 🚒 **If you have problems launching Rubrix, you can get direct support from the maintainers and other community member by joining [Rubrix's Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+
 
 The following code will log one record into a dataset called `example-dataset`:
 
@@ -141,6 +143,8 @@ If you go to your Rubrix web app at http://localhost:6900/, you should see your 
 **Congratulations! You are ready to start working with Rubrix.** You can continue reading for a working example below.
 
 To better understand what's possible take a look at Rubrix's [Cookbook](https://rubrix.rtfd.io/en/stable/guides/cookbook.html)
+
+> 🆕 **Rubrix Cloud Beta**: Use Rubrix on a scalable cloud infrastructure without installing the server. [Join the waiting list](https://www.rubrix.ml/rubrix-cloud/)
 
 ## Quick links
 
