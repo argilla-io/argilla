@@ -629,6 +629,7 @@ const actions = {
       size: pagination.size,
       page: pagination.page,
     });
+    await _refreshDatasetAggregations({ dataset: paginatedDataset });
     await _fetchAnnotationProgress(paginatedDataset);
   },
 };
