@@ -56,6 +56,10 @@ class Text2TextRecord extends BaseRecord {
     }
     return undefined;
   }
+
+  get clipboardText() {
+    return this.text;
+  }
 }
 
 class Text2TextSearchQuery extends BaseSearchQuery {

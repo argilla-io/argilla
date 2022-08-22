@@ -48,6 +48,10 @@ class TokenClassificationRecord extends BaseRecord {
   recordTitle() {
     return this.text;
   }
+
+  get clipboardText() {
+    return this.text;
+  }
 }
 
 class TokenClassificationSearchQuery extends BaseSearchQuery {

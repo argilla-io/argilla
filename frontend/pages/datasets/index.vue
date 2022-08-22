@@ -271,13 +271,7 @@ export default {
       this.copy(route);
     },
     copy(id) {
-      const myTemporaryInputElement = document.createElement("input");
-      myTemporaryInputElement.type = "text";
-      myTemporaryInputElement.className = "hidden-input";
-      myTemporaryInputElement.value = id;
-      document.body.appendChild(myTemporaryInputElement);
-      myTemporaryInputElement.select();
-      document.execCommand("Copy");
+      this.$copyToClipboard(id);
     },
     showConfirmDatasetDeletion(dataset) {
       this.datasetCompositeId = dataset.id;
