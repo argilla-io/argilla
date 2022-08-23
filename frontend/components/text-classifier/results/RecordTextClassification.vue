@@ -152,7 +152,7 @@ export default {
     width: 100%;
     padding: 50px 20px 50px 50px;
     .list__item--annotation-mode & {
-      padding-right: 200px;
+      padding-right: 240px;
     }
   }
   &__labels {

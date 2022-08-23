@@ -3,7 +3,7 @@ $tooltip-bg: palette(grey, 100);
 $tooltip-color: palette(white);
 $tooltip-font-size: 14px;
 $tooltip-triangle-size: 7px;
-$tooltip-border-radius: 3px;
+$tooltip-border-radius: $border-radius-s;
 
 %tooltip {
   position: absolute;

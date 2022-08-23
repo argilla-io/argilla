@@ -179,7 +179,7 @@ export default {
     overflow: hidden;
     pointer-events: none;
     font-weight: lighter;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     word-break: normal;
   }
   :deep(.highlight-text) {

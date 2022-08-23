@@ -36,7 +36,7 @@ export default {
   position: absolute;
   background: $font-dark;
   display: inline-block;
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   color: palette(white);
   @include font-size(12px);
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);

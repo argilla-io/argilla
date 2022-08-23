@@ -99,7 +99,7 @@ export default {
 $marginRight: 200px;
 [contenteditable="true"] {
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
-  border-radius: 3px 3px 3px 3px;
+  border-radius: $border-radius-s 3px 3px 3px;
   &:focus + span {
     display: block;
   }
