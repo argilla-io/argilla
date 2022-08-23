@@ -22,10 +22,7 @@ router = APIRouter(tags=["users"])
 
 
 @router.get(
-    "/me",
-    response_model=User,
-    response_model_exclude_none=True,
-    operation_id="whoami",
+    "/me", response_model=User, response_model_exclude_none=True, operation_id="whoami"
 )
 async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
     """
@@ -41,4 +38,5 @@ async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
         The current user
 
     """
+
     return current_user

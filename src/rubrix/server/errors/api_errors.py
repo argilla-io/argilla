@@ -5,6 +5,7 @@ from fastapi import HTTPException, Request, status
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel
 
+from rubrix.server.commons import telemetry
 from rubrix.server.errors.adapter import exception_to_rubrix_error
 from rubrix.server.errors.base_errors import RubrixServerError
 
@@ -40,6 +41,8 @@ class APIErrorHandler:
     async def common_exception_handler(request: Request, error: Exception):
         """Wraps errors as custom generic error"""
         rubrix_error = exception_to_rubrix_error(error)
+        await telemetry.track_error(rubrix_error)
+
         return await http_exception_handler(
             request, RubrixServerHTTPException(rubrix_error)
         )

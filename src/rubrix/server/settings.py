@@ -82,6 +82,8 @@ class ApiSettings(BaseSettings):
         default=50, gt=0, le=100, description="Max number of fields in metadata"
     )
 
+    enable_telemetry: bool = True
+
     @validator("disable_es_index_template_creation", always=True)
     def check_index_template_creation_value(cls, value):
 
