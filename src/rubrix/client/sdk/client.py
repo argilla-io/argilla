@@ -13,12 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import dataclasses
+import functools
 from typing import Dict, TypeVar
 
 import httpx
 
 from rubrix._constants import API_KEY_HEADER_NAME
 from rubrix.client.sdk._helpers import build_raw_response
+from rubrix.client.sdk.commons.errors import RubrixClientError
 
 
 @dataclasses.dataclass
@@ -72,6 +74,18 @@ class Client(_ClientCommonDefaults, _Client):
     def __hash__(self):
         return hash(self.base_url)
 
+    def with_httpx_error_handler(func):
+        @functools.wraps(func)
+        def inner(self, *args, **kwargs):
+            try:
+                result = func(self, *args, **kwargs)
+                return result
+            except httpx.ConnectError as err:
+                err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
+                raise RubrixClientError(err_str) from None
+        return inner
+
+    @with_httpx_error_handler
     def get(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
         response = self.__httpx__.get(
@@ -82,6 +96,7 @@ class Client(_ClientCommonDefaults, _Client):
         )
         return build_raw_response(response).parsed
 
+    @with_httpx_error_handler
     def post(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
 
@@ -93,6 +108,7 @@ class Client(_ClientCommonDefaults, _Client):
         )
         return build_raw_response(response).parsed
 
+    @with_httpx_error_handler
     def put(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
         response = self.__httpx__.put(
@@ -103,6 +119,7 @@ class Client(_ClientCommonDefaults, _Client):
         )
         return build_raw_response(response).parsed
 
+    @with_httpx_error_handler
     def stream(self, path: str, *args, **kwargs):
         return self.__httpx__.stream(
             url=path,

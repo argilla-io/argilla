@@ -3,7 +3,7 @@ import pytest
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.errors import UnauthorizedApiError
+from rubrix.client.sdk.commons.errors import RubrixClientError, UnauthorizedApiError
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
 
@@ -23,7 +23,7 @@ def test_whoami_with_auth_error(monkeypatch, mocked_client):
 
 
 def test_whoami_with_connection_error():
-    with pytest.raises(httpx.ConnectError):
+    with pytest.raises(RubrixClientError):
         whoami(
             AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
         )
