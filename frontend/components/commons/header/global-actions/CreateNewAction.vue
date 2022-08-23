@@ -82,7 +82,7 @@ export default {
 <style lang="scss" scoped>
 .new-label {
   width: 180px;
-  border-radius: $border-radius-m;
+  border-radius: $border-radius;
   box-shadow: $shadow;
   padding: $base-space * 2;
   position: absolute;

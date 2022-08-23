@@ -77,7 +77,7 @@ export default {
     width: 20px;
     line-height: 19px;
     text-align: center;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     text-align: center;
     margin-left: 1.5em;
     margin-right: 1.5em;

@@ -128,7 +128,7 @@ export default {
     background: palette(blue, 200);
     color: white;
     border: none;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     @include font-size(14px);
     font-weight: 600;
     position: absolute;

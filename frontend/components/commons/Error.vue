@@ -63,7 +63,7 @@ export default {
   max-width: 700px;
   border: 1px solid palette(grey, 600);
   color: palette(grey, 300);
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   padding: 1.2em 5em 1.2em 1.2em;
   @include font-size(14px);
   line-height: 1.5em;

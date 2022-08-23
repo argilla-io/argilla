@@ -1188,7 +1188,7 @@ export default {
   display: block;
   border-radius: 15px;
   background-color: palette(grey, 600);
-  border-radius: 3px;
+  border-radius: $border-radius-s;
 }
 
 .vue-slider-component .vue-slider::after {
@@ -1372,7 +1372,7 @@ export default {
 .vue-slider {
   .filter & {
     background: palette(grey, 600);
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     margin-top: -12px;
   }
 }
@@ -1401,7 +1401,7 @@ export default {
 .vue-slider-process {
   .filter & {
     background: palette(blue, 300);
-    border-radius: 3px;
+    border-radius: $border-radius-s;
   }
 }
 </style>

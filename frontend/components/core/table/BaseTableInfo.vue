@@ -525,7 +525,7 @@ export default {
   &__tag {
     background: $font-dark;
     display: inline-block;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     color: palette(white);
     @include font-size(12px);
     box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
@@ -587,7 +587,7 @@ export default {
   .model {
     color: $font-dark;
     border: 1px solid palette(grey, 600);
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     padding: 0.1em 2em;
     display: inline-block;
     max-width: 280px;

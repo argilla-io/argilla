@@ -77,7 +77,7 @@ export default {
     position: absolute;
     left: -2.5em;
     top: 1px;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     background: palette(grey, 600);
     display: flex;
     align-items: center;
@@ -113,7 +113,6 @@ export default {
     }
   }
   @include media(">desktop") {
-    border-radius: 1px;
     margin-left: 1em;
     display: block !important;
     right: -$sidebarPanelWidth + 1px;

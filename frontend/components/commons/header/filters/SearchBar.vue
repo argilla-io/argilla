@@ -98,7 +98,7 @@ export default {
   margin-right: 0;
   margin-left: auto;
   pointer-events: all;
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   min-width: 100%;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
   &__container {
@@ -110,7 +110,7 @@ export default {
   &__button {
     cursor: pointer;
     padding: 5px;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     background: palette(white);
     transition: background 0.2s ease-in-out;
     &:hover {

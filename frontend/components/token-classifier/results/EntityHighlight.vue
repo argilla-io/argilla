@@ -161,7 +161,7 @@ export default {
   position: absolute;
   top: -23px;
   right: -3px;
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   min-width: 10px;
   background: $font-dark;
   fill: palette(white);
