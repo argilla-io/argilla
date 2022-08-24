@@ -19,12 +19,12 @@
   <div class="breadcrumbs">
     <ul>
       <li v-for="breadcrumb in filteredBreadcrumbs" :key="breadcrumb.name">
-        <NuxtLink
+        <nuxt-link
           class="breadcrumbs__item"
           v-if="breadcrumb.link"
           :to="breadcrumb.link"
           >{{ breadcrumb.name }}
-        </NuxtLink>
+        </nuxt-link>
         <span
           class="breadcrumbs__item --action"
           v-else
