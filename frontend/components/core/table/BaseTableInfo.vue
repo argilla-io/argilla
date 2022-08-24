@@ -85,9 +85,9 @@
                       >{{ itemValue(item, column) }}
                     </a>
                     <span v-else-if="column.type === 'link'">
-                      <NuxtLink v-if="item.link" :to="item.link"
+                      <nuxt-link v-if="item.link" :to="item.link"
                         >{{ itemValue(item, column) }}
-                      </NuxtLink>
+                      </nuxt-link>
                       <span v-else>{{ itemValue(item, column) }}</span>
                       <base-action-tooltip tooltip="Copied">
                         <base-button

@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <span :class="['entity-label', color, isPrediction ? '--prediction' : null]">
-    {{ label }}
+  <span :class="['entity-label', color, isPrediction ? '--prediction' : null]"
+    >{{ label }}
     <span v-if="shortcut" class="shortcut">[{{ shortcut }}]</span>
   </span>
 </template>

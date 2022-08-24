@@ -28,7 +28,7 @@
         <p class="error__subtitle">
           The page you’re looking for can’t be found.
         </p>
-        <NuxtLink to="/" class="error__link">Take me home</NuxtLink>
+        <nuxt-link to="/" class="error__link">Take me home</nuxt-link>
       </div>
     </div>
     <div class="error--bg">
