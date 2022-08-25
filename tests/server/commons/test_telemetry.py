@@ -9,7 +9,7 @@ from rubrix.server.errors import RubrixServerError
 async def test_track_login(telemetry_track_data):
 
     await telemetry.track_login()
-    telemetry_track_data.assert_called_once_with("UserLogged", {})
+    telemetry_track_data.assert_called_once_with("UserInfoRequested", {})
 
 
 @pytest.mark.asyncio
@@ -18,7 +18,7 @@ async def test_track_bulk(telemetry_track_data):
 
     await telemetry.track_bulk(task=task, records=records)
     telemetry_track_data.assert_called_once_with(
-        "DataLogged", {"task": task, "records": records}
+        "LogRecordsRequested", {"task": task, "records": records}
     )
 
 
@@ -28,5 +28,5 @@ async def test_track_error(telemetry_track_data):
 
     await telemetry.track_error(error)
     telemetry_track_data.assert_called_once_with(
-        "ErrorRaised", {"code": error.get_error_code()}
+        "ServerErrorFound", {"code": error.get_error_code()}
     )

@@ -16,7 +16,7 @@ except ModuleNotFoundError:
     Client = None
 
 
-def _configure_analytics(disable_send: bool = True) -> Client:
+def _configure_analytics(disable_send: bool = False) -> Client:
     API_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
     return Client(
@@ -68,16 +68,16 @@ class _TelemetryClient:
 async def track_error(error: RubrixServerError):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("ErrorRaised", {"code": error.code})
+        client.track_data("ServerErrorFound", {"code": error.code})
 
 
 async def track_bulk(task: TaskType, records: int):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("DataLogged", {"task": task, "records": records})
+        client.track_data("LogRecordsRequested", {"task": task, "records": records})
 
 
 async def track_login():
     client = _TelemetryClient.get()
     if client:
-        client.track_data("UserLogged", {})
+        client.track_data("UserInfoRequested", {})
