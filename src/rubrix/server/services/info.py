@@ -14,15 +14,52 @@
 #  limitations under the License.
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import psutil
 from fastapi import Depends
-from hurry.filesize import size
+from pydantic import BaseModel
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.apis.v0.models.info import ApiStatus
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
+
+
+def size(bytes):
+    system = [
+        (1024 ** 5, "P"),
+        (1024 ** 4, "T"),
+        (1024 ** 3, "G"),
+        (1024 ** 2, "M"),
+        (1024 ** 1, "K"),
+        (1024 ** 0, "B"),
+    ]
+
+    factor, suffix = None, None
+    for factor, suffix in system:
+        if bytes >= factor:
+            break
+
+    amount = int(bytes / factor)
+    if isinstance(suffix, tuple):
+        singular, multiple = suffix
+        if amount == 1:
+            suffix = singular
+        else:
+            suffix = multiple
+    return str(amount) + suffix
+
+
+class ApiInfo(BaseModel):
+    """Basic api info"""
+
+    rubrix_version: str
+
+
+class ApiStatus(ApiInfo):
+    """The Rubrix api status model"""
+
+    elasticsearch: Dict[str, Any]
+    mem_info: Dict[str, Any]
 
 
 class ApiInfoService:
@@ -30,7 +67,22 @@ class ApiInfoService:
     The api info service
     """
 
-    def __init__(self, es: ElasticsearchWrapper):
+    _INSTANCE = None
+
+    @classmethod
+    def get_instance(
+        cls,
+        backend: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
+    ) -> "ApiInfoService":
+        """
+        Creates an api info service
+        """
+
+        if not cls._INSTANCE:
+            cls._INSTANCE = ApiInfoService(backend)
+        return cls._INSTANCE
+
+    def __init__(self, es: ElasticsearchBackend):
         self.__es__ = es
 
     def api_status(self) -> ApiStatus:
@@ -50,19 +102,3 @@ class ApiInfoService:
         """Fetch the api process memory usage"""
         process = psutil.Process(os.getpid())
         return {k: size(v) for k, v in process.memory_info()._asdict().items()}
-
-
-_instance: Optional[ApiInfoService] = None
-
-
-def create_info_service(
-    es_wrapper: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
-) -> ApiInfoService:
-    """
-    Creates an api info service
-    """
-
-    global _instance
-    if not _instance:
-        _instance = ApiInfoService(es_wrapper)
-    return _instance

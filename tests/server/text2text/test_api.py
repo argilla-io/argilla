@@ -1,7 +1,7 @@
 from rubrix.client.sdk.text2text.models import Text2TextBulkData
 from rubrix.server.apis.v0.models.commons.model import BulkResponse
 from rubrix.server.apis.v0.models.text2text import (
-    CreationText2TextRecord,
+    Text2TextRecordInputs,
     Text2TextSearchResults,
 )
 
@@ -11,7 +11,7 @@ def test_search_records(mocked_client):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
 
     records = [
-        CreationText2TextRecord.parse_obj(data)
+        Text2TextRecordInputs.parse_obj(data)
         for data in [
             {
                 "id": 0,

@@ -16,15 +16,17 @@ import pytest
 from pydantic import ValidationError
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.models.commons.model import TaskStatus
 from rubrix.server.apis.v0.models.text_classification import (
-    ClassPrediction,
-    PredictionStatus,
     TextClassificationAnnotation,
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.commons.models import PredictionStatus, TaskStatus
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
+from rubrix.server.services.tasks.text_classification.model import (
+    ClassPrediction,
+    ServiceTextClassificationRecord,
+)
 
 
 def test_flatten_metadata():
@@ -34,7 +36,7 @@ def test_flatten_metadata():
             "mail": {"subject": "The mail subject", "body": "This is a large text body"}
         },
     }
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert list(record.metadata.keys()) == ["mail.subject", "mail.body"]
 
 
@@ -48,7 +50,7 @@ def test_metadata_with_object_list():
             ]
         },
     }
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert list(record.metadata.keys()) == ["mails"]
 
 
@@ -87,7 +89,7 @@ def test_single_label_with_multiple_annotation():
         ValidationError,
         match="Single label record must include only one annotation label",
     ):
-        TextClassificationRecord.parse_obj(
+        ServiceTextClassificationRecord.parse_obj(
             {
                 "inputs": {"text": "This is a text"},
                 "annotation": {
@@ -100,7 +102,7 @@ def test_single_label_with_multiple_annotation():
 
 
 def test_too_long_metadata():
-    record = TextClassificationRecord.parse_obj(
+    record = ServiceTextClassificationRecord.parse_obj(
         {
             "inputs": {"text": "bogh"},
             "metadata": {"too_long": "a" * 1000},
@@ -112,7 +114,7 @@ def test_too_long_metadata():
 
 def test_too_long_label():
     with pytest.raises(ValidationError, match="exceeds max length"):
-        TextClassificationRecord.parse_obj(
+        ServiceTextClassificationRecord.parse_obj(
             {
                 "inputs": {"text": "bogh"},
                 "prediction": {
@@ -137,26 +139,26 @@ def test_score_integrity():
     }
 
     try:
-        TextClassificationRecord.parse_obj(data)
+        ServiceTextClassificationRecord.parse_obj(data)
     except ValidationError as e:
         assert "Wrong score distributions" in e.json()
 
     data["multi_label"] = True
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert record is not None
 
     data["multi_label"] = False
     data["prediction"]["labels"] = [
         {"class": "B", "score": 0.9},
     ]
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert record is not None
 
     data["prediction"]["labels"] = [
         {"class": "B", "score": 0.10000000012},
         {"class": "B", "score": 0.90000000002},
     ]
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert record is not None
 
 
@@ -174,7 +176,7 @@ def test_prediction_ok_cases():
         },
     }
 
-    record = TextClassificationRecord(**data)
+    record = ServiceTextClassificationRecord(**data)
     assert record.predicted is None
     record.annotation = TextClassificationAnnotation(
         **{
@@ -215,7 +217,7 @@ def test_predicted_as_with_no_labels():
         "inputs": {"text": "The input text"},
         "prediction": {"agent": "test", "labels": []},
     }
-    record = TextClassificationRecord(**data)
+    record = ServiceTextClassificationRecord(**data)
     assert record.predicted_as == []
 
 
@@ -224,12 +226,12 @@ def test_created_record_with_default_status():
         "inputs": {"data": "My cool data"},
     }
 
-    record = TextClassificationRecord.parse_obj(data)
+    record = ServiceTextClassificationRecord.parse_obj(data)
     assert record.status == TaskStatus.default
 
 
 def test_predicted_ok_for_multilabel_unordered():
-    record = TextClassificationRecord(
+    record = ServiceTextClassificationRecord(
         inputs={"text": "The text"},
         prediction=TextClassificationAnnotation(
             agent="test",
@@ -264,7 +266,7 @@ def test_validate_without_labels_for_single_label(annotation):
         ValidationError,
         match="Annotation must include some label for validated records",
     ):
-        TextClassificationRecord(
+        ServiceTextClassificationRecord(
             inputs={"text": "The text"},
             status=TaskStatus.validated,
             prediction=TextClassificationAnnotation(
@@ -281,7 +283,7 @@ def test_query_with_uncovered_by_rules():
 
     query = TextClassificationQuery(uncovered_by_rules=["query", "other*"])
 
-    assert EsQueryBuilder.to_es_query(query) == {
+    assert EsQueryBuilder._to_es_query(query) == {
         "bool": {
             "must": {"match_all": {}},
             "must_not": {
@@ -322,12 +324,12 @@ def test_empty_labels_for_no_multilabel():
         ValidationError,
         match="Single label record must include only one annotation label",
     ):
-        TextClassificationRecord(
+        ServiceTextClassificationRecord(
             inputs={"text": "The input text"},
             annotation=TextClassificationAnnotation(agent="ann.", labels=[]),
         )
 
-    record = TextClassificationRecord(
+    record = ServiceTextClassificationRecord(
         inputs={"text": "The input text"},
         prediction=TextClassificationAnnotation(agent="ann.", labels=[]),
         annotation=TextClassificationAnnotation(
@@ -338,7 +340,7 @@ def test_empty_labels_for_no_multilabel():
 
 
 def test_annotated_without_labels_for_multilabel():
-    record = TextClassificationRecord(
+    record = ServiceTextClassificationRecord(
         inputs={"text": "The input text"},
         multi_label=True,
         prediction=TextClassificationAnnotation(agent="pred.", labels=[]),

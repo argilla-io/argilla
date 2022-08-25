@@ -37,7 +37,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
 )
 from rubrix.server.apis.v0.models.text_classification import (
-    TextClassificationBulkData as ServerTextClassificationBulkData,
+    TextClassificationBulkRequest as ServerTextClassificationBulkData,
 )
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery as ServerTextClassificationQuery,
@@ -48,18 +48,14 @@ def test_bulk_data_schema(helpers):
     client_schema = TextClassificationBulkData.schema()
     server_schema = ServerTextClassificationBulkData.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_query_schema(helpers):
     client_schema = TextClassificationQuery.schema()
     server_schema = ServerTextClassificationQuery.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_labeling_rule_schema(helpers):

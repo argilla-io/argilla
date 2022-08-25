@@ -4,7 +4,7 @@ from rubrix.server.apis.v0.models.text2text import (
     Text2TextQuery,
     Text2TextRecord,
 )
-from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 def test_sentences_sorted_by_score():
@@ -57,4 +57,4 @@ def test_model_dict():
 
 def test_query_as_elasticsearch():
     query = Text2TextQuery(ids=[1, 2, 3])
-    assert EsQueryBuilder.to_es_query(query) == {"ids": {"values": query.ids}}
+    assert EsQueryBuilder._to_es_query(query) == {"ids": {"values": query.ids}}

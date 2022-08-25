@@ -17,98 +17,59 @@
 Common model for task definitions
 """
 
-from dataclasses import dataclass
-from typing import Any, Dict, Generic, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar
 
-from fastapi import Query
-from pydantic import validator
+from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.helpers import flatten_dict
 from rubrix.server.services.search.model import (
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    QueryRange,
-    SortableField,
+    ServiceQueryRange,
+    ServiceSearchResultsAggregations,
+    ServiceSortableField,
 )
 from rubrix.server.services.tasks.commons import (
-    Annotation,
-    BaseAnnotation,
-    BaseRecordDB,
-    BulkResponse,
-    EsRecordDataFieldNames,
-    PredictionStatus,
-    TaskStatus,
-    TaskType,
+    ServiceBaseAnnotation,
+    ServiceBaseRecord,
+    ServiceBaseRecordInputs,
 )
-from rubrix.utils import limit_value_length
 
 
-@dataclass
-class PaginationParams:
-    """Query pagination params"""
-
-    limit: int = Query(50, gte=0, le=1000, description="Response records limit")
-    from_: int = Query(
-        0, ge=0, le=10000, alias="from", description="Record sequence from"
-    )
-
-
-class BaseRecord(BaseRecordDB, GenericModel, Generic[Annotation]):
-    """
-    Minimal dataset record information
-
-    Attributes:
-    -----------
-
-    id:
-        The record id
-    metadata:
-        The metadata related to record
-    event_timestamp:
-        The timestamp when record event was triggered
-
-    """
-
-    @validator("metadata", pre=True)
-    def flatten_metadata(cls, metadata: Dict[str, Any]):
-        """
-        A fastapi validator for flatten metadata dictionary
-
-        Parameters
-        ----------
-        metadata:
-            The metadata dictionary
-
-        Returns
-        -------
-            A flatten version of metadata dictionary
-
-        """
-        if metadata:
-            metadata = flatten_dict(metadata, drop_empty=True)
-            metadata = limit_value_length(metadata, max_length=MAX_KEYWORD_LENGTH)
-        return metadata
-
-
-Record = TypeVar("Record", bound=BaseRecord)
-
-
-class ScoreRange(QueryRange):
+class SortableField(ServiceSortableField):
     pass
 
 
-__ALL__ = [
-    QueryRange,
-    SortableField,
-    BaseSearchResults,
-    BaseSearchResultsAggregations,
-    Annotation,
-    TaskStatus,
-    TaskType,
-    EsRecordDataFieldNames,
-    BaseAnnotation,
-    PredictionStatus,
-    BulkResponse,
-]
+class BaseAnnotation(ServiceBaseAnnotation):
+    pass
+
+
+Annotation = TypeVar("Annotation", bound=BaseAnnotation)
+
+
+class BaseRecordInputs(ServiceBaseRecordInputs[Annotation], Generic[Annotation]):
+    def extended_fields(self) -> Dict[str, Any]:
+        return {}
+
+
+class BaseRecord(ServiceBaseRecord[Annotation], Generic[Annotation]):
+    pass
+
+
+class ScoreRange(ServiceQueryRange):
+    pass
+
+
+_Record = TypeVar("_Record", bound=BaseRecord)
+
+
+class BulkResponse(BaseModel):
+    dataset: str
+    processed: int
+    failed: int = 0
+
+
+class BaseSearchResults(
+    GenericModel, Generic[_Record, ServiceSearchResultsAggregations]
+):
+    total: int = 0
+    records: List[_Record] = Field(default_factory=list)
+    aggregations: ServiceSearchResultsAggregations = None

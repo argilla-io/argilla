@@ -19,38 +19,63 @@ from typing import Iterable, List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import text_classification_dataset_settings
-from rubrix.server.apis.v0.helpers import takeuntil
-from rubrix.server.apis.v0.models.commons.model import (
-    BulkResponse,
-    PaginationParams,
-    TaskType,
+from rubrix.server.apis.v0.models.commons.model import BulkResponse
+from rubrix.server.apis.v0.models.commons.params import (
+    CommonTaskHandlerDependencies,
+    RequestPagination,
 )
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
     LabelingRule,
     LabelingRuleMetricsSummary,
-    TextClassificationBulkData,
+    TextClassificationBulkRequest,
     TextClassificationQuery,
     TextClassificationRecord,
+    TextClassificationSearchAggregations,
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
     UpdateLabelingRule,
 )
+from rubrix.server.apis.v0.models.token_classification import (
+    TokenClassificationDataset,
+    TokenClassificationQuery,
+)
 from rubrix.server.apis.v0.validators.text_classification import DatasetValidator
+from rubrix.server.commons.config import TasksFactory
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
+from rubrix.server.helpers import takeuntil
 from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.text_classification import TextClassificationService
+from rubrix.server.services.tasks.text_classification import TextClassificationService
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceLabelingRule,
+    ServiceTextClassificationQuery,
+    ServiceTextClassificationRecord,
+)
+from rubrix.server.services.tasks.token_classification.metrics import (
+    TokenClassificationMetrics,
+)
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
 
 TASK_TYPE = TaskType.text_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
 NEW_BASE_ENDPOINT = f"/{TASK_TYPE}/{{name}}"
+
+TasksFactory.register_task(
+    task_type=TaskType.token_classification,
+    dataset_class=TokenClassificationDataset,
+    query_request=TokenClassificationQuery,
+    record_class=ServiceTokenClassificationRecord,
+    metrics=TokenClassificationMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -63,8 +88,8 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 )
 async def bulk_records(
     name: str,
-    bulk: TextClassificationBulkData,
-    common_params: CommonTaskQueryParams = Depends(),
+    bulk: TextClassificationBulkRequest,
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -72,33 +97,8 @@ async def bulk_records(
     validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
-    """
-    Includes a chunk of record data with provided dataset bulk information
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    bulk:
-        The bulk data
-    common_params:
-        Common query params
-    service:
-        the Service
-    datasets:
-        The dataset service
-    validator:
-        The dataset validator component
-    current_user:
-        Current request user
-
-    Returns
-    -------
-        Bulk response data
-    """
 
     task = TASK_TYPE
-    task_mappings = TaskFactory.get_task_mappings(TASK_TYPE)
     owner = current_user.check_workspace(common_params.workspace)
     try:
         dataset = datasets.find_by_name(
@@ -106,7 +106,7 @@ async def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -115,22 +115,20 @@ async def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
-        datasets.create_dataset(
-            user=current_user, dataset=dataset, mappings=task_mappings
-        )
+        datasets.create_dataset(user=current_user, dataset=dataset)
 
+    # TODO(@frascuchon): Validator should be applied in the service layer
+    records = [ServiceTextClassificationRecord.parse_obj(r) for r in bulk.records]
     await validator.validate_dataset_records(
-        user=current_user, dataset=dataset, records=bulk.records
+        user=current_user, dataset=dataset, records=records
     )
 
     result = service.add_records(
         dataset=dataset,
-        mappings=task_mappings,
-        records=bulk.records,
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        records=records,
     )
     return BulkResponse(
         dataset=name,
@@ -148,11 +146,11 @@ async def bulk_records(
 def search_records(
     name: str,
     search: TextClassificationSearchRequest = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     include_metrics: bool = Query(
         False, description="If enabled, return related record metrics"
     ),
-    pagination: PaginationParams = Depends(),
+    pagination: RequestPagination = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -195,32 +193,24 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     result = service.search(
         dataset=dataset,
-        query=query,
+        query=ServiceTextClassificationQuery.parse_obj(query),
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "predicted_as",
-                "annotated_by",
-                "annotated_as",
-                "error_distribution",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
-    return result
+    return TextClassificationSearchResults(
+        total=result.total,
+        records=result.records,
+        aggregations=TextClassificationSearchAggregations.parse_obj(result.metrics)
+        if result.metrics
+        else None,
+    )
 
 
 def scan_data_response(
@@ -263,7 +253,7 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TextClassificationQuery] = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     id_from: Optional[str] = None,
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
     service: TextClassificationService = Depends(
@@ -273,7 +263,7 @@ async def stream_data(
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> StreamingResponse:
     """
-    Creates a data stream over dataset records
+        Creates a data stream over dataset records
 
     Parameters
     ----------
@@ -302,10 +292,15 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
-    data_stream = service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
+    data_stream = map(
+        TextClassificationRecord.parse_obj,
+        service.read_dataset(
+            dataset, query=ServiceTextClassificationQuery.parse_obj(query), id_from=id_from, limit=limit
+        ),
+    )
     return scan_data_response(
         data_stream=data_stream,
         limit=limit,
@@ -321,7 +316,7 @@ async def stream_data(
 )
 async def list_labeling_rules(
     name: str,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
@@ -334,10 +329,12 @@ async def list_labeling_rules(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
-    return list(service.get_labeling_rules(dataset))
+    return [
+        LabelingRule.parse_obj(rule) for rule in service.get_labeling_rules(dataset)
+    ]
 
 
 @router.post(
@@ -350,7 +347,7 @@ async def list_labeling_rules(
 async def create_rule(
     name: str,
     rule: CreateLabelingRule,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -363,10 +360,10 @@ async def create_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
-    rule = LabelingRule(
+    rule = ServiceLabelingRule(
         **rule.dict(),
         author=current_user.username,
     )
@@ -374,8 +371,7 @@ async def create_rule(
         dataset,
         rule=rule,
     )
-
-    return rule
+    return LabelingRule.parse_obj(rule)
 
 
 @router.get(
@@ -391,19 +387,20 @@ async def compute_rule_metrics(
     labels: Optional[List[str]] = Query(
         None, description="Label related to query rule", alias="label"
     ),
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> LabelingRuleMetricsSummary:
+
     dataset = datasets.find_by_name(
         user=current_user,
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     return service.compute_rule_metrics(dataset, rule_query=query, labels=labels)
@@ -418,7 +415,7 @@ async def compute_rule_metrics(
 )
 async def compute_dataset_rules_metrics(
     name: str,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -430,10 +427,10 @@ async def compute_dataset_rules_metrics(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
-
-    return service.compute_overall_rules_metrics(dataset)
+    metrics = service.compute_overall_rules_metrics(dataset)
+    return DatasetLabelingRulesMetricsSummary.parse_obj(metrics)
 
 
 @router.delete(
@@ -444,7 +441,7 @@ async def compute_dataset_rules_metrics(
 async def delete_labeling_rule(
     name: str,
     query: str,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -457,7 +454,7 @@ async def delete_labeling_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     service.delete_labeling_rule(dataset, rule_query=query)
@@ -473,7 +470,7 @@ async def delete_labeling_rule(
 async def get_rule(
     name: str,
     query: str,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -486,14 +483,13 @@ async def get_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
-
     rule = service.find_labeling_rule(
         dataset,
         rule_query=query,
     )
-    return rule
+    return LabelingRule.parse_obj(rule)
 
 
 @router.patch(
@@ -507,7 +503,7 @@ async def update_rule(
     name: str,
     query: str,
     update: UpdateLabelingRule,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     service: TextClassificationService = Depends(
         TextClassificationService.get_instance
     ),
@@ -520,7 +516,7 @@ async def update_rule(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
 
     rule = service.update_labeling_rule(
@@ -529,7 +525,7 @@ async def update_rule(
         labels=update.labels,
         description=update.description,
     )
-    return rule
+    return LabelingRule.parse_obj(rule)
 
 
 text_classification_dataset_settings.configure_router(router)
