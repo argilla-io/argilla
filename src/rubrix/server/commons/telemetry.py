@@ -19,7 +19,7 @@ def _configure_analytics() -> Client:
     return Client(
         write_key=API_KEY,
         gzip=True,
-        send=True,  # TODO: set to False for testing
+        send=False,  # TODO: set to False for testing
     )
 
 
