@@ -29,7 +29,6 @@ from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""
-MAX_NUMBER_OF_LISTED_DATASETS = 2500
 
 
 class DatasetsDAO:

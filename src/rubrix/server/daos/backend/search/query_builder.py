@@ -100,15 +100,22 @@ class EsQueryBuilder:
         schema: Optional[Dict[str, Any]] = None,
         query: Optional[BackendQuery] = None,
         sort: Optional[SortConfig] = None,
+        id_from: Optional[str] = None,
     ) -> Dict[str, Any]:
         es_query: Dict[str, Any] = (
             {"query": self._datasets_to_es_query(query)}
             if isinstance(query, BaseDatasetsQuery)
             else {"query": self._search_to_es_query(schema, query)}
         )
+
+        if id_from:
+            es_query["search_after"] = [id_from]
+            sort = SortConfig()  # sort by id as default
+
         es_sort = self.map_2_es_sort_configuration(schema=schema, sort=sort)
         if es_sort:
             es_query["sort"] = es_sort
+
         return es_query
 
     def map_2_es_sort_configuration(

@@ -118,6 +118,9 @@ class ElasticsearchBackend(LoggingMixin):
         rf"{__HIGHLIGHT_POST_TAG__}\s+{__HIGHLIGHT_PRE_TAG__}"
     )
 
+    # TODO(@frascuchon): Once id is included as keyword in datasets index, we can discard this
+    __MAX_NUMBER_OF_LISTED_DATASETS__ = 2500
+
     @classmethod
     def get_instance(cls) -> "ElasticsearchBackend":
         """
@@ -177,7 +180,9 @@ class ElasticsearchBackend(LoggingMixin):
         return self.__query_builder__
 
     def _list_documents(
-        self, index: str, query: Dict[str, Any] = None,
+        self,
+        index: str,
+        query: Dict[str, Any] = None,
         sort_cfg: Optional[List[Dict[str, Any]]] = None,
         size: Optional[int] = None,
         fetch_once: bool = False,
@@ -786,6 +791,8 @@ class ElasticsearchBackend(LoggingMixin):
         self,
         id: str,
         query: Optional[BackendRecordsQuery] = None,
+        id_from: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> Iterable[Dict[str, Any]]:
         index = dataset_records_index(id)
         with backend_error_handler(index):
@@ -793,10 +800,12 @@ class ElasticsearchBackend(LoggingMixin):
                 **self.query_builder.map_2_es_query(
                     schema=self.get_mappings(id),
                     query=query,
+                    id_from=id_from,
+                    sort=SortConfig(),  # sort by id as default for proper index scan using search after
                 ),
                 "highlight": self.__configure_query_highlight__(),
             }
-            docs = self._list_documents(index, query=es_query)
+            docs = self._list_documents(index, query=es_query, size=limit)
             for doc in docs:
                 yield self.__esdoc2record__(doc)
 
@@ -885,8 +894,14 @@ class ElasticsearchBackend(LoggingMixin):
         self._create_index(DATASETS_INDEX_NAME)
 
     def list_datasets(self, query: BaseDatasetsQuery):
-        es_query = self.query_builder.map_2_es_query(query=query)
-        return self._list_documents(index=DATASETS_INDEX_NAME, query=es_query)
+        with backend_error_handler(index=DATASETS_INDEX_NAME):
+            es_query = self.query_builder.map_2_es_query(query=query)
+            return self._list_documents(
+                index=DATASETS_INDEX_NAME,
+                query=es_query,
+                fetch_once=True,
+                size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
+            )
 
     def add_dataset_document(self, id: str, document: Dict[str, Any]):
         self._add_document(index=DATASETS_INDEX_NAME, doc_id=id, document=document)
@@ -902,24 +917,30 @@ class ElasticsearchBackend(LoggingMixin):
     def find_dataset(
         self, id: str, name: Optional[str] = None, owner: Optional[str] = None
     ):
-        document = self._get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=id)
-        if not document and owner is None and name:
+        with backend_error_handler(index=DATASETS_INDEX_NAME):
+            document = self._get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=id)
+            if not document and owner is None and name:
 
-            # We must search by name since we have no owner
-            es_query = self.query_builder.map_2_es_query(
-                query=BaseDatasetsQuery(name=name)
-            )
-            docs = self._list_documents(index=DATASETS_INDEX_NAME, query=es_query)
-            docs = list(docs)
-            if len(docs) == 0:
-                return None
-
-            if len(docs) > 1:
-                raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
+                # We must search by name since we have no owner
+                es_query = self.query_builder.map_2_es_query(
+                    query=BaseDatasetsQuery(name=name)
                 )
-            document = docs[0]
-        return document
+                docs = self._list_documents(
+                    index=DATASETS_INDEX_NAME,
+                    query=es_query,
+                    size=self.__MAX_NUMBER_OF_LISTED_DATASETS__,
+                    fetch_once=True,
+                )
+                docs = list(docs)
+                if len(docs) == 0:
+                    return None
+
+                if len(docs) > 1:
+                    raise ValueError(
+                        f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
+                    )
+                document = docs[0]
+            return document
 
     def compute_rubrix_metric(self, metric_id):
         return self._compute_metric(index=DATASETS_INDEX_NAME, metric_id=metric_id)

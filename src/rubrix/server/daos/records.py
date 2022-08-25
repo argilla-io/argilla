@@ -189,7 +189,9 @@ class DatasetRecordsDAO:
             An iterable over found dataset records
         """
         search = search or DaoRecordsSearch()
-        return self._es.scan_records(id=dataset.id, query=search.query, limit=limit, id_from_=id_from)
+        return self._es.scan_records(
+            id=dataset.id, query=search.query, limit=limit, id_from=id_from
+        )
 
     def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
