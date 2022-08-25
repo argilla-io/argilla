@@ -119,7 +119,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     assert results.records[0].predicted is None
 
 
-def test_create_records_for_text_classification(mocked_client):
+def test_create_records_for_text_classification(mocked_client, telemetry_track_data):
     dataset = "test_create_records_for_text_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     tags = {"env": "test", "class": "text classification"}
@@ -177,6 +177,8 @@ def test_create_records_for_text_classification(mocked_client):
         "status": {"Default": 1},
         "words": {"data": 1},
     }
+
+    telemetry_track_data.assert_called_once()
 
 
 def test_partial_record_update(mocked_client):
