@@ -86,20 +86,23 @@ class DatasetRecordsDAO:
 
         """
 
-        now = None
+        now = datetime.datetime.utcnow()
         documents = []
         metadata_values = {}
+        mapping = self._es.get_mappings(dataset.id)
 
-        if "last_updated" in record_class.schema()["properties"]:
-            now = datetime.datetime.utcnow()
+        exclude_fields = [
+            name
+            for name in record_class.schema()["properties"]
+            if name not in mapping["mappings"]["properties"]
+        ]
 
         for r in records:
             metadata_values.update(r.metadata or {})
             db_record = record_class.parse_obj(r)
-            if now:
-                db_record.last_updated = now
+            db_record.last_updated = now
             documents.append(
-                db_record.dict(exclude_none=False, exclude={"search_keywords"})
+                db_record.dict(exclude_none=False, exclude=set(exclude_fields))
             )
 
         self._es.create_dataset_index(
