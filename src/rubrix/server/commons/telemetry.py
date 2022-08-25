@@ -16,13 +16,13 @@ except ModuleNotFoundError:
     Client = None
 
 
-def _configure_analytics() -> Client:
+def _configure_analytics(disable_send: bool = True) -> Client:
     API_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
     return Client(
         write_key=API_KEY,
         gzip=True,
-        send=False,  # TODO: set to False for testing
+        send=not disable_send,  # TODO: set to False for testing
     )
 
 
@@ -32,7 +32,7 @@ class _TelemetryClient:
     __INSTANCE__: "_TelemetryClient" = None
 
     __server_id__: str = dataclasses.field(init=False, default=None)
-    __client__: Client = dataclasses.field(
+    _client: Client = dataclasses.field(
         init=False, default_factory=_configure_analytics
     )
 
@@ -62,9 +62,7 @@ class _TelemetryClient:
         }
 
     def track_data(self, action: str, data: Dict[str, Any]):
-        self.__client__.track(
-            self.__server_id__, action, {**data, **self.__system_info__}
-        )
+        self._client.track(self.__server_id__, action, {**data, **self.__system_info__})
 
 
 async def track_error(error: RubrixServerError):
