@@ -99,6 +99,21 @@ class Helpers:
                 expanded_props = self._expands_schema(field_props, definitions)
                 definition["items"] = expanded_props.get("properties", expanded_props)
                 new_schema[name] = definition
+            elif "allOf" in definition:
+                allOf_expanded = [
+                    self._expands_schema(
+                        definitions[def_["$ref"].replace("#/definitions/", "")].get(
+                            "properties", {}
+                        ),
+                        definitions,
+                    )
+                    for def_ in definition["allOf"]
+                    if "$ref" in def_
+                ]
+                if len(allOf_expanded) == 1:
+                    new_schema[name] = allOf_expanded[0]
+                else:
+                    new_schema[name] = allOf_expanded
             else:
                 new_schema[name] = definition
         return new_schema

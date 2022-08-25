@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, root_validator, validator
 from pydantic.generics import GenericModel
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
@@ -38,7 +38,10 @@ class DaoRecordsSearchResults(BaseModel):
 
 
 class BaseAnnotationDB(BaseModel):
-    agent: str = Field(max_length=64)
+    agent: Optional[str] = Field(
+        None,
+        max_length=64,
+    )
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
@@ -49,8 +52,56 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
-    prediction: Optional[AnnotationDB] = None
+    prediction: Optional[AnnotationDB] = Field(
+        None, description="Deprecated. Use `predictions` instead"
+    )
     annotation: Optional[AnnotationDB] = None
+
+    predictions: Optional[Dict[str, AnnotationDB]] = Field(
+        None,
+        description="Provide the prediction info as a key-value dictionary."
+        "The key will represent the agent ant the value the prediction."
+        "Using this way you can skip passing the agent inside of the prediction",
+    )
+    annotations: Optional[Dict[str, AnnotationDB]] = Field(
+        None,
+        description="Provide the annotation info as a key-value dictionary."
+        "The key will represent the agent ant the value the annotation."
+        "Using this way you can skip passing the agent inside the annotation",
+    )
+
+    @staticmethod
+    def update_annotation(values, annotation_field: str):
+        field_to_update = f"{annotation_field}s"
+        annotation = values.get(annotation_field)
+        annotations = values.get(field_to_update) or {}
+
+        if annotation:
+            annotations.update(
+                {
+                    annotation.agent: annotation.__class__.parse_obj(
+                        annotation.dict(exclude={"agent"})
+                    )
+                }
+            )
+            values[field_to_update] = annotations
+
+        if annotations and not annotation:
+            for key, value in annotations.items():
+                new_annotation = value.__class__.parse_obj(
+                    {**value.dict(), "agent": key}
+                )
+                values[annotation_field] = new_annotation
+                break
+
+        return values
+
+    @root_validator()
+    def prepare_record_for_db(cls, values):
+
+        values = cls.update_annotation(values, "prediction")
+        values = cls.update_annotation(values, "annotation")
+        return values
 
     @validator("id", always=True, pre=True)
     def default_id_if_none_provided(cls, id: Optional[str]) -> str:
