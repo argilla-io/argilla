@@ -15,6 +15,7 @@
 
 from fastapi import APIRouter, Security
 
+from rubrix.server.commons import telemetry
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 
@@ -39,4 +40,5 @@ async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
 
     """
 
+    await telemetry.track_login()
     return current_user
