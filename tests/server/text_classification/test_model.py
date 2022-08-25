@@ -75,6 +75,56 @@ def test_model_dict():
                 {"class_label": "B", "score": 1.0},
             ],
         },
+        "annotations": {
+            "test": {
+                "labels": [
+                    {"class_label": "A", "score": 1.0},
+                    {"class_label": "B", "score": 1.0},
+                ]
+            }
+        },
+        "id": 1,
+        "inputs": {"text": "This is a text"},
+        "metrics": {},
+        "multi_label": True,
+        "status": "Default",
+    }
+
+
+def test_model_with_annotations():
+    record = TextClassificationRecord.parse_obj(
+        {
+            "annotations": {
+                "test": {
+                    "labels": [
+                        {"class_label": "A", "score": 1.0},
+                        {"class_label": "B", "score": 1.0},
+                    ]
+                }
+            },
+            "id": 1,
+            "inputs": {"text": "This is a text"},
+            "multi_label": True,
+            "status": "Default",
+        }
+    )
+
+    assert record.dict(exclude_none=True) == {
+        "annotation": {
+            "agent": "test",
+            "labels": [
+                {"class_label": "A", "score": 1.0},
+                {"class_label": "B", "score": 1.0},
+            ],
+        },
+        "annotations": {
+            "test": {
+                "labels": [
+                    {"class_label": "A", "score": 1.0},
+                    {"class_label": "B", "score": 1.0},
+                ]
+            }
+        },
         "id": 1,
         "inputs": {"text": "This is a text"},
         "metrics": {},

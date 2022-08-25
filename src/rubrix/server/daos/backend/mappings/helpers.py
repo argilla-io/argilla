@@ -103,6 +103,10 @@ class mappings:
     def decimal_field():
         return {"type": "float"}
 
+    @classmethod
+    def dynamic_field(cls):
+        return {"dynamic": True, "type": "object"}
+
 
 def multilingual_stop_analyzer(supported_langs: List[str] = None) -> Dict[str, Any]:
     """Multilingual stop analyzer"""
@@ -154,6 +158,15 @@ def dynamic_metadata_text():
     }
 
 
+def dynamic_annotations_text(path: str):
+    path = f"{path}.*"
+    return {
+        path: mappings.path_match_keyword_template(
+            path=path, enable_text_search_in_keywords=True
+        )
+    }
+
+
 def tasks_common_mappings():
     """Commons index mappings"""
     return {
@@ -168,16 +181,20 @@ def tasks_common_mappings():
             #  so we can build extra metrics based on these fields
             "prediction": {"type": "object", "enabled": False},
             "annotation": {"type": "object", "enabled": False},
+            "predictions": mappings.dynamic_field(),
+            "annotations": mappings.dynamic_field(),
             "status": mappings.keyword_field(),
             "event_timestamp": {"type": "date"},
             "last_updated": {"type": "date"},
             "annotated_by": mappings.keyword_field(enable_text_search=True),
             "predicted_by": mappings.keyword_field(enable_text_search=True),
-            "metrics": {"dynamic": True, "type": "object"},
-            "metadata": {"dynamic": True, "type": "object"},
+            "metrics": mappings.dynamic_field(),
+            "metadata": mappings.dynamic_field(),
         },
         "dynamic_templates": [
             dynamic_metadata_text(),
             dynamic_metrics_text(),
+            dynamic_annotations_text(path="predictions"),
+            dynamic_annotations_text(path="annotations"),
         ],
     }
