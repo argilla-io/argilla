@@ -66,6 +66,8 @@ server = [
     "passlib[bcrypt]~=1.7.4",
     # Info status
     "psutil ~= 5.8.0",
+    # Telemetry
+    "segment-analytics-python"
 ]
 listeners = [
     "schedule ~= 1.1.0",
