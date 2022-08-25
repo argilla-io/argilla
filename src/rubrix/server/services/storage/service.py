@@ -25,14 +25,14 @@ class RecordsStorageService:
     def __init__(self, dao: DatasetRecordsDAO):
         self.__dao__ = dao
 
-    def store_records(
+    async def store_records(
         self,
         dataset: ServiceDataset,
         records: List[ServiceRecord],
         record_type: Type[ServiceRecord],
     ) -> int:
         """Store a set of records"""
-        telemetry.track_bulk(task=dataset.task, records=len(records))
+        await telemetry.track_bulk(task=dataset.task, records=len(records))
 
         metrics = TasksFactory.get_task_metrics(dataset.task)
         if metrics:
