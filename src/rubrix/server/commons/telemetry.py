@@ -68,13 +68,13 @@ class _TelemetryClient:
 async def track_error(error: RubrixServerError):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("ServerError", {"code": error.code})
+        client.track_data("ErrorRaised", {"code": error.code})
 
 
 async def track_bulk(task: TaskType, records: int):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("BulkData", {"task": task, "records": records})
+        client.track_data("DataLogged", {"task": task, "records": records})
 
 
 async def track_login():

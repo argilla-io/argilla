@@ -18,7 +18,7 @@ async def test_track_bulk(telemetry_track_data):
 
     await telemetry.track_bulk(task=task, records=records)
     telemetry_track_data.assert_called_once_with(
-        "BulkData", {"task": task, "records": records}
+        "DataLogged", {"task": task, "records": records}
     )
 
 
@@ -28,5 +28,5 @@ async def test_track_error(telemetry_track_data):
 
     await telemetry.track_error(error)
     telemetry_track_data.assert_called_once_with(
-        "ServerError", {"code": error.get_error_code()}
+        "ErrorRaised", {"code": error.get_error_code()}
     )
