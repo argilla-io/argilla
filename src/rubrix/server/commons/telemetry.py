@@ -13,6 +13,7 @@ try:
 except ModuleNotFoundError:
     # TODO: show some warning info
     settings.enable_telemetry = False
+    Client = None
 
 
 def _configure_analytics() -> Client:
