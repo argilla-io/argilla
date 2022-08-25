@@ -2,6 +2,7 @@ from typing import List, Type
 
 from fastapi import Depends
 
+from rubrix.server.commons import telemetry
 from rubrix.server.commons.config import TasksFactory
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.services.datasets import ServiceDataset
@@ -31,6 +32,8 @@ class RecordsStorageService:
         record_type: Type[ServiceRecord],
     ) -> int:
         """Store a set of records"""
+        telemetry.track_bulk(task=dataset.task, records=len(records))
+
         metrics = TasksFactory.get_task_metrics(dataset.task)
         if metrics:
             for record in records:
