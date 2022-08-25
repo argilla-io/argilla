@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Type
+from typing import List, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import Record
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
-from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.daos.records import DatasetRecordsDAO
+from rubrix.server.services.datasets import ServiceDataset
+from rubrix.server.services.tasks.commons import ServiceRecord
 
 
 class RecordsStorageService:
@@ -26,20 +26,18 @@ class RecordsStorageService:
 
     def store_records(
         self,
-        dataset: BaseDatasetDB,
-        mappings: Dict[str, Any],
-        records: List[Record],
-        record_type: Type[Record],
-        metrics: Optional[Type[BaseTaskMetrics]] = None,
+        dataset: ServiceDataset,
+        records: List[ServiceRecord],
+        record_type: Type[ServiceRecord],
     ) -> int:
         """Store a set of records"""
+        metrics = TasksFactory.get_task_metrics(dataset.task)
         if metrics:
             for record in records:
                 record.metrics = metrics.record_metrics(record)
 
         return self.__dao__.add_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_class=record_type,
         )

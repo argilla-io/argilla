@@ -18,8 +18,8 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from fastapi import Depends
 
-from rubrix.server.daos.datasets import BaseDatasetDB, DatasetsDAO, SettingsDB
-from rubrix.server.daos.models.datasets import DatasetDB
+from rubrix.server.daos.datasets import BaseDatasetSettingsDB, DatasetsDAO
+from rubrix.server.daos.models.datasets import BaseDatasetDB
 from rubrix.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -28,11 +28,19 @@ from rubrix.server.errors import (
 )
 from rubrix.server.security.model import User
 
-Dataset = TypeVar("Dataset", bound=BaseDatasetDB)
 
-
-class SVCDatasetSettings(SettingsDB):
+class ServiceBaseDataset(BaseDatasetDB):
     pass
+
+
+class ServiceBaseDatasetSettings(BaseDatasetSettingsDB):
+    pass
+
+
+ServiceDataset = TypeVar("ServiceDataset", bound=ServiceBaseDataset)
+ServiceDatasetSettings = TypeVar(
+    "ServiceDatasetSettings", bound=ServiceBaseDatasetSettings
+)
 
 
 class DatasetsService:
@@ -50,9 +58,7 @@ class DatasetsService:
     def __init__(self, dao: DatasetsDAO):
         self.__dao__ = dao
 
-    def create_dataset(
-        self, user: User, dataset: Dataset, mappings: Dict[str, Any]
-    ) -> Dataset:
+    def create_dataset(self, user: User, dataset: ServiceDataset) -> ServiceDataset:
         user.check_workspace(dataset.owner)
 
         try:
@@ -60,11 +66,11 @@ class DatasetsService:
                 user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
             )
             raise EntityAlreadyExistsError(
-                name=dataset.name, type=Dataset, workspace=dataset.owner
+                name=dataset.name, type=ServiceDataset, workspace=dataset.owner
             )
         except WrongTaskError:  # Found a dataset with same name but different task
             raise EntityAlreadyExistsError(
-                name=dataset.name, type=Dataset, workspace=dataset.owner
+                name=dataset.name, type=ServiceDataset, workspace=dataset.owner
             )
         except EntityNotFoundError:
             # The dataset does not exist -> create it !
@@ -72,16 +78,16 @@ class DatasetsService:
             dataset.created_by = user.username
             dataset.created_at = date_now
             dataset.last_updated = date_now
-            return self.__dao__.create_dataset(dataset, mappings=mappings)
+            return self.__dao__.create_dataset(dataset)
 
     def find_by_name(
         self,
         user: User,
         name: str,
-        as_dataset_class: Type[BaseDatasetDB] = DatasetDB,
+        as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
         task: Optional[str] = None,
         workspace: Optional[str] = None,
-    ) -> Dataset:
+    ) -> ServiceDataset:
         owner = user.check_workspace(workspace)
 
         if task is None:
@@ -96,20 +102,20 @@ class DatasetsService:
         )
 
         if found_ds is None:
-            raise EntityNotFoundError(name=name, type=Dataset)
+            raise EntityNotFoundError(name=name, type=ServiceDataset)
         if found_ds.owner and owner and found_ds.owner != owner:
             raise EntityNotFoundError(
-                name=name, type=Dataset
+                name=name, type=ServiceDataset
             ) if user.is_superuser() else ForbiddenOperationError()
 
-        return cast(Dataset, found_ds)
+        return cast(ServiceDataset, found_ds)
 
     def __find_by_name_with_superuser_fallback__(
         self,
         user: User,
         name: str,
         owner: Optional[str],
-        as_dataset_class: Optional[Type[DatasetDB]],
+        as_dataset_class: Optional[Type[ServiceDataset]],
         task: Optional[str] = None,
     ):
         found_ds = self.__dao__.find_by_name(
@@ -125,7 +131,7 @@ class DatasetsService:
                 pass
         return found_ds
 
-    def delete(self, user: User, dataset: Dataset):
+    def delete(self, user: User, dataset: ServiceDataset):
         user.check_workspace(dataset.owner)
         found = self.__find_by_name_with_superuser_fallback__(
             user=user,
@@ -140,10 +146,10 @@ class DatasetsService:
     def update(
         self,
         user: User,
-        dataset: Dataset,
+        dataset: ServiceDataset,
         tags: Dict[str, str],
         metadata: Dict[str, Any],
-    ) -> Dataset:
+    ) -> ServiceDataset:
         found = self.find_by_name(
             user=user, name=dataset.name, task=dataset.task, workspace=dataset.owner
         )
@@ -159,30 +165,30 @@ class DatasetsService:
         self,
         user: User,
         workspaces: Optional[List[str]],
-        task2dataset_map: Dict[str, Type[BaseDatasetDB]] = None,
-    ) -> List[Dataset]:
+        task2dataset_map: Dict[str, Type[ServiceDataset]] = None,
+    ) -> List[ServiceDataset]:
         owners = user.check_workspaces(workspaces)
         return self.__dao__.list_datasets(
             owner_list=owners, task2dataset_map=task2dataset_map
         )
 
-    def close(self, user: User, dataset: Dataset):
+    def close(self, user: User, dataset: ServiceDataset):
         found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
         self.__dao__.close(found)
 
-    def open(self, user: User, dataset: Dataset):
+    def open(self, user: User, dataset: ServiceDataset):
         found = self.find_by_name(user=user, name=dataset.name, workspace=dataset.owner)
         self.__dao__.open(found)
 
     def copy_dataset(
         self,
         user: User,
-        dataset: Dataset,
+        dataset: ServiceDataset,
         copy_name: str,
         copy_workspace: Optional[str] = None,
         copy_tags: Dict[str, Any] = None,
         copy_metadata: Dict[str, Any] = None,
-    ) -> Dataset:
+    ) -> ServiceDataset:
 
         dataset_workspace = copy_workspace or dataset.owner
         dataset_workspace = user.check_workspace(dataset_workspace)
@@ -221,58 +227,23 @@ class DatasetsService:
 
         return copy_dataset
 
-    def all_workspaces(self) -> List[str]:
-        """Retrieve all dataset workspaces"""
-
-        workspaces = self.__dao__.get_all_workspaces()
-        # include the non-workspace workspace?
-        return workspaces
-
     async def get_settings(
-        self, user: User, dataset: Dataset, class_type: Type[SVCDatasetSettings]
-    ) -> SVCDatasetSettings:
-        """
-        Get the configured settings for dataset
-
-        Args:
-            user: the connected user
-            dataset: the target dataset
-            class_type: the settings class
-
-        Returns:
-            An instance of class_type settings configured for provided dataset
-
-        """
+        self,
+        user: User,
+        dataset: ServiceDataset,
+        class_type: Type[ServiceDatasetSettings],
+    ) -> ServiceDatasetSettings:
         settings = self.__dao__.load_settings(dataset=dataset, as_class=class_type)
         if not settings:
             raise EntityNotFoundError(name=dataset.name, type=class_type)
         return class_type.parse_obj(settings.dict())
 
     async def save_settings(
-        self, user: User, dataset: Dataset, settings: SVCDatasetSettings
-    ) -> SVCDatasetSettings:
-        """
-        Save a set of settings for a dataset
+        self, user: User, dataset: ServiceDataset, settings: ServiceDatasetSettings
+    ) -> ServiceDatasetSettings:
 
-        Args:
-            user: The user executing the command
-            dataset: The dataset
-            settings: The dataset settings
-
-        Returns:
-            Stored dataset settings
-
-        """
         self.__dao__.save_settings(dataset=dataset, settings=settings)
         return settings
 
-    async def delete_settings(self, user: User, dataset: Dataset) -> None:
-        """
-        Deletes the dataset settings
-
-        Args:
-            user: The user executing the command
-            dataset:  The dataset
-
-        """
+    async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
         self.__dao__.delete_settings(dataset=dataset)

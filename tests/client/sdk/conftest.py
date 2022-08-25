@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import logging
 from datetime import datetime
+from typing import Any, Dict, List
 
 import pytest
 
@@ -32,6 +34,8 @@ from rubrix.client.sdk.token_classification.models import (
     TokenClassificationBulkData,
 )
 
+LOGGER = logging.getLogger(__name__)
+
 
 class Helpers:
     def remove_key(self, schema: dict, key: str):
@@ -49,6 +53,55 @@ class Helpers:
 
     def remove_pattern(self, schema: dict):
         return self.remove_key(schema, key="pattern")
+
+    def are_compatible_api_schemas(self, client_schema: dict, server_schema: dict):
+        def check_schema_props(client_props, server_props):
+            different_props = []
+            for name, definition in client_props.items():
+                if name not in server_props:
+                    LOGGER.warning(
+                        f"Client property {name} not found in server properties. "
+                        "Make sure your API compatibility"
+                    )
+                    different_props.append(name)
+                    continue
+                elif definition != server_props[name]:
+                    if not check_schema_props(definition, server_props[name]):
+                        return False
+            return len(different_props) < len(client_props) / 2
+
+        client_props = self._expands_schema(
+            client_schema["properties"], client_schema["definitions"]
+        )
+        server_props = self._expands_schema(
+            server_schema["properties"], server_schema["definitions"]
+        )
+
+        if client_props == server_props:
+            return True
+        return check_schema_props(client_props, server_props)
+
+    def _expands_schema(
+        self, props: Dict[str, Any], definitions: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        new_schema = {}
+        for name, definition in props.items():
+            if "$ref" in definition:
+                ref = definition["$ref"]
+                ref_def = definitions[ref.replace("#/definitions/", "")]
+                field_props = ref_def.get("properties", ref_def)
+                expanded_props = self._expands_schema(field_props, definitions)
+                new_schema[name] = expanded_props.get("properties", expanded_props)
+            elif "items" in definition and "$ref" in definition["items"]:
+                ref = definition["items"]["$ref"]
+                ref_def = definitions[ref.replace("#/definitions/", "")]
+                field_props = ref_def.get("properties", ref_def)
+                expanded_props = self._expands_schema(field_props, definitions)
+                definition["items"] = expanded_props.get("properties", expanded_props)
+                new_schema[name] = definition
+            else:
+                new_schema[name] = definition
+        return new_schema
 
 
 @pytest.fixture(scope="session")

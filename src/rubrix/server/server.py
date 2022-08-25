@@ -27,9 +27,9 @@ from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
 from rubrix.logging import configure_logging
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.client_wrapper import create_es_wrapper
 from rubrix.server.errors import APIErrorHandler, EntityNotFoundError
 from rubrix.server.routes import api_router
 from rubrix.server.security import auth
@@ -89,7 +89,7 @@ def configure_app_storage(app: FastAPI):
         import opensearchpy
 
         try:
-            es_wrapper = create_es_wrapper()
+            es_wrapper = ElasticsearchBackend.get_instance()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
             datasets: DatasetsDAO = DatasetsDAO.get_instance(
                 es_wrapper, records_dao=dataset_records

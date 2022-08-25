@@ -17,14 +17,13 @@
 Dataset models definition
 """
 
-from datetime import datetime
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
 from rubrix._constants import DATASET_NAME_REGEX_PATTERN
-from rubrix.server.apis.v0.models.commons.model import TaskType
-from rubrix.server.services.datasets import DatasetDB as SVCDataset
+from rubrix.server.commons.models import TaskType
+from rubrix.server.services.datasets import ServiceBaseDataset
 
 
 class UpdateDatasetRequest(BaseModel):
@@ -43,15 +42,15 @@ class UpdateDatasetRequest(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-class CreationDatasetRequest(UpdateDatasetRequest):
+class _BaseDatasetRequest(UpdateDatasetRequest):
     name: str = Field(regex=DATASET_NAME_REGEX_PATTERN, description="The dataset name")
 
 
-class DatasetCreate(CreationDatasetRequest):
+class CreateDatasetRequest(_BaseDatasetRequest):
     task: TaskType = Field(description="The dataset task")
 
 
-class CopyDatasetRequest(CreationDatasetRequest):
+class CopyDatasetRequest(_BaseDatasetRequest):
     """
     Request body for copy dataset operation
     """
@@ -59,7 +58,7 @@ class CopyDatasetRequest(CreationDatasetRequest):
     target_workspace: Optional[str] = None
 
 
-class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
+class Dataset(_BaseDatasetRequest, ServiceBaseDataset):
     """
     Low level dataset data model
 
@@ -76,13 +75,3 @@ class BaseDatasetDB(CreationDatasetRequest, SVCDataset):
     """
 
     task: TaskType
-
-
-class DatasetDB(BaseDatasetDB):
-    pass
-
-
-class Dataset(BaseDatasetDB):
-    """Dataset used for response output"""
-
-    pass

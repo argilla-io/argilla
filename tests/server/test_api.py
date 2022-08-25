@@ -15,12 +15,11 @@
 
 import os
 
-from rubrix.server.apis.v0.models.commons.model import TaskStatus
 from rubrix.server.apis.v0.models.text_classification import (
-    TaskType,
-    TextClassificationBulkData,
+    TextClassificationBulkRequest,
     TextClassificationRecord,
 )
+from rubrix.server.commons.models import TaskStatus, TaskType
 
 
 def create_some_data_for_text_classification(client, name: str, n: int):
@@ -65,7 +64,7 @@ def create_some_data_for_text_classification(client, name: str, n: int):
     ]
     client.post(
         f"/api/datasets/{name}/{TaskType.text_classification}:bulk",
-        json=TextClassificationBulkData(
+        json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
             records=records,

@@ -16,7 +16,8 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.apis.v0.models.datasets import CreationDatasetRequest
+from rubrix.server.apis.v0.models.datasets import CreateDatasetRequest
+from rubrix.server.commons.models import TaskType
 
 
 @pytest.mark.parametrize(
@@ -24,7 +25,7 @@ from rubrix.server.apis.v0.models.datasets import CreationDatasetRequest
     ["fine", "fine33", "fine_33", "fine-3-3"],
 )
 def test_dataset_naming_ok(name):
-    request = CreationDatasetRequest(name=name)
+    request = CreateDatasetRequest(name=name, task=TaskType.token_classification)
     assert request.name == name
 
 
@@ -42,4 +43,4 @@ def test_dataset_naming_ok(name):
 )
 def test_dataset_naming_ko(name):
     with pytest.raises(ValidationError, match="string does not match regex"):
-        CreationDatasetRequest(name=name)
+        CreateDatasetRequest(name=name, task=TaskType.token_classification)

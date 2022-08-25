@@ -2,27 +2,27 @@ from typing import List, Optional, Set, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import TaskType
 from rubrix.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.text_classification import DatasetLabels
-from rubrix.server.apis.v0.models.text_classification import (
-    CreationTextClassificationRecord,
-    TextClassificationRecord,
-)
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import BadRequestError, EntityNotFoundError
 from rubrix.server.security.model import User
-from rubrix.server.services.datasets import DatasetsService, SVCDatasetSettings
+from rubrix.server.services.datasets import DatasetsService, ServiceBaseDatasetSettings
+from rubrix.server.services.tasks.text_classification.metrics import DatasetLabels
 
-__svc_settings_class__: Type[SVCDatasetSettings] = type(
+__svc_settings_class__: Type[ServiceBaseDatasetSettings] = type(
     f"{TaskType.text_classification}_DatasetSettings",
-    (SVCDatasetSettings, TextClassificationSettings),
+    (ServiceBaseDatasetSettings, TextClassificationSettings),
     {},
 )
 
 from rubrix.server.services.metrics import MetricsService
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
 
 
+# TODO(@frascuchon): Move validator and its models to the service layer
 class DatasetValidator:
 
     _INSTANCE = None
@@ -48,7 +48,7 @@ class DatasetValidator:
             results = self.__metrics__.summarize_metric(
                 dataset=dataset,
                 metric=DatasetLabels(),
-                record_class=TextClassificationRecord,
+                record_class=ServiceTextClassificationRecord,
                 query=None,
             )
             if results:
@@ -67,7 +67,7 @@ class DatasetValidator:
         self,
         user: User,
         dataset: Dataset,
-        records: Optional[List[CreationTextClassificationRecord]] = None,
+        records: Optional[List[ServiceTextClassificationRecord]] = None,
     ):
         try:
             settings: TextClassificationSettings = await self.__datasets__.get_settings(

@@ -3,10 +3,13 @@ from typing import Any, Dict, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
+from rubrix._constants import DATASET_NAME_REGEX_PATTERN
+from rubrix.server.commons.models import TaskType
 
-class DatasetDB(BaseModel):
-    name: str
-    task: str
+
+class BaseDatasetDB(BaseModel):
+    name: str = Field(regex=DATASET_NAME_REGEX_PATTERN)
+    task: TaskType
     owner: Optional[str] = None
     tags: Dict[str, str] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -29,8 +32,9 @@ class DatasetDB(BaseModel):
         return self.build_dataset_id(self.name, self.owner)
 
 
-class SettingsDB(BaseModel):
+class BaseDatasetSettingsDB(BaseModel):
     pass
 
 
-BaseDatasetDB = TypeVar("BaseDatasetDB", bound=DatasetDB)
+DatasetDB = TypeVar("DatasetDB", bound=BaseDatasetDB)
+DatasetSettingsDB = TypeVar("DatasetSettingsDB", bound=BaseDatasetSettingsDB)
