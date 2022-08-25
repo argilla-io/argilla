@@ -2,19 +2,36 @@ import dataclasses
 import uuid
 from typing import Any, Dict, Optional
 
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import RubrixServerError
-from rubrix.server.services.tasks.commons import TaskType
 from rubrix.server.settings import settings
+
+try:
+    from analytics import Client
+except ModuleNotFoundError:
+    # TODO: show some warning info
+    settings.enable_telemetry = False
+
+
+def _configure_analytics() -> Client:
+    API_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+
+    return Client(
+        write_key=API_KEY,
+        gzip=True,
+        send=True,  # TODO: set to False for testing
+    )
 
 
 @dataclasses.dataclass
 class _TelemetryClient:
 
-    __API_KEY__ = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+    __INSTANCE__: "_TelemetryClient" = None
 
     __server_id__: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
-
-    __INSTANCE__: "_TelemetryClient" = None
+    __client__: Client = dataclasses.field(
+        init=False, default_factory=_configure_analytics
+    )
 
     @classmethod
     def get(cls):
@@ -27,11 +44,8 @@ class _TelemetryClient:
         import platform
         import sys
 
-        import analytics
-
         from rubrix import __version__
 
-        analytics.write_key = self.__API_KEY__
         self.__server_id__ = uuid.UUID(int=uuid.getnode())
         self.__system_info__ = {
             "system": platform.system(),
@@ -43,9 +57,9 @@ class _TelemetryClient:
         }
 
     def track_data(self, action: str, data: Dict[str, Any]):
-        import analytics
-
-        analytics.track(self.__server_id__, action, {**data, **self.__system_info__})
+        self.__client__.track(
+            self.__server_id__, action, {**data, **self.__system_info__}
+        )
 
 
 async def track_error(error: RubrixServerError):
