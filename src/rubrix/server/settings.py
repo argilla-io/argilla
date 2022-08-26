@@ -121,6 +121,7 @@ class ApiSettings(BaseSettings):
 
     class Config:
         # TODO: include a common prefix for all rubrix env vars.
+        env_prefix = "RUBRIX_"
         fields = {
             "elasticsearch_ca_path": {
                 "env": "RUBRIX_ELASTICSEARCH_CA_PATH",

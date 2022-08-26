@@ -2,21 +2,21 @@
 Rubrix uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.
 
 ## How to opt-out
-You can opt-out of telemetry reporting using the `ENV` variable `var_name_tbd` before launching the server. Setting this variable to `false` will completely disable telemetry reporting.
+You can opt-out of telemetry reporting using the `ENV` variable `RUBRIX_ENABLE_TELEMETRY` before launching the server. Setting this variable to `0` will completely disable telemetry reporting.
 
 If you are a Linux/MacOs users you should run:
 
 ```bash
-bash command to disable telemetry
+export RUBRIX_ENABLE_TELEMETRY=0
 ```
 
 If you are Windows users you should run:
 
 ```bash
-bash command to disable telemetry
+set RUBRIX_ENABLE_TELEMETRY=0
 ```
 
-To opt-in again, you can set the variable to `true`.
+To opt-in again, you can set the variable to `1`.
 
 ## Why reporting telemetry
 Anonymous telemetry information enable us to continously improve the product and detect recurring problems to better serve all users. We collect aggregated information about general usage and errors. We do NOT collect any information of users' data records, datasets, or metadata information.
@@ -31,14 +31,21 @@ We do not collect any piece of information related to the source data you store 
 The following usage and error information is reported:
 
 
-* exhaustive ist of fields/info
-* ...
+* The code of the raised error
+* Task name and number of records for bulk operations
+* The rubrix version running the server
+* The python version, e.g. `3.8.13`
+* The system/OS name, such as `Linux`, `Darwin`, `Windows`
+* The system’s release version, e.g. `Darwin Kernel Version 21.5.0: Tue Apr 26 21:08:22 PDT 2022; root:xnu-8020`
+* The machine type, e.g. `AMD64`
+* The underlying platform spec with as much useful information as possible. (ej. `macOS-10.16-x86_64-i386-64bit`)
+
 
 This is performed by registering information from the following API methods:
 
 * `/api/me`
-* `/api/dataset/.../bulk`
-* API errors
+* `/api/dataset/{name}/{task}:bulk`
+* Raised server API errors
 
 
 For transparency, you can inspect the source code where this is performed here (add link to the source).

@@ -48,11 +48,7 @@ class _TelemetryClient:
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
-            "python_version": "{major}.{minor}.{patch}".format(
-                major=sys.version_info.major,
-                minor=sys.version_info.minor,
-                patch=sys.version_info.micro,
-            ),
+            "python_version": platform.python_version(),
             "sys_version": platform.version(),
             "rubrix_version": __version__,
         }
