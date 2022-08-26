@@ -17,13 +17,9 @@ except ModuleNotFoundError:
 
 
 def _configure_analytics(disable_send: bool = False) -> Client:
-    API_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+    API_KEY = settings.telemetry_key or "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
-    return Client(
-        write_key=API_KEY,
-        gzip=True,
-        send=not disable_send,  # TODO: set to False for testing
-    )
+    return Client(write_key=API_KEY, gzip=True, send=not disable_send)
 
 
 @dataclasses.dataclass

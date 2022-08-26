@@ -84,6 +84,8 @@ class ApiSettings(BaseSettings):
 
     enable_telemetry: bool = True
 
+    telemetry_key: Optional[str] = None
+
     @validator("disable_es_index_template_creation", always=True)
     def check_index_template_creation_value(cls, value):
 
