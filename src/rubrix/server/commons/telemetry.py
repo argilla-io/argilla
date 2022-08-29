@@ -1,8 +1,10 @@
 import dataclasses
+import logging
 import platform
 import uuid
 from typing import Any, Dict
 
+import httpx
 from fastapi import Request
 
 from rubrix.server.commons.models import TaskType
@@ -19,25 +21,40 @@ except ModuleNotFoundError:
 
 def _configure_analytics(disable_send: bool = False) -> Client:
     API_KEY = settings.telemetry_key or "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+    TELEMETRY_HOST = "https://api.segment.io"
 
-    return Client(write_key=API_KEY, gzip=True, send=not disable_send)
+    # Check host connection
+    httpx.options(TELEMETRY_HOST, timeout=1)
+
+    return Client(
+        write_key=API_KEY,
+        gzip=True,
+        host=TELEMETRY_HOST,
+        send=not disable_send,
+        max_retries=5,
+    )
 
 
 @dataclasses.dataclass
 class _TelemetryClient:
 
-    __INSTANCE__: "_TelemetryClient" = None
+    client: Client
 
+    __INSTANCE__: "_TelemetryClient" = None
     __server_id__: str = dataclasses.field(init=False, default=None)
-    _client: Client = dataclasses.field(
-        init=False, default_factory=_configure_analytics
-    )
 
     @classmethod
     def get(cls):
         if settings.enable_telemetry:
             if cls.__INSTANCE__ is None:
-                cls.__INSTANCE__ = cls()
+                try:
+                    cls.__INSTANCE__ = cls(client=_configure_analytics())
+                except Exception as err:
+                    logging.getLogger(__name__).warning(
+                        f"Cannot initialize telemetry. Error: {err}. Disabling..."
+                    )
+                    settings.enable_telemetry = False
+                    return None
             return cls.__INSTANCE__
 
     def __post_init__(self):
@@ -60,7 +77,7 @@ class _TelemetryClient:
         event_data = data.copy()
         if include_system_info:
             event_data.update(self.__system_info__)
-        self._client.track(self.__server_id__, action, event_data)
+        self.client.track(self.__server_id__, action, event_data)
 
 
 def _process_request_info(request: Request):
