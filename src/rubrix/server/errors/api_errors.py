@@ -41,7 +41,7 @@ class APIErrorHandler:
     async def common_exception_handler(request: Request, error: Exception):
         """Wraps errors as custom generic error"""
         rubrix_error = exception_to_rubrix_error(error)
-        await telemetry.track_error(rubrix_error)
+        await telemetry.track_error(rubrix_error, request=request)
 
         return await http_exception_handler(
             request, RubrixServerHTTPException(rubrix_error)

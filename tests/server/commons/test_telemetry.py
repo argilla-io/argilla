@@ -1,15 +1,20 @@
 import pytest
+from fastapi import Request
 
 from rubrix.server.commons import telemetry
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import RubrixServerError
 
+mock_request = Request(scope={"type": "http", "headers": {}})
+
 
 @pytest.mark.asyncio
 async def test_track_login(telemetry_track_data):
-
-    await telemetry.track_login()
-    telemetry_track_data.assert_called_once_with("UserInfoRequested", {})
+    await telemetry.track_login(request=mock_request, username="rubrix")
+    telemetry_track_data.assert_called_once_with(
+        "UserInfoRequested",
+        {"accept-language": None, "is_default_user": True, "user-agent": None},
+    )
 
 
 @pytest.mark.asyncio
@@ -25,8 +30,12 @@ async def test_track_bulk(telemetry_track_data):
 @pytest.mark.asyncio
 async def test_track_error(telemetry_track_data):
     error = RubrixServerError()
-
-    await telemetry.track_error(error)
+    await telemetry.track_error(error, request=mock_request)
     telemetry_track_data.assert_called_once_with(
-        "ServerErrorFound", {"code": error.get_error_code()}
+        "ServerErrorFound",
+        {
+            "accept-language": None,
+            "code": "rubrix.api.errors::RubrixServerError",
+            "user-agent": None,
+        },
     )

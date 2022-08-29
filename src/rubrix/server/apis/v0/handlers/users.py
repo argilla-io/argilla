@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Request, Security
 
 from rubrix.server.commons import telemetry
 from rubrix.server.security import auth
@@ -25,12 +25,16 @@ router = APIRouter(tags=["users"])
 @router.get(
     "/me", response_model=User, response_model_exclude_none=True, operation_id="whoami"
 )
-async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
+async def whoami(
+    request: Request, current_user: User = Security(auth.get_user, scopes=[])
+):
     """
     User info endpoint
 
     Parameters
     ----------
+    request:
+        The original request
     current_user:
         The current request user
 
@@ -40,5 +44,5 @@ async def whoami(current_user: User = Security(auth.get_user, scopes=[])):
 
     """
 
-    await telemetry.track_login()
+    await telemetry.track_login(request, username=current_user.username)
     return current_user

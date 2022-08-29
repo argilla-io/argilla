@@ -1,8 +1,9 @@
 import dataclasses
 import platform
-import sys
 import uuid
 from typing import Any, Dict
+
+from fastapi import Request
 
 from rubrix.server.commons.models import TaskType
 from rubrix.server.errors.base_errors import RubrixServerError
@@ -53,14 +54,28 @@ class _TelemetryClient:
             "rubrix_version": __version__,
         }
 
-    def track_data(self, action: str, data: Dict[str, Any]):
-        self._client.track(self.__server_id__, action, {**data, **self.__system_info__})
+    def track_data(
+        self, action: str, data: Dict[str, Any], include_system_info: bool = True
+    ):
+        event_data = data.copy()
+        if include_system_info:
+            event_data.update(self.__system_info__)
+        self._client.track(self.__server_id__, action, event_data)
 
 
-async def track_error(error: RubrixServerError):
+def _process_request_info(request: Request):
+    return {
+        header: request.headers.get(header)
+        for header in ["user-agent", "accept-language"]
+    }
+
+
+async def track_error(error: RubrixServerError, request: Request):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("ServerErrorFound", {"code": error.code})
+        client.track_data(
+            "ServerErrorFound", {"code": error.code, **_process_request_info(request)}
+        )
 
 
 async def track_bulk(task: TaskType, records: int):
@@ -69,7 +84,10 @@ async def track_bulk(task: TaskType, records: int):
         client.track_data("LogRecordsRequested", {"task": task, "records": records})
 
 
-async def track_login():
+async def track_login(request: Request, username: str):
     client = _TelemetryClient.get()
     if client:
-        client.track_data("UserInfoRequested", {})
+        client.track_data(
+            "UserInfoRequested",
+            {"is_default_user": username == "rubrix", **_process_request_info(request)},
+        )
