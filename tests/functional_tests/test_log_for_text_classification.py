@@ -127,14 +127,23 @@ def test_logging_with_metadata_limits_exceeded(mocked_client):
     dataset = "test_logging_with_metadata_limits_exceeded"
 
     rb.delete(dataset)
+
     expected_record = rb.TextClassificationRecord(
         text="The input text",
-        metadata={k: k for k in range(0, settings.metadata_fields_limit + 1)},
+        metadata={
+            k: f"this is a string {k}"
+            for k in range(0, settings.metadata_fields_limit + 1)
+        },
     )
     with pytest.raises(BadRequestApiError):
         rb.log(expected_record, name=dataset)
 
-    expected_record.metadata = {k: k for k in range(0, settings.metadata_fields_limit)}
+    expected_record.metadata = {
+        k: f"This is a string {k}" for k in range(0, settings.metadata_fields_limit)
+    }
+    # Dataset creation with data
+    rb.log(expected_record, name=dataset)
+    # This call will check already included fields
     rb.log(expected_record, name=dataset)
 
     expected_record.metadata["new_key"] = "value"
