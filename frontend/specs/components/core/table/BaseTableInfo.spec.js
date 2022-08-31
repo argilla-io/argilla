@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import BaseTableInfo from "@/components/core/table/BaseTableInfo";
+import BaseTableInfo from "@/components/base/table/BaseTableInfo";
 
 const $route = {
   query: {},

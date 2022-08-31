@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import isArray from "~/components/core/utils/isArray";
+import isArray from "~/components/base/utils/isArray";
 
 export default {
   props: {

@@ -36,7 +36,7 @@
 
 <script>
 import common from "./common";
-import getClosestVueParent from "~/components/core/utils/getClosestVueParent";
+import getClosestVueParent from "~/components/base/utils/getClosestVueParent";
 
 export default {
   mixins: [common],
