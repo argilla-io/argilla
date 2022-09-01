@@ -369,8 +369,10 @@ class DatasetRecordsDAO:
         check_metadata_length(
             len(
                 {
-                    *self._es.get_field_mapping(index, "metadata.*"),
-                    *[k for k in metadata_values.keys()],
+                    *self._es.get_field_mapping(
+                        index, "metadata.*", exclude_subfields=True
+                    ),
+                    *[f"metadata.{k}" for k in metadata_values.keys()],
                 }
             )
         )
