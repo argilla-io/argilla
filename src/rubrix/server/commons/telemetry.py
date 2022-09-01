@@ -24,7 +24,7 @@ def _configure_analytics(disable_send: bool = False) -> Client:
     TELEMETRY_HOST = "https://api.segment.io"
 
     # Check host connection
-    httpx.options(TELEMETRY_HOST, timeout=1)
+    httpx.options(TELEMETRY_HOST, timeout=1, verify=False)
 
     return Client(
         write_key=API_KEY,
