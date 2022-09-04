@@ -379,7 +379,7 @@ def test_dataset_copy(mocked_client):
 
     record = rb.TextClassificationRecord(
         id=0,
-        inputs="This is the record input",
+        text="This is the record input",
         annotation_agent="test",
         annotation=["T"],
     )
@@ -415,7 +415,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         api.log(
             rb.TextClassificationRecord(
                 id=0,
-                inputs="This is the record input",
+                text="This is the record input",
                 annotation_agent="test",
                 annotation=["T"],
             ),
@@ -608,7 +608,7 @@ def test_client_workspace(mocked_client):
 def test_load_sort(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]
@@ -633,7 +633,7 @@ def test_load_sort(mocked_client):
 def test_load_workspace_from_different_workspace(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]

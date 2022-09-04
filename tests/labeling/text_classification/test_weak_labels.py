@@ -384,7 +384,7 @@ class TestWeakLabels:
 
     def test_summary(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test")] * 4
+            return [TextClassificationRecord(text="test")] * 4
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -464,7 +464,7 @@ class TestWeakLabels:
 
     def test_show_records(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -502,7 +502,7 @@ class TestWeakLabels:
 
     def test_change_mapping(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -558,7 +558,7 @@ class TestWeakLabels:
     @pytest.fixture
     def weak_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(3)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(3)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -633,9 +633,9 @@ class TestWeakMultiLabels:
 
     def test_matrix_annotation(self, monkeypatch):
         expected_records = [
-            TextClassificationRecord(inputs="test without annot", multi_label=True),
+            TextClassificationRecord(text="test without annot", multi_label=True),
             TextClassificationRecord(
-                inputs="test with annot", annotation="positive", multi_label=True
+                text="test with annot", annotation="positive", multi_label=True
             ),
         ]
 
@@ -674,7 +674,7 @@ class TestWeakMultiLabels:
 
     def test_summary(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", multi_label=True)] * 4
+            return [TextClassificationRecord(text="test", multi_label=True)] * 4
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -761,7 +761,7 @@ class TestWeakMultiLabels:
 
     def test_compute_correct_incorrect(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="mock")]
+            return [TextClassificationRecord(text="mock")]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -784,7 +784,7 @@ class TestWeakMultiLabels:
     def test_show_records(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(inputs="test", id=i, multi_label=True)
+                TextClassificationRecord(text="test", id=i, multi_label=True)
                 for i in range(5)
             ]
 
@@ -832,7 +832,7 @@ class TestWeakMultiLabels:
     def weak_multi_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(inputs="test", id=i, multi_label=True)
+                TextClassificationRecord(text="test", id=i, multi_label=True)
                 for i in range(3)
             ]
 
