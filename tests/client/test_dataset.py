@@ -71,7 +71,7 @@ class TestDatasetBase:
 
         with pytest.raises(
             WrongRecordTypeError,
-            match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
+            match=r"various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
         ):
             DatasetBase(
                 records=[

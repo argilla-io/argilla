@@ -195,12 +195,12 @@ class TestWeakLabelsBase:
             WeakLabels(rules=[lambda x: None], dataset="mock", query="mock")
         with pytest.raises(
             NoRecordsFoundError,
-            match="No records found in dataset 'mock' with ids \[-1\].",
+            match=r"No records found in dataset 'mock' with ids \[-1\].",
         ):
             WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
         with pytest.raises(
             NoRecordsFoundError,
-            match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
+            match=r"No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
         ):
             WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
