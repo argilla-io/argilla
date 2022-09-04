@@ -2,9 +2,9 @@ import logging
 import warnings
 from typing import Any, Optional
 
+from ._flair import SequenceTagger, flair_monitor
 from ._spacy import Language, ner_monitor
 from ._transformers import Pipeline, huggingface_monitor
-from ._flair import SequenceTagger, flair_monitor
 
 _LOGGER = logging.getLogger(__name__)
 

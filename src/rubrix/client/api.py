@@ -149,9 +149,9 @@ class Api:
         self._agent = _RubrixLogAgent(self)
 
     def __del__(self):
-        if hasattr(self,"_client"):
+        if hasattr(self, "_client"):
             del self._client
-        if hasattr(self,"_agent"):
+        if hasattr(self, "_agent"):
             del self._agent
 
     @property

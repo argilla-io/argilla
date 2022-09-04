@@ -96,7 +96,7 @@ class SearchRecordsService:
         record_type: Type[ServiceRecord],
         query: Optional[ServiceRecordsQuery] = None,
         id_from: Optional[str] = None,
-        limit: int = 1000
+        limit: int = 1000,
     ) -> Iterable[ServiceRecord]:
         """Scan records for a queried"""
         search = DaoRecordsSearch(query=query)

@@ -80,26 +80,26 @@ class TokenClassificationService:
     ) -> ServiceSearchResults:
 
         """
-                Run a search in a dataset
+        Run a search in a dataset
 
-                Parameters
-                ----------
-                dataset:
-                    The records dataset
-                query:
-                    The search parameters
-                sort_by:
-                    The sort by order list
-                record_from:
-                    The record from return results
-                size:
-                    The max number of records to return
+        Parameters
+        ----------
+        dataset:
+            The records dataset
+        query:
+            The search parameters
+        sort_by:
+            The sort by order list
+        record_from:
+            The record from return results
+        size:
+            The max number of records to return
 
-                Returns
-                -------
-                    The matched records with aggregation info for specified task_meta.py
+        Returns
+        -------
+            The matched records with aggregation info for specified task_meta.py
 
-                """
+        """
         metrics = TasksFactory.find_task_metrics(
             dataset.task,
             metric_ids={
@@ -147,7 +147,7 @@ class TokenClassificationService:
         dataset: ServiceTokenClassificationDataset,
         query: ServiceTokenClassificationQuery,
         id_from: Optional[str] = None,
-        limit: int = 1000
+        limit: int = 1000,
     ) -> Iterable[ServiceTokenClassificationRecord]:
         """
         Scan a dataset records
@@ -168,5 +168,9 @@ class TokenClassificationService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=ServiceTokenClassificationRecord,id_from=id_from, limit=limit
+            dataset,
+            query=query,
+            record_type=ServiceTokenClassificationRecord,
+            id_from=id_from,
+            limit=limit,
         )

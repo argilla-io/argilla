@@ -385,7 +385,7 @@ h1 {
   margin-top: 2rem
 }
 h2 {
-  margin-top: 2rem 
+  margin-top: 2rem
 }
 p {
   margin-top: 1.5rem;
@@ -396,7 +396,7 @@ p {
 .headerlink {
   height: 1px;
   overflow: hidden;
-  white-space: nowrap; 
+  white-space: nowrap;
   width: 1px;
   visibility: hidden !important;
 }
@@ -465,7 +465,7 @@ a {
 
 /* Change the white to any color */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
+input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
@@ -494,22 +494,22 @@ div[class*="tuto-section-"] {
   padding: 0;
 }
 a .tuto-section-1 {
-  background: var(--tuto-section-1);  
+  background: var(--tuto-section-1);
 }
 a .tuto-section-2 {
-  background: var(--tuto-section-2);  
+  background: var(--tuto-section-2);
 }
 a .tuto-section-3 {
-  background: var(--tuto-section-3);  
+  background: var(--tuto-section-3);
 }
 a .tuto-section-4 {
-  background: var(--tuto-section-4);  
+  background: var(--tuto-section-4);
 }
 a .tuto-section-5 {
-  background: var(--tuto-section-5);  
+  background: var(--tuto-section-5);
 }
 a .tuto-section-6 {
-  background: var(--tuto-section-6);  
+  background: var(--tuto-section-6);
 }
 
 /* Copyright */

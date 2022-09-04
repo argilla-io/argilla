@@ -231,8 +231,8 @@ def scan_data_response(
             stream = takeuntil(stream, limit=limit)
 
         for batch in grouper(
-                n=chunk_size,
-                iterable=stream,
+            n=chunk_size,
+            iterable=stream,
         ):
             filtered_records = filter(lambda r: r is not None, batch)
             yield "\n".join(
@@ -298,7 +298,10 @@ async def stream_data(
     data_stream = map(
         TextClassificationRecord.parse_obj,
         service.read_dataset(
-            dataset, query=ServiceTextClassificationQuery.parse_obj(query), id_from=id_from, limit=limit
+            dataset,
+            query=ServiceTextClassificationQuery.parse_obj(query),
+            id_from=id_from,
+            limit=limit,
         ),
     )
     return scan_data_response(

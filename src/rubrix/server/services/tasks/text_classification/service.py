@@ -153,7 +153,7 @@ class TextClassificationService:
         dataset: ServiceTextClassificationDataset,
         query: Optional[ServiceTextClassificationQuery] = None,
         id_from: Optional[str] = None,
-        limit: int = 1000
+        limit: int = 1000,
     ) -> Iterable[ServiceTextClassificationRecord]:
         """
         Scan a dataset records
@@ -172,7 +172,11 @@ class TextClassificationService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=ServiceTextClassificationRecord, id_from=id_from, limit=limit
+            dataset,
+            query=query,
+            record_type=ServiceTextClassificationRecord,
+            id_from=id_from,
+            limit=limit,
         )
 
     def _check_multi_label_integrity(

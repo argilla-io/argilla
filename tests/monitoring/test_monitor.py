@@ -25,8 +25,11 @@ def test_monitor_with_non_supported_model():
 def test_monitor_non_supported_huggingface_model():
     with warnings.catch_warnings(record=True) as warning_list:
 
-        from transformers import AutoTokenizer, AutoModelForTokenClassification
-        from transformers import pipeline
+        from transformers import (
+            AutoModelForTokenClassification,
+            AutoTokenizer,
+            pipeline,
+        )
 
         tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
         model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
@@ -37,7 +40,7 @@ def test_monitor_non_supported_huggingface_model():
         assert len(warning_list) == 1
         warn_text = warning_list[0].message.args[0]
         assert (
-                warn_text
-                == "The provided task model is not supported by monitoring module. "
-                   "Predictions won't be logged into rubrix"
+            warn_text
+            == "The provided task model is not supported by monitoring module. "
+            "Predictions won't be logged into rubrix"
         )
