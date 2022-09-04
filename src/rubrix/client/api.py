@@ -213,14 +213,11 @@ class Api:
             >>> rb.copy("my_dataset", name_of_copy="new_dataset")
             >>> rb.load("new_dataset")
         """
-        response = datasets_api.copy_dataset(
+        datasets_api.copy_dataset(
             client=self._client,
             name=dataset,
             json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
-
-        if response.status_code == 409:
-            raise RuntimeError(f"A dataset with name '{name_of_copy}' already exists.")
 
     def delete(self, name: str) -> None:
         """Deletes a dataset.
