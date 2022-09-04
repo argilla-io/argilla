@@ -85,7 +85,7 @@ def mock_response_token_401(monkeypatch):
 
 
 def test_init_correct(mock_response_200):
-    """Testing correct default initalization
+    """Testing correct default initialization
 
     It checks if the _client created is a RubrixClient object.
     """
@@ -106,7 +106,7 @@ def test_init_correct(mock_response_200):
 
 
 def test_init_evironment_url(mock_response_200, monkeypatch):
-    """Testing initalization with api_url provided via environment variable
+    """Testing initialization with api_url provided via environment variable
 
     It checks the url in the environment variable gets passed to client.
     """
@@ -124,7 +124,7 @@ def test_init_evironment_url(mock_response_200, monkeypatch):
 
 
 def test_trailing_slash(mock_response_200):
-    """Testing initalization with provided api_url via environment variable and argument
+    """Testing initialization with provided api_url via environment variable and argument
 
     It checks the trailing slash is removed in all cases
     """
