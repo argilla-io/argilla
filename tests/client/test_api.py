@@ -25,7 +25,6 @@ import pytest
 import rubrix as rb
 from rubrix.client import api
 from rubrix.client.api import InputValueError
-from rubrix.client.models import BulkResponse
 from rubrix.client.sdk.client import AuthenticatedClient
 from rubrix.client.sdk.commons.errors import (
     AlreadyExistsApiError,
