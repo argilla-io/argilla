@@ -239,7 +239,9 @@ class WeakLabelsBase:
         )
 
         if normalize_by_coverage:
-            overlaps_or_conflicts /= coverage
+            # ignore division by 0 warnings, as we convert the nan back to 0.0 afterwards
+            with np.errstate(divide="ignore", invalid="ignore"):
+                overlaps_or_conflicts /= coverage
             return np.nan_to_num(overlaps_or_conflicts)
 
         return overlaps_or_conflicts
@@ -658,8 +660,9 @@ class WeakLabels(WeakLabelsBase):
                 annotation if annotation is not None else self._annotation,
             )
 
-            # precision
-            precision = correct / (correct + incorrect)
+            # precision, ignore division by 0 warnings: we allow np.nan and np.inf
+            with np.errstate(divide="ignore", invalid="ignore"):
+                precision = correct / (correct + incorrect)
 
             return pd.DataFrame(
                 {
@@ -1043,8 +1046,9 @@ class WeakMultiLabels(WeakLabelsBase):
             # correct/incorrect
             correct, incorrect = self._compute_correct_incorrect(annotation)
 
-            # precision
-            precision = correct / (correct + incorrect)
+            # precision, ignore division by 0 warnings: we allow np.nan and np.inf
+            with np.errstate(divide="ignore", invalid="ignore"):
+                precision = correct / (correct + incorrect)
 
             return pd.DataFrame(
                 {
