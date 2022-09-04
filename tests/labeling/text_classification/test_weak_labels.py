@@ -18,7 +18,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from rubrix import TextClassificationRecord
 from rubrix.client.sdk.text_classification.models import (
@@ -420,7 +420,7 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(normalize_by_coverage=True)
         expected = pd.DataFrame(
@@ -437,7 +437,7 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
         expected = pd.DataFrame(
@@ -458,7 +458,9 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(summary, expected, check_dtype=False)
 
     def test_show_records(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
@@ -715,7 +717,7 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(normalize_by_coverage=True)
         expected = pd.DataFrame(
@@ -731,7 +733,7 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(
             annotation=np.array([[0, 1], [-1, -1], [0, 1], [1, 1]])
@@ -753,7 +755,9 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(summary, expected, check_dtype=False)
 
     def test_compute_correct_incorrect(self, monkeypatch):
         def mock_load(*args, **kwargs):
@@ -886,7 +890,11 @@ class TestWeakMultiLabels:
             },
             index=list(weak_multi_labels._rules_name2index.keys()) + ["total"],
         )
-        assert_frame_equal(weak_multi_labels.summary(), expected_summary)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(
+            weak_multi_labels.summary(), expected_summary, check_dtype=False
+        )
 
         expected_show_records = pd.DataFrame(
             map(lambda x: x.dict(), weak_multi_labels.records())
