@@ -264,7 +264,10 @@ async def stream_data(
     data_stream = map(
         TokenClassificationRecord.parse_obj,
         service.read_dataset(
-            dataset=dataset, query=ServiceTokenClassificationQuery.parse_obj(query), id_from=id_from, limit=limit
+            dataset=dataset,
+            query=ServiceTokenClassificationQuery.parse_obj(query),
+            id_from=id_from,
+            limit=limit,
         ),
     )
 
