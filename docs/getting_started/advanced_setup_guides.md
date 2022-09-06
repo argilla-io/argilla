@@ -297,7 +297,7 @@ NAME                   ACTIVE   DRIVER      STATE     URL                       
 rubrix-aws             -        amazonec2   Running   tcp://52.213.178.33:2376           v20.10.7
 ```
 
-### Save asigned machine ip
+### Save assigned machine ip
 
 In our case, the assigned ip is `52.213.178.33`
 
