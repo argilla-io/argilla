@@ -17,11 +17,9 @@ from typing import List, Optional, Union
 import httpx
 
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.api import build_data_response
+from rubrix.client.sdk.commons.api import build_data_response, build_param_dict
 from rubrix.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from rubrix.client.sdk.text2text.models import Text2TextQuery, Text2TextRecord
-
-from rubrix.client.sdk.commons.api import build_param_dict
 
 
 def data(

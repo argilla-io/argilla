@@ -26,7 +26,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
-from typing import Any, List, Type, TypeVar, Union, Optional, Dict
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 import httpx
 
@@ -50,12 +50,14 @@ _TASK_TO_ENDPOINT = {
 }
 
 
-def build_param_dict(id_from: Optional[str], limit: Optional[int]) -> Optional[Dict[str, Union[str, int]]]:
+def build_param_dict(
+    id_from: Optional[str], limit: Optional[int]
+) -> Optional[Dict[str, Union[str, int]]]:
     params = {}
     if id_from:
-        params['id_from'] = id_from
+        params["id_from"] = id_from
     if limit:
-        params['limit'] = limit
+        params["limit"] = limit
     return params
 
 

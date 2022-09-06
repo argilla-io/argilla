@@ -83,6 +83,7 @@ class Client(_ClientCommonDefaults, _Client):
             except httpx.ConnectError as err:
                 err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
                 raise RubrixClientError(err_str) from None
+
         return inner
 
     @with_httpx_error_handler

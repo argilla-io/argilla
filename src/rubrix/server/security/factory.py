@@ -13,8 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.security.auth_provider import (
-    create_local_auth_provider,
-)
+from rubrix.server.security.auth_provider import create_local_auth_provider
 
 auth = create_local_auth_provider()

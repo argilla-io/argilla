@@ -1,4 +1,4 @@
-```     
+```
         <re-input-container class='re-input-invalid'>
           <label>Email</label>
           <re-input required></re-input>
