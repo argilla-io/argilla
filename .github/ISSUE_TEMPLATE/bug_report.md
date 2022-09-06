@@ -28,7 +28,7 @@ If applicable, add screenshots to help explain your problem.
  - Browser [e.g. chrome, safari]:
  - Rubrix Version [e.g. 0.10.0]:
  - ElasticSearch Version [e.g. 7.10.2]:
- - Docker Image (optional) [e.g. rubrix:v0.10.0]:  
+ - Docker Image (optional) [e.g. rubrix:v0.10.0]:
 
 **Additional context**
 Add any other context about the problem here.
