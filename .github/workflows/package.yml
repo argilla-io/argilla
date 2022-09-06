@@ -1,5 +1,5 @@
 
-name: CI
+name: Build package
 
 on:
   push:
@@ -85,10 +85,6 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-
-      - name: Type checking with pyre
-        uses: facebook/pyre-action@v0.0.1
-        if: steps.filter.outputs.python_code == 'true'
 
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
