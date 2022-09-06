@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import concurrent.futures
 import datetime
 from time import sleep
 from typing import Iterable
@@ -206,6 +207,36 @@ def test_log_passing_empty_records_list(mocked_client):
         api.log(records=[], name="ds")
 
 
+def test_log_background(mocked_client):
+    """Verify that logs can be delayed via the background parameter."""
+    dataset_name = "test_log_background"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    # Log in the background, and extract the future
+    sample_text = "Sample text for testing"
+    future = api.log(
+        rb.TextClassificationRecord(text=sample_text),
+        name=dataset_name,
+        background=True,
+    )
+    assert isinstance(future, concurrent.futures.Future)
+
+    # The dataset does not exist yet
+    with pytest.raises(NotFoundApiError):
+        dataset = api.load(dataset_name)
+
+    # Log the record to Rubrix
+    try:
+        future.result()
+    finally:
+        future.cancel()
+
+    # The dataset now exists and holds one record
+    dataset = api.load(dataset_name)
+    assert len(dataset) == 1
+    assert dataset[0].text == sample_text
+
+
 @pytest.mark.parametrize(
     "status,error_type",
     [
@@ -347,7 +378,7 @@ def test_dataset_copy(mocked_client):
 
     record = rb.TextClassificationRecord(
         id=0,
-        inputs="This is the record input",
+        text="This is the record input",
         annotation_agent="test",
         annotation=["T"],
     )
@@ -383,7 +414,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         api.log(
             rb.TextClassificationRecord(
                 id=0,
-                inputs="This is the record input",
+                text="This is the record input",
                 annotation_agent="test",
                 annotation=["T"],
             ),
@@ -576,7 +607,7 @@ def test_client_workspace(mocked_client):
 def test_load_sort(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]
@@ -601,7 +632,7 @@ def test_load_sort(mocked_client):
 def test_load_workspace_from_different_workspace(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]

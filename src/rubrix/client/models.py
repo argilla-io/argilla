@@ -202,7 +202,7 @@ class TextClassificationRecord(_Validators):
         """Check if either text or inputs were provided. Copy text to inputs."""
         if isinstance(values.get("inputs"), str):
             warnings.warn(
-                "In the future, the `inputs` argument of the `TextClassificationRecord` will not accept strings."
+                "In the future, the `inputs` argument of the `TextClassificationRecord` will not accept strings. "
                 "Please use the `text` argument in that case. Make sure to adapt your code accordingly.",
                 category=FutureWarning,
             )
