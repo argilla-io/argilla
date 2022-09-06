@@ -18,7 +18,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from rubrix import TextClassificationRecord
 from rubrix.client.sdk.text_classification.models import (
@@ -195,12 +195,12 @@ class TestWeakLabelsBase:
             WeakLabels(rules=[lambda x: None], dataset="mock", query="mock")
         with pytest.raises(
             NoRecordsFoundError,
-            match="No records found in dataset 'mock' with ids \[-1\].",
+            match=r"No records found in dataset 'mock' with ids \[-1\].",
         ):
             WeakLabels(rules=[lambda x: None], dataset="mock", ids=[-1])
         with pytest.raises(
             NoRecordsFoundError,
-            match="No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
+            match=r"No records found in dataset 'mock' with query 'mock' and with ids \[-1\].",
         ):
             WeakLabels(rules=[lambda x: None], dataset="mock", query="mock", ids=[-1])
 
@@ -384,7 +384,7 @@ class TestWeakLabels:
 
     def test_summary(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test")] * 4
+            return [TextClassificationRecord(text="test")] * 4
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -420,7 +420,7 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(normalize_by_coverage=True)
         expected = pd.DataFrame(
@@ -437,7 +437,7 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(annotation=np.array([1, -1, 0, 1]))
         expected = pd.DataFrame(
@@ -458,11 +458,13 @@ class TestWeakLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(summary, expected, check_dtype=False)
 
     def test_show_records(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -500,7 +502,7 @@ class TestWeakLabels:
 
     def test_change_mapping(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(5)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -556,7 +558,7 @@ class TestWeakLabels:
     @pytest.fixture
     def weak_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", id=i) for i in range(3)]
+            return [TextClassificationRecord(text="test", id=i) for i in range(3)]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -631,9 +633,9 @@ class TestWeakMultiLabels:
 
     def test_matrix_annotation(self, monkeypatch):
         expected_records = [
-            TextClassificationRecord(inputs="test without annot", multi_label=True),
+            TextClassificationRecord(text="test without annot", multi_label=True),
             TextClassificationRecord(
-                inputs="test with annot", annotation="positive", multi_label=True
+                text="test with annot", annotation="positive", multi_label=True
             ),
         ]
 
@@ -672,7 +674,7 @@ class TestWeakMultiLabels:
 
     def test_summary(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="test", multi_label=True)] * 4
+            return [TextClassificationRecord(text="test", multi_label=True)] * 4
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -715,7 +717,7 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(normalize_by_coverage=True)
         expected = pd.DataFrame(
@@ -731,7 +733,7 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        assert_frame_equal(summary, expected)
 
         summary = weak_labels.summary(
             annotation=np.array([[0, 1], [-1, -1], [0, 1], [1, 1]])
@@ -753,11 +755,13 @@ class TestWeakMultiLabels:
             },
             index=["first_rule", "rule_1", "rubrix_rule", "total"],
         )
-        pd.testing.assert_frame_equal(summary, expected)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(summary, expected, check_dtype=False)
 
     def test_compute_correct_incorrect(self, monkeypatch):
         def mock_load(*args, **kwargs):
-            return [TextClassificationRecord(inputs="mock")]
+            return [TextClassificationRecord(text="mock")]
 
         monkeypatch.setattr(
             "rubrix.labeling.text_classification.weak_labels.load", mock_load
@@ -780,7 +784,7 @@ class TestWeakMultiLabels:
     def test_show_records(self, monkeypatch, multilabel_rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(inputs="test", id=i, multi_label=True)
+                TextClassificationRecord(text="test", id=i, multi_label=True)
                 for i in range(5)
             ]
 
@@ -828,7 +832,7 @@ class TestWeakMultiLabels:
     def weak_multi_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [
-                TextClassificationRecord(inputs="test", id=i, multi_label=True)
+                TextClassificationRecord(text="test", id=i, multi_label=True)
                 for i in range(3)
             ]
 
@@ -886,7 +890,11 @@ class TestWeakMultiLabels:
             },
             index=list(weak_multi_labels._rules_name2index.keys()) + ["total"],
         )
-        assert_frame_equal(weak_multi_labels.summary(), expected_summary)
+        # The "correct" and "incorrect" columns from `expected_summary` may infer a different
+        # dtype than `weak_multi_labels.summary()` returns.
+        assert_frame_equal(
+            weak_multi_labels.summary(), expected_summary, check_dtype=False
+        )
 
         expected_show_records = pd.DataFrame(
             map(lambda x: x.dict(), weak_multi_labels.records())

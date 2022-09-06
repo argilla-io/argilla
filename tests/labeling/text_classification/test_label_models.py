@@ -90,13 +90,13 @@ def weak_multi_labels(monkeypatch):
     def mock_load(*args, **kwargs):
         return [
             TextClassificationRecord(
-                inputs="test", multi_label=True, annotation=["scared"]
+                text="test", multi_label=True, annotation=["scared"]
             ),
             TextClassificationRecord(
-                inputs="test", multi_label=True, annotation=["sad", "scared"]
+                text="test", multi_label=True, annotation=["sad", "scared"]
             ),
-            TextClassificationRecord(inputs="test", multi_label=True, annotation=[]),
-            TextClassificationRecord(inputs="test", multi_label=True),
+            TextClassificationRecord(text="test", multi_label=True, annotation=[]),
+            TextClassificationRecord(text="test", multi_label=True),
         ]
 
     monkeypatch.setattr(
