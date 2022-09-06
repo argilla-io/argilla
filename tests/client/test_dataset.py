@@ -372,7 +372,7 @@ class TestDatasetForTextClassification:
 
         rb_ds = rb.DatasetForTextClassification.from_datasets(
             ds,
-            text="id",
+            inputs="id",
             annotation="labels",
         )
         assert rb_ds[0].inputs == {"id": "eecwqtt"}
