@@ -118,7 +118,7 @@ class Text2TextService:
         dataset: ServiceText2TextDataset,
         query: Optional[ServiceText2TextQuery] = None,
         id_from: Optional[str] = None,
-        limit: int = 1000
+        limit: int = 1000,
     ) -> Iterable[ServiceText2TextRecord]:
         """
         Scan a dataset records
@@ -137,5 +137,9 @@ class Text2TextService:
 
         """
         yield from self.__search__.scan_records(
-            dataset, query=query, record_type=ServiceText2TextRecord,id_from=id_from, limit=limit
+            dataset,
+            query=query,
+            record_type=ServiceText2TextRecord,
+            id_from=id_from,
+            limit=limit,
         )
