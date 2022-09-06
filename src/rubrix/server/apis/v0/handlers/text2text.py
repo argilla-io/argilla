@@ -202,7 +202,7 @@ async def stream_data(
     service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-    id_from: Optional[str] = None
+    id_from: Optional[str] = None,
 ) -> StreamingResponse:
     """
         Creates a data stream over dataset records
@@ -237,7 +237,12 @@ async def stream_data(
     )
     data_stream = map(
         Text2TextRecord.parse_obj,
-        service.read_dataset(dataset, query=ServiceText2TextQuery.parse_obj(query), id_from=id_from, limit=limit),
+        service.read_dataset(
+            dataset,
+            query=ServiceText2TextQuery.parse_obj(query),
+            id_from=id_from,
+            limit=limit,
+        ),
     )
     return scan_data_response(
         data_stream=data_stream,
