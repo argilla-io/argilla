@@ -23,21 +23,21 @@ jobs:
           pip install pyre-check
 
       - name: Run Pyre
-        continue-on-error: true
+        continue-on-error: false
         run: |
-          pyre --output=sarif check > sarif.json
+          pyre --output=text check
 
-      - name: Expose SARIF Results
-        uses: actions/upload-artifact@v2
-        with:
-          name: SARIF Results
-          path: sarif.json
-
-      - name: Upload SARIF Results
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: sarif.json
-
-      - name: Fail Command On Errors
-        run: |
-          if [ "$(cat sarif.json | grep 'PYRE-ERROR')" != "" ]; then cat sarif.json && exit 1; fi
+#      - name: Expose SARIF Results
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: SARIF Results
+#          path: sarif.json
+#
+#      - name: Upload SARIF Results
+#        uses: github/codeql-action/upload-sarif@v1
+#        with:
+#          sarif_file: sarif.json
+#
+#      - name: Fail Command On Errors
+#        run: |
+#          if [ "$(cat sarif.json | grep 'PYRE-ERROR')" != "" ]; then cat sarif.json && exit 1; fi
