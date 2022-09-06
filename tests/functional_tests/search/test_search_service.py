@@ -124,7 +124,7 @@ def test_failing_metrics(service, mocked_client):
 
     rubrix.delete(dataset.name)
     rubrix.log(
-        rubrix.TextClassificationRecord(inputs="This is a text, yeah!"),
+        rubrix.TextClassificationRecord(text="This is a text, yeah!"),
         name=dataset.name,
     )
     results = service.search(
