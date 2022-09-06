@@ -165,7 +165,7 @@ To better understand what's possible take a look at Rubrix's [Cookbook](https://
 
 ## Example
 
-Let's see Rubrix in action with a quick example: _Bootstraping data annotation with a zero-shot classifier_
+Let's see Rubrix in action with a quick example: _Bootstrapping data annotation with a zero-shot classifier_
 
 **Why**:
 
@@ -186,7 +186,7 @@ Let's see Rubrix in action with a quick example: _Bootstraping data annotation w
 
 ### 1. Predict and log
 
-Let's load the zero-shot pipeline and the dataset (we are using the AGNews dataset for demonstration, but this could be your own dataset). Then, let's go over the dataset records and log them using `rb.log()`. This will create a Rubrix dataset, accesible from the web app.
+Let's load the zero-shot pipeline and the dataset (we are using the AGNews dataset for demonstration, but this could be your own dataset). Then, let's go over the dataset records and log them using `rb.log()`. This will create a Rubrix dataset, accessible from the web app.
 
 ```python
 from transformers import pipeline
