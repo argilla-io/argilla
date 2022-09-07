@@ -11,33 +11,53 @@ on:
 jobs:
   pyre:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: rubrix
+          use-mamba: true
+
+      - name: Get date for conda cache
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
 
       - name: Cache Conda env
         uses: actions/cache@v2
         with:
           path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.set-date.outputs.today }}--${{ env.CACHE_NUMBER }}
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
         env:
-          # Increase this value to reset cache
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
           CACHE_NUMBER: 0
         id: cache
 
-      - name: Install Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install pyre-check~=0.9.0
+      - name: Update environment
+        run: mamba env update -n rubrix -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if pyproject.toml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Run Pyre
         continue-on-error: false
         run: |
-          conda env list
           pyre --sequential --output=text check
 
-#      - name: Expose SARIF Results
+#      - name: Expose SARIF Resultss
 #        uses: actions/upload-artifact@v2
 #        with:
 #          name: SARIF Results
