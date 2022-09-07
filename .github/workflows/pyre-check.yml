@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v2
         env:
           # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
+          CACHE_NUMBER: 1
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
