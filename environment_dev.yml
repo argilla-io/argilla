@@ -32,7 +32,7 @@ dependencies:
       # code formatting
       - pre-commit==2.15.0
       # Type checking
-      - pyre-check~=0.9.0
+      - pyre-check~=0.9.11
       # extra test dependencies
       - cleanlab
       - datasets>1.17.0,<2.3.0  # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
