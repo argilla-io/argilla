@@ -55,7 +55,7 @@ jobs:
       - name: Run Pyre
         continue-on-error: false
         run: |
-          pyre --sequential --output=text check
+          pyre --output=text check
 
 #      - name: Expose SARIF Resultss
 #        uses: actions/upload-artifact@v2
