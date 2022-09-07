@@ -14,18 +14,38 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
 
-      - name: Install Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install cython flask flask_cors graphql-core typing_inspect
-          pip install pyre-check
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: rubrix
+
+      - name: Set date for conda cache
+        id: set-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.set-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        run: mamba env update -n rubrix -f environment_dev.yml
 
       - name: Run Pyre
         continue-on-error: false
         run: |
-          pyre --output=text check
+          conda activate rubrix
+          pyre --sequential --output=text check
 
 #      - name: Expose SARIF Results
 #        uses: actions/upload-artifact@v2
