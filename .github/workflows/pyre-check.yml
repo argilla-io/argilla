@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v2
         env:
           # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 1
+          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
@@ -55,7 +55,7 @@ jobs:
       - name: Run Pyre
         continue-on-error: false
         run: |
-          pip install pyre-check
+          pip install --force-reinstall pyre-check
           pyre --output=text check
 
 #      - name: Expose SARIF Resultss
