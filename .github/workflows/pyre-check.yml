@@ -55,6 +55,7 @@ jobs:
       - name: Run Pyre
         continue-on-error: false
         run: |
+          pip install pyre-check
           pyre --output=text check
 
 #      - name: Expose SARIF Resultss
