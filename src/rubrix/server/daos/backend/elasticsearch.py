@@ -448,7 +448,10 @@ class ElasticsearchBackend(LoggingMixin):
             return len(failed)
 
     def _get_field_mapping(
-        self, index: str, field_name: Optional[str] = None
+        self,
+        index: str,
+        field_name: Optional[str] = None,
+        exclude_subfields: bool = False,
     ) -> Dict[str, str]:
         """
             Returns the mapping for a given field name (can be as wildcard notation). The result
@@ -462,6 +465,8 @@ class ElasticsearchBackend(LoggingMixin):
             The index name
         field_name:
             The field name pattern
+        exclude_subfields:
+            If True, exclude extra subfields from mappings definition
 
         Returns
         -------
@@ -473,10 +478,24 @@ class ElasticsearchBackend(LoggingMixin):
                 index=index,
                 ignore_unavailable=False,
             )
-            return {
+            data = {
                 key: list(definition["mapping"].values())[0]["type"]
                 for key, definition in response[index]["mappings"].items()
             }
+
+            if exclude_subfields:
+                # Remove `text`, `exact` and `wordcloud` fields
+                def is_subfield(key: str):
+                    for suffix in ["exact", "text", "wordcloud"]:
+                        if suffix in key:
+                            return True
+                    return False
+
+                data = {
+                    key: value for key, value in data.items() if not is_subfield(key)
+                }
+
+            return data
         except NotFoundError:
             # No mapping data
             return {}
@@ -852,16 +871,18 @@ class ElasticsearchBackend(LoggingMixin):
             """Returns True if value match as nested value"""
             return isinstance(v, list) and isinstance(v[0], dict)
 
+        index = dataset_records_index(id)
         check_metadata_length(len(metadata_values))
         check_metadata_length(
             len(
                 {
-                    *self.get_metadata_mappings(id=id),
-                    *[k for k in metadata_values.keys()],
+                    *self._get_field_mapping(
+                        index, "metadata.*", exclude_subfields=True
+                    ),
+                    *[f"metadata.{k}" for k in metadata_values.keys()],
                 }
             )
         )
-        index = dataset_records_index(id)
         for field, value in metadata_values.items():
             if detect_nested_type(value):
                 self._create_field_mapping(
