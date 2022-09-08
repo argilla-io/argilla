@@ -57,12 +57,12 @@ class TokenClassificationService:
         self.__storage__ = storage
         self.__search__ = search
 
-    def add_records(
+    async def add_records(
         self,
         dataset: ServiceTokenClassificationDataset,
         records: List[ServiceTokenClassificationRecord],
     ):
-        failed = self.__storage__.store_records(
+        failed = await self.__storage__.store_records(
             dataset=dataset,
             records=records,
             record_type=ServiceTokenClassificationRecord,

@@ -126,7 +126,7 @@ async def bulk_records(
         user=current_user, dataset=dataset, records=records
     )
 
-    result = service.add_records(
+    result = await service.add_records(
         dataset=dataset,
         records=records,
     )

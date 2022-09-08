@@ -60,12 +60,12 @@ class Text2TextService:
         self.__storage__ = storage
         self.__search__ = search
 
-    def add_records(
+    async def add_records(
         self,
         dataset: ServiceText2TextDataset,
         records: List[ServiceText2TextRecord],
     ):
-        failed = self.__storage__.store_records(
+        failed = await self.__storage__.store_records(
             dataset=dataset,
             records=records,
             record_type=ServiceText2TextRecord,
