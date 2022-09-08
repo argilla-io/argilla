@@ -37,7 +37,7 @@ class TokenClassificationService:
 
     """
 
-    _INSTANCE: "TokenClassificationService" = None
+    _INSTANCE: Optional["TokenClassificationService"] = None
 
     @classmethod
     def get_instance(

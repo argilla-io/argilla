@@ -12,7 +12,8 @@ from starlette.testclient import TestClient
 
 from rubrix import app
 from rubrix.client.api import active_api
-from tests.helpers import SecuredClient
+
+from .helpers import SecuredClient
 
 
 @pytest.fixture
