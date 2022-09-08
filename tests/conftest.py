@@ -22,15 +22,12 @@ from .helpers import SecuredClient
 def telemetry_track_data(mocker):
 
     client = telemetry._TelemetryClient.get()
-    if not client:
-        settings.enable_telemetry = True
-        client = telemetry._TelemetryClient.get()
+    if client:
+        # Disable sending data for tests
+        client._client = telemetry._configure_analytics(disable_send=True)
+        spy = mocker.spy(client, "track_data")
 
-    # Disable sending data for tests
-    client._client = telemetry._configure_analytics(disable_send=True)
-    spy = mocker.spy(client, "track_data")
-
-    return spy
+        return spy
 
 
 @pytest.fixture
