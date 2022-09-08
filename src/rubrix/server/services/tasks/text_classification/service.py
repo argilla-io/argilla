@@ -67,7 +67,7 @@ class TextClassificationService:
         self.__search__ = search
         self.__labeling__ = labeling
 
-    def add_records(
+    async def add_records(
         self,
         dataset: ServiceTextClassificationDataset,
         records: List[ServiceTextClassificationRecord],
@@ -75,7 +75,7 @@ class TextClassificationService:
         # TODO(@frascuchon): This will moved to dataset settings validation once DatasetSettings join the game!
         self._check_multi_label_integrity(dataset, records)
 
-        failed = self.__storage__.store_records(
+        failed = await self.__storage__.store_records(
             dataset=dataset,
             records=records,
             record_type=ServiceTextClassificationRecord,
