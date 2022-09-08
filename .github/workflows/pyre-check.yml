@@ -43,6 +43,10 @@ jobs:
       - name: Update environment
         run: mamba env update -n rubrix -f environment_dev.yml
 
+      - name: Install dependencies
+        # Force install this version since older versions fail with click < 8.0 (included by spacy 3.x)
+        run: pip install pyre-check==0.9.15
+
       - name: Run Pyre
         continue-on-error: false
         run: |
