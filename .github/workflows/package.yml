@@ -1,5 +1,5 @@
 
-name: CI
+name: Build package
 
 on:
   push:
@@ -16,7 +16,8 @@ on:
     types: [published]
 
 jobs:
-  test:
+
+  src-test:
     name: Check tests
     runs-on: ubuntu-latest
     strategy:
@@ -144,7 +145,7 @@ jobs:
     name: Build latest docker image
     runs-on: ubuntu-latest
     needs:
-      - test
+      - src-test
       - build
     defaults:
       run:

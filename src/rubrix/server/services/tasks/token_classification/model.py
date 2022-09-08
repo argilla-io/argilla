@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import typing
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -264,8 +265,8 @@ class ServiceTokenClassificationRecord(
             return None
         tags = ["O"] * len(self.tokens)
         for entity in spans:
-            token_start = self.char_id2token_id(entity.start)
-            token_end = self.char_id2token_id(entity.end - 1)
+            token_start = typing.cast(int, self.char_id2token_id(entity.start))
+            token_end = typing.cast(int, self.char_id2token_id(entity.end - 1))
             tags[token_start] = f"B-{entity.label}"
             for idx in range(token_start + 1, token_end + 1):
                 tags[idx] = f"I-{entity.label}"
