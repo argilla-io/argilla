@@ -3,6 +3,8 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from rubrix.client.sdk.users import api as users_api
+from rubrix.server.commons import telemetry
+from rubrix.server.settings import settings
 
 try:
     from loguru import logger
@@ -17,7 +19,19 @@ from .helpers import SecuredClient
 
 
 @pytest.fixture
-def mocked_client(monkeypatch) -> SecuredClient:
+def telemetry_track_data(mocker):
+
+    client = telemetry._TelemetryClient.get()
+    if client:
+        # Disable sending data for tests
+        client.client = telemetry._configure_analytics(disable_send=True)
+        spy = mocker.spy(client, "track_data")
+
+        return spy
+
+
+@pytest.fixture
+def mocked_client(monkeypatch, telemetry_track_data) -> SecuredClient:
 
     with TestClient(app, raise_server_exceptions=False) as _client:
         client_ = SecuredClient(_client)
