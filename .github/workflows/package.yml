@@ -55,22 +55,22 @@ jobs:
           use-mamba: true
           activate-environment: rubrix
 
-      - name: Set date for conda cache
+      - name: Get date for conda cache
         if: steps.filter.outputs.python_code == 'true'
-        id: set-date
+        id: get-date
         run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
         shell: bash
 
       - name: Cache Conda env
         if: steps.filter.outputs.python_code == 'true'
         uses: actions/cache@v2
+        id: cache
         with:
           path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.set-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
         env:
           # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 1
-        id: cache
+          CACHE_NUMBER: 2
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
