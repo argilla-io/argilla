@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import httpx
 from fastapi import Request
@@ -41,7 +41,11 @@ class _TelemetryClient:
     client: Client
 
     __INSTANCE__: "_TelemetryClient" = None
-    __server_id__: str = dataclasses.field(init=False, default=None)
+    __server_id__: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
+
+    @property
+    def server_id(self) -> uuid.UUID:
+        return self.__server_id__
 
     @classmethod
     def get(cls):
@@ -61,7 +65,8 @@ class _TelemetryClient:
 
         from rubrix import __version__
 
-        self.__server_id__ = str(uuid.UUID(int=uuid.getnode()))
+        self.__server_id__ = uuid.UUID(int=uuid.getnode())
+        self.__server_id_str__ = str(self.__server_id__)
         self.__system_info__ = {
             "system": platform.system(),
             "machine": platform.machine(),
@@ -77,7 +82,7 @@ class _TelemetryClient:
         event_data = data.copy()
         if include_system_info:
             event_data.update(self.__system_info__)
-        self.client.track(self.__server_id__, action, event_data)
+        self.client.track(self.__server_id_str__, action, event_data)
 
 
 def _process_request_info(request: Request):
@@ -106,5 +111,9 @@ async def track_login(request: Request, username: str):
     if client:
         client.track_data(
             "UserInfoRequested",
-            {"is_default_user": username == "rubrix", **_process_request_info(request)},
+            {
+                "is_default_user": username == "rubrix",
+                "user_hash": str(uuid.uuid5(namespace=client.server_id, name=username)),
+                **_process_request_info(request),
+            },
         )
