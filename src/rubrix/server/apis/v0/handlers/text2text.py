@@ -69,7 +69,7 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
     response_model=BulkResponse,
     response_model_exclude_none=True,
 )
-def bulk_records(
+async def bulk_records(
     name: str,
     bulk: Text2TextBulkRequest,
     common_params: CommonTaskHandlerDependencies = Depends(),
@@ -100,7 +100,7 @@ def bulk_records(
         dataset.owner = owner
         datasets.create_dataset(user=current_user, dataset=dataset)
 
-    result = service.add_records(
+    result = await service.add_records(
         dataset=dataset,
         records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
     )
