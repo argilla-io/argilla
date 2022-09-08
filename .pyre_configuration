@@ -6,6 +6,8 @@
   ],
   "search_path": [
     {"site-package": "pytest"},
+    {"site-package": "httpx"},
+    {"site-package": "datasets"},
     {"site-package": "pandas"},
     {"site-package": "pydantic"},
     {"site-package": "fastapi"},
