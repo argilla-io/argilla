@@ -22,7 +22,7 @@ from types import ModuleType
 from typing import Any, Optional, Tuple
 
 
-class _LazyRubrixModule(ModuleType):
+class LazyRubrixModule(ModuleType):
     """Module class that surfaces all objects but only performs associated imports when the objects are requested.
 
     Shamelessly copied and adapted from the Hugging Face transformers implementation.

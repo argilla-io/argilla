@@ -12,17 +12,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-import logging
-import sys
-
-from rubrix.logging import LoguruLoggerHandler
-from rubrix.utils import LazyRubrixModule
-
-
-def test_lazy_module():
-    assert isinstance(sys.modules["rubrix"], LazyRubrixModule)
-
-
-def test_configure_logging_call():
-    assert isinstance(logging.getLogger("rubrix").handlers[0], LoguruLoggerHandler)
