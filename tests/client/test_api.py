@@ -533,28 +533,34 @@ def test_load_as_pandas(mocked_client):
     assert [record.id for record in records] == [0, 1, 2, 3]
 
 
-def test_token_classification_spans(mocked_client):
-    dataset = "test_token_classification_with_consecutive_spans"
+@pytest.mark.parametrize(
+    "span,valid",
+    [
+        ((1, 2), False),
+        ((0, 4), True),
+        ((0, 5), True),  # automatic correction
+    ],
+)
+def test_token_classification_spans(span, valid):
     texto = "Esto es una prueba"
-    item = api.TokenClassificationRecord(
-        text=texto,
-        tokens=texto.split(),
-        prediction=[("test", 1, 2)],  # Inicio y fin son consecutivos
-        prediction_agent="test",
-    )
-    with pytest.raises(
-        Exception, match=r"Defined offset \[s\] is a misaligned entity mention"
-    ):
-        api.log(item, name=dataset)
-
-    item.prediction = [("test", 0, 6)]
-    with pytest.raises(
-        Exception, match=r"Defined offset \[Esto e\] is a misaligned entity mention"
-    ):
-        api.log(item, name=dataset)
-
-    item.prediction = [("test", 0, 4)]
-    api.log(item, name=dataset)
+    if valid:
+        rb.TokenClassificationRecord(
+            text=texto,
+            tokens=texto.split(),
+            prediction=[("test", *span)],
+        )
+    else:
+        with pytest.raises(
+            ValueError,
+            match="Following entity spans are not aligned with provided tokenization\n"
+            r"Spans:\n- \[s\] defined in Esto es...\n"
+            r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
+        ):
+            rb.TokenClassificationRecord(
+                text=texto,
+                tokens=texto.split(),
+                prediction=[("test", *span)],
+            )
 
 
 def test_load_text2text(mocked_client):

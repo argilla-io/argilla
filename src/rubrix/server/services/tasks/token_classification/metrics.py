@@ -6,8 +6,10 @@ from rubrix.server.services.metrics import ServiceBaseMetric, ServicePythonMetri
 from rubrix.server.services.metrics.models import CommonTasksMetrics
 from rubrix.server.services.tasks.token_classification.model import (
     EntitySpan,
+    ServiceTokenClassificationAnnotation,
     ServiceTokenClassificationRecord,
 )
+from rubrix.utils import SpanUtils
 
 
 class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):
@@ -210,7 +212,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                     [
                         token_idx
                         for i in range(entity.start, entity.end)
-                        for token_idx in [record.char_id2token_id(i)]
+                        for token_idx in [record.span_utils.char_to_token_idx.get(i)]
                         if token_idx is not None
                     ]
                 )
@@ -244,13 +246,15 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 idx=token_idx,
                 value=token_value,
                 char_start=char_start,
-                char_end=char_end,
+                # TODO(@frascuchon): Align char span definition to the entity level definition
+                #   (char_end should be the next char after the token span boundaries).
+                char_end=char_end - 1,
                 capitalness=cls.capitalness(token_value),
-                length=1 + (char_end - char_start),
+                length=char_end - char_start,
                 tag=tags[token_idx] if tags else None,
             )
             for token_idx, token_value in enumerate(record.tokens)
-            for char_start, char_end in [record.token_span(token_idx)]
+            for char_start, char_end in [record.span_utils.token_to_char_idx[token_idx]]
         ]
 
     @classmethod
@@ -258,8 +262,9 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         """Compute metrics at record level"""
         base_metrics = super(TokenClassificationMetrics, cls).record_metrics(record)
 
-        annotated_tags = record.annotated_iob_tags() or []
-        predicted_tags = record.predicted_iob_tags() or []
+        span_utils = SpanUtils(record.text, record.tokens)
+        annotated_tags = cls._compute_iob_tags(span_utils, record.annotation) or []
+        predicted_tags = cls._compute_iob_tags(span_utils, record.prediction) or []
 
         tokens_metrics = cls.build_tokens_metrics(
             record, predicted_tags or annotated_tags
@@ -283,6 +288,26 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 ],
             },
         }
+
+    @staticmethod
+    def _compute_iob_tags(
+        span_utils: SpanUtils,
+        annotation: Optional[ServiceTokenClassificationAnnotation],
+    ) -> Optional[List[str]]:
+        """Helper method to compute IOB tags from entity spans
+
+        Args:
+            span_utils: Helper class to perform the computation.
+            annotation: Contains the spans from which to compute the IOB tags.
+
+        Returns:
+            The IOB tags or None if ``annotation`` is None.
+        """
+        if annotation is None:
+            return None
+
+        spans = [(ent.label, ent.start, ent.end) for ent in annotation.entities]
+        return span_utils.to_tags(spans)
 
     metrics: ClassVar[List[ServiceBaseMetric]] = (
         CommonTasksMetrics.metrics
