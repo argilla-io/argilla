@@ -246,7 +246,9 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
                 idx=token_idx,
                 value=token_value,
                 char_start=char_start,
-                char_end=char_end,
+                # TODO(@frascuchon): Align char span definition to the entity level definition
+                #   (char_end should be the next char after the token span boundaries).
+                char_end=char_end - 1,
                 capitalness=cls.capitalness(token_value),
                 length=char_end - char_start,
                 tag=tags[token_idx] if tags else None,
