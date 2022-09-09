@@ -100,8 +100,8 @@ def test_rubrix_middleware_for_token_classification(monkeypatch):
         return JSONResponse(
             content=[
                 [
-                    {"label": "fawn", "start": 1, "end": 10},
-                    {"label": "fobis", "start": 12, "end": 14},
+                    {"label": "fawn", "start": 0, "end": 3},
+                    {"label": "fobis", "start": 4, "end": 8},
                 ],
                 [],
             ]

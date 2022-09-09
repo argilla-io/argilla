@@ -30,6 +30,7 @@ from rubrix.server.services.tasks.commons import (
     ServiceBaseAnnotation,
     ServiceBaseRecord,
 )
+from rubrix.utils import SpanUtils
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"
@@ -83,9 +84,7 @@ class ServiceTokenClassificationRecord(
     tokens: List[str] = Field(min_items=1)
     text: str = Field()
     _raw_text: Optional[str] = Field(alias="raw_text")
-
-    __chars2tokens__: Dict[int, int] = None
-    __tokens2chars__: Dict[int, Tuple[int, int]] = None
+    _span_utils: SpanUtils
 
     # TODO: review this.
     _predicted: Optional[PredictionStatus] = Field(alias="predicted")
@@ -109,117 +108,42 @@ class ServiceTokenClassificationRecord(
     def __init__(self, **data):
         super().__init__(**data)
 
-        self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__()
+        self._span_utils = SpanUtils(self.text, self.tokens)
 
-        self.check_annotation(self.prediction)
-        self.check_annotation(self.annotation)
+        if self.annotation:
+            self._validate_spans(self.annotation)
+        if self.prediction:
+            self._validate_spans(self.prediction)
 
-    def char_id2token_id(self, char_idx: int) -> Optional[int]:
-        return self.__chars2tokens__.get(char_idx)
+    def _validate_spans(self, annotation: ServiceTokenClassificationAnnotation):
+        """Validates the spans with respect to the tokens.
 
-    def token_span(self, token_idx: int) -> Tuple[int, int]:
-        if token_idx not in self.__tokens2chars__:
-            raise IndexError(f"Token id {token_idx} out of bounds")
-        return self.__tokens2chars__[token_idx]
+        If necessary, also performs an automatic correction of the spans.
 
-    def __build_indices_map__(
-        self,
-    ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
+        Args:
+            span_utils: Helper class to perform the checks.
+            annotation: Contains the spans to validate.
+
+        Raises:
+            ValidationError: If spans are not valid or misaligned.
         """
-        Build the indices mapping between text characters and tokens where belongs to,
-        and vice versa.
-
-        chars2tokens index contains is the token idx where i char is contained (if any).
-
-        Out-of-token characters won't be included in this map,
-        so access should be using ``chars2tokens_map.get(i)``
-        instead of ``chars2tokens_map[i]``.
-
-        """
-
-        def chars2tokens_index():
-            def is_space_after_token(char, idx: int, chars_map) -> str:
-                return char == " " and idx - 1 in chars_map
-
-            chars_map = {}
-            current_token = 0
-            current_token_char_start = 0
-            for idx, char in enumerate(self.text):
-                if is_space_after_token(char, idx, chars_map):
-                    continue
-                relative_idx = idx - current_token_char_start
-                if (
-                    relative_idx < len(self.tokens[current_token])
-                    and char == self.tokens[current_token][relative_idx]
-                ):
-                    chars_map[idx] = current_token
-                elif (
-                    current_token + 1 < len(self.tokens)
-                    and relative_idx >= len(self.tokens[current_token])
-                    and char == self.tokens[current_token + 1][0]
-                ):
-                    current_token += 1
-                    current_token_char_start += relative_idx
-                    chars_map[idx] = current_token
-
-            return chars_map
-
-        def tokens2chars_index(
-            chars2tokens: Dict[int, int]
-        ) -> Dict[int, Tuple[int, int]]:
-            tokens2chars_map = defaultdict(list)
-            for c, t in chars2tokens.items():
-                tokens2chars_map[t].append(c)
-
-            return {
-                token_idx: (min(chars), max(chars))
-                for token_idx, chars in tokens2chars_map.items()
-            }
-
-        chars2tokens_idx = chars2tokens_index()
-        return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
-
-    def check_annotation(
-        self,
-        annotation: Optional[ServiceTokenClassificationAnnotation],
-    ):
-        """Validates entities in terms of offset spans"""
-
-        def adjust_span_bounds(start, end):
-            if start < 0:
-                start = 0
-            if entity.end > len(self.text):
-                end = len(self.text)
-            while start <= len(self.text) and not self.text[start].strip():
-                start += 1
-            while not self.text[end - 1].strip():
-                end -= 1
-            return start, end
-
-        if annotation:
-            for entity in annotation.entities:
-                entity.start, entity.end = adjust_span_bounds(entity.start, entity.end)
-                mention = self.text[entity.start : entity.end]
-                assert len(mention) > 0, f"Empty offset defined for entity {entity}"
-
-                token_start = self.char_id2token_id(entity.start)
-                token_end = self.char_id2token_id(entity.end - 1)
-
-                assert not (
-                    token_start is None or token_end is None
-                ), f"Provided entity span {self.text[entity.start: entity.end]} is not aligned with provided tokens."
-                "Some entity chars could be reference characters out of tokens"
-
-                span_start, _ = self.token_span(token_start)
-                _, span_end = self.token_span(token_end)
-
-                assert (
-                    self.text[span_start : span_end + 1] == mention
-                ), f"Defined offset [{self.text[entity.start: entity.end]}] is a misaligned entity mention"
+        spans = [(ent.label, ent.start, ent.end) for ent in annotation.entities]
+        try:
+            self._span_utils.validate(spans)
+        except ValueError:
+            corrected_spans = self._span_utils.correct(spans)
+            self._span_utils.validate(corrected_spans)
+            for ent, span in zip(annotation.entities, corrected_spans):
+                ent.start, ent.end = span[1], span[2]
 
     def task(cls) -> TaskType:
         """The record task type"""
         return TaskType.token_classification
+
+    @property
+    def span_utils(self) -> SpanUtils:
+        """Utility class for span operations."""
+        return self._span_utils
 
     @property
     def predicted(self) -> Optional[PredictionStatus]:
@@ -249,29 +173,6 @@ class ServiceTokenClassificationRecord(
 
     def all_text(self) -> str:
         return self.text
-
-    def predicted_iob_tags(self) -> Optional[List[str]]:
-        if self.prediction is None:
-            return None
-        return self.spans2iob(self.prediction.entities)
-
-    def annotated_iob_tags(self) -> Optional[List[str]]:
-        if self.annotation is None:
-            return None
-        return self.spans2iob(self.annotation.entities)
-
-    def spans2iob(self, spans: List[EntitySpan]) -> Optional[List[str]]:
-        if spans is None:
-            return None
-        tags = ["O"] * len(self.tokens)
-        for entity in spans:
-            token_start = typing.cast(int, self.char_id2token_id(entity.start))
-            token_end = typing.cast(int, self.char_id2token_id(entity.end - 1))
-            tags[token_start] = f"B-{entity.label}"
-            for idx in range(token_start + 1, token_end + 1):
-                tags[idx] = f"I-{entity.label}"
-
-        return tags
 
     def predicted_mentions(self) -> List[Tuple[str, EntitySpan]]:
         return [
