@@ -14,7 +14,7 @@
 #  limitations under the License.
 import pytest
 
-from rubrix.utils import _LazyRubrixModule
+from rubrix.utils import LazyRubrixModule
 
 
 def test_lazy_rubrix_module(monkeypatch):
@@ -23,7 +23,7 @@ def test_lazy_rubrix_module(monkeypatch):
 
     monkeypatch.setattr("importlib.import_module", mock_import_module)
 
-    lazy_module = _LazyRubrixModule(
+    lazy_module = LazyRubrixModule(
         name="rb_mock",
         module_file="rb_mock_file",
         import_structure={"mock_module": ["title"]},
@@ -57,7 +57,7 @@ def test_lazy_rubrix_module_import_error(monkeypatch):
 
     monkeypatch.setattr("importlib.import_module", mock_import_module)
 
-    lazy_module = _LazyRubrixModule(
+    lazy_module = LazyRubrixModule(
         name="rb_mock",
         module_file=__file__,
         import_structure={"mock_module": ["title"]},

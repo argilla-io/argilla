@@ -20,7 +20,6 @@ This module contains the data models for the interface
 import datetime
 import logging
 import warnings
-from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -28,6 +27,7 @@ from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.utils import limit_value_length
+from rubrix.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -295,8 +295,7 @@ class TokenClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    __chars2tokens__: Dict[int, int] = PrivateAttr(default=None)
-    __tokens2chars__: Dict[int, Tuple[int, int]] = PrivateAttr(default=None)
+    _span_utils: SpanUtils = PrivateAttr()
 
     def __init__(
         self,
@@ -320,51 +319,48 @@ class TokenClassificationRecord(_Validators):
             text = " ".join(tokens)
 
         super().__init__(text=text, tokens=tokens, **data)
+
+        self._span_utils = SpanUtils(self.text, self.tokens)
+
+        if self.annotation:
+            self.annotation = self._validate_spans(self.annotation)
+        if self.prediction:
+            self.prediction = self._validate_spans(self.prediction)
+
         if self.annotation and tags:
             _LOGGER.warning("Annotation already provided, `tags` won't be used")
-            return
-        if tags:
-            self.annotation = self.__tags2entities__(tags)
-
-    def __tags2entities__(self, tags: List[str]) -> List[Tuple[str, int, int]]:
-        idx = 0
-        entities = []
-        entity_starts = False
-        while idx < len(tags):
-            tag = tags[idx]
-            if tag == "O":
-                entity_starts = False
-            if tag != "O":
-                prefix, entity = tag.split("-")
-                if prefix in ["B", "U"]:
-                    if prefix == "B":
-                        entity_starts = True
-                    char_start, char_end = self.token_span(token_idx=idx)
-                    entities.append(
-                        {"entity": entity, "start": char_start, "end": char_end + 1}
-                    )
-                elif prefix in ["I", "L"]:
-                    if not entity_starts:
-                        _LOGGER.warning(
-                            "Detected non-starting tag and first entity token was not found."
-                            f"Assuming {tag} as first entity token"
-                        )
-                        entity_starts = True
-                        char_start, char_end = self.token_span(token_idx=idx)
-                        entities.append(
-                            {"entity": entity, "start": char_start, "end": char_end + 1}
-                        )
-
-                    _, char_end = self.token_span(token_idx=idx)
-                    entities[-1]["end"] = char_end + 1
-            idx += 1
-        return [(value["entity"], value["start"], value["end"]) for value in entities]
+        elif tags:
+            self.annotation = self._span_utils.from_tags(tags)
 
     def __setattr__(self, name: str, value: Any):
         """Make text and tokens immutable"""
         if name in ["text", "tokens"]:
             raise AttributeError(f"You cannot assign a new value to `{name}`")
         super().__setattr__(name, value)
+
+    def _validate_spans(
+        self, spans: List[Tuple[str, int, int]]
+    ) -> List[Tuple[str, int, int]]:
+        """Validates the entity spans with respect to the tokens.
+
+        If necessary, also performs an automatic correction of the spans.
+
+        Args:
+            spans: The entity spans to validate.
+
+        Returns:
+            The optionally corrected spans.
+
+        Raises:
+            ValidationError: If spans are not valid or misaligned.
+        """
+        try:
+            self._span_utils.validate(spans)
+        except ValueError:
+            spans = self._span_utils.correct(spans)
+            self._span_utils.validate(spans)
+
+        return spans
 
     @validator("tokens", pre=True)
     def _normalize_tokens(cls, value):
@@ -375,7 +371,7 @@ class TokenClassificationRecord(_Validators):
         return value
 
     @validator("prediction")
-    def add_default_score(
+    def _add_default_score(
         cls,
         prediction: Optional[
             List[Union[Tuple[str, int, int], Tuple[str, int, int, Optional[float]]]]
@@ -391,103 +387,64 @@ class TokenClassificationRecord(_Validators):
             for pred in prediction
         ]
 
-    @staticmethod
-    def __build_indices_map__(
-        text: str, tokens: Tuple[str, ...]
-    ) -> Tuple[Dict[int, int], Dict[int, Tuple[int, int]]]:
-        """
-        Build the indices mapping between text characters and tokens where belongs to,
-        and vice versa.
+    @validator("text")
+    def _check_if_empty_after_strip(cls, text: str):
+        assert text.strip(), "The provided `text` contains only whitespaces."
+        return text
 
-        chars2tokens index contains is the token idx where i char is contained (if any).
+    @property
+    def __chars2tokens__(self) -> Dict[int, int]:
+        """DEPRECATED, please use the ``rubrix.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
+        warnings.warn(
+            "The `__chars2tokens__` attribute is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.char_to_token_idx` attribute instead.",
+            FutureWarning,
+        )
+        return self._span_utils.char_to_token_idx
 
-        Out-of-token characters won't be included in this map,
-        so access should be using ``chars2tokens_map.get(i)``
-        instead of ``chars2tokens_map[i]``.
-
-        """
-
-        def chars2tokens_index(text_, tokens_):
-            chars_map = {}
-            current_token = 0
-            current_token_char_start = 0
-            for idx, char in enumerate(text_):
-                relative_idx = idx - current_token_char_start
-                if (
-                    relative_idx < len(tokens_[current_token])
-                    and char == tokens_[current_token][relative_idx]
-                ):
-                    chars_map[idx] = current_token
-                elif (
-                    current_token + 1 < len(tokens_)
-                    and relative_idx >= len(tokens_[current_token])
-                    and char == tokens_[current_token + 1][0]
-                ):
-                    current_token += 1
-                    current_token_char_start += relative_idx
-                    chars_map[idx] = current_token
-            return chars_map
-
-        def tokens2chars_index(
-            chars2tokens: Dict[int, int]
-        ) -> Dict[int, Tuple[int, int]]:
-            tokens2chars_map = defaultdict(list)
-            for c, t in chars2tokens.items():
-                tokens2chars_map[t].append(c)
-
-            return {
-                token_idx: (min(chars), max(chars))
-                for token_idx, chars in tokens2chars_map.items()
-            }
-
-        chars2tokens_idx = chars2tokens_index(text_=text, tokens_=tokens)
-        return chars2tokens_idx, tokens2chars_index(chars2tokens_idx)
+    @property
+    def __tokens2chars__(self) -> Dict[int, Tuple[int, int]]:
+        """DEPRECATED, please use the ``rubrix.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
+        warnings.warn(
+            "The `__tokens2chars__` attribute is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.token_to_char_idx` attribute instead.",
+            FutureWarning,
+        )
+        return self._span_utils.token_to_char_idx
 
     def char_id2token_id(self, char_idx: int) -> Optional[int]:
-        """
-        Given a character id, returns the token id it belongs to.
-        ``None`` otherwise
-        """
-
-        if self.__chars2tokens__ is None:
-            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
-                self.text, tuple(self.tokens)
-            )
-        return self.__chars2tokens__.get(char_idx)
+        """DEPRECATED, please use the ``rubrix.utisl.span_utils.SpanUtils.char_to_token_idx`` dict instead."""
+        warnings.warn(
+            "The `char_id2token_id` method is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.char_to_token_idx` dict instead.",
+            FutureWarning,
+        )
+        return self._span_utils.char_to_token_idx.get(char_idx)
 
     def token_span(self, token_idx: int) -> Tuple[int, int]:
-        """
-        Given a token id, returns the start and end characters.
-        Raises an ``IndexError`` if token id is out of tokens list indices
-        """
-        if self.__tokens2chars__ is None:
-            self.__chars2tokens__, self.__tokens2chars__ = self.__build_indices_map__(
-                self.text, tuple(self.tokens)
-            )
-        if token_idx not in self.__tokens2chars__:
+        """DEPRECATED, please use the ``rubrix.utisl.span_utils.SpanUtils.token_to_char_idx`` dict instead."""
+        warnings.warn(
+            "The `token_span` method is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.span_utils.SpanUtils.token_to_char_idx` dict instead.",
+            FutureWarning,
+        )
+        if token_idx not in self._span_utils.token_to_char_idx:
             raise IndexError(f"Token id {token_idx} out of bounds")
-        return self.__tokens2chars__[token_idx]
+        return self._span_utils.token_to_char_idx[token_idx]
 
     def spans2iob(
         self, spans: Optional[List[Tuple[str, int, int]]] = None
     ) -> Optional[List[str]]:
-        """Build the iob tags sequence for a list of spans annoations"""
+        """DEPRECATED, please use the ``rubrix.utils.SpanUtils.to_tags()`` method."""
+        warnings.warn(
+            "'spans2iob' is deprecated and will be removed in a future version. "
+            "Please use the `rubrix.utils.SpanUtils.to_tags()` method instead, and adapt your code accordingly.",
+            FutureWarning,
+        )
 
         if spans is None:
             return None
-
-        tags = ["O"] * len(self.tokens)
-        for label, start, end in spans:
-            token_start = self.char_id2token_id(start)
-            token_end = self.char_id2token_id(end - 1)
-            assert (
-                token_start is not None and token_end is not None
-            ), "Provided spans are missaligned at token level"
-            tags[token_start] = f"B-{label}"
-            for idx in range(token_start + 1, token_end + 1):
-                tags[idx] = f"I-{label}"
-
-        return tags
+        return self._span_utils.to_tags(spans)
 
 
 class Text2TextRecord(_Validators):
