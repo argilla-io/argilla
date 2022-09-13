@@ -141,7 +141,12 @@ class DatasetsService:
             as_dataset_class=None,
         )
         if found:
-            self.__dao__.delete_dataset(dataset)
+            if user.is_superuser() or user.username == dataset.created_by:
+                self.__dao__.delete_dataset(dataset)
+            else:
+                raise ForbiddenOperationError(
+                    f"Only the creators or super-users can delete datasets"
+                )
 
     def update(
         self,
