@@ -145,7 +145,8 @@ class DatasetsService:
                 self.__dao__.delete_dataset(dataset)
             else:
                 raise ForbiddenOperationError(
-                    f"You don't have the necessary permissions to delete this dataset. Only dataset creators or administrators can delete datasets"
+                    f"You don't have the necessary permissions to delete this dataset. "
+                    "Only dataset creators or administrators can delete datasets"
                 )
 
     def update(
