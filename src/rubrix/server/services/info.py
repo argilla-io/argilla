@@ -26,12 +26,12 @@ from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
 
 def size(bytes):
     system = [
-        (1024 ** 5, "P"),
-        (1024 ** 4, "T"),
-        (1024 ** 3, "G"),
-        (1024 ** 2, "M"),
-        (1024 ** 1, "K"),
-        (1024 ** 0, "B"),
+        (1024**5, "P"),
+        (1024**4, "T"),
+        (1024**3, "G"),
+        (1024**2, "M"),
+        (1024**1, "K"),
+        (1024**0, "B"),
     ]
 
     factor, suffix = None, None
