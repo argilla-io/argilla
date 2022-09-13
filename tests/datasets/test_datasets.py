@@ -3,6 +3,7 @@ import pytest
 import rubrix as rb
 from rubrix import TextClassificationSettings, TokenClassificationSettings
 from rubrix.client import api
+from rubrix.client.sdk.commons.errors import ForbiddenApiError
 
 
 @pytest.mark.parametrize(
@@ -37,3 +38,17 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
 
     with pytest.raises(ValueError, match="Task type mismatch"):
         rb.configure_dataset(dataset, wrong_settings)
+
+
+def test_delete_dataset_by_non_creator(mocked_client):
+    try:
+        dataset = "test_delete_dataset_by_non_creator"
+        rb.delete(dataset)
+        rb.configure_dataset(
+            dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
+        )
+        mocked_client.change_current_user("mock-user")
+        with pytest.raises(ForbiddenApiError):
+            rb.delete(dataset)
+    finally:
+        mocked_client.reset_default_user()
