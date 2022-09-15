@@ -29,7 +29,8 @@ from rubrix.client.datasets import (
 )
 from rubrix.client.models import TextClassificationRecord
 
-_HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
+# _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
+_HF_HUB_ACCESS_TOKEN = None
 
 
 def _push_to_hub_with_retries(ds: datasets.Dataset, retries: int = 3, **kwargs):
