@@ -13,11 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+import warnings
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
+from opensearchpy.exceptions import OpenSearchWarning
 from opensearchpy.helpers import bulk as es_bulk
-from opensearchpy.helpers import scan as es_scan
 
 from rubrix.logging import LoggingMixin
 from rubrix.server.commons.models import TaskType
@@ -77,6 +78,8 @@ class backend_error_handler:
         self._index = index
 
     def __enter__(self):
+        # This line disable all open search client warnings
+        warnings.filterwarnings("ignore", category=OpenSearchWarning)
         pass
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -722,6 +725,58 @@ class ElasticsearchBackend(LoggingMixin):
                 response = response.get(index)
             return response
 
+    async def update_records_content(
+        self,
+        id: str,
+        content: Dict[str, Any],
+        query: Optional[BaseDatasetsQuery],
+    ) -> Tuple[int, int]:
+        index = dataset_records_index(id)
+        with backend_error_handler(index=index):
+            es_query = self.query_builder.map_2_es_query(
+                schema=self.get_mappings(id),
+                query=query,
+            )
+            response = self.client.update_by_query(
+                index=index,
+                body={
+                    "query": es_query["query"],
+                    "script": {
+                        "lang": "painless",
+                        "inline": ";".join(
+                            [f"ctx._source.{k}='{v}'" for k, v in content.items()]
+                        ),
+                    },
+                },
+                slices="auto",
+                wait_for_completion=True,
+                conflicts="proceed",
+            )
+            total, updated = response["total"], response["updated"]
+            return total, updated
+
+    async def delete_records_by_query(
+        self,
+        id: str,
+        query: Optional[BaseDatasetsQuery],
+    ) -> Tuple[int, int]:
+
+        index = dataset_records_index(id)
+        with backend_error_handler(index=index):
+            es_query = self.query_builder.map_2_es_query(
+                schema=self.get_mappings(id),
+                query=query,
+            )
+            response = self.client.delete_by_query(
+                index=index,
+                body={"query": es_query["query"]},
+                slices="auto",
+                wait_for_completion=True,
+                # conflicts="proceed",  # If document version conflict -> continue
+            )
+            total, deleted = response["total"], response["deleted"]
+            return total, deleted
+
     def search_records(
         self,
         id: str,
@@ -732,8 +787,8 @@ class ElasticsearchBackend(LoggingMixin):
         exclude_fields: List[str] = None,
         enable_highlight: bool = True,
     ) -> Tuple[int, List[Dict[str, Any]]]:
-        index = dataset_records_index(id)
 
+        index = dataset_records_index(id)
         with backend_error_handler(index=index):
             if not sort.sort_by and sort.shuffle is False:
                 sort.sort_by = [SortableField(id="id")]  # Default sort by id
