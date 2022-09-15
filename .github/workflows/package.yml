@@ -90,6 +90,7 @@ jobs:
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
+        run: echo "Enable hf access token"
       
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
