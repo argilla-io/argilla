@@ -21,7 +21,6 @@
       <li v-for="(counter, label) in getInfo" :key="label">
         <template v-if="counter > 0">
           <entity-label
-            :is-prediction="activeTab === 'predicted_mentions'"
             :label="label"
             :color="`color_${
               entities.filter((e) => e.text === label)[0].colorId %
