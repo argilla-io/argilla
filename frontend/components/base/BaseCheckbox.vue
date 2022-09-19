@@ -108,7 +108,6 @@ $checkbox-color: palette(grey, 600);
 $checkbox-color-dark: $primary-color;
 .re-checkbox {
   width: auto;
-  margin: $base-space * 2 $base-space $base-space * 2 0;
   display: inline-flex;
   position: relative;
   border-radius: 1px;
