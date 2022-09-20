@@ -66,6 +66,21 @@ class TextClassificationRecord extends BaseRecord {
     }
     return undefined;
   }
+
+  get clipboardText() {
+    if (Object.keys(this.inputs).length > 1) {
+      return Object.keys(this.inputs)
+        .map(
+          (key, index) =>
+            `${key.toUpperCase()}\n${this.inputs[key]}${
+              Object.keys(this.inputs).length === index + 1 ? "" : "\n\n"
+            }`
+        )
+        .join("");
+    } else {
+      return Object.values(this.inputs);
+    }
+  }
 }
 
 class TextClassificationSearchQuery extends BaseSearchQuery {

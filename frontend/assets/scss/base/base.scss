@@ -185,9 +185,7 @@ a {
 }
 
 .hidden-input {
-    opacity: 0;
-    position: absolute;
-    bottom: 100%;
+    @extend %visuallyhidden;
 }
 
 .vue-recycle-scroller {

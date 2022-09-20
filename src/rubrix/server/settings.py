@@ -75,24 +75,14 @@ class ApiSettings(BaseSettings):
 
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
-    # TODO(@frascuchon): remove in v0.12.0
-    disable_es_index_template_creation: bool = False
 
     metadata_fields_limit: int = Field(
         default=50, gt=0, le=100, description="Max number of fields in metadata"
     )
 
-    @validator("disable_es_index_template_creation", always=True)
-    def check_index_template_creation_value(cls, value):
+    enable_telemetry: bool = True
 
-        if value is True:
-            cls.__LOGGER__.warning(
-                "The environment variable DISABLE_ES_INDEX_TEMPLATE_CREATION won't be used anymore.\n"
-                "If you want customize the dataset creation index, please refer documentation "
-                "https://rubrix.readthedocs.io/en/stable"
-                "/getting_started/advanced_setup_guides.html#change-elasticsearch-index-analyzers"
-            )
-        return value
+    telemetry_key: Optional[str] = None
 
     @property
     def dataset_index_name(self) -> str:
@@ -117,21 +107,32 @@ class ApiSettings(BaseSettings):
 
     class Config:
         # TODO: include a common prefix for all rubrix env vars.
+        env_prefix = "RUBRIX_"
         fields = {
-            "elasticsearch_ca_path": {
-                "env": "RUBRIX_ELASTICSEARCH_CA_PATH",
+            # TODO(@frascuchon): Remove in 0.20.0
+            "elasticsearch": {
+                "env": ["ELASTICSEARCH", f"{env_prefix}ELASTICSEARCH"],
             },
             "elasticsearch_ssl_verify": {
-                "env": "RUBRIX_ELASTICSEARCH_SSL_VERIFY",
+                "env": [
+                    "ELASTICSEARCH_SSL_VERIFY",
+                    f"{env_prefix}ELASTICSEARCH_SSL_VERIFY",
+                ]
             },
-            "metadata_fields_limit": {"env": "RUBRIX_METADATA_FIELDS_LIMIT"},
-            "namespace": {
-                "env": "RUBRIX_NAMESPACE",
+            "cors_origins": {"env": ["CORS_ORIGINS", f"{env_prefix}CORS_ORIGINS"]},
+            "docs_enabled": {"env": ["DOCS_ENABLED", f"{env_prefix}DOCS_ENABLED"]},
+            "es_records_index_shards": {
+                "env": [
+                    "ES_RECORDS_INDEX_SHARDS",
+                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
+                ]
             },
-            "default_es_search_analyzer": {
-                "env": "RUBRIX_DEFAULT_ES_SEARCH_ANALYZER",
+            "es_records_index_replicas": {
+                "env": [
+                    "ES_RECORDS_INDEX_REPLICAS",
+                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
+                ]
             },
-            "exact_es_search_analyzer": {"env": "RUBRIX_EXACT_ES_SEARCH_ANALYZER"},
         }
 
 

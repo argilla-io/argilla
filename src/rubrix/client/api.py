@@ -149,8 +149,10 @@ class Api:
         self._agent = _RubrixLogAgent(self)
 
     def __del__(self):
-        del self._client
-        del self._agent
+        if hasattr(self, "_client"):
+            del self._client
+        if hasattr(self, "_agent"):
+            del self._agent
 
     @property
     def client(self):
@@ -211,14 +213,11 @@ class Api:
             >>> rb.copy("my_dataset", name_of_copy="new_dataset")
             >>> rb.load("new_dataset")
         """
-        response = datasets_api.copy_dataset(
+        datasets_api.copy_dataset(
             client=self._client,
             name=dataset,
             json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
-
-        if response.status_code == 409:
-            raise RuntimeError(f"A dataset with name '{name_of_copy}' already exists.")
 
     def delete(self, name: str) -> None:
         """Deletes a dataset.

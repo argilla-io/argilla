@@ -74,7 +74,7 @@ def singlelabel_textclassification_records(
             metadata={"mock_metadata": "mock"},
         ),
         rb.TextClassificationRecord(
-            inputs="mock",
+            text="mock",
             id="b",
             status="Default",
             metrics={"mock_metric": ["B", "I", "O"]},
@@ -165,7 +165,7 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             metrics={},
         ),
         rb.TextClassificationRecord(
-            inputs="mock",
+            text="mock",
             multi_label=True,
             id="b",
             status="Validated",

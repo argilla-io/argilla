@@ -90,13 +90,13 @@ def weak_multi_labels(monkeypatch):
     def mock_load(*args, **kwargs):
         return [
             TextClassificationRecord(
-                inputs="test", multi_label=True, annotation=["scared"]
+                text="test", multi_label=True, annotation=["scared"]
             ),
             TextClassificationRecord(
-                inputs="test", multi_label=True, annotation=["sad", "scared"]
+                text="test", multi_label=True, annotation=["sad", "scared"]
             ),
-            TextClassificationRecord(inputs="test", multi_label=True, annotation=[]),
-            TextClassificationRecord(inputs="test", multi_label=True),
+            TextClassificationRecord(text="test", multi_label=True, annotation=[]),
+            TextClassificationRecord(text="test", multi_label=True),
         ]
 
     monkeypatch.setattr(
@@ -320,9 +320,10 @@ class TestMajorityVoter:
             assert probabilities is None
             if wls == "weak_labels":
                 assert tie_break_policy == TieBreakPolicy.ABSTAIN
-            else:
-                assert tie_break_policy is None
-            return np.array([[1, 1], [0, 0]]), np.array([[1, 1], [1, 0]])
+                return np.array([1, 0]), np.array([1, 1])
+
+            assert tie_break_policy is None
+            return np.array([[1, 1, 1], [0, 0, 0]]), np.array([[1, 1, 1], [1, 0, 0]])
 
         single_or_multi = "multi" if wls == "weak_multi_labels" else "single"
         monkeypatch.setattr(

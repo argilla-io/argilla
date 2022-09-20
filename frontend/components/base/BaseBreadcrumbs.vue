@@ -39,7 +39,7 @@
         class="breadcrumbs__copy"
         href="#"
         @click.prevent="
-          copyToClipboard(
+          $copyToClipboard(
             filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name
           )
         "
@@ -65,17 +65,6 @@ export default {
   computed: {
     filteredBreadcrumbs() {
       return this.breadcrumbs.filter((breadcrumb) => breadcrumb.name);
-    },
-  },
-  methods: {
-    copyToClipboard(name) {
-      const myTemporaryInputElement = document.createElement("input");
-      myTemporaryInputElement.type = "text";
-      myTemporaryInputElement.className = "hidden-input";
-      myTemporaryInputElement.value = name;
-      document.body.appendChild(myTemporaryInputElement);
-      myTemporaryInputElement.select();
-      document.execCommand("Copy");
     },
   },
 };

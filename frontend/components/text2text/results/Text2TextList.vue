@@ -20,7 +20,7 @@
     <div
       :class="[
         'content',
-        hasAnnotationAndPredictions ? 'content--separator' : null,
+        'content--separator',
         !annotationEnabled
           ? 'content--exploration-mode'
           : 'content--annotation-mode',
@@ -62,7 +62,10 @@
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
               <p v-if="!editionMode" class="content__sentences__title">
-                {{ sentencesOrigin }}
+                {{ sentencesOrigin
+                }}<span v-if="showScore" class="content__score"
+                  >: {{ sentence.score | percent }}
+                </span>
               </p>
               <base-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
@@ -92,8 +95,24 @@
             />
             <div v-if="!editionMode" class="content__footer">
               <template v-if="sentencesOrigin === 'Prediction'">
-                <div v-if="showScore" class="content__score">
-                  Score: {{ sentence.score | percent }}
+                <div v-if="annotationEnabled" class="content__actions-buttons">
+                  <base-button
+                    v-if="allowValidation"
+                    class="primary small"
+                    @click="onAnnotate(visibleSentence)"
+                    >Validate</base-button
+                  >
+                  <base-button
+                    v-if="sentences.length"
+                    :class="[
+                      'edit',
+                      'primary',
+                      'small',
+                      { outline: allowValidation },
+                    ]"
+                    @click="edit"
+                    >Edit</base-button
+                  >
                 </div>
                 <base-slider
                   v-if="sentences.length"
@@ -103,25 +122,6 @@
                   @go-to="showItemNumber"
                 />
               </template>
-              <div v-if="annotationEnabled" class="content__actions-buttons">
-                <base-button
-                  v-if="sentences.length"
-                  :class="[
-                    'edit',
-                    'primary',
-                    'small',
-                    { outline: allowValidation },
-                  ]"
-                  @click="edit"
-                  >Edit</base-button
-                >
-                <base-button
-                  v-if="allowValidation"
-                  class="primary small"
-                  @click="onAnnotate(visibleSentence)"
-                  >Validate</base-button
-                >
-              </div>
             </div>
           </div>
         </span>
@@ -415,7 +415,7 @@ export default {
     }
   }
   &__score {
-    @include font-size(13px);
+    @include font-size(15px);
     margin-right: 0;
     min-width: 33%;
     color: $font-medium;
@@ -436,8 +436,8 @@ export default {
     }
   }
   &__actions-buttons {
-    margin-right: 0;
-    margin-left: auto;
+    margin-right: auto;
+    margin-left: 0;
     display: flex;
     .edit {
       opacity: 0;

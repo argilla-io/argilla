@@ -19,30 +19,46 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
-from rubrix.server.apis.v0.helpers import takeuntil
-from rubrix.server.apis.v0.models.commons.model import (
-    BulkResponse,
-    PaginationParams,
-    TaskType,
+from rubrix.server.apis.v0.models.commons.model import BulkResponse
+from rubrix.server.apis.v0.models.commons.params import (
+    CommonTaskHandlerDependencies,
+    RequestPagination,
 )
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
 from rubrix.server.apis.v0.models.text2text import (
-    Text2TextBulkData,
+    Text2TextBulkRequest,
+    Text2TextDataset,
+    Text2TextMetrics,
     Text2TextQuery,
     Text2TextRecord,
+    Text2TextSearchAggregations,
     Text2TextSearchRequest,
     Text2TextSearchResults,
 )
+from rubrix.server.commons.config import TasksFactory
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
+from rubrix.server.helpers import takeuntil
 from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.text2text import Text2TextService, text2text_service
+from rubrix.server.services.tasks.text2text import Text2TextService
+from rubrix.server.services.tasks.text2text.models import (
+    ServiceText2TextQuery,
+    ServiceText2TextRecord,
+)
 
 TASK_TYPE = TaskType.text2text
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+
+TasksFactory.register_task(
+    task_type=TaskType.text2text,
+    dataset_class=Text2TextDataset,
+    query_request=Text2TextQuery,
+    record_class=ServiceText2TextRecord,
+    metrics=Text2TextMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -53,39 +69,16 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
     response_model=BulkResponse,
     response_model_exclude_none=True,
 )
-def bulk_records(
+async def bulk_records(
     name: str,
-    bulk: Text2TextBulkData,
-    common_params: CommonTaskQueryParams = Depends(),
-    service: Text2TextService = Depends(text2text_service),
+    bulk: Text2TextBulkRequest,
+    common_params: CommonTaskHandlerDependencies = Depends(),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
-    """
-    Includes a chunk of record data with provided dataset bulk information
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    bulk:
-        The bulk data
-    common_params:
-        Common task query params
-    service:
-        the Service
-    datasets:
-        The dataset service
-    current_user:
-        Current request user
-
-    Returns
-    -------
-        Bulk response data
-    """
 
     task = TASK_TYPE
-    task_mappings = TaskFactory.get_task_mappings(TASK_TYPE)
     owner = current_user.check_workspace(common_params.workspace)
     try:
         dataset = datasets.find_by_name(
@@ -93,7 +86,7 @@ def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -102,19 +95,14 @@ def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
+        datasets.create_dataset(user=current_user, dataset=dataset)
 
-        datasets.create_dataset(
-            user=current_user, dataset=dataset, mappings=task_mappings
-        )
-
-    result = service.add_records(
+    result = await service.add_records(
         dataset=dataset,
-        mappings=task_mappings,
-        records=bulk.records,
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
     )
     return BulkResponse(
         dataset=name,
@@ -132,42 +120,15 @@ def bulk_records(
 def search_records(
     name: str,
     search: Text2TextSearchRequest = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     include_metrics: bool = Query(
         False, description="If enabled, return related record metrics"
     ),
-    pagination: PaginationParams = Depends(),
-    service: Text2TextService = Depends(text2text_service),
+    pagination: RequestPagination = Depends(),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Text2TextSearchResults:
-    """
-    Searches data from dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    common_params:
-        The task common query params
-    include_metrics:
-        Flag to include metrics in results
-    search:
-        THe search query request
-    pagination:
-        The pagination params
-    service:
-        The dataset records service
-    datasets:
-        The dataset service
-    current_user:
-        The current request user
-
-    Returns
-    -------
-        The search results data
-
-    """
 
     search = search or Text2TextSearchRequest()
     query = search.query or Text2TextQuery()
@@ -176,29 +137,24 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
     result = service.search(
         dataset=dataset,
-        query=query,
+        query=ServiceText2TextQuery.parse_obj(query),
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "annotated_by",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
-    return result
+    return Text2TextSearchResults(
+        total=result.total,
+        records=[Text2TextRecord.parse_obj(r) for r in result.records],
+        aggregations=Text2TextSearchAggregations.parse_obj(result.metrics)
+        if result.metrics
+        else None,
+    )
 
 
 def scan_data_response(
@@ -241,15 +197,15 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[Text2TextQuery] = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: Text2TextService = Depends(text2text_service),
+    service: Text2TextService = Depends(Text2TextService.get_instance),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
-    id_from: Optional[str] = None
+    id_from: Optional[str] = None,
 ) -> StreamingResponse:
     """
-    Creates a data stream over dataset records
+        Creates a data stream over dataset records
 
     Parameters
     ----------
@@ -277,10 +233,17 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset, query=query, id_from=id_from, limit=limit)
-
+    data_stream = map(
+        Text2TextRecord.parse_obj,
+        service.read_dataset(
+            dataset,
+            query=ServiceText2TextQuery.parse_obj(query),
+            id_from=id_from,
+            limit=limit,
+        ),
+    )
     return scan_data_response(
         data_stream=data_stream,
         limit=limit,

@@ -54,6 +54,7 @@ export default {
     { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
+    { src: "~/plugins/copy-to-clipboard.js" },
     { src: "~/plugins/filters.js" },
     { src: "~/plugins/variables.js" },
   ],

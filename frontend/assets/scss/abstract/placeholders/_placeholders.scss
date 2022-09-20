@@ -104,11 +104,10 @@
   border: 0;
   &:hover,
   &:focus {
-      text-decoration: underline;
+      text-decoration: none;
       background: none;
   }
 }
-
 %hide-scrollbar {
   /* Hide scrollbar for IE, Edge and Firefox */
   -ms-overflow-style: none;  /* IE and Edge */

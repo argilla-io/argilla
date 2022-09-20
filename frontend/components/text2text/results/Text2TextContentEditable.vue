@@ -134,7 +134,7 @@ $marginRight: 200px;
     &__buttons {
       margin: 2.5em 200px 0 auto;
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       .button {
         &:last-child {
           margin-left: $base-space;

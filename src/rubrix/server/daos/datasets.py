@@ -12,24 +12,23 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import json
 from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.daos.models.datasets import BaseDatasetDB, DatasetDB, SettingsDB
-from rubrix.server.daos.records import DatasetRecordsDAO, dataset_records_index
-from rubrix.server.elasticseach import query_helpers
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
-from rubrix.server.elasticseach.mappings.datasets import (
-    DATASETS_INDEX_NAME,
-    DATASETS_INDEX_TEMPLATE,
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.daos.backend.search.model import BaseDatasetsQuery
+from rubrix.server.daos.models.datasets import (
+    BaseDatasetDB,
+    BaseDatasetSettingsDB,
+    DatasetDB,
+    DatasetSettingsDB,
 )
+from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import WrongTaskError
 
 NO_WORKSPACE = ""
-MAX_NUMBER_OF_LISTED_DATASETS = 2500
 
 
 class DatasetsDAO:
@@ -40,7 +39,7 @@ class DatasetsDAO:
     @classmethod
     def get_instance(
         cls,
-        es: ElasticsearchWrapper = Depends(ElasticsearchWrapper.get_instance),
+        es: ElasticsearchBackend = Depends(ElasticsearchBackend.get_instance),
         records_dao: DatasetRecordsDAO = Depends(DatasetRecordsDAO.get_instance),
     ) -> "DatasetsDAO":
         """
@@ -63,207 +62,91 @@ class DatasetsDAO:
             cls._INSTANCE = cls(es, records_dao)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchWrapper, records_dao: DatasetRecordsDAO):
+    def __init__(self, es: ElasticsearchBackend, records_dao: DatasetRecordsDAO):
         self._es = es
         self.__records_dao__ = records_dao
         self.init()
 
     def init(self):
         """Initializes dataset dao. Used on app startup"""
-        self._es.create_index_template(
-            name=DATASETS_INDEX_NAME,
-            template=DATASETS_INDEX_TEMPLATE,
-            force_recreate=True,
-        )
-        self._es.create_index(DATASETS_INDEX_NAME)
+        self._es.create_datasets_index(force_recreate=True)
 
     def list_datasets(
         self,
         owner_list: List[str] = None,
-        task2dataset_map: Dict[str, Type[BaseDatasetDB]] = None,
-    ) -> List[BaseDatasetDB]:
-        filters = []
-        if owner_list:
-            owners_filter = query_helpers.filters.terms_filter(
-                "owner.keyword", owner_list
-            )
-            if NO_WORKSPACE in owner_list:
-                filters.append(
-                    query_helpers.filters.boolean_filter(
-                        minimum_should_match=1,  # OR Condition
-                        should_filters=[
-                            query_helpers.filters.boolean_filter(
-                                must_not_query=query_helpers.filters.exists_field(
-                                    "owner"
-                                )
-                            ),
-                            owners_filter,
-                        ],
-                    )
-                )
-            else:
-                filters.append(owners_filter)
-
-        if task2dataset_map:
-            filters.append(
-                query_helpers.filters.terms_filter(
-                    field="task.keyword", values=[task for task in task2dataset_map]
-                )
-            )
-
-        docs = self._es.list_documents(
-            index=DATASETS_INDEX_NAME,
-            fetch_once=True,
-            # TODO(@frascuchon): include id as part of the document as keyword to enable sorting by id
-            size=MAX_NUMBER_OF_LISTED_DATASETS,
-            query={
-                "query": query_helpers.filters.boolean_filter(
-                    should_filters=filters, minimum_should_match=len(filters)
-                )
-            }
-            if filters
-            else None,
+        task2dataset_map: Dict[str, Type[DatasetDB]] = None,
+        name: Optional[str] = None,
+    ) -> List[DatasetDB]:
+        owner_list = owner_list or []
+        query = BaseDatasetsQuery(
+            owners=owner_list,
+            include_no_owner=NO_WORKSPACE in owner_list,
+            tasks=[task for task in task2dataset_map] if task2dataset_map else None,
+            name=name,
         )
 
+        docs = self._es.list_datasets(query)
         task2dataset_map = task2dataset_map or {}
         return [
             self._es_doc_to_instance(
-                doc, ds_class=task2dataset_map.get(task, DatasetDB)
+                doc, ds_class=task2dataset_map.get(task, BaseDatasetDB)
             )
             for doc in docs
             for task in [self.__get_doc_field__(doc, "task")]
         ]
 
-    def create_dataset(
-        self, dataset: BaseDatasetDB, mappings: Dict[str, Any]
-    ) -> BaseDatasetDB:
-        """
-        Stores a dataset in elasticsearch and creates corresponding dataset records index
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        Returns
-        -------
-            Created dataset
-        """
-
-        self._es.add_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            document=self._dataset_to_es_doc(dataset),
+    def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
+        self._es.add_dataset_document(
+            id=dataset.id, document=self._dataset_to_es_doc(dataset)
         )
-        self.__records_dao__.create_dataset_index(
-            dataset, mappings=mappings, force_recreate=True
+        self._es.create_dataset_index(
+            id=dataset.id,
+            task=dataset.task,
+            force_recreate=True,
         )
         return dataset
 
     def update_dataset(
         self,
-        dataset: BaseDatasetDB,
-    ) -> BaseDatasetDB:
-        """
-        Updates an stored dataset
+        dataset: DatasetDB,
+    ) -> DatasetDB:
 
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        Returns
-        -------
-            The updated dataset
-
-        """
-        dataset_id = dataset.id
-
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset_id,
-            document=self._dataset_to_es_doc(dataset),
-            partial_update=True,
+        self._es.update_dataset_document(
+            id=dataset.id, document=self._dataset_to_es_doc(dataset)
         )
         return dataset
 
-    def delete_dataset(self, dataset: BaseDatasetDB):
-        """
-        Deletes indices related to provided dataset
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        """
-        try:
-            self._es.delete_index(dataset_records_index(dataset.id))
-        finally:
-            self._es.delete_document(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+    def delete_dataset(self, dataset: DatasetDB):
+        self._es.delete(dataset.id)
 
     def find_by_name(
         self,
         name: str,
         owner: Optional[str],
-        as_dataset_class: Type[BaseDatasetDB] = DatasetDB,
+        as_dataset_class: Type[DatasetDB] = BaseDatasetDB,
         task: Optional[str] = None,
-    ) -> Optional[BaseDatasetDB]:
-        """
-        Finds a dataset by name
+    ) -> Optional[DatasetDB]:
 
-        Parameters
-        ----------
-        name: The dataset name
-        owner: The dataset owner
-        as_dataset_class: The dataset class used to return data
-        task: The dataset task string definition
-
-        Returns
-        -------
-            The found dataset if any. None otherwise
-        """
-        dataset_id = DatasetDB.build_dataset_id(
+        dataset_id = BaseDatasetDB.build_dataset_id(
             name=name,
             owner=owner,
         )
-        document = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=dataset_id
-        )
-        if not document and owner is None:
-            # We must search by name since we have no owner
-            results = self._es.list_documents(
-                index=DATASETS_INDEX_NAME,
-                query={"query": {"term": {"name.keyword": name}}},
-                fetch_once=True,
-            )
-            results = list(results)
-            if len(results) == 0:
-                return None
-
-            if len(results) > 1:
-                raise ValueError(
-                    f"Ambiguous dataset info found for name {name}. Please provide a valid owner"
-                )
-
-            document = results[0]
-
+        document = self._es.find_dataset(id=dataset_id, name=name, owner=owner)
         if document is None:
             return None
-
         base_ds = self._es_doc_to_instance(document)
         if task and task != base_ds.task:
             raise WrongTaskError(
                 detail=f"Provided task {task} cannot be applied to dataset"
             )
-        dataset_type = as_dataset_class or DatasetDB
+        dataset_type = as_dataset_class or BaseDatasetDB
         return self._es_doc_to_instance(document, ds_class=dataset_type)
 
     @staticmethod
     def _es_doc_to_instance(
-        doc: Dict[str, Any], ds_class: Type[BaseDatasetDB] = DatasetDB
-    ) -> BaseDatasetDB:
-        """Transforms a stored elasticsearch document into a `DatasetDB`"""
+        doc: Dict[str, Any], ds_class: Type[DatasetDB] = BaseDatasetDB
+    ) -> DatasetDB:
+        """Transforms a stored elasticsearch document into a `BaseDatasetDB`"""
 
         def __key_value_list_to_dict__(
             key_value_list: List[Dict[str, Any]]
@@ -300,67 +183,47 @@ class DatasetsDAO:
         }
 
     def copy(self, source: DatasetDB, target: DatasetDB):
-        source_doc = self._es.get_document_by_id(
-            index=DATASETS_INDEX_NAME, doc_id=source.id
-        )
-        self._es.add_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=target.id,
+        source_doc = self._es.find_dataset(id=source.id)
+        self._es.add_dataset_document(
+            id=target.id,
             document={
                 **source_doc["_source"],  # we copy extended fields from source document
                 **self._dataset_to_es_doc(target),
             },
         )
-        index_from = dataset_records_index(source.id)
-        index_to = dataset_records_index(target.id)
-        self._es.clone_index(index=index_from, clone_to=index_to)
+        self._es.copy(id_from=source.id, id_to=target.id)
 
     def close(self, dataset: DatasetDB):
         """Close a dataset. It's mean that release all related resources, like elasticsearch index"""
-        self._es.close_index(dataset_records_index(dataset.id))
+        self._es.close(dataset.id)
 
     def open(self, dataset: DatasetDB):
         """Make available a dataset"""
-        self._es.open_index(dataset_records_index(dataset.id))
+        self._es.open(dataset.id)
 
     def get_all_workspaces(self) -> List[str]:
         """Get all datasets (Only for super users)"""
+        metric_data = self._es.compute_rubrix_metric(metric_id="all_rubrix_workspaces")
+        return [k for k in metric_data]
 
-        workspaces_dict = self._es.aggregate(
-            index=DATASETS_INDEX_NAME,
-            aggregation=query_helpers.aggregations.terms_aggregation(
-                "owner.keyword",
-                missing=NO_WORKSPACE,
-                size=500,  # TODO: A max number of workspaces env var could be leveraged by this.
-            ),
-        )
-
-        return [k for k in workspaces_dict]
-
-    def save_settings(self, dataset: DatasetDB, settings: SettingsDB) -> SettingsDB:
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            document={"settings": settings.dict(exclude_none=True)},
-            partial_update=True,
+    def save_settings(
+        self, dataset: DatasetDB, settings: DatasetSettingsDB
+    ) -> BaseDatasetSettingsDB:
+        self._es.update_dataset_document(
+            id=dataset.id, document={"settings": settings.dict(exclude_none=True)}
         )
         return settings
 
     def load_settings(
-        self, dataset: DatasetDB, as_class: Type[SettingsDB]
-    ) -> Optional[SettingsDB]:
-        doc = self._es.get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=dataset.id)
+        self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
+    ) -> Optional[DatasetSettingsDB]:
+        doc = self._es.find_dataset(id=dataset.id)
         if doc:
             settings = self.__get_doc_field__(doc, field="settings")
             return as_class.parse_obj(settings) if settings else None
 
     def delete_settings(self, dataset: DatasetDB):
-        self._es.update_document(
-            index=DATASETS_INDEX_NAME,
-            doc_id=dataset.id,
-            script='ctx._source.remove("settings")',
-            partial_update=True,
-        )
+        self._es.remove_dataset_field(dataset.id, field="settings")
 
     def __get_doc_field__(self, doc: Dict[str, Any], field: str) -> Optional[Any]:
         return doc["_source"].get(field)

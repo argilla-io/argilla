@@ -76,7 +76,7 @@
 				$flex-basis: $flex-basis - $gutter;
 			} @else if $gutter and unitless($gutter) == false {
 				$flex-basis: calc( #{$flex-basis} - #{$gutter});
-			} 
+			}
 
 		} @else if $grid-type == margin-offset {
 			@if $gutter and unit($gutter) == '%' {

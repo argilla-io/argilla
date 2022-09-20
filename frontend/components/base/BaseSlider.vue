@@ -69,8 +69,8 @@ export default {
   align-items: center;
   justify-content: center;
   min-width: 33%;
-  margin-right: auto;
-  margin-left: 0;
+  margin-right: 33%;
+  margin-left: auto;
   color: $font-medium;
   a {
     height: 20px;

@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from rubrix import __version__ as rubrix_version
-from rubrix.server.apis.v0.models.info import ApiInfo, ApiStatus
+from rubrix.server.services.info import ApiInfo, ApiStatus
 
 
 def test_api_info(mocked_client):

@@ -1,5 +1,5 @@
 import rubrix as rb
-from rubrix.server.apis.v0.models.commons.model import TaskType
+from rubrix.server.commons.models import TaskType
 
 
 def create_dataset(client, name: str):
