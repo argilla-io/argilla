@@ -421,7 +421,7 @@ class Api:
             ids:
                 If provided, deletes dataset records with given ids.
             discard_only:
-                If `True`, matched records won't be delete. Instead of that, they will be marked
+                If `True`, matched records won't be deleted. Instead, they will be marked
                 as `Discarded`
             discard_when_forbidden:
                 Only super-user or dataset creator can delete records from a dataset.
