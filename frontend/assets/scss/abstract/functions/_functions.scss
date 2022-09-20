@@ -40,7 +40,7 @@
     @if map-has-key($palettes, $palette) {
       @return map-get(map-get($palettes, $palette), $tone);
     }
-  
+
     @warn "Unknown `#{$palette}` in $palettes.";
     @return null;
 }
