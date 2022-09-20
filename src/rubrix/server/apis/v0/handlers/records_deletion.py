@@ -17,9 +17,8 @@ def configure_router(router: APIRouter):
     QueryType = Union[TextClassificationQuery, TokenClassificationQuery, Text2TextQuery]
 
     class DeleteRecordsResponse(BaseModel):
+        matched: int
         processed: int
-        discarded: Optional[int] = None
-        deleted: Optional[int] = None
 
     @router.delete(
         "/{name}/data",
@@ -53,9 +52,8 @@ def configure_router(router: APIRouter):
         )
 
         return DeleteRecordsResponse(
-            processed=result.processed,
-            deleted=result.deleted,
-            discarded=result.discarded,
+            matched=result.processed,
+            processed=result.deleted or result.discarded,
         )
 
 
