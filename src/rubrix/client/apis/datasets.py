@@ -162,11 +162,10 @@ class Datasets(AbstractApi):
         with api_compatibility(self, min_version="0.18"):
             try:
                 response = self.__client__.delete(
-                    path=f"{self._API_PREFIX}/datasets/{name}/data?mark_as_discarded={mark_as_discarded}",
+                    path=f"{self._API_PREFIX}/{name}/data?mark_as_discarded={mark_as_discarded}",
                     json={"ids": ids} if ids else {"query_text": query},
                 )
-                data = response.json()
-                return data["matched"], data["processed"]
+                return response["matched"], response["processed"]
             except ForbiddenApiError as faer:
                 if discard_when_forbidden:
                     warnings.warn(
