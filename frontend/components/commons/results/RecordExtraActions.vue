@@ -24,11 +24,11 @@
       <div v-if="hasMetadata" @click="showMetadata()">
         <span>View metadata</span>
       </div>
-      <re-action-tooltip tooltip="Copied">
+      <base-action-tooltip tooltip="Copied">
         <div @click="$copyToClipboard(record.clipboardText)">
           <span>Copy text</span>
         </div>
-      </re-action-tooltip>
+      </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
         :class="record.status === 'Discarded' ? 'disabled' : null"

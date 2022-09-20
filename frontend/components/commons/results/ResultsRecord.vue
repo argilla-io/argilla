@@ -122,7 +122,6 @@ export default {
     border-radius: $border-radius-m;
     display: inline-block;
     width: 100%;
-    transition: 0.2s ease-in-out;
     border: 1px solid palette(grey, 600);
     margin-bottom: $base-space-between-records;
     &--annotation-mode {
