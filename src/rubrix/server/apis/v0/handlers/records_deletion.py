@@ -28,7 +28,7 @@ def configure_router(router: APIRouter):
     async def delete_dataset_records(
         name: str,
         query: Optional[QueryType] = None,
-        mark_as_discarded=Query(
+        mark_as_discarded: bool = Query(
             default=False,
             title="If True, matched records won't be deleted."
             " Instead of that, the record status will be changed to `Discarded`",
