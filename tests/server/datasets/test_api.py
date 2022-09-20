@@ -250,7 +250,7 @@ def test_delete_records(mocked_client):
         f"/api/datasets/{dataset_name}/data", json={"ids": [1]}
     )
     assert response.status_code == 200
-    assert response.json() == {"deleted": 1, "discarded": None, "processed": 1}
+    assert response.json() == {"matched": 1, "processed": 1}
 
     try:
         mocked_client.change_current_user("mock-user")
@@ -271,9 +271,8 @@ def test_delete_records(mocked_client):
         )
         assert response.status_code == 200
         assert response.json() == {
-            "deleted": None,
-            "discarded": 98,
-            "processed": 99,
+            "matched": 99,
+            "processed": 98,
         }  # different values are caused by conflicts found
     finally:
         mocked_client.reset_default_user()
