@@ -1,11 +1,16 @@
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
 from rubrix.client.apis import AbstractApi, api_compatibility
-from rubrix.client.sdk.commons.errors import AlreadyExistsApiError, NotFoundApiError
+from rubrix.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    ForbiddenApiError,
+    NotFoundApiError,
+)
 from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.client.sdk.datasets.models import TaskType
 
@@ -126,8 +131,59 @@ class Datasets(AbstractApi):
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
 
-    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
+    def delete_records(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        mark_as_discarded: bool = False,
+        discard_when_forbidden: bool = True,
+    ) -> Tuple[int, int]:
+        """
+        Tries to delete records in a dataset for a given query/ids list.
 
+        Args:
+            name: The dataset name
+            query: The query matching records
+            ids: A list of records ids. If provided, the query param will be ignored
+            mark_as_discarded: If `True`, the matched records will be marked as `Discarded` instead
+                of delete them
+            discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
+                So, running "hard" deletion for other users will raise an `ForbiddenApiError` error.
+                If this parameter is `True`, the client API will automatically try to mark as ``Discarded``
+                records instead.
+
+        Returns:
+            The total of matched records and real number of processed errors. These numbers could not
+            be the same if some data conflicts are found during operations (some matched records change during
+            deletion).
+
+        """
+        with api_compatibility(self, min_version="0.18"):
+            try:
+                response = self.__client__.delete(
+                    path=f"{self._API_PREFIX}/datasets/{name}/data?mark_as_discarded={mark_as_discarded}",
+                    json={"ids": ids} if ids else {"query_text": query},
+                )
+                data = response.json()
+                return data["matched"], data["processed"]
+            except ForbiddenApiError as faer:
+                if discard_when_forbidden:
+                    warnings.warn(
+                        message=f"{faer}. Records will be discarded instead",
+                        category=UserWarning,
+                    )
+                    return self.delete_records(
+                        name=name,
+                        query=query,
+                        ids=ids,
+                        mark_as_discarded=True,
+                        discard_when_forbidden=False,  # Next time will raise the error
+                    )
+                else:
+                    raise faer
+
+    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
                 f"The provided settings type {type(settings)} cannot be applied to dataset."
