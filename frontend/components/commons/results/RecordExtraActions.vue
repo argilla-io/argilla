@@ -124,6 +124,7 @@ export default {
     right: 0.9em;
   }
 }
+
 .extra-actions {
   position: relative;
   &__button {
