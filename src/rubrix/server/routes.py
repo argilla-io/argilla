@@ -23,6 +23,7 @@ from fastapi import APIRouter
 from rubrix.server.apis.v0.handlers import datasets as datasets
 from rubrix.server.apis.v0.handlers import info as info
 from rubrix.server.apis.v0.handlers import metrics as tasks
+from rubrix.server.apis.v0.handlers import records_deletion as records_deletion
 from rubrix.server.apis.v0.handlers import users as users
 from rubrix.server.errors.base_errors import __ALL__
 
@@ -33,5 +34,11 @@ api_router = APIRouter(
 
 dependencies = []
 
-for router in [users.router, datasets.router, info.router, tasks.router]:
+for router in [
+    users.router,
+    datasets.router,
+    info.router,
+    tasks.router,
+    records_deletion.router,
+]:
     api_router.include_router(router, dependencies=dependencies)
