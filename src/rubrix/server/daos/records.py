@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 import datetime
-from typing import Any, Dict, Iterable, List, Optional, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from fastapi import Depends
 
@@ -200,3 +200,24 @@ class DatasetRecordsDAO:
         """Return inner elasticsearch index configuration"""
         schema = self._es.get_mappings(id=dataset.id)
         return schema
+
+    async def delete_records_by_query(
+        self,
+        dataset: DatasetDB,
+        query: Optional[BackendRecordsQuery] = None,
+    ) -> Tuple[int, int]:
+        total, deleted = await self._es.delete_records_by_query(
+            id=dataset.id, query=query
+        )
+        return total, deleted
+
+    async def update_records_by_query(
+        self,
+        dataset: DatasetDB,
+        query: Optional[BackendRecordsQuery] = None,
+        **content,
+    ) -> Tuple[int, int]:
+        total, updated = await self._es.update_records_content(
+            id=dataset.id, content=content, query=query
+        )
+        return total, updated
