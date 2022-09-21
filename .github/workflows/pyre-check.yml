@@ -32,16 +32,27 @@ jobs:
 
       - name: Cache Conda env
         uses: actions/cache@v2
+        id: cache
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}-${{ runner.arch }}-${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
         env:
           # Increase this value to reset cache if etc/example-environment.yml has not changed
           CACHE_NUMBER: 0
-        id: cache
 
       - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
         run: mamba env update -n rubrix -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
+        env:
+          # Increase this value to reset cache if pyproject.toml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Install dependencies
         # Force install this version since older versions fail with click < 8.0 (included by spacy 3.x)
