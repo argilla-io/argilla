@@ -7,6 +7,18 @@ repos:
         exclude_types: [text, jupyter]
     -   id: trailing-whitespace
 
+-   repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.3.1
+    hooks:
+    -   id: insert-license
+        name: "Insert license header in Python source files"
+        files: \.py$
+        args:
+            - --license-filepath
+            - src/license_header.txt
+            - --fuzzy-match-generates-todo
+            # - --remove-header
+
 -   repo: https://github.com/psf/black
     rev: 21.9b0
     hooks:
