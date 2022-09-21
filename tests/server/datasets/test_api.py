@@ -220,12 +220,59 @@ def delete_dataset(client, dataset, workspace: Optional[str] = None):
     assert client.delete(url).status_code == 200
 
 
-def create_mock_dataset(client, dataset):
+def create_mock_dataset(client, dataset, records=[]):
     client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},
-            records=[],
+            records=records,
         ).dict(by_alias=True),
     )
+
+
+def test_delete_records(mocked_client):
+    dataset_name = "test_delete_records"
+    delete_dataset(mocked_client, dataset_name)
+
+    create_mock_dataset(
+        mocked_client,
+        dataset=dataset_name,
+        records=[
+            {
+                "id": i,
+                "inputs": {"text": f"This is a text for id {i}"},
+            }
+            for i in range(1, 100)
+        ],
+    )
+    response = mocked_client.delete(
+        f"/api/datasets/{dataset_name}/data", json={"ids": [1]}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"matched": 1, "processed": 1}
+
+    try:
+        mocked_client.change_current_user("mock-user")
+        response = mocked_client.delete(f"/api/datasets/{dataset_name}/data")
+        assert response.status_code == 403
+        assert response.json() == {
+            "detail": {
+                "code": "rubrix.api.errors::ForbiddenOperationError",
+                "params": {
+                    "detail": "You don't have the necessary permissions to delete records on this dataset."
+                    " Only dataset creators or administrators can delete datasets"
+                },
+            }
+        }
+
+        response = mocked_client.delete(
+            f"/api/datasets/{dataset_name}/data?mark_as_discarded=true"
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "matched": 99,
+            "processed": 98,
+        }  # different values are caused by conflicts found
+    finally:
+        mocked_client.reset_default_user()

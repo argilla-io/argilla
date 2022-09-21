@@ -32,6 +32,7 @@ if _TYPE_CHECKING:
     from rubrix.client.api import (
         copy,
         delete,
+        delete_records,
         get_workspace,
         init,
         load,
@@ -68,6 +69,7 @@ _import_structure = {
         "get_workspace",
         "init",
         "load",
+        "delete_records",
         "log",
         "log_async",
         "set_workspace",

@@ -34,6 +34,8 @@ class SecuredClient:
         rb_api._user = new_user
         rb_api.set_workspace(default_user.username)
         rb_api.client.token = new_user.api_key
+        self._header[API_KEY_HEADER_NAME] = new_user.api_key
+        self._header[RUBRIX_WORKSPACE_HEADER_NAME] = "rubrix"
 
     def reset_default_user(self):
         default_user = auth.users.__dao__.__users__["rubrix"]
@@ -42,6 +44,7 @@ class SecuredClient:
         rb_api._user = default_user
         rb_api.client.token = default_user.api_key
         rb_api.client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME)
+        self._header[API_KEY_HEADER_NAME] = default_user.api_key
 
     def add_workspaces_to_rubrix_user(self, workspaces: List[str]):
         rubrix_user = auth.users.__dao__.__users__["rubrix"]
