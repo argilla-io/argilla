@@ -26,7 +26,9 @@ def test_log_with_empty_text(mocked_client):
     text = " "
 
     rubrix.delete(dataset)
-    with pytest.raises(Exception, match="No text or empty text provided"):
+    with pytest.raises(
+        Exception, match="The provided `text` contains only whitespaces."
+    ):
         rubrix.log(
             TokenClassificationRecord(id=0, text=text, tokens=["a", "b", "c"]),
             name=dataset,

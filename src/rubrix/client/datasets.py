@@ -28,6 +28,7 @@ from rubrix.client.models import (
     TokenClassificationRecord,
 )
 from rubrix.client.sdk.datasets.models import TaskType
+from rubrix.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -877,12 +878,11 @@ class DatasetForTokenClassification(DatasetBase):
         class_tags = datasets.ClassLabel(names=class_tags)
 
         def spans2iob(example):
-            r = TokenClassificationRecord(
-                text=example["text"],
-                tokens=example["tokens"],
-                annotation=self.__entities_to_tuple__(example["annotation"]),
-            )
-            return class_tags.str2int(r.spans2iob(r.annotation))
+            span_utils = SpanUtils(example["text"], example["tokens"])
+            entity_spans = self.__entities_to_tuple__(example["annotation"])
+            tags = span_utils.to_tags(entity_spans)
+
+            return class_tags.str2int(tags)
 
         ds = (
             self.to_datasets()

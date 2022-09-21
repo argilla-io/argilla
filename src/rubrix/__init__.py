@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING as _TYPE_CHECKING
 from rubrix.logging import configure_logging as _configure_logging
 
 from . import _version
-from .utils import _LazyRubrixModule
+from .utils import LazyRubrixModule as _LazyRubrixModule
 
 __version__ = _version.version
 
@@ -32,6 +32,7 @@ if _TYPE_CHECKING:
     from rubrix.client.api import (
         copy,
         delete,
+        delete_records,
         get_workspace,
         init,
         load,
@@ -68,6 +69,7 @@ _import_structure = {
         "get_workspace",
         "init",
         "load",
+        "delete_records",
         "log",
         "log_async",
         "set_workspace",
