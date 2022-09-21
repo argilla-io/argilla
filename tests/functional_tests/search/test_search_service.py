@@ -1,69 +1,76 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pytest
 
 import rubrix
-from rubrix.server.apis.v0.models.commons.model import ScoreRange, TaskType
+from rubrix.server.apis.v0.models.commons.model import ScoreRange
 from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.metrics.base import BaseMetric
 from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
 from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
+from rubrix.server.commons.models import TaskType
+from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
 from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.elasticseach.client_wrapper import ElasticsearchWrapper
-from rubrix.server.services.metrics import MetricsService
-from rubrix.server.services.search.model import SortConfig
-from rubrix.server.services.search.query_builder import EsQueryBuilder
+from rubrix.server.services.metrics import MetricsService, ServicePythonMetric
+from rubrix.server.services.search.model import ServiceSortConfig
 from rubrix.server.services.search.service import SearchRecordsService
 
 
 @pytest.fixture
-def es_wrapper():
-    return ElasticsearchWrapper.get_instance()
+def backend():
+    return ElasticsearchBackend.get_instance()
 
 
 @pytest.fixture
-def dao(es_wrapper: ElasticsearchWrapper):
-    return DatasetRecordsDAO.get_instance(es=es_wrapper)
+def dao(backend: ElasticsearchBackend):
+    return DatasetRecordsDAO.get_instance(es=backend)
 
 
 @pytest.fixture
-def query_builder(dao: DatasetRecordsDAO):
-    return EsQueryBuilder.get_instance(dao=dao)
+def metrics(dao: DatasetRecordsDAO):
+    return MetricsService.get_instance(dao=dao)
 
 
 @pytest.fixture
-def metrics(dao: DatasetRecordsDAO, query_builder: EsQueryBuilder):
-    return MetricsService.get_instance(dao=dao, query_builder=query_builder)
+def service(dao: DatasetRecordsDAO, metrics: MetricsService):
+    return SearchRecordsService.get_instance(dao=dao, metrics=metrics)
 
 
-@pytest.fixture
-def service(
-    dao: DatasetRecordsDAO, metrics: MetricsService, query_builder: EsQueryBuilder
-):
-    return SearchRecordsService.get_instance(
-        dao=dao, metrics=metrics, query_builder=query_builder
-    )
-
-
-def test_query_builder_with_query_range(query_builder):
-    es_query = query_builder(
-        "ds", query=TextClassificationQuery(score=ScoreRange(range_from=10))
+def test_query_builder_with_query_range(backend: ElasticsearchBackend):
+    es_query = backend.query_builder.map_2_es_query(
+        schema=None,
+        query=TextClassificationQuery(score=ScoreRange(range_from=10)),
     )
     assert es_query == {
-        "bool": {
-            "filter": {
-                "bool": {
-                    "minimum_should_match": 1,
-                    "should": [{"range": {"score": {"gte": 10.0}}}],
-                }
-            },
-            "must": {"match_all": {}},
+        "query": {
+            "bool": {
+                "filter": {
+                    "bool": {
+                        "minimum_should_match": 1,
+                        "should": [{"range": {"score": {"gte": 10.0}}}],
+                    }
+                },
+                "must": {"match_all": {}},
+            }
         }
     }
 
 
-def test_query_builder_with_nested(query_builder, mocked_client):
+def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBackend):
     dataset = Dataset(
         name="test_query_builder_with_nested",
         owner=rubrix.get_workspace(),
@@ -79,8 +86,8 @@ def test_query_builder_with_nested(query_builder, mocked_client):
         ),
     )
 
-    es_query = query_builder(
-        dataset=dataset,
+    es_query = backend.query_builder.map_2_es_query(
+        schema=dao.get_dataset_schema(dataset),
         query=TokenClassificationQuery(
             advanced_query_dsl=True,
             query_text="metrics.predicted.mentions:(label:NAME AND score:[* TO 0.1])",
@@ -88,33 +95,35 @@ def test_query_builder_with_nested(query_builder, mocked_client):
     )
 
     assert es_query == {
-        "bool": {
-            "filter": {"bool": {"must": {"match_all": {}}}},
-            "must": {
-                "nested": {
-                    "path": "metrics.predicted.mentions",
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {
-                                    "term": {
-                                        "metrics.predicted.mentions.label": {
-                                            "value": "NAME"
+        "query": {
+            "bool": {
+                "filter": {"bool": {"must": {"match_all": {}}}},
+                "must": {
+                    "nested": {
+                        "path": "metrics.predicted.mentions",
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "term": {
+                                            "metrics.predicted.mentions.label": {
+                                                "value": "NAME"
+                                            }
                                         }
-                                    }
-                                },
-                                {
-                                    "range": {
-                                        "metrics.predicted.mentions.score": {
-                                            "lte": "0.1"
+                                    },
+                                    {
+                                        "range": {
+                                            "metrics.predicted.mentions.score": {
+                                                "lte": "0.1"
+                                            }
                                         }
-                                    }
-                                },
-                            ]
-                        }
-                    },
-                }
-            },
+                                    },
+                                ]
+                            }
+                        },
+                    }
+                },
+            }
         }
     }
 
@@ -129,14 +138,14 @@ def test_failing_metrics(service, mocked_client):
 
     rubrix.delete(dataset.name)
     rubrix.log(
-        rubrix.TextClassificationRecord(inputs="This is a text, yeah!"),
+        rubrix.TextClassificationRecord(text="This is a text, yeah!"),
         name=dataset.name,
     )
     results = service.search(
         dataset=dataset,
         query=TextClassificationQuery(),
-        sort_config=SortConfig(),
-        metrics=[BaseMetric(id="missing-metric", name="Missing metric")],
+        sort_config=ServiceSortConfig(),
+        metrics=[ServicePythonMetric(id="missing-metric", name="Missing metric")],
         size=0,
         record_type=TextClassificationRecord,
     )

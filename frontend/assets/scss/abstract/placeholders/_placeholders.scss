@@ -145,7 +145,7 @@
   border: 0;
   &:hover,
   &:focus {
-      text-decoration: underline;
+      text-decoration: none;
       background: none;
   }
 }
@@ -186,7 +186,7 @@
   &:after {
     content: attr(data-title);
     @extend %tooltip;
-  }  
+  }
 }
 %hastooltip {
   &:after {
@@ -202,8 +202,8 @@
     content: "";
     position: absolute;
     display: block;
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     opacity: 0;
     pointer-events: none;
   }

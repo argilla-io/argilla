@@ -19,35 +19,56 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
 from rubrix.server.apis.v0.handlers import token_classification_dataset_settings
-from rubrix.server.apis.v0.helpers import takeuntil
-from rubrix.server.apis.v0.models.commons.model import (
-    BulkResponse,
-    PaginationParams,
-    TaskType,
+from rubrix.server.apis.v0.models.commons.model import BulkResponse
+from rubrix.server.apis.v0.models.commons.params import (
+    CommonTaskHandlerDependencies,
+    RequestPagination,
 )
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.text_classification import (
+    TextClassificationDataset,
+    TextClassificationQuery,
+)
 from rubrix.server.apis.v0.models.token_classification import (
-    TokenClassificationBulkData,
+    TokenClassificationAggregations,
+    TokenClassificationBulkRequest,
     TokenClassificationQuery,
     TokenClassificationRecord,
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
 from rubrix.server.apis.v0.validators.token_classification import DatasetValidator
+from rubrix.server.commons.config import TasksFactory
+from rubrix.server.commons.models import TaskType
 from rubrix.server.errors import EntityNotFoundError
+from rubrix.server.helpers import takeuntil
 from rubrix.server.responses import StreamingResponseWithErrorHandling
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
 from rubrix.server.services.datasets import DatasetsService
-from rubrix.server.services.token_classification import (
-    TokenClassificationService,
-    token_classification_service,
+from rubrix.server.services.tasks.text_classification.metrics import (
+    TextClassificationMetrics,
+)
+from rubrix.server.services.tasks.text_classification.model import (
+    ServiceTextClassificationRecord,
+)
+from rubrix.server.services.tasks.token_classification import TokenClassificationService
+from rubrix.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationQuery,
+    ServiceTokenClassificationRecord,
 )
 
 TASK_TYPE = TaskType.token_classification
 BASE_ENDPOINT = "/{name}/" + TASK_TYPE
+
+TasksFactory.register_task(
+    task_type=TaskType.text_classification,
+    dataset_class=TextClassificationDataset,
+    query_request=TextClassificationQuery,
+    record_class=ServiceTextClassificationRecord,
+    metrics=TextClassificationMetrics,
+)
+
 
 router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 
@@ -60,38 +81,17 @@ router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
 )
 async def bulk_records(
     name: str,
-    bulk: TokenClassificationBulkData,
-    common_params: CommonTaskQueryParams = Depends(),
-    service: TokenClassificationService = Depends(token_classification_service),
+    bulk: TokenClassificationBulkRequest,
+    common_params: CommonTaskHandlerDependencies = Depends(),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     validator: DatasetValidator = Depends(DatasetValidator.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> BulkResponse:
-    """
-    Includes a chunk of record data with provided dataset bulk information
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    bulk:
-        The bulk data
-    common_params:
-        Common query params
-    service:
-        the Service
-    datasets:
-        The dataset service
-    current_user:
-        Current request user
-
-    Returns
-    -------
-        Bulk response data
-    """
 
     task = TASK_TYPE
-    task_mappings = TaskFactory.get_task_mappings(TASK_TYPE)
     owner = current_user.check_workspace(common_params.workspace)
     try:
         dataset = datasets.find_by_name(
@@ -99,7 +99,7 @@ async def bulk_records(
             name=name,
             task=task,
             workspace=owner,
-            as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
         )
         datasets.update(
             user=current_user,
@@ -108,24 +108,22 @@ async def bulk_records(
             metadata=bulk.metadata,
         )
     except EntityNotFoundError:
-        dataset_class = TaskFactory.get_task_dataset(task)
+        dataset_class = TasksFactory.get_task_dataset(task)
         dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
         dataset.owner = owner
-        datasets.create_dataset(
-            user=current_user, dataset=dataset, mappings=task_mappings
-        )
+        datasets.create_dataset(user=current_user, dataset=dataset)
 
+    records = [ServiceTokenClassificationRecord.parse_obj(r) for r in bulk.records]
+    # TODO(@frascuchon): validator can be applied in service layer
     await validator.validate_dataset_records(
         user=current_user,
         dataset=dataset,
-        records=bulk.records,
+        records=records,
     )
 
-    result = service.add_records(
+    result = await service.add_records(
         dataset=dataset,
-        mappings=task_mappings,
-        records=bulk.records,
-        metrics=TaskFactory.get_task_metrics(TASK_TYPE),
+        records=records,
     )
     return BulkResponse(
         dataset=name,
@@ -143,42 +141,17 @@ async def bulk_records(
 def search_records(
     name: str,
     search: TokenClassificationSearchRequest = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     include_metrics: bool = Query(
         False, description="If enabled, return related record metrics"
     ),
-    pagination: PaginationParams = Depends(),
-    service: TokenClassificationService = Depends(token_classification_service),
+    pagination: RequestPagination = Depends(),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> TokenClassificationSearchResults:
-    """
-    Searches data from dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    search:
-        THe search query request
-    common_params:
-        Common query params
-    include_metrics:
-        include metrics flag
-    pagination:
-        The pagination params
-    service:
-        The dataset records service
-    datasets:
-        The dataset service
-    current_user:
-        The current request user
-
-    Returns
-    -------
-        The search results data
-
-    """
 
     search = search or TokenClassificationSearchRequest()
     query = search.query or TokenClassificationQuery()
@@ -188,34 +161,24 @@ def search_records(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
-    result = service.search(
+    results = service.search(
         dataset=dataset,
-        query=query,
+        query=ServiceTokenClassificationQuery.parse_obj(query),
         sort_by=search.sort,
         record_from=pagination.from_,
         size=pagination.limit,
         exclude_metrics=not include_metrics,
-        metrics=TaskFactory.find_task_metrics(
-            TASK_TYPE,
-            metric_ids={
-                "words_cloud",
-                "predicted_by",
-                "predicted_as",
-                "annotated_by",
-                "annotated_as",
-                "error_distribution",
-                "predicted_mentions_distribution",
-                "annotated_mentions_distribution",
-                "status_distribution",
-                "metadata",
-                "score",
-            },
-        ),
     )
 
-    return result
+    return TokenClassificationSearchResults(
+        total=results.total,
+        records=[TokenClassificationRecord.parse_obj(r) for r in results.records],
+        aggregations=TokenClassificationAggregations.parse_obj(results.metrics)
+        if results.metrics
+        else None,
+    )
 
 
 def scan_data_response(
@@ -258,15 +221,17 @@ def scan_data_response(
 async def stream_data(
     name: str,
     query: Optional[TokenClassificationQuery] = None,
-    common_params: CommonTaskQueryParams = Depends(),
+    common_params: CommonTaskHandlerDependencies = Depends(),
     limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: TokenClassificationService = Depends(token_classification_service),
+    service: TokenClassificationService = Depends(
+        TokenClassificationService.get_instance
+    ),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
     id_from: Optional[str] = None,
 ) -> StreamingResponse:
     """
-    Creates a data stream over dataset records
+        Creates a data stream over dataset records
 
     Parameters
     ----------
@@ -294,9 +259,17 @@ async def stream_data(
         name=name,
         task=TASK_TYPE,
         workspace=common_params.workspace,
-        as_dataset_class=TaskFactory.get_task_dataset(TASK_TYPE),
+        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
     )
-    data_stream = service.read_dataset(dataset=dataset, query=query, id_from=id_from, limit=limit)
+    data_stream = map(
+        TokenClassificationRecord.parse_obj,
+        service.read_dataset(
+            dataset=dataset,
+            query=ServiceTokenClassificationQuery.parse_obj(query),
+            id_from=id_from,
+            limit=limit,
+        ),
+    )
 
     return scan_data_response(
         data_stream=data_stream,

@@ -1,11 +1,38 @@
-from typing import Any, Dict, List, Optional, Type
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+import dataclasses
+from typing import List, Optional, Type
 
 from fastapi import Depends
 
-from rubrix.server.apis.v0.models.commons.model import Record
-from rubrix.server.apis.v0.models.datasets import BaseDatasetDB
-from rubrix.server.apis.v0.models.metrics.base import BaseTaskMetrics
+from rubrix.server.commons import telemetry
+from rubrix.server.commons.config import TasksFactory
+from rubrix.server.commons.models import TaskStatus
 from rubrix.server.daos.records import DatasetRecordsDAO
+from rubrix.server.errors import ForbiddenOperationError
+from rubrix.server.security.model import User
+from rubrix.server.services.datasets import ServiceDataset
+from rubrix.server.services.search.model import ServiceBaseRecordsQuery
+from rubrix.server.services.tasks.commons import ServiceRecord
+
+
+@dataclasses.dataclass
+class DeleteRecordsOut:
+    processed: int
+    discarded: Optional[int] = None
+    deleted: Optional[int] = None
 
 
 class RecordsStorageService:
@@ -24,22 +51,53 @@ class RecordsStorageService:
     def __init__(self, dao: DatasetRecordsDAO):
         self.__dao__ = dao
 
-    def store_records(
+    async def store_records(
         self,
-        dataset: BaseDatasetDB,
-        mappings: Dict[str, Any],
-        records: List[Record],
-        record_type: Type[Record],
-        metrics: Optional[Type[BaseTaskMetrics]] = None,
+        dataset: ServiceDataset,
+        records: List[ServiceRecord],
+        record_type: Type[ServiceRecord],
     ) -> int:
         """Store a set of records"""
+        await telemetry.track_bulk(task=dataset.task, records=len(records))
+
+        metrics = TasksFactory.get_task_metrics(dataset.task)
         if metrics:
             for record in records:
                 record.metrics = metrics.record_metrics(record)
 
         return self.__dao__.add_records(
             dataset=dataset,
-            mappings=mappings,
             records=records,
             record_class=record_type,
+        )
+
+    async def delete_records(
+        self,
+        user: User,
+        dataset: ServiceDataset,
+        query: Optional[ServiceBaseRecordsQuery] = None,
+        mark_as_discarded: bool = False,
+    ) -> DeleteRecordsOut:
+        processed, discarded, deleted = None, None, None
+        if mark_as_discarded:
+            processed, discarded = await self.__dao__.update_records_by_query(
+                dataset,
+                query=query,
+                status=TaskStatus.discarded,
+            )
+        else:
+            if not user.is_superuser() and user.username != dataset.created_by:
+                raise ForbiddenOperationError(
+                    f"You don't have the necessary permissions to delete records on this dataset. "
+                    "Only dataset creators or administrators can delete datasets"
+                )
+
+            processed, deleted = await self.__dao__.delete_records_by_query(
+                dataset, query=query
+            )
+
+        return DeleteRecordsOut(
+            processed=processed,
+            discarded=discarded,
+            deleted=deleted,
         )

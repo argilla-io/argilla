@@ -168,8 +168,8 @@ you will lose all your datasets in Rubrix!
 :::
 
 ### Persisting ElasticSearch data
-To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a 
-volume in the docker compose. 
+To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a
+volume in the docker compose.
 
 To this end, **modify the elasticsearch service and create a new volume** in the docker-compse.yml file:
 
@@ -194,7 +194,7 @@ services:
       - elasticdata:/usr/share/elasticsearch/data
   rubrix:
     # ... here goes the rest of the docker-compose.yaml
-  
+
 # ...
 
 # At the end of the file create a volume for ElasticSearch
@@ -211,11 +211,11 @@ you can execute the command:
 docker volume ls
 ```
 
-Note that if you want to apply these changes, and you already have a previous docker-compose instance running, you need 
+Note that if you want to apply these changes, and you already have a previous docker-compose instance running, you need
 to execute the **up** command again:
 
 ```bash
-docker-compose up -d 
+docker-compose up -d
 ```
 
 
@@ -297,7 +297,7 @@ NAME                   ACTIVE   DRIVER      STATE     URL                       
 rubrix-aws             -        amazonec2   Running   tcp://52.213.178.33:2376           v20.10.7
 ```
 
-### Save asigned machine ip
+### Save assigned machine ip
 
 In our case, the assigned ip is `52.213.178.33`
 

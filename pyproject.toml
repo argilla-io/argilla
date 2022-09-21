@@ -65,8 +65,9 @@ server = [
     "python-jose[cryptography]~=3.2.0",
     "passlib[bcrypt]~=1.7.4",
     # Info status
-    "hurry.filesize", # TODO: remove
     "psutil ~= 5.8.0",
+    # Telemetry
+    "segment-analytics-python != 2.2.1"
 ]
 listeners = [
     "schedule ~= 1.1.0",
@@ -87,6 +88,19 @@ log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = [
     "tests"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if _TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:"
 ]
 
 [tool.isort]

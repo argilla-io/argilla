@@ -1,8 +1,23 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pytest
 
 import rubrix as rb
 from rubrix import TextClassificationSettings, TokenClassificationSettings
 from rubrix.client import api
+from rubrix.client.sdk.commons.errors import ForbiddenApiError
 
 
 @pytest.mark.parametrize(
@@ -37,3 +52,17 @@ def test_settings_workflow(mocked_client, settings_, wrong_settings):
 
     with pytest.raises(ValueError, match="Task type mismatch"):
         rb.configure_dataset(dataset, wrong_settings)
+
+
+def test_delete_dataset_by_non_creator(mocked_client):
+    try:
+        dataset = "test_delete_dataset_by_non_creator"
+        rb.delete(dataset)
+        rb.configure_dataset(
+            dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"})
+        )
+        mocked_client.change_current_user("mock-user")
+        with pytest.raises(ForbiddenApiError):
+            rb.delete(dataset)
+    finally:
+        mocked_client.reset_default_user()

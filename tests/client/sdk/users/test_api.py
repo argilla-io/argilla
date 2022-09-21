@@ -1,9 +1,23 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import httpx
 import pytest
 
 from rubrix._constants import DEFAULT_API_KEY
 from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.errors import UnauthorizedApiError
+from rubrix.client.sdk.commons.errors import RubrixClientError, UnauthorizedApiError
 from rubrix.client.sdk.users.api import whoami
 from rubrix.client.sdk.users.models import User
 
@@ -23,7 +37,7 @@ def test_whoami_with_auth_error(monkeypatch, mocked_client):
 
 
 def test_whoami_with_connection_error():
-    with pytest.raises(httpx.ConnectError):
+    with pytest.raises(RubrixClientError):
         whoami(
             AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey")
         )

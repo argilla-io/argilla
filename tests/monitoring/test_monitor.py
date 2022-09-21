@@ -1,3 +1,17 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import warnings
 
 import rubrix
@@ -25,8 +39,11 @@ def test_monitor_with_non_supported_model():
 def test_monitor_non_supported_huggingface_model():
     with warnings.catch_warnings(record=True) as warning_list:
 
-        from transformers import AutoTokenizer, AutoModelForTokenClassification
-        from transformers import pipeline
+        from transformers import (
+            AutoModelForTokenClassification,
+            AutoTokenizer,
+            pipeline,
+        )
 
         tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
         model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
@@ -37,7 +54,7 @@ def test_monitor_non_supported_huggingface_model():
         assert len(warning_list) == 1
         warn_text = warning_list[0].message.args[0]
         assert (
-                warn_text
-                == "The provided task model is not supported by monitoring module. "
-                   "Predictions won't be logged into rubrix"
+            warn_text
+            == "The provided task model is not supported by monitoring module. "
+            "Predictions won't be logged into rubrix"
         )

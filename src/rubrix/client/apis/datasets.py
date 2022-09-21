@@ -1,11 +1,30 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
 from rubrix.client.apis import AbstractApi, api_compatibility
-from rubrix.client.sdk.commons.errors import AlreadyExistsApiError, NotFoundApiError
+from rubrix.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    ForbiddenApiError,
+    NotFoundApiError,
+)
 from rubrix.client.sdk.datasets.api import get_dataset
 from rubrix.client.sdk.datasets.models import TaskType
 
@@ -85,9 +104,9 @@ class Datasets(AbstractApi):
     class _DatasetApiModel(BaseModel):
         name: str
         task: TaskType
-        owner: str = None
-        created_at: datetime = None
-        last_updated: datetime = None
+        owner: Optional[str] = None
+        created_at: Optional[datetime] = None
+        last_updated: Optional[datetime] = None
 
         tags: Dict[str, str] = Field(default_factory=dict)
         metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -126,8 +145,58 @@ class Datasets(AbstractApi):
             ds = self.find_by_name(name)
             self.__save_settings__(dataset=ds, settings=settings)
 
-    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
+    def delete_records(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        mark_as_discarded: bool = False,
+        discard_when_forbidden: bool = True,
+    ) -> Tuple[int, int]:
+        """
+        Tries to delete records in a dataset for a given query/ids list.
 
+        Args:
+            name: The dataset name
+            query: The query matching records
+            ids: A list of records ids. If provided, the query param will be ignored
+            mark_as_discarded: If `True`, the matched records will be marked as `Discarded` instead
+                of delete them
+            discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
+                So, running "hard" deletion for other users will raise an `ForbiddenApiError` error.
+                If this parameter is `True`, the client API will automatically try to mark as ``Discarded``
+                records instead.
+
+        Returns:
+            The total of matched records and real number of processed errors. These numbers could not
+            be the same if some data conflicts are found during operations (some matched records change during
+            deletion).
+
+        """
+        with api_compatibility(self, min_version="0.18"):
+            try:
+                response = self.__client__.delete(
+                    path=f"{self._API_PREFIX}/{name}/data?mark_as_discarded={mark_as_discarded}",
+                    json={"ids": ids} if ids else {"query_text": query},
+                )
+                return response["matched"], response["processed"]
+            except ForbiddenApiError as faer:
+                if discard_when_forbidden:
+                    warnings.warn(
+                        message=f"{faer}. Records will be discarded instead",
+                        category=UserWarning,
+                    )
+                    return self.delete_records(
+                        name=name,
+                        query=query,
+                        ids=ids,
+                        mark_as_discarded=True,
+                        discard_when_forbidden=False,  # Next time will raise the error
+                    )
+                else:
+                    raise faer
+
+    def __save_settings__(self, dataset: _DatasetApiModel, settings: Settings):
         if __TASK_TO_SETTINGS__.get(dataset.task) != type(settings):
             raise ValueError(
                 f"The provided settings type {type(settings)} cannot be applied to dataset."

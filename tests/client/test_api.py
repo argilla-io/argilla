@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import concurrent.futures
 import datetime
 from time import sleep
 from typing import Iterable
@@ -85,7 +86,7 @@ def mock_response_token_401(monkeypatch):
 
 
 def test_init_correct(mock_response_200):
-    """Testing correct default initalization
+    """Testing correct default initialization
 
     It checks if the _client created is a RubrixClient object.
     """
@@ -106,7 +107,7 @@ def test_init_correct(mock_response_200):
 
 
 def test_init_evironment_url(mock_response_200, monkeypatch):
-    """Testing initalization with api_url provided via environment variable
+    """Testing initialization with api_url provided via environment variable
 
     It checks the url in the environment variable gets passed to client.
     """
@@ -124,7 +125,7 @@ def test_init_evironment_url(mock_response_200, monkeypatch):
 
 
 def test_trailing_slash(mock_response_200):
-    """Testing initalization with provided api_url via environment variable and argument
+    """Testing initialization with provided api_url via environment variable and argument
 
     It checks the trailing slash is removed in all cases
     """
@@ -204,6 +205,36 @@ def test_log_passing_empty_records_list(mocked_client):
         api.InputValueError, match="Empty record list has been passed as argument."
     ):
         api.log(records=[], name="ds")
+
+
+def test_log_background(mocked_client):
+    """Verify that logs can be delayed via the background parameter."""
+    dataset_name = "test_log_background"
+    mocked_client.delete(f"/api/datasets/{dataset_name}")
+
+    # Log in the background, and extract the future
+    sample_text = "Sample text for testing"
+    future = api.log(
+        rb.TextClassificationRecord(text=sample_text),
+        name=dataset_name,
+        background=True,
+    )
+    assert isinstance(future, concurrent.futures.Future)
+
+    # The dataset does not exist yet
+    with pytest.raises(NotFoundApiError):
+        dataset = api.load(dataset_name)
+
+    # Log the record to Rubrix
+    try:
+        future.result()
+    finally:
+        future.cancel()
+
+    # The dataset now exists and holds one record
+    dataset = api.load(dataset_name)
+    assert len(dataset) == 1
+    assert dataset[0].text == sample_text
 
 
 @pytest.mark.parametrize(
@@ -347,7 +378,7 @@ def test_dataset_copy(mocked_client):
 
     record = rb.TextClassificationRecord(
         id=0,
-        inputs="This is the record input",
+        text="This is the record input",
         annotation_agent="test",
         annotation=["T"],
     )
@@ -383,7 +414,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         api.log(
             rb.TextClassificationRecord(
                 id=0,
-                inputs="This is the record input",
+                text="This is the record input",
                 annotation_agent="test",
                 annotation=["T"],
             ),
@@ -502,28 +533,31 @@ def test_load_as_pandas(mocked_client):
     assert [record.id for record in records] == [0, 1, 2, 3]
 
 
-def test_token_classification_spans(mocked_client):
-    dataset = "test_token_classification_with_consecutive_spans"
+@pytest.mark.parametrize(
+    "span,valid",
+    [
+        ((1, 2), False),
+        ((0, 4), True),
+        ((0, 5), True),  # automatic correction
+    ],
+)
+def test_token_classification_spans(span, valid):
     texto = "Esto es una prueba"
-    item = api.TokenClassificationRecord(
-        text=texto,
-        tokens=texto.split(),
-        prediction=[("test", 1, 2)],  # Inicio y fin son consecutivos
-        prediction_agent="test",
-    )
-    with pytest.raises(
-        Exception, match=r"Defined offset \[s\] is a misaligned entity mention"
-    ):
-        api.log(item, name=dataset)
-
-    item.prediction = [("test", 0, 6)]
-    with pytest.raises(
-        Exception, match=r"Defined offset \[Esto e\] is a misaligned entity mention"
-    ):
-        api.log(item, name=dataset)
-
-    item.prediction = [("test", 0, 4)]
-    api.log(item, name=dataset)
+    if valid:
+        rb.TokenClassificationRecord(
+            text=texto,
+            tokens=texto.split(),
+            prediction=[("test", *span)],
+        )
+    else:
+        with pytest.raises(
+            ValueError, match="The entity spans \['s'\] are not aligned"
+        ):
+            rb.TokenClassificationRecord(
+                text=texto,
+                tokens=texto.split(),
+                prediction=[("test", *span)],
+            )
 
 
 def test_load_text2text(mocked_client):
@@ -576,7 +610,7 @@ def test_client_workspace(mocked_client):
 def test_load_sort(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]
@@ -601,7 +635,7 @@ def test_load_sort(mocked_client):
 def test_load_workspace_from_different_workspace(mocked_client):
     records = [
         rb.TextClassificationRecord(
-            inputs="test text",
+            text="test text",
             id=i,
         )
         for i in ["1str", 1, 2, 11, "2str", "11str"]

@@ -71,7 +71,7 @@ class TestDatasetBase:
 
         with pytest.raises(
             WrongRecordTypeError,
-            match="various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
+            match=r"various types: \['TextClassificationRecord', 'Text2TextRecord'\]",
         ):
             DatasetBase(
                 records=[
@@ -207,7 +207,7 @@ class TestDatasetBase:
             [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
         )
 
-        record = rb.TextClassificationRecord(inputs="mock")
+        record = rb.TextClassificationRecord(text="mock")
         dataset[0] = record
 
         assert dataset._records[0] is record
@@ -273,7 +273,7 @@ class TestDatasetForTextClassification:
 
     def test_from_to_datasets_id(self):
         dataset_rb = rb.DatasetForTextClassification(
-            [rb.TextClassificationRecord(inputs="mock")]
+            [rb.TextClassificationRecord(text="mock")]
         )
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [None]
@@ -282,7 +282,7 @@ class TestDatasetForTextClassification:
 
     def test_datasets_empty_metadata(self):
         dataset = rb.DatasetForTextClassification(
-            [rb.TextClassificationRecord(inputs="mock")]
+            [rb.TextClassificationRecord(text="mock")]
         )
         assert dataset.to_datasets()["metadata"] == [None]
 
@@ -379,7 +379,7 @@ class TestDatasetForTextClassification:
 
         rb_ds = rb.DatasetForTextClassification.from_datasets(
             ds,
-            inputs="text",
+            text="text",
             annotation="labels",
         )
         again_the_ds = rb_ds.to_datasets()
@@ -411,7 +411,7 @@ class TestDatasetForTextClassification:
         )
 
         rb_ds = rb.DatasetForTextClassification.from_datasets(
-            ds, inputs="review", annotation="star", metadata=["package_name", "date"]
+            ds, text="review", annotation="star", metadata=["package_name", "date"]
         )
 
         again_the_ds = rb_ds.to_datasets()

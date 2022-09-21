@@ -13,15 +13,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import Depends
-from fastapi.security import (
-    APIKeyHeader,
-    SecurityScopes,
-)
-from rubrix._constants import API_KEY_HEADER_NAME
-from rubrix.server.security.model import User
 from typing import Optional
 
+from fastapi import Depends
+from fastapi.security import APIKeyHeader, SecurityScopes
+
+from rubrix._constants import API_KEY_HEADER_NAME
+from rubrix.server.security.model import User
 
 api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
 

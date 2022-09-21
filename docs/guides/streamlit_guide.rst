@@ -2,15 +2,15 @@
 Monitoring and collecting data from third-party apps
 ====================================================
 
-This guide will show you **how can Rubrix be integrated into third-party applications** to collect predictions and user feedback. To do this, we are going to use `streamlit <https://streamlit.io>`_\ , an amazing tool to turn Python scripts into beautiful web-apps. 
+This guide will show you **how can Rubrix be integrated into third-party applications** to collect predictions and user feedback. To do this, we are going to use `streamlit <https://streamlit.io>`_\ , an amazing tool to turn Python scripts into beautiful web-apps.
 
 Let's make a quick tour of the app, how you can run it locally and how to integrate Rubrix into other apps.
 
 What does our streamlit app do?
 -------------------------------
 
-In our streamlit app we are working on a use case of *multilabel text classification*\ , 
-including the inference process to make predictions and the annotations over those predictions. The NLP model is a zero-shot classifier based on `SqueezeBERT <https://huggingface.co/typeform/squeezebert-mnli>`_\ , used to predict text categories. These predictions are **mutilabel**\ , which means that more than one category can be predicted for a given text, thus the sum of the probabilities of all the candidate labels can be greater than 1. For this reasons, we let the user pick a threshold, showing which labels will be included in the prediction when changing its value. 
+In our streamlit app we are working on a use case of *multilabel text classification*\ ,
+including the inference process to make predictions and the annotations over those predictions. The NLP model is a zero-shot classifier based on `SqueezeBERT <https://huggingface.co/typeform/squeezebert-mnli>`_\ , used to predict text categories. These predictions are **mutilabel**\ , which means that more than one category can be predicted for a given text, thus the sum of the probabilities of all the candidate labels can be greater than 1. For this reasons, we let the user pick a threshold, showing which labels will be included in the prediction when changing its value.
 
 After the threshold is selected, the user can make its own annotation, whether or not she or he thinks the predictions are correct. This is where the *human-in-the-loop* comes into play, by responding to a model made prediction with a user made annotation, that could eventually be used to provide feedback to the model or to make retrainings.
 

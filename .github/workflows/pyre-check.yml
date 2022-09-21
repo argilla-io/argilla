@@ -1,0 +1,79 @@
+name: pyre
+
+on:
+  push:
+    branches: [ main, master, releases/* ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ main, master, releases/* ]
+
+
+jobs:
+  pyre:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: rubrix
+          use-mamba: true
+
+      - name: Get date for conda cache
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}-${{ runner.arch }}-${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+
+      - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n rubrix -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v2
+        if: steps.filter.outputs.python_code == 'true'
+        env:
+          # Increase this value to reset cache if pyproject.toml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install dependencies
+        # Force install this version since older versions fail with click < 8.0 (included by spacy 3.x)
+        run: pip install pyre-check==0.9.15
+
+      - name: Run Pyre
+        continue-on-error: false
+        run: |
+          pyre --output=text check
+
+#      - name: Expose SARIF Resultss
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: SARIF Results
+#          path: sarif.json
+#
+#      - name: Upload SARIF Results
+#        uses: github/codeql-action/upload-sarif@v1
+#        with:
+#          sarif_file: sarif.json
+#
+#      - name: Fail Command On Errors
+#        run: |
+#          if [ "$(cat sarif.json | grep 'PYRE-ERROR')" != "" ]; then cat sarif.json && exit 1; fi

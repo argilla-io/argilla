@@ -17,14 +17,14 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
 
-from rubrix.server.apis.v0.config.tasks_factory import TaskFactory
-from rubrix.server.apis.v0.models.commons.workspace import CommonTaskQueryParams
+from rubrix.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from rubrix.server.apis.v0.models.datasets import (
     CopyDatasetRequest,
+    CreateDatasetRequest,
     Dataset,
-    DatasetCreate,
     UpdateDatasetRequest,
 )
+from rubrix.server.commons.config import TasksFactory
 from rubrix.server.errors import EntityNotFoundError
 from rubrix.server.security import auth
 from rubrix.server.security.model import User
@@ -39,30 +39,16 @@ router = APIRouter(tags=["datasets"], prefix="/datasets")
     response_model_exclude_none=True,
     operation_id="list_datasets",
 )
-def list_datasets(
-    ds_params: CommonTaskQueryParams = Depends(),
+async def list_datasets(
+    request_deps: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> List[Dataset]:
-    """
-    List accessible user datasets
-
-    Parameters
-    ----------
-    ds_params:
-        Common task query params
-    service:
-        The datasets service
-    current_user:
-        The request user
-
-    Returns
-    -------
-        A list of datasets visible by current user
-    """
     return service.list(
         user=current_user,
-        workspaces=[ds_params.workspace] if ds_params.workspace is not None else None,
+        workspaces=[request_deps.workspace]
+        if request_deps.workspace is not None
+        else None,
     )
 
 
@@ -75,24 +61,19 @@ def list_datasets(
     description="Create a new dataset",
 )
 async def create_dataset(
-    request: DatasetCreate = Body(..., description=f"The request dataset info"),
-    ws_params: CommonTaskQueryParams = Depends(),
+    request: CreateDatasetRequest = Body(..., description=f"The request dataset info"),
+    ws_params: CommonTaskHandlerDependencies = Depends(),
     datasets: DatasetsService = Depends(DatasetsService.get_instance),
     user: User = Security(auth.get_user, scopes=["create:datasets"]),
 ) -> Dataset:
 
     owner = user.check_workspace(ws_params.workspace)
 
-    dataset_class = TaskFactory.get_task_dataset(request.task)
-    task_mappings = TaskFactory.get_task_mappings(request.task)
-
+    dataset_class = TasksFactory.get_task_dataset(request.task)
     dataset = dataset_class.parse_obj({**request.dict()})
     dataset.owner = owner
 
-    response = datasets.create_dataset(
-        user=user, dataset=dataset, mappings=task_mappings
-    )
-
+    response = datasets.create_dataset(user=user, dataset=dataset)
     return Dataset.parse_obj(response)
 
 
@@ -104,34 +85,15 @@ async def create_dataset(
 )
 def get_dataset(
     name: str,
-    ds_params: CommonTaskQueryParams = Depends(),
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    """
-    Find a dataset by name visible for current user
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    ds_params:
-        Common dataset query params
-    service:
-        Datasets service
-    current_user:
-        The current user
-
-    Returns
-    -------
-        - The found dataset if accessible or exists.
-        - EntityNotFoundError if not found.
-        - NotAuthorizedError if user cannot access the found dataset
-
-    """
     return Dataset.parse_obj(
         service.find_by_name(
-            user=current_user, name=name, workspace=ds_params.workspace
+            user=current_user,
+            name=name,
+            workspace=ds_params.workspace,
         )
     )
 
@@ -144,35 +106,11 @@ def get_dataset(
 )
 def update_dataset(
     name: str,
-    update_request: UpdateDatasetRequest,
-    ds_params: CommonTaskQueryParams = Depends(),
+    request: UpdateDatasetRequest,
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    """
-    Update a set of parameters for a dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    update_request:
-        The fields to update
-    ds_params:
-        Common dataset query params
-    service:
-        The datasets service
-    current_user:
-        The current user
-
-    Returns
-    -------
-
-    - The updated dataset if exists and user has access.
-    - EntityNotFoundError if not found.
-    - NotAuthorizedError if user cannot access the found dataset
-
-    """
 
     found_ds = service.find_by_name(
         user=current_user, name=name, workspace=ds_params.workspace
@@ -181,8 +119,8 @@ def update_dataset(
     return service.update(
         user=current_user,
         dataset=found_ds,
-        tags=update_request.tags,
-        metadata=update_request.metadata,
+        tags=request.tags,
+        metadata=request.metadata,
     )
 
 
@@ -192,25 +130,10 @@ def update_dataset(
 )
 def delete_dataset(
     name: str,
-    ds_params: CommonTaskQueryParams = Depends(),
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    """
-    Deletes a dataset
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    ds_params:
-        Common dataset query params
-    service:
-        The datasets service
-    current_user:
-        The current user
-
-    """
     try:
         found_ds = service.find_by_name(
             user=current_user, name=name, workspace=ds_params.workspace
@@ -226,25 +149,10 @@ def delete_dataset(
 )
 def close_dataset(
     name: str,
-    ds_params: CommonTaskQueryParams = Depends(),
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    """
-    Closes a dataset. This operation will releases backend resources
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    ds_params:
-        Common dataset query params
-    service:
-        The datasets service
-    current_user:
-        The current user
-
-    """
     found_ds = service.find_by_name(
         user=current_user, name=name, workspace=ds_params.workspace
     )
@@ -257,25 +165,10 @@ def close_dataset(
 )
 def open_dataset(
     name: str,
-    ds_params: CommonTaskQueryParams = Depends(),
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ):
-    """
-    Closes a dataset. This operation will releases backend resources
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    ds_params:
-        Common dataset query params
-    service:
-        The datasets service
-    current_user:
-        The current user
-
-    """
     found_ds = service.find_by_name(
         user=current_user, name=name, workspace=ds_params.workspace
     )
@@ -291,27 +184,10 @@ def open_dataset(
 def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,
-    ds_params: CommonTaskQueryParams = Depends(),
+    ds_params: CommonTaskHandlerDependencies = Depends(),
     service: DatasetsService = Depends(DatasetsService.get_instance),
     current_user: User = Security(auth.get_user, scopes=[]),
 ) -> Dataset:
-    """
-    Creates a dataset copy and its tags/metadata info
-
-    Parameters
-    ----------
-    name:
-        The dataset name
-    copy_request:
-        The copy request data
-    ds_params:
-        Common dataset query params
-    service:
-        The datasets service
-    current_user:
-        The current user
-
-    """
     found = service.find_by_name(
         user=current_user, name=name, workspace=ds_params.workspace
     )
