@@ -128,8 +128,8 @@ class Api:
             workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
                 env variable ``RUBRIX_WORKSPACE`` is not set, it will default to the private user workspace.
             timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
-            extra_headers: Extra http headers sent to the server. You can use this for customize
-                client requests if you have some security restrictions. Default: `None`.
+            extra_headers: Extra HTTP headers sent to the server. You can use this to customize
+                the headers of Rubrix client requests, like additional security restrictions. Default: `None`.
 
         Examples:
             >>> import rubrix as rb
