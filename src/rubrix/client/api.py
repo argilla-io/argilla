@@ -20,7 +20,7 @@ import warnings
 from asyncio import Future
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from tqdm.auto import tqdm
 
@@ -401,6 +401,48 @@ class Api:
         # Creating a composite BulkResponse with the total processed and failed
         return BulkResponse(dataset=name, processed=processed, failed=failed)
 
+    def delete_records(
+        self,
+        name: str,
+        query: Optional[str] = None,
+        ids: Optional[List[Union[str, int]]] = None,
+        discard_only: bool = False,
+        discard_when_forbidden: bool = True,
+    ) -> Tuple[int, int]:
+        """Delete records from a Rubrix dataset.
+
+        Args:
+            name: The dataset name.
+            query: An ElasticSearch query with the `query string syntax
+                <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+            ids: If provided, deletes dataset records with given ids.
+            discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
+            discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
+                So, running "hard" deletion for other users will raise an `ForbiddenApiError` error.
+                If this parameter is `True`, the client API will automatically try to mark as ``Discarded``
+                records instead. Default, `True`
+
+        Returns:
+            The total of matched records and real number of processed errors. These numbers could not
+            be the same if some data conflicts are found during operations (some matched records change during
+            deletion).
+
+        Examples:
+            >>> ## Delete by id
+            >>> import rubrix as rb
+            >>> rb.delete_records(name="example-dataset", ids=[1,3,5])
+            >>> ## Discard records by query
+            >>> import rubrix as rb
+            >>> rb.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
+        """
+        return self.datasets.delete_records(
+            name=name,
+            query=query,
+            ids=ids,
+            mark_as_discarded=discard_only,
+            discard_when_forbidden=discard_when_forbidden,
+        )
+
     def load(
         self,
         name: str,
@@ -647,6 +689,11 @@ def log_async(*args, **kwargs):
 @api_wrapper(Api.load)
 def load(*args, **kwargs):
     return active_api().load(*args, **kwargs)
+
+
+@api_wrapper(Api.delete_records)
+def delete_records(*args, **kwargs):
+    return active_api().delete_records(*args, **kwargs)
 
 
 class InputValueError(RubrixClientError):

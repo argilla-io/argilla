@@ -15,7 +15,7 @@ Methods
 -------
 
 .. automodule:: rubrix
-   :members: init, log, load, copy, delete, set_workspace, get_workspace
+   :members: init, log, load, copy, delete, set_workspace, get_workspace, delete_records
 
 .. _python ref records:
 
