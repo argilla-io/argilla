@@ -20,7 +20,7 @@
     <div class="metadata__container">
       <div v-for="(item, index) in formatSortedMetadataItems" :key="index">
         <div class="metadata__blocks">
-          <ReCheckbox
+          <base-checkbox
             :id="item[0]"
             v-model="selectedMetadata"
             class="re-checkbox--dark"
@@ -32,20 +32,17 @@
                 {{ item[1] }}
               </div>
             </div>
-          </ReCheckbox>
+          </base-checkbox>
         </div>
       </div>
     </div>
     <div class="metadata__buttons">
-      <ReButton
-        class="button-tertiary--small button-tertiary--outline"
-        @click="$emit('cancel')"
-      >
+      <base-button class="primary outline" @click="$emit('cancel')">
         Cancel
-      </ReButton>
-      <ReButton class="button-primary--small" @click="applySelectedFilters()">
+      </base-button>
+      <base-button class="primary" @click="applySelectedFilters()">
         Filter
-      </ReButton>
+      </base-button>
     </div>
   </div>
 </template>
@@ -162,21 +159,21 @@ export default {
       align-items: center;
       margin-right: 0;
     }
-    ::v-deep .checkbox-label {
+    :deep(.checkbox-label) {
       height: auto !important;
     }
   }
   &__block {
     padding: 1em 0;
     margin-right: 0.5em;
-    color: $font-dark-color;
+    color: $font-dark;
     font-weight: 600;
     &__item {
       min-width: 200px;
       max-width: 300px;
       text-align: left;
       white-space: pre-line;
-      color: palette(grey, medium);
+      color: $font-medium;
       font-weight: normal;
       line-height: 1em;
       word-break: break-word;
@@ -196,14 +193,11 @@ export default {
     text-align: right;
     margin-top: 2em;
     display: flex;
-    .re-button {
-      margin-right: 0.5em;
-      margin-bottom: 0;
-      display: inline-block;
+    .button {
       width: 100%;
-      min-height: 38px;
-      &:last-child() {
-        margin-right: 0;
+      justify-content: center;
+      &:last-of-type {
+        margin-left: $base-space;
       }
     }
   }

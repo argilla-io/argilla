@@ -18,7 +18,7 @@
 <template>
   <div class="app__content">
     <div class="grid">
-      <Results :dataset="dataset" />
+      <results :dataset="dataset" />
     </div>
   </div>
 </template>
@@ -61,7 +61,7 @@ export default {
     padding-top: 2em;
     margin-bottom: 1.5em;
     &:after {
-      border-bottom: 1px solid $line-light-color;
+      border-bottom: 1px solid palette(grey, 700);
       content: "";
       margin-bottom: 1.5em;
       position: absolute;

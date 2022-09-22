@@ -16,25 +16,20 @@
   -->
 
 <template>
-  <div>
-    <div
-      v-for="(item, index) in sortedObject.slice(0, limit)"
-      :key="index"
-      class="info"
-    >
-      <label>{{ item[0] }}</label>
-      <span class="records-number">
+  <ul class="metrics__list">
+    <li v-for="(item, index) in sortedObject.slice(0, limit)" :key="index">
+      <label class="metrics__list__name">{{ item[0] }}</label>
+      <span class="metrics__list__counter">
         {{ item[1] | formatNumber }}
       </span>
-    </div>
-    <a
+    </li>
+    <base-button
       v-if="limit !== 0 && sortedObject.length > 3"
-      class="sidebar__view-more"
-      href="#"
-      @click.prevent="$emit('limit', k)"
-      >{{ limit === 3 ? `show more` : `show less` }}</a
+      class="link small"
+      @click="$emit('limit', k)"
+      >{{ limit === 3 ? `Show more` : `Show less` }}</base-button
     >
-  </div>
+  </ul>
 </template>
 <script>
 export default {
@@ -60,24 +55,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.sidebar {
-  &__view-more {
-    color: $font-secondary;
-    text-decoration: none;
-    outline: none;
-    margin-bottom: 1.5em;
-    display: inline-block;
-  }
-}
-.info {
-  color: $font-secondary-dark;
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-}
-.records-number {
-  margin-right: 0;
-  margin-left: auto;
-  padding-left: 0.5em;
+.button {
+  margin-top: $base-space * 2;
 }
 </style>

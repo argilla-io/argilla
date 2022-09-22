@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar__container" v-if="dataset">
-    <SidebarPanel
+    <sidebar-panel
       :class="[currentTask, currentMetric ? 'visible' : '']"
       :dataset="dataset"
       @close-panel="onClosePanel"
@@ -16,7 +16,7 @@
           </div>
         </span>
       </transition>
-    </SidebarPanel>
+    </sidebar-panel>
     <component
       ref="menu"
       :is="currentTaskSidebar"

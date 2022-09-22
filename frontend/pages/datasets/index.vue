@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <ReLoading v-if="$fetchState.pending" />
+    <base-loading v-if="$fetchState.pending" />
     <div v-else class="wrapper">
       <div class="main">
         <app-header
@@ -26,7 +26,7 @@
           :sticky="false"
           @breadcrumb-action="onBreadcrumbAction($event)"
         />
-        <Error
+        <error
           v-if="$fetchState.error"
           where="workspace datasets"
           :error="$fetchState.error"
@@ -34,10 +34,10 @@
         <datasets-empty v-else-if="!datasets.length" :workspace="workspace" />
         <div v-else class="container">
           <div class="interactions">
-            <ReSearchBar @input="onSearch" placeholder="Search datasets" />
+            <base-search-bar @input="onSearch" placeholder="Search datasets" />
           </div>
           <div>
-            <ReTableInfo
+            <base-table-info
               ref="table"
               :data="datasets"
               :sorted-order="sortedOrder"
@@ -323,7 +323,7 @@ export default {
     padding-top: 2em;
     margin-bottom: 1.5em;
     &:after {
-      border-bottom: 1px solid $line-light-color;
+      border-bottom: 1px solid palette(grey, 700);
       content: "";
       margin-bottom: 1.5em;
       position: absolute;
@@ -337,10 +337,6 @@ export default {
   display: flex;
   align-items: flex-end;
   margin: 2em 0 1em 0;
-  .re-button {
-    margin-left: auto;
-    margin-bottom: 0;
-  }
 }
 
 .title {
@@ -356,7 +352,7 @@ export default {
     position: fixed;
     top: 56px;
     right: 0;
-    border-left: 1px solid palette(grey, smooth);
+    border-left: 1px solid palette(grey, 600);
   }
 }
 </style>

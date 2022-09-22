@@ -17,77 +17,73 @@
 
 <template>
   <div>
-    <p class="sidebar__title">Overall rule metrics</p>
-    <div class="progress__info">
-      <p class="progress__info__text" :data-title="tooltip.coverage">
-        Coverage
-      </p>
-      <span class="progress__info__percent">{{
+    <p class="metrics__title">Overall rule metrics</p>
+    <div class="metrics__info">
+      <p class="metrics__info__name" :data-title="tooltip.coverage">Coverage</p>
+      <span class="metrics__info__counter">{{
         coverage.percent || 0 | percent
       }}</span>
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       color="#4C4EA3"
       :progress="coverage.percent * 100"
       :tooltip="`${coverage.records}/${totalRecords}`"
-    ></ReProgress>
-    <div class="progress__info">
-      <p class="progress__info__text" :data-title="tooltip.annotatedCoverage">
+    ></base-progress>
+    <div class="metrics__info">
+      <p class="metrics__info__name" :data-title="tooltip.annotatedCoverage">
         Annotated Coverage
       </p>
-      <span class="progress__info__percent">{{
+      <span class="metrics__info__counter">{{
         annotatedCoverage.percent || 0 | percent
       }}</span>
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       color="#A1A2CC"
       :progress="annotatedCoverage.percent * 100"
       :tooltip="`${annotatedCoverage.records}/${metricsTotal.annotated_records}`"
-    ></ReProgress>
-    <div class="progress__info">
-      <p class="progress__info__text" :data-title="tooltip.precision">
+    ></base-progress>
+    <div class="metrics__info">
+      <p class="metrics__info__name" :data-title="tooltip.precision">
         Precision average
       </p>
       <transition name="fade" mode="out-in" appear
-        ><span :key="precision" class="progress__info__percent">{{
+        ><span :key="precision" class="metrics__info__counter">{{
           precision || 0 | percent
         }}</span></transition
       >
     </div>
-    <div class="progress__info">
-      <p class="progress__info__text" :data-title="tooltip.correctAndIncorrect">
+    <div class="metrics__info">
+      <p class="metrics__info__name" :data-title="tooltip.correctAndIncorrect">
         Correct/Incorrect
       </p>
       <transition name="fade" mode="out-in" appear
-        ><span :key="correctAndIncorrect" class="progress__info__percent">{{
+        ><span :key="correctAndIncorrect" class="metrics__info__counter">{{
           correctAndIncorrect
         }}</span></transition
       >
     </div>
-    <span class="space"></span>
-    <div class="progress__info">
-      <p class="progress__info__text">Total rules</p>
+    <span class="separator"></span>
+    <div class="metrics__info">
+      <p class="metrics__info__name">Total rules</p>
       <transition name="fade" mode="out-in" appear
-        ><span :key="dataset.rules.length" class="progress__info__percent">{{
+        ><span :key="dataset.rules.length" class="metrics__info__counter">{{
           dataset.rules.length
         }}</span></transition
       >
     </div>
     <template v-if="labels.length">
-      <div class="scroll">
-        <div v-for="label in labels" :key="label.index">
-          <div class="info">
-            <label>{{ label.label }}</label>
-            <transition name="fade" mode="out-in" appear
-              ><span class="records-number">{{
-                label.counter | formatNumber
-              }}</span></transition
-            >
-          </div>
-        </div>
-      </div>
+      <ul class="scroll metrics__list">
+        <li v-for="label in labels" :key="label.index">
+          <label class="metrics__list__name">{{ label.label }}</label>
+          <transition name="fade" mode="out-in" appear
+            ><span class="metrics__list__counter">{{
+              label.counter | formatNumber
+            }}</span></transition
+          >
+        </li>
+      </ul>
     </template>
   </div>
 </template>
@@ -177,26 +173,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color: #333346;
-label {
-  display: block;
-  width: calc(100% - 40px);
-  hyphens: auto;
-  word-break: break-word;
-}
-.labels {
-  margin-top: 3em;
-  strong {
-    margin-bottom: 1em;
-    display: block;
-  }
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  color: $font-secondary-dark;
-}
 .scroll {
   max-height: calc(100vh - 400px);
   padding-right: 1em;
@@ -204,69 +180,13 @@ label {
   overflow: auto;
   @extend %hide-scrollbar;
 }
-.records-number {
-  margin-right: 0;
-  margin-left: auto;
-}
-.space {
-  margin-bottom: 2em;
+.separator {
   display: block;
-}
-.progress {
-  float: right;
-  line-height: 0.8em;
-  font-weight: bold;
-  &__info {
-    display: flex;
-    @include font-size(15px);
-    align-items: center;
-    color: $font-secondary-dark;
-    font-weight: 600;
-    margin-bottom: 0.5em;
-    margin-top: 1em;
-    &__text {
-      margin: 0;
-    }
-    &__percent {
-      margin-top: 0;
-      margin-right: 0;
-      margin-left: auto;
-    }
-  }
-  &__numbers {
-    color: $font-secondary-dark;
-    margin-bottom: 1.5em;
-    @include font-size(18px);
-    span {
-      @include font-size(40px);
-      font-weight: 700;
-    }
-  }
+  margin-bottom: $base-space * 4;
 }
 p[data-title] {
   position: relative;
-  @extend %hastooltip;
-  &:after {
-    padding: 0.5em 1em;
-    bottom: 100%;
-    right: 50%;
-    transform: translateX(50%);
-    background: $color;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    @include font-size(14px);
-    font-weight: 600;
-    margin-bottom: 0.5em;
-    min-width: 220px;
-    white-space: break-spaces;
-  }
-  &:before {
-    right: calc(50% - 7px);
-    top: -0.5em;
-    border-top: 7px solid $color;
-    border-right: 7px solid transparent;
-    border-left: 7px solid transparent;
-  }
+  @extend %has-tooltip--top;
+  @extend %tooltip-large-text;
 }
 </style>

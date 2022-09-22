@@ -15,11 +15,11 @@
       <div class="rule__metrics">
         <rules-metrics title="Rule Metrics" :dataset="dataset">
           <template #button-bottom>
-            <re-button
-              class="rule__button button-quaternary--outline"
+            <base-button
+              class="rule__button quaternary outline"
               :disabled="isLoading"
               @click="showRulesList"
-              >Manage rules</re-button
+              >Manage rules</base-button
             >
           </template>
         </rules-metrics>
@@ -125,8 +125,8 @@ export default {
   }
   &__container {
     padding: 20px;
-    background: rgba($lighter-color, 0.4);
-    border: 1px solid $lighter-color;
+    background: rgba(palette(white), 0.4);
+    border: 1px solid palette(white);
     width: 100%;
     border-radius: $border-radius;
     &.active {
@@ -136,7 +136,6 @@ export default {
   &__button {
     float: left;
     align-self: flex-start;
-    margin-bottom: 0 !important;
     margin-top: auto;
     clear: both;
   }
@@ -145,7 +144,7 @@ export default {
     @include media(">desktopLarge") {
       min-width: 33%;
     }
-    &::v-deep {
+    &:deep() {
       .rule-metrics__container {
         flex-wrap: wrap;
         height: 100%;
