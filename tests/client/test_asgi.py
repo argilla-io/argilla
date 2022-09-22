@@ -123,7 +123,7 @@ def test_rubrix_middleware_for_token_classification(monkeypatch):
 
     mock.post(
         expected_endpoint,
-        json=[{"text": "The main text data"}, {"text": "The main text data"}],
+        json=[{"text": "The main text data"}, "The main text data"],
     )
     time.sleep(0.2)
     assert mock_log.was_called

@@ -46,7 +46,12 @@ _spaces_regex = re.compile(r"\s+")
 
 
 def token_classification_mapper(inputs, outputs):
-    text = inputs.get("text", "")
+    if isinstance(inputs, str):
+        text = inputs
+    elif isinstance(inputs, dict):
+        text = inputs.get("text", "")
+    else:
+        text = ""
     tokens = outputs.get("tokens") if isinstance(outputs, dict) else None
     return TokenClassificationRecord(
         text=text,
