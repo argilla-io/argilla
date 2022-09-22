@@ -16,27 +16,25 @@
   -->
 
 <template>
-  <div class="filters__area">
-    <div class="filters__content">
-      <div class="container">
-        <div class="filters__row">
-          <div class="filters__block">
-            <SearchBar
-              class="filters__searchbar"
-              :dataset="dataset"
-              @submit="onTextQuerySearch"
-            />
-            <FiltersList
-              :dataset="dataset"
-              @applyFilter="onApplyFilter"
-              @applyMetaFilter="onApplyMetaFilter"
-              @applySortBy="onApplySortBy"
-              @removeAllMetadataFilters="onRemoveAllMetadataFilters"
-              @removeFiltersByGroup="onRemoveFiltersByGroup"
-            ></FiltersList>
-          </div>
-          <slot />
+  <div class="filters__content">
+    <div class="container">
+      <div class="filters__row">
+        <div class="filters__block">
+          <search-bar
+            class="filters__searchbar"
+            :dataset="dataset"
+            @submit="onTextQuerySearch"
+          />
+          <filters-list
+            :dataset="dataset"
+            @applyFilter="onApplyFilter"
+            @applyMetaFilter="onApplyMetaFilter"
+            @applySortBy="onApplySortBy"
+            @removeAllMetadataFilters="onRemoveAllMetadataFilters"
+            @removeFiltersByGroup="onRemoveFiltersByGroup"
+          ></filters-list>
         </div>
+        <slot />
       </div>
     </div>
   </div>
@@ -124,19 +122,12 @@ export default {
 }
 
 .filters {
-  &__area {
-    display: flex;
-    align-items: center;
-    top: -1em;
-    left: 0;
-    right: 0;
-  }
   &__row {
     display: flex;
     align-items: center;
   }
   &__content {
-    padding: 32px 0;
+    padding: $base-space * 4 0;
     position: relative;
     width: 100%;
   }
@@ -146,27 +137,10 @@ export default {
     width: calc(100% - 300px);
   }
   &__searchbar {
-    margin-right: 10px;
+    margin-right: $base-space;
     width: 100%;
     @include media(">desktop") {
-      margin-right: 15px;
-    }
-    &.--extended {
-      width: 100%;
-      margin-right: 0;
-    }
-  }
-  &--disabled {
-    ::v-deep * {
-      pointer-events: none !important;
-      cursor: pointer;
-    }
-    ::v-deep .filters__searchbar {
-      opacity: 0.4;
-    }
-    ::v-deep .filters--sort {
-      align-items: center;
-      opacity: 0.4;
+      margin-right: $base-space * 2;
     }
   }
 }

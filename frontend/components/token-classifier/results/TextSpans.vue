@@ -23,7 +23,7 @@
     @mouseup="reset($event)"
     v-click-outside="onReset"
   >
-    <TextSpan
+    <text-span
       v-for="(token, i) in textSpans"
       :key="i"
       :record="record"
@@ -265,7 +265,6 @@ export default {
 <style lang="scss" scoped>
 .content {
   &__input {
-    padding-right: 200px;
     ::selection {
       background: none !important;
     }

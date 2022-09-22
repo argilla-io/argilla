@@ -24,11 +24,11 @@
       <div v-if="hasMetadata" @click="showMetadata()">
         <span>View metadata</span>
       </div>
-      <re-action-tooltip tooltip="Copied">
+      <base-action-tooltip tooltip="Copied">
         <div @click="$copyToClipboard(record.clipboardText)">
           <span>Copy text</span>
         </div>
-      </re-action-tooltip>
+      </base-action-tooltip>
       <div
         v-if="allowChangeStatus"
         :class="record.status === 'Discarded' ? 'disabled' : null"
@@ -124,6 +124,7 @@ export default {
     right: 0.9em;
   }
 }
+
 .extra-actions {
   position: relative;
   &__button {
@@ -147,7 +148,7 @@ export default {
     }
     div {
       padding: 0.5em;
-      color: $font-secondary-dark;
+      color: $font-secondary-medium-dark;
       cursor: pointer;
       display: block;
       background: white;
@@ -162,7 +163,7 @@ export default {
       }
       &:hover {
         transition: background 0.3s ease-in-out;
-        background: palette(grey, bg);
+        background: palette(grey, 800);
       }
     }
   }

@@ -16,25 +16,24 @@
   -->
 
 <template>
-  <SidebarProgress :dataset="dataset">
-    <div v-if="annotationsProgress" class="labels">
-      <div v-for="(counter, label) in getInfo" :key="label">
-        <div v-if="counter > 0" class="info">
-          <label
-            :class="[
-              `color_${
-                entities.filter((e) => e.text === label)[0].colorId %
-                $entitiesMaxColors
-              }`,
-              'entity',
-            ]"
-            >{{ label }}</label
-          >
-          <span class="records-number">{{ counter | formatNumber }}</span>
-        </div>
-      </div>
-    </div>
-  </SidebarProgress>
+  <sidebar-progress :dataset="dataset">
+    <ul v-if="annotationsProgress" class="metrics__list">
+      <li v-for="(counter, label) in getInfo" :key="label">
+        <template v-if="counter > 0">
+          <entity-label
+            :label="label"
+            :color="`color_${
+              entities.filter((e) => e.text === label)[0].colorId %
+              $entitiesMaxColors
+            }`"
+          />
+          <span class="metrics__list__counter">{{
+            counter | formatNumber
+          }}</span>
+        </template>
+      </li>
+    </ul>
+  </sidebar-progress>
 </template>
 
 <script>
@@ -59,30 +58,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.labels {
-  margin-top: 2em;
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  font-weight: 600;
-  label {
-    margin: 0;
-    word-break: break-word;
-    hyphens: auto;
-    &[class^="color_"] {
-      padding: 0.3em;
-    }
-  }
-}
-$colors: 50;
-$hue: 360;
-@for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
-  .color_#{$i - 1} {
-    background: $rcolor;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

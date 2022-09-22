@@ -64,7 +64,7 @@ export default {
   &__title {
     @include font-size(30px);
     font-weight: 400;
-    color: palette(grey, medium);
+    color: $font-medium;
   }
   &__message {
     max-width: 600px;

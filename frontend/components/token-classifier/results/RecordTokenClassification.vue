@@ -44,14 +44,14 @@
         class="content__actions-buttons"
         v-if="annotationEnabled && record.status !== 'Validated'"
       >
-        <re-button class="button-primary" @click="onValidate(record)">{{
+        <base-button class="primary" @click="onValidate(record)">{{
           record.status === "Edited" ? "Save" : "Validate"
-        }}</re-button>
-        <re-button
+        }}</base-button>
+        <base-button
           :disabled="!record.annotatedEntities.length"
-          class="button-primary--outline"
+          class="primary outline"
           @click="onClearAnnotations()"
-          >Clear annotations</re-button
+          >Clear annotations</base-button
         >
       </div>
     </div>
@@ -173,14 +173,11 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  padding: 56px 20px 50px 50px;
+  padding: 56px 200px 50px 50px;
   display: block;
   margin-bottom: 0;
   @include font-size(18px);
   line-height: 34px;
-  .list__item--annotation-mode & {
-    padding-left: 65px;
-  }
 }
 
 .content {
@@ -194,14 +191,10 @@ export default {
     margin-left: auto;
     display: flex;
     min-width: 20%;
-    .re-button {
-      min-width: 137px;
-      min-height: 34px;
-      line-height: 34px;
-      display: inline-block;
+    .button {
       margin: 1.5em 0 0 0;
-      & + .re-button {
-        margin-left: 1em;
+      & + .button {
+        margin-left: $base-space * 2;
       }
     }
   }
@@ -212,18 +205,18 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  ::v-deep {
+  :deep() {
     .span__text {
       color: transparent;
       & > * {
-        color: palette(grey, dark);
+        color: $font-dark;
       }
     }
     .highlight__content {
       color: transparent;
     }
   }
-  ::v-deep .highlight-text {
+  :deep(.highlight-text) {
     opacity: 1;
   }
 }

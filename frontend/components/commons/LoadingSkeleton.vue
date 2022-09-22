@@ -50,7 +50,7 @@ export default {
 <style lang="scss" scoped>
 .loading-skeleton {
   $this: &;
-  background: $lighter-color !important;
+  background: palette(white) !important;
   pointer-events: none;
   position: relative;
   min-height: 100vh;
@@ -59,7 +59,7 @@ export default {
     top: 0;
     height: 2px;
     display: block;
-    background: lighten($secondary-color, 40%);
+    background: lighten(palette(blue, 300), 40%);
     animation: width 1s ease 0.5s infinite;
   }
 }

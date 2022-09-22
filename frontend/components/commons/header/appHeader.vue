@@ -21,14 +21,14 @@
     ref="header"
     :class="['header', sticky && dataset ? 'sticky' : null]"
   >
-    <ReTopbarBrand>
-      <ReBreadcrumbs
+    <base-topbar-brand>
+      <base-breadcrumbs
         :breadcrumbs="breadcrumbs"
         :copy-button="copyButton"
         @breadcrumb-action="$emit('breadcrumb-action', $event)"
       />
       <user />
-    </ReTopbarBrand>
+    </base-topbar-brand>
     <slot />
     <component v-if="dataset" :is="currentTaskHeader" :dataset="dataset" />
   </section>
@@ -116,7 +116,7 @@ export default {
   position: sticky;
   background: $bg;
   z-index: 3;
-  ::v-deep .header__filters {
+  :deep(.header__filters) {
     position: relative;
   }
   &:not(.sticky) {

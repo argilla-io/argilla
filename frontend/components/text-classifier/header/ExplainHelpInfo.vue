@@ -72,7 +72,7 @@ export default {
     border: 1px solid #f48e5f57;
     padding: 3em 2em 0.5em 2em;
     background: #ffffff87;
-    color: palette(grey, medium);
+    color: $font-medium;
     border-radius: 1px;
     position: relative;
     .atom {
@@ -81,7 +81,7 @@ export default {
     }
     &__title {
       @include font-size(16px);
-      color: palette(grey, medium);
+      color: $font-medium;
       font-weight: 600;
       margin-top: 0;
     }

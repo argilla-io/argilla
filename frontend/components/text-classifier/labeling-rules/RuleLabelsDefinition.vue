@@ -26,8 +26,8 @@
           class="rule__records__info"
           v-if="areFiltersApplied.length"
           name="info"
-          width="12"
-          height="12"
+          width="18"
+          height="18"
         />
         <span
           class="rule__records__tooltip"
@@ -41,7 +41,7 @@
         :search-text="searchText"
         @input="onSearchLabel"
       />
-      <ClassifierAnnotationButton
+      <classifier-annotation-button
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
@@ -52,21 +52,19 @@
         :data-title="label.class"
         :value="label.class"
       >
-      </ClassifierAnnotationButton>
+      </classifier-annotation-button>
 
-      <a
+      <base-button
         v-if="visibleLabels.length < filteredLabels.length"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="expandLabels"
-        >+{{ filteredLabels.length - visibleLabels.length }}</a
+        class="feedback-interactions__more primary clear"
+        @click="expandLabels"
+        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
       >
-      <a
+      <base-button
         v-else-if="visibleLabels.length > maxVisibleLabels"
-        href="#"
-        class="feedback-interactions__more"
-        @click.prevent="collapseLabels"
-        >Show less</a
+        class="feedback-interactions__more primary clear"
+        @click="collapseLabels"
+        >Show less</base-button
       >
     </div>
     <div v-else class="empty-labels">
@@ -81,13 +79,13 @@
       </p>
     </div>
     <p class="rule__info" v-if="ruleInfo">{{ ruleInfo }}</p>
-    <re-button
+    <base-button
       v-else
       :disabled="!selectedLabelsVModel.length"
-      class="feedback-interactions__button button-primary"
+      class="feedback-interactions__button primary"
       @click="saveRule"
     >
-      Save rule</re-button
+      Save rule</base-button
     >
   </div>
 </template>
@@ -245,7 +243,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color: #333346;
 %item {
   // width: calc(25% - 5px);
   min-width: 80px;
@@ -264,20 +261,8 @@ $color: #333346;
     padding-right: 200px;
   }
   &__more {
-    align-self: center;
     margin: 3.5px;
-    text-decoration: none;
-    font-weight: 500;
-    font-family: $sff;
-    outline: none;
-    padding: 0.5em;
-    border-radius: $border-radius;
-    transition: all 0.2s ease-in-out;
     display: inline-block;
-    &:hover {
-      transition: all 0.2s ease-in-out;
-      background: palette(grey, bg);
-    }
   }
   &__button {
     margin-top: auto;
@@ -298,10 +283,10 @@ $color: #333346;
 .label-button {
   margin: 5px;
 }
-.label-button ::v-deep .button {
+.label-button :deep(.button) {
   justify-content: center;
 }
-.label-button:not(.active) ::v-deep .button {
+.label-button:not(.active) :deep(.button) {
   background: #e0e1ff !important;
 }
 .rule {
@@ -309,24 +294,17 @@ $color: #333346;
     @include font-size(18px);
     width: 100%;
     height: 20px;
-    color: $font-secondary;
+    color: $font-secondary-medium;
     font-weight: 600;
     margin-top: 0;
     padding: 0;
-  }
-  &__text {
-    width: 100%;
-    color: palette(grey, medium);
-    @include font-size(18px);
-    font-weight: 600;
-    margin-top: 0;
   }
   &__info {
     margin-bottom: 0;
     margin-top: auto;
   }
   &__records {
-    color: palette(grey, dark);
+    color: $font-dark;
     margin-left: auto;
     margin-top: 0;
     white-space: nowrap;
@@ -342,9 +320,9 @@ $color: #333346;
       margin-left: 0.2em;
     }
     &__info {
-      min-width: 12px;
+      min-width: 18px;
       margin-left: 0.3em;
-      fill: $color;
+      fill: palette(grey, 100);
       cursor: pointer;
       &:hover {
         & + .rule__records__tooltip:after,
@@ -360,32 +338,9 @@ $color: #333346;
     }
     &__tooltip {
       position: absolute;
-      right: 6px;
-      @extend %hastooltip;
-      &:after {
-        padding: 0.5em 1em;
-        top: calc(100% + 20px);
-        right: 50%;
-        transform: translateX(50%);
-        background: $color;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        @include font-size(14px);
-        font-weight: 600;
-        margin-bottom: 0.5em;
-        min-width: 240px;
-        white-space: break-spaces;
-        text-align: left;
-        line-height: 1.4em;
-      }
-      &:before {
-        right: calc(50% - 7px);
-        top: 13px;
-        border-bottom: 7px solid $color;
-        border-right: 7px solid transparent;
-        border-left: 7px solid transparent;
-      }
+      right: 7px;
+      @extend %has-tooltip--bottom;
+      @extend %tooltip-large-text;
     }
   }
   &__labels {

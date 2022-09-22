@@ -69,13 +69,13 @@
           </template>
         </DynamicScroller>
       </div>
-      <RePagination
+      <base-pagination
         :total-items="dataset.results.total"
         :pagination-settings="dataset.viewSettings.pagination"
         @changePage="onPagination"
       />
     </div>
-    <LazyReModal
+    <lazy-base-modal
       modal-class="modal-secondary"
       modal-position="modal-center"
       :modal-custom="true"
@@ -83,7 +83,7 @@
       :modal-visible="selectedRecord !== undefined"
       @close-modal="onCloseMetadata"
     >
-      <Metadata
+      <metadata
         v-if="selectedRecord"
         :applied-filters="dataset.query.metadata"
         :metadata-items="selectedRecord.metadata"
@@ -91,7 +91,7 @@
         @metafilterApply="onApplyMetadataFilter"
         @cancel="onCloseMetadata"
       />
-    </LazyReModal>
+    </lazy-base-modal>
   </span>
 </template>
 <script>

@@ -7,8 +7,8 @@ exports[`SortList renders properly 1`] = `
   </div>
   <!---->
   <div class="sort__buttons">
-    <re-button class="button-tertiary--small button-tertiary--outline">Cancel</re-button>
-    <re-button class="button-primary--small">Sort</re-button>
+    <base-button class="primary outline">Cancel</base-button>
+    <base-button class="primary">Sort</base-button>
   </div>
 </div>
 `;

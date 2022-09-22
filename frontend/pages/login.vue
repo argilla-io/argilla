@@ -30,8 +30,8 @@
           placeholder="Password"
         />
       </div>
-      <ReButton type="submit" class="form__button button-primary"
-        >Enter</ReButton
+      <base-button type="submit" class="form__button primary"
+        >Enter</base-button
       >
       <p v-if="error">{{ error }}</p>
     </form>
@@ -79,7 +79,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  background: $line-light-color;
+  background: palette(grey, 700);
   display: flex;
   align-items: center;
   min-height: 100vh;
@@ -87,7 +87,7 @@ export default {
 
 .form {
   border-radius: $border-radius;
-  background: $lighter-color;
+  background: palette(white);
   margin: auto;
   display: inline-block;
   padding: 50px;
@@ -101,25 +101,24 @@ export default {
   &__title {
     text-align: center;
     @include font-size(26px);
-    font-family: "Futura Medium";
     line-height: 1.2em;
     margin: 0 auto 2em auto;
     color: #010250;
+    font-weight: 600;
+    letter-spacing: 0.03em;
   }
   &__button {
     margin: 2em auto 0 auto;
-    text-align: center !important;
-    display: block !important;
+    justify-content: center;
     width: 100%;
-    min-height: 36px !important;
   }
   &__input {
     position: relative;
     display: block;
     margin-bottom: 1em;
     input {
-      border: 1px solid palette(grey, smooth);
-      border-radius: $radius;
+      border: 1px solid palette(grey, 600);
+      border-radius: $border-radius;
       padding: 0 1em;
       outline: none;
       background: transparent;
@@ -129,6 +128,6 @@ export default {
   }
 }
 input:-webkit-autofill {
-  box-shadow: 0 0 0px 1000px $lighter-color inset;
+  box-shadow: 0 0 0px 1000px palette(white) inset;
 }
 </style>

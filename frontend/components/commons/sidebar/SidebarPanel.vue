@@ -55,11 +55,8 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$topbarHeight: 56px;
-$sidebarMenuWidth: 70px;
 .sidebar {
   $this: &;
-  min-height: calc(100vh - $topbarHeight);
   width: $sidebarPanelWidth;
   position: relative;
   top: 0;
@@ -68,7 +65,7 @@ $sidebarMenuWidth: 70px;
   padding: 1em 1.5em;
   transition: right 0.25s linear 0.2s;
   z-index: -1;
-  border-left: 1px solid palette(grey, smooth);
+  border-left: 1px solid palette(grey, 600);
   &:hover {
     #{$this}__close-button:not(.zoom-out) {
       opacity: 1;
@@ -80,8 +77,8 @@ $sidebarMenuWidth: 70px;
     position: absolute;
     left: -2.5em;
     top: 1px;
-    border-radius: 3px;
-    background: palette(grey, smooth);
+    border-radius: $border-radius-s;
+    background: palette(grey, 600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,7 +93,7 @@ $sidebarMenuWidth: 70px;
       animation: zoom-out 0.3s ease-out forwards;
     }
     .svg-icon {
-      color: $secondary-color;
+      color: palette(blue, 300);
     }
   }
   &__content {
@@ -116,30 +113,61 @@ $sidebarMenuWidth: 70px;
     }
   }
   @include media(">desktop") {
-    border-radius: 1px;
     margin-left: 1em;
     display: block !important;
     right: -$sidebarPanelWidth + 1px;
   }
   &__content {
-    border-radius: 2px;
+    color: $font-secondary-medium-dark;
     @include font-size(13px);
     &:first-child {
       padding-top: 0;
     }
   }
-  ::v-deep {
-    .sidebar__title {
-      margin-bottom: 2em;
-      color: $font-secondary-dark;
-      margin-top: 0.2em;
+  :deep() {
+    .metrics__title {
+      margin-top: 0;
+      margin-bottom: $base-space * 4;
       @include font-size(20px);
       font-weight: 700;
     }
-    .sidebar__subtitle {
+    .metrics__info {
+      margin-top: 0;
+      margin-bottom: $base-space * 2;
       @include font-size(15px);
-      color: $font-secondary-dark;
       font-weight: 600;
+      display: flex;
+      &__name {
+        margin: 0;
+      }
+      &__counter {
+        margin: 0 0 0 auto;
+      }
+      & + .re-progress__container {
+        margin-top: -$base-space;
+      }
+    }
+    .metrics__list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: $base-space * 3;
+      li {
+        display: flex;
+        align-items: center;
+        margin-bottom: $base-space;
+      }
+      &__name {
+        display: block;
+        width: calc(100% - 40px);
+        hyphens: auto;
+        word-break: break-word;
+        @include font-size(13px);
+      }
+      &__counter {
+        margin-right: 0;
+        margin-left: auto;
+        @include font-size(14px);
+      }
     }
   }
 }
