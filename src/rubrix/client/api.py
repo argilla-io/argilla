@@ -113,6 +113,7 @@ class Api:
         api_key: Optional[str] = None,
         workspace: Optional[str] = None,
         timeout: int = 60,
+        extra_headers: Optional[Dict[str, str]] = None,
     ):
         """Init the Python client.
 
@@ -127,22 +128,32 @@ class Api:
             workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
                 env variable ``RUBRIX_WORKSPACE`` is not set, it will default to the private user workspace.
             timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
+            extra_headers: Extra HTTP headers sent to the server. You can use this to customize
+                the headers of Rubrix client requests, like additional security restrictions. Default: `None`.
 
         Examples:
             >>> import rubrix as rb
             >>> rb.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
+            >>> # Customizing request headers
+            >>> headers = {"X-Client-id":"id","X-Secret":"secret"}
+            >>> rb.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
+
         """
         api_url = api_url or os.getenv("RUBRIX_API_URL", "http://localhost:6900")
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
         api_key = api_key or os.getenv("RUBRIX_API_KEY", DEFAULT_API_KEY)
         workspace = workspace or os.getenv("RUBRIX_WORKSPACE")
+        headers = extra_headers or {}
 
         self._client: AuthenticatedClient = AuthenticatedClient(
-            base_url=api_url, token=api_key, timeout=timeout
+            base_url=api_url,
+            token=api_key,
+            timeout=timeout,
+            headers=headers.copy(),
         )
-        self._user: User = users_api.whoami(client=self._client)
 
+        self._user: User = users_api.whoami(client=self._client)
         if workspace is not None:
             self.set_workspace(workspace)
 
