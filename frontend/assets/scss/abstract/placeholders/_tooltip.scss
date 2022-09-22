@@ -19,7 +19,6 @@ $tooltip-border-radius: $border-radius-s;
   color: $tooltip-color;
   border-radius: $tooltip-border-radius;
   @include font-size($tooltip-font-size);
-  font-family: $ff;
   font-weight: 600;
 }
 %has-tooltip--left {

@@ -195,7 +195,6 @@ button {
   display: flex;
   align-items: center;
   @include font-size(14px);
-  font-family: $sff;
   @include media("<=desktop") {
     display: block;
     :deep(svg) {

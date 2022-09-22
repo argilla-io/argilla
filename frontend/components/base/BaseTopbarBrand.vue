@@ -64,7 +64,6 @@ export default {
     color: palette(white);
     @include font-size(18px);
     font-weight: 900;
-    font-family: $ff;
     text-decoration: none;
     .svg-icon {
       margin-right: 0.5em;

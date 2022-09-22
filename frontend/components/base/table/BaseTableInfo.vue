@@ -470,7 +470,6 @@ export default {
       padding-right: 0;
       color: $font-secondary-medium;
       @include font-size(14px);
-      font-family: $sff;
       text-align: left;
       display: flex;
       align-items: center;

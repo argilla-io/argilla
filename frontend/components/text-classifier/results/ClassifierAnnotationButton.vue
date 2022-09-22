@@ -118,7 +118,6 @@ $annotation-button-size: 20px;
       padding-right: 0.5em;
       width: 100%;
       display: flex;
-      font-family: $sff;
       font-weight: 500;
       overflow: hidden;
       color: $font-secondary-medium-dark;

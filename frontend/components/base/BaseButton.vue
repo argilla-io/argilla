@@ -102,7 +102,6 @@ export default {
   background: none;
   border: 0;
   border-radius: $button-radius;
-  font-family: $sff;
   font-style: inherit;
   font-variant: inherit;
   letter-spacing: inherit;

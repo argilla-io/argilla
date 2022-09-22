@@ -127,7 +127,6 @@ export default {
     :deep(.dropdown__header) {
       max-height: 33px;
       color: $font-secondary-medium;
-      font-family: $sff;
       font-weight: 500;
       min-width: 170px;
       @include font-size(13px);

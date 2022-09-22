@@ -154,7 +154,6 @@ export default {
       display: inline-block;
     }
     a {
-      font-family: $sff;
       width: 100%;
       border-radius: $border-radius;
       text-align: center;

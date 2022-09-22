@@ -332,7 +332,6 @@ $number-size: 18px;
       margin-right: $base-space;
       color: $font-secondary-medium;
       @include font-size(15px);
-      font-family: $sff;
       white-space: nowrap;
       @include media(">desktop") {
         padding: 0.8em 1em;

@@ -241,7 +241,6 @@ export default {
   }
   text {
     font-weight: normal !important;
-    font-family: $ff !important;
   }
 }
 </style>
