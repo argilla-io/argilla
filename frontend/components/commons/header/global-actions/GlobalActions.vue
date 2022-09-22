@@ -52,14 +52,11 @@ export default {
   align-items: center;
   width: 100%;
   text-align: left;
-  padding: 1em 1.4em;
-  background: $lighter-color;
+  padding: 1em $base-space * 2;
+  background: palette(white);
   border-radius: $border-radius-m;
   position: relative;
-  box-shadow: 0 1px 2px 0 rgba(185, 185, 185, 0.5);
-  margin-bottom: 16px;
-  &--exploration {
-    position: relative;
-  }
+  box-shadow: $shadow-300;
+  margin-bottom: $base-space * 2;
 }
 </style>

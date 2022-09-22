@@ -17,39 +17,39 @@
 
 <template>
   <div v-if="annotationsProgress">
-    <p class="sidebar__title">Progress</p>
-    <div class="progress__info">
-      <p class="progress__info__text">Total</p>
-      <span class="progress__info__percent">{{ progress | percent }}</span>
+    <p class="metrics__title">Progress</p>
+    <div class="metrics__info">
+      <p class="metrics__info__name">Total</p>
+      <span class="metrics__info__counter">{{ progress | percent }}</span>
     </div>
-    <div class="progress__numbers">
+    <div class="metrics__numbers">
       <span>{{ totalAnnotated | formatNumber }}</span
       >/{{ total | formatNumber }}
     </div>
-    <ReProgress
+    <base-progress
       re-mode="determinate"
       :multiple="true"
       :progress="(totalValidated * 100) / total"
       :progress-secondary="(totalDiscarded * 100) / total"
-    ></ReProgress>
+    ></base-progress>
     <div class="scroll">
-      <div>
-        <div class="info">
+      <ul class="metrics__list">
+        <li>
           <span class="color-bullet validated"></span>
-          <label>Validated</label>
-          <span class="records-number">
+          <label class="metrics__list__name">Validated</label>
+          <span class="metrics__list__counter">
             {{ totalValidated | formatNumber }}
           </span>
-        </div>
-        <div class="info">
+        </li>
+        <li>
           <span class="color-bullet discarded"></span>
-          <label>Discarded</label>
-          <span class="records-number">
+          <label class="metrics__list__name">Discarded</label>
+          <span class="metrics__list__counter">
             {{ totalDiscarded | formatNumber }}
           </span>
-        </div>
-        <slot></slot>
-      </div>
+        </li>
+      </ul>
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -95,37 +95,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-label {
-  margin-top: 1.2em;
-  margin-bottom: 0.5em;
-  display: block;
-  width: calc(100% - 40px);
-  hyphens: auto;
-  word-break: break-word;
-}
-.total {
-  font-weight: 600;
-  max-width: 100%;
-  width: 100%;
-  margin-bottom: 1em;
-}
-.subtitle {
-  display: inline-block;
-  margin-top: 3em;
-  margin-bottom: 0.5em;
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  color: $font-secondary-dark;
-  label {
-    margin: 0; // for tagger
-    &[class^="color_"] {
-      padding: 0.3em;
-    }
-  }
-}
 .scroll {
   max-height: calc(100vh - 300px);
   padding-right: 1em;
@@ -133,66 +102,11 @@ label {
   overflow: auto;
   @extend %hide-scrollbar;
 }
-.records-number {
-  margin-right: 0;
-  margin-left: auto;
-}
-.progress__block {
-  margin-bottom: 2.5em;
-  position: relative;
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-  &.loading-skeleton {
-    opacity: 0;
-  }
-  .re-progress {
-    margin-bottom: 0.5em;
-  }
-  p {
-    @include font-size(18px);
-    margin-top: 0;
-    font-weight: 600;
-    &:not(.button) {
-      pointer-events: none;
-    }
-  }
-  .button-icon {
-    color: $primary-color;
-    padding: 0;
-    display: flex;
-    margin-left: auto;
-    margin-right: 0;
-    margin-top: 2em;
-    .svg-icon {
-      fill: $primary-color;
-      margin-left: 1em;
-    }
-  }
-}
-.progress {
-  float: right;
-  line-height: 0.8em;
-  font-weight: bold;
-  &__info {
-    display: flex;
-    @include font-size(15px);
-    align-items: center;
-    color: $font-secondary-dark;
-    font-weight: 600;
-    margin-bottom: 1.5em;
-    &__text {
-      margin: 0;
-    }
-    &__percent {
-      margin-top: 0;
-      margin-right: 0;
-      margin-left: auto;
-    }
-  }
+.metrics {
   &__numbers {
-    color: $font-secondary-dark;
-    margin-bottom: 1.5em;
+    color: $font-secondary-medium-dark;
+    margin-bottom: $base-space * 3;
+    margin-top: $base-space * 3;
     @include font-size(18px);
     span {
       @include font-size(40px);

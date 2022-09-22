@@ -17,8 +17,8 @@
 
 <template>
   <div>
-    <p class="sidebar__title">Stats</p>
-    <StatsSelector
+    <p class="metrics__title">Stats</p>
+    <stats-selector
       :selected-option="selectedOption"
       :options="options"
       @selectOption="onSelectOption"
@@ -51,18 +51,15 @@
           :key="key"
           :class="expandedMentionsGroup === key ? 'expanded' : ''"
         >
-          <span
-            :class="[
-              `color_${
-                entities.filter((e) => e.text === key)[0].colorId %
-                $entitiesMaxColors
-              }`,
-              'entity',
-              activeTab,
-            ]"
-            >{{ key }}</span
-          >
-          <SidebarCollapsableMentions
+          <entity-label
+            :is-prediction="activeTab === 'predicted_mentions'"
+            :label="key"
+            :color="`color_${
+              entities.filter((e) => e.text === key)[0].colorId %
+              $entitiesMaxColors
+            }`"
+          />
+          <sidebar-collapsable-mentions
             :limit="
               expandedMentionsGroup && expandedMentionsGroup !== key
                 ? 0
@@ -159,9 +156,9 @@ export default {
     a {
       font-family: $sff;
       width: 100%;
-      border-radius: $radius;
+      border-radius: $border-radius;
       text-align: center;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       text-decoration: none;
       margin: 0 5px;
       outline: none;
@@ -169,19 +166,12 @@ export default {
       padding: 0.5em;
       &.active {
         color: $primary-color;
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
       &:hover {
-        background: palette(grey, smooth);
+        background: palette(grey, 600);
       }
     }
-  }
-  .entity {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-    padding: 0.5em;
-    display: inline-flex;
-    font-weight: 600;
   }
   .scroll {
     max-height: calc(100vh - 250px);
@@ -189,19 +179,6 @@ export default {
     margin-right: -1em;
     overflow: auto;
     @extend %hide-scrollbar;
-  }
-}
-$colors: 50;
-$hue: 360;
-@for $i from 1 through $colors {
-  $rcolor: hsla(($colors * $i) + calc($hue * $i / $colors), 100%, 88%, 1);
-  .color_#{$i - 1} {
-    background: $rcolor;
-    &.predicted_mentions {
-      padding: 0.4em 0;
-      background: none;
-      border-bottom: 5px solid $rcolor;
-    }
   }
 }
 </style>

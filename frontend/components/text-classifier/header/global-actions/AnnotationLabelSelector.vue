@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <FilterDropdown
+    <filter-dropdown
       class="selector"
       :visible="visible"
       @visibility="onVisibility"
@@ -26,81 +26,49 @@
         <span class="dropdown__text">Annotate as...</span>
       </template>
       <template #dropdown-content>
-        <input
+        <select-options-search
+          allow-clear
+          @clear="clearSearchText"
           v-model="searchText"
-          type="text"
-          autofocus
           placeholder="Search label..."
         />
-        <svgicon
-          v-if="searchText != undefined"
-          class="clean-search"
-          name="close"
-          width="10"
-          height="10"
-          color="#9b9b9b"
-          @click="cleanSearchText"
-        ></svgicon>
-        <ul v-if="multiLabel" class="selector__list">
-          <li
-            v-for="option in filterSearch(options, searchText)"
-            :key="option"
-            :title="option"
-            class="selector__option"
-          >
-            <ReCheckbox
-              :id="option"
-              v-model="selectedOptions"
-              class="re-checkbox--dark"
-              :value="option"
-            >
-              {{ option }}
-            </ReCheckbox>
-          </li>
-        </ul>
-        <ul v-else class="selector__list">
-          <li
-            v-for="option in filterSearch(options, searchText)"
-            :key="option.index"
-            class="selector__option"
-            @click="selected([option])"
-          >
-            <span :data-title="option">
-              {{ option | truncate(30) }}
-            </span>
-          </li>
-        </ul>
+        <select-options
+          v-if="multiLabel"
+          ref="options"
+          type="multiple"
+          v-model="selectedOptions"
+          :options="filterSearch(options, searchText)"
+        />
+        <select-options
+          v-else
+          ref="options"
+          type="single"
+          :options="filterSearch(options, searchText)"
+          @selected="selectedOption"
+        />
         <div
           v-if="multiLabel && filterSearch(options, searchText).length"
           class="selector__buttons"
         >
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
+          <base-button
+            class="primary outline small"
             @click="onVisibility(false)"
           >
             Cancel
-          </ReButton>
-          <ReButton
-            class="button-primary--small"
-            @click="selected(selectedOptions)"
+          </base-button>
+          <base-button
+            class="primary small"
+            @click="selectedOption(selectedOptions)"
           >
             Annotate
-          </ReButton>
+          </base-button>
         </div>
       </template>
-    </FilterDropdown>
+    </filter-dropdown>
   </div>
 </template>
 <script>
 export default {
-  filters: {
-    truncate(string, value) {
-      if (string.length > value) {
-        return `${string.substring(0, value)}...`;
-      }
-      return string;
-    },
-  },
   props: {
     record: Object,
     options: Array,
@@ -117,13 +85,14 @@ export default {
       this.visible = value;
       this.searchText = undefined;
     },
-    selected(labels) {
-      this.$emit("selected", labels);
+    selectedOption(labels) {
+      const labelsFormat = typeof labels === "string" ? [labels] : labels;
+      this.$emit("selected", labelsFormat);
       this.visible = false;
       this.selectedOptions = [];
     },
 
-    cleanSearchText() {
+    clearSearchText() {
       this.searchText = undefined;
     },
     filterSearch(options, text) {
@@ -153,45 +122,16 @@ export default {
 </script>
 <style lang="scss" scoped>
 .selector {
-  &__option {
-    display: block;
-    padding: 0.5em 0;
-    text-align: left;
-    font-weight: 400;
-    word-break: break-word;
-    hyphens: auto;
-    .re-checkbox {
-      margin: 0;
-      display: flex;
-      ::v-deep label {
-        max-width: 140px;
-        display: block;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-    }
-    cursor: pointer;
-    &:hover {
-      color: $secondary-color;
-    }
-  }
   &__buttons {
     margin-top: 2em;
     display: flex;
     & > * {
-      display: block;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
       justify-content: center;
       &:last-child {
-        margin-right: 0;
+        margin-left: $base-space;
       }
     }
-  }
-  ::v-deep .dropdown__content {
-    transform: translate 0;
   }
 }
 </style>

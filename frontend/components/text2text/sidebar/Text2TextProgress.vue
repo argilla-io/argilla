@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <SidebarProgress :dataset="dataset"> </SidebarProgress>
+  <sidebar-progress :dataset="dataset"> </sidebar-progress>
 </template>
 
 <script>

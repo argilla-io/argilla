@@ -22,13 +22,12 @@
   >
     <span class="record__content" v-html="$highlightKeywords(text, keywords)">
     </span>
-    <a
-      href="#"
+    <base-button
       v-if="scrollHeight >= visibleRecordHeight"
-      class="record__button"
+      class="primary clear small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </a>
+    </base-button>
   </div>
 </template>
 <script>
@@ -86,26 +85,11 @@ export default {
     white-space: pre-line;
 
     display: block;
-    color: palette(grey, medium);
+    color: $font-medium;
     width: calc(100% - 200px);
   }
-  &__button {
-    display: inline-block;
-    border-radius: $border-radius;
-    padding: 0.5em;
-    transition: all 0.2s ease;
-    @include font-size(14px);
-    font-weight: 400;
-    background: none;
+  &__show-more {
     margin-top: 1em;
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1;
-    outline: none;
-    &:hover {
-      transition: all 0.2s ease;
-      background: palette(grey, bg);
-    }
   }
 }
 </style>

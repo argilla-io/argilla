@@ -17,21 +17,23 @@
 
 <template>
   <div>
-    <p class="sidebar__title">Stats</p>
-    <StatsSelector
+    <p class="metrics__title">Stats</p>
+    <stats-selector
       :selected-option="selectedOption"
       :options="options"
       @selectOption="onSelectOption"
     />
     <template v-if="selectedOption.id === 'keywords'">
-      <div class="scroll">
-        <div v-for="(counter, keyword) in getKeywords" :key="keyword">
-          <div v-if="counter > 0" class="info">
-            <label>{{ keyword }}</label>
-            <span class="records-number">{{ counter | formatNumber }}</span>
-          </div>
-        </div>
-      </div>
+      <ul class="scroll metrics__list">
+        <li v-for="(counter, keyword) in getKeywords" :key="keyword">
+          <template v-if="counter > 0">
+            <label class="metrics__list__name">{{ keyword }}</label>
+            <span class="metrics__list__counter">{{
+              counter | formatNumber
+            }}</span>
+          </template>
+        </li>
+      </ul>
     </template>
   </div>
 </template>
@@ -77,34 +79,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-label {
-  display: block;
-  width: calc(100% - 40px);
-  hyphens: auto;
-  word-break: break-word;
-}
-.labels {
-  margin-top: 3em;
-  strong {
-    margin-bottom: 1em;
-    display: block;
-  }
-}
-.info {
-  position: relative;
-  display: flex;
-  margin-bottom: 0.7em;
-  color: $font-secondary-dark;
-}
 .scroll {
   max-height: calc(100vh - 200px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
   @extend %hide-scrollbar;
-}
-.records-number {
-  margin-right: 0;
-  margin-left: auto;
 }
 </style>

@@ -18,7 +18,7 @@
 <template>
   <form @submit.prevent="submit(query)">
     <div :class="['searchbar__container', { active: query }]">
-      <ReInputContainer class="searchbar">
+      <base-input-container class="searchbar">
         <svgicon
           v-if="!query && !dataset.query.text"
           name="search"
@@ -33,13 +33,13 @@
           height="20"
           @click="removeFilter()"
         />
-        <ReInput
+        <base-input
           ref="input"
           v-model="query"
           class="searchbar__input"
           placeholder="Introduce a query"
         />
-      </ReInputContainer>
+      </base-input-container>
     </div>
   </form>
 </template>
@@ -88,18 +88,17 @@ export default {
 
 <style lang="scss" scoped>
 .searchbar {
-  background: $lighter-color;
+  background: palette(white);
   width: 285px;
   min-height: 43px;
   border: none;
-  padding: 0 0.5em;
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
   margin-right: 0;
   margin-left: auto;
   pointer-events: all;
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   min-width: 100%;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
   &__container {
@@ -111,12 +110,12 @@ export default {
   &__button {
     cursor: pointer;
     padding: 5px;
-    border-radius: 3px;
-    background: $lighter-color;
+    border-radius: $border-radius-s;
+    background: palette(white);
     transition: background 0.2s ease-in-out;
     &:hover {
       transition: background 0.2s ease-in-out;
-      background: palette(grey, bg);
+      background: palette(grey, 800);
     }
   }
   .svg-icon {

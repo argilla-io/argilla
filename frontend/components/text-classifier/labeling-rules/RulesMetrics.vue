@@ -151,7 +151,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color: #333346;
 .rule-metrics {
   &__container {
     position: relative;
@@ -160,14 +159,14 @@ $color: #333346;
     max-height: 410px;
     background: $primary-color;
     margin-left: 1em;
-    color: $lighter-color;
+    color: palette(white);
     border-radius: $border-radius;
     margin-bottom: 2em;
     padding: 30px;
   }
   &__title {
     padding-bottom: 0;
-    color: $lighter-color;
+    color: palette(white);
     @include font-size(22px);
     font-weight: bold;
     margin-top: 0;
@@ -199,38 +198,7 @@ $color: #333346;
 }
 p[data-title] {
   position: relative;
-  @extend %hastooltip;
-  &:after {
-    padding: 0.5em 1em;
-    bottom: 100%;
-    right: 50%;
-    transform: translateX(50%);
-    background: $color;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    @include font-size(14px);
-    font-weight: 600;
-    margin-bottom: 0.5em;
-    min-width: 220px;
-    white-space: break-spaces;
-  }
-  &:before {
-    right: calc(50% - 7px);
-    top: -0.5em;
-    border-top: 7px solid $color;
-    border-right: 7px solid transparent;
-    border-left: 7px solid transparent;
-  }
-}
-</style>
-
-<style lang="scss">
-.records-number {
-  @include font-size(16px);
-  font-weight: normal;
-  .all & {
-    display: none;
-  }
+  @extend %has-tooltip--top;
+  @extend %tooltip-large-text;
 }
 </style>

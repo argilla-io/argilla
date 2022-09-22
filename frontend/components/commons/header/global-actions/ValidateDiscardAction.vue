@@ -22,20 +22,22 @@
       selectedRecords.length ? '' : 'validate-discard-actions--disabled',
     ]"
   >
-    <ReCheckbox
+    <base-checkbox
       v-model="allSelected"
       :disabled="!visibleRecords.length"
       class="list__item__checkbox"
-    ></ReCheckbox>
+    ></base-checkbox>
     <slot name="first" :selectedRecords="selectedRecords" />
-    <ReButton
+    <base-button
       :disabled="!allowValidation"
-      class="validate-discard-actions__button"
+      class="secondary outline small validate-discard-actions__button"
       @click="onValidate"
-      >Validate</ReButton
+      >Validate</base-button
     >
-    <ReButton class="validate-discard-actions__button" @click="onDiscard"
-      >Discard</ReButton
+    <base-button
+      class="secondary outline small validate-discard-actions__button"
+      @click="onDiscard"
+      >Discard</base-button
     >
     <slot name="last" :selectedRecords="selectedRecords" />
     <p v-if="selectedRecords.length" class="validate-discard-actions__text">
@@ -118,46 +120,24 @@ export default {
     position: relative;
     left: 0;
     top: 0;
-    margin: 0 8px 0 0;
-  }
-  &__export {
-    margin: auto 0 auto auto;
+    margin: 0 $base-space 0 0;
   }
   &__select {
     margin-left: 0.8em;
-    ::v-deep .dropdown__header {
+    :deep(.dropdown__header) {
       max-height: 33px;
-      background: $lighter-color;
-      border-width: 1px;
-      color: $font-secondary;
+      color: $font-secondary-medium;
       font-family: $sff;
       font-weight: 500;
       min-width: 170px;
-    }
-    ::v-deep .dropdown__content {
-      box-shadow: $shadow;
-      border-radius: $border-radius;
-      border: none;
+      @include font-size(13px);
     }
   }
   &__button {
-    border-radius: $border-radius;
-    height: 33px;
-    border: none;
-    min-width: 80px;
-    margin-left: 1em;
-    margin-right: 1em;
-    outline: none;
-    font-weight: 500;
-    color: $font-secondary;
-    background: $lighter-color;
-    border: 1px solid $line-smooth-color;
+    margin-left: $base-space;
+    margin-right: $base-space;
+    color: $font-secondary-medium;
     cursor: pointer;
-    &[disabled] {
-      opacity: 0.5;
-      pointer-events: none;
-      cursor: pointer;
-    }
     &:hover {
       border-color: $primary-color;
     }
@@ -166,8 +146,8 @@ export default {
     }
   }
   &__text {
-    margin: 0;
-    color: palette(grey, medium);
+    margin: 0 $base-space;
+    color: $font-medium;
     span {
       font-weight: bold;
       color: $primary-color;
