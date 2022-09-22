@@ -37,10 +37,10 @@
 // http://erskinedesign.com/blog/friendlier-colour-names-sass-maps/
 
 @function palette($palette, $tone: 'base') {
-    @if map-has-key($palettes-neutral, $palette) {
-      @return map-get(map-get($palettes-neutral, $palette), $tone);
+    @if map-has-key($palettes, $palette) {
+      @return map-get(map-get($palettes, $palette), $tone);
     }
 
-    @warn "Unknown `#{$palette}` in $palettes-neutral.";
+    @warn "Unknown `#{$palette}` in $palettes.";
     @return null;
 }

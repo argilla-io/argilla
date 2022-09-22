@@ -17,24 +17,22 @@
 
 <template>
   <div class="record">
-    <!-- annotation labels and prediction status -->
     <div class="record--left">
-      <!-- record text -->
-      <RecordInputs :record="record" />
-      <ClassifierAnnotationArea
+      <record-inputs :record="record" />
+      <classifier-annotation-area
         v-if="annotationEnabled"
         :dataset="dataset"
         :record="record"
         @validate="validateLabels"
         @reset="resetLabels"
       />
-      <ClassifierExplorationArea v-else :dataset="dataset" :record="record" />
+      <classifier-exploration-area v-else :dataset="dataset" :record="record" />
       <div v-if="annotationEnabled" class="content__actions-buttons">
-        <re-button
+        <base-button
           v-if="allowValidate"
-          class="button-primary"
+          class="primary"
           @click="onValidate(record)"
-          >Validate</re-button
+          >Validate</base-button
         >
       </div>
     </div>
@@ -48,7 +46,7 @@
           height="40"
           :name="record.predicted === 'ko' ? 'no-matching' : 'matching'"
         ></svgicon>
-        <re-tag
+        <base-tag
           v-for="label in record.annotation.labels"
           :key="label.class"
           :name="label.class"
@@ -154,7 +152,7 @@ export default {
     width: 100%;
     padding: 50px 20px 50px 50px;
     .list__item--annotation-mode & {
-      padding-left: 65px;
+      padding-right: 240px;
     }
   }
   &__labels {
@@ -190,13 +188,10 @@ export default {
     margin-left: auto;
     display: flex;
     min-width: 20%;
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
+    .button {
       margin: 1.5em auto 0 0;
-      & + .re-button {
-        margin-left: 1em;
+      & + .button {
+        margin-left: $base-space * 2;
       }
     }
   }

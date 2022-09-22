@@ -16,6 +16,6 @@
  */
 
 import Vue from "vue";
-import VueToast from "@/components/core/ReToast";
+import VueToast from "@/components/base/BaseToast";
 
 Vue.use(VueToast);

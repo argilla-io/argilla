@@ -26,66 +26,51 @@
       height="14"
       @click="onRemovescoreRange()"
     />
-    <div class="filter__row__content">
-      <p class="filter__label">{{ filter.name }}:</p>
-      <div
-        class="filter__item filter__item--score"
-        :class="{
-          'filter__item--open': scoreExpanded,
-          highlighted: filter.selected,
-        }"
-        @click="expandScore"
-      >
-        <div class="score-content">
-          <vega-lite
-            class="score"
-            :data="options"
-            :autosize="autosize"
-            :config="config"
-            :mark="mark"
-            :encoding="encoding"
-          />
-        </div>
-      </div>
-      <div
-        v-if="scoreExpanded"
-        v-click-outside="onClose"
-        class="filter__item filter__item--score"
-        :class="{ expanded: scoreExpanded }"
-      >
-        <div class="score-content">
-          <p class="range__panel">
+    <p class="filter__label">{{ filter.name }}:</p>
+    <filter-dropdown
+      color-type="grey"
+      :class="{ highlighted: visible || filter.selected }"
+      :visible="visible"
+      @visibility="onVisibility"
+    >
+      <span slot="dropdown-header">
+        <vega-lite
+          class="score"
+          :data="options"
+          :autosize="autosize"
+          :config="config"
+          :mark="mark"
+          :encoding="encoding"
+        />
+      </span>
+      <div slot="dropdown-content" v-if="visible">
+        <div class="score">
+          <p class="score__panel">
             {{ min | percent(0, 2) }} to {{ max | percent(0, 2) }}
           </p>
           <vega-lite
-            class="score"
             :data="options"
             :autosize="autosize"
             :config="config"
             :mark="mark"
             :encoding="encoding"
           />
-          <div class="range__container">
-            <ReRange
-              v-if="scoreExpanded"
-              ref="slider"
-              v-bind="rangeOptions"
-              v-model="scoreRanges"
-            ></ReRange>
-          </div>
+          <base-range
+            ref="slider"
+            v-bind="rangeOptions"
+            v-model="scoreRanges"
+          ></base-range>
         </div>
         <div class="filter__buttons">
-          <ReButton
-            class="button-tertiary--small button-tertiary--outline"
-            @click="onClose()"
-            >Cancel</ReButton
+          <base-button class="primary outline" @click="onClose()"
+            >Cancel</base-button
           >
-          <ReButton class="button-primary--small" @click="onApplyscoreRange"
-            >Apply</ReButton
+          <base-button class="primary" @click="onApplyscoreRange"
+            >Apply</base-button
           >
         </div>
       </div>
-    </div>
+    </filter-dropdown>
   </div>
 </template>
 
@@ -98,7 +83,7 @@ export default {
     },
   },
   data: () => ({
-    scoreExpanded: false,
+    visible: false,
     rangeOptions: {
       height: 4,
       dotSize: 20,
@@ -153,9 +138,6 @@ export default {
       });
       return test;
     },
-    visible() {
-      return this.scoreExpanded;
-    },
     min() {
       return this.scoreRanges[0] * 0.01;
     },
@@ -173,137 +155,27 @@ export default {
     this.scoreRanges = [from, to];
   },
   methods: {
-    expandScore() {
-      this.scoreExpanded = true;
+    onVisibility(value) {
+      this.visible = value;
     },
     onApplyscoreRange() {
       this.$emit("apply", this.filter, {
         from: this.min,
         to: this.max,
       });
-      this.scoreExpanded = false;
+      this.visible = false;
     },
     onRemovescoreRange() {
       this.$emit("apply", this.filter, undefined);
-      this.scoreExpanded = false;
+      this.visible = false;
     },
     onClose() {
-      this.scoreExpanded = false;
+      this.visible = false;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-.filter__item--score {
-  position: relative;
-  text-align: left;
-  transition: border 0.2s ease;
-  background: $lighter-color;
-  width: auto;
-  height: 45px;
-  align-items: center;
-  padding: 0 1em;
-  transition: all 0.2s ease;
-  border-radius: $border-radius;
-  &:not(.expanded) {
-    border: 1px solid $line-smooth-color;
-  }
-  &:not(.expanded):hover,
-  &:not(.expanded):focus {
-    border: 1px solid $primary-color;
-    transition: border 0.2s ease, background 0.2s ease;
-  }
-  &:after {
-    content: "";
-    border-color: $line-medium-color;
-    border-style: solid;
-    border-width: 1px 1px 0 0;
-    display: inline-block;
-    height: 8px;
-    width: 8px;
-    transform: translateY(-50%) rotate(133deg);
-    transition: all 1.5s ease;
-    position: absolute;
-    right: 1.5em;
-    top: 50%;
-    pointer-events: none;
-  }
-  .filter__buttons,
-  .button-clear {
-    display: none;
-  }
-  .score-content {
-    width: 100%;
-    text-align: center;
-  }
-  .range__container {
-    margin-top: 2px;
-    padding: 0;
-  }
-  .range {
-    @include font-size(14px);
-    text-align: center;
-    display: none;
-    &__panel {
-      display: inline-block;
-      border: 1px solid $line-smooth-color;
-      padding: 0.5em 1em;
-    }
-  }
-  ::v-deep svg {
-    margin-top: 5px;
-    height: 30px !important;
-    max-width: 90%;
-  }
-  &.highlighted {
-    border: 1px solid $primary-color;
-  }
-  &.expanded {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    background: $bg;
-    padding: 20px 20px 10px 20px;
-    width: 270px;
-    overflow: visible;
-    border-radius: $border-radius;
-    z-index: 4;
-    box-shadow: $shadow;
-    min-height: 270px;
-    pointer-events: all;
-    &:after {
-      content: none;
-    }
-    .score {
-      ::v-deep svg {
-        max-width: 100%;
-        height: 100px !important;
-      }
-    }
-    .filter__buttons {
-      margin-top: 2em;
-      display: flex;
-      & > * {
-        display: block;
-        width: 100%;
-        margin-right: 0.5em;
-        min-height: 38px;
-        &:last-child {
-          margin-right: 0;
-        }
-      }
-    }
-    .range {
-      display: block;
-    }
-    .range__container {
-      pointer-events: visible;
-    }
-    .label-default {
-      display: block;
-    }
-  }
-}
 .filter {
   &__remove-button {
     position: relative;
@@ -311,10 +183,16 @@ export default {
     cursor: pointer;
     flex-shrink: 0;
   }
-  &__item {
-    &--open {
-      background: $bg;
-      border-color: $bg !important;
+  &__buttons {
+    margin-top: 1em;
+    text-align: right;
+    display: flex;
+    & > * {
+      width: 100%;
+      justify-content: center;
+      &:last-child {
+        margin-left: $base-space;
+      }
     }
   }
   &__row {
@@ -323,20 +201,32 @@ export default {
     &:not(.selected) {
       margin-left: 2em;
     }
-    &__content {
-      position: relative;
-      display: flex;
-      align-items: center;
-      width: 100%;
-      .filter__item--score:not(.expanded) {
-        margin-left: auto;
-        width: 270px;
+    .dropdown {
+      margin-right: 0;
+      margin-left: auto;
+      width: 270px;
+      flex-shrink: 0;
+    }
+    :deep(.dropdown__header) {
+      svg {
+        margin-top: 5px;
+        height: 30px !important;
+        max-width: 90%;
       }
     }
   }
 }
 
-::v-deep .marks {
+.score {
+  text-align: center;
+  padding-bottom: $base-space * 2;
+  &__panel {
+    display: inline-block;
+    border: 1px solid palette(grey, 600);
+    padding: $base-space;
+  }
+}
+:deep(.marks) {
   .background {
     stroke: none !important;
   }

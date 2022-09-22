@@ -24,7 +24,7 @@
     >
       {{ selectedOption.name }}
     </p>
-    <p class="sidebar__subtitle" v-else>{{ selectedOption.name }}</p>
+    <p class="metrics__info" v-else>{{ selectedOption.name }}</p>
     <transition name="fade">
       <ul
         v-if="showOptionsSelector"
@@ -83,21 +83,21 @@ export default {
   margin-bottom: 2em;
   &__header {
     cursor: pointer;
-    border: 1px solid palette(grey, smooth);
+    border: 1px solid palette(grey, 600);
     border-radius: $border-radius;
     padding: 0.5em 1em;
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     @include font-size(13px);
     display: flex;
     align-items: center;
     &:after {
       content: "";
-      border-color: palette(grey, dark);
+      border-color: $font-dark;
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
-      height: 8px;
-      width: 8px;
+      height: $base-space;
+      width: $base-space;
       transform: rotate(133deg);
       transition: all 1.5s ease;
       margin-bottom: 2px;
@@ -108,7 +108,7 @@ export default {
     display: block;
     padding: 1em;
     background: white;
-    border: 1px solid palette(grey, smooth);
+    border: 1px solid palette(grey, 600);
     list-style: none;
     position: absolute;
     top: 100%;

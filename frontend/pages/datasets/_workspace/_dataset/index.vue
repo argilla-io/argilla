@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <re-loading v-if="$fetchState.pending" />
+  <base-loading v-if="$fetchState.pending" />
   <div
     :class="[
       'app',
