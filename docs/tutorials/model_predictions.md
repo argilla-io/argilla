@@ -24,6 +24,12 @@ Learn to log and analyze spaCy Name Entity Recognition (NER) predictions by expl
 
 Learn how to analyze and validate NER predictions from Flair's zero-shot model using the WNUT 17 dataset from the Hugging Face Hub.
 ```
+```{grid-item-card} 🕵️‍♀️ Analyzing predictions with model explainability methods
+:img-top: ../_static/tutorials/nlp-model-explainability/interpret.png
+:link: nlp_model_explainability.ipynb
+
+Learn to log and analyze model explanations using Transformers Interpret and Shap.
+```
 ````
 
 ```{toctree}
@@ -33,5 +39,6 @@ Learn how to analyze and validate NER predictions from Flair's zero-shot model u
 01-labeling-finetuning.ipynb
 02-spacy.ipynb
 07-zeroshot_ner.ipynb
+nlp_model_explainability.ipynb
 ```
 
