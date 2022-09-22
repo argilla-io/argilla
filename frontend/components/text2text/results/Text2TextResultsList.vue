@@ -22,7 +22,7 @@
     @closeMetadata="resetMetadataItem"
   >
     <template v-slot:record="{ record }">
-      <RecordText2Text
+      <record-text-2-text
         :dataset="dataset"
         :record="record"
         @onShowMetadata="onShowMetadata"

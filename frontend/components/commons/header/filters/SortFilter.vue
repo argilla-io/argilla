@@ -27,7 +27,7 @@
       @click="removeField()"
     />
     <FilterDropdown
-      class="dropdown--filter"
+      color-type="grey"
       :class="{ highlighted: visible }"
       :visible="visible"
       @visibility="onVisibility"
@@ -37,20 +37,14 @@
         <span v-else>Sort by</span>
       </span>
       <div slot="dropdown-content">
-        <input
-          v-model="searchText"
-          class="filter-options"
-          type="text"
-          autofocus
-          placeholder="Search..."
+        <select-options-search v-model="searchText" />
+        <select-options
+          ref="options"
+          type="single"
+          :option-name="optionName"
+          :options="filteredSortOptions"
+          @selected="addField"
         />
-        <ul>
-          <li v-for="option in filteredSortOptions" :key="option.text">
-            <a href="#" @click.prevent="addField(option)">
-              {{ option.name }}
-            </a>
-          </li>
-        </ul>
       </div>
     </FilterDropdown>
     <p
@@ -87,17 +81,13 @@ export default {
     visible: false,
     defaultSortedBy: undefined,
     defaultSortedByDir: "asc",
-    searchText: undefined,
+    searchText: "",
   }),
   computed: {
     filteredSortOptions() {
-      if (this.searchText === undefined) {
-        return this.sortOptions;
-      }
-      let filtered = this.sortOptions.filter((opt) =>
+      return this.sortOptions.filter((opt) =>
         opt.name.toLowerCase().match(this.searchText.toLowerCase())
       );
-      return filtered;
     },
   },
   mounted() {
@@ -129,6 +119,9 @@ export default {
       this.defaultSortedBy = currentSort;
       this.$emit("addSortField", currentSort, this.defaultSortedByDir);
     },
+    optionName(option) {
+      return option.name;
+    },
   },
 };
 </script>
@@ -148,7 +141,7 @@ export default {
     padding: 0.5em;
     @include font-size(20px);
     margin: 0 0 0 0.5em;
-    background: palette(grey, light);
+    background: palette(grey, 700);
     border-radius: $border-radius;
     min-width: 50px;
     min-height: 45px;
@@ -161,13 +154,6 @@ export default {
   .dropdown {
     width: 100%;
     max-width: 270px;
-    a {
-      text-decoration: none;
-      max-width: 250px;
-      display: block;
-      word-break: break-word;
-      hyphens: auto;
-    }
   }
 }
 </style>

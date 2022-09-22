@@ -48,21 +48,17 @@
           />
           <div class="content__footer">
             <div class="content__actions-buttons">
-              <re-button
+              <base-button
                 v-if="visibleSentence && annotationEnabled"
-                class="button-primary"
+                class="primary"
                 @click="onAnnotate(visibleSentence)"
-                >Validate</re-button
+                >Validate</base-button
               >
             </div>
           </div>
         </div>
 
-        <span
-          v-for="(sentence, index) in sentences"
-          v-else
-          :key="sentence.text"
-        >
+        <span v-for="(sentence, index) in sentences" v-else :key="index">
           <div v-if="itemNumber === index" class="content__sentences">
             <div class="content__group">
               <p v-if="!editionMode" class="content__sentences__title">
@@ -71,9 +67,9 @@
                   >: {{ sentence.score | percent }}
                 </span>
               </p>
-              <re-button
+              <base-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
-                class="button-clear"
+                class="primary clear small content__group__view-annotations"
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
@@ -83,7 +79,7 @@
                     : annotationEnabled
                     ? "Back to annotation"
                     : "View annotation"
-                }}</re-button
+                }}</base-button
               >
             </div>
             <text-2-text-content-editable
@@ -100,53 +96,31 @@
             <div v-if="!editionMode" class="content__footer">
               <template v-if="sentencesOrigin === 'Prediction'">
                 <div v-if="annotationEnabled" class="content__actions-buttons">
-                  <re-button
+                  <base-button
                     v-if="allowValidation"
-                    class="button-primary"
+                    class="primary small"
                     @click="onAnnotate(visibleSentence)"
-                    >Validate</re-button
+                    >Validate</base-button
                   >
-                  <re-button
+                  <base-button
                     v-if="sentences.length"
                     :class="[
                       'edit',
-                      allowValidation
-                        ? 'button-primary--outline'
-                        : 'button-primary',
+                      'primary',
+                      'small',
+                      { outline: allowValidation },
                     ]"
                     @click="edit"
-                    >Edit</re-button
+                    >Edit</base-button
                   >
                 </div>
-                <div v-if="sentences.length" class="content__nav-buttons">
-                  <a
-                    :class="itemNumber <= 0 ? 'disabled' : null"
-                    href="#"
-                    @click.prevent="showitemNumber(--itemNumber)"
-                  >
-                    <svgicon
-                      name="chevron-left"
-                      width="12"
-                      height="12"
-                      color="#4C4EA3"
-                    />
-                  </a>
-                  {{ itemNumber + 1 }} of {{ sentences.length }} predictions
-                  <a
-                    :class="
-                      sentences.length <= itemNumber + 1 ? 'disabled' : null
-                    "
-                    href="#"
-                    @click.prevent="showitemNumber(++itemNumber)"
-                  >
-                    <svgicon
-                      name="chevron-right"
-                      width="12"
-                      height="12"
-                      color="#4C4EA3"
-                    />
-                  </a>
-                </div>
+                <base-slider
+                  v-if="sentences.length"
+                  :slides-origin="sentences"
+                  :item-number="itemNumber"
+                  slides-name="predictions"
+                  @go-to="showItemNumber"
+                />
               </template>
             </div>
           </div>
@@ -315,7 +289,7 @@ export default {
     ...mapActions({
       updateRecords: "entities/datasets/updateDatasetRecords",
     }),
-    async showitemNumber(index) {
+    async showItemNumber(index) {
       this.itemNumber = index;
       await (this.visibleSentence = this.selectedSentence);
     },
@@ -399,21 +373,21 @@ export default {
   &--separator {
     padding-top: 1em;
     &:before {
+      width: 100%;
       content: "";
-      border-top: 1px solid palette(grey, light);
-      width: calc(100% - 200px);
+      border-top: 1px solid palette(grey, 700);
       position: absolute;
       top: 0;
     }
   }
   &--editable {
     width: 100%;
-    ::v-deep p {
+    :deep(p) {
       padding: 0.6em;
       margin: 0;
       outline: none;
     }
-    ::v-deep .re-button {
+    :deep(.button) {
       opacity: 1 !important;
     }
   }
@@ -435,8 +409,8 @@ export default {
     flex-direction: column;
     min-height: 140px;
     &__title {
-      @include font-size(14px);
-      color: palette(grey, medium);
+      @include font-size(13px);
+      color: $font-medium;
       margin: 0;
     }
   }
@@ -444,7 +418,7 @@ export default {
     @include font-size(15px);
     margin-right: 0;
     min-width: 33%;
-    color: palette(grey, medium);
+    color: $font-medium;
   }
   &__footer {
     padding-top: 2em;
@@ -454,11 +428,10 @@ export default {
     align-items: center;
   }
   &__group {
-    width: calc(100% - 200px);
     display: flex;
     align-items: center;
     margin-bottom: 0.5em;
-    .button-clear {
+    &__view-annotations {
       margin: auto 0 auto auto;
     }
   }
@@ -470,49 +443,10 @@ export default {
       opacity: 0;
       pointer-events: none;
     }
-    .re-button {
-      min-height: 32px;
-      line-height: 32px;
-      display: block;
-      margin-bottom: 0;
-      margin-right: 0;
+    .button {
       margin-left: auto;
-      & + .re-button {
-        margin-left: 6px;
-      }
-    }
-  }
-  &__nav-buttons {
-    @include font-size(14px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 33%;
-    margin-right: 33%;
-    margin-left: auto;
-    color: palette(grey, medium);
-    a {
-      height: 20px;
-      width: 20px;
-      line-height: 19px;
-      text-align: center;
-      border-radius: 3px;
-      text-align: center;
-      margin-left: 1.5em;
-      margin-right: 1.5em;
-      display: inline-block;
-      text-decoration: none;
-      outline: none;
-      @include font-size(13px);
-      background: transparent;
-      transition: all 0.2s ease-in-out;
-      &:hover {
-        background: palette(grey, bg);
-        transition: all 0.2s ease-in-out;
-      }
-      &.disabled {
-        opacity: 0;
-        pointer-events: none;
+      & + .button {
+        margin-left: $base-space;
       }
     }
   }

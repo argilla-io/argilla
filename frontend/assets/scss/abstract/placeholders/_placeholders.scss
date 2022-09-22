@@ -35,12 +35,12 @@
     background: linear-gradient( to bottom, $primary-color 0%, $primary-lighten-color 100%);
 }
 
-// Linear gradient using $secondary-color
+// Linear gradient using palette(blue, 300)
 %secondary-color-gradient {
-    background: $secondary-color;
-    background: -moz-linear-gradient( top, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
-    background: -webkit-linear-gradient( top, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
-    background: linear-gradient( to bottom, $secondary-color 0%, $secondary-darken-color 55%, $secondary-color 100%);
+    background: palette(blue, 300);
+    background: -moz-linear-gradient( top, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
+    background: -webkit-linear-gradient( top, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
+    background: linear-gradient( to bottom, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
 }
 
 // Align center block element
@@ -92,47 +92,6 @@
   }
 }
 
-// buttons
-%button {
-  position: relative;
-  min-width: $button-width;
-  min-height: $button-height;
-  padding: 0 1.2em 0 1.2em;
-  display: inline-block;
-  position: relative;
-  overflow: hidden;
-  user-select: none;
-  cursor: pointer;
-  outline: 0;
-  background: none;
-  border: 0;
-  border-radius: $button-radius;
-  font-family: $sff;
-  @include font-size(13px);
-  font-style: inherit;
-  font-variant: inherit;
-  letter-spacing: inherit;
-  font-weight: 500;
-  line-height: $button-height;
-  text-align: center;
-  text-decoration: none;
-  vertical-align: middle;
-  white-space: nowrap;
-  margin-bottom: 10px;
-  transition: all 0.4s $cb-fast;
-  &:focus {
-    outline: 0;
-  }
-  &::-moz-focus-inner {
-      border: 0;
-  }
-  &[disabled] {
-      opacity: 0.5;
-      cursor: default;
-      pointer-events: none;
-  }
-}
-
 %clear {
   @include font-size(13px);
   background: none;
@@ -147,78 +106,6 @@
   &:focus {
       text-decoration: none;
       background: none;
-  }
-}
-
-// tooltip
-%tooltip {
-  box-shadow: $shadow-100;
-  padding: 0.2em;
-  color: $font-dark-color;
-  background: $lighter-color;
-  font-family: $ff;
-  @include font-size(13px);
-  border: 1px solid $line-light-color;
-  position: absolute;
-  margin: auto;
-  transform: translateX(50%);
-  max-width: 266px;
-  overflow-wrap: break-word;
-  pointer-events: none;
-  z-index: 2;
-  white-space: nowrap;
-}
-%tooltip--top {
-  &:after {
-    top: -35px;
-    right: 50%;
-    left: auto;
-  }
-}
-%tooltip--left {
-  &:after {
-    right: calc(100% + 5px);
-    top: auto;
-    transform: none !important;
-  }
-}
-%activetooltip {
-  &:after {
-    content: attr(data-title);
-    @extend %tooltip;
-  }
-}
-%hastooltip {
-  &:after {
-    content: attr(data-title);
-    @extend %tooltip;
-    opacity: 0;
-    z-index: -1;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-  }
-  &:before {
-    content: "";
-    position: absolute;
-    display: block;
-    width: 0;
-    height: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-  &:hover{
-    &:after {
-      width: auto;
-      height: auto;
-      opacity: 1;
-      transition: opacity 0.1s ease 0.2s;
-      z-index: 2;
-    }
-    &:before {
-      opacity: 1;
-      transition: opacity 0.1s ease 0.2s;
-    }
   }
 }
 %hide-scrollbar {

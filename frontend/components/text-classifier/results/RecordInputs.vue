@@ -24,22 +24,21 @@
       <span v-for="(text, index) in data" :key="index" class="record">
         <span :class="['record__item', isHtml(text) ? 'record--email' : '']">
           <span class="record__key">{{ index }}:</span>
-          <LazyRecordExplain
+          <lazy-record-explain
             v-if="explanation"
             :record="record"
             :explain="explanation[index]"
           />
-          <LazyRecordString v-else :record="record" :text="text" />
+          <lazy-record-string v-else :record="record" :text="text" />
         </span>
       </span>
     </div>
-    <a
-      href="#"
-      v-if="scrollHeight >= visibleRecordHeight && !explanation"
-      class="record__button"
+    <base-button
+      v-if="scrollHeight >= visibleRecordHeight"
+      class="primary clear small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
-    </a>
+    </base-button>
   </div>
 </template>
 
@@ -90,9 +89,6 @@ export default {
 .record {
   white-space: pre-line;
   display: block;
-  .list__item--annotation-mode & {
-    padding-right: 200px;
-  }
   &__collapsed {
     .record__content {
       max-height: 174px;
@@ -114,27 +110,12 @@ export default {
     @include font-size(16px);
     line-height: 1.6em;
   }
-  &__button {
-    display: inline-block;
-    border-radius: $border-radius;
-    padding: 0.5em;
-    transition: all 0.2s ease;
-    @include font-size(14px);
-    font-weight: 400;
-    background: none;
+  &__show-more {
     margin-top: 1em;
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1;
-    outline: none;
-    &:hover {
-      transition: all 0.2s ease;
-      background: palette(grey, bg);
-    }
   }
   &--email {
     display: block;
-    ::v-deep table {
+    :deep(table) {
       width: calc(100% - 3em) !important;
       max-width: 700px !important;
       display: inline-block;
@@ -146,13 +127,13 @@ export default {
         max-width: 1140px !important;
       }
     }
-    ::v-deep img {
+    :deep(img) {
       display: none;
     }
-    ::v-deep pre {
+    :deep(pre) {
       white-space: pre-wrap !important;
     }
-    ::v-deep .record__content {
+    :deep(.record__content) {
       display: block;
       max-width: 748px !important;
       margin-left: 0 !important;
@@ -161,7 +142,7 @@ export default {
         max-width: 1140px !important;
       }
     }
-    ::v-deep div.WordSection1 {
+    :deep(div.WordSection1) {
       word-break: break-all !important;
       p {
         font-family: initial !important;

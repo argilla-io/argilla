@@ -21,7 +21,7 @@
       <p class="rule__text">New query</p>
     </div>
     <div class="rule__labels" v-if="labels.length">
-      <ClassifierAnnotationButton
+      <classifier-annotation-button
         v-for="label in visibleLabels"
         :id="label.class"
         :key="`${label.class}`"
@@ -30,7 +30,7 @@
         :data-title="label.class"
         :value="label.class"
       >
-      </ClassifierAnnotationButton>
+      </classifier-annotation-button>
     </div>
     <div v-else class="empty-labels">
       <p>This doesn't have any labels yet.</p>
@@ -130,9 +130,6 @@ export default {
   }
 }
 .feedback-interactions {
-  .list__item--annotation-mode & {
-    padding-right: 200px;
-  }
   &__button {
     margin-top: auto;
     margin-bottom: 0 !important;
@@ -151,7 +148,7 @@ export default {
 }
 .empty-query {
   @include font-size(18px);
-  color: palette(grey, medium);
+  color: $font-medium;
   text-align: center;
   margin-bottom: 2em;
   margin-top: 0;
@@ -159,10 +156,10 @@ export default {
 .label-button {
   margin: 5px;
 }
-.label-button ::v-deep .button {
+.label-button :deep(.button) {
   justify-content: center;
 }
-.label-button:not(.active) ::v-deep .button {
+.label-button:not(.active) :deep(.button) {
   background: #e0e1ff !important;
 }
 .rule {
@@ -173,7 +170,7 @@ export default {
   }
   &__text {
     width: 100%;
-    color: palette(grey, medium);
+    color: $font-medium;
     @include font-size(18px);
     font-weight: 600;
     margin-top: 0;

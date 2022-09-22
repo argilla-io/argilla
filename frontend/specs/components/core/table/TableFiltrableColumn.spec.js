@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import TableFiltrableColumn from "@/components/core/table/TableFiltrableColumn";
+import TableFiltrableColumn from "@/components/base/table/TableFiltrableColumn";
 
 function mountTableFiltrableColumn() {
   return mount(TableFiltrableColumn, {

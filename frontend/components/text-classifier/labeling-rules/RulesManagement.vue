@@ -1,14 +1,14 @@
 <template>
   <div v-if="isVisible" class="rules-management">
-    <ReLoading v-if="$fetchState.pending" />
+    <base-loading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error">
       <div class="rules-management__container">
-        <re-button
-          class="rules-management__close button-tertiary--outline"
+        <base-button
+          class="rules-management__close primary outline small"
           @click="hideList"
         >
           <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to
-          query view</re-button
+          query view</base-button
         >
         <p class="rules-management__title">
           Rules
@@ -16,12 +16,12 @@
             >({{ formattedRules.length }})</span
           >
         </p>
-        <ReSearchBar
+        <base-search-bar
           v-if="formattedRules.length"
           placeholder="Search rule by name"
           @input="onSearch"
         />
-        <ReTableInfo
+        <base-table-info
           class="rules-management__table"
           :data="formattedRules"
           :sorted-order="sortedOrder"
@@ -241,14 +241,14 @@ export default {
   @extend %hide-scrollbar;
   &__container {
     padding: 20px 20px 50px 20px;
-    background: rgba($lighter-color, 0.4);
-    border: 1px solid $lighter-color;
+    background: rgba(palette(white), 0.4);
+    border: 1px solid palette(white);
     width: 100%;
     border-radius: $border-radius;
     position: relative;
   }
   &__title {
-    color: $font-secondary-dark;
+    color: $font-secondary-medium-dark;
     @include font-size(22px);
     font-weight: 600;
     margin-top: 0;
@@ -259,7 +259,7 @@ export default {
   }
   &__table {
     margin-bottom: 2em !important;
-    ::v-deep {
+    :deep() {
       .table-info__item__col {
         width: 130px;
       }

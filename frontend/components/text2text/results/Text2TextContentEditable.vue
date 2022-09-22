@@ -16,10 +16,10 @@
       v-if="editionMode && annotationEnabled && editableText"
       class="content__edit__buttons"
     >
-      <re-button class="button-primary" @click="annotate">Save</re-button>
-      <re-button class="button-primary--outline" @click="$emit('back')"
-        >Back</re-button
+      <base-button class="primary outline small" @click="$emit('back')"
+        >Back</base-button
       >
+      <base-button class="primary small" @click="annotate">Save</base-button>
     </div>
   </span>
 </template>
@@ -99,7 +99,7 @@ export default {
 $marginRight: 200px;
 [contenteditable="true"] {
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
-  border-radius: 3px 3px 3px 3px;
+  border-radius: $border-radius-s 3px 3px 3px;
   &:focus + span {
     display: block;
   }
@@ -135,11 +135,9 @@ $marginRight: 200px;
       margin: 2.5em 200px 0 auto;
       display: flex;
       justify-content: flex-start;
-      .re-button {
-        margin-bottom: 0;
+      .button {
         &:last-child {
-          transition: margin 0s ease;
-          margin-left: 6px;
+          margin-left: $base-space;
         }
       }
     }
