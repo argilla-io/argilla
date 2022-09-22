@@ -51,8 +51,8 @@ export default {
   display: block;
   width: 100%;
   background: white;
-  border: 1px solid palette(grey, smooth);
-  margin-bottom: 8px;
+  border: 1px solid palette(grey, 600);
+  margin-bottom: $base-space-between-records;
   border-radius: $border-radius-m;
 }
 @keyframes load {

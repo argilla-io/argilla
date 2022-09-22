@@ -38,7 +38,7 @@ body {
     -ms-text-size-adjust: 100%;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
-    color: $font-dark-color;
+    color: palette(grey, 200);
     font-family: $ff;
     font-size: $base-font-size;
     line-height: $base-line-height;
@@ -53,7 +53,7 @@ body {
 
 a,
 button {
-    color: $font-dark-color;
+    color: $font-dark;
 }
 
 audio,

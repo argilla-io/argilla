@@ -91,7 +91,6 @@ export default {
 
 <style lang="scss" scoped>
 $sidebar-button-size: 45px;
-$color: #333346;
 .sidebar {
   top: 0;
   width: $sidebar-button-size;
@@ -111,7 +110,7 @@ $color: #333346;
     text-align: center;
     font-weight: 600;
     @include font-size(12px);
-    color: $color;
+    color: $font-dark;
     margin-bottom: 0.5em;
   }
   a {
@@ -127,25 +126,6 @@ $color: #333346;
   }
 }
 a[data-title]:not(.active) {
-  @extend %hastooltip;
-  &:after {
-    padding: 0.5em 1em;
-    top: 0;
-    right: calc(100% + 10px);
-    transform: none;
-    background: $color;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    @include font-size(14px);
-    font-weight: 600;
-  }
-  &:before {
-    right: calc(100% + 3px);
-    top: 0.65em;
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-    border-left: 7px solid $color;
-  }
+  @extend %has-tooltip--left;
 }
 </style>

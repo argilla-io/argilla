@@ -114,7 +114,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .whitespace {
+:deep(.whitespace) {
   background: palette(white);
   padding-bottom: 3px;
   border-bottom: 5px solid palette(white);
@@ -161,9 +161,9 @@ export default {
   position: absolute;
   top: -23px;
   right: -3px;
-  border-radius: 3px;
+  border-radius: $border-radius-s;
   min-width: 10px;
-  background: palette(grey, dark);
+  background: $font-dark;
   fill: palette(white);
   padding: 2px;
 }

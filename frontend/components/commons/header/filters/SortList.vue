@@ -28,20 +28,15 @@
         @addSortField="onAddSortField(index, ...arguments)"
       />
     </div>
-    <a
+    <base-button
       v-if="selectedFields.length === numberOfSortFields"
-      class="sort__add-button"
-      href="#"
+      class="sort__add-button link"
       @click="addNewField"
-      >+ Add another field</a
+      >+ Add another field</base-button
     >
     <div class="sort__buttons" v-if="sort.length || selectedFields.length">
-      <re-button
-        class="button-tertiary--small button-tertiary--outline"
-        @click="cancel"
-        >Cancel</re-button
-      >
-      <re-button class="button-primary--small" @click="apply">Sort</re-button>
+      <base-button class="primary outline" @click="cancel">Cancel</base-button>
+      <base-button class="primary" @click="apply">Sort</base-button>
     </div>
   </div>
 </template>
@@ -127,23 +122,17 @@ export default {
   &__buttons {
     display: flex;
     margin-top: 1.5em;
+    margin-bottom: 10px;
     & > * {
       display: block;
       width: 100%;
-      margin-right: 0.5em;
-      min-height: 38px;
       &:last-child {
-        margin-right: 0;
+        margin-left: $base-space;
       }
     }
   }
   &__add-button {
-    @include font-size(13px);
     margin-top: 1em;
-    color: $primary-color;
-    outline: none;
-    text-decoration: none;
-    display: block;
   }
 }
 </style>

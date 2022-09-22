@@ -31,19 +31,17 @@
         />
       </span>
 
-      <a
+      <base-button
         v-if="visibleLabels.length < filteredLabels.length"
-        href="#"
-        class="predictions__more"
-        @click.prevent="expandLabels()"
-        >+{{ filteredLabels.length - visibleLabels.length }}</a
+        class="predictions__more primary clear"
+        @click="expandLabels()"
+        >+{{ filteredLabels.length - visibleLabels.length }}</base-button
       >
-      <a
+      <base-button
         v-else-if="visibleLabels.length > maxVisibleLabels"
-        href="#"
-        class="predictions__more"
-        @click.prevent="collapseLabels()"
-        >Show less</a
+        class="predictions__more primary clear"
+        @click="collapseLabels()"
+        >Show less</base-button
       >
     </div>
   </div>
@@ -134,19 +132,8 @@ export default {
     margin-left: 0;
   }
   &__more {
-    align-self: center;
     margin: 3.5px;
-    text-decoration: none;
-    font-weight: 600;
-    outline: none;
-    padding: 0.5em;
-    border-radius: $border-radius;
-    transition: all 0.2s ease-in-out;
     display: inline-block;
-    &:hover {
-      transition: all 0.2s ease-in-out;
-      background: palette(grey, bg);
-    }
   }
 }
 </style>

@@ -2,46 +2,49 @@
   <span class="entities__selector__container">
     <div class="entities__selector">
       <ul v-if="formattedEntities.length" class="entities__selector__options">
-        <li
-          class="entities__selector__option suggestion"
-          :class="[
-            `color_${suggestedEntity.colorId % $entitiesMaxColors}`,
-            activeEntity === -1 ? 'active' : null,
-          ]"
-          v-if="suggestedEntity"
-          @click="selectEntity(suggestedEntity)"
-        >
-          <span>{{ suggestedEntity.text }}</span>
-          <span class="entity__sort-code">[space]</span>
+        <li v-if="suggestedEntity" @click="selectEntity(suggestedEntity)">
+          <entity-label
+            :label="suggestedEntity.text"
+            shortcut="space"
+            :class="[
+              'entities__selector__option',
+              'suggestion',
+              activeEntity === -1 ? 'active' : null,
+            ]"
+            :color="`color_${suggestedEntity.colorId % $entitiesMaxColors}`"
+          />
         </li>
         <li
-          class="entities__selector__option suggestion"
-          :class="[
-            `color_${lastSelectedEntity.colorId % $entitiesMaxColors}`,
-            activeEntity === -1 ? 'active' : null,
-          ]"
           v-else-if="lastSelectedEntity.text"
           @click="selectEntity(lastSelectedEntity)"
         >
-          <span>{{ lastSelectedEntity.text }}</span>
-          <span class="entity__sort-code">[space]</span>
+          <entity-label
+            :label="lastSelectedEntity.text"
+            shortcut="space"
+            :class="[
+              'entities__selector__option',
+              'suggestion',
+              activeEntity === -1 ? 'active' : null,
+            ]"
+            :color="`color_${lastSelectedEntity.colorId % $entitiesMaxColors}`"
+          />
         </li>
         <li
           v-for="(entity, index) in formattedEntities"
           tabindex="0"
           :focused="activeEntity === index"
           :key="index"
-          class="entities__selector__option"
-          :class="[
-            `color_${entity.colorId % $entitiesMaxColors}`,
-            activeEntity === index ? 'active' : null,
-          ]"
           @click="selectEntity(entity)"
         >
-          <span>{{ entity.text }}</span>
-          <span class="entity__sort-code"
-            >[{{ activeEntity === index ? "enter" : entity.shortCut }}]</span
-          >
+          <entity-label
+            :label="entity.text"
+            :shortcut="activeEntity === index ? 'enter' : entity.shortCut"
+            :class="[
+              'entities__selector__option',
+              activeEntity === index ? 'active' : null,
+            ]"
+            :color="`color_${entity.colorId % $entitiesMaxColors}`"
+          />
         </li>
       </ul>
       <div v-else class="entities__selector--empty">
@@ -161,7 +164,7 @@ export default {
 .entities {
   &__selector {
     min-width: 220px;
-    background: palette(grey, smooth);
+    background: palette(grey, 600);
     font-weight: 600;
     padding: 0.8em;
     border-radius: $border-radius;
@@ -186,19 +189,12 @@ export default {
     }
     &__option {
       display: flex;
-      transition: all 0.2s ease;
-      padding: 0.5em;
-      position: relative;
-      cursor: pointer;
-      margin-top: 2px;
       margin-bottom: 2px;
       &.suggestion {
         margin-bottom: 0.5em;
       }
-      span {
-        cursor: pointer !important;
-        word-break: break-word;
-        hyphens: auto;
+      :deep(.shortcut) {
+        margin-left: auto;
       }
     }
     &--empty {
@@ -211,20 +207,6 @@ export default {
         margin: 0;
         font-weight: 400;
       }
-    }
-  }
-}
-.entity {
-  &.non-selectable,
-  &.non-selectable--show-sort-code {
-    cursor: default;
-    pointer-events: none;
-  }
-  &__sort-code {
-    margin-left: auto;
-    margin-right: 0;
-    .non-selectable & {
-      display: none;
     }
   }
 }

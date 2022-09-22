@@ -1,11 +1,11 @@
 <template>
-  <ReCheckbox
+  <base-checkbox
     @change="changeUncoveredByRules"
     class="re-checkbox--dark"
     :value="filter.selected"
   >
     Only records not covered by rules
-  </ReCheckbox>
+  </base-checkbox>
 </template>
 
 <script>
@@ -34,8 +34,8 @@ export default {
 .re-checkbox {
   flex-direction: row-reverse;
   margin-left: 2em;
-  ::v-deep .checkbox-label {
-    margin-left: 1em;
+  :deep(.checkbox-label) {
+    margin-left: $base-space * 2;
   }
 }
 </style>
