@@ -18,6 +18,6 @@ If you want to add something here, remember to add it as normal import in the _T
 as well as in the `_import_structure` dictionary.
 """
 
-from . import _version
+from rubrix import _version
 
 __version__ = _version.version
