@@ -58,8 +58,12 @@
 <script>
 import { DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { IdState } from "vue-virtual-scroller";
+import ClassifierAnnotationButton from "../ClassifierAnnotationButton.vue";
 
 export default {
+  components: {
+    ClassifierAnnotationButton,
+  },
   mixins: [
     IdState({
       // You can customize this
@@ -187,9 +191,7 @@ export default {
       return this.record.prediction ? this.record.prediction.labels : [];
     },
     appliedLabels() {
-      return this.filteredLabels
-        .filter((l) => l.selected)
-        .map((label) => label.class);
+      return this.labels.filter((l) => l.selected).map((label) => label.class);
     },
     predictedAs() {
       return this.record.predicted_as;
@@ -224,7 +226,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 %item {
-  // width: calc(25% - 5px);
   min-width: 80px;
   max-width: 238px;
 }
