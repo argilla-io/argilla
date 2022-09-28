@@ -55,24 +55,23 @@ describe("ClassifierAnnotationAreaComponent", () => {
   });
 });
 
-const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations = async (
-  selectedAnnotations
-) => {
-  const annotationButtons = wrapper.findComponent(ClassifierAnnotationButton);
-  const emittedValuesFromAnnotationButtons = selectedAnnotations;
-  annotationButtons.vm.$emit("change", emittedValuesFromAnnotationButtons);
-  await wrapper.vm.$nextTick();
-  expect(spyUpdateLabelsMethod).toHaveBeenCalled();
-  if (selectedAnnotations.length) {
-    selectedAnnotations.forEach((annotation) => {
-      expect(wrapper.vm.selectedLabels).toContain(annotation);
-    });
-  }
-  expect(wrapper.vm.selectedLabels.length).toBe(
-    emittedValuesFromAnnotationButtons.length
-  );
-  expect(wrapper.emitted("validate"));
-  expect(wrapper.emitted().validate[0]).toEqual([
-    { labels: emittedValuesFromAnnotationButtons },
-  ]);
-};
+const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations =
+  async (selectedAnnotations) => {
+    const annotationButtons = wrapper.findComponent(ClassifierAnnotationButton);
+    const emittedValuesFromAnnotationButtons = selectedAnnotations;
+    annotationButtons.vm.$emit("change", emittedValuesFromAnnotationButtons);
+    await wrapper.vm.$nextTick();
+    expect(spyUpdateLabelsMethod).toHaveBeenCalled();
+    if (selectedAnnotations.length) {
+      selectedAnnotations.forEach((annotation) => {
+        expect(wrapper.vm.selectedLabels).toContain(annotation);
+      });
+    }
+    expect(wrapper.vm.selectedLabels.length).toBe(
+      emittedValuesFromAnnotationButtons.length
+    );
+    expect(wrapper.emitted("validate"));
+    expect(wrapper.emitted().validate[0]).toEqual([
+      { labels: emittedValuesFromAnnotationButtons },
+    ]);
+  };
