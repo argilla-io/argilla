@@ -63,7 +63,7 @@ const testIfEmittedValuesFromValidateEventIsEqualToUserSelectedAnnotations = asy
   annotationButtons.vm.$emit("change", emittedValuesFromAnnotationButtons);
   await wrapper.vm.$nextTick();
   expect(spyUpdateLabelsMethod).toHaveBeenCalled();
-  if (selectedAnnotations.lenth) {
+  if (selectedAnnotations.length) {
     selectedAnnotations.forEach((annotation) => {
       expect(wrapper.vm.selectedLabels).toContain(annotation);
     });
