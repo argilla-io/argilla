@@ -17,19 +17,19 @@ from datetime import datetime
 
 import pytest
 
-from rubrix.client.models import Text2TextRecord
-from rubrix.client.sdk.text2text.models import (
+from argilla.client.models import Text2TextRecord
+from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextAnnotation,
     Text2TextBulkData,
     Text2TextPrediction,
     Text2TextQuery,
 )
-from rubrix.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
-from rubrix.server.apis.v0.models.text2text import (
+from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
+from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest as ServerText2TextBulkData,
 )
-from rubrix.server.apis.v0.models.text2text import (
+from argilla.server.apis.v0.models.text2text import (
     Text2TextQuery as ServerText2TextQuery,
 )
 

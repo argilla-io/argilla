@@ -16,50 +16,50 @@ import time
 
 import pytest
 
-from rubrix.client.sdk.commons.errors import ForbiddenApiError
+from argilla.client.sdk.commons.errors import ForbiddenApiError
 
 
 def test_delete_records_from_dataset(mocked_client):
     dataset = "test_delete_records_from_dataset"
-    import rubrix as rb
+    import argilla as ar
 
-    rb.delete(dataset)
-    rb.log(
+    ar.delete(dataset)
+    ar.log(
         name=dataset,
         records=[
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=i, text="This is the text", metadata=dict(idx=i)
             )
             for i in range(0, 50)
         ],
     )
 
-    matched, processed = rb.delete_records(name=dataset, ids=[10], discard_only=True)
+    matched, processed = ar.delete_records(name=dataset, ids=[10], discard_only=True)
     assert matched, processed == (1, 1)
 
-    ds = rb.load(name=dataset)
+    ds = ar.load(name=dataset)
     assert len(ds) == 50
 
     time.sleep(1)
-    matched, processed = rb.delete_records(
+    matched, processed = ar.delete_records(
         name=dataset, query="id:10", discard_only=False
     )
     assert matched, processed == (1, 1)
 
     time.sleep(1)
-    ds = rb.load(name=dataset)
+    ds = ar.load(name=dataset)
     assert len(ds) == 49
 
 
 def test_delete_records_without_permission(mocked_client):
     dataset = "test_delete_records_without_permission"
-    import rubrix as rb
+    import argilla as ar
 
-    rb.delete(dataset)
-    rb.log(
+    ar.delete(dataset)
+    ar.log(
         name=dataset,
         records=[
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=i, text="This is the text", metadata=dict(idx=i)
             )
             for i in range(0, 50)
@@ -67,20 +67,20 @@ def test_delete_records_without_permission(mocked_client):
     )
     try:
         mocked_client.change_current_user("mock-user")
-        matched, processed = rb.delete_records(
+        matched, processed = ar.delete_records(
             name=dataset, ids=[10], discard_only=True
         )
         assert matched, processed == (1, 1)
 
         with pytest.raises(ForbiddenApiError):
-            rb.delete_records(
+            ar.delete_records(
                 name=dataset,
                 query="id:10",
                 discard_only=False,
                 discard_when_forbidden=False,
             )
 
-        matched, processed = rb.delete_records(
+        matched, processed = ar.delete_records(
             name=dataset,
             query="id:10",
             discard_only=False,
@@ -93,18 +93,18 @@ def test_delete_records_without_permission(mocked_client):
 
 def test_delete_records_with_unmatched_records(mocked_client):
     dataset = "test_delete_records_with_unmatched_records"
-    import rubrix as rb
+    import argilla as ar
 
-    rb.delete(dataset)
-    rb.log(
+    ar.delete(dataset)
+    ar.log(
         name=dataset,
         records=[
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=i, text="This is the text", metadata=dict(idx=i)
             )
             for i in range(0, 50)
         ],
     )
 
-    matched, processed = rb.delete_records(dataset, ids=["you-wont-find-me-here"])
+    matched, processed = ar.delete_records(dataset, ids=["you-wont-find-me-here"])
     assert (matched, processed) == (0, 0)

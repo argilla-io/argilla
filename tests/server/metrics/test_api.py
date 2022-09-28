@@ -13,17 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.apis.v0.models.text2text import Text2TextBulkRequest, Text2TextRecord
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text2text import Text2TextBulkRequest, Text2TextRecord
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecord,
 )
-from rubrix.server.apis.v0.models.token_classification import (
+from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
     TokenClassificationRecord,
 )
-from rubrix.server.services.metrics.models import CommonTasksMetrics
-from rubrix.server.services.tasks.token_classification.metrics import (
+from argilla.server.services.metrics.models import CommonTasksMetrics
+from argilla.server.services.tasks.token_classification.metrics import (
     TokenClassificationMetrics,
 )
 
@@ -57,7 +57,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::WrongTaskError",
+            "code": "argilla.api.errors::WrongTaskError",
             "params": {
                 "message": "Provided task TokenClassification cannot be applied to dataset"
             },
@@ -72,7 +72,7 @@ def test_wrong_dataset_metrics(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::WrongTaskError",
+            "code": "argilla.api.errors::WrongTaskError",
             "params": {
                 "message": "Provided task TokenClassification cannot be applied to dataset"
             },
@@ -198,7 +198,7 @@ def test_dataset_metrics(mocked_client):
     assert response.status_code == 404
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::EntityNotFoundError",
+            "code": "argilla.api.errors::EntityNotFoundError",
             "params": {"name": "missing_metric", "type": "ServiceBaseMetric"},
         }
     }

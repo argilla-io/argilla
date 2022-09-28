@@ -16,13 +16,13 @@
 import logging
 import sys
 
-from rubrix.logging import LoguruLoggerHandler
-from rubrix.utils import LazyRubrixModule
+from argilla.logging import LoguruLoggerHandler
+from argilla.utils import LazyargillaModule
 
 
 def test_lazy_module():
-    assert isinstance(sys.modules["rubrix"], LazyRubrixModule)
+    assert isinstance(sys.modules["argilla"], LazyargillaModule)
 
 
 def test_configure_logging_call():
-    assert isinstance(logging.getLogger("rubrix").handlers[0], LoguruLoggerHandler)
+    assert isinstance(logging.getLogger("argilla").handlers[0], LoguruLoggerHandler)

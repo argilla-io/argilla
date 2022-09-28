@@ -18,14 +18,14 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from rubrix import TextClassificationRecord
-from rubrix.labeling.text_classification import (
+from argilla import TextClassificationRecord
+from argilla.labeling.text_classification import (
     FlyingSquid,
     Snorkel,
     WeakLabels,
     WeakMultiLabels,
 )
-from rubrix.labeling.text_classification.label_models import (
+from argilla.labeling.text_classification.label_models import (
     LabelModel,
     MajorityVoter,
     MissingAnnotationError,
@@ -46,7 +46,7 @@ def weak_labels(monkeypatch):
         ]
 
     monkeypatch.setattr(
-        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        "argilla.labeling.text_classification.weak_labels.load", mock_load
     )
 
     def mock_apply(self, *args, **kwargs):
@@ -74,7 +74,7 @@ def weak_labels_from_guide(monkeypatch, resources):
         return [TextClassificationRecord(text="mock", id=i) for i in range(len(matrix))]
 
     monkeypatch.setattr(
-        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        "argilla.labeling.text_classification.weak_labels.load", mock_load
     )
 
     def mock_apply(self, *args, **kwargs):
@@ -100,7 +100,7 @@ def weak_multi_labels(monkeypatch):
         ]
 
     monkeypatch.setattr(
-        "rubrix.labeling.text_classification.weak_labels.load", mock_load
+        "argilla.labeling.text_classification.weak_labels.load", mock_load
     )
 
     def mock_apply(self, *args, **kwargs):

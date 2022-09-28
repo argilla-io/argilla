@@ -21,18 +21,18 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
 
-import rubrix
-from rubrix.monitoring.asgi import RubrixLogHTTPMiddleware, token_classification_mapper
+import argilla
+from argilla.monitoring.asgi import argillaLogHTTPMiddleware, token_classification_mapper
 
 
-def test_rubrix_middleware_for_text_classification(monkeypatch):
+def test_argilla_middleware_for_text_classification(monkeypatch):
 
     expected_endpoint = "/predict"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
     app = FastAPI()
     app.add_middleware(
-        RubrixLogHTTPMiddleware,
+        argillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
     )
@@ -58,10 +58,10 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
             self.was_called = True
             assert name == expected_dataset_name
             assert len(records) == 2
-            assert isinstance(records[0], rubrix.TextClassificationRecord)
+            assert isinstance(records[0], argilla.TextClassificationRecord)
 
     mock_log = MockLog()
-    monkeypatch.setattr(rubrix, "log", mock_log)
+    monkeypatch.setattr(argilla, "log", mock_log)
     mock = TestClient(app)
 
     mock.post(
@@ -82,14 +82,14 @@ def test_rubrix_middleware_for_text_classification(monkeypatch):
     assert not mock_log.was_called
 
 
-def test_rubrix_middleware_for_token_classification(monkeypatch):
+def test_argilla_middleware_for_token_classification(monkeypatch):
 
     expected_endpoint = "/predict"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
     app = Starlette()
     app.add_middleware(
-        RubrixLogHTTPMiddleware,
+        argillaLogHTTPMiddleware,
         api_endpoint=expected_endpoint,
         dataset=expected_dataset_name,
         records_mapper=token_classification_mapper,
@@ -115,10 +115,10 @@ def test_rubrix_middleware_for_token_classification(monkeypatch):
             self.was_called = True
             assert name == expected_dataset_name
             assert len(records) == 2
-            assert isinstance(records[0], rubrix.TokenClassificationRecord)
+            assert isinstance(records[0], argilla.TokenClassificationRecord)
 
     mock_log = MockLog()
-    monkeypatch.setattr(rubrix, "log", mock_log)
+    monkeypatch.setattr(argilla, "log", mock_log)
     mock = TestClient(app)
 
     mock.post(

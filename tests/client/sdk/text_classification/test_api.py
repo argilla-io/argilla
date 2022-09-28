@@ -15,8 +15,8 @@
 import httpx
 import pytest
 
-from rubrix.client.sdk.text_classification.api import data
-from rubrix.client.sdk.text_classification.models import TextClassificationRecord
+from argilla.client.sdk.text_classification.api import data
+from argilla.client.sdk.text_classification.models import TextClassificationRecord
 
 
 @pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])

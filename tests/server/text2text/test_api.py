@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse
-from rubrix.server.apis.v0.models.text2text import (
+from argilla.server.apis.v0.models.commons.model import BulkResponse
+from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
     Text2TextRecordInputs,
     Text2TextSearchResults,

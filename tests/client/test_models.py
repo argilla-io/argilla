@@ -21,8 +21,8 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.client.models import (
+from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,

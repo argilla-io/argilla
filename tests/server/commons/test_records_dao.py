@@ -14,11 +14,11 @@
 
 import pytest
 
-from rubrix.server.commons.models import TaskType
-from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
-from rubrix.server.daos.models.datasets import BaseDatasetDB
-from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.errors import MissingDatasetRecordsError
+from argilla.server.commons.models import TaskType
+from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.models.datasets import BaseDatasetDB
+from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.errors import MissingDatasetRecordsError
 
 
 def test_raise_proper_error():

@@ -17,21 +17,21 @@ from datetime import datetime
 
 import pytest
 
-from rubrix.client.models import TokenClassificationRecord
-from rubrix.client.sdk.token_classification.models import (
+from argilla.client.models import TokenClassificationRecord
+from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     EntitySpan,
     TokenClassificationAnnotation,
     TokenClassificationBulkData,
     TokenClassificationQuery,
 )
-from rubrix.client.sdk.token_classification.models import (
+from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
-from rubrix.server.apis.v0.models.token_classification import (
+from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest as ServerTokenClassificationBulkData,
 )
-from rubrix.server.apis.v0.models.token_classification import (
+from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationQuery as ServerTokenClassificationQuery,
 )
 

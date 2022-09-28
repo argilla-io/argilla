@@ -18,9 +18,9 @@ import cleanlab
 import pytest
 from pkg_resources import parse_version
 
-import rubrix as rb
-from rubrix.labeling.text_classification import find_label_errors
-from rubrix.labeling.text_classification.label_errors import (
+import argilla as ar
+from argilla.labeling.text_classification import find_label_errors
+from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,
     NoRecordsError,
     SortBy,
@@ -34,7 +34,7 @@ from rubrix.labeling.text_classification.label_errors import (
 def records(request):
     if request.param:
         return [
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 text="test", annotation=anot, prediction=pred, multi_label=True, id=i
             )
             for i, anot, pred in zip(
@@ -45,7 +45,7 @@ def records(request):
         ]
 
     return [
-        rb.TextClassificationRecord(text="test", annotation=anot, prediction=pred, id=i)
+        ar.TextClassificationRecord(text="test", annotation=anot, prediction=pred, id=i)
         for i, anot, pred in zip(
             range(2 * 6),
             ["good", "bad"] * 6,
@@ -67,8 +67,8 @@ def test_not_installed(monkeypatch):
 
 def test_no_records():
     records = [
-        rb.TextClassificationRecord(text="test", prediction=[("mock", 0.0)]),
-        rb.TextClassificationRecord(text="test", annotation="test"),
+        ar.TextClassificationRecord(text="test", prediction=[("mock", 0.0)]),
+        ar.TextClassificationRecord(text="test", annotation="test"),
     ]
 
     with pytest.raises(
@@ -78,7 +78,7 @@ def test_no_records():
 
 
 def test_multi_label_warning(caplog):
-    record = rb.TextClassificationRecord(
+    record = ar.TextClassificationRecord(
         text="test",
         prediction=[("mock", 0.0), ("mock2", 0.0)],
         annotation=["mock", "mock2"],
@@ -121,7 +121,7 @@ def test_sort_by(monkeypatch, sort_by, expected):
             mock_find_label_issues,
         )
 
-    record = rb.TextClassificationRecord(
+    record = ar.TextClassificationRecord(
         text="mock", prediction=[("mock", 0.1)], annotation="mock"
     )
     find_label_errors(records=[record], sort_by=sort_by)
@@ -209,7 +209,7 @@ def test_construct_s_and_psx(records):
 
 def test_missing_predictions():
     records = [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="test", annotation="mock", prediction=[("mock2", 0.1)]
         )
     ]
@@ -220,7 +220,7 @@ def test_missing_predictions():
         _construct_s_and_psx(records)
 
     records.append(
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="test", annotation="mock", prediction=[("mock", 0.1)]
         )
     )
@@ -235,13 +235,13 @@ def test_missing_predictions():
 def dataset(mocked_client, records):
     dataset = "dataset_for_label_errors"
 
-    rb.log(records, name=dataset)
+    ar.log(records, name=dataset)
 
     yield dataset
-    rb.delete(dataset)
+    ar.delete(dataset)
 
 
 def test_find_label_errors_integration(dataset):
-    records = rb.load(dataset)
+    records = ar.load(dataset)
     recs = find_label_errors(records)
     assert [rec.id for rec in recs] == list(range(0, 11, 2)) + list(range(1, 12, 2))

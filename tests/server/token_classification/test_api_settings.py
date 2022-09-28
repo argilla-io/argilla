@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import rubrix as rb
-from rubrix.server.commons.models import TaskType
+import argilla as ar
+from argilla.server.commons.models import TaskType
 
 
 def create_dataset(client, name: str):
@@ -25,7 +25,7 @@ def create_dataset(client, name: str):
 
 def test_create_dataset_settings(mocked_client):
     name = "test_create_dataset_settings"
-    rb.delete(name)
+    ar.delete(name)
     create_dataset(mocked_client, name)
 
     response = create_settings(mocked_client, name)
@@ -46,7 +46,7 @@ def create_settings(mocked_client, name):
 
 def test_get_dataset_settings_not_found(mocked_client):
     name = "test_get_dataset_settings"
-    rb.delete(name)
+    ar.delete(name)
     create_dataset(mocked_client, name)
 
     response = fetch_settings(mocked_client, name)
@@ -55,7 +55,7 @@ def test_get_dataset_settings_not_found(mocked_client):
 
 def test_delete_settings(mocked_client):
     name = "test_delete_settings"
-    rb.delete(name)
+    ar.delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -69,7 +69,7 @@ def test_delete_settings(mocked_client):
 
 def test_validate_settings_when_logging_data(mocked_client):
     name = "test_validate_settings_when_logging_data"
-    rb.delete(name)
+    ar.delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -78,7 +78,7 @@ def test_validate_settings_when_logging_data(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::BadRequestError",
+            "code": "argilla.api.errors::BadRequestError",
             "params": {
                 "message": "Provided records contain the BAD label, "
                 "that is not included in the labels schema.\n"
@@ -114,7 +114,7 @@ def log_some_data(mocked_client, name):
 
 def test_validate_settings_after_logging(mocked_client):
     name = "test_validate_settings_after_logging"
-    rb.delete(name)
+    ar.delete(name)
     response = log_some_data(mocked_client, name)
     assert response.status_code == 200
 
@@ -122,7 +122,7 @@ def test_validate_settings_after_logging(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::BadRequestError",
+            "code": "argilla.api.errors::BadRequestError",
             "params": {
                 "message": "The label BAD was found in the dataset but "
                 "not in provided labels schema. \n"

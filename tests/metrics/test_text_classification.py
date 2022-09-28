@@ -12,24 +12,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import rubrix as rb
-from rubrix.metrics.text_classification import f1, f1_multilabel
+import argilla as ar
+from argilla.metrics.text_classification import f1, f1_multilabel
 
 
 def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_text_classification"
 
-    rb.log(
+    ar.log(
         [
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=1,
-                text="my first rubrix example",
+                text="my first argilla example",
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=2,
-                inputs={"text": "my first rubrix example"},
+                inputs={"text": "my first argilla example"},
                 prediction=[("ham", 0.8), ("spam", 0.2)],
                 annotation=["ham"],
             ),
@@ -79,15 +79,15 @@ def test_metrics_for_text_classification(mocked_client):
 def test_f1_without_results(mocked_client):
     dataset = "test_f1_without_results"
 
-    rb.log(
+    ar.log(
         [
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=1,
-                text="my first rubrix example",
+                text="my first argilla example",
             ),
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=2,
-                inputs={"text": "my first rubrix example"},
+                inputs={"text": "my first argilla example"},
             ),
         ],
         name=dataset,

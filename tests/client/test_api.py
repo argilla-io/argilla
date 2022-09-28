@@ -22,11 +22,16 @@ import httpx
 import pandas as pd
 import pytest
 
-import rubrix as rb
-from rubrix.client import api
-from rubrix.client.api import InputValueError
-from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.commons.errors import (
+import argilla as ar
+from argilla._constants import (
+    DEFAULT_API_KEY,
+    WORKSPACE_HEADER_NAME,
+    _OLD_WORKSPACE_HEADER_NAME,
+)
+from argilla.client import api
+from argilla.client.api import InputValueError
+from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     ForbiddenApiError,
     GenericApiError,
@@ -34,9 +39,9 @@ from rubrix.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
-from rubrix.client.sdk.users import api as users_api
-from rubrix.client.sdk.users.models import User
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.client.sdk.users import api as users_api
+from argilla.client.sdk.users.models import User
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from tests.server.test_api import create_some_data_for_text_classification
@@ -88,11 +93,11 @@ def mock_response_token_401(monkeypatch):
 def test_init_correct(mock_response_200):
     """Testing correct default initialization
 
-    It checks if the _client created is a RubrixClient object.
+    It checks if the _client created is a argillaClient object.
     """
 
     assert api.active_api()._client == AuthenticatedClient(
-        base_url="http://localhost:6900", token="rubrix.apikey", timeout=60.0
+        base_url="http://localhost:6900", token=DEFAULT_API_KEY, timeout=60.0
     )
 
     assert api.__ACTIVE_API__._user == api.User(username="booohh")
@@ -102,25 +107,31 @@ def test_init_correct(mock_response_200):
         base_url="mock_url",
         token="mock_key",
         timeout=42,
-        headers={"X-Rubrix-Workspace": "mock_ws"},
+        headers={
+            WORKSPACE_HEADER_NAME: "mock_ws",
+            _OLD_WORKSPACE_HEADER_NAME: "mock_ws",
+        },
     )
 
 
-def test_init_evironment_url(mock_response_200, monkeypatch):
+def test_init_environment_url(mock_response_200, monkeypatch):
     """Testing initialization with api_url provided via environment variable
 
     It checks the url in the environment variable gets passed to client.
     """
-    monkeypatch.setenv("RUBRIX_API_URL", "mock_url")
-    monkeypatch.setenv("RUBRIX_API_KEY", "mock_key")
-    monkeypatch.setenv("RUBRIX_WORKSPACE", "mock_workspace")
+    monkeypatch.setenv("ARGILLA_API_URL", "mock_url")
+    monkeypatch.setenv("ARGILLA_API_KEY", "mock_key")
+    monkeypatch.setenv("ARGILLA_WORKSPACE", "mock_workspace")
     api.init()
 
     assert api.__ACTIVE_API__._client == AuthenticatedClient(
         base_url="mock_url",
         token="mock_key",
         timeout=60,
-        headers={"X-Rubrix-Workspace": "mock_workspace"},
+        headers={
+            WORKSPACE_HEADER_NAME: "mock_workspace",
+            _OLD_WORKSPACE_HEADER_NAME: "mock_workspace",
+        },
     )
 
 
@@ -139,7 +150,7 @@ def test_log_something(monkeypatch, mocked_client):
 
     response = api.log(
         name=dataset_name,
-        records=rb.TextClassificationRecord(inputs={"text": "This is a test"}),
+        records=ar.TextClassificationRecord(inputs={"text": "This is a test"}),
     )
 
     assert response.processed == 1
@@ -174,7 +185,7 @@ def test_load_limits(mocked_client):
 def test_log_records_with_too_long_text(mocked_client):
     dataset_name = "test_log_records_with_too_long_text"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    item = rb.TextClassificationRecord(
+    item = ar.TextClassificationRecord(
         inputs={"text": "This is a toooooo long text\n" * 10000}
     )
 
@@ -192,7 +203,7 @@ def test_log_without_name(mocked_client):
         api.InputValueError, match="Empty dataset name has been passed as argument."
     ):
         api.log(
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 inputs={"text": "This is a single record. Only this. No more."}
             ),
             name=None,
@@ -215,7 +226,7 @@ def test_log_background(mocked_client):
     # Log in the background, and extract the future
     sample_text = "Sample text for testing"
     future = api.log(
-        rb.TextClassificationRecord(text=sample_text),
+        ar.TextClassificationRecord(text=sample_text),
         name=dataset_name,
         background=True,
     )
@@ -225,7 +236,7 @@ def test_log_background(mocked_client):
     with pytest.raises(NotFoundApiError):
         dataset = api.load(dataset_name)
 
-    # Log the record to Rubrix
+    # Log the record to argilla
     try:
         future.result()
     finally:
@@ -267,10 +278,10 @@ def test_delete_with_errors(mocked_client, monkeypatch, status, error_type):
 @pytest.mark.parametrize(
     "records, dataset_class",
     [
-        ("singlelabel_textclassification_records", rb.DatasetForTextClassification),
-        ("multilabel_textclassification_records", rb.DatasetForTextClassification),
-        ("tokenclassification_records", rb.DatasetForTokenClassification),
-        ("text2text_records", rb.DatasetForText2Text),
+        ("singlelabel_textclassification_records", ar.DatasetForTextClassification),
+        ("multilabel_textclassification_records", ar.DatasetForTextClassification),
+        ("tokenclassification_records", ar.DatasetForTokenClassification),
+        ("text2text_records", ar.DatasetForText2Text),
     ],
 )
 def test_general_log_load(mocked_client, monkeypatch, request, records, dataset_class):
@@ -320,9 +331,9 @@ def test_log_with_generator(mocked_client, monkeypatch):
     dataset_name = "test_log_with_generator"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
-    def generator(items: int = 10) -> Iterable[rb.TextClassificationRecord]:
+    def generator(items: int = 10) -> Iterable[ar.TextClassificationRecord]:
         for i in range(0, items):
-            yield rb.TextClassificationRecord(id=i, inputs={"text": "The text data"})
+            yield ar.TextClassificationRecord(id=i, inputs={"text": "The text data"})
 
     api.log(generator(), name=dataset_name)
 
@@ -332,7 +343,7 @@ def test_create_ds_with_wrong_name(mocked_client):
 
     with pytest.raises(InputValueError):
         api.log(
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 inputs={"text": "The text data"},
             ),
             name=dataset_name,
@@ -344,7 +355,7 @@ def test_delete_dataset(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset_name}")
 
     api.log(
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             id=0,
             inputs={"text": "The text data"},
             annotation_agent="test",
@@ -376,7 +387,7 @@ def test_dataset_copy(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset_copy}")
     mocked_client.delete(f"/api/datasets/{dataset}")
 
-    record = rb.TextClassificationRecord(
+    record = ar.TextClassificationRecord(
         id=0,
         text="This is the record input",
         annotation_agent="test",
@@ -405,14 +416,14 @@ def test_dataset_copy_to_another_workspace(mocked_client):
 
     # Overrides the users dao config
     try:
-        mocked_client.add_workspaces_to_rubrix_user([new_workspace])
+        mocked_client.add_workspaces_to_argilla_user([new_workspace])
 
         mocked_client.delete(f"/api/datasets/{dataset}")
         mocked_client.delete(f"/api/datasets/{dataset_copy}")
         mocked_client.delete(f"/api/datasets/{dataset_copy}?workspace={new_workspace}")
 
         api.log(
-            rb.TextClassificationRecord(
+            ar.TextClassificationRecord(
                 id=0,
                 text="This is the record input",
                 annotation_agent="test",
@@ -430,7 +441,7 @@ def test_dataset_copy_to_another_workspace(mocked_client):
         with pytest.raises(AlreadyExistsApiError):
             api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=new_workspace)
     finally:
-        mocked_client.reset_rubrix_workspaces()
+        mocked_client.reset_argilla_workspaces()
         api.init()  # reset workspace
 
 
@@ -439,7 +450,7 @@ def test_update_record(mocked_client):
     mocked_client.delete(f"/api/datasets/{dataset}")
 
     expected_inputs = ["This is a text"]
-    record = rb.TextClassificationRecord(
+    record = ar.TextClassificationRecord(
         id=0,
         inputs=expected_inputs,
         annotation_agent="test",
@@ -456,7 +467,7 @@ def test_update_record(mocked_client):
     assert len(records) == 1
     assert records[0]["annotation"] == "T"
     # This record will replace the old one
-    record = rb.TextClassificationRecord(
+    record = ar.TextClassificationRecord(
         id=0,
         inputs=expected_inputs,
     )
@@ -480,7 +491,7 @@ def test_text_classifier_with_inputs_list(mocked_client):
 
     expected_inputs = ["A", "List", "of", "values"]
     api.log(
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             id=0,
             inputs=expected_inputs,
             annotation_agent="test",
@@ -528,8 +539,8 @@ def test_load_as_pandas(mocked_client):
     create_some_data_for_text_classification(mocked_client, dataset, n=expected_data)
 
     records = api.load(name=dataset)
-    assert isinstance(records, rb.DatasetForTextClassification)
-    assert isinstance(records[0], rb.TextClassificationRecord)
+    assert isinstance(records, ar.DatasetForTextClassification)
+    assert isinstance(records[0], ar.TextClassificationRecord)
     assert [record.id for record in records] == [0, 1, 2, 3]
 
 
@@ -544,7 +555,7 @@ def test_load_as_pandas(mocked_client):
 def test_token_classification_spans(span, valid):
     texto = "Esto es una prueba"
     if valid:
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text=texto,
             tokens=texto.split(),
             prediction=[("test", *span)],
@@ -556,7 +567,7 @@ def test_token_classification_spans(span, valid):
             r"Spans:\n- \[s\] defined in Esto es...\n"
             r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
         ):
-            rb.TokenClassificationRecord(
+            ar.TokenClassificationRecord(
                 text=texto,
                 tokens=texto.split(),
                 prediction=[("test", *span)],
@@ -565,7 +576,7 @@ def test_token_classification_spans(span, valid):
 
 def test_load_text2text(mocked_client):
     records = [
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="test text",
             prediction=["test prediction"],
             annotation="test annotation",
@@ -590,7 +601,7 @@ def test_load_text2text(mocked_client):
 def test_client_workspace(mocked_client):
     try:
         ws = api.get_workspace()
-        assert ws == "rubrix"
+        assert ws == "argilla"
 
         api.set_workspace("")
         assert api.get_workspace() == ""
@@ -604,15 +615,15 @@ def test_client_workspace(mocked_client):
         with pytest.raises(Exception, match="Wrong provided workspace c"):
             api.set_workspace("c")
 
-        api.set_workspace("rubrix")
-        assert api.get_workspace() == "rubrix"
+        api.set_workspace("argilla")
+        assert api.get_workspace() == "argilla"
     finally:
         api.init()  # reset workspace
 
 
 def test_load_sort(mocked_client):
     records = [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="test text",
             id=i,
         )
@@ -637,7 +648,7 @@ def test_load_sort(mocked_client):
 
 def test_load_workspace_from_different_workspace(mocked_client):
     records = [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="test text",
             id=i,
         )

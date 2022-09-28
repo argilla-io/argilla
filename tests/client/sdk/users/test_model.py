@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.client.sdk.users.models import User
-from rubrix.server.security.model import User as ServerUser
+from argilla.client.sdk.users.models import User
+from argilla.server.security.model import User as ServerUser
 
 
 def test_users_schema(helpers):

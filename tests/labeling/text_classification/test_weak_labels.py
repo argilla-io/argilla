@@ -20,14 +20,14 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from rubrix import TextClassificationRecord
-from rubrix.client.sdk.text_classification.models import (
+from argilla import TextClassificationRecord
+from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.labeling.text_classification import WeakLabels, WeakMultiLabels
-from rubrix.labeling.text_classification.rule import Rule
-from rubrix.labeling.text_classification.weak_labels import (
+from argilla.labeling.text_classification import WeakLabels, WeakMultiLabels
+from argilla.labeling.text_classification.rule import Rule
+from argilla.labeling.text_classification.weak_labels import (
     DuplicatedRuleNameError,
     MissingLabelError,
     MultiLabelError,
@@ -87,9 +87,9 @@ def rules(monkeypatch) -> List[Callable]:
 
     monkeypatch.setattr(Rule, "apply", mock_apply)
 
-    rubrix_rule = Rule(query="mock", label="positive", name="rubrix_rule")
+    argilla_rule = Rule(query="mock", label="positive", name="argilla_rule")
 
-    return [first_rule, rule2, rubrix_rule]
+    return [first_rule, rule2, argilla_rule]
 
 
 @pytest.fixture
@@ -143,9 +143,9 @@ def multilabel_rules(monkeypatch) -> List[Callable]:
 
     monkeypatch.setattr(Rule, "apply", mock_apply)
 
-    rubrix_rule = Rule(query="mock", label="positive", name="rubrix_rule")
+    argilla_rule = Rule(query="mock", label="positive", name="argilla_rule")
 
-    return [first_rule, rule2, rubrix_rule]
+    return [first_rule, rule2, argilla_rule]
 
 
 class TestWeakLabelsBase:
@@ -156,7 +156,7 @@ class TestWeakLabelsBase:
     def test_rules_from_dataset(self, monkeypatch, log_dataset):
         mock_rules = [Rule(query="mock", label="mock")]
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load_rules",
+            "argilla.labeling.text_classification.weak_labels.load_rules",
             lambda x: mock_rules,
         )
 
@@ -165,7 +165,7 @@ class TestWeakLabelsBase:
 
     def test_norulesfounderror(self, monkeypatch):
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load_rules", lambda x: []
+            "argilla.labeling.text_classification.weak_labels.load_rules", lambda x: []
         )
 
         with pytest.raises(NoRulesFoundError, match="No rules were found"):
@@ -181,7 +181,7 @@ class TestWeakLabelsBase:
             return []
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         with pytest.raises(
@@ -214,7 +214,7 @@ class TestWeakLabelsBase:
             return expected_records
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
@@ -235,7 +235,7 @@ class TestWeakLabelsBase:
             return ["mock"]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         weak_labels = WeakLabelsBase(rules=["mock"], dataset="mock")
@@ -260,7 +260,7 @@ class TestWeakLabelsBase:
             return ["mock"]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
         monkeypatch.setitem(sys.modules, "faiss", None)
         with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
@@ -274,7 +274,7 @@ class TestWeakLabels:
             return [TextClassificationRecord(text="test", multi_label=True)]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         with pytest.raises(MultiLabelError):
@@ -351,7 +351,7 @@ class TestWeakLabels:
             return expected_records
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -387,7 +387,7 @@ class TestWeakLabels:
             return [TextClassificationRecord(text="test")] * 4
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -418,7 +418,7 @@ class TestWeakLabels:
                 "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
                 "conflicts": [1.0 / 4, 1.0 / 4, 0, 1.0 / 4],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         assert_frame_equal(summary, expected)
 
@@ -435,7 +435,7 @@ class TestWeakLabels:
                 "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
                 "conflicts": [1.0 / 2, 1.0 / 3, 0, 1.0 / 3],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         assert_frame_equal(summary, expected)
 
@@ -456,7 +456,7 @@ class TestWeakLabels:
                 "incorrect": [1, 0, 0, 1],
                 "precision": [1.0 / 2, 2 / 2, np.nan, 3.0 / 4],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         # The "correct" and "incorrect" columns from `expected_summary` may infer a different
         # dtype than `weak_multi_labels.summary()` returns.
@@ -467,7 +467,7 @@ class TestWeakLabels:
             return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -497,7 +497,7 @@ class TestWeakLabels:
             4,
         ]
         assert weak_labels.show_records(
-            labels=["positive"], rules=["rubrix_rule"]
+            labels=["positive"], rules=["argilla_rule"]
         ).empty
 
     def test_change_mapping(self, monkeypatch, rules):
@@ -505,7 +505,7 @@ class TestWeakLabels:
             return [TextClassificationRecord(text="test", id=i) for i in range(5)]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -561,7 +561,7 @@ class TestWeakLabels:
             return [TextClassificationRecord(text="test", id=i) for i in range(3)]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -643,7 +643,7 @@ class TestWeakMultiLabels:
             return expected_records
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -677,7 +677,7 @@ class TestWeakMultiLabels:
             return [TextClassificationRecord(text="test", multi_label=True)] * 4
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -715,7 +715,7 @@ class TestWeakMultiLabels:
                 "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
                 "overlaps": [2.0 / 4, 2.0 / 4, 0, 2.0 / 4],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         assert_frame_equal(summary, expected)
 
@@ -731,7 +731,7 @@ class TestWeakMultiLabels:
                 "coverage": [2.0 / 4, 3.0 / 4, 0, 3.0 / 4],
                 "overlaps": [2.0 / 2, 2.0 / 3, 0, 2.0 / 3],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         assert_frame_equal(summary, expected)
 
@@ -753,7 +753,7 @@ class TestWeakMultiLabels:
                 "incorrect": [1, 1, 0, 2],
                 "precision": [2.0 / 3, 1.0 / 2, np.nan, 3.0 / 5],
             },
-            index=["first_rule", "rule_1", "rubrix_rule", "total"],
+            index=["first_rule", "rule_1", "argilla_rule", "total"],
         )
         # The "correct" and "incorrect" columns from `expected_summary` may infer a different
         # dtype than `weak_multi_labels.summary()` returns.
@@ -764,7 +764,7 @@ class TestWeakMultiLabels:
             return [TextClassificationRecord(text="mock")]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -789,7 +789,7 @@ class TestWeakMultiLabels:
             ]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):
@@ -825,7 +825,7 @@ class TestWeakMultiLabels:
             4,
         ]
         assert weak_labels.show_records(
-            labels=["positive"], rules=["rubrix_rule"]
+            labels=["positive"], rules=["argilla_rule"]
         ).empty
 
     @pytest.fixture
@@ -837,7 +837,7 @@ class TestWeakMultiLabels:
             ]
 
         monkeypatch.setattr(
-            "rubrix.labeling.text_classification.weak_labels.load", mock_load
+            "argilla.labeling.text_classification.weak_labels.load", mock_load
         )
 
         def mock_apply(self, *args, **kwargs):

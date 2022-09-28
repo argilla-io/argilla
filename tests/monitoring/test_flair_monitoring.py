@@ -20,16 +20,16 @@ def test_flair_monitoring(mocked_client, monkeypatch):
     from flair.data import Sentence
     from flair.models import SequenceTagger
 
-    import rubrix as rb
+    import argilla as ar
 
     dataset = "test_flair_monitoring"
     model = "flair/ner-english"
 
-    rb.delete(dataset)
+    ar.delete(dataset)
 
     # load tagger
     tagger = SequenceTagger.load(model)
-    tagger = rb.monitor(
+    tagger = ar.monitor(
         tagger,
         dataset=dataset,
         sample_rate=1.0,
@@ -44,7 +44,7 @@ def test_flair_monitoring(mocked_client, monkeypatch):
     tagger.predict(sentence)
 
     detected_labels = sentence.get_labels("ner")
-    records = rb.load(dataset)
+    records = ar.load(dataset)
     assert len(records) == 1
 
     record = records[0]

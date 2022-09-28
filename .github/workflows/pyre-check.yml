@@ -22,7 +22,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: rubrix
+          activate-environment: argilla
           use-mamba: true
 
       - name: Get date for conda cache
@@ -42,7 +42,7 @@ jobs:
 
       - name: Update environment
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n rubrix -f environment_dev.yml
+        run: mamba env update -n argilla -f environment_dev.yml
 
       - name: Cache pip 👜
         uses: actions/cache@v2

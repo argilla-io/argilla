@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.client import api
+from argilla.client import api
 
 
 def test_resource_leaking_with_several_init(mocked_client):
     dataset = "test_resource_leaking_with_several_init"
     api.delete(dataset)
 
-    # TODO: review performance in Windows. See https://github.com/recognai/rubrix/pull/1702
+    # TODO: review performance in Windows. See https://github.com/recognai/argilla/pull/1702
     for i in range(0, 20):
         api.init()
 

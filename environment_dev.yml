@@ -1,10 +1,10 @@
-name: rubrix
+name: argilla
 
 channels:
   - conda-forge
 
 dependencies:
-  - python~=3.8.0
+  - python~=3.9.0
   - pip>=20.3.0
   # pyparsing 3.0.5 seems to be buggy
   - pyparsing!=3.0.5
@@ -45,6 +45,6 @@ dependencies:
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0.tar.gz
       - transformers[torch]~=4.18.0
       - loguru
-      # install Rubrix in editable mode
+      # install Argilla in editable mode
       - -e .[server,listeners]
 

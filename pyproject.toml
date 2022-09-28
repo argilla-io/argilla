@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rubrix"
+name = "argilla"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
 readme = "README.md"
 requires-python = ">=3.7"
@@ -75,12 +75,12 @@ listeners = [
 ]
 
 [project.urls]
-homepage = "https://www.rubrix.ml"
-documentation = "https://docs.rubrix.ml"
-repository = "https://github.com/recognai/rubrix"
+homepage = "https://www.argilla.io"
+documentation = "https://docs.argilla.io"
+repository = "https://github.com/argilla-io/argilla"
 
 [tool.setuptools.dynamic]
-version = {attr = "rubrix.__version__"}
+version = {attr = "argilla.__version__"}
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"

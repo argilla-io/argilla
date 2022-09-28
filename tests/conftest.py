@@ -16,9 +16,9 @@ import httpx
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rubrix.client.sdk.users import api as users_api
-from rubrix.server.commons import telemetry
-from rubrix.server.settings import settings
+from argilla.client.sdk.users import api as users_api
+from argilla.server.commons import telemetry
+from argilla.server.settings import settings
 
 try:
     from loguru import logger
@@ -26,8 +26,8 @@ except ModuleNotFoundError:
     logger = None
 from starlette.testclient import TestClient
 
-from rubrix import app
-from rubrix.client.api import active_api
+from argilla import app
+from argilla.client.api import active_api
 
 from .helpers import SecuredClient
 

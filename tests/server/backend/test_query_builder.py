@@ -14,8 +14,8 @@
 
 import pytest
 
-from rubrix.server.daos.backend.search.model import SortableField, SortConfig, SortOrder
-from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
+from argilla.server.daos.backend.search.model import SortableField, SortConfig, SortOrder
+from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 @pytest.mark.parametrize(

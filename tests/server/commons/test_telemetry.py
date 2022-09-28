@@ -17,23 +17,23 @@ import uuid
 import pytest
 from fastapi import Request
 
-from rubrix.server.commons import telemetry
-from rubrix.server.commons.models import TaskType
-from rubrix.server.errors import RubrixServerError
+from argilla.server.commons import telemetry
+from argilla.server.commons.models import TaskType
+from argilla.server.errors import ServerError
 
 mock_request = Request(scope={"type": "http", "headers": {}})
 
 
 @pytest.mark.asyncio
 async def test_track_login(telemetry_track_data):
-    await telemetry.track_login(request=mock_request, username="rubrix")
+    await telemetry.track_login(request=mock_request, username="argilla")
 
     current_server_id = telemetry._TelemetryClient.get().server_id
     expected_event_data = {
         "accept-language": None,
         "is_default_user": True,
         "user-agent": None,
-        "user_hash": str(uuid.uuid5(current_server_id, name="rubrix")),
+        "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
     telemetry_track_data.assert_called_once_with(
         "UserInfoRequested",
@@ -53,13 +53,13 @@ async def test_track_bulk(telemetry_track_data):
 
 @pytest.mark.asyncio
 async def test_track_error(telemetry_track_data):
-    error = RubrixServerError()
+    error = ServerError()
     await telemetry.track_error(error, request=mock_request)
     telemetry_track_data.assert_called_once_with(
         "ServerErrorFound",
         {
             "accept-language": None,
-            "code": "rubrix.api.errors::RubrixServerError",
+            "code": "argilla.api.errors::ServerError",
             "user-agent": None,
         },
     )

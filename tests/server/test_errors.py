@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix.server.errors import GenericRubrixServerError
+from argilla.server.errors import GenericServerError
 
 
 def test_generic_error():
 
-    err = GenericRubrixServerError(error=ValueError("this is an error"))
+    err = GenericServerError(error=ValueError("this is an error"))
     assert (
         str(err)
-        == "rubrix.api.errors::GenericRubrixServerError(type=builtins.ValueError,message=this is an error)"
+        == "argilla.api.errors::GenericServerError(type=builtins.ValueError,message=this is an error)"
     )

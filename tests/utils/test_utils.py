@@ -14,16 +14,16 @@
 #  limitations under the License.
 import pytest
 
-from rubrix.utils import LazyRubrixModule
+from argilla.utils import LazyargillaModule
 
 
-def test_lazy_rubrix_module(monkeypatch):
+def test_lazy_argilla_module(monkeypatch):
     def mock_import_module(name, package):
         return name
 
     monkeypatch.setattr("importlib.import_module", mock_import_module)
 
-    lazy_module = LazyRubrixModule(
+    lazy_module = LazyargillaModule(
         name="rb_mock",
         module_file="rb_mock_file",
         import_structure={"mock_module": ["title"]},
@@ -36,12 +36,12 @@ def test_lazy_rubrix_module(monkeypatch):
     assert lazy_module.string == str
 
     with pytest.warns(
-        FutureWarning, match="Importing 'dep_mock_module' from the rubrix namespace"
+        FutureWarning, match="Importing 'dep_mock_module' from the argilla namespace"
     ):
         assert lazy_module.dep_mock_module == ".dep_mock_module"
 
     with pytest.warns(
-        FutureWarning, match="Importing 'upper' from the rubrix namespace"
+        FutureWarning, match="Importing 'upper' from the argilla namespace"
     ):
         assert lazy_module.upper() == ".dep_mock_module".upper()
 
@@ -51,13 +51,13 @@ def test_lazy_rubrix_module(monkeypatch):
     assert lazy_module.__reduce__()
 
 
-def test_lazy_rubrix_module_import_error(monkeypatch):
+def test_lazy_argilla_module_import_error(monkeypatch):
     def mock_import_module(*args, **kwargs):
         raise Exception
 
     monkeypatch.setattr("importlib.import_module", mock_import_module)
 
-    lazy_module = LazyRubrixModule(
+    lazy_module = LazyargillaModule(
         name="rb_mock",
         module_file=__file__,
         import_structure={"mock_module": ["title"]},

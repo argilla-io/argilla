@@ -15,8 +15,8 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.errors import EntityNotFoundError
-from rubrix.server.security.model import User
+from argilla.server.errors import EntityNotFoundError
+from argilla.server.security.model import User
 
 
 @pytest.mark.parametrize("email", ["my@email.com", "infra@recogn.ai"])

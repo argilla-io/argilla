@@ -14,9 +14,9 @@
 
 import pytest
 
-import rubrix as rb
-from rubrix.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
-from rubrix.server.settings import settings
+import argilla as ar
+from argilla.client.sdk.commons.errors import BadRequestApiError, ValidationApiError
+from argilla.server.settings import settings
 from tests.helpers import SecuredClient
 
 
@@ -24,14 +24,14 @@ def test_log_records_with_multi_and_single_label_task(mocked_client):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
-    rb.delete(dataset)
+    ar.delete(dataset)
     records = [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             id=0,
             inputs=expected_inputs,
             multi_label=False,
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             id=1,
             inputs=expected_inputs,
             multi_label=True,
@@ -39,30 +39,30 @@ def test_log_records_with_multi_and_single_label_task(mocked_client):
     ]
 
     with pytest.raises(ValidationApiError):
-        rb.log(
+        ar.log(
             records,
             name=dataset,
         )
 
-    rb.log(records[0], name=dataset)
+    ar.log(records[0], name=dataset)
     with pytest.raises(Exception):
-        rb.log(records[1], name=dataset)
+        ar.log(records[1], name=dataset)
 
 
 def test_delete_and_create_for_different_task(mocked_client):
     dataset = "test_delete_and_create_for_different_task"
     text = "This is a text"
 
-    rb.delete(dataset)
-    rb.log(rb.TextClassificationRecord(id=0, inputs=text), name=dataset)
-    rb.load(dataset)
+    ar.delete(dataset)
+    ar.log(ar.TextClassificationRecord(id=0, inputs=text), name=dataset)
+    ar.load(dataset)
 
-    rb.delete(dataset)
-    rb.log(
-        rb.TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")),
+    ar.delete(dataset)
+    ar.log(
+        ar.TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")),
         name=dataset,
     )
-    rb.load(dataset)
+    ar.load(dataset)
 
 
 def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
@@ -71,23 +71,23 @@ def test_log_data_in_several_workspaces(mocked_client: SecuredClient):
     dataset = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    mocked_client.add_workspaces_to_rubrix_user([workspace])
+    mocked_client.add_workspaces_to_argilla_user([workspace])
 
-    curr_ws = rb.get_workspace()
+    curr_ws = ar.get_workspace()
     for ws in [curr_ws, workspace]:
-        rb.set_workspace(ws)
-        rb.delete(dataset)
+        ar.set_workspace(ws)
+        ar.delete(dataset)
 
-    rb.set_workspace(curr_ws)
-    rb.log(rb.TextClassificationRecord(id=0, inputs=text), name=dataset)
+    ar.set_workspace(curr_ws)
+    ar.log(ar.TextClassificationRecord(id=0, inputs=text), name=dataset)
 
-    rb.set_workspace(workspace)
-    rb.log(rb.TextClassificationRecord(id=1, inputs=text), name=dataset)
-    ds = rb.load(dataset)
+    ar.set_workspace(workspace)
+    ar.log(ar.TextClassificationRecord(id=1, inputs=text), name=dataset)
+    ds = ar.load(dataset)
     assert len(ds) == 1
 
-    rb.set_workspace(curr_ws)
-    ds = rb.load(dataset)
+    ar.set_workspace(curr_ws)
+    ds = ar.load(dataset)
     assert len(ds) == 1
 
 
@@ -96,12 +96,12 @@ def test_search_keywords(mocked_client):
     from datasets import load_dataset
 
     dataset_ds = load_dataset("Recognai/sentiment-banking", split="train")
-    dataset_rb = rb.read_datasets(dataset_ds, task="TextClassification")
+    dataset_rb = ar.read_datasets(dataset_ds, task="TextClassification")
 
-    rb.delete(dataset)
-    rb.log(name=dataset, records=dataset_rb)
+    ar.delete(dataset)
+    ar.log(name=dataset, records=dataset_rb)
 
-    ds = rb.load(dataset, query="lim*")
+    ds = ar.load(dataset, query="lim*")
     df = ds.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
@@ -120,16 +120,16 @@ def test_search_keywords(mocked_client):
 def test_log_records_with_empty_metadata_list(mocked_client):
     dataset = "test_log_records_with_empty_metadata_list"
 
-    rb.delete(dataset)
+    ar.delete(dataset)
     expected_records = [
-        rb.TextClassificationRecord(text="The input text", metadata={"emptyList": []}),
-        rb.TextClassificationRecord(text="The input text", metadata={"emptyTuple": ()}),
-        rb.TextClassificationRecord(text="The input text", metadata={"emptyDict": {}}),
-        rb.TextClassificationRecord(text="The input text", metadata={"none": None}),
+        ar.TextClassificationRecord(text="The input text", metadata={"emptyList": []}),
+        ar.TextClassificationRecord(text="The input text", metadata={"emptyTuple": ()}),
+        ar.TextClassificationRecord(text="The input text", metadata={"emptyDict": {}}),
+        ar.TextClassificationRecord(text="The input text", metadata={"none": None}),
     ]
-    rb.log(expected_records, name=dataset)
+    ar.log(expected_records, name=dataset)
 
-    df = rb.load(dataset)
+    df = ar.load(dataset)
     df = df.to_pandas()
     assert len(df) == len(expected_records)
 
@@ -140,9 +140,9 @@ def test_log_records_with_empty_metadata_list(mocked_client):
 def test_logging_with_metadata_limits_exceeded(mocked_client):
     dataset = "test_logging_with_metadata_limits_exceeded"
 
-    rb.delete(dataset)
+    ar.delete(dataset)
 
-    expected_record = rb.TextClassificationRecord(
+    expected_record = ar.TextClassificationRecord(
         text="The input text",
         metadata={
             k: f"this is a string {k}"
@@ -150,45 +150,45 @@ def test_logging_with_metadata_limits_exceeded(mocked_client):
         },
     )
     with pytest.raises(BadRequestApiError):
-        rb.log(expected_record, name=dataset)
+        ar.log(expected_record, name=dataset)
 
     expected_record.metadata = {
         k: f"This is a string {k}" for k in range(0, settings.metadata_fields_limit)
     }
     # Dataset creation with data
-    rb.log(expected_record, name=dataset)
+    ar.log(expected_record, name=dataset)
     # This call will check already included fields
-    rb.log(expected_record, name=dataset)
+    ar.log(expected_record, name=dataset)
 
     expected_record.metadata["new_key"] = "value"
     with pytest.raises(BadRequestApiError):
-        rb.log(expected_record, name=dataset)
+        ar.log(expected_record, name=dataset)
 
 
 def test_log_with_other_task(mocked_client):
     dataset = "test_log_with_other_task"
 
-    rb.delete(dataset)
-    record = rb.TextClassificationRecord(
+    ar.delete(dataset)
+    record = ar.TextClassificationRecord(
         text="The input text",
     )
-    rb.log(record, name=dataset)
+    ar.log(record, name=dataset)
 
     with pytest.raises(BadRequestApiError):
-        rb.log(
-            rb.TokenClassificationRecord(text="The text", tokens=["The", "text"]),
+        ar.log(
+            ar.TokenClassificationRecord(text="The text", tokens=["The", "text"]),
             name=dataset,
         )
 
 
 def test_dynamics_metadata(mocked_client):
     dataset = "test_dynamics_metadata"
-    rb.log(
-        rb.TextClassificationRecord(text="This is a text", metadata={"a": "value"}),
+    ar.log(
+        ar.TextClassificationRecord(text="This is a text", metadata={"a": "value"}),
         name=dataset,
     )
 
-    rb.log(
-        rb.TextClassificationRecord(text="Another text", metadata={"b": "value"}),
+    ar.log(
+        ar.TextClassificationRecord(text="Another text", metadata={"b": "value"}),
         name=dataset,
     )

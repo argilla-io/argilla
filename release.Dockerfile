@@ -9,7 +9,7 @@ RUN wget -O /wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for
  && find /packages/*.whl -exec pip install {}[server] \;
 
 # See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
-ENV MODULE_NAME="rubrix"
+ENV MODULE_NAME="argilla"
 ENV VARIABLE_NAME="app"
 
 CMD /wait-for-it.sh $ELASTICSEARCH -- /start.sh

@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import rubrix
-from rubrix.monitoring.base import BaseMonitor
+import argilla
+from argilla.monitoring.base import BaseMonitor
 
 
 def mock_monitor(monitor: BaseMonitor, monkeypatch):
@@ -21,6 +21,6 @@ def mock_monitor(monitor: BaseMonitor, monkeypatch):
         log_args = monitor._prepare_log_data(*args, **kwargs)
         log_args.pop("verbose", None)
         log_args.pop("background", None)
-        return rubrix.log(**log_args, background=False)
+        return argilla.log(**log_args, background=False)
 
     monkeypatch.setattr(monitor, "log_async", log)

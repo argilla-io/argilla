@@ -17,8 +17,8 @@ from datetime import datetime
 
 import pytest
 
-from rubrix.client.models import TextClassificationRecord, TokenAttributions
-from rubrix.client.sdk.text_classification.models import (
+from argilla.client.models import TextClassificationRecord, TokenAttributions
+from argilla.client.sdk.text_classification.models import (
     ClassPrediction,
     CreationTextClassificationRecord,
     LabelingRule,
@@ -27,19 +27,19 @@ from rubrix.client.sdk.text_classification.models import (
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from rubrix.client.sdk.text_classification.models import (
+from argilla.client.sdk.text_classification.models import (
     TextClassificationRecord as SdkTextClassificationRecord,
 )
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text_classification import (
     LabelingRule as ServerLabelingRule,
 )
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text_classification import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
 )
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest as ServerTextClassificationBulkData,
 )
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationQuery as ServerTextClassificationQuery,
 )
 

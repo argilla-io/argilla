@@ -15,9 +15,9 @@
 
 from datetime import datetime
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse
-from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.commons.model import BulkResponse
+from argilla.server.apis.v0.models.datasets import Dataset
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
     TextClassificationBulkRequest,
     TextClassificationQuery,
@@ -25,7 +25,7 @@ from rubrix.server.apis.v0.models.text_classification import (
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
 )
-from rubrix.server.commons.models import PredictionStatus
+from argilla.server.commons.models import PredictionStatus
 
 
 def test_create_records_for_text_classification_with_multi_label(mocked_client):
@@ -366,7 +366,7 @@ def test_some_sort_by(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::BadRequestError",
+            "code": "argilla.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
                 "are: ['id', 'metadata', 'score', "
@@ -590,7 +590,7 @@ def test_wrong_text_query(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::InvalidTextSearchError",
+            "code": "argilla.api.errors::InvalidTextSearchError",
             "params": {"message": "Failed to parse query [!]"},
         }
     }

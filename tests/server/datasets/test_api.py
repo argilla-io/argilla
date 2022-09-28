@@ -14,11 +14,11 @@
 #  limitations under the License.
 from typing import Optional
 
-from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.datasets import Dataset
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
 )
-from rubrix.server.commons.models import TaskType
+from argilla.server.commons.models import TaskType
 from tests.helpers import SecuredClient
 
 
@@ -32,7 +32,7 @@ def test_delete_dataset(mocked_client):
     assert response.status_code == 404
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::EntityNotFoundError",
+            "code": "argilla.api.errors::EntityNotFoundError",
             "params": {"name": "test_delete_dataset", "type": "ServiceDataset"},
         }
     }
@@ -53,11 +53,11 @@ def test_create_dataset(mocked_client):
     )
     assert response.status_code == 200
     dataset = Dataset.parse_obj(response.json())
-    assert dataset.created_by == "rubrix"
+    assert dataset.created_by == "argilla"
     assert dataset.metadata == request["metadata"]
     assert dataset.tags == request["tags"]
     assert dataset.name == dataset_name
-    assert dataset.owner == "rubrix"
+    assert dataset.owner == "argilla"
     assert dataset.task == TaskType.text_classification
 
     response = mocked_client.post(
@@ -70,7 +70,7 @@ def test_create_dataset(mocked_client):
 def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
     ws = "mock-ws"
     dataset_name = "test_fetch_dataset_using_workspaces"
-    mocked_client.add_workspaces_to_rubrix_user([ws])
+    mocked_client.add_workspaces_to_argilla_user([ws])
 
     delete_dataset(mocked_client, dataset_name, workspace=ws)
     delete_dataset(mocked_client, dataset_name)
@@ -85,7 +85,7 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
 
     assert response.status_code == 200, response.json()
     dataset = Dataset.parse_obj(response.json())
-    assert dataset.created_by == "rubrix"
+    assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
     assert dataset.owner == ws
     assert dataset.task == TaskType.text_classification
@@ -103,9 +103,9 @@ def test_fetch_dataset_using_workspaces(mocked_client: SecuredClient):
 
     assert response.status_code == 200, response.json()
     dataset = Dataset.parse_obj(response.json())
-    assert dataset.created_by == "rubrix"
+    assert dataset.created_by == "argilla"
     assert dataset.name == dataset_name
-    assert dataset.owner == "rubrix"
+    assert dataset.owner == "argilla"
     assert dataset.task == TaskType.text_classification
 
 
@@ -120,7 +120,7 @@ def test_dataset_naming_validation(mocked_client):
     assert response.status_code == 422
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::ValidationError",
+            "code": "argilla.api.errors::ValidationError",
             "params": {
                 "errors": [
                     {
@@ -142,7 +142,7 @@ def test_dataset_naming_validation(mocked_client):
     assert response.status_code == 422
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::ValidationError",
+            "code": "argilla.api.errors::ValidationError",
             "params": {
                 "errors": [
                     {
@@ -199,7 +199,7 @@ def test_open_and_close_dataset(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::ClosedDatasetError",
+            "code": "argilla.api.errors::ClosedDatasetError",
             "params": {"name": dataset},
         }
     }
@@ -258,7 +258,7 @@ def test_delete_records(mocked_client):
         assert response.status_code == 403
         assert response.json() == {
             "detail": {
-                "code": "rubrix.api.errors::ForbiddenOperationError",
+                "code": "argilla.api.errors::ForbiddenOperationError",
                 "params": {
                     "detail": "You don't have the necessary permissions to delete records on this dataset."
                     " Only dataset creators or administrators can delete datasets"

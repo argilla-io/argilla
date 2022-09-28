@@ -15,15 +15,15 @@
 import httpx
 import pytest
 
-from rubrix import load
-from rubrix.client.models import TextClassificationRecord
-from rubrix.client.sdk.text_classification.models import (
+from argilla import load
+from argilla.client.models import TextClassificationRecord
+from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.labeling.text_classification import Rule, load_rules
-from rubrix.labeling.text_classification.rule import RuleNotAppliedError
-from rubrix.server.errors import EntityNotFoundError
+from argilla.labeling.text_classification import Rule, load_rules
+from argilla.labeling.text_classification.rule import RuleNotAppliedError
+from argilla.server.errors import EntityNotFoundError
 
 
 @pytest.fixture
@@ -124,7 +124,7 @@ def test_load_rules(mocked_client, log_dataset):
 
 
 def test_copy_dataset_with_rules(mocked_client, log_dataset):
-    import rubrix as rb
+    import argilla as ar
 
     rule = Rule(query="a query", label="LALA")
     delete_rule_silently(mocked_client, log_dataset, rule)
@@ -135,8 +135,8 @@ def test_copy_dataset_with_rules(mocked_client, log_dataset):
     )
 
     copied_dataset = f"{log_dataset}_copy"
-    rb.delete(copied_dataset)
-    rb.copy(log_dataset, name_of_copy=copied_dataset)
+    ar.delete(copied_dataset)
+    ar.copy(log_dataset, name_of_copy=copied_dataset)
 
     assert [{"q": r.query, "l": r.label} for r in load_rules(copied_dataset)] == [
         {"q": r.query, "l": r.label} for r in load_rules(log_dataset)

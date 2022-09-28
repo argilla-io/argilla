@@ -21,13 +21,13 @@ import pandas as pd
 import pytest
 import spacy
 
-import rubrix as rb
-from rubrix.client.datasets import (
+import argilla as ar
+from argilla.client.datasets import (
     DatasetBase,
     DatasetForTokenClassification,
     WrongRecordTypeError,
 )
-from rubrix.client.models import TextClassificationRecord
+from argilla.client.models import TextClassificationRecord
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
@@ -51,7 +51,7 @@ class TestDatasetBase:
 
     def test_init(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
 
         ds = DatasetBase(
@@ -66,7 +66,7 @@ class TestDatasetBase:
             WrongRecordTypeError, match="but you provided Text2TextRecord"
         ):
             DatasetBase(
-                records=[rb.Text2TextRecord(text="test")],
+                records=[ar.Text2TextRecord(text="test")],
             )
 
         with pytest.raises(
@@ -75,8 +75,8 @@ class TestDatasetBase:
         ):
             DatasetBase(
                 records=[
-                    rb.TextClassificationRecord(text="test"),
-                    rb.Text2TextRecord(text="test"),
+                    ar.TextClassificationRecord(text="test"),
+                    ar.Text2TextRecord(text="test"),
                 ],
             )
 
@@ -91,7 +91,7 @@ class TestDatasetBase:
 
     def test_to_dataframe(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
 
         df = DatasetBase(singlelabel_textclassification_records).to_pandas()
@@ -102,7 +102,7 @@ class TestDatasetBase:
 
     def test_prepare_dataset_and_column_mapping(self, monkeypatch, caplog):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
 
         ds = datasets.Dataset.from_dict(
@@ -139,10 +139,10 @@ class TestDatasetBase:
 
     def test_from_pandas(self, monkeypatch, caplog):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._from_pandas", lambda x: x
+            "argilla.client.datasets.DatasetBase._from_pandas", lambda x: x
         )
 
         df = pd.DataFrame({"unsupported_column": [None]})
@@ -152,14 +152,15 @@ class TestDatasetBase:
         assert len(caplog.record_tuples) == 1
         assert caplog.record_tuples[0][1] == 30
         assert (
-            "Following columns are not supported by the TextClassificationRecord model and are ignored: ['unsupported_column']"
+            "Following columns are not supported by the "
+            "TextClassificationRecord model and are ignored: ['unsupported_column']"
             == caplog.record_tuples[0][2]
         )
 
     def test_to_datasets(self, monkeypatch, caplog):
-        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._to_datasets_dict",
+            "argilla.client.datasets.DatasetBase._to_datasets_dict",
             lambda x: {"metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]},
         )
 
@@ -174,13 +175,13 @@ class TestDatasetBase:
         )
 
     def test_datasets_not_installed(self, monkeypatch):
-        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
         monkeypatch.setitem(sys.modules, "datasets", None)
         with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
             DatasetBase().to_datasets()
 
     def test_datasets_wrong_version(self, monkeypatch):
-        monkeypatch.setattr("rubrix.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
         monkeypatch.setattr("datasets.__version__", "1.16.0")
         with pytest.raises(ModuleNotFoundError, match="pip install -U datasets>1.17.0"):
             DatasetBase().to_datasets()
@@ -189,7 +190,7 @@ class TestDatasetBase:
         self, monkeypatch, singlelabel_textclassification_records
     ):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
         dataset = DatasetBase(singlelabel_textclassification_records)
 
@@ -201,13 +202,13 @@ class TestDatasetBase:
 
     def test_setitem_delitem(self, monkeypatch, singlelabel_textclassification_records):
         monkeypatch.setattr(
-            "rubrix.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
+            "argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord
         )
         dataset = DatasetBase(
             [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
         )
 
-        record = rb.TextClassificationRecord(text="mock")
+        record = ar.TextClassificationRecord(text="mock")
         dataset[0] = record
 
         assert dataset._records[0] is record
@@ -220,13 +221,13 @@ class TestDatasetBase:
             WrongRecordTypeError,
             match="You are only allowed to set a record of type .*TextClassificationRecord.* but you provided .*Text2TextRecord.*",
         ):
-            dataset[0] = rb.Text2TextRecord(text="mock")
+            dataset[0] = ar.Text2TextRecord(text="mock")
 
 
 class TestDatasetForTextClassification:
     def test_init(self, singlelabel_textclassification_records):
-        ds = rb.DatasetForTextClassification(singlelabel_textclassification_records)
-        assert ds._RECORD_TYPE == rb.TextClassificationRecord
+        ds = ar.DatasetForTextClassification(singlelabel_textclassification_records)
+        assert ds._RECORD_TYPE == ar.TextClassificationRecord
         assert ds._records == singlelabel_textclassification_records
 
     @pytest.mark.parametrize(
@@ -238,7 +239,7 @@ class TestDatasetForTextClassification:
     )
     def test_to_from_datasets(self, records, request):
         records = request.getfixturevalue(records)
-        expected_dataset = rb.DatasetForTextClassification(records)
+        expected_dataset = ar.DatasetForTextClassification(records)
 
         dataset_ds = expected_dataset.to_datasets()
 
@@ -262,27 +263,27 @@ class TestDatasetForTextClassification:
             {"label": datasets.Value("string"), "score": datasets.Value("float64")}
         ]
 
-        dataset = rb.DatasetForTextClassification.from_datasets(dataset_ds)
+        dataset = ar.DatasetForTextClassification.from_datasets(dataset_ds)
 
-        assert isinstance(dataset, rb.DatasetForTextClassification)
+        assert isinstance(dataset, ar.DatasetForTextClassification)
         _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict({"inputs": ["mock"]})
-        rec = rb.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
+        rec = ar.DatasetForTextClassification.from_datasets(missing_optional_cols)[0]
         assert rec.inputs == {"text": "mock"}
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rb.DatasetForTextClassification(
-            [rb.TextClassificationRecord(text="mock")]
+        dataset_rb = ar.DatasetForTextClassification(
+            [ar.TextClassificationRecord(text="mock")]
         )
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [None]
 
-        assert rb.read_datasets(dataset_ds, task="TextClassification")[0].id is None
+        assert ar.read_datasets(dataset_ds, task="TextClassification")[0].id is None
 
     def test_datasets_empty_metadata(self):
-        dataset = rb.DatasetForTextClassification(
-            [rb.TextClassificationRecord(text="mock")]
+        dataset = ar.DatasetForTextClassification(
+            [ar.TextClassificationRecord(text="mock")]
         )
         assert dataset.to_datasets()["metadata"] == [None]
 
@@ -295,16 +296,16 @@ class TestDatasetForTextClassification:
     )
     def test_to_from_pandas(self, records, request):
         records = request.getfixturevalue(records)
-        expected_dataset = rb.DatasetForTextClassification(records)
+        expected_dataset = ar.DatasetForTextClassification(records)
 
         dataset_df = expected_dataset.to_pandas()
 
         assert isinstance(dataset_df, pd.DataFrame)
         assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
 
-        dataset = rb.DatasetForTextClassification.from_pandas(dataset_df)
+        dataset = ar.DatasetForTextClassification.from_pandas(dataset_df)
 
-        assert isinstance(dataset, rb.DatasetForTextClassification)
+        assert isinstance(dataset, ar.DatasetForTextClassification)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
 
@@ -321,8 +322,9 @@ class TestDatasetForTextClassification:
     )
     def test_push_to_hub(self, request, name: str):
         records = request.getfixturevalue(name)
+        # TODO(@frascuchon): move dataset to new organization
         dataset_name = f"rubrix/_test_text_classification_records-{name}"
-        dataset_ds = rb.DatasetForTextClassification(records).to_datasets()
+        dataset_ds = ar.DatasetForTextClassification(records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds, repo_id=dataset_name, token=_HF_HUB_ACCESS_TOKEN, private=True
         )
@@ -345,7 +347,7 @@ class TestDatasetForTextClassification:
     def test_prepare_for_training(self, request, records):
         records = request.getfixturevalue(records)
 
-        ds = rb.DatasetForTextClassification(records)
+        ds = ar.DatasetForTextClassification(records)
         train = ds.prepare_for_training()
 
         assert isinstance(train, datasets.Dataset)
@@ -363,21 +365,22 @@ class TestDatasetForTextClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
-    def test_from_dataset_with_non_rubrix_format_multilabel(self):
+    def test_from_dataset_with_non_argilla_format_multilabel(self):
+        # TODO(@frascuchon): Move dataset to the new org
         ds = datasets.load_dataset(
             "rubrix/go_emotions_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
 
-        rb_ds = rb.DatasetForTextClassification.from_datasets(
+        rb_ds = ar.DatasetForTextClassification.from_datasets(
             ds,
             inputs="id",
             annotation="labels",
         )
         assert rb_ds[0].inputs == {"id": "eecwqtt"}
 
-        rb_ds = rb.DatasetForTextClassification.from_datasets(
+        rb_ds = ar.DatasetForTextClassification.from_datasets(
             ds,
             text="text",
             annotation="labels",
@@ -403,14 +406,15 @@ class TestDatasetForTextClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
-    def test_from_dataset_with_non_rubrix_format(self):
+    def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
             "rubrix/app_reviews_train_100",
             split="train",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
 
-        rb_ds = rb.DatasetForTextClassification.from_datasets(
+        rb_ds = ar.DatasetForTextClassification.from_datasets(
             ds, text="review", annotation="star", metadata=["package_name", "date"]
         )
 
@@ -441,7 +445,7 @@ class TestDatasetForTextClassification:
                 }
             ),
         )
-        dataset_rb = rb.DatasetForTextClassification.from_datasets(
+        dataset_rb = ar.DatasetForTextClassification.from_datasets(
             dataset_ds, annotation="label"
         )
 
@@ -450,12 +454,12 @@ class TestDatasetForTextClassification:
 
 class TestDatasetForTokenClassification:
     def test_init(self, tokenclassification_records):
-        ds = rb.DatasetForTokenClassification(tokenclassification_records)
-        assert ds._RECORD_TYPE == rb.TokenClassificationRecord
+        ds = ar.DatasetForTokenClassification(tokenclassification_records)
+        assert ds._RECORD_TYPE == ar.TokenClassificationRecord
         assert ds._records == tokenclassification_records
 
     def test_to_from_datasets(self, tokenclassification_records):
-        expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
+        expected_dataset = ar.DatasetForTokenClassification(tokenclassification_records)
 
         dataset_ds = expected_dataset.to_datasets()
 
@@ -489,49 +493,49 @@ class TestDatasetForTokenClassification:
             }
         ]
 
-        dataset = rb.DatasetForTokenClassification.from_datasets(dataset_ds)
+        dataset = ar.DatasetForTokenClassification.from_datasets(dataset_ds)
 
-        assert isinstance(dataset, rb.DatasetForTokenClassification)
+        assert isinstance(dataset, ar.DatasetForTokenClassification)
         _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict(
             {"text": ["mock"], "tokens": [["mock"]]}
         )
-        rec = rb.DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
+        rec = ar.DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock" and rec.tokens == ["mock"]
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rb.DatasetForTokenClassification(
-            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        dataset_rb = ar.DatasetForTokenClassification(
+            [ar.TokenClassificationRecord(text="mock", tokens=["mock"])]
         )
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [None]
 
-        assert rb.read_datasets(dataset_ds, task="TokenClassification")[0].id is None
+        assert ar.read_datasets(dataset_ds, task="TokenClassification")[0].id is None
 
     def test_prepare_for_training_empty(self):
-        dataset = rb.DatasetForTokenClassification(
-            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        dataset = ar.DatasetForTokenClassification(
+            [ar.TokenClassificationRecord(text="mock", tokens=["mock"])]
         )
         assert len(dataset.prepare_for_training()) == 0
 
     def test_datasets_empty_metadata(self):
-        dataset = rb.DatasetForTokenClassification(
-            [rb.TokenClassificationRecord(text="mock", tokens=["mock"])]
+        dataset = ar.DatasetForTokenClassification(
+            [ar.TokenClassificationRecord(text="mock", tokens=["mock"])]
         )
         assert dataset.to_datasets()["metadata"] == [None]
 
     def test_to_from_pandas(self, tokenclassification_records):
-        expected_dataset = rb.DatasetForTokenClassification(tokenclassification_records)
+        expected_dataset = ar.DatasetForTokenClassification(tokenclassification_records)
 
         dataset_df = expected_dataset.to_pandas()
 
         assert isinstance(dataset_df, pd.DataFrame)
         assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
 
-        dataset = rb.DatasetForTokenClassification.from_pandas(dataset_df)
+        dataset = ar.DatasetForTokenClassification.from_pandas(dataset_df)
 
-        assert isinstance(dataset, rb.DatasetForTokenClassification)
+        assert isinstance(dataset, ar.DatasetForTokenClassification)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
 
@@ -540,17 +544,19 @@ class TestDatasetForTokenClassification:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_push_to_hub(self, tokenclassification_records):
-        dataset_ds = rb.DatasetForTokenClassification(
+        dataset_ds = ar.DatasetForTokenClassification(
             tokenclassification_records
         ).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
+            # TODO(@frascuchon): Move dataset to the new org
             repo_id="rubrix/_test_token_classification_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
         sleep(1)
         dataset_ds = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
             "rubrix/_test_token_classification_records",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
@@ -564,11 +570,12 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training_with_spacy(self):
         ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
             "rubrix/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
-        rb_dataset: DatasetForTokenClassification = rb.read_datasets(
+        rb_dataset: DatasetForTokenClassification = ar.read_datasets(
             ner_dataset, task="TokenClassification"
         )
         for r in rb_dataset:
@@ -591,11 +598,12 @@ class TestDatasetForTokenClassification:
     )
     def test_prepare_for_training(self):
         ner_dataset = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
             "rubrix/gutenberg_spacy-ner",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
             split="train",
         )
-        rb_dataset: DatasetForTokenClassification = rb.read_datasets(
+        rb_dataset: DatasetForTokenClassification = ar.read_datasets(
             ner_dataset, task="TokenClassification"
         )
         for r in rb_dataset:
@@ -645,7 +653,7 @@ class TestDatasetForTokenClassification:
 
         _push_to_hub_with_retries(
             train,
-            repo_id="rubrix/_test_token_classification_training",
+            repo_id="argilla/_test_token_classification_training",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
         )
@@ -654,14 +662,15 @@ class TestDatasetForTokenClassification:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
-    def test_from_dataset_with_non_rubrix_format(self):
+    def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
+            # TODO(@frascuchon): Move dataset to the new org
             "rubrix/wikiann_es_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
 
-        rb_ds = rb.DatasetForTokenClassification.from_datasets(
+        rb_ds = ar.DatasetForTokenClassification.from_datasets(
             ds, tags="ner_tags", metadata=["spans"]
         )
 
@@ -682,7 +691,7 @@ class TestDatasetForTokenClassification:
 
     def test_from_datasets_with_empty_tokens(self, caplog):
         dataset_ds = datasets.Dataset.from_dict({"empty_tokens": [["mock"], []]})
-        dataset_rb = rb.DatasetForTokenClassification.from_datasets(
+        dataset_rb = ar.DatasetForTokenClassification.from_datasets(
             dataset_ds, tokens="empty_tokens"
         )
 
@@ -695,12 +704,12 @@ class TestDatasetForTokenClassification:
 
 class TestDatasetForText2Text:
     def test_init(self, text2text_records):
-        ds = rb.DatasetForText2Text(text2text_records)
-        assert ds._RECORD_TYPE == rb.Text2TextRecord
+        ds = ar.DatasetForText2Text(text2text_records)
+        assert ds._RECORD_TYPE == ar.Text2TextRecord
         assert ds._records == text2text_records
 
     def test_to_from_datasets(self, text2text_records):
-        expected_dataset = rb.DatasetForText2Text(text2text_records)
+        expected_dataset = ar.DatasetForText2Text(text2text_records)
 
         dataset_ds = expected_dataset.to_datasets()
 
@@ -724,45 +733,45 @@ class TestDatasetForText2Text:
             }
         ]
 
-        dataset = rb.DatasetForText2Text.from_datasets(dataset_ds)
+        dataset = ar.DatasetForText2Text.from_datasets(dataset_ds)
 
-        assert isinstance(dataset, rb.DatasetForText2Text)
+        assert isinstance(dataset, ar.DatasetForText2Text)
         _compare_datasets(dataset, expected_dataset)
 
         missing_optional_cols = datasets.Dataset.from_dict({"text": ["mock"]})
-        rec = rb.DatasetForText2Text.from_datasets(missing_optional_cols)[0]
+        rec = ar.DatasetForText2Text.from_datasets(missing_optional_cols)[0]
         assert rec.text == "mock"
 
         # alternative format for the predictions
         ds = datasets.Dataset.from_dict(
             {"text": ["example"], "prediction": [["ejemplo"]]}
         )
-        rec = rb.DatasetForText2Text.from_datasets(ds)[0]
+        rec = ar.DatasetForText2Text.from_datasets(ds)[0]
         assert rec.prediction[0][0] == "ejemplo"
         assert rec.prediction[0][1] == pytest.approx(1.0)
 
     def test_from_to_datasets_id(self):
-        dataset_rb = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])
+        dataset_rb = ar.DatasetForText2Text([ar.Text2TextRecord(text="mock")])
         dataset_ds = dataset_rb.to_datasets()
         assert dataset_ds["id"] == [None]
 
-        assert rb.read_datasets(dataset_ds, task="Text2Text")[0].id is None
+        assert ar.read_datasets(dataset_ds, task="Text2Text")[0].id is None
 
     def test_datasets_empty_metadata(self):
-        dataset = rb.DatasetForText2Text([rb.Text2TextRecord(text="mock")])
+        dataset = ar.DatasetForText2Text([ar.Text2TextRecord(text="mock")])
         assert dataset.to_datasets()["metadata"] == [None]
 
     def test_to_from_pandas(self, text2text_records):
-        expected_dataset = rb.DatasetForText2Text(text2text_records)
+        expected_dataset = ar.DatasetForText2Text(text2text_records)
 
         dataset_df = expected_dataset.to_pandas()
 
         assert isinstance(dataset_df, pd.DataFrame)
         assert list(dataset_df.columns) == list(expected_dataset[0].__fields__.keys())
 
-        dataset = rb.DatasetForText2Text.from_pandas(dataset_df)
+        dataset = ar.DatasetForText2Text.from_pandas(dataset_df)
 
-        assert isinstance(dataset, rb.DatasetForText2Text)
+        assert isinstance(dataset, ar.DatasetForText2Text)
         for rec, expected in zip(dataset, expected_dataset):
             assert rec == expected
 
@@ -771,9 +780,10 @@ class TestDatasetForText2Text:
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
     def test_push_to_hub(self, text2text_records):
-        dataset_ds = rb.DatasetForText2Text(text2text_records).to_datasets()
+        dataset_ds = ar.DatasetForText2Text(text2text_records).to_datasets()
         _push_to_hub_with_retries(
             dataset_ds,
+            # TODO(@frascuchon): Move dataset to the new org
             repo_id="rubrix/_test_text2text_records",
             token=_HF_HUB_ACCESS_TOKEN,
             private=True,
@@ -791,14 +801,14 @@ class TestDatasetForText2Text:
         _HF_HUB_ACCESS_TOKEN is None,
         reason="You need a HF Hub access token to test the push_to_hub feature",
     )
-    def test_from_dataset_with_non_rubrix_format(self):
+    def test_from_dataset_with_non_argilla_format(self):
         ds = datasets.load_dataset(
             "rubrix/big_patent_a_test_100",
             split="test",
             use_auth_token=_HF_HUB_ACCESS_TOKEN,
         )
 
-        rb_ds = rb.DatasetForText2Text.from_datasets(
+        rb_ds = ar.DatasetForText2Text.from_datasets(
             ds, text="description", annotation="abstract"
         )
 
@@ -841,10 +851,10 @@ def test_read_pandas(monkeypatch, task, dataset_class):
         return mock
 
     monkeypatch.setattr(
-        f"rubrix.client.datasets.{dataset_class}.from_pandas", mock_from_pandas
+        f"argilla.client.datasets.{dataset_class}.from_pandas", mock_from_pandas
     )
 
-    assert rb.read_pandas("mock", task) == "mock"
+    assert ar.read_pandas("mock", task) == "mock"
 
 
 @pytest.mark.parametrize(
@@ -860,7 +870,7 @@ def test_read_datasets(monkeypatch, task, dataset_class):
         return mock
 
     monkeypatch.setattr(
-        f"rubrix.client.datasets.{dataset_class}.from_datasets", mock_from_datasets
+        f"argilla.client.datasets.{dataset_class}.from_datasets", mock_from_datasets
     )
 
-    assert rb.read_datasets("mock", task) == "mock"
+    assert ar.read_datasets("mock", task) == "mock"

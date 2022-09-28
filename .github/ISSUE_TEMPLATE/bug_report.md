@@ -26,9 +26,9 @@ If applicable, add screenshots to help explain your problem.
 **Environment (please complete the following information):**
  - OS [e.g. iOS]:
  - Browser [e.g. chrome, safari]:
- - Rubrix Version [e.g. 0.10.0]:
+ - Argilla Version [e.g. 1.0.0]:
  - ElasticSearch Version [e.g. 7.10.2]:
- - Docker Image (optional) [e.g. rubrix:v0.10.0]:
+ - Docker Image (optional) [e.g. argilla:v1.0.0]:
 
 **Additional context**
 Add any other context about the problem here.

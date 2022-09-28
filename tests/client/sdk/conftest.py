@@ -18,18 +18,18 @@ from typing import Any, Dict, List
 
 import pytest
 
-import rubrix as rb
-from rubrix._constants import DEFAULT_API_KEY
-from rubrix.client.sdk.client import AuthenticatedClient
-from rubrix.client.sdk.text2text.models import (
+import argilla as ar
+from argilla._constants import DEFAULT_API_KEY
+from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from rubrix.client.sdk.text_classification.models import (
+from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.client.sdk.token_classification.models import (
+from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
@@ -136,10 +136,10 @@ def sdk_client(mocked_client, monkeypatch):
 @pytest.fixture
 def bulk_textclass_data():
     explanation = {
-        "text": [rb.TokenAttributions(token="test", attributions={"test": 0.5})]
+        "text": [ar.TokenAttributions(token="test", attributions={"test": 0.5})]
     }
     records = [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="test",
             prediction=[("test", 0.5)],
             prediction_agent="agent",
@@ -165,7 +165,7 @@ def bulk_textclass_data():
 @pytest.fixture
 def bulk_text2text_data():
     records = [
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="test",
             prediction=[("prueba", 0.5), ("intento", 0.5)],
             prediction_agent="agent",
@@ -189,7 +189,7 @@ def bulk_text2text_data():
 @pytest.fixture
 def bulk_tokenclass_data():
     records = [
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="a raw text",
             tokens=["a", "raw", "text"],
             prediction=[("test", 2, 5, 0.9)],

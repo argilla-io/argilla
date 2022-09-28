@@ -14,7 +14,7 @@
 #  limitations under the License.
 import logging
 
-from rubrix.logging import LoggingMixin, LoguruLoggerHandler
+from argilla.logging import LoggingMixin, LoguruLoggerHandler
 
 
 class LoggingForTest(LoggingMixin):

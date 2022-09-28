@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { RubrixInfo } from "@/models/RubrixInfo";
+import { AppInfo } from "@/models/AppInfo";
 
 const actions = {
-  async getRubrixVersion() {
-    const { response } = await RubrixInfo.api().get("_info");
-    return response.data.rubrix_version;
+  async getAppVersion() {
+    const { response } = await AppInfo.api().get("_info");
+    return response.data.version;
   },
 };
 export default {

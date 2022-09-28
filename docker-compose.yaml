@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  rubrix:
-    image: recognai/rubrix:v0.18.0
+  argilla:
+    image: recognai/rubrix:latest
     restart: unless-stopped
     ports:
       - "6900:80"
@@ -12,7 +12,7 @@ services:
     # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml
     networks:
-      - rubrix
+      - argilla
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
@@ -28,7 +28,7 @@ services:
         soft: -1
         hard: -1
     networks:
-      - rubrix
+      - argilla
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
 
@@ -41,10 +41,10 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     networks:
-      - rubrix
+      - argilla
 
 networks:
-  rubrix:
+  argilla:
     driver: bridge
 
 volumes:

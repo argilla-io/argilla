@@ -1,2 +1,2 @@
-graft src/rubrix/server/static
+graft src/argilla/server/static
 prune docs

@@ -14,8 +14,8 @@
 #  limitations under the License.
 import pytest
 
-from rubrix.client.sdk.datasets.models import Dataset, TaskType
-from rubrix.server.apis.v0.models.datasets import Dataset as ServerDataset
+from argilla.client.sdk.datasets.models import Dataset, TaskType
+from argilla.server.apis.v0.models.datasets import Dataset as ServerDataset
 
 
 def test_dataset_schema(helpers):

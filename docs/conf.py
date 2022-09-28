@@ -32,14 +32,19 @@
 # -- Project information -----------------------------------------------------
 import os
 
-import rubrix as rb
+try:
+    import argilla as ar
+    version_ = ar.__version__
+except ModuleNotFoundError:
+    version_ = os.environ["VERSION"]
 
-project = "Rubrix"
-copyright = "2022, Recognai"
-author = "Recognai"
+
+project = "Argilla"
+copyright = "2022, Argilla.io"
+author = "Argilla.io"
 
 # Normally the full version, including alpha/beta/rc tags.
-release = rb.__version__
+release = version_
 
 # The short X.Y version
 version = ".".join(release.split(".")[0:2])

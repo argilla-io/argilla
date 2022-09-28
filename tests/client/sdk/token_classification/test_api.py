@@ -15,8 +15,8 @@
 import httpx
 import pytest
 
-from rubrix.client.sdk.token_classification.api import data
-from rubrix.client.sdk.token_classification.models import TokenClassificationRecord
+from argilla.client.sdk.token_classification.api import data
+from argilla.client.sdk.token_classification.models import TokenClassificationRecord
 
 
 @pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])

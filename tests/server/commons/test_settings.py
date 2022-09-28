@@ -17,22 +17,22 @@ import os
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.settings import ApiSettings
+from argilla.server.settings import ApiSettings
 
 
 @pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])
 def test_wrong_settings_namespace(bad_namespace):
-    os.environ["RUBRIX_NAMESPACE"] = bad_namespace
+    os.environ["ARGILLA_NAMESPACE"] = bad_namespace
     with pytest.raises(ValidationError):
         ApiSettings()
 
 
 def test_settings_namespace():
-    os.environ["RUBRIX_NAMESPACE"] = "namespace"
+    os.environ["ARGILLA_NAMESPACE"] = "namespace"
     settings = ApiSettings()
 
     assert settings.namespace == "namespace"
-    assert settings.dataset_index_name == ".rubrix.namespace.datasets-v0"
+    assert settings.dataset_index_name == "namespace.ar.datasets"
     assert (
-        settings.dataset_records_index_name == ".rubrix.namespace.dataset.{}.records-v0"
+        settings.dataset_records_index_name == "namespace.ar.dataset.{}"
     )

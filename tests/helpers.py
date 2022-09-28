@@ -17,11 +17,11 @@ from typing import List
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
-from rubrix._constants import API_KEY_HEADER_NAME, RUBRIX_WORKSPACE_HEADER_NAME
-from rubrix.client.api import active_api
-from rubrix.server.security import auth
-from rubrix.server.security.auth_provider.local.settings import settings
-from rubrix.server.security.auth_provider.local.users.model import UserInDB
+from argilla._constants import API_KEY_HEADER_NAME, WORKSPACE_HEADER_NAME
+from argilla.client.api import active_api
+from argilla.server.security import auth
+from argilla.server.security.auth_provider.local.settings import settings
+from argilla.server.security.auth_provider.local.users.model import UserInDB
 
 
 class SecuredClient:
@@ -35,12 +35,12 @@ class SecuredClient:
         return self._client.app
 
     def change_current_user(self, username):
-        default_user = auth.users.__dao__.__users__["rubrix"]
+        default_user = auth.users.__dao__.__users__["argilla"]
         new_user = UserInDB(
             username=username,
             hashed_password=username,  # Even if required, we can ignore it
             api_key=username,
-            workspaces=["rubrix"],  # The default workspace
+            workspaces=["argilla"],  # The default workspace
         )
 
         auth.users.__dao__.__users__[username] = new_user
@@ -49,31 +49,31 @@ class SecuredClient:
         rb_api.set_workspace(default_user.username)
         rb_api.client.token = new_user.api_key
         self._header[API_KEY_HEADER_NAME] = new_user.api_key
-        self._header[RUBRIX_WORKSPACE_HEADER_NAME] = "rubrix"
+        self._header[WORKSPACE_HEADER_NAME] = "argilla"
 
     def reset_default_user(self):
-        default_user = auth.users.__dao__.__users__["rubrix"]
+        default_user = auth.users.__dao__.__users__["argilla"]
 
         rb_api = active_api()
         rb_api._user = default_user
         rb_api.client.token = default_user.api_key
-        rb_api.client.headers.pop(RUBRIX_WORKSPACE_HEADER_NAME)
+        rb_api.client.headers.pop(WORKSPACE_HEADER_NAME)
         self._header[API_KEY_HEADER_NAME] = default_user.api_key
 
-    def add_workspaces_to_rubrix_user(self, workspaces: List[str]):
-        rubrix_user = auth.users.__dao__.__users__["rubrix"]
-        rubrix_user.workspaces.extend(workspaces or [])
+    def add_workspaces_to_argilla_user(self, workspaces: List[str]):
+        argilla_user = auth.users.__dao__.__users__["argilla"]
+        argilla_user.workspaces.extend(workspaces or [])
 
         rb_api = active_api()
-        rb_api._user = rubrix_user
+        rb_api._user = argilla_user
 
-    def reset_rubrix_workspaces(self):
-        rubrix_user = auth.users.__dao__.__users__["rubrix"]
-        rubrix_user.workspaces = ["", "rubrix"]
+    def reset_argilla_workspaces(self):
+        argilla_user = auth.users.__dao__.__users__["argilla"]
+        argilla_user.workspaces = ["", "argilla"]
 
         rb_api = active_api()
-        rb_api._user = rubrix_user
-        rb_api.set_workspace("rubrix")
+        rb_api._user = argilla_user
+        rb_api.set_workspace("argilla")
 
     def delete(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})

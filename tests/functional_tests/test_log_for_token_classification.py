@@ -14,22 +14,22 @@
 
 import pytest
 
-import rubrix
-from rubrix import TokenClassificationRecord
-from rubrix.client import api
-from rubrix.client.sdk.commons.errors import NotFoundApiError
-from rubrix.metrics import __all__ as ALL_METRICS
+import argilla
+from argilla import TokenClassificationRecord
+from argilla.client import api
+from argilla.client.sdk.commons.errors import NotFoundApiError
+from argilla.metrics import __all__ as ALL_METRICS
 
 
 def test_log_with_empty_text(mocked_client):
     dataset = "test_log_with_empty_text"
     text = " "
 
-    rubrix.delete(dataset)
+    argilla.delete(dataset)
     with pytest.raises(
         Exception, match="The provided `text` contains only whitespaces."
     ):
-        rubrix.log(
+        argilla.log(
             TokenClassificationRecord(id=0, text=text, tokens=["a", "b", "c"]),
             name=dataset,
         )
@@ -39,12 +39,12 @@ def test_log_with_empty_tokens_list(mocked_client):
     dataset = "test_log_with_empty_text"
     text = "The text"
 
-    rubrix.delete(dataset)
+    argilla.delete(dataset)
     with pytest.raises(
         Exception,
         match="At least one token should be provided",
     ):
-        rubrix.log(
+        argilla.log(
             TokenClassificationRecord(id=0, text=text, tokens=[]),
             name=dataset,
         )
@@ -107,10 +107,10 @@ def test_log_record_that_makes_me_cry(mocked_client):
         status="Default",
         event_timestamp=None,
     )
-    rubrix.delete(dataset)
-    rubrix.log(record, name=dataset)
+    argilla.delete(dataset)
+    argilla.log(record, name=dataset)
 
-    records = rubrix.load(dataset)
+    records = argilla.load(dataset)
     assert len(records) == 1
     assert records[0].text == record.text
     assert records[0].tokens == record.tokens
@@ -514,13 +514,14 @@ def test_search_keywords(mocked_client):
     dataset = "test_search_keywords"
     from datasets import load_dataset
 
+    # TODO(@frascuchon): Move dataset to new organization
     dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
-    dataset_rb = rubrix.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    rubrix.delete(dataset)
-    rubrix.log(name=dataset, records=dataset_rb)
+    argilla.delete(dataset)
+    argilla.log(name=dataset, records=dataset_rb)
 
-    df = rubrix.load(dataset, query="lis*")
+    df = argilla.load(dataset, query="lis*")
     df = df.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns

@@ -1,4 +1,4 @@
-name: rubrix_doc
+name: argilla-docs
 channels:
   - defaults
 dependencies:

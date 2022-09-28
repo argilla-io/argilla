@@ -13,8 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rubrix import __version__ as rubrix_version
-from rubrix.server.services.info import ApiInfo, ApiStatus
+from argilla import __version__ as argilla_version
+from argilla.server.services.info import ApiInfo, ApiStatus
 
 
 def test_api_info(mocked_client):
@@ -24,7 +24,7 @@ def test_api_info(mocked_client):
 
     info = ApiInfo.parse_obj(response.json())
 
-    assert info.rubrix_version == rubrix_version
+    assert info.version == argilla_version
 
 
 def test_api_status(mocked_client):
@@ -35,7 +35,7 @@ def test_api_status(mocked_client):
 
     info = ApiStatus.parse_obj(response.json())
 
-    assert info.rubrix_version == rubrix_version
+    assert info.version == argilla_version
 
     # Checking to not get the error dictionary service.py includes whenever something goes wrong
     assert not "error" in info.elasticsearch

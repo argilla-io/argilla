@@ -15,8 +15,8 @@
 import httpx
 import pytest
 
-from rubrix.client.sdk.text2text.api import data
-from rubrix.client.sdk.text2text.models import Text2TextRecord
+from argilla.client.sdk.text2text.api import data
+from argilla.client.sdk.text2text.models import Text2TextRecord
 
 
 @pytest.mark.parametrize("limit,expected", [(None, 3), (2, 2)])

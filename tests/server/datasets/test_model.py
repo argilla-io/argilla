@@ -16,8 +16,8 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix.server.apis.v0.models.datasets import CreateDatasetRequest
-from rubrix.server.commons.models import TaskType
+from argilla.server.apis.v0.models.datasets import CreateDatasetRequest
+from argilla.server.commons.models import TaskType
 
 
 @pytest.mark.parametrize(

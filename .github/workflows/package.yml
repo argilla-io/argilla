@@ -55,7 +55,7 @@ jobs:
           miniforge-variant: Mambaforge
           miniforge-version: latest
           use-mamba: true
-          activate-environment: rubrix
+          activate-environment: argilla
 
       - name: Get date for conda cache
         if: steps.filter.outputs.python_code == 'true'
@@ -76,7 +76,7 @@ jobs:
 
       - name: Update environment
         if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n rubrix -f environment_dev.yml
+        run: mamba env update -n argilla -f environment_dev.yml
 
       - name: Cache pip 👜
         uses: actions/cache@v2
@@ -97,7 +97,7 @@ jobs:
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
-          pytest --cov=rubrix --cov-report=xml
+          pytest --cov=argilla --cov-report=xml
           pip install "spacy<3.0" && python -m spacy download en_core_web_sm
           pytest tests/monitoring/test_spacy_monitoring.py
           pip install "cleanlab<2.0"
@@ -212,7 +212,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps rubrix==${GITHUB_REF#refs/*/v}
+        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:

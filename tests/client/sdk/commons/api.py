@@ -16,15 +16,15 @@ import httpx
 import pytest
 from httpx import Response as HttpxResponse
 
-from rubrix.client.sdk.commons.api import build_bulk_response, build_data_response, bulk
-from rubrix.client.sdk.commons.models import (
+from argilla.client.sdk.commons.api import build_bulk_response, build_data_response, bulk
+from argilla.client.sdk.commons.models import (
     BulkResponse,
     ErrorMessage,
     HTTPValidationError,
     Response,
     ValidationError,
 )
-from rubrix.client.sdk.text_classification.models import TextClassificationRecord
+from argilla.client.sdk.text_classification.models import TextClassificationRecord
 
 
 def test_text2text_bulk(sdk_client, mocked_client, bulk_text2text_data, monkeypatch):

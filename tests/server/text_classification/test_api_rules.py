@@ -14,7 +14,7 @@
 
 import pytest
 
-from rubrix.server.apis.v0.models.text_classification import (
+from argilla.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     LabelingRule,
     LabelingRuleMetricsSummary,
@@ -215,7 +215,7 @@ def test_duplicated_dataset_rules(mocked_client):
     assert response.status_code == 409
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::EntityAlreadyExistsError",
+            "code": "argilla.api.errors::EntityAlreadyExistsError",
             "params": {"name": "a query", "type": "ServiceLabelingRule"},
         }
     }

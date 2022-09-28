@@ -14,4 +14,4 @@
 
 import pytest
 
-from rubrix.server.commons import telemetry
+from argilla.server.commons import telemetry

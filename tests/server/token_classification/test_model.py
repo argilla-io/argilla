@@ -16,15 +16,15 @@
 import pytest
 from pydantic import ValidationError
 
-from rubrix._constants import MAX_KEYWORD_LENGTH
-from rubrix.server.apis.v0.models.token_classification import (
+from argilla._constants import MAX_KEYWORD_LENGTH
+from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAnnotation,
     TokenClassificationQuery,
     TokenClassificationRecord,
 )
-from rubrix.server.commons.models import PredictionStatus
-from rubrix.server.daos.backend.search.query_builder import EsQueryBuilder
-from rubrix.server.services.tasks.token_classification.model import (
+from argilla.server.commons.models import PredictionStatus
+from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
+from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )

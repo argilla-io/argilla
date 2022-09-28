@@ -17,17 +17,17 @@ from typing import List
 
 import pytest
 
-import rubrix as rb
-from rubrix.client.sdk.datasets.models import TaskType
-from rubrix.client.sdk.text2text.models import (
+import argilla as ar
+from argilla.client.sdk.datasets.models import TaskType
+from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from rubrix.client.sdk.text_classification.models import (
+from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from rubrix.client.sdk.token_classification.models import (
+from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
@@ -36,9 +36,9 @@ from rubrix.client.sdk.token_classification.models import (
 @pytest.fixture(scope="session")
 def singlelabel_textclassification_records(
     request,
-) -> List[rb.TextClassificationRecord]:
+) -> List[ar.TextClassificationRecord]:
     return [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock", "context": "mock"},
             prediction=[("a", 0.5), ("b", 0.5)],
             prediction_agent="mock_pagent",
@@ -49,14 +49,14 @@ def singlelabel_textclassification_records(
             metadata={"mock_metadata": "mock"},
             explanation={
                 "text": [
-                    rb.TokenAttributions(
+                    ar.TokenAttributions(
                         token="mock", attributions={"a": 0.1, "b": 0.5}
                     )
                 ]
             },
             status="Validated",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
@@ -65,21 +65,21 @@ def singlelabel_textclassification_records(
             metadata={"mock2_metadata": "mock2"},
             explanation={
                 "text": [
-                    rb.TokenAttributions(
+                    ar.TokenAttributions(
                         token="mock2", attributions={"a": 0.7, "b": 0.2}
                     )
                 ]
             },
             status="Default",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
             id=3,
             status="Discarded",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation="a",
             annotation_agent="mock_aagent",
@@ -87,7 +87,7 @@ def singlelabel_textclassification_records(
             event_timestamp=datetime.datetime(2000, 3, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="mock",
             id="b",
             status="Default",
@@ -122,9 +122,9 @@ def log_singlelabel_textclassification_records(
 
 
 @pytest.fixture(scope="session")
-def multilabel_textclassification_records(request) -> List[rb.TextClassificationRecord]:
+def multilabel_textclassification_records(request) -> List[ar.TextClassificationRecord]:
     return [
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock", "context": "mock"},
             prediction=[("a", 0.6), ("b", 0.4)],
             prediction_agent="mock_pagent",
@@ -136,14 +136,14 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             metadata={"mock_metadata": "mock"},
             explanation={
                 "text": [
-                    rb.TokenAttributions(
+                    ar.TokenAttributions(
                         token="mock", attributions={"a": 0.1, "b": 0.5}
                     )
                 ]
             },
             status="Validated",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
@@ -153,14 +153,14 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             metadata={"mock2_metadata": "mock2"},
             explanation={
                 "text": [
-                    rb.TokenAttributions(
+                    ar.TokenAttributions(
                         token="mock2", attributions={"a": 0.7, "b": 0.2}
                     )
                 ]
             },
             status="Default",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
@@ -168,7 +168,7 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             id=3,
             status="Discarded",
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation=["a"],
             annotation_agent="mock_aagent",
@@ -178,7 +178,7 @@ def multilabel_textclassification_records(request) -> List[rb.TextClassification
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rb.TextClassificationRecord(
+        ar.TextClassificationRecord(
             text="mock",
             multi_label=True,
             id="b",
@@ -215,9 +215,9 @@ def log_multilabel_textclassification_records(
 
 
 @pytest.fixture(scope="session")
-def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
+def tokenclassification_records(request) -> List[ar.TokenClassificationRecord]:
     return [
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="This is an example",
             tokens=["This", "is", "an", "example"],
             prediction=[("a", 5, 7), ("b", 11, 18)],
@@ -229,7 +229,7 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
             metadata={"mock_metadata": "mock"},
             status="Validated",
         ),
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="This is a second example",
             tokens=["This", "is", "a", "second", "example"],
             prediction=[("a", 5, 7), ("b", 8, 9)],
@@ -238,7 +238,7 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="This is a secondd example",
             tokens=["This", "is", "a", "secondd", "example"],
             prediction=[("a", 5, 7), ("b", 8, 9, 0.5)],
@@ -246,7 +246,7 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
             id=3,
             status="Default",
         ),
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="This is a third example",
             tokens=["This", "is", "a", "third", "example"],
             annotation=[("a", 0, 4), ("b", 16, 23)],
@@ -256,7 +256,7 @@ def tokenclassification_records(request) -> List[rb.TokenClassificationRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rb.TokenClassificationRecord(
+        ar.TokenClassificationRecord(
             text="This is a third example",
             tokens=["This", "is", "a", "third", "example"],
             id="b",
@@ -292,9 +292,9 @@ def log_tokenclassification_records(
 
 
 @pytest.fixture(scope="session")
-def text2text_records(request) -> List[rb.Text2TextRecord]:
+def text2text_records(request) -> List[ar.Text2TextRecord]:
     return [
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="This is an example",
             prediction=["Das ist ein Beispiel", "Esto es un ejemplo"],
             prediction_agent="mock_pagent",
@@ -305,7 +305,7 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             status="Validated",
         ),
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="This is a one and a half example",
             prediction=[("Das ist ein Beispiell", 0.9), ("Esto es un ejemploo", 0.1)],
             prediction_agent="mock_pagent",
@@ -313,7 +313,7 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="This is a second example",
             prediction=["Esto es un ejemplooo", ("Das ist ein Beispielll", 0.9)],
             prediction_agent="mock_pagent",
@@ -322,7 +322,7 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="This is a third example",
             annotation="C'est une très bonne baguette",
             annotation_agent="mock_pagent",
@@ -331,7 +331,7 @@ def text2text_records(request) -> List[rb.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rb.Text2TextRecord(
+        ar.Text2TextRecord(
             text="This is a forth example",
             id="b",
             status="Discarded",

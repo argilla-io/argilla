@@ -14,7 +14,7 @@
 #  limitations under the License.
 import pytest
 
-from rubrix.utils.span_utils import SpanUtils
+from argilla.utils.span_utils import SpanUtils
 
 
 def test_init():

@@ -14,20 +14,20 @@
 
 import pytest
 
-import rubrix
-from rubrix.server.apis.v0.models.commons.model import ScoreRange
-from rubrix.server.apis.v0.models.datasets import Dataset
-from rubrix.server.apis.v0.models.text_classification import (
+import argilla
+from argilla.server.apis.v0.models.commons.model import ScoreRange
+from argilla.server.apis.v0.models.datasets import Dataset
+from argilla.server.apis.v0.models.text_classification import (
     TextClassificationQuery,
     TextClassificationRecord,
 )
-from rubrix.server.apis.v0.models.token_classification import TokenClassificationQuery
-from rubrix.server.commons.models import TaskType
-from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
-from rubrix.server.daos.records import DatasetRecordsDAO
-from rubrix.server.services.metrics import MetricsService, ServicePythonMetric
-from rubrix.server.services.search.model import ServiceSortConfig
-from rubrix.server.services.search.service import SearchRecordsService
+from argilla.server.apis.v0.models.token_classification import TokenClassificationQuery
+from argilla.server.commons.models import TaskType
+from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend
+from argilla.server.daos.records import DatasetRecordsDAO
+from argilla.server.services.metrics import MetricsService, ServicePythonMetric
+from argilla.server.services.search.model import ServiceSortConfig
+from argilla.server.services.search.service import SearchRecordsService
 
 
 @pytest.fixture
@@ -73,13 +73,13 @@ def test_query_builder_with_query_range(backend: ElasticsearchBackend):
 def test_query_builder_with_nested(mocked_client, dao, backend: ElasticsearchBackend):
     dataset = Dataset(
         name="test_query_builder_with_nested",
-        owner=rubrix.get_workspace(),
+        owner=argilla.get_workspace(),
         task=TaskType.token_classification,
     )
-    rubrix.delete(dataset.name)
-    rubrix.log(
+    argilla.delete(dataset.name)
+    argilla.log(
         name=dataset.name,
-        records=rubrix.TokenClassificationRecord(
+        records=argilla.TokenClassificationRecord(
             text="Michael is a professor at Harvard",
             tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
             prediction=[("NAME", 0, 7, 0.9), ("LOC", 26, 33, 0.12)],
@@ -132,13 +132,13 @@ def test_failing_metrics(service, mocked_client):
 
     dataset = Dataset(
         name="test_failing_metrics",
-        owner=rubrix.get_workspace(),
+        owner=argilla.get_workspace(),
         task=TaskType.text_classification,
     )
 
-    rubrix.delete(dataset.name)
-    rubrix.log(
-        rubrix.TextClassificationRecord(text="This is a text, yeah!"),
+    argilla.delete(dataset.name)
+    argilla.log(
+        argilla.TextClassificationRecord(text="This is a text, yeah!"),
         name=dataset.name,
     )
     results = service.search(

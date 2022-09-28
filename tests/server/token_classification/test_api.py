@@ -16,8 +16,8 @@ from typing import Callable
 
 import pytest
 
-from rubrix.server.apis.v0.models.commons.model import BulkResponse, SortableField
-from rubrix.server.apis.v0.models.token_classification import (
+from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
+from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
     TokenClassificationQuery,
     TokenClassificationRecord,
@@ -56,7 +56,7 @@ def test_load_as_different_task(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::WrongTaskError",
+            "code": "argilla.api.errors::WrongTaskError",
             "params": {
                 "message": "Provided task TextClassification cannot be "
                 "applied to dataset"
@@ -140,7 +140,7 @@ def test_some_sort(mocked_client):
     assert response.status_code == 400
     assert response.json() == {
         "detail": {
-            "code": "rubrix.api.errors::BadRequestError",
+            "code": "argilla.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id babba. Valid values are: "
                 "['id', 'metadata', 'score', 'predicted', "
@@ -331,4 +331,4 @@ def test_show_not_aggregable_metadata_fields(mocked_client):
     results = TokenClassificationSearchResults.parse_obj(response.json())
     assert len(results.aggregations.metadata) == 2
     assert "field_one" in results.aggregations.metadata
-    assert "rubrix:stats" in results.aggregations.metadata["field_one"]
+    assert "argilla:stats" in results.aggregations.metadata["field_one"]

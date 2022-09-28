@@ -14,9 +14,9 @@
 
 import pytest
 
-import rubrix
-import rubrix as rb
-from rubrix.metrics.token_classification import (
+import argilla
+import argilla as ar
+from argilla.metrics.token_classification import (
     Annotations,
     entity_capitalness,
     entity_consistency,
@@ -32,33 +32,33 @@ from rubrix.metrics.token_classification import (
 
 
 def log_some_data(dataset: str):
-    rubrix.delete(dataset)
-    text = "My first rubrix example \n"
+    argilla.delete(dataset)
+    text = "My first great example \n"
     tokens = text.split(" ")
-    rb.log(
+    ar.log(
         [
-            rb.TokenClassificationRecord(
+            ar.TokenClassificationRecord(
                 id=1,
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
                 annotation=[("CARDINAL", 3, 8)],
             ),
-            rb.TokenClassificationRecord(
+            ar.TokenClassificationRecord(
                 id=2,
                 text=text,
                 tokens=tokens,
                 prediction=[("CARDINAL", 3, 8)],
                 annotation=[("CARDINAL", 3, 8)],
             ),
-            rb.TokenClassificationRecord(
+            ar.TokenClassificationRecord(
                 id=3,
                 text=text,
                 tokens=tokens,
                 prediction=[("NUMBER", 3, 8)],
                 annotation=[("NUMBER", 3, 8)],
             ),
-            rb.TokenClassificationRecord(
+            ar.TokenClassificationRecord(
                 id=4,
                 text=text,
                 tokens=tokens,
@@ -72,10 +72,10 @@ def log_some_data(dataset: str):
 
 def test_search_by_nested_metric(mocked_client):
     dataset = "test_search_by_nested_metric"
-    rb.delete(dataset)
+    ar.delete(dataset)
     log_some_data(dataset)
 
-    df = rb.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
+    df = ar.load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
     assert len(df) > 0
 
 
@@ -100,8 +100,8 @@ def test_token_length(mocked_client):
         "2.0": 4,
         "3.0": 0,
         "4.0": 0,
-        "5.0": 4,
-        "6.0": 4,
+        "5.0": 8,
+        "6.0": 0,
         "7.0": 4,
     }
     results.visualize()
@@ -113,7 +113,7 @@ def test_token_frequency(mocked_client):
 
     results = token_frequency(dataset)
     assert results
-    assert results.data == {"\n": 4, "My": 4, "example": 4, "first": 4, "rubrix": 4}
+    assert results.data == {"\n": 4, "My": 4, "example": 4, "first": 4, "great": 4}
     results.visualize()
 
 
@@ -201,7 +201,7 @@ def test_entity_labels(mocked_client):
 
 def test_entity_capitalness(mocked_client):
     dataset = "test_entity_capitalness"
-    rubrix.delete(dataset)
+    argilla.delete(dataset)
     log_some_data(dataset)
 
     results = entity_capitalness(dataset)
@@ -217,7 +217,7 @@ def test_entity_capitalness(mocked_client):
 
 def test_entity_consistency(mocked_client):
     dataset = "test_entity_consistency"
-    rubrix.delete(dataset)
+    argilla.delete(dataset)
     log_some_data(dataset)
 
     results = entity_consistency(dataset, threshold=2)
@@ -265,12 +265,12 @@ def test_entity_consistency(mocked_client):
 )
 def test_metrics_without_data(mocked_client, metric, expected_results, monkeypatch):
     dataset = "test_metrics_without_data"
-    rb.delete(dataset)
+    ar.delete(dataset)
 
     text = "M"
     tokens = text.split(" ")
-    rb.log(
-        rb.TokenClassificationRecord(
+    ar.log(
+        ar.TokenClassificationRecord(
             id=1,
             text=text,
             tokens=tokens,
@@ -288,8 +288,8 @@ def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_token_classification"
 
     text = "test the f1 metric of the token classification task"
-    rb.log(
-        rb.TokenClassificationRecord(
+    ar.log(
+        ar.TokenClassificationRecord(
             id=1,
             text=text,
             tokens=text.split(),

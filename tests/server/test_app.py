@@ -17,12 +17,12 @@ from importlib import reload
 
 import pytest
 
-from rubrix.server import app
+from argilla.server import app
 
 
 def test_fallback_app(monkeypatch):
-    monkeypatch.setitem(sys.modules, "rubrix.server.server", None)
+    monkeypatch.setitem(sys.modules, "argilla.server.server", None)
     reload(app)
 
-    with pytest.raises(RuntimeError, match="Cannot start rubrix server"):
+    with pytest.raises(RuntimeError, match="Cannot start argilla server"):
         app.app()

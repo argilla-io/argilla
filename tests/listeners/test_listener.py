@@ -17,9 +17,9 @@ from typing import List
 
 import pytest
 
-import rubrix as rb
-from rubrix import RBListenerContext, listener
-from rubrix.client.models import Record
+import argilla as ar
+from argilla import RBListenerContext, listener
+from argilla.client.models import Record
 
 
 def condition_check_params(search):
@@ -43,7 +43,7 @@ def condition_check_params(search):
 def test_listener_with_parameters(
     mocked_client, dataset, query, metrics, condition, query_params
 ):
-    rb.delete(dataset)
+    ar.delete(dataset)
 
     class TestListener:
         executed = False
@@ -81,7 +81,7 @@ def test_listener_with_parameters(
 
     time.sleep(1.5)
     assert test.action.is_running()
-    rb.log(rb.TextClassificationRecord(text="This is a text"), name=dataset)
+    ar.log(ar.TextClassificationRecord(text="This is a text"), name=dataset)
 
     with pytest.raises(ValueError):
         test.action.start()
