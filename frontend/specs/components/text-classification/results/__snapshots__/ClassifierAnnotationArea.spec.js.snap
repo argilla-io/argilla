@@ -4,8 +4,18 @@ exports[`ClassifierAnnotationArea renders properly 1`] = `
 <div class="annotation-area">
   <!---->
   <div class="feedback-interactions">
-    <classifier-annotation-button id="A" label="[object Object]" data-title="A" value="A" class="label-button"></classifier-annotation-button>
-    <classifier-annotation-button id="B" label="[object Object]" data-title="B" value="B" class="label-button"></classifier-annotation-button>
+    <div class="re-annotation-button single label-button" data-title="A"><label for="A" class="button"><span title="A" class="annotation-button-data__text">A
+    </span>
+        <!---->
+      </label>
+      <div tabindex="0" class="annotation-button-container"><input id="A" type="checkbox" value="A"></div>
+    </div>
+    <div class="re-annotation-button single label-button" data-title="B"><label for="B" class="button"><span title="B" class="annotation-button-data__text">B
+    </span>
+        <!---->
+      </label>
+      <div tabindex="0" class="annotation-button-container"><input id="B" type="checkbox" value="B"></div>
+    </div>
     <!---->
   </div>
 </div>
