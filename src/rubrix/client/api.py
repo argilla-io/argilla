@@ -422,26 +422,18 @@ class Api:
     ) -> Tuple[int, int]:
         """Delete records from a Rubrix dataset.
 
-        Parameters:
-        -----------
-            name:
-                The dataset name.
-            query:
-                An ElasticSearch query with the
-                `query string syntax <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
-            ids:
-                If provided, deletes dataset records with given ids.
-            discard_only:
-                If `True`, matched records won't be deleted. Instead, they will be marked
-                as `Discarded`
-            discard_when_forbidden:
-                Only super-user or dataset creator can delete records from a dataset.
+        Args:
+            name: The dataset name.
+            query: An ElasticSearch query with the `query string syntax
+                <https://rubrix.readthedocs.io/en/stable/guides/queries.html>`_
+            ids: If provided, deletes dataset records with given ids.
+            discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
+            discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
                 So, running "hard" deletion for other users will raise an `ForbiddenApiError` error.
                 If this parameter is `True`, the client API will automatically try to mark as ``Discarded``
                 records instead. Default, `True`
 
         Returns:
-        --------
             The total of matched records and real number of processed errors. These numbers could not
             be the same if some data conflicts are found during operations (some matched records change during
             deletion).
