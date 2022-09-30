@@ -1,9 +1,24 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from itertools import zip_longest
 from typing import Any, Dict, List, Optional
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, bulk
+from elasticsearch.helpers import bulk, scan
 from pydantic import BaseSettings
+
 from rubrix.server.tasks.commons import TaskType
 
 
@@ -97,9 +112,7 @@ if __name__ == "__main__":
         source_index_info = client.get(index=source_datasets_index, id=dataset)
 
         target_dataset_name = f"{dataset}-{settings.task}".lower()
-        target_index = target_record_index_pattern.format(
-            target_dataset_name
-        )
+        target_index = target_record_index_pattern.format(target_dataset_name)
 
         target_index_info = source_index_info["_source"]
         target_index_info["task"] = settings.task
