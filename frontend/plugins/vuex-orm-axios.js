@@ -42,7 +42,7 @@ export default ({ $axios, app }) => {
 
   $axios.onError((error) => {
     const code = parseInt(error.response && error.response.status);
-    if (error instanceof ExpiredAuthSessionError || [401, 403].includes(code)) {
+    if (error instanceof ExpiredAuthSessionError || 401 === code) {
       app.$auth.logout();
     }
 
@@ -70,13 +70,13 @@ export default ({ $axios, app }) => {
         break;
       case 404:
         Notification.dispatch("notify", {
-          message: "Warning: " + error.response.data.detail,
+          message: "Warning: " + messageDetail.params.detail,
           type: "warning",
         });
         break;
       default:
         Notification.dispatch("notify", {
-          message: error,
+          message: "Error: " + messageDetail.params.detail,
           type: "error",
         });
     }
