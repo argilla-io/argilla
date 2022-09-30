@@ -123,7 +123,8 @@ class Client(_ClientCommonDefaults, _Client):
     @with_httpx_error_handler
     def delete(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
-        response = self.__httpx__.delete(
+        response = self.__httpx__.request(
+            method="DELETE",
             url=path,
             headers=self.get_headers(),
             *args,
