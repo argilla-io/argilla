@@ -32,5 +32,6 @@ Build a news classifier using rules and weak supervision, and how Rubrix makes t
 
 01-labeling-finetuning.ipynb
 weak-supervision-with-rubrix.ipynb
+few-shot-classification-with-setfit.ipynb
 ```
 
