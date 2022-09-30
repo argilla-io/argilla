@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import Component from "@/components/text-classifier/results/ClassifierAnnotationArea";
+import Component from "@/components/text-classifier/results/classifier-annotation/ClassifierAnnotationArea";
 
 import { TextClassificationRecord } from "@/models/TextClassification";
 

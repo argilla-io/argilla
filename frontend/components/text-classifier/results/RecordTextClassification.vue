@@ -105,18 +105,20 @@ export default {
     },
 
     async validateLabels({ labels }) {
+      const annotation = {
+        labels: labels.map((label) => ({
+          class: label,
+          score: 1.0,
+        })),
+      };
+
       await this.validateAnnotations({
         dataset: this.dataset,
         agent: this.$auth.user.username,
         records: [
           {
             ...this.record,
-            annotation: {
-              labels: labels.map((label) => ({
-                class: label,
-                score: 1.0,
-              })),
-            },
+            annotation,
           },
         ],
       });
