@@ -447,11 +447,10 @@ class Api:
             deletion).
 
         Examples:
-            **Delete by id**:
+            >>> ## Delete by id
             >>> import rubrix as rb
             >>> rb.delete_records(name="example-dataset", ids=[1,3,5])
-
-            **Discard records by query**:
+            >>> ## Discard records by query
             >>> import rubrix as rb
             >>> rb.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
         """
