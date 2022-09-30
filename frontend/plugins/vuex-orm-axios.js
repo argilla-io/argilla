@@ -70,13 +70,13 @@ export default ({ $axios, app }) => {
         break;
       case 404:
         Notification.dispatch("notify", {
-          message: "Warning: " + messageDetail.params.detail,
+          message: `Warning: ${messageDetail.params.detail}`,
           type: "warning",
         });
         break;
       default:
         Notification.dispatch("notify", {
-          message: "Error: " + messageDetail.params.detail,
+          message: `Error:  ${messageDetail.params.detail}`,
           type: "error",
         });
     }
