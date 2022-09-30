@@ -30,9 +30,9 @@ from rubrix.server.services.tasks.commons import ServiceRecord
 
 @dataclasses.dataclass
 class DeleteRecordsOut:
-    processed: int
-    discarded: Optional[int] = None
-    deleted: Optional[int] = None
+    processed: int = 0
+    discarded: int = 0
+    deleted: int = 0
 
 
 class RecordsStorageService:
@@ -97,7 +97,7 @@ class RecordsStorageService:
             )
 
         return DeleteRecordsOut(
-            processed=processed,
-            discarded=discarded,
-            deleted=deleted,
+            processed=processed or 0,
+            discarded=discarded or 0,
+            deleted=deleted or 0,
         )
