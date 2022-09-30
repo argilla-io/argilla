@@ -89,3 +89,22 @@ def test_delete_records_without_permission(mocked_client):
         assert matched, processed == (1, 1)
     finally:
         mocked_client.reset_default_user()
+
+
+def test_delete_records_with_unmatched_records(mocked_client):
+    dataset = "test_delete_records_with_unmatched_records"
+    import rubrix as rb
+
+    rb.delete(dataset)
+    rb.log(
+        name=dataset,
+        records=[
+            rb.TextClassificationRecord(
+                id=i, text="This is the text", metadata=dict(idx=i)
+            )
+            for i in range(0, 50)
+        ],
+    )
+
+    matched, processed = rb.delete_records(dataset, ids=["you-wont-find-me-here"])
+    assert (matched, processed) == (0, 0)

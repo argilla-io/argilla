@@ -80,6 +80,11 @@ class SecuredClient:
         headers = {**self._header, **request_headers}
         return self._client.delete(*args, headers=headers, **kwargs)
 
+    def request(self, *args, **kwargs):
+        request_headers = kwargs.pop("headers", {})
+        headers = {**self._header, **request_headers}
+        return self._client.request(*args, headers=headers, **kwargs)
+
     def post(self, *args, **kwargs):
         request_headers = kwargs.pop("headers", {})
         headers = {**self._header, **request_headers}
