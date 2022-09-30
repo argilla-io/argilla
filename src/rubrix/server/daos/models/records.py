@@ -76,6 +76,10 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         annotation = values.get(annotation_field)
         annotations = values.get(field_to_update) or {}
 
+        if annotations:
+            for key, value in annotations.items():
+                value.agent = key  # Maybe we want key and agents with different values
+
         if annotation:
             annotations.update(
                 {
@@ -87,12 +91,8 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             values[field_to_update] = annotations
 
         if annotations and not annotation:
-            for key, value in annotations.items():
-                new_annotation = value.__class__.parse_obj(
-                    {**value.dict(), "agent": key}
-                )
-                values[annotation_field] = new_annotation
-                break
+            # set first annotation
+            values[annotation_field] = list(annotations.values())[0]
 
         return values
 
