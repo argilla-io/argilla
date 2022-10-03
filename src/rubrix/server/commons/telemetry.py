@@ -87,16 +87,19 @@ class _TelemetryClient:
             "platform": platform.platform(),
             "python_version": platform.python_version(),
             "sys_version": platform.version(),
-            "rubrix_version": __version__,
+            "version": __version__,
         }
 
     def track_data(
         self, action: str, data: Dict[str, Any], include_system_info: bool = True
     ):
         event_data = data.copy()
-        if include_system_info:
-            event_data.update(self.__system_info__)
-        self.client.track(self.__server_id_str__, action, event_data)
+        self.client.track(
+            user_id=self.__server_id_str__,
+            event=action,
+            properties=event_data,
+            context=self.__system_info__ if include_system_info else {},
+        )
 
 
 def _process_request_info(request: Request):
