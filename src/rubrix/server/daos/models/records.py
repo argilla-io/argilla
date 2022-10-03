@@ -22,6 +22,7 @@ from pydantic.generics import GenericModel
 from rubrix._constants import MAX_KEYWORD_LENGTH
 from rubrix.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from rubrix.server.daos.backend.search.model import BackendRecordsQuery, SortConfig
+from rubrix.server.errors import ValidationError
 from rubrix.server.helpers import flatten_dict
 from rubrix.utils import limit_value_length
 
@@ -78,9 +79,12 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         if annotations:
             for key, value in annotations.items():
-                value.agent = key  # Maybe we want key and agents with different values
+                value.agent = None  # Maybe we want key and agents with different values
 
         if annotation:
+            if not annotation.agent:
+                raise AssertionError("Agent must be defined!")
+
             annotations.update(
                 {
                     annotation.agent: annotation.__class__.parse_obj(
@@ -92,7 +96,10 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         if annotations and not annotation:
             # set first annotation
-            values[annotation_field] = list(annotations.values())[0]
+            key, value = list(annotations.items())[0]
+            values[annotation_field] = value.__class__(
+                agent=key, **value.dict(exclude={"agent"})
+            )
 
         return values
 
