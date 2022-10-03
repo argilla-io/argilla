@@ -418,10 +418,18 @@ def test_using_predictions_dict():
         "labels": [{"class_label": "YES", "score": 1.0}],
     }
     assert record.predictions == {
-        "BOB": TextClassificationAnnotation(
-            agent="BOB", labels=[ClassPrediction(class_label="NO")]
-        ),
+        "BOB": TextClassificationAnnotation(labels=[ClassPrediction(class_label="NO")]),
         "carl": TextClassificationAnnotation(
-            agent="carl", labels=[ClassPrediction(class_label="YES")]
+            labels=[ClassPrediction(class_label="YES")]
         ),
     }
+
+
+def test_with_no_agent_at_all():
+    with pytest.raises(ValidationError):
+        ServiceTextClassificationRecord(
+            inputs={"text": "this is a text"},
+            prediction=TextClassificationAnnotation(
+                labels=[ClassPrediction(class_label="YES")]
+            ),
+        )
