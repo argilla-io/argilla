@@ -26,17 +26,6 @@ from rubrix.server.errors.base_errors import RubrixServerError
 _LOGGER = logging.getLogger("rubrix")
 
 
-class UnauthorizedError(HTTPException):
-    """Unauthorized error"""
-
-    def __init__(self):
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
 class RubrixErrorDetail(BaseModel):
     code: str
     params: Dict[str, Any]

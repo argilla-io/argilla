@@ -95,6 +95,15 @@ class ForbiddenOperationError(RubrixServerError):
         self.detail = message or "Operation not allowed"
 
 
+class UnauthorizedError(RubrixServerError):
+    """Unauthorized operation"""
+
+    HTTP_STATUS = status.HTTP_401_UNAUTHORIZED
+
+    def __init__(self, message: Optional[str] = None):
+        self.detail = message or "Could not validate credentials"
+
+
 class BadRequestError(RubrixServerError):
     """Generic bad request error"""
 
