@@ -17,7 +17,26 @@
 If you want to add something here, remember to add it as normal import in the _TYPE_CHECKING section (for IDEs),
 as well as in the `_import_structure` dictionary.
 """
+import inspect
 
 from rubrix import _version
 
 __version__ = _version.version
+
+
+import warnings
+
+
+MIGRATION_MESSAGE = """
+    Rubrix has been moved to Argilla project. You should use blablablab...
+    
+    pip install argilla==1.0.0
+    
+    or 
+    
+    import argilla as ag
+    
+    ar.log....
+    """
+
+warnings.warn(inspect.cleandoc(MIGRATION_MESSAGE))
