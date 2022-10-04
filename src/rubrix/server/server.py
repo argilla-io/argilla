@@ -16,7 +16,9 @@
 """
 This module configures the global fastapi application
 """
+import inspect
 import os
+import sys
 import warnings
 from pathlib import Path
 
@@ -130,20 +132,32 @@ app = FastAPI(
 
 
 def configure_telemetry(app):
-    TELEMETRY_MESSAGE = """
-Server telemetry is enabled by default when you run the server.
-If you want to disable it, you can configure the environment variable:
+    message = "\n"
+    message += inspect.cleandoc(
+        """
+        Rubrix uses telemetry to report anonymous usage and error information.
 
-$>export RUBRIX_ENABLE_TELEMETRY=0
+        You can know more about what information is reported at:
 
-You can find more info in docs https://rubrix.readthedocs.io/en/releases-0.x/community/telemetry.html?highlight=telemetry#telemetry
-"""
+            https://rubrix.readthedocs.io/en/stable/reference/telemetry.html
+
+        Telemetry is currently enabled. If you want to disable it, you can configure
+        the environment variable before relaunching the server:
+    """
+    )
+    message += "\n\n    "
+    message += (
+        "#set RUBRIX_ENABLE_TELEMETRY=0"
+        if os.name == "nt"
+        else "$>export RUBRIX_ENABLE_TELEMETRY=0"
+    )
+    message += "\n"
 
     @app.on_event("startup")
     async def check_telemetry():
         if settings.enable_telemetry:
             warnings.warn(
-                TELEMETRY_MESSAGE,
+                message,
                 category=UserWarning,
             )
 
