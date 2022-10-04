@@ -62,6 +62,7 @@ if _TYPE_CHECKING:
     from rubrix.monitoring.model_monitor import monitor
     from rubrix.server.server import app
 
+# TODO: remove me
 _import_structure = {
     "client.api": [
         "copy",
