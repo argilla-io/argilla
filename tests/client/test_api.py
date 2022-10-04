@@ -551,7 +551,10 @@ def test_token_classification_spans(span, valid):
         )
     else:
         with pytest.raises(
-            ValueError, match="The entity spans \['s'\] are not aligned"
+            ValueError,
+            match="Following entity spans are not aligned with provided tokenization\n"
+            r"Spans:\n- \[s\] defined in Esto es...\n"
+            r"Tokens:\n\['Esto', 'es', 'una', 'prueba'\]",
         ):
             rb.TokenClassificationRecord(
                 text=texto,
