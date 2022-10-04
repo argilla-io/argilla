@@ -172,6 +172,7 @@ You can join the conversation on Slack! We are a very friendly and inclusive com
    :caption: Reference
    :hidden:
 
+   reference/telemetry
    reference/python/index
    reference/webapp/index
 
