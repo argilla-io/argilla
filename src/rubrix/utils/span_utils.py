@@ -83,22 +83,38 @@ class SpanUtils:
         Raises:
             ValueError: If a span is invalid, or if a span is not aligned with the tokens.
         """
-        not_valid_spans, misaligned_spans = [], []
-        for span in spans:
-            if span[2] - span[1] < 1:
-                not_valid_spans.append(span)
-            elif None in (
-                self._start_to_token_idx.get(span[1]),
-                self._end_to_token_idx.get(span[2]),
-            ):
-                misaligned_spans.append(self.text[span[1] : span[2]])
+        not_valid_spans_errors, misaligned_spans_errors = [], []
 
-        if not_valid_spans or misaligned_spans:
+        for span in spans:
+            char_start, char_end = span[1], span[2]
+            if char_end - char_start < 1:
+                not_valid_spans_errors.append(span)
+            elif None in (
+                self._start_to_token_idx.get(char_start),
+                self._end_to_token_idx.get(char_end),
+            ):
+                message = f"- [{self.text[char_start:char_end]}] defined in "
+                if char_start - 5 > 0:
+                    message += "..."
+                message += self.text[max(char_start - 5, 0) : char_end + 5]
+                if char_end + 5 < len(self.text):
+                    message += "..."
+
+                misaligned_spans_errors.append(message)
+
+        if not_valid_spans_errors or misaligned_spans_errors:
             message = ""
-            if not_valid_spans:
-                message += f"Following entity spans are not valid: {not_valid_spans}\n"
-            if misaligned_spans:
-                message += f"The entity spans {misaligned_spans} are not aligned with following tokens: {self.tokens}"
+            if not_valid_spans_errors:
+                message += (
+                    f"Following entity spans are not valid: {not_valid_spans_errors}\n"
+                )
+
+            if misaligned_spans_errors:
+                spans = "\n".join(misaligned_spans_errors)
+                message += f"Following entity spans are not aligned with provided tokenization\n"
+                message += f"Spans:\n{spans}\n"
+                message += f"Tokens:\n{self.tokens}"
+
             raise ValueError(message)
 
     def correct(self, spans: List[Tuple[str, int, int]]) -> List[Tuple[str, int, int]]:

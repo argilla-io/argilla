@@ -67,7 +67,9 @@ def test_validate_misaligned_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
     with pytest.raises(
         ValueError,
-        match="The entity spans \['test '\] are not aligned with following tokens: \['test', 'this', '.'\]",
+        match="Following entity spans are not aligned with provided tokenization\n"
+        r"Spans:\n- \[test \] defined in test this.\n"
+        r"Tokens:\n\['test', 'this', '.'\]",
     ):
         span_utils.validate([("mock", 0, 5)])
 
@@ -76,8 +78,10 @@ def test_validate_not_valid_and_misaligned_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
     with pytest.raises(
         ValueError,
-        match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"
-        "The entity spans \['test '\] are not aligned with following tokens: \['test', 'this', '.'\]",
+        match=r"Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"
+        "Following entity spans are not aligned with provided tokenization\n"
+        r"Spans:\n- \[test \] defined in test this.\n"
+        r"Tokens:\n\['test', 'this', '.'\]",
     ):
         span_utils.validate([("mock", 2, 1), ("mock", 0, 5)])
 
