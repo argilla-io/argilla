@@ -103,11 +103,13 @@ jobs:
 
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
-        if: steps.filter.outputs.python_code == 'true'
+        if: steps.filter.outputs.python_code == 'true' && matrix.elasticsearch == '8.0'
         with:
           files: ./coverage.xml
           flags: pytest
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+
+
 
   build:
     name: Build the python package
