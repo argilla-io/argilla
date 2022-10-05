@@ -2,6 +2,10 @@
 name: Build package
 
 on:
+  release:
+    types:
+      - 'published'
+
   push:
     branches:
       - 'main'
@@ -12,8 +16,6 @@ on:
       - 'main'
       - 'master'
       - 'releases/**'
-  release:
-    types: [published]
 
 jobs:
 
