@@ -44,8 +44,8 @@ from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
 from argilla.server.daos.backend.search.model import (
     BackendRecordsQuery,
     BaseDatasetsQuery,
-    SortableField,
     SortConfig,
+    SortableField,
 )
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.errors import EntityNotFoundError, InvalidTextSearchError
@@ -88,11 +88,9 @@ class backend_error_handler:
         try:
             raise exception_value from exception_value
         except RequestError as ex:
+            detail = self.__get_es_error_detail__(ex, exception_value)
             if ex.error == "search_phase_execution_exception":
-                detail = exception_value.info["error"]
-                detail = detail.get("root_cause")
-                detail = detail[0].get("reason") if detail else ex.info["error"]
-
+                detail = detail or ex.info["error"]
                 raise InvalidTextSearchError(detail)
             elif ex.error == "index_closed_exception":
                 raise ClosedIndexError(self._index)
@@ -101,6 +99,12 @@ class backend_error_handler:
             raise IndexNotFoundError(ex)
         except OpenSearchException as ex:
             raise GenericSearchError(ex)
+
+    def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:
+        detail = exception_value.info["error"]
+        detail = detail.get("root_cause")
+
+        return detail[0].get("reason")
 
 
 class ElasticsearchBackend(LoggingMixin):
@@ -228,7 +232,7 @@ class ElasticsearchBackend(LoggingMixin):
             query["search_after"] = [last_id]
             response = self.__client__.search(index=index, body=query, size=size)
 
-    def index_exists(self, index: str) -> bool:
+    def _index_exists(self, index: str) -> bool:
         """
         Checks if provided index exists
 
@@ -304,7 +308,7 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index):
             if force_recreate:
                 self._delete_index(index)
-            if not self.index_exists(index):
+            if not self._index_exists(index):
                 self.__client__.indices.create(
                     index=index,
                     body={"settings": settings or {}, "mappings": mappings or {}},
@@ -340,11 +344,15 @@ class ElasticsearchBackend(LoggingMixin):
                     name=index_template, ignore=[400, 404]
                 )
 
-    def _delete_index(self, index: str):
+    def _delete_index(self, index: str, raises_error: bool = False):
         """Deletes an elasticsearch index"""
         with backend_error_handler(index=index):
-            if self.index_exists(index):
-                self.__client__.indices.delete(index, ignore=[400, 404])
+            if self._index_exists(index):
+                ignore_errors = [400, 404]
+                if raises_error:
+                    ignore_errors = []
+                self.__client__.indices.delete(index, ignore=ignore_errors)
+
 
     def _add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
@@ -481,9 +489,12 @@ class ElasticsearchBackend(LoggingMixin):
                 index=index,
                 ignore_unavailable=False,
             )
+            schema = self._extract_index_schema_from_response(
+                index=index, es_response=response
+            )
             data = {
                 key: list(definition["mapping"].values())[0]["type"]
-                for key, definition in response[index]["mappings"].items()
+                for key, definition in schema["mappings"].items()
             }
 
             if exclude_subfields:
@@ -713,17 +724,17 @@ class ElasticsearchBackend(LoggingMixin):
             index=index,
             metric_id=metric_id,
             query=query,
-            schema=self.get_mappings(id),
+            schema=self.get_schema(id),
             params=params,
         )
 
-    def get_mappings(self, id: str) -> Dict[str, Any]:
+    def get_schema(self, id: str) -> Dict[str, Any]:
         index = dataset_records_index(id)
         with backend_error_handler(index=index):
             response = self.__client__.indices.get_mapping(index=index)
-            if index in response:
-                response = response.get(index)
-            return response
+            return self._extract_index_schema_from_response(
+                index=index, es_response=response
+            )
 
     async def update_records_content(
         self,
@@ -734,7 +745,7 @@ class ElasticsearchBackend(LoggingMixin):
         index = dataset_records_index(id)
         with backend_error_handler(index=index):
             es_query = self.query_builder.map_2_es_query(
-                schema=self.get_mappings(id),
+                schema=self.get_schema(id),
                 query=query,
             )
             response = self.client.update_by_query(
@@ -764,7 +775,7 @@ class ElasticsearchBackend(LoggingMixin):
         index = dataset_records_index(id)
         with backend_error_handler(index=index):
             es_query = self.query_builder.map_2_es_query(
-                schema=self.get_mappings(id),
+                schema=self.get_schema(id),
                 query=query,
             )
             response = self.client.delete_by_query(
@@ -794,7 +805,7 @@ class ElasticsearchBackend(LoggingMixin):
                 sort.sort_by = [SortableField(id="id")]  # Default sort by id
             es_query = {
                 **self.query_builder.map_2_es_query(
-                    schema=self.get_mappings(id),
+                    schema=self.get_schema(id),
                     query=query,
                     sort=sort,
                 ),
@@ -872,7 +883,7 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index):
             es_query = {
                 **self.query_builder.map_2_es_query(
-                    schema=self.get_mappings(id),
+                    schema=self.get_schema(id),
                     query=query,
                     id_from=id_from,
                     sort=SortConfig(),  # sort by id as default for proper index scan using search after
@@ -947,8 +958,16 @@ class ElasticsearchBackend(LoggingMixin):
                 )
 
     def delete(self, id: str):
+        index = dataset_records_index(id)
         try:
-            return self._delete_index(dataset_records_index(id))
+            self._delete_index(index, raises_error=True)
+        except GenericSearchError as ex:
+            if not ex.origin_error.status_code == 400:
+                raise ex
+            # It's an alias --> DELETE from original index
+            original_index = settings.old_dataset_records_index_name.format(id)
+            self._delete_index_alias(original_index, alias=index)
+
         finally:
             self._delete_document(index=DATASETS_INDEX_NAME, doc_id=id)
 
@@ -967,6 +986,8 @@ class ElasticsearchBackend(LoggingMixin):
             force_recreate=force_recreate,
             mappings=datasets_index_mappings(),
         )
+        if not settings.enable_migration:
+            return
 
         source_index = settings.old_dataset_index_name
         target_index = DATASETS_INDEX_NAME
@@ -1012,7 +1033,6 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index=DATASETS_INDEX_NAME):
             document = self._get_document_by_id(index=DATASETS_INDEX_NAME, doc_id=id)
             if not document and owner is None and name:
-
                 # We must search by name since we have no owner
                 es_query = self.query_builder.map_2_es_query(
                     query=BaseDatasetsQuery(name=name)
@@ -1105,6 +1125,9 @@ class ElasticsearchBackend(LoggingMixin):
             name=alias,
             ignore=[400, 404],
         )
+
+    def _delete_index_alias(self, index: str, alias: str):
+        self.__client__.indices.delete_alias(index=index, name=alias, ignore=[400, 404])
 
 
 def dataset_records_index(dataset_id: str) -> str:

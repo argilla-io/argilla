@@ -89,7 +89,7 @@ class DatasetRecordsDAO:
         now = datetime.datetime.utcnow()
         documents = []
         metadata_values = {}
-        mapping = self._es.get_mappings(dataset.id)
+        mapping = self._es.get_schema(dataset.id)
 
         exclude_fields = [
             name
@@ -198,7 +198,7 @@ class DatasetRecordsDAO:
 
     def get_dataset_schema(self, dataset: DatasetDB) -> Dict[str, Any]:
         """Return inner elasticsearch index configuration"""
-        schema = self._es.get_mappings(id=dataset.id)
+        schema = self._es.get_schema(id=dataset.id)
         return schema
 
     async def delete_records_by_query(

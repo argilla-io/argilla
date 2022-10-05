@@ -45,6 +45,16 @@ class BaseDatasetDB(BaseModel):
         """The dataset id. Compounded by owner and name"""
         return self.build_dataset_id(self.name, self.owner)
 
+    def dict(self, *args, **kwargs) -> "DictStrAny":
+        """
+        Extends base component dict extending object properties
+        and user defined extended fields
+        """
+        return {
+            **super().dict(*args, **kwargs),
+            "id": self.id,
+        }
+
 
 class BaseDatasetSettingsDB(BaseModel):
     pass

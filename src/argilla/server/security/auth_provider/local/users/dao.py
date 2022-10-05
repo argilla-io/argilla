@@ -38,7 +38,15 @@ class UsersDAO:
                 ]
                 self.__users__ = {user.username: user for user in user_list}
         except FileNotFoundError:
-            self.__users__ = {_DEFAULT_USER.username: _DEFAULT_USER}
+            self.__users__ = {
+                _DEFAULT_USER.username: _DEFAULT_USER,
+                # Old user datasets compatibility
+                "rubrix": UserInDB(
+                    username="rubrix",
+                    hashed_password=_DEFAULT_USER.hashed_password,
+                    api_key=_DEFAULT_USER.api_key,
+                ),
+            }
 
     def get_user(self, user_name: str) -> Optional[UserInDB]:
         """Fetch user info for a given user name"""

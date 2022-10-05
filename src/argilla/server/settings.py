@@ -67,6 +67,11 @@ class ApiSettings(BaseSettings):
 
     namespace: str = Field(default=None, regex=r"^[a-z]+$")
 
+    enable_migration: bool = Field(
+        default=False,
+        description="If enabled, try to migrate data from old rubrix installation",
+    )
+
     # Analyzer configuration
     default_es_search_analyzer: str = "standard"
     exact_es_search_analyzer: str = "whitespace"
@@ -97,6 +102,22 @@ class ApiSettings(BaseSettings):
         if ns:
             return f"{self.namespace}.{self.__DATASETS_RECORDS_INDEX_NAME__}"
         return self.__DATASETS_RECORDS_INDEX_NAME__
+
+    @property
+    def old_dataset_index_name(self) -> str:
+        index_name = ".rubrix<NAMESPACE>.datasets-v0"
+        ns = self.namespace
+        if ns is None:
+            return index_name.replace("<NAMESPACE>", "")
+        return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def old_dataset_records_index_name(self) -> str:
+        index_name = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
+        ns = self.namespace
+        if ns is None:
+            return index_name.replace("<NAMESPACE>", "")
+        return index_name.replace("<NAMESPACE>", f".{ns}")
 
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""

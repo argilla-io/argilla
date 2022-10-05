@@ -16,13 +16,12 @@ from argilla.server.settings import settings
 
 DATASETS_INDEX_NAME = settings.dataset_index_name
 
-# TODO(@frascuchon): Define an mapping definition instead and
-#  use it when datasets index is created
-DATASETS_INDEX_TEMPLATE = {
-    "index_patterns": [DATASETS_INDEX_NAME],
-    "settings": {"number_of_shards": 1},
-    "mappings": {
+
+def datasets_index_mappings():
+    """The index mapping definition for the main datasets index"""
+    return {
         "properties": {
+            "id": {"type": "keyword"},
             "tags": {
                 "type": "nested",
                 "properties": {
@@ -38,5 +37,4 @@ DATASETS_INDEX_TEMPLATE = {
                 },
             },
         }
-    },
-}
+    }

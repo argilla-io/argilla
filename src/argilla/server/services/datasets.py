@@ -140,14 +140,16 @@ class DatasetsService:
             task=dataset.task,
             as_dataset_class=None,
         )
-        if found:
-            if user.is_superuser() or user.username == dataset.created_by:
-                self.__dao__.delete_dataset(dataset)
-            else:
-                raise ForbiddenOperationError(
-                    f"You don't have the necessary permissions to delete this dataset. "
-                    "Only dataset creators or administrators can delete datasets"
-                )
+        if not found:
+            return
+
+        if user.is_superuser() or user.username == dataset.created_by:
+            self.__dao__.delete_dataset(dataset)
+        else:
+            raise ForbiddenOperationError(
+                f"You don't have the necessary permissions to delete this dataset. "
+                "Only dataset creators or administrators can delete datasets"
+            )
 
     def update(
         self,
@@ -199,25 +201,18 @@ class DatasetsService:
         dataset_workspace = copy_workspace or dataset.owner
         dataset_workspace = user.check_workspace(dataset_workspace)
 
-        try:
-            found = self.find_by_name(
-                user=user, name=copy_name, workspace=dataset_workspace
-            )
-            raise EntityAlreadyExistsError(
-                name=found.name, type=found.__class__, workspace=dataset_workspace
-            )
-        except (EntityNotFoundError, ForbiddenOperationError):
-            pass
+        self._validate_create_dataset(
+            name=copy_name,
+            workspace=dataset_workspace,
+            user=user,
+        )
 
         copy_dataset = dataset.copy()
-
         copy_dataset.name = copy_name
         copy_dataset.owner = dataset_workspace
-
         date_now = datetime.utcnow()
         copy_dataset.created_at = date_now
         copy_dataset.last_updated = date_now
-
         copy_dataset.tags = {**copy_dataset.tags, **(copy_tags or {})}
         copy_dataset.metadata = {
             **copy_dataset.metadata,
@@ -232,6 +227,17 @@ class DatasetsService:
         )
 
         return copy_dataset
+
+    def _validate_create_dataset(self, name: str, workspace: str, user: User):
+        try:
+            found = self.find_by_name(user=user, name=name, workspace=workspace)
+            raise EntityAlreadyExistsError(
+                name=found.name,
+                type=found.__class__,
+                workspace=workspace,
+            )
+        except (EntityNotFoundError, ForbiddenOperationError):
+            pass
 
     async def get_settings(
         self,

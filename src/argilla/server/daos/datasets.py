@@ -69,7 +69,7 @@ class DatasetsDAO:
 
     def init(self):
         """Initializes dataset dao. Used on app startup"""
-        self._es.create_datasets_index(force_recreate=True)
+        self._es.create_datasets_index()
 
     def list_datasets(
         self,

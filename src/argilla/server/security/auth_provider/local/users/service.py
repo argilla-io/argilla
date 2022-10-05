@@ -66,7 +66,10 @@ class UsersService:
     def get_user(self, username) -> Optional[User]:
         user = self.__dao__.get_user(username)
         if user and user.is_superuser():
-            user.workspaces = [NO_WORKSPACE] + list(self._fetch_all_workspaces())
+            workspaces = list(self._fetch_all_workspaces())
+            if NO_WORKSPACE not in workspaces:
+                workspaces.append(NO_WORKSPACE)
+            user.workspaces = workspaces
         return user
 
     def _fetch_all_workspaces(self) -> List[str]:
