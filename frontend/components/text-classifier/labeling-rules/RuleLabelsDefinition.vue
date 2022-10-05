@@ -56,13 +56,13 @@
 
       <base-button
         v-if="visibleLabels.length < filteredLabels.length"
-        class="feedback-interactions__more primary clear"
+        class="feedback-interactions__more secondary light small"
         @click="expandLabels"
         >+{{ filteredLabels.length - visibleLabels.length }}</base-button
       >
       <base-button
         v-else-if="visibleLabels.length > maxVisibleLabels"
-        class="feedback-interactions__more primary clear"
+        class="feedback-interactions__more secondary light small"
         @click="collapseLabels"
         >Show less</base-button
       >
@@ -287,14 +287,14 @@ export default {
   justify-content: center;
 }
 .label-button:not(.active) :deep(.button) {
-  background: #e0e1ff !important;
+  background: #e0e1ff;
 }
 .rule {
   &__description {
     @include font-size(18px);
     width: 100%;
     height: 20px;
-    color: $font-secondary-medium;
+    color: $brand-primary-color;
     font-weight: 600;
     margin-top: 0;
     padding: 0;
@@ -302,9 +302,9 @@ export default {
   &__info {
     margin-bottom: 0;
     margin-top: auto;
+    color: $black-54;
   }
   &__records {
-    color: $font-dark;
     margin-left: auto;
     margin-top: 0;
     white-space: nowrap;
@@ -315,14 +315,16 @@ export default {
     line-height: 1em;
     display: flex;
     align-items: center;
+    color: $black-37;
     strong {
       font-weight: 600;
       margin-left: 0.2em;
+      color: $black-54;
     }
     &__info {
       min-width: 18px;
       margin-left: 0.3em;
-      fill: palette(grey, 100);
+      fill: $black-87;
       cursor: pointer;
       &:hover {
         & + .rule__records__tooltip:after,

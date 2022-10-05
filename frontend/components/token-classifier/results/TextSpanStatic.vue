@@ -119,12 +119,12 @@ export default {
   &__text {
     display: inline;
     position: relative;
-    @include font-size(18px);
+    @include font-size(16px);
     margin: 0 -1.5px;
     padding: 0 1.5px;
   }
   &__whitespace {
-    @include font-size(18px);
+    @include font-size(16px);
     cursor: default !important;
   }
 }

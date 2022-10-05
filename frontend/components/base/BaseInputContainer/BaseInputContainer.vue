@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="re-input-container" :class="[classes]">
+  <div class="input-container" :class="[classes]">
     <slot />
 
     <span v-if="enableCounter" class="re-count"
@@ -105,7 +105,7 @@ input:-webkit-autofill {
   box-shadow: 0 0 0px 1000px palette(white) inset;
 }
 
-.re-input-container {
+.input-container {
   input,
   textarea {
     width: 100%;
@@ -117,12 +117,11 @@ input:-webkit-autofill {
     background: none;
     transition: $swift-ease-out;
     transition-property: font-size;
-    color: $font-secondary-medium;
+    color: $black-87;
     line-height: normal;
     @include input-placeholder {
-      color: $font-secondary-medium;
-      font-family: $sff;
-      font-weight: 500;
+      color: $black-54;
+      font-weight: 400;
     }
     &:focus {
       outline: none;

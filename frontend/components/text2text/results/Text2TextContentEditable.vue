@@ -16,10 +16,10 @@
       v-if="editionMode && annotationEnabled && editableText"
       class="content__edit__buttons"
     >
+      <base-button class="primary small" @click="annotate">Save</base-button>
       <base-button class="primary outline small" @click="$emit('back')"
         >Back</base-button
       >
-      <base-button class="primary small" @click="annotate">Save</base-button>
     </div>
   </span>
 </template>

@@ -19,7 +19,7 @@
   <div class="new-label__container">
     <base-button
       v-if="!showLabelCreation"
-      class="new-label__main-button primary small"
+      class="new-label__main-button primary light small"
       @click="openLabelCreation()"
       >{{ text }}</base-button
     >
@@ -96,7 +96,7 @@ export default {
     cursor: pointer;
     height: 12px;
     width: 12px;
-    stroke: $font-secondary-medium;
+    stroke: $black-54;
     stroke-width: 1;
   }
   &__input {

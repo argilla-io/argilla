@@ -18,23 +18,44 @@
 <template>
   <div class="container">
     <form class="form" @submit.prevent="userLogin">
-      <Rubrix class="form__logo" />
-      <p class="form__title">Build, improve, and monitor data for NLP</p>
-      <div class="form__input" :class="{ active: login.username }">
-        <input v-model="login.username" type="text" placeholder="Username" />
+      <brand-logo class="form__logo" />
+      <div class="form__content">
+        <p class="form__title">Welcome</p>
+        <p class="form__text">Please enter your details to login.</p>
+        <div class="form__input" :class="{ active: login.username }">
+          <label class="form__label">Username</label>
+          <input
+            v-model="login.username"
+            type="text"
+            placeholder="Enter your username"
+          />
+        </div>
+        <div class="form__input" :class="{ active: login.password }">
+          <label class="form__label">Password</label>
+          <input
+            v-model="login.password"
+            type="password"
+            placeholder="Enter your password"
+          />
+        </div>
+        <base-button type="submit" class="form__button primary"
+          >Enter</base-button
+        >
+        <p class="form__error" v-if="error">{{ formattedError }}</p>
       </div>
-      <div class="form__input" :class="{ active: login.password }">
-        <input
-          v-model="login.password"
-          type="password"
-          placeholder="Password"
-        />
-      </div>
-      <base-button type="submit" class="form__button primary"
-        >Enter</base-button
-      >
-      <p v-if="error">{{ error }}</p>
     </form>
+    <div class="login--right">
+      <p class="login__claim">Build, improve, and monitor data for NLP</p>
+      <geometric-shape-a />
+      <p class="login__text">
+        To get support from the community, join us on
+        <a
+          href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"
+          target="_blank"
+          >Slack</a
+        >
+      </p>
+    </div>
   </div>
 </template>
 
@@ -54,6 +75,15 @@ export default {
     if (this.$auth.loggedIn) {
       return;
     }
+  },
+  computed: {
+    formattedError() {
+      if (this.error) {
+        return this.error.toString().includes("401")
+          ? "Wrong username or password. Try again"
+          : this.error;
+      }
+    },
   },
   methods: {
     nextRedirect() {
@@ -79,33 +109,55 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  background: palette(grey, 700);
-  display: flex;
-  align-items: center;
   min-height: 100vh;
+  background: $brand-secondary-color;
+  display: flex;
 }
-
 .form {
-  border-radius: $border-radius;
   background: palette(white);
-  margin: auto;
-  display: inline-block;
-  padding: 50px;
-  box-shadow: $shadow;
-  text-align: center;
-  max-width: 350px;
+  display: flex;
+  padding: $base-space * 5;
+  z-index: 1;
+  min-height: 100vh;
+  width: 50vw;
+  flex-flow: column;
+  &__content {
+    max-width: 300px;
+    margin: auto;
+  }
   &__logo {
-    text-align: center;
-    margin-bottom: 1.5em;
+    text-align: left;
+    max-width: 120px;
+    height: auto;
+  }
+  &__label {
+    display: block;
+    margin-bottom: $base-space;
+    font-weight: 500;
   }
   &__title {
-    text-align: center;
-    @include font-size(26px);
+    @include font-size(40px);
     line-height: 1.2em;
-    margin: 0 auto 2em auto;
-    color: #010250;
-    font-weight: 600;
+    margin: 0 auto $base-space auto;
+    color: $black-87;
+    font-weight: 500;
     letter-spacing: 0.03em;
+    font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
+  }
+  &__text {
+    margin-top: 0;
+    margin-bottom: $base-space * 6;
+    @include font-size(18px);
+    line-height: 1.4em;
+    font-weight: 400;
+    a {
+      font-weight: 700;
+      color: $brand-primary-color;
+      text-decoration: none;
+      &:hover {
+        color: darken($brand-primary-color, 10%);
+      }
+    }
   }
   &__button {
     margin: 2em auto 0 auto;
@@ -126,8 +178,54 @@ export default {
       width: 100%;
     }
   }
+  &__error {
+    color: #ff4f46;
+  }
 }
 input:-webkit-autofill {
   box-shadow: 0 0 0px 1000px palette(white) inset;
+}
+.login {
+  &--right {
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    width: 50vw;
+    svg {
+      position: absolute;
+      max-width: 380px;
+      margin: auto;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+  &__claim {
+    margin: auto auto;
+    max-width: 400px;
+    z-index: 1;
+    @include font-size(40px);
+    line-height: 1.3em;
+    color: palette(white);
+    font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
+    transform: translateX(-0.85em);
+    padding-top: 1em;
+  }
+  &__text {
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: $base-space * 3;
+    @include font-size(16px);
+    line-height: 1.4em;
+    font-weight: 400;
+    a {
+      color: $brand-primary-color;
+      text-decoration: none;
+      &:hover {
+        color: darken($brand-primary-color, 10%);
+      }
+    }
+  }
 }
 </style>

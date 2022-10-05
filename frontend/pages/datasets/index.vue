@@ -318,7 +318,7 @@ export default {
   @extend %container;
   padding-top: 0.2em;
   padding-bottom: 0;
-  padding-right: calc($sidebarMenuWidth + 15px);
+  padding-right: calc($sidebarMenuWidth + 4em);
   &--intro {
     padding-top: 2em;
     margin-bottom: 1.5em;

@@ -216,7 +216,7 @@ $pagination-size: 30px;
   justify-content: center;
   align-items: center;
   margin: auto;
-  font-weight: 600;
+  font-weight: 400;
   &__container {
     position: fixed;
     bottom: 0;
@@ -224,7 +224,7 @@ $pagination-size: 30px;
     right: $sidebarMenuWidth;
     display: flex;
     align-items: center;
-    background: palette(grey, 700);
+    background: palette(grey, 800);
     border-top: 1px solid palette(grey, 600);
     min-height: 63px;
     z-index: 99;
@@ -239,7 +239,6 @@ $pagination-size: 30px;
   }
   &__arrow {
     transition: all 0.3s ease-in-out;
-    color: $font-secondary-medium;
     background: transparent;
     text-decoration: none;
     display: flex;
@@ -255,7 +254,7 @@ $pagination-size: 30px;
     }
     &:hover {
       transition: all 0.3s ease-in-out;
-      background: palette(grey, 600);
+      background: $black-4;
     }
     &--next {
       margin-left: 1em;
@@ -271,7 +270,7 @@ $pagination-size: 30px;
     }
     &.is-disabled {
       pointer-events: none;
-      opacity: 0;
+      opacity: 0.5;
     }
   }
   &__numbers {
@@ -282,7 +281,6 @@ $pagination-size: 30px;
     @include font-size(14px);
     #{$self}__number {
       transition: all 0.3s ease-in-out;
-      color: $font-secondary-medium;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -295,13 +293,12 @@ $pagination-size: 30px;
       padding: 5px;
       &:hover {
         transition: all 0.3s ease-in-out;
-        background: palette(grey, 600);
+        background: $black-4;
       }
       &.is-current {
         pointer-events: none;
-        color: $font-secondary-medium-dark;
-        font-weight: 700;
-        background: palette(grey, 600);
+        font-weight: 600;
+        background: $black-4;
       }
     }
   }
@@ -310,18 +307,19 @@ $pagination-size: 30px;
     margin-right: 3em;
     display: flex;
     align-items: center;
+    color: $black-54;
     &__content {
       position: relative;
       & > a {
-        color: palette(blue, 300);
+        color: $black-54;
         border: 1px solid palette(grey, 600);
       }
     }
     &__title {
       display: block;
-      margin-bottom: 0.5em;
-      color: $font-secondary-medium-dark;
+      color: $black-54;
       margin-right: 1em;
+      @include font-size(12px);
     }
     ul {
       list-style: none;
@@ -346,11 +344,11 @@ $pagination-size: 30px;
       }
       a {
         display: block;
-        color: $font-secondary-medium-dark;
         border-radius: 1px;
         margin: 2px;
+        color: $black-54;
         &:hover {
-          background: $bg;
+          background: $black-4;
         }
       }
     }
@@ -362,7 +360,6 @@ $pagination-size: 30px;
       padding: 0.5em 1em;
       border-radius: $border-radius;
       .svg-icon {
-        fill: $primary-color;
         margin-left: 1em;
         margin-bottom: 2px;
       }
@@ -371,7 +368,9 @@ $pagination-size: 30px;
   &__info {
     margin-left: auto;
     margin-right: 0;
-    color: $font-secondary-medium-dark;
+    color: $black-54;
+    font-weight: 400;
+    @include font-size(13px);
   }
 }
 </style>

@@ -61,10 +61,9 @@ export default {
   position: relative;
   top: 0;
   right: -$sidebarPanelWidth + 1px;
-  background: $bg;
+  background: palette(grey, 700);
   padding: 1em 1.5em;
   transition: right 0.25s linear 0.2s;
-  z-index: -1;
   border-left: 1px solid palette(grey, 600);
   &:hover {
     #{$this}__close-button:not(.zoom-out) {
@@ -101,7 +100,7 @@ export default {
     position: relative;
     opacity: 0;
     transition: opacity 0.1s ease-out 0.6s;
-    z-index: 0;
+    color: $black-54;
   }
   &.visible {
     overflow: visible;
@@ -118,7 +117,6 @@ export default {
     right: -$sidebarPanelWidth + 1px;
   }
   &__content {
-    color: $font-secondary-medium-dark;
     @include font-size(13px);
     &:first-child {
       padding-top: 0;
@@ -128,14 +126,16 @@ export default {
     .metrics__title {
       margin-top: 0;
       margin-bottom: $base-space * 4;
-      @include font-size(20px);
-      font-weight: 700;
+      @include font-size(18px);
+      font-weight: 600;
+    }
+    .metrics__subtitle {
+      @include font-size(15px);
+      font-weight: 600;
     }
     .metrics__info {
       margin-top: 0;
-      margin-bottom: $base-space * 2;
-      @include font-size(15px);
-      font-weight: 600;
+      margin-bottom: $base-space;
       display: flex;
       &__name {
         margin: 0;
@@ -155,18 +155,17 @@ export default {
         display: flex;
         align-items: center;
         margin-bottom: $base-space;
+        @include font-size(13px);
       }
       &__name {
         display: block;
         width: calc(100% - 40px);
         hyphens: auto;
         word-break: break-word;
-        @include font-size(13px);
       }
       &__counter {
         margin-right: 0;
         margin-left: auto;
-        @include font-size(14px);
       }
     }
   }

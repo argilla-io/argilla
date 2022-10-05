@@ -17,7 +17,7 @@
 
 <template>
   <input
-    class="re-input"
+    class="input"
     :type="type"
     :name="name"
     :value="value"
@@ -50,13 +50,13 @@ export default {
     this.$nextTick(() => {
       this.parentContainer = getClosestVueParent(
         this.$parent,
-        "re-input-container"
+        "input-container"
       );
 
       if (!this.parentContainer) {
         this.$destroy();
 
-        throw new Error("You should wrap the re-input in a re-input-container");
+        throw new Error("You should wrap the input in a input-container");
       }
 
       this.parentContainer.inputInstance = this;

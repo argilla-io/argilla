@@ -168,7 +168,6 @@ export default {
     font-weight: lighter;
     margin-top: 0 !important;
     margin-bottom: 1em;
-    color: $font-dark;
     @include font-size(32px);
     line-height: 1.2em;
   }

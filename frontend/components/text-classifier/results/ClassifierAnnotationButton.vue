@@ -17,7 +17,7 @@
 
 <template>
   <div
-    class="re-annotation-button"
+    class="annotation-button"
     :class="[classes, allowMultiple ? 'multiple' : 'single']"
   >
     <label :for="id" class="button" @click.prevent="toggleCheck">
@@ -93,7 +93,7 @@ export default {
 
 <style lang="scss" scoped>
 $annotation-button-size: 20px;
-.re-annotation-button {
+.annotation-button {
   width: auto;
   margin: $base-space * 2 $base-space $base-space * 2 0;
   display: inline-flex;
@@ -103,7 +103,7 @@ $annotation-button-size: 20px;
   }
   &.label-button {
     margin: 3.5px;
-    color: $font-secondary-medium-dark;
+    color: palette(purple, 200);
     padding: 0;
     transition: all 0.3s ease;
     max-width: 238px;
@@ -114,14 +114,13 @@ $annotation-button-size: 20px;
       border-radius: $base-space;
       height: 40px;
       line-height: 40px;
-      padding-left: 0.5em;
-      padding-right: 0.5em;
+      padding-left: $base-space * 2;
+      padding-right: $base-space * 2;
       width: 100%;
       display: flex;
-      font-family: $sff;
       font-weight: 500;
       overflow: hidden;
-      color: $font-secondary-medium-dark;
+      color: palette(purple, 200);
       box-shadow: 0;
       transition: all 0.2s ease-in-out;
     }
@@ -135,7 +134,7 @@ $annotation-button-size: 20px;
       box-shadow: none;
       .button {
         transition: all 0.2s ease-in-out;
-        background: palette(blue, 200);
+        background: palette(purple, 200);
         box-shadow: none;
       }
       &:hover {
@@ -182,10 +181,14 @@ $annotation-button-size: 20px;
         border-radius: 2px;
       }
     }
+    &.predicted-label:not(.active):hover {
+      .button {
+        background: darken(#d6d6ff, 2%);
+      }
+    }
     &:not(.active):hover {
       .button {
-        box-shadow: 0 0 1px 0 rgba(212, 212, 212, 0.5),
-          inset 0 -2px 6px 1px #bbbce0;
+        background: darken(#f0f0fe, 2%);
       }
     }
   }
@@ -200,9 +203,14 @@ $annotation-button-size: 20px;
     //   display: inline-block;
     // }
     .button {
-      background: palette(white) !important;
-      color: palette(white);
-      border: 1px solid palette(grey, 700);
+      background: #e0e1ff !important;
+      opacity: 0.5;
+      > * {
+        color: palette(purple, 200) !important;
+      }
+      // background: palette(white) !important;
+      // color: palette(white);
+      // border: 1px solid palette(grey, 700);
     }
   }
   &:not(.disabled) {

@@ -30,7 +30,7 @@
     </div>
     <base-button
       v-if="selectedFields.length === numberOfSortFields"
-      class="sort__add-button link"
+      class="sort__add-button secondary light small"
       @click="addNewField"
       >+ Add another field</base-button
     >

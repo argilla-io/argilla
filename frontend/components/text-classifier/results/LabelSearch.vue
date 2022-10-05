@@ -65,14 +65,13 @@ export default {
   font-weight: 600;
   @include font-size(14px);
   input {
-    color: $font-secondary-medium-dark;
-    font-weight: 600;
+    color: $black-87;
     @include input-placeholder {
-      color: $font-secondary-medium-dark;
+      color: $black-37;
     }
   }
   .svg-icon {
-    fill: $font-secondary-medium-dark;
+    fill: $black-37;
     margin: auto 1em auto auto;
   }
   &__button {

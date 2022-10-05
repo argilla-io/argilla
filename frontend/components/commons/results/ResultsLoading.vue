@@ -37,15 +37,6 @@ export default {
 .loading {
   position: relative;
 }
-.line {
-  height: 2px;
-  position: absolute;
-  top: 0;
-  left: 10px;
-  right: 10px;
-  background: $primary-color;
-  animation: load 0.8s ease-in-out infinite;
-}
 .record {
   min-height: 140px;
   display: block;
@@ -54,14 +45,5 @@ export default {
   border: 1px solid palette(grey, 600);
   margin-bottom: $base-space-between-records;
   border-radius: $border-radius-m;
-}
-@keyframes load {
-  0% {
-    width: 0%;
-  }
-
-  100% {
-    width: 100%;
-  }
 }
 </style>

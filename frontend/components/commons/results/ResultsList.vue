@@ -33,12 +33,7 @@
               v-if="showLoader"
               :size="dataset.viewSettings.pagination.size"
             />
-            <results-empty
-              :title="emptySearchInfo.title"
-              :message="emptySearchInfo.message"
-              :icon="emptySearchInfo.icon"
-              v-else-if="dataset.results.total === 0"
-            />
+            <results-empty v-else-if="dataset.results.total === 0" />
           </template>
           <template v-slot="{ item, index, active }">
             <DynamicScrollerItem
@@ -95,7 +90,7 @@
   </span>
 </template>
 <script>
-import "assets/icons/unavailable";
+import "assets/icons/smile-sad";
 import { mapActions } from "vuex";
 export default {
   props: {
@@ -108,10 +103,6 @@ export default {
     return {
       scrollComponent: undefined,
       selectedRecord: undefined,
-      emptySearchInfo: {
-        // message: "There is no result. <br />Try another query.",
-        icon: "unavailable",
-      },
     };
   },
   computed: {

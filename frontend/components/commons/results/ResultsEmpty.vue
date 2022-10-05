@@ -18,13 +18,7 @@
 <template>
   <div class="empty">
     <span class="empty__content">
-      <svgicon
-        v-if="icon"
-        :name="icon"
-        width="50"
-        height="50"
-        color="#686a6d"
-      />
+      <svgicon v-if="icon" :name="icon" width="50" height="50" />
       <h1 class="empty__title">{{ title }}</h1>
       <p v-if="message" class="empty__message" v-html="message" />
     </span>
@@ -32,6 +26,7 @@
 </template>
 
 <script>
+import "assets/icons/smile-sad";
 export default {
   props: {
     title: {
@@ -44,7 +39,7 @@ export default {
     },
     icon: {
       type: String,
-      default: undefined,
+      default: "smile-sad",
     },
   },
 };
@@ -64,10 +59,13 @@ export default {
   &__title {
     @include font-size(30px);
     font-weight: 400;
-    color: $font-medium;
+    color: $black-37;
   }
   &__message {
     max-width: 600px;
   }
+}
+.svg-icon {
+  fill: $black-37;
 }
 </style>

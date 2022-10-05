@@ -29,6 +29,7 @@
       />
       <user />
     </base-topbar-brand>
+    <loading-line v-if="showRecordsLoader" />
     <slot />
     <component v-if="dataset" :is="currentTaskHeader" :dataset="dataset" />
   </section>
@@ -69,6 +70,9 @@ export default {
       if (this.sticky && this.dataset) {
         return this.dataset.viewSettings.headerHeight;
       }
+    },
+    showRecordsLoader() {
+      return this.dataset?.viewSettings.loading;
     },
   },
   mounted() {

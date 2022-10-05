@@ -1,7 +1,7 @@
 // tooltip
 $tooltip-bg: palette(grey, 100);
 $tooltip-color: palette(white);
-$tooltip-font-size: 14px;
+$tooltip-font-size: 13px;
 $tooltip-triangle-size: 7px;
 $tooltip-border-radius: $border-radius-s;
 
@@ -19,8 +19,7 @@ $tooltip-border-radius: $border-radius-s;
   color: $tooltip-color;
   border-radius: $tooltip-border-radius;
   @include font-size($tooltip-font-size);
-  font-family: $ff;
-  font-weight: 600;
+  font-weight: 500;
 }
 %has-tooltip--left {
   @extend %has-tooltip;

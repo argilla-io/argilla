@@ -28,14 +28,14 @@
         />
         <base-button
           v-if="!showEntitySelector && dataset.entities.length > entitiesNumber"
-          class="entities__container__button primary clear small"
+          class="entities__container__button secondary light small"
           @click="toggleEntitiesNumber"
           >{{ `+ ${dataset.entities.length - entitiesNumber}` }}</base-button
         >
       </div>
       <base-button
         v-if="showEntitySelector && dataset.entities.length > entitiesNumber"
-        class="entities__container__button primary clear small fixed"
+        class="entities__container__button secondary light small fixed"
         @click="toggleEntitiesNumber"
         >{{ "Show less" }}</base-button
       >
@@ -103,14 +103,15 @@ export default {
     overflow: auto;
     @extend %hide-scrollbar;
     &__button {
-      margin-top: -1px;
-      margin-left: 0.3em;
       display: inline-block;
       &.fixed {
         position: absolute;
         right: $base-space;
         bottom: $base-space;
-        background: rgba(255, 255, 255, 80%);
+        background: palette(grey, 800);
+        &:hover {
+          background: palette(grey, 700);
+        }
       }
     }
   }

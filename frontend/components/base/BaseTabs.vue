@@ -48,7 +48,7 @@ export default {
     position: relative;
     text-align: left;
     align-items: center;
-    @include font-size(15px);
+    @include font-size(14px);
     display: flex;
   }
   &__links {

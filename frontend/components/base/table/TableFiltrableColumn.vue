@@ -5,7 +5,7 @@
       @click="openFilter(column)"
       :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
     >
-      <svgicon color="#4C4EA3" name="filter" width="16" />
+      <svgicon color="#4D4D4D" name="filter" width="16" />
       {{ column.name }}
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
@@ -191,11 +191,10 @@ button {
   background: transparent;
   padding-left: 0;
   padding-right: 0;
-  color: $font-secondary-medium;
+  color: $black-87;
   display: flex;
   align-items: center;
   @include font-size(14px);
-  font-family: $sff;
   @include media("<=desktop") {
     display: block;
     :deep(svg) {
@@ -205,17 +204,11 @@ button {
   }
   &:hover,
   &.active {
-    background: $bg;
+    background: $black-4;
     min-height: 40px;
     padding: 0 1em;
     margin: 0 -1em;
     border-radius: $border-radius;
-    color: $primary-color;
-    :deep(svg) {
-      & > * {
-        fill: $primary-color !important;
-      }
-    }
   }
   .svg-icon {
     margin-right: $base-space;

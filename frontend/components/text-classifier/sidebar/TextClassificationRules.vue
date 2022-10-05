@@ -64,7 +64,6 @@
         }}</span></transition
       >
     </div>
-    <span class="separator"></span>
     <div class="metrics__info">
       <p class="metrics__info__name">Total rules</p>
       <transition name="fade" mode="out-in" appear
@@ -74,6 +73,7 @@
       >
     </div>
     <template v-if="labels.length">
+      <p class="metrics__subtitle">Labels</p>
       <ul class="scroll metrics__list">
         <li v-for="label in labels" :key="label.index">
           <label class="metrics__list__name">{{ label.label }}</label>
@@ -180,13 +180,15 @@ export default {
   overflow: auto;
   @extend %hide-scrollbar;
 }
-.separator {
-  display: block;
-  margin-bottom: $base-space * 4;
-}
+
 p[data-title] {
   position: relative;
   @extend %has-tooltip--top;
   @extend %tooltip-large-text;
+}
+.metrics {
+  &__subtitle {
+    margin-top: $base-space * 3;
+  }
 }
 </style>

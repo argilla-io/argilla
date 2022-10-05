@@ -2,44 +2,44 @@
   <div v-if="isVisible" class="rules-management">
     <base-loading v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error">
-      <div class="rules-management__container">
-        <base-button
-          class="rules-management__close primary outline small"
-          @click="hideList"
-        >
-          <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to
-          query view</base-button
-        >
+      <div class="rules-management__header">
         <p class="rules-management__title">
           Rules
           <span v-if="formattedRules.length"
             >({{ formattedRules.length }})</span
           >
         </p>
-        <base-search-bar
-          v-if="formattedRules.length"
-          placeholder="Search rule by name"
-          @input="onSearch"
-        />
-        <base-table-info
-          class="rules-management__table"
-          :data="formattedRules"
-          :sorted-order="sortedOrder"
-          :sorted-by-field="sortedByField"
-          :columns="tableColumns"
-          :actions="actions"
-          :query-search="querySearch"
-          :global-actions="false"
-          search-on="query"
-          :no-data-info="noDataInfo"
-          :empty-search-info="emptySearchInfo"
-          :visible-modal-id="visibleModalId"
-          :delete-modal-content="getDeleteModalText"
-          @sort-column="onSortColumns"
-          @onActionClicked="onActionClicked"
-          @close-modal="closeModal"
-        />
+        <base-button
+          class="rules-management__button primary outline small"
+          @click="hideList"
+        >
+          <svgicon name="chevron-left" width="12" height="12"></svgicon>Back to
+          query view</base-button
+        >
       </div>
+      <base-search-bar
+        v-if="formattedRules.length"
+        placeholder="Search rule by name"
+        @input="onSearch"
+      />
+      <base-table-info
+        class="rules-management__table"
+        :data="formattedRules"
+        :sorted-order="sortedOrder"
+        :sorted-by-field="sortedByField"
+        :columns="tableColumns"
+        :actions="actions"
+        :query-search="querySearch"
+        :global-actions="false"
+        search-on="query"
+        :no-data-info="noDataInfo"
+        :empty-search-info="emptySearchInfo"
+        :visible-modal-id="visibleModalId"
+        :delete-modal-content="getDeleteModalText"
+        @sort-column="onSortColumns"
+        @onActionClicked="onActionClicked"
+        @close-modal="closeModal"
+      />
     </div>
   </div>
 </template>
@@ -239,16 +239,11 @@ export default {
   overflow: auto;
   height: 100vh;
   @extend %hide-scrollbar;
-  &__container {
-    padding: 20px 20px 50px 20px;
-    background: rgba(palette(white), 0.4);
-    border: 1px solid palette(white);
-    width: 100%;
-    border-radius: $border-radius;
-    position: relative;
+  &__header {
+    display: flex;
+    align-items: center;
   }
   &__title {
-    color: $font-secondary-medium-dark;
     @include font-size(22px);
     font-weight: 600;
     margin-top: 0;
@@ -256,6 +251,9 @@ export default {
       @include font-size(16px);
       font-weight: normal;
     }
+  }
+  &__button {
+    margin-left: auto;
   }
   &__table {
     margin-bottom: 2em !important;
@@ -276,11 +274,6 @@ export default {
         padding-right: 3em !important;
       }
     }
-  }
-  &__close {
-    position: absolute;
-    right: 1.5em;
-    top: 1.5em;
   }
 }
 </style>

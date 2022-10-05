@@ -66,17 +66,17 @@ export default {
   line-height: 40px;
   color: palette(white);
   border-radius: $border-radius-m;
-  padding: 0.2em 0.5em;
+  padding: $base-space $base-space * 2;
   @include font-size(14px);
   border: 1px solid transparent;
   margin: 3.5px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .pill {
   @extend %pill;
   border: 1px solid palette(grey, 600);
-  color: $font-medium;
+  color: $black-54;
   line-height: 1.4em;
   &__container {
     display: flex;

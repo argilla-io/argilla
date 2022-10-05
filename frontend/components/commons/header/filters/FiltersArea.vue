@@ -122,6 +122,7 @@ export default {
 }
 
 .filters {
+  color: $black-54;
   &__row {
     display: flex;
     align-items: center;

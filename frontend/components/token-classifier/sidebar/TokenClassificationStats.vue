@@ -154,22 +154,20 @@ export default {
       display: inline-block;
     }
     a {
-      font-family: $sff;
       width: 100%;
       border-radius: $border-radius;
       text-align: center;
-      color: $font-secondary-medium;
       text-decoration: none;
       margin: 0 5px;
       outline: none;
       @include font-size(13px);
       padding: 0.5em;
+      font-weight: 500;
       &.active {
-        color: $primary-color;
-        background: palette(grey, 600);
+        background: $black-4;
       }
       &:hover {
-        background: palette(grey, 600);
+        background: $black-4;
       }
     }
   }

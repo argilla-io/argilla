@@ -1204,7 +1204,7 @@ export default {
 .vue-slider-component .vue-slider-process {
   position: absolute;
   border-radius: 15px;
-  background-color: #3b3269;
+  background-color: palette(purple, 100);
   transition: all 0s;
   z-index: 1;
 }
@@ -1379,21 +1379,21 @@ export default {
 
 .vue-slider-dot {
   .filter & {
-    border: 1px solid palette(blue, 300);
+    border: 1px solid palette(purple, 100);
     &:before {
       content: "";
       @include absoluteCenter;
       height: 7px;
       width: 7px;
-      border-left: 1px solid palette(blue, 300);
-      border-right: 1px solid palette(blue, 300);
+      border-left: 1px solid palette(purple, 100);
+      border-right: 1px solid palette(purple, 100);
     }
     &:after {
       content: "";
       @include absoluteCenter;
       height: 7px;
       width: 1px;
-      background: palette(blue, 300);
+      background: palette(purple, 100);
     }
   }
 }

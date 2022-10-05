@@ -25,7 +25,7 @@ export default {
   padding: 3em 3em 0 3em;
   display: flex;
   align-items: center;
-  color: $font-medium;
+  color: $black-54;
   .svg-icon {
     margin-right: 2em;
   }

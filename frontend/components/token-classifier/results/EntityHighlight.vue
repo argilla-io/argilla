@@ -118,7 +118,7 @@ export default {
   background: palette(white);
   padding-bottom: 3px;
   border-bottom: 5px solid palette(white);
-  @include font-size(18px);
+  @include font-size(16px);
   white-space: pre-line;
   display: inline;
 }
@@ -144,7 +144,7 @@ export default {
     }
   }
   &__content {
-    @include font-size(18px);
+    @include font-size(16px);
     white-space: pre-line;
     display: inline;
     padding-bottom: 1px;
@@ -161,9 +161,9 @@ export default {
   position: absolute;
   top: -23px;
   right: -3px;
-  border-radius: $border-radius-s;
+  border-radius: 2px;
   min-width: 10px;
-  background: $font-dark;
+  background: $black-87;
   fill: palette(white);
   padding: 2px;
 }

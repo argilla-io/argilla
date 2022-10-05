@@ -34,7 +34,7 @@ export default {
 <style scoped lang="scss">
 .tooltip {
   position: absolute;
-  background: $font-dark;
+  background: palette(grey, 100);
   display: inline-block;
   border-radius: $border-radius-s;
   color: palette(white);
@@ -48,10 +48,9 @@ export default {
     position: relative;
     &.active {
       :deep(svg) {
-        fill: $primary-color !important;
         .breadcrumbs &,
         .code & {
-          fill: #f2067a !important;
+          fill: $brand-secondary-color;
         }
       }
     }

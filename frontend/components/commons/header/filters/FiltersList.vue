@@ -84,7 +84,7 @@
             v-if="
               initialVisibleGroup !== 'Sort' && itemsAppliedOnGroup(group) > 1
             "
-            class="filters__list__button link"
+            class="filters__list__button secondary light small"
             @click="removeFiltersByGroup(group)"
             >Remove all filters</base-button
           >
@@ -330,20 +330,18 @@ $number-size: 18px;
       padding: 0.8em;
       border-radius: $border-radius;
       margin-right: $base-space;
-      color: $font-secondary-medium;
-      @include font-size(15px);
-      font-family: $sff;
+      @include font-size(14px);
       white-space: nowrap;
+      font-weight: 500;
       @include media(">desktop") {
         padding: 0.8em 1em;
         margin-right: $base-space * 2;
       }
       &:hover {
-        background: palette(grey, 600);
+        background: $black-4;
       }
       &.active {
-        background: palette(grey, 600);
-        color: $primary-color;
+        background: $black-4;
       }
     }
   }
@@ -357,6 +355,23 @@ $number-size: 18px;
     padding-bottom: 10px;
     .dropdown {
       position: static;
+    }
+  }
+  :deep(.filter__remove-button) {
+    position: relative;
+    margin-right: 1em;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: auto;
+    padding: 0;
+    display: flex;
+    &:hover {
+      .svg-icon {
+        fill: $black-87;
+      }
+    }
+    .svg-icon {
+      margin: auto;
     }
   }
 }

@@ -157,18 +157,17 @@ export default {
     display: flex;
     flex-flow: column;
     max-height: 410px;
-    background: $primary-color;
+    background: $black-4;
     margin-left: 1em;
-    color: palette(white);
+    color: $black-54;
     border-radius: $border-radius;
     margin-bottom: 2em;
     padding: 30px;
   }
   &__title {
     padding-bottom: 0;
-    color: palette(white);
-    @include font-size(22px);
-    font-weight: bold;
+    @include font-size(18px);
+    font-weight: 600;
     margin-top: 0;
   }
   &__item {
@@ -192,7 +191,7 @@ export default {
   &__title {
     display: inline-block;
     @include font-size(14px);
-    font-weight: 600;
+    color: $black-37;
     margin-bottom: 0;
   }
 }

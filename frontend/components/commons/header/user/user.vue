@@ -16,7 +16,7 @@
       <a class="user__link" href="#" @click.prevent="logout">
         <svgicon width="16" heigth="16" name="log-out"></svgicon> Log out
       </a>
-      <span class="copyright">© 2022 Rubrix ({{ rubrixVersion }})</span>
+      <span class="copyright">© 2022 Argilla ({{ appVersion }})</span>
     </div>
   </div>
 </template>
@@ -29,7 +29,7 @@ export default {
   data: () => {
     return {
       visibleSelector: false,
-      rubrixVersion: undefined,
+      appVersion: undefined,
     };
   },
   computed: {
@@ -38,11 +38,11 @@ export default {
     },
   },
   async fetch() {
-    this.rubrixVersion = await this.getRubrixVersion();
+    this.appVersion = await this.getAppVersion();
   },
   methods: {
     ...mapActions({
-      getRubrixVersion: "entities/rubrix-info/getRubrixVersion",
+      getAppVersion: "entities/rubrix-info/getAppVersion",
     }),
     firstChar(name) {
       return name.slice(0, 2);
@@ -72,7 +72,7 @@ $buttonSize: 34px;
   text-transform: uppercase;
   border-radius: 50%;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 500;
   @include font-size(16px);
 }
 .user {
@@ -80,56 +80,58 @@ $buttonSize: 34px;
   z-index: 3;
   &__button {
     @extend %circle;
-    background: palette(white);
+    background: palette(orange-red-crayola);
     transform: scale3d(1, 1, 1) translateZ(0);
     transition: all 0.2s ease-in-out;
-    color: $primary-color;
+    color: palette(white);
     will-change: auto;
     &:hover {
       transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
       transition: all 0.2s ease-in-out;
+      outline: 0;
+      border: none;
     }
   }
   &__content {
     position: absolute;
-    top: 3.5em;
+    top: 3.8em;
     right: -0.5em;
     padding-top: 1.5em;
-    background: palette(white);
+    background: palette(grey, 100);
     border-radius: $border-radius;
     @include font-size(14px);
     font-weight: 400;
-    color: $font-medium;
+    color: palette(white);
     box-shadow: $shadow;
-    min-width: 300px;
+    min-width: 260px;
     &:after {
       position: absolute;
       top: -10px;
       right: 1em;
-      @include triangle(top, 10px, 10px, white);
+      @include triangle(top, 10px, 10px, palette(grey, 100));
     }
     a {
       text-decoration: none;
     }
   }
   &__name {
-    color: $font-dark;
     @include font-size(16px);
     margin: 0 1.5em 0.3em 1.5em;
     font-weight: 600;
   }
   &__mail {
     margin: 0 1.5em 2em 1.5em;
+    color: palette(apricot);
   }
   &__link {
     display: flex;
     align-items: center;
-    color: $font-medium;
     margin: 0.5em 1.5em 1.5em 1.5em;
+    color: palette(white);
     &:hover {
-      color: darken($font-medium, 10%);
+      color: darken(palette(white), 10%);
       .svg-icon {
-        fill: darken($font-medium, 10%);
+        fill: darken(palette(white), 10%);
       }
     }
     .svg-icon {
@@ -141,11 +143,10 @@ $buttonSize: 34px;
   display: block;
   @include font-size(11px);
   font-weight: 400;
-  color: $font-dark;
   line-height: 1em;
   margin-top: 1.5em;
   padding: 1em;
-  background: palette(grey, 800);
+  background: $black-54;
   text-align: right;
   border-bottom-right-radius: $border-radius;
   border-bottom-left-radius: $border-radius;

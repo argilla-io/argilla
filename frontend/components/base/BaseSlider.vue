@@ -30,7 +30,7 @@
       href="#"
       @click.prevent="next(itemNumber)"
     >
-      <svgicon name="chevron-right" width="8" height="8" color="#4C4EA3" />
+      <svgicon name="chevron-right" width="8" height="8" />
     </a>
   </div>
 </template>
@@ -44,7 +44,6 @@ export default {
     },
     slidesName: {
       type: String,
-      required: true,
     },
     slidesOrigin: {
       type: Array,
@@ -71,7 +70,7 @@ export default {
   min-width: 33%;
   margin-right: 33%;
   margin-left: auto;
-  color: $font-medium;
+  color: $black-54;
   a {
     height: 20px;
     width: 20px;
@@ -87,12 +86,16 @@ export default {
     @include font-size(13px);
     background: transparent;
     transition: all 0.2s ease-in-out;
+    background: palette(grey, 800);
+    .svg-icon {
+      fill: $black-87;
+    }
     &:hover {
-      background: palette(grey, 800);
+      background: palette(grey, 700);
       transition: all 0.2s ease-in-out;
     }
     &.disabled {
-      opacity: 0;
+      opacity: 0.5;
       pointer-events: none;
     }
   }

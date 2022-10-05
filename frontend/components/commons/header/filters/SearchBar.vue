@@ -119,7 +119,7 @@ export default {
     }
   }
   .svg-icon {
-    fill: #4c4ea3;
+    fill: $black-54;
     margin: auto 1em auto 1em;
   }
   &:hover {

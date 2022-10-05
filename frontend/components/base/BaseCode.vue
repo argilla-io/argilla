@@ -4,7 +4,7 @@
       <code v-highlight class="python">{{code}}</code>
     </pre>
     <base-action-tooltip class="code__button" tooltip="Copied">
-      <a class="breadcrumbs__copy" href="#" @click.prevent="copy(code)">
+      <a href="#" @click.prevent="copy(code)">
         <svgicon name="copy" width="16" height="16" />
       </a>
     </base-action-tooltip>

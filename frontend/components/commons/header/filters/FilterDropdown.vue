@@ -118,6 +118,7 @@ export default {
 <style lang="scss" scoped>
 .dropdown {
   position: relative;
+  color: $black-54;
   &__header {
     height: 100%;
     width: auto;
@@ -130,7 +131,7 @@ export default {
     border-radius: $border-radius;
     &:after {
       content: "";
-      border-color: $font-dark;
+      border-color: $black-54;
       border-style: solid;
       border-width: 1px 1px 0 0;
       display: inline-block;
@@ -146,11 +147,11 @@ export default {
     }
     &:hover,
     &:focus {
-      border-color: $primary-color;
+      border-color: $black-37;
       background: palette(white);
       transition: all 0.3s ease;
       &:after {
-        border-color: $primary-color;
+        border-color: $black-54;
       }
     }
     // dropdown selected text

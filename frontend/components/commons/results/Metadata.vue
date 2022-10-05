@@ -166,14 +166,13 @@ export default {
   &__block {
     padding: 1em 0;
     margin-right: 0.5em;
-    color: $font-dark;
     font-weight: 600;
     &__item {
       min-width: 200px;
       max-width: 300px;
       text-align: left;
       white-space: pre-line;
-      color: $font-medium;
+      color: $black-54;
       font-weight: normal;
       line-height: 1em;
       word-break: break-word;

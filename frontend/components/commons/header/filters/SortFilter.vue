@@ -17,15 +17,13 @@
 
 <template>
   <div :class="[selectedField ? 'selected' : '', 'sort']">
-    <svgicon
+    <base-button
       v-if="selectedField"
-      title="remove field"
-      class="sort__remove-button"
-      name="close"
-      width="14"
-      height="14"
+      class="filter__remove-button"
       @click="removeField()"
-    />
+    >
+      <svgicon title="remove field" name="close" width="14" height="14" />
+    </base-button>
     <FilterDropdown
       color-type="grey"
       :class="{ highlighted: visible }"
@@ -47,10 +45,10 @@
         />
       </div>
     </FilterDropdown>
-    <p
+    <base-button
       v-if="selectedField"
       title="sort direction"
-      class="sort__direction"
+      class="sort__direction secondary light"
       @click="selectSortDirection()"
     >
       <svgicon
@@ -58,7 +56,7 @@
         height="24"
         :name="defaultSortedByDir === 'asc' ? 'arrow-up' : 'arrow-down'"
       />
-    </p>
+    </base-button>
   </div>
 </template>
 
@@ -130,12 +128,6 @@ export default {
 .sort {
   display: flex;
   align-items: center;
-  &__remove-button {
-    position: relative;
-    margin-right: 1em;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
   &__direction {
     position: relative;
     padding: 0.5em;
@@ -147,6 +139,10 @@ export default {
     min-height: 45px;
     text-align: center;
     cursor: pointer;
+    display: flex;
+    .svg-icon {
+      margin: auto;
+    }
   }
   &:not(.selected) {
     margin-left: 2em;

@@ -16,7 +16,7 @@
         <rules-metrics title="Rule Metrics" :dataset="dataset">
           <template #button-bottom>
             <base-button
-              class="rule__button quaternary outline"
+              class="rule__button primary light"
               :disabled="isLoading"
               @click="showRulesList"
               >Manage rules</base-button
@@ -125,13 +125,13 @@ export default {
   }
   &__container {
     padding: 20px;
-    background: rgba(palette(white), 0.4);
-    border: 1px solid palette(white);
+    background: palette(white);
+    box-shadow: $shadow-100;
     width: 100%;
     border-radius: $border-radius;
-    &.active {
-      box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
-    }
+    // &.active {
+    //   box-shadow: 0 1px 4px 0 rgba(185, 185, 185, 0.5);
+    // }
   }
   &__button {
     float: left;

@@ -155,13 +155,8 @@ $checkbox-color-dark: $primary-color;
     hyphens: auto;
   }
   &--dark {
-    &.checked {
-      .checkbox-label {
-        color: $primary-color;
-      }
-    }
     .checkbox-container {
-      border: 1px solid $primary-color;
+      border: 1px solid $black-20;
       &:after {
         background: $checkbox-color-dark;
       }

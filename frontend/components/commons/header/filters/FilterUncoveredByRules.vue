@@ -34,8 +34,9 @@ export default {
 .re-checkbox {
   flex-direction: row-reverse;
   margin-left: 2em;
+  @include font-size(13px);
   :deep(.checkbox-label) {
-    margin-left: $base-space * 2;
+    margin-left: $base-space;
   }
 }
 </style>

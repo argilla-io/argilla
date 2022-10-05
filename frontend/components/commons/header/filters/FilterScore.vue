@@ -17,15 +17,13 @@
 
 <template>
   <div :class="[filter.selected ? 'selected' : '', 'filter__row']">
-    <svgicon
+    <base-button
       v-if="filter.selected"
-      title="remove field"
       class="filter__remove-button"
-      name="close"
-      width="14"
-      height="14"
       @click="onRemovescoreRange()"
-    />
+    >
+      <svgicon title="remove field" name="close" width="14" height="14" />
+    </base-button>
     <p class="filter__label">{{ filter.name }}:</p>
     <filter-dropdown
       color-type="grey"
@@ -177,12 +175,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .filter {
-  &__remove-button {
-    position: relative;
-    margin-right: 1em;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
   &__buttons {
     margin-top: 1em;
     text-align: right;
@@ -241,7 +233,6 @@ export default {
   }
   text {
     font-weight: normal !important;
-    font-family: $ff !important;
   }
 }
 </style>

@@ -39,20 +39,14 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
               >
-                <svgicon width="18" height="18" color="#4C4EA3" name="sort" />
+                <svgicon width="18" height="18" color="#4D4D4D" name="sort" />
                 <span>{{ column.name }}</span>
               </button>
             </div>
           </div>
         </slot>
       </div>
-      <results-empty
-        v-if="!data.length"
-        :title="noDataInfo.title"
-        :message="noDataInfo.message"
-        :icon="noDataInfo.icon"
-      />
-      <template v-else-if="resultsAvailable">
+      <template v-if="resultsAvailable">
         <div v-for="group in groups" :key="group" class="table-info__body">
           <span v-if="groupBy && groupBy !== 'list'" class="table-info__group">
             <p class="table-info__group__title">
@@ -236,8 +230,6 @@ export default {
     },
     emptySearchInfo: {
       title: undefined,
-      description: undefined,
-      icon: undefined,
     },
     hideButton: {
       type: Boolean,
@@ -425,24 +417,17 @@ export default {
   padding: 0;
   list-style: none;
   margin-bottom: 5em;
+  color: $black-54;
   ul {
-    background: palette(white);
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  li {
-    &:hover,
-    &:focus {
-      background: #fcfcfc;
-    }
   }
   &__header {
     background: palette(white);
     min-height: 50px;
     position: relative;
-    margin-top: 1em;
-    margin-bottom: 3px;
+    margin-top: $base-space * 2;
     &__checkbox {
       margin: 0 !important;
     }
@@ -455,7 +440,6 @@ export default {
     #{$this}__item {
       min-height: 50px;
       background: none;
-      border-bottom: none;
       padding-top: 0.2em;
       padding-bottom: 0.2em;
       display: flex;
@@ -468,9 +452,8 @@ export default {
       background: transparent;
       padding-left: 0;
       padding-right: 0;
-      color: $font-secondary-medium;
+      color: $black-87;
       @include font-size(14px);
-      font-family: $sff;
       text-align: left;
       display: flex;
       align-items: center;
@@ -490,17 +473,25 @@ export default {
     height: calc(100vh - 203px);
     padding-bottom: 0.5em;
     @extend %hide-scrollbar;
+    #{$this}__item {
+      margin-bottom: -1px;
+      &:hover,
+      &:focus {
+        background: #fcfcfc;
+      }
+    }
   }
   &__item {
+    background: palette(white);
     position: relative;
     list-style: none;
     padding: 2em 5em 2em 2em;
     display: flex;
     width: 100%;
-    border-bottom: 1px solid palette(grey, 700);
     align-items: flex-start;
     text-decoration: none;
     outline: none;
+    border: 1px solid palette(grey, 700);
     &__col {
       text-align: left;
       margin-right: 1em;
@@ -516,14 +507,14 @@ export default {
     }
     .svg-icon {
       margin-right: $base-space;
-      fill: $font-medium;
+      fill: $black-54;
       &:hover {
-        fill: darken($font-medium, 10%);
+        fill: $black-87;
       }
     }
   }
   &__tag {
-    background: $font-dark;
+    background: palette(grey, 100);
     display: inline-block;
     border-radius: $border-radius-s;
     color: palette(white);
@@ -554,7 +545,6 @@ export default {
   }
   &__title {
     display: block;
-    @include font-size(15px);
     hyphens: auto;
     word-break: break-word;
     .button-icon {
@@ -568,7 +558,7 @@ export default {
     a {
       text-decoration: none;
       &:hover {
-        color: $primary-color;
+        color: palette(black);
       }
     }
   }
@@ -584,28 +574,8 @@ export default {
       }
     }
   }
-  .model {
-    color: $font-dark;
-    border: 1px solid palette(grey, 600);
-    border-radius: $border-radius-s;
-    padding: 0.1em 2em;
-    display: inline-block;
-    max-width: 280px;
-    font-weight: 600;
-    hyphens: auto;
-    word-break: break-word;
-  }
-  .array {
-    p {
-      margin-top: 0;
-      margin-bottom: 0;
-      display: inline;
-      hyphens: auto;
-      word-break: break-word;
-    }
-  }
   .text {
-    color: $font-medium;
+    color: $black-54;
     p {
       display: inline-block;
       background: palette(grey, 800);
@@ -620,26 +590,27 @@ export default {
       }
     }
   }
-  .dataSource {
-    color: $font-medium;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .actionName {
-    margin-left: 1em;
-    display: inline-block;
-  }
-  .metrics {
-    display: block;
-    span {
-      display: inline-block;
-      padding: 0.2em 0.5em;
-      margin-top: 1em;
-      background: lighten(palette(blue, 300), 44%);
-      margin-right: 3px;
-      border-radius: 2px;
+  .array {
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+      display: inline;
+      hyphens: auto;
+      word-break: break-word;
     }
   }
+
+  // .metrics {
+  //   display: block;
+  //   span {
+  //     display: inline-block;
+  //     padding: 0.2em 0.5em;
+  //     margin-top: 1em;
+  //     background: lighten(palette(blue, 300), 44%);
+  //     margin-right: 3px;
+  //     border-radius: 2px;
+  //   }
+  // }
 }
 button[data-title] {
   position: relative;

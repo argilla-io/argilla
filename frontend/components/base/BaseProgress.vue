@@ -16,17 +16,17 @@
   -->
 
 <template>
-  <transition name="re-progress" :duration="2500" appear>
-    <div class="re-progress__container">
-      <p v-if="tooltip" class="re-progress__tooltip" :style="tooltipStyles">
+  <transition name="progress" :duration="2500" appear>
+    <div class="progress__container">
+      <p v-if="tooltip" class="progress__tooltip" :style="tooltipStyles">
         <span class="triangle" :style="tooltipTriangleStyles"></span
         >{{ tooltip }}
       </p>
-      <div class="re-progress" :style="backgroundStyles">
-        <div class="re-progress-track" :style="styles"></div>
+      <div class="progress" :style="backgroundStyles">
+        <div class="progress-track" :style="styles"></div>
         <div
           v-if="multiple"
-          class="re-progress-track--secondary"
+          class="progress-track--secondary"
           :style="stylesSecondary"
         />
       </div>
@@ -71,7 +71,7 @@ export default {
     },
     tooltipStyles() {
       return {
-        left: this.progress > 80 ? `80%` : `${this.progress}%`,
+        left: this.progress > 80 ? `70%` : `${this.progress}%`,
         backgroundColor: this.color,
       };
     },
@@ -91,7 +91,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.re-progress {
+.progress {
   height: 22px;
   position: relative;
   overflow: hidden;
@@ -114,7 +114,7 @@ export default {
   &__container {
     position: relative;
     &:hover {
-      .re-progress__tooltip {
+      .progress__tooltip {
         clip-path: none;
         opacity: 1;
         transition: opacity 0.5s linear 0.3s;
@@ -125,12 +125,12 @@ export default {
     padding: 0.5em 1em;
     top: -5px;
     transform: none;
-    background: palette(blue, 200);
+    background: palette(purple, 200);
     color: white;
     border: none;
     border-radius: $border-radius-s;
-    @include font-size(14px);
-    font-weight: 600;
+    @include font-size(13px);
+    font-weight: 500;
     position: absolute;
     margin: 0 0 0 6px;
     z-index: 1;
@@ -139,50 +139,50 @@ export default {
     transition: opacity 0.5s linear 0.3s;
     border-color: lime !important;
     .triangle {
-      @include triangle(left, 6px, 6px, palette(blue, 200));
+      @include triangle(left, 6px, 6px, palette(purple, 200));
       position: absolute;
       left: -6px;
       top: calc(50% - 6px);
     }
   }
   &--minimal {
-    @extend .re-progress;
+    @extend .progress;
     height: 2px;
-    .re-progress-track {
+    .progress-track {
       background: palette(grey, 300);
     }
   }
   &--multiple {
-    @extend .re-progress;
+    @extend .progress;
     height: 20px;
   }
 }
 
-.re-progress-track {
+.progress-track {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
-  background: palette(blue, 200);
+  background: palette(purple, 200);
   transition: width 1s linear, left 1s linear;
   &:last-of-type {
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
   }
-  .re-progress-enter-active & {
+  .progress-enter-active & {
     animation: progress 1s 0.5s;
     transform-origin: 0 50%;
     animation-fill-mode: backwards;
   }
   &--secondary {
-    @extend .re-progress-track;
+    @extend .progress-track;
     left: auto;
     right: 0;
     background: #a1a2cc;
     transition: width 1s linear, left 1s linear;
-    .re-progress-enter-active & {
+    .progress-enter-active & {
       animation: progress 1s 1.5s;
       animation-fill-mode: backwards;
     }

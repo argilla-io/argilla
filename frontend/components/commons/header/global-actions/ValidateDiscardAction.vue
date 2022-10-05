@@ -30,12 +30,12 @@
     <slot name="first" :selectedRecords="selectedRecords" />
     <base-button
       :disabled="!allowValidation"
-      class="secondary outline small validate-discard-actions__button"
+      class="primary outline small validate-discard-actions__button"
       @click="onValidate"
       >Validate</base-button
     >
     <base-button
-      class="secondary outline small validate-discard-actions__button"
+      class="primary outline small validate-discard-actions__button"
       @click="onDiscard"
       >Discard</base-button
     >
@@ -126,17 +126,19 @@ export default {
     margin-left: 0.8em;
     :deep(.dropdown__header) {
       max-height: 33px;
-      color: $font-secondary-medium;
-      font-family: $sff;
       font-weight: 500;
       min-width: 170px;
       @include font-size(13px);
+      border: 1px solid palette(blue, 500);
+      color: palette(blue, 500);
+      &:after {
+        border-color: palette(blue, 500);
+      }
     }
   }
   &__button {
     margin-left: $base-space;
     margin-right: $base-space;
-    color: $font-secondary-medium;
     cursor: pointer;
     &:hover {
       border-color: $primary-color;
@@ -146,11 +148,12 @@ export default {
     }
   }
   &__text {
+    @include font-size(13px);
     margin: 0 $base-space;
-    color: $font-medium;
+    color: $black-54;
     span {
-      font-weight: bold;
-      color: $primary-color;
+      font-weight: 700;
+      color: $black-54;
     }
   }
   &--disabled {

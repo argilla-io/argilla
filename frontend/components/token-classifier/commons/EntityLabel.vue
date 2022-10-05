@@ -52,10 +52,11 @@ export default {
   display: inline-flex;
   align-items: center;
   max-height: 28px;
-  font-weight: 600;
-  color: palette(grey, 200);
+  font-weight: 500;
+  color: $black-87;
+  @include font-size(13px);
   .shortcut {
-    @include font-size(14px);
+    color: $black-54;
     font-weight: lighter;
     margin-left: $base-space * 2;
   }

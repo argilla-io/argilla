@@ -1,4 +1,4 @@
-# Rubrix (UI)
+# Argilla (UI)
 
 ## Build Setup
 

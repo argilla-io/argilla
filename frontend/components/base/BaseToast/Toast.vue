@@ -284,7 +284,6 @@ $toast-colors: map-merge(
   box-shadow: $shadow;
   border-radius: 0.25em;
   pointer-events: auto;
-  color: $font-dark;
   background: palette(white) !important;
   min-height: 3em;
   .toast-text {
@@ -301,7 +300,6 @@ $toast-colors: map-merge(
     cursor: pointer;
     &:after {
       content: "\2573";
-      color: $font-dark;
       font-size: 10px;
     }
   }

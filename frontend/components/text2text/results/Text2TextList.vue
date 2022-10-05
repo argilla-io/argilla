@@ -69,7 +69,7 @@
               </p>
               <base-button
                 v-if="hasAnnotationAndPredictions && !editionMode"
-                class="primary clear small content__group__view-annotations"
+                class="primary light small content__group__view-annotations"
                 @click="changeVisibleSentences"
                 >{{
                   sentencesOrigin === "Annotation"
@@ -118,7 +118,6 @@
                   v-if="sentences.length"
                   :slides-origin="sentences"
                   :item-number="itemNumber"
-                  slides-name="predictions"
                   @go-to="showItemNumber"
                 />
               </template>
@@ -410,7 +409,7 @@ export default {
     min-height: 140px;
     &__title {
       @include font-size(13px);
-      color: $font-medium;
+      color: $black-54;
       margin: 0;
     }
   }
@@ -418,7 +417,7 @@ export default {
     @include font-size(15px);
     margin-right: 0;
     min-width: 33%;
-    color: $font-medium;
+    color: $black-54;
   }
   &__footer {
     padding-top: 2em;

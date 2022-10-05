@@ -17,11 +17,7 @@
 
 <template>
   <div>
-    <filter-dropdown
-      class="selector"
-      :visible="visible"
-      @visibility="onVisibility"
-    >
+    <filter-dropdown :visible="visible" @visibility="onVisibility">
       <template #dropdown-header>
         <span class="dropdown__text">Annotate as...</span>
       </template>

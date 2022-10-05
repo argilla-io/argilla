@@ -17,9 +17,6 @@
 
 <template>
   <div class="rule-labels-definition">
-    <div class="rule-labels-definition__info">
-      <p class="rule__text">New query</p>
-    </div>
     <div class="rule__labels" v-if="labels.length">
       <classifier-annotation-button
         v-for="label in visibleLabels"
@@ -44,7 +41,7 @@
       </p>
     </div>
     <div v-if="labels.length" class="empty-query">
-      <p><strong>Introduce a query</strong> to define a rule.</p>
+      <p>Introduce a query to define a rule.</p>
     </div>
   </div>
 </template>
@@ -125,9 +122,6 @@ export default {
   height: 100%;
   display: flex;
   flex-flow: column;
-  &__info {
-    display: flex;
-  }
 }
 .feedback-interactions {
   &__button {
@@ -147,8 +141,8 @@ export default {
   }
 }
 .empty-query {
-  @include font-size(18px);
-  color: $font-medium;
+  @include font-size(14px);
+  color: $black-54;
   text-align: center;
   margin-bottom: 2em;
   margin-top: 0;
@@ -167,13 +161,6 @@ export default {
     margin-bottom: 1em;
     margin-left: -5px;
     margin-right: -5px;
-  }
-  &__text {
-    width: 100%;
-    color: $font-medium;
-    @include font-size(18px);
-    font-weight: 600;
-    margin-top: 0;
   }
 }
 </style>

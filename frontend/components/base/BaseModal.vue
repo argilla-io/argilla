@@ -113,7 +113,7 @@ export default {
   transition: opacity 0.3s ease;
   pointer-events: none;
   cursor: default;
-  // background: rgba(0, 0, 0, 0.1);
+  background: $black-4;
 }
 
 .modal-wrapper {
@@ -132,7 +132,7 @@ export default {
 .modal-container {
   max-width: 460px;
   margin: 0px auto;
-  padding: 1.5em;
+  padding: $base-space * 4;
   background-color: palette(white);
   border-radius: $border-radius;
   box-shadow: $shadow;
@@ -173,8 +173,8 @@ export default {
   }
 }
 :deep(.modal__title) {
-  @include font-size(14px);
-  color: $font-dark;
+  @include font-size(16px);
+  color: $black-54;
   font-weight: 600;
   margin-top: 0;
   margin-right: 2em;
@@ -216,7 +216,7 @@ export default {
 // .modal-close {
 //   border: 0;
 //   background: palette(white);
-//   color: $font-medium;
+//   color: $black-54;
 //   position: absolute;
 //   top: 0.5em;
 //   right: 0.5em;

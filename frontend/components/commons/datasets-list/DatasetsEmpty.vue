@@ -8,7 +8,7 @@
     />
     <p class="datasets-empty__title">There aren't any datasets yet</p>
     <p class="datasets-empty__subtitle">
-      The Rubrix web app allows you to log, explore and annotate your data.<br />
+      The Argilla web app allows you to log, explore and annotate your data.<br />
       Start logging data with our Python client, or
       <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
       more information.
@@ -44,7 +44,7 @@ rb.log(
   text-align: center;
   margin: auto;
   margin-top: 12%;
-  color: $font-medium;
+  color: $black-54;
   max-width: 610px;
   line-height: 20px;
   &__icon {
@@ -61,10 +61,10 @@ rb.log(
     @include font-size(14px);
     max-width: 520px;
     a {
-      color: $primary-color;
+      color: $brand-primary-color;
       text-decoration: none;
       &:hover {
-        color: darken($primary-color, 10%);
+        color: darken($brand-primary-color, 10%);
       }
     }
   }

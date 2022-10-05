@@ -15,16 +15,17 @@ export default {
 <style lang="scss" scoped>
 .tag {
   text-align: left;
-  border: none;
+  border: 1px solid $black-10;
   display: inline-block;
-  border-radius: $border-radius-m;
-  padding: 0.3em 1em;
+  border-radius: 20px;
+  padding: 0.2em 0.8em;
   margin: 3.5px;
   max-width: 175px;
   vertical-align: top;
-  background: palette(grey, 800);
+  color: $black-54;
   word-break: break-word;
   hyphens: auto;
+  @include font-size(12px);
   @include media(">desktopLarge") {
     max-width: 200px;
   }

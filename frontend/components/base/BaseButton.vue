@@ -102,7 +102,6 @@ export default {
   background: none;
   border: 0;
   border-radius: $button-radius;
-  font-family: $sff;
   font-style: inherit;
   font-variant: inherit;
   letter-spacing: inherit;
@@ -169,84 +168,44 @@ export default {
       border-color: $primary-darken-color;
     }
   }
-  &.clear {
-    background: transparent;
-    color: $font-dark;
+  &.light {
+    background: lighten($black-4, 50%);
+    color: $primary-color;
     &:hover,
     &:active,
     &.active {
-      background: palette(grey, 700);
+      background: $black-4;
     }
   }
 }
 
 .secondary {
-  background-color: palette(grey, 700);
-  color: palette(blue, 200);
+  background-color: palette(grey, 200);
+  color: palette(white);
   .svg-icon {
-    fill: palette(blue, 200);
+    fill: palette(white);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: $secondary-darken-color;
+    background-color: darken(palette(grey, 200), 5%);
   }
   &.outline {
     background: none;
-    border: 1px solid palette(grey, 600);
+    border: 1px solid $black-54;
+    color: palette(grey, 200);
   }
-  &.clear {
-    background: transparent;
+  &.light {
+    background: lighten($black-4, 50%);
+    color: $black-54;
     &:hover,
     &:active,
     &.active {
-      background: palette(grey, 700);
+      background: $black-4;
+    }
+    .svg-icon {
+      fill: $black-54;
     }
   }
-}
-
-.tertiary {
-  background-color: none;
-  color: $font-medium;
-  .svg-icon {
-    fill: $font-medium;
-  }
-  &:hover,
-  &:active,
-  &.active {
-    background-color: $font-dark;
-  }
-  &.outline {
-    background: none;
-    border: 1px solid $font-medium;
-    &:hover,
-    &:active,
-    &.active {
-      border-color: $font-dark;
-      color: $font-dark;
-    }
-  }
-}
-.quaternary {
-  background-color: palette(white);
-  color: $font-medium;
-  .svg-icon {
-    fill: $font-medium;
-  }
-  &:hover,
-  &:active,
-  &.active {
-    background-color: $font-dark;
-  }
-  &.outline {
-    background: none;
-    border: 1px solid palette(white);
-    color: palette(white);
-  }
-}
-.link {
-  padding: 0;
-  color: $primary-color;
-  font-weight: 400;
 }
 </style>

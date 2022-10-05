@@ -17,38 +17,45 @@
 
 <template>
   <div class="help">
-    <div
-      v-if="!showHelpPanel"
-      class="help__button"
+    <base-button
+      class="help__button secondary light small"
       @click="showHelpPanel = true"
     >
-      <svgicon name="support" width="22" height="22" color="#F38959"></svgicon>
+      <svgicon name="support" width="22" height="22"></svgicon>
       Help
-    </div>
-    <div v-if="showHelpPanel" class="help__panel">
-      <div class="help__panel__button" @click="showHelpPanel = false">
-        Close
+    </base-button>
+    <lazy-base-modal
+      modal-class="modal-secondary"
+      modal-position="modal-center"
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      :modal-visible="showHelpPanel"
+      @close-modal="closeModal"
+    >
+      <div v-if="showHelpPanel" class="help__panel">
+        <p class="help__panel__title">
+          This dataset contains token attributions. What do highlight colors
+          mean?
+        </p>
+        <p>
+          Argilla enables you to register token attributions as part of the
+          dataset records. For getting token attributions, you can use methods
+          such as Integrated Gradients or SHAP. These methods try to provide a
+          mechanism to interpret model predictions.
+        </p>
+        <p>The attributions work as follows:</p>
+        <p>
+          [0,1] <strong>Positive attributions</strong> (in blue) reflect those
+          tokens that are making the model predict the specific predicted label.
+        </p>
+        <p>
+          [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
+          tokens that can influence the model to predict a label other than the
+          specific predicted label.
+        </p>
       </div>
-      <p class="help__panel__title">
-        This dataset contains token attributions. What do highlight colors mean?
-      </p>
-      <p>
-        Rubrix enables you to register token attributions as part of the dataset
-        records. For getting token attributions, you can use methods such as
-        Integrated Gradients or SHAP. These methods try to provide a mechanism
-        to interpret model predictions.
-      </p>
-      <p>The attributions work as follows:</p>
-      <p>
-        [0,1] <strong>Positive attributions</strong> (in blue) reflect those
-        tokens that are making the model predict the specific predicted label.
-      </p>
-      <p>
-        [-1, 0] <strong>Negative attributions</strong> (in red) reflect those
-        tokens that can influence the model to predict a label other than the
-        specific predicted label.
-      </p>
-    </div>
+      <base-button class="primary" @click="closeModal"> Close </base-button>
+    </lazy-base-modal>
   </div>
 </template>
 
@@ -58,6 +65,11 @@ export default {
   data: () => ({
     showHelpPanel: false,
   }),
+  methods: {
+    closeModal() {
+      this.showHelpPanel = false;
+    },
+  },
 };
 </script>
 
@@ -69,19 +81,17 @@ export default {
   padding-left: 4em;
   @extend %collapsable-if-metrics !optional;
   &__panel {
-    border: 1px solid #f48e5f57;
-    padding: 3em 2em 0.5em 2em;
-    background: #ffffff87;
-    color: $font-medium;
+    color: $black-54;
     border-radius: 1px;
     position: relative;
+    margin-bottom: $base-space * 4;
     .atom {
       @include font-size(16px);
       display: inline-block;
     }
     &__title {
       @include font-size(16px);
-      color: $font-medium;
+      color: $black-54;
       font-weight: 600;
       margin-top: 0;
     }
@@ -94,7 +104,6 @@ export default {
       margin-bottom: 1.5em;
     }
     &__button {
-      color: palette(orange);
       position: absolute;
       right: 1em;
       top: 1em;
@@ -102,18 +111,22 @@ export default {
       &:after {
         content: "\2715";
         font-weight: bold;
-        color: palette(orange);
+        color: palette(brown);
         font-size: 14px;
       }
     }
   }
   &__button {
-    text-align: right;
-    color: palette(orange);
-    font-weight: 600;
-    cursor: pointer;
+    display: flex;
+    margin-right: 0;
+    margin-left: auto;
+    background: palette(grey, 700) !important;
+    &:hover {
+      background: darken(palette(grey, 700), 2%) !important;
+    }
     .svg-icon {
       margin-right: 0.3em;
+      fill: $black-54;
     }
   }
 }

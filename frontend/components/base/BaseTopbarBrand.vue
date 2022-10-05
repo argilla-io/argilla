@@ -17,28 +17,13 @@
 
 <template>
   <div class="topbar">
-    <rubrix-isotipo v-if="!title" />
-    <nuxt-link v-else :to="{ name: 'datasets' }">
-      <p class="title">
-        {{ title }}
-      </p>
-    </nuxt-link>
+    <brand-icon class="brand-icon" color="white" />
     <slot />
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    title: {
-      type: String,
-      default: undefined,
-    },
-    icon: {
-      type: String,
-      default: undefined,
-    },
-  },
   data: () => ({}),
 };
 </script>
@@ -50,8 +35,7 @@ export default {
   align-items: center;
   min-height: 56px;
   position: relative;
-  background: $primary-color;
-  border-bottom: 1px solid palette(grey, 700);
+  background: palette(grey, 100);
   color: palette(white);
   padding-top: 0;
   padding-bottom: 0;
@@ -60,15 +44,9 @@ export default {
   a {
     text-decoration: none;
   }
-  .title {
-    color: palette(white);
-    @include font-size(18px);
-    font-weight: 900;
-    font-family: $ff;
-    text-decoration: none;
-    .svg-icon {
-      margin-right: 0.5em;
-    }
-  }
+}
+.brand-icon {
+  width: 32px;
+  height: auto;
 }
 </style>

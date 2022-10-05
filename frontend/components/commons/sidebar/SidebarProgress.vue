@@ -96,7 +96,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .scroll {
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 270px);
   padding-right: 1em;
   margin-right: -1em;
   overflow: auto;
@@ -104,7 +104,6 @@ export default {
 }
 .metrics {
   &__numbers {
-    color: $font-secondary-medium-dark;
     margin-bottom: $base-space * 3;
     margin-top: $base-space * 3;
     @include font-size(18px);

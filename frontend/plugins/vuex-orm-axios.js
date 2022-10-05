@@ -33,9 +33,9 @@ export default ({ $axios, app }) => {
 
     let ws = currentWorkspace(app.context.route);
     if (ws === NO_WORKSPACE) {
-      config.headers["X-Rubrix-Workspace"] = "";
+      config.headers["X-Argilla-Workspace"] = "";
     } else if (ws) {
-      config.headers["X-Rubrix-Workspace"] = ws;
+      config.headers["X-Argilla-Workspace"] = ws;
     }
     return config;
   });

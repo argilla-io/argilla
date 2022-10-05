@@ -35,7 +35,7 @@
     </div>
     <base-button
       v-if="scrollHeight >= visibleRecordHeight"
-      class="primary clear small record__show-more"
+      class="secondary light small record__show-more"
       @click.prevent="showFullRecord = !showFullRecord"
       >{{ !showFullRecord ? "Show full record" : "Show less" }}
     </base-button>

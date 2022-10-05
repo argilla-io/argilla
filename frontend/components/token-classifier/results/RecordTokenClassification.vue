@@ -176,7 +176,7 @@ export default {
   padding: 56px 200px 50px 50px;
   display: block;
   margin-bottom: 0;
-  @include font-size(18px);
+  @include font-size(16px);
   line-height: 34px;
 }
 
@@ -194,7 +194,7 @@ export default {
     .button {
       margin: 1.5em 0 0 0;
       & + .button {
-        margin-left: $base-space * 2;
+        margin-left: $base-space;
       }
     }
   }
@@ -209,7 +209,7 @@ export default {
     .span__text {
       color: transparent;
       & > * {
-        color: $font-dark;
+        color: $black-54;
       }
     }
     .highlight__content {

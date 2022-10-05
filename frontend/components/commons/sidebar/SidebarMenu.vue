@@ -97,10 +97,9 @@ $sidebar-button-size: 45px;
   min-width: $sidebar-button-size;
   min-height: 100vh;
   min-width: $sidebarMenuWidth;
-  background: $bg;
+  background: palette(grey, 700);
   box-shadow: none;
   pointer-events: all;
-  z-index: 1;
   transition: box-shadow 0.2s ease-in-out 0.4s;
   .--metrics & {
     box-shadow: inset 1px 1px 5px -2px #c7c7c7;
@@ -110,18 +109,15 @@ $sidebar-button-size: 45px;
     text-align: center;
     font-weight: 600;
     @include font-size(12px);
-    color: $font-dark;
     margin-bottom: 0.5em;
   }
   a {
     position: relative;
     display: block;
     outline: none;
-    z-index: 3;
   }
   &__info {
     position: relative;
-    z-index: 1;
     margin-bottom: 2em;
   }
 }

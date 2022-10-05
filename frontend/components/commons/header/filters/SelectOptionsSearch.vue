@@ -61,6 +61,9 @@ export default {
     height: 40px;
     background: transparent;
     width: calc(100% - 20px);
+    @include input-placeholder {
+      color: $black-37;
+    }
   }
   &__clear {
     outline: none;

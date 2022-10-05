@@ -38,7 +38,7 @@ export default {
   right: 3.6em;
   display: flex;
   align-items: center;
-  background: palette(blue, 200);
+  background: palette(purple, 200);
   color: palette(white);
   border-radius: 50px;
   padding: 0.7em 1em;
