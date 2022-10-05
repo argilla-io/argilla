@@ -156,10 +156,7 @@ def configure_telemetry(app):
     @app.on_event("startup")
     async def check_telemetry():
         if settings.enable_telemetry:
-            warnings.warn(
-                message,
-                category=UserWarning,
-            )
+            print(message, flush=True)
 
 
 for app_configure in [
