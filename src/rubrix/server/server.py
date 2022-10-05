@@ -27,7 +27,10 @@ from pydantic import ConfigError
 
 from rubrix import __version__ as rubrix_version
 from rubrix.logging import configure_logging
-from rubrix.server.daos.backend.elasticsearch import ElasticsearchBackend
+from rubrix.server.daos.backend.elasticsearch import (
+    ElasticsearchBackend,
+    GenericSearchError,
+)
 from rubrix.server.daos.datasets import DatasetsDAO
 from rubrix.server.daos.records import DatasetRecordsDAO
 from rubrix.server.errors import APIErrorHandler, EntityNotFoundError
@@ -86,8 +89,6 @@ def configure_app_statics(app: FastAPI):
 def configure_app_storage(app: FastAPI):
     @app.on_event("startup")
     async def configure_elasticsearch():
-        import opensearchpy
-
         try:
             es_wrapper = ElasticsearchBackend.get_instance()
             dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(es_wrapper)
@@ -96,7 +97,7 @@ def configure_app_storage(app: FastAPI):
             )
             datasets.init()
             dataset_records.init()
-        except opensearchpy.exceptions.ConnectionError as error:
+        except GenericSearchError as error:
             raise ConfigError(
                 f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
                 "is not available or not responding.\n"
