@@ -16,7 +16,10 @@
 """
 This module configures the global fastapi application
 """
+import inspect
 import os
+import sys
+import warnings
 from pathlib import Path
 
 from brotli_asgi import BrotliMiddleware
@@ -128,6 +131,35 @@ app = FastAPI(
     version=str(rubrix_version),
 )
 
+
+def configure_telemetry(app):
+    message = "\n"
+    message += inspect.cleandoc(
+        """
+        Rubrix uses telemetry to report anonymous usage and error information.
+
+        You can know more about what information is reported at:
+
+            https://rubrix.readthedocs.io/en/stable/reference/telemetry.html
+
+        Telemetry is currently enabled. If you want to disable it, you can configure
+        the environment variable before relaunching the server:
+    """
+    )
+    message += "\n\n    "
+    message += (
+        "#set RUBRIX_ENABLE_TELEMETRY=0"
+        if os.name == "nt"
+        else "$>export RUBRIX_ENABLE_TELEMETRY=0"
+    )
+    message += "\n"
+
+    @app.on_event("startup")
+    async def check_telemetry():
+        if settings.enable_telemetry:
+            print(message, flush=True)
+
+
 for app_configure in [
     configure_app_logging,
     configure_middleware,
@@ -136,5 +168,6 @@ for app_configure in [
     configure_api_router,
     configure_app_statics,
     configure_app_storage,
+    configure_telemetry,
 ]:
     app_configure(app)
