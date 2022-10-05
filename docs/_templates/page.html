@@ -34,8 +34,19 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="{{ pathto(master_doc) }}"><div class="brand">    <img class="header-logo" src="{{ logo_url }}" alt="Logo"/></div></a>
+      <a href="{{ pathto(master_doc) }}">
+        <div class="brand">  
+          {%- if logo_url %}  
+          <img class="header-logo" src="{{ logo_url }}" alt="Logo"/>
+          {%- endif %}
+          {%- if theme_light_logo and theme_dark_logo %}
+          <img class="header-logo only-light" src="{{ pathto('_static/' + theme_light_logo, 1) }}" alt="Light Logo"/>
+          <img class="header-logo only-dark" src="{{ pathto('_static/' + theme_dark_logo, 1) }}" alt="Dark Logo"/>
+        {%- endif %}
+        </div>
+      </a>
     </div>
+
     <div class="header-right">
       <label class="search-icon" for="__search">
         <div class="visually-hidden">Toggle search</div>
@@ -106,8 +117,9 @@
           </label>
         </div>
         <article role="main">
-            <div class="stars" style="margin-top: 1em; display: flex; justify-content: right">
-                <iframe src="https://ghbtns.com/github-btn.html?user=recognai&repo=rubrix&type=star&count=true&size=large" allowtransparency="true" style="color-scheme: none" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+            <div class="social social--main" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
+                <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g" class="button--primary" target="_blank">Join <span aria-label="slack" class="slack-icon"></span></span></a>
+                <iframe name="github-stars" src="https://ghbtns.com/github-btn.html?user=recognai&repo=rubrix&type=star&count=true&size=large" allowtransparency="true" style="color-scheme: none" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
             </div>
           {% block content %}{{ body }}{% endblock %}
         </article>
