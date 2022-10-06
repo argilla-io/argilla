@@ -1,6 +1,5 @@
 
 <h1 align="center">
-  <br>
   <a href=""><img src="https://github.com/dvsrepo/imgs/raw/main/rg.svg" alt="Argilla" width="150"></a>
   <br>
   Argilla
@@ -8,6 +7,8 @@
 </h1>
 
 <h3 align="center">Open-source framework for data-centric NLP</h3>
+<p align="center">Data Labeling + Data Curation + Inference Store  </p>
+<p align="center">Designed for MLOps + Feedback Loops  </p>
 
 <p align="center">
 <a  href="https://pypi.org/project/rubrix/">
@@ -73,12 +74,18 @@ To get started you need to **install the client and the server** with `pip`:
 pip install "argilla[server]"
 
 ```
+<details>
+<summary>
 or `conda`:
+</summary>
+
 ```bash
 
 pip install "argilla[server]"
 
 ```
+
+</details>
 
 Then you need to **run [Elasticsearch (ES)](https://www.elastic.co/elasticsearch)**.
 
@@ -133,52 +140,26 @@ To upload your first dataset you can run from your terminal:
 
 
 ### What is Argilla?
-
-
-
-Argilla is an open-source MLOps tool for building and managing training data for Natural Language Processing.
-
-
+Argilla is an open-source MLOps tool for building and managing data for Natural Language Processing.
 
 ### What can I use Argilla for?
-
-
-
 Argilla is useful if you want to:
 
-
-
-- create a data set for training a model.
+- create a dataset for training a model.
 
 - evaluate and improve an existing model.
 
 - monitor an existing model to improve it over time and gather more training data.
 
-
-
 ### What do I need to start using Argilla?
-
-
-
 You need to have a running instance of Elasticsearch and install the Argilla Python library.
-
-
-
 The library is used to read and write data into Argilla.
-
 To get started we highly recommend using Jupyter Notebooks so you might want to install Jupyter Lab or use Jupiter support for VS Code for example.
 
-
-
 ### How can I "upload" data into Argilla?
-
-
-
 Currently, the only way to upload data into Argilla is by using the Python library.
 
 This is based on the assumption that there's rarely a perfectly prepared dataset in the format expected by the data annotation tool.
-
-
 
 Argilla is designed to enable fast iteration for users that are closer to data and models, namely data scientists and NLP/ML/Data engineers.
 
@@ -186,84 +167,45 @@ If you are familiar with libraries like Weights & Biases or MLFlow, you'll find 
 
 That said, Argilla gives you different shortcuts and utils to make loading data into Argilla a breeze, such as the ability to read datasets directly from the Hugging Face Hub.
 
-
-
 In summary, the recommended process for uploading data into Argilla would be following:
 
+1. Install Argilla Python library,
 
+2. Open a Jupyter Notebook,
 
-(1) Install Argilla Python library,
+3. Make sure you have a Argilla server instance up and running,
 
+4. Read your source dataset using Pandas, Hugging Face datasets, or any other library,
 
+5. Do any data preparation, pre-processing, or pre-annotation with a pretrained model, and
 
-(2) Open a Jupyter Notebook,
-
-
-
-(3) Make sure you have a Argilla server instance up and running,
-
-
-
-(4) Read your source dataset using Pandas, Hugging Face datasets, or any other library,
-
-
-
-(5) Do any data preparation, pre-processing, or pre-annotation with a pretrained model, and
-
-
-
-(6) Transform your dataset rows/records into Argilla records and log them into a dataset using `rb.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
-
-
+6. Transform your dataset rows/records into Argilla records and log them into a dataset using `rb.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
 
 ### How can I train a model
-
-
-
-The training datasets curated with Argilla are model agnostic.
+The training datasets created with Argilla are model agnostic.
 
 You can choose one of many amazing frameworks to train your model, like [transformers](https://huggingface.co/docs/transformers/), [spaCy](https://spacy.io/), [flair](https://github.com/flairNLP/flair) or [sklearn](https://scikit-learn.org).
 
 Check out our [cookbook](https://rubrix.readthedocs.io/en/stable/guides/cookbook.html) and our [tutorials](https://rubrix.readthedocs.io/en/stable) on how Argilla integrates with these frameworks.
 
 
-
-If you want to train a Hugging Face transformer, we provide a neat shortcut to [prepare your dataset for training](https://rubrix.readthedocs.io/en/stable/reference/python/python_client.html#rubrix.client.datasets.DatasetForTextClassification.prepare_for_training).
-
-
-
+If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://rubrix.readthedocs.io/en/stable/reference/python/python_client.html#rubrix.client.datasets.DatasetForTextClassification.prepare_for_training).
 ### Can Argilla share the Elasticsearch Instance/cluster?
-
-
-
 Yes, you can use the same Elasticsearch instance/cluster for Argilla and other applications.
-
-You only need to perform some configuration, check the Advanced installation guide in the [docs](https://docs.rubrix.ml/).
-
-
-
+You only need to perform some configuration, check the Advanced installation guide in the docs.
 ### How to solve an exceeded flood-stage watermark in Elasticsearch?
-
-
-
 By default, Elasticsearch is quite conservative regarding the disk space it is allowed to use.
 
 If less than 5% of your disk is free, Elasticsearch can enforce a read-only block on every index, and as a consequence, Argilla stops working.
 
 To solve this, you can simply increase the watermark by executing the following command in your terminal:
 
-
 ```bash
 
 curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'{"persistent": {"cluster.routing.allocation.disk.watermark.flood_stage":"99%"}}'
 
 ```
-
-
-
 ## Contributors
-
-
 <a  href="https://github.com/recognai/rubrix/graphs/contributors">
 
 <img  src="https://contrib.rocks/image?repo=recognai/rubrix" />
