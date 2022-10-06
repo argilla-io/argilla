@@ -6,9 +6,9 @@
   <br>
 </h1>
 
-<h3 align="center">Open-source framework for data-centric NLP</h3>
-<p align="center">Data Labeling + Data Curation + Inference Store  </p>
-<p align="center">Designed for MLOps + Feedback Loops  </p>
+<h2 align="center">Open-source framework for data-centric NLP</h2>
+<p align="center">Data Labeling + Data Curation + Inference Store</p>
+<p align="center">Designed for MLOps & Feedback Loops</p>
 
 <p align="center">
 <a  href="https://pypi.org/project/rubrix/">
@@ -31,14 +31,18 @@
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
 </p>
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#quickstart">Quickstart</a> •
-  <a href="#documentation">Documentation</a>
-  <!--a href="#documentation">FAQ</a-->
-</p>
+<h3>
+
 
 https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
+  
+<p align="center">
+<a href="#key-features">Key Features</a> <span> | </span>
+<a href="#quickstart">Quickstart</a> <span> | </span>
+<a href="#documentation">Documentation</a>
+<a href="#documentation">FAQ</a>
+</p>
+</h3>
 
 ## Key Features
 
@@ -56,7 +60,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 - Close the gap between production data and data collection activities
 - Auto-monitoring for major NLP libraries and pipelines (spaCy, Hugging Face, FlairNLP)
 - ASGI middleware for HTTP endpoints
-- Rubrix Metrics to understand data and model issues, like entity consistency for NER models
+- Argilla Metrics to understand data and model issues, like entity consistency for NER models
 - Integrated with Kibana for custom dashboards
 
 ### Team workspaces
@@ -76,7 +80,7 @@ pip install "argilla[server]"
 ```
 <details>
 <summary>
-or `conda`:
+or conda:
 </summary>
 
 ```bash
