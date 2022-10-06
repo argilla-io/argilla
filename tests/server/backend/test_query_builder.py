@@ -14,7 +14,11 @@
 
 import pytest
 
-from argilla.server.daos.backend.search.model import SortableField, SortConfig, SortOrder
+from argilla.server.daos.backend.search.model import (
+    SortableField,
+    SortConfig,
+    SortOrder,
+)
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 

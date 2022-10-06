@@ -17,7 +17,11 @@ from typing import Any, Dict, Type, TypeVar, Union
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.commons.models import (
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 
 
 def build_raw_response(

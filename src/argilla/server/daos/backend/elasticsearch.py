@@ -18,7 +18,8 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
 from opensearchpy.exceptions import OpenSearchWarning
-from opensearchpy.helpers import bulk as es_bulk, reindex, scan
+from opensearchpy.helpers import bulk as es_bulk
+from opensearchpy.helpers import reindex, scan
 
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
@@ -44,8 +45,8 @@ from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
 from argilla.server.daos.backend.search.model import (
     BackendRecordsQuery,
     BaseDatasetsQuery,
-    SortConfig,
     SortableField,
+    SortConfig,
 )
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.errors import EntityNotFoundError, InvalidTextSearchError
@@ -352,7 +353,6 @@ class ElasticsearchBackend(LoggingMixin):
                 if raises_error:
                     ignore_errors = []
                 self.__client__.indices.delete(index, ignore=ignore_errors)
-
 
     def _add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """

@@ -16,7 +16,11 @@ import httpx
 import pytest
 from httpx import Response as HttpxResponse
 
-from argilla.client.sdk.commons.api import build_bulk_response, build_data_response, bulk
+from argilla.client.sdk.commons.api import (
+    build_bulk_response,
+    build_data_response,
+    bulk,
+)
 from argilla.client.sdk.commons.models import (
     BulkResponse,
     ErrorMessage,
