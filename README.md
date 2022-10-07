@@ -25,7 +25,7 @@
 https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
 
 
-<br> 
+<br>
 
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
@@ -35,7 +35,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
 </p>
 
-<br> 
+<br>
 
 <h3>
 <p align="center">
