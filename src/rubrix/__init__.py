@@ -19,12 +19,9 @@ as well as in the `_import_structure` dictionary.
 """
 import inspect
 
-from rubrix import _version
+from . import _version
 
 __version__ = _version.version
-
-
-import warnings
 
 
 MIGRATION_MESSAGE = """
@@ -37,6 +34,9 @@ MIGRATION_MESSAGE = """
     import argilla as ag
     
     ar.log....
+    
+    or 
+    python -m argilla
     """
 
-warnings.warn(inspect.cleandoc(MIGRATION_MESSAGE))
+print(inspect.cleandoc(MIGRATION_MESSAGE))
