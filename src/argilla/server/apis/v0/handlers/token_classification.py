@@ -52,7 +52,9 @@ from argilla.server.services.tasks.text_classification.metrics import (
 from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationRecord,
 )
-from argilla.server.services.tasks.token_classification import TokenClassificationService
+from argilla.server.services.tasks.token_classification import (
+    TokenClassificationService,
+)
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,

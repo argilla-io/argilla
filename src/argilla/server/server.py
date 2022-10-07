@@ -30,7 +30,10 @@ from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
 from argilla.logging import configure_logging
-from argilla.server.daos.backend.elasticsearch import ElasticsearchBackend, GenericSearchError
+from argilla.server.daos.backend.elasticsearch import (
+    ElasticsearchBackend,
+    GenericSearchError,
+)
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import APIErrorHandler, EntityNotFoundError

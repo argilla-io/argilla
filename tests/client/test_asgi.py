@@ -22,7 +22,10 @@ from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
 
 import argilla
-from argilla.monitoring.asgi import argillaLogHTTPMiddleware, token_classification_mapper
+from argilla.monitoring.asgi import (
+    argillaLogHTTPMiddleware,
+    token_classification_mapper,
+)
 
 
 def test_argilla_middleware_for_text_classification(monkeypatch):

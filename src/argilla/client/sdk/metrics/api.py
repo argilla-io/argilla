@@ -20,7 +20,11 @@ import httpx
 from argilla.client.sdk._helpers import build_raw_response
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import build_list_response
-from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.commons.models import (
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 from argilla.client.sdk.metrics.models import MetricInfo
 
 

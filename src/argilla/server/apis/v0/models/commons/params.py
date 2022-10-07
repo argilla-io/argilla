@@ -17,9 +17,9 @@ from dataclasses import dataclass
 from fastapi import Header, Path, Query
 
 from argilla._constants import (
+    _OLD_WORKSPACE_HEADER_NAME,
     DATASET_NAME_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
-    _OLD_WORKSPACE_HEADER_NAME,
 )
 from argilla.server.security.model import WORKSPACE_NAME_PATTERN
 
@@ -60,7 +60,11 @@ class CommonTaskHandlerDependencies:
     @property
     def workspace(self) -> str:
         """Return read workspace. Query param prior to header param"""
-        workspace = self.__workspace_param__ or self.__workspace_header__ or self.__old_workspace_header__
+        workspace = (
+            self.__workspace_param__
+            or self.__workspace_header__
+            or self.__old_workspace_header__
+        )
         if workspace:
             assert WORKSPACE_NAME_PATTERN.match(workspace), (
                 "Wrong workspace format. "

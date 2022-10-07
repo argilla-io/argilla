@@ -17,6 +17,7 @@ from typing import Any, Dict, Optional, Type, Union
 import pydantic
 from starlette import status
 
+
 class ServerError(Exception):
 
     HTTP_STATUS: int = status.HTTP_500_INTERNAL_SERVER_ERROR

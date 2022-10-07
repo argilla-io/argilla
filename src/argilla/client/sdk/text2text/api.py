@@ -18,7 +18,11 @@ import httpx
 
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import build_data_response, build_param_dict
-from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.commons.models import (
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 from argilla.client.sdk.text2text.models import Text2TextQuery, Text2TextRecord
 
 

@@ -23,7 +23,11 @@ from argilla.client.sdk.commons.api import (
     build_list_response,
     build_param_dict,
 )
-from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.commons.models import (
+    ErrorMessage,
+    HTTPValidationError,
+    Response,
+)
 from argilla.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,

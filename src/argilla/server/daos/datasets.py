@@ -203,7 +203,9 @@ class DatasetsDAO:
 
     def get_all_workspaces(self) -> List[str]:
         """Get all datasets (Only for super users)"""
-        metric_data = self._es.compute_argilla_metric(metric_id="all_argilla_workspaces")
+        metric_data = self._es.compute_argilla_metric(
+            metric_id="all_argilla_workspaces"
+        )
         return [k for k in metric_data]
 
     def save_settings(
