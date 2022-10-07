@@ -5,11 +5,6 @@
   Argilla
   <br>
 </h1>
-
-<h2 align="center">Open-source framework for data-centric NLP</h2>
-<p align="center">Data Labeling + Data Curation + Inference Store</p>
-<p align="center">Designed for MLOps & Feedback Loops</p>
-
 <p align="center">
 <a  href="https://pypi.org/project/rubrix/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
@@ -23,6 +18,14 @@
 </a>
 </p>
 
+<h2 align="center">Open-source framework for data-centric NLP</h2>
+<p align="center">Data Labeling + Data Curation + Inference Store</p>
+<p align="center">Designed for MLOps & Feedback Loops</p>
+
+https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
+
+
+<br> 
 
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
@@ -31,16 +34,16 @@
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
 </p>
+
+<br> 
+
 <h3>
-
-
-https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
-
 <p align="center">
+<a href="#">Documentation</a> | </span>
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
-<a href="#documentation">Documentation</a>
-<a href="#documentation">FAQ</a>
+<a href="#principles">Principles</a> | </span>
+<a href="#FAQ">FAQ</a>
 </p>
 </h3>
 
@@ -121,7 +124,7 @@ To upload your first dataset you can run from your terminal:
 @TODO give a one-liner or something else to create a data. Or provide a command which creates one or several demo datasets.
 
 
-> 🚒 **If you find issues, you can get direct support from the team and other community members by joining the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+> 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
 
 ## Principles
