@@ -25,9 +25,10 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from tqdm.auto import tqdm
 
 from argilla._constants import (
+    _OLD_WORKSPACE_HEADER_NAME,
     DATASET_NAME_REGEX_PATTERN,
     DEFAULT_API_KEY,
-    WORKSPACE_HEADER_NAME, _OLD_WORKSPACE_HEADER_NAME,
+    WORKSPACE_HEADER_NAME,
 )
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
@@ -208,9 +209,7 @@ class Api:
         Returns:
             The name of the active workspace as a string.
         """
-        return self._client.headers.get(
-            WORKSPACE_HEADER_NAME, self._user.username
-        )
+        return self._client.headers.get(WORKSPACE_HEADER_NAME, self._user.username)
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata

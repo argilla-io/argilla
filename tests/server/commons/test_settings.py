@@ -33,6 +33,4 @@ def test_settings_namespace():
 
     assert settings.namespace == "namespace"
     assert settings.dataset_index_name == "namespace.ar.datasets"
-    assert (
-        settings.dataset_records_index_name == "namespace.ar.dataset.{}"
-    )
+    assert settings.dataset_records_index_name == "namespace.ar.dataset.{}"

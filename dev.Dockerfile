@@ -28,7 +28,7 @@ RUN rm -rf /build \
  && chmod +x /wait-for-it.sh
 
 # See <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker#module_name>
-ENV MODULE_NAME="rubrix.server.server"
+ENV MODULE_NAME="argilla"
 ENV VARIABLE_NAME="app"
 
-CMD /wait-for-it.sh $ELASTICSEARCH -- /start.sh
+CMD /wait-for-it.sh $ARGILLA_ELASTICSEARCH -- /start.sh

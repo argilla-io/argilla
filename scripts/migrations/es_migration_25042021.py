@@ -18,7 +18,6 @@ from typing import Any, Dict, List, Optional
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk, scan
 from pydantic import BaseSettings
-
 from rubrix.server.tasks.commons import TaskType
 
 

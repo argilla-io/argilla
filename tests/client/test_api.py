@@ -24,9 +24,9 @@ import pytest
 
 import argilla as ar
 from argilla._constants import (
+    _OLD_WORKSPACE_HEADER_NAME,
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
-    _OLD_WORKSPACE_HEADER_NAME,
 )
 from argilla.client import api
 from argilla.client.api import InputValueError

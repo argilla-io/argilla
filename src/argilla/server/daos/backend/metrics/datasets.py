@@ -16,7 +16,5 @@
 from argilla.server.daos.backend.metrics.base import TermsAggregation
 
 METRICS = {
-    "all_workspaces": TermsAggregation(
-        id="all_workspaces", field="owner.keyword"
-    )
+    "all_workspaces": TermsAggregation(id="all_workspaces", field="owner.keyword")
 }

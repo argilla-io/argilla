@@ -30,6 +30,7 @@ class ErrorDetail(BaseModel):
     code: str
     params: Dict[str, Any]
 
+
 # TODO(@frascuchon): Review class Naming
 class ServerHTTPException(HTTPException):
     def __init__(self, error: ServerError):
@@ -46,6 +47,4 @@ class APIErrorHandler:
         argilla_error = exception_to_argilla_error(error)
         await telemetry.track_error(argilla_error, request=request)
 
-        return await http_exception_handler(
-            request, ServerHTTPException(argilla_error)
-        )
+        return await http_exception_handler(request, ServerHTTPException(argilla_error))

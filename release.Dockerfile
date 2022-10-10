@@ -12,4 +12,4 @@ RUN wget -O /wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for
 ENV MODULE_NAME="argilla"
 ENV VARIABLE_NAME="app"
 
-CMD /wait-for-it.sh $ELASTICSEARCH -- /start.sh
+CMD /wait-for-it.sh $ARGILLA_ELASTICSEARCH -- /start.sh
