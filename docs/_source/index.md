@@ -183,8 +183,8 @@ You can join the conversation on Slack! We are a very friendly and inclusive com
    :hidden:
 
    Slack <https://join.slack.com/t/argillaworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
-   Github <https://github.com/recognai/argilla>
-   Discussion forum <https://github.com/recognai/argilla/discussions>
+   Github <https://github.com/argilla/argilla>
+   Discussion forum <https://github.com/argilla/argilla/discussions>
    community/developer_docs
 
 :::
