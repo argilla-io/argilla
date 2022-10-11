@@ -62,6 +62,7 @@ A very simple framework for state-of-the-art NLP.
 ````
 ## Active Learning
 ````{grid} 1 1 2 2
+
 ```{grid-item-card} Small-Text
 :img-top: /_static/images/libraries/smalltext.png
 :link: smalltext.md
