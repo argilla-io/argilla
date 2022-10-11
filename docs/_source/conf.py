@@ -1,4 +1,4 @@
-#  Copyright 2021-present, the Recognai S.L. team.
+#  Copyright 2021-present, the Argilla S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ version: "3"
 
 services:
  argilla:
-   image: recognai/argilla:{}
+   image: argilla/argilla:{}
    ports:
      - "80:80"
    environment:
@@ -98,7 +98,7 @@ myst_substitutions[
 # docker-compose.yaml
 services:
   argilla:
-    image: recognai/argilla:{}
+    image: argilla/argilla:{}
     ports:
       - "6900:80"
     environment:
@@ -255,7 +255,7 @@ pygments_dark_style = "material"
 
 # Open graph meta
 ogp_image = (
-    "https://raw.githubusercontent.com/recognai/argilla/master/docs/images/og_argilla.png"
+    "https://raw.githubusercontent.com/argilla/argilla/master/docs/images/og_argilla.png"
 )
 
 ogp_custom_meta_tags = [

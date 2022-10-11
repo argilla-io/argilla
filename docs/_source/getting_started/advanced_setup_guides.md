@@ -107,7 +107,7 @@ You can use vanilla docker to run our image of the web app.
 First, pull the image from the [Docker Hub](https://hub.docker.com/):
 
 ```bash
-docker pull recognai/argilla
+docker pull argilla/argilla
 ```
 
 Then simply run it.
@@ -116,7 +116,7 @@ By default, the Argilla server will look for your Elasticsearch endpoint at `htt
 But you can customize this by setting the `ELASTICSEARCH` environment variable.
 
 ```bash
-docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla recognai/argilla
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla
 ```
 
 To find running instances of the Argilla server, you can list all the running containers on your machine:
@@ -147,7 +147,7 @@ mkdir argilla && cd argilla
 and launch the docker-contained web app with the following command:
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/argilla/master/docker-compose.yaml && docker-compose up -d
+wget -O docker-compose.yml https://raw.githubusercontent.com/argilla/argilla/master/docker-compose.yaml && docker-compose up -d
 ```
 :::{warning}
 Latest versions of docker should be executed without the dash '-', e.g:
@@ -339,7 +339,7 @@ If you want the cutting-edge version of *Argilla* with the latest changes and ex
 First, you need to install the master version of our python client:
 
 ```bash
- pip install -U git+https://github.com/recognai/argilla.git
+ pip install -U git+https://github.com/argilla/argilla.git
 ```
 
 Then, the easiest way to get the master version of our web app up and running is via docker-compose:
@@ -352,7 +352,7 @@ If you want to run the web app of the master branch **without** docker, we refer
 ```bash
  # get the docker-compose yaml file
  mkdir argilla && cd argilla
- wget -O docker-compose.yml https://raw.githubusercontent.com/recognai/argilla/master/docker-compose.yaml
+ wget -O docker-compose.yml https://raw.githubusercontent.com/argilla/argilla/master/docker-compose.yaml
  # use the master image of the argilla container instead of the latest
  sed -i 's/argilla:latest/argilla:master/' docker-compose.yml
  # start all services
@@ -362,5 +362,5 @@ If you want to run the web app of the master branch **without** docker, we refer
 If you want to use vanilla docker (and have your own Elasticsearch instance running), you can just use our master image:
 
 ```bash
-docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla recognai/argilla:master
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla:master
 ```
