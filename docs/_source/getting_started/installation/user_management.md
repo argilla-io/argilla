@@ -1,4 +1,4 @@
-# User Management and Workspaces
+# User Management
 
 This guide explains how to setup the users and team workspaces for your Argilla instance.
 
