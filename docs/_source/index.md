@@ -17,21 +17,19 @@
    :caption: Guides
    :hidden:
 
-   guides/cookbook
-   guides/task_examples
-   guides/weak-supervision
-   guides/monitoring
-   guides/metrics
-   guides/datasets
-   guides/dataset_settings
-   guides/queries
+   guides/guides
+   guides/features/features.md
+   guides/steps/steps.md
+   guides/tasks/tasks.md
+   guides/libraries/libraries.md
+   guides/techniques/techniques.md
 
 .. toctree::
    :maxdepth: 4
    :caption: Tutorials
    :hidden:
 
-   tutorials/introduction
+   tutorials/tutorials
    tutorials/steps/steps.md
    tutorials/tasks/tasks.md
    tutorials/libraries/libraries.md
