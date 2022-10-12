@@ -12,7 +12,7 @@ The Python library and the web app are built around a few simple concepts.
 This section aims to clarify what those concepts are and to show you the main constructs for using Argilla with your own models and data.
 Let's take a look at Argilla's components and methods:
 
-![A sketch of the Argilla data model](../images/argilla_data_model.svg)
+![A sketch of the Argilla data model](/_static/images/main/argilla_data_model.svg)
 
 
 ### Dataset

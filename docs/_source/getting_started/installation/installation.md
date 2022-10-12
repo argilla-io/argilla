@@ -65,18 +65,16 @@ rg.log(
 
 If you now go to your Argilla app at [http://localhost:6900/](http://localhost:6900/), you will find your first data set.
 
-**Congratulations! You are ready to start working with Argilla.**
 
-## Next steps
+```{toctree}
+:maxdepth: 1
+:hidden:
 
-Have a look at our [advanced setup guides](advanced-setup-guides) if you want to (among other things):
+docker.md
+docker_compose.md
+elasticsearch.md
+user_management.md
+cloud_providers.md
+from_master.md
 
-- [setup Elasticsearch (ES) via docker](setting-up-elasticsearch-via-docker)
-- [configure the Argilla server](server-configurations)
-- [share an ES instance with other applications](configure-elasticsearch-role-users)
-- [deploy Argilla on an AWS instance](deploy-to-aws-instance-using-docker-machine)
-
-To continue learning we recommend you to:
-
-* Check our **Guides** and **Tutorials**;
-* Read about Argilla's main [concepts](concepts.md);
+```
