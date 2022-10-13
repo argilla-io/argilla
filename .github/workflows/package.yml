@@ -1,30 +1,28 @@
-
 name: Build package
 
 on:
   release:
     types:
-      - 'published'
+      - "published"
 
   push:
     branches:
-      - 'main'
-      - 'master'
-      - 'releases/**'
+      - "main"
+      - "master"
+      - "releases/**"
   pull_request:
     branches:
-      - 'main'
-      - 'master'
-      - 'releases/**'
+      - "main"
+      - "master"
+      - "releases/**"
 
 jobs:
-
   src-test:
     name: Check tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elasticsearch: [ 7.4, 7.10.2, 7.14, 7.16, 7.17, 8.0 ]
+        elasticsearch: [7.4, 7.10.2, 7.14, 7.16, 7.17, 8.0]
     defaults:
       run:
         shell: bash -l {0}
@@ -111,8 +109,6 @@ jobs:
           flags: pytest
           fail_ci_if_error: false
 
-
-
   build:
     name: Build the python package
     runs-on: ubuntu-latest
@@ -136,7 +132,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
 
       - name: Build Package 🍟
         run: |

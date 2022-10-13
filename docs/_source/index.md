@@ -14,7 +14,7 @@
 
 .. toctree::
    :maxdepth: 3
-   :caption: Guides
+   :caption: Deep Dives
    :hidden:
 
    guides/guides

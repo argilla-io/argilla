@@ -1,37 +1,23 @@
-# Introduction
+# What are Tutorials?
 
-These tutorials are a good starting point and introduce you to various topics covered by Argilla.
+These tutorials are a practical starting point and introduce you to various topics covered by Argilla. If you want a more theoretical approach, take a look at our deep dives!
 
+- [MLOps Steps](/features/features.html): the steps we cover for the MLOps cycle.
+    - [🏷 Labelling](/features/features.html)
+    - [💪🏽 Training](/features/features.html)
+    - [👨🏽‍💻 Deploying](/features/features.html)
+    - [📊 Monitoring](/features/features.html)
+- [NLP Tasks](/features/features.html): the tasks that Argilla can handle.
+    - [📕📗 TextClassification](/features/features.html)
+    - [🈴🈯️ TokenClassification](/features/features.html)
+    - [👨🏽💬 TextGeneration](/features/features.html)
+- [Libraries](/features/features.html): your favorite NLP libraries.
+- [Techniques](/features/features.html): simple or advanced techniques for a more data-centric approach to your NLP problems.
+    - [👨🏽‍🏫 Active Learning](/features/features.html)
+    - [🫡 Weak Supervision](/features/features.html)
+    - [🔎 Explainability and bias](/features/features.html)
+    - [🔫 Few-shot classification](/features/features.html)
 
-````{grid} 1 1 2 2
-:class-container: tuto-section-2
-```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
-```
-```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
-```
-```{include} /_static/tutorials/labelling-textclassification-snorkel-weaksupervision/modal.md
-```
-```{include} /_static/tutorials/labelling-textclassification-sklearn-weaksupervision/modal.md
-```
-```{include} /_static/tutorials/monitoring-textclassification-cleanlab-explainability/modal.md
-```
-```{include} /_static/tutorials/monitoring-textclassification-shaptransformersinterpret-explainability/modal.md
-```
-```{include} /_static/tutorials/labelling-textclassification-sentencetransformers-weaksupervision/modal.md
-```
-```{include} /_static/tutorials/labelling-textclassification-skweak-weaksupervision/modal.md
-```
-```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md
-```
-```{include} /_static/tutorials/monitoring-textclassification-transformers-explainability/modal.md
-```
-```{include} /_static/tutorials/labelling-tokenclassification-flair-fewshot/modal.md
-```
-```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
-```
-```{include} /_static/tutorials/labelling-tokenclassification-spacy-pretrained/modal.md
-```
-````
 
 
 

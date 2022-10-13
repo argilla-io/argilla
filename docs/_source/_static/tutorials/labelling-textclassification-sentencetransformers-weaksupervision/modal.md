@@ -1,8 +1,8 @@
-```{grid-item-card} 🗂 Weak supervision in multi-label text classification tasks
+```{grid-item-card} 🧱 Extending weak supervision workflows with sentence embeddings
 :img-top: /_static/tutorials/labelling-textclassification-sentencetransformers-weaksupervision/extend_weak_labels.png
 :link: /tutorials/notebooks/labelling-textclassification-sentencetransformers-weaksupervision.html
-steps: Labelling \
-tasks: TextClassification (multi-label) \
-libraries: ArgillaUI, scikit-multilearn \
-technique: Weak Supervision
+MLOps Steps: Labelling, Training \
+NLP Tasks: TextClassification \
+Libraries: Argilla, sentence-transformers \
+Techniques: Weak Supervision
 ```

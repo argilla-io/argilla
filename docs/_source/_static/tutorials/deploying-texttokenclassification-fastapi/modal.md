@@ -1,7 +1,7 @@
-```{grid-item-card} Monitoring Inference Predictions
+```{grid-item-card} Monitoring Inference Predictions FastAPI
 :img-top: /_static/tutorials/deploying-texttokenclassification-fastapi/gallery_thumbnail.png
 :link: /tutorials/notebooks/deploying-texttokenclassification-fastapi.html
-steps: Deploying \
-tasks: TextClassification, TokenClassification \
-libraries: spaCy, FastAPI, transformers
+MLOps Steps: Deploying, Monitoring \
+NLP Tasks: TextClassification, TokenClassification (NER) \
+Libraries: spaCy, FastAPI, transformers
 ```

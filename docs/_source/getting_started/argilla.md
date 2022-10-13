@@ -19,7 +19,7 @@
 
 ## Quickstart
 
-Getting started with Argilla is easy, let's see a quick example using the 🤗 `transformers` and `datasets` libraries:
+Getting started with Argilla is easy, let's see a quick example using the 🤗 `transformers` and `datasets` Libraries
 
 {{ '```bash\npip install "argilla[server]{}" "transformers[torch]" datasets\n```'.format(pipversion) }}
 

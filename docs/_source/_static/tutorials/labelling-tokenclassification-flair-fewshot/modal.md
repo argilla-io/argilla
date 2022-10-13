@@ -1,8 +1,8 @@
-```{grid-item-card} 🔫 Zero-shot Named Entity Recognition with Flair
+```{grid-item-card} 🔫 Zero-shot NER with Flair
 :img-top: /_static/tutorials/labelling-tokenclassification-flair-fewshot/gallery_thumbnail.png
 :link: /tutorials/notebooks/labelling-tokenclassification-flair-fewshot.html
-steps: Labelling \
-tasks: TextClassification \
-libraries: flair  \
-technique: Zero-shot classifcation
+MLOps Steps: Labelling \
+NLP Tasks: TokenClassification (NER) \
+Libraries: flair  \
+Techniques: Zero-shot classifcation
 ```
