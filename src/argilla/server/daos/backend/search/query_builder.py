@@ -76,8 +76,7 @@ class EsQueryBuilder:
         if not query_filters:
             return filters.match_all()
         return filters.boolean_filter(
-            should_filters=query_filters, minimum_should_match=len(
-                query_filters)
+            should_filters=query_filters, minimum_should_match=len(query_filters)
         )
 
     def _search_to_es_query(
@@ -214,22 +213,19 @@ class EsQueryBuilder:
                 )
 
             else:
-                cls._LOGGER.warning(
-                    f"Cannot parse query value {value} for key {key}")
+                cls._LOGGER.warning(f"Cannot parse query value {value} for key {key}")
             if key_filter:
                 all_filters.append(key_filter)
 
         return filters.boolean_filter(
             must_query=query_text or filters.match_all(),
             filter_query=filters.boolean_filter(
-                should_filters=all_filters, minimum_should_match=len(
-                    all_filters)
+                should_filters=all_filters, minimum_should_match=len(all_filters)
             )
             if all_filters
             else None,
             must_not_query=filters.boolean_filter(
-                should_filters=[filters.text_query(
-                    q) for q in query.uncovered_by_rules]
+                should_filters=[filters.text_query(q) for q in query.uncovered_by_rules]
             )
             if hasattr(query, "uncovered_by_rules") and query.uncovered_by_rules
             else None,
