@@ -16,10 +16,15 @@ import re
 import warnings
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
-from opensearchpy.exceptions import OpenSearchWarning
-from opensearchpy.helpers import bulk as es_bulk
-from opensearchpy.helpers import reindex, scan
+from elasticsearch import (
+    Elasticsearch,
+    ElasticsearchWarning,
+    NotFoundError,
+    RequestError,
+)
+from elasticsearch.exceptions import AuthenticationException, AuthorizationException
+from elasticsearch.helpers import bulk as es_bulk
+from elasticsearch.helpers import reindex, scan
 
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
@@ -52,6 +57,12 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.errors import EntityNotFoundError, InvalidTextSearchError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 
+# from opensearchpy import NotFoundError, OpenSearch, OpenSearchException, RequestError
+# from opensearchpy.exceptions import OpenSearchWarning
+# from opensearchpy.helpers import bulk as es_bulk
+# from opensearchpy.helpers import reindex, scan
+
+
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -80,7 +91,7 @@ class backend_error_handler:
 
     def __enter__(self):
         # This line disable all open search client warnings
-        warnings.filterwarnings("ignore", category=OpenSearchWarning)
+        warnings.filterwarnings("ignore", category=ElasticsearchWarning)
         pass
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -98,7 +109,7 @@ class backend_error_handler:
             raise GenericSearchError(exception_value) from exception_value
         except NotFoundError as ex:
             raise IndexNotFoundError(ex)
-        except OpenSearchException as ex:
+        except Exception as ex:
             raise GenericSearchError(ex)
 
     def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:
@@ -144,7 +155,7 @@ class ElasticsearchBackend(LoggingMixin):
         """
 
         if cls._INSTANCE is None:
-            es_client = OpenSearch(
+            es_client = Elasticsearch(
                 hosts=settings.elasticsearch,
                 verify_certs=settings.elasticsearch_ssl_verify,
                 ca_certs=settings.elasticsearch_ca_path,
@@ -167,7 +178,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def __init__(
         self,
-        es_client: OpenSearch,
+        es_client: Elasticsearch,
         query_builder: EsQueryBuilder,
         metrics: Dict[str, ElasticsearchMetric] = None,
         mappings: Dict[str, Dict[str, Any]] = None,
@@ -246,7 +257,7 @@ class ElasticsearchBackend(LoggingMixin):
         -------
             True if index exists. False otherwise
         """
-        return self.__client__.indices.exists(index)
+        return self.__client__.indices.exists(index=index)
 
     def _search(
         self,
@@ -308,8 +319,8 @@ class ElasticsearchBackend(LoggingMixin):
         """
         with backend_error_handler(index):
             if force_recreate:
-                self._delete_index(index)
-            if not self._index_exists(index):
+                self._delete_index(index=index)
+            if not self._index_exists(index=index):
                 self.__client__.indices.create(
                     index=index,
                     body={"settings": settings or {}, "mappings": mappings or {}},
@@ -690,7 +701,7 @@ class ElasticsearchBackend(LoggingMixin):
         """Returns basic about es cluster"""
         try:
             return self.__client__.info()
-        except OpenSearchException as ex:
+        except Exception as ex:
             return {"error": ex}
 
     def aggregate(self, index: str, aggregation: Dict[str, Any]) -> Dict[str, Any]:
@@ -982,7 +993,7 @@ class ElasticsearchBackend(LoggingMixin):
 
     def create_datasets_index(self, force_recreate: bool = False):
         self._create_index(
-            DATASETS_INDEX_NAME,
+            index=DATASETS_INDEX_NAME,
             force_recreate=force_recreate,
             mappings=datasets_index_mappings(),
         )
@@ -994,15 +1005,15 @@ class ElasticsearchBackend(LoggingMixin):
         try:
             with backend_error_handler(index=source_index):
                 reindex(
-                    self.__client__,
+                    client=self.__client__,
                     source_index=source_index,
                     target_index=target_index,
                 )
                 for doc in scan(self.__client__, index=source_index):
                     dataset_id = doc["_id"]
                     index = settings.old_dataset_records_index_name.format(dataset_id)
-                    alias = dataset_records_index(dataset_id)
-                    self._create_index_alias(index, alias=alias)
+                    alias = dataset_records_index(dataset_id=dataset_id)
+                    self._create_index_alias(index=index, alias=alias)
         except IndexNotFoundError:
             pass  # Nothing to migrate
 
