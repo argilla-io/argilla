@@ -8,9 +8,9 @@
    :hidden:
 
    getting_started/argilla
+   getting_started/quickstart
    getting_started/installation/installation.md
-   getting_started/concepts
-   getting_started/basics
+   getting_started/howto
 
 .. toctree::
    :maxdepth: 3
@@ -43,6 +43,7 @@
 
    reference/python/index
    reference/webapp/index
+   reference/datamodel
    reference/notebooks
    reference/telemetry
 

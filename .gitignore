@@ -32,7 +32,7 @@ venv
 *.jsonl
 
 # Sphinx documentation
-docs/_build/
+docs/_source/_build/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template

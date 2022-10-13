@@ -1,5 +1,8 @@
 
 # Docker-compose
+
+This section explains how to run the Argilla server with Elasticsearch using `docker-compose`.
+
 (launching-the-web-app-via-docker-compose)=
 ## Launching the web app via docker-compose
 
@@ -34,7 +37,7 @@ docker-compose down
 you will lose all your datasets in Argilla!
 :::
 
-### Persisting ElasticSearch data
+## Persisting ElasticSearch data
 To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a
 volume in the docker compose.
 

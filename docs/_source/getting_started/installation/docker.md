@@ -1,6 +1,6 @@
 # Docker
 
-Here we provide some setup guides for an advanced usage of Argilla.
+This guide explains how to launch the Elasticsearch backend and Argilla Server using `docker`. Please check the setup and installation section to understand other options.
 
 (setting-up-elasticsearch-via-docker)=
 ## Setting up Elasticsearch
@@ -39,70 +39,9 @@ For more details about the ES installation with docker, see their [official docu
 For MacOS and Windows, Elasticsearch also provides [homebrew formulae](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/brew.html) and a [msi package](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/windows.html), respectively.
 We recommend ES version 7.10 to work with Argilla.
 
+## Launching Argilla Server and UI
 
-(server-configurations)=
-## Server configurations
-
-By default, the Argilla server will look for your ES endpoint at `http://localhost:9200`.
-But you can customize this by setting the `ELASTICSEARCH` environment variable.
-Have a look at the list of available [environment variables](#environment-variables) to further configure the Argilla server.
-
-Since the Argilla server is built on fastapi, you can launch it using **uvicorn** directly:
-
-```bash
-uvicorn argilla:app
-```
-
-:::{note}
-
-For Argilla versions below 0.9 you can launch the server via
-```bash
-uvicorn argilla.server.server:app
-```
-:::
-
-For more details about fastapi and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
-
-Fastapi also provides beautiful REST API docs that you can check at [http://localhost:6900/api/docs](http://localhost:6900/api/docs).
-
-### Environment variables
-
-You can set following environment variables to further configure your server and client.
-
-#### Server
-
-- `ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
-
-- `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connection to the Elasticsearch backend.
-
-- `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
-
-- `ARGILLA_NAMESPACE`: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Argilla instances.
-
-- `ARGILLA_DEFAULT_ES_SEARCH_ANALYZER`: Default analyzer for textual fields excluding the metadata (Default: "standard").
-
-- `ARGILLA_EXACT_ES_SEARCH_ANALYZER`: Default analyzer for `*.exact` fields in textual information (Default: "whitespace").
-
-- `METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
-
-- `CORS_ORIGINS`: List of host patterns for CORS origin access.
-
-- `DOCS_ENABLED`: If False, disables openapi docs endpoint at */api/docs*.
-
-#### Client
-
-- `ARGILLA_API_URL`: The default API URL when calling {meth}`argilla.init`.
-
-- `ARGILLA_API_KEY`: The default API key when calling {meth}`argilla.init`.
-
-- `ARGILLA_WORKSPACE`: The default workspace when calling {meth}`argilla.init`.
-
-
-
-(launching-the-web-app-via-docker)=
-## Launching the web app
-
-You can use vanilla docker to run our image of the web app.
+You can use vanilla docker to run our image of Argilla Server.
 First, pull the image from the [Docker Hub](https://hub.docker.com/):
 
 ```bash

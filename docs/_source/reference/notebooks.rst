@@ -3,7 +3,9 @@
 Notebooks
 =========
 
-The notebook reference guide for Argilla tutorials. This section contains:
+The notebook reference guide for Argilla tutorials.
+
+This section contains:
 
 .. toctree::
    :maxdepth: 2

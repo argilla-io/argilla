@@ -73,6 +73,7 @@ If you now go to your Argilla app at [http://localhost:6900/](http://localhost:6
 docker.md
 docker_compose.md
 elasticsearch.md
+server_configuration.md
 user_management.md
 cloud_providers.md
 from_master.md

@@ -1,5 +1,5 @@
 (install-from-master)=
-## Install from master
+# Install from master
 
 If you want the cutting-edge version of *Argilla* with the latest changes and experimental features, follow the steps below in your terminal.
 **Be aware that this version might be unstable!**

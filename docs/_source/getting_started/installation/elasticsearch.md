@@ -1,6 +1,7 @@
 
-# Elasticsearch
+# Elasticsearch Configuration
 
+This section explains advanced configurations to use Argilla with Elasticsearch instances or clusters.
 (configure-elasticsearch-role-users)=
 ## Configure Elasticsearch role/users
 
@@ -26,7 +27,7 @@ Below you can see a screenshot for setting up a new *argilla* Role and its permi
 ![Argilla Role and permissions in ES](https://user-images.githubusercontent.com/2518789/142883104-f4f20cf0-34a0-47ff-8ee3-ab9f4644271c.png)
 
 
-### Change elasticsearch index analyzers
+## Change elasticsearch index analyzers
 
 By default, for indexing text fields, Argilla uses the `standard` analyzer for general search and the `whitespace`
 analyzer for more exact queries (required by certain rules in the weak supervision module). If those analyzers

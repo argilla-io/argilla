@@ -1,8 +1,10 @@
 
 # Cloud Providers
 
+This guide explains how to deploy the Argilla Server on different cloud providers.
+
 (deploy-to-aws-instance-using-docker-machine)=
-## Deploying to AWS
+## Amazon Web Services (AWS)
 
 ### Setup an AWS profile
 
@@ -74,4 +76,16 @@ docker-compose up -d
 ### Accessing Argilla
 
 In our case http://52.213.178.33
+
+## Google Cloud Platform (GCP)
+
+Coming soon!
+
+> 🚒 **If you'd like support with this and/or want to contribute this gude, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+
+## Azure
+
+Coming soon!
+
+> 🚒 **If you'd like support with this and/or want to contribute this gude, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
