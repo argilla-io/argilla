@@ -29,10 +29,10 @@ export default {
 
   methods: {
     generateCodeSnippet() {
-      return `import rubrix as rb
+      return `import argilla as rg
 
-rb.log(
-  rb.TextClassificationRecord(text="my first rubrix example"),
+rg.log(
+  y rg.TextClassificationRecord(text="my first cool example"),
   name='example-dataset'
 )`;
     },
