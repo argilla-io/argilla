@@ -41,10 +41,10 @@
    :glob:
    :hidden:
 
-   reference/telemetry
    reference/python/index
-   reference/notebooks
    reference/webapp/index
+   reference/notebooks
+   reference/telemetry
 
 .. toctree::
    :maxdepth: 2
