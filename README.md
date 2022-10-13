@@ -112,7 +112,7 @@ Finally you can **launch the server**:
 python -m argilla
 
 ```
-> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you can set point the server to its URL by using [ENV variables](#)
+> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you point the server to its URL by using [ENV variables](#)
 
 
 🎉 You can now access Argilla UI pointing your browser at http://localhost:6900/.
