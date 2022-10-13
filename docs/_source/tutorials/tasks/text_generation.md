@@ -1,8 +1,4 @@
 
 ## 👨🏽💬 Text Generation
 
-````{grid} 1 1 2 2
-:class-container: tuto-section-6
-```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
-```
-````
+Sorry, we don´t have any TextGeneration tutorials yet, but we won`t leave you hanging. Feel free to ask david@argilla.io for help.

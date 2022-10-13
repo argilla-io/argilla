@@ -140,7 +140,8 @@ class Api:
             >>> ar.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
 
         """
-        api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+        api_url = api_url or os.getenv(
+            "ARGILLA_API_URL", "http://localhost:6900")
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
         api_key = api_key or os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
@@ -227,7 +228,8 @@ class Api:
         datasets_api.copy_dataset(
             client=self._client,
             name=dataset,
-            json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
+            json_body=CopyDatasetRequest(
+                name=name_of_copy, target_workspace=workspace),
         )
 
     def delete(self, name: str) -> None:
@@ -336,7 +338,8 @@ class Api:
         metadata = metadata or {}
 
         if not name:
-            raise InputValueError("Empty dataset name has been passed as argument.")
+            raise InputValueError(
+                "Empty dataset name has been passed as argument.")
 
         if not re.match(DATASET_NAME_REGEX_PATTERN, name):
             raise InputValueError(
@@ -358,7 +361,8 @@ class Api:
         try:
             record_type = type(records[0])
         except IndexError:
-            raise InputValueError("Empty record list has been passed as argument.")
+            raise InputValueError(
+                "Empty record list has been passed as argument.")
 
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
@@ -377,7 +381,7 @@ class Api:
         processed, failed = 0, 0
         progress_bar = tqdm(total=len(records), disable=not verbose)
         for i in range(0, len(records), chunk_size):
-            chunk = records[i : i + chunk_size]
+            chunk = records[i: i + chunk_size]
 
             response = await async_bulk(
                 client=self._client,
@@ -543,7 +547,7 @@ class Api:
             get_dataset_data, request_class, dataset_class = task_config[task]
         except KeyError:
             raise ValueError(
-                f"Load method not supported for the '{task}' task. Supported tasks: "
+                f"Load method not supported for the '{task}' task. Supported Tasks: "
                 f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
             )
         response = get_dataset_data(
@@ -654,7 +658,8 @@ def api_wrapper(api_method: Callable):
 
         sign = signature(api_method)
         wrapped_func.__signature__ = sign.replace(
-            parameters=[val for key, val in sign.parameters.items() if key != "self"]
+            parameters=[val for key, val in sign.parameters.items()
+                        if key != "self"]
         )
         return wrapped_func
 
