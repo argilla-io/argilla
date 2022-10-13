@@ -1,3 +1,5 @@
+# TODO: This license is not consistent with license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #  Copyright 2021-present, the Argilla S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,9 +256,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = (
-    "https://raw.githubusercontent.com/argilla/argilla/master/docs/images/og_argilla.png"
-)
+ogp_image = "https://raw.githubusercontent.com/argilla/argilla/master/docs/images/og_argilla.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',
