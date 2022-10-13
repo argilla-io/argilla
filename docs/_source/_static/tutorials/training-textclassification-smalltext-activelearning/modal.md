@@ -1,6 +1,6 @@
 ```{grid-item-card} 👂 Active learning for text classification with small-text
 :img-top: /_static/tutorials/training-textclassification-smalltext-activelearning/screenshot.png
-:link: /tutorials/notebooks/training-textclassification-smalltext-activelearning.html
+:link: ../../tutorials/notebooks/training-textclassification-smalltext-activelearning.html
 MLOps Steps: Training \
 NLP Tasks: TextClassification \
 Libraries: small-text \
