@@ -16,6 +16,7 @@ from typing import Type
 
 from fastapi import APIRouter, Body, Depends, Security
 
+from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import (
     DATASET_NAME_PATH_PARAM,
     CommonTaskHandlerDependencies,
@@ -38,9 +39,12 @@ def configure_router(router: APIRouter):
 
     task = TaskType.text_classification
     base_endpoint = f"/{task}/{{name}}/settings"
+    new_base_endpoint = f"/{{name}}/{task}/settings"
 
-    @router.get(
+    @deprecate_endpoint(
         path=base_endpoint,
+        new_path=new_base_endpoint,
+        router_method=router.get,
         name=f"get_dataset_settings_for_{task}",
         operation_id=f"get_dataset_settings_for_{task}",
         description=f"Get the {task} dataset settings",
@@ -66,8 +70,10 @@ def configure_router(router: APIRouter):
         )
         return TextClassificationSettings.parse_obj(settings)
 
-    @router.put(
+    @deprecate_endpoint(
         path=base_endpoint,
+        new_path=new_base_endpoint,
+        router_method=router.put,
         name=f"save_dataset_settings_for_{task}",
         operation_id=f"save_dataset_settings_for_{task}",
         description=f"Save the {task} dataset settings",
@@ -101,8 +107,10 @@ def configure_router(router: APIRouter):
         )
         return TextClassificationSettings.parse_obj(settings)
 
-    @router.delete(
+    @deprecate_endpoint(
         path=base_endpoint,
+        new_path=new_base_endpoint,
+        router_method=router.delete,
         operation_id=f"delete_{task}_settings",
         name=f"delete_{task}_settings",
         description=f"Delete {task} dataset settings",

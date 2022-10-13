@@ -19,6 +19,7 @@ from typing import Iterable, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from fastapi.responses import StreamingResponse
 
+from argilla.server.apis.v0.handlers import metrics
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
@@ -48,203 +49,211 @@ from argilla.server.services.tasks.text2text.models import (
     ServiceText2TextRecord,
 )
 
-TASK_TYPE = TaskType.text2text
-BASE_ENDPOINT = "/{name}/" + TASK_TYPE
 
-TasksFactory.register_task(
-    task_type=TaskType.text2text,
-    dataset_class=Text2TextDataset,
-    query_request=Text2TextQuery,
-    record_class=ServiceText2TextRecord,
-    metrics=Text2TextMetrics,
-)
+def configure_router():
+    task_type = TaskType.text2text
+    base_endpoint = "/{name}/" + task_type
 
+    TasksFactory.register_task(
+        task_type=TaskType.text2text,
+        dataset_class=Text2TextDataset,
+        query_request=Text2TextQuery,
+        record_class=ServiceText2TextRecord,
+        metrics=Text2TextMetrics,
+    )
 
-router = APIRouter(tags=[TASK_TYPE], prefix="/datasets")
+    router = APIRouter(tags=[task_type], prefix="/datasets")
 
+    @router.post(
+        path=f"{base_endpoint}:bulk",
+        operation_id="bulk_records",
+        response_model=BulkResponse,
+        response_model_exclude_none=True,
+    )
+    async def bulk_records(
+        name: str,
+        bulk: Text2TextBulkRequest,
+        common_params: CommonTaskHandlerDependencies = Depends(),
+        service: Text2TextService = Depends(Text2TextService.get_instance),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        current_user: User = Security(auth.get_user, scopes=[]),
+    ) -> BulkResponse:
 
-@router.post(
-    BASE_ENDPOINT + ":bulk",
-    operation_id="bulk_records",
-    response_model=BulkResponse,
-    response_model_exclude_none=True,
-)
-async def bulk_records(
-    name: str,
-    bulk: Text2TextBulkRequest,
-    common_params: CommonTaskHandlerDependencies = Depends(),
-    service: Text2TextService = Depends(Text2TextService.get_instance),
-    datasets: DatasetsService = Depends(DatasetsService.get_instance),
-    current_user: User = Security(auth.get_user, scopes=[]),
-) -> BulkResponse:
+        task = task_type
+        owner = current_user.check_workspace(common_params.workspace)
+        try:
+            dataset = datasets.find_by_name(
+                current_user,
+                name=name,
+                task=task,
+                workspace=owner,
+                as_dataset_class=TasksFactory.get_task_dataset(task_type),
+            )
+            datasets.update(
+                user=current_user,
+                dataset=dataset,
+                tags=bulk.tags,
+                metadata=bulk.metadata,
+            )
+        except EntityNotFoundError:
+            dataset_class = TasksFactory.get_task_dataset(task)
+            dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
+            dataset.owner = owner
+            datasets.create_dataset(user=current_user, dataset=dataset)
 
-    task = TASK_TYPE
-    owner = current_user.check_workspace(common_params.workspace)
-    try:
-        dataset = datasets.find_by_name(
-            current_user,
-            name=name,
-            task=task,
-            workspace=owner,
-            as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
-        )
-        datasets.update(
-            user=current_user,
+        result = await service.add_records(
             dataset=dataset,
-            tags=bulk.tags,
-            metadata=bulk.metadata,
+            records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
         )
-    except EntityNotFoundError:
-        dataset_class = TasksFactory.get_task_dataset(task)
-        dataset = dataset_class.parse_obj({**bulk.dict(), "name": name})
-        dataset.owner = owner
-        datasets.create_dataset(user=current_user, dataset=dataset)
+        return BulkResponse(
+            dataset=name,
+            processed=result.processed,
+            failed=result.failed,
+        )
 
-    result = await service.add_records(
-        dataset=dataset,
-        records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
+    @router.post(
+        path=f"{base_endpoint}:search",
+        response_model=Text2TextSearchResults,
+        response_model_exclude_none=True,
+        operation_id="search_records",
     )
-    return BulkResponse(
-        dataset=name,
-        processed=result.processed,
-        failed=result.failed,
-    )
-
-
-@router.post(
-    BASE_ENDPOINT + ":search",
-    response_model=Text2TextSearchResults,
-    response_model_exclude_none=True,
-    operation_id="search_records",
-)
-def search_records(
-    name: str,
-    search: Text2TextSearchRequest = None,
-    common_params: CommonTaskHandlerDependencies = Depends(),
-    include_metrics: bool = Query(
-        False, description="If enabled, return related record metrics"
-    ),
-    pagination: RequestPagination = Depends(),
-    service: Text2TextService = Depends(Text2TextService.get_instance),
-    datasets: DatasetsService = Depends(DatasetsService.get_instance),
-    current_user: User = Security(auth.get_user, scopes=[]),
-) -> Text2TextSearchResults:
-
-    search = search or Text2TextSearchRequest()
-    query = search.query or Text2TextQuery()
-    dataset = datasets.find_by_name(
-        user=current_user,
-        name=name,
-        task=TASK_TYPE,
-        workspace=common_params.workspace,
-        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
-    )
-    result = service.search(
-        dataset=dataset,
-        query=ServiceText2TextQuery.parse_obj(query),
-        sort_by=search.sort,
-        record_from=pagination.from_,
-        size=pagination.limit,
-        exclude_metrics=not include_metrics,
-    )
-
-    return Text2TextSearchResults(
-        total=result.total,
-        records=[Text2TextRecord.parse_obj(r) for r in result.records],
-        aggregations=Text2TextSearchAggregations.parse_obj(result.metrics)
-        if result.metrics
-        else None,
-    )
-
-
-def scan_data_response(
-    data_stream: Iterable[Text2TextRecord],
-    chunk_size: int = 1000,
-    limit: Optional[int] = None,
-) -> StreamingResponseWithErrorHandling:
-    """Generate an textual stream data response for a dataset scan"""
-
-    async def stream_generator(stream):
-        """Converts dataset scan into a text stream"""
-
-        def grouper(n, iterable, fillvalue=None):
-            args = [iter(iterable)] * n
-            return itertools.zip_longest(fillvalue=fillvalue, *args)
-
-        if limit:
-            stream = takeuntil(stream, limit=limit)
-
-        for batch in grouper(
-            n=chunk_size,
-            iterable=stream,
-        ):
-            filtered_records = filter(lambda r: r is not None, batch)
-            yield "\n".join(
-                map(
-                    lambda r: r.json(by_alias=True, exclude_none=True), filtered_records
-                )
-            ) + "\n"
-
-    return StreamingResponseWithErrorHandling(
-        stream_generator(data_stream), media_type="application/json"
-    )
-
-
-@router.post(
-    BASE_ENDPOINT + "/data",
-    operation_id="stream_data",
-)
-async def stream_data(
-    name: str,
-    query: Optional[Text2TextQuery] = None,
-    common_params: CommonTaskHandlerDependencies = Depends(),
-    limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
-    service: Text2TextService = Depends(Text2TextService.get_instance),
-    datasets: DatasetsService = Depends(DatasetsService.get_instance),
-    current_user: User = Security(auth.get_user, scopes=[]),
-    id_from: Optional[str] = None,
-) -> StreamingResponse:
-    """
-        Creates a data stream over dataset records
-
-    Parameters
-    ----------
-    name
-        The dataset name
-    query:
-        The stream data query
-    common_params:
-        The task common query params
-    limit:
-        The load number of records limit. Optional
-    service:
-        The dataset records service
-    datasets:
-        The datasets service
-    current_user:
-        Request user
-    id_from:
-        If provided, read the samples after this record ID
-
-    """
-    query = query or Text2TextQuery()
-    dataset = datasets.find_by_name(
-        user=current_user,
-        name=name,
-        task=TASK_TYPE,
-        workspace=common_params.workspace,
-        as_dataset_class=TasksFactory.get_task_dataset(TASK_TYPE),
-    )
-    data_stream = map(
-        Text2TextRecord.parse_obj,
-        service.read_dataset(
-            dataset,
-            query=ServiceText2TextQuery.parse_obj(query),
-            id_from=id_from,
-            limit=limit,
+    def search_records(
+        name: str,
+        search: Text2TextSearchRequest = None,
+        common_params: CommonTaskHandlerDependencies = Depends(),
+        include_metrics: bool = Query(
+            False, description="If enabled, return related record metrics"
         ),
+        pagination: RequestPagination = Depends(),
+        service: Text2TextService = Depends(Text2TextService.get_instance),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        current_user: User = Security(auth.get_user, scopes=[]),
+    ) -> Text2TextSearchResults:
+
+        search = search or Text2TextSearchRequest()
+        query = search.query or Text2TextQuery()
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task_type,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+        )
+        result = service.search(
+            dataset=dataset,
+            query=ServiceText2TextQuery.parse_obj(query),
+            sort_by=search.sort,
+            record_from=pagination.from_,
+            size=pagination.limit,
+            exclude_metrics=not include_metrics,
+        )
+
+        return Text2TextSearchResults(
+            total=result.total,
+            records=[Text2TextRecord.parse_obj(r) for r in result.records],
+            aggregations=Text2TextSearchAggregations.parse_obj(result.metrics)
+            if result.metrics
+            else None,
+        )
+
+    def scan_data_response(
+        data_stream: Iterable[Text2TextRecord],
+        chunk_size: int = 1000,
+        limit: Optional[int] = None,
+    ) -> StreamingResponseWithErrorHandling:
+        """Generate an textual stream data response for a dataset scan"""
+
+        async def stream_generator(stream):
+            """Converts dataset scan into a text stream"""
+
+            def grouper(n, iterable, fillvalue=None):
+                args = [iter(iterable)] * n
+                return itertools.zip_longest(fillvalue=fillvalue, *args)
+
+            if limit:
+                stream = takeuntil(stream, limit=limit)
+
+            for batch in grouper(
+                n=chunk_size,
+                iterable=stream,
+            ):
+                filtered_records = filter(lambda r: r is not None, batch)
+                yield "\n".join(
+                    map(
+                        lambda r: r.json(by_alias=True, exclude_none=True),
+                        filtered_records,
+                    )
+                ) + "\n"
+
+        return StreamingResponseWithErrorHandling(
+            stream_generator(data_stream), media_type="application/json"
+        )
+
+    @router.post(
+        path=f"{base_endpoint}/data",
+        operation_id="stream_data",
     )
-    return scan_data_response(
-        data_stream=data_stream,
-        limit=limit,
+    async def stream_data(
+        name: str,
+        query: Optional[Text2TextQuery] = None,
+        common_params: CommonTaskHandlerDependencies = Depends(),
+        limit: Optional[int] = Query(None, description="Limit loaded records", gt=0),
+        service: Text2TextService = Depends(Text2TextService.get_instance),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        current_user: User = Security(auth.get_user, scopes=[]),
+        id_from: Optional[str] = None,
+    ) -> StreamingResponse:
+        """
+            Creates a data stream over dataset records
+
+        Parameters
+        ----------
+        name
+            The dataset name
+        query:
+            The stream data query
+        common_params:
+            The task common query params
+        limit:
+            The load number of records limit. Optional
+        service:
+            The dataset records service
+        datasets:
+            The datasets service
+        current_user:
+            Request user
+        id_from:
+            If provided, read the samples after this record ID
+
+        """
+        query = query or Text2TextQuery()
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task_type,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task_type),
+        )
+        data_stream = map(
+            Text2TextRecord.parse_obj,
+            service.read_dataset(
+                dataset,
+                query=ServiceText2TextQuery.parse_obj(query),
+                id_from=id_from,
+                limit=limit,
+            ),
+        )
+        return scan_data_response(
+            data_stream=data_stream,
+            limit=limit,
+        )
+
+    metrics.configure_router(
+        router,
+        cfg=TasksFactory.get_task_by_task_type(task_type),
     )
+
+    return router
+
+
+router = configure_router()

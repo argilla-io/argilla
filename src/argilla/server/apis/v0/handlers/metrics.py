@@ -19,11 +19,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from pydantic import BaseModel, Field
 
-from argilla.server.apis.v0.handlers import (
-    text2text,
-    text_classification,
-    token_classification,
-)
+from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.commons.config import TaskConfig, TasksFactory
 from argilla.server.security import auth
@@ -56,13 +52,15 @@ class MetricSummaryParams:
     )
 
 
-def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
+def configure_router(router: APIRouter, cfg: TaskConfig):
 
-    # TODO(@frascuchon): Use new api endpoint (/datasets/{name}/{task}/...
     base_metrics_endpoint = f"/{cfg.task}/{{name}}/metrics"
+    new_base_metrics_endpoint = f"/{{name}}/{cfg.task}/metrics"
 
-    @router.get(
-        base_metrics_endpoint,
+    @deprecate_endpoint(
+        path=base_metrics_endpoint,
+        new_path=new_base_metrics_endpoint,
+        router_method=router.get,
         operation_id=f"get_dataset_metrics",
         name="get_dataset_metrics",
     )
@@ -85,8 +83,10 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
 
         return [MetricInfo.parse_obj(metric) for metric in metrics]
 
-    @router.post(
-        base_metrics_endpoint + "/{metric}:summary",
+    @deprecate_endpoint(
+        path=base_metrics_endpoint + "/{metric}:summary",
+        new_path=new_base_metrics_endpoint + "/{metric}:summary",
+        router_method=router.post,
         operation_id=f"metric_summary",
         name="metric_summary",
     )
@@ -121,10 +121,6 @@ def configure_metrics_endpoints(router: APIRouter, cfg: TaskConfig):
         )
 
 
-router = APIRouter()
-
-for task_api in [text_classification, token_classification, text2text]:
-    cfg = TasksFactory.get_task_by_task_type(task_api.TASK_TYPE)
-    if cfg:
-        configure_metrics_endpoints(task_api.router, cfg)
-    router.include_router(task_api.router)
+router = APIRouter(tags=["Metrics"], prefix="/datasets")
+for cfg in TasksFactory.get_all_configs():
+    configure_router(router, cfg)
