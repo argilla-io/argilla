@@ -89,7 +89,7 @@ class DatasetRecordsDAO:
         now = datetime.datetime.utcnow()
         documents = []
         metadata_values = {}
-        mapping = self._es.get_schema(dataset.id)
+        mapping = self._es.get_schema(id=dataset.id)
 
         exclude_fields = [
             name
@@ -106,7 +106,7 @@ class DatasetRecordsDAO:
             )
 
         self._es.create_dataset_index(
-            dataset.id,
+            id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
         )
