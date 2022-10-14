@@ -351,7 +351,7 @@ class ElasticsearchBackend(LoggingMixin):
         """Deletes an index template"""
         with backend_error_handler(index=""):
 
-            if self.__client__.indices.exists_index_template(index_template):
+            if self.__client__.indices.exists_index_template(name=index_template):
                 self.__client__.indices.delete_template(
                     name=index_template, ignore=[400, 404]
                 )
@@ -363,7 +363,7 @@ class ElasticsearchBackend(LoggingMixin):
                 ignore_errors = [400, 404]
                 if raises_error:
                     ignore_errors = []
-                self.__client__.indices.delete(index, ignore=ignore_errors)
+                self.__client__.indices.delete(index=index, ignore=ignore_errors)
 
     def _add_document(self, index: str, doc_id: str, document: Dict[str, Any]):
         """
@@ -461,7 +461,7 @@ class ElasticsearchBackend(LoggingMixin):
 
         with backend_error_handler(index=index):
             success, failed = es_bulk(
-                self.__client__,
+                client=self.__client__,
                 index=index,
                 actions=map(map_doc_2_action, documents),
                 raise_on_error=True,
@@ -1009,7 +1009,7 @@ class ElasticsearchBackend(LoggingMixin):
                     source_index=source_index,
                     target_index=target_index,
                 )
-                for doc in scan(self.__client__, index=source_index):
+                for doc in scan(client=self.__client__, index=source_index):
                     dataset_id = doc["_id"]
                     index = settings.old_dataset_records_index_name.format(dataset_id)
                     alias = dataset_records_index(dataset_id=dataset_id)
