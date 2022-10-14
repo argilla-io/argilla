@@ -25,7 +25,11 @@ from fastapi.security import (
 from jose import JWTError, jwt
 
 from argilla.server.errors import InactiveUserError, UnauthorizedError
-from argilla.server.security.auth_provider.base import AuthProvider, api_key_header
+from argilla.server.security.auth_provider.base import (
+    AuthProvider,
+    api_key_header,
+    old_api_key_header,
+)
 from argilla.server.security.auth_provider.local.users.service import UsersService
 from argilla.server.security.model import Token, User
 
@@ -135,6 +139,7 @@ class LocalAuthProvider(AuthProvider):
         self,
         security_scopes: SecurityScopes,
         api_key: Optional[str] = Depends(api_key_header),
+        old_api_key: Optional[str] = Depends(old_api_key_header),
         token: Optional[str] = Depends(_oauth2_scheme),
     ) -> User:
         """
@@ -144,6 +149,8 @@ class LocalAuthProvider(AuthProvider):
         ----------
         api_key:
             The apikey header info if provided
+        old_api_key:
+            Same as api key but for old clients
         token:
             The login token.
             fastapi injects this param from request
@@ -151,7 +158,9 @@ class LocalAuthProvider(AuthProvider):
         -------
 
         """
-        user = await self._find_user_by_api_key(api_key)
+        user = await self._find_user_by_api_key(
+            api_key
+        ) or await self._find_user_by_api_key(old_api_key)
         if user:
             return user
         if token:
