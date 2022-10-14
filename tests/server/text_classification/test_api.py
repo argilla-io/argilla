@@ -363,10 +363,10 @@ def test_some_sort_by(mocked_client):
         },
     )
 
-    assert response.status_code == 400
-    assert response.json() == {
+    assert response.status_code == 500
+    expected_response_property_name_2_value = {
         "detail": {
-            "code": "argilla.api.errors::BadRequestError",
+            "code": "argilla.api.errors::GenericServerError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
                 "are: ['id', 'metadata', 'score', "
@@ -377,7 +377,14 @@ def test_some_sort_by(mocked_client):
             },
         }
     }
-
+    assert (
+        response.json()["detail"]["code"]
+        == expected_response_property_name_2_value["detail"]["code"]
+    )
+    assert (
+        response.json()["detail"]["params"]["message"]
+        == expected_response_property_name_2_value["detail"]["params"]["message"]
+    )
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:search?from=0&limit=10",
         json={

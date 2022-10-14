@@ -195,6 +195,8 @@ def test_open_and_close_dataset(mocked_client):
 
     assert mocked_client.put(f"/api/datasets/{dataset}:close").status_code == 200
 
+    print("Done")
+
     response = mocked_client.post(f"/api/datasets/{dataset}/TextClassification:search")
     assert response.status_code == 400
     assert response.json() == {
@@ -203,6 +205,7 @@ def test_open_and_close_dataset(mocked_client):
             "params": {"name": dataset},
         }
     }
+    print("Done 2")
 
     assert mocked_client.put(f"/api/datasets/{dataset}:open").status_code == 200
     assert (
