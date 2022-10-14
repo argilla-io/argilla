@@ -33,6 +33,7 @@ venv
 
 # Sphinx documentation
 docs/_source/_build/
+docs/_build/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
