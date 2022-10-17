@@ -1,4 +1,4 @@
-# Migrating to argilla from rubrix
+# Migration from Rubrix to Argilla
 
 If you have already running a Rubrix server and want to upgrade to the new Argilla server, this guide will help you understand and transition into Argilla.
 
