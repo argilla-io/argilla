@@ -17,6 +17,7 @@ import warnings
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from elasticsearch import (
+    ApiError,
     Elasticsearch,
     ElasticsearchWarning,
     NotFoundError,
@@ -109,7 +110,7 @@ class backend_error_handler:
             raise GenericSearchError(exception_value) from exception_value
         except NotFoundError as ex:
             raise IndexNotFoundError(ex)
-        except Exception as ex:
+        except ApiError as ex:
             raise GenericSearchError(ex)
 
     def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:

@@ -363,10 +363,10 @@ def test_some_sort_by(mocked_client):
         },
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     expected_response_property_name_2_value = {
         "detail": {
-            "code": "argilla.api.errors::GenericServerError",
+            "code": "argilla.api.errors::BadRequestError",
             "params": {
                 "message": "Wrong sort id wrong_field. Valid values "
                 "are: ['id', 'metadata', 'score', "
