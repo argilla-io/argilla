@@ -16,11 +16,12 @@
   -->
 
 <template>
-  <results-list
-    :dataset="dataset"
-    :metadata-item="selectedMetadataRecord"
-    @onCloseMetadata="onCloseMetadata"
-  >
+  <results-list :dataset="dataset">
+    <template slot="results-header">
+      <!-- <rule-definition :dataset="dataset" v-if="isLabellingRules" /> -->
+      <RuleDefinitionToken :dataset="dataset" v-if="isLabellingRules">
+      </RuleDefinitionToken>
+    </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
         :dataset="dataset"
@@ -29,7 +30,10 @@
     </template>
   </results-list>
 </template>
+
 <script>
+import RuleModel from "../../../models/token-classification/Rule.modelTokenClassification";
+import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
 export default {
   props: {
     dataset: {
@@ -37,14 +41,64 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      selectedMetadataRecord: undefined,
-    };
+  components: {
+    RuleDefinitionToken,
+  },
+  async mounted() {
+    const { name } = this.dataset;
+    //call computed rules
+    const rules = await this.fetchTokenClassificationRules(name);
+
+    rules.forEach((rule) => {
+      this.fetchRuleMetricsByRuleAndInsertInDatabase(name, rule);
+    });
+  },
+  computed: {
+    isLabellingRules() {
+      return this.dataset.viewSettings.viewMode === "labelling-rules";
+    },
   },
   methods: {
-    onCloseMetadata() {
-      this.selectedMetadataRecord = undefined;
+    async fetchRuleMetricsByRuleAndInsertInDatabase(name, rule) {
+      const rulesMetrics =
+        await this.fetchTokenClassificationRulesMetricsByRule(name, rule.query);
+      console.log(rulesMetrics);
+
+      RuleModel.insertOrUpdate({
+        data: {
+          dataset_id: this.dataset.$id,
+          ...rule,
+          rule_metrics: rulesMetrics,
+        },
+      });
+    },
+    async fetchTokenClassificationRules(name) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/TokenClassification/labeling/rules`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rules");
+        }
+      } catch (err) {
+        console.log("Error: ", error);
+      }
+    },
+    async fetchTokenClassificationRulesMetricsByRule(name, query) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}:summary`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rule metrics");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
     },
   },
 };
