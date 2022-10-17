@@ -46,7 +46,7 @@ For indices containing the dataset records, the new name convention is `ar.datas
 
 ## Enable migration process
 
-By default, the new Argilla server won't check if datasets from a previous Rubrix instance exists. 
+By default, the new Argilla server won't check if datasets from a previous Rubrix instance exists.
 
 If you want the new Argilla Server to detect previous Rubrix datasets and make them accessible into your Argilla Server instance you can set the `ARGILLA_ENABLE_MIGRATION` like this before starting the Argilla server:
 
@@ -59,7 +59,7 @@ will copy the info into the new `ar.datasets` index.
 
 Then, for each old rubrix index, will create an alias with new new name convention format.
 
-This will allow you to work with previous Rubrix datasets from your new Argilla Server without duplicating information and still see the changes from your previous Rubrix Server. 
+This will allow you to work with previous Rubrix datasets from your new Argilla Server without duplicating information and still see the changes from your previous Rubrix Server.
 
 This migration switch can help you with a more gradual transition into Argilla.
 
