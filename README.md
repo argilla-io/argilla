@@ -43,6 +43,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
+<a href="#">Rubrix migration</a> | </span>
 <a href="#FAQ">FAQ</a>
 </p>
 </h3>
@@ -126,73 +127,6 @@ To upload your first dataset you can run from your terminal:
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
-
-## Upgrading and migration steps
-
-If you have already running a rubrix server and you want to upgrade to the new Argilla server, you need to know about
-the changes
-
-### Python module and command
-
-The module now is called `argilla` instead of `rubrix`, but the rest of code remains fully compatible, so
-if you have to updgrade some codebase, you should just replace the line
-
-`import rubrix...`
-
-with the new module name
-
-`import argilla...`
-
-
-Equivalent to launch the server:
-
-````bash
-python -m argilla
-````
-
-instead of
-````bash
-python -m rubrix
-````
-
-### Environment variables
-
-All the environment variables are prefixed form `RUBRIX_` to `ARGILLA_` for common used variables.
-the `ELASTICSEARCH` and other non-prefixed variables are still available, but they will be removed in a future.
-You should use `ARGILLA_` version instead.
-
-The better way to configure a new argilla instance from Rubrix is just to duplicate all env vars for
-both, rubrix and argilla instances. This will simplify a version rollback if needed.
-
-### New elasticsearch index naming conventions
-
-Argilla also introduces a new name convention for the stored indices in elasticsearch.
-
-For index containing all defined datasets, the new naming is `ar.datasets`, instead of `.rubrix.datasets-v0`
-
-For indices containing the dataset records, the new name convention is `ar.dataset.<dataset_id>`, instead of
-`.rubrix.dataset.<datset_id>.records-v0`
-
-### Enable migration process
-
-As default, the new argilla server won't check if exists data from a rubrix instance. You need to enable
-on server startup. This can be done by setting the `ARGILLA_ENABLE_MIGRATION` environment variable.
-
-```bash
-ARGILLA_ENABLE_MIGRATION=1 python -m argilla
-```
-
-This will fetch info contained for the rubrix installation in the `.rubrix.datasetsw-v0` index and
-will copy the info in the new `ar.datasets` index.
-
-Then, for each old rubrix index, will create an alias with new new name convention format.
-
-This will allow to work with old datasets without duplicate information and also seeing the changes
-from the rubrix instances.
-
->:warning: New datasets created from argilla won't be visibles from the old rubrix instance.
-
-
 ## Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -209,8 +143,6 @@ from the rubrix instances.
 -  **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 ## FAQ
-
-
 
 ### What is Argilla?
 Argilla is an open-source MLOps tool for building and managing data for Natural Language Processing.
