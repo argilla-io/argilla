@@ -25,6 +25,8 @@ import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
+import Rule from "@/models/token-classification/Rule.modelTokenClassification";
+import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenClassification";
 
 import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
@@ -45,5 +47,7 @@ database.register(ObservationDataset, datasets);
 database.register(Text2TextDataset);
 database.register(TextClassificationDataset, text_classification);
 database.register(TokenClassificationDataset, token_classification);
+database.register(Rule);
+database.register(RulesMetric);
 
 export default database;
