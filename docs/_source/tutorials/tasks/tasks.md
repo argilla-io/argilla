@@ -1,6 +1,6 @@
 #  NLP Tasks
 
-```{include} /_common/techniques_points.md
+```{include} /_common/tasks_points.md
 ```
 
 ```{toctree}
