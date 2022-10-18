@@ -61,7 +61,11 @@ async function _getOrFetchDataset({ workspace, name }) {
    * Find locally a dataset by its name and fetch from backend if not found
    */
 
-  let ds = ObservationDataset.find([workspace, name]);
+  // let ds = ObservationDataset.find([workspace, name]);
+  let ds = ObservationDataset.query()
+    .where("owner", workspace)
+    .where("name", name)
+    .first();
   if (ds !== null) {
     return ds;
   }
@@ -317,7 +321,12 @@ async function _search({ dataset, query, sort, size }) {
   });
 
   const entity = dataset.getTaskDatasetClass();
-  return entity.query().withAllRecursive().whereId(dataset.id).first();
+  return entity
+    .query()
+    .withAllRecursive()
+    .where("owner", dataset.owner)
+    .where("name", dataset.name)
+    .first();
 }
 
 async function _updateAnnotationProgress({ id, total, aggregations }) {
@@ -429,7 +438,11 @@ async function _updatePagination({ id, size, page }) {
 const getters = {
   findByName: () => (name) => {
     const workspace = currentWorkspace($nuxt.$route);
-    const ds = ObservationDataset.find([workspace, name]);
+    // const ds = ObservationDataset.find([workspace, name]);
+    const ds = ObservationDataset.query()
+      .where("owner", workspace)
+      .where("name", name)
+      .first();
     if (ds === null) {
       throw Error("Not found dataset named " + name);
     }
