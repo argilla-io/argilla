@@ -43,7 +43,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
-<a href="#">Rubrix migration</a> | </span>
+<a href="docs/migration-rubrix.md">Rubrix migration</a> | </span>
 <a href="#FAQ">FAQ</a>
 </p>
 </h3>
