@@ -2,7 +2,7 @@
 
 Argilla, is a free and open-source tool to explore, annotate, and monitor data for NLP projects.
 
-If you are new to Argilla, check out the ⭐ [Github repository](https://github.com/argilla/argilla).
+If you are new to Argilla, check out the ⭐ [Github repository](https://github.com/recognai/rubrix).
 
 If you have not installed and launched Argilla yet, check the [Setup and Installation guide](../../getting_started/setup&installation.rst).
 

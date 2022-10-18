@@ -1,0 +1,4 @@
+- [NLP Tasks](./tasks/tasks): the tasks that Argilla can handle.
+    - [📕📗 TextClassification](./tasks/text_classification)
+    - [🈴🈯️ TokenClassification](./tasks/token_classification)
+    - [👨🏽💬 TextGeneration](./tasks/text_generation)

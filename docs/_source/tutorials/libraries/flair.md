@@ -1,11 +1,11 @@
 # Flair
 
-These tutorials show you how Argilla can be used in combination with FastAPI.
-FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
+These tutorials show you how Argilla can be used in combination with Flair.
+A very simple framework for state-of-the-art NLP. Developed by Humboldt University of Berlin and friends.
 
 ````{grid} 1 1 2 2
 :class-container: tuto-section-6
-```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
+```{include} /_static/tutorials/labelling-tokenclassification-flair-fewshot/modal.md
 ```
 ````
 

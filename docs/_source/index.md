@@ -52,9 +52,9 @@
    :caption: Community
    :hidden:
 
-   Slack <https://join.slack.com/t/argillaworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
-   Github <https://github.com/argilla/argilla>
-   Discussion forum <https://github.com/argilla/argilla/discussions>
+   Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
+   Github <https://github.com/recognai/rubrix>
+   Discussion forum <https://github.com/recognai/rubrix/discussions>
    community/developer_docs
 
 :::

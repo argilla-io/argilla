@@ -6,19 +6,7 @@ These tutorials show you can use your favorite packages with Argilla.
 ````{grid} 1 1 2 2
 :class-container: tuto-section-6
 
-
-```{grid-item-card} FastAPI
-:img-top: /_static/images/libraries/fastapi.png
-:link: fastapi.md
-
-FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
-```
-
-```{grid-item-card} BentoML
-:img-top: /_static/images/libraries/bentoml.png
-:link: bentoml.md
-
-BentoML: The Unified Model Serving Framework
+```{include} /_static/libraries/fastapi/modal.md
 ```
 ````
 

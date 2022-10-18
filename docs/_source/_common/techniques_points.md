@@ -1,0 +1,4 @@
+- [👨🏽‍🏫 Active Learning](./active_learning)
+- [👮 Weak Supervision](./weak_supervision)
+- [🔎 Explainability and bias](./explainability)
+- [🔫 Few-shot classification](./few_shot)

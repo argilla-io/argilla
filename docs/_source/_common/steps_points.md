@@ -1,0 +1,4 @@
+- [🏷 Labelling](./1_labelling)
+- [💪🏽 Training](./2_training)
+- [👨🏽‍💻 Deploying](./3_deploying)
+- [📊 Monitoring](./4_monitoring)

@@ -9,7 +9,7 @@ Development setup
 -----------------
 
 To set up your system for *Argilla* development, you first of all have to
-`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/argilla/argilla>`_
+`fork <https://guides.github.com/activities/forking/>`_ our `repository <https://github.com/recognai/rubrix>`_
 and clone the fork to your computer:
 
 .. code-block:: bash
@@ -22,7 +22,7 @@ To keep your fork's master branch up to date with our repo you should add it as 
 
 .. code-block:: bash
 
-    git remote add upstream https://github.com/argilla/argilla.git
+    git remote add upstream https://github.com/recognai/rubrix.git
 
 Now go ahead and create a new conda environment in which the development will take place and activate it:
 

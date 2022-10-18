@@ -28,4 +28,4 @@
 
 You can join the conversation on Slack! We are a very friendly and inclusive community:
 
-* [Slack community](https://join.slack.com/t/argillaworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+* [Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)

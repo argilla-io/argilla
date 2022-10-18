@@ -1,0 +1,3 @@
+- [📕📗 TextClassification](./text_classification)
+- [🈴🈯️ TokenClassification](./token_classification)
+- [👨🏽💬 TextGeneration](./text_generation)

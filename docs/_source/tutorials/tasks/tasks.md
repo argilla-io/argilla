@@ -1,19 +1,12 @@
 #  NLP Tasks
 
-```{include} text_classification.md
-```
-
-```{include} token_classification.md
-```
-
-```{include} text_generation.md
+```{include} /_common/techniques_points.md
 ```
 
 ```{toctree}
 :maxdepth: 1
 :hidden:
+:glob:
 
-text_classification.md
-token_classification.md
-text_generation.md
+[!_]*
 ```

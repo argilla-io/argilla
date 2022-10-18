@@ -51,4 +51,4 @@ This is performed by registering information from the following API methods:
 
 For transparency, you can inspect the source code where this is performed here (add link to the source).
 
-If you have any doubts, don't hesitate to join our [Slack channel](https://join.slack.com/t/argillaworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or open a GitHub issue. We'd be very happy to discuss about how we can improve this.
+If you have any doubts, don't hesitate to join our [Slack channel](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or open a GitHub issue. We'd be very happy to discuss about how we can improve this.

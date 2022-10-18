@@ -9,9 +9,9 @@ Argilla is built around a few simple concepts. This section clarifies what those
 ## Dataset
 
 A dataset is a collection of [records](#record) of a common type.
-You can programmatically [build datasets](../guides/datasets.ipynb) with the Argilla client and [`log`](#rb-log) them to the web app.
+You can programmatically [build datasets](../guides/features/datasets.ipynb) with the Argilla client and [`log`](#rb-log) them to the web app.
 In the web app you can [dive into your dataset](../reference/webapp/dataset.md) to explore and annotate your records.
-You can also [`load`](#rb-load) your datasets back to the client and export it into various formats, or [prepare it for training](../guides/datasets.ipynb#prepare-dataset-for-training) a model.
+You can also [`load`](#rb-load) your datasets back to the client and export it into various formats, or [prepare it for training](../guides/features/datasets.ipynb#prepare-dataset-for-training) a model.
 
 
 ## Record

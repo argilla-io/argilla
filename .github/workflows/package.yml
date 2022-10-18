@@ -166,7 +166,7 @@ jobs:
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
-          images: argilla/argilla-server
+          images: recognai/rubrix-server
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:

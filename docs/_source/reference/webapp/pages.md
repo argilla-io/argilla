@@ -2,7 +2,7 @@
 
 ## Home page
 
-![Home page](../../_static/reference/webapp/home-page.png)
+![Home page](../../_static/reference/webapp/homepage.png)
 
 The _Home page_ is mainly a **filterable, searchable and sortable list** of **datasets**.
 It is the **entry point** to the Argilla web app and is composed of the following three components.

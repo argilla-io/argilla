@@ -45,7 +45,7 @@ You can use vanilla docker to run our image of Argilla Server.
 First, pull the image from the [Docker Hub](https://hub.docker.com/):
 
 ```bash
-docker pull argilla/argilla
+docker pull recognai/rubrix
 ```
 
 Then simply run it.
@@ -54,7 +54,7 @@ By default, the Argilla server will look for your Elasticsearch endpoint at `htt
 But you can customize this by setting the `ELASTICSEARCH` environment variable.
 
 ```bash
-docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla recognai/rubrix
 ```
 
 To find running instances of the Argilla server, you can list all the running containers on your machine:

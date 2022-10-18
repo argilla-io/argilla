@@ -1,24 +1,12 @@
 # MLOps Steps
 
-
-```{include} labelling.md
-```
-
-```{include} training.md
-```
-
-```{include} deploying.md
-```
-
-```{include} monitoring.md
+```{include} /_common/steps_points.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :hidden:
+:glob:
 
-labelling.md
-training.md
-deploying.md
-monitoring.md
+[!_]*
 ```

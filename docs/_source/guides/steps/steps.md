@@ -1,17 +1,12 @@
 # MLOps Steps
 
-The steps we cover for the MLOps cycle.
-- [🏷 Labelling](/features/features.html)
-- [💪🏽 Training](/features/features.html)
-- [👨🏽‍💻 Deploying](/features/features.html)
-- [📊 Monitoring](/features/features.html)
+```{include} /_common/steps_points.md
+```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :hidden:
+:glob:
 
-labelling.md
-training.md
-deploying.md
-monitoring
+[!_]*
 ```

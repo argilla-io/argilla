@@ -1,4 +1,4 @@
-## 🫡 Weak Supervision
+## 👮 Weak Supervision
 
 These tutorials show you how to use weak supervision with Argilla.
 

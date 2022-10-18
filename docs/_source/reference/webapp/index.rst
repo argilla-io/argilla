@@ -1,4 +1,4 @@
-.. _python:
+.. _argillaui:
 
 Argilla UI
 ==========
