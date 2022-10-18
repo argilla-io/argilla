@@ -19,7 +19,7 @@
   <results-list :dataset="dataset">
     <template slot="results-header">
       <!-- <rule-definition :dataset="dataset" v-if="isLabellingRules" /> -->
-      <RuleDefinitionToken :dataset="dataset" v-if="isLabellingRules">
+      <RuleDefinitionToken :datasetId="dataset.id" v-if="isLabellingRules">
       </RuleDefinitionToken>
     </template>
     <template slot="record" slot-scope="results">
@@ -44,8 +44,9 @@ export default {
   components: {
     RuleDefinitionToken,
   },
-  async mounted() {
+  async beforeMounted() {
     const { name } = this.dataset;
+
     //call computed rules
     const rules = await this.fetchTokenClassificationRules(name);
 
@@ -62,7 +63,6 @@ export default {
     async fetchRuleMetricsByRuleAndInsertInDatabase(name, rule) {
       const rulesMetrics =
         await this.fetchTokenClassificationRulesMetricsByRule(name, rule.query);
-      console.log(rulesMetrics);
 
       RuleModel.insertOrUpdate({
         data: {
