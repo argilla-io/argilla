@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import RulesMetricsToken from "./RulesMetricsToken.component.vue";
+import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
 export default {
   name: "RuleDefinitionToken",
