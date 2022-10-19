@@ -43,6 +43,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
+<a href="docs/migration-rubrix.md">Rubrix migration</a> | </span>
 <a href="#FAQ">FAQ</a>
 </p>
 </h3>
@@ -126,7 +127,6 @@ To upload your first dataset you can run from your terminal:
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
-
 ## Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -143,8 +143,6 @@ To upload your first dataset you can run from your terminal:
 -  **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 ## FAQ
-
-
 
 ### What is Argilla?
 Argilla is an open-source MLOps tool for building and managing data for Natural Language Processing.
