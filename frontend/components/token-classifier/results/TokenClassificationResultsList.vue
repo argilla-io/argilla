@@ -18,7 +18,11 @@
 <template>
   <results-list :dataset="dataset">
     <template slot="results-header" v-if="isLabellingRules">
-      <RuleDefinitionToken :datasetId="dataset.id" />
+      <RuleDefinitionToken
+        v-if="rule && queryText"
+        :rule="rule"
+        :queryText="queryText"
+      />
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -30,8 +34,13 @@
 </template>
 
 <script>
-import RuleModel from "../../../models/token-classification/Rule.modelTokenClassification";
+import {
+  Rule as RuleModel,
+  getRuleModelPrimaryKey,
+} from "../../../models/token-classification/Rule.modelTokenClassification";
+import { TokenClassificationDataset } from "../../../models/TokenClassification";
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
+import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 export default {
   props: {
     dataset: {
@@ -53,32 +62,49 @@ export default {
     const rules = await this.fetchTokenClassificationRules(name);
 
     rules.forEach(async (rule) => {
-      await this.fetchRuleMetricsByRuleAndInsertInDatabase(name, rule);
+      await this.initRuleModelTable(name, rule);
     });
     this.rulesHaveBeenFetched = true;
   },
   computed: {
+    owner() {
+      return this.dataset.owner;
+    },
+    name() {
+      return this.dataset.name;
+    },
+    viewMode() {
+      return this.dataset.viewSettings.viewMode;
+    },
     isLabellingRules() {
-      return (
-        this.dataset.viewSettings.viewMode === "labelling-rules" &&
-        this.rulesHaveBeenFetched
-      );
+      return this.viewMode === "labelling-rules" && this.rulesHaveBeenFetched;
+    },
+    datasetPrimaryKey() {
+      const paramsToGetDatasetPrimaryKey = {
+        name: this.name,
+        owner: this.owner,
+      };
+      return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
+    },
+    queryText() {
+      return TokenClassificationDataset.find(this.datasetPrimaryKey).query.text;
+    },
+    rulePrimaryKey() {
+      const paramsToGetRulePrimaryKey = {
+        query: this.queryText,
+        name: this.name,
+        owner: this.owner,
+      };
+      return getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
+    },
+    rule() {
+      return RuleModel.query()
+        .with("rule_metrics")
+        .whereId(this.rulePrimaryKey)
+        .first();
     },
   },
   methods: {
-    async fetchRuleMetricsByRuleAndInsertInDatabase(name, rule) {
-      const rulesMetrics =
-        await this.fetchTokenClassificationRulesMetricsByRule(name, rule.query);
-
-      RuleModel.insertOrUpdate({
-        data: {
-          dataset_id: this.dataset.$id,
-          name: this.dataset.name,
-          ...rule,
-          rule_metrics: rulesMetrics,
-        },
-      });
-    },
     async fetchTokenClassificationRules(name) {
       try {
         const { data, status } = await this.$axios.get(
@@ -106,6 +132,27 @@ export default {
       } catch (error) {
         console.log("Error: ", error);
       }
+    },
+    async initRuleModelTable(name, rule) {
+      const rulesMetrics = await this.fetchRuleMetricsByRule(name, rule);
+      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+    },
+    async fetchRuleMetricsByRule(name, rule) {
+      return await this.fetchTokenClassificationRulesMetricsByRule(
+        name,
+        rule.query
+      );
+    },
+    insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
+      RuleModel.insertOrUpdate({
+        data: {
+          ...rule,
+          rule_metrics: rulesMetrics,
+          dataset_id: this.dataset.$id,
+          name: this.dataset.name,
+          owner: this.dataset.owner,
+        },
+      });
     },
   },
 };
