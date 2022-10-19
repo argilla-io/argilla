@@ -75,16 +75,13 @@ class ObservationDataset extends Model {
     }
   }
 
-  get id() {
-    return [this.owner, this.name];
-  }
-
   get visibleRecords() {
     return this.results.records.slice(0, this.viewSettings.pagination.size);
   }
 
   static fields() {
     return {
+      id: this.uid(),
       name: this.string(null),
       owner: this.string(null),
       metadata: this.attr(null),
@@ -101,4 +98,9 @@ class ObservationDataset extends Model {
   }
 }
 
-export { ObservationDataset, USER_DATA_METADATA_KEY };
+const getDatasetModelPrimaryKey = ({ owner, name }) => [owner, name];
+export {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+};

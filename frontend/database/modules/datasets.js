@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "@/models/Dataset";
+import {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+} from "@/models/Dataset";
 import { DatasetViewSettings, Pagination } from "@/models/DatasetViewSettings";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
 import { currentWorkspace, NO_WORKSPACE } from "@/models/Workspace";
@@ -61,11 +65,12 @@ async function _getOrFetchDataset({ workspace, name }) {
    * Find locally a dataset by its name and fetch from backend if not found
    */
 
-  // let ds = ObservationDataset.find([workspace, name]);
-  let ds = ObservationDataset.query()
-    .where("owner", workspace)
-    .where("name", name)
-    .first();
+  const inputForPrimaryKey = {
+    owner: workspace,
+    name,
+  };
+  const datasetPrimaryKey = getDatasetModelPrimaryKey(inputForPrimaryKey);
+  let ds = ObservationDataset.find(datasetPrimaryKey);
   if (ds !== null) {
     return ds;
   }
@@ -75,7 +80,10 @@ async function _getOrFetchDataset({ workspace, name }) {
       return data;
     },
   });
-  return await _getOrFetchDataset({ workspace, name });
+
+  ds = ObservationDataset.find(datasetPrimaryKey);
+
+  return ds;
 }
 
 async function _fetchAnnotationProgress(dataset) {
@@ -107,7 +115,6 @@ async function _loadTaskDataset(dataset) {
     sort,
     size: pagination.size,
   });
-
   const { total, aggregations } = _dataset.globalResults;
   if (total === undefined || aggregations === undefined) {
     const globalResults = await _querySearch({
@@ -121,7 +128,6 @@ async function _loadTaskDataset(dataset) {
     });
     await _refreshDatasetAggregations({ dataset: _dataset });
   }
-
   if (pagination && pagination.page > 1) {
     return await _paginate({
       dataset: _dataset,
@@ -324,8 +330,7 @@ async function _search({ dataset, query, sort, size }) {
   return entity
     .query()
     .withAllRecursive()
-    .where("owner", dataset.owner)
-    .where("name", dataset.name)
+    .whereId(getDatasetModelPrimaryKey(dataset))
     .first();
 }
 
@@ -423,7 +428,9 @@ async function _updateTaskDataset({ dataset, data }) {
       results: mergeObjectsDeep(datasetResults, dataResults),
     },
   });
-  return entity.find(dataset.id);
+
+  const datasetPrimaryKey = getDatasetModelPrimaryKey(dataset);
+  return entity.find(datasetPrimaryKey);
 }
 
 async function _updatePagination({ id, size, page }) {
@@ -438,11 +445,13 @@ async function _updatePagination({ id, size, page }) {
 const getters = {
   findByName: () => (name) => {
     const workspace = currentWorkspace($nuxt.$route);
-    // const ds = ObservationDataset.find([workspace, name]);
-    const ds = ObservationDataset.query()
-      .where("owner", workspace)
-      .where("name", name)
-      .first();
+
+    const inputForPrimaryKey = {
+      owner: workspace,
+      name,
+    };
+    const datasetPrimaryKey = getDatasetModelPrimaryKey(inputForPrimaryKey);
+    const ds = ObservationDataset.find(datasetPrimaryKey);
     if (ds === null) {
       throw Error("Not found dataset named " + name);
     }
@@ -451,7 +460,7 @@ const getters = {
       .getTaskDatasetClass()
       .query()
       .withAllRecursive()
-      .whereId(ds.id)
+      .whereId(datasetPrimaryKey)
       .first();
   },
 };
@@ -583,7 +592,6 @@ const actions = {
       total: dataset.globalResults.total,
       aggregations: dataset.globalResults.aggregations,
     });
-
     return dataset;
   },
 

@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { ObservationDataset, USER_DATA_METADATA_KEY } from "./Dataset";
+import {
+  ObservationDataset,
+  USER_DATA_METADATA_KEY,
+  getDatasetModelPrimaryKey,
+} from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
 
 class TokenClassificationRecord extends BaseRecord {
@@ -110,7 +114,8 @@ class TokenClassificationDataset extends ObservationDataset {
         },
       ],
     });
-    return entity.find(this.id);
+
+    return entity.find(getDatasetModelPrimaryKey(this));
   }
 
   get entities() {
