@@ -17,10 +17,8 @@
 
 <template>
   <results-list :dataset="dataset">
-    <template slot="results-header">
-      <!-- <rule-definition :dataset="dataset" v-if="isLabellingRules" /> -->
-      <RuleDefinitionToken :datasetId="dataset.id" v-if="isLabellingRules">
-      </RuleDefinitionToken>
+    <template slot="results-header" v-if="isLabellingRules">
+      <RuleDefinitionToken :datasetId="dataset.id" />
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -41,22 +39,30 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      rulesHaveBeenFetched: false,
+    };
+  },
   components: {
     RuleDefinitionToken,
   },
-  async beforeMounted() {
+  async beforeMount() {
+    this.rulesHaveBeenFetched = false;
     const { name } = this.dataset;
-
-    //call computed rules
     const rules = await this.fetchTokenClassificationRules(name);
 
-    rules.forEach((rule) => {
-      this.fetchRuleMetricsByRuleAndInsertInDatabase(name, rule);
+    rules.forEach(async (rule) => {
+      await this.fetchRuleMetricsByRuleAndInsertInDatabase(name, rule);
     });
+    this.rulesHaveBeenFetched = true;
   },
   computed: {
     isLabellingRules() {
-      return this.dataset.viewSettings.viewMode === "labelling-rules";
+      return (
+        this.dataset.viewSettings.viewMode === "labelling-rules" &&
+        this.rulesHaveBeenFetched
+      );
     },
   },
   methods: {
@@ -67,6 +73,7 @@ export default {
       RuleModel.insertOrUpdate({
         data: {
           dataset_id: this.dataset.$id,
+          name: this.dataset.name,
           ...rule,
           rule_metrics: rulesMetrics,
         },
