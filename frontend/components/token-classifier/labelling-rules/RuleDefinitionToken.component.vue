@@ -7,22 +7,21 @@
       btnLabel="Manage rules"
       @onClickBottomBtn="goToManageRules()"
     />
-
-    <pre>{{ ruleByQueryAndByDataset_id }}</pre>
-    <!-- <pre>{{ ruleMetrics }}</pre> -->
   </div>
 </template>
 
 <script>
-import Rule from "../../../models/token-classification/Rule.modelTokenClassification";
-import { TokenClassificationDataset } from "../../../models/TokenClassification";
 import RulesMetricsToken from "./RulesMetricsToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
 export default {
   name: "RuleDefinitionToken",
   props: {
-    datasetId: {
-      type: Array,
+    queryText: {
+      type: String,
+      required: true,
+    },
+    rule: {
+      type: Object,
       required: true,
     },
   },
@@ -40,31 +39,12 @@ export default {
     },
   },
   computed: {
-    queryText() {
-      return TokenClassificationDataset.find([
-        this.datasetId[0],
-        this.datasetId[1],
-      ]).query.text;
-    },
-    ruleByQueryAndByDataset_id() {
-      return Rule.query()
-        .where("author", this.datasetId[0])
-        .where("name", this.datasetId[1])
-        .where("query", this.queryText)
-        .with("rule_metrics")
-        .first();
-    },
     ruleMetrics() {
-      if (
-        this.ruleByQueryAndByDataset_id &&
-        this.ruleByQueryAndByDataset_id.rule_metrics
-      ) {
-        return this.ruleByQueryAndByDataset_id.rule_metrics;
-      }
+      return this.rule.rule_metrics;
     },
   },
   watch: {
-    ruleMetrics(newValue, oldValue) {
+    ruleMetrics(newValue) {
       if (newValue) {
         const optionsForInstance = {
           coverage: newValue.coverage,
