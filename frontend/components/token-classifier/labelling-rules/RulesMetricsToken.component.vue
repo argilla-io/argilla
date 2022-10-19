@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import TooltipComponent from "./Tooltip.component.vue";
+import TooltipComponent from "@/components/base/tooltip/Tooltip.component.vue";
 export default {
   name: "RulesMetricsToken",
   components: {
