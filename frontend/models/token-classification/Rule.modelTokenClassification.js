@@ -2,13 +2,9 @@ import { Model } from "@vuex-orm/core";
 import { ObservationDataset } from "../Dataset";
 import RulesMetric from "./RulesMetric.modelTokenClassification";
 
-export default class Rule extends Model {
+class Rule extends Model {
   static entity = "rules";
-  static primaryKey = ["query", "author", "name"];
-
-  // get id() {
-  //   return [this.query, ...this.dataset_id];
-  // }
+  static primaryKey = ["query", "owner", "name"];
 
   static fields() {
     return {
@@ -21,7 +17,8 @@ export default class Rule extends Model {
       author: this.string(null),
       created_at: this.string(null),
 
-      //name have vbeen added to be able to reach out the specific rule from a dataset
+      //name have been added to be able to reach out the specific rule from a dataset primarykey
+      owner: this.string(null),
       name: this.string(null),
       // relationships
       dataset: this.belongsTo(ObservationDataset, "dataset_id"),
@@ -29,3 +26,7 @@ export default class Rule extends Model {
     };
   }
 }
+
+const getRuleModelPrimaryKey = ({ query, owner, name }) => [query, owner, name];
+
+export { Rule, getRuleModelPrimaryKey };

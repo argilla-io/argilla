@@ -25,7 +25,7 @@ import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
-import Rule from "@/models/token-classification/Rule.modelTokenClassification";
+import { Rule } from "@/models/token-classification/Rule.modelTokenClassification";
 import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenClassification";
 
 import info from "@/database/modules/info";

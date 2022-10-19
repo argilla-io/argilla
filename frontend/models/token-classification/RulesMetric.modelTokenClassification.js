@@ -1,5 +1,5 @@
 import { Model } from "@vuex-orm/core";
-import Rule from "./Rule.modelTokenClassification";
+import { Rule } from "./Rule.modelTokenClassification";
 
 export default class RulesMetric extends Model {
   static entity = "rulesMetrics";
