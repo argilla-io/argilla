@@ -61,6 +61,7 @@ version = ".".join(release.split(".")[0:2])
 extensions = [
     "myst_parser",
     "nbsphinx",
+    "notfound.extension",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxext.opengraph",
@@ -154,7 +155,7 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
+notfound_no_urls_prefix = True
 
 # -- Options for HTML output -------------------------------------------------
 

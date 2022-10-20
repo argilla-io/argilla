@@ -7,10 +7,3 @@ These tutorials show you how Argilla can be used in combination with Hugging Fac
 ```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
 ```
 ````
-
-<!-- ```{toctree}
-:maxdepth: 1
-:hidden:
-
-deploying-texttokenclassification-fastapi.ipynb
-``` -->

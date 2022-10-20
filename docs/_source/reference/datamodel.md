@@ -3,7 +3,7 @@
 
 Argilla is built around a few simple concepts. This section clarifies what those concepts are. Let's take a look at Argilla's data model:
 
-![A sketch of the Argilla data model](/_static/images/main/argilla_data_model.svg)
+![A sketch of the Argilla data model](/_static/images/main/argilla_data_model.png)
 
 
 ## Dataset

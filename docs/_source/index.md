@@ -10,7 +10,7 @@
    getting_started/argilla
    getting_started/quickstart
    getting_started/installation/installation.md
-   getting_started/howto
+   getting_started/terminology
 
 .. toctree::
    :maxdepth: 3

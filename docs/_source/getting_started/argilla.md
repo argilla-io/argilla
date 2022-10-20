@@ -24,8 +24,5 @@
 * **Model debugging**: log predictions during the development process to visually spot issues.
 * **Explainability:** log token attributions to help you interpret model predictions.
 
-## Community
-
-You can join the conversation on Slack! We are a very friendly and inclusive community:
-
-* [Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+```{include} /_common/next_steps.md
+```
