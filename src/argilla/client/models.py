@@ -23,9 +23,9 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+from deprecated import deprecated
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
-from argilla import __version__
 from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.utils import limit_value_length
 from argilla.utils.span_utils import SpanUtils
@@ -527,12 +527,8 @@ class TextGenerationRecord(_Validators):
         return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
+@deprecated("Use TextGenerationRecord instead.")
 class Text2TextRecord(TextGenerationRecord):
-    _LOGGER.warning(
-        "Text2TextRecord is Deprecated as off version 1. Use TextGenerationRecord"
-        " instead."
-    )
-
     pass
 
 
