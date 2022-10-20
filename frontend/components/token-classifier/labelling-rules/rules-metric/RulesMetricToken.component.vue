@@ -1,7 +1,7 @@
 <template>
-  <div class="rule-metrics-token" :style="cssVars">
-    <h2 class="rule-metrics-token__title">{{ title }}</h2>
-    <div class="rule-metrics-token__metrics">
+  <div class="rules-metric-token" :style="cssVars">
+    <h2 class="rules-metric-token__title">{{ title }}</h2>
+    <div class="rules-metric-token__metrics" v-if="subcardInputs">
       <div
         class="subcard"
         v-for="{ id, label, mainValue, subValue, tooltip } in subcardInputs"
@@ -19,7 +19,7 @@
         <span class="subcard__items"> {{ subValue }}</span>
       </div>
     </div>
-    <div class="rule-metrics-token__bottom" v-if="btnLabel">
+    <div class="rules-metric-token__bottom" v-if="btnLabel">
       <button @click="onClickBtnBottom">{{ btnLabel }}</button>
     </div>
   </div>
@@ -93,9 +93,10 @@ export default {
   margin: inherit;
 }
 
-.rule-metrics-token {
+.rules-metric-token {
   display: flex;
   flex-direction: column;
+  flex-basis: 30em;
   padding: 2em;
   gap: 3em;
   color: var(--text-color);
@@ -111,7 +112,7 @@ export default {
   &__metrics {
     display: grid;
     grid-gap: 10px;
-    grid-template-columns: repeat(var(--number-of-columns), 12em);
+    grid-template-columns: repeat(var(--number-of-columns), 1fr);
     grid-template-rows: repeat(var(--number-of-rows), 8em);
     .subcard {
       display: flex;
