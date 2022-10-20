@@ -58,13 +58,13 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     annotation: Optional[AnnotationDB] = None
 
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
-        None,
+        default_factory=dict,
         description="Provide the prediction info as a key-value dictionary."
         "The key will represent the agent ant the value the prediction."
         "Using this way you can skip passing the agent inside of the prediction",
     )
-    annotations: Optional[Dict[str, AnnotationDB]] = Field(
-        None,
+    annotations: Dict[str, AnnotationDB] = Field(
+        default_factory=dict,
         description="Provide the annotation info as a key-value dictionary."
         "The key will represent the agent ant the value the annotation."
         "Using this way you can skip passing the agent inside the annotation",
