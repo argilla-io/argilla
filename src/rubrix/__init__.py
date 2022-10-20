@@ -19,24 +19,24 @@ as well as in the `_import_structure` dictionary.
 """
 import inspect
 
-from . import _version
+from . import _version, _version
 
 __version__ = _version.version
 
 
-MIGRATION_MESSAGE = """
-    Rubrix has been moved to Argilla project. You should use blablablab...
+message = """
+    The rubrix package name has changed its name to argilla. 
     
-    pip install argilla==1.0.0
+    This is the last version of rubrix and the argilla package 
+    has been installed for your convenience. You need to use: 
     
-    or 
+    import argilla
     
-    import argilla as ag
+    and launch the server with:
     
-    ar.log....
-    
-    or 
-    python -m argilla
-    """
+    $>python -m argilla
+    \t 
+"""
 
-print(inspect.cleandoc(MIGRATION_MESSAGE))
+
+print(inspect.cleandoc(message))
