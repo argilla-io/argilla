@@ -45,6 +45,7 @@ from argilla.client.models import (
     Record,
     Text2TextRecord,
     TextClassificationRecord,
+    TextGenerationRecord,
     TokenClassificationRecord,
 )
 from argilla.client.sdk.client import AuthenticatedClient
@@ -88,7 +89,6 @@ class _ArgillaLogAgent:
 
     @staticmethod
     async def __log_internal__(api: "Api", *args, **kwargs):
-
         try:
             return await api.log_async(*args, **kwargs)
         except Exception as ex:
@@ -340,8 +340,9 @@ class Api:
 
         if not re.match(DATASET_NAME_REGEX_PATTERN, name):
             raise InputValueError(
-                f"Provided dataset name {name} does not match the pattern {DATASET_NAME_REGEX_PATTERN}. "
-                "Please, use a valid name for your dataset"
+                f"Provided dataset name {name} does not match the pattern"
+                f" {DATASET_NAME_REGEX_PATTERN}. Please, use a valid name for your"
+                " dataset"
             )
 
         if chunk_size > self._MAX_CHUNK_SIZE:
@@ -366,12 +367,13 @@ class Api:
         elif record_type is TokenClassificationRecord:
             bulk_class = TokenClassificationBulkData
             creation_class = CreationTokenClassificationRecord
-        elif record_type is Text2TextRecord:
+        elif (record_type is Text2TextRecord) or (record_type is TextGenerationRecord):
             bulk_class = Text2TextBulkData
             creation_class = CreationText2TextRecord
         else:
             raise InputValueError(
-                f"Unknown record type {record_type}. Available values are {Record.__args__}"
+                f"Unknown record type {record_type}. Available values are"
+                f" {Record.__args__}"
             )
 
         processed, failed = 0, 0
@@ -406,7 +408,8 @@ class Api:
             ):  # Just for backward comp. with datasets with no workspaces
                 workspace = "-"
             print(
-                f"{processed} records logged to {self._client.base_url}/datasets/{workspace}/{name}"
+                f"{processed} records logged to"
+                f" {self._client.base_url}/datasets/{workspace}/{name}"
             )
 
         # Creating a composite BulkResponse with the total processed and failed
@@ -507,15 +510,16 @@ class Api:
         """
         if as_pandas is False:
             warnings.warn(
-                "The argument `as_pandas` is deprecated and will be removed in a future version. "
-                "Please adapt your code accordingly. ",
+                "The argument `as_pandas` is deprecated and will be removed in a future"
+                " version. Please adapt your code accordingly. ",
                 FutureWarning,
             )
         elif as_pandas is True:
             raise ValueError(
-                "The argument `as_pandas` is deprecated and will be removed in a future version. "
-                "Please adapt your code accordingly. ",
-                "If you want a pandas DataFrame do `ar.load('my_dataset').to_pandas()`.",
+                "The argument `as_pandas` is deprecated and will be removed in a future"
+                " version. Please adapt your code accordingly. ",
+                "If you want a pandas DataFrame do"
+                " `ar.load('my_dataset').to_pandas()`.",
             )
 
         response = datasets_api.get_dataset(client=self._client, name=name)
