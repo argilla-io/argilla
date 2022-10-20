@@ -26,15 +26,14 @@ maintainers = [
     {name = "recognai", email = "contact@recogn.ai"}
 ]
 dependencies = [
-    # Client
-    # TODO(@frascuchon): include argilla release.
+    "argilla>=1.0.*"
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 # TODO: maybe we can disable these optional deps.
 server = [
-
+    "argilla[server]>=1.0.0*"
 ]
 listeners = [
 
