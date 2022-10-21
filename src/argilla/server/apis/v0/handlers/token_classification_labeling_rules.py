@@ -24,15 +24,29 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
+from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import User
+from argilla.server.services.datasets import DatasetsService
+from argilla.server.services.tasks.token_classification import (
+    TokenClassificationService,
+)
+from argilla.server.services.tasks.token_classification.labeling_rules.service import (
+    ServiceLabelingRule,
+)
 
 
 class UpdateLabelingRule(BaseModel):
-    label: str = Field(description="The label associated with the rule.")
-    labeling_function: str = Field(description="The labeling function descriptor id")
+    name: Optional[str] = Field(
+        default=None,
+        description="The rule name",
+    )
+    label: Optional[str] = Field(
+        default=None,
+        description="The label associated with the rule.",
+    )
     description: Optional[str] = Field(
         default=None,
         description="A brief description of the rule",
@@ -90,9 +104,23 @@ def configure_router(router: APIRouter):
         name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> List[LabelingRule]:
 
-        return mocked_rules
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
+
+        return [
+            LabelingRule.parse_obj(rule) for rule in service.get_labeling_rules(dataset)
+        ]
 
     @router.post(
         path=f"{base_endpoint}",
@@ -106,19 +134,32 @@ def configure_router(router: APIRouter):
         rule: CreateLabelingRule,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> LabelingRule:
 
-        rule = LabelingRule(
-            **rule.dict(exclude_none=True),
-            author=current_user.username,
-            created_at=datetime.utcnow(),
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
-        mocked_rules.append(rule)
-        return rule
+        rule = ServiceLabelingRule(
+            **rule.dict(),
+            author=current_user.username,
+        )
+        service.add_labeling_rule(
+            dataset,
+            rule=rule,
+        )
+        return LabelingRule.parse_obj(rule)
 
     @router.get(
-        path=f"{base_endpoint}/{{query:path}}:summary",
+        path=f"{base_endpoint}/{{query_or_name:path}}:summary",
         operation_id="compute_rule_metrics",
         description="Computes dataset labeling rule metrics",
         response_model=LabelingRuleSearchResults,
@@ -126,7 +167,7 @@ def configure_router(router: APIRouter):
     )
     async def compute_rule_metrics(
         name: str,
-        query: str,
+        query_or_name: str,
         label: Optional[str] = Query(
             None,
             description="Label related to query rule",
@@ -143,59 +184,44 @@ def configure_router(router: APIRouter):
         )
 
     @router.get(
-        path=f"{base_endpoint}/{{query:path}}:search",
+        path=f"{base_endpoint}/{{query_or_name:path}}/search",
         operation_id="search_rule_records",
-        description="Fetch matched records by the provided rule applying the rule labeling function",
+        description="Fetch matched records by the provided rule",
         response_model=TokenClassificationSearchResults,
         response_model_exclude_none=True,
     )
     async def search_rule_records(
         name: str,
-        query: str,
+        query_or_name: str,
         label: Optional[str] = Query(
             None,
             description="Label related to query rule",
         ),
-        labeling_function: Optional[str] = Query(
-            None, description="Labeling function related to the query rule"
-        ),
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> TokenClassificationSearchResults:
 
-        matched_rule = None
-        for rule in mocked_rules:
-            if rule.query == rule:
-                matched_rule = rule
-                break
-        if not matched_rule:
-            matched_rule = CreateLabelingRule(
-                query=query,
-                label=label,
-                labeling_function=labeling_function,
-            )
-        text = "what do you think?"
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
+
+        results = service.search_by_rule(
+            dataset,
+            query=query_or_name,
+            label=label,
+        )
+
         return TokenClassificationSearchResults(
-            total=1,
-            records=[
-                TokenClassificationRecord(
-                    text=text,
-                    tokens=text.split(" "),
-                    annotations={
-                        labeling_function: TokenClassificationAnnotation.parse_obj(
-                            {
-                                "entities": [
-                                    {
-                                        "start": 0,
-                                        "end": 4,
-                                        "label": label,
-                                    }
-                                ]
-                            }
-                        )
-                    },
-                )
-            ],
+            records=results.records,
+            total=results.total,
         )
 
     @router.get(
@@ -218,25 +244,32 @@ def configure_router(router: APIRouter):
         )
 
     @router.delete(
-        path=f"{base_endpoint}/{{query:path}}",
+        path=f"{base_endpoint}/{{query_or_name:path}}",
         operation_id="delete_labeling_rule",
         description="Deletes a labeling rule from dataset",
     )
     async def delete_labeling_rule(
         name: str,
-        query: str,
+        query_or_name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> None:
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
 
-        for rule_ in mocked_rules:
-            if query == rule_.query:
-                mocked_rules.remove(rule_)
-                break
-        raise EntityNotFoundError(name=query, type=LabelingRule)
+        service.delete_labeling_rule(dataset, rule_query=query_or_name)
 
     @router.get(
-        path=f"{base_endpoint}/{{query:path}}",
+        path=f"{base_endpoint}/{{query_or_name:path}}",
         operation_id="get_rule",
         description="Get the dataset labeling rule",
         response_model=LabelingRule,
@@ -244,17 +277,30 @@ def configure_router(router: APIRouter):
     )
     async def get_rule(
         name: str,
-        query: str,
+        query_or_name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> LabelingRule:
-        for rule in mocked_rules:
-            if rule.query == query:
-                return rule
-        raise EntityNotFoundError(name=query, type=LabelingRule)
+
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
+        rule = service.find_labeling_rule(
+            dataset,
+            query_or_name=query_or_name,
+        )
+        return LabelingRule.parse_obj(rule)
 
     @router.patch(
-        path=f"{base_endpoint}/{{query:path}}",
+        path=f"{base_endpoint}/{{query_or_name:path}}",
         operation_id="update_rule",
         description="Update dataset labeling rule attributes",
         response_model=LabelingRule,
@@ -262,16 +308,28 @@ def configure_router(router: APIRouter):
     )
     async def update_rule(
         name: str,
-        query: str,
+        query_or_name: str,
         update: UpdateLabelingRule,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> LabelingRule:
-        for rule in mocked_rules:
-            if rule.query == query:
-                rule.label = update.label
-                rule.labeling_function = update.labeling_function
-                rule.description = update.description
-                return rule
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
 
-        raise EntityNotFoundError(name=query, type=LabelingRule)
+        rule = service.update_labeling_rule(
+            dataset,
+            query_or_name=query_or_name,
+            description=update.description,
+            label=update.label,
+        )
+
+        return LabelingRule.parse_obj(rule)

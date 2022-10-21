@@ -11,26 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-import dataclasses
+import re
 from typing import Callable, Dict, Iterable, List, Tuple, Union
 
 from argilla.server.errors import EntityNotFoundError
+from argilla.server.services.tasks.commons.mixins.labeling_rules import (
+    LabelingRulesMixin,
+)
 from argilla.server.services.tasks.token_classification.model import EntitySpan as Span
+from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation as Annotation,
 )
 from argilla.server.services.tasks.token_classification.model import (
+    ServiceTokenClassificationRecord,
+)
+from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationRecord as Record,
 )
-
-
-@dataclasses.dataclass
-class LabelingRule:
-    query: str
-    label: str
-    selector: str
-
 
 SpanSelector = Callable[
     [Record],
@@ -38,7 +36,9 @@ SpanSelector = Callable[
 ]
 
 
-class LabelingFunctionsService:
+class LabelingFunctionsMixin:
+
+    EXACT_MATCH_SELECTOR = "builtin::exact_match"
 
     __SELECTORS_MAP__: Dict[str, SpanSelector] = {}
 
@@ -54,11 +54,12 @@ class LabelingFunctionsService:
 
     def apply_rule(
         self,
-        rule: LabelingRule,
+        rule: ServiceLabelingRule,
         records: Iterable[Record],
     ) -> None:
         """Will update records annotation including a new agent corresponding to the rule id"""
-
+        if not rule.span_selector:
+            rule.span_selector = self._default_selector_id()
         span_selector_ = self._span_selector_by_rule(rule)
         agent = rule.query
         for record in records:
@@ -69,22 +70,49 @@ class LabelingFunctionsService:
             weak_labels = Annotation(entities=entities)
             record.annotations[agent] = weak_labels
 
-    def _span_selector_by_rule(self, rule: LabelingRule) -> SpanSelector:
+    def _span_selector_by_rule(self, rule: ServiceLabelingRule) -> SpanSelector:
         # The span selector can be defined in a decorated function or as a class implementation
-        selector = self.__SELECTORS_MAP__.get(rule.selector)
+
+        selector = self.__SELECTORS_MAP__.get(rule.span_selector)
         if not selector:
             raise EntityNotFoundError(
-                name=rule.selector,
+                name=rule.span_selector,
                 type="SpanSelector",
             )
         return selector
+
+    def _default_selector_id(self):
+        return self.EXACT_MATCH_SELECTOR
 
 
 def span_selector(name: str):
     "Decorate a function as an span selector"
 
     def inner(func: SpanSelector):
-        LabelingFunctionsService._span_selector(name, func)
+        LabelingFunctionsMixin._span_selector(name, func)
         return func
 
     return inner
+
+
+class NERLabelingRulesMixin(
+    LabelingRulesMixin[ServiceLabelingRule],
+    LabelingFunctionsMixin,
+):
+    def _prepare_rule_for_save(self, rule: ServiceLabelingRule):
+        if not rule.span_selector:
+            rule.span_selector = LabelingFunctionsMixin.EXACT_MATCH_SELECTOR
+        return rule
+
+
+@span_selector(name=LabelingFunctionsMixin.EXACT_MATCH_SELECTOR)
+def exact_match(record: ServiceTokenClassificationRecord) -> List[Tuple[int, int]]:
+    """Given a text and a set of search keywords, this selector will match all keywords found in the text"""
+    if not record.search_keywords:
+        return []
+
+    spans = []
+    pattern = re.compile(rf"({'|'.join(record.search_keywords)})")
+    for match in pattern.finditer(record.text):
+        spans.append((match.start(), match.end()))
+    return spans

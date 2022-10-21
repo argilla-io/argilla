@@ -493,7 +493,7 @@ def configure_router():
         )
         rule = service.find_labeling_rule(
             dataset,
-            rule_query=query,
+            query_or_name=query,
         )
         return LabelingRule.parse_obj(rule)
 

@@ -16,8 +16,8 @@ import pytest
 
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.services.tasks.token_classification.labeling_rules.service import (
-    LabelingFunctionsService,
-    LabelingRule,
+    LabelingFunctionsMixin,
+    ServiceLabelingRule,
     span_selector,
 )
 from argilla.server.services.tasks.token_classification.model import (
@@ -64,7 +64,7 @@ from argilla.server.services.tasks.token_classification.model import (
     ],
 )
 def test_service(text, keywords, expected):
-    service = LabelingFunctionsService()
+    service = LabelingFunctionsMixin()
 
     records = [
         ServiceTokenClassificationRecord(
@@ -74,10 +74,11 @@ def test_service(text, keywords, expected):
         )
     ]
 
-    rule = LabelingRule(
+    rule = ServiceLabelingRule(
         query="bad",
         label="PETE",
-        selector="builtin::exact_match",
+        span_selector="builtin::exact_match",
+        author="Test",
     )
     service.apply_rule(
         rule,
@@ -92,13 +93,14 @@ def test_service(text, keywords, expected):
 
 
 def test_service_with_not_found_selector():
-    service = LabelingFunctionsService()
+    service = LabelingFunctionsMixin()
     with pytest.raises(EntityNotFoundError, match="NOTFOUND"):
         service.apply_rule(
-            LabelingRule(
+            ServiceLabelingRule(
                 query="bd",
                 label="lb",
-                selector="NOTFOUND",
+                span_selector="NOTFOUND",
+                author="Test",
             ),
             records=[],
         )

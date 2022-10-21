@@ -294,7 +294,7 @@ class TextClassificationService(LabelingRulesMixin[ServiceLabelingRule]):
             annotated_records=annotated,
         )
 
-    def _normalize_rule(self, rule: ServiceLabelingRule):
+    def _prepare_rule_for_save(self, rule: ServiceLabelingRule):
         if rule.labels and len(rule.labels) == 1:
             rule.label = rule.labels[0]
         elif rule.label and not rule.labels:

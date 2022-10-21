@@ -287,8 +287,11 @@ class DatasetsService:
     ) -> Rule:
         """Adds a rule to a dataset"""
         for r in dataset.rules:
-            if r.query == rule.query:
-                raise EntityAlreadyExistsError(rule.query, type=rule.__class__)
+            if r.query == rule.query or r.name == rule.name:
+                raise EntityAlreadyExistsError(
+                    f"query:{rule.query};name:{rule.name}",
+                    type=rule.__class__,
+                )
         dataset.rules.append(rule)
         self.__dao__.update_dataset(dataset)
         return rule
@@ -296,13 +299,13 @@ class DatasetsService:
     def find_rule_by_query(
         self,
         dataset: ServiceBaseDataset,
-        rule_query: str,
+        query_or_name: str,
     ) -> Rule:
-        rule_query = rule_query.strip()
+        query_or_name = query_or_name.strip()
         for rule in dataset.rules:
-            if rule.query == rule_query:
+            if rule.query == query_or_name or rule.name == query_or_name:
                 return rule
-        raise EntityNotFoundError(rule_query, type=BaseLabelingRule)
+        raise EntityNotFoundError(query_or_name, type=BaseLabelingRule)
 
     def replace_rule(
         self,

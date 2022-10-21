@@ -120,3 +120,8 @@ def takeuntil(iterable, limit: int):
             count += 1
         else:
             break
+
+
+def exclude_nones_from_dict(dictionary: dict) -> dict:
+    """Exclude all None values from a dictionary"""
+    return {k: v for k, v in dictionary.items() if v is not None}

@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .builtin_span_selectors import exact_match
-from .service import LabelingFunctionsService
+from .service import LabelingFunctionsMixin, exact_match
 
 __all__ = [
     "exact_match",
-    "LabelingFunctionsService",
+    "LabelingFunctionsMixin",
 ]

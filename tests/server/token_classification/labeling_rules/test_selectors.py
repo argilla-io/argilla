@@ -14,7 +14,7 @@
 
 import pytest
 
-from argilla.server.services.tasks.token_classification.labeling_rules.builtin_span_selectors import (
+from argilla.server.services.tasks.token_classification.labeling_rules import (
     exact_match,
 )
 from argilla.server.services.tasks.token_classification.model import (
