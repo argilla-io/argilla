@@ -81,12 +81,6 @@ class LoguruLoggerHandler(logging.Handler):
         super().__init__(*args, **kwargs)
 
         if not self.is_available:
-            logging.getLogger(__name__).warning(
-                "Cannot find required package for logging.\n"
-                "Please, install `loguru` by typing:\n"
-                "pip install loguru\n"
-                "if you want to enable enhanced logging"
-            )
             self.emit = lambda record: None
 
     def emit(self, record: logging.LogRecord):
@@ -106,6 +100,7 @@ class LoguruLoggerHandler(logging.Handler):
 
 
 def configure_logging():
+
     """Normalizes logging configuration for argilla and its dependencies"""
     intercept_handler = LoguruLoggerHandler()
     if not intercept_handler.is_available:
