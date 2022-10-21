@@ -1,6 +1,4 @@
-# TODO: This license is not consistent with license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
-#  Copyright 2021-present, the Argilla S.L. team.
+#  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -155,7 +153,7 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-notfound_no_urls_prefix = True
+notfound_urls_prefix = "/en/latest" if os.getenv("READTHEDOCS") else None
 
 # -- Options for HTML output -------------------------------------------------
 
