@@ -108,13 +108,48 @@ python -m argilla
 
 **The default username and password are**  `argilla`  **and**  `1234`.
 
-To upload your first dataset you can run from your terminal:
+Your workspace will contain no datasets. So let's use the `datasets` library to create our first datasets!
 
-@TODO give a one-liner or something else to create a data. Or provide a command which creates one or several demo datasets.
+First, you need to install `datasets`:
+```bash
 
+pip install datasets
+
+```
+
+Then go to your Python IDE of choice and run:
+```python
+
+import pandas as pd
+import argilla as rg
+from datasets import load_dataset
+
+# load dataset from the hub
+dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+
+# read in dataset, assuming its a dataset for token classification
+dataset = rb.read_datasets(dataset, task="TokenClassification")
+
+# log the dataset to the Rubrix web app
+rg.log(dataset_rb, "gutenberg_spacy-ner")
+
+# load dataset from json
+my_dataframe = pd.read_json(
+    "https://raw.githubusercontent.com/recognai/datasets/main/sst-sentimentclassification.json")
+
+# convert pandas dataframe to DatasetForTextClassification
+dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
+
+# log the dataset to the Rubrix web app
+rg.log(dataset, name="sst-sentimentclassification")
+
+```
+
+This will create two datasets which you can use to do a quick tour of the core features of Argilla.
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
+For getting started with your own use cases, [go to the docs](https://docs.argilla.io).
 ## Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
