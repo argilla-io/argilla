@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </svg> Star`;
       rightLink.target = "_blank";
       rightLink.href = `${data.html_url}/stargazers`;
-      rightLink.innerHTML = `${data.stargazers_count}`;
+      rightLink.innerHTML = data.stargazers_count.toLocaleString('en-US');
       Array.from(githubStarsComponents).forEach((component, index) => {
         append(component, leftLink.cloneNode(true));
         append(component, rightLink.cloneNode(true));
