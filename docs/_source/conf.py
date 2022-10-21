@@ -153,7 +153,17 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-notfound_urls_prefix = "/en/latest" if os.getenv("READTHEDOCS") else None
+
+if not os.getenv("READTHEDOCS"):
+    notfound_urls_prefix = None
+else:
+    lang, docs_version = (
+        os.getenv("READTHEDOCS_LANGUAGE", "en"),
+        os.getenv("READTHEDOCS_VERSION", "latest"),
+    )
+
+    notfound_urls_prefix = f"/{lang}/{docs_version}/"
+
 
 # -- Options for HTML output -------------------------------------------------
 
