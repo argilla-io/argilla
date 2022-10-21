@@ -129,7 +129,7 @@ h2 {
   border: 0;
   text-decoration: none !important;
   color: white !important;
-  border-radius: 3px;
+  border-radius: 5px;
   padding: 0.3em;
   font-size: 14px;
   font-weight: 500;
@@ -692,7 +692,7 @@ table>caption:hover>.headerlink:before {
 }
 
 /* links and buttons */
-.article-container a:not(.headerlink):not(:hover) {
+.article-container a:not(.headerlink):not(.github-stars a):not(:hover) {
   color: var(--color-content-foreground);
 }
 
@@ -960,4 +960,45 @@ a .tuto-section-11 {
 ::selection {
   color: white;
   background: #0508D9;
+}
+
+/* github star counter */
+
+.github-stars {
+  display: inline-flex;
+  align-items: center;
+  
+}
+.github-stars > a {
+  padding: 3px 6px;
+  text-decoration: none !important;
+  min-height: 21px;
+  font-size: 0.9rem;
+}
+.github-stars .--left {
+  background: #e84242;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e84242;
+}
+.github-stars .--left:hover {
+  background: linear-gradient(-45deg, #c13030, #e25a55);
+  border-color: #c13030;
+}
+.github-stars .--right:hover {
+  color: #c13030;
+  border-color: #c13030;
+}
+.github-stars .--right {
+  background: white;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: #e84242;
+  border: 1px solid #e84242;
+  display: flex;
+  align-items: center;
 }
