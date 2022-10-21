@@ -9,9 +9,9 @@
 <a  href="https://pypi.org/project/rubrix/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
-<a  href="https://anaconda.org/conda-forge/rubrix">
+<!--a  href="https://anaconda.org/conda-forge/rubrix">
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
-</a>
+</!a-->
 <img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 <a href="https://pepy.tech/project/rubrix">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/rubrix?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
@@ -39,11 +39,11 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 
 <h3>
 <p align="center">
-<a href="#">Documentation</a> | </span>
+<a href="https://docs.argilla.io">Documentation</a> | </span>
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
-<a href="docs/migration-rubrix.md">Rubrix migration</a> | </span>
+<a href="docs/migration-rubrix.md">Migration from Rubrix</a> | </span>
 <a href="#FAQ">FAQ</a>
 </p>
 </h3>
@@ -82,18 +82,6 @@ To get started you need to **install the client and the server** with `pip`:
 pip install "argilla[server]"
 
 ```
-<details>
-<summary>
-or conda:
-</summary>
-
-```bash
-
-pip install "argilla[server]"
-
-```
-
-</details>
 
 Then you need to **run [Elasticsearch (ES)](https://www.elastic.co/elasticsearch)**.
 
