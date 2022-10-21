@@ -100,6 +100,7 @@ def test_model_dict():
     assert record.dict(exclude_none=True) == {
         "id": 1,
         "metrics": {},
+        "annotations": {},
         "prediction": {
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],
@@ -135,6 +136,7 @@ def test_model_with_predictions():
     assert record.dict(exclude_none=True) == {
         "id": 1,
         "metrics": {},
+        "annotations": {},
         "prediction": {
             "agent": "test",
             "entities": [{"end": 24, "label": "test", "score": 1.0, "start": 9}],

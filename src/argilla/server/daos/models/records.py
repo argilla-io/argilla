@@ -63,7 +63,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         "The key will represent the agent ant the value the prediction."
         "Using this way you can skip passing the agent inside of the prediction",
     )
-    annotations: Dict[str, AnnotationDB] = Field(
+    annotations: Optional[Dict[str, AnnotationDB]] = Field(
         default_factory=dict,
         description="Provide the annotation info as a key-value dictionary."
         "The key will represent the agent ant the value the annotation."
@@ -99,7 +99,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             values[annotation_field] = value.__class__(
                 agent=key, **value.dict(exclude={"agent"})
             )
-
+        values[field_to_update] = annotations
         return values
 
     @root_validator()
