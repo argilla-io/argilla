@@ -529,8 +529,9 @@ def configure_router():
         rule = service.update_labeling_rule(
             dataset,
             rule_query=query,
-            labels=update.labels,
             description=update.description,
+            labels=update.labels,
+            label=update.labels[0] if len(update.labels) == 1 else None,
         )
         return LabelingRule.parse_obj(rule)
 

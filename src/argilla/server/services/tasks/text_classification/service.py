@@ -19,6 +19,7 @@ from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.errors.base_errors import MissingDatasetRecordsError
+from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.model import (
     ServiceSearchResults,
     ServiceSortableField,
@@ -27,6 +28,9 @@ from argilla.server.services.search.model import (
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
+from argilla.server.services.tasks.commons.mixins.labeling_rules import (
+    LabelingRulesMixin,
+)
 from argilla.server.services.tasks.text_classification import LabelingService
 from argilla.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary,
@@ -38,7 +42,7 @@ from argilla.server.services.tasks.text_classification.model import (
 )
 
 
-class TextClassificationService:
+class TextClassificationService(LabelingRulesMixin[ServiceLabelingRule]):
     """
     Text classification service
 
@@ -49,20 +53,29 @@ class TextClassificationService:
     @classmethod
     def get_instance(
         cls,
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         labeling: LabelingService = Depends(LabelingService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ) -> "TextClassificationService":
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(storage, labeling=labeling, search=search)
+            cls._INSTANCE = cls(
+                datasets=datasets,
+                storage=storage,
+                labeling=labeling,
+                search=search,
+            )
         return cls._INSTANCE
 
     def __init__(
         self,
+        datasets: DatasetsService,
         storage: RecordsStorageService,
         search: SearchRecordsService,
         labeling: LabelingService,
     ):
+        super().__init__(datasets)
+
         self.__storage__ = storage
         self.__search__ = search
         self.__labeling__ = labeling
@@ -208,58 +221,6 @@ class TextClassificationService:
         if results.records:
             return results.records[0].multi_label
 
-    def get_labeling_rules(
-        self, dataset: ServiceTextClassificationDataset
-    ) -> Iterable[ServiceLabelingRule]:
-
-        return self.__labeling__.list_rules(dataset)
-
-    def add_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule
-    ) -> None:
-        """
-        Adds a labeling rule
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        rule:
-            The rule
-        """
-        self.__normalized_rule__(rule)
-        self.__labeling__.add_rule(dataset, rule)
-
-    def update_labeling_rule(
-        self,
-        dataset: ServiceTextClassificationDataset,
-        rule_query: str,
-        labels: List[str],
-        description: Optional[str] = None,
-    ) -> ServiceLabelingRule:
-        found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
-
-        found_rule.labels = labels
-        found_rule.label = labels[0] if len(labels) == 1 else None
-        if description is not None:
-            found_rule.description = description
-
-        self.__normalized_rule__(found_rule)
-        self.__labeling__.replace_rule(dataset, found_rule)
-        return found_rule
-
-    def find_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule_query: str
-    ) -> ServiceLabelingRule:
-        return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
-
-    def delete_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule_query: str
-    ):
-        if rule_query.strip():
-            return self.__labeling__.delete_rule(dataset, rule_query)
-
     def compute_rule_metrics(
         self,
         dataset: ServiceTextClassificationDataset,
@@ -333,8 +294,7 @@ class TextClassificationService:
             annotated_records=annotated,
         )
 
-    @staticmethod
-    def __normalized_rule__(rule: ServiceLabelingRule) -> ServiceLabelingRule:
+    def _normalize_rule(self, rule: ServiceLabelingRule):
         if rule.labels and len(rule.labels) == 1:
             rule.label = rule.labels[0]
         elif rule.label and not rule.labels:

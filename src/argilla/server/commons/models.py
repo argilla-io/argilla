@@ -11,8 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from datetime import datetime
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, Field, validator
 
 
 class TaskStatus(str, Enum):
@@ -33,3 +36,27 @@ class TaskType(str, Enum):
 class PredictionStatus(str, Enum):
     OK = "ok"
     KO = "ko"
+
+
+class BaseLabelingRule(BaseModel):
+
+    query: str = Field(description="The es rule query")
+
+    author: Optional[str] = Field(
+        default=None,
+        description="User who created the rule",
+    )
+    created_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow,
+        description="Rule creation timestamp",
+    )
+
+    description: Optional[str] = Field(
+        None,
+        description="A brief description of the rule",
+    )
+
+    @validator("query")
+    def strip_query(cls, query: str) -> str:
+        """Remove blank spaces for query"""
+        return query.strip()

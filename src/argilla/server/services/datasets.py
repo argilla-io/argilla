@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from fastapi import Depends
 
+from argilla.server.commons.models import BaseLabelingRule
 from argilla.server.daos.datasets import BaseDatasetSettingsDB, DatasetsDAO
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.errors import (
@@ -27,6 +28,8 @@ from argilla.server.errors import (
     WrongTaskError,
 )
 from argilla.server.security.model import User
+
+Rule = TypeVar("Rule", bound=BaseLabelingRule)
 
 
 class ServiceBaseDataset(BaseDatasetDB):
@@ -39,7 +42,8 @@ class ServiceBaseDatasetSettings(BaseDatasetSettingsDB):
 
 ServiceDataset = TypeVar("ServiceDataset", bound=ServiceBaseDataset)
 ServiceDatasetSettings = TypeVar(
-    "ServiceDatasetSettings", bound=ServiceBaseDatasetSettings
+    "ServiceDatasetSettings",
+    bound=ServiceBaseDatasetSettings,
 )
 
 
@@ -49,7 +53,8 @@ class DatasetsService:
 
     @classmethod
     def get_instance(
-        cls, dao: DatasetsDAO = Depends(DatasetsDAO.get_instance)
+        cls,
+        dao: DatasetsDAO = Depends(DatasetsDAO.get_instance),
     ) -> "DatasetsService":
         if not cls._INSTANCE:
             cls._INSTANCE = cls(dao)
@@ -259,3 +264,53 @@ class DatasetsService:
 
     async def delete_settings(self, user: User, dataset: ServiceDataset) -> None:
         self.__dao__.delete_settings(dataset=dataset)
+
+    def list_rules(self, dataset: ServiceBaseDataset) -> List[Rule]:
+        """List a set of rules for a given dataset"""
+        return dataset.rules
+
+    def delete_rule(
+        self,
+        dataset: ServiceBaseDataset,
+        rule_query: str,
+    ):
+        """Delete a rule from a dataset by its defined query string"""
+        new_rules_set = [r for r in dataset.rules if r.query != rule_query]
+        if len(dataset.rules) != new_rules_set:
+            dataset.rules = new_rules_set
+            self.__dao__.update_dataset(dataset)
+
+    def add_rule(
+        self,
+        dataset: ServiceBaseDataset,
+        rule: Rule,
+    ) -> Rule:
+        """Adds a rule to a dataset"""
+        for r in dataset.rules:
+            if r.query == rule.query:
+                raise EntityAlreadyExistsError(rule.query, type=rule.__class__)
+        dataset.rules.append(rule)
+        self.__dao__.update_dataset(dataset)
+        return rule
+
+    def find_rule_by_query(
+        self,
+        dataset: ServiceBaseDataset,
+        rule_query: str,
+    ) -> Rule:
+        rule_query = rule_query.strip()
+        for rule in dataset.rules:
+            if rule.query == rule_query:
+                return rule
+        raise EntityNotFoundError(rule_query, type=BaseLabelingRule)
+
+    def replace_rule(
+        self,
+        dataset: ServiceBaseDataset,
+        rule: Rule,
+    ):
+        for idx, r in enumerate(dataset.rules):
+            if r.query == rule.query:
+                dataset.rules[idx] = rule
+                break
+        self.__dao__.update_dataset(dataset)
