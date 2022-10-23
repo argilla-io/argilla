@@ -44,7 +44,13 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
+class BaseEmbeddingDB(BaseModel):
+    dimension: int
+    embedding: List[float]
+
+
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
+EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
@@ -57,6 +63,12 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
+    embeddings: Optional[List[EmbeddingDB]] = Field(
+        None,
+        description="Provide the embedding info as a list of key - value dictionary."
+        "The dictionary contains the dimension and dimension sized embedding float list"
+        "Using this way you can skip passing the agent inside of the embedding",
+    )
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
         None,
         description="Provide the prediction info as a key-value dictionary."
