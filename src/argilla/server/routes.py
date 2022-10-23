@@ -20,11 +20,16 @@ set the required security dependencies if api security is enabled
 
 from fastapi import APIRouter
 
-from argilla.server.apis.v0.handlers import datasets as datasets
-from argilla.server.apis.v0.handlers import info as info
-from argilla.server.apis.v0.handlers import metrics as tasks
-from argilla.server.apis.v0.handlers import records_deletion as records_deletion
-from argilla.server.apis.v0.handlers import users as users
+from argilla.server.apis.v0.handlers import (
+    datasets,
+    info,
+    metrics,
+    records_deletion,
+    text2text,
+    text_classification,
+    token_classification,
+    users,
+)
 from argilla.server.errors.base_errors import __ALL__
 
 api_router = APIRouter(
@@ -38,7 +43,10 @@ for router in [
     users.router,
     datasets.router,
     info.router,
-    tasks.router,
+    metrics.router,
     records_deletion.router,
+    text_classification.router,
+    token_classification.router,
+    text2text.router,
 ]:
     api_router.include_router(router, dependencies=dependencies)
