@@ -165,7 +165,8 @@ class TextClassificationRecord(_Validators):
         >>> import argilla as ar
         >>> record = ar.TextClassificationRecord(
         ...     text="My first argilla example",
-        ...     prediction=[('eng', 0.9), ('esp', 0.1)]
+        ...     prediction=[('eng', 0.9), ('esp', 0.1)],
+        ...     embeddings = [("text", 4, [ 1.2, 2.3, 3.1, 3.3])
         ... )
         >>>
         >>> # Various inputs
@@ -175,7 +176,8 @@ class TextClassificationRecord(_Validators):
         ...         "body": "Por usar argilla te ha tocado este premio: <link>"
         ...     },
         ...     prediction=[('spam', 0.99), ('ham', 0.01)],
-        ...     annotation="spam"
+        ...     annotation="spam",
+        ...     embeddings = [("body", 4, [1.3, 0.2, 0.3, 4.2])]
         ... )
     """
 
@@ -186,6 +188,8 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
+    embedding: Optional[str, int, List[float]]
+    embedding_agent: Optional[str]
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -276,7 +280,12 @@ class TokenClassificationRecord(_Validators):
         >>> record = ar.TokenClassificationRecord(
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
+        ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
+        ...     embeddings = [
+        ...         ("tokens", 4, [
+        ...                (0, [1,2,3,4]), (1, [0.1, 2.1, 3.2, 1.2]), (2, [1.3, 2.1, 3.4, 4.5]),
+        ...                (3, [0.22, 0.21, 9.3, 1.42]), (4, [1.34, 2.21, 3.42, 4.32]), (5, [11.2, 99.1, 21.3, 4.1])]),
+        ...         ("text", 4, [3.2, 4.5, 5.6, 8.9])]
         ... )
     """
 
@@ -493,7 +502,8 @@ class TextGenerationRecord(_Validators):
         >>> import argilla as ar
         >>> record = ar.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
-        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
+        ...     prediction=["Je m'appelle Sarah et j'aime mon chien."],
+        ...     embeddings = [("text", 5, [1.2, 2.3, 3.4, 5.2, 6.5]), ("prediction", 5, [2.12, 3.11, 4.53, 6.53, 7.1])]
         ... )
     """
 
@@ -503,6 +513,7 @@ class TextGenerationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
+    embeddings: Optional[List[Tuple[str, int, Union[List[float]]]]]
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
