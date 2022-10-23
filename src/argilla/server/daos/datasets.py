@@ -24,6 +24,7 @@ from argilla.server.daos.models.datasets import (
     BaseDatasetSettingsDB,
     DatasetDB,
     DatasetSettingsDB,
+    EmbeddingsConfig,
 )
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.errors import WrongTaskError
@@ -62,7 +63,11 @@ class DatasetsDAO:
             cls._INSTANCE = cls(es, records_dao)
         return cls._INSTANCE
 
-    def __init__(self, es: ElasticsearchBackend, records_dao: DatasetRecordsDAO):
+    def __init__(
+        self,
+        es: ElasticsearchBackend,
+        records_dao: DatasetRecordsDAO,
+    ):
         self._es = es
         self.__records_dao__ = records_dao
         self.init()
@@ -97,7 +102,8 @@ class DatasetsDAO:
 
     def create_dataset(self, dataset: DatasetDB) -> DatasetDB:
         self._es.add_dataset_document(
-            id=dataset.id, document=self._dataset_to_es_doc(dataset)
+            id=dataset.id,
+            document=self._dataset_to_es_doc(dataset),
         )
         self._es.create_dataset_index(
             id=dataset.id,
@@ -209,12 +215,29 @@ class DatasetsDAO:
         return [k for k in metric_data]
 
     def save_settings(
-        self, dataset: DatasetDB, settings: DatasetSettingsDB
+        self,
+        dataset: DatasetDB,
+        settings: DatasetSettingsDB,
     ) -> BaseDatasetSettingsDB:
+
+        self._configure_embeddings(dataset, settings)
         self._es.update_dataset_document(
-            id=dataset.id, document={"settings": settings.dict(exclude_none=True)}
+            id=dataset.id,
+            document={"settings": settings.dict(exclude_none=True)},
         )
         return settings
+
+    def _configure_embeddings(self, dataset, settings):
+        if not settings.embeddings:
+            return
+        embeddings_cfg = {
+            k: v.dim if isinstance(v, EmbeddingsConfig) else int(v)
+            for k, v in settings.embeddings.items()
+        }
+        self._es.configure_embeddings(
+            id=dataset.id,
+            embeddings=embeddings_cfg,
+        )
 
     def load_settings(
         self, dataset: DatasetDB, as_class: Type[DatasetSettingsDB]
