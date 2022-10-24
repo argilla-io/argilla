@@ -50,6 +50,7 @@ if _TYPE_CHECKING:
     from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
+        TextGenerationRecord,
         TokenAttributions,
         TokenClassificationRecord,
     )
@@ -77,6 +78,7 @@ _import_structure = {
     ],
     "client.models": [
         "Text2TextRecord",
+        "TextGenerationRecord",
         "TextClassificationRecord",
         "TokenClassificationRecord",
         "TokenAttributions",

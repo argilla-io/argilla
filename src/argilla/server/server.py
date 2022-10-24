@@ -140,7 +140,7 @@ def configure_telemetry(app):
 
         You can know more about what information is reported at:
 
-            https://rubrix.readthedocs.io/en/stable/reference/telemetry.html
+            https://docs.argilla.io/en/latest/reference/telemetry.html
 
         Telemetry is currently enabled. If you want to disable it, you can configure
         the environment variable before relaunching the server:

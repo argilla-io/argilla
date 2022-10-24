@@ -23,6 +23,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+from deprecated import deprecated
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from argilla._constants import MAX_KEYWORD_LENGTH
@@ -41,8 +42,8 @@ class _Validators(BaseModel):
         new_metadata = limit_value_length(v, max_length=MAX_KEYWORD_LENGTH)
         if new_metadata != v:
             warnings.warn(
-                "Some metadata values exceed the max length. "
-                f"Those values will be truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
+                "Some metadata values exceed the max length. Those values will be"
+                f" truncated by keeping only the last {MAX_KEYWORD_LENGTH} characters."
             )
 
         return new_metadata
@@ -202,8 +203,9 @@ class TextClassificationRecord(_Validators):
         """Check if either text or inputs were provided. Copy text to inputs."""
         if isinstance(values.get("inputs"), str):
             warnings.warn(
-                "In the future, the `inputs` argument of the `TextClassificationRecord` will not accept strings. "
-                "Please use the `text` argument in that case. Make sure to adapt your code accordingly.",
+                "In the future, the `inputs` argument of the `TextClassificationRecord`"
+                " will not accept strings. Please use the `text` argument in that case."
+                " Make sure to adapt your code accordingly.",
                 category=FutureWarning,
             )
 
@@ -216,7 +218,8 @@ class TextClassificationRecord(_Validators):
             and values["text"] != values["inputs"].get("text")
         ):
             raise ValueError(
-                "For a TextClassificationRecord you must provide either 'text' or 'inputs'"
+                "For a TextClassificationRecord you must provide either 'text' or"
+                " 'inputs'"
             )
 
         if values.get("text") is not None:
@@ -306,7 +309,8 @@ class TokenClassificationRecord(_Validators):
     ):
         if text is None and tokens is None:
             raise AssertionError(
-                "Missing fields: At least one of `text` or `tokens` argument must be provided!"
+                "Missing fields: At least one of `text` or `tokens` argument must be"
+                " provided!"
             )
 
         if (data.get("annotation") or data.get("prediction")) and text is None:
@@ -396,8 +400,10 @@ class TokenClassificationRecord(_Validators):
     def __chars2tokens__(self) -> Dict[int, int]:
         """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
         warnings.warn(
-            "The `__chars2tokens__` attribute is deprecated and will be removed in a future version. "
-            "Please use the `argilla.utils.span_utils.SpanUtils.char_to_token_idx` attribute instead.",
+            "The `__chars2tokens__` attribute is deprecated and will be removed in a"
+            " future version. Please use the"
+            " `argilla.utils.span_utils.SpanUtils.char_to_token_idx` attribute"
+            " instead.",
             FutureWarning,
         )
         return self._span_utils.char_to_token_idx
@@ -406,8 +412,10 @@ class TokenClassificationRecord(_Validators):
     def __tokens2chars__(self) -> Dict[int, Tuple[int, int]]:
         """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
         warnings.warn(
-            "The `__tokens2chars__` attribute is deprecated and will be removed in a future version. "
-            "Please use the `argilla.utils.span_utils.SpanUtils.token_to_char_idx` attribute instead.",
+            "The `__tokens2chars__` attribute is deprecated and will be removed in a"
+            " future version. Please use the"
+            " `argilla.utils.span_utils.SpanUtils.token_to_char_idx` attribute"
+            " instead.",
             FutureWarning,
         )
         return self._span_utils.token_to_char_idx
@@ -415,8 +423,9 @@ class TokenClassificationRecord(_Validators):
     def char_id2token_id(self, char_idx: int) -> Optional[int]:
         """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.char_to_token_idx`` dict instead."""
         warnings.warn(
-            "The `char_id2token_id` method is deprecated and will be removed in a future version. "
-            "Please use the `argilla.utils.span_utils.SpanUtils.char_to_token_idx` dict instead.",
+            "The `char_id2token_id` method is deprecated and will be removed in a"
+            " future version. Please use the"
+            " `argilla.utils.span_utils.SpanUtils.char_to_token_idx` dict instead.",
             FutureWarning,
         )
         return self._span_utils.char_to_token_idx.get(char_idx)
@@ -424,8 +433,9 @@ class TokenClassificationRecord(_Validators):
     def token_span(self, token_idx: int) -> Tuple[int, int]:
         """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.token_to_char_idx`` dict instead."""
         warnings.warn(
-            "The `token_span` method is deprecated and will be removed in a future version. "
-            "Please use the `argilla.utils.span_utils.SpanUtils.token_to_char_idx` dict instead.",
+            "The `token_span` method is deprecated and will be removed in a future"
+            " version. Please use the"
+            " `argilla.utils.span_utils.SpanUtils.token_to_char_idx` dict instead.",
             FutureWarning,
         )
         if token_idx not in self._span_utils.token_to_char_idx:
@@ -437,8 +447,9 @@ class TokenClassificationRecord(_Validators):
     ) -> Optional[List[str]]:
         """DEPRECATED, please use the ``argilla.utils.SpanUtils.to_tags()`` method."""
         warnings.warn(
-            "'spans2iob' is deprecated and will be removed in a future version. "
-            "Please use the `argilla.utils.SpanUtils.to_tags()` method instead, and adapt your code accordingly.",
+            "'spans2iob' is deprecated and will be removed in a future version. Please"
+            " use the `argilla.utils.SpanUtils.to_tags()` method instead, and adapt"
+            " your code accordingly.",
             FutureWarning,
         )
 
@@ -447,7 +458,7 @@ class TokenClassificationRecord(_Validators):
         return self._span_utils.to_tags(spans)
 
 
-class Text2TextRecord(_Validators):
+class TextGenerationRecord(_Validators):
     """Record for a text to text task
 
     Args:
@@ -511,4 +522,14 @@ class Text2TextRecord(_Validators):
         return [(pred, 1.0) if isinstance(pred, str) else pred for pred in prediction]
 
 
-Record = Union[TextClassificationRecord, TokenClassificationRecord, Text2TextRecord]
+@deprecated("Use TextGenerationRecord instead.")
+class Text2TextRecord(TextGenerationRecord):
+    pass
+
+
+Record = Union[
+    TextClassificationRecord,
+    TokenClassificationRecord,
+    Text2TextRecord,
+    TextGenerationRecord,
+]

@@ -9,9 +9,9 @@
 <a  href="https://pypi.org/project/rubrix/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
-<a  href="https://anaconda.org/conda-forge/rubrix">
+<!--a  href="https://anaconda.org/conda-forge/rubrix">
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
-</a>
+</!a-->
 <img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
 <a href="https://pepy.tech/project/rubrix">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/rubrix?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
@@ -22,7 +22,7 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
+<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
 
 
 <br>
@@ -39,11 +39,12 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 
 <h3>
 <p align="center">
-<a href="#">Documentation</a> | </span>
+<a href="https://docs.argilla.io">Documentation</a> | </span>
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
-<a href="#FAQ">FAQ</a>
+<a href="docs/migration-rubrix.md">Migration from Rubrix</a> | </span>
+<a href="#faq">FAQ</a>
 </p>
 </h3>
 
@@ -81,18 +82,6 @@ To get started you need to **install the client and the server** with `pip`:
 pip install "argilla[server]"
 
 ```
-<details>
-<summary>
-or conda:
-</summary>
-
-```bash
-
-pip install "argilla[server]"
-
-```
-
-</details>
 
 Then you need to **run [Elasticsearch (ES)](https://www.elastic.co/elasticsearch)**.
 
@@ -119,14 +108,48 @@ python -m argilla
 
 **The default username and password are**  `argilla`  **and**  `1234`.
 
-To upload your first dataset you can run from your terminal:
+Your workspace will contain no datasets. So let's use the `datasets` library to create our first datasets!
 
-@TODO give a one-liner or something else to create a data. Or provide a command which creates one or several demo datasets.
+First, you need to install `datasets`:
+```bash
 
+pip install datasets
+
+```
+
+Then go to your Python IDE of choice and run:
+```python
+
+import pandas as pd
+import argilla as rg
+from datasets import load_dataset
+
+# load dataset from the hub
+dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+
+# read in dataset, assuming its a dataset for token classification
+dataset = rb.read_datasets(dataset, task="TokenClassification")
+
+# log the dataset to the Rubrix web app
+rg.log(dataset_rb, "gutenberg_spacy-ner")
+
+# load dataset from json
+my_dataframe = pd.read_json(
+    "https://raw.githubusercontent.com/argilla-io/datasets/main/sst-sentimentclassification.json")
+
+# convert pandas dataframe to DatasetForTextClassification
+dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
+
+# log the dataset to the Rubrix web app
+rg.log(dataset, name="sst-sentimentclassification")
+
+```
+
+This will create two datasets which you can use to do a quick tour of the core features of Argilla.
 
 > 🚒 **If you find issues, get direct support from the team and other community members on the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
 
-
+For getting started with your own use cases, [go to the docs](https://docs.argilla.io).
 ## Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
 
@@ -143,8 +166,6 @@ To upload your first dataset you can run from your terminal:
 -  **Beyond hand-labeling**: Classical hand labeling workflows are costly and inefficient, but having humans-in-the-loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak-supervision in **novel data annotation workflows**.
 
 ## FAQ
-
-
 
 ### What is Argilla?
 Argilla is an open-source MLOps tool for building and managing data for Natural Language Processing.
