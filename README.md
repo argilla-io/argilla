@@ -135,7 +135,7 @@ rg.log(dataset_rb, "gutenberg_spacy-ner")
 
 # load dataset from json
 my_dataframe = pd.read_json(
-    "https://raw.githubusercontent.com/recognai/datasets/main/sst-sentimentclassification.json")
+    "https://raw.githubusercontent.com/argilla-io/datasets/main/sst-sentimentclassification.json")
 
 # convert pandas dataframe to DatasetForTextClassification
 dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
