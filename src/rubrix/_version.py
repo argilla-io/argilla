@@ -14,4 +14,3 @@
 
 # coding: utf-8
 version = "0.19.0.dev0"
-

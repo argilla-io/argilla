@@ -19,23 +19,23 @@ as well as in the `_import_structure` dictionary.
 """
 import inspect
 
-from . import _version, _version
+from . import _version
 
 __version__ = _version.version
 
 
 message = """
-    The rubrix package name has changed its name to argilla. 
-    
-    This is the last version of rubrix and the argilla package 
-    has been installed for your convenience. You need to use: 
-    
+    The rubrix package name has changed its name to argilla.
+
+    This is the last version of rubrix and the argilla package
+    has been installed for your convenience. You need to use:
+
     import argilla
-    
+
     and launch the server with:
-    
+
     $>python -m argilla
-    \t 
+    \t
 """
 
 
