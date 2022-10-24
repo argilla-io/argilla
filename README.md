@@ -135,7 +135,7 @@ dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
 # read in dataset, assuming its a dataset for token classification
 dataset = rg.read_datasets(dataset, task="TokenClassification")
 
-# log the dataset to the Rubrix web app
+# log the dataset to the Argilla web app
 rg.log(dataset_rg, "gutenberg_spacy-ner")
 
 # load dataset from json
@@ -145,7 +145,7 @@ my_dataframe = pd.read_json(
 # convert pandas dataframe to DatasetForTextClassification
 dataset = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 
-# log the dataset to the Rubrix web app
+# log the dataset to the Argilla web app
 rg.log(dataset, name="sst-sentimentclassification")
 
 ```
