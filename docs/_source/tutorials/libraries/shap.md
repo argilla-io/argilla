@@ -6,6 +6,6 @@ SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
 
-```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
+```{include} /_static/tutorials/monitoring-textclassification-shaptransformersinterpret-explainability/modal.md
 ```
 ````

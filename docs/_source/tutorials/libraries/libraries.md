@@ -34,6 +34,11 @@ We're on a journey to advance and democratize artificial intelligence through op
 
 SentenceTransformers is a Python framework for state-of-the-art sentence, text and image embeddings.
 ```
+```{grid-item-card} SetFit
+:link: setfit.md
+
+SetFit is an efficient and prompt-free framework for few-shot fine-tuning of Sentence Transformers.
+```
 ```{grid-item-card} flAIr
 :link: flair.md
 
@@ -89,6 +94,7 @@ stanza.md
 huggingface.md
 sentencetransformers.md
 flair.md
+setfit.md
 
 smalltext.md
 modal.md

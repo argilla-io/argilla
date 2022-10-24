@@ -6,6 +6,6 @@ modAL is an active learning framework for Python3, designed with modularity, fle
 ````{grid} 1 1 2 2
 :class-container: tuto-section-2
 
-```{include} /_static/tutorials/deploying-texttokenclassification-fastapi/modal.md
+```{include} /_static/tutorials/training-textclassification-modal-activelearning/modal.md
 ```
 ````
