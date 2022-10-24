@@ -1,5 +1,5 @@
 (install-from-master)=
-# Install from master
+# Install from `develop`
 
 If you want the cutting-edge version of *Argilla* with the latest changes and experimental features, follow the steps below in your terminal.
 **Be aware that this version might be unstable!**
@@ -30,5 +30,5 @@ If you want to run the web app of the master branch **without** docker, we refer
 If you want to use vanilla docker (and have your own Elasticsearch instance running), you can just use our master image:
 
 ```bash
-docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla recognai/rubrix:master
+docker run -p 6900:6900 -e "ELASTICSEARCH=<your-elasticsearch-endpoint>" --name argilla argilla/argilla-server:develop
 ```
