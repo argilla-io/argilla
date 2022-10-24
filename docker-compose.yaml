@@ -2,13 +2,13 @@ version: "3"
 
 services:
   argilla:
-    image: recognai/rubrix:latest
+    image: argilla-io/argilla-server:latest
     restart: unless-stopped
     ports:
       - "6900:80"
     environment:
-      ELASTICSEARCH: http://elasticsearch:9200
-      # RUBRIX_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
+      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
     # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml
     networks:
@@ -19,7 +19,7 @@ services:
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
-      - cluster.name=es-rubrix-local
+      - cluster.name=es-local
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - cluster.routing.allocation.disk.threshold_enabled=false
