@@ -1,4 +1,5 @@
 - [Techniques](./techniques/techniques): Simple or advanced techniques for a more data-centric approach to your NLP problems.
+    - [🍼 Basics](./1_basics)
     - [👨🏽‍🏫 Active Learning](./techniques/active_learning)
     - [👮 Weak Supervision](./techniques/weak_supervision)
     - [🔎 Explainability and bias](./techniques/explainability)

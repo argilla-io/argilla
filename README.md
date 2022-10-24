@@ -22,12 +22,7 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-
-
-https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
-
-
-<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
+<iframe width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 <br>
@@ -106,7 +101,7 @@ Finally you can **launch the server**:
 python -m argilla
 
 ```
-> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you point the server to its URL by using [ENV variables](#)
+> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you can set point the server to its URL by using [ENV variables](#)
 
 
 🎉 You can now access Argilla UI pointing your browser at http://localhost:6900/.
@@ -212,7 +207,7 @@ In summary, the recommended process for uploading data into Argilla would be fol
 
 5. Do any data preparation, pre-processing, or pre-annotation with a pretrained model, and
 
-6. Transform your dataset rows/records into Argilla records and log them into a dataset using `rg.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
+6. Transform your dataset rows/records into Argilla records and log them into a dataset using `rb.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
 
 ### How can I train a model
 The training datasets created with Argilla are model agnostic.
