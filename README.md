@@ -22,6 +22,11 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
+
+
+https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
+
+
 <!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
 
 
