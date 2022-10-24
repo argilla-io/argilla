@@ -154,7 +154,6 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-notfound_urls_prefix = None
 if not os.getenv("READTHEDOCS"):
     notfound_urls_prefix = None
 else:
