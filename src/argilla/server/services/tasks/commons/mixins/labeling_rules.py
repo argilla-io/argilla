@@ -14,7 +14,7 @@
 
 from typing import Generic, Iterable, Optional
 
-from argilla.server import helpers
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.services.datasets import DatasetsService, Rule, ServiceBaseDataset
 
 
@@ -51,14 +51,23 @@ class LabelingRulesMixin(Generic[Rule]):
         self,
         dataset: ServiceBaseDataset,
         query_or_name: str,
+        name: Optional[str] = None,
         description: Optional[str] = None,
         **extra_data,
     ) -> Rule:
         found_rule = self.__datasets__.find_rule_by_query(dataset, query_or_name)
 
-        extra_data = helpers.exclude_nones_from_dict(extra_data or {})
+        if name:
+            self._check_name_is_available(
+                dataset,
+                name=name,
+            )
+            found_rule.name = name
+
+        extra_data = extra_data or {}
         if description is not None:
             found_rule.description = description
+
         data = {
             **found_rule.dict(exclude_unset=True),
             **extra_data,
@@ -69,6 +78,19 @@ class LabelingRulesMixin(Generic[Rule]):
         self.__datasets__.replace_rule(dataset, new_rule)
 
         return found_rule
+
+    def _check_name_is_available(self, dataset: ServiceBaseDataset, name: str):
+        try:
+            self.__datasets__.find_rule_by_query(
+                dataset,
+                query_or_name=name,
+            )
+            raise EntityAlreadyExistsError(
+                name=name,
+                type=Rule,
+            )
+        except EntityNotFoundError:
+            pass
 
     def find_labeling_rule(
         self,

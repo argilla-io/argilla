@@ -18,6 +18,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Security
 from pydantic import BaseModel, Field, validator
 
+from argilla.server.apis.v0.models.commons.model import BaseUpdateLabelingRule
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchResults,
@@ -35,18 +36,10 @@ from argilla.server.services.tasks.token_classification.labeling_rules.service i
 )
 
 
-class UpdateLabelingRule(BaseModel):
-    name: Optional[str] = Field(
-        default=None,
-        description="The rule name",
-    )
+class UpdateLabelingRule(BaseUpdateLabelingRule):
     label: Optional[str] = Field(
         default=None,
         description="The label associated with the rule.",
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="A brief description of the rule",
     )
 
 

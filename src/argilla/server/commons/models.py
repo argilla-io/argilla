@@ -46,6 +46,7 @@ class BaseLabelingRule(BaseModel):
     name: Optional[str] = Field(
         default=None,
         description="The rule name. If not provided will be computed from query",
+        regex=__SANITIZE_REGEX__.pattern,
     )
     query: str = Field(description="The rule query")
 

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from argilla.server.apis.v0.handlers.token_classification_labeling_rules import (
     LabelingRule,
@@ -21,6 +21,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
+from argilla.server.errors import ServerError, ValidationError
 from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
 
 
@@ -53,6 +54,7 @@ def test_rules_creation(mocked_client, records_for_token_classification):
 
 
 def test_rule_update(mocked_client, records_for_token_classification):
+
     dataset = "test_rule_update"
     base_api_url = prepare_dataset(
         client=mocked_client,
@@ -63,11 +65,38 @@ def test_rule_update(mocked_client, records_for_token_classification):
         client=mocked_client,
         base_url=base_api_url,
     )
+
+    update_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        rule=rule,
+        name="Wrong name",
+        with_error=ValidationError,
+        error_detail={
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "model": "Request",
+                    "errors": [
+                        {
+                            "loc": ["body", "name"],
+                            "msg": 'string does not match regex "^(\\w|[0-9]|_|-|\\.)+$"',
+                            "type": "value_error.str.regex",
+                            "ctx": {"pattern": "^(\\w|[0-9]|_|-|\\.)+$"},
+                        }
+                    ],
+                },
+            }
+        },
+    )
+
     rule = update_rule(
         client=mocked_client,
         base_url=base_api_url,
         rule=rule,
+        name="better_name",
     )
+
     new_rule = get_rule(
         client=mocked_client,
         base_url=base_api_url,
@@ -219,14 +248,30 @@ def update_rule(
     client,
     base_url: str,
     rule: LabelingRule,
+    description: Optional[str] = None,
+    label: Optional[str] = None,
+    name: Optional[str] = None,
+    with_error: Optional[Type[ServerError]] = None,
+    error_detail: Optional[Dict[str, Any]] = None,
 ):
+
     response = client.patch(
         f"{base_url}/labeling/rules/{rule.query}",
-        json={"description": "new Rule description"},
+        json={
+            "description": description or "new Rule description",
+            "label": label,
+            "name": name,
+        },
     )
     data = response.json()
-    assert response.status_code == 200, data
 
+    if with_error:
+        assert response.status_code == with_error.HTTP_STATUS
+        if error_detail:
+            assert error_detail == data
+        return
+
+    assert response.status_code == 200, data
     updated_rule = LabelingRule.parse_obj(data)
     assert updated_rule.description == "new Rule description"
     assert updated_rule.label == rule.label
