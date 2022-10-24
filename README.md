@@ -43,7 +43,7 @@
 <a href="#key-features">Key Features</a> <span> | </span>
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
-<a href="docs/migration-rubrix.md">Migration from Rubrix</a> | </span>
+<a href="docs/_source/community/migration-rubrix.md">Migration from Rubrix</a> | </span>
 <a href="#faq">FAQ</a>
 </p>
 </h3>

@@ -56,5 +56,6 @@
    Github <https://github.com/recognai/rubrix>
    Discussion forum <https://github.com/recognai/rubrix/discussions>
    community/developer_docs
+   community/migration-rubrix.md
 
 :::
