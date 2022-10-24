@@ -127,18 +127,18 @@ from datasets import load_dataset
 # load dataset from the hub
 dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
 
-# read in dataset, assuming its a dataset for token classification
-dataset = rg.read_datasets(dataset, task="TokenClassification")
+# read in dataset, assuming its a dataset for text classification
+dataset_rg = rg.read_datasets(dataset, task="TokenClassification")
 
 # log the dataset to the Argilla web app
 rg.log(dataset_rg, "gutenberg_spacy-ner")
 
 # load dataset from json
 my_dataframe = pd.read_json(
-    "https://raw.githubusercontent.com/argilla-io/datasets/main/sst-sentimentclassification.json")
+    "https://raw.githubusercontent.com/recognai/datasets/main/sst-sentimentclassification.json")
 
 # convert pandas dataframe to DatasetForTextClassification
-dataset = rg.DatasetForTextClassification.from_pandas(my_dataframe)
+dataset_rg = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 
 # log the dataset to the Argilla web app
 rg.log(dataset, name="sst-sentimentclassification")
