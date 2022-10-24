@@ -1,3 +1,0 @@
-## 👨🏽‍💻 Deploying
-
-WORK IN PROGRESS
