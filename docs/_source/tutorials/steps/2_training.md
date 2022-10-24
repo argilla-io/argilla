@@ -1,7 +1,7 @@
 ## 💪🏽 Training
 
 ````{grid} 1 1 2 2
-:class-container: tuto-section-6
+:class-container: tuto-section-2
 ```{include} /_static/tutorials/training-textclassification-transformers-pretrained/modal.md
 ```
 ```{include} /_static/tutorials/training-textclassification-smalltext-activelearning/modal.md

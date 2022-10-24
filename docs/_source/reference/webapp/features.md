@@ -106,7 +106,7 @@ You can find more information about the metrics in our dedicated [metrics guide]
 ![Weak labelling](../../_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/weak-supervision-with-argilla.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Weak labelling_ mode via the sidebar of the [Dataset page](dataset.md).
 

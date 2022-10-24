@@ -2,9 +2,7 @@
 
 [Argilla](https://argilla.io) is a **production-ready framework for building and improving datasets** for NLP projects.
 
-
-<video width="100%" controls><source src="/_static/tutorials/labelling-textclassification-snorkel-weaksupervision/ws_news.mp4" type="video/mp4"></video>
-
+<iframe width="100%" height="450" src="https://www.youtube.com/embed/2liPIhFKLQM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Features
 
