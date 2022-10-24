@@ -136,7 +136,7 @@ dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
 dataset = rg.read_datasets(dataset, task="TokenClassification")
 
 # log the dataset to the Rubrix web app
-rg.log(dataset_rb, "gutenberg_spacy-ner")
+rg.log(dataset_rg, "gutenberg_spacy-ner")
 
 # load dataset from json
 my_dataframe = pd.read_json(
@@ -212,7 +212,7 @@ In summary, the recommended process for uploading data into Argilla would be fol
 
 5. Do any data preparation, pre-processing, or pre-annotation with a pretrained model, and
 
-6. Transform your dataset rows/records into Argilla records and log them into a dataset using `rb.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
+6. Transform your dataset rows/records into Argilla records and log them into a dataset using `rg.log`. If your dataset is already loaded as a Hugging Face dataset, check the `read_datasets` method to make this process even simpler.
 
 ### How can I train a model
 The training datasets created with Argilla are model agnostic.
