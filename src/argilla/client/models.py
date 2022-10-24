@@ -83,8 +83,7 @@ class _Validators(BaseModel):
 
     @root_validator
     def _check_and_update_status(cls, values):
-        """Updates the status if an annotation is provided and no status is specified.
-        """
+        """Updates the status if an annotation is provided and no status is specified."""
         values["status"] = values.get("status") or (
             "Default" if values.get("annotation") is None else "Validated"
         )
@@ -399,8 +398,7 @@ class TokenClassificationRecord(_Validators):
 
     @property
     def __chars2tokens__(self) -> Dict[int, int]:
-        """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute.
-        """
+        """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
         warnings.warn(
             "The `__chars2tokens__` attribute is deprecated and will be removed in a"
             " future version. Please use the"
@@ -412,8 +410,7 @@ class TokenClassificationRecord(_Validators):
 
     @property
     def __tokens2chars__(self) -> Dict[int, Tuple[int, int]]:
-        """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute.
-        """
+        """DEPRECATED, please use the ``argilla.utils.span_utils.SpanUtils.chars_to_token_idx`` attribute."""
         warnings.warn(
             "The `__tokens2chars__` attribute is deprecated and will be removed in a"
             " future version. Please use the"
@@ -424,8 +421,7 @@ class TokenClassificationRecord(_Validators):
         return self._span_utils.token_to_char_idx
 
     def char_id2token_id(self, char_idx: int) -> Optional[int]:
-        """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.char_to_token_idx`` dict instead.
-        """
+        """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.char_to_token_idx`` dict instead."""
         warnings.warn(
             "The `char_id2token_id` method is deprecated and will be removed in a"
             " future version. Please use the"
@@ -435,8 +431,7 @@ class TokenClassificationRecord(_Validators):
         return self._span_utils.char_to_token_idx.get(char_idx)
 
     def token_span(self, token_idx: int) -> Tuple[int, int]:
-        """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.token_to_char_idx`` dict instead.
-        """
+        """DEPRECATED, please use the ``argilla.utisl.span_utils.SpanUtils.token_to_char_idx`` dict instead."""
         warnings.warn(
             "The `token_span` method is deprecated and will be removed in a future"
             " version. Please use the"
