@@ -30,7 +30,6 @@
 
 
 # -- Project information -----------------------------------------------------
-import os
 
 import rubrix as rb
 
@@ -59,3 +58,9 @@ myst_enable_extensions = []
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+templates_path = ["_templates"]
+
+html_additional_pages = {
+    "index": "index.html"
+}
