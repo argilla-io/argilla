@@ -22,7 +22,7 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4
+<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
 
 
 <br>
@@ -44,7 +44,7 @@ https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-
 <a href="#quickstart">Quickstart</a> <span> | </span>
 <a href="#principles">Principles</a> | </span>
 <a href="docs/migration-rubrix.md">Migration from Rubrix</a> | </span>
-<a href="#FAQ">FAQ</a>
+<a href="#faq">FAQ</a>
 </p>
 </h3>
 
