@@ -1,3 +1,4 @@
 ## 🔫 Few-shot classification
 
-WORK IN PROGRESS
+```{include} /_common/general.md
+```
