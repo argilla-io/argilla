@@ -20,13 +20,10 @@ from pydantic import BaseModel, Field, validator
 
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.token_classification import (
-    TokenClassificationAnnotation,
-    TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -325,11 +322,13 @@ def configure_router(router: APIRouter):
             as_dataset_class=TasksFactory.get_task_dataset(task),
         )
 
+        params = {"label": update.label} if update.label else {}
         rule = service.update_labeling_rule(
             dataset,
             query_or_name=query_or_name,
             description=update.description,
-            label=update.label,
+            name=update.name,
+            **params,
         )
 
         return LabelingRule.parse_obj(rule)

@@ -289,7 +289,7 @@ class DatasetsService:
         for r in dataset.rules:
             if r.query == rule.query or r.name == rule.name:
                 raise EntityAlreadyExistsError(
-                    f"query:{rule.query};name:{rule.name}",
+                    f"{rule.name}",
                     type=rule.__class__,
                 )
         dataset.rules.append(rule)

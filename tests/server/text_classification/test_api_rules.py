@@ -75,7 +75,6 @@ def test_dataset_update_rule(mocked_client):
         json=CreateLabelingRule(query=query, label="LALA").dict(),
     )
     assert response.status_code == 200
-
     mocked_client.patch(
         f"/api/datasets/TextClassification/{dataset}/labeling/rules/{query}",
         json={"label": "NEW Label"},
@@ -216,7 +215,7 @@ def test_duplicated_dataset_rules(mocked_client):
     assert response.json() == {
         "detail": {
             "code": "argilla.api.errors::EntityAlreadyExistsError",
-            "params": {"name": "a query", "type": "ServiceLabelingRule"},
+            "params": {"name": "a_query", "type": "ServiceLabelingRule"},
         }
     }
 
