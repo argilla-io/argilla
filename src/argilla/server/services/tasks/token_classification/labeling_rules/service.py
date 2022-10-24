@@ -61,7 +61,7 @@ class LabelingFunctionsMixin:
         if not rule.span_selector:
             rule.span_selector = self._default_selector_id()
         span_selector_ = self._span_selector_by_rule(rule)
-        agent = rule.query
+        agent = rule.name
         for record in records:
             entities = [
                 Span(start=start, end=end, label=rule.label)

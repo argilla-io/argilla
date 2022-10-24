@@ -69,15 +69,21 @@ class BaseLabelingRule(BaseModel):
         return query.strip()
 
     @root_validator
-    def compute_id(cls, values):
-        id_ = values.get("name")
+    def compute_name(cls, values):
+        name = values.get("name")
         query = values["query"]
 
-        if not id_:
-            values["name"] = cls.__sanitize_query__(query)
+        if not name:
+            name = query
 
+        values["name"] = cls.sanitize_query(name)
         return values
 
     @classmethod
-    def __sanitize_query__(cls, query: str) -> str:
-        return "_".join(cls.__SANITIZE_REGEX__.findall(query))
+    def sanitize_query(cls, query: str) -> str:
+        """
+        Remove all special characters from a query.
+        Normally, this sanitization should be used for storage purposes.
+        """
+        all_accepted_spans = cls.__SANITIZE_REGEX__.finditer(query)
+        return "_".join([span.group() for span in all_accepted_spans])

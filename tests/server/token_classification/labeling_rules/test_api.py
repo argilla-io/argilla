@@ -21,6 +21,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
+from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
 
 
 def test_rules_creation(mocked_client, records_for_token_classification):
@@ -184,14 +185,22 @@ def search_by_rule(
     assert results.aggregations is None
     assert results.total == 4, results
 
-    for record in results.records:
-        if label:
-            assert query in record.annotations
-            for entity in record.annotations[query].entities:
-                assert entity.label == label
-        else:
-            assert query not in record.annotations
+    agent = ServiceLabelingRule.sanitize_query(query)
 
+    def check_when_label(record):
+        assert agent in record.annotations
+        for entity in record.annotations[agent].entities:
+            assert entity.label == label
+
+    def check_when_no_label(record):
+        assert agent not in record.annotations
+
+    if label:
+        validate = check_when_label
+    else:
+        validate = check_when_no_label
+    for record in results.records:
+        validate(record)
     return results
 
 
@@ -215,8 +224,10 @@ def update_rule(
         f"{base_url}/labeling/rules/{rule.query}",
         json={"description": "new Rule description"},
     )
-    updated_rule = LabelingRule.parse_obj(response.json())
-    assert response.status_code == 200, updated_rule
+    data = response.json()
+    assert response.status_code == 200, data
+
+    updated_rule = LabelingRule.parse_obj(data)
     assert updated_rule.description == "new Rule description"
     assert updated_rule.label == rule.label
 
