@@ -547,7 +547,7 @@ class Api:
             get_dataset_data, request_class, dataset_class = task_config[task]
         except KeyError:
             raise ValueError(
-                f"Load method not supported for the '{task}' task. Supported tasks: "
+                f"Load method not supported for the '{task}' task. Supported Tasks: "
                 f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
             )
         response = get_dataset_data(
