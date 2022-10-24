@@ -14,7 +14,7 @@
 #  limitations under the License.
 from typing import Dict, List, Optional, Union
 
-import argilla as ar
+import argilla as rg
 from argilla import TextClassificationRecord
 from argilla.client import api
 from argilla.client.sdk.text_classification.models import LabelingRule
@@ -30,11 +30,11 @@ class Rule:
             `argilla.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
 
     Examples:
-        >>> import argilla as ar
+        >>> import argilla as rg
         >>> urgent_rule = Rule(query="inputs.text:(urgent AND immediately)", label="urgent", name="urgent_rule")
         >>> not_urgent_rule = Rule(query="inputs.text:(NOT urgent) AND metadata.title_length>20", label="not urgent")
         >>> not_urgent_rule.apply("my_dataset")
-        >>> my_dataset_records = ar.load(name="my_dataset")
+        >>> my_dataset_records = rg.load(name="my_dataset")
         >>> not_urgent_rule(my_dataset_records[0])
         "not urgent"
     """
@@ -80,7 +80,7 @@ class Rule:
         Args:
             dataset: The name of the dataset.
         """
-        records = ar.load(name=dataset, query=self._query)
+        records = rg.load(name=dataset, query=self._query)
 
         self._matching_ids = {record.id: None for record in records}
 

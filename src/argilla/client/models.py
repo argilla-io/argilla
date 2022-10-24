@@ -155,21 +155,21 @@ class TextClassificationRecord(_Validators):
         event_timestamp:
             The timestamp of the record.
         metrics:
-            READ ONLY! Metrics at record level provided by the server when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Metrics at record level provided by the server when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
         search_keywords:
-            READ ONLY! Relevant record keywords/terms for provided query when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Relevant record keywords/terms for provided query when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
     Examples:
         >>> # Single text input
-        >>> import argilla as ar
-        >>> record = ar.TextClassificationRecord(
+        >>> import argilla as rg
+        >>> record = rg.TextClassificationRecord(
         ...     text="My first argilla example",
         ...     prediction=[('eng', 0.9), ('esp', 0.1)]
         ... )
         >>>
         >>> # Various inputs
-        >>> record = ar.TextClassificationRecord(
+        >>> record = rg.TextClassificationRecord(
         ...     inputs={
         ...         "subject": "Has ganado 1 million!",
         ...         "body": "Por usar argilla te ha tocado este premio: <link>"
@@ -266,14 +266,14 @@ class TokenClassificationRecord(_Validators):
         event_timestamp:
             The timestamp of the record.
         metrics:
-            READ ONLY! Metrics at record level provided by the server when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Metrics at record level provided by the server when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
         search_keywords:
-            READ ONLY! Relevant record keywords/terms for provided query when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Relevant record keywords/terms for provided query when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
     Examples:
-        >>> import argilla as ar
-        >>> record = ar.TokenClassificationRecord(
+        >>> import argilla as rg
+        >>> record = rg.TokenClassificationRecord(
         ...     text = "Michael is a professor at Harvard",
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
         ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)]
@@ -483,15 +483,15 @@ class TextGenerationRecord(_Validators):
         event_timestamp:
             The timestamp of the record.
         metrics:
-            READ ONLY! Metrics at record level provided by the server when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Metrics at record level provided by the server when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
         search_keywords:
-            READ ONLY! Relevant record keywords/terms for provided query when using `ar.load`.
-            This attribute will be ignored when using `ar.log`.
+            READ ONLY! Relevant record keywords/terms for provided query when using `rg.load`.
+            This attribute will be ignored when using `rg.log`.
 
     Examples:
-        >>> import argilla as ar
-        >>> record = ar.Text2TextRecord(
+        >>> import argilla as rg
+        >>> record = rg.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
         ...     prediction=["Je m'appelle Sarah et j'aime mon chien."]
         ... )

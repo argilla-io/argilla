@@ -425,7 +425,7 @@ class WeakLabels(WeakLabelsBase):
 
         if self._records[0].multi_label:
             raise MultiLabelError(
-                "For multi-label text classification, use the `ar.labeling.text_classification.WeakMultiLabels` class."
+                "For multi-label text classification, use the `rg.labeling.text_classification.WeakMultiLabels` class."
             )
 
         # apply rules -> create the weak label matrix, annotation array, final label2int mapping

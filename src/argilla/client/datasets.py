@@ -399,8 +399,8 @@ class DatasetForTextClassification(DatasetBase):
     """
     Examples:
         >>> # Import/export records:
-        >>> import argilla as ar
-        >>> dataset = ar.DatasetForTextClassification.from_pandas(my_dataframe)
+        >>> import argilla as rg
+        >>> dataset = rg.DatasetForTextClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
         >>>
         >>> # Looping over the dataset:
@@ -409,16 +409,16 @@ class DatasetForTextClassification(DatasetBase):
         >>>
         >>> # Passing in a list of records:
         >>> records = [
-        ...     ar.TextClassificationRecord(text="example"),
-        ...     ar.TextClassificationRecord(text="another example"),
+        ...     rg.TextClassificationRecord(text="example"),
+        ...     rg.TextClassificationRecord(text="another example"),
         ... ]
-        >>> dataset = ar.DatasetForTextClassification(records)
+        >>> dataset = rg.DatasetForTextClassification(records)
         >>> assert len(dataset) == 2
         >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
-        ... ar.TextClassificationRecord(text="example")
-        >>> dataset[0] = ar.TextClassificationRecord(text="replaced example")
+        ... rg.TextClassificationRecord(text="example")
+        >>> dataset[0] = rg.TextClassificationRecord(text="replaced example")
     """
 
     _RECORD_TYPE = TextClassificationRecord
@@ -606,9 +606,9 @@ class DatasetForTextClassification(DatasetBase):
             A datasets Dataset with a *label* column and several *inputs* columns.
 
         Examples:
-            >>> import argilla as ar
-            >>> rb_dataset = ar.DatasetForTextClassification([
-            ...     ar.TextClassificationRecord(
+            >>> import argilla as rg
+            >>> rb_dataset = rg.DatasetForTextClassification([
+            ...     rg.TextClassificationRecord(
             ...         inputs={"header": "my header", "content": "my content"},
             ...         annotation="SPAM",
             ...     )
@@ -673,8 +673,8 @@ class DatasetForTokenClassification(DatasetBase):
     """
     Examples:
         >>> # Import/export records:
-        >>> import argilla as ar
-        >>> dataset = ar.DatasetForTokenClassification.from_pandas(my_dataframe)
+        >>> import argilla as rg
+        >>> dataset = rg.DatasetForTokenClassification.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
         >>>
         >>> # Looping over the dataset:
@@ -683,17 +683,17 @@ class DatasetForTokenClassification(DatasetBase):
         ...     print(record)
         >>>
         >>> # Passing in a list of records:
-        >>> import argilla as ar
+        >>> import argilla as rg
         >>> records = [
-        ...     ar.TokenClassificationRecord(text="example", tokens=["example"]),
-        ...     ar.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
+        ...     rg.TokenClassificationRecord(text="example", tokens=["example"]),
+        ...     rg.TokenClassificationRecord(text="another example", tokens=["another", "example"]),
         ... ]
-        >>> dataset = ar.DatasetForTokenClassification(records)
+        >>> dataset = rg.DatasetForTokenClassification(records)
         >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
-        ... ar.TokenClassificationRecord(text="example", tokens=["example"])
-        >>> dataset[0] = ar.TokenClassificationRecord(text="replace example", tokens=["replace", "example"])
+        ... rg.TokenClassificationRecord(text="example", tokens=["example"])
+        >>> dataset[0] = rg.TokenClassificationRecord(text="replace example", tokens=["replace", "example"])
     """
 
     _RECORD_TYPE = TokenClassificationRecord
@@ -814,9 +814,9 @@ class DatasetForTokenClassification(DatasetBase):
             A spacy DocBin ready to use for training a spacy NER model for "spacy" framework.
 
         Examples:
-            >>> import argilla as ar
-            >>> rb_dataset = ar.DatasetForTokenClassification([
-            ...     ar.TokenClassificationRecord(
+            >>> import argilla as rg
+            >>> rb_dataset = rg.DatasetForTokenClassification([
+            ...     rg.TokenClassificationRecord(
             ...         text="The text",
             ...         tokens=["The", "text"],
             ...         annotation=[("TAG", 0, 2)],
@@ -1000,16 +1000,16 @@ class DatasetForText2Text(DatasetBase):
     """
     Examples:
         >>> # Import/export records:
-        >>> import argilla as ar
-        >>> dataset = ar.DatasetForText2Text.from_pandas(my_dataframe)
+        >>> import argilla as rg
+        >>> dataset = rg.DatasetForText2Text.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
         >>>
         >>> # Passing in a list of records:
         >>> records = [
-        ...     ar.Text2TextRecord(text="example"),
-        ...     ar.Text2TextRecord(text="another example"),
+        ...     rg.Text2TextRecord(text="example"),
+        ...     rg.Text2TextRecord(text="another example"),
         ... ]
-        >>> dataset = ar.DatasetForText2Text(records)
+        >>> dataset = rg.DatasetForText2Text(records)
         >>> assert len(dataset) == 2
         >>>
         >>> # Looping over the dataset:
@@ -1018,8 +1018,8 @@ class DatasetForText2Text(DatasetBase):
         >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
-        ... ar.Text2TextRecord(text="example"})
-        >>> dataset[0] = ar.Text2TextRecord(text="replaced example")
+        ... rg.Text2TextRecord(text="example"})
+        >>> dataset[0] = rg.Text2TextRecord(text="replaced example")
     """
 
     _RECORD_TYPE = Text2TextRecord
