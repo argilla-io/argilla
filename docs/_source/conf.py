@@ -84,7 +84,7 @@ version: "3"
 
 services:
  argilla:
-   image: recognai/rubrix:{}
+   image: argilla/argilla-server:{}
    ports:
      - "80:80"
    environment:
@@ -99,7 +99,7 @@ myst_substitutions[
 # docker-compose.yaml
 services:
   argilla:
-    image: recognai/rubrix:{}
+    image: argilla/argilla-server:{}
     ports:
       - "6900:80"
     environment:
@@ -266,7 +266,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = "https://raw.githubusercontent.com/recognai/rubrix/master/docs/images/og_argilla.png"
+ogp_image = "https://www.argilla.io/og.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',
