@@ -832,7 +832,7 @@ a .tuto-section-11 {
 
 .sd-card img {
   width: auto;
-  margin: 2rem auto auto auto;
+  margin: 2rem auto -1rem auto;
   border-radius: 5px;
   object-fit: cover;
   object-position: 100% 0;
@@ -926,9 +926,14 @@ a .tuto-section-11 {
   background: var(--tuto-section-11);
 }
 
+.sd-card img+.sd-card-body {
+  border-radius: 0
+}
+
 .sd-card-body {
   background: var(--color-background-primary);
-  margin-top: -1em;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
 }
 
 .sd-card-body .sd-card-title {
