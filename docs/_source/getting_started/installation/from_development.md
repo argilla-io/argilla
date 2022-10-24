@@ -1,4 +1,4 @@
-(install-from-master)=
+(install-from-develop)=
 # Install from `develop`
 
 If you want the cutting-edge version of *Argilla* with the latest changes and experimental features, follow the steps below in your terminal.
@@ -7,7 +7,7 @@ If you want the cutting-edge version of *Argilla* with the latest changes and ex
 First, you need to install the master version of our python client:
 
 ```bash
- pip install -U git+https://github.com/recognai/rubrix.git
+ pip install -U git+https://github.com/argilla-io/argilla.git
 ```
 
 Then, the easiest way to get the master version of our web app up and running is via docker-compose:
