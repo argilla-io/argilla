@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +13,4 @@
 #  limitations under the License.
 
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        "rubrix:app",
-        port=6900,
-        host="0.0.0.0",
-        access_log=True,
-    )
+    pass

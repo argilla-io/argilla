@@ -26,52 +26,17 @@ maintainers = [
     {name = "recognai", email = "contact@recogn.ai"}
 ]
 dependencies = [
-    # Client
-    "httpx ~= 0.15.0",
-    "packaging >= 20.0",
-    # pandas -> For data loading
-    "pandas >=1.0.0,<2.0.0",
-    # Aligned pydantic version with server fastAPI
-    "pydantic >= 1.7.1",
-    # monitoring
-    "wrapt ~= 1.13.0",
-    # weaksupervision
-    "numpy",
-    "tqdm >= 4.27.0"
-
+    "argilla>=1.0.*"
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
+# TODO: maybe we can disable these optional deps.
 server = [
-    # Basic dependencies
-    "fastapi ~= 0.75.0",
-    "opensearch-py ~= 1.0.0",
-    "uvicorn[standard] >= 0.15.0,<0.18.0",
-    "smart-open",
-    "brotli-asgi ~= 1.1.0",
-    "Deprecated ~= 1.2.0",
-    # Advanced query search dsl
-    "luqum ~= 0.11.0",
-    # metrics
-    "scikit-learn >= 0.24.2",
-    # Words cloud
-    "stopwordsiso ~= 0.6.1",
-    # Statics server
-    "aiofiles~=0.6.0",
-    "PyYAML~=5.4.1",
-    # security dependencies
-    "python-multipart~=0.0.5",
-    "python-jose[cryptography]~=3.2.0",
-    "passlib[bcrypt]~=1.7.4",
-    # Info status
-    "psutil ~= 5.8.0",
-    # Telemetry
-    "segment-analytics-python != 2.2.1"
+    "argilla[server]>=1.0.0*"
 ]
 listeners = [
-    "schedule ~= 1.1.0",
-    "prodict ~= 0.8.0"
+
 ]
 
 [project.urls]
