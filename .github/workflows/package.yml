@@ -8,12 +8,12 @@ on:
   push:
     branches:
       - "main"
-      - "master"
+      - "develop"
       - "releases/**"
   pull_request:
     branches:
       - "main"
-      - "master"
+      - "develop"
       - "releases/**"
 
 jobs:
