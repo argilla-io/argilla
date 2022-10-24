@@ -133,11 +133,11 @@ class Api:
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
 
         Examples:
-            >>> import argilla as ar
-            >>> ar.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
+            >>> import argilla as rg
+            >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
             >>> # Customizing request headers
             >>> headers = {"X-Client-id":"id","X-Secret":"secret"}
-            >>> ar.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
+            >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
 
         """
         api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
@@ -220,9 +220,9 @@ class Api:
             workspace: If provided, dataset will be copied to that workspace
 
         Examples:
-            >>> import argilla as ar
-            >>> ar.copy("my_dataset", name_of_copy="new_dataset")
-            >>> ar.load("new_dataset")
+            >>> import argilla as rg
+            >>> rg.copy("my_dataset", name_of_copy="new_dataset")
+            >>> rg.load("new_dataset")
         """
         datasets_api.copy_dataset(
             client=self._client,
@@ -237,8 +237,8 @@ class Api:
             name: The dataset name.
 
         Examples:
-            >>> import argilla as ar
-            >>> ar.delete(name="example-dataset")
+            >>> import argilla as rg
+            >>> rg.delete(name="example-dataset")
         """
         datasets_api.delete_dataset(client=self._client, name=name)
 
@@ -271,17 +271,17 @@ class Api:
             If the ``background`` argument is set to True, an ``asyncio.Future`` will be returned instead.
 
         Examples:
-            >>> import argilla as ar
-            >>> record = ar.TextClassificationRecord(
+            >>> import argilla as rg
+            >>> record = rg.TextClassificationRecord(
             ...     text="my first argilla example",
             ...     prediction=[('spam', 0.8), ('ham', 0.2)]
             ... )
-            >>> ar.log(record, name="example-dataset")
+            >>> rg.log(record, name="example-dataset")
             1 records logged to http://localhost:6900/datasets/argilla/example-dataset
             BulkResponse(dataset='example-dataset', processed=1, failed=0)
             >>>
             >>> # Logging records in the background
-            >>> ar.log(record, name="example-dataset", background=True, verbose=False)
+            >>> rg.log(record, name="example-dataset", background=True, verbose=False)
             <Future at 0x7f675a1fffa0 state=pending>
         """
         future = self._agent.log(
@@ -325,11 +325,11 @@ class Api:
         Examples:
             >>> # Log asynchronously from your notebook
             >>> import asyncio
-            >>> import argilla as ar
+            >>> import argilla as rg
             >>> from argilla.utils import setup_loop_in_thread
             >>> loop, _ = setup_loop_in_thread()
             >>> future_response = asyncio.run_coroutine_threadsafe(
-            ...     ar.log_async(my_records, dataset_name), loop
+            ...     rg.log_async(my_records, dataset_name), loop
             ... )
         """
         tags = tags or {}
@@ -443,11 +443,11 @@ class Api:
 
         Examples:
             >>> ## Delete by id
-            >>> import rubrix as rb
-            >>> rb.delete_records(name="example-dataset", ids=[1,3,5])
+            >>> import argilla as rg
+            >>> rg.delete_records(name="example-dataset", ids=[1,3,5])
             >>> ## Discard records by query
-            >>> import rubrix as rb
-            >>> rb.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
+            >>> import argilla as rg
+            >>> rg.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
         """
         return self.datasets.delete_records(
             name=name,
@@ -485,7 +485,7 @@ class Api:
                 load method are sorted by ID, ´id_from´ can be used to load using batches.
 
             as_pandas:
-                DEPRECATED! To get a pandas DataFrame do ``ar.load('my_dataset').to_pandas()``.
+                DEPRECATED! To get a pandas DataFrame do ``rg.load('my_dataset').to_pandas()``.
 
         Returns:
         --------
@@ -493,8 +493,8 @@ class Api:
 
         Examples:
             **Basic Loading**: load the samples sorted by their ID
-            >>> import argilla as ar
-            >>> dataset = ar.load(name="example-dataset")
+            >>> import argilla as rg
+            >>> dataset = rg.load(name="example-dataset")
 
             **Iterate over a large dataset:**
                 When dealing with a large dataset you might want to load it in batches to optimize memory consumption
@@ -503,9 +503,9 @@ class Api:
                 the given id, where N is determined by the `limit` parameter. **NOTE** If
                 no `limit` is given the whole dataset after that ID will be retrieved.
 
-            >>> import argilla as ar
-            >>> dataset_batch_1 = ar.load(name="example-dataset", limit=1000)
-            >>> dataset_batch_2 = ar.load(name="example-dataset", limit=1000, id_from=dataset_batch_1[-1].id)
+            >>> import argilla as rg
+            >>> dataset_batch_1 = rg.load(name="example-dataset", limit=1000)
+            >>> dataset_batch_2 = rg.load(name="example-dataset", limit=1000, id_from=dataset_batch_1[-1].id)
 
         """
         if as_pandas is False:
@@ -519,7 +519,7 @@ class Api:
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
                 "If you want a pandas DataFrame do"
-                " `ar.load('my_dataset').to_pandas()`.",
+                " `rg.load('my_dataset').to_pandas()`.",
             )
 
         response = datasets_api.get_dataset(client=self._client, name=name)

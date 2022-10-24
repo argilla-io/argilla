@@ -22,6 +22,11 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
+
+
+https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
+
+
 <!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
 
 
@@ -128,7 +133,7 @@ from datasets import load_dataset
 dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
 
 # read in dataset, assuming its a dataset for token classification
-dataset = rb.read_datasets(dataset, task="TokenClassification")
+dataset = rg.read_datasets(dataset, task="TokenClassification")
 
 # log the dataset to the Rubrix web app
 rg.log(dataset_rb, "gutenberg_spacy-ner")
@@ -138,7 +143,7 @@ my_dataframe = pd.read_json(
     "https://raw.githubusercontent.com/argilla-io/datasets/main/sst-sentimentclassification.json")
 
 # convert pandas dataframe to DatasetForTextClassification
-dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
+dataset = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 
 # log the dataset to the Rubrix web app
 rg.log(dataset, name="sst-sentimentclassification")

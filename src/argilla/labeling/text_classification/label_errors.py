@@ -72,8 +72,8 @@ def find_label_errors(
         ValueError: If not supported kwargs are passed on, e.g. 'sorted_index_method'.
 
     Examples:
-        >>> import argilla as ar
-        >>> records = ar.load("my_dataset")
+        >>> import argilla as rg
+        >>> records = rg.load("my_dataset")
         >>> records_with_label_errors = find_label_errors(records)
     """
     try:
