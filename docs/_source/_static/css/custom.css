@@ -812,10 +812,9 @@ a .tuto-section-11 {
 
 /* Cards */
 .sd-card {
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  box-shadow: none !important;
+  border-top: 1px solid var(--color-background-primary);
+  border-left: 1px solid var(--color-background-primary);
+  border-right: 1px solid var(--color-background-primary);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border-bottom-left-radius: 0;
@@ -870,8 +869,16 @@ a .tuto-section-11 {
 }
 
 .tuto-section-2 .sd-card {
-  border-color: var(--tuto-section-2);
+  border-bottom-color: var(--tuto-section-2);
   background: var(--tuto-section-2);
+  transition: all 0.2s ease-in;
+}
+
+.tuto-section-2 .sd-card-hover:hover {
+  background: #f7b598;
+  border-color: #f7b598;
+  transition: all 0.2s ease-in;
+  box-shadow: 0 0.1rem 0.25rem var(--sd-color-shadow), 0 0 0.6rem rgba(0, 0, 0, .1) !important;
 }
 
 .tuto-section-3 .sd-card {
@@ -920,8 +927,6 @@ a .tuto-section-11 {
 }
 
 .sd-card-body {
-  padding-left: 0;
-  padding-right: 0;
   background: var(--color-background-primary);
   margin-top: -1em;
 }
