@@ -19,7 +19,7 @@ All steps that we directly or in-directly cover within the `MLOps lifecycle`.
 | Terminology | Description |
 | :--- | :--- |
 | 🏷 Labelling       | `manual or automatic` data collection and label assignment.        |
-| 💪🏽 Training      | Argilla `Metrics` enable you to perform fine-grained analyses of your models and training datasets.        |
+| 💪🏽 Training      |  `training and evaluation` of NLP models  |
 | 👨🏽‍💻 Deploying       | `logging inference/prediction` of your ML models during their deployment.        |
 | 📊 Monitoring       | `Dashboarding and evaluation` of model performance.        |
 
