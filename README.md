@@ -128,7 +128,7 @@ from datasets import load_dataset
 dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
 
 # read in dataset, assuming its a dataset for token classification
-dataset = rb.read_datasets(dataset, task="TokenClassification")
+dataset = rg.read_datasets(dataset, task="TokenClassification")
 
 # log the dataset to the Rubrix web app
 rg.log(dataset_rb, "gutenberg_spacy-ner")
@@ -138,7 +138,7 @@ my_dataframe = pd.read_json(
     "https://raw.githubusercontent.com/argilla-io/datasets/main/sst-sentimentclassification.json")
 
 # convert pandas dataframe to DatasetForTextClassification
-dataset = rb.DatasetForTextClassification.from_pandas(my_dataframe)
+dataset = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 
 # log the dataset to the Rubrix web app
 rg.log(dataset, name="sst-sentimentclassification")
