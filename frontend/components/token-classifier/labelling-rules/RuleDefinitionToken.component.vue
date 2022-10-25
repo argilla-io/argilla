@@ -1,17 +1,21 @@
 <template>
   <div class="rule__area">
-    <div class="left-item">RuleDefinition</div>
+    <div class="left-item">
+      <RulesQueryToken title="New query" :recordsValue="10" />
+    </div>
     <RulesMetricsToken
       title="Rules Metrics"
       :subcardInputs="options"
       btnLabel="Manage rules"
       @onClickBottomBtn="goToManageRules()"
+      :isBtnDisabled="isManageRulesButtonDisabled"
     />
   </div>
 </template>
 
 <script>
 import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
+import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
 export default {
   name: "RuleDefinitionToken",
@@ -32,6 +36,7 @@ export default {
   },
   components: {
     RulesMetricsToken,
+    RulesQueryToken,
   },
   methods: {
     goToManageRules() {
@@ -40,7 +45,10 @@ export default {
   },
   computed: {
     ruleMetrics() {
-      return this.rule.rule_metrics;
+      if (this.rule) return this.rule.rule_metrics;
+    },
+    isManageRulesButtonDisabled() {
+      return this.rule.length === 0;
     },
   },
   watch: {
@@ -71,6 +79,7 @@ export default {
   gap: 20px;
 }
 .left-item {
+  display: flex;
   flex: 1;
 }
 </style>

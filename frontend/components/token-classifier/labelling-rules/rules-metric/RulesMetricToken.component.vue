@@ -20,7 +20,9 @@
       </div>
     </div>
     <div class="rules-metric-token__bottom" v-if="btnLabel">
-      <button @click="onClickBtnBottom">{{ btnLabel }}</button>
+      <button @click="onClickBtnBottom" :disabled="isBtnDisabled">
+        {{ btnLabel }}
+      </button>
     </div>
   </div>
 </template>
@@ -61,6 +63,10 @@ export default {
     },
     btnLabel: {
       type: String,
+    },
+    isBtnDisabled: {
+      type: Boolean,
+      required: true,
     },
   },
   computed: {

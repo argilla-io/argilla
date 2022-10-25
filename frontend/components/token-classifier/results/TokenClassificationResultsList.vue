@@ -18,11 +18,7 @@
 <template>
   <results-list :dataset="dataset">
     <template slot="results-header" v-if="isLabellingRules">
-      <RuleDefinitionToken
-        v-if="rule && queryText"
-        :rule="rule"
-        :queryText="queryText"
-      />
+      <RuleDefinitionToken :rule="rule" :queryText="queryText" />
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -87,7 +83,9 @@ export default {
       return getDatasetModelPrimaryKey(paramsToGetDatasetPrimaryKey);
     },
     queryText() {
-      return TokenClassificationDataset.find(this.datasetPrimaryKey).query.text;
+      return (
+        TokenClassificationDataset.find(this.datasetPrimaryKey).query.text || ""
+      );
     },
     rulePrimaryKey() {
       const paramsToGetRulePrimaryKey = {
@@ -98,10 +96,12 @@ export default {
       return getRuleModelPrimaryKey(paramsToGetRulePrimaryKey);
     },
     rule() {
-      return RuleModel.query()
-        .with("rule_metrics")
-        .whereId(this.rulePrimaryKey)
-        .first();
+      return (
+        RuleModel.query()
+          .with("rule_metrics")
+          .whereId(this.rulePrimaryKey)
+          .first() || {}
+      );
     },
   },
   methods: {
