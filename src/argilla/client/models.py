@@ -322,10 +322,20 @@ class TokenClassificationRecord(_Validators):
         ...     tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
         ...     prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
         ...     embeddings = [
-        ...         ("tokens", 4, [
-        ...                (0, [1,2,3,4]), (1, [0.1, 2.1, 3.2, 1.2]), (2, [1.3, 2.1, 3.4, 4.5]),
-        ...                (3, [0.22, 0.21, 9.3, 1.42]), (4, [1.34, 2.21, 3.42, 4.32]), (5, [11.2, 99.1, 21.3, 4.1])]),
-        ...         ("text", 4, [3.2, 4.5, 5.6, 8.9])]
+        ...         {
+        ...                "recordPropertyName":"text",
+        ...                "embeddings": [
+        ...                  {
+        ...                     "embeddingVectors": [
+        ...                            {
+        ...                                 "vectorizerName": "bert_base_uncased"
+        ...                                 "embeddingVector": [3.2, 4.5, 5.6, 8.9])
+        ...                            }
+        ...                     ]
+        ...                  }
+        ...               ]
+        ...          }
+        ...       ]
         ... )
     """
 
@@ -543,7 +553,25 @@ class TextGenerationRecord(_Validators):
         >>> record = rg.Text2TextRecord(
         ...     text="My name is Sarah and I love my dog.",
         ...     prediction=["Je m'appelle Sarah et j'aime mon chien."],
-        ...     embeddings = [("text", 5, [1.2, 2.3, 3.4, 5.2, 6.5]), ("prediction", 5, [2.12, 3.11, 4.53, 6.53, 7.1])]
+        ...     embeddings = [
+        ...           {
+        ...                 "recordPropertyName":"text",
+        ...                  "embeddings": [
+        ...                        {
+        ...                            "embeddingVectors": [
+        ...                                {
+        ...                                   "vectorizerName": "bert_base_uncased",
+        ...                                   "embeddingVector": [1.2, 2.3, 3.4, 5.2, 6.5]
+        ...                                },
+        ...                                {
+        ...                                    "vectorizerName": "xlm_multilingual_uncased",
+        ...                                    "embeddingName": [2.2, 5.3, 5.4, 3.2, 2.5]
+        ...                                }
+        ...                            ]
+        ...                        }
+        ...                    ]
+        ...            }
+        ...     ]
         ... )
     """
 

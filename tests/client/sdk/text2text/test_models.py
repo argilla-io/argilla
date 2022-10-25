@@ -36,6 +36,7 @@ from argilla.server.apis.v0.models.text2text import (
 
 def test_bulk_data_schema(helpers):
     client_schema = Text2TextBulkData.schema()
+    print(client_schema)
     server_schema = ServerText2TextBulkData.schema()
     assert helpers.are_compatible_api_schemas(client_schema, server_schema)
 
