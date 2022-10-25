@@ -136,7 +136,7 @@ def configure_telemetry(app):
     message = "\n"
     message += inspect.cleandoc(
         """
-        Rubrix uses telemetry to report anonymous usage and error information.
+        Argilla uses telemetry to report anonymous usage and error information.
 
         You can know more about what information is reported at:
 
@@ -148,9 +148,9 @@ def configure_telemetry(app):
     )
     message += "\n\n    "
     message += (
-        "#set RUBRIX_ENABLE_TELEMETRY=0"
+        "#set ARGILLA_ENABLE_TELEMETRY=0"
         if os.name == "nt"
-        else "$>export RUBRIX_ENABLE_TELEMETRY=0"
+        else "$>export ARGILLA_ENABLE_TELEMETRY=0"
     )
     message += "\n"
 

@@ -141,8 +141,7 @@ my_dataframe = pd.read_json(
 dataset_rg = rg.DatasetForTextClassification.from_pandas(my_dataframe)
 
 # log the dataset to the Argilla web app
-rg.log(dataset, name="sst-sentimentclassification")
-
+rg.log(dataset_rg, name="sst-sentimentclassification")
 ```
 
 This will create two datasets which you can use to do a quick tour of the core features of Argilla.
