@@ -213,7 +213,7 @@ class ElasticsearchBackend(LoggingMixin):
         ----------
         index:
             The index name
-        sor_id:
+        sort_id:
             The sort id configuration
         query:
             The es query for filter results. Default: None
@@ -304,7 +304,7 @@ class ElasticsearchBackend(LoggingMixin):
         mappings: Dict[str, Any] = None,
     ):
         """
-        Applies a index creation with provided mapping configuration.
+        Applies an index creation with provided mapping configuration.
 
         See <https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html>
 
@@ -332,7 +332,7 @@ class ElasticsearchBackend(LoggingMixin):
         self, name: str, template: Dict[str, Any], force_recreate: bool = False
     ):
         """
-        Applies a index template creation with provided template definition.
+        Applies an index template creation with provided template definition.
 
         Parameters
         ----------

@@ -120,6 +120,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         values = cls.update_annotation(values, "prediction")
         values = cls.update_annotation(values, "annotation")
+        values = cls.update_annotation(values, "embedding")
         return values
 
     @validator("id", always=True, pre=True)
