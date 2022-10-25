@@ -44,10 +44,15 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
+class BaseEmbeddingVectorDB(BaseModel):
+    property_name: Optional[str] = Field(default=None)
+    propertyNames: Optional[List[str]] = Field(default=None)
+    embedding_vectors: List[Dict[str, List[float]]]
+
+
 class BaseEmbeddingDB(BaseModel):
-    dimension: int
-    embedding: List[float]
-    embedding_name: str
+    record_property_name: str = Field(default="text")
+    embeddings: List[BaseEmbeddingVectorDB]
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
