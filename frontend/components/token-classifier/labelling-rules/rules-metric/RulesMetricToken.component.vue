@@ -61,6 +61,10 @@ export default {
       type: String,
       default: () => "white",
     },
+    textSubcardColor: {
+      type: String,
+      default: () => "black",
+    },
     btnLabel: {
       type: String,
     },
@@ -83,6 +87,7 @@ export default {
         "--text-color": this.textColor,
         "--background-color": this.backgroundColor,
         "--background-subcard-color": this.backgroundSubcardColor,
+        "--text-subcard-color": this.textSubcardColor,
       };
     },
   },
@@ -124,7 +129,9 @@ export default {
       display: flex;
       flex-direction: column;
       border-radius: 10px;
+      padding: 0.8em;
       gap: 5px;
+      color: var(--text-subcard-color);
       background-color: var(--background-subcard-color);
       .subcard__items {
         &:first-child {

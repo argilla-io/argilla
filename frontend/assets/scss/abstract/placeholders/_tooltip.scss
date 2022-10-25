@@ -35,6 +35,20 @@ $tooltip-border-radius: $border-radius-s;
     @include triangle(right, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
   }
 }
+%has-tooltip--right {
+  @extend %has-tooltip;
+  &:after {
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(-100% + 10px);
+  }
+  &:before {
+    right: calc(25% + $tooltip-triangle-size/2);
+    top: 50%;
+    transform: translateY(-50%);
+    @include triangle(left, $tooltip-triangle-size, $tooltip-triangle-size, $tooltip-bg);
+  }
+}
 %has-tooltip--bottom {
   @extend %has-tooltip;
   &:after {

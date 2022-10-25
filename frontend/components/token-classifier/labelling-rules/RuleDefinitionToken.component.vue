@@ -8,6 +8,9 @@
       :subcardInputs="options"
       btnLabel="Manage rules"
       @onClickBottomBtn="goToManageRules()"
+      backgroundColor="#E84242"
+      backgroundSubcardColor="white"
+      textSubcardColor="#E84242"
       :isBtnDisabled="isManageRulesButtonDisabled"
     />
   </div>
