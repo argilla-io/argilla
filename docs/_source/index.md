@@ -7,6 +7,7 @@
    :caption: Getting Started
    :hidden:
 
+   getting_started/argilla
    getting_started/quickstart
    getting_started/installation/installation.md
    getting_started/terminology
