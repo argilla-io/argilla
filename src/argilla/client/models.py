@@ -228,7 +228,7 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Tuple[str, Tuple[str, int, List[float]]]]]
+    embeddings: Optional[List[Dict[str, List[Dict[str, List[float]]]]]]
     embedding_agent: Optional[str]
 
     multi_label: bool = False
