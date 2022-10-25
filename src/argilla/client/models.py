@@ -148,7 +148,7 @@ class TextClassificationRecord(_Validators):
         id:
             The id of the record. By default (`None`), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.
@@ -177,7 +177,47 @@ class TextClassificationRecord(_Validators):
         ...     },
         ...     prediction=[('spam', 0.99), ('ham', 0.01)],
         ...     annotation="spam",
-        ...     embeddings = [("body", 4, [1.3, 0.2, 0.3, 4.2])]
+        ...     embeddings = [
+        ...            {
+        ...                 "recordPropertyName":"inputs",
+        ...                 "embeddings": [
+        ...                     {
+        ...                         "propertyName": "subject",
+        ...                         "embeddingVectors": [
+        ...                             {
+        ...                                 "vectorizerName": "distilbert_uncased",
+        ...                                 "embeddingVector": [1.13, 4.1, 6.3, 4.2, 9.1]
+        ...                             }
+        ...                         ]
+        ...                     },
+        ...                     {
+        ...                         "propertyNames": ["subject", "body"],
+        ...                         "embeddingVectors":[
+        ...                             {
+        ...                                 "vectorizerName": "distilbert_uncased",
+        ...                                 "embeddingVector": [1.1, 2.1, 3.3, 4.2, 2.1]
+        ...                             },
+        ...                             {
+        ...                                  "vectorizerName": "xlm_roberta_cased",
+        ...                                  "embeddingVector": [2.1, 3.1, 4.3, 5.6, 8.9]
+        ...                              }
+        ...                     }
+        ...                 ]
+        ...             },
+        ...             {
+        ...                 "recordPropertyName": "annotation",
+        ...                 "embeddings": [
+        ...                      {
+        ...                         "embeddingVectors": [
+        ...                                {
+        ...                                     "vectorizerName": "bert_base_uncased"
+        ...                                     "embeddingVector": [1.3, 2.1, 3.4, 5.1]
+        ...                                 }
+        ...                          ]
+        ...                      }
+        ...                  ]
+        ...             }
+        ...         ]
         ... )
     """
 
@@ -188,7 +228,7 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
-    embedding: Optional[str, int, List[float]]
+    embeddings: Optional[List[Tuple[str, Tuple[str, int, List[float]]]]]
     embedding_agent: Optional[str]
 
     multi_label: bool = False
@@ -263,7 +303,7 @@ class TokenClassificationRecord(_Validators):
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
-            Meta data for the record. Defaults to `{}`.
+            Metadata for the record. Defaults to `{}`.
         status:
             The status of the record. Options: 'Default', 'Edited', 'Discarded', 'Validated'.
             If an annotation is provided, this defaults to 'Validated', otherwise 'Default'.

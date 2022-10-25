@@ -47,6 +47,7 @@ class BaseAnnotationDB(BaseModel):
 class BaseEmbeddingDB(BaseModel):
     dimension: int
     embedding: List[float]
+    embedding_name: str
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
