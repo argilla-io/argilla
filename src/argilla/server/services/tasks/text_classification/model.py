@@ -20,6 +20,8 @@ from pydantic import BaseModel, Field, root_validator, validator
 from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import (
     BaseLabelingRule,
+    BaseRulesSummary,
+    BaseRuleSummary,
     PredictionStatus,
     TaskStatus,
     TaskType,
@@ -331,3 +333,13 @@ class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(default_factory=list)
+
+
+class DatasetLabelingRulesSummary(BaseRulesSummary):
+    pass
+
+
+class LabelingRuleSummary(BaseRuleSummary):
+    correct_records: int = Field(default=0)
+    incorrect_records: int = Field(default=0)
+    precision: Optional[float] = None

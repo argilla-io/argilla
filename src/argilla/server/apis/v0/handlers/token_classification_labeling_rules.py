@@ -21,10 +21,11 @@ from pydantic import BaseModel, Field, validator
 from argilla.server.apis.v0.models.commons.model import BaseUpdateLabelingRule
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.token_classification import (
+    TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
 from argilla.server.commons.config import TasksFactory
-from argilla.server.commons.models import TaskType
+from argilla.server.commons.models import BaseRulesSummary, BaseRuleSummary, TaskType
 from argilla.server.security import auth
 from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
@@ -67,6 +68,8 @@ class LabelingRuleSearchResults(BaseModel):
 
     total_records: int
     annotated_records: int
+
+    records: Optional[List[TokenClassificationRecord]] = None
 
 
 class DatasetLabelingRulesMetricsSummary(BaseModel):
@@ -149,31 +152,6 @@ def configure_router(router: APIRouter):
         return LabelingRule.parse_obj(rule)
 
     @router.get(
-        path=f"{base_endpoint}/{{query_or_name:path}}:summary",
-        operation_id="compute_rule_metrics",
-        description="Computes dataset labeling rule metrics",
-        response_model=LabelingRuleSearchResults,
-        response_model_exclude_none=True,
-    )
-    async def compute_rule_metrics(
-        name: str,
-        query_or_name: str,
-        label: Optional[str] = Query(
-            None,
-            description="Label related to query rule",
-        ),
-        common_params: CommonTaskHandlerDependencies = Depends(),
-        current_user: User = Security(auth.get_user, scopes=[]),
-    ) -> LabelingRuleSearchResults:
-
-        return LabelingRuleSearchResults(
-            coverage=56,
-            coverage_annotated=12,
-            total_records=100,
-            annotated_records=30,
-        )
-
-    @router.get(
         path=f"{base_endpoint}/{{query_or_name:path}}/search",
         operation_id="search_rule_records",
         description="Fetch matched records by the provided rule",
@@ -215,7 +193,7 @@ def configure_router(router: APIRouter):
         )
 
     @router.get(
-        path=f"{base_endpoint}:summary",
+        path=f"{base_endpoint}/summary",
         operation_id="compute_dataset_rules_metrics",
         description="Computes overall metrics for dataset labeling rules",
         response_model=DatasetLabelingRulesMetricsSummary,
@@ -225,13 +203,85 @@ def configure_router(router: APIRouter):
         name: str,
         common_params: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
     ) -> DatasetLabelingRulesMetricsSummary:
-        return DatasetLabelingRulesMetricsSummary(
-            coverage=73,
-            coverage_annotated=22,
-            total_records=100,
-            annotated_records=30,
+
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
         )
+
+        total, annotated, summary = service.compute_dataset_rules_summary(
+            dataset=dataset
+        )
+        return DatasetLabelingRulesMetricsSummary(
+            coverage=summary.covered_records,
+            coverage_annotated=summary.annotated_covered_records,
+            annotated_records=annotated,
+            total_records=total,
+        )
+
+    @router.get(
+        path=f"{base_endpoint}/{{query_or_name:path}}/summary",
+        operation_id="compute_rule_metrics",
+        description="Computes dataset labeling rule metrics",
+        response_model=LabelingRuleSearchResults,
+        response_model_exclude_none=True,
+    )
+    async def compute_rule_metrics(
+        name: str,
+        query_or_name: str,
+        label: Optional[str] = Query(
+            None,
+            description="Label related to query rule",
+        ),
+        with_records: Optional[bool] = Query(
+            default=False,
+            description="If true, will return also matched records for the rule",
+        ),
+        common_params: CommonTaskHandlerDependencies = Depends(),
+        current_user: User = Security(auth.get_user, scopes=[]),
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
+        service: TokenClassificationService = Depends(
+            TokenClassificationService.get_instance
+        ),
+    ) -> LabelingRuleSearchResults:
+
+        dataset = datasets.find_by_name(
+            user=current_user,
+            name=name,
+            task=task,
+            workspace=common_params.workspace,
+            as_dataset_class=TasksFactory.get_task_dataset(task),
+        )
+
+        total_records, annotated_records, summary = service.compute_rule_summary(
+            dataset=dataset,
+            rule_query=query_or_name,
+        )
+        response = LabelingRuleSearchResults(
+            coverage=summary.covered_records / total_records if total_records else 0.0,
+            coverage_annotated=summary.annotated_covered_records / annotated_records
+            if annotated_records
+            else 0.0,
+            total_records=total_records,
+            annotated_records=annotated_records,
+        )
+
+        if with_records:
+            results = service.search_by_rule(
+                dataset,
+                query=query_or_name,
+                label=label,
+            )
+            response.records = results.records
+        return response
 
     @router.delete(
         path=f"{base_endpoint}/{{query_or_name:path}}",

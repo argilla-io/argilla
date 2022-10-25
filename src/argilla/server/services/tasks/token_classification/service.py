@@ -61,7 +61,7 @@ class TokenClassificationService(NERLabelingRulesMixin):
         storage: RecordsStorageService,
         search: SearchRecordsService,
     ):
-        super().__init__(datasets)
+        super().__init__(datasets, records=search.__dao__)
 
         self.__storage__ = storage
         self.__search__ = search

@@ -11,17 +11,21 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import math
 from typing import Any, Dict, List, Optional, Type
 
+import pytest
+
 from argilla.server.apis.v0.handlers.token_classification_labeling_rules import (
+    DatasetLabelingRulesMetricsSummary,
     LabelingRule,
+    LabelingRuleSearchResults,
 )
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
     TokenClassificationSearchResults,
 )
-from argilla.server.errors import ServerError, ValidationError
+from argilla.server.errors import EntityAlreadyExistsError, ServerError, ValidationError
 from argilla.server.services.tasks.token_classification.model import ServiceLabelingRule
 
 
@@ -97,6 +101,26 @@ def test_rule_update(mocked_client, records_for_token_classification):
         name="better_name",
     )
 
+    rule = update_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        rule=rule,
+        description="New new description HERE!",
+        name="better_name",
+    )
+    other_rule = create_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        label="LELELE",
+        query="peter",
+    )
+    update_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        rule=other_rule,
+        name="better_name",
+        with_error=EntityAlreadyExistsError,
+    )
     new_rule = get_rule(
         client=mocked_client,
         base_url=base_api_url,
@@ -194,6 +218,147 @@ def test_search_records_by_rule(
     )
 
 
+def test_rule_summary(
+    mocked_client,
+    records_for_token_classification: List[TokenClassificationRecord],
+):
+    dataset = "test_rule_summary"
+    base_api_url = prepare_dataset(
+        client=mocked_client,
+        name=dataset,
+        records=records_for_token_classification,
+    )
+    query, _ = get_rule_summary(
+        client=mocked_client,
+        base_url=base_api_url,
+    )
+
+    get_rule_summary(
+        client=mocked_client,
+        base_url=base_api_url,
+        label="BB",
+        fetch_records=True,
+    )
+
+    rule = create_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        query=query,
+    )
+
+    get_rule_summary(
+        client=mocked_client,
+        base_url=base_api_url,
+        label=rule.label,
+        fetch_records=True,
+        send_label=False,
+    )
+
+
+def test_dataset_rules_summary(
+    mocked_client,
+    records_for_token_classification: List[TokenClassificationRecord],
+):
+    dataset = "test_dataset_rules_summary"
+    base_api_url = prepare_dataset(
+        client=mocked_client,
+        name=dataset,
+        records=records_for_token_classification,
+    )
+
+    results = get_dataset_rules_summary(
+        client=mocked_client,
+        base_url=base_api_url,
+    )
+
+    assert results == DatasetLabelingRulesMetricsSummary(
+        coverage=0.0,
+        coverage_annotated=0.0,
+        total_records=6,
+        annotated_records=6,
+    )
+
+    create_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        query="a*",
+        label="AA",
+    )
+    create_rule(
+        client=mocked_client,
+        base_url=base_api_url,
+        query="b*",
+        label="BB",
+    )
+
+    results = get_dataset_rules_summary(
+        client=mocked_client,
+        base_url=base_api_url,
+    )
+    assert results == DatasetLabelingRulesMetricsSummary(
+        coverage=4.0,
+        coverage_annotated=4.0,
+        total_records=6,
+        annotated_records=6,
+    )
+
+
+def get_dataset_rules_summary(
+    *,
+    client,
+    base_url: str,
+):
+
+    response = client.get(f"{base_url}/labeling/rules/summary")
+
+    data = response.json()
+    assert response.status_code == 200, data
+
+    return DatasetLabelingRulesMetricsSummary.parse_obj(data)
+
+
+def get_rule_summary(
+    *,
+    client,
+    base_url: str,
+    label: Optional[str] = None,
+    fetch_records: bool = False,
+    send_label: bool = True,
+):
+    query = "a*"
+    url = f"{base_url}/labeling/rules/{query}/summary"
+    params = {}
+    if label and send_label:
+        params["label"] = label
+    if fetch_records:
+        params["with_records"] = True
+    if params:
+        query_params = "&".join([f"{k}={v}" for k, v in params.items()])
+        url += f"?{query_params}"
+
+    response = client.get(url)
+
+    data = response.json()
+    assert response.status_code == 200, data
+
+    results = LabelingRuleSearchResults.parse_obj(data)
+    assert results.dict(exclude={"records"}) == {
+        "annotated_records": 6,
+        "coverage": 0.6666666666666666,
+        "coverage_annotated": 0.6666666666666666,
+        "total_records": 6,
+    }
+
+    if fetch_records:
+        _validate_matched_records(
+            records=results.records,
+            query=query,
+            label=label,
+        )
+
+    return query, results
+
+
 def search_by_rule(
     *,
     client,
@@ -214,23 +379,38 @@ def search_by_rule(
     assert results.aggregations is None
     assert results.total == 4, results
 
+    _validate_matched_records(
+        records=results.records,
+        query=query,
+        label=label,
+    )
+    return results
+
+
+def _validate_matched_records(
+    *,
+    records: List[TokenClassificationRecord],
+    query: str,
+    label: Optional[str] = None,
+):
+
     agent = ServiceLabelingRule.sanitize_query(query)
 
-    def check_when_label(record):
+    def check_when_label(record: TokenClassificationRecord):
         assert agent in record.annotations
         for entity in record.annotations[agent].entities:
             assert entity.label == label
 
-    def check_when_no_label(record):
+    def check_when_no_label(record: TokenClassificationRecord):
         assert agent not in record.annotations
 
     if label:
         validate = check_when_label
     else:
         validate = check_when_no_label
-    for record in results.records:
-        validate(record)
-    return results
+
+    for r in records:
+        validate(r)
 
 
 def delete_rule(
@@ -254,11 +434,11 @@ def update_rule(
     with_error: Optional[Type[ServerError]] = None,
     error_detail: Optional[Dict[str, Any]] = None,
 ):
-
+    description = description or "new Rule description"
     response = client.patch(
         f"{base_url}/labeling/rules/{rule.query}",
         json={
-            "description": description or "new Rule description",
+            "description": description,
             "label": label,
             "name": name,
         },
@@ -273,7 +453,7 @@ def update_rule(
 
     assert response.status_code == 200, data
     updated_rule = LabelingRule.parse_obj(data)
-    assert updated_rule.description == "new Rule description"
+    assert updated_rule.description == description
     assert updated_rule.label == rule.label
 
     return updated_rule

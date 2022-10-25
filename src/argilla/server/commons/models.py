@@ -88,3 +88,13 @@ class BaseLabelingRule(BaseModel):
         """
         all_accepted_spans = cls.__SANITIZE_REGEX__.finditer(query)
         return "_".join([span.group() for span in all_accepted_spans])
+
+
+class BaseRulesSummary(BaseModel):
+    covered_records: int = 0
+    annotated_covered_records: int = 0
+
+
+class BaseRuleSummary(BaseModel):
+    covered_records: int
+    annotated_covered_records: int
