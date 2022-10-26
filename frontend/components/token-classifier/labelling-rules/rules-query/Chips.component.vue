@@ -1,9 +1,20 @@
 <template>
-  <button>Button Label</button>
+  <div class="chips-area">
+    <button>Chip Label</button>
+    <pre>{{ chips }}</pre>
+  </div>
 </template>
 
 <script>
-export default { component: "ButtonLabel" };
+export default {
+  component: "ChipsComponent",
+  props: {
+    chips: {
+      type: Array,
+      required: true,
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

@@ -7,19 +7,20 @@
       </span>
     </div>
     <div class="rule-query-token__labels">
-      <div class="label-item"><ButtonLabel /></div>
-      <div class="label-item"><ButtonLabel /></div>
-      <div class="label-item"><ButtonLabel /></div>
+      <ChipsComponent />
+      <!-- <div class="label-item"><Chips /></div>
+      <div class="label-item"><Chips /></div>
+      <div class="label-item"><Chips /></div> -->
     </div>
   </div>
 </template>
 
 <script>
-import ButtonLabel from "./ButtonLabel.component.vue";
+import ChipsComponent from "./Chips.component.vue";
 export default {
   name: "RulesQueryToken",
   components: {
-    ButtonLabel,
+    ChipsComponent,
   },
   props: {
     title: {
