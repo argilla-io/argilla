@@ -113,7 +113,7 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
             if self.annotation
             else None,
             annotation_agent=self.annotation.agent if self.annotation else None,
-            embeddings = self.embeddings if self.embeddings else None,
+            embeddings=self.embeddings if self.embeddings else None,
             id=self.id,
             event_timestamp=self.event_timestamp,
             status=self.status,
