@@ -8,6 +8,7 @@
         :key="id"
       >
         <TooltipComponent
+          class="title"
           :message="tooltip.tooltipMessage"
           :direction="tooltip.tooltipDirection"
         >
@@ -65,6 +66,10 @@ export default {
       type: String,
       default: () => "black",
     },
+    borderColor: {
+      type: String,
+      default: () => "black",
+    },
     btnLabel: {
       type: String,
     },
@@ -86,8 +91,8 @@ export default {
         "--number-of-columns": this.numberOfColumns,
         "--text-color": this.textColor,
         "--background-color": this.backgroundColor,
-        "--background-subcard-color": this.backgroundSubcardColor,
         "--text-subcard-color": this.textSubcardColor,
+        "--border-color": this.borderColor,
       };
     },
   },
@@ -113,6 +118,7 @@ export default {
   color: var(--text-color);
   background-color: var(--background-color);
   border-radius: 10px;
+  border: 1px solid var(--border-color);
   &__title {
     padding-bottom: 0;
     margin-top: 0;
@@ -129,15 +135,21 @@ export default {
       display: flex;
       flex-direction: column;
       border-radius: 10px;
-      padding: 0.8em;
+      padding: 0.8em 0.8em 0.8em 0em;
       gap: 5px;
       color: var(--text-subcard-color);
-      background-color: var(--background-subcard-color);
+      .title {
+        flex: 1;
+      }
       .subcard__items {
         &:first-child {
-          font-weight: 600;
+          font-weight: bold;
           margin-bottom: 0;
           margin: inherit;
+        }
+        &:nth-child(2) {
+          font-weight: bold;
+          font-weight: 600;
         }
       }
     }

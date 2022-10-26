@@ -17,7 +17,7 @@
 
 <template>
   <results-list :dataset="dataset">
-    <template slot="results-header" v-if="isLabellingRules">
+    <template slot="results-header">
       <RuleDefinitionToken :rule="rule" :queryText="queryText" />
     </template>
     <template slot="record" slot-scope="results">
@@ -115,14 +115,14 @@ export default {
         } else {
           throw new Error("Error fetching API rules");
         }
-      } catch (err) {
+      } catch (error) {
         console.log("Error: ", error);
       }
     },
     async fetchTokenClassificationRulesMetricsByRule(name, query) {
       try {
         const { data, status } = await this.$axios.get(
-          `/datasets/${name}/TokenClassification/labeling/rules/${query}:summary`
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/summary`
         );
         if (status === 200) {
           return data;

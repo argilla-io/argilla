@@ -5,8 +5,10 @@ export default class OptionsForRuleMetrics {
   #annotatedRecords = 0;
   #typeOfTask = "";
   constructor(options, typeOfTask) {
-    this.#coverage = options.coverage;
-    this.#coverageAnnotated = options.coverageAnnotated;
+    this.#coverage = this.#roundValuesWithSpecificDigit(options.coverage);
+    this.#coverageAnnotated = this.#roundValuesWithSpecificDigit(
+      options.coverageAnnotated
+    );
     this.#totalRecords = options.totalRecords;
     this.#annotatedRecords = options.annotatedRecords;
     this.#typeOfTask = typeOfTask;
@@ -48,10 +50,23 @@ export default class OptionsForRuleMetrics {
     ];
   }
 
-  #formatToPercent(value) {
-    return `${value}%`;
+  #formatToPercent(value, min = 2, max = 3) {
+    const browserLanguage = navigator.language || "en";
+    const formatterOptions = {
+      style: "percent",
+      minimumFractionDigits: min,
+      maximumFractionDigits: max,
+    };
+
+    const formatter = new Intl.NumberFormat(browserLanguage, formatterOptions);
+    return formatter.format(value);
   }
-  #formatToFraction(value1, value2) {
-    return `${value1}/${value2}`;
+
+  #formatToFraction(value, total) {
+    return `${Math.round(value * total)}/${total}`;
+  }
+
+  #roundValuesWithSpecificDigit(value, numberOfDigit = 4) {
+    return Number(value.toFixed(numberOfDigit));
   }
 }
