@@ -130,12 +130,11 @@ export default {
     display: grid;
     grid-gap: 10px;
     grid-template-columns: repeat(var(--number-of-columns), 1fr);
-    grid-template-rows: repeat(var(--number-of-rows), 8em);
+    grid-template-rows: repeat(var(--number-of-rows), 7em);
     .subcard {
       display: flex;
       flex-direction: column;
       border-radius: 10px;
-      padding-block: 0.8em 0.8em;
       gap: 5px;
       color: var(--text-subcard-color);
       .title {
