@@ -140,6 +140,8 @@ class TextClassificationRecord(_Validators):
             A string or a list of strings (multilabel) corresponding to the annotation (gold label) for the record.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        embeddings:
+            Embedding data mappings of the natural language text containing class attributes'
         multi_label:
             Is the prediction/annotation for a multi label classification task? Defaults to `False`.
         explanation:
@@ -228,7 +230,7 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Dict[str, List[Dict[str, List[float]]]]]]
+    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
     embedding_agent: Optional[str]
 
     multi_label: bool = False
@@ -300,6 +302,8 @@ class TokenClassificationRecord(_Validators):
             name of the entity, the second and third entry correspond to the start and stop char index of the entity.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        embeddings:
+            Embedding data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
@@ -348,6 +352,8 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
+
+    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -532,6 +538,8 @@ class TextGenerationRecord(_Validators):
             A string representing the expected output text for the given input text.
         annotation_agent:
             Name of the prediction agent. By default, this is set to the hostname of your machine.
+        embeddings:
+            Embedding data mappings of the natural language text containing class attributes'
         id:
             The id of the record. By default (None), we will generate a unique ID for you.
         metadata:
@@ -581,7 +589,7 @@ class TextGenerationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Tuple[str, int, Union[List[float]]]]]
+    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
