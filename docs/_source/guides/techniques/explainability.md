@@ -2,10 +2,10 @@
 
 Explainability and bias are becoming more and more important in the world of data. Luckily, Argilla was developed with data-centricity in mind, which means we have some nice tailormade features that deal with these topics.
 ### Certainty filters
-#### Oops! Something is missing.
 
-```{include} /_common/general.md
-```
+![filter-score](../../_static/reference/webapp/features-filter-score.png "Filter Score")
+
+It is possible to add a certainty score to each of the logged predictions. Often, these certainty scores are already included in major packages like the `predict_proba()` from `sklearn` and the `return_all_scores`for `transformers`. This additional information seldom has extra significant impact on the model latency but does offer a lot of additional understanding about the performance of the model. Within our UI, it is possible to select and filter scores. We could argue that it is more relevant to start annotating less certain entries, so we could use these filters to find less certain data. Do you want a more applied example, take a look at [this tutorial about TextClassification](../../tutorials/notebooks/monitoring-textclassification-transformers-explainability.ipynb)
 
 ### Token attributions
 
@@ -23,10 +23,10 @@ The Argilla package gets shipped with build-in metrics for `TextClassification`a
 ![weak-labelling](../../_static/reference/webapp/features-weak-labelling.png "Weak Labelling")
 
 Besides our more general metrics, we also provide the option to keep track of the impact of weak supervision rules. This impact is determined by testing against verified annotated data and unannotated data, which gives you an understanding of how the rules perform in real-life and what percentage of the data is influenced by them.
-
+<!--
 ### Data Drift and Data Shift
 
 #### Oops! Something is missing.
 
 ```{include} /_common/general.md
-```
+``` -->
