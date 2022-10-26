@@ -3,11 +3,11 @@
    :parser: myst_parser.sphinx_
 
 .. toctree::
-   :maxdepth: 3
    :caption: Getting Started
+   :maxdepth: 3
    :hidden:
 
-   getting_started/argilla
+   self
    getting_started/quickstart
    getting_started/installation/installation.md
    getting_started/terminology

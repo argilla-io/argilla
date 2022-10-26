@@ -37,6 +37,14 @@ docker-compose down
 you will lose all your datasets in Argilla!
 :::
 
+:::{tip}
+Instead, execute
+```bash
+docker compose stop
+```
+:::
+
+
 ## Persisting ElasticSearch data
 To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a
 volume in the docker compose.
