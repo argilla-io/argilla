@@ -1,3 +1,0 @@
-## 💪🏽 Training
-
-WORK IN PROGRESS
