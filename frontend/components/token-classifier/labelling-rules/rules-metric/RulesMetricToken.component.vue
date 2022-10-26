@@ -135,7 +135,7 @@ export default {
       display: flex;
       flex-direction: column;
       border-radius: 10px;
-      padding: 0.8em 0.8em 0.8em 0em;
+      padding-block: 0.8em 0.8em;
       gap: 5px;
       color: var(--text-subcard-color);
       .title {
