@@ -17,8 +17,10 @@
 
 <template>
   <results-list :dataset="dataset">
-    <template slot="results-header">
-      <RuleDefinitionToken :rule="rule" :queryText="queryText" />
+    <template slot="results-header" v-if="isLabellingRules">
+      <transition name="fade" mode="out-in" appear>
+        <RuleDefinitionToken :rule="rule" :queryText="queryText" />
+      </transition>
     </template>
     <template slot="record" slot-scope="results">
       <record-token-classification
@@ -59,6 +61,7 @@ export default {
 
     rules.forEach(async (rule) => {
       await this.initRuleModelTable(name, rule);
+      await this.initSearchRuleRecordsTable(name, rule);
     });
     this.rulesHaveBeenFetched = true;
   },
@@ -105,6 +108,22 @@ export default {
     },
   },
   methods: {
+    async initRuleModelTable(name, rule) {
+      const rulesMetrics = await this.fetchRuleMetricsByRule(name, rule);
+      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
+    },
+    async initSearchRuleRecordsTable(name, rule) {
+      const searchRulesRecords =
+        await this.fetchTokenClassificationSearchRuleRecords(name, rule.query);
+
+      console.log("searchRulesRecords", searchRulesRecords);
+    },
+    async fetchRuleMetricsByRule(name, rule) {
+      return await this.fetchTokenClassificationRulesMetricsByRule(
+        name,
+        rule.query
+      );
+    },
     async fetchTokenClassificationRules(name) {
       try {
         const { data, status } = await this.$axios.get(
@@ -133,15 +152,19 @@ export default {
         console.log("Error: ", error);
       }
     },
-    async initRuleModelTable(name, rule) {
-      const rulesMetrics = await this.fetchRuleMetricsByRule(name, rule);
-      this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-    },
-    async fetchRuleMetricsByRule(name, rule) {
-      return await this.fetchTokenClassificationRulesMetricsByRule(
-        name,
-        rule.query
-      );
+    async fetchTokenClassificationSearchRuleRecords(name, query) {
+      try {
+        const { data, status } = await this.$axios.get(
+          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`
+        );
+        if (status === 200) {
+          return data;
+        } else {
+          throw new Error("Error fetching API rule metrics");
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
     },
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
       RuleModel.insertOrUpdate({
