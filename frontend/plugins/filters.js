@@ -12,12 +12,15 @@ Vue.filter("formatNumber", function (value) {
   return new Intl.NumberFormat(locale.length ? locale[0] : "en").format(value);
 });
 
-Vue.filter("percent", function (value, min, max) {
-  const formatter = new Intl.NumberFormat(locale.length ? locale[0] : "en", {
+Vue.filter("percent", function (value, min = 2, max = 3) {
+  const browserLanguage = locale[0] || "en";
+  const formatterOptions = {
     style: "percent",
-    minimumFractionDigits: min !== undefined ? min : 2,
-    maximumFractionDigits: max !== undefined ? max : 3,
-  });
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
+  };
+
+  const formatter = new Intl.NumberFormat(browserLanguage, formatterOptions);
   return formatter.format(value);
 });
 
