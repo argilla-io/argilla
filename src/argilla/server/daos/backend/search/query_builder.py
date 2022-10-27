@@ -49,7 +49,10 @@ class EsQueryBuilder:
 
         query_filters = []
         if query.owners:
-            owners_filter = filters.terms_filter("owner.keyword", query.owners)
+            owners_filter = filters.terms_filter(
+                "owner.keyword",
+                query.owners,
+            )
             if query.include_no_owner:
                 query_filters.append(
                     filters.boolean_filter(
@@ -67,16 +70,24 @@ class EsQueryBuilder:
 
         if query.Tasks:
             query_filters.append(
-                filters.terms_filter(field="task.keyword", values=query.tasks)
+                filters.terms_filter(
+                    field="task.keyword",
+                    values=query.tasks,
+                )
             )
         if query.name:
             query_filters.append(
-                filters.term_filter(field="name.keyword", value=query.name)
+                filters.term_filter(
+                    field="name.keyword",
+                    value=query.name,
+                )
             )
         if not query_filters:
             return filters.match_all()
+
         return filters.boolean_filter(
-            should_filters=query_filters, minimum_should_match=len(query_filters)
+            should_filters=query_filters,
+            minimum_should_match=len(query_filters),
         )
 
     def _search_to_es_query(
@@ -106,7 +117,8 @@ class EsQueryBuilder:
         query_text = es_query_builder(query_tree)
 
         return filters.boolean_filter(
-            filter_query=self._to_es_query(new_query), must_query=query_text
+            filter_query=self._to_es_query(new_query),
+            must_query=query_text,
         )
 
     def map_2_es_query(
@@ -180,6 +192,11 @@ class EsQueryBuilder:
         if query.ids:
             return filters.ids_filter(query.ids)
 
+        # TODO(@ufukhurriyetoglu): Here, we will use the query embeddings settings to build the knn search
+        if query.embedding_vector:
+            # do your magic ;-) !
+            pass
+
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
         if query.has_annotation:
@@ -220,7 +237,8 @@ class EsQueryBuilder:
         return filters.boolean_filter(
             must_query=query_text or filters.match_all(),
             filter_query=filters.boolean_filter(
-                should_filters=all_filters, minimum_should_match=len(all_filters)
+                should_filters=all_filters,
+                minimum_should_match=len(all_filters),
             )
             if all_filters
             else None,

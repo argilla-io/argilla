@@ -102,13 +102,21 @@ class DatasetRecordsDAO:
             db_record = record_class.parse_obj(r)
             db_record.last_updated = now
             documents.append(
-                db_record.dict(exclude_none=False, exclude=set(exclude_fields))
+                db_record.dict(
+                    exclude_none=False,
+                    exclude=set(exclude_fields),
+                )
             )
 
+        # TODO(@ufukhurriyetoglu): At this point, we can setup the embeddings setting at index level
         self._es.create_dataset_index(
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
+            # Here, we can pass the embeddings configuration to create. We can do index level validations
+            # inside the es.created_dataset_index method (like embeddings fields are
+            # already created and things like that)
+            embeddings_cfg=...,
         )
 
         return self._es.add_documents(
