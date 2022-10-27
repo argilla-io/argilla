@@ -13,8 +13,8 @@
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
 </!a-->
 <img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
-<a href="https://pepy.tech/project/rubrix">
-<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/rubrix?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
+<a href="https://pepy.tech/project/argilla">
+<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
 </p>
 
