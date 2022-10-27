@@ -13,8 +13,8 @@
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
 </!a-->
 <img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
-<a href="https://pepy.tech/project/rubrix">
-<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/rubrix?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
+<a href="https://pepy.tech/project/argilla">
+<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
 </p>
 
@@ -22,14 +22,7 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-
-
-https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
-
-
-<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
-
-
+<iframe src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="100%" height="450" frameborder="0"></iframe>
 <br>
 
 <p align="center">
@@ -101,7 +94,7 @@ The simplest way is to use`Docker` by running:
 docker run -d --name es-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
 
 ```
-> :information_source: **Check [the docs](https://rubrix.readthedocs.io/en/stable/getting_started/setup%26installation.html) for further options and configurations for Elasticsearch.**
+> :information_source: **Check [the docs](https://docs.argilla.io/en/latest/getting_started/quickstart.html) for further options and configurations for Elasticsearch.**
 
 Finally you can **launch the server**:
 
@@ -222,10 +215,10 @@ The training datasets created with Argilla are model agnostic.
 
 You can choose one of many amazing frameworks to train your model, like [transformers](https://huggingface.co/docs/transformers/), [spaCy](https://spacy.io/), [flair](https://github.com/flairNLP/flair) or [sklearn](https://scikit-learn.org).
 
-Check out our [cookbook](https://rubrix.readthedocs.io/en/stable/guides/cookbook.html) and our [tutorials](https://rubrix.readthedocs.io/en/stable) on how Argilla integrates with these frameworks.
+Check out our [deep deives](https://docs.argilla.io/en/latest/guides/guides.html) and our [tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) on how Argilla integrates with these frameworks.
 
 
-If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://rubrix.readthedocs.io/en/stable/reference/python/python_client.html#rubrix.client.datasets.DatasetForTextClassification.prepare_for_training).
+If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://docs.argilla.io/en/latest/guides/features/datasets.html#Prepare-dataset-for-training).
 ### Can Argilla share the Elasticsearch Instance/cluster?
 Yes, you can use the same Elasticsearch instance/cluster for Argilla and other applications.
 You only need to perform some configuration, check the Advanced installation guide in the docs.
@@ -242,8 +235,8 @@ curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: applicat
 
 ```
 ## Contributors
-<a  href="https://github.com/recognai/rubrix/graphs/contributors">
+<a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
-<img  src="https://contrib.rocks/image?repo=recognai/rubrix" />
+<img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
 
 </a>
