@@ -6,7 +6,7 @@
   <br>
 </h1>
 <p align="center">
-<a  href="https://pypi.org/project/rubrix/">
+<a  href="https://pypi.org/project/argilla/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
 <!--a  href="https://anaconda.org/conda-forge/rubrix">
