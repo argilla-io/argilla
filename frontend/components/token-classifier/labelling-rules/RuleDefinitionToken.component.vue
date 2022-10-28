@@ -1,7 +1,7 @@
 <template>
   <div class="rule__area">
-    <div class="left-item">
-      <RulesQueryToken title="New query" :recordsValue="10" />
+    <div class="left-item" v-if="entities.length">
+      <RulesQueryToken title="New query" :entities="entities" />
     </div>
     <RulesMetricsToken
       title="Rules Metrics"
@@ -31,6 +31,10 @@ export default {
     },
     rule: {
       type: Object,
+      required: true,
+    },
+    entities: {
+      type: Array,
       required: true,
     },
   },
