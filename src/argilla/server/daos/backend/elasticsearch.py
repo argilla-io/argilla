@@ -265,6 +265,7 @@ class ElasticsearchBackend(LoggingMixin):
         index: str,
         routing: str = None,
         size: int = 100,
+        knn: Dict[str, Any] = None,
         query: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
@@ -287,6 +288,10 @@ class ElasticsearchBackend(LoggingMixin):
 
         """
         with backend_error_handler(index=index):
+            if knn is not None:
+                return self.__client__.knn_search(
+                    index=index, knn=knn, query=query, routing=routing, size=size
+                )
             return self.__client__.search(
                 index=index,
                 body=query or {},

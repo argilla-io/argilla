@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
-from argilla.server.daos.backend.query_helpers import filters
+from argilla.server.daos.backend.query_helpers import filters, knn
 from argilla.server.daos.backend.search.model import (
     BackendDatasetsQuery,
     BackendQuery,
@@ -115,10 +115,13 @@ class EsQueryBuilder:
 
         query_tree = parser.parse(text_search)
         query_text = es_query_builder(query_tree)
-
-        return filters.boolean_filter(
-            filter_query=self._to_es_query(new_query),
-            must_query=query_text,
+        boolean_filter_query, knn_query = (self._to_es_query(new_query),)
+        return (
+            filters.boolean_filter(
+                filter_query=boolean_filter_query,
+                must_query=query_text,
+            ),
+            knn_query,
         )
 
     def map_2_es_query(
@@ -195,7 +198,12 @@ class EsQueryBuilder:
         # TODO(@ufukhurriyetoglu): Here, we will use the query embeddings settings to build the knn search
         if query.embedding_vector:
             # do your magic ;-) !
-            pass
+            knn_query = knn.knn_query(
+                field=query.embedding_name,
+                query_vector=query.embedding_vector,
+                k=3,
+                num_candidates=50,
+            )
 
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
@@ -234,7 +242,7 @@ class EsQueryBuilder:
             if key_filter:
                 all_filters.append(key_filter)
 
-        return filters.boolean_filter(
+        boolean_filter_query = filters.boolean_filter(
             must_query=query_text or filters.match_all(),
             filter_query=filters.boolean_filter(
                 should_filters=all_filters,
@@ -248,6 +256,8 @@ class EsQueryBuilder:
             if hasattr(query, "uncovered_by_rules") and query.uncovered_by_rules
             else None,
         )
+
+        return boolean_filter_query, knn_query
 
     def _clean_mappings(self, mappings: Dict[str, Any]):
         if not mappings:
