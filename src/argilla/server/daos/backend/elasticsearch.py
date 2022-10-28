@@ -1160,8 +1160,8 @@ class ElasticsearchBackend(LoggingMixin):
                 "type": "dense_vector",
                 "dims": embedding_dimension,
                 "index": True,
-                "similarity": "cosine",
-            }  ## can this also be part of config @frascuchon ?
+                "similarity": "cosine",  ## can similarity property also be part of config @frascuchon ? relates vector search similarity metric
+            }
             vector_search_index_name_2_index_mapping[
                 vector_search_index_name
             ] = index_mapping
