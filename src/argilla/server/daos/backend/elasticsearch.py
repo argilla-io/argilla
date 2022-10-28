@@ -1146,6 +1146,16 @@ class ElasticsearchBackend(LoggingMixin):
     def _delete_index_alias(self, index: str, alias: str):
         self.__client__.indices.delete_alias(index=index, name=alias, ignore=[400, 404])
 
+    def configure_embeddings(
+        self,
+        id: str,
+        embeddings: Dict[str, int],
+    ):
+        raise NotImplementedError(
+            "Here, we should configure embeddings mappings by using the provided "
+            "per-field embeddings configuration. "
+        )
+
 
 def dataset_records_index(dataset_id: str) -> str:
     index_mame_template = settings.dataset_records_index_name
