@@ -390,18 +390,3 @@ def find_nested_field_path(
         if properties_map[prop] == "nested" and field_name.startswith(prop):
             return prop
     return None
-
-
-class knn:
-    """Implements knn query"""
-
-    @staticmethod
-    def knn_query(field: str, query_vector: List[float], k: int, num_candidates):
-        if field is None or query_vector is None:
-            return None
-        return {
-            "field": field,
-            "query_vector": query_vector,
-            "k": k,
-            "num_candidates": num_candidates,
-        }

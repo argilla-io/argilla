@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
 
-from argilla.server.daos.backend.query_helpers import filters, knn
+from argilla.server.daos.backend.query_helpers import filters
 from argilla.server.daos.backend.search.model import (
     BackendDatasetsQuery,
     BackendQuery,
@@ -115,13 +115,10 @@ class EsQueryBuilder:
 
         query_tree = parser.parse(text_search)
         query_text = es_query_builder(query_tree)
-        boolean_filter_query, knn_query = (self._to_es_query(new_query),)
-        return (
-            filters.boolean_filter(
-                filter_query=boolean_filter_query,
-                must_query=query_text,
-            ),
-            knn_query,
+        boolean_filter_query = self._to_es_query(new_query)
+        return filters.boolean_filter(
+            filter_query=boolean_filter_query,
+            must_query=query_text,
         )
 
     def map_2_es_query(
@@ -131,6 +128,7 @@ class EsQueryBuilder:
         sort: Optional[SortConfig] = None,
         id_from: Optional[str] = None,
     ) -> Dict[str, Any]:
+
         es_query: Dict[str, Any] = (
             {"query": self._datasets_to_es_query(query)}
             if isinstance(query, BaseDatasetsQuery)
@@ -148,7 +146,9 @@ class EsQueryBuilder:
         return es_query
 
     def map_2_es_sort_configuration(
-        self, schema: Optional[Dict[str, Any]] = None, sort: Optional[SortConfig] = None
+        self,
+        schema: Optional[Dict[str, Any]] = None,
+        sort: Optional[SortConfig] = None,
     ) -> Optional[List[Dict[str, Any]]]:
 
         if not sort:
@@ -194,16 +194,6 @@ class EsQueryBuilder:
     def _to_es_query(cls, query: BackendRecordsQuery) -> Dict[str, Any]:
         if query.ids:
             return filters.ids_filter(query.ids)
-
-        # TODO(@ufukhurriyetoglu): Here, we will use the query embeddings settings to build the knn search
-        if query.embedding_vector:
-            # do your magic ;-) !
-            knn_query = knn.knn_query(
-                field=query.embedding_name,
-                query_vector=query.embedding_vector,
-                k=3,
-                num_candidates=50,
-            )
 
         query_text = filters.text_query(query.query_text)
         all_filters = filters.metadata(query.metadata)
@@ -257,7 +247,7 @@ class EsQueryBuilder:
             else None,
         )
 
-        return boolean_filter_query, knn_query
+        return boolean_filter_query
 
     def _clean_mappings(self, mappings: Dict[str, Any]):
         if not mappings:
@@ -266,4 +256,20 @@ class EsQueryBuilder:
         return {
             key: definition.get("type") or self._clean_mappings(definition)
             for key, definition in mappings["properties"].items()
+        }
+
+    def map_2_knn_query(
+        self,
+        *,
+        embedding_name: str,
+        embedding_vector: List[float],
+    ) -> Optional[Dict[str, Any]]:
+
+        if embedding_name is None or embedding_vector is None:
+            return None
+        return {
+            "field": embedding_name,
+            "query_vector": embedding_vector,
+            "k": 3,
+            "num_candidates": 50,
         }
