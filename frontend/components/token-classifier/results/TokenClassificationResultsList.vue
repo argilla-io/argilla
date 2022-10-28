@@ -19,7 +19,11 @@
   <results-list :dataset="dataset">
     <template slot="results-header" v-if="isLabellingRules">
       <transition name="fade" mode="out-in" appear>
-        <RuleDefinitionToken :rule="rule" :queryText="queryText" />
+        <RuleDefinitionToken
+          :rule="rule"
+          :queryText="queryText"
+          :entities="entities"
+        />
       </transition>
     </template>
     <template slot="record" slot-scope="results">
@@ -38,7 +42,15 @@ import {
 } from "../../../models/token-classification/Rule.modelTokenClassification";
 import { TokenClassificationDataset } from "../../../models/TokenClassification";
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
-import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
+import {
+  getDatasetModelPrimaryKey,
+  ObservationDataset,
+} from "../../../models/Dataset";
+import { SearchRulesRecord } from "../../../models/token-classification/SearchRulesRecord.modelTokenClassification";
+import {
+  TokenEntity,
+  formatDatasetIdForTokenEntityModel,
+} from "../../../models/token-classification/TokenEntity.modelTokenClassification";
 export default {
   props: {
     dataset: {
@@ -106,6 +118,17 @@ export default {
           .first() || {}
       );
     },
+    entities() {
+      return (
+        this.datasetPrimaryKey,
+        TokenEntity.query()
+          .where(
+            "dataset_id",
+            formatDatasetIdForTokenEntityModel(this.datasetPrimaryKey)
+          )
+          .get()
+      );
+    },
   },
   methods: {
     async initRuleModelTable(name, rule) {
@@ -116,7 +139,7 @@ export default {
       const searchRulesRecords =
         await this.fetchTokenClassificationSearchRuleRecords(name, rule.query);
 
-      console.log("searchRulesRecords", searchRulesRecords);
+      this.insertOrUpdateEntityInTokenEntityModel();
     },
     async fetchRuleMetricsByRule(name, rule) {
       return await this.fetchTokenClassificationRulesMetricsByRule(
@@ -160,7 +183,7 @@ export default {
         if (status === 200) {
           return data;
         } else {
-          throw new Error("Error fetching API rule metrics");
+          throw new Error("Error fetching API rule records");
         }
       } catch (error) {
         console.log("Error: ", error);
@@ -175,6 +198,19 @@ export default {
           name: this.dataset.name,
           owner: this.dataset.owner,
         },
+      });
+    },
+    insertOrUpdateEntityInTokenEntityModel() {
+      this.dataset.entities.forEach(({ text, colorId }) => {
+        TokenEntity.insertOrUpdate({
+          data: {
+            dataset_id: formatDatasetIdForTokenEntityModel(
+              this.datasetPrimaryKey
+            ),
+            text: text,
+            color_id: colorId,
+          },
+        });
       });
     },
   },

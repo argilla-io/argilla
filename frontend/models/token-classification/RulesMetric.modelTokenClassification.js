@@ -12,6 +12,7 @@ export default class RulesMetric extends Model {
       total_records: this.number(null),
       annotated_records: this.number(null),
       rule_id: this.string(null),
+
       // relationships
       rule: this.belongsTo(Rule, "rule_id"),
     };
