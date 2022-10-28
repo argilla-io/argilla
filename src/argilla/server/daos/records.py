@@ -112,6 +112,7 @@ class DatasetRecordsDAO:
             id=dataset.id,
             task=dataset.task,
             metadata_values=metadata_values,
+            embeddings_cfg=...,  # TODO(@ufuk): this field should be computed from the provided info in records
         )
 
         return self._es.add_documents(

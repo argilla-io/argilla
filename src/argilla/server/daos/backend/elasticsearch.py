@@ -948,6 +948,7 @@ class ElasticsearchBackend(LoggingMixin):
         id: str,
         task: TaskType,
         metadata_values: Optional[Dict[str, Any]] = None,
+        embeddings_cfg: Optional[Dict[str, Any]] = None,
         force_recreate: bool = False,
     ) -> None:
 
@@ -967,6 +968,9 @@ class ElasticsearchBackend(LoggingMixin):
         )
         if metadata_values:
             self._configure_metadata_fields(id, metadata_values)
+
+        if embeddings_cfg:
+            self.configure_embeddings(id, embeddings=embeddings_cfg)
 
     def _configure_metadata_fields(self, id: str, metadata_values: Dict[str, Any]):
         def check_metadata_length(metadata_length: int = 0):
