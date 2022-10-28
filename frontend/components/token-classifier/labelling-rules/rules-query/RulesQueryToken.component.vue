@@ -2,15 +2,12 @@
   <div class="rule-query-token" :style="cssVars">
     <div class="rule-query-token__title-area">
       <h2 class="title">{{ title }}</h2>
-      <span v-if="recordsValue">
-        Records: <b>{{ recordsValue }}</b>
+      <span v-if="entitiesLength">
+        Records: <b>{{ entitiesLength }}</b>
       </span>
     </div>
-    <div class="rule-query-token__labels">
-      <ChipsComponent />
-      <!-- <div class="label-item"><Chips /></div>
-      <div class="label-item"><Chips /></div>
-      <div class="label-item"><Chips /></div> -->
+    <div class="rule-query-token__chips">
+      <ChipsComponent :chips="entities" />
     </div>
   </div>
 </template>
@@ -27,8 +24,9 @@ export default {
       type: String,
       required: true,
     },
-    recordsValue: {
-      type: Number,
+    entities: {
+      type: Array,
+      required: true,
     },
     textColor: {
       type: String,
@@ -50,6 +48,9 @@ export default {
         "--background-color": this.backgroundColor,
         "--background-label-color": this.backgroundLabelColor,
       };
+    },
+    entitiesLength() {
+      return this.entities.length;
     },
   },
 };
@@ -82,17 +83,10 @@ export default {
       font-weight: bold;
     }
   }
-  &__labels {
+  &__chips {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     gap: 10px;
   }
-}
-
-.label-item {
-  display: inline-flex;
-  border-radius: 8px;
-  background-color: var(--background-label-color);
 }
 </style>
