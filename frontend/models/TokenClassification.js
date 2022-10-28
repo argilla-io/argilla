@@ -21,10 +21,11 @@ import {
   getDatasetModelPrimaryKey,
 } from "./Dataset";
 import { BaseRecord, BaseSearchQuery, BaseSearchResults } from "./Common";
+import { TokenEntity } from "./token-classification/TokenEntity.modelTokenClassification";
 
 class TokenClassificationRecord extends BaseRecord {
-  tokens;
-  text;
+  // tokens;
+  // text;
   constructor({ tokens, text, annotatedEntities, ...superData }) {
     super({ ...superData });
     this.tokens = tokens;
@@ -98,6 +99,9 @@ class TokenClassificationDataset extends ObservationDataset {
       ),
       globalResults: this.attr({}),
       lastSelectedEntity: this.attr({}),
+
+      //relationships
+      token_entities: this.hasMany(TokenEntity, "dataset_id"),
     };
   }
 
@@ -128,6 +132,7 @@ class TokenClassificationDataset extends ObservationDataset {
       });
     const predefinedEntities =
       this.settings.label_schema && this.settings.label_schema.labels;
+
     if (predefinedEntities) {
       return formatEntities(predefinedEntities.map((l) => l.id));
     }
@@ -141,6 +146,7 @@ class TokenClassificationDataset extends ObservationDataset {
           .concat(Object.keys(aggregations.predicted_as))
       ),
     ];
+
     return formatEntities(names);
   }
 }
