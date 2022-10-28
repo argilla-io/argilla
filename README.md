@@ -55,25 +55,25 @@ https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9
 
 ### Advanced NLP labeling
 
-- Programmatic labeling using Weak Supervision. Built-in label models (Snorkel, Flyingsquid)
-- Bulk-labeling and search-driven annotation
-- Iterate on training data with any pre-trained model or library
+- Programmatic labeling using [weak supervision](https://docs.argilla.io/en/latest/guides/techniques/weak_supervision.html). Built-in label models (Snorkel, Flyingsquid)
+- [Bulk-labeling](https://docs.argilla.io/en/latest/reference/webapp/features.html#bulk-annotate) and [search-driven annotation](https://docs.argilla.io/en/latest/guides/features/queries.html)
+- Iterate on training data with any [pre-trained model](https://docs.argilla.io/en/latest/tutorials/libraries/huggingface.html) or [library](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html)
 - Efficiently review and refine annotations in the UI and with Python
-- Use Argilla built-in metrics and methods for finding label and data errors (e.g., cleanlab)
-- Simple integration with active learning workflows
+- Use Argilla built-in metrics and methods for [finding label and data errors (e.g., cleanlab)](https://docs.argilla.io/en/latest/tutorials/notebooks/monitoring-textclassification-cleanlab-explainability.html)
+- Simple integration with [active learning workflows](https://docs.argilla.io/en/latest/tutorials/techniques/active_learning.html)
 
 ### Monitoring
 
 - Close the gap between production data and data collection activities
-- Auto-monitoring for major NLP libraries and pipelines (spaCy, Hugging Face, FlairNLP)
-- ASGI middleware for HTTP endpoints
-- Argilla Metrics to understand data and model issues, like entity consistency for NER models
+- Auto-monitoring for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
+- [ASGI middleware](https://docs.argilla.io/en/latest/tutorials/notebooks/deploying-texttokenclassification-fastapi.html) for HTTP endpoints
+- Argilla Metrics to understand data and model issues, [like entity consistency for NER models](https://docs.argilla.io/en/latest/guides/steps/4_monitoring.html)
 - Integrated with Kibana for custom dashboards
 
 ### Team workspaces
 
 - Bring different users and roles into the NLP data and model lifecycles
-- Organize data collection, review and monitoring into different workspaces
+- Organize data collection, review and monitoring into different [workspaces](https://docs.argilla.io/en/latest/getting_started/installation/user_management.html#workspace)
 - Manage workspace access for different users
 
 ## Quickstart
