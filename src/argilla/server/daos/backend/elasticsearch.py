@@ -1151,10 +1151,25 @@ class ElasticsearchBackend(LoggingMixin):
         id: str,
         embeddings: Dict[str, int],
     ):
-        raise NotImplementedError(
-            "Here, we should configure embeddings mappings by using the provided "
-            "per-field embeddings configuration. "
-        )
+        vector_search_index_name_2_index_mapping = {}
+        for embedding_name, embedding_dimension in embeddings:
+            vector_search_index_name = "_".join(
+                id, embedding_name
+            )  ## aims to make the vector search index name unique
+            index_mapping = {
+                "type": "dense_vector",
+                "dims": embedding_dimension,
+                "index": True,
+                "similarity": "cosine",
+            }  ## can this also be part of config @frascuchon ?
+            vector_search_index_name_2_index_mapping[
+                vector_search_index_name
+            ] = index_mapping
+        # raise NotImplementedError(
+        #    "Here, we should configure embeddings mappings by using the provided "
+        #    "per-field embeddings configuration. "
+        # )
+        return vector_search_index_name_2_index_mapping
 
 
 def dataset_records_index(dataset_id: str) -> str:
