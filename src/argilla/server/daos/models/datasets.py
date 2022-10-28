@@ -57,7 +57,7 @@ class BaseDatasetDB(BaseModel):
         }
 
 
-class EmbeddingsConfig:
+class EmbeddingsConfig(BaseModel):
     dim: int = Field(
         description="The number of dimensions for the named embeddings",
     )
