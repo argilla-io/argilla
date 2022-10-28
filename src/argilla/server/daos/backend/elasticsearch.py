@@ -290,7 +290,11 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index=index):
             if knn is not None:
                 return self.__client__.knn_search(
-                    index=index, knn=knn, query=query, routing=routing, size=size
+                    index=index,
+                    knn=knn,
+                    query=query,  # filter=query??
+                    routing=routing,
+                    size=size,
                 )
             return self.__client__.search(
                 index=index,
@@ -697,10 +701,17 @@ class ElasticsearchBackend(LoggingMixin):
         mapping: Dict[str, Any],
     ):
         """Creates or updates an index field mapping configuration"""
+        self._put_index_mappings(index=index, mapping={field_name: mapping})
+
+    def _put_index_mappings(
+        self,
+        index: str,
+        mapping: Dict[str, Any],
+    ):
         with backend_error_handler(index=index):
             self.__client__.indices.put_mapping(
                 index=index,
-                body={"properties": {field_name: mapping}},
+                body={"properties": mapping},
             )
 
     def get_cluster_info(self) -> Dict[str, Any]:
@@ -820,6 +831,7 @@ class ElasticsearchBackend(LoggingMixin):
         with backend_error_handler(index=index):
             if not sort.sort_by and sort.shuffle is False:
                 sort.sort_by = [SortableField(id="id")]  # Default sort by id
+
             es_query = {
                 **self.query_builder.map_2_es_query(
                     schema=self.get_schema(id),
@@ -829,10 +841,22 @@ class ElasticsearchBackend(LoggingMixin):
                 "_source": {"excludes": exclude_fields or []},
                 "from": record_from,
             }
+
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
 
-            results = self._search(index=index, query=es_query, size=size)
+            if query.embedding_vector:
+                knn_query = self.query_builder.map_2_knn_query(
+                    embedding_name=query.embedding_name,
+                    embedding_vector=query.embedding_vector,
+                )
+
+            results = self._search(
+                index=index,
+                query=es_query,
+                knn=knn_query,
+                size=size,
+            )
             hits = results["hits"]
             total = hits["total"]
             docs = hits["hits"]
@@ -848,7 +872,8 @@ class ElasticsearchBackend(LoggingMixin):
             **doc["_source"],
             "id": doc["_id"],
             "search_keywords": self.__parse_highlight_results__(
-                doc, is_phrase_query=is_phrase_query
+                doc=doc,
+                is_phrase_query=is_phrase_query,
             ),
         }
 
@@ -1108,7 +1133,11 @@ class ElasticsearchBackend(LoggingMixin):
                 ),
                 "aggs": agg,
             }
-            search_result = self._search(index=index, query=es_query, size=0)
+            search_result = self._search(
+                index=index,
+                query=es_query,
+                size=0,
+            )
             search_aggregations = search_result.get("aggregations", {})
 
             if search_aggregations:
@@ -1144,32 +1173,34 @@ class ElasticsearchBackend(LoggingMixin):
         )
 
     def _delete_index_alias(self, index: str, alias: str):
-        self.__client__.indices.delete_alias(index=index, name=alias, ignore=[400, 404])
+        self.__client__.indices.delete_alias(
+            index=index,
+            name=alias,
+            ignore=[400, 404],
+        )
 
     def configure_embeddings(
         self,
         id: str,
         embeddings: Dict[str, int],
     ):
-        vector_search_index_name_2_index_mapping = {}
-        for embedding_name, embedding_dimension in embeddings:
-            vector_search_index_name = "_".join(
-                id, embedding_name
-            )  ## aims to make the vector search index name unique
+        embedding_mappings = {}
+        for embedding_name, embedding_dimension in embeddings.items():
             index_mapping = {
                 "type": "dense_vector",
                 "dims": embedding_dimension,
                 "index": True,
-                "similarity": "cosine",  ## can similarity property also be part of config @frascuchon ? relates vector search similarity metric
+                ## can similarity property also be part of config @frascuchon ?
+                # relates vector search similarity metric
+                "similarity": "cosine",
             }
-            vector_search_index_name_2_index_mapping[
-                vector_search_index_name
-            ] = index_mapping
-        # raise NotImplementedError(
-        #    "Here, we should configure embeddings mappings by using the provided "
-        #    "per-field embeddings configuration. "
-        # )
-        return vector_search_index_name_2_index_mapping
+            embedding_mappings[embedding_name] = index_mapping
+
+        index = dataset_records_index(id)
+        self._put_index_mappings(
+            index=index,
+            mapping=embedding_mappings,
+        )
 
 
 def dataset_records_index(dataset_id: str) -> str:
