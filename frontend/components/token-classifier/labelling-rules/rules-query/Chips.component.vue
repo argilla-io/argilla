@@ -1,7 +1,11 @@
 <template>
-  <div class="chips-area">
-    <button>Chip Label</button>
-    <pre>{{ chips }}</pre>
+  <div class="chips">
+    <div class="chips-wrapper">
+      <div class="chips__items" v-for="chip in chips" :key="chip.id">
+        <button @click="onChipsSelection(chip)">{{ chip.text }}</button>
+      </div>
+    </div>
+    <!-- <pre>{{ chips }}</pre> -->
   </div>
 </template>
 
@@ -14,10 +18,23 @@ export default {
       required: true,
     },
   },
+  methods: {
+    onChipsSelection({ text }) {
+      console.log(text);
+      this.$emit("on-chips-selection", { text });
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.chips {
+  // display: flex;
+  flex: 1;
+  &__items {
+    display: inline-flex;
+  }
+}
 button {
   border: none;
   min-height: 50px;
