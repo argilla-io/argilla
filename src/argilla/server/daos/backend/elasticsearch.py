@@ -844,8 +844,8 @@ class ElasticsearchBackend(LoggingMixin):
 
             if enable_highlight:
                 es_query["highlight"] = self.__configure_query_highlight__()
-
-            if query.embedding_vector:
+            knn_query = None
+            if hasattr(query, "embedding_vector"):
                 knn_query = self.query_builder.map_2_knn_query(
                     embedding_name=query.embedding_name,
                     embedding_vector=query.embedding_vector,
