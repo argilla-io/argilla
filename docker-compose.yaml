@@ -8,7 +8,7 @@ services:
       - "9300:9300"
     environment:
       - node.name=elasticsearch
-      - cluster.name=es-rubrix-local
+      - cluster.name=es-argilla-local
       - discovery.type=single-node
       - “ES_JAVA_OPTS=-Xms512m -Xmx512m”
       - cluster.routing.allocation.disk.threshold_enabled=false

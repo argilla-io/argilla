@@ -352,7 +352,6 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
-
     embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
 
     id: Optional[Union[int, str]] = None

@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
+from torch import embedding
 
 from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.client.models import (
@@ -80,11 +81,16 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
+        embeddings = None
+        if record.embeddings is not None:
+            embeddings = record.embeddings
+
         return cls(
             tokens=record.tokens,
             text=record.text,
             prediction=prediction,
             annotation=annotation,
+            embeddings=embeddings,
             status=record.status,
             id=record.id,
             metadata=record.metadata,

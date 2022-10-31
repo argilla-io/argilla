@@ -636,7 +636,9 @@ def test_load_sort(mocked_client):
 
     # check sorting policies
     ds = api.load(name=dataset)
+    print(ds)
     df = ds.to_pandas()
+    print(df.head())
     assert list(df.id) == [1, 11, "11str", "1str", 2, "2str"]
     ds = api.load(name=dataset, ids=[1, 2, 11])
     df = ds.to_pandas()

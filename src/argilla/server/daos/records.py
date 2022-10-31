@@ -17,7 +17,6 @@ import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from fastapi import Depends
-from torch import embedding
 
 from argilla.server.daos.backend.elasticsearch import (
     ClosedIndexError,
@@ -102,44 +101,43 @@ class DatasetRecordsDAO:
             metadata_values.update(r.metadata or {})
             db_record = record_class.parse_obj(r)
             db_record.last_updated = now
-            if db_record.embeddings is None:
-                continue
-            for embedding in db_record.embeddings:
-                for embedding_property_name_2_value in embedding.embeddings:
-                    if hasattr(embedding_property_name_2_value, "propertyNames"):
-                        embedding_property_name = "_".join(
-                            embedding_property_name_2_value.propertyNames
+            if db_record.embeddings is not None:
+                for embedding in db_record.embeddings:
+                    for embedding_property_name_2_value in embedding.embeddings:
+                        if hasattr(embedding_property_name_2_value, "propertyNames"):
+                            embedding_property_name = "_".join(
+                                embedding_property_name_2_value.propertyNames
+                            )
+                        elif hasattr(embedding_property_name_2_value, "property_name"):
+                            embedding_property_name = (
+                                embedding_property_name_2_value.property_name
+                            )
+                        else:
+                            embedding_property_name = "this"
+                        embedding_name = ".".join(
+                            [embedding.record_property_name, embedding_property_name]
                         )
-                    elif hasattr(embedding_property_name_2_value, "property_name"):
-                        embedding_property_name = (
-                            embedding_property_name_2_value.property_name
-                        )
-                    else:
-                        embedding_property_name = "this"
-                    embedding_name = ".".join(
-                        [embedding.record_property_name, embedding_property_name]
-                    )
-                    for (
-                        embedding_vector
-                    ) in embedding_property_name_2_value.embedding_vectors:
-                        embedding_index_name = (
-                            embedding_name + "_" + embedding_vector.vectorizer_name
-                        )
-                        embedding_dimension = len(embedding_vector.embedding_vector)
-                        expected_dimension = embedding_index_name_2_dimension.get(
-                            embedding_index_name, None
-                        )
-                        if expected_dimension is None:
-                            embedding_index_name_2_dimension[
-                                embedding_index_name
-                            ] = embedding_dimension
-                            continue
-                        ## we can drop these two if statements, keeping them for discussion purpose
-                        if embedding_dimension != expected_dimension:
-                            ## there is inconsistency keep the previous, @frascuchon lets discuss about potential issues
-                            continue
-                        if embedding_dimension == expected_dimension:
-                            continue  ## everything is fine
+                        for (
+                            embedding_vector
+                        ) in embedding_property_name_2_value.embedding_vectors:
+                            embedding_index_name = (
+                                embedding_name + "_" + embedding_vector.vectorizer_name
+                            )
+                            embedding_dimension = len(embedding_vector.embedding_vector)
+                            expected_dimension = embedding_index_name_2_dimension.get(
+                                embedding_index_name, None
+                            )
+                            if expected_dimension is None:
+                                embedding_index_name_2_dimension[
+                                    embedding_index_name
+                                ] = embedding_dimension
+                                continue
+                            ## we can drop these two if statements, keeping them for discussion purpose
+                            if embedding_dimension != expected_dimension:
+                                ## there is inconsistency keep the previous, @frascuchon lets discuss about potential issues
+                                continue
+                            if embedding_dimension == expected_dimension:
+                                continue  ## everything is fine
 
             documents.append(
                 db_record.dict(
