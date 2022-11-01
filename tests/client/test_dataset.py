@@ -244,6 +244,7 @@ class TestDatasetForTextClassification:
         dataset_ds = expected_dataset.to_datasets()
 
         assert isinstance(dataset_ds, datasets.Dataset)
+        print(dataset_ds.column_names)
         assert dataset_ds.column_names == [
             "text",
             "inputs",
@@ -251,6 +252,8 @@ class TestDatasetForTextClassification:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "embeddings",
+            "embedding_agent",
             "multi_label",
             "explanation",
             "id",
@@ -463,6 +466,8 @@ class TestDatasetForTokenClassification:
 
         dataset_ds = expected_dataset.to_datasets()
 
+        print(dataset_ds.column_names)
+
         assert isinstance(dataset_ds, datasets.Dataset)
         assert dataset_ds.column_names == [
             "text",
@@ -471,6 +476,7 @@ class TestDatasetForTokenClassification:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "embeddings",
             "id",
             "metadata",
             "status",
@@ -720,6 +726,7 @@ class TestDatasetForText2Text:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "embeddings",
             "id",
             "metadata",
             "status",
