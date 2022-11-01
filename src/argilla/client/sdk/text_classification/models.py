@@ -81,6 +81,8 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             inputs=record.inputs,
             prediction=prediction,
             annotation=annotation,
+            embeddings=embeddings,
+            embedding_agent=embedding_agent,
             multi_label=record.multi_label,
             status=record.status,
             explanation=record.explanation,
@@ -119,6 +121,8 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=annotations,
             annotation_agent=self.annotation.agent if self.annotation else None,
+            embeddings=self.embeddings if self.embeddings else None,
+            embedding_agent=self.embedding_agent if self.embedding_agent else None,
             explanation={
                 key: [
                     ClientTokenAttributions.parse_obj(attribution)
