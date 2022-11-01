@@ -81,16 +81,12 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
                 agent=record.annotation_agent or MACHINE_NAME,
             )
 
-        embeddings = None
-        if record.embeddings is not None:
-            embeddings = record.embeddings
-
         return cls(
             tokens=record.tokens,
             text=record.text,
             prediction=prediction,
             annotation=annotation,
-            embeddings=embeddings,
+            embeddings=record.embeddings,
             status=record.status,
             id=record.id,
             metadata=record.metadata,
@@ -147,3 +143,5 @@ class TokenClassificationQuery(BaseModel):
     score: Optional[ScoreRange] = Field(default=None)
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
+    embedding_name: str = Field(default=None)
+    embedding_vector = List[float] = Field(default_factory=list)
