@@ -65,7 +65,7 @@ https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9
 ### Monitoring
 
 - Close the gap between production data and data collection activities
-- Auto-monitoring for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
+- [Auto-monitoring](https://docs.argilla.io/en/latest/guides/steps/3_deploying.html) for [major NLP libraries and pipelines](https://docs.argilla.io/en/latest/tutorials/libraries/libraries.html) (spaCy, Hugging Face, FlairNLP)
 - [ASGI middleware](https://docs.argilla.io/en/latest/tutorials/notebooks/deploying-texttokenclassification-fastapi.html) for HTTP endpoints
 - Argilla Metrics to understand data and model issues, [like entity consistency for NER models](https://docs.argilla.io/en/latest/guides/steps/4_monitoring.html)
 - Integrated with Kibana for custom dashboards
@@ -184,7 +184,6 @@ Argilla is useful if you want to:
 ### What do I need to start using Argilla?
 You need to have a running instance of Elasticsearch and install the Argilla Python library.
 The library is used to read and write data into Argilla.
-To get started we highly recommend using Jupyter Notebooks so you might want to install Jupyter Lab or use Jupiter support for VS Code for example.
 
 ### How can I "upload" data into Argilla?
 Currently, the only way to upload data into Argilla is by using the Python library.
@@ -216,7 +215,7 @@ The training datasets created with Argilla are model agnostic.
 
 You can choose one of many amazing frameworks to train your model, like [transformers](https://huggingface.co/docs/transformers/), [spaCy](https://spacy.io/), [flair](https://github.com/flairNLP/flair) or [sklearn](https://scikit-learn.org).
 
-Check out our [deep deives](https://docs.argilla.io/en/latest/guides/guides.html) and our [tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) on how Argilla integrates with these frameworks.
+Check out our [deep dives](https://docs.argilla.io/en/latest/guides/guides.html) and our [tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) on how Argilla integrates with these frameworks.
 
 
 If you want to train a Hugging Face transformer or spaCy NER model, we provide a neat shortcut to [prepare your dataset for training](https://docs.argilla.io/en/latest/guides/features/datasets.html#Prepare-dataset-for-training).
