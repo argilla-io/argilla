@@ -60,7 +60,7 @@ export default {
         let percent = Math.round(Math.abs(grad) * 100);
         if (percent !== 0) {
           /* eslint-disable no-mixed-operators */
-          const p = 1.5; // color sensitivity (values from 1 to 4)
+          const p = 1; // color sensitivity (values from 1 to 4)
           const s = 100 / Math.log10(100) ** p;
           percent = Math.round(Math.log10(percent) ** p * s);
         }
@@ -91,7 +91,7 @@ export default {
       margin: auto;
       transform: translateY(10px);
       position: absolute;
-      bottom: 5px;
+      bottom: 4px;
       right: 0;
       left: 0;
     }
@@ -110,7 +110,7 @@ export default {
     }
   }
   .grad-neg-#{$i} {
-    $bg: hsla(200, 60%, 100% - $i * 0.5, 1);
+    $bg: hsla(200, 60%, 100% - $i * 0.5, 0.5);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
@@ -132,7 +132,7 @@ export default {
     }
   }
   .grad-rest-#{$i} {
-    $bg: hsla(0, 80%, 100% - $i * 0.5, 1);
+    $bg: hsla(0, 80%, 100% - $i * 0.5, 0.5);
     @extend %grad;
     background: $bg;
     .atom__tooltip {
