@@ -60,9 +60,9 @@ export default {
         let percent = Math.round(Math.abs(grad) * 100);
         if (percent !== 0) {
           /* eslint-disable no-mixed-operators */
-          const p = 1; // color sensitivity (values from 1 to 4)
-          const s = 100 / Math.log10(100) ** p;
-          percent = Math.round(Math.log10(percent) ** p * s);
+          const colorSensitivity = 1; // color sensitivity (values from 1 to 4)
+          const s = 100 / Math.log10(100) ** colorSensitivity;
+          percent = Math.round(Math.log10(percent) ** colorSensitivity * s);
         }
         return {
           text: this.record.search_keywords
