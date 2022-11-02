@@ -230,7 +230,9 @@ class TextClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
+    embeddings: Optional[
+        Dict[str, Dict[str, Union[List[str], Dict[str, List[float]]]]]
+    ] = None
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
@@ -351,7 +353,9 @@ class TokenClassificationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[List[Tuple[str, int, int]]] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
+    embeddings: Optional[
+        Dict[str, Dict[str, Union[List[str], Dict[str, List[float]]]]]
+    ] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -587,7 +591,9 @@ class TextGenerationRecord(_Validators):
     prediction_agent: Optional[str] = None
     annotation: Optional[str] = None
     annotation_agent: Optional[str] = None
-    embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
+    embeddings: Optional[
+        Dict[str, Dict[str, Union[List[str], Dict[str, List[float]]]]]
+    ] = None
 
     id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)

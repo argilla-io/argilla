@@ -44,15 +44,34 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
-class BaseEmbeddingVectorDB(BaseModel):
-    property_name: Optional[str] = Field(default=None)
-    propertyNames: Optional[List[str]] = Field(default=None)
-    embedding_vectors: List[Dict[str, List[float]]]
-
-
 class BaseEmbeddingDB(BaseModel):
-    record_property_name: str = Field(default="text")
-    embeddings: List[BaseEmbeddingVectorDB]
+    """
+    embeddings = {
+        "text": {
+            "embedding_vectors": {
+                "bert_uncased": [...],
+                "bert_case": [...]
+            }
+        },
+        "inputs": {
+            "property_names": ["body", "subject"],
+            "embedding_vectors": {
+                "bert_uncased": [...],
+                "bert_case": [...]
+            }
+        }
+        "prediction": {
+            "property_names": ["source_sentence"],
+            "embedding_vectors": {
+                "bert_uncased": [...],
+                "bert_case": [...]
+            },
+        }
+    },
+    """
+
+    property_names: List[str]
+    embedding_vectors: Dict[str, List[float]]
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
@@ -69,7 +88,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    embeddings: Optional[List[EmbeddingDB]] = Field(
+    embeddings: Optional[Dict[str, EmbeddingDB]] = Field(
         None,
         description="Provide the embedding info as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized embedding float list"
