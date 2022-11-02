@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
-from torch import embedding
 
 from argilla._constants import MAX_KEYWORD_LENGTH
 from argilla.client.models import (
@@ -144,4 +143,4 @@ class TokenClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
     embedding_name: str = Field(default=None)
-    embedding_vector = List[float] = Field(default_factory=list)
+    embedding_vector: List[float] = Field(default_factory=list)

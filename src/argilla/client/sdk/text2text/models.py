@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
-from torch import embedding
 
 from argilla.client.models import Text2TextRecord as ClientText2TextRecord
 from argilla.client.sdk.commons.models import (
@@ -115,7 +114,7 @@ class Text2TextQuery(BaseModel):
     predicted_by: List[str] = Field(default_factory=list)
 
     embedding_name: str = Field(default=None)
-    embedding_vector = List[float] = Field(default_factory=list)
+    embedding_vector: List[float] = Field(default_factory=list)
 
     score: Optional[ScoreRange] = Field(default=None)
 

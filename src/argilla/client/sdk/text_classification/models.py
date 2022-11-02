@@ -122,7 +122,6 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             annotation=annotations,
             annotation_agent=self.annotation.agent if self.annotation else None,
             embeddings=self.embeddings if self.embeddings else None,
-            embedding_agent=self.embedding_agent if self.embedding_agent else None,
             explanation={
                 key: [
                     ClientTokenAttributions.parse_obj(attribution)
@@ -156,6 +155,8 @@ class TextClassificationQuery(BaseModel):
     status: List[TaskStatus] = Field(default_factory=list)
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
+    embedding_name: str = Field(default=None)
+    embedding_vector: List[float] = Field(default_factory=list)
     uncovered_by_rules: List[str] = Field(
         default_factory=list,
         description="List of rule queries that WILL NOT cover the resulting records",
