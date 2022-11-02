@@ -58,6 +58,8 @@ class Helpers:
         def check_schema_props(client_props, server_props):
             different_props = []
             for name, definition in client_props.items():
+                if name == "type":
+                    continue
                 if name not in server_props:
                     LOGGER.warning(
                         f"Client property {name} not found in server properties. "
@@ -71,10 +73,12 @@ class Helpers:
             return len(different_props) < len(client_props) / 2
 
         client_props = self._expands_schema(
-            client_schema["properties"], client_schema["definitions"]
+            client_schema["properties"],
+            client_schema["definitions"],
         )
         server_props = self._expands_schema(
-            server_schema["properties"], server_schema["definitions"]
+            server_schema["properties"],
+            server_schema["definitions"],
         )
 
         if client_props == server_props:

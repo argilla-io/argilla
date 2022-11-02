@@ -231,7 +231,6 @@ class TextClassificationRecord(_Validators):
     annotation: Optional[Union[str, List[str]]] = None
     annotation_agent: Optional[str] = None
     embeddings: Optional[List[Dict[str, List[Dict[str, List[Dict[str, List]]]]]]] = None
-    embedding_agent: Optional[str]
 
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None

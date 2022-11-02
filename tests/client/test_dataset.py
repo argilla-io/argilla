@@ -253,7 +253,6 @@ class TestDatasetForTextClassification:
             "annotation",
             "annotation_agent",
             "embeddings",
-            "embedding_agent",
             "multi_label",
             "explanation",
             "id",

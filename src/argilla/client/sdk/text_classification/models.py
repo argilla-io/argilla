@@ -82,7 +82,6 @@ class CreationTextClassificationRecord(BaseRecord[TextClassificationAnnotation])
             prediction=prediction,
             annotation=annotation,
             embeddings=record.embeddings,
-            embedding_agent=record.embedding_agent,
             multi_label=record.multi_label,
             status=record.status,
             explanation=record.explanation,
