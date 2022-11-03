@@ -20,7 +20,7 @@
     <div
       v-for="group in sidebarGroups"
       :key="group"
-      class="sidebar__info"
+      :class="`sidebar__info --${!group ? 'ungruped' : 'group'}`"
     >
       <p>{{ group }}</p>
       <sidebar-button
@@ -123,6 +123,10 @@ $sidebar-button-size: 45px;
   &__info {
     position: relative;
     margin-bottom: 1em;
+    &.--ungruped {
+      margin-top: auto;
+      margin-bottom: 0em;
+    }
   }
 }
 a[data-title]:not(.active) {

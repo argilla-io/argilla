@@ -1,9 +1,9 @@
 <template>
   <a
     class="sidebar-button"
-    :class="[type.toLowerCase(), activeView.includes(id) ? 'active' : '']"
+    :class="sidebarButtonClass"
     href="#"
-    :data-title="!activeView.includes(id) ? tooltip : null"
+    :data-title="sidebarButtonTooltipText"
     @click="$emit('button-action', id)"
   >
     <svgicon :name="icon"></svgicon>
@@ -24,8 +24,7 @@ export default {
       default: () => [],
     },
     tooltip: {
-      type: String,
-      required: true,
+      type: [String, null],
     },
     id: {
       type: String,
@@ -36,11 +35,21 @@ export default {
       required: true,
     },
     type: {
-      type: String,
-      required: true,
+      type: [String, null],
       validator: (value) => {
-        return ["Mode", "Metrics", "Refresh"].includes(value);
+        return ["Mode", "Metrics", "Refresh", "View-info", null].includes(value);
       },
+    },
+  },
+  computed: {
+    sidebarButtonClass() {
+      return [
+        this.type?.toLowerCase(),
+        this.activeView.includes(this.id) ? "active" : "",
+      ];
+    },
+    sidebarButtonTooltipText() {
+      return !this.activeView.includes(this.id) ? this.tooltip : null;
     },
   },
 };

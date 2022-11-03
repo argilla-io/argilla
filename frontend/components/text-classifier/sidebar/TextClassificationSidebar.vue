@@ -19,9 +19,10 @@
   <sidebar-menu
     :current-metric="currentMetric"
     :dataset="dataset"
-    :sidebar-items="sidebarItems"
+    :sidebar-items="filteredSidebarItems"
     @refresh="$emit('refresh')"
     @show-metrics="onShowMetrics"
+    @show-view-info="onShowViewInfo"
     @change-view-mode="onChangeViewMode"
   />
 </template>
@@ -92,8 +93,25 @@ export default {
           group: "Refresh",
           action: "refresh",
         },
+        {
+          id: "view-info",
+          tooltip: null,
+          icon: "info",
+          group: null,
+          action: "show-view-info",
+        },
       ],
     };
+  },
+  computed: {
+    recordHasExplanation() {
+      return this.dataset.results.records.some((record) => record.explanation);
+    },
+    filteredSidebarItems() {
+      return this.recordHasExplanation
+        ? this.sidebarItems
+        : this.sidebarItems.filter((i) => i.id !== "view-info");
+    },
   },
   methods: {
     onChangeViewMode(value) {
@@ -101,6 +119,9 @@ export default {
     },
     onShowMetrics(info) {
       this.$emit("show-metrics", info);
+    },
+    async onShowViewInfo() {
+      await this.dataset.viewSettings.openViewInfo(true);
     },
   },
 };
