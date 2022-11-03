@@ -1,7 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { ObservationDataset } from "../Dataset";
 import RulesMetric from "./RulesMetric.modelTokenClassification";
-import SearchRulesRecord from "./SearchRulesRecord.modelTokenClassification";
 
 class Rule extends Model {
   static entity = "rules";
@@ -24,7 +23,6 @@ class Rule extends Model {
       // relationships
       dataset: this.belongsTo(ObservationDataset, "dataset_id"),
       rule_metrics: this.hasOne(RulesMetric, "rule_id"),
-      search_rules_records: this.hasMany(SearchRulesRecord, "rule_id"),
     };
   }
 }
