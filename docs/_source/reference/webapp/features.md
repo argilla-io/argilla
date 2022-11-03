@@ -39,10 +39,10 @@ You can also remove annotations by hovering over the highlights and pressing the
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_ and a _Save_ button will appear.
 Once a record is saved, its status will change to _Validated_.
 
-#### Text2Text
+#### TextGeneration
 
 
-For text2text datasets, you have a text box available, in which you can draft or edit an annotation.
+For TextGeneration datasets, you have a text box available, in which you can draft or edit an annotation.
 After editing or drafting your annotation, don't forget to save your changes.
 
 ### Bulk annotate
@@ -74,7 +74,7 @@ You can also validate the predictions (or the absence of them) by pressing the _
 
 Once the record is saved or validated, its status will change to _Validated_.
 
-#### Text2Text
+#### TextGeneration
 
 You can validate or edit a prediction, by first clicking on the _view predictions_ button, and then the _Edit_ or _Validate_ button.
 After editing or drafting your annotation, don't forget to save your changes.
@@ -206,7 +206,7 @@ In this task, predictions and annotations are displayed as highlights in the inp
 
 For datasets with available score, the solid line for **predictions** disappears when the **score filter** (in **Predictions filter** section) is applied.
 
-#### Text2Text
+#### TextGeneration
 
 
 In this task predictions and the annotation are given in a text field below the input text.

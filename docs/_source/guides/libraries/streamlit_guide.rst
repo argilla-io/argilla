@@ -20,7 +20,7 @@ Once the annotated labels are selected, the user can press the **log** button. A
 How to run the app
 ------------------
 
-We've created a `standalone repository <https://github.com/recognai/rubrix-streamlit-example>`_\  for this streamlit app, for you to clone and play around. To run the app, follow these steps:
+We've created a `standalone repository <https://github.com/argilla-io/argilla-streamlit-example>`_\  for this streamlit app, for you to clone and play around. To run the app, follow these steps:
 
 #. Install the requirements into a fresh environment (or into your system, but take care with the dependency problems!) with Python 3, via ``pip install -r requirements.txt``.
 #. Run ``streamlit run app.py``.
