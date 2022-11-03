@@ -73,11 +73,10 @@ def test_search_records(mocked_client):
 
     response = mocked_client.post(f"/api/datasets/{dataset}/Text2Text:search", json={})
     assert response.status_code == 200, response.json()
+    print(response.json())
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.records[0].predicted is None
-
-    print(results)
 
     assert results.aggregations.dict(exclude={"score"}) == {
         "annotated_as": {},
@@ -91,6 +90,34 @@ def test_search_records(mocked_client):
         "status": {"Default": 2},
         "words": {"data": 2, "ånother": 1},
     }
+    print("----------------------------------------")
+
+    response = mocked_client.post(
+        f"/api/datasets/{dataset}/Text2Text:search",
+        json={
+            "knn": {
+                "field": "my_bert",
+                "query_vector": [1, 2, 4, 4],
+                "k": 10,
+                "num_candidates": 100,
+            },
+        },
+    )
+    assert response.status_code == 200, response.json()
+    print(response.json())
+    """
+    {'total': 2, 'records': [{'id': 0, 'metadata': {'field_one': 'value one'}, 'status': 'Default',
+     'prediction': {'agent': 'test', 'sentences': [{'text': 'This is a test data', 'score': 0.6}]},
+     'embeddings': {'my_bert': {'vector': [1.0, 2.0, 3.0, 4.0], 'record_properties': ['text']}},
+     'predictions': {'test': {'sentences': [{'text': 'This is a test data', 'score': 0.6}]}}, 'metrics': {},
+    'last_updated': '2022-11-03T15:19:10.396200', 'text': 'This is a text data'}, {'id': 1, 'status': 'Default',
+    'embeddings': {'my_bert': {'vector': [1.0, 2.0, 4.0, 4.0], 'record_properties': ['text']}}, 'metrics': {},
+    'last_updated': '2022-11-03T15:19:10.396200', 'text': 'Ånother data'}], 'aggregations': {'predicted_as': {},
+    'annotated_as': {}, 'annotated_by': {}, 'predicted_by': {'test': 1}, 'status': {'Default': 2}, 'predicted': {},
+    'score': {'0.6': 1}, 'words': {'data': 2, 'ånother': 1},
+    'metadata': {'field_one': {'value one': 1}}, 'predicted_text': {}, 'annotated_text': {}}}
+    """
+    results = Text2TextSearchResults.parse_obj(response.json())
 
 
 def test_api_with_new_predictions_data_model(mocked_client):
