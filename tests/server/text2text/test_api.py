@@ -11,10 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List, Optional
 
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
+    Text2TextRecord,
     Text2TextRecordInputs,
     Text2TextSearchResults,
 )
@@ -37,22 +39,10 @@ def test_search_records(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
-                "embeddings": {
-                    "my_bert": {
-                        "record_properties": ["text"],
-                        "vector": [1, 2, 3, 4],
-                    }
-                },
             },
             {
                 "id": 1,
                 "text": "Ånother data",
-                "embeddings": {
-                    "my_bert": {
-                        "record_properties": ["text"],
-                        "vector": [1, 2, 4, 4],
-                    }
-                },
             },
         ]
     ]
@@ -73,7 +63,6 @@ def test_search_records(mocked_client):
 
     response = mocked_client.post(f"/api/datasets/{dataset}/Text2Text:search", json={})
     assert response.status_code == 200, response.json()
-    print(response.json())
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.records[0].predicted is None
@@ -90,35 +79,51 @@ def test_search_records(mocked_client):
         "status": {"Default": 2},
         "words": {"data": 2, "ånother": 1},
     }
-    print("----------------------------------------")
 
-    response = mocked_client.post(
-        f"/api/datasets/{dataset}/Text2Text:search",
-        json={
-            "knn": {
-                "field": "my_bert",
-                "query_vector": [1, 2, 4, 4],
-                "k": 10,
-                "num_candidates": 100,
-            },
-        },
+
+def search_data(
+    *,
+    client,
+    base_url: str,
+    expected_total: int,
+    query: Optional[dict] = None,
+    embedding_name: Optional[str] = None,
+):
+    response = client.post(
+        url=f"{base_url}:search",
+        json=query or {},
     )
     assert response.status_code == 200, response.json()
-    print(response.json())
-    """
-    {'total': 2, 'records': [{'id': 0, 'metadata': {'field_one': 'value one'}, 'status': 'Default',
-     'prediction': {'agent': 'test', 'sentences': [{'text': 'This is a test data', 'score': 0.6}]},
-     'embeddings': {'my_bert': {'vector': [1.0, 2.0, 3.0, 4.0], 'record_properties': ['text']}},
-     'predictions': {'test': {'sentences': [{'text': 'This is a test data', 'score': 0.6}]}}, 'metrics': {},
-    'last_updated': '2022-11-03T15:19:10.396200', 'text': 'This is a text data'}, {'id': 1, 'status': 'Default',
-    'embeddings': {'my_bert': {'vector': [1.0, 2.0, 4.0, 4.0], 'record_properties': ['text']}}, 'metrics': {},
-    'last_updated': '2022-11-03T15:19:10.396200', 'text': 'Ånother data'}], 'aggregations': {'predicted_as': {},
-    'annotated_as': {}, 'annotated_by': {}, 'predicted_by': {'test': 1}, 'status': {'Default': 2}, 'predicted': {},
-    'score': {'0.6': 1}, 'words': {'data': 2, 'ånother': 1},
-    'metadata': {'field_one': {'value one': 1}}, 'predicted_text': {}, 'annotated_text': {}}}
-    """
+
     results = Text2TextSearchResults.parse_obj(response.json())
-    assert results == 5
+    assert results.total == expected_total
+    for record in results.records:
+        if embedding_name:
+            assert record.embeddings is not None
+            assert embedding_name in record.embeddings
+
+
+def test_search_with_embeddings(mocked_client, records_for_text2text_with_embeddings):
+    dataset = "test_search_with_embeddings"
+
+    base_url = prepare_data(
+        client=mocked_client,
+        dataset=dataset,
+        records=records_for_text2text_with_embeddings,
+    )
+
+    search_data(
+        client=mocked_client,
+        base_url=base_url,
+        expected_total=2,
+        embedding_name="my_bert",
+        query={
+            "query": {
+                "embedding_name": "my_bert",
+                "embedding_vector": [1, 3],
+            }
+        },
+    )
 
 
 def test_api_with_new_predictions_data_model(mocked_client):
@@ -147,18 +152,11 @@ def test_api_with_new_predictions_data_model(mocked_client):
         ),
     ]
 
-    response = mocked_client.post(
-        f"/api/datasets/{dataset}/Text2Text:bulk",
-        json=Text2TextBulkRequest(
-            records=records,
-        ).dict(by_alias=True),
+    prepare_data(
+        client=mocked_client,
+        dataset=dataset,
+        records=records,
     )
-
-    assert response.status_code == 200, response.json()
-    bulk_response = BulkResponse.parse_obj(response.json())
-    assert bulk_response.dataset == dataset
-    assert bulk_response.failed == 0
-    assert bulk_response.processed == 2
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/Text2Text:search",
@@ -177,6 +175,24 @@ def test_api_with_new_predictions_data_model(mocked_client):
     assert response.status_code == 200, response.json()
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 1, results
+
+
+def prepare_data(*, client, dataset: str, records: List[Text2TextRecordInputs]):
+    base_api_url = f"/api/datasets/{dataset}/Text2Text"
+    response = client.post(
+        f"{base_api_url}:bulk",
+        json=Text2TextBulkRequest(
+            records=records,
+        ).dict(by_alias=True),
+    )
+    assert response.status_code == 200, response.json()
+
+    bulk_response = BulkResponse.parse_obj(response.json())
+    assert bulk_response.dataset == dataset
+    assert bulk_response.failed == 0
+    assert bulk_response.processed == len(records)
+
+    return base_api_url
 
 
 def delete_dataset(dataset, mocked_client):
