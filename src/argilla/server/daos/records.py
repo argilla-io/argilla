@@ -90,8 +90,22 @@ class DatasetRecordsDAO:
         documents = []
         metadata_values = {}
 
+        mapping = self._es.get_schema(id=dataset.id)
+        exclude_fields = [
+            name
+            for name in record_class.schema()["properties"]
+            if name not in mapping["mappings"]["properties"]
+        ]
+
         embeddings_configuration = {}
         for record in records:
+            metadata_values.update(record.metadata or {})
+            db_record = record_class.parse_obj(record)
+            db_record.last_updated = now
+            record_dict = db_record.dict(
+                exclude_none=False,
+                exclude=set(exclude_fields),
+            )
             if record.embeddings is not None:
                 for (
                     embedding_name,
@@ -103,30 +117,9 @@ class DatasetRecordsDAO:
                     if embedding_dimension is None:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
+                    record_dict[embedding_name] = embedding_vector_data_mapping
 
-        self._es.configure_embeddings(
-            id=dataset.id,
-            embeddings=embeddings_configuration,
-        )
-
-        mapping = self._es.get_schema(id=dataset.id)
-        exclude_fields = [
-            name
-            for name in record_class.schema()["properties"]
-            if name not in mapping["mappings"]["properties"]
-        ]
-
-        for record in records:
-            metadata_values.update(record.metadata or {})
-            db_record = record_class.parse_obj(record)
-            db_record.last_updated = now
-
-            documents.append(
-                db_record.dict(
-                    exclude_none=False,
-                    exclude=set(exclude_fields),
-                )
-            )
+            documents.append(record_dict)
 
         self._es.create_dataset_index(
             id=dataset.id,

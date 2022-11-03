@@ -1200,16 +1200,10 @@ class ElasticsearchBackend(LoggingMixin):
             }
             embedding_mappings[embedding_name] = index_mapping
 
-        mapping = {
-            "_knn": {
-                "type": "object",
-                "properties": embedding_mappings,
-            }
-        }
         index = dataset_records_index(id)
         self._put_index_mappings(
             index=index,
-            mapping=mapping,
+            mapping=embedding_mappings,
         )
 
 
