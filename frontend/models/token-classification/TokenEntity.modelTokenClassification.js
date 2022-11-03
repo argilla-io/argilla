@@ -11,12 +11,12 @@ class TokenEntity extends Model {
       color_id: this.attr(null),
       text: this.string(null),
       dataset_id: this.attr(null),
-
+      is_activate: this.attr(false),
       // // relationships
       dataset: this.belongsTo(TokenClassificationDataset, "dataset_id"),
     };
   }
 }
 
-const formatDatasetIdForTokenEntityModel = (dataset_id) => dataset_id.join();
+const formatDatasetIdForTokenEntityModel = (dataset_id) => dataset_id.join(".");
 export { TokenEntity, formatDatasetIdForTokenEntityModel };
