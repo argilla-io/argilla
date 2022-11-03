@@ -13,13 +13,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
 from argilla._constants import MAX_KEYWORD_LENGTH
-from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
+from argilla.server.commons.models import (
+    BaseLabelingRule,
+    BaseRulesSummary,
+    BaseRuleSummary,
+    PredictionStatus,
+    TaskStatus,
+    TaskType,
+)
 from argilla.server.helpers import flatten_dict
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import (
@@ -32,13 +38,7 @@ from argilla.server.services.tasks.commons import (
 )
 
 
-class ServiceLabelingRule(BaseModel):
-    query: str = Field(description="The es rule query")
-
-    author: str = Field(description="User who created the rule")
-    created_at: Optional[datetime] = Field(
-        default_factory=datetime.utcnow, description="Rule creation timestamp"
-    )
+class ServiceLabelingRule(BaseLabelingRule):
 
     label: Optional[str] = Field(
         default=None, description="@Deprecated::The label associated with the rule."
@@ -47,9 +47,6 @@ class ServiceLabelingRule(BaseModel):
         default_factory=list,
         description="For multi label problems, a list of labels. "
         "It will replace the `label` field",
-    )
-    description: Optional[str] = Field(
-        None, description="A brief description of the rule"
     )
 
     @root_validator
@@ -64,14 +61,8 @@ class ServiceLabelingRule(BaseModel):
         assert len(labels) >= 1, f"No labels was provided in rule {values}"
         return values
 
-    @validator("query")
-    def strip_query(cls, query: str) -> str:
-        """Remove blank spaces for query"""
-        return query.strip()
-
 
 class ServiceTextClassificationDataset(ServiceBaseDataset):
-
     task: TaskType = Field(default=TaskType.text_classification, const=True)
     rules: List[ServiceLabelingRule] = Field(default_factory=list)
 
@@ -342,3 +333,13 @@ class ServiceTextClassificationQuery(ServiceBaseRecordsQuery):
     predicted: Optional[PredictionStatus] = Field(default=None, nullable=True)
 
     uncovered_by_rules: List[str] = Field(default_factory=list)
+
+
+class DatasetLabelingRulesSummary(BaseRulesSummary):
+    pass
+
+
+class LabelingRuleSummary(BaseRuleSummary):
+    correct_records: int = Field(default=0)
+    incorrect_records: int = Field(default=0)
+    precision: Optional[float] = None

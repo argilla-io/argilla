@@ -12,21 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.daos.backend.metrics.base import TermsAggregation
-from argilla.server.daos.backend.metrics.commons import (
-    DatasetLabelingRulesMetric,
-    LabelingRulesMetric,
-)
+from .service import LabelingFunctionsMixin, exact_match
 
-METRICS = {
-    "predicted_as": TermsAggregation(
-        id="predicted_as",
-        field="predicted_as",
-    ),
-    "annotated_as": TermsAggregation(
-        id="annotated_as",
-        field="annotated_as",
-    ),
-    "labeling_rule": LabelingRulesMetric(id="labeling_rule"),
-    "dataset_labeling_rules": DatasetLabelingRulesMetric(id="dataset_labeling_rules"),
-}
+__all__ = [
+    "exact_match",
+    "LabelingFunctionsMixin",
+]

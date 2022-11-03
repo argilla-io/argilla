@@ -11,22 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from argilla.server.daos.backend.metrics.base import TermsAggregation
-from argilla.server.daos.backend.metrics.commons import (
-    DatasetLabelingRulesMetric,
-    LabelingRulesMetric,
-)
-
-METRICS = {
-    "predicted_as": TermsAggregation(
-        id="predicted_as",
-        field="predicted_as",
-    ),
-    "annotated_as": TermsAggregation(
-        id="annotated_as",
-        field="annotated_as",
-    ),
-    "labeling_rule": LabelingRulesMetric(id="labeling_rule"),
-    "dataset_labeling_rules": DatasetLabelingRulesMetric(id="dataset_labeling_rules"),
-}

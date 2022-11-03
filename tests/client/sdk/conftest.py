@@ -54,7 +54,11 @@ class Helpers:
     def remove_pattern(self, schema: dict):
         return self.remove_key(schema, key="pattern")
 
-    def are_compatible_api_schemas(self, client_schema: dict, server_schema: dict):
+    def are_compatible_api_schemas(
+        self,
+        client_schema: dict,
+        server_schema: dict,
+    ):
         def check_schema_props(client_props, server_props):
             different_props = []
             for name, definition in client_props.items():
@@ -71,10 +75,12 @@ class Helpers:
             return len(different_props) < len(client_props) / 2
 
         client_props = self._expands_schema(
-            client_schema["properties"], client_schema["definitions"]
+            client_schema["properties"],
+            client_schema.get("definitions", []),
         )
         server_props = self._expands_schema(
-            server_schema["properties"], server_schema["definitions"]
+            server_schema["properties"],
+            server_schema.get("definitions", []),
         )
 
         if client_props == server_props:

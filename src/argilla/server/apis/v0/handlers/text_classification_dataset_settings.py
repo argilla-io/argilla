@@ -66,7 +66,9 @@ def configure_router(router: APIRouter):
         )
 
         settings = await datasets.get_settings(
-            user=user, dataset=found_ds, class_type=__svc_settings_class__
+            user=user,
+            dataset=found_ds,
+            class_type=__svc_settings_class__,
         )
         return TextClassificationSettings.parse_obj(settings)
 

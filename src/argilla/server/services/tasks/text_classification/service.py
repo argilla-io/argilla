@@ -19,6 +19,7 @@ from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.errors.base_errors import MissingDatasetRecordsError
+from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.model import (
     ServiceSearchResults,
     ServiceSortableField,
@@ -27,10 +28,14 @@ from argilla.server.services.search.model import (
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
-from argilla.server.services.tasks.text_classification import LabelingService
+from argilla.server.services.tasks.commons.mixins.labeling_rules import (
+    LabelingRulesMixin,
+)
 from argilla.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary,
+    DatasetLabelingRulesSummary,
     LabelingRuleMetricsSummary,
+    LabelingRuleSummary,
     ServiceLabelingRule,
     ServiceTextClassificationDataset,
     ServiceTextClassificationQuery,
@@ -38,7 +43,7 @@ from argilla.server.services.tasks.text_classification.model import (
 )
 
 
-class TextClassificationService:
+class TextClassificationService(LabelingRulesMixin[ServiceLabelingRule]):
     """
     Text classification service
 
@@ -49,23 +54,28 @@ class TextClassificationService:
     @classmethod
     def get_instance(
         cls,
+        datasets: DatasetsService = Depends(DatasetsService.get_instance),
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
-        labeling: LabelingService = Depends(LabelingService.get_instance),
         search: SearchRecordsService = Depends(SearchRecordsService.get_instance),
     ) -> "TextClassificationService":
         if not cls._INSTANCE:
-            cls._INSTANCE = cls(storage, labeling=labeling, search=search)
+            cls._INSTANCE = cls(
+                datasets=datasets,
+                storage=storage,
+                search=search,
+            )
         return cls._INSTANCE
 
     def __init__(
         self,
+        datasets: DatasetsService,
         storage: RecordsStorageService,
         search: SearchRecordsService,
-        labeling: LabelingService,
     ):
+        super().__init__(datasets, records=search.__dao__)
+
         self.__storage__ = storage
         self.__search__ = search
-        self.__labeling__ = labeling
 
     async def add_records(
         self,
@@ -179,87 +189,6 @@ class TextClassificationService:
             limit=limit,
         )
 
-    def _check_multi_label_integrity(
-        self,
-        dataset: ServiceTextClassificationDataset,
-        records: List[ServiceTextClassificationRecord],
-    ):
-        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
-        if is_multi_label_dataset is not None:
-            is_multi_label = records[0].multi_label
-            assert is_multi_label == is_multi_label_dataset, (
-                "You cannot pass {labels_type} records for this dataset. "
-                "Stored records are {labels_type}".format(
-                    labels_type="multi-label" if is_multi_label else "single-label"
-                )
-            )
-
-    def _is_dataset_multi_label(
-        self, dataset: ServiceTextClassificationDataset
-    ) -> Optional[bool]:
-        try:
-            results = self.__search__.search(
-                dataset,
-                record_type=ServiceTextClassificationRecord,
-                size=1,
-            )
-        except MissingDatasetRecordsError:  # No records index yet
-            return None
-        if results.records:
-            return results.records[0].multi_label
-
-    def get_labeling_rules(
-        self, dataset: ServiceTextClassificationDataset
-    ) -> Iterable[ServiceLabelingRule]:
-
-        return self.__labeling__.list_rules(dataset)
-
-    def add_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule: ServiceLabelingRule
-    ) -> None:
-        """
-        Adds a labeling rule
-
-        Parameters
-        ----------
-        dataset:
-            The dataset
-
-        rule:
-            The rule
-        """
-        self.__normalized_rule__(rule)
-        self.__labeling__.add_rule(dataset, rule)
-
-    def update_labeling_rule(
-        self,
-        dataset: ServiceTextClassificationDataset,
-        rule_query: str,
-        labels: List[str],
-        description: Optional[str] = None,
-    ) -> ServiceLabelingRule:
-        found_rule = self.__labeling__.find_rule_by_query(dataset, rule_query)
-
-        found_rule.labels = labels
-        found_rule.label = labels[0] if len(labels) == 1 else None
-        if description is not None:
-            found_rule.description = description
-
-        self.__normalized_rule__(found_rule)
-        self.__labeling__.replace_rule(dataset, found_rule)
-        return found_rule
-
-    def find_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule_query: str
-    ) -> ServiceLabelingRule:
-        return self.__labeling__.find_rule_by_query(dataset, rule_query=rule_query)
-
-    def delete_labeling_rule(
-        self, dataset: ServiceTextClassificationDataset, rule_query: str
-    ):
-        if rule_query.strip():
-            return self.__labeling__.delete_rule(dataset, rule_query)
-
     def compute_rule_metrics(
         self,
         dataset: ServiceTextClassificationDataset,
@@ -294,20 +223,22 @@ class TextClassificationService:
         """
 
         rule_query = rule_query.strip()
-
         if labels is None:
             for rule in self.get_labeling_rules(dataset):
                 if rule.query == rule_query:
                     labels = rule.labels
                     break
 
-        total, annotated, metrics = self.__labeling__.compute_rule_metrics(
-            dataset, rule_query=rule_query, labels=labels
+        total, annotated, summary = self.compute_rule_summary(
+            dataset=dataset,
+            rule_query=rule_query,
+            summary_model=LabelingRuleSummary,
+            labels=labels,
         )
 
-        coverage = metrics.covered_records / total if total > 0 else None
+        coverage = summary.covered_records / total if total > 0 else None
         coverage_annotated = (
-            metrics.annotated_covered_records / annotated if annotated > 0 else None
+            summary.annotated_covered_records / annotated if annotated > 0 else None
         )
 
         return LabelingRuleMetricsSummary(
@@ -315,17 +246,22 @@ class TextClassificationService:
             annotated_records=annotated,
             coverage=coverage,
             coverage_annotated=coverage_annotated,
-            correct=metrics.correct_records if annotated > 0 else None,
-            incorrect=metrics.incorrect_records if annotated > 0 else None,
-            precision=metrics.precision if annotated > 0 else None,
+            correct=summary.correct_records if annotated > 0 else None,
+            incorrect=summary.incorrect_records if annotated > 0 else None,
+            precision=summary.precision if annotated > 0 else None,
         )
 
     def compute_overall_rules_metrics(self, dataset: ServiceTextClassificationDataset):
-        total, annotated, metrics = self.__labeling__.all_rules_metrics(dataset)
+
+        total, annotated, metrics = self.compute_dataset_rules_summary(
+            dataset=dataset,
+            summary_model=DatasetLabelingRulesSummary,
+        )
         coverage = metrics.covered_records / total if total else None
         coverage_annotated = (
             metrics.annotated_covered_records / annotated if annotated else None
         )
+
         return DatasetLabelingRulesMetricsSummary(
             coverage=coverage,
             coverage_annotated=coverage_annotated,
@@ -333,11 +269,39 @@ class TextClassificationService:
             annotated_records=annotated,
         )
 
-    @staticmethod
-    def __normalized_rule__(rule: ServiceLabelingRule) -> ServiceLabelingRule:
+    def _prepare_rule_for_save(self, rule: ServiceLabelingRule):
         if rule.labels and len(rule.labels) == 1:
             rule.label = rule.labels[0]
         elif rule.label and not rule.labels:
             rule.labels = [rule.label]
 
         return rule
+
+    def _check_multi_label_integrity(
+        self,
+        dataset: ServiceTextClassificationDataset,
+        records: List[ServiceTextClassificationRecord],
+    ):
+        is_multi_label_dataset = self._is_dataset_multi_label(dataset)
+        if is_multi_label_dataset is not None:
+            is_multi_label = records[0].multi_label
+            assert is_multi_label == is_multi_label_dataset, (
+                "You cannot pass {labels_type} records for this dataset. "
+                "Stored records are {labels_type}".format(
+                    labels_type="multi-label" if is_multi_label else "single-label"
+                )
+            )
+
+    def _is_dataset_multi_label(
+        self, dataset: ServiceTextClassificationDataset
+    ) -> Optional[bool]:
+        try:
+            results = self.__search__.search(
+                dataset,
+                record_type=ServiceTextClassificationRecord,
+                size=1,
+            )
+        except MissingDatasetRecordsError:  # No records index yet
+            return None
+        if results.records:
+            return results.records[0].multi_label

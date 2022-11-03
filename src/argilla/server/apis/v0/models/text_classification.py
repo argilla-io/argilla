@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -22,6 +22,7 @@ from argilla.server.apis.v0.models.commons.model import (
     BaseRecord,
     BaseRecordInputs,
     BaseSearchResults,
+    BaseUpdateLabelingRule,
     ScoreRange,
     SortableField,
 )
@@ -41,25 +42,20 @@ from argilla.server.services.tasks.text_classification.model import (
     ServiceTextClassificationDataset,
 )
 from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationQuery as _TextClassificationQuery,
-)
-from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
 from argilla.server.services.tasks.text_classification.model import TokenAttributions
 
 
-class UpdateLabelingRule(BaseModel):
+class UpdateLabelingRule(BaseUpdateLabelingRule):
     label: Optional[str] = Field(
-        default=None, description="@Deprecated::The label associated with the rule."
+        default=None,
+        description="@Deprecated::The label associated with the rule.",
     )
     labels: List[str] = Field(
         default_factory=list,
         description="For multi label problems, a list of labels. "
         "It will replace the `label` field",
-    )
-    description: Optional[str] = Field(
-        None, description="A brief description of the rule"
     )
 
     @root_validator
