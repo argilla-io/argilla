@@ -27,7 +27,6 @@ import { TextClassificationDataset } from "@/models/TextClassification";
 import { TokenClassificationDataset } from "@/models/TokenClassification";
 import { Rule } from "@/models/token-classification/Rule.modelTokenClassification";
 import RulesMetric from "@/models/token-classification/RulesMetric.modelTokenClassification";
-import { SearchRulesRecord } from "@/models/token-classification/SearchRulesRecord.modelTokenClassification";
 import { TokenEntity } from "@/models/token-classification/TokenEntity.modelTokenClassification";
 
 import info from "@/database/modules/info";
@@ -51,7 +50,6 @@ database.register(TextClassificationDataset, text_classification);
 database.register(TokenClassificationDataset, token_classification);
 database.register(Rule);
 database.register(RulesMetric);
-database.register(SearchRulesRecord);
 database.register(TokenEntity);
 
 export default database;
