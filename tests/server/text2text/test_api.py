@@ -118,6 +118,7 @@ def test_search_records(mocked_client):
     'metadata': {'field_one': {'value one': 1}}, 'predicted_text': {}, 'annotated_text': {}}}
     """
     results = Text2TextSearchResults.parse_obj(response.json())
+    assert results == 5
 
 
 def test_api_with_new_predictions_data_model(mocked_client):

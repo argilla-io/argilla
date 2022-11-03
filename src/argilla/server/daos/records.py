@@ -117,9 +117,8 @@ class DatasetRecordsDAO:
                     if embedding_dimension is None:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
-                    record_dict[embedding_name] = record_dict["embeddings"][
-                        embedding_name
-                    ]["vector"]
+                    record_dict[embedding_name] = embedding_vector_data_mapping.vector
+            print(record_dict)
             documents.append(record_dict)
 
         self._es.create_dataset_index(

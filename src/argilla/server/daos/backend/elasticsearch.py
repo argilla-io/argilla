@@ -467,7 +467,9 @@ class ElasticsearchBackend(LoggingMixin):
             id_ = doc_id(doc)
             if id_ is not None:
                 data["_id"] = id_
-
+            print("*******")
+            print(data)
+            print("*******")
             return data
 
         with backend_error_handler(index=index):
