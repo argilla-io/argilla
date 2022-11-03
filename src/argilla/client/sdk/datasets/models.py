@@ -23,13 +23,15 @@ from pydantic import BaseModel, Field
 class TaskType(str, Enum):
     text_classification = "TextClassification"
     token_classification = "TokenClassification"
-    text2text = "Text2Text"
+    text2text = "Text2Text"  # deprecated since v1
+    text_generation = "TextGeneration"
     multi_task_text_token_classification = "MultitaskTextTokenClassification"
 
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of"
+            f" {list(cls._value2member_map_.keys())}"
         )
 
 

@@ -37,6 +37,7 @@ from argilla.client.datasets import (
     Dataset,
     DatasetForText2Text,
     DatasetForTextClassification,
+    DatasetForTextGeneration,
     DatasetForTokenClassification,
 )
 from argilla.client.metrics.models import MetricResults

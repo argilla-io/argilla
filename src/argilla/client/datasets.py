@@ -18,12 +18,14 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
+from deprecated import deprecated
 from pkg_resources import parse_version
 
 from argilla.client.models import (
     Record,
     Text2TextRecord,
     TextClassificationRecord,
+    TextGenerationRecord,
     TokenAttributions,
     TokenClassificationRecord,
 )
@@ -40,13 +42,14 @@ def _requires_datasets(func):
             import datasets
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
-                f"'datasets' must be installed to use `{func.__name__}`! "
-                "You can install 'datasets' with the command: `pip install datasets>1.17.0`"
+                f"'datasets' must be installed to use `{func.__name__}`! You can"
+                " install 'datasets' with the command: `pip install datasets>1.17.0`"
             )
         if not (parse_version(datasets.__version__) > parse_version("1.17.0")):
             raise ModuleNotFoundError(
-                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`! "
-                "You can update 'datasets' with the command: `pip install -U datasets>1.17.0`"
+                "Version >1.17.0 of 'datasets' must be installed to use `to_datasets`!"
+                " You can update 'datasets' with the command: `pip install -U"
+                " datasets>1.17.0`"
             )
         return func(*args, **kwargs)
 
@@ -113,13 +116,15 @@ class DatasetBase:
         record_types = {type(rec): None for rec in self._records}
         if len(record_types) > 1:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
-                f"but you provided various types: {[rt.__name__ for rt in record_types.keys()]}"
+                f"A {type(self).__name__} must only contain"
+                f" {self._RECORD_TYPE.__name__}s, but you provided various types:"
+                f" {[rt.__name__ for rt in record_types.keys()]}"
             )
         elif next(iter(record_types)) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"A {type(self).__name__} must only contain {self._RECORD_TYPE.__name__}s, "
-                f"but you provided {list(record_types.keys())[0].__name__}s."
+                f"A {type(self).__name__} must only contain"
+                f" {self._RECORD_TYPE.__name__}s, but you provided"
+                f" {list(record_types.keys())[0].__name__}s."
             )
 
     def __iter__(self):
@@ -131,7 +136,8 @@ class DatasetBase:
     def __setitem__(self, key, value):
         if type(value) is not self._RECORD_TYPE:
             raise WrongRecordTypeError(
-                f"You are only allowed to set a record of type {self._RECORD_TYPE} in this dataset, but you provided {type(value)}"
+                f"You are only allowed to set a record of type {self._RECORD_TYPE} in"
+                f" this dataset, but you provided {type(value)}"
             )
         self._records[key] = value
 
@@ -162,13 +168,15 @@ class DatasetBase:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
             _LOGGER.warning(
-                "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
+                "The 'metadata' of the records were removed, since it was incompatible"
+                " with the 'datasets' format."
             )
 
         return dataset
 
     def _to_datasets_dict(self) -> Dict:
-        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`"""
+        """Helper method to transform a argilla dataset into a dict that is compatible with `datasets.Dataset`
+        """
         raise NotImplementedError
 
     @classmethod
@@ -204,7 +212,8 @@ class DatasetBase:
 
         if isinstance(dataset, datasets.DatasetDict):
             raise ValueError(
-                "`datasets.DatasetDict` are not supported. Please, select the dataset split before."
+                "`datasets.DatasetDict` are not supported. Please, select the dataset"
+                " split before."
             )
 
         # clean column mappings
@@ -251,8 +260,9 @@ class DatasetBase:
 
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__}"
-                f" model and are ignored: {not_supported_columns}"
+                "Following columns are not supported by the"
+                f" {cls._RECORD_TYPE.__name__} model and are ignored:"
+                f" {not_supported_columns}"
             )
             dataset = dataset.remove_columns(not_supported_columns)
 
@@ -339,8 +349,9 @@ class DatasetBase:
         ]
         if not_supported_columns:
             _LOGGER.warning(
-                f"Following columns are not supported by the {cls._RECORD_TYPE.__name__} model "
-                f"and are ignored: {not_supported_columns}"
+                "Following columns are not supported by the"
+                f" {cls._RECORD_TYPE.__name__} model and are ignored:"
+                f" {not_supported_columns}"
             )
             dataframe = dataframe.drop(columns=not_supported_columns)
 
@@ -664,7 +675,8 @@ class Framework(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of"
+            f" {list(cls._value2member_map_.keys())}"
         )
 
 
@@ -850,7 +862,8 @@ class DatasetForTokenClassification(DatasetBase):
         # else: must be spacy for sure
         if lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
+                "Please provide a spacy language model to prepare the dataset for"
+                " training with the spacy framework."
             )
         return self._prepare_for_training_with_spacy(nlp=lang)
 
@@ -898,7 +911,6 @@ class DatasetForTokenClassification(DatasetBase):
     def _prepare_for_training_with_spacy(
         self, nlp: "spacy.Language"
     ) -> "spacy.tokens.DocBin":
-
         from spacy.tokens import DocBin
 
         db = DocBin()
@@ -917,8 +929,9 @@ class DatasetForTokenClassification(DatasetBase):
                 if span is None:
                     # TODO(@dcfidalgo): Do we want to warn and continue or should we stop the training set generation?
                     raise ValueError(
-                        "The following annotation does not align with the tokens produced "
-                        f"by the provided spacy language model: {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
+                        "The following annotation does not align with the tokens"
+                        " produced by the provided spacy language model:"
+                        f" {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
                     )
                 else:
                     entities.append(span)
@@ -995,21 +1008,21 @@ class DatasetForTokenClassification(DatasetBase):
         )
 
 
-@_prepend_docstring(Text2TextRecord)
-class DatasetForText2Text(DatasetBase):
+@_prepend_docstring(TextGenerationRecord)
+class DatasetForTextGeneration(DatasetBase):
     """
     Examples:
         >>> # Import/export records:
         >>> import argilla as rg
-        >>> dataset = rg.DatasetForText2Text.from_pandas(my_dataframe)
+        >>> dataset = rg.DatasetForTextGeneration.from_pandas(my_dataframe)
         >>> dataset.to_datasets()
         >>>
         >>> # Passing in a list of records:
         >>> records = [
-        ...     rg.Text2TextRecord(text="example"),
-        ...     rg.Text2TextRecord(text="another example"),
+        ...     rg.TextGenerationRecord(text="example"),
+        ...     rg.TextGenerationRecord(text="another example"),
         ... ]
-        >>> dataset = rg.DatasetForText2Text(records)
+        >>> dataset = rg.DatasetForTextGeneration(records)
         >>> assert len(dataset) == 2
         >>>
         >>> # Looping over the dataset:
@@ -1018,13 +1031,13 @@ class DatasetForText2Text(DatasetBase):
         >>>
         >>> # Indexing into the dataset:
         >>> dataset[0]
-        ... rg.Text2TextRecord(text="example"})
-        >>> dataset[0] = rg.Text2TextRecord(text="replaced example")
+        ... rg.TextGenerationRecord(text="example"})
+        >>> dataset[0] = rg.TextGenerationRecord(text="replaced example")
     """
 
-    _RECORD_TYPE = Text2TextRecord
+    _RECORD_TYPE = TextGenerationRecord
 
-    def __init__(self, records: Optional[List[Text2TextRecord]] = None):
+    def __init__(self, records: Optional[List[TextGenerationRecord]] = None):
         # we implement this to have more specific type hints
         super().__init__(records=records)
 
@@ -1036,7 +1049,7 @@ class DatasetForText2Text(DatasetBase):
         annotation: Optional[str] = None,
         metadata: Optional[Union[str, List[str]]] = None,
         id: Optional[str] = None,
-    ) -> "DatasetForText2Text":
+    ) -> "DatasetForTextGeneration":
         """Imports records from a `datasets.Dataset`.
 
         Columns that are not supported are ignored.
@@ -1083,7 +1096,7 @@ class DatasetForText2Text(DatasetBase):
                     row, cols_to_be_joined["metadata"]
                 )
 
-            records.append(Text2TextRecord.parse_obj(row))
+            records.append(TextGenerationRecord.parse_obj(row))
 
         return cls(records)
 
@@ -1103,7 +1116,7 @@ class DatasetForText2Text(DatasetBase):
         # we implement this to have more specific type hints
         cls,
         dataframe: pd.DataFrame,
-    ) -> "DatasetForText2Text":
+    ) -> "DatasetForTextGeneration":
         return super().from_pandas(dataframe)
 
     def _to_datasets_dict(self) -> Dict:
@@ -1134,12 +1147,22 @@ class DatasetForText2Text(DatasetBase):
         return ds_dict
 
     @classmethod
-    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
-        return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
+    def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextGeneration":
+        return cls(
+            [TextGenerationRecord(**row) for row in dataframe.to_dict("records")]
+        )
+
+
+@deprecated("Use DatasetForTextGeneration instead.")
+class DatasetForText2Text(DatasetForTextGeneration):
+    pass
 
 
 Dataset = Union[
-    DatasetForTextClassification, DatasetForTokenClassification, DatasetForText2Text
+    DatasetForTextClassification,
+    DatasetForTokenClassification,
+    DatasetForText2Text,
+    DatasetForTextGeneration,
 ]
 
 
@@ -1150,7 +1173,7 @@ def read_datasets(
 
     Args:
         dataset: Dataset to be read in.
-        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"].
+        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "TextGeneration"].
         **kwargs: Passed on to the task-specific ``DatasetFor*.from_datasets()`` method.
 
     Returns:
@@ -1177,7 +1200,7 @@ def read_datasets(
         ... })
         >>> read_datasets(ds, task="TokenClassification")
         >>>
-        >>> # Read text2text records from a datasets Dataset
+        >>> # Read TextGenerationRecords from a datasets Dataset
         >>> ds = datasets.Dataset.from_dict({
         ...     "text": ["my example"],
         ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
@@ -1187,7 +1210,7 @@ def read_datasets(
         ...     "text": ["my example"],
         ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
         ... })
-        >>> read_datasets(ds, task="Text2Text")
+        >>> read_datasets(ds, task="TextGeneration")
     """
     if isinstance(task, str):
         task = TaskType(task)
@@ -1196,6 +1219,8 @@ def read_datasets(
         return DatasetForTextClassification.from_datasets(dataset, **kwargs)
     if task is TaskType.token_classification:
         return DatasetForTokenClassification.from_datasets(dataset, **kwargs)
+    if task is TaskType.text_generation:
+        return DatasetForTextGeneration.from_datasets(dataset, **kwargs)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_datasets(dataset, **kwargs)
     raise NotImplementedError(
@@ -1208,7 +1233,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
 
     Args:
         dataframe: Dataframe to be read in.
-        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "Text2Text"]
+        task: Task for the dataset, one of: ["TextClassification", "TokenClassification", "TextGeneration"]
 
     Returns:
         A argilla dataset for the given task.
@@ -1234,7 +1259,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         ... })
         >>> read_pandas(df, task="TokenClassification")
         >>>
-        >>> # Read text2text records from a datasets Dataset
+        >>> # Read TextGenerationRecords from a datasets Dataset
         >>> df = pd.DataFrame({
         ...     "text": ["my example"],
         ...     "prediction": [["mi ejemplo", "ejemplo mio"]]
@@ -1244,7 +1269,7 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         ...     "text": ["my example"],
         ...     "prediction": [[("mi ejemplo", 0.9)]]
         ... })
-        >>> read_pandas(df, task="Text2Text")
+        >>> read_pandas(df, task="TextGeneration")
     """
     if isinstance(task, str):
         task = TaskType(task)
@@ -1253,6 +1278,8 @@ def read_pandas(dataframe: pd.DataFrame, task: Union[str, TaskType]) -> Dataset:
         return DatasetForTextClassification.from_pandas(dataframe)
     if task is TaskType.token_classification:
         return DatasetForTokenClassification.from_pandas(dataframe)
+    if task is TaskType.text_generation:
+        return DatasetForTextGeneration.from_pandas(dataframe)
     if task is TaskType.text2text:
         return DatasetForText2Text.from_pandas(dataframe)
     raise NotImplementedError(

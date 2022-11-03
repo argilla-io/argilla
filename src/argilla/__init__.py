@@ -43,6 +43,7 @@ if _TYPE_CHECKING:
     from argilla.client.datasets import (
         DatasetForText2Text,
         DatasetForTextClassification,
+        DatasetForTextGeneration,
         DatasetForTokenClassification,
         read_datasets,
         read_pandas,
@@ -78,14 +79,15 @@ _import_structure = {
     ],
     "client.models": [
         "Text2TextRecord",
-        "TextGenerationRecord",
         "TextClassificationRecord",
+        "TextGenerationRecord",
         "TokenClassificationRecord",
         "TokenAttributions",
     ],
     "client.datasets": [
         "DatasetForText2Text",
         "DatasetForTextClassification",
+        "DatasetForTextGeneration",
         "DatasetForTokenClassification",
         "read_datasets",
         "read_pandas",
