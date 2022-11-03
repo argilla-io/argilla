@@ -96,6 +96,7 @@ class DatasetRecordsDAO:
             for name in record_class.schema()["properties"]
             if name not in mapping["mappings"]["properties"]
         ]
+        print(exclude_fields)
         embeddings_configuration = {}
         for r in records:
             metadata_values.update(r.metadata or {})
@@ -109,6 +110,7 @@ class DatasetRecordsDAO:
                             if len(embedding.property_names) == 1
                             else str.join("_", embedding.property_names)
                         )
+
                     for (
                         embedding_model_name,
                         embedding_vector,
@@ -117,6 +119,7 @@ class DatasetRecordsDAO:
                             "_",
                             [record_property_name, property_name, embedding_model_name],
                         )
+
                         embedding_dimension = embeddings_configuration.get(
                             embedding_name, None
                         )

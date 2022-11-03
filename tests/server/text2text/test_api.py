@@ -37,6 +37,12 @@ def test_search_records(mocked_client):
                     "agent": "test",
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
+                "embeddings": {
+                    "text": {
+                        "property_names": ["text"],
+                        "embedding_vectors": {"bert_cased": [1, 2, 3, 4]},
+                    }
+                },
             },
             {
                 "id": 1,
@@ -64,6 +70,8 @@ def test_search_records(mocked_client):
     results = Text2TextSearchResults.parse_obj(response.json())
     assert results.total == 2
     assert results.records[0].predicted is None
+
+    print(results)
 
     assert results.aggregations.dict(exclude={"score"}) == {
         "annotated_as": {},

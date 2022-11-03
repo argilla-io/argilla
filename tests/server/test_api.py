@@ -40,6 +40,12 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                         {"class": "Mocking"},
                     ],
                 },
+                "embeddings": {
+                    "inputs": {
+                        "property_names": ["data"],
+                        "embedding_vectors": {"bert_cased": [1.2, 2.3, 3.4, 4.5]},
+                    }
+                },
             },
             {
                 "id": idx + 1,
@@ -58,6 +64,12 @@ def create_some_data_for_text_classification(client, name: str, n: int):
                     "labels": [
                         {"class": "Test"},
                     ],
+                },
+                "embeddings": {
+                    "inputs": {
+                        "property_names": ["data"],
+                        "embedding_vectors": {"bert_cased": [1.2, 2.3, 3.4, 4.5]},
+                    }
                 },
             },
         ]

@@ -542,6 +542,10 @@ def test_load_as_pandas(mocked_client):
     assert isinstance(records, ar.DatasetForTextClassification)
     assert isinstance(records[0], ar.TextClassificationRecord)
     assert [record.id for record in records] == [0, 1, 2, 3]
+    assert [
+        record.embeddings["inputs"]["embedding_vectors"]["bert_uncased"]
+        for record in records
+    ] == [[1.2, 2.3, 3.4, 4.5], [1.2, 2.3, 3.4, 4.5]]
 
 
 @pytest.mark.parametrize(
@@ -580,6 +584,12 @@ def test_load_text2text(mocked_client):
             text="test text",
             prediction=["test prediction"],
             annotation="test annotation",
+            embeddings={
+                "text": {
+                    "property_names": ["text"],
+                    "embedding_vectors": {"bert_uncased": [1.2, 3.4, 6.4, 6.4]},
+                }
+            },
             prediction_agent="test_model",
             annotation_agent="test_annotator",
             id=i,
@@ -596,6 +606,10 @@ def test_load_text2text(mocked_client):
 
     df = api.load(name=dataset)
     assert len(df) == 2
+    assert [
+        record.embeddings["text"]["embedding_vectors"]["bert_uncased"]
+        for record in records
+    ] == [[1.2, 3.4, 6.4, 6.4], [1.2, 3.4, 6.4, 6.4]]
 
 
 def test_client_workspace(mocked_client):
