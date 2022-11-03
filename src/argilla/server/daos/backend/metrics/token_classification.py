@@ -24,6 +24,10 @@ from argilla.server.daos.backend.metrics.base import (
     NestedTermsAggregation,
     TermsAggregation,
 )
+from argilla.server.daos.backend.metrics.commons import (
+    DatasetLabelingRulesMetric,
+    LabelingRulesMetric,
+)
 from argilla.server.daos.backend.query_helpers import aggregations
 
 _DEFAULT_MAX_ENTITY_BUCKET = 1000
@@ -225,4 +229,6 @@ METRICS = {
         mention_field="value",
         labels_field="tag",
     ),
+    "labeling_rule": LabelingRulesMetric(id="labeling_rule"),
+    "dataset_labeling_rules": DatasetLabelingRulesMetric(id="dataset_labeling_rules"),
 }

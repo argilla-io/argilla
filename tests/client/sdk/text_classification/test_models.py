@@ -62,9 +62,7 @@ def test_labeling_rule_schema(helpers):
     client_schema = LabelingRule.schema()
     server_schema = ServerLabelingRule.schema()
 
-    assert helpers.remove_description(client_schema) == helpers.remove_description(
-        server_schema
-    )
+    helpers.are_compatible_api_schemas(client_schema, server_schema)
 
 
 def test_labeling_rule_metrics_schema(helpers):

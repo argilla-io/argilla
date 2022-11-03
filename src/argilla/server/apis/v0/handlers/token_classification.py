@@ -22,6 +22,7 @@ from fastapi.responses import StreamingResponse
 from argilla.server.apis.v0.handlers import (
     metrics,
     token_classification_dataset_settings,
+    token_classification_labeling_rules,
 )
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.model import BulkResponse
@@ -280,6 +281,7 @@ def configure_router():
         router,
         cfg=TasksFactory.get_task_by_task_type(task_type),
     )
+    token_classification_labeling_rules.configure_router(router)
 
     return router
 
