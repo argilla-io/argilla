@@ -17,23 +17,25 @@
 
 <template>
   <div class="sidebar">
-    <span v-for="group in sidebarGroups" :key="group">
-      <div class="sidebar__info">
-        <p>{{ group }}</p>
-        <sidebar-button
-          v-for="button in filteredSidebarItems.filter(
-            (button) => button.group === group
-          )"
-          :id="button.id"
-          :key="button.id"
-          :active-view="[viewMode, currentMetric]"
-          :icon="button.icon"
-          :tooltip="button.tooltip"
-          :type="group"
-          @button-action="action(button.action, button.id)"
-        />
-      </div>
-    </span>
+    <div
+      v-for="group in sidebarGroups"
+      :key="group"
+      class="sidebar__info"
+    >
+      <p>{{ group }}</p>
+      <sidebar-button
+        v-for="button in filteredSidebarItems.filter(
+          (button) => button.group === group
+        )"
+        :id="button.id"
+        :key="button.id"
+        :active-view="[viewMode, currentMetric]"
+        :icon="button.icon"
+        :tooltip="button.tooltip"
+        :type="group"
+        @button-action="action(button.action, button.id)"
+      />
+    </div>
     <slot />
   </div>
 </template>
@@ -95,12 +97,14 @@ $sidebar-button-size: 45px;
   top: 0;
   width: $sidebar-button-size;
   min-width: $sidebar-button-size;
-  min-height: 100vh;
+  min-height: calc(100vh - $topbarHeight);
   min-width: $sidebarMenuWidth;
   background: palette(grey, 700);
   box-shadow: none;
   pointer-events: all;
   transition: box-shadow 0.2s ease-in-out 0.4s;
+  display: flex;
+  flex-direction: column;
   .--metrics & {
     box-shadow: inset 1px 1px 5px -2px #c7c7c7;
     transition: box-shadow 0.2s ease-in-out;
@@ -118,7 +122,7 @@ $sidebar-button-size: 45px;
   }
   &__info {
     position: relative;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
   }
 }
 a[data-title]:not(.active) {

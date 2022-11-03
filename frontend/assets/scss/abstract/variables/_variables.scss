@@ -157,6 +157,9 @@ $swift-linear-duration: 0.15s !default;
 $swift-linear-timing-function: linear !default;
 $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;
 
+// topbar
+$topbarHeight: 56px;
+
 // sidebar
 $sidebarPanelWidth: 280px;
 $sidebarMenuWidth: 70px;
