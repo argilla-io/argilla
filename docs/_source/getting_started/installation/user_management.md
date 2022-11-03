@@ -27,7 +27,7 @@ A workspace is a Argilla "space" where users can collaborate, both using the Web
 A user is given access to a workspace by including the name of the workspace in the list of workspaces defined by the `workspaces` field. **Users with no defined workspaces field are super-users** and have access and right to all datasets.
 
 
-### Python client methods and workspaces
+### Python client
 
 The Python client gives developers the ability to log, load, and copy datasets from and to different workspace. Check out the [Python Reference](../reference/python/python_client.rst) for the parameter and methods related to workspaces.
 Some examples are:
@@ -57,7 +57,7 @@ By default, if you don't configure a `users.yml` file, your Argilla instance is 
 
 for security reasons we recommend changing at least the password and API key.
 
-### How to override the default API key
+### Override default API key
 
 To override the default API key you can set the following environment variable before launching the server:
 
@@ -66,7 +66,7 @@ export ARGILLA_LOCAL_AUTH_DEFAULT_APIKEY=new-apikey
 ```
 
 
-### How to override the default user password
+### Override default password
 
 To override the password, you must set an environment variable that contains an already hashed password.
 You can use `htpasswd` to generate a hashed password:
@@ -89,7 +89,7 @@ from passlib.context import CryptContext
 print(CryptContext(schemes=["bcrypt"], deprecated="auto").hash('password'))
 ```
 
-## How to add new users and workspaces
+## Add new users and workspaces
 
 To configure your Argilla instance for various users, you just need to create a yaml file as follows:
 ```yaml

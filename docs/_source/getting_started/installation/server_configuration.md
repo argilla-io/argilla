@@ -4,7 +4,7 @@ This section explains advanced operations and settings for running the Argilla S
 
 By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at `http://localhost:9200`. You can customize this by setting the `ELASTICSEARCH` environment variable. Have a look at the list of available [environment variables](#environment-variables) to further configure the Argilla server.
 
-## Running Argilla Server with `uvicorn`
+## Argilla Server with `uvicorn`
 
 Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:
 

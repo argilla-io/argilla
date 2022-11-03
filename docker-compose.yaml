@@ -9,7 +9,7 @@ services:
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-    # volumes:
+      # volumes:
       #- ${PWD}/.users.yaml:/config/.users.yaml
     networks:
       - argilla
