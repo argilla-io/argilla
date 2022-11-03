@@ -118,12 +118,7 @@ class DatasetRecordsDAO:
                     if embedding_dimension is None:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
-                    record_dict[embedding_name] = record_dict["embeddings"][
-                        embedding_name
-                    ]["vector"]
-            print("-" * 50)
-            print(record_dict)
-            del record_dict["embeddings"]
+                    record_dict[embedding_name] = embedding_vector_data_mapping.vector
             documents.append(record_dict)
 
         self._es.create_dataset_index(
