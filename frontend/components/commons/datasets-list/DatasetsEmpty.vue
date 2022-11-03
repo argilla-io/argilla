@@ -29,12 +29,18 @@ export default {
 
   methods: {
     generateCodeSnippet() {
-      return `import argilla as rg
+      return `# install datasets library with pip install datasets
+import argilla as rg
+from datasets import load_dataset
 
-rg.log(
-  y rg.TextClassificationRecord(text="my first cool example"),
-  name='example-dataset'
-)`;
+# load dataset from the hub
+dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+
+# read in dataset, assuming its a dataset for token classification
+dataset_rg = rg.read_datasets(dataset, task="TokenClassification")
+
+# log the dataset
+rg.log(dataset_rg, "gutenberg_spacy-ner")`;
     },
   },
 };

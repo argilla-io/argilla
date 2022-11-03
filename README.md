@@ -6,15 +6,15 @@
   <br>
 </h1>
 <p align="center">
-<a  href="https://pypi.org/project/rubrix/">
+<a  href="https://pypi.org/project/argilla/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/rubrix.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
 <!--a  href="https://anaconda.org/conda-forge/rubrix">
 <img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
 </!a-->
 <img  alt="Codecov" src="https://img.shields.io/codecov/c/github/recognai/rubrix">
-<a href="https://pepy.tech/project/rubrix">
-<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/rubrix?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
+<a href="https://pepy.tech/project/argilla">
+<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
 </p>
 
@@ -22,7 +22,12 @@
 <p align="center">Data Labeling + Data Curation + Inference Store</p>
 <p align="center">Designed for MLOps & Feedback Loops</p>
 
-<iframe width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+https://user-images.githubusercontent.com/1107111/197567844-4370487d-fe44-441e-9a92-48e529713a15.mp4
+
+
+<!--https://user-images.githubusercontent.com/15979778/167146590-72d8f7b1-f94d-45a6-9896-1525cf949efe.mp4-->
 
 
 <br>
@@ -101,7 +106,7 @@ Finally you can **launch the server**:
 python -m argilla
 
 ```
-> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you can set point the server to its URL by using [ENV variables](#)
+> :information_source:  The most common error message after this step is related to the Elasticsearch instance not running. Make sure your Elasticsearch instance is running on http://localhost:9200/. If you already have an Elasticsearch instance or cluster, you point the server to its URL by using [ENV variables](#)
 
 
 🎉 You can now access Argilla UI pointing your browser at http://localhost:6900/.
