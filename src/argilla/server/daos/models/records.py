@@ -44,38 +44,14 @@ class BaseAnnotationDB(BaseModel):
     )
 
 
-class BaseEmbeddingDB(BaseModel):
-    """
-    embeddings = {
-        "text": {
-            "embedding_vectors": {
-                "bert_uncased": [...],
-                "bert_case": [...]
-            }
-        },
-        "inputs": {
-            "property_names": ["body", "subject"],
-            "embedding_vectors": {
-                "bert_uncased": [...],
-                "bert_case": [...]
-            }
-        }
-        "prediction": {
-            "property_names": ["source_sentence"],
-            "embedding_vectors": {
-                "bert_uncased": [...],
-                "bert_case": [...]
-            },
-        }
-    },
-    """
-
-    property_names: List[str]
-    embedding_vectors: Dict[str, List[float]]
+class BaseEmbeddingVectorDB(BaseModel):
+    vector: List[float]
+    record_properties: Optional[List[Union[str, Dict[str, Any]]]]
+    model: Optional[str]
 
 
 AnnotationDB = TypeVar("AnnotationDB", bound=BaseAnnotationDB)
-EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingDB)
+EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
@@ -88,12 +64,13 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     )
     annotation: Optional[AnnotationDB] = None
 
-    embeddings: Optional[Dict[str, EmbeddingDB]] = Field(
+    embeddings: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
         None,
         description="Provide the embedding info as a list of key - value dictionary."
         "The dictionary contains the dimension and dimension sized embedding float list"
         "Using this way you can skip passing the agent inside of the embedding",
     )
+
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
         None,
         description="Provide the prediction info as a key-value dictionary."

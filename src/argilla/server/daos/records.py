@@ -103,30 +103,16 @@ class DatasetRecordsDAO:
             db_record = record_class.parse_obj(r)
             db_record.last_updated = now
             if db_record.embeddings is not None:
-                for record_property_name, embedding in db_record.embeddings.items():
-                    if embedding.property_names:
-                        property_name = (
-                            embedding.property_names[0]
-                            if len(embedding.property_names) == 1
-                            else str.join("_", embedding.property_names)
-                        )
-
-                    for (
-                        embedding_model_name,
-                        embedding_vector,
-                    ) in embedding.embedding_vectors.items():
-                        embedding_name = str.join(
-                            "_",
-                            [record_property_name, property_name, embedding_model_name],
-                        )
-
-                        embedding_dimension = embeddings_configuration.get(
-                            embedding_name, None
-                        )
-                        if embedding_dimension is None:
-                            embeddings_configuration[embedding_name] = len(
-                                embedding_vector
-                            )
+                for (
+                    embedding_name,
+                    embedding_vector_data_mapping,
+                ) in db_record.embeddings.items():
+                    embedding_dimension = embeddings_configuration.get(
+                        embedding_name, None
+                    )
+                    if embedding_dimension is None:
+                        dimension = len(embedding_vector_data_mapping.vector)
+                        embeddings_configuration[embedding_name] = dimension
 
             documents.append(
                 db_record.dict(
