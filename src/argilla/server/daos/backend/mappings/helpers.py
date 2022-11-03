@@ -204,6 +204,7 @@ def tasks_common_mappings():
             "predicted_by": mappings.keyword_field(enable_text_search=True),
             "metrics": mappings.dynamic_field(),
             "metadata": mappings.dynamic_field(),
+            "embeddings": {"type": "object"},
         },
         "dynamic_templates": [
             dynamic_metadata_text(),

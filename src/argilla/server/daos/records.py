@@ -89,30 +89,37 @@ class DatasetRecordsDAO:
         now = datetime.datetime.utcnow()
         documents = []
         metadata_values = {}
-        mapping = self._es.get_schema(id=dataset.id)
 
-        exclude_fields = [
-            name
-            for name in record_class.schema()["properties"]
-            if name not in mapping["mappings"]["properties"]
-        ]
-        print(exclude_fields)
         embeddings_configuration = {}
-        for r in records:
-            metadata_values.update(r.metadata or {})
-            db_record = record_class.parse_obj(r)
-            db_record.last_updated = now
-            if db_record.embeddings is not None:
+        for record in records:
+            if record.embeddings is not None:
                 for (
                     embedding_name,
                     embedding_vector_data_mapping,
-                ) in db_record.embeddings.items():
+                ) in record.embeddings.items():
                     embedding_dimension = embeddings_configuration.get(
                         embedding_name, None
                     )
                     if embedding_dimension is None:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
+
+        self._es.configure_embeddings(
+            id=dataset.id,
+            embeddings=embeddings_configuration,
+        )
+
+        mapping = self._es.get_schema(id=dataset.id)
+        exclude_fields = [
+            name
+            for name in record_class.schema()["properties"]
+            if name not in mapping["mappings"]["properties"]
+        ]
+
+        for record in records:
+            metadata_values.update(record.metadata or {})
+            db_record = record_class.parse_obj(record)
+            db_record.last_updated = now
 
             documents.append(
                 db_record.dict(
