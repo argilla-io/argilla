@@ -1,11 +1,9 @@
 # Stanza
 
-These tutorials show you how Argilla can be used in combination with spaCy.
+These tutorials show you how Argilla can be used in combination with Stanza.
 Stanza is a collection of accurate and efficient tools for the linguistic analysis of many human languages.
 
-````{grid} 1 1 2 2
-:class-container: tuto-section-2
-
-```{include} /_static/tutorials/labelling-tokenclassification-spacy-pretrained/modal.md
+### Oops! Something is missing.
+```{include} /_common/general.md
 ```
-````
+
