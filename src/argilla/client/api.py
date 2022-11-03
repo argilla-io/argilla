@@ -542,6 +542,11 @@ class Api:
                 Text2TextQuery,
                 DatasetForText2Text,
             ),
+            TaskType.text_generation: (
+                text2text_api.data,
+                Text2TextQuery,
+                DatasetForTextGeneration,
+            ),
         }
 
         try:
@@ -549,7 +554,7 @@ class Api:
         except KeyError:
             raise ValueError(
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
-                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
+                f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text, TaskType.text_generation]}"
             )
         response = get_dataset_data(
             client=self._client,

@@ -1074,7 +1074,7 @@ class DatasetForTextGeneration(DatasetBase):
             ...     "text": ["my example"],
             ...     "prediction": [[{"text": "mi ejemplo", "score": 0.9}]]
             ... })
-            >>> DatasetForText2Text.from_datasets(ds)
+            >>> DatasetForTextGeneration.from_datasets(ds)
         """
         dataset, cols_to_be_joined = cls._prepare_dataset_and_column_mapping(
             dataset,
@@ -1155,6 +1155,7 @@ class DatasetForTextGeneration(DatasetBase):
 
 @deprecated("Use DatasetForTextGeneration instead.")
 class DatasetForText2Text(DatasetForTextGeneration):
+    _RECORD_TYPE = Text2TextRecord
     pass
 
 
