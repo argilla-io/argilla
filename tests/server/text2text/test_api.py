@@ -38,9 +38,9 @@ def test_search_records(mocked_client):
                     "sentences": [{"text": "This is a test data", "score": 0.6}],
                 },
                 "embeddings": {
-                    "text": {
-                        "property_names": ["text"],
-                        "embedding_vectors": {"bert_cased": [1, 2, 3, 4]},
+                    "my_bert": {
+                        "record_properties": ["text"],
+                        "vector": [1, 2, 3, 4],
                     }
                 },
             },
