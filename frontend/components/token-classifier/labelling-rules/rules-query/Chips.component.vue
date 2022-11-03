@@ -1,10 +1,16 @@
 <template>
   <div class="chips">
     <div class="chips__items" v-for="chip in chips" :key="chip.id">
-      <button @click="onChipsSelection(chip)">{{ chip.text }}</button>
+      <label
+        class="chip"
+        :for="chip.id"
+        v-text="chip.text"
+        :class="[chip.is_activate ? 'activate' : 'not-activate']"
+        @click="onChipsSelect(chip)"
+      />
+      <input :id="chip.id" type="checkbox" v-model="chip.is_activate" />
     </div>
   </div>
-  <!-- <pre>{{ chips }}</pre> -->
 </template>
 
 <script>
@@ -15,11 +21,19 @@ export default {
       type: Array,
       required: true,
     },
+    isMultiSelection: {
+      type: Boolean,
+      default: () => false,
+    },
+  },
+  data() {
+    return {
+      cloneChips: [],
+    };
   },
   methods: {
-    onChipsSelection({ id, text }) {
-      console.log(text, id);
-      this.$emit("on-chips-selection", { text, id });
+    onChipsSelect({ id, dataset_id }) {
+      this.$emit("on-chips-select", { id, dataset_id });
     },
   },
 };
@@ -35,13 +49,29 @@ export default {
     display: inline-flex;
   }
 }
-button {
+.chip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-inline: 1em;
   border: none;
   min-height: 50px;
   min-width: 100px;
   border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+input {
+  display: none;
+}
+.activate {
+  color: white;
+  background-color: #4c4ea3;
+}
+
+.not-activate {
   color: black;
   background-color: #e0e1ff;
-  cursor: pointer;
 }
 </style>
