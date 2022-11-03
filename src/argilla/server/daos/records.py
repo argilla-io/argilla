@@ -106,6 +106,7 @@ class DatasetRecordsDAO:
                 exclude_none=False,
                 exclude=set(exclude_fields),
             )
+            print(record_dict)
             if record.embeddings is not None:
                 for (
                     embedding_name,
@@ -117,8 +118,12 @@ class DatasetRecordsDAO:
                     if embedding_dimension is None:
                         dimension = len(embedding_vector_data_mapping.vector)
                         embeddings_configuration[embedding_name] = dimension
-                    record_dict[embedding_name] = embedding_vector_data_mapping
-
+                    record_dict[embedding_name] = record_dict["embeddings"][
+                        embedding_name
+                    ]["vector"]
+            print("-" * 50)
+            print(record_dict)
+            del record_dict["embeddings"]
             documents.append(record_dict)
 
         self._es.create_dataset_index(

@@ -47,6 +47,12 @@ def test_search_records(mocked_client):
             {
                 "id": 1,
                 "text": "Ånother data",
+                "embeddings": {
+                    "my_bert": {
+                        "record_properties": ["text"],
+                        "vector": [1, 2, 4, 4],
+                    }
+                },
             },
         ]
     ]

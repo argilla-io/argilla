@@ -111,6 +111,7 @@ class backend_error_handler:
         except NotFoundError as ex:
             raise IndexNotFoundError(ex)
         except ApiError as ex:
+            print(ex)
             raise GenericSearchError(ex)
 
     def __get_es_error_detail__(self, ex, exception_value) -> Optional[str]:
