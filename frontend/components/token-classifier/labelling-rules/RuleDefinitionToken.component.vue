@@ -1,7 +1,14 @@
 <template>
   <div class="rule__area">
-    <div class="left-item" v-if="entities.length">
-      <RulesQueryToken title="New query" :entities="entities" />
+    <div class="left-item" v-if="queryText.length">
+      <RulesQueryToken
+        :title="`Query: ${queryText}`"
+        :entities="entities"
+        :recordLength="5"
+        @on-search-entity="
+          (searchQuery) => $emit('on-search-entity', searchQuery)
+        "
+      />
     </div>
     <RulesMetricsToken
       title="Rules Metrics"
@@ -22,6 +29,7 @@
 import RulesMetricsToken from "./rules-metric/RulesMetricToken.component.vue";
 import RulesQueryToken from "./rules-query/RulesQueryToken.component.vue";
 import OptionsForRuleMetrics from "./OptionsForRuleMetrics.class";
+
 export default {
   name: "RuleDefinitionToken",
   props: {

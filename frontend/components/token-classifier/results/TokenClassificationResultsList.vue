@@ -23,6 +23,7 @@
           :rule="rule"
           :queryText="queryText"
           :entities="entities"
+          @on-search-entity="(value) => (searchQuery = value)"
         />
       </transition>
     </template>
@@ -40,16 +41,12 @@ import {
   Rule as RuleModel,
   getRuleModelPrimaryKey,
 } from "../../../models/token-classification/Rule.modelTokenClassification";
-import { TokenClassificationDataset } from "../../../models/TokenClassification";
+import { TokenClassificationDataset as TokenClassificationModel } from "../../../models/TokenClassification";
 import RuleDefinitionToken from "../labelling-rules/RuleDefinitionToken.component.vue";
+import { getDatasetModelPrimaryKey } from "../../../models/Dataset";
 import {
-  getDatasetModelPrimaryKey,
-  ObservationDataset,
-} from "../../../models/Dataset";
-import { SearchRulesRecord } from "../../../models/token-classification/SearchRulesRecord.modelTokenClassification";
-import {
-  TokenEntity,
   formatDatasetIdForTokenEntityModel,
+  TokenEntity,
 } from "../../../models/token-classification/TokenEntity.modelTokenClassification";
 export default {
   props: {
@@ -61,6 +58,7 @@ export default {
   data() {
     return {
       rulesHaveBeenFetched: false,
+      searchQuery: "",
     };
   },
   components: {
@@ -73,8 +71,9 @@ export default {
 
     rules.forEach(async (rule) => {
       await this.initRuleModelTable(name, rule);
-      await this.initSearchRuleRecordsTable(name, rule);
     });
+
+    this.insertOrUpdateEntityInTokenEntityModel();
     this.rulesHaveBeenFetched = true;
   },
   computed: {
@@ -99,7 +98,7 @@ export default {
     },
     queryText() {
       return (
-        TokenClassificationDataset.find(this.datasetPrimaryKey).query.text || ""
+        TokenClassificationModel.find(this.datasetPrimaryKey).query.text || ""
       );
     },
     rulePrimaryKey() {
@@ -119,27 +118,21 @@ export default {
       );
     },
     entities() {
-      return (
-        this.datasetPrimaryKey,
-        TokenEntity.query()
-          .where(
-            "dataset_id",
-            formatDatasetIdForTokenEntityModel(this.datasetPrimaryKey)
-          )
-          .get()
-      );
+      return TokenEntity.query()
+        .where(
+          "dataset_id",
+          formatDatasetIdForTokenEntityModel(this.datasetPrimaryKey)
+        )
+        .where("text", (value) =>
+          this.isStringIncludeSubstring(value, this.searchQuery)
+        )
+        .get();
     },
   },
   methods: {
     async initRuleModelTable(name, rule) {
       const rulesMetrics = await this.fetchRuleMetricsByRule(name, rule);
       this.insertOrUpdateDataInRuleModel(rule, rulesMetrics);
-    },
-    async initSearchRuleRecordsTable(name, rule) {
-      const searchRulesRecords =
-        await this.fetchTokenClassificationSearchRuleRecords(name, rule.query);
-
-      this.insertOrUpdateEntityInTokenEntityModel();
     },
     async fetchRuleMetricsByRule(name, rule) {
       return await this.fetchTokenClassificationRulesMetricsByRule(
@@ -175,43 +168,43 @@ export default {
         console.log("Error: ", error);
       }
     },
-    async fetchTokenClassificationSearchRuleRecords(name, query) {
-      try {
-        const { data, status } = await this.$axios.get(
-          `/datasets/${name}/TokenClassification/labeling/rules/${query}/search`
-        );
-        if (status === 200) {
-          return data;
-        } else {
-          throw new Error("Error fetching API rule records");
-        }
-      } catch (error) {
-        console.log("Error: ", error);
-      }
-    },
+
     insertOrUpdateDataInRuleModel(rule, rulesMetrics) {
       RuleModel.insertOrUpdate({
         data: {
           ...rule,
           rule_metrics: rulesMetrics,
-          dataset_id: this.dataset.$id,
+          dataset_id: this.dataset.id,
           name: this.dataset.name,
           owner: this.dataset.owner,
         },
       });
     },
     insertOrUpdateEntityInTokenEntityModel() {
+      const entities = [];
+
       this.dataset.entities.forEach(({ text, colorId }) => {
-        TokenEntity.insertOrUpdate({
-          data: {
-            dataset_id: formatDatasetIdForTokenEntityModel(
-              this.datasetPrimaryKey
-            ),
-            text: text,
-            color_id: colorId,
-          },
-        });
+        const entity = {
+          dataset_id: formatDatasetIdForTokenEntityModel(
+            this.datasetPrimaryKey
+          ),
+          text: text,
+          color_id: colorId,
+          is_activate: false,
+        };
+
+        entities.push(entity);
       });
+
+      TokenClassificationModel.insertOrUpdate({
+        where: this.datasetPrimaryKey,
+        data: {
+          token_entities: entities,
+        },
+      });
+    },
+    isStringIncludeSubstring(refString, substring) {
+      return refString.toLowerCase().includes(substring.toLowerCase());
     },
   },
 };

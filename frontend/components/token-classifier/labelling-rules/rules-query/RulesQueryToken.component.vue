@@ -1,18 +1,42 @@
 <template>
   <div class="rule-query-token" :style="cssVars">
     <div class="rule-query-token__title-area">
-      <h2 class="title">{{ title }}</h2>
-      <span v-if="entitiesLength">
-        Records: <b>{{ entitiesLength }}</b>
+      <h2 class="title" v-text="title">{{ title }}</h2>
+      <span>
+        Records: <b>{{ recordLength }}</b>
       </span>
     </div>
+    <div class="rule-query-token__search">
+      <BaseInputContainer class="searchbar">
+        <svgicon v-if="!searchEntity" name="search" width="20" height="40" />
+        <svgicon
+          v-else
+          class="searchbar__button"
+          name="close"
+          width="20"
+          height="20"
+          @click="searchEntity = ''"
+        />
+        <BaseInput
+          v-model="searchEntity"
+          class="searchbar__input"
+          placeholder="Search an entity"
+        />
+      </BaseInputContainer>
+    </div>
     <div class="rule-query-token__chips">
-      <ChipsComponent :chips="entities" />
+      <ChipsComponent :chips="entities" @on-chips-select="onChipsSelection" />
+    </div>
+    <div class="rule-query-token__save-rules-button">
+      <button @click="onSaveRules" :disabled="isSaveRulesDisable">
+        Save Rules
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import { TokenEntity } from "../../../../models/token-classification/TokenEntity.modelTokenClassification";
 import ChipsComponent from "./Chips.component.vue";
 export default {
   name: "RulesQueryToken",
@@ -28,6 +52,10 @@ export default {
       type: Array,
       required: true,
     },
+    recordLength: {
+      type: Number | null,
+      default: () => null,
+    },
     textColor: {
       type: String,
       default: () => "#000",
@@ -41,6 +69,13 @@ export default {
       default: () => "#fff",
     },
   },
+  data() {
+    return {
+      selectedEntity: [],
+      isSaveRulesDisable: true,
+      searchEntity: "",
+    };
+  },
   computed: {
     cssVars() {
       return {
@@ -49,8 +84,37 @@ export default {
         "--background-label-color": this.backgroundLabelColor,
       };
     },
-    entitiesLength() {
-      return this.entities.length;
+  },
+  methods: {
+    onChipsSelection({ id }) {
+      this.updateTokenEntities(id);
+      this.disableSaveRulesButton();
+    },
+    onSaveRules() {
+      console.log("newEntities", this.selectedEntity);
+    },
+    updateTokenEntities(id) {
+      let entities = TokenEntity.all();
+      entities = entities.map((entity) => {
+        if (entity.id !== id) {
+          return { ...entity, is_activate: false };
+        } else {
+          return { ...entity, is_activate: !entity.is_activate };
+        }
+      });
+      TokenEntity.insertOrUpdate({ data: entities });
+    },
+    disableSaveRulesButton() {
+      const entities = TokenEntity.all();
+      const isSelectedEntities = entities.some((entity) => entity.is_activate);
+      isSelectedEntities
+        ? (this.isSaveRulesDisable = false)
+        : (this.isSaveRulesDisable = true);
+    },
+  },
+  watch: {
+    searchEntity(newValue) {
+      this.$emit("on-search-entity", newValue);
     },
   },
 };
@@ -81,6 +145,13 @@ export default {
       @include font-size(22px);
       line-height: 22px;
       font-weight: bold;
+    }
+  }
+  &__search {
+    .searchbar {
+      display: flex;
+      gap: 1em;
+      align-items: center;
     }
   }
   &__chips {
